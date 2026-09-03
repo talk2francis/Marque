@@ -51,6 +51,117 @@ Fund the demo wallet and open the positions. A deliberately tight Pancake V3 ran
 Commit AGENTS.md.
 Register on the intake form.
 
+
+
+
+...............................
+...............................
+BELOW IS AN UPDATED MODIFICATIONS TO THIS BUILD AS I HAD A BACK AND FORTH WITH MY AI
+
+That was a genuinely good review. I fetched the HackQuest page before deciding anything, and I owe you a correction before the verdict.
+
+I was wrong about the name, and it was the worst kind of wrong
+
+The Marque collision is real and it is worse than GPT described. That project's one-line pitch is "agents that carry a budget, not your keys." Scoped, revocable delegation. Live on Base mainnet. Verified contract, GitHub, X handle, domain. And they independently landed on a hallmark-seal logo, which means they walked the identical semantic path from the same word to the same visual.
+
+The failure wasn't the reasoning, it was the clearance. I ran one search, got nothing relevant back, and told you "no dominant crypto squatter, I checked." A single search returning nothing is weak evidence for a negative and I stated it as if it were strong. That's the kind of confident negative I should not have handed you.
+
+Renamed to Rialto across all three documents. Venice's market district, the place where reputation decided who was good for it. And the rename produced a better structure than the original, because it frees the authority vocabulary for the primitives instead of cramming two ideas into one word:
+
+a Charter — the scoped session. Grant a charter, revoke a charter. Chartering is hiring a whole capability for a defined voyage under written terms. Plain English, a stranger gets it instantly.
+a Warrant — the conformance certificate. A warrant of fitness is literally an inspection certificate.
+The Desk, the Register, the Ledger, RCS for the standard.
+
+The seal moment survives and is now historically correct, since charters are sealed.
+
+I am not clearing Rialto either. There's a US broker-dealer called Rialto Markets, private securities, not crypto, not AI. Lower risk than the Marque collision but not zero. So I added the fix that removes the whole class of problem: the display name lives in one constant, packages/ui/src/brand.ts. Repo and DB use the code name. You do a proper 20-minute sweep on Day 4 and renaming becomes one line plus a DNS record. Don't let this block an hour of engineering.
+
+Verdict on the eleven points
+
+Accepted outright, and three of them were real defects in my work:
+
+#7, the data invariant, was the most important catch. I wrote "Postgres is fully rebuildable from chain" and then wrote a P11 acceptance test that says drop the DB and rebuild. Those two together would have authorised a coding agent to delete the Ledger — probe history, conformance results, raw agent responses, manual benchmark recordings. None of that is recreatable from BSC. I over-applied the Agora lesson. Now split into two explicit tiers: derived state (rebuildable, drill it in a scratch DB, never production) and first-party observations (nightly backup, restore tested, never deletable, removed from the drill entirely).
+
+#3, conformance determinism, was the sharpest technical point. GPT is right that there is no objectively correct re-centred V3 range, and that "expected fills at stated volatility" is a model output wearing a fact's clothes. The fix is cleaner than either of us proposed: the test case supplies the policy. "Re-centre symmetrically at ±6% around spot on the 0.25% tier" — then every check is arithmetic against a given constraint. The volatility check is deleted. New invariant: if you cannot write it as an assertion with a numeric tolerance, it is not a conformance test, it is a Ledger question.
+
+#2, the ~99% attrition figure. Correct, and internally inconsistent with my own invariant 4. Replaced with a directional engineering expectation plus an explicit prohibition on hardcoding any ratio. I also swept the master plan to label every illustrative number as layout copy, because a coding agent reading 214,882 registered in a mock is exactly how fabricated data reaches production.
+
+#1 wallet-optional is now an invariant and appears verbatim in P4. #9 post-deadline shipping — I was wrong to call it free points; that framing invites a rules problem. Now three buckets, and you email the organisers on Sep 9 and paste the answer into SUBMISSION.md. #10 Pancake gaps demoted to cut-by-default. #5, #8, #11 accepted as stated.
+
+#6, the TermiX adapter — we agree on the principle, but there's a fact worth keeping. GPT is right that a generic A2AExecutor should handle them and that we shouldn't build sponsor plumbing. But their endpoint is a URL template with a literal {agentId} placeholder that 404s if you fetch it verbatim. So it's not an executor, it's a template resolver in packages/registry — written generically, because other publishers do this too. Without it those agents are unreachable, which makes it a supply unlock rather than cosmetics. That's the version now in P5.
+
+Where GPT was directionally right but slightly soft: #5. "Isolate the portable engine first" is correct but doesn't tell a bot when to quit. P8a now has a four-hour timebox and a named fallback: thin approval-risk and privileged-function triage over verified source. Still satisfies TermiX's high-stakes weighting.
+
+On funding I accepted almost everything, including the point I'd have made myself if I'd thought about it: do not run a mainnet Venus position near liquidation for presentation. My HF 1.43 was layout copy that read like an instruction. Ours stays above 2.5, and the scary demo reads a real third-party address — which is strictly better proof, because it demonstrates the reader works on arbitrary input, which is precisely what the functionality criterion tests.
+
+Two things GPT missed on funding: the ERC-8183 settlement-token point is excellent and I've promoted it into the gotchas, but nobody budgeted agent LLM spend. Five agents answering calls for two weeks of judging, with probe loops and curious judges. Uncapped, that quietly costs more than your entire mainnet budget. Now DAILY_LLM_USD_CAP=5 with per-agent sub-caps and an 80% alert.
+
+Breathing space for the bot
+
+You asked for this directly and it was the biggest gap in what I gave you. My prompts were rigid: all criteria pass, paste evidence, STOP. That's how a bot stalls at 3am on an SDK.
+
+Added a degradation ladder to AGENTS.md and referenced from every phase:
+
+Green ship it. Amber the bot has standing authority to cut optional features, substitute libraries, stub integrations behind our interfaces, ship a thin category, widen a tolerance if it records why — all without asking, logged one line each in docs/DEVIATIONS.md. Red is only four things: the hard gates, a genuinely impossible outcome, having to fabricate a number, or two sessions with no progress on the same blocker.
+A timebox per phase with a named consequence. Hitting it means shipping reduced, not stalling.
+Two explicit fallbacks: P6-lite if Altana burns a day (our own allowlist + cap + expiry on RialtoRegistry, same UI, same revoke — forfeits the XP, keeps the main-track safety story), and the Redcell fallback above. Both cost nothing because you build against CharterService from the start.
+
+DEVIATIONS.md is the piece I most want you to hold the bot to. It turns "what did it quietly skip" into a readable list.
+
+One thing I'd push back on if you asked me to
+
+GPT suggests asking the organisers about post-deadline changes. Do that. But don't let the ambiguity make you passive during 9–23 Sep. Data accrual is not shipping. An index staying fresh, new probes landing, sealed calls resolving, third-party owners self-listing through the claim rail, real people hiring — that's the product operating normally, and it's the only evidence you'll have for the "real-world usage" criterion BNB's press release named and their tracks page omitted. That survives either ruling, and almost every other team will be dark.
+
+Files are updated. FORMS-AND-FUNDING.md has the paste-ready 8004scan answers, the allocation, and the ordered next hour. Start there, then paste P0.
+
+Send me Codex's P0 report and its DEVIATIONS.md before it moves to P1. The reachable-service ratio in that report is the number that decides how hard you personally need to push on agent-owner outreach, and it's the one thing in this plan I can't predict for you.
+
+Rialto master plan
+Document·MD 
+Agents
+Document·MD 
+Rialto build prompts
+Document·MD 
+Forms and funding
+Document·MD 
+
+
+...............................
+...............................
+...............................
+
+THEN BELOW IS THE MOST UP TO DATE PLAN AS REGARDS THIS BUILD PLAN, SWITCHED BACK FROM RIALTO TO MARQUE, AS IT SEEMED MORE ALIGNED WITH THE BUILD...
+
+
+note that i am okay with marque.. keeep the name, i already purchased a cheap domain url usemarque.xyz for $2 whihc is okay
+
+Accepted. It's your call, you've paid for it, and the risk is manageable. But I want to make one structural change that materially reduces the collision, and it costs nothing.
+
+Marque it is. All four documents are back to the name, usemarque.xyz is in them, and the naming section now records the collision honestly instead of pretending it isn't there.
+
+The one change I kept from the rename, because it does real work:
+
+The collision isn't the brand word. It's the primitive. That other project's entire pitch is an agent carrying a scoped, revocable budget. If we also call our scoped revocable budget "a marque," we're naming the identical concept with the identical word and anyone seeing both reads ours as derivative.
+
+So: Marque is the venue. A Charter is the scoped session. A Warrant is the conformance certificate. Grant a charter, revoke a charter. Warranted for Health Factor, 5 Sep.
+
+That drops the overlap from same concept, same word down to shared brand word, different sectors, different chains, which is ordinary and survivable. And it's better naming on its own merits — splitting the two ideas across two plain-English words reads more clearly than cramming both into one, and "grant a charter" is instantly legible to a judge who has never touched a session key.
+
+Three rules now baked into AGENTS.md and enforced by a grep in P12:
+
+marque is a proper noun and nothing else. Never "a marque," never "grant a marque," never "the Mark."
+No wax-seal or hallmark logo. That's their mark, and they got there first. Our Seal stays as an interaction — the brass press on granting a charter — but the wordmark is typographic. If both the logo and the primitive matched theirs, "coincidence" would stop being available to us.
+No "letter of marque" framing in public copy. Lead with the quality-mark half instead: warranted, held to a standard, stands behind its work. That's also the half that matches our actual wedge, so we lose nothing.
+
+One optional five-minute thing: usemarque.xyz is fine and it cost you $2. If marque.market or marque.trade is under $15, grab one and point it at the same host. A two-word URL is slightly weak for something BNB might adopt as a standalone brand, and it's cheaper to fix before the README exists than after. Not worth more than five minutes, and it doesn't block anything — the display name lives in one constant either way.
+
+Everything else from the last pass stands: the two data tiers, the conformance-versus-judgement split, the degradation ladder with timeboxes and the P6-lite and Redcell fallbacks, the funding numbers, and the Venus safety rule.
+
+Point DNS at the VPS, submit the 8004scan form, register on the intake form, then paste P0 into Codex.
+
+Marque master plan
+Document·MD 
+
 Then paste P0 into Codex.
 
 One thing I want your call on before Day 2: I have written Redcell as an Archon port. If the Archon audit core is more entangled with Mantle than I am assuming, tell me now and I will restructure the TermiX security benchmark around a thinner approval-risk triage agent instead.
