@@ -207,3 +207,18 @@ product, it is written down here.
   money moving this for a week", not "your position is too small".
 - **Cost** — None to the code; it is a correction to the pitch.
 - **Restore** — n/a.
+
+### D1-07 · `{agentId}` resolves to the token id, not the composite agent id
+
+- **Planned** — AGENTS.md gotcha 9: "resolve templates from the agent's own
+  metadata before calling."
+- **Shipped** — Templates resolve `{agentId}` to the bare ERC-8004 **token id**.
+- **Why** — The composite `chain:registry:token` id is the primary key
+  everywhere else, so it is the natural substitution, and it returns 404. So do
+  the TermiX account id and the agent name. Only the bare token id returns 200.
+  Since 763 of 767 indexed A2A endpoints are templated, getting this wrong makes
+  the entire A2A supply on BSC read as dead. See docs/FINDINGS.md F-02.
+- **Cost** — A publisher that means the composite would now mis-resolve. The
+  composite is still exposed as `agentIdFull`, and P2's probe should try
+  candidate resolutions and record which one answered.
+- **Restore** — n/a.

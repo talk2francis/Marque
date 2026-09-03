@@ -77,12 +77,24 @@ function str(v: unknown): string | undefined {
   return typeof v === 'string' && v.trim() !== '' ? v.trim() : undefined
 }
 
-/** The substitutions we can offer a template, drawn from the agent itself. */
+/**
+ * The substitutions we can offer a template, drawn from the agent itself.
+ *
+ * `agentId` resolves to the ERC-8004 **token id**, not 8004scan's composite
+ * "chain:registry:token" string. This was determined empirically against the
+ * only publisher that templates its endpoints at scale: TermiX's
+ * `/a2a/agents/{agentId}/card` returns 200 for the bare token id and 404 for
+ * the composite, the account id, and the agent name. Getting this wrong makes
+ * effectively the entire A2A supply on BSC look dead.
+ *
+ * The composite is still offered as `agentIdFull` for publishers that mean it.
+ */
 export function templateVars(detail: ScanAgentDetail): Record<string, string | undefined> {
   const termixId = pick(offchainContent(detail), ['termix', 'ownerAccountId'])
   return {
-    agentId: detail.agent_id,
-    agentid: detail.agent_id,
+    agentId: detail.token_id,
+    agentid: detail.token_id,
+    agentIdFull: detail.agent_id,
     tokenId: detail.token_id,
     tokenid: detail.token_id,
     chainId: String(detail.chain_id),

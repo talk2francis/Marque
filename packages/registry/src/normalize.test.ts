@@ -94,8 +94,10 @@ describe('extractServices', () => {
       },
     }))
     expect(out[0]?.isTemplate).toBe(true)
+    // {agentId} is the bare ERC-8004 token id. Verified live: TermiX returns
+    // 200 for this form and 404 for the composite "chain:registry:token".
     expect(out[0]?.resolvedEndpoint).toBe(
-      'https://platform-backend.prod.termix.live/api/v1/a2a/agents/56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:318810/card',
+      'https://platform-backend.prod.termix.live/api/v1/a2a/agents/318810/card',
     )
   })
 

@@ -11,6 +11,7 @@ Built for the BNB Chain **"Build the Era"** hackathon.
 - **Live** — https://marque.trade
 - **Constitution** — [`AGENTS.md`](./AGENTS.md), read at the top of every phase
 - **Reductions log** — [`docs/DEVIATIONS.md`](./docs/DEVIATIONS.md)
+- **Measured findings** — [`docs/FINDINGS.md`](./docs/FINDINGS.md)
 
 ## Development
 
