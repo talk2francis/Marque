@@ -118,6 +118,22 @@ importers:
         specifier: ^5.7.2
         version: 5.9.3
 
+  packages/positions:
+    dependencies:
+      '@marque/chain':
+        specifier: workspace:*
+        version: link:../chain
+      viem:
+        specifier: ^2.21.55
+        version: 2.56.3(typescript@5.9.3)(zod@3.25.76)
+    devDependencies:
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
+      vitest:
+        specifier: ^2.1.8
+        version: 2.1.9(@types/node@22.20.1)
+
   packages/registry:
     dependencies:
       '@marque/db':

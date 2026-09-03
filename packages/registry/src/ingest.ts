@@ -262,7 +262,11 @@ export async function enrichDetails(opts: {
 
     const services = extractServices(detail)
     await d.update(agent).set(detailToUpdate(detail)).where(eq(agent.id, c.id))
-    servicesWritten += await writeServices(c.id, services)
+    // `x += await f()` reads x before awaiting, so under concurrency the write
+    // back clobbers increments made while this task was suspended. Resolve
+    // first, then increment.
+    const written = await writeServices(c.id, services)
+    servicesWritten += written
     if (services.length > 0) withAtLeastOneService++
     succeeded++
   })

@@ -18,4 +18,12 @@ export default tseslint.config(
     files: ['**/*.test.ts'],
     rules: { '@typescript-eslint/no-non-null-assertion': 'off' },
   },
+  {
+    // Node config files: CommonJS and Node globals are correct here.
+    files: ['**/*.cjs', '**/*.config.mjs', 'scripts/**/*.mjs'],
+    languageOptions: {
+      globals: { require: 'readonly', module: 'writable', process: 'readonly', URL: 'readonly', __dirname: 'readonly' },
+    },
+    rules: { '@typescript-eslint/no-require-imports': 'off' },
+  },
 )
