@@ -84,45 +84,49 @@ You disliked ChatGPT's list, and you were right to: *Prooflane, Runmark, Metria,
 
 That is the actual concept. So the name should come from the vocabulary of **licensed, bounded, revocable authority** — which is a rich and almost entirely unused well in crypto naming.
 
-### My pick: **MARQUE**
+### The name is **MARQUE**, and here is the collision you are accepting
 
-A **letter of marque** was a sovereign instrument granting a private operator authority to act on the state's behalf, with a defined scope, a defined target, and an expiry — and it could be revoked. That is, with no stretching whatsoever, **exactly what an Altana scoped session key is.**
+A *letter of marque* was a sovereign instrument granting a private operator authority to act, with a defined scope, a defined target and an expiry, revocable by the grantor. A *marque* is also a maker's mark of quality. Two halves of the product in one word.
 
-A **marque** is *also* a maker's mark of quality — the stamp that says this came from a house that stands behind it. That is, exactly, the conformance certificate.
+**Domain: `usemarque.xyz`, purchased.**
 
-One four-letter-sound word carries both halves of the product: *the authority you grant* and *the quality you can rely on.* I have never seen a name do this much work.
+Now the honest part, because I got this wrong once and will not soften it now.
 
-It gives us a complete internal vocabulary, which is worth a lot when you have coding agents that lose context:
+On the first pass I told you there was "no dominant crypto squatter." That claim rested on a single search returning nothing relevant, which is weak evidence for a negative, and I stated it as though it were strong. It isn't true. There is a live project called **Marque** on Base mainnet whose one-line pitch is *"agents that carry a budget, not your keys"* — scoped, revocable delegation, per-render settlement, a verified contract, a GitHub, an X handle at `@marque_run`, and a **hallmark-seal logo**. They arrived at the same name from the same etymology and landed on the same visual motif.
 
-| Product primitive | Marque term |
-|---|---|
-| A scoped Altana session over a position | **a Marque** ("grant a marque") |
-| The conformance certificate | **the Mark** ("Marked for Rebalancing, 5 Sep") |
-| The indexed agent universe | **the Register** |
-| The proof-of-advantage record | **the Ledger** |
-| The live execution view | **the Run Room** |
-| The published standard | **MCS** — Marque Conformance Standard |
+You have decided to keep the name. That is a defensible call: it is a solo hackathon project, not a funded company; it is a creative-studio/NFT product on Base, not a DeFi position marketplace on BSC; and trademark exposure from a hackathon submission is close to nil. Names do not win hackathons.
 
-It is short, hard-consonanted, spellable, pronounceable in every accent, non-AI-cliché, has no dominant crypto squatter (I checked), and — critically for the *actual prize* — it is **not BNB-specific**, so it can survive as a standalone brand with its own team, which is literally what adoption means.
+But the overlap is not zero, and it is concentrated in one specific place. **The collision is not the brand word. It is the primitive.** Their entire product is *an agent carrying a scoped, revocable budget*. If we also call our scoped revocable budget "a marque," we are naming the identical concept with the identical word, and anyone who sees both will read ours as derivative.
 
-**Domains to sweep, in order:** `marque.market` · `marque.xyz` · `marque.finance` · `usemarque.com` · `marque.trade` · `getmarque.xyz`. Buy today; do not spend an hour on it.
+### The mitigation: keep the brand, move the primitive
 
-### The full ten, ranked, with honest reasoning
+This is the change I want, and it costs nothing because it is strictly better naming anyway:
 
-| # | Name | Why it works | Risk |
-|---|---|---|---|
-| **1** | **Marque** | Letter of marque = bounded revocable authority; maker's marque = quality stamp. Both halves of the product in one word. Full internal vocabulary falls out of it. | Automotive association ("luxury marque"). Mitigated instantly by the tagline. |
-| **2** | **Rialto** | The Venetian market district — the archetypal place where merchants met and where *reputation determined who was good for it*. "What news on the Rialto?" A marketplace name with 500 years of credit-and-trust connotation. | Slightly opaque to people who don't know the reference. Some existing small usages. |
-| **3** | **Ward** | Triple meaning: a ward is placed under a guardian with *defined powers and accountability*; to ward is to protect; and in locksmithing, **wards are the notches that only admit the right key** — literally a call allowlist. Extremely short. | Very common word (SEO pain). Warden Protocol exists and is adjacent. |
-| **4** | **Tender** | Three exact meanings: a *tender* is a formal competitive bid to do work at a price (the procurement process); *legal tender* (money); and *to tend* (to look after a position). "Put your position out to tender." | Soft/food connotations. Common word. |
-| **5** | **Covenant** | In credit, covenants are the *continuously monitored limits a counterparty must operate within* — precisely a mandate. Serious finance register. | Religious and gaming (Halo) baggage. |
-| **6** | **Bourse** | A bourse is an exchange where *authorized members* trade under published rules. Membership + standards + venue in one word. | Euro-opaque; reads institutional rather than consumer. |
-| **7** | **Consign** | Consignment: you hand goods to a party who acts for you and remits proceeds — **and ownership never leaves you.** That is non-custodial delegation, precisely. | Secondary meaning ("consign to the bin") is negative. |
-| **8** | **Vantage** | Directly encodes the TermiX rubric: hire agents with a *measured advantage*. | Generic; heavily used in fintech. |
-| **9** | **Fathom** | To measure depth, and to understand. "Fathom what an agent can do before you pay it." | Soft; no authority connotation. |
-| **10** | **Assay Market** | Reuses your own equity — an assay is the test that certifies metal before it is traded, which is exactly the conformance test. | You already own Assay as a separate product; reusing it muddies both. Listed for completeness; I'd not do it. |
+| Product primitive | Term | Why |
+|---|---|---|
+| The venue | **Marque** | The brand. The maker's-mark half of the etymology, which pairs with the certificate below. |
+| A scoped session over a position | **a Charter** — *grant a charter, revoke a charter* | Chartering is hiring a whole capability for a defined voyage under written terms. Plain English, a stranger understands it instantly, and it is **not what the other project calls its budget.** |
+| The conformance certificate | **a Warrant** — *"Warranted for Health Factor, 5 Sep"* | A warrant of fitness is literally an inspection certificate. |
+| The indexed agent universe | **the Register** | |
+| The position view | **the Desk** | |
+| The measured-advantage record | **the Ledger** | |
+| The published standard | **MCS** — Marque Conformance Standard | |
 
-Everything below this line is written as **Marque**. Swap freely; the strategy is name-independent.
+Splitting the two ideas across two words reads better than cramming both into one, and it drops the overlap from *same concept, same word* to *shared brand word, different sectors, different chains* — which is ordinary and survivable.
+
+### Three rules that follow from this, and they are not optional
+
+1. **Do not ship a wax-seal or hallmark logo.** That is their mark. Our Seal interaction stays — a brass press on granting a charter is an *animation*, not an identity. The wordmark must be typographic. If the logo and the primitive both match theirs, "coincidence" stops being available to us.
+2. **Do not lean on "letter of marque" in public copy.** The privateer-authority framing is their territory. Lead with the quality-mark half: *warranted, held to a standard, stands behind its work.* That is also the half that matches our actual wedge.
+3. **Do not use the word "marque" as a common noun anywhere in the product.** It is a proper noun and nothing else. The session is a charter. The certificate is a warrant. Grep for lowercase `marque` before submission and fix anything that comes back.
+
+### Optional, five minutes, non-blocking
+
+`usemarque.xyz` works and it cost $2. If `marque.market` or `marque.trade` is under $15, take one as well and point it at the same host — a two-word URL is slightly weak for something BNB might adopt as a standalone brand, and it is cheaper to fix now than after the README is written. Not worth more than five minutes.
+
+The display name still lives in **one constant**, `packages/ui/src/brand.ts`. Not because we expect to change it, but because a product that hardcodes its own name in forty files is a product that cannot be rebranded by whoever adopts it.
+
+Everything below this line is written as **Marque**.
 
 ---
 
@@ -160,8 +164,8 @@ Three gaps compound:
 ## 4. The core loop
 
 ```
-      READ ────────► RANK ────────► PREVIEW ────────► MARQUE ────────► RUN ────────► RECEIPT
-   your positions   qualified      free dry-run     bounded session   live view    verifiable
+      READ ───────► RANK ───────► PREVIEW ───────► CHARTER ───────► RUN ───────► RECEIPT
+  your positions  qualified     free dry-run    bounded session  live view   verifiable
    from the chain   agents for      of the exact     with cap +        with tx      proof that
                     THIS position   proposed action  allowlist +       stream       improves the
                                                      expiry                         Register
@@ -187,14 +191,22 @@ The brief is blunt: *"Single-category submissions score poorly. All four, equall
 2. a **task schema** (Zod; what a hire of this category means)
 3. a **conformance test** (deterministic, published, dated)
 4. a **comparison table** with category-native columns
-5. a **mandate template** (which contracts, which cap shape, which expiry)
+5. a **charter template** (which contracts, which cap shape, which expiry)
 6. **≥1 reference agent** + every reachable third-party agent
+
+> **What a conformance test is and is not.** This distinction is load-bearing and I got it slightly wrong on the first pass.
+>
+> **MCS tests correctness of facts and compliance with a supplied policy.** There is no objectively correct re-centred V3 range in the abstract — so the test case *supplies the policy* ("re-centre symmetrically at ±6% around spot, fee tier 0.25%") and then checks whether the agent's answer is arithmetically correct, legal for the pool, and compliant with the policy it was given. Facts (current tick, health factor, gross APR) have one right answer. Judgement (which range is wisest, which venue is best) does not, and never appears in a pass/fail test.
+>
+> **The Ledger tests judgement and advantage.** Quality of decision, speed, and cost belong there, graded against a pre-registered rubric, not in a binary certificate.
+>
+> Keeping these apart is what makes the standard defensible if a judge or a sponsor interrogates it. A conformance test that quietly grades taste is not deterministic, and someone will notice.
 
 ### 5.1 Rebalancing — PancakeSwap V3
 
 **Reader.** `NonfungiblePositionManager.positions(tokenId)` → tickLower/tickUpper/liquidity/feeGrowth; `PancakeV3Pool.slot0()` → current tick, sqrtPriceX96; fee tier → tickSpacing; `collect` static-call → uncollected fees. Derive: in-range boolean, % distance to each boundary in *price* terms, capital efficiency of the current range, uncollected fees in USD, and hours-out-of-range from indexed tick history.
 
-**Conformance test (MCS-REB-1).** Pin a real mainnet position at a specific block. Ask the agent for: current tick, in-range boolean, distance to nearest bound, a proposed re-centred range, and the token amounts required to mint it. **Validate:** ticks are multiples of the pool's tickSpacing (this alone fails most naive agents), lower < current < upper, amounts satisfy the V3 liquidity formula within 0.5%, and slippage policy is stated. Deterministic, no judgement calls.
+**Conformance test (MCS-REB-1).** Pin a real mainnet position at a specific block **and supply the range policy in the prompt** (e.g. "re-centre symmetrically at ±6% around spot"). Ask the agent for: current tick, in-range boolean, distance to nearest bound, the range implied by that policy, and the token amounts required to mint it. **Validate:** ticks are multiples of the pool's tickSpacing (this alone fails most naive agents), lower < current < upper, the range matches the supplied policy within one tick-spacing, amounts satisfy the V3 liquidity formula within 0.5%, and a slippage bound is stated. Every check is arithmetic. Whether ±6% was a *wise* policy is a Ledger question, not a conformance question.
 
 **Mandate template.** Allowlist = NonfungiblePositionManager + SmartRouter + the two tokens' `approve`. Cap = gas + swap value. Expiry = user-chosen, default 24h. Explicitly *not* allowed: arbitrary ERC-20 transfer, unknown contracts.
 
@@ -202,7 +214,9 @@ The brief is blunt: *"Single-category submissions score poorly. All four, equall
 
 **Reader.** Spot balances, chosen pair, live price from Pancake V3 TWAP + a second source for divergence checking, realized volatility over 7/30d from indexed swaps.
 
-**Conformance test (MCS-GRID-1).** Given price range, capital, grid count and a stop condition, validate: spacing arithmetic (arithmetic vs geometric declared), per-level allocation sums to ≤ capital, no level below the stated stop, **fee drag disclosed** (every honest grid plan must state that `n` levels means `n` round-trips of fees — agents that omit this fail), and expected number of fills at stated volatility is internally consistent.
+**Conformance test (MCS-GRID-1).** Given price range, capital, grid count and a stop condition, validate: spacing arithmetic (arithmetic vs geometric, declared and correct), per-level allocation sums to ≤ capital, every level lies inside the stated bounds, no level below the stated stop, and **fee drag is disclosed** — an honest grid plan states that `n` levels means `n` round-trips of fees. All five are arithmetic.
+
+*Removed from the test on review:* "expected fills at stated volatility." That is a model output, not a fact, and grading it would have made the standard quietly non-deterministic. It moves to the Ledger.
 
 **Track record.** For grid agents TermiX wants *win rate, window, and risk taken*. We do not fabricate. See §9.4 — the **Sealed Call** mechanism.
 
@@ -309,7 +323,7 @@ Plus, for TermiX specifically:
 /standard/[testId]      One test: spec, ground-truth method, current pass list
 /pancakeswap            The Pancake Desk
 /pancakeswap/gaps       Liquidity Gap report
-/mandates/[id]          Public mandate view: scope, cap, expiry, spend, revocation
+/charters/[id]          Public mandate view: scope, cap, expiry, spend, revocation
 /judge                  Judge Mode — 90-second guided flow
 /status                 Live system status, probe coverage, index freshness
 /docs                   Integration docs (human + agent)
@@ -321,7 +335,7 @@ Plus, for TermiX specifically:
 
 ```
 /app/positions          Your positions across all four categories
-/app/marques            Active mandates: spend meters, expiry timers, revoke
+/app/charters            Active charters: spend meters, expiry timers, revoke
 /app/jobs               ERC-8183 jobs, quotes, settlement
 /app/receipts           Your run history
 /app/watch              Alerts: HF thresholds, range boundaries, APR deltas
@@ -362,16 +376,16 @@ Above the fold, left: a single line of type, then the address field. Right: the 
 │                                            │  │ ├────●─────┤  healthy    │  │
 │                                            │  └──────────────────────────┘  │
 ├───────────────────────────────────────────────────────────────────────────┤
-│  ◂ Keel · Venus check · 0.05 U · 6.2s · settled 2m ago ◂ Bound MARKED for  │
-│    Rebalancing ◂ marque #018 revoked · 0x9f…21 ◂ Lattice · grid plan ◂     │
+│  ◂ Keel · Venus check · 0.05 U · 6.2s · settled 2m ago ◂ Bound WARRANTED for  │
+│    Rebalancing ◂ charter #018 revoked · 0x9f…21 ◂ Lattice · grid plan ◂     │
 └───────────────────────────────────────────────────────────────────────────┘
 ```
 
 Then, down the page — each section earning its place:
 
 1. **"Two of these three positions are losing money right now."** The four categories introduced *as problems, not as products*, each with a live count of qualified agents. Not four identical cards: four rows, each with the category's own measure device rendered with real data.
-2. **"A registration is not a résumé."** The supply funnel, with today's *real* numbers pulled live: `214,882 registered on BSC → 1,140 with a parseable service → 61 responding → 23 classified into a category → 11 Marked`. Publishing the honest attrition is the single most persuasive thing on the site, and it is the thing no competitor will dare show.
-3. **"Trust the agent. Cap the damage."** The mandate explained in plain language with a real, live mandate card — spend meter draining, expiry counting, revoke button live.
+2. **"A registration is not a résumé."** The supply funnel, with today's *real* numbers pulled live: `214,882 registered on BSC → 1,140 with a parseable service → 61 responding → 23 classified into a category → 11 Warranted`. Publishing the honest attrition is the single most persuasive thing on the site, and it is the thing no competitor will dare show.
+3. **"Trust the agent. Cap the damage."** The mandate explained in plain language with a real, live charter card — spend meter draining, expiry counting, revoke button live.
 4. **"Measured, not asserted."** Two rows from the Ledger with real numbers and a link to reproduce.
 5. **Recent runs** — three real receipts with tx links.
 6. **For builders** — Claim & List in one line, with the free test tool.
@@ -382,12 +396,12 @@ No testimonials. No logo soup. No "the future of autonomous intelligence."
 
 Default filter is **Working** (reachable + classified + priced). A visible toggle reveals `Registered but unreachable (1,079)` with the specific parse error per row — `IA002 · no services array`. Showing the graveyard *and labelling it correctly* is data quality.
 
-Category-native columns. For Rebalancing: pools supported, fee tiers, tick-spacing awareness, observed p95 latency, Marked date, verified runs, price, permission shape. For Health Factor: protocols, action modes (monitor / alert / repay / add collateral), HF accuracy on last test, response latency, max spend.
+Category-native columns. For Rebalancing: pools supported, fee tiers, tick-spacing awareness, observed p95 latency, Warranted date, verified runs, price, permission shape. For Health Factor: protocols, action modes (monitor / alert / repay / add collateral), HF accuracy on last test, response latency, max spend.
 
 Agent row, ~64px, 8 visible per screen:
 
 ```
-  Bound                                  MARKED  5 Sep    live · 3s
+  Bound                                  WARRANTED  5 Sep    live · 3s
   PancakeSwap V3 range management                          0.15 U
   ─────────────────────────────────────────────────────────────────
   MCS-REB-1  pass (tick 0 err, amounts 0.11%)   19 runs   p95 6.4s
@@ -418,17 +432,17 @@ The conversion feature and the judge-comprehension feature simultaneously.
 
   No transaction has been submitted.
 
-  [ Preview another agent ]                        [ Grant a marque → ]
+  [ Preview another agent ]                        [ Grant a charter → ]
 ```
 
 Free where the agent supports a read-only mode; a cheap paid probe otherwise.
 
-### 7.5 The Mandate Desk — the one bold moment
+### 7.5 The Charter Desk — the one bold moment
 
 Grant flow, in the dark "cockpit" surface (see §8):
 
 ```
-  MARQUE  #024                                         BNB Smart Chain
+  CHARTER  #024                                         BNB Smart Chain
 
   Bound may                          Bound may not
   ✓ read position #482910            ✕ transfer arbitrary tokens
@@ -438,13 +452,13 @@ Grant flow, in the dark "cockpit" surface (see §8):
 
   Wallet: Altana Smart Agentic Wallet · session registered in Keystore
 
-                        [ Grant this marque ]
+                        [ Grant this charter ]
 ```
 
-Active state, always visible in `/app/marques`:
+Active state, always visible in `/app/charters`:
 
 ```
-  MARQUE #024 · ACTIVE          73.40 USDT remaining  ▓▓▓▓▓▓▓░░░
+  CHARTER #024 · ACTIVE          73.40 USDT remaining  ▓▓▓▓▓▓▓░░░
                                 19h 41m remaining     ▓▓▓▓▓▓▓▓░░
   2 contracts permitted · 1 call used            [ Revoke now ]
 ```
@@ -459,7 +473,7 @@ Active state, always visible in `/app/marques`:
   14:03:25  agent accepted
   14:03:31  position read at block 118,964,401
   14:03:35  plan validated against MCS-REB-1  pass
-  14:03:36  permission check                  within marque #024
+  14:03:36  permission check                  within charter #024
   14:03:42  transaction submitted             0x8b…4c  ↗
   14:03:44  included · block 118,964,405
   14:03:47  result delivered
@@ -475,7 +489,7 @@ Not a PDF. A product. See §9.
 
 A judge has four minutes. Give them a guided, pre-filled, real run against the funded demo address:
 
-`Intent recognised → 3 agents ranked with reasons → compare → preview → grant marque → hire → run room → receipt → revoke`
+`Intent recognised → 3 agents ranked with reasons → compare → preview → grant charter → hire → run room → receipt → revoke`
 
 Ends with a checklist drawer that maps what they just saw onto the rubric: *ERC-8004 discovery · live chain data · four-category parity · conformance evidence · ERC-8183 commerce · Altana bounded authority · PancakeSwap execution · verifiable receipt.*
 
@@ -496,7 +510,7 @@ You also said Assay's dark theme felt unexciting for normies. You're right about
 
 ### 8.2 The idea: **light for looking, dark for doing**
 
-Marque is a light interface — a daylight instrument panel — **except on the surfaces where money moves**, which drop into a warm near-black cockpit: the Mandate Desk, the Run Room, the receipt seal.
+Marque is a light interface — a daylight instrument panel — **except on the surfaces where money moves**, which drop into a warm near-black cockpit: the Charter Desk, the Run Room, the receipt seal.
 
 This is not a theme toggle and not decoration. It is **semantic**: the interface visibly changes state when you stop browsing and start committing capital. A judge feels the gear change without being told. Every competitor will be uniformly dark (crypto default) or uniformly light (Hive). Nobody will do this, and it is defensible in one sentence when someone asks why.
 
@@ -519,8 +533,8 @@ It also lets us use both aesthetics you actually like — Occestra's daylight ed
 --deck-rule:    #2C3023;
 
 /* BRAND — oxidised brass. BNB-adjacent, not Binance yellow. ≤8% of viewport. */
---marque:       #B0892C;
---marque-lit:   #D9AE45;   /* seal bloom + active mandate only */
+--brass:       #B0892C;
+--brass-lit:   #D9AE45;   /* seal bloom + active charter only */
 
 /* SIGNAL — state only. Never decoration. Never a brand colour. */
 --holds:        #2E7351;   /* in range / healthy / pass */
@@ -536,7 +550,7 @@ It also lets us use both aesthetics you actually like — Occestra's daylight ed
 Two families, clearly distinct, neither a default reach.
 
 - **UI, data, labels — Geist** (with **Geist Mono strictly for numerals inside tables, receipts and hashes**, never for labels or eyebrows). Tabular figures mandatory anywhere numbers stack.
-- **Statements — Fraunces**, one weight, `wonk` at 0, `soft` low. Used for **exactly four things**: the hero line, the six section statements on `/`, mandate document headings, and the receipt title. Never on card titles, never on buttons.
+- **Statements — Fraunces**, one weight, `wonk` at 0, `soft` low. Used for **exactly four things**: the hero line, the six section statements on `/`, charter document headings, and the receipt title. Never on card titles, never on buttons.
 
 Scale — restrained, as you asked, roughly Occestra's proportions:
 
@@ -568,14 +582,14 @@ Same device, four categories, one component. It is not a card grid, it is not a 
 
 ### 8.6 Motion — spend it in one place
 
-**The one bold moment: the Seal.** On granting a marque, the daylight dims to cockpit over 260ms, the mandate composes line by line (allowlist, then cap, then expiry, 60ms stagger), and the brass mark presses down with a short bloom — your Occestra wax-seal moment, reborn as an authority stamp. Then the session tx hash writes in beneath it, character by character, as it confirms. That is the screenshot that goes in your submission and on X.
+**The one bold moment: the Seal.** On granting a charter, the daylight dims to cockpit over 260ms, the charter composes line by line (allowlist, then cap, then expiry, 60ms stagger), and the brass mark presses down with a short bloom — your Occestra wax-seal moment, reborn as an authority stamp. Then the session tx hash writes in beneath it, character by character, as it confirms. That is the screenshot that goes in your submission and on X.
 
 Everything else stays quiet and functional:
 
-- **The Tape.** A slow horizontal marquee of real settled runs, marks awarded, and revocations — the CrabTalk reference, but every item is a real event and clicks through to its receipt. Pauses on hover. Never loops fake data; if there are no events, it doesn't render.
+- **The Tape.** A slow horizontal chartere of real settled runs, marks awarded, and revocations — the CrabTalk reference, but every item is a real event and clicks through to its receipt. Pauses on hover. Never loops fake data; if there are no events, it doesn't render.
 - **Measure fill.** Measures animate 0→value once on data arrival, 400ms cubic-bezier(.16,1,.3,1), 30ms stagger. Once. Not on scroll.
 - **FLIP reorder.** When a filter or ranking changes, rows physically move to their new position. This shows *what changed*, which is the only good reason for motion.
-- **Spend meter.** Drains in real time on active mandates.
+- **Spend meter.** Drains in real time on active charters.
 - **Confirmation pulse.** One 200ms brass pulse when a tx is included. Nothing else.
 
 **Banned:** scroll-triggered fade-up on every section, hover-lift on every card, parallax, bouncing anything, animated gradient blobs, particle fields, 3D robots. Every animation has a `prefers-reduced-motion` fallback. Performance floor: 60fps on a mid laptop, LCP < 2.0s, zero console errors.
@@ -586,7 +600,7 @@ The Treasure Okure instinct is right but must be subtle. A monochrome grain over
 
 ### 8.8 Copy voice
 
-Plain verbs. Sentence case. Say what happens. The button that says **Grant a marque** produces a state that says **Marque granted**. Errors state what failed and what to do. Empty states are invitations:
+Plain verbs. Sentence case. Say what happens. The button that says **Grant a charter** produces a state that says **Charter granted**. Errors state what failed and what to do. Empty states are invitations:
 
 > *No agent has passed MCS-GRID-1 yet. If you run a grid agent on BSC, test it here — it takes about a minute.*
 
@@ -703,14 +717,14 @@ That wins the *marketplace* story and the *Pancake benefit* story with the same 
 
 ### 10.3 One real mainnet rebalance
 
-Budget **$25–40** of your own capital. Open a deliberately tight CAKE/USDT or BNB/USDT V3 range so it drifts out within hours, then let Bound rebalance it under an Altana marque. Capture everything:
+Budget **$25–40** of your own capital. Open a deliberately tight CAKE/USDT or BNB/USDT V3 range so it drifts out within hours, then let Bound rebalance it under an Altana charter. Capture everything:
 
 ```
   before   ▏1.281 ────────────●▕  OUT OF RANGE · 6h 12m · 0 fees accrued
   action   decreaseLiquidity → collect → mint       tx 0x…, 0x…, 0x…
   after    ▏1.289 ─────●──────▕  IN RANGE · fees resumed at block 118,9xx,xxx
   cost     0.15 U agent · 0.0021 BNB gas · 0.18% realised slippage
-  bounded  marque #024 · cap 100 USDT · 2 contracts · expired 14:30 UTC
+  bounded  charter #024 · cap 100 USDT · 2 contracts · expired 14:30 UTC
 ```
 
 **Mainnet, not testnet, for this prize.** A tiny real transaction beats an elaborate testnet simulation in the eyes of a protocol team.
@@ -730,10 +744,10 @@ Requirements, mapped one-to-one to what we're building regardless:
 | Altana requirement | Marque surface |
 |---|---|
 | Agents on their own Altana wallets | Each reference agent provisioned with an Altana Smart Agentic Wallet |
-| Sessions with call allowlist, spend cap, expiry | The Mandate Desk, verbatim |
+| Sessions with call allowlist, spend cap, expiry | The Charter Desk, verbatim |
 | Sessions registered in Keystore | On grant, before any execution |
 | Real on-chain tx through a session key | The Pancake rebalance + one Venus repay |
-| User-facing visibility and revocation | `/app/marques` + the persistent header strip + one-click revoke |
+| User-facing visibility and revocation | `/app/charters` + the persistent header strip + one-click revoke |
 | *Bonus:* ERC-8183 buyer side | `hireErc8183Agent` via `docs.altana.network/sdk/erc8183` |
 | *Bonus:* sell over x402/B402 | `@altananetwork/x402-server` on the reference agents |
 
@@ -755,14 +769,14 @@ Production-shaped, not distributed theatre. Six days, one operator, no Docker (h
 
 ```
                       ┌──────────────────────────────────┐
-                      │   marque.market  ·  Next.js 15   │
+                      │   charter.market  ·  Next.js 15   │
                       │   App Router · standalone · Caddy│
                       └──────────────┬───────────────────┘
                                      │
                   ┌──────────────────▼──────────────────┐
                   │            Marque API                │
                   │  positions · register · conformance  │
-                  │  quotes · jobs · marques · ledger    │
+                  │  quotes · jobs · charters · ledger    │
                   └───┬──────────┬───────────┬───────────┘
                       │          │           │
           ┌───────────▼──┐  ┌────▼─────┐  ┌──▼────────────┐
@@ -902,9 +916,9 @@ Judging deadline **9 Sep**. Treat **8 Sep** as the engineering deadline. You hav
 - **Gate: ≥3 successful end-to-end paid hires with public receipts.**
 
 ### Day 4 — 7 Sep · Bound authority + partner surfaces
-- Altana wallets on all reference agents; Mandate Desk; Keystore registration; the Seal moment
+- Altana wallets on all reference agents; Charter Desk; Keystore registration; the Seal moment
 - Real session-key transaction; revoke working and visible
-- `/pancakeswap` Pancake Desk + **one real mainnet rebalance under a marque**
+- `/pancakeswap` Pancake Desk + **one real mainnet rebalance under a charter**
 - **Redcell** (Archon-derived security agent) live and registered
 - ADV-03 run; repetition passes for ADV-01/02
 - **Gate: a judge can grant, watch, and revoke a real mandate.**
@@ -924,17 +938,56 @@ Judging deadline **9 Sep**. Treat **8 Sep** as the engineering deadline. You hav
 - Submit via the intake form (`forms.gle/9g9XPNFwnYaHAz9L8`), tick TermiX, PancakeSwap, Altana, AltLayer
 - **Do not turn anything off.**
 
-### Days 7–20 — 10–23 Sep · The judging window (this is free points)
+### Days 7–20 — 10–23 Sep · The judging window
 
-Judging runs 9–23 September. **Almost every team will go dark on the 9th.** Eligibility says the submission must be *functional and publicly accessible during judging* and *agents must be live on BSC*. So:
+Judging runs 9–23 September. Almost every team will go dark on the 9th. Eligibility requires the submission to be *functional and publicly accessible during judging* and *agents live on BSC*. But — and this is a correction to my first draft — **the rules do not authorise materially changing the judged product after the deadline, and I should not have framed continued feature-shipping as "free points."** A judge comparing to a Sep-9 snapshot could reasonably treat post-deadline features as unfair.
 
-- Daily uptime checks and a public `/status` page with real numbers
-- Keep running sealed calls so the track record grows *during* judging
-- Keep listing third-party agents — every new listing is evidence of a working rail
-- Post daily on X with real receipts, not marketing
-- If BNB's press language ("functionality, data quality, agent diversity, **and real-world usage**") reflects the redacted Phase 2, usage during this window is scored. Go get some.
+Split it into three buckets and behave differently in each:
 
----
+**Unambiguously allowed — do all of it, daily.**
+Uptime, monitoring, security patches, bug fixes, keeping agents live, keeping the index fresh.
+
+**Not shipping, just working — this is the real free-points bucket.**
+A marketplace that indexes new agents, records new probes, resolves sealed calls, accepts self-serve third-party listings and serves real users during judging is not *changing*; it is *operating*. Data accrual is the product doing its job. Every one of those is evidence for a criterion BNB's own press release named — *"real-world usage"* — that the tracks page omits. This survives either ruling.
+
+**Ambiguous — ask before doing.**
+New features, new pages, redesigns. On 9 Sep, email the organisers and ask in one line: *"Is post-deadline iteration permitted during judging, or should the submitted build be frozen?"* Record the answer in `SUBMISSION.md`. If yes, ship. If no, freeze features and keep operating.
+
+Asking costs one email and removes the entire risk. Assuming costs the prize.
+
+Also during this window: post daily on X with real receipts rather than marketing, and keep the `/status` page honest.
+
+## 15b. Funding — what you actually pay for
+
+Three separate situations, and conflating them is how people overspend.
+
+| Purpose | Network | Asset | Amount |
+|---|---|---|---|
+| Development and contract testing | BSC testnet (97) | tBNB | Free from the faucet. ~0.01–0.02 tBNB per active test wallet. Agent Studio's own walkthrough runs on roughly 0.005 tBNB. |
+| Real demo positions and proof runs | BSC mainnet (56) | BNB + USDT | **0.10 BNB + 40 USDT** into one dedicated low-value wallet |
+| ERC-8183 paid-job settlement | Testnet first | **Whatever the deployed kernel reports** | Do not guess |
+
+**On the settlement asset: do not pre-buy an assumed "ERC-8183 token."** The BNB Agent SDK resolves its commerce settlement asset from the deployed kernel at runtime. Have the code call `token_symbol()` / `token_decimals()` / `token_balance()` first, then fund exactly what it reports. Guessing USDT and being wrong wastes a swap and half a morning.
+
+**ERC-8004 registration is gas-sponsored** via MegaFuel on both testnet and mainnet, so registering the reference agents should not burn BNB. Verify this at build time rather than budgeting for it.
+
+Mainnet allocation of the 0.10 BNB + 40 USDT:
+
+- **~0.025 BNB + 15–20 USDT** → PancakeSwap V3 BNB/USDT or CAKE/USDT position, deliberately narrow so it drifts out of range within hours. This is the Pancake proof.
+- **~0.04 BNB** → Venus collateral, borrowing only 5–8 USDT.
+- **~15–20 USDT** → left genuinely idle so the yield reader has something real to read.
+- **~0.01 BNB** → split across reference-agent wallets for job submission and session gas.
+- Remainder as operational gas buffer. BSC gas at ~0.05 gwei makes 0.01 BNB extremely generous.
+
+Most of this stays yours. Real cost is gas, slippage, LP drift and paid agent calls — call it $10–20 burned across the whole build.
+
+**One correction to my own earlier example.** The mock on `/` shows a Venus position at HF 1.43. That was illustrative layout copy, not an instruction. **Do not deliberately run a mainnet position near liquidation for presentation.** Keep our own mainnet Venus position comfortably above HF 2.5. Demonstrate the dangerous case against a **real third-party mainnet address** — there are thousands of genuinely at-risk Venus positions readable right now — or a pinned historical block.
+
+That is strictly better anyway: reading a stranger's risky position proves the reader works on arbitrary input, which is precisely the functionality criterion. Manufacturing our own liquidation risk proves nothing and can lose money.
+
+**Also budget agent LLM spend.** Five reference agents answering calls for two weeks of judging. Cap it: `DAILY_LLM_USD_CAP=5` globally with per-agent sub-caps, and an alert at 80%. Left uncapped, a probe loop plus a curious judge can burn real money overnight.
+
+**Every illustrative number in this document — 214,882 registered, 61 responding, HF 1.43, $0.18 fees — is layout copy.** None of it ships. The product displays only what ingest and the readers actually measure.
 
 ## 16. Acceptance gates — put this in `SUBMISSION.md` and refuse to add polish until every line passes
 
@@ -974,15 +1027,15 @@ Judging runs 9–23 September. **Almost every team will go dark on the 9th.** El
 # Marque
 Put your BNB Chain positions in the hands of agents you can hold to account.
 
-▶ LIVE            https://marque.market
-▶ 90-SECOND FLOW  https://marque.market/judge
+▶ LIVE            https://charter.market
+▶ 90-SECOND FLOW  https://charter.market/judge
 ▶ VIDEO           …
 
 MAIN TRACK
-  Rebalancing         /register/rebalancing        n agents · n Marked
-  Grid Trading        /register/grid-trading       n agents · n Marked
-  Yield Optimisation  /register/yield              n agents · n Marked
-  Health Factor       /register/health-factor      n agents · n Marked
+  Rebalancing         /register/rebalancing        n agents · n Warranted
+  Grid Trading        /register/grid-trading       n agents · n Warranted
+  Yield Optimisation  /register/yield              n agents · n Warranted
+  Health Factor       /register/health-factor      n agents · n Warranted
 
 DATA QUALITY
   Live position readers        /desk?address=0x…
@@ -1007,7 +1060,7 @@ PANCAKESWAP
   Liquidity gaps        /pancakeswap/gaps
 
 ALTANA
-  Mandate Desk          /app/marques
+  Charter Desk          /app/charters
   Session registration  tx 0x…
   Session-key execution tx 0x…
   Revocation            tx 0x…
@@ -1024,7 +1077,7 @@ ARCHITECTURE, SECURITY, RUNBOOK  ↓
 | 0:12–0:35 | Paste an address. Positions appear. Two need attention. |
 | 0:35–0:55 | Three agents ranked for *this* position, with reasons. Compare. |
 | 0:55–1:15 | Preview: exactly what would happen. Nothing submitted. |
-| 1:15–1:35 | Grant a marque. The Seal. Cap, allowlist, expiry visible. |
+| 1:15–1:35 | Grant a charter. The Seal. Cap, allowlist, expiry visible. |
 | 1:35–1:55 | Run Room → transaction → receipt → revoke. |
 | 1:55–2:15 | All four categories, each with its own depth. |
 | 2:15–2:35 | The Ledger: manual vs agent, with the methodology link. |
@@ -1042,7 +1095,7 @@ Afterwards, in order of defensibility:
 2. **Builder Pro** — conversion funnels, benchmark history, uptime alerting, listing analytics. The people who most want this are the agent builders BNB wants to retain.
 3. **Enterprise / treasury** — approved-agent catalogues, org-level mandate policy, multi-signer approval, audit export. This is where mandates become genuinely valuable.
 4. **Decision API** — the qualified-supply feed and conformance results, sold to wallets and protocols that want to embed *"find an agent to manage this position."*
-5. **Sponsored placement**, clearly marked, **never mixed into ranking.** A sponsor can buy a labelled slot. A sponsor cannot buy a Mark. That separation is stated publicly and is part of the brand.
+5. **Sponsored placement**, clearly marked, **never mixed into ranking.** A sponsor can buy a labelled slot. A sponsor cannot buy a Warrant. That separation is stated publicly and is part of the brand.
 
 The long game: Marque is not a crypto Fiverr. It is **the procurement and delegation layer for autonomous software** — the place where a buyer (human or agent) says *"here is my outcome, my budget, my risk tolerance, and the authority I will delegate,"* and something trustworthy resolves who, how much, what it may touch, how it's contained, and what it did.
 
