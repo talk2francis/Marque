@@ -1,0 +1,56 @@
+I'm going to do this properly. Let me pull my own context on your past builds first, then go deep on the hackathon material and the competitive field before I write anything.
+
+Three documents above. Here is what matters, and where I overrode ChatGPT.
+
+The finding that changes the whole strategy
+
+I queried the 8004scan API directly rather than reading the marketing. The "200,000+ agents on BSC" are mostly not real supply. Record after record comes back with description: null, services: null, and 8004scan's own parser emitting IA002 — Missing services array (agent won't be reachable). Their scoring engine literally has an integrity_tier of "broken" and a discoverability_tier of "unavailable". Health checks return degraded, unhealthy, skipped, with endpoints resolving to dead Cloudflare tunnels.
+
+Then I read Hive's live homepage. It surfaces five agents, of which zero are Grid Trading and zero are Yield Optimisation. Two of its four mandated categories are empty on its own front page, and "agent diversity, all four equally deep" is one of three scored criteria.
+
+So the brief's framing is half wrong in a way that will sink most entries:
+
+BNB Chain does not have a discovery problem. It has a supply problem wearing a discovery problem's clothes.
+
+Everyone will build a search box over the registry and ship a beautiful directory of dead links.
+
+The wedge: position-first, not agent-first
+
+You don't arrive at Marque to browse agents. You paste an address and it reads your actual BSC positions live: your Pancake V3 range and how far it is from the boundary, your Venus health factor and liquidation price, your idle USDT and what it should be earning at your size. Then, and only then, the agents that can act on that specific position.
+
+That single inversion is the shortest path through all three criteria at once. Functionality, because there is no dead end when the first screen is your own money instead of a taxonomy. Data quality, because every number is chain-derived tick math and health factors rather than registry counts, which is exactly what "beyond basic counts" means. Agent diversity, because the four categories are four position types and you physically cannot fake three of them. The architecture forces the depth.
+
+Second wedge, which makes the first credible: a deterministic conformance test per category. We compute ground truth ourselves at a pinned block, ask the agent, and diff. Published standard generated from the enforcing code, same pattern that worked for AS and OQS. Third wedge: the TermiX Advantage Report stops being a PDF and becomes a product surface, because the harness already owns the manual baseline.
+
+Where I disagreed with ChatGPT
+
+"Proof" is not a wedge any more. Hive already says receipts and permissions. OKX.AI has trust layers. A six-level Proof Spectrum is a good slide and a mediocre product. Users don't want a ladder, they want to know if this thing can do their job right now.
+
+Its design direction is the current default. Warm graphite, bone, hairlines, sparse BNB yellow, editorial grain, 01/02/03 numbering. That is precisely what every design-capable model outputs in 2026, and Hive already looks like it. I replaced it with something structural: light for looking, dark for doing. Discovery is a daylight instrument panel; the moment you commit capital the interface drops into a warm near-black cockpit. Semantic, not decorative, and nobody else will do it. The signature component is one measure rule used identically for LP range, health factor, net APR and grid band. One device, four categories, equal depth made visible.
+
+It ignored Archon. You already built an ERC-8004 smart contract auditor that placed #1 in AI DevTools at Mantle. TermiX weights security agents above general-purpose at 20% of their rubric. Port Archon's audit core to a BSC-registered agent and you enter that criterion with a competition-placed engine while everyone else enters with a weekend GPT wrapper. Half a day of work.
+
+It missed TermiX's own supply. While probing I found redpen.agent at 56:0x8004a169…:318810 with an on-chain termix.metadataHash key and a live A2A endpoint at platform-backend.prod.termix.live. TermiX registers its roster as ERC-8004 identities on BSC. That is indexable supply, it is security-category supply, and when a TermiX judge lands on your marketplace and sees their own agents correctly classified, health-probed and conformance-tested with a working hire path, that is very hard to beat.
+
+It missed the judging window. Judging runs 9 to 23 September. Eligibility requires the site functional and agents live throughout. BNB's own press release names a fourth criterion the tracks page omits: "real-world usage." Every team goes dark on the 9th. Two weeks of shipping and usage while the field sleeps is close to free points.
+
+The name
+
+Marque. A letter of marque is delegated authority with defined scope and an expiry, revocable by the grantor, which is exactly an Altana scoped session. A marque is also a maker's mark of quality, which is exactly the conformance certificate. One word carrying both halves of the product, with a full vocabulary falling out of it: grant a marque, earn the Mark, browse the Register, read the Ledger. Short, ownable, no crypto squatter, and not BNB-specific, which matters because the prize is a standalone brand.
+
+Backups ranked in the doc: Rialto, Ward, Tender, Covenant, Bourse, Consign, Vantage, Fathom. Sweep marque.market, marque.xyz, usemarque.com today.
+
+Honest scoring
+
+Main track blended around 87 if it ships as specified, which should make the top three shortlist. TermiX is your most winnable prize at roughly 90, and I would take it over a coin flip on the main prize. PancakeSwap around 88, Altana 85. Where we lose, if we lose, is third-party supply depth in Grid and Yield. That is the one thing your own hands should attack while the bots build.
+
+Five things to do in the next hour
+Buy the domain, point it at the VPS.
+Submit the 8004scan Pro tier application. Lead time is not under your control.
+Fund the demo wallet and open the positions. A deliberately tight Pancake V3 range, a small Venus borrow, some idle USDT. Nothing in the plan works without this existing, and it is the most important forty dollars in the build.
+Commit AGENTS.md.
+Register on the intake form.
+
+Then paste P0 into Codex.
+
+One thing I want your call on before Day 2: I have written Redcell as an Archon port. If the Archon audit core is more entangled with Mantle than I am assuming, tell me now and I will restructure the TermiX security benchmark around a thinner approval-risk triage agent instead.
