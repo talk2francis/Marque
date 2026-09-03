@@ -165,3 +165,27 @@ Document·MD 
 Then paste P0 into Codex.
 
 One thing I want your call on before Day 2: I have written Redcell as an Archon port. If the Archon audit core is more entangled with Mantle than I am assuming, tell me now and I will restructure the TermiX security benchmark around a thinner approval-risk triage agent instead.
+
+
+
+............................
+.............................
+..............................
+SOME ESSENTIAL LINKS YOU CLAUDE OPUS 5 MIGHT NEED BUILDING MARQUE, WHEN YOU EVENTUALLY READ THROUGH THIS
+[1]: https://zamantika.com/hi/BNBChainDevs/status/2091978856878297110 "https://zamantika.com/hi/BNBChainDevs/status/2091978856878297110"
+[2]: https://minia2a.uk/hackathon/ "https://minia2a.uk/hackathon/"
+[3]: https://www.agentmart.fun/ "https://www.agentmart.fun/"
+[4]: https://8004scan.io/developers "https://8004scan.io/developers"
+[5]: https://8004scan.io/agents/bsc/124714 "https://8004scan.io/agents/bsc/124714"
+[6]: https://www.bnbchain.org/en/blog/bnb-chain-ai-agent-landscape-agents-tools-and-payments "https://www.bnbchain.org/en/blog/bnb-chain-ai-agent-landscape-agents-tools-and-payments"
+[7]: https://www.bnbchain.org/en/hackathons/smart-money-era "https://www.bnbchain.org/en/hackathons/smart-money-era"
+[8]: https://termix.ai/ "https://termix.ai/"
+[9]: https://web3.okx.com/sv/learn/okx-ai "https://web3.okx.com/sv/learn/okx-ai"
+[10]: https://www.okx.ai/agents/4453 "https://www.okx.ai/agents/4453"
+[11]: https://www.bnbchain.org/en/blog/bnb-agent-studio-v2-your-agents-your-rules "https://www.bnbchain.org/en/blog/bnb-agent-studio-v2-your-agents-your-rules"
+[12]: https://ng.linkedin.com/in/timokonkwo "https://ng.linkedin.com/in/timokonkwo"
+[13]: https://www.agent.family/campaigns/bnb-build-the-era "https://www.agent.family/campaigns/bnb-build-the-era"
+[14]: https://blog.pancakeswap.finance/articles/PancakeSwap-x-BNB-AI-Agent-Studio "https://blog.pancakeswap.finance/articles/PancakeSwap-x-BNB-AI-Agent-Studio"
+[15]: https://docs.bnbchain.org/developer-kit/bnbchain-studio/quickstart/ "https://docs.bnbchain.org/developer-kit/bnbchain-studio/quickstart/"
+[16]: https://docs.bnbchain.org/developer-kit/bnbchain-studio/cli-reference/ "https://docs.bnbchain.org/developer-kit/bnbchain-studio/cli-reference/"
+[17]: https://www.bnbchain.org/en/bnb-agent-studio "https://www.bnbchain.org/en/bnb-agent-studio"
