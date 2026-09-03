@@ -1,0 +1,19 @@
+{
+  "name": "@marque/worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "ingest": "tsx src/ingest.ts",
+    "ingest:once": "tsx src/ingest.ts --once"
+  },
+  "dependencies": {
+    "@marque/db": "workspace:*",
+    "@marque/registry": "workspace:*",
+    "@marque/chain": "workspace:*",
+    "drizzle-orm": "^0.38.2"
+  },
+  "devDependencies": { "typescript": "^5.7.2", "tsx": "^4.19.2" }
+}

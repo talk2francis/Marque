@@ -1,0 +1,8 @@
+@import '@marque/ui/tokens.css';
+
+/* next/font supplies the real families; the token file names the fallbacks. */
+:root {
+  --font-ui: var(--font-geist), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --font-statement: var(--font-fraunces), 'Iowan Old Style', Georgia, serif;
+}

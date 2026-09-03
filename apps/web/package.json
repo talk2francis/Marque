@@ -1,0 +1,25 @@
+{
+  "name": "@marque/web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3200",
+    "build": "next build",
+    "start": "next start -p 3200",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "next": "15.1.3",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "@marque/ui": "workspace:*",
+    "@marque/db": "workspace:*",
+    "drizzle-orm": "^0.38.2"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.2",
+    "@types/react-dom": "^19.0.2",
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2"
+  }
+}

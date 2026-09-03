@@ -1,0 +1,17 @@
+.main {
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  padding: var(--s5);
+  background: var(--ground);
+}
+
+.line {
+  margin: 0;
+  max-width: 20ch;
+  font-size: var(--size-hero);
+  line-height: var(--lh-hero);
+  font-weight: 400;
+  color: var(--fg);
+  text-wrap: balance;
+}

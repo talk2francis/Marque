@@ -1,0 +1,144 @@
+/**
+ * Marque design tokens.
+ *
+ * Light for looking, dark for doing — but ONE product, not two.
+ * Only ground, ink and rule tokens swap between daylight and cockpit.
+ * Type scale, spacing, measure rules, chips and buttons are identical in both.
+ *
+ * Cockpit is applied per-surface with [data-surface="cockpit"], NOT as a global
+ * theme toggle. The transition is a dim, never a navigation.
+ */
+
+:root {
+  /* DAYLIGHT — discovery, register, profiles, ledger, standard */
+  --paper: #ededE7;
+  --paper-raised: #f7f7f3;
+  --ink: #15160f;
+  --ink-soft: #5c5e52;
+  --rule: #d4d4cb;
+
+  /* COCKPIT — charter desk, run room, receipt. Applied via [data-surface]. */
+  --deck: #12140e;
+  --deck-raised: #1b1e15;
+  --deck-ink: #e8e9e0;
+  --deck-rule: #2c3023;
+
+  /* BRAND — oxidised brass, BNB-adjacent, never Binance yellow. <=8% of viewport. */
+  --brass: #b0892c;
+  --brass-lit: #d9ae45;
+
+  /* SIGNAL — state only. Never branding, never decoration. */
+  --holds: #2e7351;
+  --watch: #b8721a;
+  --breach: #a83a2c;
+  --chain: #2b5a85;
+
+  /* Active ground. Surfaces remap these three, everything else stays put. */
+  --ground: var(--paper);
+  --ground-raised: var(--paper-raised);
+  --fg: var(--ink);
+  --fg-soft: var(--ink-soft);
+  --line: var(--rule);
+
+  /* TYPE — Fraunces for statements only, Geist for everything else. */
+  --font-ui: 'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, 'SF Mono', 'Roboto Mono', monospace;
+  --font-statement: 'Fraunces', 'Iowan Old Style', Georgia, serif;
+
+  --size-hero: 48px;
+  --size-statement: 30px;
+  --size-title: 16px;
+  --size-body: 15px;
+  --size-data: 13.5px;
+  --size-caption: 11.5px;
+  --lh-hero: 1.05;
+  --lh-statement: 1.15;
+  --lh-body: 1.55;
+
+  /* SPACE — a 4px base, so vertical rhythm never drifts. */
+  --s1: 4px;
+  --s2: 8px;
+  --s3: 12px;
+  --s4: 16px;
+  --s5: 24px;
+  --s6: 32px;
+  --s7: 48px;
+  --s8: 64px;
+  --s9: 96px;
+
+  --measure: 68ch;
+  --ease-settle: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/** The cockpit. Semantic: the interface changes state when money moves. */
+[data-surface='cockpit'] {
+  --ground: var(--deck);
+  --ground-raised: var(--deck-raised);
+  --fg: var(--deck-ink);
+  --fg-soft: #9a9d8e;
+  --line: var(--deck-rule);
+}
+
+@media (max-width: 768px) {
+  :root {
+    --size-hero: 30px;
+    --size-statement: 24px;
+    --size-title: 15px;
+    --size-data: 13px;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--fg);
+  font-family: var(--font-ui);
+  font-size: var(--size-body);
+  line-height: var(--lh-body);
+  font-feature-settings: 'cv11', 'ss01';
+  -webkit-font-smoothing: antialiased;
+}
+
+/** Numerals in tables, receipts and hashes only — never labels or eyebrows. */
+.mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--size-data);
+}
+
+.statement {
+  font-family: var(--font-statement);
+  font-weight: 400;
+  font-variation-settings: 'SOFT' 20, 'WONK' 0;
+  letter-spacing: -0.015em;
+}
+
+a {
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--brass);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
