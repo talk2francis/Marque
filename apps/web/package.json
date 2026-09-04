@@ -14,7 +14,10 @@
     "react-dom": "^19.0.0",
     "@marque/ui": "workspace:*",
     "@marque/db": "workspace:*",
-    "drizzle-orm": "^0.38.2"
+    "drizzle-orm": "^0.38.2",
+    "@marque/registry": "workspace:*",
+    "@marque/probe": "workspace:*",
+    "@marque/positions": "workspace:*"
   },
   "devDependencies": {
     "@types/react": "^19.0.2",

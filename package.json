@@ -3,7 +3,9 @@
   "private": true,
   "version": "0.1.0",
   "packageManager": "pnpm@9.15.9",
-  "engines": { "node": ">=22" },
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "build": "pnpm -r --filter './packages/*' build && pnpm --filter @marque/web build",
     "dev": "pnpm --filter @marque/web dev",
@@ -13,7 +15,8 @@
     "test:watch": "vitest",
     "audit": "node scripts/audit.mjs",
     "db:generate": "pnpm --filter @marque/db generate",
-    "db:migrate": "pnpm --filter @marque/db migrate"
+    "db:migrate": "pnpm --filter @marque/db migrate",
+    "supply-report": "tsx scripts/supply-report.mts"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
@@ -22,6 +25,12 @@
     "typescript-eslint": "^8.18.1",
     "@eslint/js": "^9.17.0",
     "vitest": "^2.1.8",
-    "tsx": "^4.19.2"
+    "tsx": "^4.19.2",
+    "@marque/db": "workspace:*",
+    "@marque/registry": "workspace:*",
+    "@marque/probe": "workspace:*",
+    "@marque/positions": "workspace:*",
+    "@marque/chain": "workspace:*",
+    "drizzle-orm": "^0.38.2"
   }
 }

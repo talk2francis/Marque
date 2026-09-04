@@ -5,6 +5,18 @@ const nextConfig = {
   output: 'standalone',
   outputFileTracingRoot: new URL('../../', import.meta.url).pathname,
   reactStrictMode: true,
+  // Workspace packages ship TypeScript source, not a build step.
+  transpilePackages: ['@marque/db', '@marque/ui', '@marque/chain', '@marque/registry', '@marque/probe', '@marque/positions'],
+  webpack(config) {
+    // Those packages use TypeScript's ESM convention of importing './x.js' from
+    // './x.ts'. Node and tsx resolve that natively; webpack needs telling.
+    config.resolve.extensionAlias = {
+      ...(config.resolve.extensionAlias ?? {}),
+      '.js': ['.ts', '.tsx', '.js'],
+      '.mjs': ['.mts', '.mjs'],
+    }
+    return config
+  },
   poweredByHeader: false,
   eslint: { ignoreDuringBuilds: true },
   async headers() {

@@ -138,9 +138,16 @@ export async function sweepList(opts: {
     const batchSize = Math.min(concurrency, maxPages - pagesFetched)
     const offsets = Array.from({ length: batchSize }, (_, i) => offset + i * PAGE)
 
-    const pages = await mapLimit(offsets, concurrency, (off) =>
-      client.listAgents({ chainId, limit: PAGE, offset: off }),
-    )
+    // A single slow page at a deep offset must not abort the batch: the API
+    // gets measurably slower past ~100k offset, and one timeout previously
+    // took the whole ingest tick down with it.
+    const pages = await mapLimit(offsets, concurrency, async (off) => {
+      try {
+        return await client.listAgents({ chainId, limit: PAGE, offset: off })
+      } catch {
+        return { items: [], total: null, droppedOffChain: 0 }
+      }
+    })
     pagesFetched += pages.length
 
     let batchItems = 0

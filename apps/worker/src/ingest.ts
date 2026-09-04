@@ -35,7 +35,45 @@ function log(event: string, data: Record<string, unknown>): void {
   console.log(JSON.stringify({ t: new Date().toISOString(), worker: 'ingest', event, ...data }))
 }
 
+/**
+ * One tick: sweep, then enrich, then occasionally snapshot the funnel.
+ *
+ * Each stage is independently guarded. A sweep failure previously aborted the
+ * whole tick, so a single slow page at a deep offset starved enrichment for an
+ * hour — the sweep is the fragile stage and the enrich is the valuable one.
+ */
 async function tick(client: ScanClient, state: { lastFunnelAt: number }): Promise<void> {
+  try {
+    await sweepStage(client)
+  } catch (err) {
+    log('sweep_error', { error: err instanceof Error ? err.message : String(err) })
+  }
+
+  try {
+    const enrich = await enrichDetails({ client, chainId: BSC, limit: ENRICH_LIMIT })
+    log('enrich', {
+      attempted: enrich.attempted,
+      ok: enrich.succeeded,
+      failed: enrich.failed,
+      services: enrich.servicesWritten,
+      withService: enrich.withAtLeastOneService,
+    })
+  } catch (err) {
+    log('enrich_error', { error: err instanceof Error ? err.message : String(err) })
+  }
+
+  if (Date.now() - state.lastFunnelAt > FUNNEL_EVERY_MS) {
+    try {
+      const stages = await snapshotFunnel({ client, chainId: BSC })
+      state.lastFunnelAt = Date.now()
+      log('funnel', Object.fromEntries(stages.map((s) => [s.stage, s.count])))
+    } catch (err) {
+      log('funnel_error', { error: err instanceof Error ? err.message : String(err) })
+    }
+  }
+}
+
+async function sweepStage(client: ScanClient): Promise<void> {
   const sweep = await sweepList({ client, chainId: BSC, maxPages: SWEEP_PAGES })
   log('sweep', {
     pages: sweep.pagesFetched,
@@ -47,21 +85,6 @@ async function tick(client: ScanClient, state: { lastFunnelAt: number }): Promis
     budgetMinute: client.rateLimit.remainingMinute,
     budgetDay: client.rateLimit.remainingDay,
   })
-
-  const enrich = await enrichDetails({ client, chainId: BSC, limit: ENRICH_LIMIT })
-  log('enrich', {
-    attempted: enrich.attempted,
-    ok: enrich.succeeded,
-    failed: enrich.failed,
-    services: enrich.servicesWritten,
-    withService: enrich.withAtLeastOneService,
-  })
-
-  if (Date.now() - state.lastFunnelAt > FUNNEL_EVERY_MS) {
-    const stages = await snapshotFunnel({ client, chainId: BSC })
-    state.lastFunnelAt = Date.now()
-    log('funnel', Object.fromEntries(stages.map((s) => [s.stage, s.count])))
-  }
 }
 
 async function main(): Promise<void> {

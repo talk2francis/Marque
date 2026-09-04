@@ -7,13 +7,21 @@
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "ingest": "tsx src/ingest.ts",
-    "ingest:once": "tsx src/ingest.ts --once"
+    "ingest:once": "tsx src/ingest.ts --once",
+    "probe": "tsx src/probe.ts",
+    "probe:once": "tsx src/probe.ts --once",
+    "classify": "tsx src/classify.ts",
+    "classify:once": "tsx src/classify.ts --once"
   },
   "dependencies": {
     "@marque/db": "workspace:*",
     "@marque/registry": "workspace:*",
     "@marque/chain": "workspace:*",
-    "drizzle-orm": "^0.38.2"
+    "drizzle-orm": "^0.38.2",
+    "@marque/probe": "workspace:*"
   },
-  "devDependencies": { "typescript": "^5.7.2", "tsx": "^4.19.2" }
+  "devDependencies": {
+    "typescript": "^5.7.2",
+    "tsx": "^4.19.2"
+  }
 }

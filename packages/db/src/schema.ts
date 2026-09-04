@@ -35,10 +35,20 @@ export type ServiceKind = (typeof SERVICE_KINDS)[number]
 export const SERVICE_SOURCES = ['top_level', 'offchain_array', 'onchain_key'] as const
 export type ServiceSource = (typeof SERVICE_SOURCES)[number]
 
-/** Probe failure taxonomy. Anything unclassified is a bug in the classifier, not a new class. */
+/**
+ * Probe failure taxonomy. Anything unclassified is a bug in the classifier,
+ * not a new class.
+ *
+ * `unbound` and `empty_tools` are NOT transport failures — the endpoint
+ * answered correctly and quickly. They mean the agent behind it has never been
+ * bound to a runtime and exposes nothing callable, which docs/FINDINGS.md F-01
+ * shows is how the overwhelming majority of BSC agents actually fail. They are
+ * kept distinct so the graveyard can say *why* rather than just "dead".
+ */
 export const FAILURE_CLASSES = [
   'dns', 'tls', 'timeout', 'refused', 'http_4xx', 'http_5xx',
-  'bad_schema', 'blocked_ssrf', 'template_unresolved', 'rate_limited', 'unknown',
+  'bad_schema', 'blocked_ssrf', 'template_unresolved', 'rate_limited',
+  'unbound', 'empty_tools', 'unknown',
 ] as const
 export type FailureClass = (typeof FAILURE_CLASSES)[number]
 
@@ -138,6 +148,10 @@ export const ingestCursor = pgTable('ingest_cursor', {
 // FIRST-PARTY OBSERVATIONS — never deletable, never in a rebuild drill
 // ---------------------------------------------------------------------------
 
+/** How alive an endpoint is. `ok` alone cannot express `unbound`. */
+export const LIVENESS = ['live', 'unbound', 'bad_schema', 'dead'] as const
+export type Liveness = (typeof LIVENESS)[number]
+
 /** FIRST-PARTY. Every liveness measurement we have ever taken. */
 export const probe = pgTable('probe', {
   id: serial('id').primaryKey(),
@@ -149,6 +163,12 @@ export const probe = pgTable('probe', {
   statusCode: integer('status_code'),
   failureClass: text('failure_class').$type<FailureClass>(),
   detail: text('detail'),
+  /** Finer-grained than `ok`: distinguishes "dead" from "answers but unbound". */
+  liveness: text('liveness').$type<Liveness>(),
+  /** Capabilities the endpoint advertised at probe time. */
+  skills: jsonb('skills').$type<string[]>().notNull().default([]),
+  /** The callable endpoint the descriptor pointed at, if any. */
+  executableEndpoint: text('executable_endpoint'),
 }, (t) => ({
   agentCheckedIdx: index('probe_agent_checked_idx').on(t.agentId, t.checkedAt.desc()),
   checkedIdx: index('probe_checked_idx').on(t.checkedAt.desc()),

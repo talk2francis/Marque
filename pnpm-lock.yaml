@@ -11,9 +11,27 @@ importers:
       '@eslint/js':
         specifier: ^9.17.0
         version: 9.39.5
+      '@marque/chain':
+        specifier: workspace:*
+        version: link:packages/chain
+      '@marque/db':
+        specifier: workspace:*
+        version: link:packages/db
+      '@marque/positions':
+        specifier: workspace:*
+        version: link:packages/positions
+      '@marque/probe':
+        specifier: workspace:*
+        version: link:packages/probe
+      '@marque/registry':
+        specifier: workspace:*
+        version: link:packages/registry
       '@types/node':
         specifier: ^22.10.2
         version: 22.20.1
+      drizzle-orm:
+        specifier: ^0.38.2
+        version: 0.38.4(@types/react@19.2.18)(postgres@3.4.9)(react@19.2.8)
       eslint:
         specifier: ^9.17.0
         version: 9.39.5
@@ -35,6 +53,15 @@ importers:
       '@marque/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@marque/positions':
+        specifier: workspace:*
+        version: link:../../packages/positions
+      '@marque/probe':
+        specifier: workspace:*
+        version: link:../../packages/probe
+      '@marque/registry':
+        specifier: workspace:*
+        version: link:../../packages/registry
       '@marque/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -72,6 +99,9 @@ importers:
       '@marque/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@marque/probe':
+        specifier: workspace:*
+        version: link:../../packages/probe
       '@marque/registry':
         specifier: workspace:*
         version: link:../../packages/registry
@@ -126,6 +156,25 @@ importers:
       viem:
         specifier: ^2.21.55
         version: 2.56.3(typescript@5.9.3)(zod@3.25.76)
+    devDependencies:
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
+      vitest:
+        specifier: ^2.1.8
+        version: 2.1.9(@types/node@22.20.1)
+
+  packages/probe:
+    dependencies:
+      '@marque/db':
+        specifier: workspace:*
+        version: link:../db
+      drizzle-orm:
+        specifier: ^0.38.2
+        version: 0.38.4(@types/react@19.2.18)(postgres@3.4.9)(react@19.2.8)
+      zod:
+        specifier: ^3.24.1
+        version: 3.25.76
     devDependencies:
       typescript:
         specifier: ^5.7.2

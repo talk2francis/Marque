@@ -8,6 +8,13 @@
       "when": 1788476161751,
       "tag": "0000_nosy_omega_red",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1788482277185,
+      "tag": "0001_empty_outlaw_kid",
+      "breakpoints": true
     }
   ]
 }
