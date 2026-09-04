@@ -1,6 +1,6 @@
 {
   "base": "https://marque.trade",
-  "ranAt": "2026-09-04T07:18:22.638Z",
+  "ranAt": "2026-09-04T07:47:58.275Z",
   "results": [
     {
       "route": "/",
@@ -83,7 +83,7 @@
       "allCapsLabels": []
     },
     {
-      "route": "/_ui",
+      "route": "/standard",
       "viewport": "1440",
       "status": 200,
       "issues": [],
@@ -103,7 +103,7 @@
       "allCapsLabels": []
     },
     {
-      "route": "/_ui",
+      "route": "/standard",
       "viewport": "1024",
       "status": 200,
       "issues": [],
@@ -123,7 +123,7 @@
       "allCapsLabels": []
     },
     {
-      "route": "/_ui",
+      "route": "/standard",
       "viewport": "768",
       "status": 200,
       "issues": [],
@@ -143,7 +143,7 @@
       "allCapsLabels": []
     },
     {
-      "route": "/_ui",
+      "route": "/standard",
       "viewport": "390",
       "status": 200,
       "issues": [],
@@ -224,326 +224,6 @@
     },
     {
       "route": "/register",
-      "viewport": "390",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/register/rebalancing",
-      "viewport": "1440",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/register/rebalancing",
-      "viewport": "1024",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/register/rebalancing",
-      "viewport": "768",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/register/rebalancing",
-      "viewport": "390",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/register/grid",
-      "viewport": "1440",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/register/grid",
-      "viewport": "1024",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/register/grid",
-      "viewport": "768",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/register/grid",
-      "viewport": "390",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/register/yield",
-      "viewport": "1440",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/register/yield",
-      "viewport": "1024",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/register/yield",
-      "viewport": "768",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/register/yield",
-      "viewport": "390",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/register/health-factor",
-      "viewport": "1440",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/register/health-factor",
-      "viewport": "1024",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/register/health-factor",
-      "viewport": "768",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/register/health-factor",
       "viewport": "390",
       "status": 200,
       "issues": [],

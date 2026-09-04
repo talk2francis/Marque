@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import { sql } from 'drizzle-orm'
 import { db } from '@marque/db'
 import { Statement, Chip, DataCell, ProvenanceChip, WarrantBadge, EmptyState, EvidenceDrawer } from '@marque/ui'
+import { SiteHeader, SiteFooter } from '../../../_components/SiteHeader'
 import styles from './agent.module.css'
 
 export const dynamic = 'force-dynamic'
@@ -77,7 +78,9 @@ export default async function AgentPage({ params }: { params: Promise<{ tokenId:
   const name = (a['name'] as string | null) ?? `Agent ${tokenId}`
 
   return (
-    <main className={styles.page}>
+    <>
+      <SiteHeader active="register" />
+      <main className={styles.page}>
       <header className={styles.head}>
         <div className={styles.headTop}>
           <Statement as="h1">{name}</Statement>
@@ -278,5 +281,7 @@ export default async function AgentPage({ params }: { params: Promise<{ tokenId:
 
       <p className={styles.back}><a href="/register">Back to the Register</a></p>
     </main>
+      <SiteFooter />
+    </>
   )
 }

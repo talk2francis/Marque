@@ -27,4 +27,11 @@ if [ -d "$WEB/public" ]; then
   cp -r "$WEB/public" "$STANDALONE/public"
 fi
 
+# The /standard page renders the GENERATED standard from docs/, so the file has
+# to travel with the standalone bundle. Next's tracing does not follow a runtime
+# readFile, and shipping without it means the page renders its empty state in
+# production while looking fine locally.
+mkdir -p "$STANDALONE/docs/standard"
+cp -r "$ROOT/docs/standard/." "$STANDALONE/docs/standard/" 2>/dev/null || true
+
 echo "build-web: standalone ready at $STANDALONE"

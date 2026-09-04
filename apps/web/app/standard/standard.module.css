@@ -1,0 +1,52 @@
+.page { max-width: 860px; margin: 0 auto; padding: var(--s7) var(--s5) var(--s9); }
+.head { display: flex; flex-direction: column; gap: var(--s3); padding-bottom: var(--s5); }
+.lede { margin: 0; max-width: 68ch; color: var(--fg-soft); font-size: var(--size-body); line-height: var(--lh-body); }
+.lede > span { margin-left: var(--s2); }
+.section { padding: var(--s6) 0; border-top: 1px solid var(--line); display: flex; flex-direction: column; gap: var(--s3); }
+.h2 { margin: 0 0 var(--s2); font-family: var(--font-statement); font-weight: 400; font-size: var(--size-statement); letter-spacing: -0.015em; }
+.muted { margin: 0; color: var(--fg-soft); font-size: var(--size-body); }
+.note { margin: 0; max-width: 68ch; font-size: var(--size-caption); line-height: 1.55; color: var(--fg-soft); }
+.note > span { margin-right: var(--s2); }
+
+.table { width: 100%; border-collapse: collapse; font-size: var(--size-data); display: block; overflow-x: auto; }
+.table th, .table td { text-align: left; padding: 8px var(--s4) 8px 0; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.table th { color: var(--fg-soft); font-weight: 500; font-size: var(--size-caption); }
+
+.cases { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--s3); }
+.cases li {
+  display: flex; gap: var(--s2); align-items: baseline; flex-wrap: wrap;
+  font-size: var(--size-data); min-width: 0; overflow-wrap: anywhere;
+}
+.caseMeta { color: var(--fg-soft); font-size: var(--size-caption); }
+
+/* The generated standard. Long-form reading, so the measure stays tight. */
+.prose { max-width: 68ch; font-size: var(--size-body); line-height: var(--lh-body); color: var(--fg); }
+.prose h1 { font-family: var(--font-statement); font-weight: 400; font-size: var(--size-statement); letter-spacing: -0.015em; margin: var(--s7) 0 var(--s3); }
+.prose h2 { font-family: var(--font-statement); font-weight: 400; font-size: 22px; margin: var(--s6) 0 var(--s3); padding-top: var(--s5); border-top: 1px solid var(--line); }
+.prose h3 { font-size: var(--size-title); font-weight: 500; margin: var(--s5) 0 var(--s2); }
+.prose p { margin: 0 0 var(--s3); }
+.prose ul, .prose ol { margin: 0 0 var(--s4); padding-left: var(--s5); }
+.prose li { margin-bottom: var(--s2); }
+.prose blockquote {
+  margin: 0 0 var(--s4); padding-left: var(--s4);
+  border-left: 2px solid var(--line); color: var(--fg-soft);
+}
+.prose code {
+  font-family: var(--font-mono); font-size: var(--size-data);
+  background: var(--ground-raised); padding: 1px 4px; border-radius: 2px;
+  /* Contract addresses and 32-byte hashes are longer than a phone is wide.
+     Without this the whole page scrolls sideways at 390px. */
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+.prose table {
+  width: 100%; border-collapse: collapse; font-size: var(--size-data);
+  margin: 0 0 var(--s4); display: block; overflow-x: auto;
+}
+.prose th, .prose td { text-align: left; padding: 7px var(--s3) 7px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+.prose th { color: var(--fg-soft); font-weight: 500; font-size: var(--size-caption); white-space: nowrap; }
+.prose strong { font-weight: 600; }
+.prose a { color: var(--chain); }
+.prose hr { border: 0; border-top: 1px solid var(--line); margin: var(--s6) 0; }
+
+@media (max-width: 640px) { .page { padding-inline: var(--s4); } }

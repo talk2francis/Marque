@@ -2,6 +2,7 @@ import { Statement, DataCell, EmptyState, LinkButton, Chip, MeasureRule, Tape, P
 import { BRAND } from '@marque/ui/brand'
 import { funnel, categoryFunnel } from '@marque/registry'
 import { Desk } from './desk/Desk'
+import { SiteHeader, SiteFooter } from './_components/SiteHeader'
 import styles from './home.module.css'
 
 export const dynamic = 'force-dynamic'
@@ -66,14 +67,7 @@ export default async function Home() {
 
   return (
     <>
-      <header className={styles.nav}>
-        <a className={styles.brand} href="/">{BRAND.name}</a>
-        <nav className={styles.navLinks}>
-          <a href="/register">Register</a>
-          <a href="/standard">Standard</a>
-          <a href="/_ui">Design</a>
-        </nav>
-      </header>
+      <SiteHeader />
 
       <main className={styles.main}>
         {/* ---- Hero: the product, not a picture of it ---- */}
@@ -234,13 +228,7 @@ export default async function Home() {
       {/* Real events only. With none, the Tape does not render at all. */}
       <Tape events={[]} />
 
-      <footer className={styles.footer}>
-        <span>{BRAND.name} · {BRAND.chain} · chain 56</span>
-        <span className={styles.footerLinks}>
-          <a href="/api/v1/funnel">Funnel API</a>
-          <a href="/standard">MCS v1.0</a>
-        </span>
-      </footer>
+      <SiteFooter />
     </>
   )
 }

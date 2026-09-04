@@ -3,6 +3,7 @@ import { Statement, Chip } from '@marque/ui'
 import { categoryFunnel, MIN_THIRD_PARTY_PER_CATEGORY } from '@marque/registry'
 import { RegisterTable } from '../RegisterTable'
 import { CategoryTabs } from '../CategoryTabs'
+import { SiteHeader, SiteFooter } from '../../_components/SiteHeader'
 import styles from '../register.module.css'
 
 export const dynamic = 'force-dynamic'
@@ -56,7 +57,9 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
   const row = cats?.find((c) => c.category === meta.key)
 
   return (
-    <main className={styles.page}>
+    <>
+      <SiteHeader active="register" />
+      <main className={styles.page}>
       <div className={styles.head}>
         <Statement as="h1">{meta.label}</Statement>
         <p className={styles.lede}>{meta.what}</p>
@@ -81,5 +84,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
       <CategoryTabs active={meta.key} />
       <RegisterTable category={meta.key} />
     </main>
+      <SiteFooter />
+    </>
   )
 }
