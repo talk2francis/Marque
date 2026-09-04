@@ -14,6 +14,9 @@ importers:
       '@marque/chain':
         specifier: workspace:*
         version: link:packages/chain
+      '@marque/conformance':
+        specifier: workspace:*
+        version: link:packages/conformance
       '@marque/db':
         specifier: workspace:*
         version: link:packages/db
@@ -96,6 +99,9 @@ importers:
       '@marque/chain':
         specifier: workspace:*
         version: link:../../packages/chain
+      '@marque/conformance':
+        specifier: workspace:*
+        version: link:../../packages/conformance
       '@marque/db':
         specifier: workspace:*
         version: link:../../packages/db
@@ -121,6 +127,37 @@ importers:
       viem:
         specifier: ^2.21.55
         version: 2.56.3(typescript@5.9.3)(zod@3.25.76)
+    devDependencies:
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
+      vitest:
+        specifier: ^2.1.8
+        version: 2.1.9(@types/node@22.20.1)
+
+  packages/conformance:
+    dependencies:
+      '@marque/chain':
+        specifier: workspace:*
+        version: link:../chain
+      '@marque/db':
+        specifier: workspace:*
+        version: link:../db
+      '@marque/positions':
+        specifier: workspace:*
+        version: link:../positions
+      '@marque/probe':
+        specifier: workspace:*
+        version: link:../probe
+      drizzle-orm:
+        specifier: ^0.38.2
+        version: 0.38.4(@types/react@19.2.18)(postgres@3.4.9)(react@19.2.8)
+      viem:
+        specifier: ^2.21.55
+        version: 2.56.3(typescript@5.9.3)(zod@3.25.76)
+      zod:
+        specifier: ^3.24.1
+        version: 3.25.76
     devDependencies:
       typescript:
         specifier: ^5.7.2

@@ -1,0 +1,274 @@
+{
+  "version": "1.0.0",
+  "toleranceRevision": 1,
+  "generatedAt": "2026-09-04T06:36:08.688Z",
+  "generatedFrom": "packages/conformance/src/tolerances.ts",
+  "tests": {
+    "MCS-REB-1": {
+      "name": "Rebalancing",
+      "category": "rebalancing",
+      "reader": "PancakeSwap V3 NonfungiblePositionManager + pool slot0",
+      "case": {
+        "id": "REB-1-btcb-usdc-2500",
+        "subject": {
+          "owner": "0x2e07E0145C0CFdF6D200B0aFAeD36953ef00d0cD",
+          "tokenId": "7321916",
+          "pair": "BTCB/USDC"
+        },
+        "policy": {
+          "rangePct": 6,
+          "feeTier": 2500,
+          "statement": "re-centre the position symmetrically at ±6% around the current spot price, on the 0.25% fee tier, keeping the same liquidity"
+        },
+        "why": "A live BTCB/USDC position on the 0.25% tier, whose tickSpacing of 50 makes the multiple-of-spacing check bite immediately. It sits near the top of its range, so the distance-to-bound arithmetic is non-trivial.",
+        "blockNumber": "119862131",
+        "groundTruthHash": "0x69e42d95f32d3be06eae171fc0410e95683361bd7467235402e419728db7a993"
+      },
+      "checks": [
+        {
+          "id": "currentTick",
+          "description": "Reported current tick must equal the pool tick at the pinned block, exactly.",
+          "bound": 0,
+          "unit": "ticks",
+          "rationale": "The tick is a single integer read from slot0 at a fixed block. There is no ambiguity and therefore no tolerance."
+        },
+        {
+          "id": "proposedTickSpacing",
+          "description": "Every proposed tick must be an exact multiple of the pool’s tickSpacing.",
+          "bound": null,
+          "unit": "boolean",
+          "rationale": "The pool contract reverts on a tick that is not a multiple of its spacing, so a plan that violates this is not merely suboptimal, it is unexecutable. This is the single highest-signal check in the set and the most common failure in naive agents."
+        },
+        {
+          "id": "policyRange",
+          "description": "Proposed bounds must match the range implied by the policy SUPPLIED IN THE TEST CASE, within one tick spacing.",
+          "bound": 1,
+          "unit": "tick spacings",
+          "rationale": "There is no objectively correct V3 range in the abstract, so the case supplies the policy and we check compliance with it. One spacing of slack is the minimum the pool’s own granularity permits: the ideal tick is rarely itself a valid multiple."
+        },
+        {
+          "id": "amounts",
+          "description": "Proposed token amounts must satisfy the V3 liquidity formula within this tolerance.",
+          "bound": 0.5,
+          "unit": "%",
+          "rationale": "The formula is exact, but agents legitimately round for slippage and gas. 0.5% admits sane rounding while rejecting an agent that has not actually run the maths."
+        },
+        {
+          "id": "inRange",
+          "description": "The in-range boolean must match the chain.",
+          "bound": null,
+          "unit": "boolean",
+          "rationale": "Derived from tickLower <= tick < tickUpper. One right answer."
+        },
+        {
+          "id": "distanceToBound",
+          "description": "Distance to the nearest bound, in price terms.",
+          "bound": 0.5,
+          "unit": "percentage points",
+          "rationale": "Derived arithmetic from the tick and the two bounds. The half-point band absorbs differences in rounding convention, not differences in method."
+        },
+        {
+          "id": "slippageBound",
+          "description": "A slippage bound must be stated, as a positive number.",
+          "bound": null,
+          "unit": "boolean",
+          "rationale": "An execution plan with no slippage bound is unsafe to sign regardless of how good its range is. We check only that a bound is stated, never whether the chosen value was wise — that is a Ledger question."
+        }
+      ]
+    },
+    "MCS-GRID-1": {
+      "name": "Grid Trading",
+      "category": "grid",
+      "reader": "spot balances + pair price",
+      "case": {
+        "id": "GRID-1-bnb-usdt",
+        "subject": {
+          "address": "0x60AA3AEE06E2345A17E4d4B12c53E046F4F63CAf",
+          "pair": "BNB/USDT"
+        },
+        "policy": {
+          "pair": "BNB/USDT",
+          "lowerBound": 600,
+          "upperBound": 850,
+          "capitalUsd": 2000,
+          "levels": 12,
+          "stopPrice": 580,
+          "feeBps": 25,
+          "statement": "build a 12-level grid for BNB/USDT between 600 and 850 using 2,000 USD of capital, with a stop at 580, and disclose the fee drag at 25 bps per trade"
+        },
+        "why": "Bounds and a stop that are close enough together that a careless plan places levels below the stop, and a level count that makes fee drag material rather than a rounding error.",
+        "blockNumber": "119862134",
+        "groundTruthHash": "0x0f0999d4cf2ae021e22807c41bf744cffff2c3e6902e6edc6155796bf2206ce8"
+      },
+      "checks": [
+        {
+          "id": "levelSpacing",
+          "description": "Level spacing must match the declared spacing type (arithmetic or geometric).",
+          "bound": 0.5,
+          "unit": "%",
+          "rationale": "The agent declares which type it used; we then verify the levels actually follow it. Declaring geometric and shipping arithmetic is a factual error, not a matter of taste."
+        },
+        {
+          "id": "allocationSum",
+          "description": "Summed level allocations must not exceed the stated capital.",
+          "bound": 0.1,
+          "unit": "%",
+          "rationale": "Spending more than the capital supplied is unexecutable. The 0.1% band covers floating-point summation, nothing more."
+        },
+        {
+          "id": "levelsWithinBounds",
+          "description": "Every level must lie inside the bounds supplied by the test case.",
+          "bound": null,
+          "unit": "boolean",
+          "rationale": "Compliance with a constraint the case supplied. One right answer."
+        },
+        {
+          "id": "levelsAboveStop",
+          "description": "No level may sit below the stop supplied by the test case.",
+          "bound": null,
+          "unit": "boolean",
+          "rationale": "A level below the stop would be filled and then immediately stopped out."
+        },
+        {
+          "id": "feeDragDisclosed",
+          "description": "The plan must disclose fee drag: n levels implies n round-trips of fees, stated as a number.",
+          "bound": null,
+          "unit": "boolean",
+          "rationale": "A grid plan that omits fee drag overstates its own return, and the omission is invisible to the buyer. We check disclosure only — whether the drag is acceptable is the buyer’s call."
+        }
+      ]
+    },
+    "MCS-YIELD-1": {
+      "name": "Yield Optimisation",
+      "category": "yield",
+      "reader": "Venus Core markets",
+      "case": {
+        "id": "YIELD-1-usdt-1000",
+        "subject": {
+          "asset": "USDT"
+        },
+        "policy": {
+          "asset": "USDT",
+          "sizeUsd": 1000,
+          "allowedProtocols": [
+            "venus"
+          ],
+          "minImprovementBps": 50,
+          "leverageAllowed": false,
+          "currentAprPct": 0,
+          "statement": "find the best net-of-cost route for 1,000 USD of USDT across the allowed protocols, only recommending a move that beats the current 0% by at least 50 bps, and excluding leveraged strategies"
+        },
+        "why": "Idle stablecoins are the most common real position on BSC. The 50 bps threshold and the 1,000 USD size make the net-of-cost arithmetic decide the answer, which is exactly the thing agents get wrong by quoting gross APR.",
+        "blockNumber": "119862134",
+        "groundTruthHash": "0xb527ec79a3f789a99ae6b303ca38655f6d0244b866f198195515ba64a295cd85"
+      },
+      "checks": [
+        {
+          "id": "aprProvenance",
+          "description": "Every quoted APR must carry a source and a timestamp.",
+          "bound": null,
+          "unit": "boolean",
+          "rationale": "An APR with no source and no timestamp cannot be checked by anyone, including the buyer. This is the yield-category equivalent of a provenance chip."
+        },
+        {
+          "id": "netApr",
+          "description": "Net APR at the stated size must reproduce ours within this tolerance.",
+          "bound": 15,
+          "unit": "basis points",
+          "rationale": "Both sides compute from the same on-chain rates at the same block, so the only legitimate divergence is gas and compounding convention. 15bps is generous for that and far tighter than the differences between real venues."
+        },
+        {
+          "id": "switchingCost",
+          "description": "The switching cost must be itemized, not given as a single opaque number.",
+          "bound": null,
+          "unit": "boolean",
+          "rationale": "Gas, swap and exit costs behave differently with size. A lump sum hides which one dominates at the buyer’s size."
+        },
+        {
+          "id": "improvementThreshold",
+          "description": "A recommendation must clear the minimum-improvement threshold supplied by the test case, or the agent must decline to recommend.",
+          "bound": null,
+          "unit": "boolean",
+          "rationale": "Compliance with a supplied constraint. Declining is a pass: an agent that correctly says \"nothing beats your current position by enough\" is behaving well."
+        },
+        {
+          "id": "leverageFlagged",
+          "description": "If the case excludes leverage, any leveraged strategy must be flagged as such.",
+          "bound": null,
+          "unit": "boolean",
+          "rationale": "Presenting a looped position as a plain deposit misstates the risk the buyer is taking."
+        }
+      ]
+    },
+    "MCS-HF-1": {
+      "name": "Health Factor",
+      "category": "health_factor",
+      "reader": "Venus Comptroller",
+      "case": {
+        "id": "HF-1-venus-at-risk",
+        "subject": {
+          "address": "0x60AA3AEE06E2345A17E4d4B12c53E046F4F63CAf"
+        },
+        "policy": {
+          "targetHealthFactor": 2.5,
+          "statement": "report the account’s current health factor and the exact USD of debt that must be repaid to restore a health factor of 2.5"
+        },
+        "why": "A genuinely at-risk third-party Venus account carrying real debt across multiple collateral markets. Chosen precisely because it is not ours: it proves the reader works on arbitrary input, and AGENTS.md forbids manufacturing our own liquidation risk for a demo.",
+        "blockNumber": "119862133",
+        "groundTruthHash": "0x98f02295934c1c38ac9f6302cb393122855767617c4c837f41a35ecaf974c08b"
+      },
+      "checks": [
+        {
+          "id": "healthFactor",
+          "description": "Reported health factor must match ours to three decimal places.",
+          "bound": 0.005,
+          "unit": "HF",
+          "rationale": "Both sides read the same Comptroller state at the same block, so this is pure arithmetic. 0.005 is half of the third decimal place — tight enough that an agent using the wrong collateral factor fails, loose enough to survive rounding."
+        },
+        {
+          "id": "collateralFactor",
+          "description": "Per-market collateral factor must match the Comptroller.",
+          "bound": 0.001,
+          "unit": "fraction",
+          "rationale": "Read directly from markets(vToken). Getting this wrong is what makes an HF wrong."
+        },
+        {
+          "id": "repayToTarget",
+          "description": "The repay amount must, when applied, restore the target health factor within this tolerance.",
+          "bound": 0.005,
+          "unit": "HF",
+          "rationale": "Checked by APPLYING the agent’s number to the snapshot and recomputing, not by comparing to ours. An agent that reaches the target by a different but valid route passes."
+        },
+        {
+          "id": "liquidationPrice",
+          "description": "Per-asset liquidation price must match ours within this tolerance.",
+          "bound": 1,
+          "unit": "%",
+          "rationale": "A closed-form function of collateral, debt and collateral factors. One percent admits oracle rounding, not method error."
+        }
+      ]
+    }
+  },
+  "excluded": [
+    {
+      "check": "Expected number of fills at a stated volatility",
+      "test": "MCS-GRID-1",
+      "reason": "A model output wearing the clothes of a fact. Two honest agents can differ and both be right, so grading it would make the standard quietly non-deterministic. Moved to the Ledger."
+    },
+    {
+      "check": "Whether the chosen range is the wisest available",
+      "test": "MCS-REB-1",
+      "reason": "There is no objectively correct V3 range in the abstract. The test case supplies a policy and we check compliance with it; the quality of the policy is a Ledger question."
+    },
+    {
+      "check": "Whether the recommended venue is the best one",
+      "test": "MCS-YIELD-1",
+      "reason": "Judgement. We check that the arithmetic is right, the sources are cited and the supplied threshold is respected — not that the choice was optimal."
+    },
+    {
+      "check": "Speed, price and helpfulness of the response",
+      "test": "MCS-HF-1",
+      "reason": "Measured and published, but in the Ledger against a pre-registered rubric, never as a pass/fail certificate."
+    }
+  ]
+}

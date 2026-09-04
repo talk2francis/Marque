@@ -302,3 +302,66 @@ product, it is written down here.
   9–23 Sep judging window, when a judge could hit it.
 - **Restore** — P11: build to a staging directory, then swap it in and
   `pm2 reload` for a zero-downtime cutover.
+
+---
+
+## P3 — Conformance
+
+### D3-01 · Cases are materialised, not re-read from a pinned block
+
+- **Planned** — "picks a PINNED test case (real mainnet position, fixed block
+  number); computes GROUND TRUTH itself using packages/positions at that block".
+- **Shipped** — Ground truth is computed from chain state exactly as specified,
+  but it is then **frozen** into `conformance_case` with its block number and a
+  hash. Every agent is graded against that identical snapshot.
+- **Why** — Measured: every free BSC RPC endpoint retains only **64 blocks** of
+  state, about 30 seconds at 0.45s blocks. Re-reading a pinned block a minute
+  later fails on all six providers tested. Archive access is a paid tier, which
+  is a hard escalation gate (AGENTS.md gate 2, new recurring cost).
+- **Cost** — A case cannot be re-derived from chain by us. Mitigated: the block
+  number and a hash of the snapshot are published with every result, so anyone
+  with archive access can verify it. Freezing is also *stronger* for fairness —
+  every agent sees byte-identical inputs, which re-reading cannot guarantee
+  because the chain moves between runs.
+- **Restore** — Point `BSC_RPC_URLS` at an archive provider and grade against a
+  live re-read; the case row already carries everything needed.
+
+### D3-02 · A2A is a two-step protocol, and the first implementation got it wrong
+
+- **Planned** — "sends the agent the same question over its adapter".
+- **Shipped** — The adapter now GETs the agent card, reads the callable endpoint
+  from its `url` field, and POSTs `message/send` there.
+- **Why** — The first implementation POSTed JSON-RPC directly at
+  `/.well-known/agent-card.json`. Every third-party agent returned 404, which
+  reads exactly like a broken agent and was in fact a broken client. Publishing
+  those results would have libelled roughly thirty real projects.
+- **Cost** — None.
+- **Restore** — n/a.
+
+### D3-03 · An absent answer is not a decline (vacuous pass)
+
+- **Planned** — MCS-YIELD-1 treats a correct refusal to recommend as a pass,
+  which is right: an agent that says "nothing beats your position by enough" is
+  obeying the supplied policy.
+- **Shipped** — A decline must now be **explicit** (`recommend: false`). A
+  response with no `recommend` field fails.
+- **Why** — Caught in the first real run. A live third-party agent returned no
+  recognisable fields at all and scored **PASS** on MCS-YIELD-1, because the
+  absent field read as "declined" and every later check returned early. A
+  standard that cannot distinguish silence from a decision certifies nothing.
+- **Cost** — None.
+- **Restore** — Do not.
+
+### D3-04 · MCP agents are reported as "no compatible interface", not graded wrong
+
+- **Planned** — Run the tests against whatever real agents exist.
+- **Shipped** — MCP servers are inspected for a tool that plausibly answers a
+  position question. Where none exists, the result records
+  `no_compatible_interface` rather than a graded failure.
+- **Why** — MCP exposes named tools, not a free-form task endpoint. Calling an
+  unrelated tool and grading its answer as wrong arithmetic would attribute our
+  own mis-addressing to the agent. The distinction matters because these results
+  are published.
+- **Cost** — An MCP agent that could answer via an unusually-named tool is
+  recorded as untestable rather than tested.
+- **Restore** — Widen the tool-matching heuristic in `mcpAdapter`.

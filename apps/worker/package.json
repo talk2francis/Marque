@@ -11,14 +11,17 @@
     "probe": "tsx src/probe.ts",
     "probe:once": "tsx src/probe.ts --once",
     "classify": "tsx src/classify.ts",
-    "classify:once": "tsx src/classify.ts --once"
+    "classify:once": "tsx src/classify.ts --once",
+    "conform": "tsx src/conform.ts",
+    "conform:once": "tsx src/conform.ts --once"
   },
   "dependencies": {
     "@marque/db": "workspace:*",
     "@marque/registry": "workspace:*",
     "@marque/chain": "workspace:*",
     "drizzle-orm": "^0.38.2",
-    "@marque/probe": "workspace:*"
+    "@marque/probe": "workspace:*",
+    "@marque/conformance": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.7.2",

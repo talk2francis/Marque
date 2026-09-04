@@ -193,6 +193,84 @@ export const funnelSnapshot = pgTable('funnel_snapshot', {
   stageIdx: index('funnel_stage_idx').on(t.chainId, t.stage, t.takenAt.desc()),
 }))
 
+/**
+ * FIRST-PARTY. A materialised conformance case.
+ *
+ * BSC public RPC retains only ~64 blocks of state (about 30 seconds at 0.45s
+ * blocks), so a case cannot be graded by re-reading a pinned block later. The
+ * ground truth is therefore CAPTURED once, frozen here with its block number
+ * and a hash, and every agent is graded against that identical snapshot.
+ *
+ * This is stronger than re-fetching, not weaker: every agent sees byte-identical
+ * inputs, and the snapshot is published so anyone with an archive node can
+ * verify it against the chain. Never regenerated — a changed snapshot would
+ * silently invalidate every result taken against it.
+ */
+export const conformanceCase = pgTable('conformance_case', {
+  id: text('id').primaryKey(),
+  testId: text('test_id').notNull(),
+  category: text('category').$type<Category>().notNull(),
+  chainId: integer('chain_id').notNull(),
+  blockNumber: text('block_number').notNull(),
+  /** The subject of the case: an address, a position id. */
+  subject: jsonb('subject').$type<Record<string, string>>().notNull(),
+  /** The policy the agent must comply with. Supplied, never inferred. */
+  policy: jsonb('policy').notNull(),
+  /** Frozen ground truth, computed by us from chain state at capture. */
+  groundTruth: jsonb('ground_truth').notNull(),
+  /** keccak-style hash of the frozen ground truth, published with results. */
+  groundTruthHash: text('ground_truth_hash').notNull(),
+  /** The exact question put to every agent. */
+  prompt: text('prompt').notNull(),
+  capturedAt: timestamp('captured_at', { withTimezone: true }).notNull().defaultNow(),
+  /** False when superseded by a fresher case for the same subject. */
+  active: boolean('active').notNull().default(true),
+}, (t) => ({
+  testActiveIdx: index('conformance_case_test_idx').on(t.testId, t.active),
+}))
+
+export type ConformanceCase = typeof conformanceCase.$inferSelect
+export type NewConformanceCase = typeof conformanceCase.$inferInsert
+
+/**
+ * FIRST-PARTY. Every conformance run we have ever made.
+ *
+ * Includes the raw request and response, hashed, because a published pass or
+ * fail is only credible if the evidence behind it can be re-read. Never
+ * dropped, never recomputed (AGENTS.md invariant 12).
+ */
+export const conformanceResult = pgTable('conformance_result', {
+  id: serial('id').primaryKey(),
+  agentId: text('agent_id').notNull(),
+  testId: text('test_id').notNull(),
+  testVersion: text('test_version').notNull(),
+  toleranceRevision: integer('tolerance_revision').notNull(),
+  category: text('category').$type<Category>().notNull(),
+  /** The pinned case, so a result is reproducible. */
+  caseId: text('case_id').notNull(),
+  chainId: integer('chain_id').notNull(),
+  blockNumber: text('block_number').notNull(),
+  pass: boolean('pass').notNull(),
+  /** Per-field diffs, each naming what was expected and what arrived. */
+  diffs: jsonb('diffs').$type<unknown[]>().notNull().default([]),
+  failedFields: jsonb('failed_fields').$type<string[]>().notNull().default([]),
+  latencyMs: integer('latency_ms'),
+  costUsd: doublePrecision('cost_usd'),
+  request: jsonb('request'),
+  response: jsonb('response'),
+  requestHash: text('request_hash').notNull(),
+  responseHash: text('response_hash').notNull(),
+  error: text('error'),
+  ranAt: timestamp('ran_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({
+  agentRanIdx: index('conformance_agent_ran_idx').on(t.agentId, t.ranAt.desc()),
+  testRanIdx: index('conformance_test_ran_idx').on(t.testId, t.ranAt.desc()),
+  passIdx: index('conformance_pass_idx').on(t.pass),
+}))
+
+export type ConformanceResult = typeof conformanceResult.$inferSelect
+export type NewConformanceResult = typeof conformanceResult.$inferInsert
+
 export type Agent = typeof agent.$inferSelect
 export type NewAgent = typeof agent.$inferInsert
 export type AgentService = typeof agentService.$inferSelect

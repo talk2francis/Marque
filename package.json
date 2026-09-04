@@ -16,7 +16,9 @@
     "audit": "node scripts/audit.mjs",
     "db:generate": "pnpm --filter @marque/db generate",
     "db:migrate": "pnpm --filter @marque/db migrate",
-    "supply-report": "tsx scripts/supply-report.mts"
+    "supply-report": "tsx scripts/supply-report.mts",
+    "mcs": "tsx scripts/mcs.mts",
+    "standard": "tsx scripts/generate-standard.mts"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
@@ -31,6 +33,7 @@
     "@marque/probe": "workspace:*",
     "@marque/positions": "workspace:*",
     "@marque/chain": "workspace:*",
-    "drizzle-orm": "^0.38.2"
+    "drizzle-orm": "^0.38.2",
+    "@marque/conformance": "workspace:*"
   }
 }
