@@ -38,32 +38,6 @@ function routes() {
   return value.split(',').map((r) => r.trim()).filter(Boolean)
 }
 
-/** Relative luminance, per WCAG. */
-function luminance([r, g, b]) {
-  const a = [r, g, b].map((v) => {
-    const s = v / 255
-    return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4
-  })
-  return 0.2126 * a[0] + 0.7152 * a[1] + 0.0722 * a[2]
-}
-
-function contrast(fg, bg) {
-  const l1 = luminance(fg)
-  const l2 = luminance(bg)
-  const [hi, lo] = l1 > l2 ? [l1, l2] : [l2, l1]
-  return (hi + 0.05) / (lo + 0.05)
-}
-
-function parseRgb(s) {
-  const m = String(s).match(/rgba?\(([^)]+)\)/)
-  if (!m) return null
-  const parts = m[1].split(',').map((p) => parseFloat(p.trim()))
-  if (parts.length < 3) return null
-  // Fully transparent text is invisible, not low-contrast; skip it.
-  if (parts.length >= 4 && parts[3] === 0) return null
-  return [parts[0], parts[1], parts[2]]
-}
-
 async function auditRoute(browser, route, viewport) {
   const context = await browser.newContext({
     viewport: { width: viewport.width, height: viewport.height },

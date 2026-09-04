@@ -20,10 +20,21 @@ export default tseslint.config(
   },
   {
     // Node config files: CommonJS and Node globals are correct here.
-    files: ['**/*.cjs', '**/*.config.mjs', 'scripts/**/*.mjs'],
+    files: ['**/*.cjs', '**/*.config.mjs'],
     languageOptions: {
       globals: { require: 'readonly', module: 'writable', process: 'readonly', URL: 'readonly', __dirname: 'readonly' },
     },
     rules: { '@typescript-eslint/no-require-imports': 'off' },
+  },
+  {
+    // Audit scripts run in Node but evaluate code inside a browser page, so
+    // both sets of globals are legitimate in the same file.
+    files: ['scripts/**/*.mjs', 'scripts/**/*.mts'],
+    languageOptions: {
+      globals: {
+        process: 'readonly', console: 'readonly', URL: 'readonly',
+        document: 'readonly', window: 'readonly', getComputedStyle: 'readonly',
+      },
+    },
   },
 )
