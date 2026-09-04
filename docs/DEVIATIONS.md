@@ -537,3 +537,99 @@ product, it is written down here.
   guarantee the sealed-call track record depends on, confirmed on real chain
   state rather than in a test harness.
 - **Mainnet:** not deployed. Escalation gate 1, requires written approval.
+
+---
+
+## P6 — Charters (bounded authority)
+
+### D6-01 · Altana works; P6-lite is built and proven anyway
+
+- **Planned** — "TIMEBOX 8 HOURS. If Altana integration is not working by then,
+  ship P6-LITE."
+- **Shipped** — **Both.** Altana integrated well inside the timebox, with real
+  grant, execution, refusal and revocation transactions on BSC testnet. The
+  P6-lite `RegistryCharterService` is also complete and exercised through the
+  same acceptance script.
+- **Why build the fallback anyway** — It cost about twenty minutes because the
+  work was done against `CharterService` from the start, and a fallback written
+  *after* an SDK has burned a day is written under pressure. It also gives the
+  product a second, independent path if Altana's testnet relay is unavailable
+  during judging.
+- **Cost** — One extra provider to keep compiling.
+- **Restore** — n/a.
+
+### D6-02 · P6-lite anchors the policy but does not enforce it at a validator
+
+- **Planned** — "identical UI, identical revoke, identical on-chain visibility".
+- **Shipped** — Identical interface, identical revoke, and the policy hash and
+  its revocation are both anchored on MarqueRegistry and publicly readable.
+- **The difference, stated rather than glossed** — Altana's sessions revert **at
+  the on-chain validator**; a call outside the allowlist cannot be included.
+  P6-lite enforces the allowlist and cap **in the service, before signing**. The
+  policy is publicly auditable either way, but only one of them is enforced by
+  the chain, and the UI must say which is in use rather than let a reader assume
+  equivalence.
+- **Cost** — P6-lite is a weaker guarantee. It is the fallback, not the plan.
+- **Restore** — n/a; Altana is the shipped path.
+
+### D6-03 · Refusal reasons are classified from real relay responses
+
+- **Planned** — Implicit in "an attempt to call a contract outside the
+  allowlist, rejected".
+- **Shipped** — Refusals are classified into `revoked` / `expired` / `over_cap`
+  / `outside_allowlist`, from patterns observed in actual relay output.
+- **Why** — The first classifier reported `over_cap` for a **revoked** charter,
+  because the relay's message ("key hash … is unknown") happened to contain a
+  word its regex matched. Telling a buyer they hit a spend cap when their
+  authority was revoked is a false explanation of why they were stopped. A
+  wrong specific reason is worse than an honest vague one, so anything
+  unmatched now stays `unknown`.
+- **Cost** — None.
+- **Restore** — n/a.
+
+### D6-04 · Session keys are held in memory, never written to our database
+
+- **Planned** — Not specified.
+- **Shipped** — `Session` objects live in the granting process for its lifetime.
+  Our database stores the charter's public facts (id, allowlist, cap, expiry,
+  tx hashes); the durable, publicly verifiable record is the Keystore entry.
+- **Why** — A session key is signing material. AGENTS.md is explicit that keys
+  are never written where the repo can see them, and a session key in a database
+  row is a session key in every backup of that database.
+- **Cost** — A charter cannot be executed from a different process than granted
+  it. Acceptable now; if it becomes limiting, the fix is a keystore, not a
+  database column.
+- **Restore** — Do not.
+
+### D6-05 · ERC-8183 buyer side and x402-server not attempted
+
+- **Planned** — "Bonus (do it if the first five land cleanly)".
+- **Shipped** — Not attempted. The SDK exports `hireErc8183Agent`,
+  `submitErc8183Deliverable` and `settleErc8183Job`, and testnet has a $U faucet
+  paying 10 $U per address every 30 minutes, so the path is open.
+- **Why** — The five required items landed and were verified on chain; the bonus
+  is genuinely optional and P7 is the higher-value next move. Recorded rather
+  than silently skipped.
+- **Restore** — `hireErc8183Agent(wallet, signer, { provider, task, budget })`
+  against the testnet kernel, funded from the $U faucet at
+  `0x86e9197CC0F76E4e4aaa7082180945196bBAb5D3`.
+
+### D6-06 · An OOM event took every PM2 process down, and PM2 did not come back
+
+- **Observed** — Mid-P6 the whole site returned 502 and `pm2 list` was **empty**.
+  Cause: the kernel OOM-killer fired
+  (`Out of memory: Killed process 1359616 (systemx86)`, ~2.1 GB RSS). The killed
+  process was **not one of ours** — this VPS is shared with several projects —
+  but the PM2 daemon died with it, taking `marque-web`, `marque-ingest`,
+  `marque-probe`, `marque-classify` and `marque-keel` with it.
+- **Recovered** — `pm2 resurrect` restored all five from the saved dump; the
+  site and the reference agent returned 200 immediately.
+- **Why it matters** — PM2 restarts a crashed *app*, but nothing was restarting
+  PM2 itself. `pm2 startup` is configured, so a reboot is covered; a daemon
+  death without a reboot was not. During the 9–23 Sep judging window this is the
+  difference between a blip and a judge finding a dead site.
+- **Cost** — Unknown downtime; it was found by a failing test, not by an alert,
+  which is itself the finding.
+- **Fix (P11)** — A systemd watchdog that checks `/api/health` and the reference
+  agent every 60s and runs `pm2 resurrect` when the daemon is absent, plus an
+  alert. Deploy downtime (D2-05) folds into the same work.
