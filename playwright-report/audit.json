@@ -1,0 +1,86 @@
+{
+  "base": "https://marque.trade",
+  "ranAt": "2026-09-04T06:51:12.759Z",
+  "results": [
+    {
+      "route": "/_ui",
+      "viewport": "1440",
+      "status": 200,
+      "issues": [],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(132, 102, 33) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/_ui",
+      "viewport": "1024",
+      "status": 200,
+      "issues": [],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(132, 102, 33) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/_ui",
+      "viewport": "768",
+      "status": 200,
+      "issues": [],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(132, 102, 33) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/_ui",
+      "viewport": "390",
+      "status": 200,
+      "issues": [],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(132, 102, 33) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [],
+      "allCapsLabels": []
+    }
+  ]
+}

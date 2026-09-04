@@ -1,4 +1,5 @@
 @import '@marque/ui/tokens.css';
+@import '@marque/ui/components.css';
 
 /* next/font supplies the real families; the token file names the fallbacks. */
 :root {

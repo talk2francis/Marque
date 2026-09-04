@@ -24,12 +24,30 @@
   --deck-rule: #2c3023;
 
   /* BRAND — oxidised brass, BNB-adjacent, never Binance yellow. <=8% of viewport. */
-  --brass: #b0892c;
+  --brass-mark: #b0892c;
+  --brass: #846621;
   --brass-lit: #d9ae45;
 
-  /* SIGNAL — state only. Never branding, never decoration. */
+  /* SIGNAL — state only. Never branding, never decoration.
+   *
+   * Two values per signal. The `-mark` value is the hue exactly as specified in
+   * AGENTS.md and is used for measure markers, rules and borders, where the
+   * shape carries the meaning and contrast is not a legibility question. The
+   * base value is the TEXT variant, adjusted per surface so small type clears
+   * WCAG AA (4.5:1).
+   *
+   * This is necessary because a single value cannot do both jobs: on paper,
+   * --watch at #B8721A reads 3.27:1, and on the cockpit deck --chain at
+   * #2B5A85 reads 2.56:1. Both are unreadable at 11.5px, and the audit script
+   * catches it. Adapting per surface is what the ground/ink/rule tokens
+   * already do; the signals now do the same. */
+  --holds-mark: #2e7351;
+  --watch-mark: #b8721a;
+  --breach-mark: #a83a2c;
+  --chain-mark: #2b5a85;
+
   --holds: #2e7351;
-  --watch: #b8721a;
+  --watch: #985e15;
   --breach: #a83a2c;
   --chain: #2b5a85;
 
@@ -77,6 +95,15 @@
   --fg: var(--deck-ink);
   --fg-soft: #9a9d8e;
   --line: var(--deck-rule);
+
+  /* Text variants lightened so small type clears 4.5:1 against the deck.
+     The -mark hues are unchanged: the signal identity is the same in both
+     surfaces, only its legibility as text is adjusted. */
+  --holds: #4f896c;
+  --watch: #b8721a;
+  --breach: #bb655a;
+  --chain: #5d81a2;
+  --brass: #b0892c;
 }
 
 @media (max-width: 768px) {

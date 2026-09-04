@@ -1,0 +1,341 @@
+/**
+ * Component styles.
+ *
+ * Every value here is a token. Nothing is a magic number, because a design
+ * system whose components hardcode their own colours cannot be re-themed and
+ * cannot swap into the cockpit.
+ */
+
+/* --- Statement: Fraunces, four uses only ---------------------------------- */
+
+.statement {
+  font-family: var(--font-statement);
+  font-weight: 400;
+  font-variation-settings: 'SOFT' 20, 'WONK' 0;
+  letter-spacing: -0.015em;
+  color: var(--fg);
+  margin: 0;
+  text-wrap: balance;
+}
+.statement--hero {
+  font-size: var(--size-hero);
+  line-height: var(--lh-hero);
+  max-width: 15ch;
+}
+.statement--statement {
+  font-size: var(--size-statement);
+  line-height: var(--lh-statement);
+  max-width: 26ch;
+}
+
+/* --- Data: mono, tabular -------------------------------------------------- */
+
+.data {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--size-data);
+  color: var(--fg);
+  white-space: nowrap;
+}
+.data--right { text-align: right; }
+.data--left { text-align: left; }
+.data--muted { color: var(--fg-soft); }
+
+/* --- Provenance: a controlled vocabulary, and the one justified caps use --- */
+
+.prov {
+  display: inline-block;
+  font-size: 10.5px;
+  letter-spacing: 0.09em;
+  line-height: 1;
+  padding: 3px 5px;
+  border-radius: 2px;
+  border: 1px solid var(--line);
+  color: var(--fg-soft);
+  background: transparent;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+.prov--onchain { color: var(--chain); border-color: color-mix(in srgb, var(--chain) 40%, transparent); }
+.prov--measured { color: var(--fg-soft); border-color: var(--line); }
+.prov--tested { color: var(--holds); border-color: color-mix(in srgb, var(--holds) 40%, transparent); }
+/* CLAIMED is deliberately the weakest thing on the page. An unverified
+   provider metric must never carry the visual weight of a chain-read fact. */
+.prov--claimed {
+  color: color-mix(in srgb, var(--fg-soft) 62%, transparent);
+  border-color: color-mix(in srgb, var(--line) 55%, transparent);
+  border-style: dashed;
+}
+.prov__button {
+  border: 0;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+}
+
+/* --- Chip ---------------------------------------------------------------- */
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s1);
+  font-size: var(--size-caption);
+  line-height: 1;
+  padding: 4px 7px;
+  border-radius: 2px;
+  border: 1px solid var(--line);
+  color: var(--fg-soft);
+  white-space: nowrap;
+}
+.chip--holds { color: var(--holds); border-color: color-mix(in srgb, var(--holds) 35%, transparent); }
+.chip--watch { color: var(--watch); border-color: color-mix(in srgb, var(--watch) 35%, transparent); }
+.chip--breach { color: var(--breach); border-color: color-mix(in srgb, var(--breach) 35%, transparent); }
+.chip--chain { color: var(--chain); border-color: color-mix(in srgb, var(--chain) 35%, transparent); }
+
+/* --- Warrant ------------------------------------------------------------- */
+
+.warrant {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--s1);
+  font-size: var(--size-caption);
+  line-height: 1;
+  padding: 4px 7px;
+  border-radius: 2px;
+  white-space: nowrap;
+}
+.warrant--ok {
+  color: var(--brass);
+  border: 1px solid color-mix(in srgb, var(--brass) 45%, transparent);
+  background: color-mix(in srgb, var(--brass) 7%, transparent);
+}
+.warrant__date { color: var(--fg-soft); font-family: var(--font-mono); }
+.warrant--failed {
+  color: var(--breach);
+  border: 1px solid color-mix(in srgb, var(--breach) 40%, transparent);
+}
+.warrant--untested { color: var(--fg-soft); border: 1px dashed var(--line); }
+
+/* --- Button -------------------------------------------------------------- */
+
+.btn {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s2);
+  font-family: var(--font-ui);
+  font-size: var(--size-body);
+  line-height: 1;
+  padding: 10px 16px;
+  min-height: 40px;
+  border-radius: 2px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--fg);
+  cursor: pointer;
+  text-decoration: none;
+  transition: border-color 140ms ease, background-color 140ms ease;
+}
+.btn--sm { padding: 6px 10px; min-height: 32px; font-size: var(--size-data); }
+.btn--primary {
+  background: var(--fg);
+  color: var(--ground);
+  border-color: var(--fg);
+}
+.btn--primary:hover { background: color-mix(in srgb, var(--fg) 88%, var(--ground)); }
+.btn--secondary:hover { border-color: var(--fg-soft); }
+.btn--quiet { border-color: transparent; color: var(--fg-soft); padding-inline: var(--s2); }
+.btn--quiet:hover { color: var(--fg); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* --- Row: the unit of the Register. Never a card. ------------------------- */
+
+.row {
+  display: grid;
+  align-items: center;
+  gap: var(--s4);
+  width: 100%;
+  min-height: 64px;
+  padding: var(--s3) var(--s4);
+  border-bottom: 1px solid var(--line);
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  text-decoration: none;
+  font: inherit;
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  transition: background-color 120ms ease;
+}
+/* A background tint on hover, never a lift: hover-lift on every row is a
+   templated tell and it makes a dense table feel like jelly. */
+a.row:hover, button.row:hover { background: var(--ground-raised); }
+.row--muted { color: var(--fg-soft); }
+.row--muted .data { color: var(--fg-soft); }
+
+/* --- MeasureRule: the signature device ------------------------------------ */
+
+.measure {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  width: 100%;
+  min-width: 140px;
+}
+.measure__track {
+  position: relative;
+  height: 14px;
+  display: flex;
+  align-items: center;
+}
+.measure__rule {
+  height: 3px;
+  width: 100%;
+  border-radius: 2px;
+  /* The travelled portion is tinted so the rule reads as a gauge at a glance.
+     A bare 3px line with a 3px marker is invisible at a distance, which defeats
+     the entire point of a device meant to communicate risk instantly. */
+  background: linear-gradient(
+    to right,
+    color-mix(in srgb, var(--measure-color) 34%, var(--line)) 0,
+    color-mix(in srgb, var(--measure-color) 34%, var(--line)) var(--measure-pos),
+    var(--line) var(--measure-pos)
+  );
+}
+.measure__threshold {
+  position: absolute;
+  top: 1px;
+  bottom: 1px;
+  width: 1px;
+  background: var(--fg-soft);
+  opacity: 0.7;
+  transform: translateX(-0.5px);
+}
+.measure__marker {
+  position: absolute;
+  left: var(--measure-pos);
+  top: 50%;
+  width: 3px;
+  height: 14px;
+  border-radius: 1.5px;
+  background: var(--measure-color);
+  /* A hairline of ground around the marker keeps it readable where it lands on
+     the threshold tick or the tinted fill. */
+  box-shadow: 0 0 0 1.5px var(--ground);
+  transform: translate(-50%, -50%);
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  line-height: 1;
+  color: var(--measure-color);
+}
+/* An out-of-band caret sits beside the pinned marker rather than inside it. */
+.measure__marker:not(:empty) {
+  width: auto;
+  min-width: 3px;
+  padding-inline: 1px;
+  background: transparent;
+  box-shadow: none;
+  font-weight: 700;
+}
+/* Fill once, on data arrival. Not on scroll, not on hover. */
+.measure--animate .measure__marker {
+  animation: measure-settle 400ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes measure-settle {
+  from { left: 0%; opacity: 0; }
+  to { left: var(--measure-pos); opacity: 1; }
+}
+.measure__labels {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: baseline;
+  gap: var(--s3);
+  font-size: var(--size-caption);
+  color: var(--fg-soft);
+}
+.measure__bound { font-size: var(--size-caption); color: var(--fg-soft); white-space: nowrap; }
+.measure__readout {
+  display: inline-flex;
+  gap: var(--s2);
+  align-items: baseline;
+  justify-content: center;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+.measure__value { color: var(--fg); font-weight: 500; }
+.measure__thresholdLabel { color: var(--fg-soft); white-space: nowrap; }
+
+/* --- Tape: real events only ---------------------------------------------- */
+
+.tape {
+  display: flex;
+  align-items: center;
+  gap: var(--s5);
+  overflow: hidden;
+  border-top: 1px solid var(--line);
+  padding: var(--s3) 0;
+  font-size: var(--size-data);
+  color: var(--fg-soft);
+  mask-image: linear-gradient(to right, transparent, black 3%, black 97%, transparent);
+}
+.tape__track {
+  display: flex;
+  gap: var(--s5);
+  white-space: nowrap;
+  animation: tape-scroll 90s linear infinite;
+}
+.tape:hover .tape__track { animation-play-state: paused; }
+@keyframes tape-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.tape__item { display: inline-flex; gap: var(--s2); align-items: baseline; }
+.tape__item a { color: inherit; }
+
+/* --- EvidenceDrawer ------------------------------------------------------- */
+
+.evidence {
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  padding: var(--s4);
+  background: var(--ground-raised);
+  font-size: var(--size-data);
+}
+.evidence__row { display: flex; gap: var(--s3); padding: 3px 0; }
+.evidence__key { color: var(--fg-soft); min-width: 96px; }
+.evidence__value { color: var(--fg); word-break: break-all; }
+
+/* --- EmptyState: an invitation, never a shrug ----------------------------- */
+
+.empty {
+  border: 1px dashed var(--line);
+  border-radius: 2px;
+  padding: var(--s5);
+  color: var(--fg-soft);
+  max-width: 60ch;
+}
+.empty__title { margin: 0 0 var(--s2); color: var(--fg); font-size: var(--size-title); }
+.empty__body { font-size: var(--size-body); line-height: var(--lh-body); }
+.empty__body p { margin: 0 0 var(--s2); }
+
+/* --- Grain: cockpit only. On light ground this reads as dirt. ------------- */
+
+.grain {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+[data-surface='cockpit'] .grain { opacity: 0.015; }
+
+@media (prefers-reduced-motion: reduce) {
+  .measure--animate .measure__marker { animation: none; }
+  .tape__track { animation: none; }
+}
