@@ -523,14 +523,17 @@ product, it is written down here.
 - **Restore** — Supply a testnet kernel address and set `allowWrites` with a
   funded signer.
 
-### D5-06 · MarqueRegistry is written and tested but not yet deployed
+### D5-06 · MarqueRegistry deployed to BSC testnet — RESOLVED
 
-- **Planned** — "Deploy to BSC TESTNET only in this phase. Address pasted, tests
-  green."
-- **Shipped** — Contract complete, **14 Foundry tests green including fuzzing**.
-  Not deployed: the fresh testnet wallet holds 0 tBNB and the BNB faucet
-  requires a captcha, which cannot be completed from here.
-- **Cost** — Acceptance (e) is outstanding until the wallet is funded. Deploy is
-  one command once it is.
-- **Restore** — Fund `0xd09b8d9e266B87759e505287Ef07633ecae55Ed3` with testnet
-  tBNB, then `forge create`.
+- **Shipped** — Deployed to BSC testnet (97) at
+  **`0x01D584f3a07Ba07D114386A78CA7fa3103db7AE7`**, deploy tx
+  `0x068f9474ee84dd19e9dc0d945a92a4c947f803a4235eb0304e70aee5622ac931`.
+  14 Foundry tests green including fuzzing.
+- **Verified against the live contract, not just in tests:** a real P5 receipt
+  hash was anchored (tx `0x8b0da973e1203949e9a0046c09a50aeabd0311bf6aa60c36fde2f787e935414c`),
+  read back as anchored at block 129,051,524; a sealed call was written
+  (tx `0x67964616eb3cac4ad39e66ac509779137016e160d9ee20be8ea46b4ec273b9fd`)
+  and **re-sealing the same hash did not move its block** — the immutability
+  guarantee the sealed-call track record depends on, confirmed on real chain
+  state rather than in a test harness.
+- **Mainnet:** not deployed. Escalation gate 1, requires written approval.
