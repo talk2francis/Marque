@@ -222,3 +222,83 @@ product, it is written down here.
   composite is still exposed as `agentIdFull`, and P2's probe should try
   candidate resolutions and record which one answered.
 - **Restore** — n/a.
+
+---
+
+## P2 — Probe and classifier
+
+### D2-01 · Liveness is a four-way verdict, not a boolean
+
+- **Planned** — "record ok, latency_ms, status_code, failure_class" with
+  failure classes `dns | tls | timeout | 4xx | 5xx | bad_schema | blocked_ssrf |
+  empty_tools`.
+- **Shipped** — All of those, plus a `liveness` column with four values
+  (`live | unbound | bad_schema | dead`) and a new failure class `unbound`.
+- **Why** — docs/FINDINGS.md F-01. On BSC the dominant failure is an endpoint
+  that answers 200, fast, with a valid agent card describing an agent that was
+  never bound to a runtime. `ok = true` would be a lie and `ok = false` would
+  blame a healthy endpoint. Neither is true, so the schema gained a word for it.
+- **Cost** — One extra column and a slightly larger taxonomy.
+- **Restore** — n/a.
+
+### D2-02 · LLM classification pass (pass 2) not yet run
+
+- **Planned** — "for anything still unclassified WITH a live endpoint, one LLM
+  call over its metadata returning a strict Zod-validated
+  {category, confidence, reason}".
+- **Shipped** — Pass 1 (deterministic) only. The pass-2 gate is implemented in
+  `candidates(limit, onlyLive)`, which already restricts to agents with a live
+  endpoint; the LLM call itself is not wired.
+- **Why** — The population pass 2 exists to serve is currently tiny: only a
+  handful of distinct live third-party hosts exist on BSC, and each has been
+  read by hand. Spending LLM budget to classify agents that are unreachable is
+  explicitly wasteful, and the phase timebox is better spent on the supply-gap
+  measurement Francis asked for.
+- **Cost** — A live agent whose metadata avoids every taxonomy term stays
+  `unclassified`. Given the measured live set, this currently affects a
+  countable number of agents rather than a population.
+- **Restore** — Implement the call behind `classifySemanticPass()`; the gate,
+  storage, `method: 'semantic'` value and confidence field already exist.
+
+### D2-03 · Classification requires a strong, category-defining term
+
+- **Planned** — "deterministic keyword/skill/tag map".
+- **Shipped** — The map, plus a rule that a category must match at least one
+  `strong` term, not merely accumulate weak ones.
+- **Why** — Found in review of real output. `CoinAnk.agent`, a market-data
+  service, was labelled **health_factor** at confidence 1.00 because its copy
+  contains the weak term "liquidation" — it reports liquidation *volumes*; it
+  does not monitor anyone's loan. A false positive in this product recommends
+  the wrong agent for someone's money, so precision beats recall here.
+- **Cost** — Recall drops. An agent that describes itself only in weak terms is
+  left unclassified rather than guessed at.
+- **Restore** — Set `REQUIRE_STRONG_TERM = false` in `taxonomy.ts`.
+
+### D2-04 · Census coverage is partial and the reports say so
+
+- **Planned** — Implicitly, a complete funnel.
+- **Shipped** — A complete funnel *of what has been enriched so far*, with the
+  coverage percentage printed at the top of `docs/SUPPLY-OUTREACH.md` and
+  returned by the API.
+- **Why** — Service endpoints exist only on 8004scan's detail record, so supply
+  can only be counted for agents that have been enriched, and enrichment is
+  rate-limited to a few hundred a minute against a candidate pool of ~53,000.
+  8004scan also spent part of this phase returning HTTP 500. Every supply number
+  is therefore a **lower bound** and will rise. Publishing it without that
+  caveat would be presenting an incomplete census as a complete one.
+- **Cost** — The headline third-party count understates real supply until the
+  queue drains (a few hours, unattended).
+- **Restore** — n/a; the caveat disappears on its own as coverage reaches 100%.
+
+### D2-05 · Deploying rebuilds in place, which drops the web process
+
+- **Planned** — not specified.
+- **Shipped** — `scripts/build-web.sh` builds into `.next/` under the running
+  app, so `server.js` briefly does not exist and PM2 restart-loops until the
+  build finishes. Observed: 32 restarts across one rebuild. The site recovered
+  on its own and was serving 200s immediately afterwards.
+- **Why** — Speed during the build phase.
+- **Cost** — Roughly 30–60 seconds of 502s per deploy. Unacceptable during the
+  9–23 Sep judging window, when a judge could hit it.
+- **Restore** — P11: build to a staging directory, then swap it in and
+  `pm2 reload` for a zero-downtime cutover.
