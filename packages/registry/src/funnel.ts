@@ -27,8 +27,18 @@ export interface CategoryFunnelRow {
   hasServiceMetadata: number
   reachableNow: number
   classified: number
-  /** Live, callable, and NOT a Marque reference agent. */
+  /**
+   * Distinct third-party SUPPLIERS that are live and callable — counted by
+   * distinct endpoint host, not by registration.
+   *
+   * Registrations overstate supply badly on BSC: one operator registers the
+   * same endpoint under many ERC-8004 identities, so 46 "callable" rebalancing
+   * registrations turned out to be 7 actual suppliers. A marketplace that
+   * counts registrations is quoting its own inventory 6x.
+   */
   thirdPartyExecutable: number
+  /** Registrations behind those suppliers. Published alongside, never instead. */
+  thirdPartyRegistrations: number
   /** Marque's own agents. Never counted toward the third-party number. */
   referenceAgents: number
   supplyGap: boolean
@@ -106,7 +116,9 @@ export async function categoryFunnel(chainId = 56): Promise<CategoryFunnelRow[]>
       select c.category, b.id, b.owner_address,
              (${owners}) as is_reference,
              exists (select 1 from agent_service s where s.agent_id = b.id) as has_service,
-             p.liveness
+             p.liveness,
+             (select regexp_replace(coalesce(s2.resolved_endpoint, s2.endpoint), '^(https?://[^/]+).*', '\\1')
+              from agent_service s2 where s2.agent_id = b.id limit 1) as host
       from base b
       join agent_category c on c.agent_id = b.id
       left join latest_probe p on p.agent_id = b.id
@@ -115,10 +127,11 @@ export async function categoryFunnel(chainId = 56): Promise<CategoryFunnelRow[]>
     select category,
            count(*) as registered,
            count(*) filter (where has_service) as has_service_metadata,
-           count(*) filter (where liveness in ('live','unbound','bad_schema')) as reachable_now,
+           count(distinct host) filter (where liveness in ('live','unbound','bad_schema')) as reachable_now,
            count(*) as classified,
-           count(*) filter (where liveness = 'live' and not is_reference) as third_party_executable,
-           count(*) filter (where is_reference) as reference_agents
+           count(distinct host) filter (where liveness = 'live' and not is_reference) as third_party_executable,
+           count(*) filter (where liveness = 'live' and not is_reference) as third_party_registrations,
+           count(distinct owner_address) filter (where is_reference) as reference_agents
     from labelled
     group by category
     order by category
@@ -134,6 +147,7 @@ export async function categoryFunnel(chainId = 56): Promise<CategoryFunnelRow[]>
       reachableNow: Number(r['reachable_now'] ?? 0),
       classified: Number(r['classified'] ?? 0),
       thirdPartyExecutable: thirdParty,
+      thirdPartyRegistrations: Number(r['third_party_registrations'] ?? 0),
       referenceAgents: Number(r['reference_agents'] ?? 0),
       supplyGap: thirdParty < MIN_THIRD_PARTY_PER_CATEGORY,
     }

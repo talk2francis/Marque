@@ -1,0 +1,170 @@
+.nav {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s4);
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: var(--s5) var(--s5) 0;
+}
+.brand {
+  font-family: var(--font-statement);
+  font-size: 20px;
+  letter-spacing: -0.01em;
+  color: var(--fg);
+  text-decoration: none;
+}
+.navLinks { display: flex; gap: var(--s3); font-size: var(--size-body); }
+/* Inline links still need a real tap target. 23px tall fails on a phone and
+   the audit catches it; padding gets them over the 24px floor without
+   changing how they look. */
+.navLinks a {
+  color: var(--fg-soft);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding-inline: var(--s2);
+}
+.navLinks a:hover { color: var(--fg); }
+
+.main { max-width: 1180px; margin: 0 auto; padding: 0 var(--s5); }
+
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  gap: var(--s8);
+  align-items: start;
+  padding: var(--s8) 0 var(--s9);
+}
+.heroCopy { display: flex; flex-direction: column; gap: var(--s4); min-width: 0; }
+.lede {
+  margin: 0;
+  max-width: 46ch;
+  font-size: var(--size-body);
+  line-height: var(--lh-body);
+  color: var(--fg-soft);
+}
+.example {
+  margin: 0;
+  max-width: 46ch;
+  font-size: var(--size-caption);
+  line-height: 1.5;
+  color: var(--fg-soft);
+  border-left: 2px solid var(--line);
+  padding-left: var(--s3);
+}
+.heroDesk { min-width: 0; }
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s4);
+  padding: var(--s8) 0;
+  border-top: 1px solid var(--line);
+}
+.sectionQuiet { padding: var(--s7) 0; border-top: 1px solid var(--line); }
+.sectionLede {
+  margin: 0;
+  max-width: 68ch;
+  font-size: var(--size-body);
+  line-height: var(--lh-body);
+  color: var(--fg-soft);
+}
+
+/* Four rows, each with its own measure — deliberately not four identical cards. */
+.categories { display: flex; flex-direction: column; margin-top: var(--s2); }
+.category {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s3);
+  padding: var(--s5) 0;
+  border-top: 1px solid var(--line);
+  text-decoration: none;
+  color: inherit;
+  transition: background-color 120ms ease;
+}
+.category:first-child { border-top: 0; }
+.category:hover { background: var(--ground-raised); }
+.categoryHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s3);
+  flex-wrap: wrap;
+}
+.categoryName { font-size: var(--size-title); font-weight: 500; }
+.categoryProblem {
+  margin: 0;
+  max-width: 68ch;
+  font-size: var(--size-body);
+  line-height: var(--lh-body);
+  color: var(--fg-soft);
+}
+
+.funnel { list-style: none; margin: var(--s2) 0 0; padding: 0; }
+.funnelRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1.1fr);
+  gap: var(--s4);
+  align-items: baseline;
+  padding: var(--s3) 0;
+  border-bottom: 1px solid var(--line);
+}
+.funnelLabel { font-size: var(--size-body); color: var(--fg); }
+.funnelHow { font-size: var(--size-caption); color: var(--fg-soft); }
+.funnelNote {
+  margin: var(--s4) 0 0;
+  max-width: 68ch;
+  font-size: var(--size-body);
+  line-height: var(--lh-body);
+  color: var(--fg-soft);
+}
+.funnelNote > span { margin-right: var(--s2); }
+
+.builders {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s5);
+  flex-wrap: wrap;
+}
+.buildersTitle { font-size: var(--size-title); font-weight: 500; color: var(--fg); }
+.buildersCopy a, .sectionLede a { display: inline-flex; align-items: center; min-height: 24px; }
+.buildersCopy {
+  margin: var(--s2) 0 0;
+  max-width: 58ch;
+  font-size: var(--size-body);
+  line-height: var(--lh-body);
+  color: var(--fg-soft);
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--s4);
+  flex-wrap: wrap;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: var(--s6) var(--s5) var(--s8);
+  font-size: var(--size-caption);
+  color: var(--fg-soft);
+}
+.footerLinks { display: flex; gap: var(--s2); }
+.footerLinks a {
+  color: var(--fg-soft);
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding-inline: var(--s2);
+}
+
+@media (max-width: 900px) {
+  .hero { grid-template-columns: 1fr; gap: var(--s6); padding: var(--s6) 0 var(--s7); }
+  .funnelRow { grid-template-columns: minmax(0, 1fr) auto; }
+  .funnelHow { grid-column: 1 / -1; }
+}
+@media (max-width: 640px) {
+  .nav, .main, .footer { padding-inline: var(--s4); }
+  .section { padding: var(--s6) 0; }
+}

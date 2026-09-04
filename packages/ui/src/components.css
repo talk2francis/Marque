@@ -321,6 +321,8 @@ a.row:hover, button.row:hover { background: var(--ground-raised); }
 .empty__title { margin: 0 0 var(--s2); color: var(--fg); font-size: var(--size-title); }
 .empty__body { font-size: var(--size-body); line-height: var(--lh-body); }
 .empty__body p { margin: 0 0 var(--s2); }
+/* Inline links inside body copy still need a 24px tap target on a phone. */
+.empty__body a { display: inline-flex; align-items: center; min-height: 24px; }
 
 /* --- Grain: cockpit only. On light ground this reads as dirt. ------------- */
 
