@@ -1,6 +1,6 @@
 # Supply outreach
 
-> Generated 2026-09-04T01:14:51.469Z · chain 56 · every number measured, none hardcoded.
+> Generated 2026-09-04T01:17:34.815Z · chain 56 · every number measured, none hardcoded.
 > Regenerate with `pnpm tsx scripts/supply-report.mts`.
 
 Marque reference agents are excluded from every third-party count in this
@@ -8,8 +8,8 @@ document by construction (0 reference owner(s) registered).
 
 ## Census coverage — read this before trusting the counts
 
-The detail-enrichment pass is **13.08% complete**
-(7,251 of 55,445 agents that declare a transport).
+The detail-enrichment pass is **14.72% complete**
+(8,161 of 55,445 agents that declare a transport).
 Service endpoints exist only on the detail record, so an agent that has not been
 enriched yet cannot appear as supply. **These are lower bounds, and they will rise.**
 
@@ -21,7 +21,7 @@ enriched yet cannot appear as supply. **These are lower bounds, and they will ri
 | Stage | Count | How measured |
 |---|---:|---|
 | Registered on BSC | 108,248 | count of indexed agents on chain 56 |
-| Declares a service we can parse | 4,944 | agents with at least one agent_service row |
+| Declares a service we can parse | 5,803 | agents with at least one agent_service row |
 | Endpoint responds | 2,056 | latest probe returned a well-formed response |
 | Bound and callable | 472 | latest probe found an executable endpoint or declared skills |
 | Classified into a category | 195 | has a non-unclassified category label |
@@ -35,7 +35,7 @@ enriched yet cannot appear as supply. **These are lower bounds, and they will ri
 | Grid Trading | 7 | 1 | 0 | **0** | 0 | **SUPPLY_GAP** |
 | Yield Optimisation | 11 | 6 | 4 | **0** | 0 | **SUPPLY_GAP** |
 | Health Factor | 17 | 2 | 1 | **0** | 0 | **SUPPLY_GAP** |
-| Security (TermiX high-stakes) | 139 | 45 | 14 | **0** | 0 | **SUPPLY_GAP** |
+| Security (TermiX high-stakes) | 139 | 52 | 14 | **0** | 0 | **SUPPLY_GAP** |
 
 **Threshold:** a required category with fewer than 2 reachable third-party agents is flagged SUPPLY_GAP.
 
@@ -72,17 +72,17 @@ are marked `dup` — they are the same supplier reached through another identity
 | # | Owner | Agent | Agents | Live | Unbound | Categories | Host | Contact | Why contact them | Priority |
 |---:|---|---|---:|---:|---:|---|---|---|---|---|
 | 1 | `0x20f1ca5d1e5a3ee94c29dbf95e6bf6cea6a8d64b` | BNB LP Range Rebalancer | 1 | 1 | 0 | rebalancing | bnb-lp.172-104-171-139.nip.io | — | Live supply in rebalancing — a required category. Highest-value contact on the list. | HIGH |
-| 2 | `0xbad35fa6e368e90fc4faf63507f2d0a2fdf94baf` | positioncrew-yield-optimizer.agent | 4 | 0 | 4 | yield, rebalancing, health_factor | platform-backend.prod.termix.live | https://platform-backend.prod.termix.live/api/v1/a2a/agents/{agentId}/card | Has 4 agent(s) in yield, rebalancing, health_factor that are registered but not bound. One deploy unlocks a category we have no supply for. | HIGH |
+| 2 | `0xbad35fa6e368e90fc4faf63507f2d0a2fdf94baf` | positioncrew-yield-optimizer.agent | 4 | 0 | 4 | yield, health_factor, rebalancing | platform-backend.prod.termix.live | https://platform-backend.prod.termix.live/api/v1/a2a/agents/{agentId}/card | Has 4 agent(s) in yield, health_factor, rebalancing that are registered but not bound. One deploy unlocks a category we have no supply for. | HIGH |
 | 3 | `0x73809f69916fcf7ddc5bb1315fbdf96a569a5963` | Brain on BNB — Venus Health Factor Monitor | 4 | 0 | 0 | health_factor, rebalancing | agent.brainonbnb.com | https://brainonbnb.com/logo-200x200.png | Has 4 agent(s) in health_factor, rebalancing that are registered but not bound. One deploy unlocks a category we have no supply for. | HIGH |
-| 4 | `0x4e21f74143660ee576f4d2ac26bd30729a849f55` | Sentinels Grid Trader | 3 | 0 | 0 | grid | bedrock-agentcore.us-east-1.amazonaws.com | https://github.com/agntcy/oasf/ · https://blob.8004scan.app/sanitized-images/v1/959cce6d11b2a4c9691dd803020977890eabadfb507f005038505119b47fd1f6.webp | Has 3 agent(s) in grid that are registered but not bound. One deploy unlocks a category we have no supply for. | HIGH |
+| 4 | `0x4e21f74143660ee576f4d2ac26bd30729a849f55` | Sentinels Grid Trader | 3 | 0 | 0 | grid | bedrock-agentcore.us-east-1.amazonaws.com | https://github.com/agntcy/oasf/ · https://blob.8004scan.app/sanitized-images/v1/7f6004c748b8adb00da78f476bcfd16705c8f2f1d600585404118ea9bc248fa1.webp | Has 3 agent(s) in grid that are registered but not bound. One deploy unlocks a category we have no supply for. | HIGH |
 | 5 | `0xfeaf9ee9e828a3029f8a6d7c65d39aed372d4673` | Q402 Agent (by Quack AI) | 5 | 5 | 0 | — | q402.quackai.ai | https://q402.quackai.ai/icon.svg | Running live, callable supply. Worth listing even outside the four required categories. | HIGH |
 | 6 | `0x97e8f3b4bffc1982b2791b21609c3b2542c5eb50` | bnbagent | 3 | 1 | 0 | — | api.bortagent.xyz | https://gray-key-salamander-905.mypinata.cloud/ipfs/QmTEggcqeLj8rAX3HuCdsX21sH7BH3afYrbnA7rCcUsUN2 | Running live, callable supply. Worth listing even outside the four required categories. | HIGH |
 | 7 | `0xb680b333211ac2b670b080bee6267d1173c81049` | Rook Trading Intelligence | 1 | 1 | 0 | — | ai-rook.com | https://agents.ai-rook.com | Running live, callable supply. Worth listing even outside the four required categories. | HIGH |
-| 8 | `0x4e593473a06a48c4b4d2b8ff526bc6cac238646a` | Launch Kit | 1 | 0 | 0 | — | api.bitagent.io | https://api.bitagent.io/aip/launch_kit | 1 registered agent(s), none bound yet. | LOW |
-| 9 | `0x4d09af0beac3f65c5bdbf1d19f31caca7924b7ec` | QwibiBNB | 1 | 0 | 0 | — | bedrock-agentcore.us-east-1.amazonaws.com | https://raw.githubusercontent.com/ezekiel6262/QwibiBNB/main/public/qwibi-bnb.svg | 1 registered agent(s), none bound yet. | LOW |
-| 10 | `0x999561c6c239c9ef660dfbe38cc2ce6bd0c2ecba` | lean-agente-aprendizaje | 1 | 0 | 0 | — | example.com | https://example.com/status | 1 registered agent(s), none bound yet. | LOW |
+| 8 | `0x4d09af0beac3f65c5bdbf1d19f31caca7924b7ec` | QwibiBNB | 1 | 0 | 0 | — | bedrock-agentcore.us-east-1.amazonaws.com | https://raw.githubusercontent.com/ezekiel6262/QwibiBNB/main/public/qwibi-bnb.svg | 1 registered agent(s), none bound yet. | LOW |
+| 9 | `0x999561c6c239c9ef660dfbe38cc2ce6bd0c2ecba` | lean-agente-aprendizaje | 1 | 0 | 0 | — | example.com | https://example.com/status | 1 registered agent(s), none bound yet. | LOW |
+| 10 | `0x08407662bcf644802174dc70d28ce0c1c7ec42ba` | Mood Check | 1 | 0 | 0 | — | api.bitagent.io | https://api.bitagent.io/aip/mood_check | 1 registered agent(s), none bound yet. | LOW |
 
-Suppressed as duplicate suppliers: 2602 owner(s) pointing at hosts already listed above.
+Suppressed as duplicate suppliers: 2567 owner(s) pointing at hosts already listed above.
 
 ## Prospect records
 
@@ -109,8 +109,8 @@ Full records in `SUPPLY-OUTREACH.json` and `SUPPLY-OUTREACH.csv`.
 |---|---|---|---|---|---|---|
 | positioncrew-yield-optimizer.agent | `266232` | `0xbad35fa6e3…` | a2a | unbound (350ms) | Registered and discoverable, but never bound to a runtime: the card serves, yet exposes no executable endpoint and no skills. One deploy away from being hireable. | HIGH |
 | fid_up79.agent | `305950` | `0xf4e047eda1…` | a2a | unbound (361ms) | Registered and discoverable, but never bound to a runtime: the card serves, yet exposes no executable endpoint and no skills. One deploy away from being hireable. | HIGH |
-| dROumWv.agent | `330286` | `0x7e83fe7f5c…` | a2a | dead (8001ms) | Declared endpoint does not respond (timeout). Either the host is gone or the URL in their registry metadata is stale — worth telling them, since it is invisible from their side. | MEDIUM |
 | GvPuHKg.agent | `327022` | `0x550f892585…` | a2a | unbound (343ms) | Registered and discoverable, but never bound to a runtime: the card serves, yet exposes no executable endpoint and no skills. One deploy away from being hireable. | HIGH |
+| dROumWv.agent | `330286` | `0x7e83fe7f5c…` | a2a | dead (8001ms) | Declared endpoint does not respond (timeout). Either the host is gone or the URL in their registry metadata is stale — worth telling them, since it is invisible from their side. | MEDIUM |
 | GoVIhMYLY.agent | `327900` | `0xdd58333289…` | a2a | unbound (337ms) | Registered and discoverable, but never bound to a runtime: the card serves, yet exposes no executable endpoint and no skills. One deploy away from being hireable. | HIGH |
 | Pubg.agent | `301934` | `0x8f7d175a21…` | a2a | unprobed | Not yet probed. | LOW |
 
@@ -121,67 +121,66 @@ Full records in `SUPPLY-OUTREACH.json` and `SUPPLY-OUTREACH.csv`.
 | positioncrew-lending-rescue.agent | `266229` | `0xbad35fa6e3…` | a2a | unbound (348ms) | Registered and discoverable, but never bound to a runtime: the card serves, yet exposes no executable endpoint and no skills. One deploy away from being hireable. | HIGH |
 | Brain on BNB — Venus Health Factor Monitor | `302257` | `0x73809f6991…` | a2a | unprobed | Not yet probed. | LOW |
 
-### Security (TermiX high-stakes) — 25 prospect(s)
+### Security (TermiX high-stakes) — 24 prospect(s)
 
 | Agent | ERC-8004 ID | Owner | Protocol | Liveness | Why it is / is not ready | Priority |
 |---|---|---|---|---|---|---|
-| yPMVIaOa.agent | `330676` | `0x2e85b02fc1…` | a2a | unbound (335ms) | Registered and discoverable, but never bound to a runtime: the card serves, yet exposes no executable endpoint and no skills. One deploy away from being hireable. | MEDIUM |
 | soCQCG.agent | `330995` | `0x9589d05553…` | a2a | unbound (335ms) | Registered and discoverable, but never bound to a runtime: the card serves, yet exposes no executable endpoint and no skills. One deploy away from being hireable. | MEDIUM |
-| xOSoj.agent | `327030` | `0x05b676f0f9…` | a2a | unbound (350ms) | Registered and discoverable, but never bound to a runtime: the card serves, yet exposes no executable endpoint and no skills. One deploy away from being hireable. | MEDIUM |
-| cFbaui.agent | `327077` | `0xf5d2525a6d…` | a2a | unbound (341ms) | Registered and discoverable, but never bound to a runtime: the card serves, yet exposes no executable endpoint and no skills. One deploy away from being hireable. | MEDIUM |
-| tungthanh.agent | `327155` | `0x1893a3a427…` | a2a | unbound (346ms) | Registered and discoverable, but never bound to a runtime: the card serves, yet exposes no executable endpoint and no skills. One deploy away from being hireable. | MEDIUM |
-| thanhtung.agent | `327154` | `0x1893a3a427…` | a2a | unbound (336ms) | Registered and discoverable, but never bound to a runtime: the card serves, yet exposes no executable endpoint and no skills. One deploy away from being hireable. | MEDIUM |
+| yPMVIaOa.agent | `330676` | `0x2e85b02fc1…` | a2a | unbound (335ms) | Registered and discoverable, but never bound to a runtime: the card serves, yet exposes no executable endpoint and no skills. One deploy away from being hireable. | MEDIUM |
 | eth5k.agent | `328093` | `0xe1116b8286…` | a2a | unbound (340ms) | Registered and discoverable, but never bound to a runtime: the card serves, yet exposes no executable endpoint and no skills. One deploy away from being hireable. | MEDIUM |
-| behre.agent | `304643` | `0x209c9e8a21…` | a2a | unbound (338ms) | Registered and discoverable, but never bound to a runtime: the card serves, yet exposes no executable endpoint and no skills. One deploy away from being hireable. | MEDIUM |
+| thanhtung.agent | `327154` | `0x1893a3a427…` | a2a | unbound (336ms) | Registered and discoverable, but never bound to a runtime: the card serves, yet exposes no executable endpoint and no skills. One deploy away from being hireable. | MEDIUM |
+| tungthanh.agent | `327155` | `0x1893a3a427…` | a2a | unbound (346ms) | Registered and discoverable, but never bound to a runtime: the card serves, yet exposes no executable endpoint and no skills. One deploy away from being hireable. | MEDIUM |
+| cFbaui.agent | `327077` | `0xf5d2525a6d…` | a2a | unbound (341ms) | Registered and discoverable, but never bound to a runtime: the card serves, yet exposes no executable endpoint and no skills. One deploy away from being hireable. | MEDIUM |
+| xOSoj.agent | `327030` | `0x05b676f0f9…` | a2a | unbound (350ms) | Registered and discoverable, but never bound to a runtime: the card serves, yet exposes no executable endpoint and no skills. One deploy away from being hireable. | MEDIUM |
 | Dillah.agent | `331210` | `0x898c3100d7…` | a2a | unbound (350ms) | Registered and discoverable, but never bound to a runtime: the card serves, yet exposes no executable endpoint and no skills. One deploy away from being hireable. | MEDIUM |
+| behre.agent | `304643` | `0x209c9e8a21…` | a2a | unbound (338ms) | Registered and discoverable, but never bound to a runtime: the card serves, yet exposes no executable endpoint and no skills. One deploy away from being hireable. | MEDIUM |
+| QMRdshM.agent | `327460` | `0x705b451012…` | a2a | unbound (336ms) | Registered and discoverable, but never bound to a runtime: the card serves, yet exposes no executable endpoint and no skills. One deploy away from being hireable. | MEDIUM |
 | Sumon6251.agent | `327075` | `0xaf29c978f9…` | a2a | unbound (349ms) | Registered and discoverable, but never bound to a runtime: the card serves, yet exposes no executable endpoint and no skills. One deploy away from being hireable. | MEDIUM |
-| kmvng.agent | `327136` | `0x34d099ba24…` | a2a | unbound (336ms) | Registered and discoverable, but never bound to a runtime: the card serves, yet exposes no executable endpoint and no skills. One deploy away from being hireable. | MEDIUM |
 | gnORC.agent | `331548` | `0xb59c783ef2…` | a2a | unbound (338ms) | Registered and discoverable, but never bound to a runtime: the card serves, yet exposes no executable endpoint and no skills. One deploy away from being hireable. | MEDIUM |
 | huonglien.agent | `330405` | `0x7c591da943…` | a2a | unbound (344ms) | Registered and discoverable, but never bound to a runtime: the card serves, yet exposes no executable endpoint and no skills. One deploy away from being hireable. | MEDIUM |
-| QMRdshM.agent | `327460` | `0x705b451012…` | a2a | unbound (336ms) | Registered and discoverable, but never bound to a runtime: the card serves, yet exposes no executable endpoint and no skills. One deploy away from being hireable. | MEDIUM |
+| kmvng.agent | `327136` | `0x34d099ba24…` | a2a | unbound (336ms) | Registered and discoverable, but never bound to a runtime: the card serves, yet exposes no executable endpoint and no skills. One deploy away from being hireable. | MEDIUM |
 | antispam.agent | `301721` | `0xdbe78dec8d…` | a2a | unprobed | Not yet probed. | LOW |
-| linhcu11.agent | `302314` | `0x831bbc4349…` | a2a | unprobed | Not yet probed. | LOW |
+| hype.agent | `301759` | `0x8a2042b381…` | a2a | unprobed | Not yet probed. | LOW |
 | vana.agent | `302042` | `0xdb98539023…` | a2a | unprobed | Not yet probed. | LOW |
 | bsc.agent | `301715` | `0x8a2042b381…` | a2a | unprobed | Not yet probed. | LOW |
-| hype.agent | `301759` | `0x8a2042b381…` | a2a | unprobed | Not yet probed. | LOW |
+| kujeng.agent | `298748` | `0xdb98539023…` | a2a | unprobed | Not yet probed. | LOW |
 | Black_Diamond.agent | `304125` | `0x384aaff760…` | a2a | unprobed | Not yet probed. | LOW |
+| linhcu11.agent | `302314` | `0x831bbc4349…` | a2a | unprobed | Not yet probed. | LOW |
 | linhcu.agent | `302286` | `0x831bbc4349…` | a2a | unprobed | Not yet probed. | LOW |
 | 0xnana.agent | `306040` | `0x3b74978d03…` | a2a | unprobed | Not yet probed. | LOW |
 | jui.agent | `303607` | `0x629ad9c3d6…` | a2a | unprobed | Not yet probed. | LOW |
-| PCS.agent | `301116` | `0x01d945b00d…` | a2a | unprobed | Not yet probed. | LOW |
-| Pisces.agent | `301049` | `0x01d945b00d…` | a2a | unprobed | Not yet probed. | LOW |
 
-### Unclassified — 2962 prospect(s)
+### Unclassified — 2963 prospect(s)
 
 | Agent | ERC-8004 ID | Owner | Protocol | Liveness | Why it is / is not ready | Priority |
 |---|---|---|---|---|---|---|
 | bnbagent | `270339` | `0x97e8f3b4bf…` | a2a | live (759ms) | Ready now: endpoint answers and exposes 7 callable skill(s). Needs only a conformance run and a listing. | HIGH |
-| Q402 Agent (by Quack AI) | `268193` | `0xfeaf9ee9e8…` | mcp | live (42ms) | Ready now: endpoint answers and exposes 46 callable skill(s). Needs only a conformance run and a listing. | HIGH |
 | Q402 Agent (by Quack AI) | `268188` | `0xfeaf9ee9e8…` | mcp | live (26ms) | Ready now: endpoint answers and exposes 46 callable skill(s). Needs only a conformance run and a listing. | HIGH |
+| Q402 Agent (by Quack AI) | `268193` | `0xfeaf9ee9e8…` | mcp | live (42ms) | Ready now: endpoint answers and exposes 46 callable skill(s). Needs only a conformance run and a listing. | HIGH |
 | Q402 Agent (by Quack AI) | `268189` | `0xfeaf9ee9e8…` | mcp | live (15ms) | Ready now: endpoint answers and exposes 46 callable skill(s). Needs only a conformance run and a listing. | HIGH |
-| Q402 Agent (by Quack AI) | `268192` | `0xfeaf9ee9e8…` | mcp | live (39ms) | Ready now: endpoint answers and exposes 46 callable skill(s). Needs only a conformance run and a listing. | HIGH |
 | Q402 Agent (by Quack AI) | `268195` | `0xfeaf9ee9e8…` | mcp | live (19ms) | Ready now: endpoint answers and exposes 46 callable skill(s). Needs only a conformance run and a listing. | HIGH |
-| Q402 Agent (by Quack AI) | `265071` | `0xc7eaa6512f…` | mcp | live (14ms) | Ready now: endpoint answers and exposes 46 callable skill(s). Needs only a conformance run and a listing. | HIGH |
-| Q402 Agent (by Quack AI) | `265069` | `0xc7eaa6512f…` | mcp | live (55ms) | Ready now: endpoint answers and exposes 46 callable skill(s). Needs only a conformance run and a listing. | HIGH |
+| Q402 Agent (by Quack AI) | `268192` | `0xfeaf9ee9e8…` | mcp | live (39ms) | Ready now: endpoint answers and exposes 46 callable skill(s). Needs only a conformance run and a listing. | HIGH |
 | Q402 Agent (by Quack AI) | `265066` | `0xc7eaa6512f…` | mcp | live (58ms) | Ready now: endpoint answers and exposes 46 callable skill(s). Needs only a conformance run and a listing. | HIGH |
 | Q402 Agent (by Quack AI) | `265067` | `0xc7eaa6512f…` | mcp | live (22ms) | Ready now: endpoint answers and exposes 46 callable skill(s). Needs only a conformance run and a listing. | HIGH |
+| Q402 Agent (by Quack AI) | `265069` | `0xc7eaa6512f…` | mcp | live (55ms) | Ready now: endpoint answers and exposes 46 callable skill(s). Needs only a conformance run and a listing. | HIGH |
+| Q402 Agent (by Quack AI) | `265071` | `0xc7eaa6512f…` | mcp | live (14ms) | Ready now: endpoint answers and exposes 46 callable skill(s). Needs only a conformance run and a listing. | HIGH |
 | Q402 Agent (by Quack AI) | `267906` | `0xc59ee7521a…` | mcp | live (26ms) | Ready now: endpoint answers and exposes 46 callable skill(s). Needs only a conformance run and a listing. | HIGH |
+| Q402 Agent (by Quack AI) | `267905` | `0xc59ee7521a…` | mcp | live (29ms) | Ready now: endpoint answers and exposes 46 callable skill(s). Needs only a conformance run and a listing. | HIGH |
+| Q402 Agent (by Quack AI) | `267620` | `0x63094ea04a…` | mcp | live (34ms) | Ready now: endpoint answers and exposes 46 callable skill(s). Needs only a conformance run and a listing. | HIGH |
+| Q402 Agent (by Quack AI) | `267621` | `0x63094ea04a…` | mcp | live (44ms) | Ready now: endpoint answers and exposes 46 callable skill(s). Needs only a conformance run and a listing. | HIGH |
+| Q402 Agent (by Quack AI) | `268615` | `0x631b88b3d0…` | mcp | live (38ms) | Ready now: endpoint answers and exposes 46 callable skill(s). Needs only a conformance run and a listing. | HIGH |
+| Q402 Agent (by Quack AI) | `267777` | `0xb0ddebe55c…` | mcp | live (26ms) | Ready now: endpoint answers and exposes 46 callable skill(s). Needs only a conformance run and a listing. | HIGH |
 | Q402 Agent (by Quack AI) | `268614` | `0x631b88b3d0…` | mcp | live (26ms) | Ready now: endpoint answers and exposes 46 callable skill(s). Needs only a conformance run and a listing. | HIGH |
+| Q402 Agent (by Quack AI) | `267779` | `0xb0ddebe55c…` | mcp | live (34ms) | Ready now: endpoint answers and exposes 46 callable skill(s). Needs only a conformance run and a listing. | HIGH |
 | Q402 Agent (by Quack AI) | `268619` | `0x764e45ad6e…` | mcp | live (37ms) | Ready now: endpoint answers and exposes 46 callable skill(s). Needs only a conformance run and a listing. | HIGH |
 | Q402 Agent (by Quack AI) | `268618` | `0x764e45ad6e…` | mcp | live (34ms) | Ready now: endpoint answers and exposes 46 callable skill(s). Needs only a conformance run and a listing. | HIGH |
-| Q402 Agent (by Quack AI) | `267779` | `0xb0ddebe55c…` | mcp | live (34ms) | Ready now: endpoint answers and exposes 46 callable skill(s). Needs only a conformance run and a listing. | HIGH |
-| Q402 Agent (by Quack AI) | `267905` | `0xc59ee7521a…` | mcp | live (29ms) | Ready now: endpoint answers and exposes 46 callable skill(s). Needs only a conformance run and a listing. | HIGH |
-| Q402 Agent (by Quack AI) | `268615` | `0x631b88b3d0…` | mcp | live (38ms) | Ready now: endpoint answers and exposes 46 callable skill(s). Needs only a conformance run and a listing. | HIGH |
-| Q402 Agent (by Quack AI) | `267621` | `0x63094ea04a…` | mcp | live (44ms) | Ready now: endpoint answers and exposes 46 callable skill(s). Needs only a conformance run and a listing. | HIGH |
-| Q402 Agent (by Quack AI) | `267620` | `0x63094ea04a…` | mcp | live (34ms) | Ready now: endpoint answers and exposes 46 callable skill(s). Needs only a conformance run and a listing. | HIGH |
-| Q402 Agent (by Quack AI) | `267777` | `0xb0ddebe55c…` | mcp | live (26ms) | Ready now: endpoint answers and exposes 46 callable skill(s). Needs only a conformance run and a listing. | HIGH |
-| Q402 Agent (by Quack AI) | `306098` | `0x3cb0158e25…` | mcp | live (142ms) | Ready now: endpoint answers and exposes 46 callable skill(s). Needs only a conformance run and a listing. | HIGH |
-| Q402 Agent (by Quack AI) | `266422` | `0xe85c9b6d9c…` | mcp | live (31ms) | Ready now: endpoint answers and exposes 46 callable skill(s). Needs only a conformance run and a listing. | HIGH |
-| Q402 Agent (by Quack AI) | `306082` | `0x68eccf2995…` | mcp | live (151ms) | Ready now: endpoint answers and exposes 46 callable skill(s). Needs only a conformance run and a listing. | HIGH |
-| Q402 Agent (by Quack AI) | `330805` | `0xd3a0dc7f21…` | mcp | live (29ms) | Ready now: endpoint answers and exposes 46 callable skill(s). Needs only a conformance run and a listing. | HIGH |
-| Q402 Agent (by Quack AI) | `283562` | `0x9c474d912a…` | mcp | live (15ms) | Ready now: endpoint answers and exposes 46 callable skill(s). Needs only a conformance run and a listing. | HIGH |
-| Q402 Agent (by Quack AI) | `265049` | `0xc5392fb133…` | mcp | live (28ms) | Ready now: endpoint answers and exposes 46 callable skill(s). Needs only a conformance run and a listing. | HIGH |
-| Q402 Agent (by Quack AI) | `265047` | `0x807fb8045b…` | mcp | live (34ms) | Ready now: endpoint answers and exposes 46 callable skill(s). Needs only a conformance run and a listing. | HIGH |
-| Q402 Agent (by Quack AI) | `265042` | `0xdd63956913…` | mcp | live (22ms) | Ready now: endpoint answers and exposes 46 callable skill(s). Needs only a conformance run and a listing. | HIGH |
-| Q402 Agent (by Quack AI) | `265279` | `0x594c70b230…` | mcp | live (29ms) | Ready now: endpoint answers and exposes 46 callable skill(s). Needs only a conformance run and a listing. | HIGH |
-| Q402 Agent (by Quack AI) | `265282` | `0x6f3574debb…` | mcp | live (22ms) | Ready now: endpoint answers and exposes 46 callable skill(s). Needs only a conformance run and a listing. | HIGH |
+| Q402 Agent (by Quack AI) | `268330` | `0x2ea2ce7bb6…` | mcp | live (29ms) | Ready now: endpoint answers and exposes 46 callable skill(s). Needs only a conformance run and a listing. | HIGH |
+| Q402 Agent (by Quack AI) | `265002` | `0x1f79251052…` | mcp | live (21ms) | Ready now: endpoint answers and exposes 46 callable skill(s). Needs only a conformance run and a listing. | HIGH |
+| Q402 Agent (by Quack AI) | `265057` | `0xde749fade0…` | mcp | live (181ms) | Ready now: endpoint answers and exposes 46 callable skill(s). Needs only a conformance run and a listing. | HIGH |
+| Q402 Agent (by Quack AI) | `283572` | `0xaccc6d61f0…` | mcp | live (33ms) | Ready now: endpoint answers and exposes 46 callable skill(s). Needs only a conformance run and a listing. | HIGH |
+| Q402 Agent (by Quack AI) | `268211` | `0x1388b5d70b…` | mcp | live (56ms) | Ready now: endpoint answers and exposes 46 callable skill(s). Needs only a conformance run and a listing. | HIGH |
+| Q402 Agent (by Quack AI) | `276454` | `0x27fba42113…` | mcp | live (23ms) | Ready now: endpoint answers and exposes 46 callable skill(s). Needs only a conformance run and a listing. | HIGH |
+| Q402 Agent (by Quack AI) | `265091` | `0xdc40f4c12c…` | mcp | live (21ms) | Ready now: endpoint answers and exposes 46 callable skill(s). Needs only a conformance run and a listing. | HIGH |
+| Q402 Agent (by Quack AI) | `268416` | `0x0ba67c585b…` | mcp | live (76ms) | Ready now: endpoint answers and exposes 46 callable skill(s). Needs only a conformance run and a listing. | HIGH |
+| Q402 Agent (by Quack AI) | `268413` | `0x37c63601a9…` | mcp | live (29ms) | Ready now: endpoint answers and exposes 46 callable skill(s). Needs only a conformance run and a listing. | HIGH |
+| Q402 Agent (by Quack AI) | `268399` | `0x5272ee25be…` | mcp | live (71ms) | Ready now: endpoint answers and exposes 46 callable skill(s). Needs only a conformance run and a listing. | HIGH |
