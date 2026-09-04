@@ -76,6 +76,23 @@ module.exports = {
       error_file: '/root/.pm2/logs/marque-classify-err.log',
     },
     {
+      // Reference agent. Speaks standard A2A on a public path so it is reached
+      // through the same SSRF guard as any third-party agent.
+      name: 'marque-keel',
+      cwd: ROOT,
+      script: 'node_modules/.bin/tsx',
+      args: 'agents/keel/src/server.ts',
+      interpreter: 'none',
+      env: { ...env, NODE_ENV: 'production' },
+      autorestart: true,
+      max_restarts: 50,
+      restart_delay: 3000,
+      max_memory_restart: '400M',
+      time: true,
+      out_file: '/root/.pm2/logs/marque-keel-out.log',
+      error_file: '/root/.pm2/logs/marque-keel-err.log',
+    },
+    {
       name: 'marque-web',
       cwd: `${ROOT}/apps/web`,
       script: '.next/standalone/apps/web/server.js',

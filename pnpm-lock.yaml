@@ -20,6 +20,9 @@ importers:
       '@marque/db':
         specifier: workspace:*
         version: link:packages/db
+      '@marque/execution':
+        specifier: workspace:*
+        version: link:packages/execution
       '@marque/positions':
         specifier: workspace:*
         version: link:packages/positions
@@ -59,6 +62,22 @@ importers:
       vitest:
         specifier: ^2.1.8
         version: 2.1.9(@types/node@22.20.1)
+
+  agents/keel:
+    dependencies:
+      '@marque/chain':
+        specifier: workspace:*
+        version: link:../../packages/chain
+      '@marque/positions':
+        specifier: workspace:*
+        version: link:../../packages/positions
+    devDependencies:
+      tsx:
+        specifier: ^4.19.2
+        version: 4.23.13
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
 
   apps/web:
     dependencies:
@@ -193,6 +212,43 @@ importers:
       typescript:
         specifier: ^5.7.2
         version: 5.9.3
+
+  packages/execution:
+    dependencies:
+      '@marque/chain':
+        specifier: workspace:*
+        version: link:../chain
+      '@marque/conformance':
+        specifier: workspace:*
+        version: link:../conformance
+      '@marque/db':
+        specifier: workspace:*
+        version: link:../db
+      '@marque/positions':
+        specifier: workspace:*
+        version: link:../positions
+      '@marque/probe':
+        specifier: workspace:*
+        version: link:../probe
+      '@marque/registry':
+        specifier: workspace:*
+        version: link:../registry
+      drizzle-orm:
+        specifier: ^0.38.2
+        version: 0.38.4(@types/react@19.2.18)(postgres@3.4.9)(react@19.2.8)
+      viem:
+        specifier: ^2.21.55
+        version: 2.56.3(typescript@5.9.3)(zod@3.25.76)
+      zod:
+        specifier: ^3.24.1
+        version: 3.25.76
+    devDependencies:
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
+      vitest:
+        specifier: ^2.1.8
+        version: 2.1.9(@types/node@22.20.1)
 
   packages/positions:
     dependencies:

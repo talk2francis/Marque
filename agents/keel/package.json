@@ -1,0 +1,15 @@
+{
+  "name": "@marque/agent-keel",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "tsx src/server.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@marque/positions": "workspace:*",
+    "@marque/chain": "workspace:*"
+  },
+  "devDependencies": { "typescript": "^5.7.2", "tsx": "^4.19.2" }
+}

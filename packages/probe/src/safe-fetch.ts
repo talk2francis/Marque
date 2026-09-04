@@ -116,13 +116,40 @@ export function isBlockedAddress(ip: string): boolean {
   if (lower.startsWith('fe80')) return true // link-local
   if (lower.startsWith('fc') || lower.startsWith('fd')) return true // unique local
   if (lower.startsWith('ff')) return true // multicast
-  // IPv4-mapped (::ffff:127.0.0.1) and IPv4-compatible: re-check the v4 part,
-  // otherwise loopback sneaks through in v6 clothing.
-  const mapped = lower.match(/^::(?:ffff:)?(\d+\.\d+\.\d+\.\d+)$/)
-  if (mapped?.[1]) return isBlockedAddress(mapped[1])
+
+  /*
+   * IPv4-mapped IPv6, in BOTH notations.
+   *
+   * `::ffff:169.254.169.254` and `::ffff:a9fe:a9fe` are the same address, and
+   * Node's URL parser rewrites the first into the second. Checking only the
+   * dotted form let `http://[::ffff:169.254.169.254]/` through to a real
+   * socket — the cloud metadata endpoint, reached through the guard. Found by
+   * the redirect test suite, not by reading the code.
+   */
+  const mappedV4 = mappedIpv4(lower)
+  if (mappedV4) return isBlockedAddress(mappedV4)
+
   if (lower.startsWith('2002:')) return true // 6to4, can encode private v4
   if (lower.startsWith('64:ff9b:')) return true // NAT64, can encode private v4
   return false
+}
+
+/** The embedded IPv4 address of an IPv4-mapped IPv6, in either notation. */
+function mappedIpv4(lower: string): string | null {
+  // Dotted form: ::ffff:169.254.169.254 or ::169.254.169.254
+  const dotted = lower.match(/^::(?:ffff:)?(\d+\.\d+\.\d+\.\d+)$/)
+  if (dotted?.[1]) return dotted[1]
+
+  // Hex form: ::ffff:a9fe:a9fe — two 16-bit groups holding the four octets.
+  const hex = lower.match(/^::(?:ffff:)?([0-9a-f]{1,4}):([0-9a-f]{1,4})$/)
+  if (hex?.[1] && hex[2]) {
+    const hi = parseInt(hex[1], 16)
+    const lo = parseInt(hex[2], 16)
+    if (Number.isFinite(hi) && Number.isFinite(lo)) {
+      return `${(hi >> 8) & 0xff}.${hi & 0xff}.${(lo >> 8) & 0xff}.${lo & 0xff}`
+    }
+  }
+  return null
 }
 
 export interface UrlCheck {

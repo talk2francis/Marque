@@ -169,3 +169,26 @@ describe('safeFetch', () => {
     if (!r.ok) expect(['blocked_ssrf', 'timeout']).toContain(r.failure)
   }, 10_000)
 })
+
+describe('IPv4-mapped IPv6 in hex notation', () => {
+  it('blocks the metadata address written as ::ffff:a9fe:a9fe', () => {
+    // Node's URL parser rewrites [::ffff:169.254.169.254] into this form, and
+    // the first version of the guard only matched the dotted notation — so the
+    // cloud metadata endpoint was reachable THROUGH the guard. Found by a test,
+    // not by reading the code.
+    expect(isBlockedAddress('::ffff:a9fe:a9fe')).toBe(true)
+    expect(isBlockedAddress('::ffff:7f00:1')).toBe(true)   // 127.0.0.1
+    expect(isBlockedAddress('::ffff:a00:1')).toBe(true)    // 10.0.0.1
+    expect(isBlockedAddress('::ffff:c0a8:1')).toBe(true)   // 192.168.0.1
+  })
+
+  it('still allows a public address in the same notation', () => {
+    expect(isBlockedAddress('::ffff:808:808')).toBe(false) // 8.8.8.8
+  })
+
+  it('blocks it end to end through safeFetch', async () => {
+    const r = await safeFetch('http://[::ffff:169.254.169.254]/latest/meta-data/', { timeoutMs: 3_000 })
+    expect(r.ok).toBe(false)
+    if (!r.ok) expect(r.failure).toBe('blocked_ssrf')
+  }, 10_000)
+})

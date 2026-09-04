@@ -444,3 +444,93 @@ product, it is written down here.
   in place because the content genuinely exists in the repo.
 - **Cost** — One link on `/` currently 404s.
 - **Restore** — Render the generated Markdown at `/standard`. Small.
+
+---
+
+## P5 — Execution
+
+### D5-01 · No TermixExecutor, exactly as instructed — and it was not needed
+
+- **Planned** — The phase brief explicitly says do NOT build one, and that
+  A2AExecutor must handle TermiX agents via a generic template resolver.
+- **Shipped** — Exactly that. `executorFor()` maps `termix` to `A2AExecutor`,
+  and the `{agentId}` resolver lives in `packages/registry` (built in P0).
+- **Cost** — None.
+- **Restore** — n/a.
+
+### D5-02 · A2A endpoint resolution refuses to guess
+
+- **Planned** — "agent card resolution, JSON-RPC task send, artifact retrieval".
+- **Shipped** — Card resolution reads the `url` field. Where a card names no
+  callable endpoint, the executor returns `no_compatible_interface` rather than
+  falling back to the service origin.
+- **Why** — The first version fell back to the origin. TermiX cards name no
+  `url` at all, so it POSTed JSON-RPC at a page that is not an A2A endpoint, and
+  the resulting garbage failed all five MCS fields — attributing our own
+  mis-addressing to twenty real projects. This is the third instance of the same
+  class in this build (P3: POSTing at the card; P3: silence read as a decline).
+  The rule now applied everywhere: **never guess on behalf of a counterparty,
+  because the guess gets published as their failure.**
+- **Cost** — Agents whose card omits `url` are reported untestable rather than
+  tested. That is the true statement.
+- **Restore** — Do not.
+
+### D5-03 · A hire is graded only when it asks the published case's question
+
+- **Planned** — "validate the result against the relevant MCS test".
+- **Shipped** — The result is graded against the live MCS case **only when the
+  hire's policy matches the case's policy**. Otherwise the receipt's quality
+  proof is null, meaning "not graded against the published standard".
+- **Why** — Caught in the acceptance run. A hire asking for health factor 1.6
+  was graded against a case that fixes 2.5. It **passed** — because the
+  reference agent's target parser had silently defaulted to 2.5 and returned the
+  case's answer. The grade certified the bug. A published case fixes a subject,
+  a block AND a policy; grading a different question against it is meaningless
+  in both directions.
+- **Cost** — Hires with bespoke policies carry no warrant. Correct: they were
+  not tested against anything published.
+- **Restore** — Do not.
+
+### D5-04 · Reference agent Keel is served publicly, not on loopback
+
+- **Planned** — Implied by "three end-to-end runs against our own reference
+  agent".
+- **Shipped** — Keel runs on 127.0.0.1:8610 and is exposed at
+  `https://marque.trade/agents/keel/`, reached through the same `safeFetch`
+  guard as any third party.
+- **Why** — `safeFetch` blocks loopback, which is correct, so our own agent was
+  unreachable from our own pipeline. The fix is to serve it properly rather than
+  to carve an exception into the SSRF guard for first-party endpoints — that
+  exception is exactly how such guards rot.
+- **Cost** — One Caddy path.
+- **Restore** — n/a.
+
+### D5-05 · ERC-8183 write paths are described, not executed
+
+- **Planned** — "job create, fund, provider fulfil, buyer settle".
+- **Shipped** — The settlement asset is resolved from the deployed kernel at
+  runtime (`token_symbol` / `token_decimals` / `token_balance`), exactly as
+  gotcha 13 requires. Every WRITE path returns `blocked` with the job it *would*
+  create, including the resolved asset and the buyer's balance.
+- **Why** — Two reasons. Creating and funding a job is an on-chain state change,
+  which on mainnet is escalation gate 1; and no ERC-8183 kernel address has been
+  supplied for BSC testnet yet, so there is nothing to write to. Settlement is
+  additionally never automated: releasing money to a provider is the buyer's
+  decision, and the code says so rather than implying it.
+- **Cost** — P5 acceptance (b) has no ERC-8183 counterparty. No kernel was found
+  among indexed BSC agents either, so this is an absence of supply as much as an
+  absence of implementation.
+- **Restore** — Supply a testnet kernel address and set `allowWrites` with a
+  funded signer.
+
+### D5-06 · MarqueRegistry is written and tested but not yet deployed
+
+- **Planned** — "Deploy to BSC TESTNET only in this phase. Address pasted, tests
+  green."
+- **Shipped** — Contract complete, **14 Foundry tests green including fuzzing**.
+  Not deployed: the fresh testnet wallet holds 0 tBNB and the BNB faucet
+  requires a captcha, which cannot be completed from here.
+- **Cost** — Acceptance (e) is outstanding until the wallet is funded. Deploy is
+  one command once it is.
+- **Restore** — Fund `0xd09b8d9e266B87759e505287Ef07633ecae55Ed3` with testnet
+  tBNB, then `forge create`.
