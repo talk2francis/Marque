@@ -222,3 +222,22 @@ Node 22 · TypeScript strict · pnpm workspaces · Next.js 15 App Router (`outpu
 - Reduce scope freely under AMBER; record it in `DEVIATIONS.md`.
 - If you claim something is done, paste the evidence. Claims without evidence have burned this project before.
 - If you are about to reframe a requirement so it becomes easier, stop and flag it instead of doing it quietly.
+
+Standing rules for every phase
+
+Append this to any prompt where an agent has been drifting:
+
+REMINDERS:
+- No fabricated, hardcoded or estimated numbers anywhere in the shipped path. Empty states instead.
+- Every metric needs a provenance chip. CLAIMED is styled weaker than the rest.
+- All four categories stay equally deep. Do not implement one well and stub three.
+- safeFetch() with the SSRF guard on every outbound call to an agent endpoint.
+- The LLM never signs and never prices.
+- Mainnet requires my written "approved, mainnet". Testnet is free.
+- If you claim it's done, paste the evidence.
+- If you are about to reframe a requirement to make it easier, stop and flag it instead.
+- You are AMBER-authorised: reduce scope to protect the phase outcome and log it in
+  docs/DEVIATIONS.md rather than stalling or asking.
+- MCS checks facts and supplied-policy compliance only. Judgement goes in the Ledger.
+- Never delete a first-party observation (probe history, conformance results, run artifacts,
+  Ledger manifests). They cannot be recreated.
