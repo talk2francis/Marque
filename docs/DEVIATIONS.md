@@ -365,3 +365,82 @@ product, it is written down here.
 - **Cost** — An MCP agent that could answer via an unusually-named tool is
   recorded as untestable rather than tested.
 - **Restore** — Widen the tool-matching heuristic in `mcpAdapter`.
+
+---
+
+## P4 — Frontend, daylight surfaces
+
+### D4-01 · `/mnt/skills/public/frontend-design/SKILL.md` does not exist here
+
+- **Planned** — "read /mnt/skills/public/frontend-design/SKILL.md and follow it".
+- **Shipped** — `/mnt` does not exist on this VPS and no skill by that name is
+  installed. AGENTS.md §8 (Design & front-end) was used as the brief instead,
+  which is considerably more specific to this product than a generic skill would
+  be: it names the tokens, the type scale, the signature device, the motion
+  budget and an explicit list of forbidden templated tells.
+- **Cost** — Any guidance in that skill not already covered by AGENTS.md §8 is
+  missing. Worth a second pass if the file can be supplied.
+- **Restore** — Provide the file and re-read it.
+
+### D4-02 · Signal colours carry a per-surface text variant
+
+- **Planned** — The token block in AGENTS.md gives one value per signal.
+- **Shipped** — Each signal has a `-mark` value (exactly as specified, used for
+  measure markers, rules and borders) and a text value that changes between
+  daylight and cockpit.
+- **Why** — Measured by the audit script: `--watch` at `#B8721A` gives 3.27:1 on
+  `--paper`, and `--chain` at `#2B5A85` gives 2.56:1 on `--deck`. Both fail WCAG
+  AA and are genuinely hard to read at 11.5px. One value cannot serve both
+  surfaces, and adapting per surface is exactly what the ground/ink/rule tokens
+  already do.
+- **Cost** — Two extra token names per signal.
+- **Restore** — Do not; this fixes a real legibility failure.
+
+### D4-03 · `/_ui` is a `%5Fui` folder
+
+- **Planned** — "Storybook-style page at /_ui".
+- **Shipped** — The route serves at `/_ui` exactly as specified, but the folder
+  is named `%5Fui`.
+- **Why** — Next.js App Router treats an underscore-prefixed folder as a private
+  folder and excludes it from routing, so `app/_ui/page.tsx` returned 404. The
+  URL-encoded folder name is Next's own documented escape hatch.
+- **Cost** — A slightly odd folder name.
+- **Restore** — n/a.
+
+### D4-04 · Category counts are distinct suppliers, not registrations
+
+- **Planned** — "the four categories as PROBLEMS with live qualified-agent
+  counts".
+- **Shipped** — The count is **distinct callable suppliers**, by endpoint host.
+  The registration count is returned alongside and the page says which it shows.
+- **Why** — The first version reported "42 callable" for Rebalancing. There were
+  **7**. One operator registers the same endpoint under dozens of ERC-8004
+  identities, so a registration count quotes our own inventory at roughly six
+  times its real size. This is the same inflation the supply report already
+  guards against, and it had leaked into the headline number on the homepage.
+- **Cost** — The headline numbers are smaller, and true.
+- **Restore** — Do not.
+
+### D4-05 · Sections with no data ship empty states, not mock data
+
+- **Planned** — "a real live charter card (placeholder state until P6)",
+  "two real Ledger rows (empty state until P8)".
+- **Shipped** — Empty states that name what is missing, why, and which phase
+  brings it. No mock charter, no illustrative Ledger row, no fake receipts, and
+  the Tape does not render at all rather than showing invented activity.
+- **Why** — Invariant 4, and the specific risk that a screenshot of a mock
+  charter ends up in a submission. An honest empty state is also a better
+  argument than a fake row: it says the product does not invent things.
+- **Cost** — The page has more empty space until P6 and P8 land.
+- **Restore** — n/a.
+
+### D4-06 · `/standard` is not yet a route
+
+- **Planned** — Implied by the audit route list and linked from `/`.
+- **Shipped** — The standard is generated and committed at
+  `docs/standard/MCS-v1.0.md` (P3), and `/standard` is linked but not yet built
+  as a page.
+- **Why** — P4's brief is 4a–4d and ends at the agent profile. The link is left
+  in place because the content genuinely exists in the repo.
+- **Cost** — One link on `/` currently 404s.
+- **Restore** — Render the generated Markdown at `/standard`. Small.

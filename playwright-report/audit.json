@@ -1,6 +1,6 @@
 {
   "base": "https://marque.trade",
-  "ranAt": "2026-09-04T07:06:31.112Z",
+  "ranAt": "2026-09-04T07:18:22.638Z",
   "results": [
     {
       "route": "/",
@@ -144,6 +144,486 @@
     },
     {
       "route": "/_ui",
+      "viewport": "390",
+      "status": 200,
+      "issues": [],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(132, 102, 33) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/register",
+      "viewport": "1440",
+      "status": 200,
+      "issues": [],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(132, 102, 33) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/register",
+      "viewport": "1024",
+      "status": 200,
+      "issues": [],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(132, 102, 33) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/register",
+      "viewport": "768",
+      "status": 200,
+      "issues": [],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(132, 102, 33) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/register",
+      "viewport": "390",
+      "status": 200,
+      "issues": [],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(132, 102, 33) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/register/rebalancing",
+      "viewport": "1440",
+      "status": 200,
+      "issues": [],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(132, 102, 33) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/register/rebalancing",
+      "viewport": "1024",
+      "status": 200,
+      "issues": [],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(132, 102, 33) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/register/rebalancing",
+      "viewport": "768",
+      "status": 200,
+      "issues": [],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(132, 102, 33) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/register/rebalancing",
+      "viewport": "390",
+      "status": 200,
+      "issues": [],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(132, 102, 33) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/register/grid",
+      "viewport": "1440",
+      "status": 200,
+      "issues": [],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(132, 102, 33) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/register/grid",
+      "viewport": "1024",
+      "status": 200,
+      "issues": [],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(132, 102, 33) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/register/grid",
+      "viewport": "768",
+      "status": 200,
+      "issues": [],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(132, 102, 33) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/register/grid",
+      "viewport": "390",
+      "status": 200,
+      "issues": [],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(132, 102, 33) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/register/yield",
+      "viewport": "1440",
+      "status": 200,
+      "issues": [],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(132, 102, 33) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/register/yield",
+      "viewport": "1024",
+      "status": 200,
+      "issues": [],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(132, 102, 33) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/register/yield",
+      "viewport": "768",
+      "status": 200,
+      "issues": [],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(132, 102, 33) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/register/yield",
+      "viewport": "390",
+      "status": 200,
+      "issues": [],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(132, 102, 33) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/register/health-factor",
+      "viewport": "1440",
+      "status": 200,
+      "issues": [],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(132, 102, 33) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/register/health-factor",
+      "viewport": "1024",
+      "status": 200,
+      "issues": [],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(132, 102, 33) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/register/health-factor",
+      "viewport": "768",
+      "status": 200,
+      "issues": [],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(132, 102, 33) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/register/health-factor",
+      "viewport": "390",
+      "status": 200,
+      "issues": [],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(132, 102, 33) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/agents/56/113284",
+      "viewport": "1440",
+      "status": 200,
+      "issues": [],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(132, 102, 33) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/agents/56/113284",
+      "viewport": "1024",
+      "status": 200,
+      "issues": [],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(132, 102, 33) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/agents/56/113284",
+      "viewport": "768",
+      "status": 200,
+      "issues": [],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(132, 102, 33) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/agents/56/113284",
       "viewport": "390",
       "status": 200,
       "issues": [],
