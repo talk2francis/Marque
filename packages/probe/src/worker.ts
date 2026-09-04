@@ -62,6 +62,46 @@ async function mapLimit<T, R>(items: readonly T[], limit: number, fn: (t: T) => 
   return out
 }
 
+/**
+ * Per-host concurrency cap.
+ *
+ * Most BSC agents share a handful of hosts — one platform serves hundreds of
+ * registrations — so a global concurrency of 20 lands as 20 simultaneous
+ * requests on a single third party. That is both rude and self-defeating: it
+ * gets us throttled, and a throttled endpoint is indistinguishable from a dead
+ * one in our own results. Politeness here is measurement accuracy.
+ */
+const PER_HOST_CONCURRENCY = Number(process.env.PROBE_PER_HOST_CONCURRENCY ?? 3)
+
+class HostLimiter {
+  private readonly active = new Map<string, number>()
+  private readonly queues = new Map<string, Array<() => void>>()
+
+  private hostOf(url: string): string {
+    try { return new URL(url).host } catch { return url }
+  }
+
+  async run<T>(url: string, fn: () => Promise<T>): Promise<T> {
+    const host = this.hostOf(url)
+    while ((this.active.get(host) ?? 0) >= PER_HOST_CONCURRENCY) {
+      await new Promise<void>((resolve) => {
+        const q = this.queues.get(host)
+        if (q) q.push(resolve)
+        else this.queues.set(host, [resolve])
+      })
+    }
+    this.active.set(host, (this.active.get(host) ?? 0) + 1)
+    try {
+      return await fn()
+    } finally {
+      this.active.set(host, Math.max(0, (this.active.get(host) ?? 1) - 1))
+      const q = this.queues.get(host)
+      const next = q?.shift()
+      if (next) next()
+    }
+  }
+}
+
 interface Candidate {
   serviceId: number
   agentId: string
@@ -131,8 +171,9 @@ export async function runProbeCycle(opts: { limit?: number; concurrency?: number
   }
   if (candidates.length === 0) return result
 
+  const limiter = new HostLimiter()
   const rows = await mapLimit(candidates, concurrency, async (c) => {
-    const outcome = await probeService(c.kind, c.url)
+    const outcome = await limiter.run(c.url, () => probeService(c.kind, c.url))
     switch (outcome.liveness) {
       case 'live': result.live++; break
       case 'unbound': result.unbound++; break

@@ -56,7 +56,7 @@ async function censusCoverage(): Promise<{ enriched: number; candidates: number;
 async function main(): Promise<void> {
   const takenAt = new Date().toISOString()
   const [stages, categories, failures, prospects, coverage] = await Promise.all([
-    funnel(56), categoryFunnel(56), failureHistogram(), buildProspects({ limit: 500 }), censusCoverage(),
+    funnel(56), categoryFunnel(56), failureHistogram(), buildProspects({ limit: 3000 }), censusCoverage(),
   ])
   const owners = rollupByOwner(prospects)
 
@@ -147,13 +147,19 @@ async function main(): Promise<void> {
   lines.push('Ranked by what one conversation could unlock: live supply first, then')
   lines.push('portfolio size, because an owner who binds one runtime can activate many agents.')
   lines.push('')
-  lines.push('| # | Owner | Agents | Live | Unbound | Categories | Contact | Priority |')
-  lines.push('|---:|---|---:|---:|---:|---|---|---|')
-  owners.slice(0, 25).forEach((o, i) => {
+  lines.push('Owners whose every endpoint is already covered by someone ranked above them')
+  lines.push('are marked `dup` — they are the same supplier reached through another identity.')
+  lines.push('')
+  lines.push('| # | Owner | Agent | Agents | Live | Unbound | Categories | Host | Contact | Why contact them | Priority |')
+  lines.push('|---:|---|---|---:|---:|---:|---|---|---|---|---|')
+  const ranked = owners.filter((o) => !o.duplicateSupplier)
+  ranked.slice(0, 20).forEach((o, i) => {
     const contact = [o.contacts.x, o.contacts.github, o.contacts.website, o.contacts.email]
       .filter(Boolean).slice(0, 2).join(' · ') || '—'
-    lines.push(`| ${i + 1} | \`${o.ownerAddress}\` | ${o.agentCount} | ${o.liveCount} | ${o.unboundCount} | ${o.categories.join(', ') || '—'} | ${esc(contact)} | ${o.priority} |`)
+    lines.push(`| ${i + 1} | \`${o.ownerAddress}\` | ${esc(o.topAgentName)} | ${o.agentCount} | ${o.liveCount} | ${o.unboundCount} | ${o.categories.join(', ') || '—'} | ${esc(o.hosts.slice(0, 1).join(''))} | ${esc(contact)} | ${esc(o.whyContact)} | ${o.priority} |`)
   })
+  lines.push('')
+  lines.push(`Suppressed as duplicate suppliers: ${owners.length - ranked.length} owner(s) pointing at hosts already listed above.`)
   lines.push('')
 
   lines.push('## Prospect records')

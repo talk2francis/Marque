@@ -140,11 +140,13 @@ describe('safeFetch', () => {
     expect(r.latencyMs).toBeLessThan(1000)
   })
 
-  it('fetches a real public endpoint and caps the body', async () => {
-    const r = await safeFetch(
-      'https://platform-backend.prod.termix.live/api/v1/a2a/agents/318810/card',
-      { timeoutMs: 15_000 },
-    )
+  // These two hit a real network endpoint, so they target our own host rather
+  // than a third party's: a suite that fails when someone else rate-limits us
+  // reports our code as broken when it is not.
+  const OWN_ENDPOINT = 'https://marque.trade/api/health'
+
+  it('fetches a real public endpoint', async () => {
+    const r = await safeFetch(OWN_ENDPOINT, { timeoutMs: 15_000 })
     expect(r.ok).toBe(true)
     if (r.ok) {
       expect(r.status).toBe(200)
@@ -154,10 +156,7 @@ describe('safeFetch', () => {
   }, 30_000)
 
   it('enforces the byte cap', async () => {
-    const r = await safeFetch(
-      'https://platform-backend.prod.termix.live/api/v1/a2a/agents/318810/card',
-      { maxBytes: 10, timeoutMs: 15_000 },
-    )
+    const r = await safeFetch(OWN_ENDPOINT, { maxBytes: 10, timeoutMs: 15_000 })
     expect(r.ok).toBe(false)
     if (!r.ok) expect(r.failure).toBe('too_large')
   }, 30_000)

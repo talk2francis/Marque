@@ -58,7 +58,9 @@ export function extractContacts(rawMetadata: unknown): Prospect['contacts'] {
     if (depth > 6 || node === null || node === undefined) return
     if (typeof node === 'string') {
       const s = node.trim()
-      if (/^https?:\/\//i.test(s)) {
+      // Spec links and machine metadata endpoints are not ways to reach a human.
+      const NOISE = /eips\.ethereum\.org|schema\.org|w3\.org|\/agent-metadata\/|\.well-known\/|amazonaws\.com|ipfs\.io|arweave/i
+      if (/^https?:\/\//i.test(s) && !NOISE.test(s)) {
         if (/twitter\.com|(^|\/\/)x\.com/i.test(s)) out.x ??= s
         else if (/github\.com/i.test(s)) out.github ??= s
         else if (/docs?\./i.test(s) || /\/docs/i.test(s)) out.docs ??= s
@@ -236,12 +238,25 @@ export interface OwnerRollup {
   liveCount: number
   unboundCount: number
   categories: string[]
+  /** Distinct hosts this owner's agents point at. */
+  hosts: string[]
   contacts: Prospect['contacts']
   topAgentName: string | null
+  /** True when this owner covers a category we have no supply for. */
+  coversRequiredCategory: boolean
+  /**
+   * True when every host this owner uses is already served by a higher-ranked
+   * owner. Hundreds of BSC identities point at one shared endpoint, so without
+   * this the list is 400 rows for a single supplier.
+   */
+  duplicateSupplier: boolean
   priority: Priority
+  whyContact: string
 }
 
 export function rollupByOwner(prospects: readonly Prospect[]): OwnerRollup[] {
+  const REQUIRED = new Set(['rebalancing', 'grid', 'yield', 'health_factor'])
+
   const byOwner = new Map<string, Prospect[]>()
   for (const p of prospects) {
     if (!p.ownerAddress) continue
@@ -251,35 +266,56 @@ export function rollupByOwner(prospects: readonly Prospect[]): OwnerRollup[] {
     else byOwner.set(key, [p])
   }
 
-  const out: OwnerRollup[] = []
+  const hostOf = (url: string): string => {
+    try { return new URL(url).host } catch { return url }
+  }
+
+  const rows: OwnerRollup[] = []
   for (const [ownerAddress, list] of byOwner) {
     const live = list.filter((p) => p.liveness === 'live').length
     const unbound = list.filter((p) => p.liveness === 'unbound').length
     const categories = [...new Set(list.map((p) => p.category).filter((c) => c !== 'unclassified'))]
+    const hosts = [...new Set(list.flatMap((p) => p.endpoints.map((e) => hostOf(e.url))))]
     const contacts: Prospect['contacts'] = {}
     for (const p of list) Object.assign(contacts, p.contacts, contacts)
-    const priority: Priority =
-      live > 0 ? 'HIGH'
-      : list.some((p) => p.priority === 'HIGH') ? 'HIGH'
-      : list.some((p) => p.priority === 'MEDIUM') ? 'MEDIUM'
-      : 'LOW'
+    const coversRequiredCategory = categories.some((c) => REQUIRED.has(c))
 
-    out.push({
-      ownerAddress,
-      agentCount: list.length,
-      liveCount: live,
-      unboundCount: unbound,
-      categories,
-      contacts,
-      topAgentName: list[0]?.name ?? null,
-      priority,
+    const why = coversRequiredCategory && live > 0
+      ? `Live supply in ${categories.filter((c) => REQUIRED.has(c)).join(', ')} — a required category. Highest-value contact on the list.`
+      : coversRequiredCategory
+        ? `Has ${list.length} agent(s) in ${categories.filter((c) => REQUIRED.has(c)).join(', ')} that are registered but not bound. One deploy unlocks a category we have no supply for.`
+        : live > 0
+          ? 'Running live, callable supply. Worth listing even outside the four required categories.'
+          : `${list.length} registered agent(s), none bound yet.`
+
+    rows.push({
+      ownerAddress, agentCount: list.length, liveCount: live, unboundCount: unbound,
+      categories, hosts, contacts, topAgentName: list[0]?.name ?? null,
+      coversRequiredCategory,
+      duplicateSupplier: false,
+      priority: coversRequiredCategory ? 'HIGH' : live > 0 ? 'HIGH' : list.some((p) => p.priority === 'HIGH') ? 'MEDIUM' : 'LOW',
+      whyContact: why,
     })
   }
 
-  const rank: Record<Priority, number> = { HIGH: 0, MEDIUM: 1, LOW: 2 }
-  return out.sort((a, b) =>
-    rank[a.priority] - rank[b.priority] ||
-    b.liveCount - a.liveCount ||
+  // Rank by what a single conversation could actually unlock.
+  rows.sort((a, b) =>
+    Number(b.coversRequiredCategory) - Number(a.coversRequiredCategory) ||
+    Number(b.liveCount > 0) - Number(a.liveCount > 0) ||
+    b.categories.length - a.categories.length ||
     b.agentCount - a.agentCount,
   )
+
+  // Mark owners whose every host is already covered by someone ranked above
+  // them. They are the same supplier reached through a different identity.
+  const seenHosts = new Set<string>()
+  for (const r of rows) {
+    if (r.hosts.length > 0 && r.hosts.every((h) => seenHosts.has(h))) {
+      r.duplicateSupplier = true
+      if (!r.coversRequiredCategory) r.priority = 'LOW'
+    }
+    for (const h of r.hosts) seenHosts.add(h)
+  }
+
+  return rows
 }
