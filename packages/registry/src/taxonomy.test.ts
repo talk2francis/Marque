@@ -154,3 +154,28 @@ describe('strong-term requirement', () => {
     expect(r.category).toBe('health_factor')
   })
 })
+
+describe('recall audit against live BSC agents', () => {
+  it('classifies a grid planner that never says "grid trading"', () => {
+    // The only live Grid agent on BSC as of 4 Sep 2026. It was missed because
+    // every strong term assumed the phrase "grid trading" or "grid bot".
+    const r = classifyByKeyword({
+      name: 'marketplace-operated-grid-planner',
+      description: 'Marketplace-operated deterministic Grid planning seller. No trading, custody or financial execution.',
+      skills: ['Negotiate a deterministic Grid plan', 'Compute and submit a funded Grid plan'],
+    })
+    expect(r.category).toBe('grid')
+  })
+
+  it('still leaves a generic trading agent unclassified', () => {
+    // These sit alongside it in the live set and must NOT be padded into a
+    // category just because supply is thin.
+    for (const input of [
+      { name: 'OnlyUp', description: 'Lets grow bag', skills: ['On-chain trading', 'Live market data', 'Portfolio'] },
+      { name: 'Rook Trading Intelligence', description: 'Live crypto trading intelligence for AI agents — real-time BTC signals, CVD, order flow.' },
+      { name: 'SolarVoyager', description: 'Autonomous trading agent (simple-mode). AI agent for autonomous DeFi trading on BNB Chain.' },
+    ]) {
+      expect(classifyByKeyword(input).category, input.name).toBe('unclassified')
+    }
+  })
+})

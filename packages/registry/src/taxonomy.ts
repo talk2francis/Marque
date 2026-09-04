@@ -64,6 +64,10 @@ export const TAXONOMY: Readonly<Record<Exclude<Category, 'unclassified'>, Catego
       ['grid trading', 6], ['grid bot', 6], ['grid strategy', 6], ['grid level', 5],
       ['dca bot', 4], ['martingale', 4], ['spot grid', 6], ['futures grid', 5],
       ['buy low sell high', 3], ['ladder order', 4],
+      // Added from a recall audit of live agents: the only live Grid agent on
+      // BSC describes itself as a "Grid planning seller" that computes a "Grid
+      // plan", and matched none of the terms above.
+      ['grid plan', 6], ['grid planner', 6], ['grid planning', 6],
     ],
     weak: [
       ['grid', 2], ['bot', 1], ['spot trading', 2], ['limit order', 2],
