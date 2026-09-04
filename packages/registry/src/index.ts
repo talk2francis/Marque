@@ -1,4 +1,4 @@
-export { ScanClient, ScanRateLimitError, type ScanAgentListItem, type ScanAgentDetail, type RateLimitState } from './scan-client.js'
+export { ScanClient, ScanRateLimitError, ScanTransientError, type ScanAgentListItem, type ScanAgentDetail, type RateLimitState } from './scan-client.js'
 export { extractServices, extractTags, parseCodes, normalizeKind, isTemplate, resolveTemplate, templateVars } from './normalize.js'
 export { mapLimit } from './concurrency.js'
 export { TAXONOMY, MIN_SCORE, MIN_CONFIDENCE, REQUIRED_CATEGORIES, classifyByKeyword, type ClassificationInput, type ClassificationResult, type CategoryRules } from './taxonomy.js'

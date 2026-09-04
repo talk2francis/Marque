@@ -55,6 +55,7 @@ async function tick(client: ScanClient, state: { lastFunnelAt: number }): Promis
       attempted: enrich.attempted,
       ok: enrich.succeeded,
       failed: enrich.failed,
+      transient: enrich.transient,
       services: enrich.servicesWritten,
       withService: enrich.withAtLeastOneService,
     })

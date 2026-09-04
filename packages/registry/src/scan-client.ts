@@ -151,6 +151,19 @@ export interface RateLimitState {
   limitDay: number | null
 }
 
+/**
+ * The upstream is temporarily unavailable.
+ *
+ * Distinct from "not found" because the caller MUST NOT mark the agent as
+ * fetched: doing so during an outage permanently discards it from the index.
+ */
+export class ScanTransientError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'ScanTransientError'
+  }
+}
+
 export class ScanRateLimitError extends Error {
   constructor(public readonly retryAfterMs: number) {
     super(`8004scan rate limited; retry in ${retryAfterMs}ms`)
@@ -192,13 +205,48 @@ export class ScanClient {
     this.rateLimit.limitDay = num('x-ratelimit-limit-day')
   }
 
-  /** Back off before we get thrown a 429, not after. */
+  /**
+   * Client-side rate limiting.
+   *
+   * Reacting to the response headers alone does not work: several concurrent
+   * requests read the same `remaining` value before any of them lands, so the
+   * budget is overspent and the API answers 429. Pacing locally prevents the
+   * 429 instead of recovering from it.
+   *
+   * Paced under the real ceiling so a second consumer sharing the same key
+   * (the probe worker, a one-off script) does not push us over.
+   */
+  private readonly targetPerMinute = Number(process.env.SCAN_TARGET_RPM ?? 420)
+  private windowStart = Date.now()
+  private windowCount = 0
+  /** Serialises the pacing decision so concurrent callers cannot race past it. */
+  private gate: Promise<void> = Promise.resolve()
+
   private async respectBudget(): Promise<void> {
-    const { remainingMinute } = this.rateLimit
-    if (remainingMinute !== null && remainingMinute <= 5) {
-      // Their minute window is not exposed, so wait out a full one.
-      await sleep(3_000)
-    }
+    const wait = this.gate.then(async () => {
+      const now = Date.now()
+      if (now - this.windowStart >= 60_000) {
+        this.windowStart = now
+        this.windowCount = 0
+      }
+      if (this.windowCount >= this.targetPerMinute) {
+        const until = this.windowStart + 60_000 - now
+        if (until > 0) await sleep(until)
+        this.windowStart = Date.now()
+        this.windowCount = 0
+      }
+      this.windowCount++
+
+      // Belt and braces: if the server says we are nearly out, stop regardless.
+      const { remainingMinute } = this.rateLimit
+      if (remainingMinute !== null && remainingMinute <= 3) {
+        await sleep(5_000)
+        this.windowStart = Date.now()
+        this.windowCount = 0
+      }
+    })
+    this.gate = wait.catch(() => {})
+    await wait
   }
 
   private async get(path: string, params: Record<string, string | number | boolean> = {}): Promise<unknown> {
@@ -213,13 +261,22 @@ export class ScanClient {
         this.absorbRateLimit(res)
 
         if (res.status === 429) {
+          // Our local window is out of step with the server's; reset it so we
+          // resume from a known-good baseline rather than drifting further.
+          this.windowStart = Date.now()
+          this.windowCount = this.targetPerMinute
           const retryAfter = Number(res.headers.get('retry-after') ?? '0')
-          const waitMs = retryAfter > 0 ? retryAfter * 1000 : 2_000 * 2 ** attempt
+          const waitMs = retryAfter > 0 ? retryAfter * 1000 : Math.min(60_000, 5_000 * 2 ** attempt)
           await sleep(waitMs)
           continue
         }
         if (res.status >= 500) {
-          await sleep(1_000 * 2 ** attempt)
+          // Their backend flakes. Retry briefly, but do not spend 30s per agent
+          // during an outage — the caller re-queues transient failures.
+          if (attempt >= 1) {
+            throw new ScanTransientError(`8004scan ${res.status} on ${path}`)
+          }
+          await sleep(500)
           continue
         }
         if (!res.ok) throw new Error(`8004scan ${res.status} on ${path}: ${(await res.text()).slice(0, 200)}`)
@@ -275,29 +332,49 @@ export class ScanClient {
   /** Counts of why detail fetches failed. Surfaced by the worker, never swallowed. */
   readonly detailFailures = { http: 0, parse: 0, wrongChain: 0 }
 
-  async getAgent(chainId: number, tokenId: string): Promise<ScanAgentDetail | null> {
+  /**
+   * One agent's detail record.
+   *
+   * Returns a discriminated result rather than `null`, because the caller has to
+   * treat "this agent does not exist" and "8004scan is down" completely
+   * differently. Collapsing them marks agents permanently fetched during an
+   * outage and silently shrinks the index.
+   */
+  async getAgentResult(chainId: number, tokenId: string): Promise<
+    { status: 'ok'; detail: ScanAgentDetail } | { status: 'not_found' } | { status: 'transient'; reason: string }
+  > {
     let raw: unknown
     try {
       raw = await this.get(`/agents/${chainId}/${tokenId}`)
     } catch (err) {
       this.detailFailures.http++
-      console.warn(`[scan] detail ${chainId}/${tokenId} http failed: ${err instanceof Error ? err.message : String(err)}`)
-      return null
+      const reason = err instanceof Error ? err.message : String(err)
+      // Anything that is not a definitive 404 is treated as transient.
+      if (err instanceof ScanTransientError || !/\b404\b/.test(reason)) {
+        return { status: 'transient', reason }
+      }
+      return { status: 'not_found' }
     }
 
     const parsed = scanAgentDetail.safeParse(raw)
     if (!parsed.success) {
-      // A schema surprise must be loud. Silently returning null here once cost
-      // us most of the reachable supply on this chain.
       this.detailFailures.parse++
       const issues = parsed.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; ')
       console.warn(`[scan] detail ${chainId}/${tokenId} failed schema: ${issues}`)
-      return null
+      return { status: 'not_found' }
     }
     if (parsed.data.chain_id !== chainId) {
       this.detailFailures.wrongChain++
-      return null
+      return { status: 'not_found' }
     }
-    return coerceDetail(parsed.data)
+    return { status: 'ok', detail: coerceDetail(parsed.data) }
   }
+
+  /** Convenience wrapper. Prefer getAgentResult where the distinction matters. */
+  async getAgent(chainId: number, tokenId: string): Promise<ScanAgentDetail | null> {
+    const r = await this.getAgentResult(chainId, tokenId)
+    return r.status === 'ok' ? r.detail : null
+  }
+
+
 }

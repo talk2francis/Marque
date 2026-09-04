@@ -30,6 +30,17 @@ export interface CategoryRules {
 /** A category must reach this score before it is assigned at all. */
 export const MIN_SCORE = 3
 
+/**
+ * A category must ALSO match at least one `strong` term.
+ *
+ * Weak terms alone are not evidence. "CoinAnk.agent", a market-data service,
+ * scored into Health Factor on the single weak term "liquidation" — it reports
+ * liquidation *volumes*, it does not monitor anyone's loan. A false positive
+ * here puts the wrong agent in front of someone's money, which is worse than
+ * leaving it unclassified.
+ */
+export const REQUIRE_STRONG_TERM = true
+
 /** Below this confidence we record the guess but treat it as unclassified. */
 export const MIN_CONFIDENCE = 0.4
 
@@ -138,15 +149,26 @@ export function classifyByKeyword(input: ClassificationInput): ClassificationRes
   const scores: Record<string, number> = {}
   const hits: Record<string, string[]> = {}
 
+  const strongHits: Record<string, number> = {}
+
   for (const [category, rules] of Object.entries(TAXONOMY)) {
     let score = 0
+    let strong = 0
     const matched: string[] = []
-    for (const [term, weight] of [...rules.strong, ...rules.weak]) {
+    for (const [term, weight] of rules.strong) {
+      if (text.includes(term)) {
+        score += weight
+        strong++
+        matched.push(term)
+      }
+    }
+    for (const [term, weight] of rules.weak) {
       if (text.includes(term)) {
         score += weight
         matched.push(term)
       }
     }
+    strongHits[category] = strong
     for (const [term, weight] of rules.negative) {
       if (text.includes(term)) {
         score -= weight
@@ -157,9 +179,21 @@ export function classifyByKeyword(input: ClassificationInput): ClassificationRes
     hits[category] = matched
   }
 
-  const ranked = Object.entries(scores).sort((a, b) => b[1] - a[1])
+  // Only categories with a strong term are eligible to win.
+  const eligible = Object.entries(scores).filter(([k]) => !REQUIRE_STRONG_TERM || (strongHits[k] ?? 0) > 0)
+  const ranked = eligible.sort((a, b) => b[1] - a[1])
   const top = ranked[0]
+
   if (!top || top[1] < MIN_SCORE) {
+    if (!top && Object.values(scores).some((v) => v >= MIN_SCORE)) {
+      return {
+        category: 'unclassified',
+        confidence: 0,
+        method: 'keyword',
+        rationale: 'only weak terms matched; no category-defining term present',
+        scores,
+      }
+    }
     return {
       category: 'unclassified',
       confidence: 0,

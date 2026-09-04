@@ -132,3 +132,25 @@ describe('classifyByKeyword', () => {
     expect(r.confidence).toBeLessThanOrEqual(1)
   })
 })
+
+describe('strong-term requirement', () => {
+  it('refuses to classify on a weak term alone', () => {
+    // Regression: CoinAnk.agent, a market-data service, was labelled
+    // health_factor because its copy contains the weak term "liquidation".
+    // It reports liquidation volumes; it does not monitor anyone's loan.
+    const r = classifyByKeyword({
+      name: 'CoinAnk.agent',
+      description: 'Crypto market data: open interest, funding rates, liquidation charts and order book analytics.',
+    })
+    expect(r.category).toBe('unclassified')
+    expect(r.rationale).toMatch(/weak terms|category-defining/)
+  })
+
+  it('still classifies when a defining term is present', () => {
+    const r = classifyByKeyword({
+      name: 'LiqGuard',
+      description: 'Tracks your health factor and warns before liquidation.',
+    })
+    expect(r.category).toBe('health_factor')
+  })
+})

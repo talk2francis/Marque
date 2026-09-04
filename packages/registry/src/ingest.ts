@@ -37,6 +37,8 @@ export interface EnrichResult {
   attempted: number
   succeeded: number
   failed: number
+  /** Upstream was unavailable; these agents stay queued for a retry. */
+  transient: number
   servicesWritten: number
   withAtLeastOneService: number
 }
@@ -250,22 +252,32 @@ export async function enrichDetails(opts: {
 
   let succeeded = 0
   let failed = 0
+  let transient = 0
   let servicesWritten = 0
   let withAtLeastOneService = 0
 
   const concurrency = Math.max(1, Number(process.env.INGEST_ENRICH_CONCURRENCY ?? 4))
 
   await mapLimit(candidates, concurrency, async (c) => {
-    const detail = await client.getAgent(chainId, c.tokenId)
-    if (!detail) {
+    const res = await client.getAgentResult(chainId, c.tokenId)
+
+    if (res.status === 'transient') {
+      // 8004scan is degraded. Leave detailFetched false so this agent is
+      // retried when they recover. Marking it fetched here would silently
+      // drop it from the index for good.
+      transient++
+      return
+    }
+    if (res.status === 'not_found') {
       failed++
-      // Mark it fetched anyway so a permanently 404ing agent is not retried
-      // forever. getAgent has already logged why it failed.
+      // Definitively absent or unparseable: mark fetched so a permanently
+      // 404ing agent is not retried forever.
       await d.update(agent)
         .set({ detailFetched: true, detailFetchedAt: nowIso() })
         .where(eq(agent.id, c.id))
       return
     }
+    const detail = res.detail
 
     const services = extractServices(detail)
     await d.update(agent).set(detailToUpdate(detail)).where(eq(agent.id, c.id))
@@ -278,7 +290,7 @@ export async function enrichDetails(opts: {
     succeeded++
   })
 
-  return { attempted: candidates.length, succeeded, failed, servicesWritten, withAtLeastOneService }
+  return { attempted: candidates.length, succeeded, failed, transient, servicesWritten, withAtLeastOneService }
 }
 
 /**
