@@ -797,3 +797,26 @@ product, it is written down here.
   own registry. Registration is discovery, not capability.
 - **Restore** — `./scripts/register-agents.sh` once 8004scan answers 200. Under
   five minutes, and it is idempotent per agent.
+
+---
+
+## P8b — The Ledger
+
+### D8-06 · Three benchmarks are half-complete, because the manual arm is Francis's to run
+
+- **Planned** — Acceptance (c): three benchmarks complete, two reps per arm,
+  manifests hashed, outputs attached.
+- **Shipped** — All four benchmarks registered with their rubrics hashed before
+  any arm ran; the agent arm run twice for each, manifests hashed and published
+  at `/ledger/<id>`. **The manual arms have not run**, so no benchmark is a
+  comparison yet and every one is labelled incomplete on the page.
+- **Why** — Not a reduction, a dependency. The phase brief assigns the manual
+  arms to Francis with a timer and a screen recording, and the intake exists
+  for exactly that. Simulating a human analyst would take an hour and would
+  make every number on `/ledger` worthless, which is the one outcome worth
+  avoiding more than an incomplete page.
+- **Cost** — `/ledger` publishes four half-benchmarks. It says so in those
+  words rather than showing a filled-in comparison.
+- **Restore** — `/ledger/intake`: pick the benchmark, paste the analysis, enter
+  the stopwatch time. Two repetitions each for ADV-01, ADV-02 and ADV-03
+  completes acceptance (c). Blind scoring runs after both arms exist.

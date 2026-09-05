@@ -36,6 +36,9 @@ const DEFAULT_ROUTES = [
   // are passed with --routes rather than defaulted to a fabricated one.
   '/app/charter', '/app/charter?category=grid', '/app/charter?category=yield',
   '/app/charter?category=health_factor', '/app/charters',
+  // P8b Ledger surfaces. /ledger/:id takes a registered benchmark id, so ADV-01
+  // is a real row rather than a fabricated one.
+  '/ledger', '/ledger/methodology', '/ledger/intake', '/ledger/ADV-01',
 ]
 
 function routes() {

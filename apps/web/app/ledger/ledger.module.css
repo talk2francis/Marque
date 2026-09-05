@@ -1,0 +1,74 @@
+.page { max-width: 860px; margin: 0 auto; padding: var(--s7) var(--s5) var(--s9); }
+.head { display: flex; flex-direction: column; gap: var(--s3); padding-bottom: var(--s5); }
+.lede { margin: 0; max-width: 68ch; color: var(--fg-soft); font-size: var(--size-body); line-height: var(--lh-body); }
+.section { padding: var(--s6) 0; border-top: 1px solid var(--line); display: flex; flex-direction: column; gap: var(--s3); }
+.h2 { margin: 0 0 var(--s2); font-family: var(--font-statement); font-weight: 400; font-size: var(--size-statement); letter-spacing: -0.015em; }
+.muted { margin: 0; color: var(--fg-soft); font-size: var(--size-body); }
+.note { margin: 0; max-width: 68ch; font-size: var(--size-caption); line-height: 1.55; color: var(--fg-soft); }
+.note > span { margin-right: var(--s2); }
+
+/* One benchmark. Deliberately not a rounded card in a grid — AGENTS.md lists
+   that as a templated tell. A rule and a measure, like everything else here. */
+.bench { padding: var(--s5) 0; border-top: 1px solid var(--line); display: flex; flex-direction: column; gap: var(--s3); }
+.bench:first-of-type { border-top: 0; }
+.benchHead { display: flex; gap: var(--s3); align-items: baseline; flex-wrap: wrap; }
+.benchId { font-family: var(--font-mono); font-size: var(--size-data); color: var(--fg-soft); }
+.benchTitle { margin: 0; font-size: var(--size-title); font-weight: 500; }
+.benchTitle a { color: inherit; text-decoration: none; }
+.benchTitle a:hover { text-decoration: underline; }
+
+.arms { width: 100%; border-collapse: collapse; font-size: var(--size-data); display: block; overflow-x: auto; }
+.arms th, .arms td { text-align: left; padding: 8px var(--s4) 8px 0; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.arms th { color: var(--fg-soft); font-weight: 500; font-size: var(--size-caption); }
+.arms tbody tr:last-child td { border-bottom: 0; }
+
+.pending { display: flex; flex-direction: column; gap: var(--s2); padding: var(--s3) 0 0; }
+.pendingList { margin: 0; padding-left: var(--s5); font-size: var(--size-caption); color: var(--fg-soft); }
+.pendingList li { margin-bottom: 4px; }
+
+.hashes { display: flex; flex-direction: column; gap: 4px; font-size: var(--size-caption); color: var(--fg-soft); }
+.hashes code { font-family: var(--font-mono); overflow-wrap: anywhere; word-break: break-word; }
+
+.actions { display: flex; gap: var(--s3); flex-wrap: wrap; align-items: center; padding-top: var(--s2); }
+.actions a { font-size: var(--size-caption); color: var(--chain); }
+
+.output { margin: 0; padding: var(--s3); background: var(--ground-raised); border: 1px solid var(--line);
+  font-family: var(--font-mono); font-size: var(--size-data); line-height: 1.5;
+  overflow-x: auto; white-space: pre-wrap; overflow-wrap: anywhere; }
+
+.warn { margin: 0; padding: var(--s3); border-left: 2px solid var(--watch);
+  background: var(--ground-raised); font-size: var(--size-caption); line-height: 1.55; color: var(--fg); max-width: 68ch; }
+
+.field { display: flex; flex-direction: column; gap: 6px; margin-bottom: var(--s4); max-width: 68ch; }
+.field label { font-size: var(--size-caption); color: var(--fg-soft); }
+.field input, .field textarea, .field select {
+  font: inherit; font-size: var(--size-data); color: var(--fg);
+  background: var(--ground-raised); border: 1px solid var(--line); border-radius: 2px; padding: 8px 10px; width: 100%;
+}
+.field textarea { min-height: 190px; font-family: var(--font-mono); line-height: 1.5; resize: vertical; }
+.field .hint { font-size: var(--size-caption); color: var(--fg-soft); line-height: 1.5; }
+
+.prose { max-width: 68ch; font-size: var(--size-body); line-height: var(--lh-body); color: var(--fg); }
+.prose h2 { font-family: var(--font-statement); font-weight: 400; font-size: 22px; margin: var(--s6) 0 var(--s3); padding-top: var(--s5); border-top: 1px solid var(--line); }
+.prose h3 { font-size: var(--size-title); font-weight: 500; margin: var(--s5) 0 var(--s2); }
+.prose p { margin: 0 0 var(--s3); }
+.prose ul, .prose ol { margin: 0 0 var(--s4); padding-left: var(--s5); }
+.prose li { margin-bottom: var(--s2); }
+.prose code { font-family: var(--font-mono); font-size: var(--size-data); background: var(--ground-raised);
+  padding: 1px 4px; border-radius: 2px; overflow-wrap: anywhere; word-break: break-word; }
+.prose a { color: var(--chain); }
+
+@media (max-width: 640px) { .page { padding-inline: var(--s4); } }
+
+/* Tap targets.
+   Every link on these pages sits inside caption- or data-sized text, whose
+   line box is under the 24px minimum the audit enforces. Padding the link box
+   raises the hit area without changing the type scale, which invariant 15
+   requires to stay identical in daylight and cockpit. Prose links get a taller
+   line instead, because inline-block inside a sentence breaks wrapping. */
+.note a, .arms a, .hashes a, .actions a, .benchTitle a, .pendingList a, .lede a, .field a {
+  display: inline-block;
+  padding-block: 4px;
+}
+.prose { line-height: 1.7; }
+.prose a { display: inline-block; padding-block: 2px; }

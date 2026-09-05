@@ -1,0 +1,202 @@
+import Link from 'next/link'
+import { Statement, Chip, ProvenanceChip, EmptyState } from '@marque/ui'
+import { SiteHeader, SiteFooter } from '../_components/SiteHeader'
+import { readLedger, readSeals, type LedgerBenchmark } from '../../lib/ledger'
+import styles from './ledger.module.css'
+
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+export const metadata = {
+  title: 'The Ledger — measured advantage, or none',
+  description:
+    'Agent against a human analyst on the same task, at the same block, graded blind against a rubric registered before either arm ran.',
+}
+
+/**
+ * The Ledger.
+ *
+ * MCS asks whether an agent is correct. The Ledger asks whether it is BETTER —
+ * which is a different question, cannot be settled by assertion, and is
+ * therefore graded against a rubric that is written and hashed before anybody
+ * has seen an answer.
+ *
+ * The honest state today is that the agent arms have run and the manual arms
+ * have not, because a human runs those with a stopwatch. So this page shows
+ * the agent arms as recorded and says plainly that no comparison exists yet.
+ * A page that filled the other column with an estimate would be the single
+ * most damaging thing this project could publish.
+ */
+
+function ms(n: number): string {
+  return n < 1000 ? `${n} ms` : `${(n / 1000).toFixed(n < 10_000 ? 2 : 1)} s`
+}
+
+function short(hash: string): string {
+  return hash.length > 20 ? `${hash.slice(0, 12)}…${hash.slice(-6)}` : hash
+}
+
+function Benchmark({ b }: { b: LedgerBenchmark }) {
+  const agent = b.runs.filter((r) => r.arm === 'agent')
+  const manual = b.runs.filter((r) => r.arm === 'manual')
+
+  return (
+    <article className={styles.bench}>
+      <div className={styles.benchHead}>
+        <span className={styles.benchId}>{b.id}</span>
+        <h3 className={styles.benchTitle}>
+          <Link href={`/ledger/${b.id}`}>{b.title}</Link>
+        </h3>
+        <Chip>{b.category.replace('_', ' ')}</Chip>
+        {b.complete
+          ? <Chip tone="holds">complete</Chip>
+          : <Chip tone="watch">incomplete</Chip>}
+      </div>
+
+      <p className={styles.note}>
+        {b.agentName ?? b.agentId} against a human analyst on the same task, at the same block,
+        graded blind against rubric {b.rubricVersion}, registered{' '}
+        {new Date(b.rubricRegisteredAt).toISOString().slice(0, 16).replace('T', ' ')}Z — before
+        either arm ran.
+      </p>
+
+      {b.runs.length === 0 ? (
+        <p className={styles.muted}>No arm has been run yet.</p>
+      ) : (
+        <table className={styles.arms}>
+          <thead>
+            <tr><th>Arm</th><th>Rep</th><th>Block</th><th>Elapsed</th><th>Score</th><th>Output</th></tr>
+          </thead>
+          <tbody>
+            {[...agent, ...manual].map((r) => (
+              <tr key={r.id}>
+                <td>{r.arm === 'agent' ? (b.agentName ?? 'agent') : 'human analyst'}</td>
+                <td className="mono">{r.rep}</td>
+                <td className="mono">{r.blockNumber}</td>
+                <td className="mono">{ms(r.elapsedMs)}</td>
+                <td className="mono">
+                  {r.scoreTotal === null
+                    ? <span className={styles.muted}>unscored</span>
+                    : `${r.scoreTotal} / ${r.scoreOutOf}`}
+                </td>
+                <td className="mono">{short(r.outputHash)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+
+      {!b.complete && (
+        <div className={styles.pending}>
+          <p className={styles.note}>
+            <ProvenanceChip provenance="MEASURED" />
+            Not yet a comparison. Still outstanding:
+          </p>
+          <ul className={styles.pendingList}>
+            {b.missing.map((m) => <li key={m}>{m}</li>)}
+          </ul>
+        </div>
+      )}
+
+      {(b.earlierSittings ?? 0) > 0 && (
+        <p className={styles.note}>
+          {b.earlierSittings} earlier sitting{b.earlierSittings === 1 ? '' : 's'} of this benchmark
+          {b.earlierSittings === 1 ? ' is' : ' are'} kept but not published here: each read
+          different chain state, so its repetitions are not interchangeable with these.
+        </p>
+      )}
+
+      <div className={styles.actions}>
+        <Link href={`/ledger/${b.id}`}>Full manifests, rubric and raw outputs</Link>
+      </div>
+    </article>
+  )
+}
+
+export default async function LedgerPage() {
+  const [benchmarks, seals] = await Promise.all([
+    readLedger().catch(() => [] as LedgerBenchmark[]),
+    readSeals(200).catch(() => []),
+  ])
+
+  const anchored = seals.filter((s) => s.sealTxHash)
+  const resolved = seals.filter((s) => s.outcome !== 'unresolved')
+
+  return (
+    <>
+      <SiteHeader active="ledger" />
+      <main className={styles.page}>
+        <header className={styles.head}>
+          <Statement as="h1">The Ledger</Statement>
+          <p className={styles.lede}>
+            The Standard asks whether an agent is correct. The Ledger asks whether it is better
+            than doing the work yourself — same task, same block, graded blind against a rubric
+            that was written and hashed before either arm ran.
+          </p>
+          <p className={styles.lede}>
+            <Link href="/ledger/methodology">Read the method in full</Link>, including how the
+            arms are timed, how cost is itemized, and what would make a result void.
+          </p>
+        </header>
+
+        <section className={styles.section}>
+          <h2 className={styles.h2}>Benchmarks</h2>
+          {benchmarks.length === 0 ? (
+            <EmptyState title="No benchmark has been registered yet.">
+              <p>Benchmarks appear here once their rubric is registered, before any arm runs.</p>
+            </EmptyState>
+          ) : (
+            benchmarks.map((b) => <Benchmark key={b.id} b={b} />)
+          )}
+        </section>
+
+        <section className={styles.section}>
+          <h2 className={styles.h2}>Sealed calls</h2>
+          <p className={styles.note}>
+            Every recommendation a Marque agent issues is hashed and written on chain at the
+            moment it is issued, together with the rule that will decide it. The rule cannot be
+            softened afterwards to make a call look right.
+          </p>
+          {seals.length === 0 ? (
+            <p className={styles.muted}>No call has been sealed yet.</p>
+          ) : (
+            <>
+              <table className={styles.arms}>
+                <thead>
+                  <tr><th>Agent</th><th>Issued</th><th>Block</th><th>Outcome</th><th>Anchor</th></tr>
+                </thead>
+                <tbody>
+                  {seals.slice(0, 20).map((s) => (
+                    <tr key={s.hash}>
+                      <td className="mono">{s.agentId}</td>
+                      <td className="mono">{s.issuedAt.slice(0, 16).replace('T', ' ')}Z</td>
+                      <td className="mono">{s.blockNumber}</td>
+                      <td>
+                        {s.outcome === 'unresolved'
+                          ? <span className={styles.muted}>unresolved</span>
+                          : <Chip tone={s.outcome === 'correct' ? 'holds' : 'breach'}>{s.outcome}</Chip>}
+                      </td>
+                      <td className="mono">
+                        {s.sealTxHash
+                          ? <a href={`https://testnet.bscscan.com/tx/${s.sealTxHash}`} rel="noreferrer noopener" target="_blank">{short(s.sealTxHash)}</a>
+                          : <span className={styles.muted}>not anchored</span>}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <p className={styles.warn}>
+                {anchored.length} of {seals.length} sealed calls are anchored on chain.{' '}
+                {resolved.length === 0
+                  ? 'None has reached its resolution window yet, so no call has an outcome.'
+                  : `${resolved.length} of them ${resolved.length === 1 ? 'has' : 'have'} reached its resolution window.`}{' '}
+                That is far too few to support a win rate, so none is shown. A percentage computed
+                over a handful of calls is a number that looks like evidence and is not.
+              </p>
+            </>
+          )}
+        </section>
+      </main>
+      <SiteFooter />
+    </>
+  )
+}

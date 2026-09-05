@@ -1,9 +1,9 @@
 {
-  "base": "http://127.0.0.1:3400",
-  "ranAt": "2026-09-04T21:44:15.253Z",
+  "base": "https://marque.trade",
+  "ranAt": "2026-09-05T09:06:16.811Z",
   "results": [
     {
-      "route": "/",
+      "route": "/ledger",
       "viewport": "1440",
       "status": 200,
       "issues": [],
@@ -23,13 +23,15 @@
       "allCapsLabels": []
     },
     {
-      "route": "/",
+      "route": "/ledger",
       "viewport": "1024",
       "status": 200,
       "issues": [],
       "consoleErrors": [],
       "pageErrors": [],
-      "failedRequests": [],
+      "failedRequests": [
+        "GET https://marque.trade/ledger/ADV-02?_rsc=1fsoy — net::ERR_ABORTED"
+      ],
       "focusVisible": {
         "ok": true,
         "tag": "a",
@@ -43,13 +45,15 @@
       "allCapsLabels": []
     },
     {
-      "route": "/",
+      "route": "/ledger",
       "viewport": "768",
       "status": 200,
       "issues": [],
       "consoleErrors": [],
       "pageErrors": [],
-      "failedRequests": [],
+      "failedRequests": [
+        "GET https://marque.trade/ledger/ADV-01?_rsc=1fsoy — net::ERR_ABORTED"
+      ],
       "focusVisible": {
         "ok": true,
         "tag": "a",
@@ -63,13 +67,16 @@
       "allCapsLabels": []
     },
     {
-      "route": "/",
+      "route": "/ledger",
       "viewport": "390",
       "status": 200,
       "issues": [],
       "consoleErrors": [],
       "pageErrors": [],
-      "failedRequests": [],
+      "failedRequests": [
+        "GET https://marque.trade/ledger/ADV-01?_rsc=1fsoy — net::ERR_ABORTED",
+        "GET https://marque.trade/ledger/ADV-02?_rsc=1fsoy — net::ERR_ABORTED"
+      ],
       "focusVisible": {
         "ok": true,
         "tag": "a",
@@ -83,13 +90,15 @@
       "allCapsLabels": []
     },
     {
-      "route": "/register",
+      "route": "/ledger/ADV-01",
       "viewport": "1440",
       "status": 200,
       "issues": [],
       "consoleErrors": [],
       "pageErrors": [],
-      "failedRequests": [],
+      "failedRequests": [
+        "GET https://marque.trade/ledger?_rsc=yf7qh — net::ERR_ABORTED"
+      ],
       "focusVisible": {
         "ok": true,
         "tag": "a",
@@ -103,13 +112,15 @@
       "allCapsLabels": []
     },
     {
-      "route": "/register",
+      "route": "/ledger/ADV-01",
       "viewport": "1024",
       "status": 200,
       "issues": [],
       "consoleErrors": [],
       "pageErrors": [],
-      "failedRequests": [],
+      "failedRequests": [
+        "GET https://marque.trade/ledger?_rsc=yf7qh — net::ERR_ABORTED"
+      ],
       "focusVisible": {
         "ok": true,
         "tag": "a",
@@ -123,7 +134,7 @@
       "allCapsLabels": []
     },
     {
-      "route": "/register",
+      "route": "/ledger/ADV-01",
       "viewport": "768",
       "status": 200,
       "issues": [],
@@ -143,567 +154,7 @@
       "allCapsLabels": []
     },
     {
-      "route": "/register",
-      "viewport": "390",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/app/charter",
-      "viewport": "1440",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/app/charter",
-      "viewport": "1024",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/app/charter",
-      "viewport": "768",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/app/charter",
-      "viewport": "390",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/app/charter?category=rebalancing",
-      "viewport": "1440",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/app/charter?category=rebalancing",
-      "viewport": "1024",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/app/charter?category=rebalancing",
-      "viewport": "768",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/app/charter?category=rebalancing",
-      "viewport": "390",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/app/charter?category=grid",
-      "viewport": "1440",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/app/charter?category=grid",
-      "viewport": "1024",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/app/charter?category=grid",
-      "viewport": "768",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/app/charter?category=grid",
-      "viewport": "390",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/app/charter?category=yield",
-      "viewport": "1440",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/app/charter?category=yield",
-      "viewport": "1024",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/app/charter?category=yield",
-      "viewport": "768",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/app/charter?category=yield",
-      "viewport": "390",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/app/charters",
-      "viewport": "1440",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/app/charters",
-      "viewport": "1024",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/app/charters",
-      "viewport": "768",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/app/charters",
-      "viewport": "390",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/runs/722b1958-349b-4b5d-b815-500be74cb761",
-      "viewport": "1440",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(176, 137, 44) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/runs/722b1958-349b-4b5d-b815-500be74cb761",
-      "viewport": "1024",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(176, 137, 44) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/runs/722b1958-349b-4b5d-b815-500be74cb761",
-      "viewport": "768",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(176, 137, 44) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/runs/722b1958-349b-4b5d-b815-500be74cb761",
-      "viewport": "390",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(176, 137, 44) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/receipts/722b1958-349b-4b5d-b815-500be74cb761",
-      "viewport": "1440",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/receipts/722b1958-349b-4b5d-b815-500be74cb761",
-      "viewport": "1024",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/receipts/722b1958-349b-4b5d-b815-500be74cb761",
-      "viewport": "768",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/receipts/722b1958-349b-4b5d-b815-500be74cb761",
+      "route": "/ledger/ADV-01",
       "viewport": "390",
       "status": 200,
       "issues": [],
