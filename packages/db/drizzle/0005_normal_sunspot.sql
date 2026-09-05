@@ -1,0 +1,1 @@
+ALTER TABLE "charter" ADD COLUMN "category" text DEFAULT 'unclassified' NOT NULL;

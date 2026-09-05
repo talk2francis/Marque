@@ -1,0 +1,52 @@
+/*
+ * The mandate strip. Cockpit colouring on every surface, including daylight
+ * ones — it is the one element that means "something is acting right now", and
+ * it should read as the same object wherever it appears.
+ */
+.strip {
+  display: flex; align-items: center; gap: var(--s3);
+  padding: var(--s2) var(--s5);
+  background: var(--deck); color: var(--deck-ink);
+  border-bottom: 1px solid var(--deck-rule);
+  font-size: var(--size-caption);
+  position: sticky; top: 0; z-index: 40;
+}
+
+.mark {
+  width: 7px; height: 7px; flex: none; border-radius: 50%;
+  background: var(--brass-lit);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brass-lit) 22%, transparent);
+}
+
+.what { white-space: nowrap; }
+.who { color: #9a9d8e; }
+
+.meter {
+  flex: 1 1 120px; min-width: 60px; max-width: 260px; height: 3px;
+  background: var(--deck-rule); position: relative; overflow: hidden;
+}
+.meterFill {
+  position: absolute; inset: 0;
+  background: var(--brass-mark); transform-origin: left center;
+  transition: transform 400ms var(--ease-settle);
+}
+
+.figure { color: var(--deck-ink); white-space: nowrap; font-size: var(--size-caption); }
+.urgent { color: #d0a06a; }
+
+.revoke {
+  margin-left: auto; white-space: nowrap;
+  display: inline-flex; align-items: center; min-height: 32px; padding-inline: var(--s3);
+  color: var(--deck-ink); text-decoration: none;
+  border: 1px solid var(--brass-mark);
+}
+.revoke:hover { background: var(--brass-mark); color: var(--deck); }
+
+@media (max-width: 768px) {
+  .strip { padding-inline: var(--s4); gap: var(--s2); flex-wrap: wrap; }
+  .meter { display: none; }
+  .revoke { margin-left: auto; }
+}
+@media (max-width: 480px) {
+  .who { display: none; }
+}

@@ -29,7 +29,14 @@ const WIDTHS = [
   { name: '390', width: 390, height: 844 },
 ]
 
-const DEFAULT_ROUTES = ['/', '/_ui', '/register', '/register/rebalancing', '/register/grid', '/register/yield', '/register/health-factor', '/standard']
+const DEFAULT_ROUTES = [
+  '/', '/_ui', '/register', '/register/rebalancing', '/register/grid', '/register/yield',
+  '/register/health-factor', '/standard',
+  // P7 cockpit surfaces. /runs/:id and /receipts/:id need a real id, so they
+  // are passed with --routes rather than defaulted to a fabricated one.
+  '/app/charter', '/app/charter?category=grid', '/app/charter?category=yield',
+  '/app/charter?category=health_factor', '/app/charters',
+]
 
 function routes() {
   const arg = process.argv.find((a) => a.startsWith('--routes'))

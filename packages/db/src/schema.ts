@@ -277,3 +277,160 @@ export type AgentService = typeof agentService.$inferSelect
 export type NewAgentService = typeof agentService.$inferInsert
 export type Probe = typeof probe.$inferSelect
 export type FunnelSnapshot = typeof funnelSnapshot.$inferSelect
+
+// ---------------------------------------------------------------------------
+// FIRST-PARTY OBSERVATIONS — the charter, run and receipt record (P7)
+//
+// These are measurements, not derived state. A charter that was granted and
+// revoked on chain, the run that executed under it, and the receipt issued for
+// that run are things that HAPPENED. They cannot be rebuilt by re-running
+// ingest, and invariant 12 forbids dropping them.
+//
+// Note what is deliberately NOT here: session key material. Altana's session
+// signer stays in process memory for the life of the process and is never
+// written to our database. The durable, publicly verifiable record is the
+// on-chain anchor plus the policy hash, both of which are stored below.
+// ---------------------------------------------------------------------------
+
+/** Terminal states are terminal: nothing moves a charter out of them. */
+export const CHARTER_STATUS = ['active', 'revoked', 'expired', 'exhausted', 'failed'] as const
+export type CharterStatusValue = (typeof CHARTER_STATUS)[number]
+
+/** FIRST-PARTY. Every charter Marque has ever granted. */
+export const charter = pgTable('charter', {
+  id: text('id').primaryKey(),
+  /** 'altana' or 'registry'. The UI states which, because they differ in kind. */
+  provider: text('provider').notNull(),
+  chainId: integer('chain_id').notNull(),
+  /** The wallet whose assets are at stake. */
+  ownerAddress: text('owner_address').notNull(),
+  agentId: text('agent_id').notNull(),
+  agentName: text('agent_name'),
+  /** Which of the four categories this charter was drawn for. */
+  category: text('category').$type<Category>().notNull().default('unclassified'),
+  status: text('status').$type<CharterStatusValue>().notNull(),
+
+  /**
+   * The grant, canonically serialised. Spend limits are stored as DECIMAL
+   * STRINGS, never as JSON numbers — an 18-decimal cap exceeds 2^53 and would
+   * be silently rounded, which is exactly the class of bug that produces a
+   * charter that can never execute.
+   */
+  policy: jsonb('policy').$type<Record<string, unknown>>().notNull(),
+  /** keccak of the canonical policy. What was anchored, and what is verified. */
+  policyHash: text('policy_hash').notNull(),
+  /** The revocation leaf, once revoked. */
+  revokeHash: text('revoke_hash'),
+
+  sessionKeyAddress: text('session_key_address'),
+  grantTxHash: text('grant_tx_hash'),
+  revokeTxHash: text('revoke_tx_hash'),
+  verifyUrl: text('verify_url'),
+
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+  grantedAt: timestamp('granted_at', { withTimezone: true }).notNull().defaultNow(),
+  revokedAt: timestamp('revoked_at', { withTimezone: true }),
+
+  callsUsed: integer('calls_used').notNull().default(0),
+  /** symbol -> cumulative spend in the token's smallest unit, as a string. */
+  spent: jsonb('spent').$type<Record<string, string>>().notNull().default({}),
+
+  /** Who asked for it: 'visitor' for the public desk, 'operator' for scripts. */
+  grantedBy: text('granted_by').notNull().default('visitor'),
+  label: text('label'),
+}, (t) => ({
+  statusIdx: index('charter_status_idx').on(t.status, t.grantedAt.desc()),
+  ownerIdx: index('charter_owner_idx').on(t.ownerAddress),
+  grantedIdx: index('charter_granted_idx').on(t.grantedAt.desc()),
+}))
+
+/** A run's lifecycle. `running` is the only non-terminal value. */
+export const RUN_STATUS = ['running', 'complete', 'failed'] as const
+export type RunStatusValue = (typeof RUN_STATUS)[number]
+
+/** FIRST-PARTY. Every hire, whether it worked or not. */
+export const run = pgTable('run', {
+  id: text('id').primaryKey(),
+  agentId: text('agent_id').notNull(),
+  agentName: text('agent_name'),
+  kind: text('kind').notNull(),
+  category: text('category').$type<Category>().notNull(),
+  charterId: text('charter_id'),
+  /** The address the work was done for. */
+  subject: text('subject').notNull(),
+  chainId: integer('chain_id').notNull(),
+  blockNumber: text('block_number').notNull(),
+  task: jsonb('task').$type<Record<string, unknown>>().notNull(),
+
+  status: text('status').$type<RunStatusValue>().notNull().default('running'),
+  /** Which pipeline stage the run reached. */
+  stage: text('stage').notNull().default('quote'),
+  ok: boolean('ok'),
+  /** Plain-English statement of what stopped the run. */
+  failure: text('failure'),
+  failureReason: text('failure_reason'),
+
+  feeUsd: doublePrecision('fee_usd'),
+  maxSpendUsd: doublePrecision('max_spend_usd').notNull(),
+  latencyMs: integer('latency_ms'),
+  txHashes: jsonb('tx_hashes').$type<string[]>().notNull().default([]),
+
+  /** The agent's answer, whole. The receipt hash covers it. */
+  result: jsonb('result'),
+
+  startedAt: timestamp('started_at', { withTimezone: true }).notNull().defaultNow(),
+  finishedAt: timestamp('finished_at', { withTimezone: true }),
+}, (t) => ({
+  startedIdx: index('run_started_idx').on(t.startedAt.desc()),
+  agentIdx: index('run_agent_idx').on(t.agentId, t.startedAt.desc()),
+  charterIdx: index('run_charter_idx').on(t.charterId),
+}))
+
+/**
+ * FIRST-PARTY. The Run Room timeline.
+ *
+ * Every event carries a REAL timestamp taken when it happened. The Run Room
+ * renders these and nothing else: a timeline with invented intermediate steps
+ * would be a fabricated metric wearing a clock (invariant 4).
+ */
+export const runEvent = pgTable('run_event', {
+  id: serial('id').primaryKey(),
+  runId: text('run_id').notNull().references(() => run.id, { onDelete: 'cascade' }),
+  at: timestamp('at', { withTimezone: true }).notNull().defaultNow(),
+  /** 'quote' | 'authority' | 'execute' | 'tx' | 'grade' | 'receipt' | 'refused' | 'error' */
+  kind: text('kind').notNull(),
+  label: text('label').notNull(),
+  detail: text('detail'),
+  txHash: text('tx_hash'),
+  data: jsonb('data').$type<Record<string, unknown>>(),
+}, (t) => ({
+  runAtIdx: index('run_event_run_idx').on(t.runId, t.at),
+}))
+
+/** FIRST-PARTY. The four-proof receipt, and its anchor. */
+export const receipt = pgTable('receipt', {
+  /** Same id as the run. One run, one receipt. */
+  id: text('id').primaryKey(),
+  runId: text('run_id').notNull(),
+  agentId: text('agent_id').notNull(),
+  /** Content hash of the canonically serialised receipt. */
+  hash: text('hash').notNull(),
+  body: jsonb('body').$type<Record<string, unknown>>().notNull(),
+  /** Transaction that anchored the hash on MarqueRegistry, when anchored. */
+  anchorTxHash: text('anchor_tx_hash'),
+  anchorBlock: text('anchor_block'),
+  anchoredAt: timestamp('anchored_at', { withTimezone: true }),
+  issuedAt: timestamp('issued_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({
+  hashIdx: index('receipt_hash_idx').on(t.hash),
+  issuedIdx: index('receipt_issued_idx').on(t.issuedAt.desc()),
+}))
+
+export type Charter = typeof charter.$inferSelect
+export type NewCharter = typeof charter.$inferInsert
+export type Run = typeof run.$inferSelect
+export type NewRun = typeof run.$inferInsert
+export type RunEvent = typeof runEvent.$inferSelect
+export type NewRunEvent = typeof runEvent.$inferInsert
+export type ReceiptRow = typeof receipt.$inferSelect
+export type NewReceiptRow = typeof receipt.$inferInsert

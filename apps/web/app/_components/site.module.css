@@ -1,12 +1,15 @@
 .nav {
   display: flex; align-items: baseline; justify-content: space-between; gap: var(--s4);
+  flex-wrap: wrap;
   max-width: 1180px; margin: 0 auto; padding: var(--s5) var(--s5) 0;
 }
 .brand {
   font-family: var(--font-statement); font-size: 20px; letter-spacing: -0.01em;
   color: var(--fg); text-decoration: none;
 }
-.navLinks { display: flex; gap: var(--s3); font-size: var(--size-body); }
+/* Four links no longer fit a 390px viewport in one line, so the nav wraps
+ * rather than pushing the page 37px wider than the phone it is on. */
+.navLinks { display: flex; flex-wrap: wrap; gap: var(--s3); font-size: var(--size-body); }
 .navLinks a {
   color: var(--fg-soft); text-decoration: none;
   display: inline-flex; align-items: center; min-height: 32px; padding-inline: var(--s2);
@@ -24,4 +27,8 @@
   color: var(--fg-soft);
   display: inline-flex; align-items: center; min-height: 32px; padding-inline: var(--s2);
 }
-@media (max-width: 640px) { .nav, .footer { padding-inline: var(--s4); } }
+@media (max-width: 640px) {
+  .nav, .footer { padding-inline: var(--s4); }
+  .navLinks { gap: 0; font-size: var(--size-data); }
+  .navLinks a { padding-inline: var(--s1); }
+}

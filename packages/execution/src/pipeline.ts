@@ -20,12 +20,39 @@ import type { AgentExecutor, ExecutionContext, PreflightResult, Quote, RunResult
  * stronger claim than "the agent responded".
  */
 
+/**
+ * One thing that actually happened, at the moment it happened.
+ *
+ * The Run Room renders these and nothing else. It is tempting to synthesise
+ * plausible intermediate steps so a timeline looks busy; that would be a
+ * fabricated metric wearing a clock (AGENTS.md invariant 4). If the pipeline
+ * did not emit it, the timeline does not show it.
+ */
+export interface RunEventInput {
+  kind: 'quote' | 'authority' | 'execute' | 'tx' | 'grade' | 'receipt' | 'refused' | 'error'
+  label: string
+  detail?: string | null
+  txHash?: string | null
+  data?: Record<string, unknown>
+}
+
 export interface RunOptions {
   executor: AgentExecutor
   task: StructuredTask
   ctx: ExecutionContext
   /** Skip persistence, e.g. in a dry run. */
   persist?: boolean
+  /**
+   * Supplied by a caller that has already created the run record, so the
+   * buyer can be handed a URL before the work finishes.
+   */
+  runId?: string
+  /**
+   * Called as each stage completes. Awaited, so an event is durable before the
+   * next stage runs — a timeline that loses the step before a crash is worse
+   * than no timeline, because it points at the wrong stage.
+   */
+  onEvent?: (event: RunEventInput) => void | Promise<void>
 }
 
 export interface PipelineOutcome {
@@ -149,20 +176,42 @@ async function gradeAgainstCase(
 }
 
 export async function runHire(opts: RunOptions): Promise<PipelineOutcome> {
-  const runId = randomUUID()
+  const runId = opts.runId ?? randomUUID()
   const started = Date.now()
   const base = { runId, quote: null, run: null, receipt: null, receiptHash: null }
+  const emit = async (event: RunEventInput) => {
+    if (opts.onEvent) await opts.onEvent(event)
+  }
 
   // ---- 1. Quote -----------------------------------------------------------
   const quote = await opts.executor.quote(opts.task)
   if (!quote.ok) {
+    await emit({
+      kind: 'refused',
+      label: 'No quote',
+      detail: quote.detail ?? quote.reason ?? 'the agent did not answer with a price',
+    })
     return {
       ...base, ok: false, stage: 'quote', quote,
       failure: `could not get a quote: ${quote.detail ?? quote.reason ?? 'unknown'}`,
       elapsedMs: Date.now() - started,
     }
   }
+  await emit({
+    kind: 'quote',
+    label: quote.feeUsd === null
+      ? `Quoted, no machine-readable price (${quote.kind})`
+      : `Quoted ${quote.feeUsd} USD (${quote.kind})`,
+    detail: quote.declaredPrice,
+    data: { feeUsd: quote.feeUsd, latencyMs: quote.latencyMs, settlementAsset: quote.settlementAsset },
+  })
+
   if (quote.feeUsd !== null && quote.feeUsd > opts.ctx.maxSpendUsd) {
+    await emit({
+      kind: 'refused',
+      label: 'Refused on price',
+      detail: `the agent asks ${quote.feeUsd} USD, above the ${opts.ctx.maxSpendUsd} USD ceiling set for this run`,
+    })
     return {
       ...base, ok: false, stage: 'quote', quote,
       failure: `the agent asks ${quote.feeUsd} USD, above the ${opts.ctx.maxSpendUsd} USD ceiling set for this run`,
@@ -173,6 +222,7 @@ export async function runHire(opts: RunOptions): Promise<PipelineOutcome> {
   // ---- 2. Authority, BEFORE anything happens -------------------------------
   const authority = checkAuthority(opts.task, opts.ctx)
   if (!authority.ok) {
+    await emit({ kind: 'refused', label: 'Refused before execution', detail: authority.detail })
     return {
       ...base, ok: false, stage: 'authority', quote,
       failure: `refused before execution: ${authority.detail}`,
@@ -180,11 +230,45 @@ export async function runHire(opts: RunOptions): Promise<PipelineOutcome> {
     }
   }
 
+  await emit({
+    kind: 'authority',
+    label: opts.ctx.charterId
+      ? `Authority checked against charter ${opts.ctx.charterId}`
+      : 'Authority checked — read-only, no contract call permitted',
+    detail: `ceiling ${opts.ctx.maxSpendUsd} USD · ${opts.ctx.allowlist?.length ?? 0} contract(s) permitted`,
+    data: { charterId: opts.ctx.charterId ?? null, allowlist: opts.ctx.allowlist ?? [] },
+  })
+
   // ---- 3. Execute ----------------------------------------------------------
+  await emit({ kind: 'execute', label: `Sent to the agent over ${opts.executor.kind}` })
   const run = await opts.executor.execute(opts.task, opts.ctx)
+
+  for (const txHash of run.txHashes) {
+    await emit({ kind: 'tx', label: 'Transaction included', txHash })
+  }
+
+  await emit({
+    kind: run.ok ? 'execute' : 'error',
+    label: run.ok ? `Agent answered in ${run.latencyMs} ms` : `Agent failed: ${run.reason ?? 'unknown'}`,
+    detail: run.ok ? null : (run.detail ?? null),
+    data: { latencyMs: run.latencyMs },
+  })
 
   // ---- 4. Grade ------------------------------------------------------------
   const graded = run.ok ? await gradeAgainstCase(opts.task, run.result) : null
+
+  await emit({
+    kind: 'grade',
+    label: graded === null
+      ? 'Not graded against the published case'
+      : graded.pass
+        ? `Passed ${graded.testId}`
+        : `Failed ${graded.testId} on ${graded.failedFields.join(', ')}`,
+    detail: graded === null
+      ? 'this hire asks a different question from the published case, so grading it against that case would be meaningless in both directions'
+      : null,
+    data: graded ? { ...graded } : {},
+  })
 
   // ---- 5. Receipt. Issued for failures too. --------------------------------
   // A failed run with a legible reason is evidence the system is real, and
@@ -217,6 +301,13 @@ export async function runHire(opts: RunOptions): Promise<PipelineOutcome> {
       caseId: loaded?.testCase.id ?? null,
       groundTruthHash: loaded?.groundTruthHash ?? null,
     },
+  })
+
+  await emit({
+    kind: 'receipt',
+    label: 'Receipt issued',
+    detail: hash,
+    data: { hash },
   })
 
   return {

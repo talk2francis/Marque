@@ -1,0 +1,115 @@
+/*
+ * The Run Room. Cockpit: this is a doing surface, and the ground says so.
+ * Only ground, ink and rule change from daylight — the type scale, the chips
+ * and the measure rules are the same objects they are on the Register.
+ */
+
+.deck {
+  position: relative;
+  background: var(--ground);
+  color: var(--fg);
+  min-height: 70vh;
+}
+
+.page { position: relative; z-index: 1; max-width: 1180px; margin: 0 auto; padding: var(--s6) var(--s5) var(--s8); }
+
+.head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--s4); flex-wrap: wrap; }
+.headMain { min-width: 0; }
+.headSub { margin: var(--s2) 0 0; font-size: var(--size-caption); color: var(--fg-soft); overflow-wrap: anywhere; }
+.headSub a {
+  text-decoration: underline; text-underline-offset: 3px;
+  /* An 18px-tall inline link is below the 24px tap floor on a phone. */
+  display: inline-flex; align-items: center; min-height: 24px;
+}
+.headState { display: flex; align-items: center; gap: var(--s3); }
+
+.failure {
+  margin: var(--s4) 0 0; padding: var(--s3) var(--s4);
+  font-size: var(--size-body); color: var(--breach);
+  border-left: 3px solid var(--breach-mark); background: var(--ground-raised);
+}
+
+.tabs { display: flex; gap: var(--s1); flex-wrap: wrap; margin: var(--s6) 0 var(--s5); border-bottom: 1px solid var(--line); }
+.tab {
+  display: inline-flex; align-items: center; gap: var(--s2);
+  min-height: 40px; padding-inline: var(--s3); margin-bottom: -1px;
+  background: none; border: none; border-bottom: 2px solid transparent;
+  font: inherit; font-size: var(--size-body); color: var(--fg-soft); cursor: pointer;
+}
+.tab:hover { color: var(--fg); }
+.tab[aria-current='true'] { color: var(--fg); border-bottom-color: var(--brass-mark); }
+.tabCount { font-size: var(--size-caption); color: var(--fg-soft); }
+
+/* ---- Activity: real timestamps, nothing synthesised in between --------- */
+.timeline { list-style: none; margin: 0; padding: 0; }
+.event {
+  display: grid; grid-template-columns: 96px 68px 1fr; gap: var(--s3);
+  padding: var(--s3) 0; border-top: 1px solid var(--line);
+}
+.event:first-child { border-top: none; }
+.event[data-pulse='true'] { animation: txpulse 200ms var(--ease-settle); }
+@keyframes txpulse {
+  from { background: color-mix(in srgb, var(--brass-lit) 18%, transparent); }
+  to { background: transparent; }
+}
+
+.eventTime { color: var(--fg-soft); white-space: nowrap; }
+.eventSince { color: var(--fg-soft); white-space: nowrap; }
+.eventBody { display: flex; flex-direction: column; gap: var(--s1); min-width: 0; }
+.eventKind { font-size: var(--size-caption); color: var(--fg-soft); }
+.eventLabel { font-size: var(--size-body); }
+.eventDetail { font-size: var(--size-caption); color: var(--fg-soft); overflow-wrap: anywhere; }
+.eventLink { overflow-wrap: anywhere; text-decoration: underline; text-underline-offset: 3px; display: inline-flex; align-items: center; min-height: 32px; }
+
+.event[data-kind='refused'] .eventKind, .event[data-kind='error'] .eventKind { color: var(--breach); }
+.event[data-kind='tx'] .eventKind { color: var(--chain); }
+.event[data-kind='receipt'] .eventKind { color: var(--brass); }
+
+/* ---- Panels ----------------------------------------------------------- */
+.panel { display: flex; flex-direction: column; gap: var(--s4); }
+.empty { margin: 0; font-size: var(--size-body); color: var(--fg-soft); max-width: var(--measure); }
+.subhead { margin: 0; font-size: var(--size-title); font-weight: 500; }
+
+.json {
+  margin: 0; padding: var(--s4); overflow-x: auto;
+  background: var(--ground-raised); border: 1px solid var(--line);
+  font-size: var(--size-data); line-height: 1.5; white-space: pre;
+}
+
+.grade { margin: 0; font-size: var(--size-body); border-left: 3px solid var(--watch-mark); padding-left: var(--s3); }
+.grade[data-pass='true'] { border-left-color: var(--holds-mark); }
+.gradeDetail { display: block; font-size: var(--size-caption); color: var(--fg-soft); margin-top: var(--s1); max-width: var(--measure); }
+
+.txList { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--s2); }
+.txLink { overflow-wrap: anywhere; text-decoration: underline; text-underline-offset: 3px; display: inline-flex; align-items: center; min-height: 32px; }
+
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--s4); margin: 0; }
+.facts dt { font-size: var(--size-caption); color: var(--fg-soft); }
+.facts dd { margin: var(--s1) 0 0; font-size: var(--size-body); overflow-wrap: anywhere; }
+
+.authorityNote { margin: 0; font-size: var(--size-body); color: var(--fg-soft); max-width: var(--measure); }
+
+.permitList { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--s2); }
+.permitList li { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s3); border-top: 1px solid var(--line); padding-top: var(--s2); }
+.permitList a { text-decoration: underline; text-underline-offset: 3px; overflow-wrap: anywhere; display: inline-flex; align-items: center; min-height: 32px; }
+.selectors { color: var(--fg-soft); white-space: nowrap; }
+
+.receiptLine { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--s3); margin: 0; }
+.receiptLink {
+  display: inline-flex; align-items: center; min-height: 40px; padding-inline: var(--s4);
+  border: 1px solid var(--brass-mark); text-decoration: none;
+}
+.receiptLink:hover { background: var(--brass-mark); color: var(--deck); }
+.hash { color: var(--fg-soft); overflow-wrap: anywhere; }
+
+@media (prefers-reduced-motion: reduce) {
+  .event[data-pulse='true'] { animation: none; }
+}
+
+@media (max-width: 768px) {
+  .event { grid-template-columns: 84px 1fr; }
+  .eventSince { display: none; }
+}
+@media (max-width: 640px) {
+  .page { padding-inline: var(--s4); }
+}

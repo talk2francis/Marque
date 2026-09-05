@@ -1,0 +1,112 @@
+/*
+ * The charters page stays in DAYLIGHT. Light for looking, dark for doing: this
+ * is a surface for reading what is outstanding, and the cockpit is reserved for
+ * the two moments where something is actually happening — the Seal and the Run
+ * Room. Making every page that mentions money dark would turn one product into
+ * two websites (AGENTS.md invariant 15).
+ */
+
+.page {
+  max-width: 1180px; margin: 0 auto; padding: var(--s6) var(--s5) var(--s8);
+}
+
+.head { max-width: var(--measure); }
+.lede { font-size: var(--size-body); color: var(--fg-soft); margin: var(--s3) 0 0; }
+.headAct { margin: var(--s4) 0 0; }
+
+.sectionHead {
+  display: flex; align-items: baseline; gap: var(--s2);
+  font-size: var(--size-title); font-weight: 500;
+  margin: var(--s7) 0 var(--s4); padding-bottom: var(--s2);
+  border-bottom: 1px solid var(--line);
+}
+.count { color: var(--fg-soft); }
+.past { margin-top: var(--s6); }
+
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: var(--s5); }
+
+/*
+ * Not a rounded card in a grid of identical rounded cards: a plain rule-bounded
+ * block with a state edge on the left, so status is legible before you read a
+ * word of it.
+ */
+.card {
+  background: var(--ground-raised);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--fg-soft);
+  padding: var(--s4);
+  display: flex; flex-direction: column; gap: var(--s4);
+  min-width: 0;
+}
+.card[data-status='active'] { border-left-color: var(--brass-mark); }
+.card[data-status='revoked'] { border-left-color: var(--breach-mark); }
+.card[data-status='expired'] { border-left-color: var(--watch-mark); }
+
+/* One 200ms pulse when a call lands under the charter. Nothing else moves. */
+.card[data-pulse='true'] { animation: pulse 200ms var(--ease-settle); }
+@keyframes pulse {
+  from { box-shadow: inset 3px 0 0 0 var(--brass-lit); }
+  to { box-shadow: inset 0 0 0 0 transparent; }
+}
+
+.cardHead { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--s3); }
+.cardTitle { margin: 0; font-size: var(--size-title); font-weight: 500; overflow-wrap: anywhere; }
+.cardSub { margin: var(--s1) 0 0; font-size: var(--size-caption); color: var(--fg-soft); }
+
+.meterBlock { margin-top: var(--s1); }
+
+.facts { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s3); margin: 0; }
+.fact { min-width: 0; }
+.fact dt { font-size: var(--size-caption); color: var(--fg-soft); }
+.fact dd { margin: var(--s1) 0 0; }
+
+.permits { border-top: 1px solid var(--line); padding-top: var(--s3); }
+.permitsLabel { display: block; font-size: var(--size-caption); color: var(--fg-soft); }
+.permitList { list-style: none; margin: var(--s2) 0 0; padding: 0; display: flex; flex-direction: column; gap: var(--s1); }
+.permitList li { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s3); font-size: var(--size-data); }
+.permitList a {
+  text-decoration: underline; text-underline-offset: 3px; overflow-wrap: anywhere;
+  display: inline-flex; align-items: center; min-height: 32px;
+}
+.selectors { color: var(--fg-soft); white-space: nowrap; }
+
+.proofs { display: flex; flex-wrap: wrap; gap: var(--s3); font-size: var(--size-caption); }
+.proof { color: var(--fg-soft); display: inline-flex; align-items: center; min-height: 32px; }
+a.proof { text-decoration: underline; text-underline-offset: 3px; }
+
+.error { margin: 0; font-size: var(--size-body); color: var(--breach); border-left: 3px solid var(--breach-mark); padding-left: var(--s3); }
+
+.actions { display: flex; gap: var(--s3); flex-wrap: wrap; margin-top: auto; }
+
+/*
+ * REVOKE NOW. Impossible to miss and impossible to hit by accident: the widest
+ * control on the card, the only one carrying the breach colour, and the only
+ * one that never greys out while a charter is live.
+ */
+.revoke {
+  flex: 1 1 160px;
+  min-height: 44px; padding-inline: var(--s4);
+  font: inherit; font-size: var(--size-body); cursor: pointer;
+  background: var(--breach-mark); color: #fff;
+  border: 1px solid var(--breach-mark);
+}
+.revoke:hover:not(:disabled) { background: #8e2f23; border-color: #8e2f23; }
+.revoke:disabled { opacity: 0.55; cursor: progress; }
+
+.hire {
+  flex: 0 1 auto;
+  min-height: 44px; padding-inline: var(--s4);
+  font: inherit; font-size: var(--size-body); cursor: pointer;
+  background: transparent; color: var(--fg); border: 1px solid var(--line);
+}
+.hire:hover:not(:disabled) { border-color: var(--brass-mark); }
+.hire:disabled { opacity: 0.55; cursor: progress; }
+
+@media (prefers-reduced-motion: reduce) {
+  .card[data-pulse='true'] { animation: none; }
+}
+
+@media (max-width: 640px) {
+  .page { padding-inline: var(--s4); }
+  .cards { grid-template-columns: 1fr; }
+}

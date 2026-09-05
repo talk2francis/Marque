@@ -1,0 +1,208 @@
+/*
+ * The Charter Desk.
+ *
+ * Two columns, three fields, one button, and the Seal. The page is deliberately
+ * short: this is a decision screen, and every extra element on a decision screen
+ * is a reason to stop reading the one that matters.
+ */
+
+.page { max-width: 1180px; margin: 0 auto; padding: var(--s6) var(--s5) var(--s8); }
+
+.head { max-width: var(--measure); }
+.lede { font-size: var(--size-body); color: var(--fg-soft); margin: var(--s3) 0 0; }
+.note { font-size: var(--size-body); margin: var(--s4) 0 0; max-width: var(--measure); }
+
+.tabs { display: flex; gap: var(--s1); flex-wrap: wrap; margin: var(--s6) 0 var(--s5); border-bottom: 1px solid var(--line); }
+.tab {
+  display: inline-flex; align-items: center; min-height: 40px; padding-inline: var(--s3);
+  color: var(--fg-soft); text-decoration: none; border-bottom: 2px solid transparent; margin-bottom: -1px;
+}
+.tab:hover { color: var(--fg); }
+.tab[aria-current='page'] { color: var(--fg); border-bottom-color: var(--brass-mark); }
+
+/* ---- The desk. Becomes the cockpit when the Seal runs. ---------------- */
+.desk {
+  position: relative;
+  background: var(--ground);
+  color: var(--fg);
+  padding: var(--s5);
+  border: 1px solid var(--line);
+  transition: background 260ms var(--ease-settle), color 260ms var(--ease-settle),
+              border-color 260ms var(--ease-settle);
+}
+
+/* ---- Bound may / Bound may not --------------------------------------- */
+.columns { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s6); align-items: start; }
+.column { min-width: 0; }
+/*
+ * The asymmetry between the two columns IS the argument — one thing an agent
+ * may do against seven it may not. So the short column is closed with a line
+ * that says how short it is, rather than padded out or left as dead space.
+ */
+.columnClose {
+  display: block; margin-top: var(--s3); padding-top: var(--s3);
+  border-top: 1px solid var(--line);
+  font-size: var(--size-caption); color: var(--fg-soft);
+}
+.columnHead {
+  display: flex; align-items: center; gap: var(--s2);
+  font-size: var(--size-title); font-weight: 500; margin: 0 0 var(--s4);
+}
+.columnMark { width: 3px; height: 18px; flex: none; }
+.columnMark[data-tone='may'] { background: var(--holds-mark); }
+.columnMark[data-tone='maynot'] { background: var(--breach-mark); }
+
+.list { list-style: none; margin: 0; padding: 0; }
+.item { padding: var(--s3) 0; border-top: 1px solid var(--line); }
+.item:first-child { border-top: none; padding-top: 0; }
+.itemText { display: block; font-size: var(--size-body); }
+.itemWhere {
+  display: inline-flex; align-items: center; min-height: 32px;
+  font-size: var(--size-caption); color: var(--fg-soft); text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ---- The three bounds ------------------------------------------------ */
+.controls {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s5);
+  margin-top: var(--s6); padding-top: var(--s5); border-top: 1px solid var(--line);
+}
+.field { display: flex; flex-direction: column; gap: var(--s2); min-width: 0; }
+.fieldLabel { font-size: var(--size-body); }
+.fieldNote { font-size: var(--size-caption); color: var(--fg-soft); }
+.inputRow { display: flex; align-items: center; gap: var(--s2); }
+.input {
+  flex: 1 1 auto; min-width: 0; min-height: 40px; padding: 0 var(--s3);
+  background: var(--ground-raised); color: var(--fg);
+  border: 1px solid var(--line); font-size: var(--size-data);
+}
+.unit { font-size: var(--size-caption); color: var(--fg-soft); }
+.select {
+  min-height: 40px; padding: 0 var(--s2);
+  background: var(--ground-raised); color: var(--fg);
+  border: 1px solid var(--line); font: inherit; font-size: var(--size-data);
+  max-width: 100%;
+}
+
+.act { display: flex; align-items: center; gap: var(--s4); flex-wrap: wrap; margin-top: var(--s5); }
+.actNote { font-size: var(--size-caption); color: var(--fg-soft); max-width: 52ch; }
+.error {
+  margin-top: var(--s4); padding: var(--s3); font-size: var(--size-body);
+  color: var(--breach); border-left: 3px solid var(--breach-mark);
+}
+
+.footnote {
+  display: flex; gap: var(--s3); align-items: flex-start;
+  margin-top: var(--s6); max-width: var(--measure);
+}
+.footnote p { margin: 0; font-size: var(--size-caption); color: var(--fg-soft); }
+
+/* =======================================================================
+ * THE SEAL
+ *
+ * The one bold moment. It overlays the desk rather than navigating, because
+ * granting authority is a change of state on the page you are already on — a
+ * route change would make it feel like a different decision on a different
+ * screen.
+ * ===================================================================== */
+
+.seal {
+  position: fixed; inset: 0; z-index: 60;
+  display: flex; align-items: center; justify-content: center;
+  padding: var(--s7) var(--s5);
+  background: var(--deck);
+  overflow-y: auto;
+  animation: dim 260ms var(--ease-settle) both;
+}
+
+@keyframes dim { from { opacity: 0; } to { opacity: 1; } }
+
+.sealDoc { width: min(100%, 620px); color: var(--deck-ink); }
+.sealTitle { font-size: var(--size-statement); margin: 0; }
+.sealWho { margin: var(--s2) 0 var(--s5); font-size: var(--size-caption); color: #9a9d8e; }
+
+.sealLines { margin: 0; padding: 0; }
+.sealLine {
+  display: grid; grid-template-columns: 148px 1fr; gap: var(--s3);
+  padding: var(--s3) 0; border-top: 1px solid var(--deck-rule);
+  opacity: 0;
+}
+/* 60ms stagger, exactly as specified. The delay is per line index. */
+.sealLine[data-shown='true'] {
+  animation: compose 300ms var(--ease-settle) both;
+  animation-delay: calc(var(--i) * 60ms);
+}
+@keyframes compose {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+
+.sealLabel { margin: 0; font-size: var(--size-caption); color: #9a9d8e; }
+.sealValue { margin: 0; font-size: var(--size-data); overflow-wrap: anywhere; }
+.sealValue a { text-decoration: underline; text-underline-offset: 3px; }
+
+/* The mark. Typographic and pressed — never a wax seal or a hallmark. */
+.mark {
+  display: flex; align-items: center; gap: var(--s3);
+  margin-top: var(--s5); padding-top: var(--s4); border-top: 1px solid var(--deck-rule);
+}
+.markGlyph {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 44px; height: 44px; flex: none;
+  font-family: var(--font-statement); font-size: 24px; line-height: 1;
+  color: var(--brass-lit); border: 1px solid var(--brass-mark);
+  transform: scale(1.12); opacity: 0.35;
+  transition: transform 420ms var(--ease-settle), opacity 420ms var(--ease-settle);
+}
+.mark[data-pressed='true'] .markGlyph {
+  transform: none; opacity: 1;
+  animation: bloom 420ms var(--ease-settle) both;
+}
+@keyframes bloom {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--brass-lit) 0%, transparent); }
+  40% { box-shadow: 0 0 0 8px color-mix(in srgb, var(--brass-lit) 26%, transparent); }
+  100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--brass-lit) 0%, transparent); }
+}
+.markText { font-size: var(--size-caption); color: #9a9d8e; }
+
+.sealTx { margin-top: var(--s4); display: flex; flex-direction: column; gap: var(--s1); }
+.sealHash {
+  color: var(--deck-ink); overflow-wrap: anywhere;
+  text-decoration: underline; text-underline-offset: 3px;
+  display: inline-flex; align-items: center; min-height: 32px;
+}
+.sealPending { font-size: var(--size-caption); color: #9a9d8e; }
+.caret {
+  display: inline-block; width: 7px; height: 14px; margin-left: 2px;
+  background: var(--brass-lit); animation: blink 900ms steps(2, start) infinite;
+}
+@keyframes blink { to { visibility: hidden; } }
+
+.sealDone { display: flex; gap: var(--s3); flex-wrap: wrap; margin-top: var(--s5); }
+.sealGo {
+  display: inline-flex; align-items: center; min-height: 40px; padding-inline: var(--s4);
+  border: 1px solid var(--brass-mark); color: var(--deck-ink); text-decoration: none;
+}
+.sealGo:hover { background: var(--brass-mark); color: var(--deck); }
+
+/* ---- Reduced motion: no dim, no press, no typing. Same final frame. --- */
+@media (prefers-reduced-motion: reduce) {
+  .seal { animation: none; }
+  .sealLine, .sealLine[data-shown='true'] { animation: none; opacity: 1; transform: none; }
+  .markGlyph { transition: none; transform: none; opacity: 1; }
+  .mark[data-pressed='true'] .markGlyph { animation: none; }
+  .caret { display: none; }
+  .desk { transition: none; }
+  .meterFill { transition: none; }
+}
+
+@media (max-width: 900px) {
+  .columns { grid-template-columns: 1fr; gap: var(--s5); }
+  .controls { grid-template-columns: 1fr; gap: var(--s4); }
+}
+@media (max-width: 640px) {
+  .page { padding-inline: var(--s4); }
+  .desk { padding: var(--s4); }
+  .sealLine { grid-template-columns: 1fr; gap: var(--s1); }
+  .seal { padding: var(--s5) var(--s4); }
+}

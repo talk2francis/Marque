@@ -1,0 +1,83 @@
+/*
+ * The receipt. Daylight, because this is a document meant to be read, printed
+ * and screenshotted — a dark share image reads as a terminal dump, and this is
+ * evidence, not telemetry.
+ *
+ * Laid out so a screenshot of the top half is already the whole argument: what
+ * ran, whether it worked, and the hash that fixes it.
+ */
+
+.page { max-width: 980px; margin: 0 auto; padding: var(--s6) var(--s5) var(--s8); }
+
+.head {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: var(--s4); flex-wrap: wrap;
+  padding-bottom: var(--s4); border-bottom: 2px solid var(--fg);
+}
+.title { margin: 0; }
+.sub { margin: var(--s2) 0 0; font-size: var(--size-caption); color: var(--fg-soft); overflow-wrap: anywhere; }
+.sub a { display: inline-flex; align-items: center; min-height: 24px; }
+
+.blocks { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+
+/*
+ * Four blocks in a 2x2, sharing rules rather than floating as four cards. A
+ * receipt is one document; four shadowed cards would make it look like four.
+ */
+.block {
+  padding: var(--s5) var(--s5) var(--s5) var(--s4);
+  border-bottom: 1px solid var(--line);
+  border-left: 3px solid var(--fg-soft);
+  min-width: 0;
+}
+.block:nth-child(odd) { border-right: 1px solid var(--line); }
+.block[data-tone='holds'] { border-left-color: var(--holds-mark); }
+.block[data-tone='watch'] { border-left-color: var(--watch-mark); }
+.block[data-tone='breach'] { border-left-color: var(--breach-mark); }
+
+.blockHead { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s3); flex-wrap: wrap; }
+.blockTitle { margin: 0; font-size: var(--size-title); font-weight: 500; }
+.blockVerdict { font-size: var(--size-caption); color: var(--fg-soft); }
+
+.rows { margin: var(--s4) 0 0; display: flex; flex-direction: column; gap: var(--s3); }
+.row { display: grid; grid-template-columns: 132px 1fr; gap: var(--s3); align-items: baseline; }
+.rowLabel { font-size: var(--size-caption); color: var(--fg-soft); }
+.rowValue { margin: 0; font-size: var(--size-body); min-width: 0; overflow-wrap: anywhere; display: flex; flex-direction: column; gap: var(--s1); }
+.rowValue a {
+  text-decoration: underline; text-underline-offset: 3px;
+  display: inline-flex; align-items: center; min-height: 24px;
+}
+.absent { color: var(--fg-soft); }
+.txLink { font-size: var(--size-data); display: inline-flex; align-items: center; min-height: 32px; }
+.hashInline { overflow-wrap: anywhere; }
+
+/* ---- The leaf --------------------------------------------------------- */
+.leaf { margin-top: var(--s6); padding-top: var(--s5); border-top: 2px solid var(--fg); }
+.leafTitle { margin: 0; font-size: var(--size-title); font-weight: 500; }
+.leafHash {
+  margin: var(--s3) 0 0; padding: var(--s3) var(--s4);
+  background: var(--ground-raised); border: 1px solid var(--line);
+  overflow-wrap: anywhere; font-size: var(--size-data);
+}
+.leafNote { margin: var(--s3) 0 0; font-size: var(--size-body); color: var(--fg-soft); max-width: var(--measure); }
+.leafActions { display: flex; flex-wrap: wrap; gap: var(--s3); margin-top: var(--s5); }
+.verify {
+  display: inline-flex; align-items: center; min-height: 44px; padding-inline: var(--s5);
+  background: var(--brass); color: var(--paper-raised); text-decoration: none;
+  border: 1px solid var(--brass);
+}
+.verify:hover { background: var(--brass-lit); border-color: var(--brass-lit); color: var(--ink); }
+.raw {
+  display: inline-flex; align-items: center; min-height: 44px; padding-inline: var(--s4);
+  border: 1px solid var(--line); text-decoration: none; color: var(--fg);
+}
+.raw:hover { border-color: var(--brass-mark); }
+
+@media (max-width: 768px) {
+  .blocks { grid-template-columns: 1fr; }
+  .block { border-right: none !important; }
+}
+@media (max-width: 640px) {
+  .page { padding-inline: var(--s4); }
+  .row { grid-template-columns: 1fr; gap: var(--s1); }
+}

@@ -88,9 +88,21 @@ importers:
 
   apps/web:
     dependencies:
+      '@marque/chain':
+        specifier: workspace:*
+        version: link:../../packages/chain
+      '@marque/conformance':
+        specifier: workspace:*
+        version: link:../../packages/conformance
       '@marque/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@marque/execution':
+        specifier: workspace:*
+        version: link:../../packages/execution
+      '@marque/mandates':
+        specifier: workspace:*
+        version: link:../../packages/mandates
       '@marque/positions':
         specifier: workspace:*
         version: link:../../packages/positions
@@ -115,6 +127,15 @@ importers:
       react-dom:
         specifier: ^19.0.0
         version: 19.2.8(react@19.2.8)
+      server-only:
+        specifier: ^0.0.1
+        version: 0.0.1
+      viem:
+        specifier: ^2.21.55
+        version: 2.56.3(typescript@5.9.3)(zod@3.25.76)
+      zod:
+        specifier: ^3.24.1
+        version: 3.25.76
     devDependencies:
       '@types/node':
         specifier: ^22.10.2
@@ -2093,6 +2114,9 @@ packages:
     engines: {node: '>=10'}
     hasBin: true
 
+  server-only@0.0.1:
+    resolution: {integrity: sha512-qepMx2JxAa5jjfzxG79yPPq+8BuFToHd1hm7kI+Z4zAq1ftQiP7HcxMhDDItrbtwVeLg/cY2JnKnrcFkmiswNA==}
+
   sharp@0.33.5:
     resolution: {integrity: sha512-haPVm1EkS9pgvHrQ/F3Xy+hgcuMV0Wm9vfIBSiwZ05k+xgb0PkBQpGsAA/oWdDobNaZTH5ppvHtzCFbnSEwHVw==}
     engines: {node: ^18.17.0 || ^20.3.0 || >=21.0.0}
@@ -3778,6 +3802,8 @@ snapshots:
   scheduler@0.27.0: {}
 
   semver@7.8.5: {}
+
+  server-only@0.0.1: {}
 
   sharp@0.33.5:
     dependencies:

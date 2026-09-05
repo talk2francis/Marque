@@ -1,4 +1,5 @@
 import { BRAND } from '@marque/ui/brand'
+import { CharterStrip } from './CharterStrip'
 import styles from './site.module.css'
 
 /**
@@ -8,16 +9,22 @@ import styles from './site.module.css'
  * a focusable first element — a page whose first tab stop is nothing is a page
  * a keyboard user cannot enter.
  */
-export function SiteHeader({ active }: { active?: 'register' | 'standard' | 'design' }) {
+export function SiteHeader({ active }: { active?: 'register' | 'standard' | 'design' | 'charters' }) {
   return (
+    <>
+    {/* Whenever any charter is live, this is pinned above everything, on every
+        page. Bounded authority nobody can see is not meaningfully bounded. */}
+    <CharterStrip />
     <header className={styles.nav}>
       <a className={styles.brand} href="/">{BRAND.name}</a>
       <nav className={styles.navLinks} aria-label="Main">
         <a href="/register" aria-current={active === 'register' ? 'page' : undefined}>Register</a>
         <a href="/standard" aria-current={active === 'standard' ? 'page' : undefined}>Standard</a>
+        <a href="/app/charters" aria-current={active === 'charters' ? 'page' : undefined}>Charters</a>
         <a href="/_ui" aria-current={active === 'design' ? 'page' : undefined}>Design</a>
       </nav>
     </header>
+    </>
   )
 }
 

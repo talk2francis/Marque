@@ -633,3 +633,64 @@ product, it is written down here.
 - **Fix (P11)** — A systemd watchdog that checks `/api/health` and the reference
   agent every 60s and runs `pm2 resurrect` when the daemon is absent, plus an
   alert. Deploy downtime (D2-05) folds into the same work.
+
+---
+
+## P7 — Cockpit UI
+
+### D7-01 · The web app grants charters through the REGISTRY provider, not Altana
+
+- **Planned** — P6 proved both `CharterService` implementations on testnet.
+  The obvious default for P7 was Altana, because it carries a prize.
+- **Shipped** — The web process constructs `RegistryCharterService` (P6-lite),
+  and the UI names the provider on every charter and states plainly what it does
+  and does not give you.
+- **Why** — Altana's implementation holds its session signer in process memory
+  by design, which is right for a key and wrong for a marketplace whose only
+  revoke path runs through it. A charter granted before a deploy would come back
+  after the deploy with a revoke button that could not work. The registry
+  provider signs with the operator key against a durable Postgres record, so a
+  charter survives a restart with its revoke intact.
+- **Cost** — The Altana prize track is not exercised by the live UI. The policy
+  is anchored on chain and publicly readable either way, but it is enforced by
+  Marque before signing rather than by a validator, and the Authority tab and
+  the receipt both say so rather than letting a reader assume equivalence.
+- **Restore** — Set `MARQUE_CHARTER_PROVIDER=altana` once Altana sessions can be
+  rehydrated across processes, or once a resident signer process exists for them
+  to live in. One implementation of one interface; no surface changes.
+
+### D7-02 · Public grants are rate limited, and the cap is deliberately small
+
+- **Planned** — Nothing was specified.
+- **Shipped** — Two grants a minute per client, and a durable 40-a-day ceiling
+  counted in Postgres.
+- **Why** — Granting writes a transaction and the testnet wallet holds a finite
+  amount of tBNB. An unmetered public grant button drains the faucet, and the
+  failure lands during judging.
+- **Cost** — A determined visitor can exhaust the daily ceiling. The message
+  says so in plain words and points at the charters already granted, which are
+  all still real and still revocable.
+
+### D7-03 · Receipt hashes are SHA-256, and the page says SHA-256
+
+- **Observed** — `receiptHash()` has always used SHA-256 over the canonical
+  receipt; a comment in that file called it "keccak-style", and the phase brief
+  calls the anchored value "the keccak leaf".
+- **Shipped** — The receipt page names it as SHA-256 over the canonical form.
+- **Why** — Both are 32 bytes and both anchor identically, so nothing about the
+  proof changes. But a page that says keccak while computing SHA-256 gives a
+  verifier the wrong recipe, and a hash nobody else can reproduce proves nothing.
+- **Cost** — None. **Restore** — n/a; switching to keccak256 would be a one-line
+  change in `packages/execution/src/receipt.ts` plus this label.
+
+### D7-04 · The Run Room timeline shows only events the pipeline emitted
+
+- **Planned** — "Timeline with real timestamps as events stream in."
+- **Shipped** — Exactly that, and nothing else. There is no synthesised
+  "connecting…", no interpolated progress, and a run that produced two events
+  shows two.
+- **Why** — Invented intermediate steps are a fabricated metric wearing a clock
+  (invariant 4). A two-line timeline that is true is worth more than a ten-line
+  one that is decorated.
+- **Cost** — A fast failure looks sparse. That is the honest shape of a fast
+  failure.

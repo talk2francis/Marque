@@ -5,6 +5,7 @@ import type {
   Charter, CharterGrant, CharterService, CharterState,
   ExecuteUnderCharter, ExecutionOutcome,
 } from '../types.js'
+import { InMemoryCharterStore, type CharterRecord, type CharterStore } from '../store.js'
 
 /**
  * P6-LITE — CharterService against our own primitives.
@@ -49,15 +50,21 @@ export interface RegistryConfig {
   privateKey: `0x${string}`
   rpcUrl: string
   chainId: number
+  /**
+   * Where charters are kept between calls. Defaults to memory, which is right
+   * for a one-shot script and wrong for a web process: a charter that vanishes
+   * on restart takes its revoke button with it. The web app passes the
+   * Postgres store.
+   */
+  store?: CharterStore
 }
 
-interface StoredCharter {
-  charter: Charter
-  /** Cumulative spend per token symbol, in smallest units. */
-  spent: Map<string, bigint>
-  callsUsed: number
-  policyHash: string
-  revokeHash: string | null
+/** Extra fields the store keeps that the protocol itself has no opinion about. */
+export interface GrantMeta {
+  agentName?: string | null
+  grantedBy?: string
+  label?: string | null
+  category?: string
 }
 
 /** Canonical policy hash. Anchoring this proves WHAT was granted, not just that. */
@@ -89,7 +96,7 @@ export class RegistryCharterService implements CharterService {
   private readonly account: ReturnType<typeof privateKeyToAccount>
   private readonly wallet: ReturnType<typeof createWalletClient>
   private readonly pub: PublicClient
-  private readonly charters = new Map<string, StoredCharter>()
+  private readonly store: CharterStore
 
   constructor(private readonly config: RegistryConfig) {
     if (config.chainId === 56) {
@@ -99,6 +106,12 @@ export class RegistryCharterService implements CharterService {
     const transport = http(config.rpcUrl, { timeout: 30_000 })
     this.wallet = createWalletClient({ account: this.account, chain: bscTestnet, transport })
     this.pub = createPublicClient({ chain: bscTestnet, transport })
+    this.store = config.store ?? new InMemoryCharterStore()
+  }
+
+  /** The address that signs under every charter this service issues. */
+  get signerAddress(): string {
+    return this.account.address
   }
 
   async provisionWallet(opts: { label: string }): Promise<{ address: string; provider: string }> {
@@ -108,7 +121,7 @@ export class RegistryCharterService implements CharterService {
     return { address: this.account.address, provider: this.provider }
   }
 
-  async grant(grant: CharterGrant): Promise<Charter> {
+  async grant(grant: CharterGrant, meta: GrantMeta = {}): Promise<Charter> {
     const policy = policyHash(grant)
     const grantedAt = new Date().toISOString()
 
@@ -136,8 +149,23 @@ export class RegistryCharterService implements CharterService {
       verifyUrl: `https://testnet.bscscan.com/tx/${txHash}`,
     }
 
-    this.charters.set(charterId, { charter, spent: new Map(), callsUsed: 0, policyHash: policy, revokeHash: null })
+    await this.store.put({
+      charter,
+      policyHash: policy,
+      revokeHash: null,
+      spent: {},
+      callsUsed: 0,
+      agentName: meta.agentName ?? null,
+      grantedBy: meta.grantedBy ?? 'operator',
+      label: meta.label ?? null,
+      category: meta.category ?? 'unclassified',
+    })
     return charter
+  }
+
+  /** The stored record, for surfaces that need the document rather than state. */
+  async record(charterId: string): Promise<CharterRecord | null> {
+    return this.store.get(charterId)
   }
 
   /**
@@ -147,7 +175,7 @@ export class RegistryCharterService implements CharterService {
    * asking the contract which of them exist — not by trusting our own map.
    */
   async state(charterId: string): Promise<CharterState> {
-    const stored = this.charters.get(charterId)
+    const stored = await this.store.get(charterId)
     if (!stored) throw new Error(`unknown charter ${charterId}`)
 
     const [grantAnchored, revokeAnchored, blockNumber] = await Promise.all([
@@ -178,7 +206,7 @@ export class RegistryCharterService implements CharterService {
       charterId,
       status,
       remaining: stored.charter.grant.spend.map((s) => {
-        const used = stored.spent.get(s.symbol) ?? 0n
+        const used = BigInt(stored.spent[s.symbol] ?? '0')
         return {
           symbol: s.symbol,
           remaining: s.limit > used ? s.limit - used : 0n,
@@ -196,7 +224,7 @@ export class RegistryCharterService implements CharterService {
   }
 
   async revoke(charterId: string): Promise<{ ok: boolean; txHash: string | null; detail?: string }> {
-    const stored = this.charters.get(charterId)
+    const stored = await this.store.get(charterId)
     if (!stored) return { ok: false, txHash: null, detail: `unknown charter ${charterId}` }
 
     const revokeHash = revocationHash(charterId, stored.policyHash)
@@ -211,10 +239,12 @@ export class RegistryCharterService implements CharterService {
       })
       await this.pub.waitForTransactionReceipt({ hash: txHash })
 
-      stored.revokeHash = revokeHash
-      stored.charter.status = 'revoked'
-      stored.charter.revokedAt = new Date().toISOString()
-      stored.charter.revokeTxHash = txHash
+      await this.store.patch(charterId, {
+        revokeHash,
+        status: 'revoked',
+        revokedAt: new Date().toISOString(),
+        revokeTxHash: txHash,
+      })
       return { ok: true, txHash }
     } catch (err) {
       return { ok: false, txHash: null, detail: err instanceof Error ? err.message : String(err) }
@@ -231,7 +261,7 @@ export class RegistryCharterService implements CharterService {
    */
   async execute(req: ExecuteUnderCharter): Promise<ExecutionOutcome> {
     const started = Date.now()
-    const stored = this.charters.get(req.charterId)
+    const stored = await this.store.get(req.charterId)
     if (!stored) {
       return { ok: false, txHash: null, refusedBecause: 'unknown', detail: 'unknown charter', latencyMs: 0 }
     }
@@ -260,7 +290,7 @@ export class RegistryCharterService implements CharterService {
     const nativeCap = stored.charter.grant.spend.find((s) => !s.token)
     if (nativeCap) {
       const requested = req.calls.reduce((sum, c) => sum + (c.value ?? 0n), 0n)
-      const used = stored.spent.get(nativeCap.symbol) ?? 0n
+      const used = BigInt(stored.spent[nativeCap.symbol] ?? '0')
       if (used + requested > nativeCap.limit) {
         return {
           ok: false, txHash: null, refusedBecause: 'over_cap',
@@ -272,6 +302,8 @@ export class RegistryCharterService implements CharterService {
 
     try {
       let lastHash: string | null = null
+      const spent = { ...stored.spent }
+      let callsUsed = stored.callsUsed
       for (const call of req.calls) {
         const hash = await this.wallet.sendTransaction({
           to: call.to as Address,
@@ -284,9 +316,12 @@ export class RegistryCharterService implements CharterService {
         lastHash = hash
 
         if (nativeCap && call.value) {
-          stored.spent.set(nativeCap.symbol, (stored.spent.get(nativeCap.symbol) ?? 0n) + call.value)
+          spent[nativeCap.symbol] = (BigInt(spent[nativeCap.symbol] ?? '0') + call.value).toString()
         }
-        stored.callsUsed++
+        callsUsed++
+        // Persisted per call, not once at the end. A crash between two calls
+        // must not lose the record of the first, or the cap silently widens.
+        await this.store.patch(req.charterId, { spent, callsUsed })
       }
       return { ok: true, txHash: lastHash, latencyMs: Date.now() - started }
     } catch (err) {

@@ -17,7 +17,14 @@
     "drizzle-orm": "^0.38.2",
     "@marque/registry": "workspace:*",
     "@marque/probe": "workspace:*",
-    "@marque/positions": "workspace:*"
+    "@marque/positions": "workspace:*",
+    "@marque/mandates": "workspace:*",
+    "@marque/execution": "workspace:*",
+    "@marque/conformance": "workspace:*",
+    "@marque/chain": "workspace:*",
+    "zod": "^3.24.1",
+    "viem": "^2.21.55",
+    "server-only": "^0.0.1"
   },
   "devDependencies": {
     "@types/react": "^19.0.2",
