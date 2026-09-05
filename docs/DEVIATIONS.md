@@ -797,6 +797,26 @@ product, it is written down here.
   own registry. Registration is discovery, not capability.
 - **Restore** — `./scripts/register-agents.sh` once 8004scan answers 200. Under
   five minutes, and it is idempotent per agent.
+- **RESOLVED 2026-09-05 17:54 CEST.** Two things were wrong, not one. The SDK
+  calls `www.8004scan.io/api/v1/agents` with **no API key at all** — the host
+  308-redirects to the API, arriving unauthenticated, and unauthenticated reads
+  now fail. That is an SDK bug and no paid tier would fix it, because no key is
+  ever sent; `chunk-TKWQT3DN.js` in the globally installed SDK is patched to
+  forward `SCAN_API_KEY` (original kept as `.orig`). On top of that their
+  database was genuinely flapping — the same keyed read returned 200 and 500
+  minutes apart. `scripts/register-when-up.sh` polled for a healthy window and
+  registered all five the moment one appeared:
+
+  | Agent | ERC-8004 id | Wallet |
+  |---|---|---|
+  | Bound | **#2160** | `0x72b99eFf53a7DbA31f66F7a98116bE7D84d4810B` |
+  | Lattice | **#2161** | `0x7d7216A4e4Ee5F2663aE273d492fE99D495E4e44` |
+  | Sluicegate | **#2162** | `0x6d5767Ca6e48B7103F3E660A2ff78148D2Ec6Ab4` |
+  | Keel | **#2163** | `0x35e2EcBcC9DCA14A85Cf99CC76eb6899c6f29566` |
+  | Redcell | **#2164** | `0x5d47Ac7b6A73b4ebA1105677258e9baf904f9309` |
+
+  P8a acceptance (a) — all five live, registered on BSC, passing their MCS
+  tests — is complete.
 
 ---
 
