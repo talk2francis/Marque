@@ -1,0 +1,77 @@
+P8a acceptance · https://marque.trade · block 120076122 · 2026-09-05T08:09:49.578Z
+
+==============================================================================
+CONFORMANCE — every reference agent against its own published test
+==============================================================================
+Cases are captured immediately before the run: BSC keeps ~64 blocks of
+state, so a case captured earlier is unreadable by the agent AND by us.
+
+capturing REB-1-btcb-usdc-2500 (MCS-REB-1)… block 120076122  hash 0x62f36c8ea62d7a6a…
+capturing HF-1-venus-at-risk (MCS-HF-1)… block 120076124  hash 0x20a5be2917bf3c31…
+capturing GRID-1-bnb-usdt (MCS-GRID-1)… block 120076125  hash 0x27909e69968819b2…
+capturing YIELD-1-usdt-1000 (MCS-YIELD-1)… block 120076125  hash 0xfeb27bf82123cc44…
+
+[Bound] MCS-REB-1  case REB-1-btcb-usdc-2500  block 120076122
+MCS-REB-1  PASS  marque:bound  (951ms, case REB-1-btcb-usdc-2500, block 120076122)
+    ok   currentTick            expected 112862  ·  got 112862  ·  tol exact match
+    ok   inRange                expected true  ·  got true  ·  tol exact match
+    ok   distanceToBound        expected 2.407636  ·  got 2.407636  ·  tol ±0.5 percentage points
+    ok   proposedTickSpacing    expected both ticks multiples of tickSpacing 50  ·  got lower 112250, upper 113450  ·  tol must hold
+    ok   tickOrdering           expected proposedTickLower < proposedTickUpper  ·  got lower 112250, upper 113450  ·  tol must hold
+    ok   policyRange            expected [112250, 113450] ±50 ticks  ·  got [112250, 113450]  ·  tol must hold
+    ok   amounts                expected amounts consistent with the V3 liquidity formula within 0.5%  ·  got 0.023240743468078067 BTCB / 1925.9906452409418 USDC  ·  tol must hold
+    ok   slippageBound          expected a stated slippage bound, 0 < bps < 10000  ·  got 50  ·  tol must hold
+
+[Lattice] MCS-GRID-1  case GRID-1-bnb-usdt  block 120076125
+MCS-GRID-1  PASS  marque:lattice  (214ms, case GRID-1-bnb-usdt, block 120076125)
+    ok   levelSpacing           expected levels evenly spaced (geometric) within 0.5%  ·  got worst deviation 0.000%  ·  tol must hold
+    ok   allocationSum          expected allocations sum to at most 2000 USD  ·  got 2000.00 USD  ·  tol must hold
+    ok   levelsWithinBounds     expected all levels within [600, 850]  ·  got all within bounds  ·  tol must hold
+    ok   levelsAboveStop        expected no level at or below the stop (580)  ·  got none  ·  tol must hold
+    ok   feeDragDisclosed       expected fee drag disclosed, at least ~6.000% for 12 levels at 25bps  ·  got 6%  ·  tol must hold
+
+[Sluicegate] MCS-YIELD-1  case YIELD-1-usdt-1000  block 120076125
+MCS-YIELD-1  PASS  marque:sluicegate  (1100ms, case YIELD-1-usdt-1000, block 120076125)
+    ok   improvementThreshold   expected may recommend (best available beats the threshold)  ·  got recommended venus  ·  tol must hold
+    ok   netApr                 expected 2.878908  ·  got 2.878908  ·  tol ±0.15 percentage points
+    ok   aprProvenance          expected every quoted APR carries a source and an ISO 8601 timestamp  ·  got 2 of 2 fully sourced  ·  tol must hold
+    ok   switchingCost          expected switching cost itemized as gasUsd, swapUsd and exitUsd  ·  got provided: gasUsd, swapUsd, exitUsd  ·  tol must hold
+    ok   leverageFlagged        expected usesLeverage stated explicitly, because the case excludes leverage  ·  got false  ·  tol must hold
+
+[Keel] MCS-HF-1  case HF-1-venus-at-risk  block 120076124
+MCS-HF-1  PASS  marque:keel  (1142ms, case HF-1-venus-at-risk, block 120076124)
+    ok   healthFactor           expected 1.172  ·  got 1.172  ·  tol ±0.005 HF
+    ok   primaryCollateralSymbol expected BTCB  ·  got BTCB  ·  tol must hold
+    ok   collateralFactor       expected 0.8  ·  got 0.8  ·  tol ±0.001 fraction
+    ok   liquidationPrice       expected 67984.731169  ·  got 67984.731169  ·  tol ±1%
+    ok   repayToTarget          expected 5794.64 USD → HF 2.5  ·  got 5794.64 USD → HF 2.5000  ·  tol ±0.005 HF after applying
+
+[Redcell] security
+  NOT TESTED — no MCS test is published for this category. An agent with
+  no published test carries no warrant, and we do not write one for our
+  own agent that no third party could be measured against.
+
+==============================================================================
+LATENCY — 50 real calls each, over public HTTPS
+==============================================================================
+agent          n  ok     min     p50     p95     max   budget
+bound         50  50    313ms    394ms    717ms    901ms   PASS (<8s)
+lattice       50  50      5ms      7ms     15ms    234ms   PASS (<8s)
+sluicegate    50  49    197ms    460ms    582ms    992ms   PASS (<8s)
+             first non-answer: could not read yield venues: comptroller_unreadable
+keel          50  48    200ms    520ms    888ms   1115ms   PASS (<8s)
+             first non-answer: could not read Venus state: comptroller_unreadable
+redcell       50  49     82ms    120ms    285ms    705ms   PASS (<8s)
+             first non-answer: Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+URL: https://bsc-datase
+
+==============================================================================
+STRUCTURED FAILURE — a refusal must arrive in under 3s
+==============================================================================
+bound            51ms  PASS  no range policy found in the task
+lattice          26ms  PASS  the task does not state lower bound, upper bound, capital, levels, stop price, fee per trade in 
+sluicegate       34ms  PASS  the task does not state the asset, the size in USD, the allowed protocols, the minimum improveme
+keel             22ms  PASS  no target health factor found in the task
+redcell           9ms  PASS  no BNB Smart Chain address found in the task

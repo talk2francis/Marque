@@ -694,3 +694,84 @@ product, it is written down here.
   one that is decorated.
 - **Cost** — A fast failure looks sparse. That is the honest shape of a fast
   failure.
+
+---
+
+## P8a — Reference agents
+
+### D8-01 · Agents are served on paths, not subdomains
+
+- **Planned** — `bound.<domain>`, `lattice.<domain>`, `sluicegate.<domain>`,
+  `keel.<domain>`, `redcell.<domain>`, each its own Caddy site.
+- **Shipped** — `https://marque.trade/agents/<name>/`, one Caddy block, five
+  reverse proxies to 8610–8614. All five return 200 on `/health` and serve a
+  real agent card at `/.well-known/agent-card.json`.
+- **Why** — Five subdomains are five DNS records and five certificate issuances
+  on a domain that already carries the live product two weeks before judging.
+  A wildcard would need a DNS-01 challenge and an API token for the registrar,
+  which is new credential surface for zero user-visible gain. Nothing in the
+  ERC-8004 or A2A resolution path cares whether an agent is a host or a path.
+- **Cost** — The agent cards advertise a path, so an agent cannot later be moved
+  to its own host without the card URL changing, and a card URL is what a
+  registry stores. Moving after registration means re-registering.
+- **Restore** — Five A records, five Caddy blocks, and `AGENT_PUBLIC_URL` per
+  agent in `ecosystem.config.cjs`. Roughly an hour, best done before any
+  mainnet registration rather than after.
+
+### D8-02 · Redcell took the Archon fallback in the first hour, not the fourth
+
+- **Planned** — Extract the smallest portable engine from Archon — the finding
+  schema, the severity model, and whichever of the Slither/solc pipeline runs
+  cleanly against BscScan-verified source — with a four-hour timebox.
+- **Shipped** — The finding schema, the severity model and the dedupe key were
+  ported. The Slither/solc pipeline was not, and the fallback agent named in
+  AGENTS.md was built instead: approval-risk and privileged-function triage
+  (unlimited approvals, ownable/privileged selectors, proxy status,
+  pausability, mint authority, blacklist functions).
+- **Why** — The port could not be clean, and the reason was dependencies rather
+  than effort: `solc` and `slither` are not installed on this VPS and a BscScan
+  API key is a new external dependency. Installing a Python toolchain and
+  fetching verified source for a security agent is a day, not four hours. The
+  timebox exists precisely for this, so it was taken immediately rather than
+  burned down first.
+- **Cost** — No dataflow analysis, no reentrancy detection, no bytecode
+  decompilation. Redcell triages authority and approvals; it does not audit.
+  Every response says so.
+- **Restore** — `apt install solc`, `pipx install slither-analyzer`, a BscScan
+  key in the env registry, and the Archon pipeline behind the same `Engine`
+  interface. The interface was built to accept it.
+
+### D8-03 · Redcell ships with no MCS test, and is listed as untested
+
+- **Planned** — "Each must PASS its own MCS test before being listed. If one
+  fails, list it as failing."
+- **Shipped** — Four of five are tested and all four pass. Redcell is published
+  as **NOT TESTED**, with the reason on the page rather than a silent omission.
+- **Why** — AGENTS.md invariant 8 is explicit: if a check cannot be written as
+  an assertion with a numeric tolerance, it does not belong in MCS. There is no
+  security question with one right answer and a tolerance — "is this contract
+  safe" is judgement, and judgement belongs in the Ledger. Writing an MCS test
+  for our own security agent that no third party could be measured against
+  would be worse than having none: it would manufacture a warrant.
+- **Cost** — The highest-priced agent (0.25U) carries no warrant. That is the
+  honest state and the marketplace shows it.
+- **Restore** — Not by writing an MCS test. Redcell's evidence belongs in the
+  Ledger as ADV-01, graded against a pre-registered rubric versus a manual
+  analyst, which is exactly what P8b builds.
+
+### D8-04 · Four of 250 latency calls did not answer, and are reported as refusals
+
+- **Planned** — p95 < 8s over 50 real calls each.
+- **Shipped** — All five pass with large margin (worst p95 888ms). 246 of 250
+  calls answered; 4 returned a structured refusal because a BSC public RPC was
+  momentarily unreadable (`comptroller_unreadable`, and one upstream 400).
+- **Why** — Not a deviation in the result but in what the number means, and the
+  distinction is the product: an agent that cannot read the chain says so.
+  Every one of the four is a legible refusal naming the upstream, not a
+  fabricated answer and not a hang. Invariant 4 makes that the only acceptable
+  behaviour, and gotcha 11 predicted the cause.
+- **Cost** — A buyer sees an occasional refusal under RPC degradation. The
+  alternative — retrying silently until an answer appears — would hide a real
+  property of the network behind a better-looking number.
+- **Restore** — n/a. Widening the RPC pool reduces the rate; it should never
+  reach zero by suppression.
