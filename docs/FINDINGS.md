@@ -150,3 +150,39 @@ This is a fabricated-looking metric arriving through an entirely legitimate
 contract read, which is the most dangerous kind. The yield reader now requires
 a market to hold at least $25,000 of cash and report under 200% APR, and
 publishes every exclusion with its reason rather than filtering silently.
+
+---
+
+## F-06 · "Hours out of range" cannot be sourced from public BSC infrastructure
+
+The number that makes an LP feel the loss is how long their position has been
+earning nothing. Every obvious source for it is unusable on BSC, and each was
+measured rather than assumed:
+
+| Source | Measured on 2026-09-05 | Usable? |
+|---|---|---|
+| Pool `slot0` at a past block | BSC public nodes keep ~64 blocks of state | No |
+| Official PancakeSwap V3 BSC subgraph | head **95,216,583** vs chain **120,127,162** | No |
+| `Swap` event logs (carry `tick`) | only the most recent ~5,000 blocks served | Barely |
+
+The subgraph at `thegraph.pancakeswap.com/exchange-v3-bsc` answers happily and
+is **roughly four months behind** — its last indexed block timestamps to late
+April. It reports no error; it simply serves April. Anything built on it
+presents April's range history as today's.
+
+The log window is the only live source, and it is about **37 minutes** wide.
+`bsc-rpc.publicnode.com` and `bsc.blockrazor.xyz` both serve a 5,000-block
+span at head and refuse any range older than that; four other public providers
+refuse log queries outright. So a swap that took a position out of range an
+hour ago is already invisible.
+
+**Therefore any product displaying "out of range for 3 days" on BSC is either
+paying for an archive node or an indexer, or making the number up.** Ours
+measures it: a watcher records each tracked pool's tick on a schedule as a
+first-party observation, and the figure is reported as "measured by us since
+T" with the watch start stated. Before T we have no data, and we say so
+rather than extrapolating backwards.
+
+The 5,000-block log window is still used, for the one thing it is good at:
+pinning the exact block of the most recent crossing when it happened inside
+that window.

@@ -5,3 +5,5 @@ export { pancakeV3Reader, type V3Position, type V3Portfolio, type TokenMeta } fr
 export { venusReader, exactRepayToReachTargetHf, healthFactorOf, type VenusAccount, type VenusMarket } from './venus.js'
 export { spotReader, TRACKED_TOKENS, type SpotBalance, type SpotHoldings } from './spot.js'
 export { yieldReader, netAprAtSize, aprFromRatePerBlock, type YieldVenue, type YieldQuote, type YieldOpportunities, type ExcludedVenue } from './yield.js'
+export { rangeHistory, swapEvent, MAX_LOG_SPAN, BSC_BLOCK_SECONDS, type RangeHistory } from './range-history.js'
+export { readTicks, measureOutOfRange, type TickReading, type OutOfRangeMeasure } from './pool-watch.js'

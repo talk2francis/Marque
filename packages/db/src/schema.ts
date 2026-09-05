@@ -544,6 +544,40 @@ export const benchmarkRun = pgTable('benchmark_run', {
   hashIdx: index('benchmark_run_hash_idx').on(t.manifestHash),
 }))
 
+/**
+ * FIRST-PARTY. A pool's tick, observed by us, on a schedule.
+ *
+ * There is no other source. BSC keeps ~64 blocks of state, the official
+ * PancakeSwap V3 subgraph is about four months behind head, and public log
+ * queries reach back roughly 37 minutes (docs/FINDINGS.md F-06). So "how long
+ * has this position been out of range" is answerable only from observations we
+ * made ourselves and can never recreate — invariant 12 applies in full: this
+ * table is never dropped and never rebuilt from chain.
+ */
+export const poolTickObservation = pgTable('pool_tick_observation', {
+  id: serial('id').primaryKey(),
+  pool: text('pool').notNull(),
+  /** The tick at the moment we looked. */
+  tick: integer('tick').notNull(),
+  /** Chain head when we read it, so the reading can be placed exactly. */
+  blockNumber: text('block_number').notNull(),
+  observedAt: timestamp('observed_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({
+  poolTimeIdx: index('pool_tick_pool_time_idx').on(t.pool, t.observedAt),
+}))
+
+/** When we started watching a pool. Before this, we have no data and say so. */
+export const poolWatch = pgTable('pool_watch', {
+  pool: text('pool').primaryKey(),
+  fee: integer('fee').notNull(),
+  token0Symbol: text('token0_symbol'),
+  token1Symbol: text('token1_symbol'),
+  /** Why we watch it: a position we were asked about, or a benchmark pool. */
+  reason: text('reason').notNull(),
+  watchingSince: timestamp('watching_since', { withTimezone: true }).notNull().defaultNow(),
+  lastObservedAt: timestamp('last_observed_at', { withTimezone: true }),
+})
+
 /** How a sealed call turned out. `unresolved` is honest, not a placeholder. */
 export const SEAL_OUTCOMES = ['correct', 'incorrect', 'unresolved', 'void'] as const
 export type SealOutcomeValue = (typeof SEAL_OUTCOMES)[number]
