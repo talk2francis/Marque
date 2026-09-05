@@ -112,7 +112,9 @@ export default async function StandardPage() {
                   const acc = byTest.get(String(c['test_id'])) ?? { pass: 0, fail: 0, errored: 0 }
                   return (
                     <tr key={String(c['id'])}>
-                      <td className="mono">{String(c['test_id'])}</td>
+                      <td className="mono">
+                        <a href={`/standard/${String(c['test_id'])}`}>{String(c['test_id'])}</a>
+                      </td>
                       <td className="mono">{String(c['id'])}</td>
                       <td className="mono">{String(c['block_number'])}</td>
                       <td><DataCell align="left">{acc.pass}</DataCell></td>

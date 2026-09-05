@@ -168,3 +168,8 @@
   .nav, .main, .footer { padding-inline: var(--s4); }
   .section { padding: var(--s6) 0; }
 }
+
+/* Tap targets: links inside the lede and example paragraphs sit in line boxes
+   under the 24px minimum. Padding the link box lifts the hit area without
+   touching the type scale, which stays identical in daylight and cockpit. */
+.lede a, .example a { display: inline-block; padding-block: 4px; }

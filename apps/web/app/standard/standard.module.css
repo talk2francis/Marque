@@ -50,3 +50,8 @@
 .prose hr { border: 0; border-top: 1px solid var(--line); margin: var(--s6) 0; }
 
 @media (max-width: 640px) { .page { padding-inline: var(--s4); } }
+
+/* Tap targets: the caption- and data-sized rows here are under the 24px
+   minimum, so links inside them get a padded box rather than a bigger font —
+   the type scale is identical in daylight and cockpit (invariant 15). */
+.table a, .note a, .cases a, .lede a { display: inline-block; padding-block: 4px; color: var(--chain); }

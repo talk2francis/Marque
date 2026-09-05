@@ -1,5 +1,7 @@
 import { Statement, DataCell, EmptyState, LinkButton, Chip, MeasureRule, Tape, ProvenanceChip } from '@marque/ui'
 import { BRAND } from '@marque/ui/brand'
+import { sql } from 'drizzle-orm'
+import { db } from '@marque/db'
 import { funnel, categoryFunnel } from '@marque/registry'
 import { Desk } from './desk/Desk'
 import { SiteHeader, SiteFooter } from './_components/SiteHeader'
@@ -50,6 +52,28 @@ const ORDER = ['rebalancing', 'grid', 'yield', 'health_factor'] as const
 export default async function Home() {
   // Measured at request time. If the database is unreachable the sections that
   // depend on it say so, rather than rendering a zero that looks like a fact.
+  const homeCounts = await db().execute(sql`
+    select
+      (select count(*)::int from benchmark) as benchmarks,
+      (select count(*)::int from receipt) as receipts,
+      (select count(*)::int from conformance_result
+        where pass = false and error is null and agent_id not like 'stub:%' and agent_id not like 'marque:%'
+      ) as public_failures
+  `).then((r) => (((r as { rows?: unknown[] }).rows ?? (r as unknown[])) as Array<Record<string, unknown>>)[0] ?? {})
+    .catch(() => ({} as Record<string, unknown>))
+
+  // One real, named public failure to link. An agent that calls itself a health
+  // factor monitor and fails every field of the health factor test is the most
+  // honest thing on this page, and it is linked rather than described.
+  const namedFailure = await db().execute(sql`
+    select cr.agent_id, cr.test_id, a.name, jsonb_array_length(cr.failed_fields) as n
+    from conformance_result cr join agent a on a.id = cr.agent_id
+    where cr.pass = false and cr.error is null and cr.agent_id not like 'stub:%'
+      and cr.agent_id not like 'marque:%' and jsonb_array_length(cr.failed_fields) > 0
+    order by jsonb_array_length(cr.failed_fields) desc, cr.ran_at desc limit 1
+  `).then((r) => (((r as { rows?: unknown[] }).rows ?? (r as unknown[])) as Array<Record<string, unknown>>)[0] ?? null)
+    .catch(() => null)
+
   const [stages, categories] = await Promise.all([
     funnel(56).catch(() => null),
     categoryFunnel(56).catch(() => null),
@@ -189,26 +213,48 @@ export default async function Home() {
             Because we compute the correct answer ourselves before asking an agent, the question
             &ldquo;does hiring this beat doing it yourself&rdquo; is measurable rather than claimed.
           </p>
-          <EmptyState title="The Ledger has no benchmarks yet.">
-            <p>
-              Benchmarks are run against a rubric that is version-hashed and published before any
-              run, with both outputs attached. Until those runs exist this section stays empty
-              rather than showing an illustrative number.
-            </p>
-            <p>
-              The published standard the agents are tested against is already live at{' '}
-              <a href="/standard">/standard</a>.
-            </p>
-          </EmptyState>
+          <p className={styles.lede}>
+            {Number(homeCounts['benchmarks'] ?? 0)} benchmarks are registered, each with its rubric
+            hashed before any arm ran, and the agent arms recorded with their manifests. None is a
+            finished comparison yet: the manual arm is run by a human with a stopwatch, and
+            simulating that would make every number on the page worthless.{' '}
+            <a href="/ledger">See the Ledger</a>, or{' '}
+            <a href="/ledger/methodology">read the method</a>.
+          </p>
         </section>
 
         {/* ---- 5. Recent runs ---- */}
         <section className={styles.section}>
           <Statement>See what it has done before you decide what it may do.</Statement>
-          <EmptyState title="No runs have settled yet.">
-            <p>Every settled run gets a public receipt with its transaction hashes. None exist yet, so none are shown.</p>
-          </EmptyState>
+          <p className={styles.lede}>
+            {Number(homeCounts['receipts'] ?? 0)} settled runs carry a public receipt with four
+            proof blocks — commercial, execution, authority and quality — the canonical hash, and
+            the transaction that anchored it on chain.
+          </p>
         </section>
+
+        {/* ---- 5b. One real, named public failure ---- */}
+        {namedFailure !== null && (
+          <section className={styles.section}>
+            <Statement>Registration answers who. It never answers how good.</Statement>
+            <p className={styles.lede}>
+              <strong>{String(namedFailure['name'])}</strong> is registered on BNB Smart Chain and
+              answers when called. Run against{' '}
+              <a href={`/standard/${String(namedFailure['test_id'])}`}>
+                {String(namedFailure['test_id'])}
+              </a>
+              , it failed {Number(namedFailure['n'])} of its checked fields — arithmetic with one
+              right answer, computed by us from chain state at a pinned block.
+            </p>
+            <p className={styles.example}>
+              We publish that, with the fields it failed and the reason for each, the same way we
+              publish our own agents&rsquo; results. Of{' '}
+              {Number(homeCounts['public_failures'] ?? 0)} third-party conformance runs recorded so
+              far, none has passed. Honest attrition is the most credible thing here, and a
+              directory that only listed its passes would be a brochure.
+            </p>
+          </section>
+        )}
 
         {/* ---- 6. Builders ---- */}
         <section className={styles.sectionQuiet}>
@@ -216,11 +262,12 @@ export default async function Home() {
             <div>
               <span className={styles.buildersTitle}>Run an agent on BNB Smart Chain?</span>
               <p className={styles.buildersCopy}>
-                Test it against the published standard for free, with no signup. You get the same
-                per-field diff we publish.
+                Test it against the published standard for free, with no signup and no wallet.
+                You get the same per-field diff we publish, and the result is not recorded against
+                you.
               </p>
             </div>
-            <LinkButton href="/standard" variant="secondary">Read the standard</LinkButton>
+            <LinkButton href="/builders/test" variant="secondary">Test your agent</LinkButton>
           </div>
         </section>
       </main>
