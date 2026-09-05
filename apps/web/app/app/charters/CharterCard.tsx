@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { Chip, DataCell, MeasureRule } from '@marque/ui'
+import { announceChartersChanged } from '../../_components/CharterStrip'
 import { scanAddress, scanTx } from '../../../lib/charter-templates'
 import styles from './charters.module.css'
 
@@ -115,6 +116,10 @@ export function CharterCard({ charter, subject }: { charter: CharterView; subjec
       const data = (await res.json()) as { charter?: CharterView; error?: string }
       if (!res.ok || !data.charter) { setError(data.error ?? 'the revocation did not land'); return }
       setLive(data.charter)
+      // Tell the strip at once. Its poll is fifteen seconds, and a strip still
+      // saying "Charter active" after the revoke has landed is the one stale
+      // state a safety product may never show.
+      announceChartersChanged()
     } catch {
       setError('the network request failed before the revocation could be sent')
     } finally {

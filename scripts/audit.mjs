@@ -44,6 +44,7 @@ const DEFAULT_ROUTES = [
   // P10 builder and judge surfaces.
   '/builders/test', '/status',
   '/standard/MCS-REB-1', '/standard/MCS-HF-1',
+  '/judge',
 ]
 
 function routes() {

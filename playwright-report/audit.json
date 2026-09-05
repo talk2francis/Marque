@@ -1,15 +1,17 @@
 {
   "base": "https://marque.trade",
-  "ranAt": "2026-09-05T18:30:43.189Z",
+  "ranAt": "2026-09-05T18:51:49.874Z",
   "results": [
     {
-      "route": "/",
+      "route": "/judge",
       "viewport": "1440",
       "status": 200,
       "issues": [],
       "consoleErrors": [],
       "pageErrors": [],
-      "failedRequests": [],
+      "failedRequests": [
+        "GET https://marque.trade/status?_rsc=12crh — net::ERR_ABORTED"
+      ],
       "focusVisible": {
         "ok": true,
         "tag": "a",
@@ -23,13 +25,15 @@
       "allCapsLabels": []
     },
     {
-      "route": "/",
+      "route": "/judge",
       "viewport": "1024",
       "status": 200,
       "issues": [],
       "consoleErrors": [],
       "pageErrors": [],
-      "failedRequests": [],
+      "failedRequests": [
+        "GET https://marque.trade/status?_rsc=12crh — net::ERR_ABORTED"
+      ],
       "focusVisible": {
         "ok": true,
         "tag": "a",
@@ -43,13 +47,15 @@
       "allCapsLabels": []
     },
     {
-      "route": "/",
+      "route": "/judge",
       "viewport": "768",
       "status": 200,
       "issues": [],
       "consoleErrors": [],
       "pageErrors": [],
-      "failedRequests": [],
+      "failedRequests": [
+        "GET https://marque.trade/status?_rsc=12crh — net::ERR_ABORTED"
+      ],
       "focusVisible": {
         "ok": true,
         "tag": "a",
@@ -63,7 +69,7 @@
       "allCapsLabels": []
     },
     {
-      "route": "/",
+      "route": "/judge",
       "viewport": "390",
       "status": 200,
       "issues": [],

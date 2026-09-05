@@ -20,6 +20,16 @@ import styles from './strip.module.css'
  * simulated, and when no charter is live the strip is absent rather than empty.
  */
 
+/**
+ * Fired whenever a charter is granted or revoked, so the strip stops claiming
+ * authority is live the instant it is not.
+ */
+export const CHARTERS_CHANGED = 'marque:charters-changed'
+
+export function announceChartersChanged(): void {
+  if (typeof window !== 'undefined') window.dispatchEvent(new Event(CHARTERS_CHANGED))
+}
+
 interface Cap { symbol: string; limit: number; spent: number; remaining: number }
 interface StripCharter {
   id: string
@@ -63,7 +73,21 @@ export function CharterStrip() {
     void load()
     const poll = setInterval(load, 15_000)
     const tick = setInterval(() => setNow(Date.now()), 1000)
-    return () => { cancelled = true; clearInterval(poll); clearInterval(tick) }
+
+    // A fifteen-second poll meant the strip could go on saying "Charter active"
+    // for fifteen seconds after the revoke transaction had already landed —
+    // caught in the judge-mode recording. On a page whose entire job is showing
+    // that authority is live, that is the one staleness that must never happen,
+    // so grants and revocations announce themselves and the strip refetches at
+    // once. The poll stays as the backstop for changes made in another tab.
+    const onChanged = () => { void load() }
+    window.addEventListener(CHARTERS_CHANGED, onChanged)
+
+    return () => {
+      cancelled = true
+      clearInterval(poll); clearInterval(tick)
+      window.removeEventListener(CHARTERS_CHANGED, onChanged)
+    }
   }, [])
 
   const live = (charters ?? []).filter((c) => new Date(c.expiresAt).getTime() > now)

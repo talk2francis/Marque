@@ -1,0 +1,45 @@
+.page { max-width: 900px; margin: 0 auto; padding: var(--s7) var(--s5) var(--s9); }
+.head { display: flex; flex-direction: column; gap: var(--s3); padding-bottom: var(--s5); }
+.lede { margin: 0; max-width: 68ch; color: var(--fg-soft); font-size: var(--size-body); line-height: var(--lh-body); }
+.note { margin: 0; max-width: 68ch; font-size: var(--size-caption); line-height: 1.55; color: var(--fg-soft); }
+.note a { display: inline-block; padding-block: 4px; color: var(--chain); }
+
+.clock { display: flex; gap: var(--s3); align-items: baseline; flex-wrap: wrap; padding: var(--s3) 0; border-bottom: 1px solid var(--line); }
+.clockValue { font-family: var(--font-mono); font-size: 26px; line-height: 1; }
+.clockLabel { font-size: var(--size-caption); color: var(--fg-soft); }
+
+.steps { list-style: none; margin: 0; padding: 0; }
+.step { display: flex; gap: var(--s4); padding: var(--s4) 0; border-top: 1px solid var(--line); align-items: flex-start; }
+.step:first-child { border-top: 0; }
+.stepIndex {
+  flex: 0 0 auto; width: 26px; height: 26px; border: 1px solid var(--line); border-radius: 50%;
+  display: grid; place-items: center; font-family: var(--font-mono); font-size: 12px; color: var(--fg-soft);
+}
+.stepDone { border-color: var(--holds); color: var(--holds); }
+.stepActive { border-color: var(--brass); color: var(--brass); }
+.stepBody { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.stepTitle { font-size: var(--size-title); font-weight: 500; }
+.stepWhy { font-size: var(--size-caption); color: var(--fg-soft); line-height: 1.55; max-width: 68ch; }
+.stepResult {
+  font-family: var(--font-mono); font-size: var(--size-data); line-height: 1.55;
+  overflow-wrap: anywhere; word-break: break-word;
+}
+.stepResult a { color: var(--chain); display: inline-block; padding-block: 4px; }
+.stepActions { display: flex; gap: var(--s3); flex-wrap: wrap; align-items: center; padding-top: 4px; }
+
+.agents { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--s2); }
+.agentRow { display: flex; gap: var(--s3); align-items: baseline; flex-wrap: wrap; font-size: var(--size-data); }
+.agentWhy { font-size: var(--size-caption); color: var(--fg-soft); }
+
+.warn { margin: 0; padding: var(--s3); border-left: 2px solid var(--watch); background: var(--ground-raised);
+  font-size: var(--size-caption); line-height: 1.55; color: var(--fg); max-width: 68ch; }
+
+/* The closing drawer: what they just saw, against the rubric it answers. */
+.drawer { margin-top: var(--s6); border-top: 1px solid var(--line); padding-top: var(--s5); }
+.rubric { width: 100%; border-collapse: collapse; font-size: var(--size-data); display: block; overflow-x: auto; }
+.rubric th, .rubric td { text-align: left; padding: 8px var(--s4) 8px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+.rubric th { color: var(--fg-soft); font-weight: 500; font-size: var(--size-caption); white-space: nowrap; }
+.rubric td.wrap { white-space: normal; min-width: 28ch; }
+.rubric a { color: var(--chain); display: inline-block; padding-block: 4px; }
+
+@media (max-width: 640px) { .page { padding-inline: var(--s4); } .step { gap: var(--s3); } }
