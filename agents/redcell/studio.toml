@@ -1,0 +1,82 @@
+[project]
+name = "redcell-agent"
+
+[stack]
+# Project-lifetime facts: which runtime adapter recipe this Agent was
+# scaffolded against. doctor / dev / deploy read these to know what to
+# check, load, and route. runtime: agentcore | azure-foundry.
+runtime = "agentcore"
+# Public faces exposed by this one runtime and signer (canonical order):
+#   A2A — serveA2a: agent card + negotiate/notify_funded skills.
+#   MCP — streamable-HTTP /mcp: negotiate (signed quote) + notify_funded
+#         (verify → deliver → submit, synchronously within the tool call) +
+#         read-only chain tools.
+#   X402 or MPP — publish exactly one sibling B402 seller route (/x402 or
+#          /mpp). Payment-only still uses A2A as the cloud carrier but hides
+#          that native face at the public gateway.
+protocols = ["A2A","X402"]
+
+[network]
+default = "bsc-testnet"
+
+[wallet]
+# Local keystore signer. The Agent is the SOLE key-holder/signer.
+# The keystore lives at the WORKSPACE root — outside app/agent (the deploy
+# codeLocation) — so no packaging path can bundle it into a deploy artifact.
+kind = "evm-local"
+signer = "local"
+keystore_dir = ".studio/wallets"
+# address = "0x..."   # filled by `bag wallet new`
+address = "0x5d47Ac7b6A73b4ebA1105677258e9baf904f9309"
+
+[llm]
+provider = "anthropic"
+model = "claude-sonnet-4-5"
+
+[payments.erc8183]
+# Read by the Agent: it quotes the FIXED `price`, CLAMPS it to [min,max],
+# freezes a short-TTL offer, and EIP-191 signs it — pricing is rule-based, the
+# LLM never prices. price=0 is FREE and is supported by the canonical stack.
+currency = "0xc70B8741B8B07A6d61E54fd4B20f22Fa648E5565"   # $U token address — prefilled from [network].default; rarely changed
+# All prices are in wei of the currency token. U has 18 decimals (not 6 like USDC).
+price = "250000000000000000"                    # wei; 0 = FREE (zero token escrow)
+min_price = "0"                                # wei — clamp floor
+max_price = ""                                 # wei — clamp ceiling; empty = unbounded; SET before going live
+quote_ttl_seconds = 900                        # seconds a signed quote stays valid; SDK caps at 900 (~15min work window)
+default_estimated_completion_seconds = 600
+poll_interval_seconds = 30
+auto_settle = false                            # opt-in: detect dispute-window-elapsed → settle
+
+[storage]
+# Deliverables written to local disk (file://). Offline-dev only —
+# does NOT survive deploy. Path from STORAGE_LOCAL_PATH.
+kind = "local"
+
+
+[payments.b402_seller]
+# Public X402 seller rail mounted at /x402. Credentials stay in
+# <workspace>/.studio/.env.local and are issued per B402 environment.
+enabled = true
+# Decimal USD string; "0" is explicit FREE passthrough and bypasses B402.
+price_usd = "0.25"
+# v1 supports United Stables (U) through EIP-3009 only.
+assets = ["U"]
+# Empty means the agent wallet receives payment.
+pay_to = ""
+# Payment settles before work; this bounds only the post-settlement work.
+work_timeout_seconds = 60
+# Optional Bazaar metadata can be added later as scalar JSON fields under
+# [payments.b402_seller.bazaar]: info_json, schema_json, description,
+# and route_template.
+
+[budget]
+# auto-topup consent — `acknowledged_at` is the ISO-8601 UTC
+# timestamp marking when the user explicitly accepted the auto-topup terms.
+# Both `enabled = true` AND a valid `acknowledged_at` are required for the
+# in-process auto-topup hook to fire (defends against hand-edits).
+enabled = false
+acknowledged_at = "2026-09-05T06:40:59Z"
+# Caps — tighten/loosen via `bag budget enable --max-per-topup-usd N ...`
+max_per_topup_usd = 1.0
+max_per_day_usd = 3.0
+max_per_month_usd = 15.0

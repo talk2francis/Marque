@@ -20,14 +20,19 @@
     "mcs": "tsx scripts/mcs.mts",
     "standard": "tsx scripts/generate-standard.mts",
     "hire": "tsx scripts/hire.mts",
-    "p6": "tsx scripts/p6-acceptance.mts"
+    "p6": "tsx scripts/p6-acceptance.mts",
+    "p8a": "tsx scripts/p8a-acceptance.mts",
+    "p8b": "tsx scripts/p8b-run.mts"
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",
+    "@marque/agent-engines": "workspace:*",
     "@marque/chain": "workspace:*",
     "@marque/conformance": "workspace:*",
     "@marque/db": "workspace:*",
     "@marque/execution": "workspace:*",
+    "@marque/ledger": "workspace:*",
+    "@marque/mandates": "workspace:*",
     "@marque/positions": "workspace:*",
     "@marque/probe": "workspace:*",
     "@marque/registry": "workspace:*",
@@ -40,8 +45,7 @@
     "tsx": "^4.19.2",
     "typescript": "^5.7.2",
     "typescript-eslint": "^8.18.1",
-    "vitest": "^2.1.8",
-    "@marque/mandates": "workspace:*"
+    "vitest": "^2.1.8"
   },
   "dependencies": {
     "@altananetwork/sdk": "^0.9.0"

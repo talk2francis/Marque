@@ -24,7 +24,9 @@
     "@marque/chain": "workspace:*",
     "zod": "^3.24.1",
     "viem": "^2.21.55",
-    "server-only": "^0.0.1"
+    "server-only": "^0.0.1",
+    "@marque/ledger": "workspace:*",
+    "@marque/agent-engines": "workspace:*"
   },
   "devDependencies": {
     "@types/react": "^19.0.2",

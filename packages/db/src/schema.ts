@@ -434,3 +434,153 @@ export type RunEvent = typeof runEvent.$inferSelect
 export type NewRunEvent = typeof runEvent.$inferInsert
 export type ReceiptRow = typeof receipt.$inferSelect
 export type NewReceiptRow = typeof receipt.$inferInsert
+
+// ---------------------------------------------------------------------------
+// FIRST-PARTY OBSERVATIONS — the Ledger (P8b)
+//
+// MCS tests facts; the Ledger tests judgement. These rows are measurements —
+// a benchmark run, a stopwatch reading, a sealed recommendation and how it
+// resolved. None of them can be rebuilt from chain, and invariant 12 forbids
+// dropping them. The Ledger is the single most deletable-looking and least
+// deletable thing in this database.
+// ---------------------------------------------------------------------------
+
+/** Which arm produced an output. Stripped before blind scoring. */
+export const BENCHMARK_ARMS = ['agent', 'manual'] as const
+export type BenchmarkArm = (typeof BENCHMARK_ARMS)[number]
+
+/** FIRST-PARTY. One benchmark: a task, a rubric, and the arms that answered it. */
+export const benchmark = pgTable('benchmark', {
+  /** e.g. ADV-01. Stable and published. */
+  id: text('id').primaryKey(),
+  title: text('title').notNull(),
+  category: text('category').$type<Category>().notNull(),
+  /** The agent arm's identity. */
+  agentId: text('agent_id').notNull(),
+  agentName: text('agent_name'),
+  /** The exact task text both arms were given. */
+  task: text('task').notNull(),
+  taskHash: text('task_hash').notNull(),
+  /** Pinned inputs: subject, block, policy. */
+  input: jsonb('input').$type<Record<string, unknown>>().notNull(),
+  inputHash: text('input_hash').notNull(),
+
+  /**
+   * The rubric, PRE-REGISTERED. Written before any arm runs, and hashed, so a
+   * later result cannot be graded by a quietly different standard.
+   */
+  rubricVersion: text('rubric_version').notNull(),
+  rubricHash: text('rubric_hash').notNull(),
+  rubric: jsonb('rubric').$type<Record<string, unknown>>().notNull(),
+  rubricRegisteredAt: timestamp('rubric_registered_at', { withTimezone: true }).notNull().defaultNow(),
+
+  /** Why this benchmark exists and what it would take to falsify the result. */
+  method: text('method').notNull(),
+  /** False for the stretch benchmark until it is actually run. */
+  published: boolean('published').notNull().default(false),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({
+  categoryIdx: index('benchmark_category_idx').on(t.category),
+}))
+
+/** FIRST-PARTY. One arm, one repetition. Every arm runs at least twice. */
+export const benchmarkRun = pgTable('benchmark_run', {
+  id: serial('id').primaryKey(),
+  benchmarkId: text('benchmark_id').notNull().references(() => benchmark.id, { onDelete: 'restrict' }),
+  arm: text('arm').$type<BenchmarkArm>().notNull(),
+  /** 1 or 2. A single run is an anecdote. */
+  rep: integer('rep').notNull(),
+
+  /** The answer, whole. Hashed, so the output shown is the output graded. */
+  output: jsonb('output'),
+  outputText: text('output_text'),
+  outputHash: text('output_hash').notNull(),
+
+  /** Wall clock. Measured, never estimated (escalation gate 4). */
+  elapsedMs: integer('elapsed_ms').notNull(),
+  /** How the elapsed figure was obtained, in words. Published. */
+  timingMethod: text('timing_method').notNull(),
+
+  blockNumber: text('block_number').notNull(),
+  /** ERC-8183 job id, when the arm was hired through the commerce rail. */
+  jobId: text('job_id'),
+  txHashes: jsonb('tx_hashes').$type<string[]>().notNull().default([]),
+
+  /** Itemized: gas, LLM, agent fee and human time are separate lines. */
+  costBreakdown: jsonb('cost_breakdown').$type<Record<string, unknown>>().notNull(),
+
+  /** Filled after blind scoring. Null until then, never a placeholder zero. */
+  scoreBreakdown: jsonb('score_breakdown').$type<Record<string, number>>(),
+  scoreTotal: doublePrecision('score_total'),
+  scoreOutOf: doublePrecision('score_out_of'),
+  scoreReasons: jsonb('score_reasons').$type<Record<string, string>>(),
+  scoredAt: timestamp('scored_at', { withTimezone: true }),
+  /** True when the scorer could not see which arm this was. */
+  scoredBlind: boolean('scored_blind').notNull().default(false),
+
+  /** The full manifest, and its hash. */
+  manifest: jsonb('manifest').$type<Record<string, unknown>>().notNull(),
+  manifestHash: text('manifest_hash').notNull(),
+
+  /** Screen recording or other evidence for a manual arm. */
+  evidenceUrl: text('evidence_url'),
+  note: text('note'),
+  ranAt: timestamp('ran_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({
+  benchArmIdx: index('benchmark_run_bench_idx').on(t.benchmarkId, t.arm, t.rep),
+  hashIdx: index('benchmark_run_hash_idx').on(t.manifestHash),
+}))
+
+/** How a sealed call turned out. `unresolved` is honest, not a placeholder. */
+export const SEAL_OUTCOMES = ['correct', 'incorrect', 'unresolved', 'void'] as const
+export type SealOutcomeValue = (typeof SEAL_OUTCOMES)[number]
+
+/**
+ * FIRST-PARTY. Every recommendation, hashed and anchored BEFORE its outcome.
+ *
+ * This table is what makes a track record falsifiable. Without it any win rate
+ * is assembled after the fact from a set chosen once the answers were known.
+ */
+export const sealedCall = pgTable('sealed_call', {
+  id: serial('id').primaryKey(),
+  /** keccak(recommendation ‖ block ‖ agentId ‖ timestamp). */
+  hash: text('hash').notNull().unique(),
+  agentId: text('agent_id').notNull(),
+  category: text('category').$type<Category>().notNull(),
+
+  /** The recommendation exactly as issued. */
+  recommendation: jsonb('recommendation').$type<Record<string, unknown>>().notNull(),
+  /** The subject it was about, so a scorer knows what to re-read. */
+  subject: text('subject').notNull(),
+  /** Block at issue. The seal precedes the outcome by construction. */
+  blockNumber: text('block_number').notNull(),
+  issuedAt: timestamp('issued_at', { withTimezone: true }).notNull().defaultNow(),
+
+  /** What must be true later for this to count as correct. Written at issue. */
+  resolutionRule: text('resolution_rule').notNull(),
+  resolveAfter: timestamp('resolve_after', { withTimezone: true }).notNull(),
+
+  /** The on-chain seal. Null means the anchor did not land, and we say so. */
+  sealTxHash: text('seal_tx_hash'),
+  sealBlock: text('seal_block'),
+  sealedAt: timestamp('sealed_at', { withTimezone: true }),
+  /** 97 while charters and seals live on testnet. */
+  chainId: integer('chain_id').notNull().default(97),
+
+  outcome: text('outcome').$type<SealOutcomeValue>().notNull().default('unresolved'),
+  /** What the chain said when the call was resolved. */
+  resolutionEvidence: jsonb('resolution_evidence').$type<Record<string, unknown>>(),
+  resolvedAt: timestamp('resolved_at', { withTimezone: true }),
+  resolvedAtBlock: text('resolved_at_block'),
+}, (t) => ({
+  agentIdx: index('sealed_call_agent_idx').on(t.agentId, t.issuedAt.desc()),
+  outcomeIdx: index('sealed_call_outcome_idx').on(t.outcome),
+  resolveIdx: index('sealed_call_resolve_idx').on(t.resolveAfter),
+}))
+
+export type Benchmark = typeof benchmark.$inferSelect
+export type NewBenchmark = typeof benchmark.$inferInsert
+export type BenchmarkRun = typeof benchmarkRun.$inferSelect
+export type NewBenchmarkRun = typeof benchmarkRun.$inferInsert
+export type SealedCall = typeof sealedCall.$inferSelect
+export type NewSealedCall = typeof sealedCall.$inferInsert

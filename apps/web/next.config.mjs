@@ -6,7 +6,7 @@ const nextConfig = {
   outputFileTracingRoot: new URL('../../', import.meta.url).pathname,
   reactStrictMode: true,
   // Workspace packages ship TypeScript source, not a build step.
-  transpilePackages: ['@marque/db', '@marque/ui', '@marque/chain', '@marque/registry', '@marque/probe', '@marque/positions', '@marque/mandates', '@marque/execution', '@marque/conformance'],
+  transpilePackages: ['@marque/db', '@marque/ui', '@marque/chain', '@marque/registry', '@marque/probe', '@marque/positions', '@marque/mandates', '@marque/execution', '@marque/conformance', '@marque/ledger', '@marque/agent-engines'],
   webpack(config) {
     // Those packages use TypeScript's ESM convention of importing './x.js' from
     // './x.ts'. Node and tsx resolve that natively; webpack needs telling.

@@ -25,8 +25,75 @@ function loadEnv() {
   return out
 }
 
+/**
+ * Per-agent secrets.
+ *
+ * Each reference agent owns an encrypted keystore and the password that
+ * unlocks it, and both live beside the agent in `.studio/` — outside the repo,
+ * gitignored, 0600. Merged on top of the shared secrets so an agent process
+ * gets exactly its own key and no other agent's.
+ */
+function loadAgentEnv(name) {
+  const file = `/root/marque/agents/${name}/.studio/.env.local`
+  const out = {}
+  if (!fs.existsSync(file)) return out
+  for (const line of fs.readFileSync(file, 'utf8').split('\n')) {
+    const trimmed = line.trim()
+    if (!trimmed || trimmed.startsWith('#')) continue
+    const eq = trimmed.indexOf('=')
+    if (eq === -1) continue
+    const key = trimmed.slice(0, eq)
+    const value = trimmed.slice(eq + 1)
+    if (value !== '') out[key] = value
+  }
+  return out
+}
+
 const env = loadEnv()
 const ROOT = '/root/marque'
+
+/**
+ * The five reference agents (P8a).
+ *
+ * Self-hosted from the BNB Agent Studio scaffold, on their own ports behind
+ * Caddy. Deliberately NOT `bag deploy --provider bnb`: that is a 48-hour
+ * testnet trial in the operator's cloud and signing material leaves our
+ * control (AGENTS.md gotcha 2). The emitted TypeScript is ours, so it runs
+ * here under the same supervision as everything else.
+ */
+const REFERENCE_AGENTS = [
+  { name: 'bound', port: 8611 },
+  { name: 'lattice', port: 8612 },
+  { name: 'sluicegate', port: 8613 },
+  { name: 'redcell', port: 8614 },
+  { name: 'keel', port: 8610 },
+]
+
+const agentApps = REFERENCE_AGENTS.map(({ name, port }) => ({
+  name: `marque-${name}`,
+  cwd: `${ROOT}/agents/${name}`,
+  script: `${ROOT}/node_modules/.bin/tsx`,
+  args: 'src/unifiedMain.ts',
+  interpreter: 'none',
+  env: {
+    ...env,
+    ...loadAgentEnv(name),
+    NODE_ENV: 'production',
+    AGENT_PORT: String(port),
+    AGENT_BIND_HOST: '127.0.0.1',
+    MARQUE_AGENT_PUBLIC_URL: `${env.MARQUE_PUBLIC_URL || 'https://marque.trade'}/agents/${name}`,
+  },
+  autorestart: true,
+  max_restarts: 50,
+  restart_delay: 3000,
+  // Five agents share this box with the web app and three workers, and an OOM
+  // here once took the PM2 daemon down with it. A ceiling per agent is cheaper
+  // than finding out again.
+  max_memory_restart: '300M',
+  time: true,
+  out_file: `/root/.pm2/logs/marque-${name}-out.log`,
+  error_file: `/root/.pm2/logs/marque-${name}-err.log`,
+}))
 
 module.exports = {
   apps: [
@@ -75,23 +142,7 @@ module.exports = {
       out_file: '/root/.pm2/logs/marque-classify-out.log',
       error_file: '/root/.pm2/logs/marque-classify-err.log',
     },
-    {
-      // Reference agent. Speaks standard A2A on a public path so it is reached
-      // through the same SSRF guard as any third-party agent.
-      name: 'marque-keel',
-      cwd: ROOT,
-      script: 'node_modules/.bin/tsx',
-      args: 'agents/keel/src/server.ts',
-      interpreter: 'none',
-      env: { ...env, NODE_ENV: 'production' },
-      autorestart: true,
-      max_restarts: 50,
-      restart_delay: 3000,
-      max_memory_restart: '400M',
-      time: true,
-      out_file: '/root/.pm2/logs/marque-keel-out.log',
-      error_file: '/root/.pm2/logs/marque-keel-err.log',
-    },
+    ...agentApps,
     {
       name: 'marque-web',
       cwd: `${ROOT}/apps/web`,

@@ -14,3 +14,12 @@ out/
 artifacts/
 cache/
 playwright-report/
+
+# Agent wallets and their secrets. The keystore lives beside the agent so the
+# scaffold can find it; it must never reach the repo (AGENTS.md: keys stay
+# local, never written where the repo can see them).
+agents/*/.studio/
+agents/*/vendor/
+
+# Local Claude Code tooling (the bag CLI skill pack), not product source.
+.claude/
