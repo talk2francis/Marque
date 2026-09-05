@@ -775,3 +775,25 @@ product, it is written down here.
   property of the network behind a better-looking number.
 - **Restore** — n/a. Widening the RPC pool reduces the rate; it should never
   reach zero by suppression.
+
+### D8-05 · ERC-8004 registration is blocked by an 8004scan outage, not shipped
+
+- **Planned** — Acceptance (a): all five agents live, **registered on BSC**,
+  passing their MCS tests.
+- **Shipped** — Live: yes, all five. Passing: four of five, with the fifth
+  published as untested (D8-03). **Registered: no.** The five agent wallets are
+  funded with 0.01 tBNB each and `scripts/register-agents.sh` is the one
+  remaining command.
+- **Why** — `bag erc8004 register` brokers registration through the 8004scan
+  API, and 8004scan's database is down: a plain authenticated read of
+  `/api/v1/agents?chain_id=56&limit=1` returns 500 `{"code":"DATABASE_ERROR"}`
+  with a key that has worked all week. Three hypotheses were tested — global
+  outage, our key, our code — and the failure is theirs: their host routes
+  fine, our key is unchanged, and our own site still serves from its database.
+  There is no direct-to-contract path in the CLI to route around it.
+- **Cost** — The reference agents are not discoverable through ERC-8004
+  identity until this runs. Nothing else depends on it: they are reachable,
+  they answer, they pass conformance, and the marketplace lists them from our
+  own registry. Registration is discovery, not capability.
+- **Restore** — `./scripts/register-agents.sh` once 8004scan answers 200. Under
+  five minutes, and it is idempotent per agent.
