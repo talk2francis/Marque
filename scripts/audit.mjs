@@ -39,6 +39,8 @@ const DEFAULT_ROUTES = [
   // P8b Ledger surfaces. /ledger/:id takes a registered benchmark id, so ADV-01
   // is a real row rather than a fabricated one.
   '/ledger', '/ledger/methodology', '/ledger/intake', '/ledger/ADV-01',
+  // P9 PancakeSwap Desk.
+  '/pancakeswap',
 ]
 
 function routes() {

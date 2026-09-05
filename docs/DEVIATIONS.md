@@ -820,3 +820,64 @@ product, it is written down here.
 - **Restore** — `/ledger/intake`: pick the benchmark, paste the analysis, enter
   the stopwatch time. Two repetitions each for ADV-01, ADV-02 and ADV-03
   completes acceptance (c). Blind scoring runs after both arms exist.
+
+---
+
+## P9 — PancakeSwap
+
+### D9-01 · The Desk's default address is not DEMO_ADDRESS
+
+- **Planned** — One demo address across the product.
+- **Shipped** — `/pancakeswap` defaults to `PANCAKE_DEMO_ADDRESS`, a real BSC
+  liquidity provider holding a live BTCB/USDC 0.25% position. Everywhere else
+  still uses `DEMO_ADDRESS`.
+- **Why** — Caught by looking at the audit screenshot, which the audit itself
+  passed clean: `DEMO_ADDRESS` holds Venus and spot but **no V3 liquidity**, so
+  the flagship page for a 1,000 CAKE prize opened on "No PancakeSwap V3
+  liquidity at this address". Correct, and indistinguishable from broken.
+- **Cost** — Two demo addresses to keep alive. If the LP closes that position
+  the page opens empty again.
+- **Restore** — One address holding positions in every category would collapse
+  them back. We do not control one, and manufacturing V3 liquidity to demo
+  against is real money for a screenshot.
+
+### D9-02 · Third-party agents are summarised, not listed one by one
+
+- **Planned** — "the agents that support that exact pool and fee tier, ranked,
+  with reasons."
+- **Shipped** — Bound in full with its reasons; then the shared caveat once;
+  then the twelve indexed third parties counted, three named, the rest behind
+  a disclosure.
+- **Why** — Every third party is in an identical state (never tested, never
+  probed), so listing them individually produced twelve identical paragraphs —
+  the prose form of the identical-cards tell AGENTS.md forbids. A caveat
+  repeated twelve times stops being read, which defeats disclosing it.
+- **Cost** — A reader must expand to see all twelve names. The count is always
+  visible, so nothing is hidden, only folded.
+- **Restore** — Trivial, and it becomes right the moment agents start
+  differing: `notable` already splits out any agent that has been tested or
+  probed and renders it in full.
+
+### D9-03 · Pool-level support cannot be verified for third parties
+
+- **Planned** — "agents that support that exact pool and fee tier".
+- **Shipped** — Category and liveness are verified. Pool and fee-tier support
+  is verified for our own agent only, and marked `unknown` for every third
+  party, with the reason stated once above the list.
+- **Why** — ERC-8004 metadata has no field for it. No indexed BSC agent
+  declares which pools or tiers it handles, so a claim either way would be
+  invented. Bound is `yes` because it reads the pool's own `tickSpacing` rather
+  than carrying a fixed table, which is checkable from its code.
+- **Cost** — The ranking answers "can work on this category and answers when
+  called", not "supports this pool". The page says exactly that.
+- **Restore** — Needs a declaration that does not exist yet. The nearest real
+  fix is running MCS-REB-1 against a case pinned to the pool in question, which
+  the harness can already do.
+
+### D9-04 · 9b not started, 9c cut
+
+- **9b** requires Francis's written "approved, mainnet" and $25–40 of funding,
+  and a deliberately tight range opened so it drifts out. Hard gate 1. Nothing
+  on mainnet has been touched.
+- **9c** `/pancakeswap/gaps` is cut by default per the phase brief. It is only
+  attempted if 9a and 9b are stable with time to spare, and 9b has not run.

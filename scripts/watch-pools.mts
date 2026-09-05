@@ -23,9 +23,13 @@ const MAJORS: Array<{ pool: Address; fee: number; t0: string; t1: string }> = [
 ]
 
 async function addOwner(owner: Address): Promise<number> {
-  const portfolio = await pancakeV3Reader(owner)
+  const read = await pancakeV3Reader(owner)
+  if (!read.ok) {
+    console.error(`could not read ${owner}: ${read.detail ?? read.error}`)
+    return 0
+  }
   let added = 0
-  for (const p of portfolio.positions) {
+  for (const p of read.data.positions) {
     await db().insert(poolWatch).values({
       pool: p.pool.toLowerCase(),
       fee: p.fee,

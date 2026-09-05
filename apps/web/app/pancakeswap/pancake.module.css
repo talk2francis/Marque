@@ -1,0 +1,59 @@
+.page { max-width: 900px; margin: 0 auto; padding: var(--s7) var(--s5) var(--s9); }
+.head { display: flex; flex-direction: column; gap: var(--s3); padding-bottom: var(--s5); }
+.lede { margin: 0; max-width: 68ch; color: var(--fg-soft); font-size: var(--size-body); line-height: var(--lh-body); }
+.section { padding: var(--s6) 0; border-top: 1px solid var(--line); display: flex; flex-direction: column; gap: var(--s3); }
+.h2 { margin: 0 0 var(--s2); font-family: var(--font-statement); font-weight: 400; font-size: var(--size-statement); letter-spacing: -0.015em; }
+.muted { margin: 0; color: var(--fg-soft); font-size: var(--size-body); }
+.note { margin: 0; max-width: 68ch; font-size: var(--size-caption); line-height: 1.55; color: var(--fg-soft); }
+.note > span { margin-right: var(--s2); }
+.note a, .actions a, .agent a, .warn a, .reasons a, .facts a, .lede a {
+  display: inline-block; padding-block: 4px; color: var(--chain);
+}
+
+.lookup { display: flex; gap: var(--s3); flex-wrap: wrap; align-items: flex-end; }
+.lookup label { display: flex; flex-direction: column; gap: 6px; flex: 1 1 380px; font-size: var(--size-caption); color: var(--fg-soft); }
+.lookup input {
+  font: inherit; font-family: var(--font-mono); font-size: var(--size-data); color: var(--fg);
+  background: var(--ground-raised); border: 1px solid var(--line); border-radius: 2px; padding: 9px 10px; width: 100%;
+}
+
+.position { padding: var(--s5) 0; border-top: 1px solid var(--line); display: flex; flex-direction: column; gap: var(--s3); }
+.position:first-of-type { border-top: 0; }
+.positionHead { display: flex; gap: var(--s3); align-items: baseline; flex-wrap: wrap; }
+.positionTitle { font-size: var(--size-title); font-weight: 500; }
+.tokenId { font-family: var(--font-mono); font-size: var(--size-caption); color: var(--fg-soft); }
+
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: var(--s3) var(--s4); margin: 0; }
+.facts div { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.facts dt { font-size: var(--size-caption); color: var(--fg-soft); }
+.facts dd { margin: 0; font-size: var(--size-data); overflow-wrap: anywhere; }
+
+/* The number that makes an LP feel the loss. Given its own weight, but never
+   rendered at all when we have not measured it. */
+.loss { font-family: var(--font-mono); font-size: 22px; line-height: 1.2; }
+.lossFloor { font-size: var(--size-caption); color: var(--fg-soft); }
+
+.agents { display: flex; flex-direction: column; gap: var(--s3); margin: 0; padding: 0; list-style: none; }
+.agent { padding: var(--s3) 0; border-top: 1px dashed var(--line); display: flex; flex-direction: column; gap: 6px; }
+.agent:first-child { border-top: 0; }
+.agentHead { display: flex; gap: var(--s3); align-items: baseline; flex-wrap: wrap; }
+.agentName { font-size: var(--size-body); font-weight: 500; }
+.reasons { margin: 0; padding-left: var(--s5); font-size: var(--size-caption); color: var(--fg-soft); line-height: 1.55; }
+.reasons li { margin-bottom: 3px; }
+
+.guardrails { display: flex; flex-direction: column; gap: var(--s3); }
+.guardrail { display: flex; flex-direction: column; gap: 4px; padding: var(--s3) 0; border-top: 1px solid var(--line); }
+.guardrail:first-child { border-top: 0; }
+.guardrailName { font-size: var(--size-body); font-weight: 500; }
+.guardrailValue { font-family: var(--font-mono); font-size: var(--size-data); color: var(--fg); }
+.guardrailWhy { font-size: var(--size-caption); color: var(--fg-soft); line-height: 1.55; max-width: 68ch; }
+
+.warn { margin: 0; padding: var(--s3); border-left: 2px solid var(--watch); background: var(--ground-raised);
+  font-size: var(--size-caption); line-height: 1.55; color: var(--fg); max-width: 68ch; }
+.actions { display: flex; gap: var(--s3); flex-wrap: wrap; align-items: center; padding-top: var(--s2); }
+
+.table { width: 100%; border-collapse: collapse; font-size: var(--size-data); display: block; overflow-x: auto; }
+.table th, .table td { text-align: left; padding: 8px var(--s4) 8px 0; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.table th { color: var(--fg-soft); font-weight: 500; font-size: var(--size-caption); }
+
+@media (max-width: 640px) { .page { padding-inline: var(--s4); } }

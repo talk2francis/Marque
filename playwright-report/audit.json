@@ -1,9 +1,9 @@
 {
   "base": "https://marque.trade",
-  "ranAt": "2026-09-05T09:06:16.811Z",
+  "ranAt": "2026-09-05T17:46:43.577Z",
   "results": [
     {
-      "route": "/ledger",
+      "route": "/pancakeswap",
       "viewport": "1440",
       "status": 200,
       "issues": [],
@@ -23,119 +23,8 @@
       "allCapsLabels": []
     },
     {
-      "route": "/ledger",
+      "route": "/pancakeswap",
       "viewport": "1024",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [
-        "GET https://marque.trade/ledger/ADV-02?_rsc=1fsoy — net::ERR_ABORTED"
-      ],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/ledger",
-      "viewport": "768",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [
-        "GET https://marque.trade/ledger/ADV-01?_rsc=1fsoy — net::ERR_ABORTED"
-      ],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/ledger",
-      "viewport": "390",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [
-        "GET https://marque.trade/ledger/ADV-01?_rsc=1fsoy — net::ERR_ABORTED",
-        "GET https://marque.trade/ledger/ADV-02?_rsc=1fsoy — net::ERR_ABORTED"
-      ],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/ledger/ADV-01",
-      "viewport": "1440",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [
-        "GET https://marque.trade/ledger?_rsc=yf7qh — net::ERR_ABORTED"
-      ],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/ledger/ADV-01",
-      "viewport": "1024",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [
-        "GET https://marque.trade/ledger?_rsc=yf7qh — net::ERR_ABORTED"
-      ],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/ledger/ADV-01",
-      "viewport": "768",
       "status": 200,
       "issues": [],
       "consoleErrors": [],
@@ -154,7 +43,29 @@
       "allCapsLabels": []
     },
     {
-      "route": "/ledger/ADV-01",
+      "route": "/pancakeswap",
+      "viewport": "768",
+      "status": 200,
+      "issues": [],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET https://marque.trade/app/charter?category=rebalancing&_rsc=xd1km — net::ERR_ABORTED"
+      ],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(132, 102, 33) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/pancakeswap",
       "viewport": "390",
       "status": 200,
       "issues": [],
