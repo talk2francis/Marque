@@ -1,56 +1,16 @@
 {
   "base": "https://marque.trade",
-  "ranAt": "2026-09-05T17:46:43.577Z",
+  "ranAt": "2026-09-05T18:09:23.590Z",
   "results": [
     {
-      "route": "/pancakeswap",
+      "route": "/builders/test",
       "viewport": "1440",
       "status": 200,
       "issues": [],
       "consoleErrors": [],
       "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/pancakeswap",
-      "viewport": "1024",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/pancakeswap",
-      "viewport": "768",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
       "failedRequests": [
-        "GET https://marque.trade/app/charter?category=rebalancing&_rsc=xd1km — net::ERR_ABORTED"
+        "GET https://marque.trade/standard?_rsc=ft2ac — net::ERR_ABORTED"
       ],
       "focusVisible": {
         "ok": true,
@@ -65,7 +25,139 @@
       "allCapsLabels": []
     },
     {
-      "route": "/pancakeswap",
+      "route": "/builders/test",
+      "viewport": "1024",
+      "status": 200,
+      "issues": [],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET https://marque.trade/standard?_rsc=ft2ac — net::ERR_ABORTED",
+        "GET https://marque.trade/ledger?_rsc=ft2ac — net::ERR_ABORTED"
+      ],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(132, 102, 33) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/builders/test",
+      "viewport": "768",
+      "status": 200,
+      "issues": [],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET https://marque.trade/standard?_rsc=ft2ac — net::ERR_ABORTED",
+        "GET https://marque.trade/ledger?_rsc=ft2ac — net::ERR_ABORTED"
+      ],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(132, 102, 33) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/builders/test",
+      "viewport": "390",
+      "status": 200,
+      "issues": [],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET https://marque.trade/standard?_rsc=ft2ac — net::ERR_ABORTED"
+      ],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(132, 102, 33) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/status",
+      "viewport": "1440",
+      "status": 200,
+      "issues": [],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET https://marque.trade/pancakeswap?_rsc=pw20n — net::ERR_ABORTED"
+      ],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(132, 102, 33) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/status",
+      "viewport": "1024",
+      "status": 200,
+      "issues": [],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET https://marque.trade/pancakeswap?_rsc=pw20n — net::ERR_ABORTED"
+      ],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(132, 102, 33) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/status",
+      "viewport": "768",
+      "status": 200,
+      "issues": [],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(132, 102, 33) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/status",
       "viewport": "390",
       "status": 200,
       "issues": [],

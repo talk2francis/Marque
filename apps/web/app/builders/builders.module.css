@@ -1,0 +1,36 @@
+.page { max-width: 880px; margin: 0 auto; padding: var(--s7) var(--s5) var(--s9); }
+.head { display: flex; flex-direction: column; gap: var(--s3); padding-bottom: var(--s5); }
+.lede { margin: 0; max-width: 68ch; color: var(--fg-soft); font-size: var(--size-body); line-height: var(--lh-body); }
+.section { padding: var(--s6) 0; border-top: 1px solid var(--line); display: flex; flex-direction: column; gap: var(--s3); }
+.h2 { margin: 0 0 var(--s2); font-family: var(--font-statement); font-weight: 400; font-size: var(--size-statement); letter-spacing: -0.015em; }
+.muted { margin: 0; color: var(--fg-soft); font-size: var(--size-body); }
+.note { margin: 0; max-width: 68ch; font-size: var(--size-caption); line-height: 1.55; color: var(--fg-soft); }
+.note > span { margin-right: var(--s2); }
+.note a, .actions a { display: inline-block; padding-block: 4px; color: var(--chain); }
+
+.field { display: flex; flex-direction: column; gap: 6px; margin-bottom: var(--s4); max-width: 68ch; }
+.field label { font-size: var(--size-caption); color: var(--fg-soft); }
+.field input, .field select {
+  font: inherit; font-size: var(--size-data); color: var(--fg);
+  background: var(--ground-raised); border: 1px solid var(--line); border-radius: 2px; padding: 9px 10px; width: 100%;
+}
+.field input { font-family: var(--font-mono); }
+.field .hint { font-size: var(--size-caption); color: var(--fg-soft); line-height: 1.5; }
+.actions { display: flex; gap: var(--s3); flex-wrap: wrap; align-items: center; padding-top: var(--s2); }
+
+.verdict { display: flex; gap: var(--s3); align-items: baseline; flex-wrap: wrap; padding-bottom: var(--s2); }
+.verdictWord { font-family: var(--font-statement); font-size: 30px; letter-spacing: -0.015em; }
+.pass { color: var(--holds); }
+.fail { color: var(--breach); }
+
+.diffs { width: 100%; border-collapse: collapse; font-size: var(--size-data); display: block; overflow-x: auto; }
+.diffs th, .diffs td { text-align: left; padding: 8px var(--s4) 8px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+.diffs th { color: var(--fg-soft); font-weight: 500; font-size: var(--size-caption); white-space: nowrap; }
+.diffs td.wrap { white-space: normal; min-width: 26ch; }
+.diffRow td { color: var(--fg); }
+.diffFail td:first-child { border-left: 2px solid var(--breach); padding-left: var(--s3); }
+
+.warn { margin: 0; padding: var(--s3); border-left: 2px solid var(--watch); background: var(--ground-raised);
+  font-size: var(--size-caption); line-height: 1.55; color: var(--fg); max-width: 68ch; }
+
+@media (max-width: 640px) { .page { padding-inline: var(--s4); } }

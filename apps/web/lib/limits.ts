@@ -20,7 +20,18 @@ const PER_IP_WINDOW_MS = 60_000
 const PER_IP_MAX = 2
 const DAILY_VISITOR_GRANTS = Number(process.env['MARQUE_DAILY_GRANT_CAP'] ?? 40)
 
+/**
+ * The free conformance tool is limited too, but for a different reason and at
+ * a different rate. It spends chain reads and someone else's endpoint, not
+ * tBNB, and it is meant to be USED — a builder iterating on a failing agent
+ * will legitimately run it several times a minute. Sharing the charter limiter
+ * both throttled it far too hard and told the caller the run had been refused
+ * because "granting a charter writes a transaction", which it does not.
+ */
+const TEST_TOOL_MAX = 6
+
 const hits = new Map<string, number[]>()
+const testHits = new Map<string, number[]>()
 
 export interface LimitVerdict {
   ok: boolean
@@ -51,6 +62,24 @@ export function checkBurst(key: string): LimitVerdict {
   }
   recent.push(now)
   hits.set(key, recent)
+  return { ok: true }
+}
+
+/** The free conformance tool's own limit, with its own honest reason. */
+export function checkTestBurst(key: string): LimitVerdict {
+  const now = Date.now()
+  const recent = (testHits.get(key) ?? []).filter((t) => now - t < PER_IP_WINDOW_MS)
+  if (recent.length >= TEST_TOOL_MAX) {
+    const oldest = recent[0] ?? now
+    const retry = Math.ceil((PER_IP_WINDOW_MS - (now - oldest)) / 1000)
+    return {
+      ok: false,
+      retryAfterSeconds: retry,
+      detail: `Each run captures fresh chain state, so the free tester is limited to ${TEST_TOOL_MAX} runs a minute. Try again in ${retry}s.`,
+    }
+  }
+  recent.push(now)
+  testHits.set(key, recent)
   return { ok: true }
 }
 

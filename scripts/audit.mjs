@@ -41,6 +41,8 @@ const DEFAULT_ROUTES = [
   '/ledger', '/ledger/methodology', '/ledger/intake', '/ledger/ADV-01',
   // P9 PancakeSwap Desk.
   '/pancakeswap',
+  // P10 builder and judge surfaces.
+  '/builders/test', '/status',
 ]
 
 function routes() {

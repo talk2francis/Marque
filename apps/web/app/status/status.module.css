@@ -1,0 +1,20 @@
+.page { max-width: 860px; margin: 0 auto; padding: var(--s7) var(--s5) var(--s9); }
+.head { display: flex; flex-direction: column; gap: var(--s3); padding-bottom: var(--s5); }
+.lede { margin: 0; max-width: 68ch; color: var(--fg-soft); font-size: var(--size-body); line-height: var(--lh-body); }
+.section { padding: var(--s6) 0; border-top: 1px solid var(--line); display: flex; flex-direction: column; gap: var(--s3); }
+.h2 { margin: 0 0 var(--s2); font-family: var(--font-statement); font-weight: 400; font-size: var(--size-statement); letter-spacing: -0.015em; }
+.muted { margin: 0; color: var(--fg-soft); font-size: var(--size-body); }
+.note { margin: 0; max-width: 68ch; font-size: var(--size-caption); line-height: 1.55; color: var(--fg-soft); }
+.note > span { margin-right: var(--s2); }
+.note a { display: inline-block; padding-block: 4px; color: var(--chain); }
+
+.table { width: 100%; border-collapse: collapse; font-size: var(--size-data); display: block; overflow-x: auto; }
+.table th, .table td { text-align: left; padding: 8px var(--s4) 8px 0; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.table th { color: var(--fg-soft); font-weight: 500; font-size: var(--size-caption); }
+.table td.wrap { white-space: normal; }
+
+.warn { margin: 0; padding: var(--s3); border-left: 2px solid var(--watch); background: var(--ground-raised);
+  font-size: var(--size-caption); line-height: 1.55; color: var(--fg); max-width: 68ch; }
+.stale { border-left-color: var(--breach); }
+
+@media (max-width: 640px) { .page { padding-inline: var(--s4); } }
