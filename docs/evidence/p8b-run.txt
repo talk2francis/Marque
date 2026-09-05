@@ -1,0 +1,61 @@
+
+==============================================================================
+BENCHMARK AGENT ARMS · block 120077702
+==============================================================================
+
+ADV-01  Security triage of a live BSC contract
+  agent      Redcell (marque:redcell)
+  task hash  0xab29ef1cb93cb760f4c20774ad5a77af9002012dfb4d5205b6c551853a4ca249
+  rubric     v1.0  0xe7bb4e109246cb9cc4d83f2eadc43fe2be59d6caecfa740a8a7725eff103dbfd   (registered BEFORE any arm ran)
+  rep 1      answered     445ms  output 0xfc187e377ad14fa2…  manifest 0x36a7b8f9fd3fe899…
+  rep 2      answered     112ms  output 0x7cfa1b0a30af2dd5…  manifest 0x38cc08d70b8ad4fb…
+  status     agent 4/2 · manual 0/2 · incomplete
+             waiting on: 2 more manual repetition(s) — a human runs these with a stopwatch
+
+ADV-02  A V3 re-centre decision on a live position
+  agent      Bound (marque:bound)
+  task hash  0xab485649fdca81079d90d234147c54c08ec3f2f5185189d45e3014bf6631315f
+  rubric     v1.0  0x8b514d705db4d4b6e64fd83de2887e2b4321122a2e2f67508c89575d8b4bdfc6   (registered BEFORE any arm ran)
+  rep 1      answered     862ms  output 0x68a651fe72ce0b1b…  manifest 0x93262c1130644f36…
+  rep 2      answered     374ms  output 0xf94d7f52dc16cebb…  manifest 0x0025dd335a2cfcb6…
+  status     agent 4/2 · manual 0/2 · incomplete
+             waiting on: 2 more manual repetition(s) — a human runs these with a stopwatch
+
+ADV-03  Best net route for 1,000 USDT
+  agent      Sluicegate (marque:sluicegate)
+  task hash  0x5f698c574c19aca8d7cfc04dcaf516d41fa8b461298fbe5bbaf342b5fb74f2ae
+  rubric     v1.0  0xb6e96037815ae7628f2f26cefeed7c3ee6f02b34b3d8f7344bee9f13d80db273   (registered BEFORE any arm ran)
+  rep 1      answered      26ms  output 0xd6d06cbae6617697…  manifest 0x7a3c69fa90e5dd27…
+  rep 2      answered      22ms  output 0xd6d06cbae6617697…  manifest 0x7094bfde82488f16…
+  status     agent 4/2 · manual 0/2 · incomplete
+             waiting on: 2 more manual repetition(s) — a human runs these with a stopwatch
+
+ADV-04  Exact repayment to restore a health factor
+  agent      Keel (marque:keel)
+  task hash  0x30703822ec0e72777fa3861d63bf6af1720d718d74808f432338893f1ad868cb
+  rubric     v1.0  0x9fb3baec1164b513fc544da9028f32c267dd9d8f0d46dcbbe3dd0b2909e420bf   (registered BEFORE any arm ran)
+  rep 1      answered    1140ms  output 0x86ce67ebec388484…  manifest 0x2be14bb7674745dc…
+  rep 2      answered     587ms  output 0x627fb88595711416…  manifest 0xe3f9ad8402988a1d…
+  status     agent 4/2 · manual 0/2 · incomplete
+             waiting on: 2 more manual repetition(s) — a human runs these with a stopwatch
+
+==============================================================================
+SEALED CALLS · block 120077712 · BSC testnet MarqueRegistry
+==============================================================================
+keel         SEALED   0xfc3ed2a1497645d6bd…  tx 0x2901554af6c87035834774940df5e940218f9e1da37ae3a9ea71cff005e11089
+bound        SEALED   0xca1a8adc3925fe8ec0…  tx 0x427d30af87bc534f6d8e671b91ed6079ffc2abcfb3e2d812c29cfd530e225e7d
+sluicegate   SEALED   0xc5fbb836fbdd6173b1…  tx 0xd9560c482a36c9904e8b389b8fcd5bc3c92307d05a3b6fe24a9a1f907bdc1f53
+lattice      SEALED   0xb685a30ee783e99ddf…  tx 0x74ee243ce25d44a0d115bbf2166029ecc03d5154b4bb6ce93f0e0c8c71290b29
+redcell      SEALED   0xee2cd2eabb7b63300e…  tx 0xa475e46d220774bbdd4cc229834381d5a44c835f6f5c12d22f5084457499e91c
+
+10 of 10 sealed call(s) anchored on chain.
+  marque:redcell     0xee2cd2eabb7b6330…  block 129222268  https://testnet.bscscan.com/tx/0xa475e46d220774bbdd4cc229834381d5a44c835f6f5c12d22f5084457499e91c
+  marque:lattice     0xb685a30ee783e99d…  block 129222256  https://testnet.bscscan.com/tx/0x74ee243ce25d44a0d115bbf2166029ecc03d5154b4bb6ce93f0e0c8c71290b29
+  marque:sluicegate  0xc5fbb836fbdd6173…  block 129222244  https://testnet.bscscan.com/tx/0xd9560c482a36c9904e8b389b8fcd5bc3c92307d05a3b6fe24a9a1f907bdc1f53
+  marque:bound       0xca1a8adc3925fe8e…  block 129222230  https://testnet.bscscan.com/tx/0x427d30af87bc534f6d8e671b91ed6079ffc2abcfb3e2d812c29cfd530e225e7d
+  marque:keel        0xfc3ed2a1497645d6…  block 129222217  https://testnet.bscscan.com/tx/0x2901554af6c87035834774940df5e940218f9e1da37ae3a9ea71cff005e11089
+  marque:redcell     0xabaa34d77c3755aa…  block 129213135  https://testnet.bscscan.com/tx/0x268b475e6cc34759f333074f762cad8a23d16a73046da4c676bfe4429d62a53a
+  marque:lattice     0x0f5b3748da9297ae…  block 129213122  https://testnet.bscscan.com/tx/0x8d727e3dbcb807327f16d51accbd05b454eb217fadd36493d1706c4aeb502d90
+  marque:sluicegate  0x4d040ba904a00dad…  block 129213110  https://testnet.bscscan.com/tx/0xdb6def16e56e1d68551551d76c3882d0a9b5f76366fa7919600281b7e88387f1
+  marque:bound       0x634f550b51a56faa…  block 129213096  https://testnet.bscscan.com/tx/0x1f7f30d98ef1a8beda48579da9ecad9c08862ae052ffdbb3d387bf60c1d540fc
+  marque:keel        0x6836b52381644ed0…  block 129213083  https://testnet.bscscan.com/tx/0x89672fdc5dbff13dffd83fd042b2df478e595dda09984e7f91bb5ef43dec1d80

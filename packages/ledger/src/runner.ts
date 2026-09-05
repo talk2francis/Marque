@@ -113,7 +113,7 @@ async function askAgent(baseUrl: string, agentSlug: string, task: string): Promi
  * including TLS, the reverse proxy and the SSRF guard, because those are part
  * of what a buyer waits for and excluding them would flatter the agent.
  */
-export async function runAgentArm(spec: BenchmarkSpec, rep: number, opts: { baseUrl: string }): Promise<RunArmResult> {
+export async function runAgentArm(spec: BenchmarkSpec, rep: number, opts: { baseUrl: string; batch: string }): Promise<RunArmResult> {
   const block = (await publicClient().getBlockNumber()).toString()
   await registerBenchmark(spec, block)
 
@@ -168,6 +168,7 @@ export async function runAgentArm(spec: BenchmarkSpec, rep: number, opts: { base
     benchmarkId: spec.id,
     arm: 'agent',
     rep,
+    batch: opts.batch,
     output: (answer ?? { error }) as Record<string, unknown>,
     outputText: JSON.stringify(answer ?? { error }),
     outputHash,
@@ -191,47 +192,141 @@ export async function runAgentArm(spec: BenchmarkSpec, rep: number, opts: { base
   }
 }
 
-/** Both repetitions of the agent arm. A single run is an anecdote. */
+/**
+ * Both repetitions of the agent arm, as ONE sitting.
+ *
+ * The sitting gets a batch id named for the block it starts at. Re-running
+ * later adds a new sitting rather than replacing this one, because a run is a
+ * first-party observation and those are never overwritten (invariant 12). Two
+ * sittings read different chain state, so their repetitions are not
+ * interchangeable and must never be pooled or picked between.
+ */
 export async function runAgentArms(spec: BenchmarkSpec, opts: { baseUrl: string; reps?: number }): Promise<RunArmResult[]> {
   const reps = opts.reps ?? 2
+  const batch = `b${(await publicClient().getBlockNumber()).toString()}`
   const out: RunArmResult[] = []
   for (let rep = 1; rep <= reps; rep++) {
-    out.push(await runAgentArm(spec, rep, opts))
+    out.push(await runAgentArm(spec, rep, { ...opts, batch }))
   }
   return out
+}
+
+/**
+ * Batches produced by the public "reproduce" button.
+ *
+ * A reproduction is a real run and is kept like any other, but it is NOT part
+ * of the registered comparison: it happens at a later block, on demand, as
+ * many times as a visitor likes. If it counted as the latest sitting, anyone
+ * could quietly replace the published result by clicking a button.
+ */
+export const REPRO_PREFIX = 'repro-'
+
+export function isReproduction(batch: string): boolean {
+  return batch.startsWith(REPRO_PREFIX)
+}
+
+/**
+ * The most recent PUBLISHED sitting of an arm, or null if it has never run.
+ *
+ * Ordered by the highest run id in the batch, so "latest" is the sitting that
+ * finished last rather than whichever row the database happened to return.
+ * Reproductions are excluded — see REPRO_PREFIX.
+ */
+export async function latestBatch(id: string, arm: 'agent' | 'manual'): Promise<string | null> {
+  const runs = (await db().select().from(benchmarkRun)
+    .where(and(eq(benchmarkRun.benchmarkId, id), eq(benchmarkRun.arm, arm))))
+    .filter((r) => !isReproduction(r.batch))
+  if (runs.length === 0) return null
+  let best = runs[0] as typeof runs[number]
+  for (const r of runs) if (r.id > best.id) best = r
+  return best.batch
+}
+
+/** Mint a batch id for a one-off reproduction at the current block. */
+export async function reproductionBatch(): Promise<string> {
+  return `${REPRO_PREFIX}${(await publicClient().getBlockNumber()).toString()}`
 }
 
 export function mandatoryBenchmarks(): BenchmarkSpec[] {
   return BENCHMARKS.filter((b) => b.mandatory)
 }
 
-/** What is still missing before a benchmark can be published as complete. */
+/**
+ * What is still missing before a benchmark can be published as complete.
+ *
+ * Counts repetitions WITHIN the latest sitting of each arm, never across
+ * sittings. Four runs from two sittings is not "four repetitions"; it is two
+ * sittings of two, read at different blocks, and pooling them would overstate
+ * the evidence.
+ */
 export async function benchmarkStatus(id: string): Promise<{
   id: string
   agentReps: number
   manualReps: number
+  agentBatch: string | null
+  manualBatch: string | null
+  earlierSittings: number
   scored: number
   complete: boolean
   missing: string[]
 }> {
   const runs = await db().select().from(benchmarkRun).where(eq(benchmarkRun.benchmarkId, id))
-  const agentReps = runs.filter((r) => r.arm === 'agent').length
-  const manualReps = runs.filter((r) => r.arm === 'manual').length
-  const scored = runs.filter((r) => r.scoreTotal !== null).length
+  const agentBatch = await latestBatch(id, 'agent')
+  const manualBatch = await latestBatch(id, 'manual')
+  const current = runs.filter(
+    (r) => (r.arm === 'agent' && r.batch === agentBatch) || (r.arm === 'manual' && r.batch === manualBatch),
+  )
+  const agentReps = current.filter((r) => r.arm === 'agent').length
+  const manualReps = current.filter((r) => r.arm === 'manual').length
+  const scored = current.filter((r) => r.scoreTotal !== null).length
+  const earlierSittings = new Set(
+    runs.filter((r) => r.batch !== agentBatch && r.batch !== manualBatch).map((r) => `${r.arm}:${r.batch}`),
+  ).size
+
   const missing: string[] = []
   if (agentReps < 2) missing.push(`${2 - agentReps} more agent repetition(s)`)
   if (manualReps < 2) missing.push(`${2 - manualReps} more manual repetition(s) — a human runs these with a stopwatch`)
-  if (missing.length === 0 && scored < runs.length) missing.push('blind scoring of both arms')
-  return { id, agentReps, manualReps, scored, complete: missing.length === 0, missing }
+  if (missing.length === 0 && scored < current.length) missing.push('blind scoring of both arms')
+  return {
+    id, agentReps, manualReps, agentBatch, manualBatch, earlierSittings, scored,
+    complete: missing.length === 0, missing,
+  }
 }
 
 export async function runsFor(id: string) {
-  return db().select().from(benchmarkRun).where(eq(benchmarkRun.benchmarkId, id)).orderBy(benchmarkRun.arm, benchmarkRun.rep)
+  return db().select().from(benchmarkRun).where(eq(benchmarkRun.benchmarkId, id))
+    .orderBy(benchmarkRun.arm, benchmarkRun.batch, benchmarkRun.rep)
 }
 
-export async function armRun(id: string, arm: 'agent' | 'manual', rep: number) {
+/** Only the runs the Ledger publishes: the latest sitting of each arm. */
+export async function currentRunsFor(id: string) {
+  const all = await runsFor(id)
+  const agentBatch = await latestBatch(id, 'agent')
+  const manualBatch = await latestBatch(id, 'manual')
+  return all.filter(
+    (r) => (r.arm === 'agent' && r.batch === agentBatch) || (r.arm === 'manual' && r.batch === manualBatch),
+  )
+}
+
+/**
+ * One repetition of one arm.
+ *
+ * Resolves within a single sitting. `batch` defaults to the latest, and is
+ * never left to the database to choose: before batches existed this query
+ * ended in `.limit(1)` over four matching rows and returned an arbitrary one,
+ * which is exactly the class of silent guess that has cost this project five
+ * bugs.
+ */
+export async function armRun(id: string, arm: 'agent' | 'manual', rep: number, batch?: string) {
+  const b = batch ?? (await latestBatch(id, arm))
+  if (b === null) return null
   const [row] = await db().select().from(benchmarkRun)
-    .where(and(eq(benchmarkRun.benchmarkId, id), eq(benchmarkRun.arm, arm), eq(benchmarkRun.rep, rep)))
+    .where(and(
+      eq(benchmarkRun.benchmarkId, id),
+      eq(benchmarkRun.arm, arm),
+      eq(benchmarkRun.rep, rep),
+      eq(benchmarkRun.batch, b),
+    ))
     .limit(1)
   return row ?? null
 }

@@ -1,7 +1,7 @@
 import 'server-only'
 import { desc, eq } from 'drizzle-orm'
 import { db, benchmark as benchmarkTable, benchmarkRun, sealedCall } from '@marque/db'
-import { trackRecord, type SealOutcome } from '@marque/ledger'
+import { trackRecord, isReproduction, type SealOutcome } from '@marque/ledger'
 
 /**
  * The Ledger, as the web process reads it.
@@ -34,6 +34,10 @@ export interface LedgerRun {
 }
 
 export interface LedgerBenchmark {
+  /** The sitting published for each arm, and how many earlier ones are kept. */
+  agentBatch?: string | null
+  manualBatch?: string | null
+  earlierSittings?: number
   id: string
   title: string
   category: string
@@ -84,7 +88,26 @@ export async function readLedger(): Promise<LedgerBenchmark[]> {
     db().select().from(benchmarkRun).orderBy(benchmarkRun.benchmarkId, benchmarkRun.arm, benchmarkRun.rep),
   ])
   return benchmarks.map((b) => {
-    const mine = runs.filter((r) => r.benchmarkId === b.id).map(toRun)
+    const all = runs.filter((r) => r.benchmarkId === b.id)
+    // Publish the latest sitting of each arm, never a pool of every run ever
+    // made. Reproductions are excluded from "latest" so a visitor pressing the
+    // button cannot replace the registered result. Earlier sittings are kept
+    // and counted — they are first-party observations and are never dropped.
+    const latest = (arm: 'agent' | 'manual'): string | null => {
+      const rows = all.filter((r) => r.arm === arm && !isReproduction(r.batch))
+      if (rows.length === 0) return null
+      return rows.reduce((best, r) => (r.id > best.id ? r : best), rows[0]!).batch
+    }
+    const agentBatch = latest('agent')
+    const manualBatch = latest('manual')
+    const current = all.filter(
+      (r) => (r.arm === 'agent' && r.batch === agentBatch) || (r.arm === 'manual' && r.batch === manualBatch),
+    )
+    const earlierSittings = new Set(
+      all.filter((r) => r.batch !== agentBatch && r.batch !== manualBatch).map((r) => `${r.arm}:${r.batch}`),
+    ).size
+
+    const mine = current.map(toRun)
     const agentReps = mine.filter((r) => r.arm === 'agent').length
     const manualReps = mine.filter((r) => r.arm === 'manual').length
     const scored = mine.filter((r) => r.scoreTotal !== null).length
@@ -108,6 +131,9 @@ export async function readLedger(): Promise<LedgerBenchmark[]> {
       rubricRegisteredAt: b.rubricRegisteredAt.toISOString(),
       method: b.method,
       runs: mine,
+      agentBatch,
+      manualBatch,
+      earlierSittings,
       missing,
       complete: missing.length === 0,
     }

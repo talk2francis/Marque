@@ -106,10 +106,17 @@ export async function POST(request: Request) {
     ran_at: new Date().toISOString(),
   }
 
+  // The manual sitting is keyed to the task the analyst actually answered.
+  // Re-registering the benchmark at a new block produces a new task hash and
+  // therefore a new sitting, so a manual arm can never be silently paired
+  // against a task it never saw.
+  const batch = `m${bench.taskHash.slice(2, 14)}`
+
   await db().insert(benchmarkRun).values({
     benchmarkId: bench.id,
     arm: 'manual',
     rep: input.rep,
+    batch,
     output: { text: input.output },
     outputText: input.output,
     outputHash,

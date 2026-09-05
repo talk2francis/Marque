@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
-import { benchmarkById, runAgentArm, runsFor } from '@marque/ledger'
+import { benchmarkById, runAgentArm, reproductionBatch } from '@marque/ledger'
 import { checkBurst, clientKey } from '../../../../../lib/limits'
 
 export const dynamic = 'force-dynamic'
@@ -34,10 +34,12 @@ export async function POST(request: Request) {
   const spec = benchmarkById(input.benchmarkId)
   if (!spec) return NextResponse.json({ error: `no benchmark ${input.benchmarkId}` }, { status: 404 })
 
-  const existing = await runsFor(spec.id)
-  const nextRep = Math.max(0, ...existing.filter((r) => r.arm === 'agent').map((r) => r.rep)) + 1
-
+  // A reproduction is its own single-repetition sitting at today's block. It
+  // is recorded and shown, but it never becomes the published result — the
+  // registered comparison was run at a pinned block and a visitor clicking a
+  // button must not be able to replace it.
+  const batch = await reproductionBatch()
   const base = process.env['MARQUE_PUBLIC_URL'] ?? 'https://marque.trade'
-  const result = await runAgentArm(spec, nextRep, { baseUrl: base })
+  const result = await runAgentArm(spec, 1, { baseUrl: base, batch })
   return NextResponse.json({ ...result, benchmarkId: spec.id }, { status: result.ok ? 200 : 502 })
 }

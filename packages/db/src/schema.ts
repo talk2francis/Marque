@@ -490,6 +490,18 @@ export const benchmarkRun = pgTable('benchmark_run', {
   arm: text('arm').$type<BenchmarkArm>().notNull(),
   /** 1 or 2. A single run is an anecdote. */
   rep: integer('rep').notNull(),
+  /**
+   * Which sitting of this arm the run belongs to.
+   *
+   * Re-running an arm does not overwrite the previous sitting: first-party
+   * observations are never deleted (invariant 12), so a second sitting adds
+   * rows alongside the first. Without a batch, `rep` collides across sittings
+   * and any lookup by (benchmark, arm, rep) silently picks one of them —
+   * which is the same guess-on-behalf-of-the-counterparty bug this project
+   * has paid for repeatedly. The Ledger publishes the LATEST batch and keeps
+   * the earlier ones visible as history.
+   */
+  batch: text('batch').notNull().default('legacy'),
 
   /** The answer, whole. Hashed, so the output shown is the output graded. */
   output: jsonb('output'),
@@ -528,6 +540,7 @@ export const benchmarkRun = pgTable('benchmark_run', {
   ranAt: timestamp('ran_at', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => ({
   benchArmIdx: index('benchmark_run_bench_idx').on(t.benchmarkId, t.arm, t.rep),
+  batchIdx: index('benchmark_run_batch_idx').on(t.benchmarkId, t.arm, t.batch),
   hashIdx: index('benchmark_run_hash_idx').on(t.manifestHash),
 }))
 

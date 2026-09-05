@@ -13,7 +13,8 @@ export {
 export { BENCHMARKS, benchmarkById, type BenchmarkSpec } from './benchmarks.js'
 export {
   registerBenchmark, runAgentArm, runAgentArms, mandatoryBenchmarks,
-  benchmarkStatus, runsFor, armRun, type RunArmResult,
+  benchmarkStatus, runsFor, currentRunsFor, armRun, latestBatch,
+  reproductionBatch, isReproduction, REPRO_PREFIX, type RunArmResult,
 } from './runner.js'
 export {
   seal, dueForResolution, resolve, sealsFor, allSeals, recordFor,
