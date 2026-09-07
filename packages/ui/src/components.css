@@ -111,6 +111,8 @@
   background: color-mix(in srgb, var(--brass) 7%, transparent);
 }
 .warrant__date { color: var(--fg-soft); font-family: var(--font-mono); }
+/* A warrant past its 72h retest window: dimmed, so it never looks current. */
+.warrant--stale { color: var(--watch); border-color: color-mix(in srgb, var(--watch) 45%, transparent); background: color-mix(in srgb, var(--watch) 7%, transparent); }
 .warrant--failed {
   color: var(--breach);
   border: 1px solid color-mix(in srgb, var(--breach) 40%, transparent);

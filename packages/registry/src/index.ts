@@ -3,6 +3,6 @@ export { extractServices, extractTags, parseCodes, normalizeKind, isTemplate, re
 export { mapLimit } from './concurrency.js'
 export { TAXONOMY, MIN_SCORE, MIN_CONFIDENCE, REQUIRED_CATEGORIES, classifyByKeyword, type ClassificationInput, type ClassificationResult, type CategoryRules } from './taxonomy.js'
 export { sweepList, enrichDetails, snapshotFunnel, BSC, type SweepResult, type EnrichResult } from './ingest.js'
-export { classifyKeywordPass, type ClassifyResult } from './classify.js'
+export { classifyKeywordPass, classifySemanticPass, type ClassifyResult } from './classify.js'
 export { funnel, categoryFunnel, failureHistogram, MARQUE_REFERENCE_OWNERS, MIN_THIRD_PARTY_PER_CATEGORY, type FunnelRow, type CategoryFunnelRow } from './funnel.js'
 export { buildProspects, rollupByOwner, extractContacts, assessReadiness, type Prospect, type OwnerRollup, type Priority } from './outreach.js'
