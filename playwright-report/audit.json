@@ -1,13 +1,13 @@
 {
   "base": "http://127.0.0.1:3200",
-  "ranAt": "2026-09-07T22:50:56.145Z",
+  "ranAt": "2026-09-07T22:57:50.710Z",
   "results": [
     {
       "route": "/",
       "viewport": "1440",
       "status": 200,
       "issues": [
-        "2 tap target(s) under 24px"
+        "16 tap target(s) under 24px"
       ],
       "consoleErrors": [],
       "pageErrors": [],
@@ -22,8 +22,22 @@
       "missingAlt": [],
       "lowContrast": [],
       "tinyTapTargets": [
-        "a MarqueRegistry 0x01D5…7A 274x19",
-        "a @usemarque 76x19"
+        "a keel — settled run 111x21",
+        "a sluicegate — settled run 149x21",
+        "a keel — settled run 111x21",
+        "a keel — settled run 111x21",
+        "a sluicegate — settled run 149x21",
+        "a lattice — settled run 123x21",
+        "a bound — settled run 124x21",
+        "a keel — settled run 111x21",
+        "a keel — settled run 111x21",
+        "a sluicegate — settled run 149x21",
+        "a keel — settled run 111x21",
+        "a keel — settled run 111x21",
+        "a sluicegate — settled run 149x21",
+        "a lattice — settled run 123x21",
+        "a bound — settled run 124x21",
+        "a keel — settled run 111x21"
       ],
       "allCapsLabels": []
     },
@@ -32,7 +46,7 @@
       "viewport": "1024",
       "status": 200,
       "issues": [
-        "2 tap target(s) under 24px"
+        "16 tap target(s) under 24px"
       ],
       "consoleErrors": [],
       "pageErrors": [],
@@ -47,8 +61,22 @@
       "missingAlt": [],
       "lowContrast": [],
       "tinyTapTargets": [
-        "a MarqueRegistry 0x01D5…7A 274x19",
-        "a @usemarque 76x19"
+        "a keel — settled run 111x21",
+        "a sluicegate — settled run 149x21",
+        "a keel — settled run 111x21",
+        "a keel — settled run 111x21",
+        "a sluicegate — settled run 149x21",
+        "a lattice — settled run 123x21",
+        "a bound — settled run 124x21",
+        "a keel — settled run 111x21",
+        "a keel — settled run 111x21",
+        "a sluicegate — settled run 149x21",
+        "a keel — settled run 111x21",
+        "a keel — settled run 111x21",
+        "a sluicegate — settled run 149x21",
+        "a lattice — settled run 123x21",
+        "a bound — settled run 124x21",
+        "a keel — settled run 111x21"
       ],
       "allCapsLabels": []
     },
@@ -57,7 +85,7 @@
       "viewport": "768",
       "status": 200,
       "issues": [
-        "2 tap target(s) under 24px"
+        "16 tap target(s) under 24px"
       ],
       "consoleErrors": [],
       "pageErrors": [],
@@ -72,8 +100,22 @@
       "missingAlt": [],
       "lowContrast": [],
       "tinyTapTargets": [
-        "a MarqueRegistry 0x01D5…7A 274x19",
-        "a @usemarque 76x19"
+        "a keel — settled run 111x21",
+        "a sluicegate — settled run 149x21",
+        "a keel — settled run 111x21",
+        "a keel — settled run 111x21",
+        "a sluicegate — settled run 149x21",
+        "a lattice — settled run 123x21",
+        "a bound — settled run 124x21",
+        "a keel — settled run 111x21",
+        "a keel — settled run 111x21",
+        "a sluicegate — settled run 149x21",
+        "a keel — settled run 111x21",
+        "a keel — settled run 111x21",
+        "a sluicegate — settled run 149x21",
+        "a lattice — settled run 123x21",
+        "a bound — settled run 124x21",
+        "a keel — settled run 111x21"
       ],
       "allCapsLabels": []
     },
@@ -82,7 +124,7 @@
       "viewport": "390",
       "status": 200,
       "issues": [
-        "2 tap target(s) under 24px"
+        "16 tap target(s) under 24px"
       ],
       "consoleErrors": [],
       "pageErrors": [],
@@ -97,542 +139,22 @@
       "missingAlt": [],
       "lowContrast": [],
       "tinyTapTargets": [
-        "a MarqueRegistry 0x01D5…7A 274x19",
-        "a @usemarque 76x19"
-      ],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/register",
-      "viewport": "1440",
-      "status": 200,
-      "issues": [
-        "2 tap target(s) under 24px"
-      ],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [
-        "GET http://127.0.0.1:3200/agents/56/43970?_rsc=1ynhk — net::ERR_ABORTED",
-        "GET http://127.0.0.1:3200/agents/56/49637?_rsc=1ynhk — net::ERR_ABORTED",
-        "GET http://127.0.0.1:3200/agents/56/212221?_rsc=1ynhk — net::ERR_ABORTED",
-        "GET http://127.0.0.1:3200/agents/56/172459?_rsc=1ynhk — net::ERR_ABORTED",
-        "GET http://127.0.0.1:3200/agents/56/198999?_rsc=1ynhk — net::ERR_ABORTED"
-      ],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [
-        "a MarqueRegistry 0x01D5…7A 274x19",
-        "a @usemarque 76x19"
-      ],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/register",
-      "viewport": "1024",
-      "status": 200,
-      "issues": [
-        "2 tap target(s) under 24px"
-      ],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [
-        "GET http://127.0.0.1:3200/agents/56/43970?_rsc=1ynhk — net::ERR_ABORTED",
-        "GET http://127.0.0.1:3200/agents/56/212221?_rsc=1ynhk — net::ERR_ABORTED"
-      ],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [
-        "a MarqueRegistry 0x01D5…7A 274x19",
-        "a @usemarque 76x19"
-      ],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/register",
-      "viewport": "768",
-      "status": 200,
-      "issues": [
-        "2 tap target(s) under 24px"
-      ],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [
-        "GET http://127.0.0.1:3200/agents/56/43970?_rsc=1ynhk — net::ERR_ABORTED"
-      ],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [
-        "a MarqueRegistry 0x01D5…7A 274x19",
-        "a @usemarque 76x19"
-      ],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/register",
-      "viewport": "390",
-      "status": 200,
-      "issues": [
-        "2 tap target(s) under 24px"
-      ],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [
-        "a MarqueRegistry 0x01D5…7A 274x19",
-        "a @usemarque 76x19"
-      ],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/ledger",
-      "viewport": "1440",
-      "status": 200,
-      "issues": [
-        "2 tap target(s) under 24px"
-      ],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [
-        "GET http://127.0.0.1:3200/ledger/ADV-01?_rsc=1fsoy — net::ERR_ABORTED",
-        "GET http://127.0.0.1:3200/ledger/ADV-02?_rsc=1fsoy — net::ERR_ABORTED"
-      ],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [
-        "a MarqueRegistry 0x01D5…7A 274x19",
-        "a @usemarque 76x19"
-      ],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/ledger",
-      "viewport": "1024",
-      "status": 200,
-      "issues": [
-        "2 tap target(s) under 24px"
-      ],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [
-        "GET http://127.0.0.1:3200/ledger/ADV-01?_rsc=1fsoy — net::ERR_ABORTED",
-        "GET http://127.0.0.1:3200/ledger/ADV-02?_rsc=1fsoy — net::ERR_ABORTED"
-      ],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [
-        "a MarqueRegistry 0x01D5…7A 274x19",
-        "a @usemarque 76x19"
-      ],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/ledger",
-      "viewport": "768",
-      "status": 200,
-      "issues": [
-        "2 tap target(s) under 24px"
-      ],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [
-        "GET http://127.0.0.1:3200/ledger/ADV-01?_rsc=1fsoy — net::ERR_ABORTED",
-        "GET http://127.0.0.1:3200/ledger/ADV-02?_rsc=1fsoy — net::ERR_ABORTED"
-      ],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [
-        "a MarqueRegistry 0x01D5…7A 274x19",
-        "a @usemarque 76x19"
-      ],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/ledger",
-      "viewport": "390",
-      "status": 200,
-      "issues": [
-        "2 tap target(s) under 24px"
-      ],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [
-        "GET http://127.0.0.1:3200/ledger/ADV-01?_rsc=1fsoy — net::ERR_ABORTED"
-      ],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [
-        "a MarqueRegistry 0x01D5…7A 274x19",
-        "a @usemarque 76x19"
-      ],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/judge",
-      "viewport": "1440",
-      "status": 200,
-      "issues": [
-        "2 tap target(s) under 24px"
-      ],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [
-        "GET http://127.0.0.1:3200/status?_rsc=12crh — net::ERR_ABORTED"
-      ],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [
-        "a MarqueRegistry 0x01D5…7A 274x19",
-        "a @usemarque 76x19"
-      ],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/judge",
-      "viewport": "1024",
-      "status": 200,
-      "issues": [
-        "2 tap target(s) under 24px"
-      ],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [
-        "a MarqueRegistry 0x01D5…7A 274x19",
-        "a @usemarque 76x19"
-      ],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/judge",
-      "viewport": "768",
-      "status": 200,
-      "issues": [
-        "2 tap target(s) under 24px"
-      ],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [
-        "GET http://127.0.0.1:3200/status?_rsc=12crh — net::ERR_ABORTED"
-      ],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [
-        "a MarqueRegistry 0x01D5…7A 274x19",
-        "a @usemarque 76x19"
-      ],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/judge",
-      "viewport": "390",
-      "status": 200,
-      "issues": [
-        "2 tap target(s) under 24px"
-      ],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [
-        "GET http://127.0.0.1:3200/status?_rsc=12crh — net::ERR_ABORTED"
-      ],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [
-        "a MarqueRegistry 0x01D5…7A 274x19",
-        "a @usemarque 76x19"
-      ],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/compare",
-      "viewport": "1440",
-      "status": 200,
-      "issues": [
-        "2 tap target(s) under 24px"
-      ],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [
-        "a MarqueRegistry 0x01D5…7A 274x19",
-        "a @usemarque 76x19"
-      ],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/compare",
-      "viewport": "1024",
-      "status": 200,
-      "issues": [
-        "2 tap target(s) under 24px"
-      ],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [
-        "GET http://127.0.0.1:3200/register?_rsc=1aze6 — net::ERR_ABORTED"
-      ],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [
-        "a MarqueRegistry 0x01D5…7A 274x19",
-        "a @usemarque 76x19"
-      ],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/compare",
-      "viewport": "768",
-      "status": 200,
-      "issues": [
-        "2 tap target(s) under 24px"
-      ],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [
-        "GET http://127.0.0.1:3200/register?_rsc=1aze6 — net::ERR_ABORTED"
-      ],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [
-        "a MarqueRegistry 0x01D5…7A 274x19",
-        "a @usemarque 76x19"
-      ],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/compare",
-      "viewport": "390",
-      "status": 200,
-      "issues": [
-        "2 tap target(s) under 24px"
-      ],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [
-        "a MarqueRegistry 0x01D5…7A 274x19",
-        "a @usemarque 76x19"
-      ],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/status",
-      "viewport": "1440",
-      "status": 200,
-      "issues": [
-        "2 tap target(s) under 24px"
-      ],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [
-        "a MarqueRegistry 0x01D5…7A 274x19",
-        "a @usemarque 76x19"
-      ],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/status",
-      "viewport": "1024",
-      "status": 200,
-      "issues": [
-        "2 tap target(s) under 24px"
-      ],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [
-        "a MarqueRegistry 0x01D5…7A 274x19",
-        "a @usemarque 76x19"
-      ],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/status",
-      "viewport": "768",
-      "status": 200,
-      "issues": [
-        "2 tap target(s) under 24px"
-      ],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [
-        "GET http://127.0.0.1:3200/pancakeswap?_rsc=pw20n — net::ERR_ABORTED"
-      ],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [
-        "a MarqueRegistry 0x01D5…7A 274x19",
-        "a @usemarque 76x19"
-      ],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/status",
-      "viewport": "390",
-      "status": 200,
-      "issues": [
-        "2 tap target(s) under 24px"
-      ],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [
-        "a MarqueRegistry 0x01D5…7A 274x19",
-        "a @usemarque 76x19"
+        "a keel — settled run 111x21",
+        "a sluicegate — settled run 149x21",
+        "a keel — settled run 111x21",
+        "a keel — settled run 111x21",
+        "a sluicegate — settled run 149x21",
+        "a lattice — settled run 123x21",
+        "a bound — settled run 124x21",
+        "a keel — settled run 111x21",
+        "a keel — settled run 111x21",
+        "a sluicegate — settled run 149x21",
+        "a keel — settled run 111x21",
+        "a keel — settled run 111x21",
+        "a sluicegate — settled run 149x21",
+        "a lattice — settled run 123x21",
+        "a bound — settled run 124x21",
+        "a keel — settled run 111x21"
       ],
       "allCapsLabels": []
     }

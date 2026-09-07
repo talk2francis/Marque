@@ -284,7 +284,7 @@ a.row:hover, button.row:hover { background: var(--ground-raised); }
   gap: var(--s5);
   overflow: hidden;
   border-top: 1px solid var(--line);
-  padding: var(--s3) 0;
+  padding: var(--s2) 0;
   font-size: var(--size-data);
   color: var(--fg-soft);
   mask-image: linear-gradient(to right, transparent, black 3%, black 97%, transparent);
@@ -300,8 +300,8 @@ a.row:hover, button.row:hover { background: var(--ground-raised); }
   from { transform: translateX(0); }
   to { transform: translateX(-50%); }
 }
-.tape__item { display: inline-flex; gap: var(--s2); align-items: baseline; }
-.tape__item a { color: inherit; }
+.tape__item { display: inline-flex; gap: var(--s2); align-items: center; }
+.tape__item a { color: inherit; display: inline-flex; align-items: center; min-height: 26px; }
 
 /* --- EvidenceDrawer ------------------------------------------------------- */
 

@@ -28,7 +28,7 @@
 }
 .navLinks a:hover { color: var(--fg); }
 
-.main { max-width: 1180px; margin: 0 auto; padding: 0 var(--s5); }
+.main { max-width: var(--measure-data); margin: 0 auto; padding: 0 var(--s5); }
 
 .hero {
   display: grid;
@@ -105,9 +105,9 @@
 .funnel { list-style: none; margin: var(--s2) 0 0; padding: 0; }
 .funnelRow {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1.1fr);
+  grid-template-columns: 22ch minmax(0, 1fr) 22ch;
   gap: var(--s4);
-  align-items: baseline;
+  align-items: center;
   padding: var(--s3) 0;
   border-bottom: 1px solid var(--line);
 }
@@ -162,8 +162,8 @@
 
 @media (max-width: 900px) {
   .hero { grid-template-columns: 1fr; gap: var(--s6); padding: var(--s6) 0 var(--s7); }
-  .funnelRow { grid-template-columns: minmax(0, 1fr) auto; }
-  .funnelHow { grid-column: 1 / -1; }
+  .funnelRow { grid-template-columns: 1fr; }
+  .funnelHow, .funnelBar { grid-column: 1; }
 }
 @media (max-width: 640px) {
   .nav, .main, .footer { padding-inline: var(--s4); }
@@ -174,3 +174,77 @@
    under the 24px minimum. Padding the link box lifts the hit area without
    touching the type scale, which stays identical in daylight and cockpit. */
 .lede a, .example a { display: inline-block; padding-block: 4px; }
+
+
+/* ===== P10.5E homepage ===== */
+.eyebrow {
+  font-size: var(--size-caption);
+  letter-spacing: 0.02em;
+  color: var(--fg-soft);
+  text-transform: none;
+  border-left: 2px solid var(--brass);
+  padding-left: var(--s3);
+  max-width: 60ch;
+  line-height: 1.5;
+}
+.noWallet {
+  margin: 0;
+  max-width: 52ch;
+  font-size: var(--size-body);
+  line-height: var(--lh-body);
+  color: var(--fg);
+  border-left: 2px solid var(--holds);
+  padding-left: var(--s3);
+}
+.heroCtas { display: flex; gap: var(--s3); flex-wrap: wrap; }
+.demoChips { display: flex; gap: var(--s2); flex-wrap: wrap; margin-top: var(--s2); }
+.demoChip {
+  font-size: var(--size-caption);
+  color: var(--fg-soft);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 6px 12px;
+  min-height: 28px;
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+.demoChip:hover { color: var(--fg); }
+.demoChipOn { background: var(--fg); color: var(--ground); border-color: var(--fg); }
+
+.strip { display: flex; flex-direction: column; margin-top: var(--s2); }
+.stripRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto auto auto;
+  gap: var(--s4);
+  align-items: center;
+  padding: var(--s3) 0;
+  border-bottom: 1px solid var(--line);
+}
+.stripMain { display: flex; align-items: center; gap: var(--s2); flex-wrap: wrap; min-width: 0; }
+.stripName { font-size: var(--size-title); font-weight: 500; }
+.stripMeta { font-size: var(--size-data); color: var(--fg-soft); font-family: var(--font-mono); }
+.exploreLink { margin-top: var(--s4); color: var(--chain); text-decoration: none; display: inline-flex; min-height: 28px; align-items: center; }
+
+.funnelBar {
+  background: color-mix(in srgb, var(--chain) 16%, var(--ground-raised));
+  border-radius: 2px;
+  padding: 4px var(--s3);
+  display: inline-flex;
+  align-items: center;
+  min-width: max-content;
+}
+
+.passFail { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s5); margin-top: var(--s2); }
+.pfCol { display: flex; flex-direction: column; gap: var(--s3); border: 1px solid var(--line); border-radius: 3px; padding: var(--s4); }
+.pfHead { font-size: var(--size-body); display: flex; align-items: center; gap: var(--s2); flex-wrap: wrap; }
+.pfHead a { color: var(--chain); text-decoration: none; }
+.pfFields { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; font-size: var(--size-data); }
+.pfFields li { display: flex; justify-content: space-between; gap: var(--s3); border-bottom: 1px solid var(--line); padding-bottom: 3px; }
+.pfOk { color: var(--holds); }
+.pfFailNote { margin: 0; font-size: var(--size-body); line-height: var(--lh-body); color: var(--fg-soft); }
+
+@media (max-width: 900px) {
+  .stripRow { grid-template-columns: minmax(0,1fr) auto; grid-auto-flow: row; }
+  .passFail { grid-template-columns: 1fr; }
+}

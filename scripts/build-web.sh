@@ -37,5 +37,6 @@ fi
 # production while looking fine locally.
 mkdir -p "$STANDALONE/docs/standard"
 cp -r "$ROOT/docs/standard/." "$STANDALONE/docs/standard/" 2>/dev/null || true
+cp "$ROOT/docs/pancakeswap-proof.json" "$STANDALONE/docs/" 2>/dev/null || true
 
 echo "build-web: standalone ready at $STANDALONE"
