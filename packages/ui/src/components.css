@@ -27,6 +27,11 @@
   line-height: var(--lh-statement);
   max-width: 26ch;
 }
+.statement--page {
+  font-size: var(--size-page-title);
+  line-height: 1.1;
+  max-width: 22ch;
+}
 
 /* --- Data: mono, tabular -------------------------------------------------- */
 
@@ -45,7 +50,7 @@
 
 .prov {
   display: inline-block;
-  font-size: 10.5px;
+  font-size: 12px;
   letter-spacing: 0.09em;
   line-height: 1;
   padding: 3px 5px;
@@ -128,7 +133,7 @@
   justify-content: center;
   gap: var(--s2);
   font-family: var(--font-ui);
-  font-size: var(--size-body);
+  font-size: var(--size-control);
   line-height: 1;
   padding: 10px 16px;
   min-height: 40px;

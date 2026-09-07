@@ -1,4 +1,4 @@
-.page { max-width: 880px; margin: 0 auto; padding: var(--s7) var(--s5) var(--s9); }
+.page { max-width: var(--measure-data); margin: 0 auto; padding: var(--s7) var(--s5) var(--s9); }
 .head { display: flex; flex-direction: column; gap: var(--s3); padding-bottom: var(--s5); }
 .lede { margin: 0; max-width: 68ch; color: var(--fg-soft); font-size: var(--size-body); line-height: var(--lh-body); }
 .section { padding: var(--s6) 0; border-top: 1px solid var(--line); display: flex; flex-direction: column; gap: var(--s3); }

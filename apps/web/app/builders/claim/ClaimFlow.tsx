@@ -5,11 +5,6 @@ import Link from 'next/link'
 import { Button, LinkButton, Chip, ProvenanceChip } from '@marque/ui'
 import styles from '../builders.module.css'
 
-declare global {
-  interface Window {
-    ethereum?: { request(a: { method: string; params?: unknown[] }): Promise<unknown> }
-  }
-}
 
 interface Identity {
   agentId: string

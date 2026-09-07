@@ -31,7 +31,7 @@ export interface AnchorResult {
 export async function anchorReceipt(hash: string): Promise<AnchorResult> {
   const registryAddress = process.env['MARQUE_REGISTRY_ADDRESS_TESTNET']
   const privateKey = process.env['MARQUE_TESTNET_PK']
-  const rpcUrl = process.env['BSC_TESTNET_RPC']
+  const rpcUrl = process.env['BSC_TESTNET_RPC']?.split(',')[0]?.trim()
   if (!registryAddress || !privateKey || !rpcUrl) {
     return { ok: false, txHash: null, blockNumber: null, detail: 'anchoring is not configured on this deployment' }
   }

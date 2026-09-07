@@ -56,7 +56,7 @@ export interface SealResult {
 function config() {
   const registryAddress = process.env['MARQUE_REGISTRY_ADDRESS_TESTNET']
   const privateKey = process.env['MARQUE_TESTNET_PK']
-  const rpcUrl = process.env['BSC_TESTNET_RPC']
+  const rpcUrl = process.env['BSC_TESTNET_RPC']?.split(',')[0]?.trim()
   if (!registryAddress || !privateKey || !rpcUrl) return null
   return { registryAddress: registryAddress as Address, privateKey: privateKey as `0x${string}`, rpcUrl }
 }

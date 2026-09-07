@@ -63,12 +63,17 @@
   --font-mono: 'Geist Mono', ui-monospace, 'SF Mono', 'Roboto Mono', monospace;
   --font-statement: 'Fraunces', 'Iowan Old Style', Georgia, serif;
 
-  --size-hero: 48px;
+  /* Display type was dominating while functional type was undersized (P10.5D
+     item 3). Rebalanced: hero down a touch in weight of presence, controls and
+     metadata up, and nothing below 12px anywhere — including the footer. */
+  --size-hero: 50px;
+  --size-page-title: 38px;
   --size-statement: 30px;
-  --size-title: 16px;
-  --size-body: 15px;
-  --size-data: 13.5px;
-  --size-caption: 11.5px;
+  --size-title: 17px;      /* row title */
+  --size-control: 14px;    /* buttons, inputs, selects, nav */
+  --size-body: 15.5px;
+  --size-data: 13.5px;     /* tabular numerals in tables / receipts */
+  --size-caption: 12px;    /* metadata floor — never smaller */
   --lh-hero: 1.05;
   --lh-statement: 1.15;
   --lh-body: 1.55;
@@ -84,7 +89,11 @@
   --s8: 64px;
   --s9: 96px;
 
-  --measure: 68ch;
+  /* TWO container widths, never one for both (AGENTS.md invariant 21 / P10.5D
+     item 2). Editorial prose reads at a real measure; dense data needs room. */
+  --measure-prose: 680px;
+  --measure-data: 1240px;
+  --measure: 68ch; /* legacy alias — prefer the two above */
   --ease-settle: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -108,10 +117,11 @@
 
 @media (max-width: 768px) {
   :root {
-    --size-hero: 30px;
+    --size-hero: 32px;
+    --size-page-title: 27px;
     --size-statement: 24px;
-    --size-title: 15px;
-    --size-data: 13px;
+    --size-title: 16px;
+    /* --size-data and --size-caption stay put: 13.5 / 12 is the floor. */
   }
 }
 

@@ -18,7 +18,7 @@ export function Statement({
 }: {
   children: ReactNode
   as?: 'h1' | 'h2' | 'h3' | 'p'
-  size?: 'hero' | 'statement'
+  size?: 'hero' | 'page' | 'statement'
   className?: string
 }) {
   return (
