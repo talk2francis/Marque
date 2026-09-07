@@ -241,3 +241,14 @@ REMINDERS:
 - MCS checks facts and supplied-policy compliance only. Judgement goes in the Ledger.
 - Never delete a first-party observation (probe history, conformance results, run artifacts,
   Ledger manifests). They cannot be recreated.
+
+
+17. First-party supply is always labelled. Every Marque reference agent carries a visible Marque reference agent mark wherever it appears, linking to a one-line explanation of why first-party agents exist. Never let one sit in the Register looking like third-party supply.
+
+18. One agent, one name. An agent has exactly one display name, resolved from a single source, and it is identical on the Register, the profile, the Ledger, the charter builder and every receipt. Three names for one agent is a bug, not a cosmetic issue.
+
+19. Never display a query limit as a count. Any number describing a population is a COUNT(*). If the underlying query is capped, the UI says 200+ or nothing at all. This is the same rule as invariant 4 and it applies with extra force on a product competing on data quality.
+
+20. Network context is local, never global. Every surface that shows or produces a transaction states its own chain — BSC mainnet · 56 or BSC testnet · 97 — and every explorer link inherits that context. A footer label does not establish the network for a page.
+
+21. Two container widths. Prose surfaces cap at 680px because that is a readable measure. Data surfaces — Register, Standard results, Ledger, Charters, profiles — run to 1240px. Nothing uses a single width for both.
