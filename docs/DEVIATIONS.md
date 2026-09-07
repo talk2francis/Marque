@@ -8,6 +8,107 @@ product, it is written down here.
 
 ---
 
+## REC — Rebuild after VPS compromise (2026-09-07)
+
+The host was root-compromised (miner + `ld.so.preload` rootkit, contained twice)
+and reprovisioned. The clean-rebuild bundle carried only `database/marque.dump`
+and three unrelated files; every `.env`, wallet and keystore was excluded by
+design. What follows is what changed on the way back up.
+
+### REC-01 · Secrets and the operator wallet were regenerated, not restored
+
+- **Planned** — `/root/.marque/secrets.env` and `agents/*/.studio/` keystores
+  restored from backup.
+- **Shipped** — Neither was in the recovery bundle. `secrets.env` was rebuilt by
+  hand from the AGENTS.md env registry plus the keys Francis re-supplied. A fresh
+  throwaway testnet operator wallet was generated: **`0x9598AB46aAB33389C2e9Ffe0511effD330f67F9B`**.
+  It holds no tBNB yet, so charter grant / revoke / receipt-anchor transactions
+  are blocked until it is funded.
+- **Why** — The excluded credentials do not exist anywhere the rebuild can reach.
+- **Cost** — The 12 charters, 10 receipts and 10 sealed calls in the restored DB
+  were signed by the previous operator key. They remain readable and on-chain,
+  but cannot be revoked from the new key. Acceptable: all testnet, and fresh
+  charters grant cleanly once the wallet is funded.
+- **Restore** — Fund `0x9598…7F9B` from a BSC testnet faucet. If the old
+  `secrets.env` resurfaces, its `MARQUE_TESTNET_PK` can be swapped back in.
+
+### REC-02 · The five reference agents are not yet re-registered on ERC-8004
+
+- **Planned** — Bound / Lattice / Sluicegate / Keel / Redcell live and registered
+  as ERC-8004 #2160–2164 (per D8-05).
+- **Shipped** — Their `.studio` keystores are gone, so the agent wallets that own
+  #2160–2164 cannot sign. The agent source still builds and runs; the Register
+  lists them from our own registry, not from an 8004scan lookup.
+- **Why** — Keystores were excluded from the recovery bundle.
+- **Cost** — Until re-registration, the reference agents are not discoverable via
+  ERC-8004 identity resolution. Registration is discovery, not capability
+  (D8-05): they still answer, and MCS results for them are in the restored DB.
+- **Restore** — Generate five fresh agent wallets, fund them, re-run
+  `scripts/register-when-up.sh`. New token ids; update the D8-05 table and any
+  doc that cites #2160–2164.
+
+### REC-03 · Database restored from the post-incident dump, not rebuilt from chain
+
+- **Planned** — Derived state (invariant 12) is rebuildable from ingest cursor
+  zero; first-party observations come from backup.
+- **Shipped** — `marque.dump` (SHA-256 verified against the recovery manifest)
+  restored whole into a non-superuser `marque` role in an isolated database.
+  `pg_restore --list` showed only tables, sequences, constraints and indexes —
+  no functions, extensions or triggers. Row counts: 298,817 agents, 871,252
+  probes, 168 conformance results (21 passes), 12 charters, 10 receipts, 10
+  sealed calls, 4 benchmarks / 17 runs, 306 funnel snapshots, 9,517 pool-tick
+  observations. Newest `funnel_snapshot` is dated 2026-09-07 09:55.
+- **Why** — The first-party observations (probe history, conformance results,
+  warrants, Ledger manifests, receipts, pool-tick history) can never be
+  recreated (invariant 12), and the Register / Standard / Ledger surfaces are
+  meaningless without them. The derived tables get overwritten by the next
+  ingest sweep regardless, so any tampering there does not persist.
+- **Cost** — "Rebuilt from chain" is not literally true for this deployment
+  until a full re-ingest runs. The recovery README is explicit that a clean
+  transfer does not prove the data was never modified by the attacker.
+- **Restore** — Run `marque-ingest` from cursor zero before judging to refresh
+  every derived row; the first-party tables stay untouched.
+
+### REC-04 · Drizzle migration bookkeeping was two rows behind its own schema
+
+- **Planned** — `__drizzle_migrations` matches the migrations on disk.
+- **Shipped** — The dump's schema already had migrations 0007 and 0008 applied
+  (the `benchmark_run.batch` column, `pool_tick_observation`, `pool_watch`), but
+  `drizzle.__drizzle_migrations` held only 7 rows. Two bookkeeping rows were
+  inserted with the correct file hashes and journal timestamps so the migrator
+  is a clean no-op. No DDL was replayed.
+- **Why** — Running the migrator without this would have re-applied 0007/0008 and
+  failed on "already exists".
+- **Cost** — None. Schema and bookkeeping now agree.
+- **Restore** — n/a.
+
+### REC-05 · `pnpm-lock.yaml` gained two workspace links
+
+- **Planned** — Lockfile is in sync with every `package.json`.
+- **Shipped** — `apps/web` declares `@marque/agent-engines` and `@marque/ledger`
+  as `workspace:*` dependencies that were absent from the committed lockfile. A
+  fresh `pnpm install` added the two `link:` entries. This is a correction; a
+  `--frozen-lockfile` CI run would have failed on the old file.
+- **Why** — Pre-existing inconsistency, surfaced by installing on a clean box.
+- **Cost** — None.
+- **Restore** — n/a.
+
+### REC-06 · `next dev` is not usable here; the app runs from the standalone build
+
+- **Planned** — n/a (no doc mandates a dev-server workflow).
+- **Shipped** — `next dev` (webpack) cannot resolve the workspace CSS `@import`
+  in `globals.css`; `next dev --turbo` ignores the `webpack()` config in
+  `next.config.mjs` and fails every `./x.js`→`./x.ts` workspace import. Iteration
+  is `scripts/build-web.sh` + `pm2 reload marque-web`, which is the production
+  path anyway (AGENTS.md gotcha 4).
+- **Why** — Known Next 15 limitations; not worth destabilising the shipped
+  config for a dev convenience (invariant 16).
+- **Cost** — ~90s per visual iteration instead of hot-reload.
+- **Restore** — A future `next.config` with a matching `turbo.resolveAlias`
+  block, verified against `next build`, would restore hot reload.
+
+---
+
 ## P0 — Foundation
 
 ### D0-01 · Domain is `marque.trade`, not `usemarque.xyz`

@@ -248,6 +248,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@marque/agent-engines':
+        specifier: workspace:*
+        version: link:../../packages/agent-engines
       '@marque/chain':
         specifier: workspace:*
         version: link:../../packages/chain
@@ -260,6 +263,9 @@ importers:
       '@marque/execution':
         specifier: workspace:*
         version: link:../../packages/execution
+      '@marque/ledger':
+        specifier: workspace:*
+        version: link:../../packages/ledger
       '@marque/mandates':
         specifier: workspace:*
         version: link:../../packages/mandates
