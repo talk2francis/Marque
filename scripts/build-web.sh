@@ -21,6 +21,10 @@ if [ ! -f "$STANDALONE/server.js" ]; then
   exit 1
 fi
 
+# Replace, don't merge: `cp -r src dest` when `dest` already exists nests it as
+# `dest/src`, so the second deploy onward served stale asset hashes and every
+# page 404'd its CSS and JS. Clear the targets first.
+rm -rf "$STANDALONE/.next/static" "$STANDALONE/public"
 mkdir -p "$STANDALONE/.next"
 cp -r "$WEB/.next/static" "$STANDALONE/.next/static"
 if [ -d "$WEB/public" ]; then

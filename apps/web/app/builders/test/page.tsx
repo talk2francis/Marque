@@ -30,7 +30,9 @@ export default function BuildersTestPage() {
           </p>
           <p className={styles.note}>
             The same harness that produces every result on <Link href="/standard">the Standard</Link>,
-            run against the same tolerances. Nothing here is scored by a language model.
+            run against the same tolerances. Nothing here is scored by a language model. Ready to
+            be listed? <Link href="/builders/claim">Prove you own it and publish</Link> — the run
+            then counts.
           </p>
         </header>
 

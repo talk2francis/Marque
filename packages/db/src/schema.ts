@@ -7,7 +7,8 @@
  *                     agent, agentService, agentCategory, ingestCursor.
  *
  *  FIRST-PARTY OBS.   measurements we made and can never recreate.
- *                     probe, funnelSnapshot.
+ *                     probe, funnelSnapshot, builderListing, conformance*,
+ *                     charter, run, receipt, sealedCall, poolTickObservation.
  *                     Never included in a rebuild drill. Never dropped.
  *
  * Tables in the first-party tier are marked FIRST-PARTY below.
@@ -277,6 +278,65 @@ export type AgentService = typeof agentService.$inferSelect
 export type NewAgentService = typeof agentService.$inferInsert
 export type Probe = typeof probe.$inferSelect
 export type FunnelSnapshot = typeof funnelSnapshot.$inferSelect
+
+/** A published listing is live until its owner withdraws it. */
+export const LISTING_STATUS = ['published', 'withdrawn'] as const
+export type ListingStatusValue = (typeof LISTING_STATUS)[number]
+
+/**
+ * FIRST-PARTY. The builder claim rail (P10a).
+ *
+ * The `agent` row this points at is DERIVED — ingest rebuilds it from chain and
+ * 8004scan. This row is not. It holds three things ingest can never reproduce:
+ * a signature proving the owner controls the ERC-8004 key, the listing details
+ * the builder supplied to us directly, and the conformance run we did in front
+ * of them. Invariant 12 applies in full — never dropped, never part of a
+ * rebuild-from-chain drill.
+ *
+ * Ownership is verified against `ownerOf(tokenId)` read live from the identity
+ * contract at claim time; `ownerAddress` is that on-chain value, not 8004scan's.
+ */
+export const builderListing = pgTable('builder_listing', {
+  id: serial('id').primaryKey(),
+  /** The ERC-8004 identity as our agent primary key: "chainId:registry:tokenId". */
+  agentId: text('agent_id').notNull(),
+  chainId: integer('chain_id').notNull(),
+  tokenId: text('token_id').notNull(),
+  contractAddress: text('contract_address').notNull(),
+  /** The signer, verified equal to ownerOf(tokenId) on chain at claim time. */
+  ownerAddress: text('owner_address').notNull(),
+
+  /** The exact message signed and its signature, kept so anyone can re-verify. */
+  proofMessage: text('proof_message').notNull(),
+  proofSignature: text('proof_signature').notNull(),
+  proofNonce: text('proof_nonce').notNull(),
+  verifiedAt: timestamp('verified_at', { withTimezone: true }).notNull().defaultNow(),
+
+  /** The guided listing. */
+  category: text('category').$type<Category>().notNull(),
+  serviceKind: text('service_kind').$type<ServiceKind>().notNull(),
+  endpoint: text('endpoint').notNull(),
+  /** What the agent takes and returns, in the builder's own words. */
+  inputs: text('inputs'),
+  outputs: text('outputs'),
+  /** Declared price exactly as written. Null = not advertised, itself a finding. */
+  price: text('price'),
+
+  /** The conformance run done during the claim. Null = published without testing. */
+  conformanceResultId: integer('conformance_result_id'),
+
+  status: text('status').$type<ListingStatusValue>().notNull().default('published'),
+  publishedAt: timestamp('published_at', { withTimezone: true }).notNull().defaultNow(),
+  withdrawnAt: timestamp('withdrawn_at', { withTimezone: true }),
+}, (t) => ({
+  agentUq: uniqueIndex('builder_listing_agent_uq').on(t.agentId),
+  ownerIdx: index('builder_listing_owner_idx').on(t.ownerAddress),
+  categoryIdx: index('builder_listing_category_idx').on(t.category),
+  statusIdx: index('builder_listing_status_idx').on(t.status),
+}))
+
+export type BuilderListing = typeof builderListing.$inferSelect
+export type NewBuilderListing = typeof builderListing.$inferInsert
 
 // ---------------------------------------------------------------------------
 // FIRST-PARTY OBSERVATIONS — the charter, run and receipt record (P7)

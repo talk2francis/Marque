@@ -1002,3 +1002,73 @@ design. What follows is what changed on the way back up.
   on mainnet has been touched.
 - **9c** `/pancakeswap/gaps` is cut by default per the phase brief. It is only
   attempted if 9a and 9b are stable with time to spare, and 9b has not run.
+
+---
+
+## P10 — Builder rail, Judge Mode, standard pages
+
+Continued 2026-09-07 after the rebuild (REC-*). P10b/c/d/e shipped before the
+compromise; this session picks up 10a.
+
+### D10-01 · `/builders/claim` reads identity from chain first, not from 8004scan
+
+- **Planned** — "fetch identity from chain".
+- **Shipped** — Exactly that, and 8004scan is demoted to best-effort. The owner
+  is `ownerOf(tokenId)` read live from the ERC-8004 identity contract; that is
+  the only value a signature can be checked against. 8004scan is used, with a
+  6-second cap and no hard dependency, for two things it does better than a bare
+  chain read: naming the exact registry contract, and a name/description to
+  pre-fill the form. When it 500s (D8-05: their DB flaps), the flow falls back
+  to `BSC_ERC8004_REGISTRY` (the known BSC registry, configurable, never
+  guessed) and still completes.
+- **Why** — During build the index was returning 500s on ~half of reads. A
+  claim rail that goes down with the indexer is not a claim rail. The chain is
+  always up and is the authority anyway.
+- **Cost** — If an identity lives in a registry not listed in
+  `BSC_ERC8004_REGISTRY` *and* 8004scan is down, it cannot be resolved. Adding
+  the address to the env fixes it. One known registry covers every BSC agent
+  seen so far.
+- **Restore** — n/a; this is stronger than the brief.
+
+### D10-02 · Lookup by owner address needs 8004scan; lookup by token id does not
+
+- **Planned** — "Paste an ERC-8004 token id or owner address".
+- **Shipped** — Both. The token-id path is chain-only (above). The owner-address
+  path lists the address's identities through 8004scan, because there is no
+  cheap chain-only way to enumerate an address's ERC-721 holdings without an
+  indexer or a log scan. When 8004scan is unavailable the address path returns
+  an honest "unavailable right now, paste the token id instead" rather than
+  hanging.
+- **Cost** — Owner-address lookup is only as available as 8004scan. The token-id
+  path — the primary one — is not.
+- **Restore** — A `Transfer`-event index of the identity contract would make the
+  address path chain-only too; out of scope for P10.
+
+### D10-03 · Publishing writes a first-party listing, not an `agent` row
+
+- **Planned** — "guided listing … publish".
+- **Shipped** — Publish writes `builder_listing` (first-party: the ownership
+  proof, the builder's listing fields, the conformance run) and upserts
+  `agent_category` so the identity appears under its category. It does **not**
+  create or edit the `agent` row — that is derived state and must stay
+  rebuildable from ingest (invariant 12). If the identity is not indexed yet,
+  publish returns "the chain is swept every few minutes; try again shortly"
+  rather than materialising a derived row by hand.
+- **Cost** — A brand-new ERC-8004 registration (minutes old, not yet swept)
+  cannot be published until the next ingest sweep picks it up.
+- **Restore** — n/a; this is the correct tier boundary. Migration `0009` adds
+  `builder_listing`; it is marked FIRST-PARTY in `schema.ts` and is never part
+  of a rebuild-from-chain drill.
+
+### D10-04 · The live conformance run during a claim is persisted; the free tester's is not
+
+- **Planned** — "run the conformance test LIVE in the browser with the result
+  shown".
+- **Shipped** — `/builders/claim` runs the same harness as `/builders/test` but
+  with `persist: true`, attached to the real ERC-8004 `agentId`, so the result
+  shows on the profile and counts on `/standard` — pass **or** fail
+  (invariant 7). `/builders/test` still keeps nothing, because testing
+  work-in-progress should not publish it. A builder can also publish without
+  running the test and is listed as "not yet tested".
+- **Cost** — None. The distinction is deliberate and stated on both pages.
+- **Restore** — n/a.

@@ -64,6 +64,13 @@
       "when": 1788619167652,
       "tag": "0008_brown_the_watchers",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1788798123611,
+      "tag": "0009_military_chronomancer",
+      "breakpoints": true
     }
   ]
 }

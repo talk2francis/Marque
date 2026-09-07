@@ -30,8 +30,17 @@ const DAILY_VISITOR_GRANTS = Number(process.env['MARQUE_DAILY_GRANT_CAP'] ?? 40)
  */
 const TEST_TOOL_MAX = 6
 
+/**
+ * The claim rail (P10a) is a four-step flow — resolve identity, verify a
+ * signature, run the Standard, publish — so a single builder legitimately
+ * makes several calls in a minute. It spends chain reads and one endpoint
+ * call, never tBNB, so it gets its own, looser allowance.
+ */
+const CLAIM_MAX = 15
+
 const hits = new Map<string, number[]>()
 const testHits = new Map<string, number[]>()
+const claimHits = new Map<string, number[]>()
 
 export interface LimitVerdict {
   ok: boolean
@@ -80,6 +89,24 @@ export function checkTestBurst(key: string): LimitVerdict {
   }
   recent.push(now)
   testHits.set(key, recent)
+  return { ok: true }
+}
+
+/** The claim rail's own limit — looser than the tester, same honest framing. */
+export function checkClaimBurst(key: string): LimitVerdict {
+  const now = Date.now()
+  const recent = (claimHits.get(key) ?? []).filter((t) => now - t < PER_IP_WINDOW_MS)
+  if (recent.length >= CLAIM_MAX) {
+    const oldest = recent[0] ?? now
+    const retry = Math.ceil((PER_IP_WINDOW_MS - (now - oldest)) / 1000)
+    return {
+      ok: false,
+      retryAfterSeconds: retry,
+      detail: `The claim flow is limited to ${CLAIM_MAX} steps a minute. Try again in ${retry}s.`,
+    }
+  }
+  recent.push(now)
+  claimHits.set(key, recent)
   return { ok: true }
 }
 

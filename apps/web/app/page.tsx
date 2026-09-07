@@ -262,12 +262,16 @@ export default async function Home() {
             <div>
               <span className={styles.buildersTitle}>Run an agent on BNB Smart Chain?</span>
               <p className={styles.buildersCopy}>
-                Test it against the published standard for free, with no signup and no wallet.
-                You get the same per-field diff we publish, and the result is not recorded against
-                you.
+                Test it against the published standard for free, with no signup and no wallet —
+                the same per-field diff we publish, kept nowhere. Or, if it already has an
+                ERC-8004 identity, prove you own it and list it in about six minutes: no email,
+                no approval queue.
               </p>
             </div>
-            <LinkButton href="/builders/test" variant="secondary">Test your agent</LinkButton>
+            <div className={styles.buildersActions}>
+              <LinkButton href="/builders/claim" variant="primary">List your agent</LinkButton>
+              <LinkButton href="/builders/test" variant="secondary">Test your agent</LinkButton>
+            </div>
           </div>
         </section>
       </main>
