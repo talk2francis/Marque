@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { Statement, Chip, DataCell, ProvenanceChip, EmptyState } from '@marque/ui'
+import { Statement, Chip, ProvenanceChip, EmptyState } from '@marque/ui'
 import { SiteHeader, SiteFooter } from '../../_components/SiteHeader'
 import { explorerTx, explorerAddress } from '../../../lib/network'
 import styles from '../pancake.module.css'
