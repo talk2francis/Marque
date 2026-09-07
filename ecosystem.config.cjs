@@ -157,6 +157,23 @@ module.exports = {
       out_file: '/root/.pm2/logs/marque-pancake-watch-out.log',
       error_file: '/root/.pm2/logs/marque-pancake-watch-err.log',
     },
+    {
+      // Re-runs every MCS test on a 24h cycle so a Warrant has a date and can
+      // go stale (P10.5C item 4). Depends on the reference agents being up.
+      name: 'marque-conform',
+      cwd: `${ROOT}/apps/worker`,
+      script: 'node_modules/.bin/tsx',
+      args: 'src/conform.ts',
+      interpreter: 'none',
+      env: { ...env, NODE_ENV: 'production' },
+      autorestart: true,
+      max_restarts: 50,
+      restart_delay: 30000,
+      max_memory_restart: '600M',
+      time: true,
+      out_file: '/root/.pm2/logs/marque-conform-out.log',
+      error_file: '/root/.pm2/logs/marque-conform-err.log',
+    },
     ...agentApps,
     {
       name: 'marque-web',

@@ -12,18 +12,19 @@ import { privateKeyToAccount } from 'viem/accounts'
 import { bscTestnet } from 'viem/chains'
 
 const AGENTS = {
-  bound: '0x72b99eFf53a7DbA31f66F7a98116bE7D84d4810B',
-  keel: '0x35e2EcBcC9DCA14A85Cf99CC76eb6899c6f29566',
-  lattice: '0x7d7216A4e4Ee5F2663aE273d492fE99D495E4e44',
-  redcell: '0x5d47Ac7b6A73b4ebA1105677258e9baf904f9309',
-  sluicegate: '0x6d5767Ca6e48B7103F3E660A2ff78148D2Ec6Ab4',
+  bound: '0x5B1c9fBc684a1722Bb5C66C0B22F149dA69768d6',
+  keel: '0xdF1074a272C53A1a10b96Fa0201Eb58bbbaaFe00',
+  lattice: '0x5aAF7b5B2170986C59279682Bd714c475ae8C718',
+  redcell: '0x1F0D0eF5a279888E3b86c8a99A8A99F19fCEc587',
+  sluicegate: '0x253F7Ad5D52099C4a2293418a661e9974DfB5e84',
 }
 const PER_AGENT = parseEther('0.01')
 
 const pk = process.env.MARQUE_TESTNET_PK
 if (!pk) throw new Error('MARQUE_TESTNET_PK not in env')
 const account = privateKeyToAccount(pk.startsWith('0x') ? pk : `0x${pk}`)
-const transport = http(process.env.BSC_TESTNET_RPC ?? 'https://data-seed-prebsc-1-s1.bnbchain.org:8545')
+const RPC = (process.env.BSC_TESTNET_RPC ?? 'https://data-seed-prebsc-1-s1.bnbchain.org:8545').split(',')[0].trim()
+const transport = http(RPC)
 const pub = createPublicClient({ chain: bscTestnet, transport })
 const wallet = createWalletClient({ account, chain: bscTestnet, transport })
 

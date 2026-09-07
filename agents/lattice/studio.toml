@@ -27,7 +27,7 @@ kind = "evm-local"
 signer = "local"
 keystore_dir = ".studio/wallets"
 # address = "0x..."   # filled by `bag wallet new`
-address = "0x7d7216A4e4Ee5F2663aE273d492fE99D495E4e44"
+address = "0x5aAF7b5B2170986C59279682Bd714c475ae8C718"
 
 [llm]
 provider = "anthropic"
