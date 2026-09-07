@@ -1,8 +1,8 @@
 import { notFound } from 'next/navigation'
 import { Statement, Chip } from '@marque/ui'
 import { categoryFunnel, MIN_THIRD_PARTY_PER_CATEGORY } from '@marque/registry'
+import { Marketplace } from '../Marketplace'
 import { RegisterTable } from '../RegisterTable'
-import { CategoryTabs } from '../CategoryTabs'
 import { SiteHeader, SiteFooter } from '../../_components/SiteHeader'
 import styles from '../register.module.css'
 
@@ -81,8 +81,12 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
           </p>
         )}
       </div>
-      <CategoryTabs active={meta.key} />
-      <RegisterTable category={meta.key} />
+      <Marketplace category={meta.key} />
+
+      <section className={styles.graveyard}>
+        <h2 className={styles.h2}>The graveyard, in this category</h2>
+        <RegisterTable category={meta.key} graveyard />
+      </section>
     </main>
       <SiteFooter />
     </>

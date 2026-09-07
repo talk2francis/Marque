@@ -52,8 +52,9 @@ const CATEGORY_LABEL: Record<string, string> = {
   security: 'Security',
 }
 
-export function RegisterTable({ category }: { category?: string }) {
-  const [status, setStatus] = useState<Status>('working')
+export function RegisterTable({ category, graveyard }: { category?: string; graveyard?: boolean }) {
+  const [status, setStatus] = useState<Status>(graveyard ? 'unbound' : 'working')
+  const TABS = (graveyard ? ['unbound', 'dead', 'all'] : ['working', 'unbound', 'dead', 'all']) as Status[]
   const [agents, setAgents] = useState<AgentRow[]>([])
   const [counts, setCounts] = useState<Record<Status, number | null>>({ working: null, unbound: null, dead: null, all: null })
   const [countsAt, setCountsAt] = useState<string | null>(null)
@@ -65,7 +66,7 @@ export function RegisterTable({ category }: { category?: string }) {
     setLoading(true)
     setError(null)
     const qs = (s: Status) =>
-      `/api/v1/agents?status=${s}&limit=60${category ? `&category=${category}` : ''}`
+      `/api/v1/agents?status=${s}&limit=${graveyard ? 12 : 60}${category ? `&category=${category}` : ''}`
 
     void (async () => {
       try {
@@ -131,7 +132,7 @@ export function RegisterTable({ category }: { category?: string }) {
   return (
     <>
       <div className={styles.filters} role="group" aria-label="Filter by status">
-        {(['working', 'unbound', 'dead', 'all'] as const).map((s) => (
+        {TABS.map((s) => (
           <Button
             key={s}
             size="sm"

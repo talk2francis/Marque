@@ -1,6 +1,6 @@
 # Audit report
 
 Base: http://127.0.0.1:3200
-Ran: 2026-09-07T18:22:58.580Z
+Ran: 2026-09-07T20:08:21.586Z
 
-32 route/width combinations · 0 with issues
+12 route/width combinations · 0 with issues

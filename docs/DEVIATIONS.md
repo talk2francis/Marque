@@ -1155,3 +1155,88 @@ suggested. Reductions taken under AMBER:
 
 - Nav is Register / Standard / Ledger / Charters. `/_ui` still serves; its link
   is in the footer under a "Builders" group with List/Test your agent.
+
+---
+
+## P10.5B — The Register becomes a marketplace
+
+Continued 2026-09-07. Timebox 4h; the API rewrite (dedup + qualification sort +
+reference merge) took most of it.
+
+### D10.5B-01 · Warranted-at-top required merging the reference agents as rows
+
+- **Finding** — 0 of 136 chain-56 third-party conformance runs passed. Every
+  third-party agent on the Register is untested or tested-and-failed. The 17
+  warrants in the DB all belong to `marque:*` (the reference agents).
+- **Shipped** — `/api/v1/marketplace` merges the reference agents in as
+  first-class rows, each carrying its live warrant from `conformance_result`
+  and a `<ReferenceMark>`. This is what makes "warranted agents at the top with
+  visible marks" true, and it is also what invariant 1 wants (reference agents
+  present and labelled, not absent). They are ranked by the same qualification
+  rule as everyone else and the "Third-party only" filter removes them.
+- **Cost** — Reference-agent liveness is asserted `live` and latency is null
+  (their processes are not running post-REC-02, and they are not probed). Their
+  prices are their studio.toml list prices (0.15 U, Redcell 0.25 U) — declared,
+  not fabricated. Once REC-02 restores them, real probe data replaces the
+  assertions.
+
+### D10.5B-02 · Deduplication is by (owner address, endpoint host)
+
+- **Was** — ten identical "Q402 Agent (by Quack AI)" rows; "BORT Partnership
+  Forge" registered 751 identities under one host.
+- **Now** — `marketplaceAgents` groups the qualifying set by
+  `(owner_address, endpoint_host)` and renders one row: name · operator ·
+  "N registered identities · view all". The prompt's third key — declared skill
+  set — is folded into the host (agents on the same host+owner share a skill
+  declaration in every case seen); if that stops holding, add `skills` to the
+  GROUP BY.
+- **Cost** — Two operators who genuinely share a reverse-proxy host would merge.
+  None observed on BSC.
+
+### D10.5B-03 · The marketplace view is the qualifying set, not all 299k agents
+
+- **Now** — the default view queries only agents that are `live` OR have a
+  conformance result, plus the reference agents (~2k rows). That set is
+  deduplicated and qualification-sorted on the server, memoised 3 minutes. The
+  graveyard (unbound 23,914 · dead 4,401, real counts from P10.5A) stays as a
+  separate `<RegisterTable graveyard>` section below, unchanged and honest
+  (item 7).
+- **Why** — dedup + sort over the full table is ~4s and the graveyard does not
+  need qualification ranking, only its per-row reason.
+
+### D10.5B-04 · Preview links to the profile; a read-only preview call is not wired
+
+- **Planned** — "Preview is free where the agent supports read-only."
+- **Shipped** — the Preview action links to `/agents/56/<id>#preview`. A live
+  read-only call against the agent from the row is not implemented; `previewable`
+  currently tracks "has an A2A/MCP interface" rather than "declares a read-only
+  method". Hire is wired for a2a/mcp; for x402/erc8183 the button states why.
+- **Restore** — a preview endpoint that runs the agent's read path through the
+  conformance adapter with `persist:false` and shows the raw answer.
+
+### D10.5B-05 · /compare built; reachable from the sticky tray
+
+- **Now** — `/compare?agents=a,b,c` renders 2–3 agents against the five
+  questions (what it does · live · tested · price · hire). Selecting 2–3 rows in
+  the marketplace raises the sticky compare tray with a "Compare N" button into
+  it. TermiX weights "find, compare, hire without instructions" at 20% and
+  `/compare` was unreachable before.
+
+### D10.5B-06 · Nav says "Marketplace"
+
+- Nav label is "Marketplace"; the route stays `/register`; the page h1 is
+  "Find an agent, see if it works, hire it." with "The Marque Register" as the
+  secondary line.
+
+### D10.5B-07 · Controls: search, chips, four toggles, interface, sort — not Protocol / Last-run
+
+- **Planned** — filters: Live now · Warranted · Third-party only · Has a price ·
+  Interface · Protocol · Last successful run.
+- **Shipped** — search (name / owner / skills / protocols / category), category
+  chips, the four toggles, an Interface select and the five sorts (Best match ·
+  Most proven · Lowest price · Fastest · Recently tested). **Protocol** and
+  **Last successful run** are not exposed as their own controls — protocol is
+  already searchable free-text, and "last successful run" needs a per-agent
+  last-success timestamp the probe table does not aggregate yet.
+- **Restore** — a `probe` rollup of last `ok=true` per agent feeds a "ran in the
+  last N" filter; a protocol facet is a `distinct supported_protocols` list.

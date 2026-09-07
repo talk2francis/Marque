@@ -1,43 +1,57 @@
 import { Statement, Chip } from '@marque/ui'
+import { Marketplace } from './Marketplace'
 import { RegisterTable } from './RegisterTable'
-import { CategoryTabs } from './CategoryTabs'
 import { SiteHeader, SiteFooter } from '../_components/SiteHeader'
 import { REFERENCE_AGENTS } from '../../lib/reference-agents'
 import styles from './register.module.css'
 
 export const dynamic = 'force-dynamic'
 export const metadata = {
-  title: 'The Register',
+  title: 'Marketplace',
   description:
-    'Every agent Marque can find on BNB Smart Chain, with the ones that actually answer up top and the graveyard one click away — each dead row with the reason it is dead, measured by our own probe.',
+    'Find an agent by category, see whether it works and whether it has been tested against the published standard, compare, and hire — with the ones that qualify at the top and the graveyard kept honest below.',
 }
 
+/**
+ * The Marketplace (P10.5B). Route stays /register; the page leads with a
+ * qualification-sorted, deduplicated, hireable view. "The Marque Register" is
+ * the secondary line — "Register" as a label reads as sign-up.
+ */
 export default function RegisterPage() {
   return (
     <>
       <SiteHeader active="register" />
       <main className={styles.page}>
       <div className={styles.head}>
-        <Statement as="h1">Every agent we can find on BNB Smart Chain.</Statement>
+        <Statement as="h1">Find an agent, see if it works, hire it.</Statement>
         <p className={styles.lede}>
-          Default view is what actually works: reachable, and exposing something a buyer could
-          hire. The rest is one click away with the reason it is not callable, measured by our
-          own probe rather than taken from the registry.
+          The Marque Register — every agent we can find on BNB Smart Chain, ranked by whether it
+          is callable and whether it has passed the published test. Deduplicated by operator, so
+          one team registering forty identities is one row.
         </p>
       </div>
-      <CategoryTabs active="all" />
-      <RegisterTable />
+      <Marketplace />
+
+      <section className={styles.graveyard}>
+        <h2 className={styles.h2}>The graveyard</h2>
+        <p className={styles.refCopy}>
+          Kept, not hidden. An endpoint that answers a request but was never bound to a runtime,
+          or one that does not answer at all, with the reason on every row. This transparency is
+          a differentiator; the counts are a live COUNT, not a page size.
+        </p>
+        <RegisterTable graveyard />
+      </section>
 
       <section id="reference-agents" className={styles.refSection}>
         <h2 className={styles.refHeading}>
           <Chip tone="watch">Marque reference agent</Chip> Why some agents here are ours
         </h2>
         <p className={styles.refCopy}>
-          Marque runs one agent per category so no category is ever empty for a buyer to
-          try. They are held to exactly the same standard as everyone else, tested against
-          the same published cases, and ranked by the same rules — including when a
-          third-party agent beats them. Every surface that shows one carries this mark, and
-          a &ldquo;Third-party only&rdquo; filter hides them.
+          Marque runs one agent per category so no category is ever empty for a buyer to try.
+          They are held to exactly the same standard as everyone else, tested against the same
+          published cases, and ranked by the same rules — including when a third-party agent
+          beats them. Every surface that shows one carries this mark, and the
+          &ldquo;Third-party only&rdquo; filter hides them.
         </p>
         <ul className={styles.refList}>
           {REFERENCE_AGENTS.map((a) => (

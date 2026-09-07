@@ -10,7 +10,11 @@ import { referenceMarkHref } from '../../lib/reference-agents'
  */
 export function ReferenceMark({ compact = false }: { compact?: boolean }) {
   return (
-    <Link href={referenceMarkHref} title="Why Marque runs its own agents">
+    <Link
+      href={referenceMarkHref}
+      title="Why Marque runs its own agents"
+      style={{ display: 'inline-flex', alignItems: 'center', minHeight: 28, textDecoration: 'none' }}
+    >
       <Chip tone="watch">{compact ? 'Marque agent' : 'Marque reference agent'}</Chip>
     </Link>
   )

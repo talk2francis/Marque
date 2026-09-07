@@ -20,7 +20,7 @@ export function SiteHeader({ active }: { active?: 'register' | 'standard' | 'des
       {/* "Design" (/_ui) lives in the footer under Builders, not here — a judge
           does not need the kitchen in the main navigation (P10.5A item 6). */}
       <nav className={styles.navLinks} aria-label="Main">
-        <a href="/register" aria-current={active === 'register' ? 'page' : undefined}>Register</a>
+        <a href="/register" aria-current={active === 'register' ? 'page' : undefined}>Marketplace</a>
         <a href="/standard" aria-current={active === 'standard' ? 'page' : undefined}>Standard</a>
         <a href="/ledger" aria-current={active === 'ledger' ? 'page' : undefined}>Ledger</a>
         <a href="/app/charters" aria-current={active === 'charters' ? 'page' : undefined}>Charters</a>

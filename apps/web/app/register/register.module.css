@@ -23,7 +23,7 @@
 .rows { border-top: 1px solid var(--line); }
 .rows :global(.row) { grid-template-columns: minmax(0, 1fr) auto auto auto; }
 .main { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.name { font-size: var(--size-title); font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.name { font-size: var(--size-title); font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-height: 24px; display: flex; align-items: center; }
 .sub { font-size: var(--size-caption); color: var(--fg-soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .meta { display: inline-flex; gap: var(--s2); flex-wrap: wrap; }
 .warrant { display: inline-flex; }
@@ -42,3 +42,80 @@
 .refList li { display: flex; gap: var(--s3); align-items: baseline; flex-wrap: wrap; }
 .refName { font-weight: 500; min-width: 6rem; }
 .refBlurb { font-size: var(--size-caption); color: var(--fg-soft); }
+
+/* ===== Marketplace (P10.5B) ===== */
+.controls { display: flex; flex-direction: column; gap: var(--s3); margin: var(--s4) 0 var(--s3); }
+.search {
+  font: inherit; font-size: var(--size-body); color: var(--fg);
+  background: var(--ground-raised); border: 1px solid var(--line); border-radius: 2px;
+  padding: 10px 12px; width: 100%; max-width: 520px;
+}
+.chips { display: flex; flex-wrap: wrap; gap: var(--s2); }
+.chip {
+  font: inherit; font-size: var(--size-caption); color: var(--fg-soft);
+  background: transparent; border: 1px solid var(--line); border-radius: 999px;
+  padding: 6px 12px; min-height: 28px; cursor: pointer;
+}
+.chipOn { background: var(--fg); color: var(--ground); border-color: var(--fg); }
+.filterRow { display: flex; flex-wrap: wrap; gap: var(--s2); align-items: center; }
+.toggle {
+  font: inherit; font-size: var(--size-caption); color: var(--fg-soft);
+  background: transparent; border: 1px solid var(--line); border-radius: 2px; padding: 6px 10px; min-height: 28px; cursor: pointer;
+}
+.toggleOn { background: color-mix(in srgb, var(--chain) 14%, transparent); border-color: var(--chain); color: var(--fg); }
+.select {
+  font: inherit; font-size: var(--size-caption); color: var(--fg);
+  background: var(--ground-raised); border: 1px solid var(--line); border-radius: 2px; padding: 5px 8px;
+}
+
+.mktRow {
+  display: grid; align-items: center; gap: var(--s3);
+  grid-template-columns: minmax(0, 1fr) auto minmax(150px, 200px) minmax(0, 118px) auto;
+  padding: var(--s3) 0; border-bottom: 1px solid var(--line);
+}
+.mktMain { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.mktNameLine { display: flex; align-items: baseline; gap: var(--s2); flex-wrap: wrap; }
+.mktNameLine .name { font-size: var(--size-title); font-weight: 500; display: inline-flex; align-items: center; min-height: 26px; }
+.dupes { font-size: var(--size-caption); color: var(--chain); display: inline-flex; align-items: center; min-height: 26px; }
+.mktSub { display: flex; gap: var(--s2); flex-wrap: wrap; align-items: center; }
+.owner { font-family: var(--font-mono); font-size: var(--size-caption); color: var(--fg-soft); }
+.mktLive { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.dot { width: 7px; height: 7px; border-radius: 999px; display: inline-block; }
+.dotLive { background: var(--holds); }
+.dotDown { background: var(--breach); }
+.mktWarrant, .mktPrice { font-size: var(--size-data); }
+.mktWarrant :global(.warrant) { white-space: normal; display: inline-block; line-height: 1.35; }
+.noPrice { color: var(--fg-soft); font-style: italic; }
+.mktActions { display: inline-flex; gap: var(--s2); align-items: center; }
+.compareBtn {
+  font: inherit; font-size: var(--size-caption); color: var(--fg-soft);
+  background: transparent; border: 1px solid var(--line); border-radius: 2px; padding: 7px 12px; min-height: 30px; cursor: pointer;
+}
+.compareOn { background: var(--fg); color: var(--ground); border-color: var(--fg); }
+.actionMuted {
+  font: inherit; font-size: var(--size-caption); color: var(--fg-soft);
+  background: transparent; border: 1px dashed var(--line); border-radius: 2px; padding: 7px 12px; min-height: 30px; cursor: not-allowed;
+}
+
+.tray {
+  position: sticky; bottom: 0; z-index: 5;
+  display: flex; align-items: center; justify-content: space-between; gap: var(--s3);
+  margin-top: var(--s4); padding: var(--s3) var(--s4);
+  background: var(--ground-raised); border: 1px solid var(--brass); border-radius: 3px;
+  box-shadow: 0 -6px 20px -12px rgba(0,0,0,.25);
+}
+.trayList { display: flex; gap: var(--s2); flex-wrap: wrap; }
+.trayChip {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: var(--size-caption); background: var(--ground); border: 1px solid var(--line); border-radius: 999px; padding: 3px 6px 3px 10px;
+}
+.trayChip button { border: none; background: transparent; cursor: pointer; font-size: 16px; line-height: 1; color: var(--fg-soft); min-width: 26px; min-height: 26px; }
+
+@media (max-width: 900px) {
+  .mktRow { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "main live" "warrant price" "actions actions"; }
+  .mktMain { grid-area: main; }
+  .mktLive { grid-area: live; }
+  .mktWarrant { grid-area: warrant; }
+  .mktPrice { grid-area: price; }
+  .mktActions { grid-area: actions; flex-wrap: wrap; }
+}
