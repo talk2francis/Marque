@@ -4,7 +4,7 @@ import {
 } from '@marque/ui'
 import styles from './ui.module.css'
 
-export const metadata = { title: 'Design system — Marque', robots: { index: false } }
+export const metadata = { title: 'Design system', robots: { index: false } }
 
 /**
  * The proving page for the design system.

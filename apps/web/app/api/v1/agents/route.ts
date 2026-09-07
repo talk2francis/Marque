@@ -74,7 +74,9 @@ export async function GET(req: NextRequest) {
       chainId: 56,
       takenAt: new Date().toISOString(),
       filters: { status, category, protocol, limit, offset },
-      count: list.length,
+      // This page's size, NOT a population total — the real per-status counts
+      // are at /api/v1/agents/counts (P10.5A item 1).
+      pageSize: list.length,
       agents: list.map((r) => ({
         agentId: r['id'],
         chainId: r['chain_id'],

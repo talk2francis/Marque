@@ -56,6 +56,7 @@ export function RegisterTable({ category }: { category?: string }) {
   const [status, setStatus] = useState<Status>('working')
   const [agents, setAgents] = useState<AgentRow[]>([])
   const [counts, setCounts] = useState<Record<Status, number | null>>({ working: null, unbound: null, dead: null, all: null })
+  const [countsAt, setCountsAt] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -82,19 +83,21 @@ export function RegisterTable({ category }: { category?: string }) {
     return () => { cancelled = true }
   }, [status, category])
 
-  // Counts for the toggle labels, so the graveyard's size is stated up front.
+  // Real population counts for the toggle labels — COUNT(*) over each tab's own
+  // predicate, not the page size. One call, memoised server-side for 5 minutes
+  // (P10.5A item 1).
   useEffect(() => {
     let cancelled = false
     void (async () => {
-      const out: Record<string, number | null> = {}
-      for (const s of ['working', 'unbound', 'dead'] as const) {
-        try {
-          const res = await fetch(`/api/v1/agents?status=${s}&limit=200${category ? `&category=${category}` : ''}`, { cache: 'no-store' })
-          const j = await res.json()
-          out[s] = res.ok ? (j.count ?? 0) : null
-        } catch { out[s] = null }
-      }
-      if (!cancelled) setCounts((c) => ({ ...c, ...out }))
+      try {
+        const res = await fetch(`/api/v1/agents/counts${category ? `?category=${category}` : ''}`, { cache: 'no-store' })
+        const j = await res.json()
+        if (cancelled) return
+        if (res.ok) {
+          setCounts((c) => ({ ...c, working: j.working ?? null, unbound: j.unbound ?? null, dead: j.dead ?? null, all: j.all ?? null }))
+          setCountsAt(j.computedAt ?? null)
+        }
+      } catch { /* labels fall back to no number */ }
     })()
     return () => { cancelled = true }
   }, [category])
@@ -108,13 +111,22 @@ export function RegisterTable({ category }: { category?: string }) {
     [agents],
   )
 
+  const fmt = (n: number | null) => (n === null ? '' : ` (${n.toLocaleString()})`)
   const label = (s: Status) => {
     const n = counts[s]
-    if (s === 'working') return `Working${n === null ? '' : ` (${n})`}`
-    if (s === 'unbound') return `Registered but unreachable${n === null ? '' : ` (${n})`}`
-    if (s === 'dead') return `Dead endpoints${n === null ? '' : ` (${n})`}`
+    if (s === 'working') return `Working${fmt(n)}`
+    if (s === 'unbound') return `Registered but unreachable${fmt(n)}`
+    if (s === 'dead') return `Dead endpoints${fmt(n)}`
     return 'Everything'
   }
+
+  const countedAgo = (() => {
+    if (!countsAt) return null
+    const secs = Math.max(0, Math.round((Date.now() - Date.parse(countsAt)) / 1000))
+    if (secs < 90) return 'just now'
+    if (secs < 3600) return `${Math.round(secs / 60)}m ago`
+    return `${Math.round(secs / 3600)}h ago`
+  })()
 
   return (
     <>
@@ -131,6 +143,12 @@ export function RegisterTable({ category }: { category?: string }) {
           </Button>
         ))}
       </div>
+      {countedAgo && (
+        <p className={styles.status}>
+          <ProvenanceChip provenance="MEASURED" /> Counts are a live COUNT over every indexed
+          chain-56 agent, {countedAgo}. The list below shows the first {agents.length}.
+        </p>
+      )}
 
       {status !== 'working' && (
         <p className={styles.graveyardNote}>

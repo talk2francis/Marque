@@ -10,7 +10,8 @@ export const dynamic = 'force-dynamic'
 export const revalidate = 0
 export const metadata = {
   title: 'Status — what is fresh, what is stale, and how stale',
-  description: 'Live index freshness, probe coverage, agent health and the last conformance run. Degradation is shown, never hidden behind a green tick.',
+  description:
+    'Real uptime, probe coverage, index freshness in blocks behind head, reference-agent health and the last conformance run. Honest degradation, never a silently stale number.',
 }
 
 /**

@@ -4,6 +4,8 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { Button, Chip, ProvenanceChip } from '@marque/ui'
 import { announceChartersChanged } from '../_components/CharterStrip'
+import { explorerTx } from '../../lib/network'
+import { displayName, isReferenceAgent } from '../../lib/reference-agents'
 import styles from './judge.module.css'
 
 type StepId = 'intent' | 'rank' | 'charter' | 'run' | 'receipt' | 'revoke'
@@ -23,8 +25,6 @@ interface State {
   receipt: { id: string; hash: string; anchorTx: string | null } | null
   revoke: { txHash: string | null } | null
 }
-
-const SCAN = 'https://testnet.bscscan.com/tx/'
 
 function short(h: string): string {
   return h.length > 20 ? `${h.slice(0, 12)}…${h.slice(-8)}` : h
@@ -101,7 +101,7 @@ export function JudgeFlow({ demoAddress }: { demoAddress: string }) {
         agents: [
           {
             id: 'marque:keel',
-            name: 'Keel',
+            name: displayName('marque:keel'),
             why: 'Passes MCS-HF-1 against a case captured at the current block: health factor to three decimals, the correct per-market liquidation threshold, and the exact repayment to reach the target.',
             warranted: true,
           },
@@ -118,7 +118,7 @@ export function JudgeFlow({ demoAddress }: { demoAddress: string }) {
       const res = await fetch('/api/v1/charters', {
         method: 'POST', headers: { 'content-type': 'application/json' },
         body: JSON.stringify({
-          category: 'health_factor', agentId: 'marque:keel', agentName: 'Keel',
+          category: 'health_factor', agentId: 'marque:keel', agentName: displayName('marque:keel'),
           capBnb: 0.002, minutes: 15, label: 'Judge mode',
         }),
       })
@@ -276,6 +276,7 @@ export function JudgeFlow({ demoAddress }: { demoAddress: string }) {
                       <li key={a.id}>
                         <span className={styles.agentRow}>
                           {a.name}
+                          {isReferenceAgent(a.id) && <Chip tone="watch">Marque reference agent</Chip>}
                           <Chip tone={a.warranted ? 'holds' : 'watch'}>
                             {a.warranted ? 'MCS-HF-1 pass' : 'no warrant'}
                           </Chip>
@@ -290,7 +291,7 @@ export function JudgeFlow({ demoAddress }: { demoAddress: string }) {
                   <span className={styles.stepResult}>
                     Cap {s.charter.capBnb} BNB · expires in {s.charter.minutes} min ·{' '}
                     {s.charter.txHash
-                      ? <a href={`${SCAN}${s.charter.txHash}`} rel="noreferrer noopener" target="_blank">{short(s.charter.txHash)}</a>
+                      ? <a href={explorerTx(97, s.charter.txHash)} rel="noreferrer noopener" target="_blank">{short(s.charter.txHash)}</a>
                       : 'recorded without a transaction hash'}
                   </span>
                 )}
@@ -306,7 +307,7 @@ export function JudgeFlow({ demoAddress }: { demoAddress: string }) {
                     <Link href={`/receipts/${s.receipt.id}`}>Receipt →</Link>{' '}
                     leaf {short(s.receipt.hash)}{' '}
                     {s.receipt.anchorTx && (
-                      <a href={`${SCAN}${s.receipt.anchorTx}`} rel="noreferrer noopener" target="_blank">
+                      <a href={explorerTx(97, s.receipt.anchorTx)} rel="noreferrer noopener" target="_blank">
                         anchored {short(s.receipt.anchorTx)}
                       </a>
                     )}
@@ -317,7 +318,7 @@ export function JudgeFlow({ demoAddress }: { demoAddress: string }) {
                   <span className={styles.stepResult}>
                     Revoked ·{' '}
                     {s.revoke.txHash
-                      ? <a href={`${SCAN}${s.revoke.txHash}`} rel="noreferrer noopener" target="_blank">{short(s.revoke.txHash)}</a>
+                      ? <a href={explorerTx(97, s.revoke.txHash)} rel="noreferrer noopener" target="_blank">{short(s.revoke.txHash)}</a>
                       : 'no transaction hash returned'}
                   </span>
                 )}

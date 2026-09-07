@@ -9,6 +9,7 @@ import {
 import { publicClient } from '@marque/chain'
 import { readCharter } from './charters'
 import { anchorReceipt } from './anchor'
+import { referenceAgent as refAgentMeta, displayName } from './reference-agents'
 
 /**
  * The run record.
@@ -63,15 +64,18 @@ interface ResolvedAgent { agentId: string; name: string | null; kind: string; en
  * labels it as first-party (invariant 1).
  */
 function referenceAgent(agentId: string): ResolvedAgent | null {
-  if (agentId !== 'marque:keel') return null
-  const base = process.env['KEEL_PUBLIC_URL']
+  const meta = refAgentMeta(agentId)
+  if (!meta) return null
+  const base = process.env[meta.publicUrlEnv]
   if (!base) return null
   // The A2A adapter is handed the CARD url and reads the executable endpoint
   // out of the card. Handing it the base instead is the bug that once looked
   // like thirty dead agents and was a broken client.
   return {
     agentId,
-    name: 'Keel (Marque reference agent)',
+    // The one name — the "reference agent" fact is a mark on the UI, never
+    // baked into the name (invariant 18).
+    name: displayName(agentId),
     kind: 'a2a',
     endpoint: `${base.replace(/\/$/, '')}/.well-known/agent-card.json`,
   }

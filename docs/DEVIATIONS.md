@@ -1072,3 +1072,86 @@ compromise; this session picks up 10a.
   running the test and is listed as "not yet tested".
 - **Cost** — None. The distinction is deliberate and stated on both pages.
 - **Restore** — n/a.
+
+---
+
+## P10.5A — Truth pass
+
+Continued 2026-09-07. Timebox 2h; ran over — the network-context and
+one-name-one-agent items each touched more surfaces than the prompt's examples
+suggested. Reductions taken under AMBER:
+
+### D10.5A-01 · The three-200s bug: real COUNT(*), memoised, dated
+
+- **Was** — `/register`'s status tabs showed `agents.length` capped at the
+  query `limit` (200), so "Working (200) / Registered but unreachable (200) /
+  Dead endpoints (200)" — a page size printed as a population count on a
+  product that competes on data quality.
+- **Now** — `/api/v1/agents/counts` runs one `COUNT(*)` over each tab's exact
+  predicate. Real figures (chain 56, 2026-09-07): **working 2,041 · registered
+  but unreachable 23,914 · dead 4,402** (unprobed 268,460; all 298,817). The
+  join over ~870k probe rows takes ~2.4s, so it is memoised in-process for 5
+  minutes and the global figures are written to `funnel_snapshot` (stages
+  `register_working` / `_unbound` / `_dead`) so the number is durable and
+  dated. The Register shows "Counts are a live COUNT … Nm ago. The list below
+  shows the first N." `/api/v1/agents` renamed its `count` field to `pageSize`.
+
+### D10.5A-02 · Network context resolves from a chain id, never a global
+
+- **Was** — `/app/charter` said "BNB Smart Chain testnet" while the footer on
+  the same page said "chain 56".
+- **Now** — `lib/network.ts` is the one resolver: a chain id becomes a badge
+  ("BSC testnet · 97" / "BSC mainnet · 56") and an explorer base
+  (testnet.bscscan.com vs bscscan.com). `<NetworkBadge chainId={…}>` renders it
+  from the id a transaction was built for. The footer no longer names a chain.
+  The charter page carries the badge in its header and footnote. Every explorer
+  link on charter, receipt, run, judge and ledger surfaces routes through
+  `explorerTx`/`explorerAddress` at the right chain id (all 97 today, threaded
+  rather than hardcoded).
+
+### D10.5A-03 · One agent, one name
+
+- **Was** — reference-agent names could drift ("Keel" vs "Keel (Marque
+  reference agent)").
+- **Now** — `lib/reference-agents.ts` is the single source of truth:
+  `bound→Bound` (rebalancing), `lattice→Lattice` (grid),
+  `sluicegate→Sluicegate` (yield), `keel→Keel` (health factor),
+  `redcell→Redcell` (security). `displayName(agentId, fallback)` resolves it;
+  `runs.ts`, the pancake route and the Judge flow now use it. The "reference
+  agent" fact is a UI mark, never baked into the name.
+- **Note on "Portfolio Rebalancer" on /app/charter** — that is a *third-party*
+  agent's own registry name, selected because no reference agent is wired into
+  the charter picker yet (their `*_PUBLIC_URL` envs are unset and their
+  processes are not running — REC-02). It is not our naming drift and is not
+  renamed: overriding a counterparty's self-declared name is exactly what
+  invariant discipline forbids. Once the reference agents are back, "Bound"
+  fills that slot.
+
+### D10.5A-04 · First-party supply is marked; "Third-party only" filter deferred
+
+- **Now** — `<ReferenceMark>` on the Judge ranked list; the Charter Desk
+  already marked its picker. `/register` gains a `#reference-agents` section
+  (the anchor the mark links to) with the one-line explanation and the five
+  agents.
+- **Deferred to P10.5B** — surfacing the reference agents as ranked *rows* in
+  the Register, and the "Third-party only" toggle. P10.5B rebuilds the Register
+  filter bar and row model wholesale; adding a toggle to the old bar now would
+  be thrown away in hours. The mark and the explainer ship now.
+
+### D10.5A-05 · robots / sitemap / OG — done; "curl from outside the VPS" is from the VPS
+
+- **Now** — `app/robots.ts` (allow all, disallow `/api/` and `/_ui`, sitemap
+  link), `app/sitemap.ts` (19 public routes), `app/opengraph-image.tsx`
+  (1200×630, boxed wordmark on `--paper`, the tagline, one mono line), layout
+  metadata gains `title.template`, `twitter: summary_large_image` and the
+  auto-injected `og:image`. Two double-suffix titles fixed; descriptions added
+  to Register / Ledger / Status.
+- **Caveat** — the acceptance asks for `curl -A "TestBot/1.0" https://marque.trade/`
+  *from outside the VPS*. Run from the VPS, TestBot/1.0, Googlebot and plain
+  curl all return 200 — the new Caddy config has no bot challenge and no
+  `robots` disallow. The old host's block was at a layer that no longer exists.
+
+### D10.5A-06 · Design moved to the footer
+
+- Nav is Register / Standard / Ledger / Charters. `/_ui` still serves; its link
+  is in the footer under a "Builders" group with List/Test your agent.

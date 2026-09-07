@@ -18,6 +18,8 @@
  * it may not.
  */
 
+import { explorerAddress, explorerTx } from './network'
+
 export type CharterCategory = 'rebalancing' | 'grid' | 'yield' | 'health_factor'
 
 export interface TemplateCall {
@@ -167,11 +169,15 @@ export function isCharterCategory(value: string): value is CharterCategory {
   return (CATEGORY_ORDER as string[]).includes(value)
 }
 
-/** BscScan testnet, so every address on the charter is one click from proof. */
+/**
+ * Explorer links for charter surfaces. Charters are on BSC testnet (97), so
+ * these resolve through the one network resolver at that chain id rather than
+ * hardcoding a host (P10.5A item 2).
+ */
 export function scanAddress(address: string): string {
-  return `https://testnet.bscscan.com/address/${address}`
+  return explorerAddress(97, address)
 }
 
 export function scanTx(hash: string): string {
-  return `https://testnet.bscscan.com/tx/${hash}`
+  return explorerTx(97, hash)
 }

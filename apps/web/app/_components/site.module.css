@@ -22,11 +22,12 @@
   padding: var(--s6) var(--s5) var(--s8);
   font-size: var(--size-caption); color: var(--fg-soft);
 }
-.footerLinks { display: flex; gap: var(--s2); }
+.footerLinks { display: flex; gap: var(--s2); align-items: center; flex-wrap: wrap; }
 .footerLinks a {
   color: var(--fg-soft);
   display: inline-flex; align-items: center; min-height: 32px; padding-inline: var(--s2);
 }
+.footerGroup { font-weight: 500; color: var(--fg); }
 @media (max-width: 640px) {
   .nav, .footer { padding-inline: var(--s4); }
   .navLinks { gap: 0; font-size: var(--size-data); }

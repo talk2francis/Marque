@@ -156,6 +156,7 @@ export interface SealView {
   resolveAfter: string
   sealTxHash: string | null
   sealBlock: string | null
+  chainId: number
   outcome: SealOutcome
   resolvedAt: string | null
   recommendation: Record<string, unknown>
@@ -174,6 +175,7 @@ export async function readSeals(limit = 100): Promise<SealView[]> {
     resolveAfter: r.resolveAfter.toISOString(),
     sealTxHash: r.sealTxHash,
     sealBlock: r.sealBlock,
+    chainId: r.chainId,
     outcome: r.outcome as SealOutcome,
     resolvedAt: r.resolvedAt ? r.resolvedAt.toISOString() : null,
     recommendation: r.recommendation,

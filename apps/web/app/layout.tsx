@@ -29,15 +29,21 @@ const fraunces = Fraunces({
 })
 
 export const metadata: Metadata = {
-  title: BRAND.name,
+  title: { default: BRAND.name, template: `%s — ${BRAND.name}` },
   description: BRAND.tagline,
   metadataBase: new URL(BRAND.url),
+  applicationName: BRAND.name,
   openGraph: {
     title: BRAND.name,
     description: BRAND.tagline,
     url: BRAND.url,
     siteName: BRAND.name,
     type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: BRAND.name,
+    description: BRAND.tagline,
   },
   robots: { index: true, follow: true },
 }

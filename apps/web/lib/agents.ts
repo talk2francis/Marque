@@ -21,31 +21,35 @@ export interface CallableAgent {
   isReference: boolean
 }
 
-/** Hosts belonging to Marque. Always labelled as first-party (invariant 1). */
-const REFERENCE_HINT = /marque/i
+import { REFERENCE_AGENTS, isReferenceAgent } from './reference-agents'
 
 /**
  * Marque's own reference agents, per category.
  *
- * Listed first so a category is never empty while we have a working
- * counterparty, and marked so no screen can present one as a market. They are
- * not rows in the agent table: that table is derived state and must be
+ * Names and category come from the one source of truth in `reference-agents.ts`
+ * (invariant 18). Listed first so a category is never empty while we have a
+ * working counterparty, and marked so no screen can present one as a market.
+ * They are not rows in the agent table: that table is derived state and must be
  * rebuildable from chain, and these are not registered on chain.
+ *
+ * An agent only appears if its public URL is configured — a reference agent we
+ * cannot actually reach is not a counterparty and is not listed.
  */
 function referenceAgents(category: string): CallableAgent[] {
-  if (category !== 'health_factor') return []
-  const base = process.env['KEEL_PUBLIC_URL']
-  if (!base) return []
-  return [{
-    agentId: 'marque:keel',
-    tokenId: 'keel',
-    name: 'Keel',
-    kind: 'a2a',
-    endpoint: `${base.replace(/\/$/, '')}/.well-known/agent-card.json`,
-    host: new URL(base).origin,
-    latencyMs: null,
-    isReference: true,
-  }]
+  return REFERENCE_AGENTS.filter((a) => a.category === category).flatMap((a) => {
+    const base = process.env[a.publicUrlEnv]
+    if (!base) return []
+    return [{
+      agentId: a.id,
+      tokenId: a.slug,
+      name: a.name,
+      kind: 'a2a',
+      endpoint: `${base.replace(/\/$/, '')}/.well-known/agent-card.json`,
+      host: new URL(base).origin,
+      latencyMs: null,
+      isReference: true,
+    }]
+  })
 }
 
 export async function callableAgents(category: string, limit = 12): Promise<CallableAgent[]> {
@@ -77,7 +81,9 @@ export async function callableAgents(category: string, limit = 12): Promise<Call
     endpoint: String(r['endpoint']),
     host: String(r['host']),
     latencyMs: r['latency_ms'] === null ? null : Number(r['latency_ms']),
-    isReference: REFERENCE_HINT.test(String(r['host'])),
+    // Rows from the agent table are third-party by construction — the reference
+    // agents are not in it. Kept as an explicit check rather than an assumption.
+    isReference: isReferenceAgent(String(r['agent_id'])),
   }))
   return [...referenceAgents(category), ...indexed]
 }

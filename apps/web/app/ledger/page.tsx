@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { Statement, Chip, ProvenanceChip, EmptyState } from '@marque/ui'
 import { SiteHeader, SiteFooter } from '../_components/SiteHeader'
 import { readLedger, readSeals, type LedgerBenchmark } from '../../lib/ledger'
+import { explorerTx } from '../../lib/network'
 import styles from './ledger.module.css'
 
 export const dynamic = 'force-dynamic'
@@ -9,7 +10,7 @@ export const revalidate = 0
 export const metadata = {
   title: 'The Ledger — measured advantage, or none',
   description:
-    'Agent against a human analyst on the same task, at the same block, graded blind against a rubric registered before either arm ran.',
+    'Agent against a human analyst on the same task, at the same block, graded blind against a rubric registered before either arm ran. Sealed calls are anchored on chain before their outcome is known.',
 }
 
 /**
@@ -177,7 +178,7 @@ export default async function LedgerPage() {
                       </td>
                       <td className="mono">
                         {s.sealTxHash
-                          ? <a href={`https://testnet.bscscan.com/tx/${s.sealTxHash}`} rel="noreferrer noopener" target="_blank">{short(s.sealTxHash)}</a>
+                          ? <a href={explorerTx(s.chainId, s.sealTxHash)} rel="noreferrer noopener" target="_blank">{short(s.sealTxHash)}</a>
                           : <span className={styles.muted}>not anchored</span>}
                       </td>
                     </tr>

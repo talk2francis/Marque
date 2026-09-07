@@ -1,9 +1,10 @@
-import { Statement, Chip, EmptyState } from '@marque/ui'
+import { Statement, EmptyState } from '@marque/ui'
 import { SiteHeader, SiteFooter } from '../../_components/SiteHeader'
+import { NetworkBadge } from '../../_components/NetworkBadge'
 import { CharterDesk } from './CharterDesk'
 import { TEMPLATES, CATEGORY_ORDER, isCharterCategory, UNIVERSAL_MAY_NOT } from '../../../lib/charter-templates'
 import { callableAgents } from '../../../lib/agents'
-import { charterServiceAvailable, CHARTER_CHAIN_NAME } from '../../../lib/charters'
+import { charterServiceAvailable, CHARTER_CHAIN_NAME, CHARTER_CHAIN_ID } from '../../../lib/charters'
 import styles from './charter.module.css'
 
 export const dynamic = 'force-dynamic'
@@ -50,9 +51,11 @@ export default async function CharterDeskPage({
           <Statement as="h1">{template.name}</Statement>
           <p className={styles.lede}>{template.purpose}</p>
           <p className={styles.note}>
+            <NetworkBadge chainId={CHARTER_CHAIN_ID} />{' '}
             A charter is authority with an edge on it. You set what the agent may touch, how much
             it may spend and how long it has. Outside those three bounds it cannot act at all, and
-            you can end it in one transaction at any moment.
+            you can end it in one transaction at any moment. Every transaction on this page is
+            built for {CHARTER_CHAIN_NAME}.
           </p>
         </header>
 
@@ -101,7 +104,7 @@ export default async function CharterDeskPage({
         )}
 
         <section className={styles.footnote}>
-          <Chip tone="chain">On chain</Chip>
+          <NetworkBadge chainId={CHARTER_CHAIN_ID} />
           <p>
             Charters are granted on {CHARTER_CHAIN_NAME}. Mainnet authority is a separate decision
             with a separate approval, and nothing on this page can reach it. The wallet that signs

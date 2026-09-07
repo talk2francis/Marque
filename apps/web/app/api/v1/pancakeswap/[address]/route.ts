@@ -3,6 +3,7 @@ import { and, desc, eq, gte, sql } from 'drizzle-orm'
 import { isAddress, type Address } from 'viem'
 import { db, poolTickObservation, poolWatch } from '@marque/db'
 import { pancakeV3Reader, measureOutOfRange } from '@marque/positions'
+import { displayName } from '../../../../../lib/reference-agents'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -44,7 +45,7 @@ async function rankAgentsForPool(): Promise<RankedAgent[]> {
   // reads the pool's own tickSpacing rather than carrying a hardcoded table.
   const first: RankedAgent = {
     id: 'marque:bound',
-    name: 'Bound',
+    name: displayName('marque:bound'),
     kind: 'first-party',
     mcs: 'pass',
     liveness: 'working',

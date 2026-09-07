@@ -1,6 +1,6 @@
 {
   "base": "http://127.0.0.1:3200",
-  "ranAt": "2026-09-07T17:20:10.146Z",
+  "ranAt": "2026-09-07T18:22:58.577Z",
   "results": [
     {
       "route": "/",
@@ -163,7 +163,7 @@
       "allCapsLabels": []
     },
     {
-      "route": "/standard",
+      "route": "/register/rebalancing",
       "viewport": "1440",
       "status": 200,
       "issues": [],
@@ -183,7 +183,7 @@
       "allCapsLabels": []
     },
     {
-      "route": "/standard",
+      "route": "/register/rebalancing",
       "viewport": "1024",
       "status": 200,
       "issues": [],
@@ -203,7 +203,7 @@
       "allCapsLabels": []
     },
     {
-      "route": "/standard",
+      "route": "/register/rebalancing",
       "viewport": "768",
       "status": 200,
       "issues": [],
@@ -223,7 +223,7 @@
       "allCapsLabels": []
     },
     {
-      "route": "/standard",
+      "route": "/register/rebalancing",
       "viewport": "390",
       "status": 200,
       "issues": [],
@@ -243,98 +243,7 @@
       "allCapsLabels": []
     },
     {
-      "route": "/builders/test",
-      "viewport": "1440",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [
-        "GET http://127.0.0.1:3200/ledger?_rsc=ft2ac — net::ERR_ABORTED",
-        "GET http://127.0.0.1:3200/standard?_rsc=ft2ac — net::ERR_ABORTED"
-      ],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/builders/test",
-      "viewport": "1024",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [
-        "GET http://127.0.0.1:3200/standard?_rsc=ft2ac — net::ERR_ABORTED",
-        "GET http://127.0.0.1:3200/ledger?_rsc=ft2ac — net::ERR_ABORTED"
-      ],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/builders/test",
-      "viewport": "768",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [
-        "GET http://127.0.0.1:3200/standard?_rsc=ft2ac — net::ERR_ABORTED",
-        "GET http://127.0.0.1:3200/ledger?_rsc=ft2ac — net::ERR_ABORTED"
-      ],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/builders/test",
-      "viewport": "390",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [
-        "GET http://127.0.0.1:3200/standard?_rsc=ft2ac — net::ERR_ABORTED"
-      ],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/builders/claim",
+      "route": "/app/charter",
       "viewport": "1440",
       "status": 200,
       "issues": [],
@@ -354,7 +263,7 @@
       "allCapsLabels": []
     },
     {
-      "route": "/builders/claim",
+      "route": "/app/charter",
       "viewport": "1024",
       "status": 200,
       "issues": [],
@@ -374,7 +283,7 @@
       "allCapsLabels": []
     },
     {
-      "route": "/builders/claim",
+      "route": "/app/charter",
       "viewport": "768",
       "status": 200,
       "issues": [],
@@ -394,13 +303,104 @@
       "allCapsLabels": []
     },
     {
-      "route": "/builders/claim",
+      "route": "/app/charter",
       "viewport": "390",
       "status": 200,
       "issues": [],
       "consoleErrors": [],
       "pageErrors": [],
       "failedRequests": [],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(132, 102, 33) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/ledger",
+      "viewport": "1440",
+      "status": 200,
+      "issues": [],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:3200/ledger/ADV-01?_rsc=1fsoy — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3200/ledger/ADV-02?_rsc=1fsoy — net::ERR_ABORTED"
+      ],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(132, 102, 33) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/ledger",
+      "viewport": "1024",
+      "status": 200,
+      "issues": [],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:3200/ledger/ADV-02?_rsc=1fsoy — net::ERR_ABORTED"
+      ],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(132, 102, 33) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/ledger",
+      "viewport": "768",
+      "status": 200,
+      "issues": [],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:3200/ledger/ADV-01?_rsc=1fsoy — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3200/ledger/ADV-02?_rsc=1fsoy — net::ERR_ABORTED"
+      ],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(132, 102, 33) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/ledger",
+      "viewport": "390",
+      "status": 200,
+      "issues": [],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:3200/ledger/ADV-01?_rsc=1fsoy — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3200/ledger/ADV-02?_rsc=1fsoy — net::ERR_ABORTED"
+      ],
       "focusVisible": {
         "ok": true,
         "tag": "a",
@@ -482,263 +482,7 @@
       "issues": [],
       "consoleErrors": [],
       "pageErrors": [],
-      "failedRequests": [
-        "GET http://127.0.0.1:3200/status?_rsc=12crh — net::ERR_ABORTED"
-      ],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/pancakeswap",
-      "viewport": "1440",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
       "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/pancakeswap",
-      "viewport": "1024",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/pancakeswap",
-      "viewport": "768",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [
-        "GET http://127.0.0.1:3200/app/charter?category=rebalancing&_rsc=xd1km — net::ERR_ABORTED"
-      ],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/pancakeswap",
-      "viewport": "390",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/app/charter",
-      "viewport": "1440",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/app/charter",
-      "viewport": "1024",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/app/charter",
-      "viewport": "768",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/app/charter",
-      "viewport": "390",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/ledger",
-      "viewport": "1440",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [
-        "GET http://127.0.0.1:3200/ledger/ADV-01?_rsc=1fsoy — net::ERR_ABORTED",
-        "GET http://127.0.0.1:3200/ledger/ADV-02?_rsc=1fsoy — net::ERR_ABORTED"
-      ],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/ledger",
-      "viewport": "1024",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [
-        "GET http://127.0.0.1:3200/ledger/ADV-01?_rsc=1fsoy — net::ERR_ABORTED",
-        "GET http://127.0.0.1:3200/ledger/ADV-02?_rsc=1fsoy — net::ERR_ABORTED"
-      ],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/ledger",
-      "viewport": "768",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [
-        "GET http://127.0.0.1:3200/ledger/ADV-01?_rsc=1fsoy — net::ERR_ABORTED",
-        "GET http://127.0.0.1:3200/ledger/ADV-02?_rsc=1fsoy — net::ERR_ABORTED"
-      ],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(132, 102, 33) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/ledger",
-      "viewport": "390",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [
-        "GET http://127.0.0.1:3200/ledger/ADV-01?_rsc=1fsoy — net::ERR_ABORTED",
-        "GET http://127.0.0.1:3200/ledger/ADV-02?_rsc=1fsoy — net::ERR_ABORTED"
-      ],
       "focusVisible": {
         "ok": true,
         "tag": "a",
@@ -758,9 +502,7 @@
       "issues": [],
       "consoleErrors": [],
       "pageErrors": [],
-      "failedRequests": [
-        "GET http://127.0.0.1:3200/pancakeswap?_rsc=pw20n — net::ERR_ABORTED"
-      ],
+      "failedRequests": [],
       "focusVisible": {
         "ok": true,
         "tag": "a",
@@ -838,7 +580,7 @@
       "allCapsLabels": []
     },
     {
-      "route": "/_ui",
+      "route": "/builders/claim",
       "viewport": "1440",
       "status": 200,
       "issues": [],
@@ -858,7 +600,7 @@
       "allCapsLabels": []
     },
     {
-      "route": "/_ui",
+      "route": "/builders/claim",
       "viewport": "1024",
       "status": 200,
       "issues": [],
@@ -878,7 +620,7 @@
       "allCapsLabels": []
     },
     {
-      "route": "/_ui",
+      "route": "/builders/claim",
       "viewport": "768",
       "status": 200,
       "issues": [],
@@ -898,7 +640,7 @@
       "allCapsLabels": []
     },
     {
-      "route": "/_ui",
+      "route": "/builders/claim",
       "viewport": "390",
       "status": 200,
       "issues": [],
