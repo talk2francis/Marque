@@ -26,10 +26,13 @@ interface Proof {
     tickLower: number; tickUpper: number; currentTick: number
     outOfRangeSince: string | null; hoursOutOfRange: number; feesAccruedUsd: number
   }
+  narrative?: string
   transactions?: Tx[]
   after?: { tickLower: number; tickUpper: number; currentTick: number; inRange?: boolean; resumedAtBlock?: number | null }
   realisedSlippageBps?: number
+  realisedSlippageNote?: string
   gasUsd?: number
+  gasNote?: string
   agentFeeUsd?: number
   capturedAt?: string
   revertReason?: string
@@ -142,6 +145,13 @@ export default async function PancakeProof() {
 
         {p.charterScope ? <Charter scope={p.charterScope} net={net} /> : null}
 
+        {p.narrative ? (
+          <section className={styles.section}>
+            <h2 className={styles.h2}>What happened</h2>
+            <p className={styles.muted} style={{ maxWidth: '68ch' }}>{p.narrative}</p>
+          </section>
+        ) : null}
+
         {p.before ? (
           <section className={styles.section}>
             <h2 className={styles.h2}>
@@ -207,8 +217,16 @@ export default async function PancakeProof() {
             <section className={styles.section}>
               <h2 className={styles.h2}>What it cost</h2>
               <dl className={styles.facts}>
-                <div><dt>Realised slippage</dt><dd className="mono">{p.realisedSlippageBps ?? 0} bps <ProvenanceChip provenance="ONCHAIN" /></dd></div>
-                <div><dt>Gas (all transactions)</dt><dd className="mono">${(p.gasUsd ?? 0).toFixed(2)} <ProvenanceChip provenance="ONCHAIN" /></dd></div>
+                <div>
+                  <dt>Realised slippage</dt>
+                  <dd className="mono">{p.realisedSlippageBps ? `${p.realisedSlippageBps} bps` : '< 1 bps'} <ProvenanceChip provenance="ONCHAIN" /></dd>
+                  {p.realisedSlippageNote ? <span className={styles.note}>{p.realisedSlippageNote}</span> : null}
+                </div>
+                <div>
+                  <dt>Gas (all transactions)</dt>
+                  <dd className="mono">${(p.gasUsd ?? 0).toFixed(2)} <ProvenanceChip provenance="ONCHAIN" /></dd>
+                  {p.gasNote ? <span className={styles.note}>{p.gasNote}</span> : null}
+                </div>
                 <div><dt>Agent fee</dt><dd className="mono">${(p.agentFeeUsd ?? 0).toFixed(2)}</dd></div>
               </dl>
             </section>

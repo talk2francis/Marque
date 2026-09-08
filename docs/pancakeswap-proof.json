@@ -1,6 +1,5 @@
 {
-  "status": "drifting",
-  "note": "The position is out of range and earning nothing. It has been out for a cumulative 0.0h since it was opened (a ~0.3% band on a low-volatility pair drifts in and out). It stays open until the agent re-centres it.",
+  "status": "complete",
   "pool": "0x172fcD41E0913e95784454622d1c3724f546f849",
   "chainId": 56,
   "agentId": "bound",
@@ -18,16 +17,41 @@
   "before": {
     "tickLower": -66078,
     "tickUpper": -66076,
-    "currentTick": -66086,
+    "currentTick": -66091,
     "outOfRangeSince": "2026-09-08T01:02:13.032Z",
-    "hoursOutOfRange": 0,
+    "hoursOutOfRange": 0.9,
     "feesAccruedUsd": 0
   },
+  "narrative": "The band was opened ~0.3% wide on BNB/USDT 0.01%. As BNB volatility fell through the session it kept drifting back in, so the band was narrowed twice to stay meaningful; on the razor band it drifted below range and stayed there — a cumulative 0.9h holding 100% USDT and earning zero fees — and Bound then re-centred it around the live price.",
   "transactions": [
     {
       "label": "Mint the deliberately-narrow range",
       "hash": "0xb32c204f143b233f5f38958fecda083141efd85f0352ca08bdc116703c8688ed"
+    },
+    {
+      "label": "Withdraw the drifted position — decreaseLiquidity + collect",
+      "hash": "0xfe41a8a1218e2e8c9f206c26565a537879f1de090b258e8bd64d41d925bc9001"
+    },
+    {
+      "label": "Swap toward 50/50 at the current price",
+      "hash": "0xd795d4879ee16f21f6d54a7f404cc1f7e3928241ec9a0a0c0f6afc3618fb46e9"
+    },
+    {
+      "label": "Open the re-centred range",
+      "hash": "0x83f635fc30e74e26e36575be3c179301e96de01e6a5839b6d478fba33725a806"
     }
   ],
-  "capturedAt": "2026-09-07T23:54:47.262Z"
+  "capturedAt": "2026-09-08T01:41:10.662Z",
+  "after": {
+    "tickLower": -66135,
+    "tickUpper": -66045,
+    "currentTick": -66090,
+    "inRange": true,
+    "resumedAtBlock": 120600044
+  },
+  "realisedSlippageBps": 0,
+  "realisedSlippageNote": "below 1 bps — a ~$26 USDT→WBNB rebalancing swap against the 0.01% pool, which holds the deepest BNB/USDT liquidity on PancakeSwap V3",
+  "gasUsd": 0.1,
+  "gasNote": "0.000131 BNB total across all six transactions, at ~0.05 gwei",
+  "agentFeeUsd": 0.15
 }
