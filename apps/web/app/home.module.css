@@ -135,7 +135,8 @@
   width: 26px; height: 26px;
   border: 1px solid color-mix(in srgb, var(--brass-mark) 55%, transparent);
   border-radius: var(--r-pill);
-  color: var(--brass);
+  color: var(--fg);
+  background: var(--brass-tint);
   font-family: var(--font-mono);
   font-size: 11px;
   letter-spacing: 0;

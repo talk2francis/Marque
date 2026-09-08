@@ -19,20 +19,20 @@
   --paper-raised: #fbfaf4;
   --paper-sunk: #ece7db;
   --ink: #191a14;
-  --ink-soft: #55584b;
-  --ink-faint: #8b8d7e;
-  --rule: #ddd8c9;
-  --rule-strong: #cbc5b2;
+  --ink-soft: #494c3f;     /* ~7.3:1 on paper */
+  --ink-faint: #636557;    /* ~5:1 on paper — clears AA for small text */
+  --rule: #dcd7c7;
+  --rule-strong: #c6c0ab;
 
   /* ---- NIGHT (global dark) ------------------------------------------- */
   --night: #101109;
   --night-raised: #191a10;
   --night-sunk: #0a0b05;
   --night-ink: #ece9e1;
-  --night-ink-soft: #9ba08c;
-  --night-ink-faint: #6b6f5d;
-  --night-rule: #2a2c1f;
-  --night-rule-strong: #3c3f2e;
+  --night-ink-soft: #b0b4a1;   /* ~7.5:1 on --night */
+  --night-ink-faint: #8d9180;  /* ~5:1 on --night */
+  --night-rule: #2f3123;
+  --night-rule-strong: #43462f;
 
   /* ---- COCKPIT (per-surface) --------------------------------------- */
   --deck: #12140e;
@@ -211,10 +211,20 @@
 *::before,
 *::after { box-sizing: border-box; }
 
-html { -webkit-text-size-adjust: 100%; }
+html {
+  -webkit-text-size-adjust: 100%;
+  /* Full-bleed bands break out with `width: 100vw; margin-inline: calc(50% - 50vw)`,
+     which is a hair wider than the content box once a scrollbar exists. Clip the
+     stray axis rather than let the whole page scroll sideways. */
+  overflow-x: clip;
+}
 
 body {
   margin: 0;
+  /* Full-bleed bands are `100vw`, which is a scrollbar-width wider than the
+     content box whenever a vertical scrollbar exists. Clip that sliver here so
+     the page never gains a real horizontal scrollbar. */
+  overflow-x: hidden;
   background: var(--ground);
   background-image: var(--backdrop);
   background-attachment: fixed;
