@@ -31,6 +31,19 @@ const TESTS = [
   { id: 'MCS-HF-1', label: 'Health factor — Venus, exact repay' },
 ] as const
 
+/**
+ * Reference endpoints, so a judge with no agent of their own can still watch a
+ * real test run field by field (P10.5G item 5). These are Marque's own agents;
+ * a run against them is labelled first-party on the Standard like any other.
+ */
+const REFERENCE_ENDPOINTS = [
+  { slug: 'bound', name: 'Bound', cat: 'rebalancing', testId: 'MCS-REB-1' },
+  { slug: 'lattice', name: 'Lattice', cat: 'grid trading', testId: 'MCS-GRID-1' },
+  { slug: 'sluicegate', name: 'Sluicegate', cat: 'yield', testId: 'MCS-YIELD-1' },
+  { slug: 'keel', name: 'Keel', cat: 'health factor', testId: 'MCS-HF-1' },
+] as const
+const refUrl = (slug: string) => `https://marque.trade/agents/${slug}/.well-known/agent-card.json`
+
 export function TestForm() {
   const [endpoint, setEndpoint] = useState('')
   const [testId, setTestId] = useState<string>('MCS-REB-1')
@@ -75,6 +88,19 @@ export function TestForm() {
             posting at the card itself is a mistake that once looked like thirty dead agents and
             was a broken client.
           </span>
+          <div className={styles.refRow}>
+            <span className={styles.refLabel}>No agent of your own? Try a reference endpoint:</span>
+            {REFERENCE_ENDPOINTS.map((r) => (
+              <button
+                key={r.slug}
+                type="button"
+                className={styles.refChip}
+                onClick={() => { setEndpoint(refUrl(r.slug)); setKind('a2a'); setTestId(r.testId) }}
+              >
+                {r.name} <span className={styles.refCat}>{r.cat}</span>
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className={styles.field}>

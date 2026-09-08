@@ -34,3 +34,30 @@
   font-size: var(--size-caption); line-height: 1.55; color: var(--fg); max-width: 68ch; }
 
 @media (max-width: 640px) { .page { padding-inline: var(--s4); } }
+
+/* ===== P10.5G item 5 — reference endpoint shortcuts ===== */
+.refRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s2);
+  margin-top: var(--s2);
+}
+.refLabel { font-size: var(--size-caption); color: var(--fg-soft); margin-right: var(--s1); }
+.refChip {
+  font: inherit;
+  font-size: var(--size-caption);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  min-height: 28px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--fg);
+  cursor: pointer;
+  transition: border-color 120ms ease, background-color 120ms ease;
+}
+.refChip:hover { border-color: var(--fg-soft); background: var(--ground-raised); }
+.refCat { color: var(--fg-soft); font-size: 11px; }

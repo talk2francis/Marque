@@ -67,13 +67,25 @@ export default async function ChartersPage() {
             </h2>
             <p className={styles.lede}>
               Kept, because a revocation nobody can check is not a revocation. Each of these has the
-              transaction that ended it.
+              transaction that ended it. The three most recent are shown; the rest are one click away.
             </p>
             <div className={styles.cards}>
-              {past.map((c) => (
+              {past.slice(0, 3).map((c) => (
                 <CharterCard key={c.id} charter={c} subject={DEMO} />
               ))}
             </div>
+            {past.length > 3 && (
+              <details className={styles.history}>
+                <summary className={styles.historySummary}>
+                  History <span className={`mono ${styles.count}`}>{past.length - 3}</span> more
+                </summary>
+                <div className={styles.cards}>
+                  {past.slice(3).map((c) => (
+                    <CharterCard key={c.id} charter={c} subject={DEMO} />
+                  ))}
+                </div>
+              </details>
+            )}
           </section>
         )}
       </main>

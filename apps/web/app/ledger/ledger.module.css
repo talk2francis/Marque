@@ -72,3 +72,63 @@
 }
 .prose { line-height: 1.7; }
 .prose a { display: inline-block; padding-block: 2px; }
+
+/* ===== P10.5G item 2 — the benchmark as a side-by-side experiment ===== */
+.experiment {
+  margin: var(--s4) 0 var(--s2);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.expHead,
+.expRow {
+  display: grid;
+  grid-template-columns: 88px 1fr 1fr;
+  align-items: center;
+  gap: var(--s3);
+  padding: var(--s3) var(--s4);
+}
+.expHead {
+  background: var(--ground-raised);
+  border-bottom: 1px solid var(--line);
+  font-size: var(--size-caption);
+  color: var(--fg-soft);
+}
+.expCol { letter-spacing: 0.04em; text-transform: uppercase; }
+.expRow { border-bottom: 1px solid var(--line); }
+.expRow:last-of-type { border-bottom: 0; }
+.expMetric {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: var(--fg-soft);
+}
+.expHuman, .expAgent { font-size: var(--size-data); }
+.expHuman b, .expAgent b {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 21px;
+  letter-spacing: -0.01em;
+}
+.expAgent { border-left: 1px solid var(--line); padding-left: var(--s3); }
+.awaiting {
+  font-size: var(--size-caption);
+  color: var(--watch);
+  border: 1px dashed color-mix(in srgb, var(--watch) 45%, transparent);
+  border-radius: 2px;
+  padding: 2px 7px;
+  display: inline-block;
+}
+.expFoot {
+  margin: 0;
+  padding: var(--s3) var(--s4);
+  background: var(--ground-raised);
+  border-top: 1px solid var(--line);
+  font-size: var(--size-caption);
+  line-height: 1.55;
+  color: var(--fg-soft);
+}
+@media (max-width: 640px) {
+  .expHead, .expRow { grid-template-columns: 64px 1fr 1fr; gap: var(--s2); padding-inline: var(--s3); }
+  .expHuman b, .expAgent b { font-size: 16px; }
+}

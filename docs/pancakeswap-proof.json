@@ -18,9 +18,9 @@
   "before": {
     "tickLower": -66092,
     "tickUpper": -66062,
-    "currentTick": -66060,
-    "outOfRangeSince": "2026-09-08T00:06:36.188Z",
-    "hoursOutOfRange": 0.1,
+    "currentTick": -66078,
+    "outOfRangeSince": null,
+    "hoursOutOfRange": 0,
     "feesAccruedUsd": 0
   },
   "transactions": [

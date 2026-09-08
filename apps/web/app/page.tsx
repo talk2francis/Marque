@@ -181,6 +181,17 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ a
           </div>
         </section>
 
+        {/* ---- Brand band: the one cinematic breath between hero and Act I ---- */}
+        <section className={styles.band} aria-hidden="true">
+          <picture>
+            <source srcSet="/brand/field-dark.webp" media="(prefers-color-scheme: dark)" />
+            <img src="/brand/field-light.webp" alt="" loading="lazy" decoding="async" />
+          </picture>
+        </section>
+
+        {/* ===== ACT I — THE FIELD ===== */}
+        <p className={styles.actLabel}><span>I</span> The Field — see what an address holds, and who can act on it</p>
+
         {/* ---- Agents that can work now (P10.5E item 5) ---- */}
         <section className={styles.section}>
           <Statement>Agents that can work now.</Statement>
@@ -230,7 +241,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ a
             under dozens of identities, and on this chain one does.
           </p>
           <div className={styles.categories}>
-            {ORDER.map((key) => {
+            {ORDER.map((key, i) => {
               const c = byCat.get(key)
               const copy = CATEGORY_COPY[key]!
               const live = c?.thirdPartyExecutable ?? 0
@@ -241,24 +252,31 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ a
                   <div className={styles.categoryHead}>
                     <span className={styles.categoryName}>{copy.name}</span>
                     {live >= 2
-                      ? <Chip tone="holds">{live} callable suppliers</Chip>
-                      : <Chip tone="watch">{live === 0 ? 'no callable supplier yet' : '1 callable supplier'}</Chip>}
+                      ? <Chip tone="holds">{live} callable</Chip>
+                      : <Chip tone="watch">{live === 0 ? 'none callable yet' : '1 callable'}</Chip>}
                   </div>
                   <p className={styles.categoryProblem}>{copy.problem}</p>
-                  <MeasureRule
-                    label={`${copy.name}: ${live} callable third-party agents of ${total} classified`}
-                    value={live} lower={0} upper={Math.max(total, 2)}
-                    threshold={2} thresholdLabel="2 = a market"
-                    lowerLabel="0"
-                    upperLabel={`${fmt(total)} classified`}
-                    valueLabel={`${live} callable · ${reachable} reachable`}
-                    state={live >= 2 ? 'holds' : live === 1 ? 'watch' : 'breach'}
-                  />
+                  <div className={styles.categoryMeasure}>
+                    <MeasureRule
+                      label={`${copy.name}: ${live} callable of ${total} classified`}
+                      value={live} lower={0} upper={Math.max(total, 2)}
+                      threshold={2} thresholdLabel="market = 2"
+                      lowerLabel="0"
+                      upperLabel={`${fmt(total)}`}
+                      valueLabel={`${live} callable`}
+                      state={live >= 2 ? 'holds' : live === 1 ? 'watch' : 'breach'}
+                      index={i}
+                    />
+                    <span className={styles.categoryReach}>{reachable} reachable now</span>
+                  </div>
                 </a>
               )
             })}
           </div>
         </section>
+
+        {/* ===== ACT II — THE PASSAGE ===== */}
+        <p className={styles.actLabel}><span>II</span> The Passage — what a listing has to survive to rank</p>
 
         {/* ---- 2. The funnel. The number nobody else will show. ---- */}
         <section className={styles.section}>
@@ -311,47 +329,30 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ a
           )}
         </section>
 
-        {/* ---- 3. Bounded authority ---- */}
-        <section className={styles.section}>
-          <Statement>Trust the agent. Cap the damage.</Statement>
-          <p className={styles.sectionLede}>
-            Evidence tells you how good an agent has been. It does not tell you how bad this run
-            can get. Those are different questions, and a charter answers the second: an allowlist
-            of contracts, a spend cap, an expiry, and a revoke that fires a real transaction.
-          </p>
-          <EmptyState title="No charter has been granted yet.">
-            <p>
-              The Charter Desk ships in a later phase. When it does, a live charter appears here
-              with its spend meter draining and its expiry counting down — not a mock of one.
-            </p>
-          </EmptyState>
-        </section>
-
-        {/* ---- 4. The Ledger ---- */}
+        {/* ---- 4 + 5. Evidence, as a two-up rather than two lonely paragraphs ---- */}
         <section className={styles.section}>
           <Statement>Measured, not asserted.</Statement>
-          <p className={styles.sectionLede}>
-            Because we compute the correct answer ourselves before asking an agent, the question
-            &ldquo;does hiring this beat doing it yourself&rdquo; is measurable rather than claimed.
-          </p>
-          <p className={styles.lede}>
-            {Number(homeCounts['benchmarks'] ?? 0)} benchmarks are registered, each with its rubric
-            hashed before any arm ran, and the agent arms recorded with their manifests. None is a
-            finished comparison yet: the manual arm is run by a human with a stopwatch, and
-            simulating that would make every number on the page worthless.{' '}
-            <a href="/ledger">See the Ledger</a>, or{' '}
-            <a href="/ledger/methodology">read the method</a>.
-          </p>
-        </section>
-
-        {/* ---- 5. Recent runs ---- */}
-        <section className={styles.section}>
-          <Statement>See what it has done before you decide what it may do.</Statement>
-          <p className={styles.lede}>
-            {Number(homeCounts['receipts'] ?? 0)} settled runs carry a public receipt with four
-            proof blocks — commercial, execution, authority and quality — the canonical hash, and
-            the transaction that anchored it on chain.
-          </p>
+          <div className={styles.evidenceTwoUp}>
+            <div>
+              <h3 className={styles.evHead}>The Ledger — better, not just correct</h3>
+              <p className={styles.sectionLede}>
+                Because we compute the correct answer ourselves before asking an agent, &ldquo;does
+                hiring this beat doing it yourself&rdquo; is measurable rather than claimed.
+                {' '}{Number(homeCounts['benchmarks'] ?? 0)} benchmarks are registered, each with its
+                rubric hashed before any arm ran. None is a finished comparison yet — the manual arm
+                is run by a human with a stopwatch, and simulating it would make every number
+                worthless. <a href="/ledger">See the Ledger</a> · <a href="/ledger/methodology">the method</a>.
+              </p>
+            </div>
+            <div>
+              <h3 className={styles.evHead}>Receipts — what it has already done</h3>
+              <p className={styles.sectionLede}>
+                {Number(homeCounts['receipts'] ?? 0)} settled runs carry a public receipt with four
+                proof blocks — commercial, execution, authority and quality — the canonical hash, and
+                the transaction that anchored it on chain. <a href="/receipts/latest">The latest receipt →</a>
+              </p>
+            </div>
+          </div>
         </section>
 
         {/* ---- 5b. One pass, one fail — side by side (P10.5E item 7) ---- */}
@@ -397,6 +398,25 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ a
                 </p>
               </div>
             )}
+          </div>
+        </section>
+
+        {/* ===== ACT III — THE CHAMBER (the one cockpit band) ===== */}
+        <section className={styles.chamber} data-surface="cockpit">
+          <img className={styles.chamberBg} src="/brand/chamber.webp" alt="" aria-hidden="true" loading="lazy" decoding="async" />
+          <div className={styles.chamberInner}>
+            <p className={styles.actLabelDark}><span>III</span> The Chamber — grant authority, cap the damage</p>
+            <Statement size="statement">Trust the agent. Cap the damage.</Statement>
+            <p className={styles.chamberLede}>
+              Evidence tells you how good an agent has been. It does not tell you how bad this run
+              can get. A charter answers the second question: an allowlist of contracts, a spend
+              cap, an expiry, and a revoke that fires a real transaction. Granting one dims the
+              screen to a cockpit and composes the charter line by line before it is sealed on chain.
+            </p>
+            <div className={styles.chamberActs}>
+              <LinkButton href="/app/charter" variant="primary">Grant a charter</LinkButton>
+              <LinkButton href="/app/charters" variant="secondary">See every charter granted</LinkButton>
+            </div>
           </div>
         </section>
 

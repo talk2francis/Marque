@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Statement, Chip, Button } from '@marque/ui'
 import type { CharterTemplate } from '../../../lib/charter-templates'
 import { scanAddress, scanTx } from '../../../lib/charter-templates'
+import { MarqueMark } from '../../_components/MarqueMark'
 import styles from './charter.module.css'
 
 /**
@@ -363,9 +364,9 @@ export function CharterDesk({
               ))}
             </dl>
 
-            {/* The mark. Typographic, pressed — never a wax seal. */}
+            {/* The mark. Pressed, never a wax seal. */}
             <div className={styles.mark} data-pressed={phase === 'press' || phase === 'writing' || phase === 'sealed'}>
-              <span className={styles.markGlyph} aria-hidden="true">M</span>
+              <span className={styles.markGlyph} aria-hidden="true"><MarqueMark size={24} /></span>
               <span className={styles.markText}>
                 {phase === 'sealed' ? 'Granted' : phase === 'writing' ? 'Writing to the chain' : 'Sealing'}
               </span>

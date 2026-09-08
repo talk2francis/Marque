@@ -110,3 +110,25 @@ a.proof { text-decoration: underline; text-underline-offset: 3px; }
   .page { padding-inline: var(--s4); }
   .cards { grid-template-columns: 1fr; }
 }
+
+/* ===== P10.5G item 3 — collapse the ended-charter history ===== */
+.history { margin-top: var(--s4); }
+.historySummary {
+  cursor: pointer;
+  list-style: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s2);
+  padding: var(--s2) var(--s3);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  font-size: var(--size-control, 14px);
+  color: var(--fg-soft);
+  user-select: none;
+  transition: border-color 120ms ease, color 120ms ease;
+}
+.historySummary::-webkit-details-marker { display: none; }
+.historySummary::before { content: '▸'; font-size: 10px; }
+details[open] .historySummary::before { content: '▾'; }
+.historySummary:hover { border-color: var(--fg-soft); color: var(--fg); }
+.history[open] .historySummary { margin-bottom: var(--s4); }

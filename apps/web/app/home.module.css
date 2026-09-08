@@ -72,20 +72,24 @@
   color: var(--fg-soft);
 }
 
-/* Four rows, each with its own measure — deliberately not four identical cards. */
-.categories { display: flex; flex-direction: column; margin-top: var(--s2); }
+/* Four rows, each with its own measure — deliberately not four identical cards.
+   The hover is a contained, rounded lift with real padding, not a full-bleed
+   rectangle stamped with a hard divider (the "boxy" complaint, P10.5E rev). */
+.categories { display: flex; flex-direction: column; gap: 2px; margin-top: var(--s3); }
 .category {
   display: flex;
   flex-direction: column;
   gap: var(--s3);
-  padding: var(--s5) 0;
-  border-top: 1px solid var(--line);
+  padding: var(--s4) var(--s4);
+  border: 1px solid transparent;
+  border-radius: 6px;
   text-decoration: none;
   color: inherit;
-  transition: background-color 120ms ease;
+  transition: background-color 130ms ease, border-color 130ms ease;
 }
-.category:first-child { border-top: 0; }
-.category:hover { background: var(--ground-raised); }
+.category + .category { box-shadow: 0 -1px 0 var(--line); }
+.category:hover { background: var(--ground-raised); border-color: var(--line); box-shadow: none; }
+.category:hover + .category { box-shadow: none; }
 .categoryHead {
   display: flex;
   align-items: center;
@@ -96,11 +100,14 @@
 .categoryName { font-size: var(--size-title); font-weight: 500; }
 .categoryProblem {
   margin: 0;
-  max-width: 68ch;
+  max-width: 66ch;
   font-size: var(--size-body);
   line-height: var(--lh-body);
   color: var(--fg-soft);
 }
+.categoryMeasure { display: flex; align-items: center; gap: var(--s4); flex-wrap: wrap; }
+.categoryMeasure > :first-child { flex: 1 1 260px; min-width: 0; }
+.categoryReach { font-size: var(--size-caption); color: var(--fg-soft); white-space: nowrap; }
 
 .funnel { list-style: none; margin: var(--s2) 0 0; padding: 0; }
 .funnelRow {
@@ -247,4 +254,100 @@
 @media (max-width: 900px) {
   .stripRow { grid-template-columns: minmax(0,1fr) auto; grid-auto-flow: row; }
   .passFail { grid-template-columns: 1fr; }
+}
+
+/* ===== P10.5E rev — three-act structure, brand bands, the cockpit chamber ===== */
+
+/* Act labels: small, wide-tracked, a brass numeral. The spine of the page. */
+.actLabel, .actLabelDark {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  margin: var(--s8) 0 calc(var(--s5) * -1 + var(--s6));
+  font-size: var(--size-caption);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--fg-soft);
+}
+.actLabel { padding-top: var(--s7); border-top: 1px solid var(--line); }
+.actLabel span, .actLabelDark span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px; height: 24px;
+  border: 1px solid var(--brass);
+  border-radius: 999px;
+  color: var(--brass);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0;
+  flex: none;
+}
+
+/* The cinematic band — one full-bleed breath between the hero and Act I. */
+.band {
+  position: relative;
+  margin: var(--s8) calc(50% - 50vw) 0;
+  width: 100vw;
+  height: clamp(180px, 26vw, 300px);
+  overflow: hidden;
+  border-block: 1px solid var(--line);
+}
+.band picture, .band img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.bandLabel {
+  position: absolute;
+  left: 50%; bottom: var(--s5);
+  transform: translateX(-50%);
+  font-size: var(--size-caption);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #EDEDE7;
+  text-shadow: 0 1px 12px rgba(0,0,0,0.55);
+  white-space: nowrap;
+}
+
+/* Evidence two-up — two columns instead of two lonely paragraphs. */
+.evidenceTwoUp {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s6);
+  margin-top: var(--s3);
+}
+.evHead { margin: 0 0 var(--s2); font-size: var(--size-title); font-weight: 500; }
+.evidenceTwoUp a { display: inline-flex; align-items: center; min-height: 24px; }
+
+/* The Chamber — the single dark cockpit band on the page. */
+.chamber {
+  position: relative;
+  margin: var(--s9) calc(50% - 50vw) 0;
+  width: 100vw;
+  padding: var(--s9) calc(50vw - var(--measure-data) / 2 + var(--s5));
+  background: #15160F;
+  color: #EDEDE7;
+  overflow: hidden;
+  isolation: isolate;
+}
+.chamberBg {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  opacity: 0.28;
+  z-index: -1;
+  mask-image: linear-gradient(to right, transparent, black 55%);
+}
+.chamberInner { max-width: 640px; display: flex; flex-direction: column; gap: var(--s4); }
+.chamberInner :global(.statement) { color: #EDEDE7; }
+.actLabelDark { margin: 0; color: #9A9C8C; }
+.chamberLede {
+  margin: 0;
+  font-size: var(--size-body);
+  line-height: var(--lh-body);
+  color: #C7C8BC;
+  max-width: 58ch;
+}
+.chamberActs { display: flex; gap: var(--s3); flex-wrap: wrap; margin-top: var(--s2); }
+
+@media (max-width: 900px) {
+  .evidenceTwoUp { grid-template-columns: 1fr; gap: var(--s5); }
+  .chamber { padding-inline: var(--s5); }
 }

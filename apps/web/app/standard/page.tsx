@@ -30,6 +30,14 @@ interface ResultRow { [k: string]: unknown }
 const unwrap = (r: unknown): ResultRow[] =>
   ((r as { rows?: unknown[] }).rows ?? (r as unknown[])) as ResultRow[]
 
+function relTime(d: Date): string {
+  const s = (Date.now() - d.getTime()) / 1000
+  if (s < 90) return 'just now'
+  if (s < 5400) return `${Math.round(s / 60)} min ago`
+  if (s < 129600) return `${Math.round(s / 3600)} h ago`
+  return `${Math.round(s / 86400)} d ago`
+}
+
 async function loadStandard(): Promise<string | null> {
   // Resolved relative to the repo root so it works from the standalone bundle.
   const candidates = [
@@ -48,7 +56,7 @@ async function loadStandard(): Promise<string | null> {
 }
 
 export default async function StandardPage() {
-  const [markdown, results, cases] = await Promise.all([
+  const [markdown, results, cases, perTest, topFields] = await Promise.all([
     loadStandard(),
     db().execute(sql`
       select test_id, agent_id, pass, failed_fields, ran_at, error, block_number, latency_ms
@@ -60,7 +68,45 @@ export default async function StandardPage() {
       select test_id, id, block_number, ground_truth_hash, captured_at
       from conformance_case where active = true order by test_id
     `).then(unwrap).catch(() => []),
+    db().execute(sql`
+      select test_id,
+        count(*) filter (where pass) as passes,
+        count(*) filter (where not pass) as fails,
+        count(*) filter (where not pass and error is not null) as no_answer,
+        max(ran_at) as last_run
+      from conformance_result where agent_id not like 'stub:%'
+      group by test_id
+    `).then(unwrap).catch(() => []),
+    db().execute(sql`
+      select test_id, ff as field, count(*)::int as n
+      from conformance_result, lateral jsonb_array_elements_text(failed_fields) ff
+      where agent_id not like 'stub:%'
+      group by test_id, ff
+    `).then(unwrap).catch(() => []),
   ])
+
+  const TESTS = ['MCS-REB-1', 'MCS-GRID-1', 'MCS-YIELD-1', 'MCS-HF-1'] as const
+  const TEST_LABEL: Record<string, string> = {
+    'MCS-REB-1': 'Rebalancing', 'MCS-GRID-1': 'Grid trading',
+    'MCS-YIELD-1': 'Yield optimisation', 'MCS-HF-1': 'Health factor',
+  }
+  const summary = TESTS.map((id) => {
+    const row = perTest.find((r) => String(r['test_id']) === id)
+    const fields = topFields.filter((r) => String(r['test_id']) === id)
+      .sort((a, b) => Number(b['n']) - Number(a['n']))
+    const passes = Number(row?.['passes'] ?? 0)
+    const fails = Number(row?.['fails'] ?? 0)
+    const noAnswer = Number(row?.['no_answer'] ?? 0)
+    return {
+      id,
+      label: TEST_LABEL[id],
+      passes,
+      fails,
+      noAnswer,
+      topField: fields[0] ? String(fields[0]['field']) : null,
+      lastRun: row?.['last_run'] ? new Date(String(row['last_run'])) : null,
+    }
+  })
 
   const byTest = new Map<string, { pass: number; fail: number; errored: number }>()
   for (const r of results) {
@@ -91,6 +137,34 @@ export default async function StandardPage() {
           <ProvenanceChip provenance="TESTED" />
         </p>
       </header>
+
+      <section className={styles.section}>
+        <div className={styles.cards}>
+          {summary.map((s) => (
+            <a key={s.id} href={`/standard/${s.id}`} className={styles.card}>
+              <span className={styles.cardTest}>{s.id}</span>
+              <span className={styles.cardLabel}>{s.label}</span>
+              <span className={styles.cardScore}>
+                <b className={styles.pass}>{s.passes}</b> pass
+                <span className={styles.cardSep}>·</span>
+                <b className={styles.fail}>{s.fails}</b> fail
+              </span>
+              <span className={styles.cardField}>
+                {s.topField
+                  ? <>most-missed field <code>{s.topField}</code></>
+                  : s.noAnswer > 0
+                    ? <>{s.noAnswer} did not answer at all</>
+                    : 'no failures recorded'}
+              </span>
+              <span className={styles.cardWhen}>
+                {s.lastRun
+                  ? `last run ${relTime(s.lastRun)}`
+                  : 'not run yet'}
+              </span>
+            </a>
+          ))}
+        </div>
+      </section>
 
       <section className={styles.section}>
         <h2 className={styles.h2}>Results so far</h2>

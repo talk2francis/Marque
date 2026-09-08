@@ -8,6 +8,7 @@
 .note > span { margin-right: var(--s2); }
 .note a, .actions a, .agent a, .warn a, .reasons a, .facts a, .lede a {
   display: inline-block; padding-block: 4px; color: var(--chain);
+  max-width: 100%; overflow-wrap: anywhere; word-break: break-all;
 }
 
 .lookup { display: flex; gap: var(--s3); flex-wrap: wrap; align-items: flex-end; }
@@ -26,7 +27,8 @@
 .facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: var(--s3) var(--s4); margin: 0; }
 .facts div { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
 .facts dt { font-size: var(--size-caption); color: var(--fg-soft); }
-.facts dd { margin: 0; font-size: var(--size-data); overflow-wrap: anywhere; }
+.facts dd { margin: 0; font-size: var(--size-data); overflow-wrap: anywhere; min-width: 0; }
+.facts dd a { overflow-wrap: anywhere; word-break: break-all; }
 
 /* The number that makes an LP feel the loss. Given its own weight, but never
    rendered at all when we have not measured it. */

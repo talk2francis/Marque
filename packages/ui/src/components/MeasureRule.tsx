@@ -41,6 +41,13 @@ export interface MeasureRuleProps {
   label: string
   /** Suppress the entrance fill, e.g. inside a dense table. */
   animate?: boolean
+  /**
+   * Position in a group of rules that arrive together. Each unit adds a 30ms
+   * delay to the entrance fill, so a stack of rules settles in sequence rather
+   * than all at once (P10.5H item 2). Ignored when `animate` is false or motion
+   * is reduced.
+   */
+  index?: number
   className?: string
 }
 
@@ -61,7 +68,7 @@ function fraction(value: number, lower: number, upper: number): number {
 export function MeasureRule({
   value, lower, upper, threshold,
   lowerLabel, upperLabel, valueLabel, thresholdLabel,
-  state = 'neutral', label, animate = true, className,
+  state = 'neutral', label, animate = true, index = 0, className,
 }: MeasureRuleProps) {
   const pos = fraction(value, lower, upper)
   const thresholdPos = threshold === undefined ? null : fraction(threshold, lower, upper)
@@ -74,6 +81,7 @@ export function MeasureRule({
   const style = {
     '--measure-pos': `${pos * 100}%`,
     '--measure-color': STATE_COLOR[state],
+    '--measure-i': Math.max(0, index),
   } as CSSProperties
 
   return (

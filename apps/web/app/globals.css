@@ -7,3 +7,17 @@
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
   --font-statement: var(--font-fraunces), 'Iowan Old Style', Georgia, serif;
 }
+
+/* P10.5H — the loading mark: a slow, quiet breath. Same final frame with
+   reduced motion (fully visible, still). */
+.marque-loading-mark {
+  color: var(--fg-soft);
+  animation: marque-breath 1600ms ease-in-out infinite;
+}
+@keyframes marque-breath {
+  0%, 100% { opacity: 0.35; transform: scale(0.97); }
+  50% { opacity: 0.9; transform: scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .marque-loading-mark { animation: none; opacity: 0.8; }
+}

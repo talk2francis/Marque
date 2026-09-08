@@ -248,9 +248,11 @@ a.row:hover, button.row:hover { background: var(--ground-raised); }
   box-shadow: none;
   font-weight: 700;
 }
-/* Fill once, on data arrival. Not on scroll, not on hover. */
+/* Fill once, on data arrival. Not on scroll, not on hover. A stack of rules
+   that arrive together settles in sequence: 30ms per --measure-i (P10.5H). */
 .measure--animate .measure__marker {
   animation: measure-settle 400ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: calc(var(--measure-i, 0) * 30ms);
 }
 @keyframes measure-settle {
   from { left: 0%; opacity: 0; }

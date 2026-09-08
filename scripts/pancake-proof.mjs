@@ -287,20 +287,50 @@ async function cmdStatus() {
   console.log('current  ', 'tick', st.tick, '≈', bnbPx(st.tick).toFixed(2), 'USDT/BNB')
   console.log('state    ', out ? `OUT OF RANGE (${below ? 'below — 100% ' + (USDT_IS_0 ? 'USDT' : 'WBNB') : 'above — 100% ' + (USDT_IS_0 ? 'WBNB' : 'USDT')})` : 'in range, still earning')
 
+  // A deliberately narrow range on a low-vol pair drifts in and out. Track both
+  // the current continuous spell AND the cumulative time spent out of range
+  // since the position opened, sampled at each status check — because "earned
+  // nothing for a cumulative N hours" is the honest, robust claim.
+  const now = Date.now()
+  const prevAt = s.lastCheckAt ? Date.parse(s.lastCheckAt) : now
+  const gapH = (now - prevAt) / 3600_000
+  let cumOutH = s.cumOutH ?? 0
+  if (out && s.lastWasOut) cumOutH += gapH // both this check and the previous were out → count the gap
+  const firstEverOut = s.firstEverOutAt ?? (out ? new Date().toISOString() : null)
+
   let firstOut = s.firstOutAt
-  if (out && !firstOut) { firstOut = new Date().toISOString(); saveState({ ...s, firstOutAt: firstOut, outTick: st.tick }) }
-  if (!out && firstOut) { saveState({ ...s, firstOutAt: null }); firstOut = null; console.log('  (drifted back in — clock reset)') }
+  if (out && !firstOut) firstOut = new Date().toISOString()
+  if (!out && firstOut) { firstOut = null; console.log('  (drifted back in — continuous clock reset; cumulative kept)') }
+
+  saveState({
+    ...s,
+    firstOutAt: firstOut,
+    firstEverOutAt: firstEverOut,
+    cumOutH,
+    lastCheckAt: new Date().toISOString(),
+    lastWasOut: out,
+    outTick: out ? st.tick : s.outTick,
+  })
+
+  console.log('cumulative out of range ≈', cumOutH.toFixed(2), 'h (sampled)')
   if (firstOut) {
     const hrs = (Date.now() - Date.parse(firstOut)) / 3600_000
-    console.log('out since ', firstOut, `→ ${hrs.toFixed(1)}h`)
-    console.log(hrs >= 1 ? '  READY: run `rebalance` (add --go to send)' : '  give it a little longer')
-    const p = loadProof()
-    if (p.status === 'drifting' && p.before) {
-      p.before.outOfRangeSince = firstOut
-      p.before.hoursOutOfRange = Number(hrs.toFixed(1))
-      p.before.currentTick = st.tick
-      saveProof(p)
+    console.log('current spell   ', firstOut, `→ ${hrs.toFixed(1)}h continuous`)
+  }
+  const best = Math.max(cumOutH, firstOut ? (Date.now() - Date.parse(firstOut)) / 3600_000 : 0)
+  console.log(best >= 1 ? '  READY: run `rebalance --go`' : '  give it a little longer')
+
+  const p = loadProof()
+  if (p.status === 'drifting' && p.before) {
+    p.before.currentTick = st.tick
+    p.before.outOfRangeSince = firstEverOut
+    p.before.hoursOutOfRange = Number(cumOutH.toFixed(1))
+    if (firstEverOut) {
+      p.note = out
+        ? `The position is out of range and earning nothing. It has been out for a cumulative ${cumOutH.toFixed(1)}h since it was opened (a ~0.3% band on a low-volatility pair drifts in and out). It stays open until the agent re-centres it.`
+        : `The position has drifted in and out of its ~0.3% band, out for a cumulative ${cumOutH.toFixed(1)}h and earning nothing while out. It stays open until the agent re-centres it.`
     }
+    saveProof(p)
   }
 }
 
@@ -449,8 +479,12 @@ async function cmdRebalance() {
       note: undefined,
       before: {
         ...p.before,
-        outOfRangeSince: s.firstOutAt || p.before?.outOfRangeSince,
-        hoursOutOfRange: s.firstOutAt ? Number(((Date.now() - Date.parse(s.firstOutAt)) / 3600_000).toFixed(1)) : p.before?.hoursOutOfRange,
+        outOfRangeSince: s.firstEverOutAt || s.firstOutAt || p.before?.outOfRangeSince,
+        // Cumulative sampled time out of range since the position opened, plus
+        // any final continuous spell not yet folded in.
+        hoursOutOfRange: Number(
+          ((s.cumOutH ?? 0) + (s.firstOutAt ? (Date.now() - Date.parse(s.firstOutAt)) / 3600_000 : 0)).toFixed(1),
+        ) || p.before?.hoursOutOfRange,
       },
       transactions: [...(p.transactions || []), ...txs],
       after: {

@@ -36,6 +36,21 @@ function short(hash: string): string {
   return hash.length > 20 ? `${hash.slice(0, 12)}…${hash.slice(-6)}` : hash
 }
 
+/** The three headline numbers for one arm, or nulls when it has not run. */
+function armStats(runs: Array<{ elapsedMs: number; costBreakdown: Record<string, unknown>; scoreTotal: number | null; scoreOutOf: number | null }>) {
+  if (runs.length === 0) return { time: null, cost: null, quality: null, reps: 0 }
+  const mean = (xs: number[]) => xs.reduce((a, b) => a + b, 0) / xs.length
+  const time = mean(runs.map((r) => r.elapsedMs))
+  const costNums = runs.flatMap((r) => Object.values(r.costBreakdown).filter((v): v is number => typeof v === 'number'))
+  const cost = costNums.length ? mean(runs.map((r) => Object.values(r.costBreakdown).filter((v): v is number => typeof v === 'number').reduce((a, b) => a + b, 0))) : null
+  const scored = runs.filter((r) => r.scoreTotal !== null && r.scoreOutOf !== null)
+  const first = scored[0]
+  const quality = first
+    ? { total: mean(scored.map((r) => r.scoreTotal as number)), outOf: first.scoreOutOf as number }
+    : null
+  return { time, cost, quality, reps: runs.length }
+}
+
 function Benchmark({ b }: { b: LedgerBenchmark }) {
   const agent = b.runs.filter((r) => r.arm === 'agent')
   const manual = b.runs.filter((r) => r.arm === 'manual')
@@ -50,7 +65,7 @@ function Benchmark({ b }: { b: LedgerBenchmark }) {
         <Chip>{b.category.replace('_', ' ')}</Chip>
         {b.complete
           ? <Chip tone="holds">complete</Chip>
-          : <Chip tone="watch">incomplete</Chip>}
+          : <Chip tone="watch">awaiting the manual arm</Chip>}
       </div>
 
       <p className={styles.note}>
@@ -60,31 +75,51 @@ function Benchmark({ b }: { b: LedgerBenchmark }) {
         either arm ran.
       </p>
 
-      {b.runs.length === 0 ? (
-        <p className={styles.muted}>No arm has been run yet.</p>
-      ) : (
-        <table className={styles.arms}>
-          <thead>
-            <tr><th>Arm</th><th>Rep</th><th>Block</th><th>Elapsed</th><th>Score</th><th>Output</th></tr>
-          </thead>
-          <tbody>
-            {[...agent, ...manual].map((r) => (
-              <tr key={r.id}>
-                <td>{r.arm === 'agent' ? (b.agentName ?? 'agent') : 'human analyst'}</td>
-                <td className="mono">{r.rep}</td>
-                <td className="mono">{r.blockNumber}</td>
-                <td className="mono">{ms(r.elapsedMs)}</td>
-                <td className="mono">
-                  {r.scoreTotal === null
-                    ? <span className={styles.muted}>unscored</span>
-                    : `${r.scoreTotal} / ${r.scoreOutOf}`}
-                </td>
-                <td className="mono">{short(r.outputHash)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+      {(() => {
+        const h = armStats(manual)
+        const a = armStats(agent)
+        const Cell = ({ label, human, agentVal }: { label: string; human: React.ReactNode; agentVal: React.ReactNode }) => (
+          <div className={styles.expRow}>
+            <span className={styles.expMetric}>{label}</span>
+            <span className={styles.expHuman}>{human}</span>
+            <span className={styles.expAgent}>{agentVal}</span>
+          </div>
+        )
+        const awaiting = <span className={styles.awaiting}>awaiting the manual arm</span>
+        return (
+          <div className={styles.experiment}>
+            <div className={styles.expHead}>
+              <span />
+              <span className={styles.expCol}>Human analyst</span>
+              <span className={styles.expCol}>{b.agentName ?? 'Agent'}</span>
+            </div>
+            <Cell
+              label="TIME"
+              human={h.time === null ? awaiting : <b>{ms(Math.round(h.time))}</b>}
+              agentVal={a.time === null ? <span className={styles.muted}>not run</span> : <b>{ms(Math.round(a.time))}</b>}
+            />
+            <Cell
+              label="COST"
+              human={h.cost === null ? awaiting : <b>${h.cost.toFixed(2)}</b>}
+              agentVal={a.cost === null ? <span className={styles.muted}>—</span> : <b>${a.cost.toFixed(2)}</b>}
+            />
+            <Cell
+              label="QUALITY"
+              human={h.quality === null ? awaiting : <b>{h.quality.total.toFixed(0)} / {h.quality.outOf}</b>}
+              agentVal={
+                a.quality === null
+                  ? <span className={styles.muted}>{a.reps > 0 ? 'unscored — blind scoring needs both arms' : 'not run'}</span>
+                  : <b>{a.quality.total.toFixed(0)} / {a.quality.outOf}</b>
+              }
+            />
+            <p className={styles.expFoot}>
+              {a.reps} agent repetition{a.reps === 1 ? '' : 's'} recorded, {h.reps} manual.
+              {' '}The agent numbers are real; the comparison is not a comparison until a human
+              runs the same task by hand and both arms are scored blind.
+            </p>
+          </div>
+        )
+      })()}
 
       {!b.complete && (
         <div className={styles.pending}>
