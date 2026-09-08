@@ -1,0 +1,102 @@
+{
+  "_note": "Truth-freeze for the demo film (demo/video demo, Phase V0). Every number the VO speaks or the screen shows is here, with its source and the time it was read. Immutable facts (tx hashes) are frozen. Live figures MUST be re-read immediately before capture and any moved number rewrites its VO line. Do not speak a number the product does not currently display.",
+  "frozen_at": "2026-09-08T16:00:00Z",
+  "reread_before_capture": true,
+
+  "funnel": {
+    "source": "https://marque.trade/api/v1/funnel",
+    "read_at": "2026-09-08T15:53:25Z",
+    "registered_bsc": 298817,
+    "with_parseable_service": 30357,
+    "responding_now": 30001,
+    "bound_now": 6072,
+    "classified": 508,
+    "classified_and_callable_now": 104,
+    "vo_uses": ["298,817", "30,357", "30,001", "6,072", "508"]
+  },
+
+  "the_spine": {
+    "source": "conformance_result table, agent_id like '56:%'",
+    "read_at": "2026-09-08T15:53Z",
+    "third_party_conformance_runs": 684,
+    "third_party_passes": 0,
+    "all_runs": 720,
+    "all_passes": 25,
+    "all_passes_are": "the five Marque reference agents",
+    "vo_line": "Six hundred and eighty-four conformance runs against third-party agents on BNB Smart Chain. Passes: zero.",
+    "_was_in_draft": "163 — the number has grown; the line is rewritten to 684, and it is a stronger number. RE-READ AGAIN at capture."
+  },
+
+  "standard_named_cases": {
+    "passing": {
+      "agent": "marque:bound",
+      "test": "MCS-REB-1",
+      "pass": true,
+      "latest": "2026-09-08"
+    },
+    "failing": {
+      "agent": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:36035",
+      "test": "MCS-REB-1",
+      "pass": false,
+      "failed_fields": ["currentTick", "inRange", "distanceToBound", "proposedTickSpacing", "amounts", "slippageBound"],
+      "latest": "2026-09-08",
+      "note": "This operator's identities fail every category test. Good on-camera: the fail card shows six red fields."
+    }
+  },
+
+  "ledger_ADV_01": {
+    "source": "benchmark_run, benchmark_id ADV-01, arm agent",
+    "category": "security",
+    "agent": "Redcell",
+    "agent_time_ms_median": 445,
+    "agent_time_ms_range": [112, 3355],
+    "agent_reps": 5,
+    "agent_cost_usd": { "gas": 0, "llm": 0, "fee": 0.25, "total": 0.25 },
+    "human_time": "PENDING — batch 1 done by Francis, batch 2 outstanding",
+    "human_cost": "PENDING",
+    "blind_score": "PENDING — needs both arms",
+    "vo_caution": "The draft line 'nine minutes, forty-one dollars ... the agent: 279ms' is a PLACEHOLDER. Do not speak it until the human arm is recorded and the agent ms is confirmed for the case actually shown."
+  },
+
+  "pancake_proof": {
+    "source": "docs/pancakeswap-proof.json + https://marque.trade/pancakeswap/proof",
+    "status": "complete",
+    "chain_id": 56,
+    "network": "BSC MAINNET",
+    "pool": "0x172fcD41E0913e95784454622d1c3724f546f849",
+    "tx_hashes": [
+      "0xb32c204f143b233f5f38958fecda083141efd85f0352ca08bdc116703c8688ed",
+      "0xfe41a8a1218e2e8c9f206c26565a537879f1de090b258e8bd64d41d925bc9001",
+      "0xd795d4879ee16f21f6d54a7f404cc1f7e3928241ec9a0a0c0f6afc3618fb46e9",
+      "0x83f635fc30e74e26e36575be3c179301e96de01e6a5839b6d478fba33725a806"
+    ],
+    "realised_slippage": "< 1 bps (recorded 0)",
+    "gas_usd": 0.10,
+    "agent_fee_usd": 0.15,
+    "hours_out_of_range": 0.9,
+    "fees_resumed_at_block": 120600044,
+    "vo_line": "One real rebalance, on mainnet, under a sixty-dollar charter. Four transactions. Under one basis point of slippage. Fees resumed at block one-two-oh-six-oh-oh-oh-four-four.",
+    "frozen": true
+  },
+
+  "positions_demo": {
+    "address": "0x60AA3AEE06E2345A17E4d4B12c53E046F4F63CAf",
+    "label": "a Venus loan near liquidation",
+    "health_factor": "RE-READ at capture and PIN a block — HF drifts. The draft line '0.137 from liquidation' must be replaced with the pctDropToLiquidation the page actually shows at the pinned block.",
+    "source": "https://marque.trade/positions?addr=0x60AA3AEE06E2345A17E4d4B12c53E046F4F63CAf"
+  },
+
+  "on_chain_identity": {
+    "marque_registry_testnet_97": "0x01D584f3a07Ba07D114386A78CA7fa3103db7AE7",
+    "erc8004_identity_registry_testnet_97": "0x8004a818bFB912233c491871B3d84C89A494bd9E",
+    "reference_agent_token_ids": { "bound": 2234, "lattice": 2236, "sluicegate": 2237, "keel": 2238, "redcell": 2239 },
+    "note": "Charter/seal/anchor are TESTNET on purpose (README explains). The one mainnet thing is the Pancake proof run above. The film labels every shot: TESTNET 97 for the charter, MAINNET 56 for the proof."
+  },
+
+  "capture_labels": {
+    "charter_and_run_room": "LIVE CAPTURE · BSC TESTNET 97",
+    "pancake_proof": "ARCHIVED RESULT · BSC MAINNET 56",
+    "everything_else": "LIVE CAPTURE",
+    "graphics": "EXPLANATORY GRAPHIC"
+  }
+}
