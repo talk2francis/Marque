@@ -4,6 +4,7 @@ import { db } from '@marque/db'
 import { Statement, Chip, WarrantBadge, EmptyState, LinkButton, ProvenanceChip } from '@marque/ui'
 import { SiteHeader, SiteFooter } from '../_components/SiteHeader'
 import { ReferenceMark } from '../_components/ReferenceMark'
+import { AgentAvatar } from '../_components/AgentAvatar'
 import { marketplaceAgents, type MarketRow } from '../../lib/marketplace'
 import { referenceAgent } from '../../lib/reference-agents'
 import { explorerAddress } from '../../lib/network'
@@ -138,6 +139,7 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
             <div className={styles.rowLabel} />
             {chosen.map((a) => (
               <div key={a.agentId} className={styles.colHead}>
+                <AgentAvatar id={a.agentId} category={a.category} reference={a.isReference} size={44} />
                 <Link
                   href={a.isReference ? `/agents/${a.tokenId}` : (a.tokenId && /^\d+$/.test(a.tokenId) ? `/agents/56/${a.tokenId}` : '/register')}
                   className={styles.colName}

@@ -4,6 +4,7 @@ import { db } from '@marque/db'
 import { Statement, Chip, WarrantBadge, ProvenanceChip, LinkButton } from '@marque/ui'
 import { SiteHeader, SiteFooter } from '../../_components/SiteHeader'
 import { ReferenceMark } from '../../_components/ReferenceMark'
+import { AgentAvatar } from '../../_components/AgentAvatar'
 import {
   REFERENCE_AGENTS, referenceAgent, ERC8004_REGISTRY_MAINNET,
 } from '../../../lib/reference-agents'
@@ -68,6 +69,7 @@ export default async function ReferenceAgentPage({ params }: { params: Promise<{
       <main className={styles.page}>
         <header className={styles.head}>
           <div className={styles.title}>
+            <AgentAvatar id={agent.id} category={agent.category} reference size={52} />
             <Statement as="h1" size="page">{agent.name}</Statement>
             <ReferenceMark />
           </div>
