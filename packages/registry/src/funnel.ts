@@ -198,6 +198,10 @@ async function categoryFunnelUncached(chainId = 56): Promise<CategoryFunnelRow[]
 
 /** How BSC agents actually die. Drives the graveyard view. */
 export async function failureHistogram(): Promise<Array<{ failureClass: string; count: number; share: number }>> {
+  return memoised('failureHistogram', failureHistogramUncached)
+}
+
+async function failureHistogramUncached(): Promise<Array<{ failureClass: string; count: number; share: number }>> {
   const d = db()
   const rows = await d.execute(sql`
     with latest as (

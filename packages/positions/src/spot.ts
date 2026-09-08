@@ -43,8 +43,14 @@ export interface SpotHoldings {
   unpricedCount: number
 }
 
-/** Mid price of `token` in USDT from the deepest available V3 pool. */
-async function priceInUsdt(
+/**
+ * Mid price of `token` in USDT from the deepest available V3 pool.
+ *
+ * Exported because the V3 position reader needs exactly this to value a
+ * position in dollars, and two implementations of "what is this token worth"
+ * would eventually disagree on the same screen.
+ */
+export async function priceInUsdt(
   client: PublicClient,
   token: Address,
   decimals: number,

@@ -26,22 +26,29 @@
 .pageHead :global(.statement) { max-width: 22ch; margin-bottom: var(--s4); }
 .lede { font-size: 17px; line-height: 1.6; color: var(--fg-soft); margin: 0; max-width: 64ch; }
 
+/* ---- A fixed reading frame, not a scrolling page --------------------
+   The page itself does not move. The header and the rail hold their place and
+   ONLY the section content scrolls, so the reader never loses the nav, the
+   contents list, or the prev/next control. Below 900px this collapses back to
+   normal document flow, where a fixed frame would be hostile. */
 .wrap {
   max-width: var(--measure-data);
   margin: 0 auto;
-  padding: var(--s6) var(--s5) var(--s9);
+  padding: var(--s5) var(--s5) var(--s5);
   display: grid;
   grid-template-columns: 244px minmax(0, 1fr);
   gap: var(--s8);
-  align-items: start;
+  align-items: stretch;
+  /* viewport minus the sticky nav and this page's own header */
+  height: calc(100dvh - var(--docs-chrome, 232px));
+  min-height: 380px;
+  overflow: hidden;
 }
 
-/* ---- The rail: sticky under the nav; only the content scrolls ---- */
+/* ---- The rail: holds its place; scrolls only if the list overflows ---- */
 .rail {
-  position: sticky;
-  top: 92px;
-  align-self: start;
-  max-height: calc(100vh - 110px);
+  align-self: stretch;
+  min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: thin;
@@ -81,8 +88,29 @@
 .railNum { font-family: var(--font-mono); font-size: 10.5px; color: var(--fg-soft); flex: none; }
 .railActive .railNum { color: var(--fg); }
 
-/* ---- The content column: one section at a time ---- */
-.docCol { min-width: 0; }
+/* ---- The content column: the ONLY thing that scrolls ---- */
+.docCol {
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  padding-right: var(--s5);
+  /* the pager sits at the end of the flow, always reachable by scrolling */
+  display: flex;
+  flex-direction: column;
+}
+/* A hairline that says "there is more below" without a scrollbar shouting it. */
+.docCol::after {
+  content: '';
+  position: sticky;
+  bottom: 0;
+  flex: none;
+  height: 32px;
+  margin-top: calc(-1 * var(--s5));
+  background: linear-gradient(180deg, transparent, var(--ground));
+  pointer-events: none;
+}
 .docSection {
   font-size: var(--size-body);
   line-height: 1.75;
@@ -172,8 +200,16 @@
 .pagerNext .pagerDir::after { content: ' →'; }
 .pagerTitle { font-size: var(--size-control); color: var(--fg); font-weight: 500; }
 
+/* Below 900px the fixed frame is hostile — hand the page back to normal flow. */
 @media (max-width: 900px) {
-  .wrap { grid-template-columns: 1fr; gap: var(--s5); }
+  .wrap {
+    grid-template-columns: 1fr;
+    gap: var(--s5);
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+    padding-bottom: var(--s9);
+  }
   .rail {
     position: static;
     max-height: none;
@@ -183,6 +219,8 @@
     padding: var(--s4);
     background: color-mix(in srgb, var(--ground-raised) 40%, transparent);
   }
+  .docCol { overflow: visible; padding-right: 0; display: block; }
+  .docCol::after { display: none; }
   .railList { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
   .railList a { border-left: 0; border-radius: var(--r-xs); }
   .railActive { border-left: 0 !important; }

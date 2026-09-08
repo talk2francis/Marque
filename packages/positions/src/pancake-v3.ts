@@ -9,6 +9,7 @@ import {
   sqrtPriceX96ToPrice, tickSpacingForFee, tickToPrice, toHuman,
 } from './v3-math.js'
 import { onchain, ok, fail, type Q, type ReaderResult, type ReadContext } from './provenance.js'
+import { priceInUsdt } from './spot.js'
 
 /**
  * PancakeSwap V3 position reader.
@@ -20,6 +21,39 @@ import { onchain, ok, fail, type Q, type ReaderResult, type ReadContext } from '
  */
 
 const MAX_UINT128 = (1n << 128n) - 1n
+
+/**
+ * Value a position and its uncollected fees in dollars.
+ *
+ * `positionValueUsd` and `feesUsd` were declared on V3Position and rendered by
+ * the Desk from the start, but nothing ever computed them — so a real position
+ * has always shown "—" where its size should be. A marketplace that cannot say
+ * what a position is worth cannot argue about what rebalancing it is worth.
+ *
+ * Both tokens must price, or the value is ABSENT. Half a position priced and
+ * the other half silently treated as zero would understate the position, which
+ * is worse than saying nothing (AGENTS.md: absence is shown as absence).
+ *
+ * Prices are memoised per token for the life of one read, so a wallet with five
+ * positions in the same pair costs one price lookup, not ten.
+ */
+async function valueInUsd(
+  client: PublicClient,
+  blockNumber: bigint,
+  cache: Map<string, number | null>,
+  a: { token: Address; decimals: number; amount: number },
+  b: { token: Address; decimals: number; amount: number },
+): Promise<number | null> {
+  const priceOf = async (t: Address, d: number): Promise<number | null> => {
+    const key = t.toLowerCase()
+    if (!cache.has(key)) cache.set(key, await priceInUsdt(client, t, d, blockNumber).catch(() => null))
+    return cache.get(key) ?? null
+  }
+  const [pa, pb] = await Promise.all([priceOf(a.token, a.decimals), priceOf(b.token, b.decimals)])
+  if (pa === null || pb === null) return null
+  const total = a.amount * pa + b.amount * pb
+  return Number.isFinite(total) ? total : null
+}
 
 /**
  * viem infers multicall result types from a literal `contracts` array. Ours is
@@ -169,6 +203,8 @@ export async function pancakeV3Reader(
 
   const positions: V3Position[] = []
   let emptyPositions = 0
+  /** One price per token for the whole read, not one per position. */
+  const priceCache = new Map<string, number | null>()
 
   for (let i = 0; i < ids.length; i++) {
     const row = rawPositions[i]
@@ -208,6 +244,20 @@ export async function pancakeV3Reader(
 
     const priceUnit = `${meta1.symbol}/${meta0.symbol}`
 
+    const amt0 = toHuman(amounts.amount0, d0)
+    const amt1 = toHuman(amounts.amount1, d1)
+    const fee0 = toHuman(fees.amount0, d0)
+    const fee1 = toHuman(fees.amount1, d1)
+
+    const [valueUsd, feeUsd] = await Promise.all([
+      valueInUsd(client, blockNumber, priceCache,
+        { token: token0Addr, decimals: d0, amount: amt0 },
+        { token: token1Addr, decimals: d1, amount: amt1 }),
+      valueInUsd(client, blockNumber, priceCache,
+        { token: token0Addr, decimals: d0, amount: fee0 },
+        { token: token1Addr, decimals: d1, amount: fee1 }),
+    ])
+
     positions.push({
       tokenId: tokenId.toString(),
       token0: meta0,
@@ -228,10 +278,14 @@ export async function pancakeV3Reader(
       pctToUpper: onchain(pctToUpper, '%'),
       rangePosition: onchain(rangePosition(Number(tickCurrent), Number(tickLower), Number(tickUpper)), 'fraction'),
 
-      amount0: onchain(toHuman(amounts.amount0, d0), meta0.symbol),
-      amount1: onchain(toHuman(amounts.amount1, d1), meta1.symbol),
-      fees0: onchain(toHuman(fees.amount0, d0), meta0.symbol),
-      fees1: onchain(toHuman(fees.amount1, d1), meta1.symbol),
+      amount0: onchain(amt0, meta0.symbol),
+      amount1: onchain(amt1, meta1.symbol),
+      fees0: onchain(fee0, meta0.symbol),
+      fees1: onchain(fee1, meta1.symbol),
+
+      // Absent, never zero, when either leg could not be priced on chain.
+      ...(valueUsd === null ? {} : { positionValueUsd: onchain(valueUsd, 'USD') }),
+      ...(feeUsd === null ? {} : { feesUsd: onchain(feeUsd, 'USD') }),
     })
   }
 

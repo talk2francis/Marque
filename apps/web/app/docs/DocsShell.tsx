@@ -32,9 +32,15 @@ export function DocsShell({ sections, children }: { sections: DocSection[]; chil
     })
     if (!firstRender.current) {
       history.replaceState(null, '', `#${active}`)
-      // Bring the top of the content into view without a jarring jump.
-      const top = root.getBoundingClientRect().top + window.scrollY - 96
-      window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' })
+      // The content column is its own scroll container on desktop, so reset IT
+      // rather than the window — scrolling the window would move nothing and
+      // leave the reader halfway down the previous section's scroll position.
+      if (root.scrollHeight > root.clientHeight || root.scrollTop > 0) {
+        root.scrollTo({ top: 0, behavior: 'smooth' })
+      } else {
+        const top = root.getBoundingClientRect().top + window.scrollY - 96
+        window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' })
+      }
     }
     firstRender.current = false
   }, [active])
