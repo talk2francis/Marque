@@ -97,19 +97,39 @@
   background: transparent; border: 1px dashed var(--line); border-radius: 2px; padding: 7px 12px; min-height: 30px; cursor: not-allowed;
 }
 
+/* Fixed, centred, floating — the compare action is unmissable once two agents
+   are picked. */
 .tray {
-  position: sticky; bottom: 0; z-index: 5;
-  display: flex; align-items: center; justify-content: space-between; gap: var(--s3);
-  margin-top: var(--s4); padding: var(--s3) var(--s4);
-  background: var(--ground-raised); border: 1px solid var(--brass); border-radius: 3px;
-  box-shadow: 0 -6px 20px -12px rgba(0,0,0,.25);
+  position: fixed;
+  left: 50%;
+  bottom: var(--s5);
+  transform: translateX(-50%);
+  z-index: 30;
+  width: min(680px, calc(100vw - var(--s6)));
+  display: flex; align-items: center; justify-content: space-between; gap: var(--s4);
+  padding: var(--s3) var(--s3) var(--s3) var(--s5);
+  background: color-mix(in srgb, var(--ground-raised) 92%, transparent);
+  -webkit-backdrop-filter: saturate(1.6) blur(16px);
+  backdrop-filter: saturate(1.6) blur(16px);
+  border: 1px solid color-mix(in srgb, var(--brass-mark) 45%, transparent);
+  border-radius: var(--r-pill);
+  box-shadow: var(--elev-3);
+  animation: trayIn 260ms var(--ease-settle) both;
 }
-.trayList { display: flex; gap: var(--s2); flex-wrap: wrap; }
+@keyframes trayIn { from { opacity: 0; transform: translate(-50%, 12px); } to { opacity: 1; transform: translate(-50%, 0); } }
+.trayLabel { font-size: var(--size-caption); color: var(--fg-soft); white-space: nowrap; }
+.trayList { display: flex; gap: var(--s2); flex-wrap: wrap; min-width: 0; overflow: hidden; }
 .trayChip {
   display: inline-flex; align-items: center; gap: 6px;
-  font-size: var(--size-caption); background: var(--ground); border: 1px solid var(--line); border-radius: 999px; padding: 3px 6px 3px 10px;
+  font-size: var(--size-caption); background: var(--ground); border: 1px solid var(--line);
+  border-radius: var(--r-pill); padding: 4px 6px 4px 12px; white-space: nowrap;
 }
-.trayChip button { border: none; background: transparent; cursor: pointer; font-size: 16px; line-height: 1; color: var(--fg-soft); min-width: 26px; min-height: 26px; }
+.trayChip button { border: none; background: transparent; cursor: pointer; font-size: 15px; line-height: 1; color: var(--fg-soft); min-width: 24px; min-height: 24px; }
+.trayChip button:hover { color: var(--fg); }
+@media (max-width: 560px) {
+  .tray { flex-direction: column; align-items: stretch; border-radius: var(--r-lg); padding: var(--s3); gap: var(--s2); }
+  .trayList { justify-content: center; }
+}
 
 @media (max-width: 900px) {
   .mktRow { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "main live" "warrant price" "actions actions"; }
@@ -121,18 +141,33 @@
 }
 
 /* P10.5H — the marketplace section's one brand image. Thin, full-bleed. */
+/* A thin architectural texture strip — desaturated, low-contrast, vignetted on
+   all four edges so it dissolves into the page ground in either theme rather
+   than reading as a half-cropped photo. */
 .brandBand {
   position: relative;
-  margin: var(--s5) calc(50% - 50vw) var(--s6);
+  margin: var(--s5) calc(50% - 50vw) var(--s7);
   width: 100vw;
-  height: clamp(96px, 11vw, 130px);
+  height: clamp(84px, 9vw, 110px);
   overflow: hidden;
-  border-block: 1px solid var(--line);
+  isolation: isolate;
 }
-.brandBand picture, .brandBand img { width: 100%; height: 100%; object-fit: cover; object-position: center 30%; display: block; }
+.brandBand img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  object-position: center 32%;
+  display: block;
+  filter: saturate(0.5) contrast(0.9) brightness(1.03);
+}
+:root[data-theme='dark'] .brandBand img { filter: saturate(0.45) contrast(0.88) brightness(0.8); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .brandBand img { filter: saturate(0.45) contrast(0.88) brightness(0.8); }
+}
 .brandBand::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, var(--ground) 0%, transparent 22%, transparent 78%, var(--ground) 100%);
+  background:
+    linear-gradient(90deg, var(--ground) 0%, transparent 24%, transparent 76%, var(--ground) 100%),
+    linear-gradient(180deg, var(--ground) 0%, transparent 40%, transparent 55%, var(--ground) 100%);
 }

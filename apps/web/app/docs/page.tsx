@@ -2,6 +2,7 @@ import { Statement } from '@marque/ui'
 import { BRAND, VOCAB } from '@marque/ui/brand'
 import { SiteHeader, SiteFooter } from '../_components/SiteHeader'
 import { DocsRail, type DocSection } from './DocsRail'
+import { Pager } from './Pager'
 import styles from './docs.module.css'
 
 export const metadata = {
@@ -71,6 +72,7 @@ export default function DocsPage() {
               You never connect a wallet to browse, compare, or preflight. A wallet signs exactly one
               thing: the transaction that grants a charter. Everything before that is a read.
             </p>
+            <Pager current="what" />
           </section>
 
           <section>
@@ -95,6 +97,7 @@ export default function DocsPage() {
               register the same endpoint under dozens of ERC-8004 identities, and on this chain one
               does; Marque deduplicates by owner address and endpoint host so that is one row.
             </p>
+            <Pager current="categories" />
           </section>
 
           <section>
@@ -117,6 +120,7 @@ export default function DocsPage() {
               everywhere they appear, held to the same standard as everyone else, and ranked by the
               same rules, including when a third party beats them.
             </p>
+            <Pager current="finding" />
           </section>
 
           <section>
@@ -132,6 +136,7 @@ export default function DocsPage() {
               says so; it does not borrow a number from a sibling identity or an earlier run against
               different chain state.
             </p>
+            <Pager current="comparing" />
           </section>
 
           <section>
@@ -153,6 +158,7 @@ export default function DocsPage() {
               A settled run is sealed on chain <i>before</i> its outcome is known, so a track record
               cannot be assembled after the fact by choosing which runs to keep.
             </p>
+            <Pager current="hiring" />
           </section>
 
           <section>
@@ -173,6 +179,7 @@ export default function DocsPage() {
               charters page</a> with the transaction that ended it, because a revocation nobody can
               check is not a revocation.
             </p>
+            <Pager current="charters" />
           </section>
 
           <section>
@@ -198,6 +205,7 @@ export default function DocsPage() {
               {' '}<a href="/builders/test">/builders/test</a>, with no signup and no wallet. Nothing
               from that run is stored.
             </p>
+            <Pager current="mcs" />
           </section>
 
           <section>
@@ -217,6 +225,7 @@ export default function DocsPage() {
                 everyone else.</li>
             </ol>
             <p>Start at <a href="/builders/claim">/builders/claim</a>. No email, no approval queue.</p>
+            <Pager current="builders" />
           </section>
 
           <section>
@@ -234,6 +243,7 @@ export default function DocsPage() {
                 position an address holds, with the range reader.</li>
               <li><span className="mono">GET /api/v1/funnel</span> — the registration-to-callable funnel.</li>
             </ul>
+            <Pager current="api" />
           </section>
 
           <section>
@@ -256,6 +266,7 @@ export default function DocsPage() {
               <li>The one real mainnet rebalance Marque has run, with every transaction hash, is at
                 {' '}<a href="/pancakeswap/proof">/pancakeswap/proof</a>.</li>
             </ul>
+            <Pager current="contracts" />
           </section>
 
           <section>
@@ -277,6 +288,7 @@ export default function DocsPage() {
               calls to agent endpoints pass an SSRF guard: no private, loopback, link-local or
               cloud-metadata addresses, no redirects, a hard timeout and a size cap.
             </p>
+            <Pager current="security" />
           </section>
 
           <p className={styles.foot}>

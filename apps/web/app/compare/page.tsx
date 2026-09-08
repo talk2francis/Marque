@@ -43,7 +43,12 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
             <div className={styles.rowLabel} />
             {chosen.map((a) => (
               <div key={a.agentId} className={styles.colHead}>
-                <Link href={a.isReference ? '/register#reference-agents' : `/agents/56/${a.tokenId}`} className={styles.colName}>{a.name}</Link>
+                <Link
+                  href={a.isReference ? `/agents/${a.tokenId}` : (a.tokenId && /^\d+$/.test(a.tokenId) ? `/agents/56/${a.tokenId}` : '/register')}
+                  className={styles.colName}
+                >
+                  {a.name}
+                </Link>
                 {a.isReference && <ReferenceMark compact />}
               </div>
             ))}

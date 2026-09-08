@@ -1,22 +1,14 @@
+import { MarqueMark } from './_components/MarqueMark'
+
 /**
- * The route-transition loading state (P10.5H). The real mark, a slow breath —
- * no spinner, no bar. Sized to actually register, not a speck.
+ * The route-transition loading state. One mark — `currentColor`, so it is right
+ * in daylight and at night with no second image — centred in the viewport, a
+ * slow breath. No spinner, no bar.
  */
 export default function Loading() {
   return (
-    <div
-      aria-busy="true"
-      aria-label="Loading"
-      style={{
-        minHeight: '62vh',
-        display: 'grid',
-        placeItems: 'center',
-      }}
-    >
-      <span className="marque-loading">
-        <img className="marque-loading-ink" src="/brand/mark-ink.png" alt="" width="72" height="53" />
-        <img className="marque-loading-cream" src="/brand/mark-cream.png" alt="" width="72" height="53" />
-      </span>
+    <div className="marque-loading-screen" aria-busy="true" aria-label="Loading">
+      <MarqueMark size={92} className="marque-loading-mark" />
     </div>
   )
 }

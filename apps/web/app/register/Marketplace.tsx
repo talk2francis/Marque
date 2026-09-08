@@ -132,6 +132,14 @@ export function Marketplace({ category: fixedCategory }: { category?: string }) 
   }, [])
 
   const compareHref = `/compare?agents=${selected.map((s) => encodeURIComponent(s.agentId)).join(',')}`
+
+  // Reference agents live at /agents/<slug>; third parties at /agents/56/<tokenId>
+  // when we actually have a numeric token id, else they have no profile page.
+  const profileHref = (a: MarketRow): string | null => {
+    if (a.isReference) return `/agents/${a.tokenId}`
+    if (a.tokenId && /^\d+$/.test(a.tokenId)) return `/agents/56/${a.tokenId}`
+    return null
+  }
   const countedAgo = generatedAt
     ? (() => {
         const s = Math.round((Date.now() - Date.parse(generatedAt)) / 1000)
@@ -212,12 +220,12 @@ export function Marketplace({ category: fixedCategory }: { category?: string }) 
               <div className={styles.mktRow} data-agent={a.agentId} key={a.agentId}>
                 <div className={styles.mktMain}>
                   <div className={styles.mktNameLine}>
-                    <Link href={a.isReference ? `/register#reference-agents` : `/agents/56/${a.tokenId}`} className={styles.name}>
-                      {a.name}
-                    </Link>
+                    {profileHref(a)
+                      ? <Link href={profileHref(a)!} className={styles.name}>{a.name}</Link>
+                      : <span className={styles.name}>{a.name}</span>}
                     {a.isReference && <ReferenceMark compact />}
-                    {a.identityCount > 1 && (
-                      <Link href={`/agents/56/${a.tokenId}`} className={styles.dupes}>
+                    {a.identityCount > 1 && profileHref(a) && (
+                      <Link href={profileHref(a)!} className={styles.dupes}>
                         {a.identityCount.toLocaleString()} registered identities · view all
                       </Link>
                     )}
@@ -257,9 +265,9 @@ export function Marketplace({ category: fixedCategory }: { category?: string }) 
                   >
                     {picked ? 'Selected' : 'Compare'}
                   </button>
-                  {a.previewable
-                    ? <LinkButton size="sm" variant="secondary" href={`/agents/56/${a.tokenId}#preview`}>Preview</LinkButton>
-                    : <button type="button" className={styles.actionMuted} disabled title="Read-only preview not supported">Preview</button>}
+                  {a.previewable && profileHref(a)
+                    ? <LinkButton size="sm" variant="secondary" href={`${profileHref(a)}#preview`}>Preview</LinkButton>
+                    : <button type="button" className={styles.actionMuted} disabled title="Read-only preview not available">Preview</button>}
                   {hireable
                     ? <LinkButton size="sm" variant="primary" href={`/app/charter?agent=${encodeURIComponent(a.agentId)}${a.category ? `&category=${a.category}` : ''}`}>Hire</LinkButton>
                     : <button type="button" className={styles.actionMuted} disabled title={a.hireBlockedReason ?? undefined}>Hire — {a.hireBlockedReason}</button>}
@@ -270,9 +278,10 @@ export function Marketplace({ category: fixedCategory }: { category?: string }) 
         </div>
       )}
 
-      {/* Sticky compare tray (P10.5B item 6). */}
-      {selected.length >= 2 && (
+      {/* Floating compare tray — appears the moment a second agent is picked. */}
+      {selected.length >= 1 && (
         <div className={styles.tray} role="region" aria-label="Compare tray">
+          <span className={styles.trayLabel}>{selected.length === 1 ? 'Pick one more to compare' : 'Compare'}</span>
           <span className={styles.trayList}>
             {selected.map((s) => (
               <span key={s.agentId} className={styles.trayChip}>
@@ -281,7 +290,9 @@ export function Marketplace({ category: fixedCategory }: { category?: string }) 
               </span>
             ))}
           </span>
-          <LinkButton variant="primary" size="sm" href={compareHref}>Compare {selected.length}</LinkButton>
+          <LinkButton variant="primary" size="sm" href={compareHref} {...(selected.length < 2 ? { 'aria-disabled': true, tabIndex: -1, onClick: (e: React.MouseEvent) => e.preventDefault() } : {})}>
+            Compare{selected.length >= 2 ? ` ${selected.length}` : ''}
+          </LinkButton>
         </div>
       )}
     </>

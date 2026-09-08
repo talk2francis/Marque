@@ -19,7 +19,7 @@ type Active =
 
 const NAV: Array<{ label: string; href: string; key: Active }> = [
   { label: 'Marketplace', href: '/register', key: 'register' },
-  { label: 'Positions', href: '/', key: 'positions' },
+  { label: 'Positions', href: '/positions', key: 'positions' },
   { label: 'Pancake Desk', href: '/pancakeswap', key: 'pancake' },
   { label: 'Benchmarks', href: '/ledger', key: 'benchmarks' },
   { label: 'Builders', href: '/builders/test', key: 'builders' },

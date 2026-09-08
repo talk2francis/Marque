@@ -10,24 +10,23 @@
 
 /* The loading mark: the real symbol, a slow quiet breath. Same final frame
    under reduced motion. Theme-aware (ink in daylight, cream at night). */
-.marque-loading {
-  display: inline-flex;
+.marque-loading-screen {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  background: var(--ground);
+  background-image: var(--backdrop);
+}
+.marque-loading-mark {
+  color: var(--fg-soft);
   animation: marque-breath 1700ms var(--ease) infinite;
 }
-.marque-loading img { height: 60px; width: auto; display: block; }
-.marque-loading-cream { display: none; }
-:root[data-theme='dark'] .marque-loading-ink { display: none; }
-:root[data-theme='dark'] .marque-loading-cream { display: block; }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) .marque-loading-ink { display: none; }
-  :root:not([data-theme='light']) .marque-loading-cream { display: block; }
-}
 @keyframes marque-breath {
-  0%, 100% { opacity: 0.32; transform: scale(0.94); }
-  50% { opacity: 0.95; transform: scale(1); }
+  0%, 100% { opacity: 0.3; transform: scale(0.92); }
+  50% { opacity: 0.92; transform: scale(1); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .marque-loading { animation: none; opacity: 0.85; }
+  .marque-loading-mark { animation: none; opacity: 0.85; }
 }
 
 /* ===== Scroll-reveal — the page has motion now (P10.5 rev) ===== */
