@@ -24,3 +24,4 @@ agents/*/vendor/
 # Local Claude Code tooling (the bag CLI skill pack), not product source.
 .claude/
 docs/.pancake-proof-state.json
+scripts/_drift_watch.sh
