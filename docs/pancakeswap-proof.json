@@ -1,4 +1,33 @@
 {
-  "status": "pending",
-  "note": "P9b — the one real mainnet PancakeSwap V3 rebalance under a charter. Runs only after Francis's written \"approved, mainnet\" and a funded, deliberately-tight range position. Until then this page states honestly that it has not happened."
+  "status": "drifting",
+  "note": "The position is open on mainnet and in range. It is deliberately narrow (~0.3%) so it drifts out within hours; this page updates itself when it does and again after the agent re-centres it.",
+  "pool": "0x172fcD41E0913e95784454622d1c3724f546f849",
+  "chainId": 56,
+  "agentId": "bound",
+  "charterScope": {
+    "allowlist": [
+      "0x172fcD41E0913e95784454622d1c3724f546f849",
+      "0x46A15B0b27311cedF172AB29E4f4766fbE7F4364",
+      "0x1b81D678ffb9C0263b24A97847620C99d213eB14",
+      "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
+      "0x55d398326f99059fF775485246999027B3197955"
+    ],
+    "capUsd": 60,
+    "expiresAt": "2026-09-09T23:54:47.261Z"
+  },
+  "before": {
+    "tickLower": -66092,
+    "tickUpper": -66062,
+    "currentTick": -66060,
+    "outOfRangeSince": "2026-09-08T00:06:36.188Z",
+    "hoursOutOfRange": 0.1,
+    "feesAccruedUsd": 0
+  },
+  "transactions": [
+    {
+      "label": "Mint the deliberately-narrow range",
+      "hash": "0xb32c204f143b233f5f38958fecda083141efd85f0352ca08bdc116703c8688ed"
+    }
+  ],
+  "capturedAt": "2026-09-07T23:54:47.262Z"
 }

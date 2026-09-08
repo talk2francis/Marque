@@ -1,62 +1,79 @@
-/* ===== Navigation (P10.5D item 1) ===== */
+/* ===== Navigation (P10.5D item 1 · refined P10.5F/H) ===== */
 .nav {
   position: sticky;
   top: 0;
   z-index: 40;
-  /* Translucent, not glass: content visibly passes behind, no blur haze. */
-  background: color-mix(in srgb, var(--ground) 82%, transparent);
-  -webkit-backdrop-filter: saturate(1.4) blur(8px);
-  backdrop-filter: saturate(1.4) blur(8px);
+  /* A deliberate frost: opaque enough to read as a considered surface, not a
+     muddy 80%. What passes behind is softened, not smeared. */
+  background: color-mix(in srgb, var(--ground) 90%, transparent);
+  -webkit-backdrop-filter: saturate(1.6) blur(14px);
+  backdrop-filter: saturate(1.6) blur(14px);
   border-bottom: 1px solid var(--line);
 }
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .nav { background: var(--ground); }
+}
+/* Three equal zones so the links sit truly centred in the bar, not wherever
+   the brand's width happens to push them. */
 .navInner {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  gap: var(--s5);
+  gap: var(--s4);
   max-width: var(--measure-data);
   margin: 0 auto;
   padding: 0 var(--s5);
-  min-height: 62px;
+  min-height: 64px;
 }
 .brand {
+  justify-self: start;
   display: inline-flex;
   align-items: center;
   gap: var(--s2);
   font-family: var(--font-statement);
-  font-size: 21px;
+  font-size: 20px;
   letter-spacing: -0.01em;
   color: var(--fg);
   text-decoration: none;
-  flex-shrink: 0;
 }
-.brandMark {
-  width: 12px;
-  height: 12px;
-  border: 2px solid var(--fg);
-  display: inline-block;
-}
+.brandMark { display: block; flex-shrink: 0; color: var(--fg); }
 .navLinks {
+  justify-self: center;
   display: flex;
-  gap: var(--s2);
-  margin-right: auto;
+  gap: var(--s1);
   overflow-x: auto;
   scrollbar-width: none;
+  max-width: 100%;
 }
 .navLinks::-webkit-scrollbar { display: none; }
 .navLinks a {
+  position: relative;
   color: var(--fg-soft);
   text-decoration: none;
   font-size: var(--size-control);
   display: inline-flex;
   align-items: center;
   min-height: 40px;
-  padding-inline: var(--s2);
+  padding-inline: var(--s3);
   white-space: nowrap;
+  transition: color 120ms ease;
 }
-.navLinks a:hover,
+.navLinks a:hover { color: var(--fg); }
+/* The active page is marked with a brass tick under the label, not a colour
+   swap that would fight the hover state. */
 .navLinks a[aria-current='page'] { color: var(--fg); }
+.navLinks a[aria-current='page']::after {
+  content: '';
+  position: absolute;
+  left: var(--s3);
+  right: var(--s3);
+  bottom: 10px;
+  height: 2px;
+  background: var(--brass);
+  border-radius: 1px;
+}
 
-.navRight { display: inline-flex; align-items: center; gap: var(--s2); flex-shrink: 0; }
+.navRight { justify-self: end; display: inline-flex; align-items: center; gap: var(--s2); }
 .navAddr { font-family: var(--font-mono); font-size: var(--size-caption); color: var(--fg-soft); }
 .navConnect {
   font: inherit;
@@ -71,9 +88,22 @@
 }
 .navConnect:hover { border-color: var(--fg-soft); }
 
-@media (max-width: 720px) {
-  .navInner { gap: var(--s3); padding-inline: var(--s4); }
-  .navRight .navConnect { display: none; }
+@media (max-width: 860px) {
+  /* Below the fold for a centred grid: brand left, wallet right, links scroll
+     on their own row underneath. */
+  .navInner {
+    grid-template-columns: auto 1fr;
+    grid-template-areas: 'brand right' 'links links';
+    row-gap: var(--s1);
+    padding-block: var(--s2);
+  }
+  .brand { grid-area: brand; }
+  .navRight { grid-area: right; }
+  .navLinks { grid-area: links; justify-self: stretch; }
+}
+@media (max-width: 520px) {
+  .navInner { padding-inline: var(--s4); }
+  .navConnect { display: none; }
 }
 
 /* ===== Footer (P10.5D item 4) ===== */

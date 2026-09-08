@@ -1240,3 +1240,59 @@ reference merge) took most of it.
   last-success timestamp the probe table does not aggregate yet.
 - **Restore** — a `probe` rollup of last `ok=true` per agent feeds a "ran in the
   last N" filter; a protocol facet is a `distinct supported_protocols` list.
+
+---
+
+## P9b / P10.5F — the mainnet PancakeSwap proof run
+
+### D9b-01 · BNB/USDT, not CAKE/USDT
+
+- **Planned** — a narrow CAKE/USDT or BNB/USDT V3 range.
+- **Shipped** — BNB/USDT 0.01% (pool `0x172fcD41…`), because the deployer wallet
+  already holds BNB and USDT; CAKE/USDT would have needed an extra swap (tx +
+  slippage) before the position could be opened. A ~0.3% range on BNB/USDT still
+  drifts out within the hour.
+- **Cost** — BNB/USDT is less volatile than CAKE/USDT, so the range has to be
+  tighter to drift out on the same timescale.
+
+### D9b-02 · Open mint sends `amount*Min = 0`
+
+- A mint performs no swap, so there is no execution slippage to bound on the
+  open; the pool pulls whatever ratio the range needs at the current tick and
+  the remainder stays in the wallet. Slippage bounds ARE enforced on the swap
+  inside `rebalance` (`scripts/pancake-proof.mjs`), which is where they apply.
+- The first two `--go` attempts reverted `Price slippage check` with 1.5% mins
+  because a tick-centred range does not consume the offered amounts at exactly
+  the offered ratio.
+
+### D9b-03 · publicnode RPC dropped for the proof script
+
+- `bsc-rpc.publicnode.com` returns `-32602 "Archive requests require a personal
+  token"` for `eth_getTransactionReceipt` seconds after a send. The proof script
+  uses a `fallback()` over four dataseed nodes that serve receipts.
+
+## P10.5C tail — ERC-8004 re-registration
+
+### D10.5C-05 · Reference agents re-registered via direct SDK call, not `bag`
+
+- **Planned** — `scripts/register-agents.sh` → `bag erc8004 register`.
+- **Shipped** — `scripts/register-agents-direct.mjs`, which decrypts each agent's
+  Keystore V3 and calls `ERC8004Agent.registerAgent()` from `@bnbagent/sdk`
+  directly against the BSC-testnet IdentityRegistry
+  `0x8004a818bFB912233c491871B3d84C89A494bd9E`.
+- **Why** — the `bag` CLI was lost in the VPS reinstall and is no longer on npm
+  under `@bnbchain/bag`; the 8004scan API (which `bag` brokers through) has been
+  timing out since 2026-09-05. The SDK's `register` call needs neither.
+- **Token ids (chain 97)** — bound 2234, lattice 2236, sluicegate 2237,
+  keel 2238, redcell 2239. A duplicate bound (2235) was minted when the loop
+  re-ran without `--only`; 2234 is canonical, 2235 is ignored (a testnet burn tx
+  to fix it is not worth it).
+- **Restore** — when 8004scan is back, `getLocalAgentInfo` de-dupes and the
+  registrations become visible in their explorer; nothing else changes.
+
+### D10.5C-06 · 6 compromise-era receipts reanchored
+
+- Receipts issued 2026-09-08 00:36–00:39 while the anchor worker was being
+  killed mid-run never got their MarqueRegistry anchor. `scripts/reanchor-receipts.mjs`
+  anchored all 6 on testnet and backfilled `anchor_tx_hash` / `anchor_block` /
+  `anchored_at`. The runs and receipts were always real; only the timestamp was missing.

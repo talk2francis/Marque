@@ -1,14 +1,12 @@
 {
   "base": "http://127.0.0.1:3200",
-  "ranAt": "2026-09-07T22:57:50.710Z",
+  "ranAt": "2026-09-07T23:03:22.524Z",
   "results": [
     {
       "route": "/",
       "viewport": "1440",
       "status": 200,
-      "issues": [
-        "16 tap target(s) under 24px"
-      ],
+      "issues": [],
       "consoleErrors": [],
       "pageErrors": [],
       "failedRequests": [],
@@ -21,33 +19,14 @@
       "overflow": null,
       "missingAlt": [],
       "lowContrast": [],
-      "tinyTapTargets": [
-        "a keel — settled run 111x21",
-        "a sluicegate — settled run 149x21",
-        "a keel — settled run 111x21",
-        "a keel — settled run 111x21",
-        "a sluicegate — settled run 149x21",
-        "a lattice — settled run 123x21",
-        "a bound — settled run 124x21",
-        "a keel — settled run 111x21",
-        "a keel — settled run 111x21",
-        "a sluicegate — settled run 149x21",
-        "a keel — settled run 111x21",
-        "a keel — settled run 111x21",
-        "a sluicegate — settled run 149x21",
-        "a lattice — settled run 123x21",
-        "a bound — settled run 124x21",
-        "a keel — settled run 111x21"
-      ],
+      "tinyTapTargets": [],
       "allCapsLabels": []
     },
     {
       "route": "/",
       "viewport": "1024",
       "status": 200,
-      "issues": [
-        "16 tap target(s) under 24px"
-      ],
+      "issues": [],
       "consoleErrors": [],
       "pageErrors": [],
       "failedRequests": [],
@@ -60,33 +39,14 @@
       "overflow": null,
       "missingAlt": [],
       "lowContrast": [],
-      "tinyTapTargets": [
-        "a keel — settled run 111x21",
-        "a sluicegate — settled run 149x21",
-        "a keel — settled run 111x21",
-        "a keel — settled run 111x21",
-        "a sluicegate — settled run 149x21",
-        "a lattice — settled run 123x21",
-        "a bound — settled run 124x21",
-        "a keel — settled run 111x21",
-        "a keel — settled run 111x21",
-        "a sluicegate — settled run 149x21",
-        "a keel — settled run 111x21",
-        "a keel — settled run 111x21",
-        "a sluicegate — settled run 149x21",
-        "a lattice — settled run 123x21",
-        "a bound — settled run 124x21",
-        "a keel — settled run 111x21"
-      ],
+      "tinyTapTargets": [],
       "allCapsLabels": []
     },
     {
       "route": "/",
       "viewport": "768",
       "status": 200,
-      "issues": [
-        "16 tap target(s) under 24px"
-      ],
+      "issues": [],
       "consoleErrors": [],
       "pageErrors": [],
       "failedRequests": [],
@@ -99,33 +59,14 @@
       "overflow": null,
       "missingAlt": [],
       "lowContrast": [],
-      "tinyTapTargets": [
-        "a keel — settled run 111x21",
-        "a sluicegate — settled run 149x21",
-        "a keel — settled run 111x21",
-        "a keel — settled run 111x21",
-        "a sluicegate — settled run 149x21",
-        "a lattice — settled run 123x21",
-        "a bound — settled run 124x21",
-        "a keel — settled run 111x21",
-        "a keel — settled run 111x21",
-        "a sluicegate — settled run 149x21",
-        "a keel — settled run 111x21",
-        "a keel — settled run 111x21",
-        "a sluicegate — settled run 149x21",
-        "a lattice — settled run 123x21",
-        "a bound — settled run 124x21",
-        "a keel — settled run 111x21"
-      ],
+      "tinyTapTargets": [],
       "allCapsLabels": []
     },
     {
       "route": "/",
       "viewport": "390",
       "status": 200,
-      "issues": [
-        "16 tap target(s) under 24px"
-      ],
+      "issues": [],
       "consoleErrors": [],
       "pageErrors": [],
       "failedRequests": [],
@@ -138,24 +79,87 @@
       "overflow": null,
       "missingAlt": [],
       "lowContrast": [],
-      "tinyTapTargets": [
-        "a keel — settled run 111x21",
-        "a sluicegate — settled run 149x21",
-        "a keel — settled run 111x21",
-        "a keel — settled run 111x21",
-        "a sluicegate — settled run 149x21",
-        "a lattice — settled run 123x21",
-        "a bound — settled run 124x21",
-        "a keel — settled run 111x21",
-        "a keel — settled run 111x21",
-        "a sluicegate — settled run 149x21",
-        "a keel — settled run 111x21",
-        "a keel — settled run 111x21",
-        "a sluicegate — settled run 149x21",
-        "a lattice — settled run 123x21",
-        "a bound — settled run 124x21",
-        "a keel — settled run 111x21"
-      ],
+      "tinyTapTargets": [],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/pancakeswap/proof",
+      "viewport": "1440",
+      "status": 200,
+      "issues": [],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(132, 102, 33) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/pancakeswap/proof",
+      "viewport": "1024",
+      "status": 200,
+      "issues": [],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(132, 102, 33) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/pancakeswap/proof",
+      "viewport": "768",
+      "status": 200,
+      "issues": [],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(132, 102, 33) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/pancakeswap/proof",
+      "viewport": "390",
+      "status": 200,
+      "issues": [],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(132, 102, 33) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [],
       "allCapsLabels": []
     }
   ]

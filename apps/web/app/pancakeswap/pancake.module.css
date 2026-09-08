@@ -60,3 +60,19 @@
 
 .txList { list-style: decimal; margin: 0; padding-left: var(--s5); display: flex; flex-direction: column; gap: var(--s2); font-size: var(--size-data); }
 .txList a { color: var(--chain); word-break: break-all; }
+
+/* proof page — revert reason block (P9b / P10.5F) */
+.revert {
+  margin: 0;
+  padding: var(--s3) var(--s4);
+  border: 1px solid color-mix(in srgb, var(--breach) 40%, transparent);
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--breach) 6%, transparent);
+  color: var(--fg);
+  font-family: var(--font-mono);
+  font-size: var(--size-data);
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  max-width: 68ch;
+}
