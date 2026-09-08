@@ -115,7 +115,7 @@ export async function readLedger(): Promise<LedgerBenchmark[]> {
     if (agentReps < 2) missing.push(`${2 - agentReps} more agent repetition${2 - agentReps === 1 ? '' : 's'}`)
     if (manualReps < 2) missing.push(`${2 - manualReps} manual repetition${2 - manualReps === 1 ? '' : 's'}, run by hand with a stopwatch`)
     if (missing.length === 0 && scored < mine.length) {
-      missing.push('the blind grade — both arms are recorded; the grader (scripts/ledger-grade.mjs, DeepSeek, rubric hashed first) writes the score when its API is reachable')
+      missing.push('the blind grade for the remaining repetitions (scripts/ledger-grade.mjs)')
     }
     return {
       id: b.id,

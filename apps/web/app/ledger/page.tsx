@@ -118,24 +118,26 @@ function Benchmark({ b }: { b: LedgerBenchmark }) {
               agentVal={a.cost === null ? <span className={styles.muted}>—</span> : <b>${a.cost.toFixed(2)}</b>}
             />
             <Cell
-              label="QUALITY"
+              label="QUALITY (blind)"
               human={
                 h.quality === null
-                  ? (h.reps > 0 ? <span className={styles.muted}>blind grade pending</span> : awaiting)
+                  ? (h.reps > 0 ? <span className={styles.muted}>grading…</span> : awaiting)
                   : <b>{h.quality.total.toFixed(0)} / {h.quality.outOf}</b>
               }
               agentVal={
                 a.quality === null
-                  ? <span className={styles.muted}>{a.reps > 0 ? 'blind grade pending' : 'not run'}</span>
+                  ? <span className={styles.muted}>{a.reps > 0 ? 'grading…' : 'not run'}</span>
                   : <b>{a.quality.total.toFixed(0)} / {a.quality.outOf}</b>
               }
             />
             <p className={styles.expFoot}>
-              {a.reps} agent repetition{a.reps === 1 ? '' : 's'} recorded, {h.reps} manual — both by
-              hand with a stopwatch. Time and cost are measured facts. The quality score is the one
-              piece still open: it is graded blind, by a language model, against the rubric that was
-              hashed before either arm ran (<code className="mono">scripts/ledger-grade.mjs</code>),
-              and it lands the moment that grader&rsquo;s API is reachable again.
+              {a.reps} agent repetition{a.reps === 1 ? '' : 's'}, {h.reps} manual — the manual arm
+              by hand with a stopwatch. Time and cost are measured. Quality is graded blind by a
+              language model (<code className="mono">scripts/ledger-grade.mjs</code>, DeepSeek, each
+              anonymised answer scored three times against the rubric hashed before either arm ran,
+              per-criterion median taken). The grader under-scores terse answers, so the two manual
+              repetitions can score far apart — a full write-up against a one-line summary of the
+              same finding.
             </p>
           </div>
         )

@@ -72,7 +72,7 @@ function anonymise(text) {
  * named on the methodology page and on every benchmark — a reader should know
  * exactly what produced a judgement score.
  */
-const GRADER_MODEL = process.env.LEDGER_GRADER_MODEL ?? 'deepseek-v4-pro'
+const GRADER_MODEL = process.env.LEDGER_GRADER_MODEL ?? 'deepseek-chat'
 
 /**
  * Grade ONE answer against the rubric.
@@ -233,21 +233,34 @@ for (const bench of benchmarks) {
     continue
   }
 
+  const PASSES = 3
   const stamp = {
     grader: GRADER_MODEL,
     graded_at: new Date().toISOString(),
     rubric_hash: bench.rubric_hash,
     distinct_answers: byHash.size,
     pinned_block: pinned,
+    passes: PASSES,
     excluded_wrong_block: excluded.map((r) => ({ arm: r.arm, rep: r.rep, block: r.block_number })),
-    note: 'Each answer was graded on its own against the rubric, with arm self-references neutralised. The grader was never told what produced an answer, how many arms existed, or how the other answers scored. Identical answers were graded once and the score reused. Runs that read the chain at a block other than the one the task pins were excluded as not comparable.',
+    note: `Each answer was graded ${PASSES} times, on its own, against the rubric; the per-criterion score is the median of the passes (LLM judgement is noisy on terse-vs-verbose answers, and the median damps a bad draw). Arm self-references were neutralised; the grader was never told what produced an answer, how many arms existed, or how the others scored. Identical answers were graded once. Runs that read a block other than the one the task pins were excluded.`,
+  }
+  const median = (xs) => {
+    const s = [...xs].sort((a, b) => a - b)
+    return s.length % 2 ? s[(s.length - 1) / 2] : (s[s.length / 2 - 1] + s[s.length / 2]) / 2
   }
 
   for (const group of byHash.values()) {
-    const scores = await gradeOne({ task: bench.task, rubric, answer: group.text })
-    // Guard against a degenerate reply rather than publishing it.
-    const missing = rubric.criteria.filter((c) => scores[c.id]?.points === undefined)
-    if (missing.length) { console.log(`  ! grader omitted ${missing.map((c) => c.id).join(', ')} — not written`); continue }
+    // Grade PASSES times and take the per-criterion median.
+    const runsOut = []
+    for (let p = 0; p < PASSES; p++) runsOut.push(await gradeOne({ task: bench.task, rubric, answer: group.text }))
+    const scores = {}
+    let bad = false
+    for (const c of rubric.criteria) {
+      const pts = runsOut.map((o) => o[c.id]?.points).filter((n) => Number.isFinite(n))
+      if (pts.length === 0) { bad = true; break }
+      scores[c.id] = { points: Math.round(median(pts)) }
+    }
+    if (bad) { console.log('  ! grader failed to score a criterion across all passes — not written'); continue }
     const total = totalOf(rubric, scores)
     for (const run of group.runs) {
       console.log(`  ${run.arm.padEnd(6)} rep ${run.rep}  ${String(total).padStart(3)} / ${rubric.total}`)
