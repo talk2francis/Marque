@@ -49,15 +49,16 @@
 /* --- Provenance: a controlled vocabulary, and the one justified caps use --- */
 
 .prov {
-  display: inline-block;
-  font-size: 12px;
-  letter-spacing: 0.09em;
+  display: inline-flex;
+  align-items: center;
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
   line-height: 1;
-  padding: 3px 5px;
-  border-radius: 2px;
-  border: 1px solid var(--line);
+  padding: 4px 8px;
+  border-radius: var(--r-pill);
+  border: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
   color: var(--fg-soft);
-  background: transparent;
+  background: color-mix(in srgb, var(--ground-raised) 60%, transparent);
   vertical-align: middle;
   white-space: nowrap;
 }
@@ -84,45 +85,58 @@
 .chip {
   display: inline-flex;
   align-items: center;
-  gap: var(--s1);
+  gap: 6px;
   font-size: var(--size-caption);
   line-height: 1;
-  padding: 4px 7px;
-  border-radius: 2px;
-  border: 1px solid var(--line);
+  padding: 5px 10px 5px 9px;
+  border-radius: var(--r-pill);
+  border: 1px solid color-mix(in srgb, var(--line) 75%, transparent);
+  background: color-mix(in srgb, var(--ground-raised) 55%, transparent);
   color: var(--fg-soft);
   white-space: nowrap;
 }
-.chip--holds { color: var(--holds); border-color: color-mix(in srgb, var(--holds) 35%, transparent); }
-.chip--watch { color: var(--watch); border-color: color-mix(in srgb, var(--watch) 35%, transparent); }
-.chip--breach { color: var(--breach); border-color: color-mix(in srgb, var(--breach) 35%, transparent); }
-.chip--chain { color: var(--chain); border-color: color-mix(in srgb, var(--chain) 35%, transparent); }
+/* A leading dot carries the state colour; the text stays quiet and legible. */
+.chip::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: var(--r-pill);
+  background: currentColor;
+  opacity: 0.55;
+  flex: none;
+}
+.chip--holds { color: var(--holds); border-color: color-mix(in srgb, var(--holds) 28%, transparent); background: color-mix(in srgb, var(--holds) 8%, transparent); }
+.chip--watch { color: var(--watch); border-color: color-mix(in srgb, var(--watch) 28%, transparent); background: color-mix(in srgb, var(--watch) 8%, transparent); }
+.chip--breach { color: var(--breach); border-color: color-mix(in srgb, var(--breach) 28%, transparent); background: color-mix(in srgb, var(--breach) 8%, transparent); }
+.chip--chain { color: var(--chain); border-color: color-mix(in srgb, var(--chain) 28%, transparent); background: color-mix(in srgb, var(--chain) 8%, transparent); }
+.chip--holds::before, .chip--watch::before, .chip--breach::before, .chip--chain::before { opacity: 1; }
 
 /* --- Warrant ------------------------------------------------------------- */
 
 .warrant {
   display: inline-flex;
   align-items: baseline;
-  gap: var(--s1);
+  gap: 6px;
   font-size: var(--size-caption);
   line-height: 1;
-  padding: 4px 7px;
-  border-radius: 2px;
+  padding: 5px 10px;
+  border-radius: var(--r-pill);
   white-space: nowrap;
 }
 .warrant--ok {
   color: var(--brass);
-  border: 1px solid color-mix(in srgb, var(--brass) 45%, transparent);
-  background: color-mix(in srgb, var(--brass) 7%, transparent);
+  border: 1px solid color-mix(in srgb, var(--brass-mark) 40%, transparent);
+  background: color-mix(in srgb, var(--brass-mark) 10%, transparent);
 }
 .warrant__date { color: var(--fg-soft); font-family: var(--font-mono); }
 /* A warrant past its 72h retest window: dimmed, so it never looks current. */
-.warrant--stale { color: var(--watch); border-color: color-mix(in srgb, var(--watch) 45%, transparent); background: color-mix(in srgb, var(--watch) 7%, transparent); }
+.warrant--stale { color: var(--watch); border: 1px solid color-mix(in srgb, var(--watch) 40%, transparent); background: color-mix(in srgb, var(--watch) 9%, transparent); }
 .warrant--failed {
   color: var(--breach);
-  border: 1px solid color-mix(in srgb, var(--breach) 40%, transparent);
+  border: 1px solid color-mix(in srgb, var(--breach) 36%, transparent);
+  background: color-mix(in srgb, var(--breach) 8%, transparent);
 }
-.warrant--untested { color: var(--fg-soft); border: 1px dashed var(--line); }
+.warrant--untested { color: var(--fg-soft); border: 1px dashed var(--line-strong); }
 
 /* --- Button -------------------------------------------------------------- */
 
@@ -134,28 +148,37 @@
   gap: var(--s2);
   font-family: var(--font-ui);
   font-size: var(--size-control);
+  font-weight: 500;
   line-height: 1;
-  padding: 10px 16px;
-  min-height: 40px;
-  border-radius: 2px;
-  border: 1px solid var(--line);
-  background: transparent;
+  padding: 11px 18px;
+  min-height: 42px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--line-strong);
+  background: var(--ground-raised);
   color: var(--fg);
   cursor: pointer;
   text-decoration: none;
-  transition: border-color 140ms ease, background-color 140ms ease;
+  transition: transform var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease),
+              border-color var(--dur-fast) var(--ease), background-color var(--dur-fast) var(--ease);
 }
-.btn--sm { padding: 6px 10px; min-height: 32px; font-size: var(--size-data); }
+.btn:hover { transform: translateY(-1px); box-shadow: var(--elev-1); border-color: var(--fg-soft); }
+.btn:active { transform: translateY(0); box-shadow: none; }
+.btn--sm { padding: 7px 12px; min-height: 34px; font-size: var(--size-data); border-radius: var(--r-xs); }
 .btn--primary {
-  background: var(--fg);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--fg) 96%, #fff), var(--fg));
   color: var(--ground);
   border-color: var(--fg);
 }
-.btn--primary:hover { background: color-mix(in srgb, var(--fg) 88%, var(--ground)); }
-.btn--secondary:hover { border-color: var(--fg-soft); }
-.btn--quiet { border-color: transparent; color: var(--fg-soft); padding-inline: var(--s2); }
-.btn--quiet:hover { color: var(--fg); }
-.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn--primary:hover {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--fg) 92%, #fff), color-mix(in srgb, var(--fg) 92%, var(--ground)));
+  box-shadow: var(--elev-2);
+  border-color: var(--fg);
+}
+.btn--secondary { background: transparent; }
+.btn--secondary:hover { border-color: var(--fg-soft); background: var(--ground-raised); }
+.btn--quiet { border-color: transparent; background: transparent; color: var(--fg-soft); padding-inline: var(--s3); }
+.btn--quiet:hover { color: var(--fg); background: color-mix(in srgb, var(--fg) 6%, transparent); box-shadow: none; transform: none; }
+.btn:disabled { opacity: 0.42; cursor: not-allowed; transform: none; box-shadow: none; }
 
 /* --- Row: the unit of the Register. Never a card. ------------------------- */
 
@@ -179,7 +202,7 @@
 }
 /* A background tint on hover, never a lift: hover-lift on every row is a
    templated tell and it makes a dense table feel like jelly. */
-a.row:hover, button.row:hover { background: var(--ground-raised); }
+a.row:hover, button.row:hover { background: color-mix(in srgb, var(--ground-raised) 70%, transparent); }
 .row--muted { color: var(--fg-soft); }
 .row--muted .data { color: var(--fg-soft); }
 
@@ -201,7 +224,7 @@ a.row:hover, button.row:hover { background: var(--ground-raised); }
 .measure__rule {
   height: 3px;
   width: 100%;
-  border-radius: 2px;
+  border-radius: var(--r-pill);
   /* The travelled portion is tinted so the rule reads as a gauge at a glance.
      A bare 3px line with a 3px marker is invisible at a distance, which defeats
      the entire point of a device meant to communicate risk instantly. */
@@ -309,7 +332,7 @@ a.row:hover, button.row:hover { background: var(--ground-raised); }
 
 .evidence {
   border: 1px solid var(--line);
-  border-radius: 2px;
+  border-radius: var(--r-md);
   padding: var(--s4);
   background: var(--ground-raised);
   font-size: var(--size-data);
@@ -321,8 +344,8 @@ a.row:hover, button.row:hover { background: var(--ground-raised); }
 /* --- EmptyState: an invitation, never a shrug ----------------------------- */
 
 .empty {
-  border: 1px dashed var(--line);
-  border-radius: 2px;
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--r-md);
   padding: var(--s5);
   color: var(--fg-soft);
   max-width: 60ch;

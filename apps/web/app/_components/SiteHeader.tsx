@@ -1,21 +1,21 @@
 import { BRAND } from '@marque/ui/brand'
 import { CharterStrip } from './CharterStrip'
 import { NavWallet } from './NavWallet'
-import { MarqueMark } from './MarqueMark'
+import { ThemeToggle } from './ThemeToggle'
 import styles from './site.module.css'
 
 /**
- * The shell around every page (P10.5D, refined P10.5F/H).
+ * The shell around every page.
  *
- * Sticky, lightly frosted navigation with the links centred as a group; a
- * five-column footer that makes every built route reachable. The brand lockup
- * is the real Marque mark (P10.5H), not a placeholder square. The active-charter
- * strip stays pinned above the nav whenever a charter is live.
+ * The brand lockup is the real finalised artwork (the winged mark + geometric
+ * wordmark), extracted to a transparent asset and served per theme — never a
+ * re-typeset stand-in. Sticky, lightly frosted navigation; links centred as a
+ * group; a five-column footer that makes every built route reachable.
  */
 
 type Active =
   | 'register' | 'positions' | 'benchmarks' | 'builders' | 'docs'
-  | 'charters' | 'standard' | 'ledger' | 'pancake'
+  | 'charters' | 'standard' | 'ledger' | 'pancake' | 'status'
 
 const NAV: Array<{ label: string; href: string; key: Active }> = [
   { label: 'Marketplace', href: '/register', key: 'register' },
@@ -23,8 +23,19 @@ const NAV: Array<{ label: string; href: string; key: Active }> = [
   { label: 'Pancake Desk', href: '/pancakeswap', key: 'pancake' },
   { label: 'Benchmarks', href: '/ledger', key: 'benchmarks' },
   { label: 'Builders', href: '/builders/test', key: 'builders' },
-  { label: 'Docs', href: '/standard', key: 'docs' },
+  { label: 'Docs', href: '/docs', key: 'docs' },
 ]
+
+function BrandLockup() {
+  // Two colourways of the real lockup; the CSS shows one per theme (system
+  // preference or the explicit [data-theme] toggle).
+  return (
+    <a className={styles.brand} href="/" aria-label={`${BRAND.name} — home`}>
+      <img className={styles.lockInk} src="/brand/lockup-ink.png" alt={BRAND.name} width="132" height="28" />
+      <img className={styles.lockCream} src="/brand/lockup-cream.png" alt="" aria-hidden="true" width="132" height="28" />
+    </a>
+  )
+}
 
 export function SiteHeader({ active }: { active?: Active }) {
   return (
@@ -32,10 +43,7 @@ export function SiteHeader({ active }: { active?: Active }) {
       <CharterStrip />
       <header className={styles.nav}>
         <div className={styles.navInner}>
-          <a className={styles.brand} href="/" aria-label={`${BRAND.name} — home`}>
-            <MarqueMark size={26} className={styles.brandMark} />
-            <span>{BRAND.name}</span>
-          </a>
+          <BrandLockup />
           <nav className={styles.navLinks} aria-label="Main">
             {NAV.map((n) => (
               <a
@@ -51,7 +59,10 @@ export function SiteHeader({ active }: { active?: Active }) {
               </a>
             ))}
           </nav>
-          <NavWallet />
+          <div className={styles.navRight}>
+            <ThemeToggle />
+            <NavWallet />
+          </div>
         </div>
       </header>
     </>
@@ -82,10 +93,10 @@ const FOOTER: Array<{ head: string; links: Array<[string, string]> }> = [
   {
     head: 'Builders',
     links: [
+      ['Docs', '/docs'],
       ['Test your agent', '/builders/test'],
       ['List your agent', '/builders/claim'],
-      ['API', '/api/v1/agents'],
-      ['Design system', '/_ui'],
+      ['Read API', '/api/v1/agents'],
       ['GitHub', 'https://github.com/talk2francis/Marque'],
     ],
   },
@@ -107,10 +118,7 @@ export function SiteFooter() {
     <footer className={styles.footer}>
       <div className={styles.footerInner}>
         <div className={styles.footerBrand}>
-          <a href="/" className={styles.brand} aria-label={`${BRAND.name} — home`}>
-            <MarqueMark size={24} className={styles.brandMark} />
-            <span>{BRAND.name}</span>
-          </a>
+          <BrandLockup />
           <p>Agents you can hold to account.</p>
         </div>
         {FOOTER.map((col) => (

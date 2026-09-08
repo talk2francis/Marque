@@ -15,6 +15,18 @@ const nextConfig = {
       '.js': ['.ts', '.tsx', '.js'],
       '.mjs': ['.mts', '.mjs'],
     }
+    // wagmi's `baseAccount` connector (reached only through RainbowKit's barrel
+    // import — we never use it) pulls @coinbase/cdp-sdk, which optionally needs
+    // the uninstalled @x402/* payment SDKs. Marque only connects injected
+    // wallets, so those code paths never run: stub them to keep the build green.
+    config.resolve.alias = {
+      ...(config.resolve.alias ?? {}),
+      '@x402/evm': false,
+      '@x402/evm/exact/client': false,
+      '@x402/evm/upto/client': false,
+      '@x402/svm': false,
+      '@x402/svm/exact/client': false,
+    }
     return config
   },
   poweredByHeader: false,

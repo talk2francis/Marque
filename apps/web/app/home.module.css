@@ -1,282 +1,140 @@
-.nav {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--s4);
-  max-width: 1180px;
+/* ===== Homepage ===== */
+
+.main {
+  max-width: var(--measure-data);
   margin: 0 auto;
-  padding: var(--s5) var(--s5) 0;
+  padding: 0 var(--s5);
 }
-.brand {
-  font-family: var(--font-statement);
-  font-size: 20px;
-  letter-spacing: -0.01em;
-  color: var(--fg);
-  text-decoration: none;
-}
-.navLinks { display: flex; gap: var(--s3); font-size: var(--size-body); }
-/* Inline links still need a real tap target. 23px tall fails on a phone and
-   the audit catches it; padding gets them over the 24px floor without
-   changing how they look. */
-.navLinks a {
-  color: var(--fg-soft);
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  min-height: 32px;
-  padding-inline: var(--s2);
-}
-.navLinks a:hover { color: var(--fg); }
 
-.main { max-width: var(--measure-data); margin: 0 auto; padding: 0 var(--s5); }
-
+/* ---- Hero ---------------------------------------------------------- */
 .hero {
+  position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.06fr);
   gap: var(--s8);
-  align-items: start;
-  padding: var(--s8) 0 var(--s9);
+  align-items: center;
+  padding: clamp(var(--s7), 8vw, var(--s10)) 0 var(--s9);
+}
+/* A dot-grid wash behind the hero — the brand's motif, barely there. */
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: -8% -12% -20% -50vw;
+  z-index: -1;
+  background-image: radial-gradient(var(--dotgrid) 1px, transparent 1.4px);
+  background-size: 26px 26px;
+  -webkit-mask-image: radial-gradient(70% 60% at 30% 40%, #000 0%, transparent 75%);
+  mask-image: radial-gradient(70% 60% at 30% 40%, #000 0%, transparent 75%);
+  pointer-events: none;
 }
 .heroCopy { display: flex; flex-direction: column; gap: var(--s4); min-width: 0; }
+.heroDesk { min-width: 0; }
+
+.eyebrow {
+  font-size: var(--size-eyebrow);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--fg-soft);
+  font-weight: 600;
+  max-width: 52ch;
+  line-height: 1.6;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s2);
+}
+.eyebrow::before {
+  content: '';
+  width: 22px;
+  height: 2px;
+  background: var(--brass);
+  border-radius: var(--r-pill);
+  flex: none;
+}
+.hero :global(.statement--hero) { max-width: 17ch; }
+
 .lede {
   margin: 0;
   max-width: 46ch;
+  font-size: 17px;
+  line-height: 1.55;
+  color: var(--fg-soft);
+}
+.noWallet {
+  margin: var(--s1) 0 0;
+  max-width: 50ch;
   font-size: var(--size-body);
   line-height: var(--lh-body);
-  color: var(--fg-soft);
+  color: var(--fg);
+  padding: var(--s3) var(--s4);
+  border: 1px solid color-mix(in srgb, var(--holds) 28%, transparent);
+  background: color-mix(in srgb, var(--holds) 6%, transparent);
+  border-radius: var(--r-md);
 }
-.example {
-  margin: 0;
-  max-width: 46ch;
-  font-size: var(--size-caption);
-  line-height: 1.5;
-  color: var(--fg-soft);
-  border-left: 2px solid var(--line);
-  padding-left: var(--s3);
-}
-.heroDesk { min-width: 0; }
+.noWallet strong { color: var(--holds); font-weight: 600; }
 
+.heroCtas { display: flex; gap: var(--s3); flex-wrap: wrap; margin-top: var(--s2); }
+
+.demoChips { display: flex; gap: var(--s2); flex-wrap: wrap; margin-top: var(--s3); }
+.demoChip {
+  font-size: var(--size-caption);
+  color: var(--fg-soft);
+  border: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
+  border-radius: var(--r-pill);
+  padding: 7px 14px;
+  min-height: 30px;
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  background: color-mix(in srgb, var(--ground-raised) 50%, transparent);
+  transition: color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease), background-color var(--dur-fast) var(--ease);
+}
+.demoChip:hover { color: var(--fg); border-color: var(--fg-soft); }
+.demoChipOn {
+  background: var(--fg);
+  color: var(--ground);
+  border-color: var(--fg);
+}
+
+/* ---- Section rhythm --------------------------------------------------- */
 .section {
   display: flex;
   flex-direction: column;
   gap: var(--s4);
-  padding: var(--s8) 0;
+  padding: var(--s7) 0;
   border-top: 1px solid var(--line);
 }
-.sectionQuiet { padding: var(--s7) 0; border-top: 1px solid var(--line); }
+.sectionQuiet { padding: var(--s7) 0 var(--s8); border-top: 1px solid var(--line); }
+.section :global(.statement) { max-width: 30ch; }
 .sectionLede {
-  margin: 0;
-  max-width: 68ch;
-  font-size: var(--size-body);
-  line-height: var(--lh-body);
-  color: var(--fg-soft);
-}
-
-/* Four rows, each with its own measure — deliberately not four identical cards.
-   The hover is a contained, rounded lift with real padding, not a full-bleed
-   rectangle stamped with a hard divider (the "boxy" complaint, P10.5E rev). */
-.categories { display: flex; flex-direction: column; gap: 2px; margin-top: var(--s3); }
-.category {
-  display: flex;
-  flex-direction: column;
-  gap: var(--s3);
-  padding: var(--s4) var(--s4);
-  border: 1px solid transparent;
-  border-radius: 6px;
-  text-decoration: none;
-  color: inherit;
-  transition: background-color 130ms ease, border-color 130ms ease;
-}
-.category + .category { box-shadow: 0 -1px 0 var(--line); }
-.category:hover { background: var(--ground-raised); border-color: var(--line); box-shadow: none; }
-.category:hover + .category { box-shadow: none; }
-.categoryHead {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--s3);
-  flex-wrap: wrap;
-}
-.categoryName { font-size: var(--size-title); font-weight: 500; }
-.categoryProblem {
   margin: 0;
   max-width: 66ch;
   font-size: var(--size-body);
   line-height: var(--lh-body);
   color: var(--fg-soft);
 }
-.categoryMeasure { display: flex; align-items: center; gap: var(--s4); flex-wrap: wrap; }
-.categoryMeasure > :first-child { flex: 1 1 260px; min-width: 0; }
-.categoryReach { font-size: var(--size-caption); color: var(--fg-soft); white-space: nowrap; }
+.sectionLede a { color: var(--chain); text-decoration: none; display: inline-flex; align-items: center; min-height: 24px; }
 
-.funnel { list-style: none; margin: var(--s2) 0 0; padding: 0; }
-.funnelRow {
-  display: grid;
-  grid-template-columns: 22ch minmax(0, 1fr) 22ch;
-  gap: var(--s4);
-  align-items: center;
-  padding: var(--s3) 0;
-  border-bottom: 1px solid var(--line);
-}
-.funnelLabel { font-size: var(--size-body); color: var(--fg); }
-.funnelHow { font-size: var(--size-caption); color: var(--fg-soft); }
-.funnelNote {
-  margin: var(--s4) 0 0;
-  max-width: 68ch;
-  font-size: var(--size-body);
-  line-height: var(--lh-body);
-  color: var(--fg-soft);
-}
-.funnelNote > span { margin-right: var(--s2); }
-
-.builders {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--s5);
-  flex-wrap: wrap;
-}
-.buildersActions { display: flex; gap: var(--s3); flex-wrap: wrap; }
-.buildersTitle { font-size: var(--size-title); font-weight: 500; color: var(--fg); }
-.buildersCopy a, .sectionLede a { display: inline-flex; align-items: center; min-height: 24px; }
-.buildersCopy {
-  margin: var(--s2) 0 0;
-  max-width: 58ch;
-  font-size: var(--size-body);
-  line-height: var(--lh-body);
-  color: var(--fg-soft);
-}
-
-.footer {
-  display: flex;
-  justify-content: space-between;
-  gap: var(--s4);
-  flex-wrap: wrap;
-  max-width: 1180px;
-  margin: 0 auto;
-  padding: var(--s6) var(--s5) var(--s8);
-  font-size: var(--size-caption);
-  color: var(--fg-soft);
-}
-.footerLinks { display: flex; gap: var(--s2); }
-.footerLinks a {
-  color: var(--fg-soft);
-  display: inline-flex;
-  align-items: center;
-  min-height: 32px;
-  padding-inline: var(--s2);
-}
-
-@media (max-width: 900px) {
-  .hero { grid-template-columns: 1fr; gap: var(--s6); padding: var(--s6) 0 var(--s7); }
-  .funnelRow { grid-template-columns: 1fr; }
-  .funnelHow, .funnelBar { grid-column: 1; }
-}
-@media (max-width: 640px) {
-  .nav, .main, .footer { padding-inline: var(--s4); }
-  .section { padding: var(--s6) 0; }
-}
-
-/* Tap targets: links inside the lede and example paragraphs sit in line boxes
-   under the 24px minimum. Padding the link box lifts the hit area without
-   touching the type scale, which stays identical in daylight and cockpit. */
-.lede a, .example a { display: inline-block; padding-block: 4px; }
-
-
-/* ===== P10.5E homepage ===== */
-.eyebrow {
-  font-size: var(--size-caption);
-  letter-spacing: 0.02em;
-  color: var(--fg-soft);
-  text-transform: none;
-  border-left: 2px solid var(--brass);
-  padding-left: var(--s3);
-  max-width: 60ch;
-  line-height: 1.5;
-}
-.noWallet {
-  margin: 0;
-  max-width: 52ch;
-  font-size: var(--size-body);
-  line-height: var(--lh-body);
-  color: var(--fg);
-  border-left: 2px solid var(--holds);
-  padding-left: var(--s3);
-}
-.heroCtas { display: flex; gap: var(--s3); flex-wrap: wrap; }
-.demoChips { display: flex; gap: var(--s2); flex-wrap: wrap; margin-top: var(--s2); }
-.demoChip {
-  font-size: var(--size-caption);
-  color: var(--fg-soft);
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  padding: 6px 12px;
-  min-height: 28px;
-  display: inline-flex;
-  align-items: center;
-  text-decoration: none;
-}
-.demoChip:hover { color: var(--fg); }
-.demoChipOn { background: var(--fg); color: var(--ground); border-color: var(--fg); }
-
-.strip { display: flex; flex-direction: column; margin-top: var(--s2); }
-.stripRow {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto auto auto;
-  gap: var(--s4);
-  align-items: center;
-  padding: var(--s3) 0;
-  border-bottom: 1px solid var(--line);
-}
-.stripMain { display: flex; align-items: center; gap: var(--s2); flex-wrap: wrap; min-width: 0; }
-.stripName { font-size: var(--size-title); font-weight: 500; }
-.stripMeta { font-size: var(--size-data); color: var(--fg-soft); font-family: var(--font-mono); }
-.exploreLink { margin-top: var(--s4); color: var(--chain); text-decoration: none; display: inline-flex; min-height: 28px; align-items: center; }
-
-.funnelBar {
-  background: color-mix(in srgb, var(--chain) 16%, var(--ground-raised));
-  border-radius: 2px;
-  padding: 4px var(--s3);
-  display: inline-flex;
-  align-items: center;
-  min-width: max-content;
-}
-
-.passFail { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s5); margin-top: var(--s2); }
-.pfCol { display: flex; flex-direction: column; gap: var(--s3); border: 1px solid var(--line); border-radius: 3px; padding: var(--s4); }
-.pfHead { font-size: var(--size-body); display: flex; align-items: center; gap: var(--s2); flex-wrap: wrap; }
-.pfHead a { color: var(--chain); text-decoration: none; }
-.pfFields { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; font-size: var(--size-data); }
-.pfFields li { display: flex; justify-content: space-between; gap: var(--s3); border-bottom: 1px solid var(--line); padding-bottom: 3px; }
-.pfOk { color: var(--holds); }
-.pfFailNote { margin: 0; font-size: var(--size-body); line-height: var(--lh-body); color: var(--fg-soft); }
-
-@media (max-width: 900px) {
-  .stripRow { grid-template-columns: minmax(0,1fr) auto; grid-auto-flow: row; }
-  .passFail { grid-template-columns: 1fr; }
-}
-
-/* ===== P10.5E rev — three-act structure, brand bands, the cockpit chamber ===== */
-
-/* Act labels: small, wide-tracked, a brass numeral. The spine of the page. */
+/* ---- Act labels ----------------------------------------------------- */
 .actLabel, .actLabelDark {
   display: flex;
   align-items: center;
   gap: var(--s3);
-  margin: var(--s8) 0 calc(var(--s5) * -1 + var(--s6));
-  font-size: var(--size-caption);
-  letter-spacing: 0.14em;
+  margin: var(--s8) 0 calc(var(--s6) * -1);
+  padding-top: var(--s6);
+  border-top: 1px solid var(--line);
+  font-size: var(--size-eyebrow);
+  letter-spacing: var(--tracking-eyebrow);
   text-transform: uppercase;
   color: var(--fg-soft);
+  font-weight: 500;
 }
-.actLabel { padding-top: var(--s7); border-top: 1px solid var(--line); }
 .actLabel span, .actLabelDark span {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 24px; height: 24px;
-  border: 1px solid var(--brass);
-  border-radius: 999px;
+  width: 26px; height: 26px;
+  border: 1px solid color-mix(in srgb, var(--brass-mark) 55%, transparent);
+  border-radius: var(--r-pill);
   color: var(--brass);
   font-family: var(--font-mono);
   font-size: 11px;
@@ -284,46 +142,160 @@
   flex: none;
 }
 
-/* The cinematic band — one full-bleed breath between the hero and Act I. */
+/* ---- Cinematic brand band ----------------------------------------- */
 .band {
   position: relative;
   margin: var(--s8) calc(50% - 50vw) 0;
   width: 100vw;
-  height: clamp(180px, 26vw, 300px);
+  height: clamp(200px, 28vw, 340px);
   overflow: hidden;
   border-block: 1px solid var(--line);
 }
 .band picture, .band img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.bandLabel {
+.band::after {
+  content: '';
   position: absolute;
-  left: 50%; bottom: var(--s5);
-  transform: translateX(-50%);
-  font-size: var(--size-caption);
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: #EDEDE7;
-  text-shadow: 0 1px 12px rgba(0,0,0,0.55);
-  white-space: nowrap;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 55%, color-mix(in srgb, var(--ground) 55%, transparent));
 }
 
-/* Evidence two-up — two columns instead of two lonely paragraphs. */
+/* ---- "Agents that can work now" strip ---------------------------- */
+.strip {
+  display: flex;
+  flex-direction: column;
+  margin-top: var(--s3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  background: color-mix(in srgb, var(--ground-raised) 45%, transparent);
+}
+.stripRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto auto auto;
+  gap: var(--s4);
+  align-items: center;
+  padding: var(--s4) var(--s5);
+  border-bottom: 1px solid var(--line);
+  transition: background-color var(--dur-fast) var(--ease);
+}
+.stripRow:last-child { border-bottom: 0; }
+.stripRow:hover { background: color-mix(in srgb, var(--fg) 3%, transparent); }
+.stripMain { display: flex; align-items: center; gap: var(--s2); flex-wrap: wrap; min-width: 0; }
+.stripName { font-size: var(--size-title); font-weight: 600; }
+.stripMeta { font-size: var(--size-data); color: var(--fg-soft); font-family: var(--font-mono); }
+.exploreLink {
+  margin-top: var(--s4);
+  color: var(--chain);
+  text-decoration: none;
+  font-weight: 500;
+  display: inline-flex;
+  min-height: 28px;
+  align-items: center;
+}
+
+/* ---- The four categories — a two-column table, so the row uses its width. */
+.categories {
+  display: flex;
+  flex-direction: column;
+  margin-top: var(--s4);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  background: color-mix(in srgb, var(--ground-raised) 40%, transparent);
+}
+.category {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 42%);
+  gap: var(--s6);
+  align-items: center;
+  padding: var(--s5) var(--s6);
+  border-bottom: 1px solid var(--line);
+  text-decoration: none;
+  color: inherit;
+  transition: background-color var(--dur) var(--ease);
+}
+.category:last-child { border-bottom: 0; }
+.category:hover { background: color-mix(in srgb, var(--fg) 4%, transparent); }
+.categoryHead { display: flex; align-items: center; gap: var(--s3); flex-wrap: wrap; margin-bottom: var(--s2); }
+.categoryName { font-size: var(--size-title); font-weight: 600; }
+.categoryProblem {
+  margin: 0;
+  font-size: var(--size-body);
+  line-height: var(--lh-body);
+  color: var(--fg-soft);
+}
+.categoryMeasure { display: flex; flex-direction: column; gap: var(--s2); min-width: 0; }
+.categoryReach { font-size: var(--size-caption); color: var(--fg-faint); white-space: nowrap; }
+
+/* ---- The funnel ------------------------------------------------- */
+.funnel { list-style: none; margin: var(--s3) 0 0; padding: 0; display: flex; flex-direction: column; gap: var(--s1); }
+.funnelRow {
+  display: grid;
+  grid-template-columns: 22ch minmax(0, 1fr) 24ch;
+  gap: var(--s4);
+  align-items: center;
+  padding: var(--s3) 0;
+  border-bottom: 1px solid var(--line);
+}
+.funnelRow:last-child { border-bottom: 0; }
+.funnelLabel { font-size: var(--size-body); color: var(--fg); }
+.funnelHow { font-size: var(--size-caption); color: var(--fg-faint); }
+.funnelBar {
+  background: linear-gradient(90deg,
+    color-mix(in srgb, var(--brass-mark) 22%, var(--ground-raised)),
+    color-mix(in srgb, var(--chain) 16%, var(--ground-raised)));
+  border-radius: var(--r-pill);
+  padding: 5px var(--s3);
+  display: inline-flex;
+  align-items: center;
+  min-width: max-content;
+  transition: width var(--dur-slow) var(--ease-settle);
+}
+.funnelNote {
+  margin: var(--s5) 0 0;
+  max-width: 66ch;
+  font-size: var(--size-body);
+  line-height: var(--lh-body);
+  color: var(--fg-soft);
+}
+.funnelNote > span { margin-right: var(--s2); }
+
+/* ---- Evidence two-up ------------------------------------------- */
 .evidenceTwoUp {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--s6);
   margin-top: var(--s3);
 }
-.evHead { margin: 0 0 var(--s2); font-size: var(--size-title); font-weight: 500; }
-.evidenceTwoUp a { display: inline-flex; align-items: center; min-height: 24px; }
+.evHead { margin: 0 0 var(--s2); font-size: var(--size-title); font-weight: 600; }
+.evidenceTwoUp a { color: var(--chain); text-decoration: none; display: inline-flex; align-items: center; min-height: 24px; }
 
-/* The Chamber — the single dark cockpit band on the page. */
+/* ---- The Standard: a pass and a fail ------------------------- */
+.passFail { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s5); margin-top: var(--s3); }
+.pfCol {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  padding: var(--s5);
+  background: color-mix(in srgb, var(--ground-raised) 40%, transparent);
+}
+.pfHead { font-size: var(--size-body); display: flex; align-items: center; gap: var(--s2); flex-wrap: wrap; }
+.pfHead a { color: var(--chain); text-decoration: none; }
+.pfFields { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 5px; font-size: var(--size-data); }
+.pfFields li { display: flex; justify-content: space-between; gap: var(--s3); border-bottom: 1px solid var(--line); padding-bottom: 4px; }
+.pfOk { color: var(--holds); }
+.pfFailNote { margin: 0; font-size: var(--size-body); line-height: var(--lh-body); color: var(--fg-soft); }
+
+/* ---- The Chamber (cockpit band) ------------------------------ */
 .chamber {
   position: relative;
-  margin: var(--s9) calc(50% - 50vw) 0;
+  margin: var(--s10) calc(50% - 50vw) 0;
   width: 100vw;
-  padding: var(--s9) calc(50vw - var(--measure-data) / 2 + var(--s5));
-  background: #15160F;
-  color: #EDEDE7;
+  padding: var(--s10) max(var(--s5), calc(50vw - var(--measure-data) / 2 + var(--s5)));
+  background: #101109;
+  color: #ECE9E1;
   overflow: hidden;
   isolation: isolate;
 }
@@ -331,14 +303,21 @@
   position: absolute; inset: 0;
   width: 100%; height: 100%;
   object-fit: cover;
-  object-position: 78% center;
-  opacity: 0.16;
+  object-position: 82% center;
+  opacity: 0.18;
   z-index: -1;
-  mask-image: linear-gradient(to right, transparent 8%, black 70%);
+  -webkit-mask-image: linear-gradient(90deg, transparent 4%, #000 66%);
+  mask-image: linear-gradient(90deg, transparent 4%, #000 66%);
 }
 .chamberInner { max-width: 640px; display: flex; flex-direction: column; gap: var(--s4); }
-.chamberInner :global(.statement) { color: #EDEDE7; }
-.actLabelDark { margin: 0; color: #9A9C8C; }
+.chamberInner :global(.statement) { color: #ECE9E1; }
+.actLabelDark {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  color: #9B9E8D;
+}
+.actLabelDark span { border-color: color-mix(in srgb, #d9ae45 55%, transparent); color: #d9ae45; }
 .chamberLede {
   margin: 0;
   font-size: var(--size-body);
@@ -348,7 +327,42 @@
 }
 .chamberActs { display: flex; gap: var(--s3); flex-wrap: wrap; margin-top: var(--s2); }
 
-@media (max-width: 900px) {
+/* ---- Builders CTA ------------------------------------------- */
+.builders {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s5);
+  flex-wrap: wrap;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  padding: var(--s6);
+  background: color-mix(in srgb, var(--ground-raised) 45%, transparent);
+}
+.buildersActions { display: flex; gap: var(--s3); flex-wrap: wrap; }
+.buildersTitle { font-size: var(--size-statement); font-weight: 400; font-family: var(--font-statement); letter-spacing: -0.015em; color: var(--fg); }
+.buildersCopy {
+  margin: var(--s3) 0 0;
+  max-width: 58ch;
+  font-size: var(--size-body);
+  line-height: var(--lh-body);
+  color: var(--fg-soft);
+}
+.buildersCopy a { color: var(--chain); text-decoration: none; display: inline-flex; align-items: center; min-height: 24px; }
+
+/* ---- Responsive ------------------------------------------- */
+@media (max-width: 960px) {
+  .hero { grid-template-columns: 1fr; gap: var(--s6); padding-top: var(--s7); }
+  .hero::before { display: none; }
   .evidenceTwoUp { grid-template-columns: 1fr; gap: var(--s5); }
+  .passFail { grid-template-columns: 1fr; }
+  .funnelRow { grid-template-columns: 1fr; gap: var(--s2); }
+  .funnelHow { grid-row: 3; }
+  .stripRow { grid-template-columns: minmax(0, 1fr) auto; grid-auto-flow: row; row-gap: var(--s2); }
+  .category { grid-template-columns: 1fr; gap: var(--s3); padding: var(--s5); }
   .chamber { padding-inline: var(--s5); }
+}
+@media (max-width: 560px) {
+  .main { padding-inline: var(--s4); }
+  .section, .sectionQuiet { padding: var(--s7) 0; }
 }

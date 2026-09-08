@@ -9,29 +9,32 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
+    "@marque/agent-engines": "workspace:*",
+    "@marque/chain": "workspace:*",
+    "@marque/conformance": "workspace:*",
+    "@marque/db": "workspace:*",
+    "@marque/execution": "workspace:*",
+    "@marque/ledger": "workspace:*",
+    "@marque/mandates": "workspace:*",
+    "@marque/positions": "workspace:*",
+    "@marque/probe": "workspace:*",
+    "@marque/registry": "workspace:*",
+    "@marque/ui": "workspace:*",
+    "@rainbow-me/rainbowkit": "^2.2.3",
+    "@tanstack/react-query": "^5.64.1",
+    "drizzle-orm": "^0.38.2",
     "next": "15.1.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "@marque/ui": "workspace:*",
-    "@marque/db": "workspace:*",
-    "drizzle-orm": "^0.38.2",
-    "@marque/registry": "workspace:*",
-    "@marque/probe": "workspace:*",
-    "@marque/positions": "workspace:*",
-    "@marque/mandates": "workspace:*",
-    "@marque/execution": "workspace:*",
-    "@marque/conformance": "workspace:*",
-    "@marque/chain": "workspace:*",
-    "zod": "^3.24.1",
-    "viem": "^2.21.55",
     "server-only": "^0.0.1",
-    "@marque/ledger": "workspace:*",
-    "@marque/agent-engines": "workspace:*"
+    "viem": "^2.21.55",
+    "wagmi": "^2.14.11",
+    "zod": "^3.24.1"
   },
   "devDependencies": {
+    "@types/node": "^22.10.2",
     "@types/react": "^19.0.2",
     "@types/react-dom": "^19.0.2",
-    "@types/node": "^22.10.2",
     "typescript": "^5.7.2"
   }
 }

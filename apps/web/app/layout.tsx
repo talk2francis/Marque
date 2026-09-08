@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from 'next'
 import { Geist, Geist_Mono, Fraunces } from 'next/font/google'
 import { BRAND } from '@marque/ui/brand'
+import { Reveal } from './_components/Reveal'
+import { WalletProvider } from './_components/WalletProvider'
 import './globals.css'
 
 /**
@@ -49,15 +51,33 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  themeColor: '#ededE7',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#f4f1e9' },
+    { media: '(prefers-color-scheme: dark)', color: '#101109' },
+  ],
   width: 'device-width',
   initialScale: 1,
 }
 
+/**
+ * Set the theme before first paint so there is no flash. Reads an explicit
+ * choice from localStorage; otherwise leaves it to the OS preference (the CSS
+ * handles that). Deliberately tiny and synchronous.
+ */
+const THEME_BOOTSTRAP = `(function(){try{var t=localStorage.getItem('marque-theme');if(t==='dark'||t==='light'){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();`
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${geist.variable} ${geistMono.variable} ${fraunces.variable}`}>
-      <body>{children}</body>
+    <html lang="en" className={`${geist.variable} ${geistMono.variable} ${fraunces.variable}`} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_BOOTSTRAP }} />
+      </head>
+      <body className="no-js">
+        <WalletProvider>
+          {children}
+          <Reveal />
+        </WalletProvider>
+      </body>
     </html>
   )
 }

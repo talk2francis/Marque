@@ -182,7 +182,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ a
         </section>
 
         {/* ---- Brand band: the one cinematic breath between hero and Act I ---- */}
-        <section className={styles.band} aria-hidden="true">
+        <section className={styles.band} aria-hidden="true" data-reveal>
           <picture>
             <source srcSet="/brand/field-dark.webp" media="(prefers-color-scheme: dark)" />
             <img src="/brand/field-light.webp" alt="" loading="lazy" decoding="async" />
@@ -190,10 +190,10 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ a
         </section>
 
         {/* ===== ACT I — THE FIELD ===== */}
-        <p className={styles.actLabel}><span>I</span> The Field — see what an address holds, and who can act on it</p>
+        <p className={styles.actLabel} data-reveal><span>I</span> The Field — see what an address holds, and who can act on it</p>
 
         {/* ---- Agents that can work now (P10.5E item 5) ---- */}
-        <section className={styles.section}>
+        <section className={styles.section} data-reveal>
           <Statement>Agents that can work now.</Statement>
           {hireable.length === 0 ? (
             <EmptyState title="No agent is callable right now.">
@@ -232,7 +232,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ a
         </section>
 
         {/* ---- 1. The four categories, as problems ---- */}
-        <section className={styles.section}>
+        <section className={styles.section} data-reveal>
           <Statement>Four positions. Four kinds of arithmetic to get wrong.</Statement>
           <p className={styles.sectionLede}>
             The four categories are four kinds of position, each with its own reader, its own
@@ -276,10 +276,10 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ a
         </section>
 
         {/* ===== ACT II — THE PASSAGE ===== */}
-        <p className={styles.actLabel}><span>II</span> The Passage — what a listing has to survive to rank</p>
+        <p className={styles.actLabel} data-reveal><span>II</span> The Passage — what a listing has to survive to rank</p>
 
         {/* ---- 2. The funnel. The number nobody else will show. ---- */}
-        <section className={styles.section}>
+        <section className={styles.section} data-reveal>
           <Statement>A registration is not a résumé.</Statement>
           <p className={styles.sectionLede}>
             Every stage below is a live count over data we measured ourselves. Nothing here is
@@ -330,7 +330,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ a
         </section>
 
         {/* ---- 4 + 5. Evidence, as a two-up rather than two lonely paragraphs ---- */}
-        <section className={styles.section}>
+        <section className={styles.section} data-reveal>
           <Statement>Measured, not asserted.</Statement>
           <div className={styles.evidenceTwoUp}>
             <div>
@@ -356,7 +356,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ a
         </section>
 
         {/* ---- 5b. One pass, one fail — side by side (P10.5E item 7) ---- */}
-        <section className={styles.section}>
+        <section className={styles.section} data-reveal>
           <Statement>The Standard: a pass and a fail.</Statement>
           <p className={styles.sectionLede}>
             Failure proves the test is honest. A pass proves the thing works. Both are computed
@@ -402,7 +402,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ a
         </section>
 
         {/* ===== ACT III — THE CHAMBER (the one cockpit band) ===== */}
-        <section className={styles.chamber} data-surface="cockpit">
+        <section className={styles.chamber} data-surface="cockpit" data-reveal>
           <img className={styles.chamberBg} src="/brand/chamber.webp" alt="" aria-hidden="true" loading="lazy" decoding="async" />
           <div className={styles.chamberInner}>
             <p className={styles.actLabelDark}><span>III</span> The Chamber — grant authority, cap the damage</p>
@@ -421,7 +421,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ a
         </section>
 
         {/* ---- 6. Builders ---- */}
-        <section className={styles.sectionQuiet}>
+        <section className={styles.sectionQuiet} data-reveal>
           <div className={styles.builders}>
             <div>
               <span className={styles.buildersTitle}>Run an agent on BNB Smart Chain?</span>

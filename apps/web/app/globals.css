@@ -8,16 +8,42 @@
   --font-statement: var(--font-fraunces), 'Iowan Old Style', Georgia, serif;
 }
 
-/* P10.5H — the loading mark: a slow, quiet breath. Same final frame with
-   reduced motion (fully visible, still). */
-.marque-loading-mark {
-  color: var(--fg-soft);
-  animation: marque-breath 1600ms ease-in-out infinite;
+/* The loading mark: the real symbol, a slow quiet breath. Same final frame
+   under reduced motion. Theme-aware (ink in daylight, cream at night). */
+.marque-loading {
+  display: inline-flex;
+  animation: marque-breath 1700ms var(--ease) infinite;
+}
+.marque-loading img { height: 60px; width: auto; display: block; }
+.marque-loading-cream { display: none; }
+:root[data-theme='dark'] .marque-loading-ink { display: none; }
+:root[data-theme='dark'] .marque-loading-cream { display: block; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .marque-loading-ink { display: none; }
+  :root:not([data-theme='light']) .marque-loading-cream { display: block; }
 }
 @keyframes marque-breath {
-  0%, 100% { opacity: 0.35; transform: scale(0.97); }
-  50% { opacity: 0.9; transform: scale(1); }
+  0%, 100% { opacity: 0.32; transform: scale(0.94); }
+  50% { opacity: 0.95; transform: scale(1); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .marque-loading-mark { animation: none; opacity: 0.8; }
+  .marque-loading { animation: none; opacity: 0.85; }
 }
+
+/* ===== Scroll-reveal — the page has motion now (P10.5 rev) ===== */
+/* Elements marked [data-reveal] start slightly down and faded, then settle when
+   they enter the viewport. Once. IntersectionObserver adds .is-in. No JS / no
+   reduced motion => visible immediately (the :not fallback + the media query). */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 620ms var(--ease-settle), transform 620ms var(--ease-settle);
+  transition-delay: var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
+}
+[data-reveal].is-in { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] { opacity: 1; transform: none; transition: none; }
+}
+/* If the observer never runs (JS disabled), don't leave content invisible. */
+.no-js [data-reveal] { opacity: 1; transform: none; }

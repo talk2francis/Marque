@@ -1,152 +1,233 @@
 /**
  * Marque design tokens.
  *
- * Light for looking, dark for doing — but ONE product, not two.
- * Only ground, ink and rule tokens swap between daylight and cockpit.
- * Type scale, spacing, measure rules, chips and buttons are identical in both.
+ * ONE product, three grounds:
+ *   - daylight (default light theme)
+ *   - night    (global dark theme — [data-theme="dark"] or system preference)
+ *   - cockpit  (per-surface deep dark for the charter desk / receipts, set with
+ *              [data-surface="cockpit"] — a state change, not a theme)
  *
- * Cockpit is applied per-surface with [data-surface="cockpit"], NOT as a global
- * theme toggle. The transition is a dim, never a navigation.
+ * Only ground / ink / rule / elevation swap between themes. Type scale, spacing,
+ * radii, motion and the brass accent are identical everywhere.
  */
 
 :root {
-  /* DAYLIGHT — discovery, register, profiles, ledger, standard */
-  --paper: #ededE7;
-  --paper-raised: #f7f7f3;
-  --ink: #15160f;
-  --ink-soft: #5c5e52;
-  --rule: #d4d4cb;
+  color-scheme: light;
 
-  /* COCKPIT — charter desk, run room, receipt. Applied via [data-surface]. */
+  /* ---- DAYLIGHT ------------------------------------------------------- */
+  --paper: #f4f1e9;         /* warm near-white, matches the brand art ground */
+  --paper-raised: #fbfaf4;
+  --paper-sunk: #ece7db;
+  --ink: #191a14;
+  --ink-soft: #55584b;
+  --ink-faint: #8b8d7e;
+  --rule: #ddd8c9;
+  --rule-strong: #cbc5b2;
+
+  /* ---- NIGHT (global dark) ------------------------------------------- */
+  --night: #101109;
+  --night-raised: #191a10;
+  --night-sunk: #0a0b05;
+  --night-ink: #ece9e1;
+  --night-ink-soft: #9ba08c;
+  --night-ink-faint: #6b6f5d;
+  --night-rule: #2a2c1f;
+  --night-rule-strong: #3c3f2e;
+
+  /* ---- COCKPIT (per-surface) --------------------------------------- */
   --deck: #12140e;
   --deck-raised: #1b1e15;
   --deck-ink: #e8e9e0;
   --deck-rule: #2c3023;
 
-  /* BRAND — oxidised brass, BNB-adjacent, never Binance yellow. <=8% of viewport. */
+  /* ---- BRAND — oxidised brass. Never Binance yellow. <=8% of a screen. */
   --brass-mark: #b0892c;
-  --brass: #846621;
+  --brass: #8a6a22;
   --brass-lit: #d9ae45;
+  --brass-tint: color-mix(in srgb, var(--brass-mark) 12%, transparent);
 
-  /* SIGNAL — state only. Never branding, never decoration.
-   *
-   * Two values per signal. The `-mark` value is the hue exactly as specified in
-   * AGENTS.md and is used for measure markers, rules and borders, where the
-   * shape carries the meaning and contrast is not a legibility question. The
-   * base value is the TEXT variant, adjusted per surface so small type clears
-   * WCAG AA (4.5:1).
-   *
-   * This is necessary because a single value cannot do both jobs: on paper,
-   * --watch at #B8721A reads 3.27:1, and on the cockpit deck --chain at
-   * #2B5A85 reads 2.56:1. Both are unreadable at 11.5px, and the audit script
-   * catches it. Adapting per surface is what the ground/ink/rule tokens
-   * already do; the signals now do the same. */
+  /* ---- SIGNAL — state only, never decoration. Two values each:
+   * `-mark` is the exact hue for markers/rules/borders where shape carries the
+   * meaning; the base value is the text variant, tuned per ground for AA. */
   --holds-mark: #2e7351;
   --watch-mark: #b8721a;
   --breach-mark: #a83a2c;
   --chain-mark: #2b5a85;
-
   --holds: #2e7351;
-  --watch: #985e15;
+  --watch: #8f5a14;
   --breach: #a83a2c;
   --chain: #2b5a85;
 
-  /* Active ground. Surfaces remap these three, everything else stays put. */
+  /* ---- ACTIVE — surfaces remap these, everything else stays put. */
   --ground: var(--paper);
   --ground-raised: var(--paper-raised);
+  --ground-sunk: var(--paper-sunk);
   --fg: var(--ink);
   --fg-soft: var(--ink-soft);
+  --fg-faint: var(--ink-faint);
   --line: var(--rule);
+  --line-strong: var(--rule-strong);
 
-  /* TYPE — Fraunces for statements only, Geist for everything else. */
+  /* The page itself: a barely-there warm gradient so nothing reads as a flat
+     fill. Overridable per theme. */
+  --backdrop:
+    radial-gradient(120% 70% at 80% -10%, color-mix(in srgb, var(--brass-mark) 5%, transparent), transparent 60%),
+    linear-gradient(180deg, color-mix(in srgb, var(--paper-raised) 70%, var(--paper)) 0%, var(--paper) 42%);
+  --dotgrid: color-mix(in srgb, var(--ink) 5%, transparent);
+
+  /* ---- ELEVATION — warm, layered, subtle. Theme-aware. */
+  --elev-1: 0 1px 2px color-mix(in srgb, var(--ink) 6%, transparent),
+            0 4px 12px -6px color-mix(in srgb, var(--ink) 10%, transparent);
+  --elev-2: 0 2px 4px color-mix(in srgb, var(--ink) 6%, transparent),
+            0 12px 32px -12px color-mix(in srgb, var(--ink) 16%, transparent);
+  --elev-3: 0 8px 24px -8px color-mix(in srgb, var(--ink) 14%, transparent),
+            0 40px 80px -24px color-mix(in srgb, var(--ink) 24%, transparent);
+  --ring: 0 0 0 3px color-mix(in srgb, var(--brass-mark) 22%, transparent);
+
+  /* ---- RADII — the "boxy" problem was 2px everywhere. */
+  --r-xs: 4px;
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 18px;
+  --r-xl: 26px;
+  --r-pill: 999px;
+
+  /* ---- TYPE ---------------------------------------------------------- */
   --font-ui: 'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-mono: 'Geist Mono', ui-monospace, 'SF Mono', 'Roboto Mono', monospace;
   --font-statement: 'Fraunces', 'Iowan Old Style', Georgia, serif;
 
-  /* Display type was dominating while functional type was undersized (P10.5D
-     item 3). Rebalanced: hero down a touch in weight of presence, controls and
-     metadata up, and nothing below 12px anywhere — including the footer. */
-  --size-hero: 50px;
+  --size-hero: 54px;
   --size-page-title: 38px;
   --size-statement: 30px;
-  --size-title: 17px;      /* row title */
-  --size-control: 14px;    /* buttons, inputs, selects, nav */
+  --size-title: 17px;
+  --size-control: 14px;
   --size-body: 15.5px;
-  --size-data: 13.5px;     /* tabular numerals in tables / receipts */
-  --size-caption: 12px;    /* metadata floor — never smaller */
-  --lh-hero: 1.05;
+  --size-data: 13.5px;
+  --size-caption: 12px;
+  --size-eyebrow: 11.5px;
+  --lh-hero: 1.04;
   --lh-statement: 1.15;
-  --lh-body: 1.55;
+  --lh-body: 1.6;
+  --tracking-eyebrow: 0.14em;
 
-  /* SPACE — a 4px base, so vertical rhythm never drifts. */
-  --s1: 4px;
-  --s2: 8px;
-  --s3: 12px;
-  --s4: 16px;
-  --s5: 24px;
-  --s6: 32px;
-  --s7: 48px;
-  --s8: 64px;
-  --s9: 96px;
+  /* ---- SPACE — 4px base. */
+  --s1: 4px;  --s2: 8px;  --s3: 12px; --s4: 16px; --s5: 24px;
+  --s6: 32px; --s7: 48px; --s8: 64px; --s9: 96px; --s10: 128px;
 
-  /* TWO container widths, never one for both (AGENTS.md invariant 21 / P10.5D
-     item 2). Editorial prose reads at a real measure; dense data needs room. */
+  /* ---- MEASURE — two widths, never one for both. */
   --measure-prose: 680px;
   --measure-data: 1240px;
-  --measure: 68ch; /* legacy alias — prefer the two above */
+  --measure: 68ch;
+
+  /* ---- MOTION ------------------------------------------------------- */
+  --dur-fast: 130ms;
+  --dur: 220ms;
+  --dur-slow: 420ms;
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
   --ease-settle: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/** The cockpit. Semantic: the interface changes state when money moves. */
+/* ---- NIGHT: system preference, unless the user forced light -------- */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+    --ground: var(--night);
+    --ground-raised: var(--night-raised);
+    --ground-sunk: var(--night-sunk);
+    --fg: var(--night-ink);
+    --fg-soft: var(--night-ink-soft);
+    --fg-faint: var(--night-ink-faint);
+    --line: var(--night-rule);
+    --line-strong: var(--night-rule-strong);
+    --brass: #c99a3f;
+    --holds: #57957a;
+    --watch: #c8843b;
+    --breach: #cd6f63;
+    --chain: #6f92b4;
+    --backdrop:
+      radial-gradient(120% 70% at 82% -12%, color-mix(in srgb, var(--brass-lit) 8%, transparent), transparent 55%),
+      linear-gradient(180deg, color-mix(in srgb, var(--night-raised) 80%, var(--night)) 0%, var(--night) 46%);
+    --dotgrid: color-mix(in srgb, var(--night-ink) 6%, transparent);
+    --elev-1: 0 1px 2px rgba(0, 0, 0, 0.4), 0 4px 14px -6px rgba(0, 0, 0, 0.5);
+    --elev-2: 0 2px 6px rgba(0, 0, 0, 0.45), 0 16px 40px -14px rgba(0, 0, 0, 0.6);
+    --elev-3: 0 10px 30px -10px rgba(0, 0, 0, 0.55), 0 50px 90px -30px rgba(0, 0, 0, 0.7);
+  }
+}
+
+/* ---- NIGHT: explicit user choice (wins over system either way) ---- */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --ground: var(--night);
+  --ground-raised: var(--night-raised);
+  --ground-sunk: var(--night-sunk);
+  --fg: var(--night-ink);
+  --fg-soft: var(--night-ink-soft);
+  --fg-faint: var(--night-ink-faint);
+  --line: var(--night-rule);
+  --line-strong: var(--night-rule-strong);
+  --brass: #c99a3f;
+  --holds: #57957a;
+  --watch: #c8843b;
+  --breach: #cd6f63;
+  --chain: #6f92b4;
+  --backdrop:
+    radial-gradient(120% 70% at 82% -12%, color-mix(in srgb, var(--brass-lit) 8%, transparent), transparent 55%),
+    linear-gradient(180deg, color-mix(in srgb, var(--night-raised) 80%, var(--night)) 0%, var(--night) 46%);
+  --dotgrid: color-mix(in srgb, var(--night-ink) 6%, transparent);
+  --elev-1: 0 1px 2px rgba(0, 0, 0, 0.4), 0 4px 14px -6px rgba(0, 0, 0, 0.5);
+  --elev-2: 0 2px 6px rgba(0, 0, 0, 0.45), 0 16px 40px -14px rgba(0, 0, 0, 0.6);
+  --elev-3: 0 10px 30px -10px rgba(0, 0, 0, 0.55), 0 50px 90px -30px rgba(0, 0, 0, 0.7);
+}
+
+/* ---- COCKPIT — per-surface, unchanged semantics. */
 [data-surface='cockpit'] {
   --ground: var(--deck);
   --ground-raised: var(--deck-raised);
+  --ground-sunk: #0d0f09;
   --fg: var(--deck-ink);
   --fg-soft: #9a9d8e;
+  --fg-faint: #6b6f5d;
   --line: var(--deck-rule);
-
-  /* Text variants lightened so small type clears 4.5:1 against the deck.
-     The -mark hues are unchanged: the signal identity is the same in both
-     surfaces, only its legibility as text is adjusted. */
+  --line-strong: #3a3f2c;
   --holds: #4f896c;
-  --watch: #b8721a;
+  --watch: #c8843b;
   --breach: #bb655a;
-  --chain: #5d81a2;
-  --brass: #b0892c;
+  --chain: #6f92b4;
+  --brass: #c99a3f;
 }
 
 @media (max-width: 768px) {
   :root {
-    --size-hero: 32px;
+    --size-hero: 34px;
     --size-page-title: 27px;
-    --size-statement: 24px;
+    --size-statement: 23px;
     --size-title: 16px;
-    /* --size-data and --size-caption stay put: 13.5 / 12 is the floor. */
   }
 }
 
 *,
 *::before,
-*::after {
-  box-sizing: border-box;
-}
+*::after { box-sizing: border-box; }
 
-html {
-  -webkit-text-size-adjust: 100%;
-}
+html { -webkit-text-size-adjust: 100%; }
 
 body {
   margin: 0;
   background: var(--ground);
+  background-image: var(--backdrop);
+  background-attachment: fixed;
   color: var(--fg);
   font-family: var(--font-ui);
   font-size: var(--size-body);
   line-height: var(--lh-body);
   font-feature-settings: 'cv11', 'ss01';
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  transition: background-color var(--dur) var(--ease), color var(--dur) var(--ease);
 }
 
-/** Numerals in tables, receipts and hashes only — never labels or eyebrows. */
 .mono {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
@@ -160,13 +241,21 @@ body {
   letter-spacing: -0.015em;
 }
 
-a {
-  color: inherit;
-}
+a { color: inherit; }
 
 :focus-visible {
   outline: 2px solid var(--brass);
   outline-offset: 2px;
+  border-radius: var(--r-xs);
+}
+
+/* A shared eyebrow: wide-tracked caps, used for section kickers everywhere. */
+.eyebrow {
+  font-size: var(--size-eyebrow);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--fg-soft);
+  font-weight: 500;
 }
 
 @media (prefers-reduced-motion: reduce) {
