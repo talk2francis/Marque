@@ -1,6 +1,6 @@
 {
   "status": "drifting",
-  "note": "The position is open on mainnet and in range. It is deliberately narrow (~0.3%) so it drifts out within hours; this page updates itself when it does and again after the agent re-centres it.",
+  "note": "The position has drifted in and out of its ~0.3% band, out for a cumulative 0.0h and earning nothing while out. It stays open until the agent re-centres it.",
   "pool": "0x172fcD41E0913e95784454622d1c3724f546f849",
   "chainId": 56,
   "agentId": "bound",
@@ -16,10 +16,10 @@
     "expiresAt": "2026-09-09T23:54:47.261Z"
   },
   "before": {
-    "tickLower": -66092,
-    "tickUpper": -66062,
-    "currentTick": -66078,
-    "outOfRangeSince": null,
+    "tickLower": -66081,
+    "tickUpper": -66077,
+    "currentTick": -66081,
+    "outOfRangeSince": "2026-09-08T01:02:13.032Z",
     "hoursOutOfRange": 0,
     "feesAccruedUsd": 0
   },

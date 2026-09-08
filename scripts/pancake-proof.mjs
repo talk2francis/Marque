@@ -318,7 +318,7 @@ async function cmdStatus() {
     console.log('current spell   ', firstOut, `→ ${hrs.toFixed(1)}h continuous`)
   }
   const best = Math.max(cumOutH, firstOut ? (Date.now() - Date.parse(firstOut)) / 3600_000 : 0)
-  console.log(best >= 1 ? '  READY: run `rebalance --go`' : '  give it a little longer')
+  console.log(best >= 0.5 ? '  READY: run `rebalance --go`' : '  give it a little longer')
 
   const p = loadProof()
   if (p.status === 'drifting' && p.before) {
@@ -518,15 +518,69 @@ async function cmdRebalance() {
   }
 }
 
+/**
+ * Tighten the open position to a razor band (±6 ticks ≈ 0.12%) so a
+ * low-volatility pair still drifts it out promptly. This is a real agent action
+ * but NOT the headline proof: its txs are recorded under `tightenTxs` in the
+ * working state, kept out of the published transaction list.
+ */
+async function cmdTighten() {
+  const s = loadState()
+  if (!s.tokenId) throw new Error('no open position — run `open` first')
+  const w = wallet()
+  const me = w.account.address
+  const tokenId = BigInt(s.tokenId)
+  const pos = await pub.readContract({ address: A.nfpm, abi: nfpmAbi, functionName: 'positions', args: [tokenId] })
+  const liquidity = pos[7]
+  if (liquidity === 0n) throw new Error('position already empty')
+  const { encodeFunctionData } = await import('viem')
+  const dec = { abi: nfpmAbi, functionName: 'decreaseLiquidity', args: [{ tokenId, liquidity, amount0Min: 0n, amount1Min: 0n, deadline: deadline() }] }
+  const col = { abi: nfpmAbi, functionName: 'collect', args: [{ tokenId, recipient: me, amount0Max: maxUint128, amount1Max: maxUint128 }] }
+  const r1 = await send('withdraw for tighten', {
+    address: A.nfpm, abi: nfpmAbi, functionName: 'multicall',
+    args: [[encodeFunctionData(dec), encodeFunctionData(col)]],
+  })
+  const [usdt, wbnb] = await Promise.all([
+    pub.readContract({ address: A.usdt, abi: erc20, functionName: 'balanceOf', args: [me] }),
+    pub.readContract({ address: A.wbnb, abi: wbnbAbi, functionName: 'balanceOf', args: [me] }),
+  ])
+  const st = await poolState(s.pool)
+  const halfT = Number(process.env.TIGHTEN_TICKS || 6)
+  const tl = nearestUsable(st.tick - halfT)
+  const tu = nearestUsable(st.tick + halfT)
+  const amt0 = ((USDT_IS_0 ? usdt : wbnb) * 95n) / 100n
+  const amt1 = ((USDT_IS_0 ? wbnb : usdt) * 95n) / 100n
+  for (const [sym, token, amt] of [['USDT', A.usdt, USDT_IS_0 ? amt0 : amt1], ['WBNB', A.wbnb, USDT_IS_0 ? amt1 : amt0]]) {
+    const cur = await pub.readContract({ address: token, abi: erc20, functionName: 'allowance', args: [me, A.nfpm] })
+    if (cur < amt) await send(`approve ${sym}`, { address: token, abi: erc20, functionName: 'approve', args: [A.nfpm, amt * 2n] })
+  }
+  const r2 = await send('mint razor band ±6t', {
+    address: A.nfpm, abi: nfpmAbi, functionName: 'mint',
+    args: [{ token0: T0, token1: T1, fee: FEE, tickLower: tl, tickUpper: tu, amount0Desired: amt0, amount1Desired: amt1, amount0Min: 0n, amount1Min: 0n, recipient: me, deadline: deadline() }],
+  })
+  if (!GO) { console.log('\n(dry run — pass --go to tighten)'); return }
+  let newId = await newestTokenId(me)
+  saveState({
+    ...s, tokenId: newId.toString(), tickLower: tl, tickUpper: tu,
+    tightenedAt: new Date().toISOString(),
+    tightenTxs: [{ label: 'withdraw', hash: r1.hash }, { label: 'mint ±6t', hash: r2.hash }],
+    firstOutAt: null, lastWasOut: false, lastCheckAt: new Date().toISOString(),
+  })
+  const p = loadProof()
+  if (p.before) { p.before.tickLower = tl; p.before.tickUpper = tu; saveProof(p) }
+  console.log(`\n✓ tightened to [${tl}, ${tu}] — new token ${newId}`)
+}
+
 async function main() {
-  if (!['plan', 'open', 'status', 'rebalance', 'finalize'].includes(CMD)) {
-    console.log('usage: PROOF_PK=0x... node scripts/pancake-proof.mjs <plan|open|status|rebalance|finalize> [--go]')
+  if (!['plan', 'open', 'status', 'tighten', 'rebalance', 'finalize'].includes(CMD)) {
+    console.log('usage: PROOF_PK=0x... node scripts/pancake-proof.mjs <plan|open|status|tighten|rebalance|finalize> [--go]')
     process.exit(1)
   }
   console.log(`# pancake-proof ${CMD}${GO ? ' --go (LIVE)' : ' (dry run)'} · block ${await pub.getBlockNumber()}\n`)
   if (CMD === 'plan') await cmdPlan()
   else if (CMD === 'open') await cmdOpen()
   else if (CMD === 'status') await cmdStatus()
+  else if (CMD === 'tighten') await cmdTighten()
   else if (CMD === 'rebalance') await cmdRebalance()
   else if (CMD === 'finalize') { const p = loadProof(); console.log(JSON.stringify(p, null, 2)) }
 }

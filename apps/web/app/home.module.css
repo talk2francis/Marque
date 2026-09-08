@@ -331,9 +331,10 @@
   position: absolute; inset: 0;
   width: 100%; height: 100%;
   object-fit: cover;
-  opacity: 0.28;
+  object-position: 78% center;
+  opacity: 0.16;
   z-index: -1;
-  mask-image: linear-gradient(to right, transparent, black 55%);
+  mask-image: linear-gradient(to right, transparent 8%, black 70%);
 }
 .chamberInner { max-width: 640px; display: flex; flex-direction: column; gap: var(--s4); }
 .chamberInner :global(.statement) { color: #EDEDE7; }

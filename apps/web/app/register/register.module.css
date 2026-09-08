@@ -119,3 +119,14 @@
   .mktPrice { grid-area: price; }
   .mktActions { grid-area: actions; flex-wrap: wrap; }
 }
+
+/* P10.5H — the marketplace section's one brand image. Thin, full-bleed. */
+.brandBand {
+  position: relative;
+  margin: var(--s5) calc(50% - 50vw) var(--s6);
+  width: 100vw;
+  height: clamp(120px, 15vw, 168px);
+  overflow: hidden;
+  border-block: 1px solid var(--line);
+}
+.brandBand picture, .brandBand img { width: 100%; height: 100%; object-fit: cover; object-position: center 42%; display: block; }

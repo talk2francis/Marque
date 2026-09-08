@@ -30,6 +30,12 @@ export default function RegisterPage() {
           one team registering forty identities is one row.
         </p>
       </div>
+      <div className={styles.brandBand} aria-hidden="true">
+        <picture>
+          <source srcSet="/brand/field-dark.webp" media="(prefers-color-scheme: dark)" />
+          <img src="/brand/band-dark.webp" alt="" loading="lazy" decoding="async" />
+        </picture>
+      </div>
       <Marketplace />
 
       <section className={styles.graveyard}>
