@@ -34,3 +34,11 @@ demo-video/piper-voices/
 demo-video/render/
 demo-video/render/*.mp4
 demo-video/*.wav
+demo-video/cards/
+demo-video/shots2/
+demo-video/vo2/
+demo-video/vo2-bill/
+demo-video/vo2-tmp/
+demo-video/voice-*-sample.mp3
+demo-video/render/work2/
+demo-video/render/marque-demo-v2.mp4

@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Marque film cards</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ground:#15140f; --raise:#1b1a13;
+    --ink:#ECE9E1; --soft:#b7b8a8; --faint:#8a8b7a;
+    --brass:#d9ae45; --brass-dim:#8a6a22;
+    --ember:#cd6f63; --green:#79b596;
+    --line:#33322a;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:1920px;height:1080px;overflow:hidden;background:var(--ground);color:var(--ink);
+    font-family:'Geist',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  .stage{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .mono{font-family:'Geist Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums}
+  .serif{font-family:'Fraunces',Georgia,serif}
+  /* faint vignette so pure black corners don't read flat */
+  body::after{content:'';position:fixed;inset:0;pointer-events:none;
+    background:radial-gradient(120% 90% at 50% 42%, transparent 55%, rgba(0,0,0,.45))}
+
+  .hidden{display:none!important}
+
+  /* ---------- shared entrance atoms ---------- */
+  @keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  @keyframes fadeOut{to{opacity:0;transform:translateY(-10px)}}
+  @keyframes dim{to{opacity:.32}}
+  @keyframes drawStroke{to{stroke-dashoffset:0}}
+  @keyframes fillIn{to{fill-opacity:1;stroke-opacity:0}}
+  @keyframes barGrow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+
+  /* ===== OPEN ===== */
+  #open .big{font-size:190px;font-weight:500;letter-spacing:-.02em;line-height:1;
+    opacity:0;animation:rise 900ms cubic-bezier(.16,1,.3,1) .2s both}
+  #open .sub{margin-top:34px;font-size:30px;color:var(--faint);letter-spacing:.02em;
+    opacity:0;animation:fade 900ms ease 1s both}
+
+  /* ===== FUNNEL ===== */
+  #funnel .rows{display:flex;flex-direction:column;gap:26px;width:1120px}
+  #funnel .row{display:grid;grid-template-columns:280px 1fr;align-items:baseline;gap:36px;
+    opacity:0;animation:rise 620ms cubic-bezier(.16,1,.3,1) both}
+  #funnel .row:nth-child(1){animation-delay:.15s}
+  #funnel .row:nth-child(2){animation-delay:.7s}
+  #funnel .row:nth-child(3){animation-delay:1.25s}
+  #funnel .row:nth-child(4){animation-delay:1.8s}
+  #funnel .row:nth-child(5){animation-delay:2.5s}
+  #funnel .row:nth-child(1),#funnel .row:nth-child(2),#funnel .row:nth-child(3){
+    animation:rise 620ms cubic-bezier(.16,1,.3,1) both, dim 500ms ease 3.4s forwards}
+  #funnel .n{font-size:60px;font-weight:500;text-align:right;letter-spacing:-.02em}
+  #funnel .l{font-size:26px;color:var(--soft)}
+  #funnel .row:last-child .n{color:var(--brass)}
+  #funnel .bar{grid-column:1/-1;height:2px;background:var(--brass-dim);transform-origin:left;
+    transform:scaleX(0);animation:barGrow 620ms cubic-bezier(.16,1,.3,1) both}
+  #funnel .row:nth-child(1) .bar{animation-delay:.35s}
+  #funnel .row:nth-child(2) .bar{animation-delay:.9s}
+  #funnel .row:nth-child(3) .bar{animation-delay:1.45s}
+  #funnel .row:nth-child(4) .bar{animation-delay:2s}
+  #funnel .row:nth-child(5) .bar{animation-delay:2.7s;background:var(--brass)}
+
+  /* ===== ZERO ===== */
+  #zero .pre{font-size:40px;color:var(--soft);opacity:0;animation:fade 700ms ease .2s both, fadeOut 500ms ease 2.1s forwards}
+  #zero .big{position:absolute;font-size:150px;font-weight:500;letter-spacing:.01em;opacity:0;
+    animation:rise 700ms cubic-bezier(.16,1,.3,1) 2.7s both}
+  #zero .big em{color:var(--ember);font-style:normal}
+
+  /* ===== TITLE ===== */
+  #title svg{width:190px;height:131px;overflow:visible;color:var(--ink)}
+  #title .wing{fill:currentColor;stroke:currentColor;stroke-width:1.2;stroke-linejoin:round;
+    fill-opacity:0;stroke-dasharray:260;stroke-dashoffset:260;
+    animation:drawStroke 900ms cubic-bezier(.65,0,.35,1) .3s forwards, fillIn 700ms ease .95s forwards}
+  #title .wing.r{animation-delay:.5s,1.05s}
+  #title .name{margin-top:40px;font-size:96px;font-weight:500;letter-spacing:-.01em;
+    opacity:0;animation:rise 700ms cubic-bezier(.16,1,.3,1) 1.7s both}
+  #title .tag{margin-top:16px;font-size:26px;color:var(--faint);letter-spacing:.02em;
+    opacity:0;animation:fade 700ms ease 2.1s both}
+
+  /* ===== STANDARD (pass / fail) ===== */
+  #standard .grid{display:grid;grid-template-columns:1fr 1fr;gap:90px;width:1200px}
+  #standard h3{font-size:22px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:26px;
+    opacity:0;animation:fade 500ms ease both}
+  #standard .pass h3{color:var(--green)} #standard .fail h3{color:var(--ember)}
+  #standard .pass h3{animation-delay:.2s} #standard .fail h3{animation-delay:.35s}
+  #standard ul{list-style:none;display:flex;flex-direction:column;gap:16px}
+  #standard li{display:flex;align-items:center;gap:14px;font-size:26px;color:var(--soft);
+    opacity:0;animation:rise 500ms cubic-bezier(.16,1,.3,1) both}
+  #standard .pass li:nth-child(1){animation-delay:.4s}
+  #standard .pass li:nth-child(2){animation-delay:.55s}
+  #standard .pass li:nth-child(3){animation-delay:.7s}
+  #standard .pass li:nth-child(4){animation-delay:.85s}
+  #standard .pass li:nth-child(5){animation-delay:1s}
+  #standard .fail li:nth-child(1){animation-delay:.55s}
+  #standard .fail li:nth-child(2){animation-delay:.7s}
+  #standard .fail li:nth-child(3){animation-delay:.85s}
+  #standard .fail li:nth-child(4){animation-delay:1s}
+  #standard .fail li:nth-child(5){animation-delay:1.15s}
+  #standard .fail li:nth-child(6){animation-delay:1.3s}
+  #standard .mk{width:22px;height:22px;flex:none}
+  #standard .pass .mk{color:var(--green)} #standard .fail .mk{color:var(--ember)}
+  #standard .cap{grid-column:1/-1;margin-top:56px;font-size:28px;color:var(--ink);text-align:center;
+    opacity:0;animation:fade 700ms ease 1.9s both}
+
+  /* ===== PROOF ===== */
+  #proof .lbl{font-size:22px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin-bottom:34px;
+    opacity:0;animation:fade 500ms ease .1s both}
+  #proof .tx{font-size:23px;color:var(--soft);width:1300px;margin-bottom:18px;white-space:nowrap;overflow:hidden;
+    opacity:0;animation:fade 400ms ease both}
+  #proof .tx:nth-child(2){animation-delay:.5s}
+  #proof .tx:nth-child(3){animation-delay:1.05s}
+  #proof .tx:nth-child(4){animation-delay:1.6s}
+  #proof .tx:nth-child(5){animation-delay:2.15s}
+  #proof .tx b{color:var(--ink);font-weight:500;margin-right:20px}
+  #proof .cost{margin-top:44px;font-size:32px;color:var(--ink);
+    opacity:0;animation:rise 700ms cubic-bezier(.16,1,.3,1) 2.9s both}
+  #proof .cost em{color:var(--brass);font-style:normal}
+
+  /* ===== CLOSE ===== */
+  #close .a{font-size:56px;font-weight:500;letter-spacing:-.02em;opacity:0;animation:rise 800ms cubic-bezier(.16,1,.3,1) .3s both, fadeOut 600ms ease 2.6s forwards}
+  #close .b{position:absolute;font-size:40px;color:var(--soft);opacity:0;animation:fade 800ms ease 3.2s both}
+</style>
+</head>
+<body>
+
+<div id="open" class="stage hidden">
+  <div class="big mono">298,817</div>
+  <div class="sub">AI agents registered on BNB Smart Chain</div>
+</div>
+
+<div id="funnel" class="stage hidden">
+  <div class="rows">
+    <div class="row"><span class="n mono">298,817</span><span class="l">registered on BNB Smart Chain</span><span class="bar"></span></div>
+    <div class="row"><span class="n mono">30,357</span><span class="l">declare a service we can read</span><span class="bar"></span></div>
+    <div class="row"><span class="n mono">30,001</span><span class="l">answer when we knock</span><span class="bar"></span></div>
+    <div class="row"><span class="n mono">6,072</span><span class="l">expose something a buyer could hire</span><span class="bar"></span></div>
+    <div class="row"><span class="n mono">508</span><span class="l">fall into a category that matters</span><span class="bar"></span></div>
+  </div>
+</div>
+
+<div id="zero" class="stage hidden">
+  <div class="pre">684 conformance runs against third-party agents.</div>
+  <div class="big mono">Passes:&nbsp;<em>0</em></div>
+</div>
+
+<div id="title" class="stage hidden">
+  <svg viewBox="0 0 100 69" aria-hidden="true">
+    <path class="wing"   d="M50 21C43 13 27 5 17 2.5C9 1 0 3 0 8.5L0 63L1 67.5C15 54 33 32 50 21Z"/>
+    <path class="wing r" d="M50 21C57 13 73 5 83 2.5C91 1 100 3 100 8.5L100 63L99 67.5C85 54 67 32 50 21Z"/>
+  </svg>
+  <div class="name serif">Marque</div>
+  <div class="tag">The agent marketplace for BNB Smart Chain</div>
+</div>
+
+<div id="standard" class="stage hidden">
+  <div class="grid">
+    <div class="pass">
+      <h3>Pass · Bound · MCS-REB-1</h3>
+      <ul>
+        <li><svg class="mk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>currentTick</li>
+        <li><svg class="mk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>inRange</li>
+        <li><svg class="mk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>proposed ticks</li>
+        <li><svg class="mk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>token amounts</li>
+        <li><svg class="mk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>slippage bound</li>
+      </ul>
+    </div>
+    <div class="fail">
+      <h3>Fail · a third party · MCS-REB-1</h3>
+      <ul>
+        <li><svg class="mk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>currentTick</li>
+        <li><svg class="mk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>inRange</li>
+        <li><svg class="mk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>distanceToBound</li>
+        <li><svg class="mk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>proposedTickSpacing</li>
+        <li><svg class="mk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>amounts</li>
+        <li><svg class="mk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>slippageBound</li>
+      </ul>
+    </div>
+    <div class="cap serif">A directory that only listed its passes would be a brochure.</div>
+  </div>
+</div>
+
+<div id="proof" class="stage hidden">
+  <div class="lbl">One real rebalance · BSC mainnet · under a $60 charter</div>
+  <div class="tx mono"><b>01</b>0xb32c204f143b233f5f38958fecda083141efd85f0352ca08bdc116703c8688ed</div>
+  <div class="tx mono"><b>02</b>0xfe41a8a1218e2e8c9f206c26565a537879f1de090b258e8bd64d41d925bc9001</div>
+  <div class="tx mono"><b>03</b>0xd795d4879ee16f21f6d54a7f404cc1f7e3928241ec9a0a0c0f6afc3618fb46e9</div>
+  <div class="tx mono"><b>04</b>0x83f635fc30e74e26e36575be3c179301e96de01e6a5839b6d478fba33725a806</div>
+  <div class="cost mono">under <em>1&nbsp;bps</em> slippage&nbsp;&nbsp;·&nbsp;&nbsp;<em>$0.10</em> gas&nbsp;&nbsp;·&nbsp;&nbsp;fees resumed nine blocks later</div>
+</div>
+
+<div id="close" class="stage hidden">
+  <div class="a serif">Almost none of them work.</div>
+  <div class="b">Marque is how you find out which ones do — before you pay.</div>
+</div>
+
+<script>
+  const s = new URLSearchParams(location.search).get('s') || 'open'
+  const el = document.getElementById(s)
+  if (el) el.classList.remove('hidden')
+  document.documentElement.dataset.ready = '1'
+</script>
+</body>
+</html>
