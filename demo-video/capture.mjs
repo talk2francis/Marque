@@ -55,34 +55,42 @@ async function glide(page, x, y, steps = 28) {
   await page.waitForTimeout(260)
 }
 
-async function settle(page) {
+async function settle(page, ready) {
+  // Wait for real content — the homepage in particular sits on its loading
+  // screen for ~5s while the Desk polls, and capturing that is useless.
+  if (ready) {
+    await page.waitForSelector(ready, { state: 'visible', timeout: 30000 }).catch(() => {})
+  }
+  await page.waitForFunction(
+    () => !document.querySelector('.marque-loading-screen'),
+    { timeout: 30000 },
+  ).catch(() => {})
   await page.evaluate(() => document.fonts.ready)
-  await page.waitForLoadState('networkidle').catch(() => {})
+  await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {})
   await page.addStyleTag({
     content: `
-      /* Freeze anything that would drift between takes. */
       [data-reveal]{opacity:1!important;transform:none!important}
       *,*::before,*::after{caret-color:transparent!important}
-      /* grain overlay can moiré on downscale */
       body::before{opacity:0!important}
+      .marque-loading-screen{display:none!important}
     `,
   }).catch(() => {})
   await page.addInitScript(CURSOR_JS)
   await page.evaluate(CURSOR_JS)
-  await page.waitForTimeout(500)
+  await page.waitForTimeout(700)
 }
 
 /** slug -> async (page) => actions. Keep each shot longer than the edit needs. */
 const SHOTS = {
   '01_funnel_collapse': async (page) => {
     await page.goto(`${BASE}/`, { waitUntil: 'domcontentloaded' })
-    await settle(page)
+    await settle(page, '[class*="stats"]')
     await page.evaluate(() => document.querySelector('[class*="stats"]')?.scrollIntoView({ behavior: 'instant', block: 'center' }))
     await page.waitForTimeout(3500)
   },
   '02_standard_fail': async (page) => {
     await page.goto(`${BASE}/standard`, { waitUntil: 'domcontentloaded' })
-    await settle(page)
+    await settle(page, 'text=/MCS-/')
     await page.evaluate(() => {
       const el = [...document.querySelectorAll('*')].find((n) => /MCS-REB-1|failed|Synergix/i.test(n.textContent ?? '') && n.getBoundingClientRect().height < 600)
       el?.scrollIntoView({ behavior: 'instant', block: 'center' })
@@ -91,7 +99,7 @@ const SHOTS = {
   },
   '03_positions_read': async (page) => {
     await page.goto(`${BASE}/positions`, { waitUntil: 'domcontentloaded' })
-    await settle(page)
+    await settle(page, 'input')
     const box = await page.locator('input[type="text"], input:not([type])').first().boundingBox()
     if (box) {
       await glide(page, box.x + box.width / 2, box.y + box.height / 2)
@@ -104,7 +112,7 @@ const SHOTS = {
   },
   '04_marketplace_sort': async (page) => {
     await page.goto(`${BASE}/register`, { waitUntil: 'domcontentloaded' })
-    await settle(page)
+    await settle(page, 'text=Warranted')
     await page.evaluate(() => document.querySelector('[class*="rows"], [class*="mktRow"]')?.scrollIntoView({ behavior: 'instant', block: 'start' }))
     await page.waitForTimeout(800)
     const chip = await page.getByRole('button', { name: /^Warranted$/ }).boundingBox().catch(() => null)
@@ -113,7 +121,7 @@ const SHOTS = {
   },
   '05_marketplace_dedupe': async (page) => {
     await page.goto(`${BASE}/register`, { waitUntil: 'domcontentloaded' })
-    await settle(page)
+    await settle(page, 'text=/registered identities/')
     await page.evaluate(() => {
       const el = [...document.querySelectorAll('a,button,span')].find((n) => /registered identities/i.test(n.textContent ?? ''))
       el?.scrollIntoView({ behavior: 'instant', block: 'center' })
@@ -121,45 +129,36 @@ const SHOTS = {
     await page.waitForTimeout(3500)
   },
   '06_compare': async (page) => {
-    await page.goto(`${BASE}/register`, { waitUntil: 'domcontentloaded' })
-    await settle(page)
-    const btns = await page.getByRole('button', { name: /^Compare$/ }).all()
-    for (const b of btns.slice(0, 2)) {
-      const bb = await b.boundingBox(); if (!bb) continue
-      await glide(page, bb.x + bb.width / 2, bb.y + bb.height / 2)
-      await page.mouse.click(bb.x + bb.width / 2, bb.y + bb.height / 2)
-      await page.waitForTimeout(500)
-    }
-    await page.waitForTimeout(1400)
-    const go = await page.getByRole('link', { name: /Compare \d/ }).boundingBox().catch(() => null)
-    if (go) { await glide(page, go.x + go.width / 2, go.y + go.height / 2); await page.mouse.click(go.x + go.width / 2, go.y + go.height / 2); await page.waitForLoadState('domcontentloaded') }
-    await settle(page)
-    await page.waitForTimeout(3000)
+    await page.goto(`${BASE}/compare?agents=marque:bound,marque:keel,marque:redcell`, { waitUntil: 'domcontentloaded' })
+    await settle(page, 'text=Track record')
+    await page.evaluate(() => document.querySelector('[class*="grid"]')?.scrollIntoView({ behavior: 'instant', block: 'start' }))
+    await page.waitForTimeout(3500)
   },
   '07_standard_pass_fail': async (page) => {
     await page.goto(`${BASE}/standard`, { waitUntil: 'domcontentloaded' })
-    await settle(page)
+    await settle(page, 'text=/MCS-/')
     await page.waitForTimeout(4500)
   },
   '08_charter_grant': async (page) => {
     await page.goto(`${BASE}/app/charter?agent=marque:bound&category=rebalancing`, { waitUntil: 'domcontentloaded' })
-    await settle(page)
+    await settle(page, 'text=/may not/')
     await page.waitForTimeout(7000) // the cockpit composes the charter line by line
   },
   '09_run_room': async (page) => {
-    await page.goto(`${BASE}/runs`, { waitUntil: 'domcontentloaded' })
-    await settle(page)
+    const runId = process.env.RUN_ID ?? 'c89d35ac-28c8-4bd7-b307-3b25a81f080c'
+    await page.goto(`${BASE}/runs/${runId}`, { waitUntil: 'domcontentloaded' })
+    await settle(page, 'text=Receipt')
     await page.waitForTimeout(4500)
   },
   '10_ledger': async (page) => {
     await page.goto(`${BASE}/ledger`, { waitUntil: 'domcontentloaded' })
-    await settle(page)
+    await settle(page, 'text=/ADV-/')
     await page.evaluate(() => document.querySelector('[class*="experiment"], [class*="expRow"]')?.scrollIntoView({ behavior: 'instant', block: 'center' }))
     await page.waitForTimeout(4000)
   },
   '11_pancake_proof': async (page) => {
     await page.goto(`${BASE}/pancakeswap/proof`, { waitUntil: 'domcontentloaded' })
-    await settle(page)
+    await settle(page, 'text=/0xb32c204f/')
     await page.evaluate(() => {
       const el = [...document.querySelectorAll('*')].find((n) => /0xb32c204f/i.test(n.textContent ?? ''))
       el?.scrollIntoView({ behavior: 'instant', block: 'center' })

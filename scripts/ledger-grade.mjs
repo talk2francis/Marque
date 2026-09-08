@@ -72,7 +72,7 @@ function anonymise(text) {
  * named on the methodology page and on every benchmark — a reader should know
  * exactly what produced a judgement score.
  */
-const GRADER_MODEL = process.env.LEDGER_GRADER_MODEL ?? 'deepseek-v4-flash'
+const GRADER_MODEL = process.env.LEDGER_GRADER_MODEL ?? 'deepseek-v4-pro'
 
 /**
  * Grade ONE answer against the rubric.
@@ -111,46 +111,54 @@ ${notes}
 ${answer}
 
 ## WHAT TO RETURN
-Return ONLY this JSON object, with every key present and filled in:
+Think briefly, then return ONLY this JSON object on the last line — one integer per criterion:
 
-${JSON.stringify(
-  Object.fromEntries(rubric.criteria.map((c) => [c.id, { points: `<integer 0-${c.points}>`, reason: '<one concrete sentence>' }])),
-  null,
-  2,
-)}
+${JSON.stringify(Object.fromEntries(rubric.criteria.map((c) => [c.id, `<integer 0-${c.points}>`]))).replace(/"</g, '<').replace(/>"/g, '>')}
 
 Rules:
-- Every key above must be present. An omitted criterion invalidates the whole grade.
-- points is an integer from 0 to that criterion's stated maximum. Never exceed the maximum.
+- Every criterion id above must be a key. Each value is a single integer, 0 to that
+  criterion's stated maximum, never over.
 - Award points for what the answer actually does. Zero is a strong claim — use it only when
-  nothing in the answer addresses that criterion at all. An answer that is correct but brief
-  still earns correctness marks.
-- The reason must cite something specific from the answer, not a generality.`
+  nothing in the answer addresses that criterion at all. A correct but brief answer still earns
+  correctness marks; a long answer that omits a required field does not earn completeness for effort.
+- Do not output prose after the JSON.`
 
-  // v4-flash spends "reasoning tokens" before the answer; a tight max_tokens
-  // gets eaten by that and returns empty content. Give it plenty of room and
-  // retry a couple of times on a transient empty/timeout.
+  // The grader models spend "reasoning tokens" before the answer; a tight
+  // max_tokens gets eaten by that. Give plenty of room, forbid the long
+  // reasoning explicitly, and hard-abort a stalled request.
   let lastErr
   for (let attempt = 1; attempt <= 3; attempt++) {
     try {
       const res = await fetch('https://api.deepseek.com/chat/completions', {
         method: 'POST',
         headers: { authorization: `Bearer ${KEY}`, 'content-type': 'application/json' },
+        signal: AbortSignal.timeout(180_000),
         body: JSON.stringify({
           model: GRADER_MODEL,
-          messages: [{ role: 'user', content: prompt }],
+          messages: [
+            { role: 'system', content: 'Answer immediately with the JSON only. Do not write out step-by-step reasoning. At most one short sentence of thought, then the JSON object on its own line.' },
+            { role: 'user', content: prompt },
+          ],
           temperature: 0, // judgement as reproducible as the arithmetic it grades
-          max_tokens: 16000,
-          response_format: { type: 'json_object' },
+          max_tokens: 8000,
         }),
       })
       if (!res.ok) throw new Error(`${res.status}: ${(await res.text()).slice(0, 300)}`)
       const body = await res.json()
       const choice = body.choices?.[0]
       const text = choice?.message?.content ?? ''
-      const m = text.match(/\{[\s\S]*\}/)
+      // last {...} in the text — after any reasoning the model prints
+      const matches = [...text.matchAll(/\{[^{}]*\}/g)]
+      const m = matches[matches.length - 1]
       if (!m) throw new Error(`empty content (finish_reason=${choice?.finish_reason})`)
-      return JSON.parse(m[0])
+      const raw = JSON.parse(m[0])
+      // normalise {id: 30} and {id: {points: 30}} to {id: {points: 30}}
+      const out = {}
+      for (const c of rubric.criteria) {
+        const v = raw[c.id]
+        out[c.id] = { points: typeof v === 'object' && v ? Number(v.points ?? 0) : Number(v ?? 0) }
+      }
+      return out
     } catch (e) {
       lastErr = e
       if (attempt < 3) await new Promise((r) => setTimeout(r, 2000 * attempt))

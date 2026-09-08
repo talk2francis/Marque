@@ -119,17 +119,23 @@ function Benchmark({ b }: { b: LedgerBenchmark }) {
             />
             <Cell
               label="QUALITY"
-              human={h.quality === null ? awaiting : <b>{h.quality.total.toFixed(0)} / {h.quality.outOf}</b>}
+              human={
+                h.quality === null
+                  ? (h.reps > 0 ? <span className={styles.muted}>blind grade pending</span> : awaiting)
+                  : <b>{h.quality.total.toFixed(0)} / {h.quality.outOf}</b>
+              }
               agentVal={
                 a.quality === null
-                  ? <span className={styles.muted}>{a.reps > 0 ? 'unscored — blind scoring needs both arms' : 'not run'}</span>
+                  ? <span className={styles.muted}>{a.reps > 0 ? 'blind grade pending' : 'not run'}</span>
                   : <b>{a.quality.total.toFixed(0)} / {a.quality.outOf}</b>
               }
             />
             <p className={styles.expFoot}>
-              {a.reps} agent repetition{a.reps === 1 ? '' : 's'} recorded, {h.reps} manual.
-              {' '}The agent numbers are real; the comparison is not a comparison until a human
-              runs the same task by hand and both arms are scored blind.
+              {a.reps} agent repetition{a.reps === 1 ? '' : 's'} recorded, {h.reps} manual — both by
+              hand with a stopwatch. Time and cost are measured facts. The quality score is the one
+              piece still open: it is graded blind, by a language model, against the rubric that was
+              hashed before either arm ran (<code className="mono">scripts/ledger-grade.mjs</code>),
+              and it lands the moment that grader&rsquo;s API is reachable again.
             </p>
           </div>
         )
