@@ -189,5 +189,19 @@ module.exports = {
       out_file: '/root/.pm2/logs/marque-web-out.log',
       error_file: '/root/.pm2/logs/marque-web-err.log',
     },
+    {
+      // P11 item 4 — health monitor: /status + each agent /health every 60s,
+      // Telegram alert on two consecutive failures.
+      name: 'marque-health',
+      cwd: ROOT,
+      script: `${ROOT}/ops/health-monitor.sh`,
+      interpreter: 'bash',
+      autorestart: true,
+      max_restarts: 100,
+      restart_delay: 10000,
+      time: true,
+      out_file: '/root/.pm2/logs/marque-health-out.log',
+      error_file: '/root/.pm2/logs/marque-health-err.log',
+    },
   ],
 }

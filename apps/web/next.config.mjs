@@ -32,15 +32,43 @@ const nextConfig = {
   poweredByHeader: false,
   eslint: { ignoreDuringBuilds: true },
   async headers() {
+    // Pragmatic CSP (P11 item 6). The browser never talks to an RPC directly for
+    // reads — those are server-side — so connect-src only needs self, the client
+    // RPC wagmi is configured with, and WalletConnect's relay/verify for the one
+    // signature flow. 'unsafe-inline' on script/style is Next's cost without a
+    // nonce middleware; everything else is locked down.
+    const csp = [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+      "style-src 'self' 'unsafe-inline'",
+      "img-src 'self' data: blob:",
+      "font-src 'self' data:",
+      "connect-src 'self' https://bsc-dataseed.bnbchain.org https://bsc-testnet-rpc.publicnode.com https://*.walletconnect.com https://*.walletconnect.org wss://*.walletconnect.com wss://*.walletconnect.org https://explorer-api.walletconnect.com https://pulse.walletconnect.org",
+      "frame-src 'self' https://verify.walletconnect.com https://verify.walletconnect.org",
+      "frame-ancestors 'none'",
+      "base-uri 'self'",
+      "form-action 'self'",
+      "object-src 'none'",
+      'upgrade-insecure-requests',
+    ].join('; ')
+
     return [
       {
         source: '/:path*',
         headers: [
+          { key: 'Content-Security-Policy', value: csp },
           { key: 'X-Content-Type-Options', value: 'nosniff' },
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
           { key: 'X-Frame-Options', value: 'DENY' },
-          { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+          { key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains' },
+          { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(), payment=(), usb=()' },
+          { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
         ],
+      },
+      {
+        // The read API is meant to be consumed from anywhere.
+        source: '/api/v1/:path*',
+        headers: [{ key: 'Access-Control-Allow-Origin', value: '*' }],
       },
     ]
   },

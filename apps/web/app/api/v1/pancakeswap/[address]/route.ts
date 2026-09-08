@@ -27,6 +27,25 @@ export const revalidate = 0
 /** How many observations back to consider. Two-minute cycles, so this is ~5 days. */
 const OBSERVATION_LIMIT = 3600
 
+/**
+ * A short in-process response cache (P11 load hardening). Position reads are
+ * chain-heavy; under concurrency the same address is asked for repeatedly (a
+ * judge hitting refresh, a crowd on the demo). 12s is short enough that the
+ * page never shows genuinely stale state and long enough to collapse a burst.
+ */
+const CACHE_TTL_MS = 12_000
+const respCache = new Map<string, { at: number; body: unknown }>()
+function cacheGet(k: string): unknown | null {
+  const hit = respCache.get(k)
+  if (hit && Date.now() - hit.at < CACHE_TTL_MS) return hit.body
+  if (hit) respCache.delete(k)
+  return null
+}
+function cacheSet(k: string, body: unknown): void {
+  if (respCache.size > 500) respCache.clear()
+  respCache.set(k, { at: Date.now(), body })
+}
+
 interface RankedAgent {
   id: string
   name: string
@@ -131,6 +150,12 @@ export async function GET(_req: Request, { params }: { params: Promise<{ address
     return NextResponse.json({ error: 'not_an_address', detail: 'Paste a 0x address with 40 hex characters.' }, { status: 400 })
   }
 
+  const cacheKey = address.toLowerCase()
+  const cached = cacheGet(cacheKey)
+  if (cached !== null) {
+    return NextResponse.json(cached, { headers: { 'x-marque-cache': 'hit' } })
+  }
+
   // The reader returns a discriminated result rather than throwing, and the
   // type system will not let the success fields be touched without checking —
   // which is the point: an unread position must never render as an empty one.
@@ -196,7 +221,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ address
     })
   }
 
-  return NextResponse.json({
+  const payload = {
     owner: portfolio.owner,
     positions,
     emptyPositions: portfolio.emptyPositions,
@@ -206,5 +231,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ address
       'Hours out of range is measured from our own tick observations, every two minutes. '
       + 'BSC keeps ~64 blocks of state, the official PancakeSwap subgraph is about four months behind, '
       + 'and public log queries reach back ~37 minutes, so no other source exists (FINDINGS F-06).',
-  })
+  }
+  cacheSet(cacheKey, payload)
+  return NextResponse.json(payload, { headers: { 'x-marque-cache': 'miss' } })
 }
