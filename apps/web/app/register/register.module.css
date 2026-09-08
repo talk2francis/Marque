@@ -16,6 +16,16 @@
 }
 .graveyardNote > span { margin-right: var(--s2); }
 .status { color: var(--fg-soft); }
+.listNote {
+  margin: var(--s3) 0 var(--s4);
+  max-width: 74ch;
+  padding-left: var(--s3);
+  border-left: 2px solid color-mix(in srgb, var(--brass-mark) 45%, transparent);
+  font-size: var(--size-caption);
+  line-height: 1.6;
+  color: var(--fg-soft);
+}
+.listNote b { color: var(--fg); font-weight: 600; }
 .error {
   padding: var(--s3); border-radius: 2px;
   border: 1px solid color-mix(in srgb, var(--breach) 40%, transparent); color: var(--breach);
@@ -159,10 +169,12 @@
   object-position: center 34%;
   display: block;
 }
-:root[data-theme='dark'] .brandBand img,
-:root:not([data-theme='light']) .brandBand img { filter: brightness(0.92); }
+.bandDark { display: none; }
+:root[data-theme='dark'] .bandLight { display: none; }
+:root[data-theme='dark'] .bandDark { display: block; filter: brightness(0.94); }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) .brandBand img { filter: brightness(0.92); }
+  :root:not([data-theme='light']) .bandLight { display: none; }
+  :root:not([data-theme='light']) .bandDark { display: block; filter: brightness(0.94); }
 }
 .brandBand::after {
   content: '';

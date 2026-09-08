@@ -6,9 +6,9 @@ import styles from './site.module.css'
 type Mode = 'light' | 'dark'
 
 /**
- * The daylight / night switch. An explicit choice is stored in localStorage and
- * wins over the OS preference; with nothing stored the OS decides (handled in
- * CSS). The pre-paint bootstrap in layout.tsx keeps this flash-free.
+ * The daylight / night switch. Night is the default; an explicit choice is
+ * stored in localStorage and wins. The pre-paint bootstrap in layout.tsx sets
+ * the attribute before first paint, so this only needs to reflect it.
  */
 export function ThemeToggle() {
   const [mode, setMode] = useState<Mode | null>(null)
@@ -20,7 +20,8 @@ export function ThemeToggle() {
     if (stored === 'light' || stored === 'dark') {
       setMode(stored)
     } else {
-      setMode(window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+      // Mirror the bootstrap: default is dark unless the DOM already says light.
+      setMode(document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark')
     }
   }, [])
 

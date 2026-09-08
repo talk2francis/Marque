@@ -201,6 +201,13 @@ export function Marketplace({ category: fixedCategory }: { category?: string }) 
         </p>
       )}
 
+      <p className={styles.listNote}>
+        <b>Preview is free.</b> The agent answers a real question about a real position and Marque
+        grades the answer field by field — before you pay anything. Rows below the warranted ones
+        answered a probe but have not been tested against the Standard; we show exactly what we
+        measured — liveness, latency, identity — and nothing we did not.
+      </p>
+
       {loading && <p className={styles.status}>Loading…</p>}
       {error && <div className={styles.error} role="alert">{error}</div>}
 
@@ -265,11 +272,21 @@ export function Marketplace({ category: fixedCategory }: { category?: string }) 
                   >
                     {picked ? 'Selected' : 'Compare'}
                   </button>
-                  {a.previewable && profileHref(a)
-                    ? <LinkButton size="sm" variant="secondary" href={`${profileHref(a)}#preview`}>Preview</LinkButton>
-                    : <button type="button" className={styles.actionMuted} disabled title="Read-only preview not available">Preview</button>}
+                  {/* Preview leads for anything not yet warranted — it is the honest
+                      call-to-action when there is no pass to trust. Warranted agents
+                      lead with Hire. Non-previewable third parties show neither, rather
+                      than a row of dead buttons. */}
+                  {a.previewable && profileHref(a) && (
+                    <LinkButton
+                      size="sm"
+                      variant={a.warrant.status === 'warranted' ? 'secondary' : 'primary'}
+                      href={`${profileHref(a)}#preview`}
+                    >
+                      Preview free
+                    </LinkButton>
+                  )}
                   {hireable
-                    ? <LinkButton size="sm" variant="primary" href={`/app/charter?agent=${encodeURIComponent(a.agentId)}${a.category ? `&category=${a.category}` : ''}`}>Hire</LinkButton>
+                    ? <LinkButton size="sm" variant={a.warrant.status === 'warranted' ? 'primary' : 'secondary'} href={`/app/charter?agent=${encodeURIComponent(a.agentId)}${a.category ? `&category=${a.category}` : ''}`}>Hire</LinkButton>
                     : <button type="button" className={styles.actionMuted} disabled title={a.hireBlockedReason ?? undefined}>Hire — {a.hireBlockedReason}</button>}
                 </span>
               </div>

@@ -51,20 +51,16 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#f4f1e9' },
-    { media: '(prefers-color-scheme: dark)', color: '#101109' },
-  ],
+  // Night is the product default, so the browser chrome matches it out of the box.
+  themeColor: '#101109',
   width: 'device-width',
   initialScale: 1,
 }
-
-/**
- * Set the theme before first paint so there is no flash. Reads an explicit
- * choice from localStorage; otherwise leaves it to the OS preference (the CSS
- * handles that). Deliberately tiny and synchronous.
- */
-const THEME_BOOTSTRAP = `(function(){try{var t=localStorage.getItem('marque-theme');if(t==='dark'||t==='light'){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();`
+// Dark is the default. A visitor who has explicitly chosen light keeps it
+// (stored); everyone else — every judge landing cold — gets night, which is the
+// theme the product was designed around. The attribute is set before first
+// paint so there is no flash.
+const THEME_BOOTSTRAP = `(function(){try{var t=localStorage.getItem('marque-theme');document.documentElement.setAttribute('data-theme',(t==='light'||t==='dark')?t:'dark');}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();`
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

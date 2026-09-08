@@ -38,17 +38,26 @@ function short(hash: string): string {
 
 /** The three headline numbers for one arm, or nulls when it has not run. */
 function armStats(runs: Array<{ elapsedMs: number; costBreakdown: Record<string, unknown>; scoreTotal: number | null; scoreOutOf: number | null }>) {
-  if (runs.length === 0) return { time: null, cost: null, quality: null, reps: 0 }
+  if (runs.length === 0) return { time: null, cost: null, quality: null, rate: null, reps: 0 }
   const mean = (xs: number[]) => xs.reduce((a, b) => a + b, 0) / xs.length
+  const num = (v: unknown) => (typeof v === 'number' && Number.isFinite(v) ? v : 0)
   const time = mean(runs.map((r) => r.elapsedMs))
-  const costNums = runs.flatMap((r) => Object.values(r.costBreakdown).filter((v): v is number => typeof v === 'number'))
-  const cost = costNums.length ? mean(runs.map((r) => Object.values(r.costBreakdown).filter((v): v is number => typeof v === 'number').reduce((a, b) => a + b, 0))) : null
+
+  // Sum only the actual spend lines. humanRateUsdPerHour is an input to the
+  // human-cost calc, NOT a cost — adding it inflated the figure (F: it read
+  // $313 instead of $41). It is surfaced separately so a reader can re-price.
+  const COST_KEYS = ['gasUsd', 'llmUsd', 'agentFeeUsd', 'humanUsd']
+  const rowCost = (b: Record<string, unknown>) => COST_KEYS.reduce((a, k) => a + num(b[k]), 0)
+  const cost = mean(runs.map((r) => rowCost(r.costBreakdown)))
+  const rates = runs.map((r) => num(r.costBreakdown['humanRateUsdPerHour'])).filter((x) => x > 0)
+  const rate = rates.length ? mean(rates) : null
+
   const scored = runs.filter((r) => r.scoreTotal !== null && r.scoreOutOf !== null)
   const first = scored[0]
   const quality = first
     ? { total: mean(scored.map((r) => r.scoreTotal as number)), outOf: first.scoreOutOf as number }
     : null
-  return { time, cost, quality, reps: runs.length }
+  return { time, cost, quality, rate, reps: runs.length }
 }
 
 function Benchmark({ b }: { b: LedgerBenchmark }) {
@@ -100,7 +109,12 @@ function Benchmark({ b }: { b: LedgerBenchmark }) {
             />
             <Cell
               label="COST"
-              human={h.cost === null ? awaiting : <b>${h.cost.toFixed(2)}</b>}
+              human={h.cost === null ? awaiting : (
+                <>
+                  <b>${h.cost.toFixed(2)}</b>
+                  {h.rate !== null && <span className={styles.muted}> · {ms(Math.round(h.time ?? 0))} @ ${h.rate.toFixed(0)}/h</span>}
+                </>
+              )}
               agentVal={a.cost === null ? <span className={styles.muted}>—</span> : <b>${a.cost.toFixed(2)}</b>}
             />
             <Cell

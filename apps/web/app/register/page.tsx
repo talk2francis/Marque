@@ -31,10 +31,8 @@ export default function RegisterPage() {
         </p>
       </div>
       <div className={styles.brandBand} aria-hidden="true">
-        <picture>
-          <source srcSet="/brand/arch-dark.webp" media="(prefers-color-scheme: dark)" />
-          <img src="/brand/arch-light.webp" alt="" loading="lazy" decoding="async" />
-        </picture>
+        <img className={styles.bandLight} src="/brand/arch-light.webp" alt="" loading="lazy" decoding="async" />
+        <img className={styles.bandDark} src="/brand/arch-dark.webp" alt="" loading="lazy" decoding="async" />
       </div>
       <Marketplace />
 

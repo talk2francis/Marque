@@ -7,6 +7,7 @@ import { funnel, categoryFunnel } from '@marque/registry'
 import { marketplaceAgents } from '../lib/marketplace'
 import { Desk } from './desk/Desk'
 import { CountUp } from './_components/CountUp'
+import { GlossaryStrip } from './_components/Glossary'
 import { SiteHeader, SiteFooter } from './_components/SiteHeader'
 import styles from './home.module.css'
 
@@ -199,14 +200,13 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ a
             </div>
           ))}
           <p className={styles.statsNote}><ProvenanceChip provenance="MEASURED" /> Recomputed on every request. Nothing here is a stored figure.</p>
+          <GlossaryStrip />
         </section>
 
         {/* ---- Brand band: the one cinematic breath between hero and Act I ---- */}
         <section className={styles.band} aria-hidden="true" data-reveal>
-          <picture>
-            <source srcSet="/brand/field-dark.webp" media="(prefers-color-scheme: dark)" />
-            <img src="/brand/field-light.webp" alt="" loading="lazy" decoding="async" />
-          </picture>
+          <img className={styles.bandLight} src="/brand/field-light.webp" alt="" loading="lazy" decoding="async" />
+          <img className={styles.bandDark} src="/brand/field-dark.webp" alt="" loading="lazy" decoding="async" />
         </section>
 
         {/* ===== ACT I — THE FIELD ===== */}
