@@ -56,7 +56,7 @@ async function loadStandard(): Promise<string | null> {
 }
 
 export default async function StandardPage() {
-  const [markdown, results, cases, perTest, topFields] = await Promise.all([
+  const [markdown, results, totals, cases, perTest, topFields] = await Promise.all([
     loadStandard(),
     db().execute(sql`
       select test_id, agent_id, pass, failed_fields, ran_at, error, block_number, latency_ms
@@ -64,6 +64,13 @@ export default async function StandardPage() {
       where agent_id not like 'stub:%'
       order by ran_at desc limit 200
     `).then(unwrap).catch(() => []),
+    db().execute(sql`
+      select
+        count(*)::int as total,
+        count(*) filter (where error is not null)::int as errored,
+        count(*) filter (where pass and agent_id not like 'marque:%')::int as third_party_pass
+      from conformance_result where agent_id not like 'stub:%' and agent_id not like 'marque:%'
+    `).then(unwrap).catch(() => [{ total: 0, errored: 0, third_party_pass: 0 }]),
     db().execute(sql`
       select test_id, id, block_number, ground_truth_hash, captured_at
       from conformance_case where active = true order by test_id
@@ -199,10 +206,16 @@ export default async function StandardPage() {
               </tbody>
             </table>
             <p className={styles.note}>
-              <ProvenanceChip provenance="MEASURED" /> {results.length} runs recorded against real
-              third-party agents. Of those, {results.filter((r) => r['error']).length} could not be
-              reached or exposed no interface we could address — recorded as a failure to answer,
-              which is distinct from answering wrongly.
+              <ProvenanceChip provenance="MEASURED" />{' '}
+              {Number((totals[0]?.['total'] as number) ?? 0).toLocaleString('en-US')} conformance
+              runs against third-party agents on this chain,{' '}
+              {Number((totals[0]?.['third_party_pass'] as number) ?? 0) === 0
+                ? 'zero passed'
+                : `${Number(totals[0]?.['third_party_pass']).toLocaleString('en-US')} passed`}.
+              Of those, {Number((totals[0]?.['errored'] as number) ?? 0).toLocaleString('en-US')}{' '}
+              could not be reached or exposed no interface we could address — recorded as a failure
+              to answer, which is distinct from answering wrongly. The table above shows the 200
+              most recent.
             </p>
           </>
         )}
