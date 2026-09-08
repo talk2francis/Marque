@@ -5,6 +5,7 @@ import { track } from '../../lib/track'
 import Link from 'next/link'
 import { Chip, DataCell, WarrantBadge, EmptyState, ProvenanceChip, LinkButton } from '@marque/ui'
 import { ReferenceMark } from '../_components/ReferenceMark'
+import { AgentAvatar } from '../_components/AgentAvatar'
 import styles from './register.module.css'
 
 interface MarketRow {
@@ -225,6 +226,9 @@ export function Marketplace({ category: fixedCategory }: { category?: string }) 
             const hireable = a.hireBlockedReason === null
             return (
               <div className={styles.mktRow} data-agent={a.agentId} key={a.agentId}>
+                <span className={styles.mktAvatar}>
+                  <AgentAvatar id={a.agentId} category={a.category} reference={a.isReference} size={38} />
+                </span>
                 <div className={styles.mktMain}>
                   <div className={styles.mktNameLine}>
                     {profileHref(a)

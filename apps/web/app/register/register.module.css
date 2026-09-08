@@ -80,9 +80,10 @@
 
 .mktRow {
   display: grid; align-items: center; gap: var(--s3);
-  grid-template-columns: minmax(0, 1fr) auto minmax(150px, 200px) minmax(0, 118px) auto;
+  grid-template-columns: 38px minmax(0, 1fr) auto minmax(150px, 200px) minmax(0, 118px) auto;
   padding: var(--s3) 0; border-bottom: 1px solid var(--line);
 }
+.mktAvatar { align-self: center; }
 .mktMain { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 .mktNameLine { display: flex; align-items: baseline; gap: var(--s2); flex-wrap: wrap; }
 .mktNameLine .name { font-size: var(--size-title); font-weight: 500; display: inline-flex; align-items: center; min-height: 26px; }
@@ -142,7 +143,11 @@
 }
 
 @media (max-width: 900px) {
-  .mktRow { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "main live" "warrant price" "actions actions"; }
+  .mktRow {
+    grid-template-columns: 34px minmax(0, 1fr) auto;
+    grid-template-areas: "avatar main live" "avatar warrant price" "avatar actions actions";
+  }
+  .mktAvatar { grid-area: avatar; align-self: start; }
   .mktMain { grid-area: main; }
   .mktLive { grid-area: live; }
   .mktWarrant { grid-area: warrant; }
