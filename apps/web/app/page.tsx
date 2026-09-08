@@ -113,8 +113,11 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ a
         where pass = true and agent_id not like 'stub:%'
       ) as warranted,
       (select count(*)::int from conformance_result
-        where pass = false and error is null and agent_id not like 'stub:%' and agent_id not like 'marque:%'
-      ) as public_failures
+        where agent_id not like 'stub:%' and agent_id not like 'marque:%'
+      ) as third_party_runs,
+      (select count(*)::int from conformance_result
+        where pass = true and agent_id not like 'stub:%' and agent_id not like 'marque:%'
+      ) as third_party_passes
   `).then((r) => (((r as { rows?: unknown[] }).rows ?? (r as unknown[])) as Array<Record<string, unknown>>)[0] ?? {})
     .catch(() => ({} as Record<string, unknown>))
 
@@ -414,9 +417,12 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ a
                 <p className={styles.pfFailNote}>
                   Registered on BNB Smart Chain, answers when called, and failed{' '}
                   {Number(namedFailure['n'])} of its checked fields. Of{' '}
-                  {Number(homeCounts['public_failures'] ?? 0)} third-party conformance runs recorded
-                  so far, none has passed. A directory that only listed its passes would be a
-                  brochure.
+                  {Number(homeCounts['third_party_runs'] ?? 0).toLocaleString('en-US')} conformance
+                  runs against third-party agents on this chain,{' '}
+                  {Number(homeCounts['third_party_passes'] ?? 0) === 0
+                    ? 'zero have passed'
+                    : `${Number(homeCounts['third_party_passes']).toLocaleString('en-US')} have passed`}
+                  . A directory that only listed its passes would be a brochure.
                 </p>
               </div>
             )}

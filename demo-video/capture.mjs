@@ -84,9 +84,14 @@ async function settle(page, ready) {
 const SHOTS = {
   '01_funnel_collapse': async (page) => {
     await page.goto(`${BASE}/`, { waitUntil: 'domcontentloaded' })
-    await settle(page, '[class*="stats"]')
-    await page.evaluate(() => document.querySelector('[class*="stats"]')?.scrollIntoView({ behavior: 'instant', block: 'center' }))
-    await page.waitForTimeout(3500)
+    await settle(page, 'text=A registration is not a résumé')
+    // scroll to the real funnel (the "registration is not a résumé" bars) and
+    // let the CountUp figures land
+    await page.evaluate(() => {
+      const el = [...document.querySelectorAll('h2, [class*="statement"]')].find((n) => /registration is not a résumé/i.test(n.textContent ?? ''))
+      el?.scrollIntoView({ behavior: 'instant', block: 'start' })
+    })
+    await page.waitForTimeout(4000)
   },
   '02_standard_fail': async (page) => {
     await page.goto(`${BASE}/standard`, { waitUntil: 'domcontentloaded' })
