@@ -11,6 +11,10 @@
 .colName { font-size: var(--size-title); font-weight: 500; }
 .cell { display: flex; flex-direction: column; gap: 6px; font-size: var(--size-data); align-items: flex-start; }
 .muted { color: var(--fg-soft); font-size: var(--size-caption); }
+.link { color: var(--chain); text-decoration: none; font-size: var(--size-caption); border-bottom: 1px solid color-mix(in srgb, var(--chain) 30%, transparent); }
+.link:hover { border-bottom-color: var(--chain); }
+.colName { color: var(--fg); text-decoration: none; }
+.colName:hover { color: var(--chain); }
 .dot { width: 7px; height: 7px; border-radius: 999px; display: inline-block; margin-right: 6px; }
 .dotLive { background: var(--holds); }
 .dotDown { background: var(--breach); }

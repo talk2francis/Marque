@@ -8,8 +8,10 @@
   --font-statement: var(--font-fraunces), 'Iowan Old Style', Georgia, serif;
 }
 
-/* The loading mark: the real symbol, a slow quiet breath. Same final frame
-   under reduced motion. Theme-aware (ink in daylight, cream at night). */
+/* The loading mark: the real symbol. The wings unfold from the centre pinch,
+   once; then the mark holds a slow even breath with a soft brass aura. Same
+   final frame under reduced motion. Theme-aware (ink in daylight, cream at
+   night). */
 .marque-loading-screen {
   min-height: 100dvh;
   display: grid;
@@ -19,14 +21,47 @@
 }
 .marque-loading-mark {
   color: var(--fg-soft);
-  animation: marque-breath 1700ms var(--ease) infinite;
+  /* breath starts after the unfold has landed */
+  animation: marque-breath 2400ms var(--ease-settle) 640ms infinite;
+  filter: drop-shadow(0 0 0 transparent);
+}
+.marque-loading-mark svg { display: block; overflow: visible; }
+.marque-loading-mark path {
+  opacity: 0;
+  transform-box: fill-box;
+  animation: marque-wing-l 620ms var(--ease-settle) both;
+}
+.marque-loading-mark path[data-wing='l'] { transform-origin: 100% 32%; }
+.marque-loading-mark path[data-wing='r'] {
+  transform-origin: 0% 32%;
+  animation-name: marque-wing-r;
+  animation-delay: 90ms;
+}
+@keyframes marque-wing-l {
+  0%   { opacity: 0; transform: scale(0.6) rotate(-13deg); }
+  62%  { opacity: 1; transform: scale(1.03) rotate(1.5deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0); }
+}
+@keyframes marque-wing-r {
+  0%   { opacity: 0; transform: scale(0.6) rotate(13deg); }
+  62%  { opacity: 1; transform: scale(1.03) rotate(-1.5deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0); }
 }
 @keyframes marque-breath {
-  0%, 100% { opacity: 0.3; transform: scale(0.92); }
-  50% { opacity: 0.92; transform: scale(1); }
+  0%, 100% {
+    opacity: 0.5;
+    transform: scale(0.965);
+    filter: drop-shadow(0 3px 10px color-mix(in srgb, var(--brass-mark) 0%, transparent));
+  }
+  50% {
+    opacity: 0.95;
+    transform: scale(1);
+    filter: drop-shadow(0 3px 22px color-mix(in srgb, var(--brass-mark) 34%, transparent));
+  }
 }
 @media (prefers-reduced-motion: reduce) {
-  .marque-loading-mark { animation: none; opacity: 0.85; }
+  .marque-loading-mark,
+  .marque-loading-mark path { animation: none; opacity: 0.85; transform: none; }
 }
 
 /* ===== Scroll-reveal — the page has motion now (P10.5 rev) ===== */

@@ -15,14 +15,19 @@ import styles from './site.module.css'
 
 type Active =
   | 'register' | 'positions' | 'benchmarks' | 'builders' | 'docs'
-  | 'charters' | 'standard' | 'ledger' | 'pancake' | 'status'
+  | 'charters' | 'standard' | 'ledger' | 'pancake' | 'status' | 'me'
 
+/**
+ * Six links were one too many and read as a pile of integrations. The primary
+ * nav is now the buyer's path only — find an agent, read a position, the
+ * PancakeSwap desk, the evidence that any of it works. Builders (test / list an
+ * agent) and the deeper proof pages live in the footer, one click from anywhere.
+ */
 const NAV: Array<{ label: string; href: string; key: Active }> = [
   { label: 'Marketplace', href: '/register', key: 'register' },
   { label: 'Positions', href: '/positions', key: 'positions' },
   { label: 'Pancake Desk', href: '/pancakeswap', key: 'pancake' },
   { label: 'Benchmarks', href: '/ledger', key: 'benchmarks' },
-  { label: 'Builders', href: '/builders/test', key: 'builders' },
   { label: 'Docs', href: '/docs', key: 'docs' },
 ]
 
@@ -74,8 +79,9 @@ const FOOTER: Array<{ head: string; links: Array<[string, string]> }> = [
     head: 'Explore',
     links: [
       ['Marketplace', '/register'],
-      ['Positions', '/'],
+      ['Positions', '/positions'],
       ['Pancake Desk', '/pancakeswap'],
+      ['My Marque', '/me'],
       ['Compare', '/compare'],
       ['Judge mode', '/judge'],
     ],
@@ -137,7 +143,6 @@ export function SiteFooter() {
         <a href={`https://testnet.bscscan.com/address/${REGISTRY_TESTNET}`} target="_blank" rel="noreferrer">
           MarqueRegistry {REGISTRY_TESTNET.slice(0, 6)}…{REGISTRY_TESTNET.slice(-4)} · BSC testnet · 97
         </a>
-        <a href="https://x.com/usemarque" target="_blank" rel="noreferrer">@usemarque</a>
       </div>
     </footer>
   )
