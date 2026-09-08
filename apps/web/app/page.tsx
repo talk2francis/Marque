@@ -249,13 +249,15 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ a
               const total = c?.classified ?? 0
               return (
                 <a className={styles.category} href={copy.href} key={key}>
-                  <div className={styles.categoryHead}>
-                    <span className={styles.categoryName}>{copy.name}</span>
-                    {live >= 2
-                      ? <Chip tone="holds">{live} callable</Chip>
-                      : <Chip tone="watch">{live === 0 ? 'none callable yet' : '1 callable'}</Chip>}
+                  <div className={styles.categoryText}>
+                    <div className={styles.categoryHead}>
+                      <span className={styles.categoryName}>{copy.name}</span>
+                      {live >= 2
+                        ? <Chip tone="holds">{live} callable</Chip>
+                        : <Chip tone="watch">{live === 0 ? 'none callable yet' : '1 callable'}</Chip>}
+                    </div>
+                    <p className={styles.categoryProblem}>{copy.problem}</p>
                   </div>
-                  <p className={styles.categoryProblem}>{copy.problem}</p>
                   <div className={styles.categoryMeasure}>
                     <MeasureRule
                       label={`${copy.name}: ${live} callable of ${total} classified`}

@@ -205,7 +205,7 @@
 }
 .category {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(300px, 42%);
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 40%);
   gap: var(--s6);
   align-items: center;
   padding: var(--s5) var(--s6);
@@ -216,6 +216,7 @@
 }
 .category:last-child { border-bottom: 0; }
 .category:hover { background: color-mix(in srgb, var(--fg) 4%, transparent); }
+.categoryText { min-width: 0; }
 .categoryHead { display: flex; align-items: center; gap: var(--s3); flex-wrap: wrap; margin-bottom: var(--s2); }
 .categoryName { font-size: var(--size-title); font-weight: 600; }
 .categoryProblem {
@@ -359,7 +360,7 @@
   .funnelRow { grid-template-columns: 1fr; gap: var(--s2); }
   .funnelHow { grid-row: 3; }
   .stripRow { grid-template-columns: minmax(0, 1fr) auto; grid-auto-flow: row; row-gap: var(--s2); }
-  .category { grid-template-columns: 1fr; gap: var(--s3); padding: var(--s5); }
+  .category { grid-template-columns: 1fr; gap: var(--s4); padding: var(--s5); }
   .chamber { padding-inline: var(--s5); }
 }
 @media (max-width: 560px) {
