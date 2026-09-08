@@ -140,34 +140,33 @@
   .mktActions { grid-area: actions; flex-wrap: wrap; }
 }
 
-/* P10.5H — the marketplace section's one brand image. Thin, full-bleed. */
-/* A thin architectural texture strip — desaturated, low-contrast, vignetted on
-   all four edges so it dissolves into the page ground in either theme rather
-   than reading as a half-cropped photo. */
+/* The marketplace's one brand image: the arch strip from the hero concept —
+   architecture only, no wordmark to compete with the page's own headline.
+   Shown at a real height and largely unprocessed; it fades into the page ground
+   at the bottom edge only, so it reads as the top of a room you are looking
+   into rather than a photo dropped on the page. */
 .brandBand {
   position: relative;
-  margin: var(--s5) calc(50% - 50vw) var(--s7);
+  margin: var(--s4) calc(50% - 50vw) var(--s7);
   width: 100vw;
-  height: clamp(84px, 9vw, 110px);
+  height: clamp(128px, 17vw, 208px);
   overflow: hidden;
   isolation: isolate;
 }
 .brandBand img {
   width: 100%; height: 100%;
   object-fit: cover;
-  object-position: center 32%;
+  object-position: center 34%;
   display: block;
-  filter: saturate(0.5) contrast(0.9) brightness(1.03);
 }
-:root[data-theme='dark'] .brandBand img { filter: saturate(0.45) contrast(0.88) brightness(0.8); }
+:root[data-theme='dark'] .brandBand img,
+:root:not([data-theme='light']) .brandBand img { filter: brightness(0.92); }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) .brandBand img { filter: saturate(0.45) contrast(0.88) brightness(0.8); }
+  :root:not([data-theme='light']) .brandBand img { filter: brightness(0.92); }
 }
 .brandBand::after {
   content: '';
   position: absolute;
   inset: 0;
-  background:
-    linear-gradient(90deg, var(--ground) 0%, transparent 24%, transparent 76%, var(--ground) 100%),
-    linear-gradient(180deg, var(--ground) 0%, transparent 40%, transparent 55%, var(--ground) 100%);
+  background: linear-gradient(180deg, transparent 0%, transparent 55%, color-mix(in srgb, var(--ground) 70%, transparent) 82%, var(--ground) 100%);
 }

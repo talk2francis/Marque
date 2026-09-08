@@ -6,6 +6,7 @@ import { db, receipt as receiptTable, run as runTable } from '@marque/db'
 import { funnel, categoryFunnel } from '@marque/registry'
 import { marketplaceAgents } from '../lib/marketplace'
 import { Desk } from './desk/Desk'
+import { CountUp } from './_components/CountUp'
 import { SiteHeader, SiteFooter } from './_components/SiteHeader'
 import styles from './home.module.css'
 
@@ -150,7 +151,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ a
       <main className={styles.main}>
         {/* ---- Hero: the product, not a picture of it ---- */}
         <section className={styles.hero}>
-          <div className={styles.heroCopy} data-reveal>
+          <div className={styles.heroCopy}>
             <span className={styles.eyebrow}>The agent marketplace for {BRAND.chain}</span>
             <Statement as="h1" size="hero">{BRAND.tagline}</Statement>
             <p className={styles.lede}>
@@ -178,7 +179,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ a
               ))}
             </div>
           </div>
-          <div className={styles.heroDesk} data-reveal style={{ '--reveal-delay': '120ms' } as CSSProperties}>
+          <div className={styles.heroDesk} data-reveal style={{ '--reveal-delay': '340ms' } as CSSProperties}>
             <Desk initialAddress={deskAddress} />
           </div>
         </section>
@@ -192,7 +193,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ a
             ['Settled runs', Number(homeCounts['receipts'] ?? 0), 'each with a public on-chain receipt'],
           ] as Array<[string, number | null, string]>).map(([label, n, sub]) => (
             <div className={styles.stat} key={label}>
-              <span className={styles.statN}>{n === null ? '—' : n.toLocaleString('en-US')}</span>
+              <CountUp value={n} className={styles.statN} />
               <span className={styles.statLabel}>{label}</span>
               <span className={styles.statSub}>{sub}</span>
             </div>
