@@ -1309,3 +1309,25 @@ reference merge) took most of it.
 - The published proof (`docs/pancakeswap-proof.json`, `status: complete`) is
   untouched — its transactions and captured before/after are immutable on chain.
   The live position drifts in and out of range as any real LP does.
+
+### D12-01 · Reference agents registered on BSC mainnet ERC-8004 (chain 56)
+
+- **Was** — the five reference agents held ERC-8004 identities only on BSC
+  testnet 97 (`0x8004a818…`, token ids 2234/2236/2237/2238/2239, D10.5C-05).
+- **Now** — also registered on **BSC mainnet 56**, the registry
+  `0x8004A169FB4a3325136EB29fA0ceB6D2e539a432`, via
+  `scripts/register-agents-direct.mjs --mainnet --go`. Token ids and txs:
+  bound 341553 `0xefe98cfd…`, lattice 341554 `0xbb1296eb…`,
+  sluicegate 341555 `0xcfbad5c2…`, keel 341556 `0x2c973f52…`,
+  redcell 341557 `0x6d5347aa…`. Every tx `effectiveGasPrice: 0` — gas fully
+  sponsored by the Agent Studio megafuel paymaster, so no BNB was spent.
+- **Why** — the hackathon eligibility line reads "agents surfaced on your
+  marketplace must be live on BSC". Third-party supply already is (298k mainnet
+  agents indexed), but a judge who followed the chain badge on a *reference*
+  agent landed on testnet. Registering on mainnet removes the question at zero
+  cost. Francis approved ("yes I also approve mainnet for the 5 reference
+  agents").
+- **Kept** — `erc8004Testnet` still records the 97 ids for provenance. The
+  charter / seal / receipt-anchor flow stays on testnet 97 on purpose (the
+  mechanism is chain-agnostic and a testnet seal is free to reproduce; the one
+  thing that had to be mainnet, a real rebalance, already is — the proof run).

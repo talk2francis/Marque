@@ -54,6 +54,12 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 const GO = process.argv.includes('--go')
 const onlyIx = process.argv.indexOf('--only')
 const ONLY = onlyIx > -1 ? process.argv[onlyIx + 1] : null
+/**
+ * `--mainnet` registers on BSC mainnet (chain 56). Requires Francis's written
+ * "approved, mainnet" and each agent wallet funded with a little BNB for gas
+ * (~$0.30). Default stays testnet — free, and the mechanism is identical.
+ */
+const NETWORK = process.argv.includes('--mainnet') ? 'bsc-mainnet' : 'bsc-testnet'
 
 const AGENTS = [
   { id: 'bound', name: 'Bound', description: 'Marque reference agent: PancakeSwap V3 range health and bounded re-centre planning.' },
@@ -70,6 +76,8 @@ function walletPassword(id) {
   return m[1].trim()
 }
 
+console.log(`network: ${NETWORK}${NETWORK === 'bsc-mainnet' ? '  ⚠  MAINNET — real BNB gas per agent' : ''}\n`)
+
 const results = []
 for (const a of AGENTS) {
   if (ONLY && a.id !== ONLY) continue
@@ -84,7 +92,7 @@ for (const a of AGENTS) {
     })
     console.log('   wallet     ', address)
 
-    const agent = await ERC8004Agent.create({ walletProvider, network: 'bsc-testnet' })
+    const agent = await ERC8004Agent.create({ walletProvider, network: NETWORK })
     const endpoint = AgentEndpoint.a2a(`https://marque.trade/agents/${a.id}`, { capabilities: ['mcs'] })
     const uri = agent.generateAgentUri({ name: a.name, description: a.description, endpoints: [endpoint] })
     console.log('   agent URI  ', uri.slice(0, 68) + '…')

@@ -5,9 +5,9 @@ import { Statement, Chip, WarrantBadge, ProvenanceChip, LinkButton } from '@marq
 import { SiteHeader, SiteFooter } from '../../_components/SiteHeader'
 import { ReferenceMark } from '../../_components/ReferenceMark'
 import {
-  REFERENCE_AGENTS, referenceAgent, ERC8004_REGISTRY_TESTNET,
+  REFERENCE_AGENTS, referenceAgent, ERC8004_REGISTRY_MAINNET,
 } from '../../../lib/reference-agents'
-import { explorerAddress } from '../../../lib/network'
+import { explorerAddress, explorerTx } from '../../../lib/network'
 import styles from './slug.module.css'
 
 export const dynamic = 'force-dynamic'
@@ -137,15 +137,19 @@ export default async function ReferenceAgentPage({ params }: { params: Promise<{
             <div>
               <dt>ERC-8004 identity</dt>
               <dd className="mono">
-                <a href={explorerAddress(97, ERC8004_REGISTRY_TESTNET)} target="_blank" rel="noreferrer">
-                  token {agent.erc8004.tokenId} · BSC testnet · 97
+                <a href={explorerTx(56, agent.erc8004.registerTx)} target="_blank" rel="noreferrer">
+                  token {agent.erc8004.tokenId} · BSC mainnet · 56
+                </a>
+                {' · '}
+                <a href={explorerAddress(56, ERC8004_REGISTRY_MAINNET)} target="_blank" rel="noreferrer">
+                  registry
                 </a>
               </dd>
             </div>
             <div>
-              <dt>Owner</dt>
+              <dt>Agent wallet</dt>
               <dd className="mono">
-                <a href={explorerAddress(97, agent.erc8004.wallet)} target="_blank" rel="noreferrer">
+                <a href={explorerAddress(56, agent.erc8004.wallet)} target="_blank" rel="noreferrer">
                   {agent.erc8004.wallet.slice(0, 10)}…{agent.erc8004.wallet.slice(-6)}
                 </a>
               </dd>

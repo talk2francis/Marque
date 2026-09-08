@@ -80,8 +80,8 @@ instead — a receipted failure on mainnet still proves a real system.
 
 ### On-chain identity
 
-- **MarqueRegistry** (BSC testnet 97) — [`0x01D584f3a07Ba07D114386A78CA7fa3103db7AE7`](https://testnet.bscscan.com/address/0x01D584f3a07Ba07D114386A78CA7fa3103db7AE7). `anchor(bytes32)` for receipts, `sealCall(bytes32,bytes32)` for pre-outcome seals.
-- **ERC-8004 IdentityRegistry** (BSC testnet 97) — [`0x8004a818bFB912233c491871B3d84C89A494bd9E`](https://testnet.bscscan.com/address/0x8004a818bFB912233c491871B3d84C89A494bd9E). The five reference agents: Bound (2234), Lattice (2236), Sluicegate (2237), Keel (2238), Redcell (2239).
+- **ERC-8004 IdentityRegistry** (BSC **mainnet** 56) — [`0x8004A169FB4a3325136EB29fA0ceB6D2e539a432`](https://bscscan.com/address/0x8004A169FB4a3325136EB29fA0ceB6D2e539a432). The five reference agents are registered here, on mainnet: Bound ([341553](https://bscscan.com/tx/0xefe98cfd5beb27e93f846c3b9a1d43be14d35579aa331479d34e932082d88205)), Lattice (341554), Sluicegate (341555), Keel (341556), Redcell (341557). Gas was sponsored by the Agent Studio paymaster.
+- **MarqueRegistry** (BSC testnet 97) — [`0x01D584f3a07Ba07D114386A78CA7fa3103db7AE7`](https://testnet.bscscan.com/address/0x01D584f3a07Ba07D114386A78CA7fa3103db7AE7). `anchor(bytes32)` for receipts, `sealCall(bytes32,bytes32)` for pre-outcome seals — testnet on purpose (below).
 
 Seals, charter grants and receipt anchors run on **testnet** on purpose — the
 mechanism does not depend on which chain it runs on, and a testnet seal costs
