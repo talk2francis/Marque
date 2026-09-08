@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react'
 import { Statement, DataCell, EmptyState, LinkButton, Chip, MeasureRule, Tape, ProvenanceChip, WarrantBadge } from '@marque/ui'
 import { BRAND } from '@marque/ui/brand'
 import { sql, desc, eq } from 'drizzle-orm'
@@ -106,6 +107,9 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ a
     select
       (select count(*)::int from benchmark) as benchmarks,
       (select count(*)::int from receipt) as receipts,
+      (select count(distinct agent_id)::int from conformance_result
+        where pass = true and agent_id not like 'stub:%'
+      ) as warranted,
       (select count(*)::int from conformance_result
         where pass = false and error is null and agent_id not like 'stub:%' and agent_id not like 'marque:%'
       ) as public_failures
@@ -146,10 +150,8 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ a
       <main className={styles.main}>
         {/* ---- Hero: the product, not a picture of it ---- */}
         <section className={styles.hero}>
-          <div className={styles.heroCopy}>
-            <span className={styles.eyebrow}>
-              The agent marketplace for {BRAND.chain} — rebalancing, grid trading, yield and health factor.
-            </span>
+          <div className={styles.heroCopy} data-reveal>
+            <span className={styles.eyebrow}>The agent marketplace for {BRAND.chain}</span>
             <Statement as="h1" size="hero">{BRAND.tagline}</Statement>
             <p className={styles.lede}>
               Marque reads what an address holds, finds the agents that can act on it, and gives
@@ -176,9 +178,26 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ a
               ))}
             </div>
           </div>
-          <div className={styles.heroDesk}>
+          <div className={styles.heroDesk} data-reveal style={{ '--reveal-delay': '120ms' } as CSSProperties}>
             <Desk initialAddress={deskAddress} />
           </div>
+        </section>
+
+        {/* ---- Stats band: four measured numbers, no rounding in our favour ---- */}
+        <section className={styles.stats} data-reveal>
+          {([
+            ['Registered on BNB Chain', registered, 'from the ERC-8004 registry'],
+            ['Callable right now', bound, 'answer and expose a hireable interface'],
+            ['Warranted', Number(homeCounts['warranted'] ?? 0), 'passed a published MCS case'],
+            ['Settled runs', Number(homeCounts['receipts'] ?? 0), 'each with a public on-chain receipt'],
+          ] as Array<[string, number | null, string]>).map(([label, n, sub]) => (
+            <div className={styles.stat} key={label}>
+              <span className={styles.statN}>{n === null ? '—' : n.toLocaleString('en-US')}</span>
+              <span className={styles.statLabel}>{label}</span>
+              <span className={styles.statSub}>{sub}</span>
+            </div>
+          ))}
+          <p className={styles.statsNote}><ProvenanceChip provenance="MEASURED" /> Recomputed on every request. Nothing here is a stored figure.</p>
         </section>
 
         {/* ---- Brand band: the one cinematic breath between hero and Act I ---- */}

@@ -13,8 +13,16 @@ import { useEffect } from 'react'
 export function Reveal() {
   useEffect(() => {
     document.documentElement.classList.remove('no-js')
+
+    // Nav gains elevation once the page has scrolled off the top.
+    const onScroll = () => {
+      document.documentElement.toggleAttribute('data-scrolled', window.scrollY > 8)
+    }
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+
     const els = Array.from(document.querySelectorAll<HTMLElement>('[data-reveal]'))
-    if (!els.length) return
+    if (!els.length) return () => window.removeEventListener('scroll', onScroll)
 
     if (
       !('IntersectionObserver' in window) ||
@@ -48,7 +56,7 @@ export function Reveal() {
       })
     })
 
-    return () => io.disconnect()
+    return () => { io.disconnect(); window.removeEventListener('scroll', onScroll) }
   }, [])
 
   return null

@@ -3,10 +3,16 @@
   position: sticky;
   top: 0;
   z-index: 40;
-  background: color-mix(in srgb, var(--ground) 78%, transparent);
+  background: color-mix(in srgb, var(--ground) 72%, transparent);
   -webkit-backdrop-filter: saturate(1.7) blur(18px);
   backdrop-filter: saturate(1.7) blur(18px);
-  border-bottom: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
+  border-bottom: 1px solid transparent;
+  transition: border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease), background-color var(--dur) var(--ease);
+}
+:global(:root[data-scrolled]) .nav {
+  background: color-mix(in srgb, var(--ground) 86%, transparent);
+  border-bottom-color: color-mix(in srgb, var(--line) 90%, transparent);
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--fg) 4%, transparent), var(--elev-1);
 }
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .nav { background: var(--ground); }

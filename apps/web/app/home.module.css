@@ -10,24 +10,26 @@
 .hero {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.06fr);
-  gap: var(--s8);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr);
+  gap: clamp(var(--s6), 5vw, var(--s9));
   align-items: center;
-  padding: clamp(var(--s7), 8vw, var(--s10)) 0 var(--s9);
+  padding: var(--s7) 0 var(--s8);
 }
-/* A dot-grid wash behind the hero — the brand's motif, barely there. */
+/* One soft brass glow bleeding from behind the Desk — no dot pattern, which on
+   paper reads as dirt rather than texture. */
 .hero::before {
   content: '';
   position: absolute;
-  inset: -8% -12% -20% -50vw;
+  right: -12%;
+  top: -20%;
+  width: 60%;
+  height: 120%;
   z-index: -1;
-  background-image: radial-gradient(var(--dotgrid) 1px, transparent 1.4px);
-  background-size: 26px 26px;
-  -webkit-mask-image: radial-gradient(70% 60% at 30% 40%, #000 0%, transparent 75%);
-  mask-image: radial-gradient(70% 60% at 30% 40%, #000 0%, transparent 75%);
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--brass-mark) 9%, transparent), transparent);
   pointer-events: none;
 }
-.heroCopy { display: flex; flex-direction: column; gap: var(--s4); min-width: 0; }
+.heroCopy { display: flex; flex-direction: column; gap: var(--s5); min-width: 0; align-items: flex-start; }
+.heroCopy .lede { margin-top: calc(var(--s2) * -1); }
 .heroDesk { min-width: 0; }
 
 .eyebrow {
@@ -60,15 +62,13 @@
   color: var(--fg-soft);
 }
 .noWallet {
-  margin: var(--s1) 0 0;
-  max-width: 50ch;
-  font-size: var(--size-body);
-  line-height: var(--lh-body);
-  color: var(--fg);
-  padding: var(--s3) var(--s4);
-  border: 1px solid color-mix(in srgb, var(--holds) 28%, transparent);
-  background: color-mix(in srgb, var(--holds) 6%, transparent);
-  border-radius: var(--r-md);
+  margin: var(--s2) 0 0;
+  max-width: 48ch;
+  font-size: var(--size-caption);
+  line-height: 1.6;
+  color: var(--fg-soft);
+  padding-left: var(--s3);
+  border-left: 2px solid color-mix(in srgb, var(--holds) 55%, transparent);
 }
 .noWallet strong { color: var(--holds); font-weight: 600; }
 
@@ -93,6 +93,45 @@
   background: var(--fg);
   color: var(--ground);
   border-color: var(--fg);
+}
+
+/* ---- Stats band ---------------------------------------------------- */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--s5);
+  margin-top: var(--s6);
+  padding: var(--s6) var(--s6) var(--s5);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: color-mix(in srgb, var(--ground-raised) 55%, transparent);
+  position: relative;
+}
+.stat { display: flex; flex-direction: column; gap: 4px; }
+.statN {
+  font-family: var(--font-mono);
+  font-size: clamp(30px, 4vw, 42px);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  color: var(--fg);
+}
+.statLabel { font-size: var(--size-body); font-weight: 500; color: var(--fg); margin-top: 4px; }
+.statSub { font-size: var(--size-caption); color: var(--fg-faint); line-height: 1.45; }
+.statsNote {
+  grid-column: 1 / -1;
+  margin: var(--s3) 0 0;
+  padding-top: var(--s3);
+  border-top: 1px solid var(--line);
+  font-size: var(--size-caption);
+  color: var(--fg-faint);
+}
+.statsNote > span { margin-right: var(--s2); }
+@media (max-width: 860px) {
+  .stats { grid-template-columns: 1fr 1fr; gap: var(--s4); padding: var(--s5); }
+}
+@media (max-width: 460px) {
+  .stats { grid-template-columns: 1fr; }
 }
 
 /* ---- Section rhythm --------------------------------------------------- */

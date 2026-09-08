@@ -68,12 +68,12 @@
   --line: var(--rule);
   --line-strong: var(--rule-strong);
 
-  /* The page itself: a barely-there warm gradient so nothing reads as a flat
-     fill. Overridable per theme. */
+  /* The page ground. On light this is nearly flat — just a whisper of warmth at
+     the very top — because a visible gradient on paper reads as a smudge. Dark
+     carries a slightly stronger glow (see the theme block). */
   --backdrop:
-    radial-gradient(120% 70% at 80% -10%, color-mix(in srgb, var(--brass-mark) 5%, transparent), transparent 60%),
-    linear-gradient(180deg, color-mix(in srgb, var(--paper-raised) 70%, var(--paper)) 0%, var(--paper) 42%);
-  --dotgrid: color-mix(in srgb, var(--ink) 5%, transparent);
+    radial-gradient(90% 40% at 78% -8%, color-mix(in srgb, var(--brass-mark) 4%, transparent), transparent 70%);
+  --dotgrid: color-mix(in srgb, var(--ink) 4%, transparent);
 
   /* ---- ELEVATION — warm, layered, subtle. Theme-aware. */
   --elev-1: 0 1px 2px color-mix(in srgb, var(--ink) 6%, transparent),
@@ -147,8 +147,8 @@
     --breach: #cd6f63;
     --chain: #6f92b4;
     --backdrop:
-      radial-gradient(120% 70% at 82% -12%, color-mix(in srgb, var(--brass-lit) 8%, transparent), transparent 55%),
-      linear-gradient(180deg, color-mix(in srgb, var(--night-raised) 80%, var(--night)) 0%, var(--night) 46%);
+      radial-gradient(110% 55% at 82% -12%, color-mix(in srgb, var(--brass-lit) 7%, transparent), transparent 60%),
+      linear-gradient(180deg, color-mix(in srgb, var(--night-raised) 65%, var(--night)) 0%, var(--night) 40%);
     --dotgrid: color-mix(in srgb, var(--night-ink) 6%, transparent);
     --elev-1: 0 1px 2px rgba(0, 0, 0, 0.4), 0 4px 14px -6px rgba(0, 0, 0, 0.5);
     --elev-2: 0 2px 6px rgba(0, 0, 0, 0.45), 0 16px 40px -14px rgba(0, 0, 0, 0.6);
@@ -173,8 +173,8 @@
   --breach: #cd6f63;
   --chain: #6f92b4;
   --backdrop:
-    radial-gradient(120% 70% at 82% -12%, color-mix(in srgb, var(--brass-lit) 8%, transparent), transparent 55%),
-    linear-gradient(180deg, color-mix(in srgb, var(--night-raised) 80%, var(--night)) 0%, var(--night) 46%);
+    radial-gradient(110% 55% at 82% -12%, color-mix(in srgb, var(--brass-lit) 7%, transparent), transparent 60%),
+    linear-gradient(180deg, color-mix(in srgb, var(--night-raised) 65%, var(--night)) 0%, var(--night) 40%);
   --dotgrid: color-mix(in srgb, var(--night-ink) 6%, transparent);
   --elev-1: 0 1px 2px rgba(0, 0, 0, 0.4), 0 4px 14px -6px rgba(0, 0, 0, 0.5);
   --elev-2: 0 2px 6px rgba(0, 0, 0, 0.45), 0 16px 40px -14px rgba(0, 0, 0, 0.6);
@@ -213,18 +213,16 @@
 
 html {
   -webkit-text-size-adjust: 100%;
-  /* Full-bleed bands break out with `width: 100vw; margin-inline: calc(50% - 50vw)`,
-     which is a hair wider than the content box once a scrollbar exists. Clip the
-     stray axis rather than let the whole page scroll sideways. */
-  overflow-x: clip;
 }
 
 body {
   margin: 0;
-  /* Full-bleed bands are `100vw`, which is a scrollbar-width wider than the
-     content box whenever a vertical scrollbar exists. Clip that sliver here so
-     the page never gains a real horizontal scrollbar. */
-  overflow-x: hidden;
+  position: relative;
+  /* Full-bleed bands are `100vw`, a scrollbar-width wider than the content box.
+     `clip` (not `hidden`) removes the stray horizontal axis WITHOUT turning the
+     body into a scroll container, so `position: sticky` on the nav and the docs
+     rail keeps working. */
+  overflow-x: clip;
   background: var(--ground);
   background-image: var(--backdrop);
   background-attachment: fixed;
@@ -236,6 +234,23 @@ body {
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   transition: background-color var(--dur) var(--ease), color var(--dur) var(--ease);
+}
+/* A whisper of film grain so large flat areas have tooth rather than reading as
+   dead fill — the thing that separates a considered surface from a wireframe. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 2147483000;
+  pointer-events: none;
+  opacity: 0.012;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+:root[data-theme='dark'] body::before,
+:root:not([data-theme='light']) body::before { opacity: 0.04; mix-blend-mode: overlay; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) body::before { opacity: 0.04; mix-blend-mode: overlay; }
 }
 
 .mono {

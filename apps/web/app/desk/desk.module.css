@@ -100,3 +100,19 @@
   .desk { padding: var(--s4); }
   .facts > div { flex-direction: column; gap: 0; }
 }
+
+/* Loading skeleton — so the hero's product panel never reads as empty. */
+.skeleton { display: flex; flex-direction: column; gap: var(--s3); padding: var(--s4) 0; }
+.skRow {
+  height: 14px;
+  border-radius: var(--r-pill);
+  background: linear-gradient(90deg,
+    color-mix(in srgb, var(--fg) 6%, transparent) 25%,
+    color-mix(in srgb, var(--fg) 12%, transparent) 37%,
+    color-mix(in srgb, var(--fg) 6%, transparent) 63%);
+  background-size: 400% 100%;
+  animation: skShimmer 1400ms ease-in-out infinite;
+}
+.skStatus { font-size: var(--size-caption); color: var(--fg-faint); margin-top: var(--s2); }
+@keyframes skShimmer { 0% { background-position: 100% 0; } 100% { background-position: 0 0; } }
+@media (prefers-reduced-motion: reduce) { .skRow { animation: none; } }

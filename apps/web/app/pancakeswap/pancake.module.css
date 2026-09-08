@@ -15,7 +15,7 @@
 .lookup label { display: flex; flex-direction: column; gap: 6px; flex: 1 1 380px; font-size: var(--size-caption); color: var(--fg-soft); }
 .lookup input {
   font: inherit; font-family: var(--font-mono); font-size: var(--size-data); color: var(--fg);
-  background: var(--ground-raised); border: 1px solid var(--line); border-radius: 2px; padding: 9px 10px; width: 100%;
+  background: var(--ground-raised); border: 1px solid var(--line); border-radius: var(--r-sm); padding: 10px 12px; width: 100%;
 }
 
 .position { padding: var(--s5) 0; border-top: 1px solid var(--line); display: flex; flex-direction: column; gap: var(--s3); }
@@ -68,7 +68,7 @@
   margin: 0;
   padding: var(--s3) var(--s4);
   border: 1px solid color-mix(in srgb, var(--breach) 40%, transparent);
-  border-radius: 2px;
+  border-radius: var(--r-sm);
   background: color-mix(in srgb, var(--breach) 6%, transparent);
   color: var(--fg);
   font-family: var(--font-mono);
@@ -78,3 +78,24 @@
   overflow-wrap: anywhere;
   max-width: 68ch;
 }
+
+/* Proof-run banner — the page's strongest evidence, surfaced. */
+.proofBanner {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  margin-top: var(--s4);
+  padding: var(--s3) var(--s4);
+  border: 1px solid color-mix(in srgb, var(--brass-mark) 40%, transparent);
+  background: color-mix(in srgb, var(--brass-mark) 8%, transparent);
+  border-radius: var(--r-md);
+  text-decoration: none;
+  color: var(--fg);
+  font-size: var(--size-body);
+  max-width: 68ch;
+  transition: border-color var(--dur-fast) var(--ease), background-color var(--dur-fast) var(--ease);
+}
+.proofBanner:hover { border-color: var(--brass); background: color-mix(in srgb, var(--brass-mark) 13%, transparent); }
+.proofBanner strong { color: var(--brass); font-weight: 600; }
+.proofDot { width: 8px; height: 8px; border-radius: var(--r-pill); background: var(--brass); flex: none; }
+.proofArrow { margin-left: auto; color: var(--brass); font-size: 18px; }

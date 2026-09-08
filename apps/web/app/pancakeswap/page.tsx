@@ -44,6 +44,14 @@ export default function PancakeSwapPage() {
           <p className={styles.note}>
             No wallet needed to look. Paste any address, or use the demo one.
           </p>
+          <Link href="/pancakeswap/proof" className={styles.proofBanner}>
+            <span className={styles.proofDot} aria-hidden="true" />
+            <span>
+              <strong>The proof run</strong> — one real mainnet V3 rebalance under a $60 charter,
+              every transaction hash on bscscan.
+            </span>
+            <span className={styles.proofArrow} aria-hidden="true">→</span>
+          </Link>
         </header>
 
         <PancakeDesk demoAddress={DEMO} />

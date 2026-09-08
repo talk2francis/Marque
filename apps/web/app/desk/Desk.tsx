@@ -153,7 +153,15 @@ export function Desk({ initialAddress }: { initialAddress: string }) {
         )}
       </div>
 
-      {loading && <p className={styles.status}>Reading the chain…</p>}
+      {loading && (
+        <div className={styles.skeleton} aria-hidden="true">
+          <span className={styles.skRow} style={{ width: '62%' }} />
+          <span className={styles.skRow} style={{ width: '88%' }} />
+          <span className={styles.skRow} style={{ width: '46%' }} />
+          <span className={styles.skRow} style={{ width: '74%' }} />
+          <span className={styles.skStatus}>Reading the chain…</span>
+        </div>
+      )}
       {error && <div className={styles.error} role="alert">{error}</div>}
 
       {data && !loading && (
