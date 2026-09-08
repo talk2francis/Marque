@@ -173,6 +173,24 @@
   border-top: 1px solid var(--line);
 }
 .sectionQuiet { padding: var(--s7) 0 var(--s8); border-top: 1px solid var(--line); }
+
+/* The lower half was "plain": each section revealed as one flat block. Now the
+   heading, lede and body of a section cascade in when it lands. Guarded by
+   reduced-motion in globals.css via the [data-reveal] rules. */
+@media (prefers-reduced-motion: no-preference) {
+  .section[data-reveal].is-in > *,
+  .sectionQuiet[data-reveal].is-in > * {
+    animation: sectionChild 560ms var(--ease-settle) both;
+  }
+  .section[data-reveal].is-in > *:nth-child(2) { animation-delay: 70ms; }
+  .section[data-reveal].is-in > *:nth-child(3) { animation-delay: 140ms; }
+  .section[data-reveal].is-in > *:nth-child(4) { animation-delay: 210ms; }
+  .section[data-reveal].is-in > *:nth-child(n+5) { animation-delay: 280ms; }
+}
+@keyframes sectionChild {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: none; }
+}
 .section :global(.statement) { max-width: 30ch; }
 .sectionLede {
   margin: 0;
@@ -294,6 +312,7 @@
   background: color-mix(in srgb, var(--ground-raised) 40%, transparent);
 }
 .category {
+  position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(280px, 40%);
   gap: var(--s6);
@@ -302,10 +321,24 @@
   border-bottom: 1px solid var(--line);
   text-decoration: none;
   color: inherit;
-  transition: background-color var(--dur) var(--ease);
+  transition: background-color var(--dur) var(--ease), padding-left var(--dur) var(--ease);
+}
+.category::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 2px;
+  background: var(--brass);
+  transform: scaleY(0);
+  transform-origin: 50% 50%;
+  transition: transform var(--dur) var(--ease-settle);
 }
 .category:last-child { border-bottom: 0; }
-.category:hover { background: color-mix(in srgb, var(--fg) 4%, transparent); }
+.category:hover { background: color-mix(in srgb, var(--fg) 4%, transparent); padding-left: calc(var(--s6) + 6px); }
+.category:hover::before { transform: scaleY(1); }
+@media (prefers-reduced-motion: reduce) {
+  .category:hover { padding-left: var(--s6); }
+}
 .categoryText { min-width: 0; }
 .categoryHead { display: flex; align-items: center; gap: var(--s3); flex-wrap: wrap; margin-bottom: var(--s2); }
 .categoryName { font-size: var(--size-title); font-weight: 600; }
@@ -400,6 +433,17 @@
   z-index: -1;
   -webkit-mask-image: linear-gradient(90deg, transparent 2%, #000 55%, #000 92%, transparent);
   mask-image: linear-gradient(90deg, transparent 2%, #000 55%, #000 92%, transparent);
+  /* A very slow drift so the Chamber breathes rather than sits — the cockpit
+     should feel like a live view. 28s, imperceptible frame to frame. */
+  animation: chamberDrift 28s ease-in-out infinite alternate;
+  will-change: transform;
+}
+@keyframes chamberDrift {
+  from { transform: scale(1) translateX(0); }
+  to   { transform: scale(1.07) translateX(-1.5%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .chamberBg { animation: none; }
 }
 .chamberInner { max-width: 640px; display: flex; flex-direction: column; gap: var(--s4); }
 .chamberInner :global(.statement) { color: #ECE9E1; }

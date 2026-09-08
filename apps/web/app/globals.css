@@ -8,60 +8,57 @@
   --font-statement: var(--font-fraunces), 'Iowan Old Style', Georgia, serif;
 }
 
-/* The loading mark: the real symbol. The wings unfold from the centre pinch,
-   once; then the mark holds a slow even breath with a soft brass aura. Same
-   final frame under reduced motion. Theme-aware (ink in daylight, cream at
-   night). */
+/* The loading mark.
+   1. The whole screen holds at opacity 0 for 380ms — a fast in-app navigation
+      finishes inside that and never shows a flash.
+   2. Then the two wing strokes draw themselves in (like ink being laid) and the
+      fill rises behind them.
+   3. It holds. One slow, shallow breath. No bounce, no rotation, no spinner. */
 .marque-loading-screen {
   min-height: 100dvh;
   display: grid;
   place-items: center;
   background: var(--ground);
   background-image: var(--backdrop);
-}
-.marque-loading-mark {
-  color: var(--fg-soft);
-  /* breath starts after the unfold has landed */
-  animation: marque-breath 2400ms var(--ease-settle) 640ms infinite;
-  filter: drop-shadow(0 0 0 transparent);
-}
-.marque-loading-mark svg { display: block; overflow: visible; }
-.marque-loading-mark path {
   opacity: 0;
-  transform-box: fill-box;
-  animation: marque-wing-l 620ms var(--ease-settle) both;
+  animation: mlm-screen-in 260ms ease 380ms forwards;
 }
-.marque-loading-mark path[data-wing='l'] { transform-origin: 100% 32%; }
-.marque-loading-mark path[data-wing='r'] {
-  transform-origin: 0% 32%;
-  animation-name: marque-wing-r;
-  animation-delay: 90ms;
+@keyframes mlm-screen-in { to { opacity: 1; } }
+
+.marque-loading-mark {
+  display: block;
+  overflow: visible;
+  color: var(--fg-soft);
+  animation: mlm-breath 3200ms var(--ease-settle) 1500ms infinite;
 }
-@keyframes marque-wing-l {
-  0%   { opacity: 0; transform: scale(0.6) rotate(-13deg); }
-  62%  { opacity: 1; transform: scale(1.03) rotate(1.5deg); }
-  100% { opacity: 1; transform: scale(1) rotate(0); }
+.mlm-wing {
+  fill: currentColor;
+  stroke: currentColor;
+  stroke-width: 1.25;
+  stroke-linejoin: round;
+  fill-opacity: 0;
+  /* path length of each wing outline is ~250; overshoot the dash so it fully hides */
+  stroke-dasharray: 260;
+  stroke-dashoffset: 260;
+  animation:
+    mlm-draw 900ms cubic-bezier(.65, 0, .35, 1) 420ms forwards,
+    mlm-fill 700ms ease 1000ms forwards;
 }
-@keyframes marque-wing-r {
-  0%   { opacity: 0; transform: scale(0.6) rotate(13deg); }
-  62%  { opacity: 1; transform: scale(1.03) rotate(-1.5deg); }
-  100% { opacity: 1; transform: scale(1) rotate(0); }
+.mlm-wing--r { animation-delay: 520ms, 1080ms; }
+
+@keyframes mlm-draw { to { stroke-dashoffset: 0; } }
+@keyframes mlm-fill {
+  to { fill-opacity: 1; stroke-opacity: 0; }
 }
-@keyframes marque-breath {
-  0%, 100% {
-    opacity: 0.5;
-    transform: scale(0.965);
-    filter: drop-shadow(0 3px 10px color-mix(in srgb, var(--brass-mark) 0%, transparent));
-  }
-  50% {
-    opacity: 0.95;
-    transform: scale(1);
-    filter: drop-shadow(0 3px 22px color-mix(in srgb, var(--brass-mark) 34%, transparent));
-  }
+@keyframes mlm-breath {
+  0%, 100% { opacity: 0.62; transform: scale(0.985); }
+  50%      { opacity: 1;    transform: scale(1); }
 }
+
 @media (prefers-reduced-motion: reduce) {
-  .marque-loading-mark,
-  .marque-loading-mark path { animation: none; opacity: 0.85; transform: none; }
+  .marque-loading-screen { animation: none; opacity: 1; }
+  .marque-loading-mark { animation: none; }
+  .mlm-wing { animation: none; fill-opacity: 1; stroke-opacity: 0; stroke-dashoffset: 0; }
 }
 
 /* ===== Scroll-reveal — the page has motion now (P10.5 rev) ===== */

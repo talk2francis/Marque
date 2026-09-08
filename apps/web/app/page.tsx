@@ -199,7 +199,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ a
               <span className={styles.statSub}>{sub}</span>
             </div>
           ))}
-          <p className={styles.statsNote}><ProvenanceChip provenance="MEASURED" /> Recomputed on every request. Nothing here is a stored figure.</p>
+          <p className={styles.statsNote}><ProvenanceChip provenance="MEASURED" /> Counted from chain-indexed data, refreshed continuously. Never a hand-entered figure.</p>
           <GlossaryStrip />
         </section>
 

@@ -56,7 +56,45 @@ export const MARQUE_REFERENCE_OWNERS: readonly string[] = [
 /** True when the supply for a required category is too thin to be a market. */
 export const MIN_THIRD_PARTY_PER_CATEGORY = 2
 
+/**
+ * A short in-process memo for the funnel aggregates.
+ *
+ * `funnel()` and `categoryFunnel()` each do a "latest probe per agent" scan over
+ * the whole probe table — ~7s as the table grew, and the homepage awaits both
+ * before it can stream. The numbers only move when the ingest/probe workers
+ * finish a sweep (minutes apart), so recomputing them per request bought
+ * nothing but a slow first paint. 90s keeps them effectively live.
+ */
+const MEMO_TTL_MS = 90_000
+const memo = new Map<string, { at: number; value: unknown; refreshing?: boolean }>()
+
+/**
+ * Stale-while-revalidate: once primed, a caller never waits again. A fresh entry
+ * is returned as-is; a stale one is returned immediately and refreshed in the
+ * background; only the very first call (cold process) awaits the query.
+ */
+async function memoised<T>(key: string, fn: () => Promise<T>): Promise<T> {
+  const hit = memo.get(key)
+  const now = Date.now()
+  if (hit) {
+    if (now - hit.at >= MEMO_TTL_MS && !hit.refreshing) {
+      hit.refreshing = true
+      void fn()
+        .then((value) => memo.set(key, { at: Date.now(), value }))
+        .catch(() => { hit.refreshing = false })
+    }
+    return hit.value as T
+  }
+  const value = await fn()
+  memo.set(key, { at: Date.now(), value })
+  return value
+}
+
 export async function funnel(chainId = 56): Promise<FunnelRow[]> {
+  return memoised(`funnel:${chainId}`, () => funnelUncached(chainId))
+}
+
+async function funnelUncached(chainId = 56): Promise<FunnelRow[]> {
   const d = db()
   const rows = await d.execute(sql`
     with base as (select * from agent where chain_id = ${chainId}),
@@ -101,6 +139,10 @@ export async function funnel(chainId = 56): Promise<FunnelRow[]> {
  * is the difference between measuring a market and flattering one.
  */
 export async function categoryFunnel(chainId = 56): Promise<CategoryFunnelRow[]> {
+  return memoised(`categoryFunnel:${chainId}`, () => categoryFunnelUncached(chainId))
+}
+
+async function categoryFunnelUncached(chainId = 56): Promise<CategoryFunnelRow[]> {
   const d = db()
   const owners = MARQUE_REFERENCE_OWNERS.length > 0
     ? sql`lower(a.owner_address) in (${sql.join(MARQUE_REFERENCE_OWNERS.map((o) => sql`${o.toLowerCase()}`), sql`, `)})`
