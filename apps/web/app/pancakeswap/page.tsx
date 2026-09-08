@@ -14,13 +14,13 @@ export const metadata = {
 }
 
 /**
- * The Desk's default address needs a LIVE V3 POSITION, which the general
- * DEMO_ADDRESS does not have — it holds Venus and spot, and landing a judge on
- * "no liquidity at this address" makes the flagship page look broken. This one
- * is a real BSC liquidity provider holding a BTCB/USDC position; nothing here
- * writes, so reading a third party's position is exactly what the page is for.
+ * The Desk opens on Marque's OWN live LP — the position the mainnet proof run
+ * left behind (~$100 in a USDT/WBNB range, drifting in and out like any real
+ * one). A judge lands on our own money with a real dollar value, an in/out-of
+ * range state and uncollected fees, not a stranger's wallet. The larger
+ * third-party LP is one click away for scale.
  */
-const DEMO = process.env['PANCAKE_DEMO_ADDRESS'] ?? '0x2e07E0145C0CFdF6D200B0aFAeD36953ef00d0cD'
+const DEMO = process.env['PANCAKE_DEMO_ADDRESS'] ?? '0x2e010AaDFdFEbC2AdFCAFA5F83e9687ffA47C573'
 
 /**
  * The PancakeSwap Desk.

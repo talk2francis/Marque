@@ -12,6 +12,42 @@
 }
 
 .lookup { display: flex; gap: var(--s3); flex-wrap: wrap; align-items: flex-end; }
+
+.examples { display: flex; gap: var(--s2); flex-wrap: wrap; margin-top: var(--s3); }
+.example {
+  font: inherit;
+  font-size: var(--size-caption);
+  color: var(--fg-soft);
+  border: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
+  border-radius: var(--r-pill);
+  padding: 7px 14px;
+  min-height: 32px;
+  background: color-mix(in srgb, var(--ground-raised) 55%, transparent);
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease);
+}
+.example:hover { color: var(--fg); border-color: var(--fg-soft); }
+.exampleOn { background: var(--fg); color: var(--ground); border-color: var(--fg); }
+
+/* The dollar figure the whole page is about, given the weight it deserves. */
+.positionValue {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s3);
+  flex-wrap: wrap;
+  padding: var(--s2) 0 var(--s1);
+}
+.pvFigure {
+  font-family: var(--font-mono);
+  font-size: clamp(26px, 4vw, 34px);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--fg);
+  font-variant-numeric: tabular-nums;
+}
+.pvLabel { font-size: var(--size-caption); color: var(--fg-soft); }
+.pvFees { font-size: var(--size-caption); color: var(--holds); }
+.pvUnpriced { font-size: var(--size-caption); color: var(--fg-faint); }
 .lookup label { display: flex; flex-direction: column; gap: 6px; flex: 1 1 380px; font-size: var(--size-caption); color: var(--fg-soft); }
 .lookup input {
   font: inherit; font-family: var(--font-mono); font-size: var(--size-data); color: var(--fg);

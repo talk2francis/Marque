@@ -97,6 +97,16 @@ function OutOfRange({ r }: { r: RangeMeasure }) {
   )
 }
 
+/**
+ * Addresses worth looking at. The first is Marque's own live LP — the position
+ * the mainnet proof run left behind, ~$100, drifting in and out of range like
+ * any real one — so a visitor lands on our own money, not a stranger's.
+ */
+const EXAMPLES: ReadonlyArray<{ label: string; addr: string }> = [
+  { label: "Marque's own live LP", addr: '0x2e010AaDFdFEbC2AdFCAFA5F83e9687ffA47C573' },
+  { label: 'A larger third-party LP', addr: '0x2e07E0145C0CFdF6D200B0aFAeD36953ef00d0cD' },
+]
+
 export function PancakeDesk({ demoAddress }: { demoAddress: string }) {
   const [address, setAddress] = useState('')
   const [data, setData] = useState<Payload | null>(null)
@@ -138,6 +148,18 @@ export function PancakeDesk({ demoAddress }: { demoAddress: string }) {
             {loading ? 'Reading positions…' : 'Show positions'}
           </Button>
         </form>
+        <div className={styles.examples}>
+          {EXAMPLES.map((ex) => (
+            <button
+              key={ex.addr}
+              type="button"
+              className={`${styles.example} ${data?.owner?.toLowerCase() === ex.addr.toLowerCase() ? styles.exampleOn : ''}`}
+              onClick={() => { setAddress(ex.addr); void load(ex.addr) }}
+            >
+              {ex.label}
+            </button>
+          ))}
+        </div>
         <p className={styles.note}>
           <ProvenanceChip provenance="ONCHAIN" />
           Read from the NonfungiblePositionManager and each pool directly. Uncollected fees come
@@ -174,6 +196,20 @@ export function PancakeDesk({ demoAddress }: { demoAddress: string }) {
                 </Chip>
               </header>
 
+              <div className={styles.positionValue}>
+                {p.positionValueUsd === null ? (
+                  <span className={styles.pvUnpriced}>value not shown — one leg could not be priced on chain</span>
+                ) : (
+                  <>
+                    <span className={styles.pvFigure}>${num(p.positionValueUsd, 2)}</span>
+                    <span className={styles.pvLabel}>in this range</span>
+                  </>
+                )}
+                {p.feesUsd !== null && p.feesUsd > 0 && (
+                  <span className={styles.pvFees}>+ ${num(p.feesUsd, 2)} uncollected fees</span>
+                )}
+              </div>
+
               <MeasureRule
                 label={`${p.pair} price ${num(p.priceCurrent)} inside a range of ${num(p.priceLower)} to ${num(p.priceUpper)}`}
                 value={p.priceCurrent} lower={p.priceLower} upper={p.priceUpper}
@@ -200,14 +236,6 @@ export function PancakeDesk({ demoAddress }: { demoAddress: string }) {
                   <dt>Tick range</dt>
                   <dd><DataCell align="left">{p.tickLower} … {p.tickUpper}</DataCell>
                     <br /><span className={styles.lossFloor}>now {p.tickCurrent}, spacing {p.tickSpacing}</span></dd>
-                </div>
-                <div>
-                  <dt>Position value</dt>
-                  <dd>
-                    {p.positionValueUsd === null
-                      ? <span className={styles.lossFloor}>not priced</span>
-                      : <DataCell align="left">${num(p.positionValueUsd, 2)}</DataCell>}
-                  </dd>
                 </div>
               </dl>
             </article>
