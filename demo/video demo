@@ -1,0 +1,668 @@
+# MARQUE — The Demo Film
+### Critique of the baseline · full script · phased production prompts
+Written 8 Sep 2026 · target runtime 2:40 · deliver before submission
+
+---
+
+# PART 0 — Four product notes before you film anything
+
+I read the repo and tried the live site. Three of these are quick; one is an eligibility question you should settle today.
+
+### 0.1 The site still blocks automated clients — and the README advertises a public read API
+
+I was refused at the robots layer on every path, including `https://marque.trade/api/v1/funnel`. The README says:
+
+> **Read API** — `https://marque.trade/api/v1/agents` · `/funnel` · `/marketplace` — Everything the site renders, as JSON, no key.
+
+An agent marketplace advertising a keyless machine-readable API that a machine cannot reach is the most ironic bug this product could possibly ship, and a technically-minded judge will hit it in about ten seconds. This did not get fixed in P10.5A. Check in this order:
+
+```
+curl -s https://marque.trade/robots.txt
+curl -sI -A "Mozilla/5.0 (compatible; SomeBot/1.0; +http://example.com/bot)" https://marque.trade/api/v1/funnel
+curl -sI -A "curl/8.5.0" https://marque.trade/
+```
+
+If robots.txt disallows, fix robots.txt. If a non-browser user agent gets a challenge or a 403, it is Caddy or a bot-protection rule — allow GET on public routes and the whole `/api/v1/*` tree. Verify from outside the VPS. **Fix this before the film ships**, because the film will show the API.
+
+### 0.2 All five reference agents are on testnet 97 — the eligibility line says "live on BSC"
+
+The README states the ERC-8004 identities for Bound, Lattice, Sluicegate, Keel and Redcell are on the testnet registry at chain 97. The hackathon's eligibility text reads *"Agents surfaced on your marketplace must be live on BSC."* Your marketplace does index mainnet third-party agents, so you are not in breach — but the four agents on your homepage stat bar under **Warranted** are all testnet, all first-party, and a judge who follows the chain badge will notice.
+
+ERC-8004 registration is gas-sponsored on both networks. Registering the five identities on **mainnet 56** is probably thirty minutes and it removes the question entirely. I would do it. If you do not, the film must not lean on the phrase "four warranted" — and my script does not (see §3, which uses a much stronger number instead).
+
+### 0.3 The GitHub repo description is the word "later"
+
+Top of the page, in the About panel, and in every OG preview when the link is shared: **later**. Change it to the one-liner from the README. Thirty seconds.
+
+### 0.4 The Ledger's human arms are still incomplete
+
+The README says it plainly: *"Agent arms recorded; human arms in progress."* The screenshots show `awaiting the manual arm` and `unscored — blind scoring needs both arms` on all three benchmarks, even though the time and cost columns are now filled.
+
+That is **30% of the TermiX rubric**. Time and cost are not the whole of it; the rubric asks for output quality, blind-graded. **Finish the quality scoring before the film is cut**, because Act III depends on it, and because a film that shows an unscored ledger is advertising an incomplete submission.
+
+One extra note on that page: the human-arm costs read `$41.72`, `$53.66`, `$57.50`. Those are presumably an hourly rate times elapsed time. **Publish the rate in the methodology.** An unexplained dollar figure to the cent looks derived; a stated rate looks measured. It is one sentence and it protects the most important number on the page.
+
+---
+
+# PART 1 — Why the baseline film is mediocre
+
+You asked me to be hard on it. The Oathline production benchmark is an impressive *engineering* document and a mediocre *film*, and the gap between those two things is the whole lesson.
+
+Credit where it is due first: the evidence discipline is genuinely excellent. The continuity traps section — never cutting the simulated SELL against the archived BUY, keeping `ADVISORY` on receipt 14 alongside the separate host denial, refusing to manufacture a flawless terminal session — is better ethics than most commercial product films. Keep every bit of that. Everything below is about craft.
+
+### 1.1 It mistakes technical rigour for craft
+
+Read the document and count what it measures: sample counts, LUFS, true peak, caption character limits, colour matrices, tick spacing, CRF values. Now count what it says about *why a viewer would care*. The ratio is roughly forty to one. It is a document about correctness written by someone who never asked whether the film was any good — and it says so out loud: **"No human listening test was performed."**
+
+### 1.2 The scene plan is the software's order, not a story's order
+
+Thirteen scenes in 150 seconds is 11.5 seconds each. That is a slideshow cadence. And the order — sign, replay, deny, stale, refresh, fill, reconcile, verify, tamper, tool surface, limits, close — is the order the *product* works in, not the order an argument works in. There is no question in the viewer's mind that the next scene answers. The one genuinely good instinct, opening on *"This order never reached Binance"*, is abandoned eight seconds in and never returns as a spine.
+
+A film needs one question asked early and answered late. This has a feature tour with narration on top.
+
+### 1.3 The voice choice is the single largest failure, and it was made without listening
+
+Kokoro `bm_george`, a small local ONNX model, at speed 1.02. The document admits the alternatives had "sample files generated; that alone is not evidence of a comparative listening test."
+
+The narrator is the most important quality variable in a narrated film and it was selected on availability. Local small-model TTS has no dynamic range, no emphasis, no breath, and a flat prosodic contour that the audience for this — technical judges who use AI tools daily — will identify as synthetic within four seconds. Four seconds is roughly your entire budget for first impressions.
+
+### 1.4 The pacing method is inverted
+
+They wrote copy, measured it, and then time-stretched with `atempo` up to 1.14× to fit a fixed scene grid. That is fitting the performance to the container. Professional practice is the exact reverse: **lock the narration first, then cut picture to the narration.**
+
+Every downstream problem in the document is a symptom of that inversion — the 0.235-second-per-segment shortfall that accumulated to 146.7 seconds instead of 150, the sample-padding fix, the 1.14 conform guardrail, the caption drift. None of those problems exist if the voice is the master clock.
+
+### 1.5 The resolution chain destroys the thing the film is about
+
+Captured at **1600×720**. Delivered at **1920×1080**. Camera pushes to **1.34×**.
+
+That means the hero footage is upscaled 1.2× to fill the frame and then cropped a further 1.34×, so the pushed shots are showing a 1600-pixel source at roughly 2.6× magnification. The document concedes it: *"Enlarging 1600×720 footage cannot create missing detail."*
+
+For a product whose entire pitch is *readable evidence*, shipping soft, mushy text on every emphasis shot is not a minor craft issue. It is the film undermining its own argument.
+
+### 1.6 Captions are approximated when alignment is free
+
+*"Sentence-measured, phrase-approximated timing, not word-level forced alignment."* Across 46 cues that is visible drift. WhisperX, aeneas and Gentle all do word-level forced alignment locally, for free, in minutes. There is no reason to ship approximated caption timing in 2026.
+
+### 1.7 The music is a splice, not a score
+
+"Undertow" is a fine track under a permissive licence. The edit is first 144 seconds plus the last 8, crossfaded 2 seconds, to hit a duration. There are no hit points, no build into the tamper reveal, no drop under the key line, no relationship between the music and the argument.
+
+The ducking is a single compressor at fixed threshold 0.045 / ratio 3, which will pump on plosives and duck on room tone. And there is **no sound design layer at all** — the document says so. No transition whooshes, no UI ticks, no impact on the seal. Sound design is the difference between amateur and professional more reliably than music is, and it is entirely absent.
+
+### 1.8 The loudness target is wrong for where this will be watched
+
+−16 LUFS integrated with LRA 8 is an Apple Music / podcast target. Judges will watch on a laptop speaker or a phone, likely in a playlist next to other submissions normalised nearer −14. This film will sound quiet and thin by comparison, and quiet reads as amateur.
+
+### 1.9 There is no audience model
+
+Nothing in the document asks where the film will be seen. No cold open engineered for the first three seconds of a muted autoplay timeline. No title card that doubles as a thumbnail. No end card that survives being screenshotted. No short cut for social. It is a single artefact aimed at a viewer assumed to be sitting down, sound on, willing.
+
+### 1.10 The rubric grades the producer's own priorities
+
+Seven categories, none of which is *persuasion*. "Story" at 20% is scored on comprehensibility, not on whether the viewer wants to click the link afterward. You can score 100 on that rubric and produce a film nobody acts on.
+
+---
+
+# PART 2 — Where I disagree with your brief
+
+**Length: 2:40, not 3:00.** Judges are watching a queue. Every second past about 2:45 is spent by someone who has already decided. I have written to 2:40 with a hard ceiling of 2:50.
+
+**"Epic orchestra" — partly.** I understand what you want and I am going to give you the feeling without the register. A full orchestral trailer bed under this product would sound like a token launch, and Marque's entire voice is *measured, not asserted*. Bombast contradicts the thesis on the soundtrack while the narrator argues against it.
+
+What I am specifying instead is a score that **earns** its scale: sub-bass and a single piano note in the cold open, a sparse string ostinato from the title, a low brass pulse building under Act II, and the full orchestral swell held back until the mainnet proof at 2:20 — where it lands like a payoff instead of a wallpaper. And one device nobody uses: **1.5 seconds of total silence** at the word "zero" in Act I. Silence is the loudest tool available and it is free.
+
+**One more disagreement: film the light theme, not the dark one.** Your screenshots are all dark. The original design thesis was *light for looking, dark for doing* — and if the whole product is dark, the Charter cockpit stops meaning anything. In the film, Acts I to III run in daylight and the screen dims to the cockpit exactly once, at the Charter. That single transition becomes the most memorable frame in the film and it costs nothing because you already built both themes.
+
+---
+
+# PART 3 — The film
+
+**Title:** Marque — Agents you can hold to account
+**Runtime:** 2:40 (±5s, hard ceiling 2:50) · 1920×1080 · 30fps (60 if the render budget allows)
+**Structure:** one question, asked at 0:04, answered at 2:32.
+
+### 3.1 The spine
+
+The strongest asset in this product is a number nobody else can show:
+
+> **163 conformance runs against third-party agents on BNB Smart Chain. Zero passes.**
+
+That is the film. Not "here are our features." The question is *how many of these three hundred thousand agents can actually do the job*, and the answer is a measured, uncomfortable, verifiable number. Everything else in the product exists to make that answer trustworthy.
+
+This also solves the framing problem in Part 0.2: the film never says "four warranted." It says something far stronger and entirely honest.
+
+### 3.2 Full script
+
+Every number below is a **draft to be verified against the live product at capture time.** If a figure has moved, the bot rewrites the line and re-synthesises that sentence. Never ship a number the product does not currently show.
+
+---
+
+**COLD OPEN — 0:00–0:12**
+
+*Black. Geist Mono, large, centred. The number types in digit by digit.*
+`298,817`
+*Beneath, small:* `AI agents registered on BNB Smart Chain`
+
+> **VO:** Two hundred and ninety-eight thousand agents are registered on BNB Smart Chain.
+
+*Beat. Sub-bass enters. Single sustained piano note.*
+
+> **VO:** We tried to hire them.
+
+---
+
+**ACT I — THE COUNT — 0:12–0:46**
+
+*Real capture: the homepage funnel section, pushed slowly. Each bar collapses as it is named.*
+
+> **VO:** Thirty thousand declare a service we can parse. Thirty thousand answer when we knock. Six thousand one hundred and five expose something a buyer could actually hire.
+
+*Bar collapses again, hard.*
+
+> **VO:** Five hundred and eight fall into a category that matters here — rebalancing, grid trading, yield, health factor.
+
+*Cut to `/standard`. The fail card. Fields resolving one by one, red.*
+
+> **VO:** And then we ran the test. One hundred and sixty-three conformance runs against third-party agents on this chain.
+
+*Everything stops. Music cuts to absolute silence. Hold 1.5 seconds on the number.*
+
+> **VO:** Passes: zero.
+
+*Silence holds another beat.*
+
+> **VO:** That is not an opinion about the ecosystem. It is a count.
+
+---
+
+**TITLE — 0:46–0:53**
+
+*The two forms of the mark sweep in from opposite edges, meet at centre, and part to reveal the wordmark through the negative space. Strings enter.*
+
+`Marque` · `The agent marketplace for BNB Smart Chain`
+
+> **VO:** Marque is the marketplace that will tell you that.
+
+---
+
+**ACT II · ONE — READ — 0:53–1:15**
+
+*`/positions`. An address types into the field. Read chain.*
+
+> **VO:** It starts with what you actually hold. Paste any BNB Chain address. No wallet, nothing connected, nothing signed.
+
+*The Venus position resolves. The measure rule fills toward the liquidation mark and stops just short of it.*
+
+> **VO:** This account is one hundred and thirty-seven thousandths of a point from liquidation. Every number here is read from chain at request time, and it carries the block it came from.
+
+---
+
+**ACT II · TWO — FIND — 1:15–1:37**
+
+*`/register`. Warranted rows at the top. Filter chips engage. Rows reorder with the real FLIP transition.*
+
+> **VO:** Then Marque ranks the agents that can act on it — by whether they answer, and whether they passed. Not by stars.
+
+*A deduplicated row expands: "39 registered identities".*
+
+> **VO:** One operator registering thirty-nine identities is one row, not thirty-nine.
+
+*Two agents selected, compare tray raises, cut to `/compare`.*
+
+> **VO:** Compare them on the ten things that decide a hire. Then preview one — free — before you pay anything.
+
+---
+
+**ACT II · THREE — TEST — 1:37–1:59**
+
+*`/standard`. A pass card and a fail card side by side, fields resolving.*
+
+> **VO:** A registration is not a résumé. So Marque publishes the test, computes the correct answer itself from chain state at a pinned block, and grades every agent field by field.
+
+*Push into the fail card.*
+
+> **VO:** Including the ones that fail. A directory that only listed its passes would be a brochure.
+
+---
+
+**ACT II · FOUR — BOUND — 1:59–2:21**
+
+*THE ONE TRANSITION. `/app/charter`. Over 400ms the daylight interface dims to the cockpit. Low brass enters underneath.*
+
+> **VO:** Evidence tells you how good an agent has been. It does not tell you how bad this run can get.
+
+*The may / may not columns compose line by line. Cap. Expiry.*
+
+> **VO:** So authority arrives with an edge. One contract. One function. A spending cap. An expiry — refused before it is signed, not logged afterwards.
+
+*Grant. The mark presses. The transaction hash writes in beneath it, character by character, as it confirms.*
+
+> **VO:** And a revoke that fires a real transaction.
+
+---
+
+**ACT III — PROOF — 2:21–2:47**
+
+*Run Room. Events arriving in real time.*
+
+> **VO:** Every hire leaves a receipt — what was quoted, what was permitted, what ran, what it produced — anchored on chain.
+
+*`/ledger`. The two columns. The large figures land on the beat.*
+
+> **VO:** And we asked the only question a buyer cares about. A human analyst, same task, same block: nine minutes, forty-one dollars. The agent: two hundred and seventy-nine milliseconds.
+
+*`/pancakeswap/proof`. Four transaction hashes. FULL ORCHESTRAL SWELL — the only one in the film.*
+
+> **VO:** And one real rebalance, on mainnet, under a sixty-dollar charter. Four transactions. Under one basis point of slippage. Fees resumed at block one-two-oh-six-oh-oh-oh-four-four.
+
+---
+
+**CLOSE — 2:47–3:00 → trim to land at 2:40**
+
+*The opening number returns, then dissolves into the mark.*
+
+> **VO:** Two hundred and ninety-eight thousand registered. Almost none of them work. Marque is how you find out which ones do — before you pay.
+
+*End card, held 4 seconds, screenshot-safe:*
+`Marque` · `marque.trade` · `Agents you can hold to account.`
+
+> **VO:** Marque.
+
+*Music resolves to solo piano. Out.*
+
+---
+
+### 3.3 The four lines that must survive any edit
+
+If the film has to lose thirty seconds, these stay:
+
+1. "We tried to hire them."
+2. "Passes: zero."
+3. "A directory that only listed its passes would be a brochure."
+4. "Almost none of them work. Marque is how you find out which ones do — before you pay."
+
+---
+
+# PART 4 — Production phases
+
+Paste one at a time. Every phase ends at a checkpoint and a **STOP**.
+
+## V0 — Truth freeze and pre-production (2h)
+
+```
+Read AGENTS.md in full before touching anything. Then read MARQUE-DEMO-FILM.md completely.
+
+PHASE V0 — Nothing gets captured until the facts are frozen and the story is boarded.
+
+1. FIX THE ROBOTS PROBLEM FIRST (Part 0.1). The README advertises a keyless read API that
+   automated clients cannot currently reach. Diagnose with the three curl commands in Part 0.1,
+   fix robots.txt and/or the host bot-protection rule, and verify from OUTSIDE the VPS. The film
+   shows the API; it must work when a judge tries it.
+
+2. TRUTH FREEZE. Write demo-video/FACTS.json capturing every number the script uses, read live
+   from the product, each with its source URL and the timestamp it was read:
+     funnel: registered, parseable, responding, callable, classified, classified_and_callable
+     standard: third_party_runs_total, third_party_passes, one named passing case, one named
+               failing case with the exact field that failed
+     ledger: ADV-01 human seconds, human cost, agent ms, agent cost
+     pancake: the four mainnet tx hashes, realised slippage, gas, hours out of range,
+              the block at which fees resumed
+     positions: the demo address and its health factor at a pinned block
+   THEN REWRITE THE VO SCRIPT against these numbers. My draft numbers are from 8 Sep. If any has
+   moved, the line changes. Never speak a number the product does not currently display.
+
+3. ANIMATIC BEFORE ANYTHING ELSE. Build a 2:40 animatic: still frames or coloured cards, the
+   real VO text as on-screen titles, and a scratch timing pass. Watch it end to end. This is the
+   cheapest possible place to discover the pacing is wrong, and skipping it is why most product
+   films are cut twice.
+
+4. VOICE AUDITION — THIS IS THE HIGHEST-VALUE DECISION IN THE PRODUCTION.
+   Synthesise the SAME twenty-second passage (the cold open plus the first funnel line) with
+   THREE candidate voices. Present all three to Francis as audio files. He picks by listening.
+   Do not choose on availability, price or convenience — that mistake is exactly what made the
+   baseline film mediocre.
+   Candidates, in my order of preference:
+     a. ElevenLabs (Multilingual v2 or v3) — best available naturalness, emphasis and breath
+     b. OpenAI gpt-4o-mini-tts — accepts tone instructions in the prompt, very cheap
+     c. Cartesia Sonic — fast, natural, cheap API
+     d. LAST RESORT ONLY: local Piper or Kokoro. If we end up here, say so in the deliverable.
+   VOICE DIRECTION for whichever wins: measured, unhurried, dry. A documentary narrator, not an
+   advertisement. Lower register. Slight downward inflection at the end of statements. Real
+   pauses before "Passes: zero" and before "Marque." Never enthusiastic. The product's voice is
+   "measured, not asserted" and the narrator must sound like that sentence.
+   COST GATE: any paid API is a new cost and requires Francis's written approval per AGENTS.md.
+   Present the cost (expect $5-22 total) and WAIT.
+
+5. MUSIC SELECTION. Present three candidate beds to Francis with the animatic. See V3 for the
+   score design. Same rule: he decides by listening.
+
+ACCEPTANCE: FACTS.json committed; the rewritten script; the animatic rendered and watched; three
+voice samples and three music candidates delivered to Francis.
+
+STOP. Do not capture footage until Francis has picked a voice.
+```
+
+## V1 — Capture rig (3h)
+
+```
+Read AGENTS.md and MARQUE-DEMO-FILM.md before touching anything.
+
+PHASE V1 — Capture. The baseline film's worst craft failure was capturing at 1600x720, delivering
+at 1080p, and then pushing in 1.34x. Every emphasis shot was soft. We are not doing that.
+
+1. RESOLUTION. Playwright browser context at viewport 2560x1440, deviceScaleFactor 1,
+   recordVideo size 2560x1440. For the four shots that push past 1.2x (the funnel collapse, the
+   fail card, the charter seal, the ledger figures) capture a SECOND take at viewport 3840x2160.
+   Every zoom in the edit must be a CROP OF A LARGER SOURCE. Nothing is ever upscaled. If a shot
+   would need upscaling, recapture it larger instead.
+
+2. THEME. Acts I, II-one, II-two, II-three and III are captured in the LIGHT theme. The Charter
+   movement (II-four) and the Run Room are captured in the COCKPIT. This is the film's visual
+   arc and it is the reason the product has two themes at all. Force the theme explicitly per
+   take rather than relying on a stored preference.
+
+3. DETERMINISM. Before every take: wait for networkidle, await document.fonts.ready, inject and
+   await the Geist/Geist Mono faces explicitly, then wait again. Pin the demo address. Freeze any
+   relative timestamps that would otherwise change between takes ("53s ago" drifting between
+   recaptures is a continuity error a careful viewer will catch). Disable the site's grain overlay
+   during capture if it moirés on downscale — check a still first.
+
+4. CURSOR. Inject an SVG pointer that follows real mousemove events. 28-step eased travel, 260ms
+   settle before each click. It is a visible pointer, not a claim of human operation, and the
+   deliverable says so.
+
+5. THE SHOT LIST — capture each as its own file, longer than needed, with a clean head and tail:
+     01_funnel_collapse       homepage funnel section, slow scroll, light
+     02_standard_fail         /standard, the fail card, fields resolving, light
+     03_positions_read        /positions, address typed, chain read, measure rule fills, light
+     04_marketplace_sort      /register, warranted top, filter engaged, FLIP reorder, light
+     05_marketplace_dedupe    the "39 registered identities" row expanding, light
+     06_compare               two selected, tray raises, /compare, light
+     07_standard_pass_fail    both cards side by side, light
+     08_charter_grant         /app/charter, may/may-not compose, grant, seal, tx writes in, DARK
+     09_run_room              /runs/[id], events streaming, DARK
+     10_ledger                /ledger, the two columns, ADV-01 figures, light
+     11_pancake_proof         /pancakeswap/proof, before, four hashes, after, light
+     12_api                   /api/v1/funnel raw JSON in a browser, light  (only if V0.1 is fixed)
+
+6. NEVER re-run a mainnet transaction for footage. The Pancake proof run already happened; film
+   the recorded page. Filming an archived result is fine and honest. Re-executing for the camera
+   is not, and AGENTS.md forbids the mainnet write anyway.
+
+ACCEPTANCE: all twelve takes recorded at 2560x1440 or larger; a full-size still from each of the
+four push shots, inspected at 100% for text legibility; theme correct per take.
+
+STOP.
+```
+
+## V2 — Narration (2h)
+
+```
+Read AGENTS.md and MARQUE-DEMO-FILM.md before touching anything.
+
+PHASE V2 — NARRATION IS THE MASTER CLOCK. This is the single structural change from the baseline.
+
+1. Synthesise the full script with the voice Francis chose, sentence by sentence, at NATURAL
+   SPEED. Do not set a speed multiplier. Do not plan to time-stretch.
+
+2. Measure the real duration of every sentence. Write demo-video/narration-timing.json with each
+   sentence's true start, end and text.
+
+3. THE PICTURE IS THEN CUT TO THE NARRATION, not the reverse. If the film comes out at 2:52,
+   we CUT A LINE — we do not speed the voice up. Speech time-stretch above 1.03x is forbidden;
+   past that the voice acquires the chipmunk quality that reads instantly as synthetic. If a
+   scene is short, hold the last frame or extend a push; if it is long, cut copy.
+
+4. PERFORMANCE MARKS the synthesis must honour:
+     - 700ms of silence before "We tried to hire them."
+     - 1.5s of TOTAL silence before "Passes: zero." Music muted, not ducked.
+     - 600ms after "Passes: zero." before "That is not an opinion about the ecosystem."
+     - 500ms before "Marque." in the close.
+   If the TTS will not hold a pause, insert it as measured silence in the WAV rather than trusting
+   punctuation.
+
+5. PRONUNCIATION. Check and correct: "Marque" (mark), "PancakeSwap", "BNB", "USDT", "MCS",
+   "ERC-8004" (E-R-C eighty-oh-four), "bps"/"basis point", "LUFS" never spoken. Read the block
+   number as digits, grouped, not as a single number. Generate a pronunciation lexicon file and
+   listen to every proper noun before committing.
+
+6. Cache key for synthesis MUST include voice id, model id, speed and a hash of the text. The
+   baseline's cache omitted model and speed, which silently serves stale audio when you change
+   either.
+
+ACCEPTANCE: full narration WAV, per-sentence timing JSON, and a listen-through by Francis before
+the picture edit begins. If the voice is wrong, we find out now, not after 4,800 frames.
+
+STOP.
+```
+
+## V3 — Score and sound design (2h)
+
+```
+Read AGENTS.md and MARQUE-DEMO-FILM.md before touching anything.
+
+PHASE V3 — The baseline had a spliced music bed and NO sound design layer at all. Sound design is
+what separates professional from amateur more reliably than music is.
+
+1. THE SCORE, IN FOUR MOVEMENTS, cut to the narration timing from V2:
+     0:00-0:12  sub-bass drone plus one sustained piano note. Nothing else.
+     0:12-0:40  a sparse pulse enters, low, under the funnel. Building tension by repetition.
+     0:40-0:44  ABSOLUTE SILENCE across "Passes: zero." Not a duck. A mute, with a 40ms fade
+                either side so it does not click. This is the most important sound decision in
+                the film.
+     0:46-1:59  string ostinato from the title card, steady, never rising. This is the working
+                section and the music must stay out of the way.
+     1:59-2:21  low brass enters with the dim to cockpit. Weight, not volume.
+     2:21-2:47  THE ONE SWELL, landing on the Pancake proof. Full, brief, earned.
+     2:47-end   resolve to solo piano, decay under the end card.
+   Licence: CC BY 4.0 or a paid library. If paid, that is a cost gate — present it and wait.
+   Document the exact attribution string and put it in the credits and the video description.
+
+2. SOUND DESIGN — build this layer, it does not exist in the baseline:
+     - a soft low whoosh on each of the three act transitions (200ms, -24 dB under speech)
+     - a barely-there UI tick when a filter chip engages and when rows reorder
+     - a single soft impact when the charter mark presses, and a second lighter one when the
+       transaction confirms
+     - a low sub drop under the funnel collapse
+   Every element sits at least 18 dB under the narration. If a listener notices an individual
+   sound effect, it is too loud. The test is that the film feels more solid with the layer than
+   without it, and they cannot say why.
+
+3. DUCKING. Sidechain compression with asplit=2[voice][key] — use [key] as the detector and keep
+   [voice] in the mix. The baseline consumed one labelled stream twice; do not repeat that graph
+   error. Attack 20ms, release 320ms, ratio 4, and check for pumping on plosives by listening,
+   not by reading the filter arguments.
+
+ACCEPTANCE: the score laid against the narration, sound design layer built, and a listen-through
+with Francis. The silence at "Passes: zero" must be genuinely silent.
+
+STOP.
+```
+
+## V4 — Picture edit and motion (5h)
+
+```
+Read AGENTS.md, MARQUE-DEMO-FILM.md, and /mnt/skills/public/frontend-design/SKILL.md.
+
+PHASE V4 — Remotion composition. Cut to the narration timing, never the other way round.
+
+1. CANVAS 1920x1080. Decide the frame rate empirically: render a 10-second section at 60fps,
+   measure the wall clock, and extrapolate to 4,800 frames. If the full render fits comfortably
+   in the schedule, deliver 60fps — the FLIP reorders and measure fills are visibly better. If
+   not, 30fps. Report the measurement and the decision.
+
+2. THE MOTION SIGNATURE — ONE device, used exactly three times, at the act breaks:
+   the two forms of the Marque mark sweep in from opposite edges, meet at centre, and part to
+   reveal the next act through the negative space between them. 600ms, cubic-bezier(.16,1,.3,1).
+   This is the brand's geometry doing structural work. Do not invent a second transition device
+   and do not use this anywhere else.
+
+3. CAMERA. Slow pushes only, never more than 1.25x, always a crop of the larger source from V1.
+   Ease with cubic-bezier(.22,1,.36,1). No handheld, no rotation, no parallax. Every push must
+   have a REASON — it lands on the thing being said at the moment it is said.
+
+4. TYPOGRAPHY ON SCREEN. Geist for labels, Geist Mono for numbers, the brand serif for the three
+   statement cards only. Title safe 5%, action safe 3.5%. Every on-screen number must match the
+   footage behind it and match FACTS.json.
+
+5. LABELLING — non-negotiable, inherited from the baseline's best instinct:
+   every shot carries a small, permanent corner label stating what it is:
+     LIVE CAPTURE · BSC MAINNET 56    |    LIVE CAPTURE · BSC TESTNET 97    |
+     ARCHIVED RESULT                   |    EXPLANATORY GRAPHIC
+   A graphic never impersonates a product surface. The charter footage is testnet and says so.
+   The Pancake proof is mainnet and says so. Getting this wrong is the one failure mode that
+   would turn a strong submission into a dishonest one.
+
+6. THE COLD OPEN must work MUTED. Someone scrolling X with sound off must understand the first
+   eight seconds from the picture alone: the number, then the collapse. Test it with the audio
+   disabled before you accept the cut.
+
+7. GRADE. A very slight S-curve on the light footage so the paper ground does not read flat, and
+   a matched lift on the cockpit shots so the near-black holds detail. Subtle. If it is visible
+   as a grade, it is too much.
+
+ACCEPTANCE: a silent picture cut, watched end to end at full size, with a contact sheet of every
+tenth second inspected for legibility.
+
+STOP.
+```
+
+## V5 — Captions (1h)
+
+```
+Read AGENTS.md and MARQUE-DEMO-FILM.md before touching anything.
+
+PHASE V5 — WORD-LEVEL FORCED ALIGNMENT. The baseline shipped "sentence-measured,
+phrase-approximated" timing across 46 cues and that drift is visible.
+
+1. Run WhisperX (or aeneas, or Gentle) against the rendered narration WAV to obtain word-level
+   timestamps. Align to the known script text rather than transcribing blind, so the words are
+   exactly ours.
+
+2. Build cues from the word timings: max 42 characters per line, max two lines, never break
+   before a preposition or an article, never split a number from its unit. Cue in on the first
+   word, out 120ms after the last.
+
+3. Render burned-in: 34px, white, 1.3 line height, on a near-black panel at 80% opacity, in a
+   dedicated bottom band. NEVER over a number the viewer is being asked to read — if a cue would
+   cover evidence, move the evidence or move the band for that shot.
+
+4. Deliver a separate SRT. Do NOT also mux a soft subtitle track; the baseline shipped a
+   duplicate default text track by accident.
+
+5. VERIFY BY WATCHING, not by checking the cue file. Play the film and confirm each cue lands on
+   its word. Sentence-level checking is what let the baseline ship drift.
+
+ACCEPTANCE: burned captions verified in playback, external SRT, zero overlaps, nothing masking
+evidence.
+
+STOP.
+```
+
+## V6 — Mix (1h)
+
+```
+PHASE V6 — Delivery loudness for the web, not for a podcast.
+
+Narration bus: high-pass 80Hz, de-ess, gentle 3:1 compression, then loudnorm to I=-16 as a
+  working level.
+Music bed: high-pass 45Hz, sidechained to the [key] split of the narration.
+Sound design bus: at least 18 dB under narration.
+Final sum: amix inputs=3:duration=longest:normalize=0
+FINAL DELIVERY: loudnorm I=-14 TP=-1.0 LRA=7.
+  -14 LUFS is the web/YouTube normalisation target. The baseline's -16 with LRA 8 will sound
+  quiet and thin next to other submissions in a judging queue.
+Stereo 48kHz AAC 256 kbit/s.
+
+MEASURE THE ENCODED FINAL MP4, not the intermediate WAV. Encoding changes peaks.
+Then LISTEN to it on laptop speakers AND on a phone speaker. Meters cannot tell you whether the
+narration is intelligible under the swell at 2:21. Only listening can. If listening is not
+possible, say so in the deliverable and leave that judgement unassessed — do not claim it.
+
+STOP.
+```
+
+## V7 — Encode and QA (1h)
+
+```
+PHASE V7 — Probe the intermediate BEFORE choosing a colour conversion. The baseline hardcoded a
+full-range BT.601 to limited BT.709 transform, which silently degrades an already-correct source.
+
+1. ffprobe the Remotion intermediate. Read the actual pix_fmt, range and matrix. Choose the
+   conversion from what you measure. If it is already limited BT.709, do not convert.
+
+2. Encode: libx264, preset medium, CRF 18, yuv420p, tag BT.709 primaries/transfer/matrix, TV
+   range, faststart. Render to a CANDIDATE filename, verify it, then promote it.
+
+3. QA script checking: exact duration within 0.04s, frame count, dimensions, fps, colour tags,
+   audio format, full decode with no errors, encoded integrated loudness in [-15,-13], true peak
+   at or below -1.0 dBTP, caption bounds and overlaps, and no black or duplicate frames at any
+   cut.
+
+4. HUMAN REVIEW, and record honestly which parts were actually performed:
+   watch the whole film at full size with sound. Check the first and last spoken phrase, all
+   three act transitions, every corner label, caption sync during pushes, that every on-screen
+   number matches FACTS.json, and the end card. If you inspected stills rather than watching
+   motion, say so — do not claim a review you did not perform.
+
+ACCEPTANCE: final MP4, SHA-256, QA report, contact sheet, and a written note of anything left
+unassessed.
+
+STOP.
+```
+
+## V8 — Delivery and variants (1h)
+
+```
+PHASE V8 — The baseline produced one artefact for one imagined viewer. Judging runs to 23 Sep and
+you will be posting during it.
+
+Deliver:
+  1. marque-demo-2m40.mp4        the hero film, 1080p
+  2. marque-demo.srt             external captions
+  3. marque-demo-60s.mp4         a 60-second cut for X: cold open, the funnel collapse, "Passes:
+                                 zero", the charter seal, the Pancake proof, the end card.
+                                 MUST work with sound off — burned captions, larger type.
+  4. marque-poster.png           1920x1080 still that works as a thumbnail and survives being
+                                 screenshotted. The number, the mark, the URL.
+  5. CREDITS.md                  music attribution string, voice model and licence, fonts,
+                                 every tool version
+  6. QA.json + SHA-256
+
+Then: link the hero film from the README "For judges" table as the first row, above the 90-second
+walkthrough, and set it as the repo's social preview image via the poster.
+
+And fix the two trivial things from Part 0: the GitHub repo description currently reads "later",
+and the README should carry the film.
+
+STOP.
+```
+
+---
+
+# PART 5 — Acceptance gates
+
+The film is not finished until every one of these is true.
+
+| Gate | Requirement |
+|---|---|
+| Truth | Every number spoken and shown matches FACTS.json, read live from the product. No figure is estimated, rounded in our favour, or carried over from a draft. |
+| Labels | Every shot carries its corner label. Mainnet, testnet, archive and explanatory graphic are never confused. No graphic impersonates a product surface. |
+| Voice | A human listened to three candidates and chose. If we shipped local TTS, the deliverable says so plainly. |
+| Narration-led | No speech time-stretched above 1.03×. Runtime was achieved by cutting copy, not by speeding the voice. |
+| Resolution | No shot is upscaled. Every push is a crop of a larger source. Text is legible at 100% on every push frame. |
+| Captions | Word-level forced alignment, verified in playback, nothing masking evidence, no duplicate subtitle track. |
+| Silence | The 1.5 seconds at "Passes: zero" are genuinely silent. |
+| Mix | Encoded final measures −14 ±1 LUFS, TP ≤ −1.0. Someone listened on a laptop and a phone. |
+| Muted | The first eight seconds are comprehensible with the sound off. |
+| Runtime | ≤ 2:50. |
+| Honesty | No claim of an Altana integration. No claim of a listening or review step that was not performed. |
+
+---
+
+# PART 6 — The two things that will actually decide whether this film works
+
+**One.** The voice. Everything else in this document is craft that a careful bot can execute. The voice is a judgement call that requires ears, and it is the variable with the largest effect on whether a judge finishes the film. Audition three, listen to all three, and spend the twenty dollars.
+
+**Two.** The silence at "Passes: zero." Every submission's video will have wall-to-wall music. Yours will stop dead for a second and a half on the most important number in the product. That single decision will make the film feel more expensive than anything else in this document, and it costs nothing.
