@@ -32,6 +32,5 @@ demo-video/capture-2160/
 demo-video/voice-samples/
 demo-video/piper-voices/
 demo-video/render/
-demo-video/*.mp4
+demo-video/render/*.mp4
 demo-video/*.wav
-demo-video/marque-demo-v1.mp4
