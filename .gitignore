@@ -25,3 +25,12 @@ agents/*/vendor/
 .claude/
 docs/.pancake-proof-state.json
 scripts/_drift_watch.sh
+
+# demo film — large binaries stay local, pipeline + text are versioned
+demo-video/capture-1440/
+demo-video/capture-2160/
+demo-video/voice-samples/
+demo-video/piper-voices/
+demo-video/render/
+demo-video/*.mp4
+demo-video/*.wav
