@@ -83,6 +83,7 @@ const nfpmAbi = parseAbi([
   'function positions(uint256) view returns (uint96,address,address,address,uint24,int24 tickLower,int24 tickUpper,uint128 liquidity,uint256,uint256,uint128,uint128)',
   'function balanceOf(address) view returns (uint256)',
   'function tokenOfOwnerByIndex(address,uint256) view returns (uint256)',
+  'function increaseLiquidity((uint256 tokenId,uint256 amount0Desired,uint256 amount1Desired,uint256 amount0Min,uint256 amount1Min,uint256 deadline)) payable returns (uint128 liquidity,uint256 amount0,uint256 amount1)',
   'event IncreaseLiquidity(uint256 indexed tokenId,uint128 liquidity,uint256 amount0,uint256 amount1)',
 ])
 const routerAbi = parseAbi([
@@ -571,9 +572,78 @@ async function cmdTighten() {
   console.log(`\n✓ tightened to [${tl}, ${tu}] — new token ${newId}`)
 }
 
+/**
+ * Move idle wallet BNB into the LIVE position so the LP a judge sees is the
+ * intended size, not the minimum the proof was opened at. Keeps a gas buffer.
+ * The proof (already `complete` and immutable on chain) is untouched.
+ */
+async function cmdTopup() {
+  const w = wallet()
+  const me = w.account.address
+  const { encodeFunctionData } = await import('viem')
+
+  // Find the newest position that still holds liquidity.
+  const n = await pub.readContract({ address: A.nfpm, abi: nfpmAbi, functionName: 'balanceOf', args: [me] })
+  let tokenId = null, pos = null
+  for (let i = n - 1n; i >= 0n; i--) {
+    const id = await pub.readContract({ address: A.nfpm, abi: nfpmAbi, functionName: 'tokenOfOwnerByIndex', args: [me, i] })
+    const p = await pub.readContract({ address: A.nfpm, abi: nfpmAbi, functionName: 'positions', args: [id] })
+    if (p[7] > 0n) { tokenId = id; pos = p; break }
+    if (i === 0n) break
+  }
+  if (!tokenId) throw new Error('no funded position to top up')
+  const [tickLower, tickUpper] = [Number(pos[5]), Number(pos[6])]
+  const pool = await poolAddr()
+  const st = await poolState(pool)
+  console.log(`live position ${tokenId}  range [${tickLower}, ${tickUpper}]  current tick ${st.tick}`)
+
+  const GAS_BUFFER = parseUnits('0.02', 18)   // leave this much native BNB
+  const bnb = await pub.getBalance({ address: me })
+  if (bnb <= GAS_BUFFER + parseUnits('0.005', 18)) { console.log('not enough idle BNB to top up'); return }
+  const deploy = bnb - GAS_BUFFER
+  const px = bnbPx(st.tick) // USDT per BNB
+  console.log(`idle BNB ${formatEther(bnb)} → deploying ${formatEther(deploy)} (~$${(Number(formatEther(deploy)) * px).toFixed(2)})`)
+
+  // 1. wrap
+  await send(`wrap ${formatEther(deploy)} BNB`, { address: A.wbnb, abi: wbnbAbi, functionName: 'deposit', value: deploy })
+
+  // 2. swap to the ratio the position needs right now:
+  //    below range -> ~all USDT (token0);  above -> ~all WBNB;  in range -> ~50/50.
+  const below = st.tick < tickLower, above = st.tick > tickUpper
+  const swapFrac = below ? 0.98 : above ? 0 : 0.5
+  const swapAmt = (deploy * BigInt(Math.round(swapFrac * 1000))) / 1000n
+  if (swapAmt > 0n) {
+    const cur = await pub.readContract({ address: A.wbnb, abi: erc20, functionName: 'allowance', args: [me, A.swapRouter] })
+    if (cur < swapAmt) await send('approve WBNB to router', { address: A.wbnb, abi: erc20, functionName: 'approve', args: [A.swapRouter, swapAmt * 3n] })
+    await send(`swap ${(swapFrac * 100).toFixed(0)}% WBNB → USDT`, {
+      address: A.swapRouter, abi: routerAbi, functionName: 'exactInputSingle',
+      args: [{ tokenIn: A.wbnb, tokenOut: A.usdt, fee: FEE, recipient: me, deadline: deadline(), amountIn: swapAmt, amountOutMinimum: 0n, sqrtPriceLimitX96: 0n }],
+    })
+  }
+  // 3. approvals + increaseLiquidity with whatever we now hold
+  const [usdtBal, wbnbBal] = await Promise.all([
+    pub.readContract({ address: A.usdt, abi: erc20, functionName: 'balanceOf', args: [me] }),
+    pub.readContract({ address: A.wbnb, abi: erc20, functionName: 'balanceOf', args: [me] }),
+  ])
+  for (const [sym, token, amt] of [['USDT', A.usdt, usdtBal], ['WBNB', A.wbnb, wbnbBal]]) {
+    const cur = await pub.readContract({ address: token, abi: erc20, functionName: 'allowance', args: [me, A.nfpm] })
+    if (cur < amt) await send(`approve ${sym} to NFPM`, { address: token, abi: erc20, functionName: 'approve', args: [A.nfpm, amt * 3n] })
+  }
+  const a0 = USDT_IS_0 ? usdtBal : wbnbBal
+  const a1 = USDT_IS_0 ? wbnbBal : usdtBal
+  // Mins 0: the pool pulls whatever ratio the range needs at the current tick and
+  // the rest stays in the wallet. The swap slippage was bounded on its own leg.
+  await send('increaseLiquidity', {
+    address: A.nfpm, abi: nfpmAbi, functionName: 'increaseLiquidity',
+    args: [{ tokenId, amount0Desired: a0, amount1Desired: a1, amount0Min: 0n, amount1Min: 0n, deadline: deadline() }],
+  })
+  if (!GO) { console.log('\n(dry run — pass --go to top up)'); return }
+  console.log('\n✓ liquidity increased on', tokenId.toString())
+}
+
 async function main() {
-  if (!['plan', 'open', 'status', 'tighten', 'rebalance', 'finalize'].includes(CMD)) {
-    console.log('usage: PROOF_PK=0x... node scripts/pancake-proof.mjs <plan|open|status|tighten|rebalance|finalize> [--go]')
+  if (!['plan', 'open', 'status', 'tighten', 'rebalance', 'topup', 'finalize'].includes(CMD)) {
+    console.log('usage: PROOF_PK=0x... node scripts/pancake-proof.mjs <plan|open|status|tighten|rebalance|topup|finalize> [--go]')
     process.exit(1)
   }
   console.log(`# pancake-proof ${CMD}${GO ? ' --go (LIVE)' : ' (dry run)'} · block ${await pub.getBlockNumber()}\n`)
@@ -582,6 +652,7 @@ async function main() {
   else if (CMD === 'status') await cmdStatus()
   else if (CMD === 'tighten') await cmdTighten()
   else if (CMD === 'rebalance') await cmdRebalance()
+  else if (CMD === 'topup') await cmdTopup()
   else if (CMD === 'finalize') { const p = loadProof(); console.log(JSON.stringify(p, null, 2)) }
 }
 main().catch((e) => { console.error(e); process.exit(1) })

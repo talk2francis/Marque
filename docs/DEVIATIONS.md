@@ -1296,3 +1296,16 @@ reference merge) took most of it.
   killed mid-run never got their MarqueRegistry anchor. `scripts/reanchor-receipts.mjs`
   anchored all 6 on testnet and backfilled `anchor_tx_hash` / `anchor_block` /
   `anchored_at`. The runs and receipts were always real; only the timestamp was missing.
+
+### D9b-04 · Live LP topped up to ~$102 after the proof
+
+- The proof run opened deliberately small (~$25) and the rebalance left ~$52 in
+  the re-centred position. On Francis's instruction ("add more liquidity pool …
+  use the fund for the necessary things") the idle wallet BNB was moved into the
+  live position (token 7367728) via `scripts/pancake-proof.mjs topup --go`:
+  wrap → swap to the ratio the range needs → `increaseLiquidity`
+  (tx `0xfe4a9eb30c27a324bbfef40f53c8ac483c5f8ae91833967be54f03436dd9f02d`).
+- The position now holds ~$102; the wallet keeps ~0.02 BNB (~$15) for gas.
+- The published proof (`docs/pancakeswap-proof.json`, `status: complete`) is
+  untouched — its transactions and captured before/after are immutable on chain.
+  The live position drifts in and out of range as any real LP does.
