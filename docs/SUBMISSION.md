@@ -45,7 +45,16 @@ transaction hash, or a command whose output is pasted in the phase docs.
 | 9 | LLM never signs, never prices | **PASS** | Only model call is category classification (DeepSeek), USD-capped, label-only output — `docs/SECURITY.md §4` |
 | 10 | `safeFetch()` SSRF guard on every outbound agent call | **PASS** | `packages/probe/src/safe-fetch.ts`; sole path; `safe-fetch.test.ts` + `redirect.test.ts` |
 | 11 | First-party observations never deleted | **PASS** | No delete path for probe / conformance_result / receipt / run / sealed_call / pool_tick_observation; rebuild drill truncates derived tables only |
-| 12 | The Ledger: agent vs. human, blind-graded against a pre-registered rubric | **PARTIAL — honest** | `/ledger` renders the mechanism and the registered rubric; **manual arms not yet run** — the page says so, no result is faked. Runner: `docs/LEDGER-MANUAL-ARMS.md` |
+| 12 | The Ledger: agent vs. human, blind-graded against a pre-registered rubric | **PARTIAL — honest** | `/ledger` renders the mechanism and the registered rubric. **Agent arms recorded** for all four benchmarks (ADV-01..04, 2 reps each, measured timings + hashed manifests); **human arms + blind grading in progress**. Full write-up: `docs/AGENT-ADVANTAGE-REPORT.md`. Runner for the human side: `docs/LEDGER-MANUAL-ARMS.md` |
+
+### TermiX Challenge — Agent Advantage Report
+
+| # | Requirement | State | Evidence |
+|---|---|---|---|
+| T1 | ≥ 3 real tasks, run with a marketplace agent vs. without | **PARTIAL** | 4 tasks (ADV-01..04). Agent arms recorded with measured timings + hashed manifests; human arms in progress (`docs/LEDGER-MANUAL-ARMS.md`, ~2 h) |
+| T2 | ≥ 1 task from trading / stock / security | **PASS** | ADV-01 is a security triage of a live BSC token contract |
+| T3 | Time, cost and output quality per task, actual outputs attached | **PASS (agent) / PARTIAL (human)** | `docs/AGENT-ADVANTAGE-REPORT.md` — verbatim agent outputs, measured ms, itemised cost; human columns pending |
+| T4 | Advantage measured, not asserted | **PASS by construction** | Blind grade against a 100-pt rubric registered and hashed **before** any arm ran; rubric hashes + timestamps in the report |
 
 ### PancakeSwap proof run (P9b)
 
@@ -75,7 +84,7 @@ transaction hash, or a command whose output is pasted in the phase docs.
 | # | Requirement | State | Evidence |
 |---|---|---|---|
 | 26 | README: judge links first, every link and tx-hash real | **PASS** | `README.md` — 13-row judge table, 4 real proof tx hashes, live funnel link |
-| 27 | `docs/ARCHITECTURE.md` with an inline SVG (all text as `<text>`, full-canvas bg rect, token palette) | **PASS** | `docs/ARCHITECTURE.md` |
+| 27 | `docs/ARCHITECTURE.md` with an SVG diagram (all text as `<text>`, full-canvas bg rect, token palette) | **PASS** | `docs/ARCHITECTURE.md` + standalone `docs/architecture.svg` (embedded as `<img>` because GitHub strips inline `<svg>` from markdown; inline copy kept in a `<details>`) |
 | 28 | `docs/SECURITY.md` — SSRF, signing boundary, key handling, LLM boundaries | **PASS** | `docs/SECURITY.md` |
 | 29 | `docs/SUBMISSION.md` — acceptance gate, PASS-with-evidence or honest | **PASS** | this file |
 | 30 | Naming sweep — no lowercase `marque` common noun, no wax-seal / "letter of marque" framing | **PASS** | output below — zero violations |

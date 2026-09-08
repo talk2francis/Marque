@@ -5,6 +5,13 @@ PostgreSQL 16 and Redis 7 sit underneath. No containers, no cloud control plane 
 so the whole system is legible from one `pm2 status` and one `psql`.
 
 <p align="center">
+  <img src="./architecture.svg" alt="Marque architecture — one host: browser → Caddy → Next.js + workers + reference agents, over Postgres/Redis, with a two-tier data model and RPC failover to BSC" width="900">
+</p>
+
+<details>
+<summary>The same diagram as inline SVG (for renderers that allow it)</summary>
+
+<p align="center">
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 700" width="100%" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif" font-size="13">
   <rect x="0" y="0" width="980" height="700" fill="#15160f"/>
   <text x="24" y="34" fill="#ece9e1" font-size="17" font-weight="700">Marque — one host</text>
@@ -98,6 +105,8 @@ so the whole system is legible from one `pm2 status` and one `psql`.
   <text x="24" y="680" fill="#6b6f5d" font-size="10">Palette: ink #15160f · paper tones on dark · brass #b0892c / #d9ae45 · signals holds #57957a watch #d9ae45 breach #cd6f63</text>
 </svg>
 </p>
+
+</details>
 
 ---
 

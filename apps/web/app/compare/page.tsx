@@ -5,6 +5,7 @@ import { Statement, Chip, WarrantBadge, EmptyState, LinkButton, ProvenanceChip }
 import { SiteHeader, SiteFooter } from '../_components/SiteHeader'
 import { ReferenceMark } from '../_components/ReferenceMark'
 import { marketplaceAgents, type MarketRow } from '../../lib/marketplace'
+import { referenceAgent } from '../../lib/reference-agents'
 import { explorerAddress } from '../../lib/network'
 import styles from './compare.module.css'
 
@@ -77,20 +78,28 @@ async function trackRecords(ids: string[]): Promise<Map<string, TrackRecord>> {
 }
 
 function IdentityCell({ a }: { a: MarketRow }) {
-  const chain = a.isReference ? 97 : 56
-  if (!(a.tokenId && /^\d+$/.test(a.tokenId))) {
-    return <div className={styles.cell}><span className={styles.muted}>no parseable token id</span></div>
+  // Reference agents carry their real ERC-8004 token id (chain 97); third
+  // parties carry a numeric token id on chain 56 when their metadata parsed.
+  const ref = a.isReference ? referenceAgent(a.agentId) : null
+  const chain = ref ? ref.erc8004.chainId : 56
+  const tokenId = ref ? String(ref.erc8004.tokenId) : a.tokenId
+  const ownerAddr = ref ? ref.erc8004.wallet : a.owner
+
+  if (!(tokenId && /^\d+$/.test(tokenId))) {
+    return <div className={styles.cell}><span className={styles.muted}>no on-chain token id in metadata</span></div>
   }
   return (
     <div className={styles.cell}>
-      <span>ERC-8004 <span className="mono">#{a.tokenId}</span></span>
-      {a.owner ? (
-        <a className={styles.link} href={explorerAddress(chain, a.owner)} target="_blank" rel="noreferrer">
-          owner {a.owner.slice(0, 6)}…{a.owner.slice(-4)}
-        </a>
-      ) : a.isReference ? (
-        <span className={styles.muted}>operated by Marque</span>
-      ) : null}
+      <a className={styles.link} href={explorerAddress(chain, ownerAddr ?? '')} target="_blank" rel="noreferrer">
+        ERC-8004 <span className="mono">#{tokenId}</span> · chain {chain}
+      </a>
+      {ownerAddr && (
+        <span className={styles.muted}>
+          {ref ? 'operator ' : 'owner '}
+          <span className="mono">{ownerAddr.slice(0, 6)}…{ownerAddr.slice(-4)}</span>
+          {ref ? ' (Marque)' : ''}
+        </span>
+      )}
       {a.identityCount > 1 && (
         <span className={styles.muted}>+{a.identityCount - 1} sibling identit{a.identityCount - 1 === 1 ? 'y' : 'ies'} by this operator</span>
       )}
