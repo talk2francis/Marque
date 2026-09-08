@@ -90,7 +90,7 @@ async function agentHealth(): Promise<Array<{ id: string; ok: boolean; ms: numbe
 }
 
 export default async function StatusPage() {
-  const [head, cursorQ, probesQ, confQ, watchQ, agents] = await Promise.all([
+  const [head, cursorQ, probesQ, confQ, watchQ, usageQ, agents] = await Promise.all([
     publicClient().getBlockNumber().then((b) => b.toString()).catch(() => null),
     queried('ingest cursor', db().execute(sql`select source, cursor, updated_at from ingest_cursor order by source`)),
     queried('probe rollup', db().execute(sql`
@@ -106,6 +106,9 @@ export default async function StatusPage() {
     queried('pool observations', db().execute(sql`
       select count(distinct pool)::int as pools, count(*)::int as observations, max(observed_at) as last_observed
       from pool_tick_observation
+    `)),
+    queried('product usage', db().execute(sql`
+      select name, count(*)::int as n, min(at) as since from product_event group by name
     `)),
     agentHealth(),
   ])
@@ -128,6 +131,37 @@ export default async function StatusPage() {
   }, null)
   const confFresh = freshness('Conformance', lastConf)
   const downAgents = agents.filter((a) => !a.ok)
+
+  // Real-world usage (P10.5J) — anonymous product events, counted, with the
+  // window stated. Never extrapolated.
+  const USAGE_LABEL: Record<string, string> = {
+    marketplace_search: 'marketplace searches',
+    position_read: 'positions read',
+    agent_profile_view: 'agent profiles opened',
+    compare_add: 'agents added to a comparison',
+    preflight_run: 'preflights run',
+    hire_started: 'hires started',
+    hire_completed: 'hires settled',
+    charter_granted: 'charters granted',
+    charter_revoked: 'charters revoked',
+    builder_test_run: 'independent agent tests',
+    third_party_listing: 'third-party listings',
+    judge_flow_completed: 'judge walkthroughs finished',
+  }
+  const USAGE_ORDER = [
+    'builder_test_run', 'marketplace_search', 'position_read', 'agent_profile_view',
+    'compare_add', 'preflight_run', 'hire_started', 'hire_completed',
+    'charter_granted', 'charter_revoked', 'third_party_listing', 'judge_flow_completed',
+  ]
+  const usage = usageQ.rows
+  const usageSince = usage.reduce<string | null>((a, r) => {
+    const s = r['since'] ? String(r['since']) : null
+    return s !== null && (a === null || s < a) ? s : a
+  }, null)
+  const usageRows = USAGE_ORDER
+    .map((name) => ({ name, label: USAGE_LABEL[name], n: Number(usage.find((r) => r['name'] === name)?.['n'] ?? 0) }))
+    .filter((r) => r.n > 0)
+  const usageTotal = usageRows.reduce((s, r) => s + r.n, 0)
 
   return (
     <>
@@ -161,6 +195,38 @@ export default async function StatusPage() {
             {downAgents.map((a) => a.id).join(', ')}. They are listed below with what happened.
           </p>
         )}
+
+        <section className={styles.section}>
+          <h2 className={styles.h2}>Real-world usage</h2>
+          {usageQ.failed ? (
+            <p className={`${styles.warn} ${styles.stale}`}>The usage query failed: {usageQ.failed}</p>
+          ) : usageRows.length === 0 ? (
+            <p className={styles.note}>
+              No product events recorded yet. They are anonymous — an event name and, at most, a
+              category or a count. No IP, no wallet, no cookie, no third-party analytics.
+            </p>
+          ) : (
+            <>
+              <p className={styles.note}>
+                <ProvenanceChip provenance="MEASURED" />
+                {usageTotal.toLocaleString('en-US')} anonymous product events
+                {usageSince ? `, since ${new Date(usageSince).toISOString().slice(0, 10)}` : ''}. No
+                PII: an event name and, at most, a category or a count. Counted, never extrapolated.
+              </p>
+              <table className={styles.table}>
+                <thead><tr><th>What</th><th>Count</th></tr></thead>
+                <tbody>
+                  {usageRows.map((r) => (
+                    <tr key={r.name}>
+                      <td>{r.label}</td>
+                      <td className="mono">{r.n.toLocaleString('en-US')}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </>
+          )}
+        </section>
 
         <section className={styles.section}>
           <h2 className={styles.h2}>Chain and index</h2>

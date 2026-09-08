@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { track } from '../../lib/track'
 import Link from 'next/link'
 import { Button, Chip, ProvenanceChip } from '@marque/ui'
 import { announceChartersChanged } from '../_components/CharterStrip'
@@ -44,6 +45,10 @@ export function JudgeFlow({ demoAddress }: { demoAddress: string }) {
       if (started.current !== null) setElapsed((Date.now() - started.current) / 1000)
     }, 100)
     return () => clearInterval(t)
+  }, [s.done.length])
+
+  useEffect(() => {
+    if (s.done.length >= 6) track('judge_flow_completed', undefined, { once: true })
   }, [s.done.length])
 
   const finish = (id: StepId, patch: Partial<State>) =>

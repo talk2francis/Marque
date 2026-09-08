@@ -71,6 +71,13 @@
       "when": 1788798123611,
       "tag": "0009_military_chronomancer",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1788833943619,
+      "tag": "0010_product_event",
+      "breakpoints": true
     }
   ]
 }

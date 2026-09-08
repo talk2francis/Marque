@@ -61,7 +61,8 @@ const TASK_FOR_CATEGORY: Record<string, Record<string, unknown>> = {
   health_factor: { targetHealthFactor: 2.5 },
 }
 
-function countdown(seconds: number): string {
+function countdown(seconds: number | null): string {
+  if (seconds === null) return '…'
   if (seconds <= 0) return 'expired'
   const h = Math.floor(seconds / 3600)
   const m = Math.floor((seconds % 3600) / 60)
@@ -72,20 +73,22 @@ function countdown(seconds: number): string {
 
 export function CharterCard({ charter, subject }: { charter: CharterView; subject: string }) {
   const [live, setLive] = useState<CharterView>(charter)
-  const [seconds, setSeconds] = useState(() =>
-    Math.floor((new Date(charter.expiresAt).getTime() - Date.now()) / 1000))
+  // `null` until mounted: the seconds-remaining depends on Date.now(), which is
+  // not the same on the server and in the browser, so computing it during
+  // render is a guaranteed hydration mismatch. The clock starts in useEffect.
+  const [seconds, setSeconds] = useState<number | null>(null)
   const [busy, setBusy] = useState<null | 'revoking' | 'hiring'>(null)
   const [error, setError] = useState<string | null>(null)
   const [pulse, setPulse] = useState(false)
 
-  const active = live.status === 'active' && seconds > 0
+  const active = live.status === 'active' && (seconds === null || seconds > 0)
 
   // The clock ticks locally; the state comes from the server. Extrapolating a
   // spend meter between polls would be an estimate rendered as a measurement.
   useEffect(() => {
-    const tick = setInterval(() => {
-      setSeconds(Math.floor((new Date(live.expiresAt).getTime() - Date.now()) / 1000))
-    }, 1000)
+    const compute = () => setSeconds(Math.floor((new Date(live.expiresAt).getTime() - Date.now()) / 1000))
+    compute()
+    const tick = setInterval(compute, 1000)
     return () => clearInterval(tick)
   }, [live.expiresAt])
 
@@ -190,7 +193,7 @@ export function CharterCard({ charter, subject }: { charter: CharterView; subjec
       <dl className={styles.facts}>
         <div className={styles.fact}>
           <dt>Time left</dt>
-          <dd><DataCell align="left">{active ? countdown(seconds) : '—'}</DataCell></dd>
+          <dd><DataCell align="left">{live.status === 'active' ? countdown(seconds) : '—'}</DataCell></dd>
         </div>
         <div className={styles.fact}>
           <dt>Calls used</dt>

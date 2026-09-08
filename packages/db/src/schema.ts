@@ -691,3 +691,33 @@ export type BenchmarkRun = typeof benchmarkRun.$inferSelect
 export type NewBenchmarkRun = typeof benchmarkRun.$inferInsert
 export type SealedCall = typeof sealedCall.$inferSelect
 export type NewSealedCall = typeof sealedCall.$inferInsert
+
+/**
+ * Anonymous product telemetry (P10.5J). FIRST-PARTY.
+ *
+ * No PII, ever: no IP, no user-agent, no wallet address, no cookie. A row is a
+ * bare event name plus an optional small, non-identifying `meta` (a category, a
+ * count). The point is to state real-world usage as a MEASURED number with a
+ * window, not to profile anyone. Names are validated against a fixed allowlist
+ * server-side; anything else is dropped.
+ */
+export const PRODUCT_EVENTS = [
+  'marketplace_search', 'position_read', 'agent_profile_view', 'compare_add',
+  'preflight_run', 'hire_started', 'hire_completed', 'charter_granted',
+  'charter_revoked', 'builder_test_run', 'third_party_listing', 'judge_flow_completed',
+] as const
+export type ProductEventName = (typeof PRODUCT_EVENTS)[number]
+
+export const productEvent = pgTable('product_event', {
+  id: serial('id').primaryKey(),
+  name: text('name').$type<ProductEventName>().notNull(),
+  at: timestamp('at', { withTimezone: true }).notNull().defaultNow(),
+  /** Small, non-identifying context only — e.g. { category: 'yield' }. */
+  meta: jsonb('meta').$type<Record<string, string | number>>(),
+}, (t) => ({
+  nameAtIdx: index('product_event_name_at_idx').on(t.name, t.at.desc()),
+  atIdx: index('product_event_at_idx').on(t.at.desc()),
+}))
+
+export type ProductEvent = typeof productEvent.$inferSelect
+export type NewProductEvent = typeof productEvent.$inferInsert

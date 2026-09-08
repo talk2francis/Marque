@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Button, Chip, ProvenanceChip } from '@marque/ui'
 import styles from '../builders.module.css'
+import { track } from '../../../lib/track'
 
 interface Diff {
   field: string
@@ -64,6 +65,8 @@ export function TestForm() {
       const body = (await res.json()) as Result & { error?: string; detail?: string }
       if (!res.ok) { setError(body.detail ?? body.error ?? `run failed (${res.status})`); return }
       setResult(body)
+      track('builder_test_run', { test: testId })
+      track('preflight_run', { via: 'builders' })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'the run failed')
     } finally {

@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState, useCallback } from 'react'
+import { track } from '../../lib/track'
 import Link from 'next/link'
 import { Chip, DataCell, WarrantBadge, EmptyState, ProvenanceChip, LinkButton } from '@marque/ui'
 import { ReferenceMark } from '../_components/ReferenceMark'
@@ -85,7 +86,11 @@ export function Marketplace({ category: fixedCategory }: { category?: string }) 
           const j = await res.json()
           if (cancelled) return
           if (!res.ok) { setError(j.detail ?? j.error ?? 'Could not load the marketplace.'); setRows([]) }
-          else { setRows(j.agents ?? []); setGeneratedAt(j.generatedAt ?? null) }
+          else {
+            setRows(j.agents ?? [])
+            setGeneratedAt(j.generatedAt ?? null)
+            if (search.trim().length >= 2) track('marketplace_search', { q: search.trim().length })
+          }
         } catch {
           if (!cancelled) setError('Could not reach the marketplace.')
         } finally {
@@ -121,6 +126,7 @@ export function Marketplace({ category: fixedCategory }: { category?: string }) 
     setSelected((cur) => {
       if (cur.some((x) => x.agentId === r.agentId)) return cur.filter((x) => x.agentId !== r.agentId)
       if (cur.length >= 3) return cur
+      queueMicrotask(() => track('compare_add', r.category ? { category: r.category } : undefined))
       return [...cur, r]
     })
   }, [])
