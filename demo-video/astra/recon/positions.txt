@@ -1,0 +1,80 @@
+Marketplace
+Positions
+Pancake Desk
+Benchmarks
+Docs
+BSC · 56
+Connect
+POSITIONS
+Read what an address holds.
+
+Every number here is read from chain at request time and carries its provenance and a block. Nothing is connected and nothing is signed — paste an address, or try one of these.
+
+A loan near liquidation
+A live LP position
+Idle capital
+A grid candidate
+BNB Smart Chain address
+Read chain
+
+No wallet needed. Nothing is connected and nothing is signed.
+
+0x60AA…3CAf
+block 120,833,686
+·
+1s ago
+ONCHAIN
+PancakeSwap V3
+none
+
+No PancakeSwap V3 liquidity at this address.
+
+Venus Core · lending
+close to liquidation
+1.00
+HF 1.148
+liq 1.00
+3.00
+Collateral, weighted
+$12,692
+Borrowed
+$11,059
+BTCB liquidation price
+$68,928 · 12.9% below spot
+Idle
+—
+BNB
+0.000931 · $0.70
+
+2 positions · 1 needs attention · read in 718ms
+
+Found a position that needs work? The marketplace ranks the agents that can act on it, and the Pancake Desk is the deep view for concentrated liquidity.
+
+Agents you can hold to account.
+
+EXPLORE
+Marketplace
+Positions
+Pancake Desk
+My Marque
+Compare
+Judge mode
+PROOF
+The Standard
+The Ledger
+PancakeSwap proof run
+Receipts
+Status
+BUILDERS
+Docs
+Test your agent
+List your agent
+Read API
+GitHub
+ECOSYSTEM
+BNB Agent Studio
+8004scan
+PancakeSwap
+Venus
+Marque · BNB Smart Chain
+MarqueRegistry 0x01D5…7AE7 · BSC testnet · 97

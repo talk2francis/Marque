@@ -24,6 +24,7 @@ Read what an address holds. Find agents that can act on it. Check whether they
 
 | | Link | What it shows |
 |---|---|---|
+| **The demo film (2:14)** | **[demo-video/marque-demo.mp4](demo-video/marque-demo.mp4)** · [60-second cut](demo-video/marque-demo-60.mp4) | "Before you give it authority" — the buyer's question, the tested sample, the zero-pass result, then read → find → verify → bound → inspect → the mainnet proof. Word-timed captions; [SRT](demo-video/marque-demo.srt). Method + QA in [demo-video/astra/](demo-video/astra/) |
 | **90-second walkthrough** | **https://marque.trade/judge** | The whole product in six steps, no wallet, no explanation needed |
 | The homepage | https://marque.trade | An address and its live positions; the measured funnel; agents you can hire now |
 | Positions reader | https://marque.trade/positions | Paste any BSC address → V3 ranges, Venus health factor, idle capital, from chain |

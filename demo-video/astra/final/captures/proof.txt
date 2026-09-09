@@ -1,0 +1,106 @@
+Marketplace
+Positions
+Pancake Desk
+Benchmarks
+Docs
+BSC · 56
+Connect
+The proof run
+
+One real mainnet PancakeSwap V3 rebalance, executed under a spend-capped, revocable charter. A deliberately narrow range (~0.3%) is opened so it drifts out within hours; this page captures it earning nothing, the agent re-centring it, and every cost — and if the rebalance reverts, it captures that instead.
+
+Complete — re-centred on mainnetBSC mainnet · 56 captured 2026-09-08 01:41Z
+
+The charter it runs under
+Spend cap
+$60.00 MEASURED
+Expires
+2026-09-09 23:54Z
+Contract allowlist — the only addresses it can touch
+0x172fcD41…46f8490x46A15B0b…7F43640x1b81D678…13eB140xbb4CdB9C…bc095c0x55d39832…197955
+
+The same guardrails the Desk states — slippage cap, deadline ≤ 5 minutes, approvals scoped to the exact amount, atomic multicall, a token safelist — apply to every transaction below.
+
+What happened
+
+The band was opened ~0.3% wide on BNB/USDT 0.01%. As BNB volatility fell through the session it kept drifting back in, so the band was narrowed twice to stay meaningful; on the razor band it drifted below range and stayed there — a cumulative 0.9h holding 100% USDT and earning zero fees — and Bound then re-centred it around the live price.
+
+Before — out of range, earning nothing
+Range
+$740.46 — $740.61 / BNB
+Range ticks
+[-66078, -66076]
+Current tick
+-66091 ONCHAIN
+Out of range since
+2026-09-08 01:02Z
+Hours out of range
+0.9h MEASURED
+Fees earned while out
+$0.00
+The transactions
+01
+Mint the deliberately-narrow range
+ONCHAIN
+0xb32c204f143b233f5f38958fecda083141efd85f0352ca08bdc116703c8688ed
+02
+Withdraw the drifted position — decreaseLiquidity + collect
+ONCHAIN
+0xfe41a8a1218e2e8c9f206c26565a537879f1de090b258e8bd64d41d925bc9001
+03
+Swap toward 50/50 at the current price
+ONCHAIN
+0xd795d4879ee16f21f6d54a7f404cc1f7e3928241ec9a0a0c0f6afc3618fb46e9
+04
+Open the re-centred range
+ONCHAIN
+0x83f635fc30e74e26e36575be3c179301e96de01e6a5839b6d478fba33725a806
+After — re-centred, earning again
+New range
+$738.17 — $744.84 / BNB
+New range ticks
+[-66135, -66045]
+Current tick
+-66090
+In range
+yes — fees resumed
+Fees resumed at block
+120600044
+What it cost
+Realised slippage
+< 1 bps ONCHAIN
+below 1 bps — a ~$26 USDT→WBNB rebalancing swap against the 0.01% pool, which holds the deepest BNB/USDT liquidity on PancakeSwap V3
+Gas (all transactions)
+$0.10 ONCHAIN
+0.000131 BNB total across all six transactions, at ~0.05 gwei
+Agent fee
+$0.15
+
+Agents you can hold to account.
+
+EXPLORE
+Marketplace
+Positions
+Pancake Desk
+My Marque
+Compare
+Judge mode
+PROOF
+The Standard
+The Ledger
+PancakeSwap proof run
+Receipts
+Status
+BUILDERS
+Docs
+Test your agent
+List your agent
+Read API
+GitHub
+ECOSYSTEM
+BNB Agent Studio
+8004scan
+PancakeSwap
+Venus
+Marque · BNB Smart Chain
+MarqueRegistry 0x01D5…7AE7 · BSC testnet · 97

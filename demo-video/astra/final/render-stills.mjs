@@ -1,0 +1,6 @@
+import {chromium} from 'playwright';import {readFileSync,mkdirSync,writeFileSync} from 'node:fs';import {dirname,join} from 'node:path';import {fileURLToPath,pathToFileURL} from 'node:url';
+const root=dirname(fileURLToPath(import.meta.url));mkdirSync(join(root,'frames'),{recursive:true});
+const scenes=JSON.parse(readFileSync(join(root,'scenes.json'))),facts=JSON.parse(readFileSync(join(root,'../FACTS.json')));
+const browser=await chromium.launch({args:['--force-color-profile=srgb']});const page=await browser.newPage({viewport:{width:1920,height:1080},deviceScaleFactor:1});await page.goto(pathToFileURL(join(root,'film.html')).href);
+const checks=[];for(let i=0;i<scenes.length;i++){await page.evaluate(({s,i,scenes,facts})=>window.renderFilm(s,i,scenes,facts),{s:scenes[i],i,scenes,facts});await page.evaluate(async()=>{await document.fonts.ready;await Promise.all([...document.images].map(x=>x.decode()));});await page.screenshot({path:join(root,'frames',scenes[i].id+'.png')});checks.push({id:scenes[i].id,images:await page.evaluate(()=>[...document.images].map(x=>({source:x.getAttribute('src'),naturalWidth:x.naturalWidth,displayWidth:x.getBoundingClientRect().width})))});console.log(scenes[i].id);}
+writeFileSync(join(root,'frame-checks.json'),JSON.stringify(checks,null,2));await browser.close();

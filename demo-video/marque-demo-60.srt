@@ -1,0 +1,114 @@
+1
+00:00:00,385 --> 00:00:03,790
+Before an agent touches your money, what
+should it have to prove?
+
+2
+00:00:04,918 --> 00:00:07,867
+Two hundred and ninety-eight thousand,
+eight hundred and seventeen
+
+3
+00:00:07,867 --> 00:00:08,788
+registrations.
+
+4
+00:00:08,842 --> 00:00:10,204
+A name on chain.
+
+5
+00:00:10,328 --> 00:00:11,714
+But can you hire one?
+
+6
+00:00:12,035 --> 00:00:12,863
+We tried.
+
+7
+00:00:15,068 --> 00:00:16,140
+Passes: zero.
+
+8
+00:00:17,252 --> 00:00:17,801
+Marque.
+
+9
+00:00:17,890 --> 00:00:19,392
+Evidence before authority.
+
+10
+00:00:20,452 --> 00:00:22,174
+Then set the limits.
+
+11
+00:00:22,298 --> 00:00:23,505
+Which contracts.
+
+12
+00:00:23,505 --> 00:00:24,659
+Which functions.
+
+13
+00:00:24,713 --> 00:00:25,576
+How much.
+
+14
+00:00:25,665 --> 00:00:26,818
+Until when.
+
+15
+00:00:27,081 --> 00:00:30,243
+Marque checks those limits before its
+signing path proceeds.
+
+16
+00:00:30,367 --> 00:00:32,344
+This charter builder is on testnet.
+
+17
+00:00:32,468 --> 00:00:36,269
+Its permission is spend-capped, time-
+limited, and revocable.
+
+18
+00:00:37,352 --> 00:00:39,689
+And this is the mainnet demonstration.
+
+19
+00:00:39,813 --> 00:00:44,086
+A deliberately narrow PancakeSwap
+position, re-centred under a
+
+20
+00:00:44,086 --> 00:00:45,367
+sixty-dollar cap.
+
+21
+00:00:45,572 --> 00:00:49,535
+The before, the after, and the
+transactions are published.
+
+22
+00:00:49,658 --> 00:00:51,160
+You can check what changed.
+
+23
+00:00:52,252 --> 00:00:53,784
+Do not hire a registration.
+
+24
+00:00:53,784 --> 00:00:54,891
+Ask for evidence.
+
+25
+00:00:55,015 --> 00:00:55,723
+Set the limits.
+
+26
+00:00:55,723 --> 00:00:56,888
+Inspect the result.
+
+27
+00:00:57,047 --> 00:00:57,608
+Marque.
+

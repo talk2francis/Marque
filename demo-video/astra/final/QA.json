@@ -1,0 +1,41 @@
+{
+  "durationSeconds": "134.600000",
+  "expectedSeconds": 134.6,
+  "checks": {
+    "durationWithinOneFrame": true,
+    "under170Seconds": true,
+    "resolution": true,
+    "fps30": true,
+    "bt709": true,
+    "limitedRange": true,
+    "pixelFormat": true,
+    "stereo48k": true,
+    "noSubtitleTrack": true,
+    "fullDecode": true,
+    "loudness": true,
+    "truePeak": true,
+    "zeroRevealSilent": true
+  },
+  "encodedLoudness": {
+    "input_i": "-14.27",
+    "input_tp": "-4.15",
+    "input_lra": "3.80",
+    "input_thresh": "-25.02",
+    "output_i": "-14.00",
+    "output_tp": "-3.24",
+    "output_lra": "3.40",
+    "output_thresh": "-24.70",
+    "normalization_type": "dynamic",
+    "target_offset": "-0.00"
+  },
+  "zeroRevealPeakLinear": 0.0,
+  "voice": "Sarah \u2014 ElevenLabs Multilingual v2",
+  "captionTiming": "ElevenLabs character timestamps grouped into word-based cues",
+  "visualMethod": "Editorial graphics and reframed actual product still captures; no grant/revoke interaction is claimed",
+  "unassessed": [
+    "Human listening on laptop and phone",
+    "Full-motion end-to-end human playback",
+    "Independent word-level forced alignment against recorded audio"
+  ],
+  "sha256": "60629960fbc0e5180fa0514a324c8c126ea484de1b04efdfc1f37a2aea942ce6"
+}

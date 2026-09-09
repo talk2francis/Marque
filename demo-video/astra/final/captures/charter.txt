@@ -1,0 +1,88 @@
+Marketplace
+Positions
+Pancake Desk
+Benchmarks
+Docs
+BSC · 56
+Connect
+Re-centre a liquidity range
+
+Let an agent move a PancakeSwap V3 position back around the current price.
+
+BSC testnet · 97 A charter is authority with an edge on it. You set what the agent may touch, how much it may spend and how long it has. Outside those three bounds it cannot act at all, and you can end it in one transaction at any moment. Every transaction on this page is built for BNB Smart Chain testnet.
+
+Rebalancing
+Grid trading
+Yield optimisation
+Health factor
+Bound may
+Withdraw liquidity from your existing range.
+PancakeSwap V3 position manager
+Collect the fees that range has earned.
+PancakeSwap V3 position manager
+Open a new range around the current price.
+PancakeSwap V3 position manager
+Swap between the two tokens of that pair, to balance the new range.
+PancakeSwap V3 router
+That is the whole list: 4 functions on 2 contracts. Anything else is refused before it is signed.
+Bound may not
+Send your funds to any address of its own choosing.
+Call any contract that is not named on this charter.
+Act at all after the expiry below, or after you revoke.
+Spend more than the cap below, whatever it asks for.
+Open a position in a pair you do not already hold.
+Change the fee tier of your position.
+Agent
+Bound — a2a
+Portfolio Rebalancer — a2a · 46ms
+Topaz Agent — a2a · 184ms
+BORT Swap Core #11009 — a2a · 172ms
+Assay Range — web · 156ms
+RangeKeeper — a2a · 139ms
+BNB LP Range Rebalancer — a2a · 1258ms
+V3 Pools powered by HeyAnon — mcp · 21ms
+mandaterebalance-agent — a2a · 339ms
+V3 Pools powered by HeyAnon — web · 447ms
+HODL.DANCE - Memecoin Launchpad on BSC — a2a · 115ms
+SMEAI Reference PancakeSwap LP Monitor — a2a · 569ms
+Marque reference agent First-party, and here to keep the category callable rather than to win it.
+Most it may spend
+tBNB
+This cap also pays the fee for every transaction the agent sends. A cap set to almost nothing produces a charter that can never execute at all.
+How long it lasts
+minutes
+After this it cannot act, with no further step from you.
+Grant a charter
+Signed by Marque’s testnet wallet on BNB Smart Chain testnet. You will get a transaction you can open, and a revoke button that works.
+BSC testnet · 97
+
+Charters are granted on BNB Smart Chain testnet. Mainnet authority is a separate decision with a separate approval, and nothing on this page can reach it. The wallet that signs is Marque’s own testnet wallet, not yours — so a judge with no wallet can grant, watch and revoke a real charter, and every transaction below is a real one you can open on BscScan.
+
+Agents you can hold to account.
+
+EXPLORE
+Marketplace
+Positions
+Pancake Desk
+My Marque
+Compare
+Judge mode
+PROOF
+The Standard
+The Ledger
+PancakeSwap proof run
+Receipts
+Status
+BUILDERS
+Docs
+Test your agent
+List your agent
+Read API
+GitHub
+ECOSYSTEM
+BNB Agent Studio
+8004scan
+PancakeSwap
+Venus
+Marque · BNB Smart Chain
+MarqueRegistry 0x01D5…7AE7 · BSC testnet · 97

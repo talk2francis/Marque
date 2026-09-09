@@ -1,0 +1,159 @@
+[
+  {
+    "id": "question",
+    "duration": 4.533333333333333,
+    "chapter": "The question",
+    "title": "Before an agent\ntouches your money.",
+    "vo": "Before an agent touches your money, what should it have to prove?",
+    "direction": "Paper ground. A single rule draws across the frame, stopping at a boundary. The word permission sits beyond it. The question must read muted.",
+    "kind": "Explanatory graphic",
+    "start": 0,
+    "lead": 0.35
+  },
+  {
+    "id": "population",
+    "duration": 9.0,
+    "chapter": "Identity",
+    "title": "298,817",
+    "subtitle": "Registrations indexed on BNB Smart Chain",
+    "vo": "Two hundred and ninety-eight thousand, eight hundred and seventeen registrations. A name on chain. But can you hire one? We tried.",
+    "direction": "Large number, then a smaller evidence rail. Do not imply these are unique operators. Homepage/API source appears beside the number.",
+    "kind": "Measured snapshot \u00b7 BSC mainnet 56",
+    "start": 4.533333333333333,
+    "lead": 0.35
+  },
+  {
+    "id": "sample",
+    "duration": 7.566666666666666,
+    "chapter": "The test",
+    "title": "684",
+    "subtitle": "Third-party conformance runs",
+    "vo": "Six hundred and eighty-four conformance runs against third-party agents. Published tests. Recorded outcomes.",
+    "direction": "The population count exits. New sample counter occupies a different field, explicitly marked test runs, not agents.",
+    "kind": "Measured snapshot \u00b7 MCS sample",
+    "start": 13.533333333333333,
+    "lead": 0.35
+  },
+  {
+    "id": "zero",
+    "duration": 3.3333333333333335,
+    "chapter": "The result",
+    "title": "0",
+    "subtitle": "Passes in these tests",
+    "vo": "Passes: zero.",
+    "direction": "1.5 seconds of digital silence before speech; 600 ms after. Zero is already visible during silence. No sound-effect hit.",
+    "kind": "Measured snapshot \u00b7 MCS sample",
+    "start": 21.1,
+    "lead": 1.5
+  },
+  {
+    "id": "scope",
+    "duration": 9.133333333333333,
+    "chapter": "What the count means",
+    "title": "Failure to answer\nis an outcome.",
+    "vo": "Five hundred and one could not answer through an interface we could address. That is a result of these tests. Not a verdict on every agent.",
+    "direction": "Show the 501 no-answer subset and the remaining 183 runs as separately labelled measured and derived values. One restrained comparison, never an ecosystem failure percentage.",
+    "kind": "Measured and derived snapshot",
+    "start": 24.433333333333334,
+    "lead": 0.35
+  },
+  {
+    "id": "title",
+    "duration": 3.2,
+    "chapter": "The marketplace",
+    "title": "Evidence before\nauthority.",
+    "vo": "Marque. Evidence before authority.",
+    "direction": "Use the existing mark as a brief boundary wipe; open onto the daylight product. Wordmark is original artwork.",
+    "kind": "Explanatory graphic",
+    "start": 33.56666666666666,
+    "lead": 0.35
+  },
+  {
+    "id": "read",
+    "duration": 11.333333333333334,
+    "chapter": "Read",
+    "title": "Start with\nwhat you hold.",
+    "vo": "Start with what you hold. Paste an address. No wallet connection. Marque reads the position from chain, shows its health factor, and publishes the block behind the number.",
+    "direction": "Actual address input and successful read, then crop to the Venus rule and its provenance. Do not voice a transient health factor. Scouting still is provisional; recapture after voice selection.",
+    "kind": "Captured product \u00b7 BSC mainnet 56",
+    "start": 36.766666666666666,
+    "lead": 0.35
+  },
+  {
+    "id": "find",
+    "duration": 10.733333333333333,
+    "chapter": "Find",
+    "title": "An agent.\nIts evidence.",
+    "vo": "Find an agent for the job. Compare its interface, price and test record. Duplicate identities are grouped together. Our reference agents are labelled as ours.",
+    "direction": "Real category filter, two agent selections, compare tray, free preview. Keep reference-agent badge in the crop. Match the visible action to each phrase, not a held whole-page overview.",
+    "kind": "Captured product \u00b7 Marketplace",
+    "start": 48.1,
+    "lead": 0.35
+  },
+  {
+    "id": "test",
+    "duration": 13.866666666666667,
+    "chapter": "Verify",
+    "title": "The answer\nhas to hold.",
+    "vo": "The standard checks facts and the policy supplied with the task. Same pinned chain state. Field by field. Passes and failures stay public. A directory that only listed its passes would be a brochure.",
+    "direction": "Readable actual MCS field and tolerance, a reference pass and a named third-party failure. The evidence labels state different historical blocks; do not imply they are the same trial.",
+    "kind": "Recorded conformance evidence",
+    "start": 58.833333333333336,
+    "lead": 0.35
+  },
+  {
+    "id": "charter",
+    "duration": 16.9,
+    "chapter": "Bound",
+    "title": "Permission\nhas an edge.",
+    "vo": "Then set the limits. Which contracts. Which functions. How much. Until when. Marque checks those limits before its signing path proceeds. This charter builder is on testnet. Its permission is spend-capped, time-limited, and revocable.",
+    "direction": "The sole dim to cockpit. Actual testnet grant and revoke after voice lock. Tight readable cap and expiry, scope list, then confirmation. No mainnet write. No fabricated confirmation animation.",
+    "kind": "Captured product \u00b7 BSC testnet 97",
+    "start": 72.7,
+    "lead": 0.35
+  },
+  {
+    "id": "receipt",
+    "duration": 10.966666666666667,
+    "chapter": "Inspect",
+    "title": "The run leaves\na record.",
+    "vo": "The receipt separates execution from quality. This run completed, but failed its health-factor test. Nothing moved on chain. Open the evidence behind the result.",
+    "direction": "Real archived run receipt with actual anchor status. Do not label archived events as arriving live. Require receipt source before final capture.",
+    "kind": "Archived receipt / BSC mainnet read 56",
+    "start": 89.6,
+    "lead": 0.35
+  },
+  {
+    "id": "proof",
+    "duration": 14.9,
+    "chapter": "Mainnet proof",
+    "title": "Out of range.\nBack in range.",
+    "vo": "And this is the mainnet demonstration. A deliberately narrow PancakeSwap position, re-centred under a sixty-dollar cap. The before, the after, and the transactions are published. You can check what changed.",
+    "direction": "Exact archived before/after ticks in a labelled explanatory range graphic, matched to the real proof page. Orchestral payoff begins when the new range encloses the recorded current tick. Highlight hashes as links, not tiny wallpaper.",
+    "kind": "Archived demonstration \u00b7 BSC mainnet 56",
+    "start": 100.56666666666666,
+    "lead": 0.35
+  },
+  {
+    "id": "ledger",
+    "duration": 9.333333333333334,
+    "chapter": "Accountability",
+    "title": "Publish the\nunfinished work, too.",
+    "vo": "The Ledger publishes cost, timing and quality grades, including what is still unfinished. Accountability includes our own work.",
+    "direction": "Real incomplete status plainly legible. No unsupported speed, quality or cost victory. Keep this beat brief, confident and literal.",
+    "kind": "Captured product \u00b7 Ledger",
+    "start": 115.46666666666667,
+    "lead": 0.35
+  },
+  {
+    "id": "close",
+    "duration": 9.8,
+    "chapter": "The answer",
+    "title": "Ask for evidence.\nThen give permission.",
+    "vo": "Do not hire a registration. Ask for evidence. Set the limits. Inspect the result. Marque.",
+    "direction": "Opening rule returns with its boundary intact. Existing lockup and marque.trade. Final four seconds hold the address. Solo piano resolve.",
+    "kind": "Explanatory graphic",
+    "start": 124.8,
+    "lead": 0.35
+  }
+]

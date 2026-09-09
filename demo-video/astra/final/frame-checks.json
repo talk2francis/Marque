@@ -1,0 +1,172 @@
+[
+  {
+    "id": "question",
+    "images": [
+      {
+        "source": "../assets/lockup-ink.png",
+        "naturalWidth": 950,
+        "displayWidth": 170
+      }
+    ]
+  },
+  {
+    "id": "population",
+    "images": [
+      {
+        "source": "../assets/lockup-ink.png",
+        "naturalWidth": 950,
+        "displayWidth": 170
+      }
+    ]
+  },
+  {
+    "id": "sample",
+    "images": [
+      {
+        "source": "../assets/lockup-ink.png",
+        "naturalWidth": 950,
+        "displayWidth": 170
+      }
+    ]
+  },
+  {
+    "id": "zero",
+    "images": [
+      {
+        "source": "../assets/lockup-ink.png",
+        "naturalWidth": 950,
+        "displayWidth": 170
+      }
+    ]
+  },
+  {
+    "id": "scope",
+    "images": [
+      {
+        "source": "../assets/lockup-ink.png",
+        "naturalWidth": 950,
+        "displayWidth": 170
+      }
+    ]
+  },
+  {
+    "id": "title",
+    "images": [
+      {
+        "source": "../assets/lockup-ink.png",
+        "naturalWidth": 950,
+        "displayWidth": 170
+      },
+      {
+        "source": "../assets/mark-ink.png",
+        "naturalWidth": 732,
+        "displayWidth": 140
+      }
+    ]
+  },
+  {
+    "id": "read",
+    "images": [
+      {
+        "source": "../assets/lockup-ink.png",
+        "naturalWidth": 950,
+        "displayWidth": 170
+      },
+      {
+        "source": "../recon/positions.png",
+        "naturalWidth": 3200,
+        "displayWidth": 2200
+      }
+    ]
+  },
+  {
+    "id": "find",
+    "images": [
+      {
+        "source": "../assets/lockup-ink.png",
+        "naturalWidth": 950,
+        "displayWidth": 170
+      },
+      {
+        "source": "../recon/register.png",
+        "naturalWidth": 3200,
+        "displayWidth": 2200
+      }
+    ]
+  },
+  {
+    "id": "test",
+    "images": [
+      {
+        "source": "../assets/lockup-ink.png",
+        "naturalWidth": 950,
+        "displayWidth": 170
+      }
+    ]
+  },
+  {
+    "id": "charter",
+    "images": [
+      {
+        "source": "../assets/lockup-cream.png",
+        "naturalWidth": 1072,
+        "displayWidth": 170
+      },
+      {
+        "source": "captures/charter.png",
+        "naturalWidth": 2880,
+        "displayWidth": 1900
+      }
+    ]
+  },
+  {
+    "id": "receipt",
+    "images": [
+      {
+        "source": "../assets/lockup-ink.png",
+        "naturalWidth": 950,
+        "displayWidth": 170
+      },
+      {
+        "source": "captures/receipt-grid.png",
+        "naturalWidth": 2904,
+        "displayWidth": 1728
+      }
+    ]
+  },
+  {
+    "id": "proof",
+    "images": [
+      {
+        "source": "../assets/lockup-ink.png",
+        "naturalWidth": 950,
+        "displayWidth": 170
+      }
+    ]
+  },
+  {
+    "id": "ledger",
+    "images": [
+      {
+        "source": "../assets/lockup-ink.png",
+        "naturalWidth": 950,
+        "displayWidth": 170
+      },
+      {
+        "source": "../recon/ledger.png",
+        "naturalWidth": 3200,
+        "displayWidth": 2200
+      }
+    ]
+  },
+  {
+    "id": "close",
+    "images": [
+      {
+        "source": "../assets/lockup-ink.png",
+        "naturalWidth": 950,
+        "displayWidth": 170
+      }
+    ]
+  }
+]

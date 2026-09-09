@@ -1,0 +1,600 @@
+{
+  "version": 1,
+  "status": "V0 freeze; revalidate before final capture",
+  "funnel": {
+    "source": {
+      "url": "https://marque.trade/api/v1/funnel",
+      "readAt": "2026-09-09T06:48:09.979326+00:00",
+      "status": 200
+    },
+    "snapshotTakenAt": "2026-09-09T06:48:09.973Z",
+    "stages": [
+      {
+        "stage": "registered_bsc",
+        "label": "Registered on BSC",
+        "count": 298817,
+        "method": "count of indexed agents on chain 56"
+      },
+      {
+        "stage": "with_parseable_service",
+        "label": "Declares a service we can parse",
+        "count": 30357,
+        "method": "agents with at least one agent_service row"
+      },
+      {
+        "stage": "responding_now",
+        "label": "Endpoint responds",
+        "count": 30034,
+        "method": "latest probe returned a well-formed response"
+      },
+      {
+        "stage": "bound_now",
+        "label": "Bound and callable",
+        "count": 6115,
+        "method": "latest probe found an executable endpoint or declared skills"
+      },
+      {
+        "stage": "classified",
+        "label": "Classified into a category",
+        "count": 508,
+        "method": "has a non-unclassified category label"
+      },
+      {
+        "stage": "marked",
+        "label": "Classified and callable",
+        "count": 105,
+        "method": "classified AND latest probe liveness = live"
+      }
+    ],
+    "warning": "classified is not a nested subset of bound; marked is the intersection. Counts are indexed registrations, not unique operators."
+  },
+  "standard": {
+    "source": {
+      "url": "https://marque.trade/standard",
+      "readAt": "2026-09-09T06:48:10.232481+00:00",
+      "status": 200
+    },
+    "thirdPartyRuns": 684,
+    "thirdPartyPasses": 0,
+    "noAnswerRuns": 501,
+    "wrongAnswerRuns": 183,
+    "wrongAnswerMethod": "684 minus 501, derived from published counts",
+    "scope": "Runs through MCS harness; not unique agents or entire ecosystem",
+    "passing": {
+      "agent": "marque:bound",
+      "isReference": true,
+      "test": "MCS-REB-1",
+      "block": 120574208,
+      "result": "pass"
+    },
+    "failing": {
+      "agent": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:46573",
+      "test": "MCS-REB-1",
+      "block": 120649424,
+      "result": "fail",
+      "fields": [
+        "currentTick",
+        "inRange",
+        "distanceToBound",
+        "proposedTickSpacing",
+        "amounts",
+        "slippageBound"
+      ]
+    },
+    "caseSource": {
+      "url": "https://marque.trade/standard/MCS-REB-1",
+      "readAt": "2026-09-09T06:48:10.310313+00:00",
+      "status": 200
+    }
+  },
+  "positions": {
+    "source": {
+      "url": "https://marque.trade/api/v1/positions/0x60AA3AEE06E2345A17E4d4B12c53E046F4F63CAf",
+      "readAt": "2026-09-09T06:48:11.490756+00:00",
+      "status": 200
+    },
+    "address": "0x60AA3AEE06E2345A17E4d4B12c53E046F4F63CAf",
+    "block": "120832902",
+    "readAt": "2026-09-09T06:48:11.487Z",
+    "healthFactor": 1.148,
+    "liquidationThresholdHF": 1,
+    "warning": "HF distance is not percentage collateral price drop. Do not re-use numeric line on a later live capture."
+  },
+  "marketplace": {
+    "source": {
+      "url": "https://marque.trade/api/v1/marketplace",
+      "readAt": "2026-09-09T06:48:18.071410+00:00",
+      "status": 200
+    },
+    "dedupeExample": {
+      "agentId": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:183545",
+      "tokenId": "183545",
+      "name": "recognize.me",
+      "category": "yield",
+      "isReference": false,
+      "identityCount": 39,
+      "owner": "0x769b3aba5e53368c7f61d98de1e0dac0eff3a6c2",
+      "ownerLabel": "0x769b\u2026a6c2",
+      "host": "https://me.hyreagent.fun",
+      "liveness": "live",
+      "latencyMs": 36,
+      "interfaces": [
+        "a2a",
+        "mcp",
+        "web"
+      ],
+      "protocols": [
+        "MCP",
+        "A2A",
+        "Web"
+      ],
+      "price": null,
+      "warrant": {
+        "status": "untested",
+        "testId": null,
+        "date": "2026-09-08 09:53:04.487852+02",
+        "failedField": null
+      },
+      "qual": "callable",
+      "previewable": true,
+      "hireBlockedReason": null
+    },
+    "referenceAgents": [
+      {
+        "name": "Keel",
+        "warrant": {
+          "status": "warranted",
+          "testId": "MCS-HF-1",
+          "date": "2026-09-08 00:27:29.821159+02",
+          "failedField": null
+        },
+        "isReference": true
+      },
+      {
+        "name": "Sluicegate",
+        "warrant": {
+          "status": "warranted",
+          "testId": "MCS-YIELD-1",
+          "date": "2026-09-08 00:27:27.677568+02",
+          "failedField": null
+        },
+        "isReference": true
+      },
+      {
+        "name": "Lattice",
+        "warrant": {
+          "status": "warranted",
+          "testId": "MCS-GRID-1",
+          "date": "2026-09-08 00:27:24.792621+02",
+          "failedField": null
+        },
+        "isReference": true
+      },
+      {
+        "name": "Bound",
+        "warrant": {
+          "status": "warranted",
+          "testId": "MCS-REB-1",
+          "date": "2026-09-08 00:27:24.588399+02",
+          "failedField": null
+        },
+        "isReference": true
+      }
+    ]
+  },
+  "ledger": {
+    "source": {
+      "url": "https://marque.trade/api/v1/ledger",
+      "readAt": "2026-09-09T06:48:10.119579+00:00",
+      "status": 200
+    },
+    "claimAllowed": "Publishes timing, cost and grades, including incomplete records; no same-block superiority claim",
+    "benchmarks": [
+      {
+        "id": "ADV-01",
+        "complete": false,
+        "missing": [
+          "the blind grade for the remaining repetitions (scripts/ledger-grade.mjs)"
+        ],
+        "runs": [
+          {
+            "id": 9,
+            "arm": "agent",
+            "rep": 1,
+            "blockNumber": "120077702",
+            "elapsedMs": 445,
+            "costBreakdown": {
+              "gasUsd": 0,
+              "llmUsd": 0,
+              "humanUsd": null,
+              "totalUsd": 0,
+              "agentFeeUsd": 0,
+              "humanRateUsdPerHour": null
+            },
+            "scoreTotal": null,
+            "scoredBlind": false
+          },
+          {
+            "id": 10,
+            "arm": "agent",
+            "rep": 2,
+            "blockNumber": "120077704",
+            "elapsedMs": 112,
+            "costBreakdown": {
+              "gasUsd": 0,
+              "llmUsd": 0,
+              "humanUsd": null,
+              "totalUsd": 0,
+              "agentFeeUsd": 0,
+              "humanRateUsdPerHour": null
+            },
+            "scoreTotal": null,
+            "scoredBlind": false
+          },
+          {
+            "id": 18,
+            "arm": "manual",
+            "rep": 1,
+            "blockNumber": "0",
+            "elapsedMs": 547000,
+            "costBreakdown": {
+              "gasUsd": 0,
+              "llmUsd": 0,
+              "humanUsd": 4.8622,
+              "totalUsd": 4.8622,
+              "agentFeeUsd": 0,
+              "humanRateUsdPerHour": 32
+            },
+            "scoreTotal": 100,
+            "scoredBlind": true
+          },
+          {
+            "id": 23,
+            "arm": "manual",
+            "rep": 2,
+            "blockNumber": "0",
+            "elapsedMs": 382000,
+            "costBreakdown": {
+              "gasUsd": 0,
+              "llmUsd": 0,
+              "humanUsd": 2.865,
+              "totalUsd": 2.865,
+              "agentFeeUsd": 0,
+              "humanRateUsdPerHour": 27
+            },
+            "scoreTotal": 0,
+            "scoredBlind": true
+          }
+        ]
+      },
+      {
+        "id": "ADV-02",
+        "complete": false,
+        "missing": [
+          "the blind grade for the remaining repetitions (scripts/ledger-grade.mjs)"
+        ],
+        "runs": [
+          {
+            "id": 11,
+            "arm": "agent",
+            "rep": 1,
+            "blockNumber": "120077704",
+            "elapsedMs": 862,
+            "costBreakdown": {
+              "gasUsd": 0,
+              "llmUsd": 0,
+              "humanUsd": null,
+              "totalUsd": 0,
+              "agentFeeUsd": 0,
+              "humanRateUsdPerHour": null
+            },
+            "scoreTotal": null,
+            "scoredBlind": false
+          },
+          {
+            "id": 12,
+            "arm": "agent",
+            "rep": 2,
+            "blockNumber": "120077706",
+            "elapsedMs": 374,
+            "costBreakdown": {
+              "gasUsd": 0,
+              "llmUsd": 0,
+              "humanUsd": null,
+              "totalUsd": 0,
+              "agentFeeUsd": 0,
+              "humanRateUsdPerHour": null
+            },
+            "scoreTotal": 60,
+            "scoredBlind": true
+          },
+          {
+            "id": 19,
+            "arm": "manual",
+            "rep": 1,
+            "blockNumber": "0",
+            "elapsedMs": 206000,
+            "costBreakdown": {
+              "gasUsd": 0,
+              "llmUsd": 0,
+              "humanUsd": 1.8311,
+              "totalUsd": 10.8311,
+              "agentFeeUsd": 9,
+              "humanRateUsdPerHour": 32
+            },
+            "scoreTotal": 60,
+            "scoredBlind": true
+          },
+          {
+            "id": 24,
+            "arm": "manual",
+            "rep": 2,
+            "blockNumber": "0",
+            "elapsedMs": 177000,
+            "costBreakdown": {
+              "gasUsd": 0,
+              "llmUsd": 0,
+              "humanUsd": 1.3275,
+              "totalUsd": 1.3275,
+              "agentFeeUsd": 0,
+              "humanRateUsdPerHour": 27
+            },
+            "scoreTotal": 45,
+            "scoredBlind": true
+          }
+        ]
+      },
+      {
+        "id": "ADV-03",
+        "complete": true,
+        "missing": [],
+        "runs": [
+          {
+            "id": 13,
+            "arm": "agent",
+            "rep": 1,
+            "blockNumber": "120077706",
+            "elapsedMs": 26,
+            "costBreakdown": {
+              "gasUsd": 0,
+              "llmUsd": 0,
+              "humanUsd": null,
+              "totalUsd": 0,
+              "agentFeeUsd": 0,
+              "humanRateUsdPerHour": null
+            },
+            "scoreTotal": 15,
+            "scoredBlind": true
+          },
+          {
+            "id": 14,
+            "arm": "agent",
+            "rep": 2,
+            "blockNumber": "120077706",
+            "elapsedMs": 22,
+            "costBreakdown": {
+              "gasUsd": 0,
+              "llmUsd": 0,
+              "humanUsd": null,
+              "totalUsd": 0,
+              "agentFeeUsd": 0,
+              "humanRateUsdPerHour": null
+            },
+            "scoreTotal": 15,
+            "scoredBlind": true
+          },
+          {
+            "id": 20,
+            "arm": "manual",
+            "rep": 1,
+            "blockNumber": "0",
+            "elapsedMs": 478000,
+            "costBreakdown": {
+              "gasUsd": 0,
+              "llmUsd": 0,
+              "humanUsd": 4.2489,
+              "totalUsd": 12.748899999999999,
+              "agentFeeUsd": 8.5,
+              "humanRateUsdPerHour": 32
+            },
+            "scoreTotal": 60,
+            "scoredBlind": true
+          },
+          {
+            "id": 25,
+            "arm": "manual",
+            "rep": 2,
+            "blockNumber": "0",
+            "elapsedMs": 313000,
+            "costBreakdown": {
+              "gasUsd": 0,
+              "llmUsd": 0,
+              "humanUsd": 2.3475,
+              "totalUsd": 2.3475,
+              "agentFeeUsd": 0,
+              "humanRateUsdPerHour": 27
+            },
+            "scoreTotal": 0,
+            "scoredBlind": true
+          }
+        ]
+      },
+      {
+        "id": "ADV-04",
+        "complete": false,
+        "missing": [
+          "the blind grade for the remaining repetitions (scripts/ledger-grade.mjs)"
+        ],
+        "runs": [
+          {
+            "id": 15,
+            "arm": "agent",
+            "rep": 1,
+            "blockNumber": "120077707",
+            "elapsedMs": 1140,
+            "costBreakdown": {
+              "gasUsd": 0,
+              "llmUsd": 0,
+              "humanUsd": null,
+              "totalUsd": 0,
+              "agentFeeUsd": 0,
+              "humanRateUsdPerHour": null
+            },
+            "scoreTotal": null,
+            "scoredBlind": false
+          },
+          {
+            "id": 16,
+            "arm": "agent",
+            "rep": 2,
+            "blockNumber": "120077710",
+            "elapsedMs": 587,
+            "costBreakdown": {
+              "gasUsd": 0,
+              "llmUsd": 0,
+              "humanUsd": null,
+              "totalUsd": 0,
+              "agentFeeUsd": 0,
+              "humanRateUsdPerHour": null
+            },
+            "scoreTotal": null,
+            "scoredBlind": false
+          },
+          {
+            "id": 22,
+            "arm": "manual",
+            "rep": 1,
+            "blockNumber": "0",
+            "elapsedMs": 522000,
+            "costBreakdown": {
+              "gasUsd": 0,
+              "llmUsd": 0,
+              "humanUsd": 4.64,
+              "totalUsd": 13.14,
+              "agentFeeUsd": 8.5,
+              "humanRateUsdPerHour": 32
+            },
+            "scoreTotal": 60,
+            "scoredBlind": true
+          },
+          {
+            "id": 26,
+            "arm": "manual",
+            "rep": 2,
+            "blockNumber": "0",
+            "elapsedMs": 362000,
+            "costBreakdown": {
+              "gasUsd": 0,
+              "llmUsd": 0,
+              "humanUsd": 2.715,
+              "totalUsd": 2.715,
+              "agentFeeUsd": 0,
+              "humanRateUsdPerHour": 27
+            },
+            "scoreTotal": 15,
+            "scoredBlind": true
+          }
+        ]
+      }
+    ]
+  },
+  "pancake": {
+    "source": {
+      "url": "https://marque.trade/pancakeswap/proof",
+      "readAt": "2026-09-09T06:48:10.393340+00:00",
+      "status": 200
+    },
+    "repositorySource": "docs/pancakeswap-proof.json",
+    "record": {
+      "status": "complete",
+      "pool": "0x172fcD41E0913e95784454622d1c3724f546f849",
+      "chainId": 56,
+      "agentId": "bound",
+      "charterScope": {
+        "allowlist": [
+          "0x172fcD41E0913e95784454622d1c3724f546f849",
+          "0x46A15B0b27311cedF172AB29E4f4766fbE7F4364",
+          "0x1b81D678ffb9C0263b24A97847620C99d213eB14",
+          "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
+          "0x55d398326f99059fF775485246999027B3197955"
+        ],
+        "capUsd": 60,
+        "expiresAt": "2026-09-09T23:54:47.261Z"
+      },
+      "before": {
+        "tickLower": -66078,
+        "tickUpper": -66076,
+        "currentTick": -66091,
+        "outOfRangeSince": "2026-09-08T01:02:13.032Z",
+        "hoursOutOfRange": 0.9,
+        "feesAccruedUsd": 0
+      },
+      "narrative": "The band was opened ~0.3% wide on BNB/USDT 0.01%. As BNB volatility fell through the session it kept drifting back in, so the band was narrowed twice to stay meaningful; on the razor band it drifted below range and stayed there \u2014 a cumulative 0.9h holding 100% USDT and earning zero fees \u2014 and Bound then re-centred it around the live price.",
+      "transactions": [
+        {
+          "label": "Mint the deliberately-narrow range",
+          "hash": "0xb32c204f143b233f5f38958fecda083141efd85f0352ca08bdc116703c8688ed"
+        },
+        {
+          "label": "Withdraw the drifted position \u2014 decreaseLiquidity + collect",
+          "hash": "0xfe41a8a1218e2e8c9f206c26565a537879f1de090b258e8bd64d41d925bc9001"
+        },
+        {
+          "label": "Swap toward 50/50 at the current price",
+          "hash": "0xd795d4879ee16f21f6d54a7f404cc1f7e3928241ec9a0a0c0f6afc3618fb46e9"
+        },
+        {
+          "label": "Open the re-centred range",
+          "hash": "0x83f635fc30e74e26e36575be3c179301e96de01e6a5839b6d478fba33725a806"
+        }
+      ],
+      "capturedAt": "2026-09-08T01:41:10.662Z",
+      "after": {
+        "tickLower": -66135,
+        "tickUpper": -66045,
+        "currentTick": -66090,
+        "inRange": true,
+        "resumedAtBlock": 120600044
+      },
+      "realisedSlippageBps": 0,
+      "realisedSlippageNote": "below 1 bps \u2014 a ~$26 USDT\u2192WBNB rebalancing swap against the 0.01% pool, which holds the deepest BNB/USDT liquidity on PancakeSwap V3",
+      "gasUsd": 0.1,
+      "gasNote": "0.000131 BNB total across all six transactions, at ~0.05 gwei",
+      "agentFeeUsd": 0.15
+    },
+    "claimAllowed": "Archived deliberately-narrow-range demonstration on mainnet, $60 cap, position back in range",
+    "claimExclusions": [
+      "Exactly four total execution transactions (four are highlighted; gas notes six).",
+      "Independent confirmation of earned fees after repositioning.",
+      "Autonomous rescue of an unrelated customer position.",
+      "Smart-contract enforcement of all charter constraints."
+    ]
+  },
+  "access": {
+    "checkedAt": "2026-09-09T06:47:41Z",
+    "publicGet": 200,
+    "botHead": 200,
+    "robotsAllowsPublic": true,
+    "independentOffVPS": "Unassessed: external web tool fetch failed, not evidence of origin bot denial.",
+    "repoDescription": "Already fixed"
+  },
+  "evidenceSha256": {
+    "marketplace.source.json": "7a2414b8b5b8f16fddd98c7e43d4fa8055985e6d3703d58d1bb359e355bb4c56",
+    "standard-reb.txt": "c8d3256e554d4a4fc62125a21fba82045dda2028ed76842a91fb22210dd465cc",
+    "positions.json": "0b2c7d6a323b11d3ae15637eb8879b38ae62795b62694321593b34df08ba6cf8",
+    "funnel.source.json": "1dbc8d872b0eb1eca851812b2ae1ccc235abe02c12f921bf819484e0834ceb65",
+    "standard.source.json": "057ab410f717e9d4de3196bb6bb2506c0520e72d6c7a529dab21b351eb5b1f7d",
+    "standard-reb.html": "7c1d45ec957e6f0496504dc9152022f4f0c71c6d4d90fd06ea0d2e0944639b7f",
+    "positions.source.json": "54381928ffb8c338b99bda2cb78059a05215b9b2b825dc53da3e015db1ca4ccc",
+    "marketplace.json": "967d654af01282b4007b42dcb46caac82c5a4d7aa1e2e6d20dc796d25daf2e6a",
+    "proof.txt": "5d7cd47da687c3d57f30951b1184cecc68b2b867814effd2275b2b10ac482d04",
+    "standard.html": "7719792128a303ecad486bcd9ed8d0dcf1d4d9f6246af96f117fe6f27c1f4934",
+    "proof.source.json": "d571ad0eadcce3f6daebd7a5ef31ab92406b626fbae24605fca3219173bac531",
+    "standard-reb.source.json": "b8c90f81e48a2b8335c42f9f057cc9198bd5281f2493787c0d1400d0225b6e59",
+    "proof.html": "8d59885ce4fc944b69197a07f3b46edce4edcd39daeecb2ba5ee65156979111c",
+    "funnel.json": "c8fb659c3170c46257af4090a321965838aa025ee39bf7f3ab1c66ec78e0d722",
+    "standard.txt": "c91e7b3ada7968a15e57ab1b2af82817281db5eba88ef87816e2e8377cbd40cf",
+    "ledger.json": "67b039d78e406941345da162dfa577fd850badab7ecf6a98002bd55340f4f7ba",
+    "ledger.source.json": "0c124fc98e4982d2aa693e6a3d4246a4874a3067471bd78b58d90a785b243d9e"
+  }
+}

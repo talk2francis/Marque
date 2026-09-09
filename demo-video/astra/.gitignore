@@ -1,0 +1,23 @@
+# Working intermediates — heavy, regenerable. Deliverables and pipeline stay tracked.
+music/*-source.mp3
+boards/concat.txt
+evidence/music-catalog.json
+recon/*.png
+*.candidate.mp4
+
+# final/ — keep the srt/poster/CREDITS/DECISIONS/QA/SHA256SUMS, the pipeline
+# (*.py *.mjs film.html scenes.json timeline.json) and frames/. The two cut mp4s
+# are promoted verbatim to demo-video/marque-demo.mp4 and marque-demo-60.mp4
+# (identical bytes — SHA256SUMS records the hash); don't track a second copy.
+final/marque-demo.mp4
+final/marque-demo-60.mp4
+final/build-sarah/
+final/voice/
+final/voice-timed/
+final/voice-local/
+final/voice-local-timed/
+final/captures/*.png
+final/short-picture.mp4
+final/short-concat.txt
+final/*-concat.txt
+final/_*.mjs
