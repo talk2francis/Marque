@@ -56,12 +56,12 @@
   display: flex;
   align-items: center;
   gap: 1px;
-  overflow-x: auto;
-  overflow-y: visible;
-  scrollbar-width: none;
+  /* No clipping: the dropdown menus are absolutely positioned children and an
+     overflow container would cut them off. Few enough items that desktop never
+     needs to scroll; mobile wraps (see the media query). */
+  overflow: visible;
   max-width: 100%;
 }
-.navLinks::-webkit-scrollbar { display: none; }
 .navLinks a,
 .navGroupBtn {
   position: relative;
@@ -115,6 +115,9 @@
 .navGroupBtn[aria-expanded='true'] .navCaret { transform: rotate(180deg); }
 .navGroupBtn[aria-expanded='true'] { color: var(--fg); background: color-mix(in srgb, var(--fg) 5%, transparent); }
 
+/* An author `display` rule beats the UA `[hidden]` rule, so hiding must be
+   explicit or the menu is always in the layout (and overflows at the edge). */
+.navMenu[hidden] { display: none !important; }
 .navMenu {
   position: absolute;
   top: calc(100% + 4px);
