@@ -21,11 +21,16 @@ export async function GET(req: NextRequest) {
     hasPrice: bool('hasPrice'),
     iface: p.get('iface'),
     sort: (p.get('sort') as MarketQuery['sort']) ?? 'best',
-    limit: Number(p.get('limit') ?? 120) || 120,
+    // The page size belongs to the caller, not to this endpoint. The table
+    // sends its own limit; an agent reading the marketplace without one still
+    // gets the full first page it has always got, so adding pagination here
+    // does not silently truncate anyone who was already consuming this.
+    limit: Number(p.get('limit') ?? 120),
+    offset: Number(p.get('offset') ?? 0),
   }
   try {
-    const { rows, generatedAt } = await marketplaceAgents(q)
-    return NextResponse.json({ chainId: 56, generatedAt, provenance: 'MEASURED', count: rows.length, agents: rows })
+    const { rows, generatedAt, total, offset, hasMore } = await marketplaceAgents(q)
+    return NextResponse.json({ chainId: 56, generatedAt, provenance: 'MEASURED', count: rows.length, total, offset, hasMore, agents: rows })
   } catch (err) {
     return NextResponse.json(
       { error: 'marketplace_unavailable', detail: err instanceof Error ? err.message : String(err) },

@@ -39,7 +39,7 @@ const shot = async (page, slug, path, opts = {}) => {
     await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 45000 })
     if (opts.theme) {
       await page.evaluate((t) => {
-        try { localStorage.setItem('marque-theme', t) } catch {}
+        try { localStorage.setItem('marque-theme', t) } catch { /* Storage is unavailable in some capture contexts. */ }
         document.documentElement.setAttribute('data-theme', t)
       }, opts.theme)
       await page.waitForTimeout(400)

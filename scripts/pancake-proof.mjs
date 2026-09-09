@@ -23,7 +23,7 @@
  * renders verbatim. A failed rebalance is published with its revert reason,
  * per the phase prompt.
  */
-import { readFileSync, writeFileSync, existsSync } from 'node:fs'
+import { readFileSync, writeFileSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import {
@@ -52,7 +52,7 @@ const FEE = 100            // 0.01% tier, tickSpacing 1 — lets us place a prec
 const SPACING = 1
 const HALF_WIDTH_TICKS = 15 // ±0.15% -> ~0.30% band, drifts out of a busy pool within hours
 const POSITION_USDT = '12'  // ~$12 a side, ~$24 position; leaves the rest for gas + the re-mint
-const SLIPPAGE_BPS = 150    // 1.5% floor on mint amounts / swap output
+const _SLIPPAGE_BPS = 150    // 1.5% floor on mint amounts / swap output
 
 // token0/token1 are address-sorted: USDT < WBNB on BSC, so token0 = USDT.
 const T0 = A.usdt.toLowerCase() < A.wbnb.toLowerCase() ? A.usdt : A.wbnb
@@ -380,7 +380,7 @@ async function cmdRebalance() {
 
     // tx2 — swap toward 50/50 at current price
     const half = total / 2
-    let swapReceipt = null
+    let _swapReceipt = null
     let realisedSlippageBps = 0
     if (Math.abs(usdtVal - half) > 0.5) {
       const needMoreUsdt = usdtVal < half
@@ -405,7 +405,7 @@ async function cmdRebalance() {
         }],
       })
       if (r2.receipt) {
-        swapReceipt = r2.receipt
+        _swapReceipt = r2.receipt
         txs.push({ label: `Swap toward 50/50 at the current price`, hash: r2.hash })
         gasUsds.push(await gasUsd(r2.receipt))
         // realised slippage: decode amountOut from Swap event vs expectedOut
@@ -458,12 +458,12 @@ async function cmdRebalance() {
       recipient: me, deadline: deadline(),
     }
     const r3 = await send('mint re-centred range', { address: A.nfpm, abi: nfpmAbi, functionName: 'mint', args: [mintParams] })
-    let minted
+    let _minted
     if (r3.receipt) {
       for (const log of r3.receipt.logs) {
         try {
           const ev = decodeEventLog({ abi: nfpmAbi, data: log.data, topics: log.topics })
-          if (ev.eventName === 'IncreaseLiquidity') minted = ev.args
+          if (ev.eventName === 'IncreaseLiquidity') _minted = ev.args
         } catch { /* skip */ }
       }
       txs.push({ label: 'Open the re-centred range', hash: r3.hash })
@@ -580,7 +580,6 @@ async function cmdTighten() {
 async function cmdTopup() {
   const w = wallet()
   const me = w.account.address
-  const { encodeFunctionData } = await import('viem')
 
   // Find the newest position that still holds liquidity.
   const n = await pub.readContract({ address: A.nfpm, abi: nfpmAbi, functionName: 'balanceOf', args: [me] })

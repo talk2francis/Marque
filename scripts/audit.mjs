@@ -99,16 +99,28 @@ async function auditRoute(browser, route, viewport) {
 
     const de = document.documentElement
     if (de.scrollWidth > de.clientWidth + 1) {
-      // Name the widest offender, otherwise "there is overflow" is unactionable.
-      let worst = null
-      let worstRight = de.clientWidth
-      for (const el of document.querySelectorAll('body *')) {
-        const r = el.getBoundingClientRect()
-        if (r.width > 0 && r.right > worstRight + 1) {
-          worstRight = r.right
-          worst = `${el.tagName.toLowerCase()}${el.className && typeof el.className === 'string' ? '.' + el.className.split(' ').filter(Boolean).slice(0, 2).join('.') : ''}`
+      // Name the offender, otherwise "there is overflow" is unactionable.
+      //
+      // Naming the widest box does NOT work: the Tape marquee is a 2200px
+      // absolutely-positioned track inside a clipping parent, so it is always
+      // the widest thing on the homepage and never the cause. It sent one
+      // audit chasing the wrong element entirely. Ask the page instead —
+      // hide a subtree and see whether the document narrows.
+      const name = (el) =>
+        `${el.tagName.toLowerCase()}${el.className && typeof el.className === 'string' ? '.' + el.className.split(' ').filter(Boolean).slice(0, 2).join('.') : ''}`
+      const blame = (parent, depth) => {
+        for (const el of Array.from(parent.children)) {
+          const prev = el.style.display
+          el.style.display = 'none'
+          const narrowed = de.scrollWidth < de.clientWidth + 2
+          el.style.display = prev
+          // Descend while the subtree still explains the whole overflow, so the
+          // report names the innermost box rather than <main>.
+          if (narrowed) return (depth > 0 && blame(el, depth - 1)) || name(el)
         }
+        return null
       }
+      const worst = blame(document.body, 6)
       out.overflow = { scrollWidth: de.scrollWidth, clientWidth: de.clientWidth, worst }
     }
 

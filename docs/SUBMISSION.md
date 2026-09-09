@@ -1,12 +1,14 @@
 # Submission
 
-BNB Chain **"Build the Era"** hackathon. Submitted 2026-09-08. Judging to
+BNB Chain **"Build the Era"** hackathon. Francis confirmed portal submission on
+9 September 2026. The exact portal submission timestamp is not recorded here.
+This submission-facing audit was prepared on 9 September 2026; judging runs to
 23 September 2026.
 
 - **Live:** https://marque.trade
 - **Judge walkthrough:** https://marque.trade/judge
 - **Repo:** https://github.com/talk2francis/Marque
-- **90-second video:** _see shot list at the end of this file_
+- **Final demo:** [download the 2:14 MP4](https://github.com/talk2francis/Marque/releases/download/demo-2026-09-09/marque-demo.mp4) · [60-second cut](https://github.com/talk2francis/Marque/releases/download/demo-2026-09-09/marque-demo-60.mp4)
 
 ---
 
@@ -42,19 +44,19 @@ transaction hash, or a command whose output is pasted in the phase docs.
 | 6 | Charter: allowlist + spend cap + expiry, enforced before signing, revocable in one tx | **PASS** | `/app/charter` composes it line by line; `packages/mandates` refuses an out-of-scope call; `/app/charters` shows every grant and the tx that ended it |
 | 7 | Seal: recommendation hashed on chain before its outcome is known | **PASS** | `MarqueRegistry.sealCall(bytes32,bytes32)` on BSC testnet; `conform` worker seals nightly |
 | 8 | Receipt: four proof blocks + canonical hash + anchor tx | **PASS** | `/receipts/<id>`; 6 compromise-era receipts reanchored (`DEVIATIONS.md` D10.5C-06) |
-| 9 | LLM never signs, never prices | **PASS** | Only model call is category classification (DeepSeek), USD-capped, label-only output — `docs/SECURITY.md §4` |
+| 9 | LLM never signs, never prices | **PASS** | DeepSeek performs classification and disclosed blind Ledger grading; signing and pricing remain deterministic — `docs/SECURITY.md §4` |
 | 10 | `safeFetch()` SSRF guard on every outbound agent call | **PASS** | `packages/probe/src/safe-fetch.ts`; sole path; `safe-fetch.test.ts` + `redirect.test.ts` |
 | 11 | First-party observations never deleted | **PASS** | No delete path for probe / conformance_result / receipt / run / sealed_call / pool_tick_observation; rebuild drill truncates derived tables only |
-| 12 | The Ledger: agent vs. human, blind-graded against a pre-registered rubric | **PARTIAL — honest** | `/ledger` renders the mechanism and the registered rubric. **Agent arms recorded** for all four benchmarks (ADV-01..04, 2 reps each, measured timings + hashed manifests); **human arms + blind grading in progress**. Full write-up: `docs/AGENT-ADVANTAGE-REPORT.md`. Runner for the human side: `docs/LEDGER-MANUAL-ARMS.md` |
+| 12 | The Ledger: agent vs. human, blind-graded against a pre-registered rubric | **PARTIAL — provenance gaps disclosed** | All eight human repetitions have blind grades. Five agent repetitions in published batches remain ungraded; manual manifest blocks are absent. See `docs/AGENT-ADVANTAGE-REPORT.md` for the reconciled evidence. |
 
 ### TermiX Challenge — Agent Advantage Report
 
 | # | Requirement | State | Evidence |
 |---|---|---|---|
-| T1 | ≥ 3 real tasks, run with a marketplace agent vs. without | **PARTIAL** | 4 tasks (ADV-01..04). Agent arms recorded with measured timings + hashed manifests; human arms in progress (`docs/LEDGER-MANUAL-ARMS.md`, ~2 h) |
+| T1 | ≥ 3 real tasks, run with a marketplace agent vs. without | **Recorded; comparison validity incomplete** | Four tasks, two human repetitions each and agent observations. Same-block and final-task execution gaps remain disclosed. |
 | T2 | ≥ 1 task from trading / stock / security | **PASS** | ADV-01 is a security triage of a live BSC token contract |
-| T3 | Time, cost and output quality per task, actual outputs attached | **PASS (agent) / PARTIAL (human)** | `docs/AGENT-ADVANTAGE-REPORT.md` — verbatim agent outputs, measured ms, itemised cost; human columns pending |
-| T4 | Advantage measured, not asserted | **PASS by construction** | Blind grade against a 100-pt rubric registered and hashed **before** any arm ran; rubric hashes + timestamps in the report |
+| T3 | Time, cost and output quality per task, actual outputs attached | **Recorded with gaps** | Human timings and all eight blind grades are recorded. Published agent batches have five missing grades; raw outputs and cost lines remain public in the Ledger. |
+| T4 | Advantage measured, not asserted | **NOT ESTABLISHED** | No speed/cost/quality victory is claimed until task and block provenance support a valid comparison. |
 
 ### PancakeSwap proof run (P9b)
 
@@ -88,7 +90,7 @@ transaction hash, or a command whose output is pasted in the phase docs.
 | 28 | `docs/SECURITY.md` — SSRF, signing boundary, key handling, LLM boundaries | **PASS** | `docs/SECURITY.md` |
 | 29 | `docs/SUBMISSION.md` — acceptance gate, PASS-with-evidence or honest | **PASS** | this file |
 | 30 | Naming sweep — no lowercase `marque` common noun, no wax-seal / "letter of marque" framing | **PASS** | output below — zero violations |
-| 31 | Demo video ≤ 2:45 | **NOT DONE — cannot produce** | Shot list + narration script at the end of this file; recording is a human step |
+| 31 | Demo video ≤ 2:45 | **PASS — mechanical QA** | Final hero 134.6 seconds, 60-second cut, both SRTs and `demo-video/astra/final/QA.json`; all 13 mechanical checks pass. Human listening and full-motion review remain unassessed. |
 
 ---
 
@@ -124,7 +126,7 @@ mark is a winged-M lockup, not a seal.
 
 ---
 
-## Production state at submission
+## Historical production verification (8 September 2026)
 
 ```
 $ pm2 status
@@ -162,17 +164,15 @@ Nothing is turned off on the submission date. Judging runs to **23 September
 
 ---
 
-## Demo video — shot list and narration (≤ 2:45)
+## Final demo and changing live counts
 
-Recording is a human step. Target 2:40. One take per shot, screen capture at
-1440×900, no webcam, cursor visible.
+The final 2:14 film and 60-second cut are complete. Download links appear above;
+subtitles, credits and QA are in `demo-video/`. The obsolete pre-production shot
+list has been superseded by the finished film and remains available in Git history.
 
-| # | Time | On screen | Narration |
-|---|---|---|---|
-| 1 | 0:00–0:15 | `marque.trade` homepage; paste a BSC address; positions render | "Marque is an agent marketplace for BNB Smart Chain. Paste any address — these are its live PancakeSwap and Venus positions, read straight from chain." |
-| 2 | 0:15–0:35 | `/register`, scroll: warranted agents at top, graveyard below | "There are ~300,000 agents registered on BSC. Almost none work. Marque ranks them by whether they're callable and whether they passed a published test. The ones that failed are still here — with the failure — because showing only passes would be marketing." |
-| 3 | 0:35–0:55 | An agent profile; open the conformance diff showing a **failed** field | "Every warrant is a pass on a deterministic test, run against a real position at a pinned block. A failure names the exact field that was wrong." |
-| 4 | 0:55–1:20 | `/app/charter`: screen dims to cockpit, charter composes line by line, sign, tx hash types in | "To hire one, you grant a charter — an allowlist of contracts, a spend cap, an expiry. One signature. It's enforced before the agent can sign anything, and you revoke it in one transaction." |
-| 5 | 1:20–1:45 | The Seal on a receipt; point at the anchor tx on testnet BscScan | "The recommendation is hashed on chain before its outcome is known, so a track record can't be assembled after the fact." |
-| 6 | 1:45–2:20 | `/pancakeswap/proof`: before → 4 tx hashes → after → cost | "This is one real rebalance on mainnet. A deliberately narrow BNB/USDT range drifted out and earned nothing for 0.9 hours. The agent withdrew, swapped to the ratio the new range needed, and re-centred — under a $60 charter. Every hash is on BscScan. Total gas: ten cents. Realised slippage: under one basis point." |
-| 7 | 2:20–2:40 | `/ledger` mechanism + registered rubric; `/status` | "The Ledger puts an agent against a human analyst on the same task, graded blind against a rubric registered first. And the whole system degrades honestly — `/status` tells you what's fresh and what's stale. Nothing here is a number we made up." |
+The demo was recorded at **684 completed third-party conformance runs**. The live
+Standard continues to accrue runs during normal operation, so current totals may
+be higher. Recorded figures are a dated snapshot, not a claim about today's total.
+
+The film's archived Ledger capture also predates this audit. The live Ledger and
+Agent Advantage Report disclose current completion and provenance gaps.

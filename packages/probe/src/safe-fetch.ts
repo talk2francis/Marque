@@ -1,5 +1,9 @@
 import { lookup } from 'node:dns/promises'
-import { isIP } from 'node:net'
+import { isIP, type LookupFunction } from 'node:net'
+import { request as httpRequest } from 'node:http'
+import { request as httpsRequest } from 'node:https'
+import { Readable } from 'node:stream'
+import { createGunzip, createInflate, createBrotliDecompress } from 'node:zlib'
 
 /**
  * safeFetch — the ONLY way Marque talks to an agent endpoint.
@@ -111,9 +115,10 @@ export function isBlockedAddress(ip: string): boolean {
   }
 
   // IPv6
-  const lower = ip.toLowerCase()
+  const lower = new URL(`http://[${ip}]/`).hostname.slice(1, -1).toLowerCase()
   if (lower === '::' || lower === '::1') return true // unspecified, loopback
-  if (lower.startsWith('fe80')) return true // link-local
+  const first = parseInt(lower.split(':')[0] || '0', 16)
+  if ((first & 0xffc0) === 0xfe80) return true // all of fe80::/10, not only fe80
   if (lower.startsWith('fc') || lower.startsWith('fd')) return true // unique local
   if (lower.startsWith('ff')) return true // multicast
 
@@ -131,7 +136,8 @@ export function isBlockedAddress(ip: string): boolean {
 
   if (lower.startsWith('2002:')) return true // 6to4, can encode private v4
   if (lower.startsWith('64:ff9b:')) return true // NAT64, can encode private v4
-  return false
+  if (lower.startsWith('2001:db8:') || lower.startsWith('2001:0:')) return true // documentation / Teredo
+  return (first & 0xe000) !== 0x2000 // only global-unicast IPv6 reaches the network
 }
 
 /** The embedded IPv4 address of an IPv4-mapped IPv6, in either notation. */
@@ -173,6 +179,7 @@ export async function checkUrl(rawUrl: string): Promise<UrlCheck> {
   if (url.protocol !== 'https:' && url.protocol !== 'http:') {
     return { allowed: false, reason: `scheme ${url.protocol} is not allowed` }
   }
+  if (url.username || url.password) return { allowed: false, reason: 'URL credentials are not allowed' }
 
   // Block ports that are only interesting to an attacker probing our host.
   const port = url.port ? Number(url.port) : url.protocol === 'https:' ? 443 : 80
@@ -215,6 +222,7 @@ async function readCapped(res: Response, maxBytes: number): Promise<{ body: stri
   const declared = Number(res.headers.get('content-length') ?? '0')
   if (declared > maxBytes) {
     // Do not download something we already know is too big.
+    await res.body?.cancel()
     return { body: '', bytes: declared, truncated: true }
   }
 
@@ -243,6 +251,43 @@ async function readCapped(res: Response, maxBytes: number): Promise<{ body: stri
     offset += c.byteLength
   }
   return { body: new TextDecoder().decode(merged), bytes: total, truncated: false }
+}
+
+/** Connect only to the DNS addresses we validated. A second DNS lookup permits rebinding. */
+async function pinnedRequest(url: URL, addresses: string[], opts: SafeFetchOptions, signal: AbortSignal): Promise<Response> {
+  const lookup: LookupFunction = (_hostname, options, callback) => {
+    const records = addresses.map((address) => ({ address, family: isIP(address) }))
+    if (options.all) callback(null, records)
+    else callback(null, records[0]!.address, records[0]!.family)
+  }
+  return new Promise((resolve, reject) => {
+    const request = url.protocol === 'https:' ? httpsRequest : httpRequest
+    const req = request(url, {
+      lookup, agent: false, signal, maxHeaderSize: 16 * 1024,
+      method: opts.method ?? 'GET',
+      headers: { accept: 'application/json, text/plain;q=0.9, */*;q=0.8',
+        'accept-encoding': 'identity', ...(opts.headers ?? {}) },
+    }, (incoming) => {
+      const headers = new Headers()
+      for (const [key, value] of Object.entries(incoming.headers)) {
+        if (value !== undefined) headers.set(key, Array.isArray(value) ? value.join(', ') : value)
+      }
+      const status = incoming.statusCode ?? 502
+      if ([204, 205, 304].includes(status)) {
+        incoming.resume()
+        resolve(new Response(null, { status, headers }))
+        return
+      }
+      const encoding = incoming.headers['content-encoding']
+      const decoder = encoding === 'gzip' ? createGunzip() : encoding === 'br' ? createBrotliDecompress() :
+        encoding === 'deflate' ? createInflate() : null
+      if (decoder) incoming.on('error', (err) => decoder.destroy(err))
+      const stream = decoder ? incoming.pipe(decoder) : incoming
+      resolve(new Response(Readable.toWeb(stream) as ReadableStream<Uint8Array>, { status, headers }))
+    })
+    req.on('error', reject)
+    req.end(opts.body)
+  })
 }
 
 function classifyError(err: unknown): { failure: SafeFetchFailure; detail: string } {
@@ -275,10 +320,17 @@ export async function safeFetch(rawUrl: string, opts: SafeFetchOptions = {}): Pr
   let redirects = 0
   const controller = new AbortController()
   const timer = setTimeout(() => controller.abort(), timeoutMs)
+  let removeAbort = () => {}
+  const aborted = new Promise<never>((_resolve, reject) => {
+    const onAbort = () => reject(new DOMException('aborted at timeout', 'AbortError'))
+    controller.signal.addEventListener('abort', onAbort, { once: true })
+    removeAbort = () => controller.signal.removeEventListener('abort', onAbort)
+  })
+  let requestOptions = { ...opts, headers: { ...(opts.headers ?? {}) } }
 
   try {
     for (;;) {
-      const check = await checkUrl(currentUrl)
+      const check = await Promise.race([checkUrl(currentUrl), aborted])
       if (!check.allowed) {
         return {
           ok: false,
@@ -290,13 +342,7 @@ export async function safeFetch(rawUrl: string, opts: SafeFetchOptions = {}): Pr
 
       let res: Response
       try {
-        res = await fetch(currentUrl, {
-          method: opts.method ?? 'GET',
-          headers: { accept: 'application/json, text/plain;q=0.9, */*;q=0.8', ...(opts.headers ?? {}) },
-          ...(opts.body === undefined ? {} : { body: opts.body }),
-          redirect: 'manual',
-          signal: controller.signal,
-        })
+        res = await pinnedRequest(new URL(currentUrl), check.addresses!, requestOptions, controller.signal)
       } catch (err) {
         const { failure, detail } = classifyError(err)
         return { ok: false, failure, detail, latencyMs: Date.now() - started }
@@ -305,6 +351,7 @@ export async function safeFetch(rawUrl: string, opts: SafeFetchOptions = {}): Pr
       // Manual redirect handling, so each hop is re-validated.
       if (res.status >= 300 && res.status < 400) {
         const location = res.headers.get('location')
+        await res.body?.cancel()
         if (!location) {
           return {
             ok: false, failure: 'unknown', status: res.status,
@@ -319,7 +366,14 @@ export async function safeFetch(rawUrl: string, opts: SafeFetchOptions = {}): Pr
             detail: `exceeded ${maxRedirects} redirects`, latencyMs: Date.now() - started,
           }
         }
-        currentUrl = new URL(location, currentUrl).toString()
+        const next = new URL(location, currentUrl)
+        if (next.origin !== new URL(currentUrl).origin) {
+          requestOptions = { ...requestOptions, headers: {} }
+        }
+        if (res.status === 303 || ((res.status === 301 || res.status === 302) && requestOptions.method === 'POST')) {
+          requestOptions = { ...requestOptions, method: 'GET', body: undefined }
+        }
+        currentUrl = next.toString()
         continue
       }
 
@@ -347,7 +401,11 @@ export async function safeFetch(rawUrl: string, opts: SafeFetchOptions = {}): Pr
         redirects,
       }
     }
+  } catch (err) {
+    const { failure, detail } = classifyError(err)
+    return { ok: false, failure, detail, latencyMs: Date.now() - started }
   } finally {
     clearTimeout(timer)
+    removeAbort()
   }
 }

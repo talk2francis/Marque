@@ -37,7 +37,7 @@ function Arm({ run, label }: { run: LedgerRun; label: string }) {
       <div className={styles.hashes}>
         <span>output hash <code>{run.outputHash}</code></span>
         <span>manifest hash <code>{run.manifestHash}</code></span>
-        <span>block <code>{run.blockNumber}</code> · ran {run.ranAt.slice(0, 19).replace('T', ' ')}Z</span>
+        <span>block <code>{run.blockNumber === '0' ? 'not recorded' : run.blockNumber}</code> · ran {run.ranAt.slice(0, 19).replace('T', ' ')}Z</span>
       </div>
 
       <p className={styles.note}>
@@ -91,7 +91,7 @@ export default async function BenchmarkPage({ params }: { params: Promise<{ id: 
         </header>
 
         <section className={styles.section}>
-          <h2 className={styles.h2}>The task, frozen before any answer existed</h2>
+          <h2 className={styles.h2}>The registered task</h2>
           <div className={styles.hashes}>
             <span>task hash <code>{b.taskHash}</code></span>
             <span>input hash <code>{b.inputHash}</code></span>

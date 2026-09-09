@@ -1,7 +1,7 @@
 import 'server-only'
 import { desc, eq } from 'drizzle-orm'
 import { db, benchmark as benchmarkTable, benchmarkRun, sealedCall } from '@marque/db'
-import { trackRecord, isReproduction, type SealOutcome } from '@marque/ledger'
+import { trackRecord, isReproduction, comparisonMissing, type SealOutcome } from '@marque/ledger'
 
 /**
  * The Ledger, as the web process reads it.
@@ -108,15 +108,7 @@ export async function readLedger(): Promise<LedgerBenchmark[]> {
     ).size
 
     const mine = current.map(toRun)
-    const agentReps = mine.filter((r) => r.arm === 'agent').length
-    const manualReps = mine.filter((r) => r.arm === 'manual').length
-    const scored = mine.filter((r) => r.scoreTotal !== null).length
-    const missing: string[] = []
-    if (agentReps < 2) missing.push(`${2 - agentReps} more agent repetition${2 - agentReps === 1 ? '' : 's'}`)
-    if (manualReps < 2) missing.push(`${2 - manualReps} manual repetition${2 - manualReps === 1 ? '' : 's'}, run by hand with a stopwatch`)
-    if (missing.length === 0 && scored < mine.length) {
-      missing.push('the blind grade for the remaining repetitions (scripts/ledger-grade.mjs)')
-    }
+    const missing = comparisonMissing(b, mine)
     return {
       id: b.id,
       title: b.title,

@@ -1,3 +1,4 @@
+import { comparisonMissing } from './completion.js'
 import { performance } from 'node:perf_hooks'
 import { eq, and } from 'drizzle-orm'
 import { db, benchmark as benchmarkTable, benchmarkRun } from '@marque/db'
@@ -283,10 +284,8 @@ export async function benchmarkStatus(id: string): Promise<{
     runs.filter((r) => r.batch !== agentBatch && r.batch !== manualBatch).map((r) => `${r.arm}:${r.batch}`),
   ).size
 
-  const missing: string[] = []
-  if (agentReps < 2) missing.push(`${2 - agentReps} more agent repetition(s)`)
-  if (manualReps < 2) missing.push(`${2 - manualReps} more manual repetition(s) — a human runs these with a stopwatch`)
-  if (missing.length === 0 && scored < current.length) missing.push('blind scoring of both arms')
+  const [registered] = await db().select().from(benchmarkTable).where(eq(benchmarkTable.id, id)).limit(1)
+  const missing = registered ? comparisonMissing(registered, current) : ['registered benchmark evidence']
   return {
     id, agentReps, manualReps, agentBatch, manualBatch, earlierSittings, scored,
     complete: missing.length === 0, missing,

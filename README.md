@@ -24,7 +24,7 @@ Read what an address holds. Find agents that can act on it. Check whether they
 
 | | Link | What it shows |
 |---|---|---|
-| **The demo film (2:14)** | **[demo-video/marque-demo.mp4](demo-video/marque-demo.mp4)** · [60-second cut](demo-video/marque-demo-60.mp4) | "Before you give it authority" — the buyer's question, the tested sample, the zero-pass result, then read → find → verify → bound → inspect → the mainnet proof. Word-timed captions; [SRT](demo-video/marque-demo.srt). Method + QA in [demo-video/astra/](demo-video/astra/) |
+| **The demo film (2:14)** | **[Download MP4](https://github.com/talk2francis/Marque/releases/download/demo-2026-09-09/marque-demo.mp4)** · [60-second download](https://github.com/talk2francis/Marque/releases/download/demo-2026-09-09/marque-demo-60.mp4) | "Before you give it authority" — the buyer's question, the tested sample, the zero-pass result, then read → find → verify → bound → inspect → the mainnet proof. Word-timed captions; [SRT](demo-video/marque-demo.srt). Method + QA in [demo-video/astra/](demo-video/astra/) |
 | **90-second walkthrough** | **https://marque.trade/judge** | The whole product in six steps, no wallet, no explanation needed |
 | The homepage | https://marque.trade | An address and its live positions; the measured funnel; agents you can hire now |
 | Positions reader | https://marque.trade/positions | Paste any BSC address → V3 ranges, Venus health factor, idle capital, from chain |
@@ -41,6 +41,8 @@ Read what an address holds. Find agents that can act on it. Check whether they
 | Read API | https://marque.trade/api/v1/agents · `/funnel` · `/marketplace` | Everything the site renders, as JSON, no key |
 
 ---
+
+Demo recorded at **684 completed third-party conformance runs**. The [live Standard](https://marque.trade/standard) continues to accrue runs during normal operation, so current totals may be higher. The film is a dated snapshot.
 
 ## How Marque meets the Main Track rubric
 
@@ -153,7 +155,7 @@ you pay:
 | Track | Status | Evidence |
 |---|---|---|
 | **Main Track** | Entered | The marketplace, the four equally-deep categories, the full no-wallet journey. See the rubric table above. |
-| **TermiX Challenge** | Entered | **[Agent Advantage Report](./docs/AGENT-ADVANTAGE-REPORT.md)** — four tasks (one security), agent vs. human, same task and block, blind-graded against a rubric registered first. Agent arms recorded; human arms in progress. |
+| **TermiX Challenge** | Entered | **[Agent Advantage Report](./docs/AGENT-ADVANTAGE-REPORT.md)** — four tasks (one security), agent vs. human, blind-graded against a rubric registered and hashed before either arm ran. All eight human repetitions have blind grades. The agent arms are timed at pinned blocks; the human arms recorded no block, so the report does **not** claim a same-block comparison, and states which gaps remain. |
 | **PancakeSwap Challenge** | Entered | The **[proof run](https://marque.trade/pancakeswap/proof)** — a real benefit to a PancakeSwap LP: a drifted V3 position detected, re-centred under a scoped charter, every tx on BscScan, cost and slippage measured. |
 | **AltLayer / 8004scan** | Entered | The marketplace is built on the ERC-8004 registry that 8004scan indexes; the MCS answers the “is this agent actually correct” question that an on-chain agent economy needs. |
 | ~~Altana~~ | **Not entered** | Charters run on our own registry (`MarqueRegistry`). We do not have an Altana Keystore / session-SDK integration and will not claim one — the track requires transactions in the Altana explorer, which we do not have. |

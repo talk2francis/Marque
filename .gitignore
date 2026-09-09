@@ -45,3 +45,6 @@ demo-video/render/marque-demo-v2.mp4
 demo-video/marque-demo-v1.mp4
 demo-video/marque-demo-v2.mp4
 demo-video/marque-poster-v2.png
+
+# Isolated web builds for pre-deployment verification
+apps/web/.next-*/

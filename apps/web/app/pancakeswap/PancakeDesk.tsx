@@ -202,7 +202,7 @@ export function PancakeDesk({ demoAddress }: { demoAddress: string }) {
                 ) : (
                   <>
                     <span className={styles.pvFigure}>${num(p.positionValueUsd, 2)}</span>
-                    <span className={styles.pvLabel}>in this range</span>
+                    <span className={styles.pvLabel}>current position value</span>
                   </>
                 )}
                 {p.feesUsd !== null && p.feesUsd > 0 && (
@@ -211,7 +211,7 @@ export function PancakeDesk({ demoAddress }: { demoAddress: string }) {
               </div>
 
               <MeasureRule
-                label={`${p.pair} price ${num(p.priceCurrent)} inside a range of ${num(p.priceLower)} to ${num(p.priceUpper)}`}
+                label={`${p.pair} price ${num(p.priceCurrent)}; position range ${num(p.priceLower)} to ${num(p.priceUpper)}`}
                 value={p.priceCurrent} lower={p.priceLower} upper={p.priceUpper}
                 lowerLabel={num(p.priceLower)} upperLabel={num(p.priceUpper)}
                 valueLabel={`${num(p.priceCurrent)} ${p.priceUnit}`}

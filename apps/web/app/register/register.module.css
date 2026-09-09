@@ -187,3 +187,11 @@
   inset: 0;
   background: linear-gradient(180deg, transparent 0%, transparent 55%, color-mix(in srgb, var(--ground) 70%, transparent) 82%, var(--ground) 100%);
 }
+
+.pagination { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--s4); padding: var(--s5) 0; border-top: 1px solid var(--line); font-size: var(--size-caption); }
+.pagination label, .pageButtons { display: flex; align-items: center; gap: var(--s3); }
+.pagination button:disabled { opacity: .45; cursor: default; }
+.pagination button { min-height: 40px; }
+@media (max-width: 560px) { .pagination { align-items: flex-start; flex-direction: column; } }
+
+.graveyardToggle { cursor: pointer; min-height: 44px; padding-block: var(--s3); font-size: var(--size-title); color: var(--fg); }

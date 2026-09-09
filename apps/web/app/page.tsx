@@ -89,7 +89,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ a
     .limit(8)
     .then((rows) => rows.map((r) => ({
       id: r.id,
-      text: `${r.agentId.replace('marque:', '')} — settled run`,
+      text: `${r.agentId.replace('marque:', '')} — receipt issued`,
       href: `/receipts/${r.id}`,
       at: r.issuedAt.toISOString(),
     })))
@@ -193,8 +193,8 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ a
           {([
             ['Registered on BNB Chain', registered, 'from the ERC-8004 registry'],
             ['Callable right now', bound, 'answer and expose a hireable interface'],
-            ['Warranted', Number(homeCounts['warranted'] ?? 0), 'passed a published MCS case'],
-            ['Settled runs', Number(homeCounts['receipts'] ?? 0), 'each with a public on-chain receipt'],
+            ['Warranted', homeCounts['warranted'] == null ? null : Number(homeCounts['warranted']), 'passed a published MCS case'],
+            ['Public receipts', homeCounts['receipts'] == null ? null : Number(homeCounts['receipts']), 'execution and quality recorded separately'],
           ] as Array<[string, number | null, string]>).map(([label, n, sub]) => (
             <div className={styles.stat} key={label}>
               <CountUp value={n} className={styles.statN} />
@@ -363,18 +363,17 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ a
               <p className={styles.sectionLede}>
                 Because we compute the correct answer ourselves before asking an agent, &ldquo;does
                 hiring this beat doing it yourself&rdquo; is measurable rather than claimed.
-                {' '}{Number(homeCounts['benchmarks'] ?? 0)} benchmarks are registered, each with its
-                rubric hashed before any arm ran. None is a finished comparison yet — the manual arm
-                is run by a human with a stopwatch, and simulating it would make every number
-                worthless. <a href="/ledger">See the Ledger</a> · <a href="/ledger/methodology">the method</a>.
+                {' '}{homeCounts['benchmarks'] == null ? 'The' : Number(homeCounts['benchmarks'])} benchmarks are registered, each with its
+                rubric hashed before any arm ran. Human submissions and blind grades are recorded. Each benchmark discloses
+                any missing grades or task and block provenance needed for a valid comparison. <a href="/ledger">See the Ledger</a> · <a href="/ledger/methodology">the method</a>.
               </p>
             </div>
             <div>
               <h3 className={styles.evHead}>Receipts — what it has already done</h3>
               <p className={styles.sectionLede}>
-                {Number(homeCounts['receipts'] ?? 0)} settled runs carry a public receipt with four
+                {homeCounts['receipts'] == null ? 'Recorded runs carry a public receipt' : `${Number(homeCounts['receipts'])} public receipts record runs`} with four
                 proof blocks — commercial, execution, authority and quality — the canonical hash, and
-                the transaction that anchored it on chain. <a href="/receipts/latest">The latest receipt →</a>
+                the anchor status. Completion, payment and test quality are separate facts. <a href="/receipts/latest">The latest receipt →</a>
               </p>
             </div>
           </div>

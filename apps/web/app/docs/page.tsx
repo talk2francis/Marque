@@ -27,7 +27,7 @@ const SECTIONS: DocSection[] = [
 function S({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
   return (
     <section className={styles.docSection} data-doc-section={id} id={id}>
-      <h2 className={styles.h2}>{title}</h2>
+      <h2 className={styles.h2} tabIndex={-1}>{title}</h2>
       {children}
     </section>
   )
@@ -38,6 +38,7 @@ export default function DocsPage() {
     <>
       <SiteHeader active="docs" />
 
+      <main className={styles.docsLayout}>
       <header className={styles.pageHead}>
         <span className={styles.kicker}>Documentation</span>
         <Statement as="h1" size="page">Everything Marque does, and does not do.</Statement>
@@ -266,8 +267,9 @@ export default function DocsPage() {
           </p>
         </S>
       </DocsShell>
+      </main>
 
-      <SiteFooter />
+      <div className={styles.docsFooter}><SiteFooter /></div>
     </>
   )
 }

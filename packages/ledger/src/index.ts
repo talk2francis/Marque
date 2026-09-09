@@ -20,3 +20,4 @@ export {
   seal, dueForResolution, resolve, sealsFor, allSeals, recordFor,
   type SealInput, type SealResult,
 } from './seal-store.js'
+export { comparisonMissing, type CompletionRun } from './completion.js'

@@ -36,15 +36,15 @@ export default function RegisterPage() {
       </div>
       <Marketplace />
 
-      <section className={styles.graveyard}>
-        <h2 className={styles.h2}>The graveyard</h2>
+      <details className={styles.graveyard}>
+        <summary className={styles.graveyardToggle}>The graveyard — inspect unavailable agents</summary>
         <p className={styles.refCopy}>
           Kept, not hidden. An endpoint that answers a request but was never bound to a runtime,
           or one that does not answer at all, with the reason on every row. This transparency is
           a differentiator; the counts are a live COUNT, not a page size.
         </p>
         <RegisterTable graveyard />
-      </section>
+      </details>
 
       <section id="reference-agents" className={styles.refSection}>
         <h2 className={styles.refHeading}>

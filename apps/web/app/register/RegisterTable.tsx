@@ -55,6 +55,9 @@ const CATEGORY_LABEL: Record<string, string> = {
 export function RegisterTable({ category, graveyard }: { category?: string; graveyard?: boolean }) {
   const [status, setStatus] = useState<Status>(graveyard ? 'unbound' : 'working')
   const TABS = (graveyard ? ['unbound', 'dead', 'all'] : ['working', 'unbound', 'dead', 'all']) as Status[]
+  const [pageSize, setPageSize] = useState(15)
+  const [page, setPage] = useState(0)
+  const [hasMore, setHasMore] = useState(false)
   const [agents, setAgents] = useState<AgentRow[]>([])
   const [counts, setCounts] = useState<Record<Status, number | null>>({ working: null, unbound: null, dead: null, all: null })
   const [countsAt, setCountsAt] = useState<string | null>(null)
@@ -66,7 +69,7 @@ export function RegisterTable({ category, graveyard }: { category?: string; grav
     setLoading(true)
     setError(null)
     const qs = (s: Status) =>
-      `/api/v1/agents?status=${s}&limit=${graveyard ? 12 : 60}${category ? `&category=${category}` : ''}`
+      `/api/v1/agents?status=${s}&limit=${pageSize + 1}&offset=${page * pageSize}${category ? `&category=${category}` : ''}`
 
     void (async () => {
       try {
@@ -74,7 +77,7 @@ export function RegisterTable({ category, graveyard }: { category?: string; grav
         const json = await res.json()
         if (cancelled) return
         if (!res.ok) { setError(json.detail ?? json.error ?? 'Could not load the Register.'); setAgents([]) }
-        else setAgents(json.agents ?? [])
+        else { setAgents((json.agents ?? []).slice(0, pageSize)); setHasMore((json.agents ?? []).length > pageSize) }
       } catch {
         if (!cancelled) setError('Could not reach the Register.')
       } finally {
@@ -82,7 +85,7 @@ export function RegisterTable({ category, graveyard }: { category?: string; grav
       }
     })()
     return () => { cancelled = true }
-  }, [status, category])
+  }, [status, category, page, pageSize])
 
   // Real population counts for the toggle labels — COUNT(*) over each tab's own
   // predicate, not the page size. One call, memoised server-side for 5 minutes
@@ -137,7 +140,7 @@ export function RegisterTable({ category, graveyard }: { category?: string; grav
             key={s}
             size="sm"
             variant={status === s ? 'primary' : 'secondary'}
-            onClick={() => setStatus(s)}
+            onClick={() => { setStatus(s); setPage(0) }}
             aria-pressed={status === s}
           >
             {label(s)}
@@ -212,6 +215,18 @@ export function RegisterTable({ category, graveyard }: { category?: string; grav
           })}
         </div>
       )}
+      <nav className={styles.pagination} aria-label="Register pages">
+        <label>Rows per page{' '}
+          <select className={styles.select} value={pageSize} onChange={(e) => { setPageSize(Number(e.target.value)); setPage(0) }}>
+            {[10, 15, 20].map((n) => <option key={n} value={n}>{n}</option>)}
+          </select>
+        </label>
+        <div className={styles.pageButtons}>
+          <button type="button" className={styles.toggle} disabled={loading || page === 0} onClick={() => setPage(page - 1)}>Previous</button>
+          <span role="status">Page {page + 1}</span>
+          <button type="button" className={styles.toggle} disabled={loading || !hasMore || !!error} onClick={() => setPage(page + 1)}>Next</button>
+        </div>
+      </nav>
     </>
   )
 }

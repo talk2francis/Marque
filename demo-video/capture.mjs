@@ -199,7 +199,7 @@ async function run() {
     const page = await ctx.newPage()
     page.__pos = { x: SIZE.width / 2, y: SIZE.height / 2 }
     // Force the dark theme regardless of any stored pref.
-    await page.addInitScript(() => { try { localStorage.setItem('marque-theme', 'dark') } catch {} })
+    await page.addInitScript(() => { try { localStorage.setItem('marque-theme', 'dark') } catch { /* Storage is unavailable in some capture contexts. */ } })
     console.log(`▶ ${slug}${BIG ? ' (2160)' : ''}`)
     try {
       await SHOTS[slug](page)

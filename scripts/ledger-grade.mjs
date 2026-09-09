@@ -31,8 +31,7 @@
  * A grade is never overwritten. Re-running against an already-scored arm is a
  * no-op unless --regrade is passed, and a regrade records a new scored_at.
  */
-import { createHash, randomBytes } from 'node:crypto'
-import { readFileSync } from 'node:fs'
+import { createHash } from 'node:crypto'
 import postgres from 'postgres'
 
 const GO = process.argv.includes('--go')

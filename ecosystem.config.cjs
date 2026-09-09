@@ -178,7 +178,7 @@ module.exports = {
     {
       name: 'marque-web',
       cwd: `${ROOT}/apps/web`,
-      script: '.next/standalone/apps/web/server.js',
+      script: process.env.MARQUE_WEB_SERVER || '.next/standalone/apps/web/server.js',
       interpreter: 'node',
       env: { ...env, NODE_ENV: 'production', PORT: env.WEB_PORT || '3200', HOSTNAME: '127.0.0.1' },
       autorestart: true,

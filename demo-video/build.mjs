@@ -14,7 +14,7 @@
  * light->dark swap now that the product is dark by default).
  */
 import { execFileSync } from 'node:child_process'
-import { existsSync, mkdirSync, writeFileSync, readFileSync } from 'node:fs'
+import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 const ROOT = join(process.cwd(), 'demo-video')
@@ -113,7 +113,7 @@ execFileSync('ffmpeg', ['-y', '-v', 'error', '-f', 'concat', '-safe', '0', '-i',
 const zeroScene = sceneTimes.find((s) => s.id === 'zero')
 const proofScene = sceneTimes.find((s) => s.id === 'proof')
 // sub drone at ~55 Hz + a fifth at ~82 Hz, low; gentle tremolo
-const droneExpr =
+const _droneExpr =
   `sine=frequency=55:sample_rate=48000,` +
   `volume='0.5*(1+0.15*sin(2*PI*0.08*t))':eval=frame`
 const musicRaw = join(WORK, 'music-raw.wav')

@@ -77,18 +77,34 @@ export function Marketplace({ category: fixedCategory }: { category?: string }) 
     return p.toString()
   }, [category, search, sort, liveNow, warranted, thirdParty, hasPrice, iface])
 
+  const [pageSize, setPageSize] = useState(15)
+  const [paging, setPaging] = useState({ query: '', page: 0 })
+  const page = paging.query === qs ? paging.page : 0
+  const [total, setTotal] = useState<number | null>(null)
+  const [hasMore, setHasMore] = useState(false)
+  const changePage = (next: number) => {
+    setPaging({ query: qs, page: next })
+    listRef.current?.scrollIntoView({ block: 'start', behavior: 'auto' })
+  }
+
   useEffect(() => {
     let cancelled = false
+    const controller = new AbortController()
     setLoading(true); setError(null)
     const t = setTimeout(() => {
       void (async () => {
         try {
-          const res = await fetch(`/api/v1/marketplace?${qs}&limit=48`, { cache: 'no-store' })
+          const res = await fetch(`/api/v1/marketplace?${qs}&limit=${pageSize}&offset=${page * pageSize}`, { cache: 'no-store', signal: controller.signal })
           const j = await res.json()
           if (cancelled) return
           if (!res.ok) { setError(j.detail ?? j.error ?? 'Could not load the marketplace.'); setRows([]) }
           else {
             setRows(j.agents ?? [])
+            setTotal(typeof j.total === 'number' ? j.total : null)
+            setHasMore(j.hasMore === true)
+            if (typeof j.offset === 'number' && j.offset !== page * pageSize) {
+              setPaging({ query: qs, page: Math.floor(j.offset / pageSize) })
+            }
             setGeneratedAt(j.generatedAt ?? null)
             if (search.trim().length >= 2) track('marketplace_search', { q: search.trim().length })
           }
@@ -99,8 +115,8 @@ export function Marketplace({ category: fixedCategory }: { category?: string }) 
         }
       })()
     }, 180)
-    return () => { cancelled = true; clearTimeout(t) }
-  }, [qs])
+    return () => { cancelled = true; controller.abort(); clearTimeout(t) }
+  }, [qs, page, pageSize])
 
   // FLIP: remember row positions before a reorder, animate the delta after.
   const listRef = useRef<HTMLDivElement>(null)
@@ -298,6 +314,25 @@ export function Marketplace({ category: fixedCategory }: { category?: string }) 
           })}
         </div>
       )}
+
+      <nav className={styles.pagination} aria-label="Marketplace pages">
+        <label>Rows per page{' '}
+          <select className={styles.select} value={pageSize} onChange={(e) => {
+            setPageSize(Number(e.target.value)); setPaging({ query: qs, page: 0 })
+          }}>
+            {[10, 15, 20].map((n) => <option key={n} value={n}>{n}</option>)}
+          </select>
+        </label>
+        <span role="status" aria-live="polite">
+          {loading ? 'Loading page…' : total === null ? 'Results unavailable' :
+            total === 0 ? 'No matching agents' : `${page * pageSize + 1}–${page * pageSize + rows.length} of ${total} agents`}
+        </span>
+        <div className={styles.pageButtons}>
+          <button type="button" className={styles.toggle} disabled={loading || page === 0} onClick={() => changePage(page - 1)}>Previous</button>
+          <span>Page {page + 1}</span>
+          <button type="button" className={styles.toggle} disabled={loading || !hasMore || !!error} onClick={() => changePage(page + 1)}>Next</button>
+        </div>
+      </nav>
 
       {/* Floating compare tray — appears the moment a second agent is picked. */}
       {selected.length >= 1 && (

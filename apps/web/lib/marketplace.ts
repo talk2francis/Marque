@@ -58,6 +58,7 @@ export interface MarketQuery {
   iface?: string | null
   sort?: 'best' | 'proven' | 'price' | 'fast' | 'recent'
   limit?: number
+  offset?: number
 }
 
 const HIRE_WIRED = new Set(['a2a', 'mcp'])
@@ -129,8 +130,6 @@ async function marketplaceBase(): Promise<MarketRow[]> {
 }
 
 async function queryThirdParty(): Promise<MarketRow[]> {
-  const limit = 300
-
   const rows = await db().execute(sql`
     with latest as (
       select distinct on (agent_id) agent_id, liveness, latency_ms, failure_class, skills, checked_at
@@ -184,7 +183,6 @@ async function queryThirdParty(): Promise<MarketRow[]> {
     from qualifying
     group by owner_address, host
     order by identities desc
-    limit ${limit}
   `)
 
   const list = (((rows as unknown as { rows?: unknown[] }).rows ?? (rows as unknown as unknown[])) as Array<Record<string, unknown>>)
@@ -230,7 +228,7 @@ async function queryThirdParty(): Promise<MarketRow[]> {
   return thirdParty
 }
 
-export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: MarketRow[]; generatedAt: string }> {
+export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: MarketRow[]; generatedAt: string; total: number; offset: number; hasMore: boolean }> {
   // Clone: the base is memoised and the sort below is in place.
   let all = [...(await marketplaceBase())]
 
@@ -260,16 +258,20 @@ export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: Ma
   }
 
   all.sort((a, b) => {
+    const tie = a.agentId.localeCompare(b.agentId)
     switch (q.sort) {
-      case 'proven': return byQual(a, b) || byWarrantDate(a, b) || (a.latencyMs ?? 1e9) - (b.latencyMs ?? 1e9)
-      case 'price': return priceNum(a) - priceNum(b) || byQual(a, b)
-      case 'fast': return (a.latencyMs ?? 1e9) - (b.latencyMs ?? 1e9) || byQual(a, b)
-      case 'recent': return (b.warrant.date ?? '').localeCompare(a.warrant.date ?? '') || byQual(a, b)
+      case 'proven': return byQual(a, b) || byWarrantDate(a, b) || (a.latencyMs ?? 1e9) - (b.latencyMs ?? 1e9) || tie
+      case 'price': return priceNum(a) - priceNum(b) || byQual(a, b) || tie
+      case 'fast': return (a.latencyMs ?? 1e9) - (b.latencyMs ?? 1e9) || byQual(a, b) || tie
+      case 'recent': return (b.warrant.date ?? '').localeCompare(a.warrant.date ?? '') || byQual(a, b) || tie
       default:
-        return byQual(a, b) || byWarrantDate(a, b) || b.identityCount - a.identityCount || (a.latencyMs ?? 1e9) - (b.latencyMs ?? 1e9)
+        return byQual(a, b) || byWarrantDate(a, b) || b.identityCount - a.identityCount || (a.latencyMs ?? 1e9) - (b.latencyMs ?? 1e9) || tie
     }
   })
 
-  const limit = Math.min(q.limit ?? 120, 300)
-  return { rows: all.slice(0, limit), generatedAt: new Date().toISOString() }
+  const limit = Number.isFinite(q.limit) ? Math.max(1, Math.min(Math.floor(q.limit!), 300)) : 120
+  const requestedOffset = Number.isFinite(q.offset) ? Math.max(0, Math.floor(q.offset!)) : 0
+  const offset = all.length ? Math.min(requestedOffset, Math.floor((all.length - 1) / limit) * limit) : 0
+  return { rows: all.slice(offset, offset + limit), total: all.length, offset,
+    hasMore: offset + limit < all.length, generatedAt: new Date(baseMemo?.at ?? Date.now()).toISOString() }
 }

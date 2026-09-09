@@ -3,6 +3,7 @@ const nextConfig = {
   // Self-hosted behind Caddy: run node .next/standalone/server.js
   // (AGENTS.md gotcha 4). Requires copying static/ and public/ after build.
   output: 'standalone',
+  distDir: process.env.MARQUE_BUILD_DIR || '.next',
   outputFileTracingRoot: new URL('../../', import.meta.url).pathname,
   reactStrictMode: true,
   // Workspace packages ship TypeScript source, not a build step.
@@ -39,7 +40,7 @@ const nextConfig = {
     // nonce middleware; everything else is locked down.
     const csp = [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+      "script-src 'self' 'unsafe-inline'",
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob:",
       "font-src 'self' data:",

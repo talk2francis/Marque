@@ -1,5 +1,4 @@
 import {readFileSync,writeFileSync,mkdirSync,existsSync} from 'node:fs';
-import {execFileSync} from 'node:child_process';
 import {dirname,join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 const root=dirname(fileURLToPath(import.meta.url));const scenes=JSON.parse(readFileSync(join(root,'scenes.json')));const out=join(root,'voice');mkdirSync(out,{recursive:true});

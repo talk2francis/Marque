@@ -36,8 +36,14 @@ export default function MethodologyPage() {
           <h2>The shape of a benchmark</h2>
           <p>
             A benchmark is one task, put to two arms: a Marque agent, and a human analyst working
-            by hand. Both answer the same task, pinned to the same block. Each arm is run twice,
-            because a single run is an anecdote.
+            by hand. Both answer the same task, which is meant to be pinned to the same block.
+            Each arm is run twice, because a single run is an anecdote.
+          </p>
+          <p>
+            That intent is not the same as the evidence. The agent arm records the block it read;
+            the human arm, run by hand, recorded none. Until a run carries its own block, the
+            benchmark reports what it has rather than claiming a same-block comparison — which is
+            why every card on the Ledger currently lists what is still missing.
           </p>
           <p>
             Before either arm runs, four things are frozen and hashed: the task, the inputs, the

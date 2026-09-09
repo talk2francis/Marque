@@ -40,9 +40,15 @@ export default function JudgePage() {
             watching rather than typing.
           </p>
           <p className={styles.note}>
-            Everything is real and nothing is a recording. The charter and the revocation are
+            This interactive walkthrough runs live. The charter and the revocation are
             transactions on BNB Smart Chain testnet, and each one links to BscScan.{' '}
             <Link href="/status">Check what is live first</Link> if anything here stalls.
+          </p>
+          <p className={styles.note}>
+            <a href="https://github.com/talk2francis/Marque/releases/download/demo-2026-09-09/marque-demo.mp4">Download the demo film (2:14)</a>.
+            {' '}The film was recorded at 684 completed third-party conformance runs. The{' '}
+            <Link href="/standard">live Standard</Link> continues to accrue runs during normal
+            operation, so current totals may be higher.
           </p>
         </header>
 

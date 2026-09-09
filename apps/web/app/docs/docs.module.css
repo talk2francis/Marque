@@ -231,3 +231,30 @@
   .pager { flex-direction: column; }
   .pagerPrev, .pagerNext { max-width: none; text-align: left; align-items: flex-start; }
 }
+
+/* Keep the desktop rail and pager in a stable workspace; short/mobile screens use document flow. */
+.docsLayout { height: calc(100dvh - 66px); display: flex; flex-direction: column; min-height: 0; }
+.docsLayout .pageHead { width: 100%; padding-top: var(--s5); flex: none; }
+.docsLayout .pageHead :global(.statement) { font-size: 30px; max-width: none; margin-bottom: var(--s3); }
+.docsLayout .lede { font-size: var(--size-body); max-width: 85ch; }
+.docsLayout .wrap { height: auto; flex: 1; min-height: 0; width: 100%; gap: var(--s6); }
+.docSection[hidden] { display: none; }
+.docSection { flex: 1 0 auto; max-width: 680px; }
+.docSection h2:focus { outline: none; }
+.pager { flex: none; margin-top: var(--s6); margin-bottom: var(--s4); }
+.docCol::after { display: none; }
+.docsFooter { display: none; }
+.mobilePicker { display: none; }
+@media (max-width: 900px), (max-height: 600px) {
+  .docsLayout { height: auto; }
+  .docsLayout .wrap { flex: none; display: block; overflow: visible; }
+  .rail { display: none; }
+  .mobilePicker { display: flex; flex-direction: column; gap: 8px; margin-bottom: var(--s5); font-size: var(--size-caption); }
+  .mobilePicker select { width: 100%; min-height: 44px; font: inherit; color: var(--fg); background: var(--ground-raised); border: 1px solid var(--line); border-radius: var(--r-sm); padding: 10px; }
+  .docCol { overflow: visible; padding: 0; }
+  .docsFooter { display: block; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .railList a, .pagerPrev, .pagerNext { transition: none; }
+  .pagerPrev:hover, .pagerNext:hover { transform: none; }
+}

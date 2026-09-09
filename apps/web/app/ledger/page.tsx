@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { Statement, Chip, ProvenanceChip, EmptyState } from '@marque/ui'
 import { SiteHeader, SiteFooter } from '../_components/SiteHeader'
-import { readLedger, readSeals, type LedgerBenchmark } from '../../lib/ledger'
+import { readLedger, readSeals, type LedgerBenchmark, type LedgerRun } from '../../lib/ledger'
 import { explorerTx } from '../../lib/network'
 import styles from './ledger.module.css'
 
@@ -10,7 +10,7 @@ export const revalidate = 0
 export const metadata = {
   title: 'The Ledger — measured advantage, or none',
   description:
-    'Agent against a human analyst on the same task, at the same block, graded blind against a rubric registered before either arm ran. Sealed calls are anchored on chain before their outcome is known.',
+    'Agent and human analyst results, assessed against a rubric registered before scoring. Completion requires matching task and block evidence. Sealed calls are anchored on chain before their outcome is known.',
 }
 
 /**
@@ -21,11 +21,8 @@ export const metadata = {
  * therefore graded against a rubric that is written and hashed before anybody
  * has seen an answer.
  *
- * The honest state today is that the agent arms have run and the manual arms
- * have not, because a human runs those with a stopwatch. So this page shows
- * the agent arms as recorded and says plainly that no comparison exists yet.
- * A page that filled the other column with an estimate would be the single
- * most damaging thing this project could publish.
+ * Completion is derived from recorded repetitions, blind scores and matching
+ * provenance. Missing measurements are never filled with estimates.
  */
 
 function ms(n: number): string {
@@ -74,12 +71,11 @@ function Benchmark({ b }: { b: LedgerBenchmark }) {
         <Chip>{b.category.replace('_', ' ')}</Chip>
         {b.complete
           ? <Chip tone="holds">complete</Chip>
-          : <Chip tone="watch">awaiting the manual arm</Chip>}
+          : <Chip tone="watch">comparison incomplete</Chip>}
       </div>
 
       <p className={styles.note}>
-        {b.agentName ?? b.agentId} against a human analyst on the same task, at the same block,
-        graded blind against rubric {b.rubricVersion}, registered{' '}
+        {b.agentName ?? b.agentId} and a human analyst, assessed against rubric {b.rubricVersion}, registered{' '}
         {new Date(b.rubricRegisteredAt).toISOString().slice(0, 16).replace('T', ' ')}Z — before
         either arm ran.
       </p>
@@ -87,6 +83,15 @@ function Benchmark({ b }: { b: LedgerBenchmark }) {
       {(() => {
         const h = armStats(manual)
         const a = armStats(agent)
+        // An ungraded run is not necessarily a run awaiting a grade. Where the
+        // recorded runs answered a different task revision than the one now
+        // registered, no grade is coming for them — grading an answer to a
+        // different question would not produce a comparison. Say which it is.
+        const onTask = (runs: LedgerRun[]) =>
+          runs.every((r) => r.manifest?.['task_hash'] === b.taskHash)
+        const ungraded = (runs: LedgerRun[]) => (
+          <span className={styles.muted}>{onTask(runs) ? 'ungraded' : 'answered a different task'}</span>
+        )
         const Cell = ({ label, human, agentVal }: { label: string; human: React.ReactNode; agentVal: React.ReactNode }) => (
           <div className={styles.expRow}>
             <span className={styles.expMetric}>{label}</span>
@@ -121,12 +126,12 @@ function Benchmark({ b }: { b: LedgerBenchmark }) {
               label="QUALITY (blind)"
               human={
                 h.quality === null
-                  ? (h.reps > 0 ? <span className={styles.muted}>grading…</span> : awaiting)
+                  ? (h.reps > 0 ? ungraded(manual) : awaiting)
                   : <b>{h.quality.total.toFixed(0)} / {h.quality.outOf}</b>
               }
               agentVal={
                 a.quality === null
-                  ? <span className={styles.muted}>{a.reps > 0 ? 'grading…' : 'not run'}</span>
+                  ? (a.reps > 0 ? ungraded(agent) : <span className={styles.muted}>not run</span>)
                   : <b>{a.quality.total.toFixed(0)} / {a.quality.outOf}</b>
               }
             />
@@ -135,7 +140,7 @@ function Benchmark({ b }: { b: LedgerBenchmark }) {
               by hand with a stopwatch. Time and cost are measured. Quality is graded blind by a
               language model (<code className="mono">scripts/ledger-grade.mjs</code>, DeepSeek, each
               anonymised answer scored three times against the rubric hashed before either arm ran,
-              per-criterion median taken). The grader under-scores terse answers, so the two manual
+              per-criterion median taken). Scores can differ between terse and detailed answers, so the two manual
               repetitions can score far apart — a full write-up against a one-line summary of the
               same finding.
             </p>
@@ -187,8 +192,9 @@ export default async function LedgerPage() {
           <Statement as="h1">The Ledger</Statement>
           <p className={styles.lede}>
             The Standard asks whether an agent is correct. The Ledger asks whether it is better
-            than doing the work yourself — same task, same block, graded blind against a rubric
-            that was written and hashed before either arm ran.
+            than doing the work yourself — the same task, graded blind against a rubric that was
+            written and hashed before either arm ran. Each card states what its own evidence
+            still lacks before the comparison counts.
           </p>
           <p className={styles.lede}>
             <Link href="/ledger/methodology">Read the method in full</Link>, including how the
@@ -243,7 +249,7 @@ export default async function LedgerPage() {
                 </tbody>
               </table>
               <p className={styles.warn}>
-                {anchored.length} of {seals.length} sealed calls are anchored on chain.{' '}
+                In the latest {seals.length} recorded sealed calls, {anchored.length} are anchored on chain.{' '}
                 {resolved.length === 0
                   ? 'None has reached its resolution window yet, so no call has an outcome.'
                   : `${resolved.length} of them ${resolved.length === 1 ? 'has' : 'have'} reached its resolution window.`}{' '}

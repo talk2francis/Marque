@@ -35,13 +35,25 @@ What it does, in order:
    the other. The guard decodes the embedded v4 from either form and re-checks
    it. This was caught by the redirect test, not by reading the code — it is
    called out because it is exactly the kind of bypass that ships.
-4. **Re-validate after every redirect.** `redirect: 'manual'`; each hop runs the
+4. **Connect to the addresses that were checked, not to the name.** Checking DNS
+   and then calling `fetch()` resolves the host *twice*: an attacker who controls
+   the authoritative server can answer public the first time and `127.0.0.1` the
+   second, and the guard validates an address the socket never uses. The request
+   now carries a `lookup` that returns only the already-validated addresses, so
+   the connection cannot land anywhere the check did not clear. TLS still
+   verifies against the hostname, so pinning the address does not weaken the
+   certificate check.
+5. **Re-validate after every redirect.** `redirect: 'manual'`; each hop runs the
    full check again. A public host that 302s to `169.254.169.254` gets nothing.
-   Max 3 redirects.
-5. **Blocked ports** regardless of address: 22, 23, 25, 445, 3306, 5432, 6379,
+   Max 3 redirects. Request headers are **dropped on a cross-origin hop** so a
+   redirect cannot forward an `authorization` header to a third party, and a
+   `303` (or a `301`/`302` on a `POST`) becomes a bodyless `GET`, as a browser
+   would do. URLs carrying inline credentials (`https://user:pass@host/`) are
+   refused outright.
+6. **Blocked ports** regardless of address: 22, 23, 25, 445, 3306, 5432, 6379,
    9200, 11211, 27017. `http` and `https` schemes only.
-6. **Hard 8s timeout** via `AbortController`.
-7. **512 KB response cap, enforced while streaming.** A `content-length` over the
+7. **Hard 8s timeout** via `AbortController`, covering DNS as well as the socket.
+8. **512 KB response cap, enforced while streaming.** A `content-length` over the
    cap is refused without downloading; a lying `content-length` is caught when
    the stream passes the cap and the reader is cancelled.
 
@@ -129,9 +141,11 @@ One rule, stated three ways because it is the one that would matter to a review:
 
 - **CSP** with `frame-ancestors 'none'`, `object-src 'none'`,
   `upgrade-insecure-requests`; `connect-src` is an explicit allowlist (self, the
-  named BSC RPC hosts, WalletConnect). `script-src`/`style-src` still carry
-  `'unsafe-inline'`/`'unsafe-eval'` — a known Next.js App Router limitation, not
-  yet nonce-based; tracked.
+  named BSC RPC hosts, WalletConnect). **`'unsafe-eval'` has been dropped from
+  `script-src`** — nothing in the production bundle needs it, and leaving it in
+  hands an injected string a way to become code. `script-src`/`style-src` still
+  carry `'unsafe-inline'`, a known Next.js App Router limitation that a nonce
+  would close; not yet done, and tracked rather than glossed.
 - **HSTS**, `Cross-Origin-Opener-Policy`, a tightened `Permissions-Policy`.
 - **Rate limiting** on `/api/v1/*` and the write endpoints.
 - `/api/v1/events` (anonymous telemetry) is **name-allowlisted**, drops any meta
@@ -149,3 +163,38 @@ history, conformance results, run artifacts, seals) are **append-only by
 policy** — there is no code path that deletes one, which also means an attacker
 who got write access could not quietly rewrite a track record without it showing
 in the anchor chain.
+
+---
+
+## 6. Dependency posture
+
+Audited 9 September 2026 (`pnpm audit --prod`), recorded rather than summarised
+away.
+
+**Patched.** Next.js was pinned at `15.1.3`, which predates the August 2026
+security release. The tree is now on **15.5.25** (React 19.2.6): full test suite
+green, lint clean, a route/viewport browser pass, and the standalone server
+exercised on an alternate port against the live database before any switchover.
+The build is verified ahead of the cutover rather than during it — see the
+`MARQUE_BUILD_DIR` path in `scripts/build-web.sh`, which builds a candidate into
+its own directory so the running server's assets are never removed underneath it.
+
+**Present and not patched, with the reasoning stated:**
+
+- **`drizzle-orm` <0.45.2 — SQL injection via improperly escaped identifiers
+  (high).** Marque is on `0.38.x`. The advisory concerns *identifiers* — table
+  and column names interpolated into SQL. Marque never builds an identifier from
+  input: there is no `sql.identifier` call anywhere in the tree, and the single
+  `sql.raw` call site (`packages/probe/src/worker.ts`) interpolates a `case`
+  expression generated from a hard-coded constant array, with no request data on
+  the path. Every other query parameterises its values. The upgrade crosses seven
+  minor versions of the data layer that every worker and page depends on, so it
+  is **deliberately deferred past the judging window** rather than taken
+  unverified. Exposure is believed nil; that belief is the reason, and it is
+  written down so it can be checked rather than trusted.
+- **`postcss`, `ws`, `uuid`, `axios` (moderate/high).** Build-time tooling and
+  transitive wallet-library dependencies, not code paths that serve a request.
+  Tracked for the same post-window upgrade.
+
+The audit JSON behind this section is regenerable with
+`pnpm audit --prod --json`; nothing here is a summary of a summary.

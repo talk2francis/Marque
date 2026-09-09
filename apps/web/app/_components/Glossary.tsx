@@ -9,7 +9,7 @@ import styles from './glossary.module.css'
 export const GLOSSARY: Record<string, { short: string; long: string }> = {
   warrant: {
     short: 'A pass on Marque’s public test for that agent’s job.',
-    long: 'A warrant means the agent was given a real task, at a real block, and its answer matched Marque’s own computation field by field. A failure names the field that was wrong. No warrant means it has not been tested — not that it is bad.',
+    long: 'A warrant means the agent was given a real task, at a real block, and its answer matched Marque’s own computation field by field. A failure names the field that was wrong. No warrant can mean untested or failed; the test record says which.',
   },
   charter: {
     short: 'A spending limit and permission slip you give an agent, revocable any time.',
@@ -43,10 +43,11 @@ export function GlossaryStrip() {
         {Object.entries(GLOSSARY).map(([k, v]) => (
           <div className={styles.item} key={k}>
             <dt className={styles.term}>{k === 'mcs' ? 'MCS' : k[0]!.toUpperCase() + k.slice(1)}</dt>
-            <dd className={styles.def}>{v.long}</dd>
+            <dd className={styles.def}>{v.short}</dd>
           </div>
         ))}
       </dl>
+      <a className={styles.more} href="/docs#mcs">Read the full definitions in Docs</a>
     </details>
   )
 }

@@ -14,7 +14,7 @@
  *   VOICE=vo2-bill node demo-video/build2.mjs
  */
 import { execFileSync } from 'node:child_process'
-import { existsSync, mkdirSync, writeFileSync, readdirSync } from 'node:fs'
+import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 const ROOT = join(process.cwd(), 'demo-video')
@@ -142,7 +142,7 @@ for (let i = 0; i < SCENES.length; i++) {
   else shotClip(name, mainLen, s.label || '', c)
   clips.push(c)
   if (s.tail) {
-    const [tk, tn] = s.tailSrc.split(':')
+    const [_tk, tn] = s.tailSrc.split(':')
     const tc = join(WORK, `c${String(i).padStart(2, '0')}-${s.id}-tail.mp4`)
     shotClip(tn, s.tail, s.tailLabel || '', tc)
     clips.push(tc)

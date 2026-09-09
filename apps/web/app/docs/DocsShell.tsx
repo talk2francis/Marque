@@ -20,7 +20,8 @@ export function DocsShell({ sections, children }: { sections: DocSection[]; chil
   // Initial section from the hash, if valid.
   useEffect(() => {
     const h = window.location.hash.replace('#', '')
-    if (h && sections.some((s) => s.id === h)) setActive(h)
+    if (sections.some((s) => s.id === h)) setActive(h)
+      else if (!h) setActive(sections[0]?.id ?? '')
   }, [sections])
 
   // Show only the active section.
@@ -31,15 +32,15 @@ export function DocsShell({ sections, children }: { sections: DocSection[]; chil
       el.hidden = el.dataset.docSection !== active
     })
     if (!firstRender.current) {
-      history.replaceState(null, '', `#${active}`)
+      // URL history is updated only for explicit navigation, not back/forward events.
       // The content column is its own scroll container on desktop, so reset IT
       // rather than the window — scrolling the window would move nothing and
       // leave the reader halfway down the previous section's scroll position.
       if (root.scrollHeight > root.clientHeight || root.scrollTop > 0) {
-        root.scrollTo({ top: 0, behavior: 'smooth' })
+        root.scrollTo({ top: 0, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' })
       } else {
         const top = root.getBoundingClientRect().top + window.scrollY - 96
-        window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' })
+        window.scrollTo({ top: Math.max(0, top), behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' })
       }
     }
     firstRender.current = false
@@ -49,11 +50,22 @@ export function DocsShell({ sections, children }: { sections: DocSection[]; chil
   useEffect(() => {
     const onHash = () => {
       const h = window.location.hash.replace('#', '')
-      if (h && sections.some((s) => s.id === h)) setActive(h)
+      if (sections.some((s) => s.id === h)) setActive(h)
+      else if (!h) setActive(sections[0]?.id ?? '')
     }
     window.addEventListener('hashchange', onHash)
     return () => window.removeEventListener('hashchange', onHash)
   }, [sections])
+
+  const navigate = (id: string) => {
+    if (id === active) return
+    history.pushState(null, '', `#${id}`)
+    setActive(id)
+    requestAnimationFrame(() => {
+      const heading = contentRef.current?.querySelector<HTMLElement>(`[data-doc-section="${id}"] h2`)
+      heading?.focus({ preventScroll: true })
+    })
+  }
 
   const i = sections.findIndex((s) => s.id === active)
   const prev = i > 0 ? sections[i - 1] : null
@@ -61,6 +73,11 @@ export function DocsShell({ sections, children }: { sections: DocSection[]; chil
 
   return (
     <div className={styles.wrap}>
+      <label className={styles.mobilePicker}>Section
+        <select value={active} onChange={(e) => navigate(e.target.value)}>
+          {sections.map((s) => <option key={s.id} value={s.id}>{s.title}</option>)}
+        </select>
+      </label>
       <nav className={styles.rail} aria-label="Documentation sections">
         <span className={styles.railHead}>Documentation</span>
         <ol className={styles.railList}>
@@ -68,7 +85,7 @@ export function DocsShell({ sections, children }: { sections: DocSection[]; chil
             <li key={s.id}>
               <a
                 href={`#${s.id}`}
-                onClick={(e) => { e.preventDefault(); setActive(s.id) }}
+                onClick={(e) => { e.preventDefault(); navigate(s.id) }}
                 className={active === s.id ? styles.railActive : undefined}
                 aria-current={active === s.id ? 'true' : undefined}
               >
@@ -84,13 +101,13 @@ export function DocsShell({ sections, children }: { sections: DocSection[]; chil
         {children}
         <nav className={styles.pager} aria-label="Section navigation">
           {prev ? (
-            <button type="button" className={styles.pagerPrev} onClick={() => setActive(prev.id)}>
+            <button type="button" className={styles.pagerPrev} onClick={() => navigate(prev.id)}>
               <span className={styles.pagerDir}>Previous</span>
               <span className={styles.pagerTitle}>{prev.title}</span>
             </button>
           ) : <span />}
           {next ? (
-            <button type="button" className={styles.pagerNext} onClick={() => setActive(next.id)}>
+            <button type="button" className={styles.pagerNext} onClick={() => navigate(next.id)}>
               <span className={styles.pagerDir}>Next</span>
               <span className={styles.pagerTitle}>{next.title}</span>
             </button>

@@ -93,7 +93,7 @@ const run = async () => {
       recordVideo: { dir: OUT, size: { width: 2560, height: 1440 } },
     })
     const page = await ctx.newPage()
-    await page.addInitScript(() => { try { localStorage.setItem('marque-theme', 'dark') } catch {} })
+    await page.addInitScript(() => { try { localStorage.setItem('marque-theme', 'dark') } catch { /* Storage is unavailable in some capture contexts. */ } })
     console.log(`▶ ${slug}`)
     try { await fn(page) } catch (e) { console.log(`  ! ${e.message.split('\n')[0]}`) }
     await ctx.close()
