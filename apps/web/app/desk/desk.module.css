@@ -87,6 +87,10 @@
 }
 .facts dt { color: var(--fg-soft); font-size: var(--size-caption); margin: 0; }
 .facts dd { margin: 0; min-width: 0; }
+/* A holding or fee line can be a junk-token balance 30 digits long. DataCell is
+   white-space:nowrap for tabular alignment; here it must wrap inside its column
+   instead of forcing the Desk — and the page — wider than the viewport. */
+.facts dd :global(.data) { white-space: normal; overflow-wrap: anywhere; }
 
 .summary {
   margin: 0;

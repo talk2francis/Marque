@@ -17,7 +17,15 @@
 import { chromium } from 'playwright'
 
 const BASE = process.argv[2] ?? 'http://127.0.0.1:3299'
-const ROUTES = ['/', '/judge', '/ledger', '/ledger/methodology', '/register', '/docs', '/standard', '/pancakeswap', '/positions']
+// An address with real first-party history — charters, hires, receipts, seals —
+// so the profile renders populated sections rather than only empty states.
+const ACTIVE_ADDR = '0x60AA3AEE06E2345A17E4d4B12c53E046F4F63CAf'
+const DEAD_ADDR = '0x000000000000000000000000000000000000dEaD'
+const ROUTES = [
+  '/', '/judge', '/ledger', '/ledger/methodology', '/register', '/docs', '/standard',
+  '/pancakeswap', '/positions',
+  '/me', `/me?addr=${ACTIVE_ADDR}`, `/me?addr=${DEAD_ADDR}`,
+]
 const browser = await chromium.launch()
 let failures = 0
 
@@ -68,6 +76,35 @@ const body = await page.evaluate(() => document.body.innerText)
 console.log('\n--- Ledger completion language ---')
 for (const line of body.split('\n')) {
   if (/missing|outstanding|grading|matching task|verifiable chain block|repetition/i.test(line)) console.log('  ' + line.trim())
+}
+
+// The profile is a projection over first-party tables. Exercise the API end to
+// end for a populated address, a wallet-free empty address, and a bad one, and
+// check the page actually renders the populated sections.
+{
+  const good = await fetch(`${BASE}/api/v1/profile/${ACTIVE_ADDR}`).then((r) => r.json()).catch((e) => ({ error: String(e) }))
+  const shapeOk = good && good.charters && good.hires && good.receipts && good.seals && Array.isArray(good.activity)
+  const populated = shapeOk && (good.hires.all.length > 0 || good.charters.all.length > 0 || good.seals.all.length > 0)
+  console.log(shapeOk
+    ? `\nok   /api/v1/profile — shape valid, ${good.hires.all.length} hires / ${good.charters.all.length} charters / ${good.seals.all.length} seals / ${good.activity.length} activity`
+    : `\nFAIL /api/v1/profile shape: ${JSON.stringify(good).slice(0, 200)}`)
+  if (!shapeOk || !populated) failures++
+
+  const bad = await fetch(`${BASE}/api/v1/profile/not-an-address`).then((r) => r.status).catch(() => 0)
+  console.log(bad === 400 ? 'ok   /api/v1/profile rejects a bad address (400)' : `FAIL bad address returned ${bad}`)
+  if (bad !== 400) failures++
+
+  const page = await browser.newPage({ viewport: { width: 1280, height: 900 } })
+  await page.goto(`${BASE}/me?addr=${ACTIVE_ADDR}`, { waitUntil: 'networkidle' })
+  await page.waitForTimeout(3500)
+  const text = await page.evaluate(() => document.body.innerText)
+  const hasSections = /At a glance|Positions/i.test(text) && /Hires|Sealed calls|Activity/i.test(text)
+  const hasActivity = /ago\b/.test(text)
+  console.log(hasSections && hasActivity
+    ? 'ok   /me?addr= renders populated dashboard (sections + dated activity)'
+    : `FAIL /me?addr= dashboard incomplete (sections=${hasSections} activity=${hasActivity})`)
+  if (!(hasSections && hasActivity)) failures++
+  await page.close()
 }
 
 // The wallet path: its bundle loads on click, so a page load alone proves

@@ -18,16 +18,17 @@ type Active =
   | 'charters' | 'standard' | 'ledger' | 'pancake' | 'status' | 'me'
 
 /**
- * Six links were one too many and read as a pile of integrations. The primary
- * nav is now the buyer's path only — find an agent, read a position, the
- * PancakeSwap desk, the evidence that any of it works. Builders (test / list an
- * agent) and the deeper proof pages live in the footer, one click from anywhere.
+ * The primary nav is the buyer's path: find an agent, read a position, the
+ * PancakeSwap desk, your own dashboard, the evidence that any of it works.
+ * Builders (test / list an agent) and the deeper proof pages live in the
+ * footer, one click from anywhere.
  */
 const NAV: Array<{ label: string; href: string; key: Active }> = [
   { label: 'Marketplace', href: '/register', key: 'register' },
   { label: 'Positions', href: '/positions', key: 'positions' },
   { label: 'Pancake Desk', href: '/pancakeswap', key: 'pancake' },
   { label: 'Benchmarks', href: '/ledger', key: 'benchmarks' },
+  { label: 'My Marque', href: '/me', key: 'me' },
   { label: 'Docs', href: '/docs', key: 'docs' },
 ]
 

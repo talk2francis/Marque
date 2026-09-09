@@ -97,7 +97,12 @@ export interface CharterView {
   blockNumber: string | null
 }
 
-function viewFromRow(row: typeof charterTable.$inferSelect, live?: CharterState): CharterView {
+/**
+ * Row -> view, without a chain call. Exported so the profile aggregate can
+ * reuse the exact same shaping the charter pages use, rather than re-deriving
+ * spend and expiry and drifting out of agreement with them.
+ */
+export function viewFromRow(row: typeof charterTable.$inferSelect, live?: CharterState): CharterView {
   const grant: CharterGrant = deserialiseGrant(row.policy)
   const spent = row.spent ?? {}
   const now = Date.now()

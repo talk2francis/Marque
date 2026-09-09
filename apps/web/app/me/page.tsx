@@ -1,5 +1,5 @@
 import { SiteHeader, SiteFooter } from '../_components/SiteHeader'
-import { MyMarque } from './MyMarque'
+import { Profile } from './Profile'
 import styles from './me.module.css'
 
 export const dynamic = 'force-dynamic'
@@ -7,22 +7,26 @@ export const revalidate = 0
 export const metadata = {
   title: 'My Marque',
   description:
-    'Connect a wallet to read your live positions and see the agents warranted to act on them, in one place. Nothing is signed until you grant a charter.',
+    'One place for an address: live positions, every charter granted, every agent hired and the receipt it left, and the recommendations sealed before their outcome. Connect a wallet, or pass ?addr= for any address. Nothing is stored.',
 }
 
 /**
- * "My Marque" — the one place a connected buyer sees their own positions and
- * what they can do about them. Deliberately thin: it reads the connected
- * address from chain (exactly what /positions does for a pasted address) and
- * points at the warranted agents for the position types actually held. No
- * account, no stored profile, no PII — the wallet is the identity.
+ * "My Marque" — the profile.
+ *
+ * Connected, it is the buyer's own dashboard. With ?addr= it is any address,
+ * shareable and wallet-free, exactly like /positions. Either way it is a
+ * projection of records already keyed by that address plus a live chain read —
+ * no account, no stored profile, no PII. The wallet is the identity.
  */
-export default function MePage() {
+export default async function MePage({ searchParams }: { searchParams: Promise<{ addr?: string }> }) {
+  const { addr } = await searchParams
+  const addrParam = addr && /^0x[a-fA-F0-9]{40}$/.test(addr) ? addr : null
+
   return (
     <>
       <SiteHeader active="me" />
       <main className={styles.page}>
-        <MyMarque />
+        <Profile addrParam={addrParam} />
       </main>
       <SiteFooter />
     </>

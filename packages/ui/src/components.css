@@ -286,13 +286,17 @@ a.row:hover, button.row:hover { background: color-mix(in srgb, var(--ground-rais
 }
 .measure__labels {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  /* minmax(0, …), not bare auto: a bound label of a pathological width (a V3
+     range on a junk token can be a 30-digit number) must be allowed to shrink
+     and wrap inside its column rather than force the grid — and the document —
+     wider than the viewport. */
+  grid-template-columns: minmax(0, auto) minmax(0, 1fr) minmax(0, auto);
   align-items: baseline;
   gap: var(--s3);
   font-size: var(--size-caption);
   color: var(--fg-soft);
 }
-.measure__bound { font-size: var(--size-caption); color: var(--fg-soft); white-space: nowrap; }
+.measure__bound { font-size: var(--size-caption); color: var(--fg-soft); min-width: 0; overflow-wrap: anywhere; }
 .measure__readout {
   display: inline-flex;
   gap: var(--s2);

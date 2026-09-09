@@ -56,7 +56,8 @@ export default async function PositionsPage({ searchParams }: { searchParams: Pr
         <p className={styles.note}>
           Found a position that needs work? The <a href="/register">marketplace</a> ranks the agents
           that can act on it, and the <a href="/pancakeswap">Pancake Desk</a> is the deep view for
-          concentrated liquidity.
+          concentrated liquidity. For everything Marque has on this address — charters, hires,
+          receipts, sealed calls — see <a href={`/me?addr=${address}`}>its full profile</a>.
         </p>
       </main>
       <SiteFooter />

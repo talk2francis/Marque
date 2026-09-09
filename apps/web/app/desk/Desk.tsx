@@ -72,7 +72,17 @@ function useAge(readAt: string | undefined) {
   return age
 }
 
-export function Desk({ initialAddress }: { initialAddress: string }) {
+export function Desk({
+  initialAddress,
+  onData,
+  showAddressForm = true,
+}: {
+  initialAddress: string
+  /** Observe each successful positions read, so a parent need not fetch it again. */
+  onData?: (data: PositionsResponse) => void
+  /** The profile drives the address itself; hide the paste box there. */
+  showAddressForm?: boolean
+}) {
   const [address, setAddress] = useState(initialAddress)
   const [input, setInput] = useState('')
   const [data, setData] = useState<PositionsResponse | null>(null)
@@ -92,6 +102,7 @@ export function Desk({ initialAddress }: { initialAddress: string }) {
       } else {
         setData(json)
         setAddress(addr)
+        onData?.(json)
       }
     } catch {
       setError('Could not reach the chain reader. Nothing is shown rather than something stale.')
@@ -99,7 +110,7 @@ export function Desk({ initialAddress }: { initialAddress: string }) {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [onData])
 
   useEffect(() => { void load(initialAddress) }, [initialAddress, load])
 
@@ -125,21 +136,24 @@ export function Desk({ initialAddress }: { initialAddress: string }) {
 
   return (
     <div className={styles.desk}>
-      <form className={styles.form} onSubmit={submit}>
-        <label className={styles.srOnly} htmlFor="desk-address">BNB Smart Chain address</label>
-        <input
-          id="desk-address"
-          className={styles.input}
-          placeholder="0x… any BNB Smart Chain address"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          spellCheck={false}
-          autoComplete="off"
-        />
-        <Button type="submit" variant="primary">Read chain</Button>
-      </form>
-
-      <p className={styles.noWallet}>No wallet needed. Nothing is connected and nothing is signed.</p>
+      {showAddressForm && (
+        <>
+          <form className={styles.form} onSubmit={submit}>
+            <label className={styles.srOnly} htmlFor="desk-address">BNB Smart Chain address</label>
+            <input
+              id="desk-address"
+              className={styles.input}
+              placeholder="0x… any BNB Smart Chain address"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              spellCheck={false}
+              autoComplete="off"
+            />
+            <Button type="submit" variant="primary">Read chain</Button>
+          </form>
+          <p className={styles.noWallet}>No wallet needed. Nothing is connected and nothing is signed.</p>
+        </>
+      )}
 
       <div className={styles.head}>
         <span className="mono">{shortAddress(address)}</span>
