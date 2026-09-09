@@ -11,13 +11,17 @@
  * refuses on null. A silent default is worse than a refusal.
  */
 
-const NUMBER = String.raw`(\d+(?:\.\d+)?)`
+// Allows a thousands separator INSIDE the run of digits: "1,000" reads as 1000,
+// but a trailing "," (a list or a sentence) is not swallowed. Still never
+// `[\d.]+` — a trailing sentence period must not parse as ".", which once
+// turned "restore it to 1.6." into NaN and then a silent default.
+const NUMBER = String.raw`(\d[\d,]*(?:\.\d+)?)`
 
 export function num(text: string, ...patterns: string[]): number | null {
   for (const p of patterns) {
     const m = text.match(new RegExp(p.replace('%N%', NUMBER), 'i'))
     if (m?.[1] !== undefined) {
-      const v = Number(m[1])
+      const v = Number(m[1].replace(/,/g, ''))
       if (Number.isFinite(v)) return v
     }
   }

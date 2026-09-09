@@ -60,7 +60,7 @@ interface YieldAsk {
   currentAprPct: number
 }
 
-function parseAsk(prompt: string): YieldAsk | { missing: string[] } {
+export function parseAsk(prompt: string): YieldAsk | { missing: string[] } {
   const sizeUsd = num(prompt, String.raw`size\s+%N%\s*USD`, String.raw`%N%\s*USD of`, String.raw`for\s+%N%\s*USD`)
   const minImprovementBps = num(
     prompt,
@@ -71,6 +71,11 @@ function parseAsk(prompt: string): YieldAsk | { missing: string[] } {
   const currentAprPct = num(
     prompt,
     String.raw`currently earning\s+%N%\s*%`,
+    // "the holder currently earns 0% APR" — the registered ADV-03 phrasing. The
+    // pattern above only caught the gerund; a stated current APR of any wording
+    // is a fact the task gave us, not one to refuse over.
+    String.raw`currently earns?\s+%N%\s*%`,
+    String.raw`earns?\s+%N%\s*%\s*APR`,
     String.raw`current\s+%N%\s*%`,
     String.raw`beating the current\s+%N%\s*%`,
   )
