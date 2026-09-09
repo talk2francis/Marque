@@ -1,0 +1,43 @@
+Let me look at the repo and the live site before I write anything.I read the repo. The README is genuinely excellent — better than most funded seed companies ship. Three things before the film.Full critique, script and phase pack above. Four things first, because two of them affect the film.
+
+## Product notes
+
+**The site still blocks automated clients.** I was refused at the robots layer on every path, including `https://marque.trade/api/v1/funnel` — the endpoint your README advertises as *"Everything the site renders, as JSON, no key."* An agent marketplace advertising a keyless machine-readable API that a machine cannot reach is the most ironic bug this product could ship, and a technical judge hits it in ten seconds. P10.5A item 5 did not land. Three curl commands to diagnose are in Part 0.1.
+
+**All five reference agents are on testnet 97.** Eligibility says agents must be "live on BSC." You index mainnet third-party agents so you're not in breach, but the homepage stat bar says **4 Warranted** and all four are testnet first-party. Registration is gas-sponsored on both networks — putting the five identities on mainnet 56 is maybe thirty minutes and removes the question. My script doesn't say "four warranted" anyway, for exactly this reason.
+
+**Your GitHub repo description is the word "later."** It's in the About panel and in every OG preview when the link is shared.
+
+**The Ledger's human arms are still incomplete** — the README says so and the screenshots show `unscored — blind scoring needs both arms`. That's 30% of TermiX. Also: publish the hourly rate behind `$41.72`. An unexplained figure to the cent looks derived; a stated rate looks measured.
+
+## Why the baseline film is mediocre
+
+The evidence discipline in that document is genuinely excellent and I'd keep all of it. The craft is not. The short version:
+
+It **mistakes rigour for craft** — count what it measures (LUFS, sample counts, colour matrices) against what it says about why a viewer would care; the ratio is about forty to one. And it admits it: *"No human listening test was performed."*
+
+The **voice was chosen without listening.** Kokoro `bm_george`, a small local model, selected on availability. The document concedes the alternatives got sample files but no comparative test. The narrator is the largest single quality variable in a narrated film and it was picked by default.
+
+The **pacing method is inverted.** Copy was written, measured, then time-stretched up to 1.14× to fit a fixed scene grid. Every downstream problem — the 0.235s-per-segment shortfall accumulating to 146.7 seconds, the sample-padding fix, the caption drift — is a symptom of fitting the performance to the container instead of cutting picture to the voice.
+
+The **resolution chain destroys the argument.** Captured at 1600×720, delivered at 1080p, pushed to 1.34×. That's a 1600px source shown at roughly 2.6× on every emphasis shot. For a product whose pitch is *readable evidence*, soft text on every zoom is the film contradicting itself.
+
+And there is **no sound design layer at all** — the document says so outright. No transitions, no UI ticks, no impact on the seal. That absence separates amateur from professional more reliably than the music does.
+
+## Where I disagreed with you
+
+**Epic orchestra, partly.** A full trailer bed under this product sounds like a token launch, and Marque's voice is *measured, not asserted* — bombast argues against the narrator. What I've specced instead earns its scale: sub-bass and one piano note in the cold open, sparse ostinato through the working section, low brass under the Charter, and the full swell held back until the mainnet proof at 2:21, where it lands as a payoff.
+
+**And the device nobody uses: 1.5 seconds of total silence at the word "zero."** Every other submission will have wall-to-wall music. Yours stops dead on the most important number in the product. That will make the film feel more expensive than anything else in the document and it's free.
+
+**Film the light theme.** Your screenshots are all dark, which collapses *light for looking, dark for doing* into nothing. In the film, everything is daylight and the screen dims to the cockpit exactly once — at the Charter. One transition, and it becomes the most memorable frame you have.
+
+## The spine
+
+I built the film around the number nobody else can show:
+
+> **163 conformance runs against third-party agents on BNB Smart Chain. Zero passes.**
+
+Not a feature tour. One question asked at 0:04 — *how many of these 298,817 agents can actually do the job* — and a measured, uncomfortable, verifiable answer. It also sidesteps the testnet problem entirely and turns your thinnest-looking stat into the strongest thing in the product.
+
+Full VO script, shot list, and phases V0 through V8 are in the file. The two gates I'd hold hardest: **audition three voices and let Francis pick by listening** — that's the mistake the baseline made and it's worth twenty dollars to avoid — and **truth-freeze every number into `FACTS.json` before a single frame is captured**, rewriting any line whose figure has moved.
