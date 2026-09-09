@@ -52,6 +52,21 @@ export interface BenchmarkManifest {
   agent_id: string | null
   /** Block both arms answered for. */
   block: string
+  /**
+   * The canonical hash of `block`, when it was captured. A manifest that says
+   * only "block 120…" is weaker than one that also names the block hash: the
+   * hash proves which fork, and a replay can assert it read the same one.
+   */
+  block_hash?: string | null
+  /**
+   * The block the engine reports it actually read, when the run captured it.
+   * For a historical replay this MUST equal `block`, or the repetition is
+   * invalid — an agent that answered a different block than the one asked for
+   * has not produced a comparable result.
+   */
+  observed_block?: string | null
+  /** Where historical state came from: 'public' recent window, or 'archive'. */
+  state_source?: 'public' | 'archive' | null
   /** ERC-8183 job id, when the arm was hired through the commerce rail. */
   job_id: string | null
   tx_hashes: string[]

@@ -36,7 +36,7 @@
   height: 28px;
 }
 .lockInk, .lockCream {
-  height: 26px;
+  height: 23px;
   width: auto;
   display: block;
   transition: opacity var(--dur) var(--ease);
@@ -54,28 +54,34 @@
 .navLinks {
   justify-self: center;
   display: flex;
-  gap: 2px;
+  align-items: center;
+  gap: 1px;
   overflow-x: auto;
+  overflow-y: visible;
   scrollbar-width: none;
   max-width: 100%;
 }
 .navLinks::-webkit-scrollbar { display: none; }
-.navLinks a {
+.navLinks a,
+.navGroupBtn {
   position: relative;
   color: var(--fg-soft);
   text-decoration: none;
-  font-size: var(--size-control);
+  font-size: 13.5px;
   display: inline-flex;
   align-items: center;
   min-height: 40px;
-  padding: 0 var(--s3);
+  padding: 0 10px;
   border-radius: var(--r-sm);
   white-space: nowrap;
   transition: color var(--dur-fast) var(--ease), background-color var(--dur-fast) var(--ease);
 }
-.navLinks a:hover { color: var(--fg); background: color-mix(in srgb, var(--fg) 5%, transparent); }
-.navLinks a[aria-current='page'] { color: var(--fg); }
-.navLinks a[aria-current='page']::after {
+.navLinks a:hover,
+.navGroupBtn:hover { color: var(--fg); background: color-mix(in srgb, var(--fg) 5%, transparent); }
+.navLinks a[aria-current='page'],
+.navGroupBtn[aria-current='page'] { color: var(--fg); }
+.navLinks a[aria-current='page']::after,
+.navGroupBtn[aria-current='page']::after {
   content: '';
   position: absolute;
   left: 50%;
@@ -86,6 +92,62 @@
   background: var(--brass);
   border-radius: var(--r-pill);
 }
+
+/* ---- Nav dropdown groups ---- */
+.navGroup { position: relative; display: inline-flex; }
+.navGroupBtn {
+  background: none;
+  border: 0;
+  font-family: inherit;
+  font-weight: inherit;
+  cursor: pointer;
+  gap: 5px;
+}
+.navCaret {
+  width: 0;
+  height: 0;
+  border-left: 3.5px solid transparent;
+  border-right: 3.5px solid transparent;
+  border-top: 4px solid currentColor;
+  opacity: 0.55;
+  transition: transform var(--dur-fast) var(--ease);
+}
+.navGroupBtn[aria-expanded='true'] .navCaret { transform: rotate(180deg); }
+.navGroupBtn[aria-expanded='true'] { color: var(--fg); background: color-mix(in srgb, var(--fg) 5%, transparent); }
+
+.navMenu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 50%;
+  transform: translateX(-50%);
+  min-width: 190px;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  background: var(--ground-raised);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  box-shadow: var(--elev-2);
+  z-index: 60;
+  animation: navMenuIn 120ms var(--ease) both;
+}
+@keyframes navMenuIn { from { opacity: 0; transform: translate(-50%, -4px); } to { opacity: 1; transform: translate(-50%, 0); } }
+.navMenuItem {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 36px;
+  padding: 0 10px;
+  border-radius: var(--r-sm);
+  font-size: 13.5px;
+  color: var(--fg-soft);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.navMenuItem:hover { color: var(--fg); background: color-mix(in srgb, var(--fg) 6%, transparent); }
+.navMenuExt { color: var(--fg-faint); }
+@media (prefers-reduced-motion: reduce) { .navMenu { animation: none; } .navCaret { transition: none; } }
 
 .navRight { justify-self: end; display: inline-flex; align-items: center; gap: var(--s2); }
 .navAddr { font-family: var(--font-mono); font-size: var(--size-caption); color: var(--fg-soft); }
@@ -129,7 +191,17 @@
   }
   .brand { grid-area: brand; }
   .navRight { grid-area: right; }
-  .navLinks { grid-area: links; justify-self: stretch; }
+  .navLinks {
+    grid-area: links;
+    justify-self: stretch;
+    /* Its own row here, so it can wrap instead of scroll — which keeps the
+       dropdown menus from being clipped by an overflow container. */
+    flex-wrap: wrap;
+    overflow: visible;
+    row-gap: 2px;
+  }
+  .navMenu { left: 0; transform: none; }
+  @keyframes navMenuIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
 }
 @media (max-width: 520px) {
   .navInner { padding-inline: var(--s4); }

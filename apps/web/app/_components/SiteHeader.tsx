@@ -1,6 +1,7 @@
 import { BRAND } from '@marque/ui/brand'
 import { CharterStrip } from './CharterStrip'
 import { NavWallet } from './NavWallet'
+import { NavMenu, type NavMenuItem } from './NavMenu'
 import { ThemeToggle } from './ThemeToggle'
 import styles from './site.module.css'
 
@@ -18,18 +19,34 @@ type Active =
   | 'charters' | 'standard' | 'ledger' | 'pancake' | 'status' | 'me'
 
 /**
- * The primary nav is the buyer's path: find an agent, read a position, the
- * PancakeSwap desk, your own dashboard, the evidence that any of it works.
- * Builders (test / list an agent) and the deeper proof pages live in the
- * footer, one click from anywhere.
+ * The primary nav is the buyer's path — find an agent, read a position, your
+ * own dashboard — kept to a handful of labels. The deeper routes that used to
+ * be footer-only (the proof run, receipts, status, the builder pages, the read
+ * API) now hang off three small menus so they are one click from anywhere
+ * without crowding the bar.
  */
 const NAV: Array<{ label: string; href: string; key: Active }> = [
   { label: 'Marketplace', href: '/register', key: 'register' },
   { label: 'Positions', href: '/positions', key: 'positions' },
-  { label: 'Pancake Desk', href: '/pancakeswap', key: 'pancake' },
-  { label: 'Benchmarks', href: '/ledger', key: 'benchmarks' },
   { label: 'My Marque', href: '/me', key: 'me' },
-  { label: 'Docs', href: '/docs', key: 'docs' },
+]
+
+const PANCAKE_MENU: NavMenuItem[] = [
+  { label: 'Pancake Desk', href: '/pancakeswap' },
+  { label: 'PancakeSwap proof run', href: '/pancakeswap/proof' },
+]
+const PROOF_MENU: NavMenuItem[] = [
+  { label: 'The Ledger', href: '/ledger' },
+  { label: 'The Standard', href: '/standard' },
+  { label: 'Receipts', href: '/receipts/latest' },
+  { label: 'Status', href: '/status' },
+]
+const BUILD_MENU: NavMenuItem[] = [
+  { label: 'Docs', href: '/docs' },
+  { label: 'Test your agent', href: '/builders/test' },
+  { label: 'List your agent', href: '/builders/claim' },
+  { label: 'Read API', href: '/api/v1/agents', external: true },
+  { label: 'GitHub', href: 'https://github.com/talk2francis/Marque', external: true },
 ]
 
 function BrandLockup() {
@@ -55,15 +72,22 @@ export function SiteHeader({ active }: { active?: Active }) {
               <a
                 key={n.key}
                 href={n.href}
-                aria-current={
-                  active === n.key || (n.key === 'benchmarks' && active === 'ledger')
-                    ? 'page'
-                    : undefined
-                }
+                aria-current={active === n.key ? 'page' : undefined}
               >
                 {n.label}
               </a>
             ))}
+            <NavMenu
+              label="Pancake"
+              items={PANCAKE_MENU}
+              active={active === 'pancake'}
+            />
+            <NavMenu
+              label="Benchmarks"
+              items={PROOF_MENU}
+              active={active === 'benchmarks' || active === 'ledger' || active === 'standard' || active === 'status'}
+            />
+            <NavMenu label="Docs" items={BUILD_MENU} active={active === 'docs' || active === 'builders'} />
           </nav>
           <div className={styles.navRight}>
             <ThemeToggle />

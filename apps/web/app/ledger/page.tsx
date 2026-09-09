@@ -61,6 +61,10 @@ function Benchmark({ b }: { b: LedgerBenchmark }) {
   const agent = b.runs.filter((r) => r.arm === 'agent')
   const manual = b.runs.filter((r) => r.arm === 'manual')
 
+  const isReplay = (b.agentBatch ?? '').startsWith('replay-')
+  const pinnedBlock = b.runs.map((r) => r.effectiveBlock).find((x) => /^[1-9]\d*$/.test(x))
+  const recovered = b.runs.some((r) => r.blockProvenance !== null)
+
   return (
     <article className={styles.bench}>
       <div className={styles.benchHead}>
@@ -79,6 +83,17 @@ function Benchmark({ b }: { b: LedgerBenchmark }) {
         {new Date(b.rubricRegisteredAt).toISOString().slice(0, 16).replace('T', ' ')}Z — before
         either arm ran.
       </p>
+
+      {(isReplay || recovered) && pinnedBlock && (
+        <p className={styles.note}>
+          <Chip tone="chain">
+            {isReplay ? 'Historical replay' : 'Same pinned block'} · BSC block {Number(pinnedBlock).toLocaleString('en-US')}
+          </Chip>{' '}
+          {isReplay
+            ? 'The human runs are the original observations. The agent arm was executed later against that exact immutable BSC state using historical (archive) RPC access.'
+            : 'The manual runs recorded no block; it was recovered from the benchmark task frozen before either arm ran. The raw rows are unchanged.'}
+        </p>
+      )}
 
       {(() => {
         const h = armStats(manual)

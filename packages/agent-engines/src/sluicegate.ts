@@ -1,6 +1,7 @@
 import { yieldReader, netAprAtSize } from '@marque/positions'
 import { publicClient } from '@marque/chain'
-import { blockNumber, listAfter, num, readableBlock } from './parse.js'
+import { listAfter, num } from './parse.js'
+import { historicalContext, isRefusal } from './historical.js'
 import { refuse, within, type Engine, type EngineAnswer, type EngineMeta } from './types.js'
 
 /**
@@ -112,9 +113,11 @@ export const sluicegateEngine: Engine = {
 
     try {
       const head = await within(publicClient().getBlockNumber(), 3_000, 'BNB Smart Chain')
-      const readAt = readableBlock(blockNumber(prompt), head)
+      const ctx = historicalContext(prompt, head)
+      if (isRefusal(ctx)) return ctx
+      const { client, readAt } = ctx
       const read = await within(
-        yieldReader({ ...(readAt === undefined ? {} : { blockNumber: readAt }), maxMarkets: 30 }),
+        yieldReader({ client, ...(readAt === undefined ? {} : { blockNumber: readAt }), maxMarkets: 30 }),
         deadline,
         'the Venus markets',
       )

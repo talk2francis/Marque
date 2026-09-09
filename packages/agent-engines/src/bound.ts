@@ -5,7 +5,8 @@ import {
   BSC_ADDRESSES, nonfungiblePositionManagerAbi,
 } from '@marque/positions'
 import { publicClient } from '@marque/chain'
-import { address, blockNumber, num, positionTokenId, readableBlock } from './parse.js'
+import { address, num, positionTokenId } from './parse.js'
+import { historicalContext, isRefusal } from './historical.js'
 import { refuse, within, type Engine, type EngineAnswer, type EngineMeta } from './types.js'
 
 /**
@@ -80,9 +81,13 @@ export const boundEngine: Engine = {
     const maxSlippageBps = num(prompt, String.raw`%N%\s*bps`, String.raw`slippage[^0-9]{0,20}%N%`)
 
     try {
-      const client = publicClient()
-      const head = await within(client.getBlockNumber(), 3_000, 'BNB Smart Chain')
-      const readAt = readableBlock(blockNumber(prompt), head)
+      const head = await within(publicClient().getBlockNumber(), 3_000, 'BNB Smart Chain')
+      const ctx = historicalContext(prompt, head)
+      if (isRefusal(ctx)) return ctx
+      // A pinned historical block reads off the archive client; owner, position
+      // and pool state are all resolved at the SAME block via this one client —
+      // never owner-at-history + pool-at-head.
+      const { client, readAt } = ctx
 
       /*
        * Resolve the OWNER from the position id, not from the first 0x in the
@@ -119,7 +124,7 @@ export const boundEngine: Engine = {
       }
 
       const read = await within(
-        pancakeV3Reader(owner, readAt === undefined ? {} : { blockNumber: readAt }),
+        pancakeV3Reader(owner, { client, ...(readAt === undefined ? {} : { blockNumber: readAt }) }),
         deadline,
         'the PancakeSwap V3 position manager',
       )

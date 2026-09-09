@@ -1331,3 +1331,46 @@ reference merge) took most of it.
   charter / seal / receipt-anchor flow stays on testnet 97 on purpose (the
   mechanism is chain-agnostic and a testnet seal is free to reproduce; the one
   thing that had to be mainnet, a real rebalance, already is — the proof run).
+
+### D8b-02 · Agent Advantage comparisons repaired to same-block evidence
+
+- **Was** — the four Ledger benchmarks (ADV-01..04) each had two graded human
+  repetitions but no valid same-block agent pair. The human runs recorded
+  `block_number = 0` (an intake gap); several early agent batches answered an
+  earlier task revision at whatever block was current. The runner chose a fresh
+  head *inside* each repetition and re-registered the frozen benchmark per rep,
+  so a sitting was not one chain-state reference. Engines silently fell back to
+  reading head when a pinned block was outside the ~60-block public window
+  (`readableBlock(...) ?? head`).
+- **Now**
+  - Runner resolves block + block hash + frozen task **once per sitting**;
+    repetitions never re-register the benchmark. New `runComparisonReplay` loads
+    the frozen row and replays the agent arm at the block the task pins, on a
+    `replay-` batch (publishable, unlike a `repro-` reproduction).
+  - `resolveBlock` (replacing `readableBlock`) returns an explicit
+    `latest | pinned | unavailable`; every engine returns
+    `HISTORICAL_STATE_UNAVAILABLE` on `unavailable` and never reads head as a
+    substitute. Historical reads go through `BSC_ARCHIVE_RPC_URL` (QuickNode
+    BSC archive, server-side only — the URL is the credential and is never
+    committed, logged or exposed client-side).
+  - Append-only `benchmark_run_provenance` records the block recovered from the
+    immutable frozen task for the eight `block_number = 0` human runs. The raw
+    rows are unchanged; `/ledger` shows `not recorded → effective 120…` with the
+    source task hash. Migration `0011_even_synch.sql` (additive; the
+    `product_event` re-emit drizzle-kit generates is stripped because 0010
+    shipped without a snapshot).
+  - The four screen recordings are attached to both repetitions of each sitting.
+  - `comparisonMissing` consumes the effective block but is not weakened: still
+    2 graded reps per arm, matching hashes, a verifiable block per run, one
+    pinned block across the sitting.
+  - `scripts/ledger-grade.mjs` now grades only the published sitting of each arm
+    (latest non-`repro-` batch), never a pool of every batch; INVALID
+    wrong-block replays are excluded.
+- **Why** — the comparisons can be made genuinely same-task, same-block because
+  the block was always derivable from the frozen task the human runs' hashes
+  match. This is recovery, not fabrication: no historical output, timing, score
+  or hash was changed. Francis approved Phase A (provenance) and Phase B
+  (archive replay), read-only mainnet.
+- **Kept** — every earlier batch and every `repro-` run stays in the database as
+  history. A benchmark that still cannot be made valid is left incomplete with
+  its specific blocker, not forced green.

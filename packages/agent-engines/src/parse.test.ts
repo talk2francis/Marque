@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   address, addresses, blockNumber, boolFlag, listAfter, num,
-  positionTokenId, readableBlock,
+  positionTokenId, resolveBlock,
 } from './parse.js'
 
 /**
@@ -155,28 +155,34 @@ describe('listAfter', () => {
   })
 })
 
-describe('readableBlock', () => {
+describe('resolveBlock', () => {
   const head = 120076122n
 
-  it('passes through a block still in state', () => {
-    expect(readableBlock(head - 10n, head)).toBe(head - 10n)
+  it('reads head when no block was pinned', () => {
+    expect(resolveBlock(null, head)).toEqual({ mode: 'latest' })
   })
 
-  it('accepts the boundary at 60 blocks behind head', () => {
-    expect(readableBlock(head - 60n, head)).toBe(head - 60n)
+  it('pins a recent block off the public nodes', () => {
+    expect(resolveBlock(head - 10n, head)).toEqual({ mode: 'pinned', block: head - 10n, source: 'public' })
   })
 
-  // BSC public nodes keep ~64 blocks. Answering for a different block than the
-  // one asked for, without saying so, is the quiet version of making it up.
-  it('refuses a block that has fallen out of state', () => {
-    expect(readableBlock(head - 61n, head)).toBeUndefined()
+  it('accepts the boundary at 60 blocks behind head as public', () => {
+    expect(resolveBlock(head - 60n, head)).toEqual({ mode: 'pinned', block: head - 60n, source: 'public' })
   })
 
-  it('returns undefined when no block was requested, meaning "use head"', () => {
-    expect(readableBlock(null, head)).toBeUndefined()
+  // The old readableBlock returned `undefined` here AND for a null request —
+  // the same value meaning two different things. An engine then read head and
+  // called it a success. This is now an explicit, un-ignorable state.
+  it('marks an out-of-window block UNAVAILABLE when there is no archive', () => {
+    expect(resolveBlock(head - 61n, head)).toEqual({ mode: 'unavailable', requested: head - 61n })
+  })
+
+  it('pins an out-of-window block to the archive when one is configured', () => {
+    expect(resolveBlock(head - 500_000n, head, { archiveAvailable: true }))
+      .toEqual({ mode: 'pinned', block: head - 500_000n, source: 'archive' })
   })
 
   it('does not choke on a requested block ahead of head', () => {
-    expect(readableBlock(head + 5n, head)).toBe(head + 5n)
+    expect(resolveBlock(head + 5n, head)).toEqual({ mode: 'pinned', block: head + 5n, source: 'public' })
   })
 })

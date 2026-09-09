@@ -78,6 +78,13 @@
       "when": 1788833943619,
       "tag": "0010_product_event",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1788978483546,
+      "tag": "0011_even_synch",
+      "breakpoints": true
     }
   ]
 }

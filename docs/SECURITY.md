@@ -104,6 +104,13 @@ single documented run (`docs/pancakeswap-proof.json`, `docs/DEVIATIONS.md` D9b).
 - **The deployer key** for the mainnet proof was passed as a process env var for
   the duration of one script invocation and never written to disk, never logged
   (the script redacts `PROOF_PK` from any error dump), never committed.
+- **`BSC_ARCHIVE_RPC_URL`** — a QuickNode BSC archive endpoint, used only by the
+  historical benchmark replay (`packages/ledger/src/runner.ts` →
+  `archiveClient()`). The URL contains its own access token, so it is treated
+  like a key: `secrets.env` only, never committed, never logged, never in a
+  `NEXT_PUBLIC_*` var or any client bundle. Ordinary marketplace reads keep
+  using the pooled public dataseeds; only a task that pins an out-of-window
+  block touches the archive path.
 - **Rotation:** the VPS was root-compromised via SSH brute-force in early Sep
   2026 (see below). Every key that touched the old host is considered burned and
   was regenerated on the rebuilt host: new operator wallet, new agent keystores,

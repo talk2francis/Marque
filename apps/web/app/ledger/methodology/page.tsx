@@ -40,10 +40,20 @@ export default function MethodologyPage() {
             Each arm is run twice, because a single run is an anecdote.
           </p>
           <p>
-            That intent is not the same as the evidence. The agent arm records the block it read;
-            the human arm, run by hand, recorded none. Until a run carries its own block, the
-            benchmark reports what it has rather than claiming a same-block comparison — which is
-            why every card on the Ledger currently lists what is still missing.
+            The agent arm records the block it read. The human arm, run by hand, recorded none —
+            but the block is not lost: each frozen benchmark task contains exactly one BSC block
+            number, and every human run&rsquo;s manifest hash matches that frozen task. So the
+            block is recovered from the immutable task and recorded in an <em>append-only</em>
+            provenance supplement. The raw run row is never rewritten; the recovered value is
+            shown beside the original (<code>not recorded → effective 120&hellip;</code>) with the
+            source task hash, so a reader can check the derivation.
+          </p>
+          <p>
+            Where the agent arm needs re-running against a block older than public nodes retain,
+            it is replayed against that exact block through an archive RPC endpoint, and the run
+            is rejected unless the engine reports it read the pinned block. A replay is not a
+            reproduction: it answers the same frozen task at the same immutable state as the human
+            arm, and only the agent side was executed later. The card says so plainly.
           </p>
           <p>
             Before either arm runs, four things are frozen and hashed: the task, the inputs, the

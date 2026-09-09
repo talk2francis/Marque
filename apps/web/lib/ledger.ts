@@ -1,6 +1,6 @@
 import 'server-only'
-import { desc, eq } from 'drizzle-orm'
-import { db, benchmark as benchmarkTable, benchmarkRun, sealedCall } from '@marque/db'
+import { desc, eq, inArray } from 'drizzle-orm'
+import { db, benchmark as benchmarkTable, benchmarkRun, benchmarkRunProvenance, sealedCall } from '@marque/db'
 import { trackRecord, isReproduction, comparisonMissing, type SealOutcome } from '@marque/ledger'
 
 /**
@@ -31,6 +31,18 @@ export interface LedgerRun {
   evidenceUrl: string | null
   note: string | null
   ranAt: string
+  /**
+   * The block trusted for the comparison. Equals `blockNumber` unless that was
+   * never recorded (`0`) and an append-only provenance supplement recovered it
+   * from the immutable frozen task this run's hash matches.
+   */
+  effectiveBlock: string
+  /** Set when `effectiveBlock` came from a provenance supplement, not the raw row. */
+  blockProvenance: {
+    originalValue: string | null
+    reason: string
+    sourceTaskHash: string | null
+  } | null
 }
 
 export interface LedgerBenchmark {
@@ -58,7 +70,16 @@ export interface LedgerBenchmark {
   complete: boolean
 }
 
-function toRun(r: typeof benchmarkRun.$inferSelect): LedgerRun {
+type ProvenanceRow = typeof benchmarkRunProvenance.$inferSelect
+
+function toRun(r: typeof benchmarkRun.$inferSelect, prov: ProvenanceRow[]): LedgerRun {
+  const blockFix = prov.find((p) => p.runId === r.id && p.field === 'block_number')
+  const isBlock = (s: string | null | undefined) => typeof s === 'string' && /^[1-9]\d*$/.test(s)
+  const effectiveBlock = isBlock(r.blockNumber)
+    ? r.blockNumber
+    : blockFix && isBlock(blockFix.effectiveValue)
+      ? blockFix.effectiveValue
+      : r.blockNumber
   return {
     id: r.id,
     arm: r.arm,
@@ -79,6 +100,10 @@ function toRun(r: typeof benchmarkRun.$inferSelect): LedgerRun {
     evidenceUrl: r.evidenceUrl,
     note: r.note,
     ranAt: r.ranAt.toISOString(),
+    effectiveBlock,
+    blockProvenance: blockFix && !isBlock(r.blockNumber)
+      ? { originalValue: blockFix.originalValue, reason: blockFix.reason, sourceTaskHash: blockFix.sourceTaskHash }
+      : null,
   }
 }
 
@@ -87,6 +112,10 @@ export async function readLedger(): Promise<LedgerBenchmark[]> {
     db().select().from(benchmarkTable).orderBy(benchmarkTable.id),
     db().select().from(benchmarkRun).orderBy(benchmarkRun.benchmarkId, benchmarkRun.arm, benchmarkRun.rep),
   ])
+  const runIds = runs.map((r) => r.id)
+  const provenance = runIds.length
+    ? await db().select().from(benchmarkRunProvenance).where(inArray(benchmarkRunProvenance.runId, runIds))
+    : []
   return benchmarks.map((b) => {
     const all = runs.filter((r) => r.benchmarkId === b.id)
     // Publish the latest sitting of each arm, never a pool of every run ever
@@ -107,8 +136,21 @@ export async function readLedger(): Promise<LedgerBenchmark[]> {
       all.filter((r) => r.batch !== agentBatch && r.batch !== manualBatch).map((r) => `${r.arm}:${r.batch}`),
     ).size
 
-    const mine = current.map(toRun)
-    const missing = comparisonMissing(b, mine)
+    const mine = current.map((r) => toRun(r, provenance))
+    const missing = comparisonMissing(
+      b,
+      mine.map((r) => ({
+        arm: r.arm,
+        rep: r.rep,
+        blockNumber: r.blockNumber,
+        effectiveBlock: r.effectiveBlock,
+        blockRecovered: r.blockProvenance !== null,
+        scoreTotal: r.scoreTotal,
+        scoreOutOf: r.scoreOutOf,
+        scoredBlind: r.scoredBlind,
+        manifest: r.manifest,
+      })),
+    )
     return {
       id: b.id,
       title: b.title,

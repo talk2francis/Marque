@@ -721,3 +721,45 @@ export const productEvent = pgTable('product_event', {
 
 export type ProductEvent = typeof productEvent.$inferSelect
 export type NewProductEvent = typeof productEvent.$inferInsert
+
+// ---------------------------------------------------------------------------
+// FIRST-PARTY. Append-only provenance corrections for benchmark runs (P8b).
+//
+// A benchmark_run row is an irreplaceable first-party observation and is NEVER
+// rewritten (invariant 12). But some early manual runs recorded block_number
+// as `0` because the intake did not copy the block from the task. That block
+// IS recoverable — the run's manifest task_hash matches an immutable frozen
+// benchmark task that pins exactly one block.
+//
+// This table records that recovery WITHOUT touching the raw row: the original
+// value stays `0`, the effective value is derived and cited, and every surface
+// can show both. A row here is an attestation, not an edit. It is append-only:
+// no update path, no delete path.
+// ---------------------------------------------------------------------------
+
+export const benchmarkRunProvenance = pgTable('benchmark_run_provenance', {
+  id: serial('id').primaryKey(),
+  runId: integer('run_id').notNull().references(() => benchmarkRun.id, { onDelete: 'restrict' }),
+  /** The field being corrected, e.g. 'block_number'. */
+  field: text('field').notNull(),
+  /** What the raw row holds, unchanged. */
+  originalValue: text('original_value'),
+  /** The value trusted for the comparison. */
+  effectiveValue: text('effective_value').notNull(),
+  /** Machine code for the recovery, e.g. 'recovered_from_frozen_task'. */
+  reasonCode: text('reason_code').notNull(),
+  /** Human sentence a judge can read. */
+  reason: text('reason').notNull(),
+  /** The immutable frozen task hash the effective value was derived from. */
+  sourceTaskHash: text('source_task_hash'),
+  /** Optional corroborating evidence (e.g. a screen recording URL). */
+  sourceEvidenceUrl: text('source_evidence_url'),
+  /** Which run of the repair tool wrote this, for idempotency and audit. */
+  repairVersion: text('repair_version').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({
+  runFieldIdx: index('benchmark_run_provenance_run_field_idx').on(t.runId, t.field),
+}))
+
+export type BenchmarkRunProvenance = typeof benchmarkRunProvenance.$inferSelect
+export type NewBenchmarkRunProvenance = typeof benchmarkRunProvenance.$inferInsert

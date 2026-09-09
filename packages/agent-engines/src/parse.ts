@@ -76,15 +76,39 @@ export function listAfter(text: string, phrase: string): string[] | null {
     .filter(Boolean)
 }
 
+/** BSC public dataseeds keep roughly this many blocks of state; older reads prune. */
+export const PUBLIC_STATE_WINDOW = 60n
+
 /**
- * A block we may actually read.
+ * What we can actually do about a block a task asks for.
  *
- * BSC public nodes keep roughly 64 blocks of state on every provider we pool,
- * so a pinned block older than that cannot be read at all. Answering for a
- * DIFFERENT block than the one asked for, without saying so, is the quiet
- * version of making the number up.
+ *   latest       no block was pinned; reading head is correct.
+ *   pinned       the block can be read — from a public node if it is recent, or
+ *                from the archive endpoint if one is configured. `source` says
+ *                which, so a caller can pick the right client and a manifest can
+ *                record it.
+ *   unavailable  a block WAS pinned, it is older than the public window, and no
+ *                archive endpoint is configured. The only honest moves are to
+ *                refuse or to say the answer is for a different block — never to
+ *                quietly read head, which is the quiet version of making the
+ *                number up. `readableBlock` returning `undefined` for BOTH "no
+ *                block" and "too old" was exactly that trap; this replaces it.
  */
-export function readableBlock(requested: bigint | null, head: bigint): bigint | undefined {
-  if (requested === null) return undefined
-  return head - requested <= 60n ? requested : undefined
+export type BlockResolution =
+  | { mode: 'latest' }
+  | { mode: 'pinned'; block: bigint; source: 'public' | 'archive' }
+  | { mode: 'unavailable'; requested: bigint }
+
+export function resolveBlock(
+  requested: bigint | null,
+  head: bigint,
+  opts: { archiveAvailable?: boolean } = {},
+): BlockResolution {
+  if (requested === null) return { mode: 'latest' }
+  // A future block is a task error, not a historical read — let the node reject it.
+  if (requested > head || head - requested <= PUBLIC_STATE_WINDOW) {
+    return { mode: 'pinned', block: requested, source: 'public' }
+  }
+  if (opts.archiveAvailable) return { mode: 'pinned', block: requested, source: 'archive' }
+  return { mode: 'unavailable', requested }
 }

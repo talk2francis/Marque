@@ -1,7 +1,8 @@
 import { createHash } from 'node:crypto'
 import type { Address } from 'viem'
 import { publicClient } from '@marque/chain'
-import { addresses, blockNumber, readableBlock } from './parse.js'
+import { addresses } from './parse.js'
+import { historicalContext, isRefusal } from './historical.js'
 import { refuse, within, type Engine, type EngineAnswer, type EngineMeta } from './types.js'
 
 /**
@@ -159,9 +160,14 @@ export const redcellEngine: Engine = {
     const spender = found[2] ?? null
 
     try {
-      const client = publicClient()
-      const head = await within(client.getBlockNumber(), 3_000, 'BNB Smart Chain')
-      const at = readableBlock(blockNumber(prompt), head) ?? head
+      const head = await within(publicClient().getBlockNumber(), 3_000, 'BNB Smart Chain')
+      const ctx = historicalContext(prompt, head)
+      if (isRefusal(ctx)) return ctx
+      const { client, readAt } = ctx
+      // Every read below is pinned to this block (historical) or reads head
+      // (no block pinned). There is no path that reads a different block and
+      // reports success.
+      const at = readAt ?? head
 
       const code = await within(client.getCode({ address: subject, blockNumber: at }), deadline, 'the BSC node')
       if (!code || code === '0x') {

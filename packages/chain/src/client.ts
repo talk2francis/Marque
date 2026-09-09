@@ -50,6 +50,44 @@ export function publicClient(): PublicClient {
   return client
 }
 
+let archive: PublicClient | undefined
+let archiveResolved = false
+
+/**
+ * A BSC mainnet client backed by an ARCHIVE endpoint, or null when none is
+ * configured.
+ *
+ * The pooled `publicClient()` is deliberately public dataseeds — resilient for
+ * current-state marketplace reads, but they prune state after ~64 blocks, so a
+ * benchmark that must read a block from three weeks ago cannot use them. When
+ * `BSC_ARCHIVE_RPC_URL` is set (server-side only; the URL is the credential and
+ * is never sent to the browser), historical benchmark replay uses this instead.
+ *
+ * Single endpoint on purpose: an archive replay must never silently fail over
+ * to a pruned node and answer for a different block. If the archive endpoint
+ * cannot serve a block, that is a hard error the caller must surface, not route
+ * around.
+ */
+export function archiveClient(): PublicClient | null {
+  if (!archiveResolved) {
+    archiveResolved = true
+    const url = process.env.BSC_ARCHIVE_RPC_URL?.trim()
+    if (url) {
+      archive = createPublicClient({
+        chain: bsc,
+        transport: new RpcPool([url], BSC_MAINNET_ID).transport(),
+        batch: { multicall: { batchSize: 1024, wait: 16 } },
+      })
+    }
+  }
+  return archive ?? null
+}
+
+/** Whether a historical-state endpoint is available at all. */
+export function hasArchive(): boolean {
+  return Boolean(process.env.BSC_ARCHIVE_RPC_URL?.trim())
+}
+
 /** A throwaway client on an explicit endpoint list — used by tests and probes. */
 export function clientFor(urls: readonly string[], chainId = BSC_MAINNET_ID): PublicClient {
   const p = new RpcPool(urls, chainId)

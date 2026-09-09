@@ -15,9 +15,11 @@ export {
   registerBenchmark, runAgentArm, runAgentArms, mandatoryBenchmarks,
   benchmarkStatus, runsFor, currentRunsFor, armRun, latestBatch,
   reproductionBatch, isReproduction, REPRO_PREFIX, type RunArmResult,
+  loadFrozenBenchmark, runComparisonReplay, pinnedBlockOf,
+  isComparisonReplay, REPLAY_PREFIX, type BenchmarkContext,
 } from './runner.js'
 export {
   seal, dueForResolution, resolve, sealsFor, allSeals, recordFor,
   type SealInput, type SealResult,
 } from './seal-store.js'
-export { comparisonMissing, type CompletionRun } from './completion.js'
+export { comparisonMissing, trustedBlock, type CompletionRun } from './completion.js'

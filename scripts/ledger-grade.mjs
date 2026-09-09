@@ -181,12 +181,32 @@ for (const bench of benchmarks) {
   // EVERY repetition of both arms is graded. The page averages the reps, so
   // scoring only one would let a terse second rep drag an arm down unscored, or
   // flatter it. Reps are answers in their own right.
-  const runs = await sql`
-    select id, arm, rep, output_text, score_total, block_number
+  const allRuns = await sql`
+    select id, arm, rep, batch, output_text, score_total, block_number, note
     from benchmark_run
     where benchmark_id = ${bench.id} and output_text is not null
     order by arm, rep, ran_at
   `
+
+  /*
+   * Grade ONLY the published sitting of each arm, never a pool of every batch.
+   *
+   * The published sitting is the latest batch that is not a `repro-` (visitor
+   * reproductions never become the result). A `replay-` batch — the agent arm
+   * re-run against the block the frozen task already pins — IS eligible and, if
+   * present, is the one that gets graded. Earlier batches stay in the database
+   * as history; they are not fed to the grader alongside the current one.
+   */
+  const latestBatchFor = (arm) => {
+    const rows = allRuns.filter((r) => r.arm === arm && !String(r.batch).startsWith('repro-'))
+    if (rows.length === 0) return null
+    return rows.reduce((best, r) => (Number(r.id) > Number(best.id) ? r : best), rows[0]).batch
+  }
+  const agentBatch = latestBatchFor('agent')
+  const manualBatch = latestBatchFor('manual')
+  const runs = allRuns.filter(
+    (r) => (r.arm === 'agent' && r.batch === agentBatch) || (r.arm === 'manual' && r.batch === manualBatch),
+  )
   /*
    * Only runs that answered at the PINNED block are comparable.
    *
@@ -202,9 +222,11 @@ for (const bench of benchmarks) {
    * analyst's own text states the block they worked at.
    */
   const pinned = String(bench.task).match(/Block:\s*(\d+)/)?.[1] ?? null
-  const excluded = pinned
-    ? runs.filter((r) => r.block_number && r.block_number !== '0' && r.block_number !== pinned)
-    : []
+  const excluded = runs.filter((r) =>
+    // a replay repetition that did not actually read the pinned block
+    String(r.note ?? '').startsWith('INVALID')
+    // an agent rep captured at a different block than the task names
+    || (pinned && r.block_number && r.block_number !== '0' && r.block_number !== pinned))
   const eligible = runs.filter((r) => !excluded.includes(r))
   if (excluded.length) {
     console.log(`  pinned block ${pinned}; excluding ${excluded.length} run(s) read at another block: ${[...new Set(excluded.map((r) => `${r.arm}#${r.rep}@${r.block_number}`))].join(', ')}`)

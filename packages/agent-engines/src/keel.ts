@@ -1,6 +1,7 @@
 import { venusReader, exactRepayToReachTargetHf } from '@marque/positions'
 import { publicClient } from '@marque/chain'
-import { address, blockNumber, num, readableBlock } from './parse.js'
+import { address, num } from './parse.js'
+import { historicalContext, isRefusal } from './historical.js'
 import { refuse, within, type Engine, type EngineAnswer, type EngineMeta } from './types.js'
 
 /**
@@ -67,9 +68,14 @@ export const keelEngine: Engine = {
 
     try {
       const head = await within(publicClient().getBlockNumber(), 3_000, 'BNB Smart Chain')
-      const readAt = readableBlock(blockNumber(prompt), head)
+      const ctx = historicalContext(prompt, head)
+      if (isRefusal(ctx)) return ctx
+      // Comptroller state, market state and the oracle price are all read at
+      // this one block through this one client — never a historical balance
+      // combined with a current collateral factor.
+      const { client, readAt } = ctx
       const r = await within(
-        venusReader(subject, readAt === undefined ? {} : { blockNumber: readAt }),
+        venusReader(subject, { client, ...(readAt === undefined ? {} : { blockNumber: readAt }) }),
         deadline,
         'the Venus Comptroller',
       )

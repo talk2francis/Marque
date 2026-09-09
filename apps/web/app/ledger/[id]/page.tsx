@@ -37,8 +37,26 @@ function Arm({ run, label }: { run: LedgerRun; label: string }) {
       <div className={styles.hashes}>
         <span>output hash <code>{run.outputHash}</code></span>
         <span>manifest hash <code>{run.manifestHash}</code></span>
-        <span>block <code>{run.blockNumber === '0' ? 'not recorded' : run.blockNumber}</code> · ran {run.ranAt.slice(0, 19).replace('T', ' ')}Z</span>
+        {run.blockProvenance ? (
+          <span>
+            block <code>{run.blockProvenance.originalValue === '0' ? 'not recorded' : run.blockProvenance.originalValue}</code>
+            {' → effective '}<code>{run.effectiveBlock}</code>
+            {' · ran '}{run.ranAt.slice(0, 19).replace('T', ' ')}Z
+          </span>
+        ) : (
+          <span>block <code>{run.blockNumber === '0' ? 'not recorded' : run.blockNumber}</code> · ran {run.ranAt.slice(0, 19).replace('T', ' ')}Z</span>
+        )}
       </div>
+
+      {run.blockProvenance && (
+        <p className={styles.note}>
+          <ProvenanceChip provenance="MEASURED" />
+          Provenance: {run.blockProvenance.reason}
+          {run.blockProvenance.sourceTaskHash && (
+            <> Source task <code>{run.blockProvenance.sourceTaskHash.slice(0, 14)}…</code>. The raw run row is unchanged.</>
+          )}
+        </p>
+      )}
 
       <p className={styles.note}>
         <ProvenanceChip provenance="MEASURED" />

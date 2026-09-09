@@ -1,11 +1,47 @@
 import { comparisonMissing } from './completion.js'
 import { performance } from 'node:perf_hooks'
-import { eq, and } from 'drizzle-orm'
-import { db, benchmark as benchmarkTable, benchmarkRun } from '@marque/db'
-import { publicClient } from '@marque/chain'
+import { eq, and, inArray } from 'drizzle-orm'
+import { db, benchmark as benchmarkTable, benchmarkRun, benchmarkRunProvenance as benchmarkRunProvenanceTable } from '@marque/db'
+import { publicClient, archiveClient } from '@marque/chain'
 import { BENCHMARKS, type BenchmarkSpec } from './benchmarks.js'
 import { buildRubric, rubricHash } from './rubric.js'
 import { hashContent, manifestHash, totalCost, type BenchmarkManifest, type CostBreakdown } from './manifest.js'
+
+/**
+ * The immutable context one comparison SITTING resolves ONCE.
+ *
+ * Every repetition of that sitting runs against exactly this — the same frozen
+ * task, the same pinned block, the same batch. The old runner fetched a fresh
+ * head inside each repetition and re-registered the benchmark per rep, so rep 1
+ * and rep 2 could read different blocks and the "frozen" task could be rewritten
+ * mid-sitting. A sitting is one chain-state reference or it is not a sitting.
+ */
+export interface BenchmarkContext {
+  benchmarkId: string
+  /** The block every repetition answers for. Decimal string. */
+  block: string
+  blockHash: string | null
+  batch: string
+  batchKind: 'original' | 'comparison_replay' | 'reproduction'
+  /** The exact frozen task text handed to the agent — never re-derived per rep. */
+  task: string
+  taskHash: string
+  inputHash: string
+  rubricVersion: string
+  rubricHash: string
+  /**
+   * When true (historical replay), a repetition whose engine reports a block
+   * other than `block` is INVALID and is recorded with a note, not as a result.
+   */
+  assertObservedBlock: boolean
+}
+
+/** The single pinned block encoded in a frozen benchmark task, or null. */
+export function pinnedBlockOf(task: string): string | null {
+  const all = [...task.matchAll(/Block:\s*(\d+)/gi)].map((m) => m[1])
+  const uniq = [...new Set(all)]
+  return uniq.length === 1 ? uniq[0]! : null
+}
 
 /**
  * The benchmark runner.
@@ -79,6 +115,34 @@ export async function registerBenchmark(spec: BenchmarkSpec, block: string): Pro
   return { id: spec.id, rubricHash: rHash, taskHash: tHash }
 }
 
+/**
+ * Load the ALREADY-FROZEN benchmark for a historical replay.
+ *
+ * Unlike `registerBenchmark`, this never writes: a replay reproduces what was
+ * promised before either arm ran, so it must READ the frozen record, not
+ * re-register it into a new state. It refuses if the row is missing or if the
+ * caller's expected hash does not match what is stored.
+ */
+export async function loadFrozenBenchmark(
+  id: string,
+  expect?: { taskHash?: string },
+): Promise<{ id: string; task: string; taskHash: string; inputHash: string; rubricVersion: string; rubricHash: string; block: string | null }> {
+  const [row] = await db().select().from(benchmarkTable).where(eq(benchmarkTable.id, id)).limit(1)
+  if (!row) throw new Error(`benchmark ${id} is not registered`)
+  if (expect?.taskHash && expect.taskHash !== row.taskHash) {
+    throw new Error(`benchmark ${id} frozen task hash ${row.taskHash} does not match expected ${expect.taskHash}`)
+  }
+  return {
+    id: row.id,
+    task: row.task,
+    taskHash: row.taskHash,
+    inputHash: row.inputHash,
+    rubricVersion: row.rubricVersion,
+    rubricHash: row.rubricHash,
+    block: pinnedBlockOf(row.task),
+  }
+}
+
 /** How the agent arm is reached: the same public A2A face any buyer uses. */
 async function askAgent(baseUrl: string, agentSlug: string, task: string): Promise<{ answer: unknown; elapsedMs: number; error?: string }> {
   const started = performance.now()
@@ -108,21 +172,98 @@ async function askAgent(baseUrl: string, agentSlug: string, task: string): Promi
 }
 
 /**
+ * Resolve the sitting context ONCE.
+ *
+ * For a fresh benchmark: pick the current head, register the task at it, return
+ * the frozen row. For a historical replay: load the already-frozen row, take
+ * the block from its immutable task, do NOT re-register.
+ */
+async function resolveContext(
+  spec: BenchmarkSpec,
+  opts: { batch: string; batchKind: BenchmarkContext['batchKind']; replay?: boolean },
+): Promise<BenchmarkContext> {
+  if (opts.replay) {
+    const frozen = await loadFrozenBenchmark(spec.id)
+    if (!frozen.block) {
+      throw new Error(`benchmark ${spec.id} frozen task does not pin exactly one block; cannot replay`)
+    }
+    const client = archiveClient()
+    const blockHash = client
+      ? await client.getBlock({ blockNumber: BigInt(frozen.block) }).then((b) => b.hash).catch(() => null)
+      : null
+    return {
+      benchmarkId: spec.id,
+      block: frozen.block,
+      blockHash,
+      batch: opts.batch,
+      batchKind: opts.batchKind,
+      task: frozen.task,
+      taskHash: frozen.taskHash,
+      inputHash: frozen.inputHash,
+      rubricVersion: frozen.rubricVersion,
+      rubricHash: frozen.rubricHash,
+      assertObservedBlock: true,
+    }
+  }
+
+  const block = (await publicClient().getBlockNumber()).toString()
+  await registerBenchmark(spec, block)
+  const [row] = await db().select().from(benchmarkTable).where(eq(benchmarkTable.id, spec.id)).limit(1)
+  if (!row) throw new Error(`benchmark ${spec.id} was not registered`)
+  const blockHash = await publicClient().getBlock({ blockNumber: BigInt(block) }).then((b) => b.hash).catch(() => null)
+  return {
+    benchmarkId: spec.id,
+    block,
+    blockHash,
+    batch: opts.batch,
+    batchKind: opts.batchKind,
+    task: row.task,
+    taskHash: row.taskHash,
+    inputHash: row.inputHash,
+    rubricVersion: row.rubricVersion,
+    rubricHash: row.rubricHash,
+    assertObservedBlock: false,
+  }
+}
+
+/** The block an engine says it read, dug out of its answer shape. */
+function observedBlock(answer: unknown): string | null {
+  if (!answer || typeof answer !== 'object') return null
+  const a = answer as Record<string, unknown>
+  const b = a['blockNumber'] ?? a['block'] ?? (a['readAt'] as Record<string, unknown> | undefined)
+  return typeof b === 'string' || typeof b === 'number' ? String(b) : null
+}
+
+/**
  * Run the agent arm once and record its manifest.
  *
  * The elapsed figure is wall clock around the HTTP call a buyer would make —
  * including TLS, the reverse proxy and the SSRF guard, because those are part
  * of what a buyer waits for and excluding them would flatter the agent.
+ *
+ * `opts.context` is passed by `runAgentArms` / `runComparisonReplay` so every
+ * repetition of a sitting shares one block and one frozen task. Without it (the
+ * public "reproduce" button) the run registers at the current head, as a
+ * single-repetition reproduction.
  */
-export async function runAgentArm(spec: BenchmarkSpec, rep: number, opts: { baseUrl: string; batch: string }): Promise<RunArmResult> {
-  const block = (await publicClient().getBlockNumber()).toString()
-  await registerBenchmark(spec, block)
-
-  const [row] = await db().select().from(benchmarkTable).where(eq(benchmarkTable.id, spec.id)).limit(1)
-  if (!row) return { ok: false, rep, elapsedMs: 0, outputHash: '', manifestHash: '', detail: 'benchmark not registered' }
+export async function runAgentArm(
+  spec: BenchmarkSpec,
+  rep: number,
+  opts: { baseUrl: string; batch: string; context?: BenchmarkContext },
+): Promise<RunArmResult> {
+  const ctx = opts.context ?? await resolveContext(spec, { batch: opts.batch, batchKind: 'reproduction' })
+  const block = ctx.block
 
   const slug = spec.agentId.replace(/^marque:/, '')
-  const { answer, elapsedMs, error } = await askAgent(opts.baseUrl, slug, row.task)
+  const { answer, elapsedMs, error: askError } = await askAgent(opts.baseUrl, slug, ctx.task)
+
+  // A historical replay that answered a DIFFERENT block than the one asked for
+  // has not produced a comparable result. Record it, note why, do not treat it
+  // as a valid repetition (it stays ungraded — a wrong-block answer is not the
+  // agent's quality, it is a state-access failure).
+  const seen = observedBlock(answer)
+  const blockMismatch = ctx.assertObservedBlock && seen !== null && seen !== block
+  const error = askError ?? (blockMismatch ? `observed block ${seen} != pinned block ${block}` : undefined)
 
   const outputHash = hashContent(answer ?? { error })
   const cost: CostBreakdown = totalCost({
@@ -144,18 +285,21 @@ export async function runAgentArm(spec: BenchmarkSpec, rep: number, opts: { base
     benchmark_id: spec.id,
     arm: 'agent',
     rep,
-    task_hash: row.taskHash,
-    input_hash: row.inputHash,
+    task_hash: ctx.taskHash,
+    input_hash: ctx.inputHash,
     manual_output_hash: null,
     agent_output_hash: outputHash,
     agent_id: spec.agentId,
     block,
+    block_hash: ctx.blockHash,
+    observed_block: seen,
+    state_source: ctx.assertObservedBlock ? 'archive' : 'public',
     job_id: null,
     tx_hashes: [],
     cost_breakdown: cost,
     elapsed_ms: Math.round(elapsedMs),
-    rubric_version: row.rubricVersion,
-    rubric_hash: row.rubricHash,
+    rubric_version: ctx.rubricVersion,
+    rubric_hash: ctx.rubricHash,
     // Empty until blind scoring. NOT zero — an unscored arm and an arm that
     // scored zero are different facts.
     score_breakdown: {},
@@ -165,11 +309,16 @@ export async function runAgentArm(spec: BenchmarkSpec, rep: number, opts: { base
   }
 
   const mHash = manifestHash(manifest)
+  const note = askError
+    ? `the agent did not answer: ${askError}`
+    : blockMismatch
+      ? `INVALID: the agent answered for block ${seen}, not the pinned block ${block}`
+      : undefined
   await db().insert(benchmarkRun).values({
     benchmarkId: spec.id,
     arm: 'agent',
     rep,
-    batch: opts.batch,
+    batch: ctx.batch,
     output: (answer ?? { error }) as Record<string, unknown>,
     outputText: JSON.stringify(answer ?? { error }),
     outputHash,
@@ -180,7 +329,7 @@ export async function runAgentArm(spec: BenchmarkSpec, rep: number, opts: { base
     costBreakdown: cost as unknown as Record<string, unknown>,
     manifest: manifest as unknown as Record<string, unknown>,
     manifestHash: mHash,
-    ...(error ? { note: `the agent did not answer: ${error}` } : {}),
+    ...(note ? { note } : {}),
   })
 
   return {
@@ -196,20 +345,59 @@ export async function runAgentArm(spec: BenchmarkSpec, rep: number, opts: { base
 /**
  * Both repetitions of the agent arm, as ONE sitting.
  *
- * The sitting gets a batch id named for the block it starts at. Re-running
- * later adds a new sitting rather than replacing this one, because a run is a
- * first-party observation and those are never overwritten (invariant 12). Two
- * sittings read different chain state, so their repetitions are not
- * interchangeable and must never be pooled or picked between.
+ * The sitting resolves its context — block, block hash, frozen task — ONCE, up
+ * front, and every repetition runs against exactly that. Re-running later adds
+ * a new sitting rather than replacing this one, because a run is a first-party
+ * observation and those are never overwritten (invariant 12). Two sittings read
+ * different chain state, so their repetitions are not interchangeable and must
+ * never be pooled or picked between.
  */
 export async function runAgentArms(spec: BenchmarkSpec, opts: { baseUrl: string; reps?: number }): Promise<RunArmResult[]> {
   const reps = opts.reps ?? 2
   const batch = `b${(await publicClient().getBlockNumber()).toString()}`
+  const context = await resolveContext(spec, { batch, batchKind: 'original' })
   const out: RunArmResult[] = []
   for (let rep = 1; rep <= reps; rep++) {
-    out.push(await runAgentArm(spec, rep, { ...opts, batch }))
+    out.push(await runAgentArm(spec, rep, { baseUrl: opts.baseUrl, batch, context }))
   }
   return out
+}
+
+/**
+ * A HISTORICAL comparison replay: run the agent arm against the block the frozen
+ * benchmark task already pins, using the archive endpoint.
+ *
+ * This is not a reproduction. A reproduction happens at today's head, on a
+ * visitor's click, and never becomes the published sitting. A comparison replay
+ * answers the SAME frozen task at the SAME immutable block as the human arm,
+ * because the human's evidence pinned that block and only the agent side is
+ * being executed later. It IS eligible to become the published agent sitting —
+ * gated on every repetition actually reading the pinned block (`assertObserved`
+ * in the context).
+ *
+ * The frozen benchmark is never re-registered. Each replay gets its own batch;
+ * running it twice does not silently create a competing set — the caller passes
+ * an explicit batch id and this asserts it does not already exist.
+ */
+export async function runComparisonReplay(
+  id: string,
+  opts: { baseUrl: string; reps?: number; batch?: string },
+): Promise<{ batch: string; block: string; blockHash: string | null; results: RunArmResult[] }> {
+  const spec = BENCHMARKS.find((b) => b.id === id)
+  if (!spec) throw new Error(`no benchmark ${id}`)
+  const reps = opts.reps ?? 2
+  const batch = opts.batch ?? `${REPLAY_PREFIX}${Date.now()}`
+
+  const existing = await db().select().from(benchmarkRun)
+    .where(and(eq(benchmarkRun.benchmarkId, id), eq(benchmarkRun.batch, batch))).limit(1)
+  if (existing.length > 0) throw new Error(`replay batch ${batch} already has runs for ${id}; refusing to add more`)
+
+  const context = await resolveContext(spec, { batch, batchKind: 'comparison_replay', replay: true })
+  const results: RunArmResult[] = []
+  for (let rep = 1; rep <= reps; rep++) {
+    results.push(await runAgentArm(spec, rep, { baseUrl: opts.baseUrl, batch, context }))
+  }
+  return { batch, block: context.block, blockHash: context.blockHash, results }
 }
 
 /**
@@ -221,9 +409,20 @@ export async function runAgentArms(spec: BenchmarkSpec, opts: { baseUrl: string;
  * could quietly replace the published result by clicking a button.
  */
 export const REPRO_PREFIX = 'repro-'
+/**
+ * A comparison replay: the agent arm run later against the block the frozen task
+ * already pins. Unlike a reproduction it CAN become the published sitting —
+ * `latestBatch` includes it — because it answers the same frozen task at the
+ * same immutable block as the human arm.
+ */
+export const REPLAY_PREFIX = 'replay-'
 
 export function isReproduction(batch: string): boolean {
   return batch.startsWith(REPRO_PREFIX)
+}
+
+export function isComparisonReplay(batch: string): boolean {
+  return batch.startsWith(REPLAY_PREFIX)
 }
 
 /**
@@ -284,8 +483,21 @@ export async function benchmarkStatus(id: string): Promise<{
     runs.filter((r) => r.batch !== agentBatch && r.batch !== manualBatch).map((r) => `${r.arm}:${r.batch}`),
   ).size
 
+  // Provenance supplements: recovered blocks for runs that recorded none.
+  const prov = current.length
+    ? await db().select().from(benchmarkRunProvenanceTable)
+        .where(inArray(benchmarkRunProvenanceTable.runId, current.map((r) => r.id)))
+    : []
+  const isBlk = (s: string | null | undefined) => typeof s === 'string' && /^[1-9]\d*$/.test(s)
+  const withProv = current.map((r) => {
+    const fix = prov.find((p) => p.runId === r.id && p.field === 'block_number')
+    const effectiveBlock = isBlk(r.blockNumber) ? r.blockNumber
+      : fix && isBlk(fix.effectiveValue) ? fix.effectiveValue : r.blockNumber
+    return { ...r, effectiveBlock, blockRecovered: Boolean(fix) && !isBlk(r.blockNumber) }
+  })
+
   const [registered] = await db().select().from(benchmarkTable).where(eq(benchmarkTable.id, id)).limit(1)
-  const missing = registered ? comparisonMissing(registered, current) : ['registered benchmark evidence']
+  const missing = registered ? comparisonMissing(registered, withProv) : ['registered benchmark evidence']
   return {
     id, agentReps, manualReps, agentBatch, manualBatch, earlierSittings, scored,
     complete: missing.length === 0, missing,
