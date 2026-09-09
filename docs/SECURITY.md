@@ -172,12 +172,19 @@ Audited 9 September 2026 (`pnpm audit --prod`), recorded rather than summarised
 away.
 
 **Patched.** Next.js was pinned at `15.1.3`, which predates the August 2026
-security release. The tree is now on **15.5.25** (React 19.2.6): full test suite
-green, lint clean, a route/viewport browser pass, and the standalone server
-exercised on an alternate port against the live database before any switchover.
-The build is verified ahead of the cutover rather than during it — see the
-`MARQUE_BUILD_DIR` path in `scripts/build-web.sh`, which builds a candidate into
-its own directory so the running server's assets are never removed underneath it.
+security release. Production runs **15.5.25** (React 19.2.6) as of 9 September
+2026: full test suite green, lint clean, and `scripts/verify-candidate.mjs`
+green on the candidate before cutover and again on production after — 27
+route/width combinations with no console error, no CSP refusal and no real
+horizontal scroll, plus the wallet modal opening under the tightened
+`script-src`.
+
+The build was verified *ahead* of the cutover rather than during it.
+`scripts/build-web.sh` with `MARQUE_BUILD_DIR` builds a candidate into its own
+directory, so the running server's static assets are never removed underneath
+it; the candidate is then exercised on an alternate port against the live
+database and swapped into place by rename. The previous build is kept at
+`apps/web/.next/standalone-prev`, so a rollback is two renames and a restart.
 
 **Present and not patched, with the reasoning stated:**
 
