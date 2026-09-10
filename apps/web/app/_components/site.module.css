@@ -322,6 +322,17 @@
 }
 .footerBrand p { margin: var(--s4) 0 0; color: var(--fg-soft); max-width: 24ch; font-size: var(--size-caption); line-height: 1.6; }
 .footerBrand .brand { height: 26px; }
+.footerSocial {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: var(--s3);
+  color: var(--fg-soft);
+  text-decoration: none;
+  transition: color var(--dur-fast) var(--ease);
+}
+.footerSocial:hover { color: var(--fg); }
+.footerSocial svg { flex: none; }
 .footerCol { display: flex; flex-direction: column; gap: var(--s2); }
 .footerHead {
   font-weight: 600;
