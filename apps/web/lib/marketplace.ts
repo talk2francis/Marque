@@ -77,10 +77,20 @@ function ownerLabel(owner: string | null): string | null {
   return `${owner.slice(0, 6)}…${owner.slice(-4)}`
 }
 
-/** An https image URL from the registry metadata, or null. */
+/**
+ * A registry image URL we are allowed to render — 8004scan's own image hosts
+ * only. An arbitrary third-party image URL is never loaded (CSP, tracking
+ * pixels, dead links); those agents get the generated emblem instead.
+ */
 function httpImage(v: unknown): string | null {
   const s = typeof v === 'string' ? v.trim() : ''
-  return /^https:\/\/[^\s]+$/i.test(s) ? s : null
+  if (!/^https:\/\/[^\s]+$/i.test(s)) return null
+  try {
+    const h = new URL(s).hostname
+    return /(^|\.)8004scan\.(io|app)$/i.test(h) ? s : null
+  } catch {
+    return null
+  }
 }
 /** The origin of a registry-supplied URL — a hint at the agent's own site. */
 function originOf(v: unknown): string | null {
@@ -256,7 +266,7 @@ async function queryThirdParty(): Promise<MarketRow[]> {
       ownerLabel: ownerLabel(owner),
       host,
       identity: {
-        imageUrl: (r['image_url'] ? String(r['image_url']) : null) ?? httpImage(r['meta_image']),
+        imageUrl: httpImage(r['image_url']) ?? httpImage(r['meta_image']),
         description: r['description'] ? String(r['description']) : null,
         contractAddress: r['contract_address'] ? String(r['contract_address']) : null,
         website,
