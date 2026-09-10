@@ -3,6 +3,7 @@ import { Statement, Chip, ProvenanceChip, EmptyState } from '@marque/ui'
 import { SiteHeader, SiteFooter } from '../_components/SiteHeader'
 import { readLedger, readSeals, type LedgerBenchmark, type LedgerRun } from '../../lib/ledger'
 import { explorerTx } from '../../lib/network'
+import { HumanArmEvidence } from './HumanArmEvidence'
 import styles from './ledger.module.css'
 
 export const dynamic = 'force-dynamic'
@@ -159,6 +160,15 @@ function Benchmark({ b }: { b: LedgerBenchmark }) {
               repetitions can score far apart — a full write-up against a one-line summary of the
               same finding.
             </p>
+            {h.reps > 0 && (
+              <div className={styles.expEvidence}>
+                <HumanArmEvidence id={b.id} compact />
+                <span className={styles.expEvidenceNote}>
+                  The manual arm was recorded on camera. This is the analyst running {b.id} by
+                  hand at the pinned block — <Link href={`/ledger/${b.id}`}>see it in context</Link>.
+                </span>
+              </div>
+            )}
           </div>
         )
       })()}

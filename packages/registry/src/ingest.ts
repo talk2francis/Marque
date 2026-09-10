@@ -23,6 +23,15 @@ import { mapLimit } from './concurrency.js'
 
 export const BSC = 56
 const PAGE = 100
+/**
+ * 8004scan now rejects `offset > 10000` with a 422. The list is sorted
+ * newest-first, so the reachable window is the most recent ~10k registrations.
+ * Ingest sweeps that window on a loop: new agents appear at offset 0 and shift
+ * down, so a repeated 0..MAX_OFFSET scan catches every one. Agents older than
+ * the window were ingested while the API still allowed deep offsets and are
+ * kept; they simply cannot be re-listed until 8004scan lifts the cap.
+ */
+const MAX_OFFSET = Number(process.env.SCAN_MAX_OFFSET ?? 10_000)
 
 export interface SweepResult {
   pagesFetched: number
@@ -117,18 +126,23 @@ export async function sweepList(opts: {
   chainId?: number
   maxPages?: number
   restart?: boolean
+  /** The registry's own headline total, taken from a reliable first-page count. */
+  registryTotal?: number | null
 }): Promise<SweepResult> {
   const client = opts.client
   const chainId = opts.chainId ?? BSC
   const maxPages = opts.maxPages ?? 60
   const source = `scan:list:${chainId}`
 
+  // A cursor left past the reachable window (or a legacy deep cursor) restarts
+  // at the head rather than looping on 422s / empty pages forever.
   let offset = opts.restart ? 0 : await readCursor(source)
+  if (offset > MAX_OFFSET) offset = 0
   let pagesFetched = 0
   let agentsSeen = 0
   let agentsUpserted = 0
   let droppedOffChain = 0
-  let reportedTotal: number | null = null
+  let reportedTotal: number | null = opts.registryTotal ?? null
   let stoppedBecause: SweepResult['stoppedBecause'] = 'page_limit'
 
   // Offsets are independent, so a batch of pages can be fetched in parallel.
@@ -139,6 +153,15 @@ export async function sweepList(opts: {
   while (pagesFetched < maxPages) {
     const batchSize = Math.min(concurrency, maxPages - pagesFetched)
     const offsets = Array.from({ length: batchSize }, (_, i) => offset + i * PAGE)
+      .filter((o) => o <= MAX_OFFSET)
+
+    // Reached the top of the reachable window: reset to the head so the next
+    // sweep re-scans it and picks up everything registered since.
+    if (offsets.length === 0) {
+      stoppedBecause = 'exhausted'
+      await writeCursor(source, 0, { reportedTotal, reason: 'window_wrap', maxOffset: MAX_OFFSET })
+      break
+    }
 
     // A single slow page at a deep offset must not abort the batch: the API
     // gets measurably slower past ~100k offset, and one timeout previously
@@ -163,6 +186,10 @@ export async function sweepList(opts: {
 
     if (batchItems === 0) {
       stoppedBecause = 'empty_page'
+      // Nothing in this batch, inside the reachable window. Usually a transient
+      // upstream blip. Reset to the head so the next sweep re-scans from offset
+      // 0 rather than sitting on a dead offset; upserts are idempotent.
+      if (offset > 0) await writeCursor(source, 0, { reportedTotal, reason: 'empty_page_reset' })
       break
     }
 

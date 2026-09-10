@@ -42,7 +42,10 @@ const nextConfig = {
       "default-src 'self'",
       "script-src 'self' 'unsafe-inline'",
       "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: blob:",
+      // 8004scan hosts the registry-supplied agent avatars we already index.
+      // They are images only, clearly labelled CLAIMED in the UI, and never on
+      // a trust-bearing path. Everything else stays self/data/blob.
+      "img-src 'self' data: blob: https://api.8004scan.io",
       "font-src 'self' data:",
       "connect-src 'self' https://bsc-dataseed.bnbchain.org https://bsc-testnet-rpc.publicnode.com https://*.walletconnect.com https://*.walletconnect.org wss://*.walletconnect.com wss://*.walletconnect.org https://explorer-api.walletconnect.com https://pulse.walletconnect.org",
       "frame-src 'self' https://verify.walletconnect.com https://verify.walletconnect.org",

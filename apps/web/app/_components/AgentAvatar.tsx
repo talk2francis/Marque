@@ -1,9 +1,15 @@
+'use client'
+
+import { useState } from 'react'
+
 /**
- * A generated emblem for an agent, so a row/profile isn't a wall of text.
+ * An agent's avatar.
  *
- * Deterministic: the winged mark on a tile whose hue and corner ticks are
- * seeded from the agent's id. Reference agents get their category's signal
- * colour; third parties get a neutral seeded hue. No image files, no network.
+ * A registry-supplied image when there is one (CLAIMED — it is whatever the
+ * operator uploaded), falling back on error or absence to a deterministic
+ * generated emblem: the winged mark on a tile whose hue and corner ticks are
+ * seeded from the agent's id. The generated form needs no network and never
+ * fails, so a row is never a blank square.
  */
 
 const CATEGORY_HUE: Record<string, number> = {
@@ -23,17 +29,7 @@ function hash(s: string): number {
   return h >>> 0
 }
 
-export function AgentAvatar({
-  id,
-  category,
-  size = 40,
-  reference = false,
-}: {
-  id: string
-  category?: string | null
-  size?: number
-  reference?: boolean
-}) {
+function Emblem({ id, category, size, reference }: { id: string; category?: string | null; size: number; reference: boolean }) {
   const h = hash(id)
   const hue = reference && category && CATEGORY_HUE[category] !== undefined
     ? CATEGORY_HUE[category]
@@ -42,8 +38,6 @@ export function AgentAvatar({
   const bg = `hsl(${hue} ${sat}% 16%)`
   const edge = `hsl(${hue} ${sat}% 34%)`
   const mark = `hsl(${hue} ${Math.min(sat + 18, 60)}% 72%)`
-
-  // three corner ticks, present/absent from the hash — a quiet fingerprint
   const ticks = [h & 1, (h >> 3) & 1, (h >> 6) & 1, (h >> 9) & 1]
 
   return (
@@ -65,4 +59,37 @@ export function AgentAvatar({
       </g>
     </svg>
   )
+}
+
+export function AgentAvatar({
+  id,
+  category,
+  size = 40,
+  reference = false,
+  imageUrl = null,
+}: {
+  id: string
+  category?: string | null
+  size?: number
+  reference?: boolean
+  /** Registry-supplied image. Falls back to the generated emblem on error. */
+  imageUrl?: string | null
+}) {
+  const [failed, setFailed] = useState(false)
+
+  if (imageUrl && !failed) {
+    return (
+      <img
+        src={imageUrl}
+        alt=""
+        aria-hidden="true"
+        width={size}
+        height={size}
+        loading="lazy"
+        onError={() => setFailed(true)}
+        style={{ flex: 'none', width: size, height: size, borderRadius: 8, objectFit: 'cover', display: 'block', background: 'var(--ground-sunk)' }}
+      />
+    )
+  }
+  return <Emblem id={id} category={category} size={size} reference={reference} />
 }

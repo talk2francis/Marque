@@ -44,3 +44,30 @@
   .page { padding-inline: var(--s4); }
   .feedbackSplit { grid-template-columns: 1fr; gap: var(--s4); }
 }
+
+/* ---- Registry identity block (CLAIMED) ---- */
+.idBlock { display: flex; align-items: flex-start; gap: var(--s4); }
+.idText { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--s2); }
+.idClaimed {
+  display: inline-flex; align-items: center; gap: var(--s2);
+  font-size: var(--size-eyebrow); letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase; font-weight: 600; color: var(--fg-faint);
+}
+.idGrid {
+  margin: var(--s4) 0 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--s3) var(--s5);
+  padding: var(--s4);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: color-mix(in srgb, var(--ground-raised) 40%, transparent);
+}
+.idGrid > div { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.idGrid dt { font-size: var(--size-caption); color: var(--fg-soft); }
+.idGrid dd { margin: 0; font-size: var(--size-body); min-width: 0; overflow-wrap: anywhere; }
+.idGrid dd a { color: var(--chain); text-decoration: none; }
+.idGrid dd a:hover { text-decoration: underline; }
+.idChips { display: inline-flex; gap: var(--s2); flex-wrap: wrap; }
+.idNote { margin: var(--s3) 0 0; font-size: var(--size-caption); line-height: 1.6; color: var(--fg-faint); }
+@media (max-width: 560px) { .idBlock { gap: var(--s3); } .idGrid { grid-template-columns: 1fr; } }

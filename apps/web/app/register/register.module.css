@@ -90,6 +90,7 @@
 .dupes { font-size: var(--size-caption); color: var(--chain); display: inline-flex; align-items: center; min-height: 26px; }
 .mktSub { display: flex; gap: var(--s2); flex-wrap: wrap; align-items: center; }
 .owner { font-family: var(--font-mono); font-size: var(--size-caption); color: var(--fg-soft); }
+.identityMeta { font-size: var(--size-caption); color: var(--fg-faint); }
 .mktLive { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
 .dot { width: 7px; height: 7px; border-radius: 999px; display: inline-block; }
 .dotLive { background: var(--holds); }

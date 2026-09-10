@@ -300,6 +300,12 @@ export class ScanClient {
     offset?: number
     extra?: Record<string, string | number | boolean>
   }): Promise<{ items: ScanAgentListItem[]; total: number | null; droppedOffChain: number }> {
+    // 8004scan rejects offset > 10000 with a 422. Past that there is nothing to
+    // fetch, so return an empty page rather than throwing.
+    if ((opts.offset ?? 0) > 10_000) {
+      const total = await this.countAgents(opts.chainId, opts.extra ?? {}).catch(() => null)
+      return { items: [], total, droppedOffChain: 0 }
+    }
     const raw = await this.get('/agents', {
       chain_id: opts.chainId,
       limit: opts.limit ?? 100,

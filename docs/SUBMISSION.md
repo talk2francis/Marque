@@ -47,16 +47,16 @@ transaction hash, or a command whose output is pasted in the phase docs.
 | 9 | LLM never signs, never prices | **PASS** | DeepSeek performs classification and disclosed blind Ledger grading; signing and pricing remain deterministic — `docs/SECURITY.md §4` |
 | 10 | `safeFetch()` SSRF guard on every outbound agent call | **PASS** | `packages/probe/src/safe-fetch.ts`; sole path; `safe-fetch.test.ts` + `redirect.test.ts` |
 | 11 | First-party observations never deleted | **PASS** | No delete path for probe / conformance_result / receipt / run / sealed_call / pool_tick_observation; rebuild drill truncates derived tables only |
-| 12 | The Ledger: agent vs. human, blind-graded against a pre-registered rubric | **PARTIAL — provenance gaps disclosed** | All eight human repetitions have blind grades. Five agent repetitions in published batches remain ungraded; manual manifest blocks are absent. See `docs/AGENT-ADVANTAGE-REPORT.md` for the reconciled evidence. |
+| 12 | The Ledger: agent vs. human, blind-graded against a pre-registered rubric | **PASS** | All four benchmarks complete: 2 blind-graded agent reps + 2 blind-graded human reps, same frozen task, same pinned BSC block. Human arm on camera (`benchmark_run.evidence_url`). Agent arms replayed at the pinned block through an archive endpoint; the human arm's block recovered from the frozen task via an append-only provenance supplement (`docs/DEVIATIONS.md` D8b-02). |
 
 ### TermiX Challenge — Agent Advantage Report
 
 | # | Requirement | State | Evidence |
 |---|---|---|---|
-| T1 | ≥ 3 real tasks, run with a marketplace agent vs. without | **Recorded; comparison validity incomplete** | Four tasks, two human repetitions each and agent observations. Same-block and final-task execution gaps remain disclosed. |
+| T1 | ≥ 3 real tasks, run with a marketplace agent vs. without | **PASS** | Four tasks (ADV-01..04), agent vs. human analyst, two blind-graded repetitions each side, same frozen task and pinned block. `docs/AGENT-ADVANTAGE-REPORT.md`. |
 | T2 | ≥ 1 task from trading / stock / security | **PASS** | ADV-01 is a security triage of a live BSC token contract |
-| T3 | Time, cost and output quality per task, actual outputs attached | **Recorded with gaps** | Human timings and all eight blind grades are recorded. Published agent batches have five missing grades; raw outputs and cost lines remain public in the Ledger. |
-| T4 | Advantage measured, not asserted | **NOT ESTABLISHED** | No speed/cost/quality victory is claimed until task and block provenance support a valid comparison. |
+| T3 | Time, cost and output quality per task, actual outputs attached | **PASS** | All 16 runs graded blind; agent elapsed and $0 direct cost, human stopwatch time and rate; raw outputs, manifests and screen recordings on each benchmark page and `/api/v1/ledger`. |
+| T4 | Advantage measured, not asserted | **PASS — split result** | Same-task, same-block, blind-graded. On the mechanical DeFi tasks the agent matches/beats the human (ADV-02 60/60 vs 60/45, ADV-03 60/60 vs 60/0, ADV-04 60/30 vs 60/15) and is sub-second at $0; on the judgement-heavy security triage the human wins (ADV-01 100/0 vs 10/35). Stated as measured, not spun. |
 
 ### PancakeSwap proof run (P9b)
 

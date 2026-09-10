@@ -132,3 +132,69 @@
   .expHead, .expRow { grid-template-columns: 64px 1fr 1fr; gap: var(--s2); padding-inline: var(--s3); }
   .expHuman b, .expAgent b { font-size: 16px; }
 }
+
+/* ---- Human-arm evidence: the recording, shown not linked ---- */
+.evCard {
+  margin: var(--s4) 0 0;
+  display: grid;
+  grid-template-columns: 480px 1fr;
+  gap: var(--s5);
+  align-items: start;
+  padding: var(--s4);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: color-mix(in srgb, var(--ground-raised) 40%, transparent);
+}
+.evThumb, .evThumbCompact {
+  position: relative;
+  display: block;
+  border-radius: var(--r-sm);
+  overflow: hidden;
+  border: 1px solid var(--line-strong);
+  line-height: 0;
+  transition: border-color var(--dur-fast) var(--ease);
+}
+.evThumb img, .evThumbCompact img { width: 100%; height: auto; display: block; }
+.evThumb:hover, .evThumbCompact:hover { border-color: var(--brass); }
+.evPlay {
+  position: absolute; top: 50%; left: 50%;
+  width: 54px; height: 54px; transform: translate(-50%, -50%);
+  border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--night) 66%, transparent);
+  border: 2px solid rgba(255,255,255,0.9);
+}
+.evPlay::after {
+  content: ''; position: absolute; top: 50%; left: 54%; transform: translate(-50%, -50%);
+  border-style: solid; border-width: 11px 0 11px 18px;
+  border-color: transparent transparent transparent #fff;
+}
+.evCaption { display: flex; flex-direction: column; gap: var(--s2); }
+.evHead {
+  font-size: var(--size-body); font-weight: 600; color: var(--fg);
+  display: inline-flex; align-items: center; gap: var(--s2); flex-wrap: wrap;
+}
+.evBody { font-size: var(--size-caption); line-height: 1.6; color: var(--fg-soft); }
+.evLink { font-size: var(--size-caption); color: var(--chain); text-decoration: none; }
+.evLink:hover { text-decoration: underline; }
+
+.evThumbCompact { width: 160px; }
+.evThumbCompact .evPlay { width: 34px; height: 34px; }
+.evThumbCompact .evPlay::after { border-width: 7px 0 7px 12px; }
+.evThumbLabel {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  padding: 4px 6px; font-size: 11px; line-height: 1.3;
+  color: #fff; background: color-mix(in srgb, var(--night) 74%, transparent);
+}
+
+@media (max-width: 700px) {
+  .evCard { grid-template-columns: 1fr; gap: var(--s3); }
+}
+
+.expEvidence {
+  display: flex; align-items: flex-start; gap: var(--s4);
+  padding: var(--s4);
+  border-top: 1px solid var(--line);
+}
+.expEvidenceNote { font-size: var(--size-caption); line-height: 1.6; color: var(--fg-soft); }
+.expEvidenceNote a { color: var(--chain); text-decoration: none; }
+@media (max-width: 560px) { .expEvidence { flex-direction: column; gap: var(--s2); } }

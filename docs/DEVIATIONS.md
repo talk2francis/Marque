@@ -1374,3 +1374,26 @@ reference merge) took most of it.
 - **Kept** — every earlier batch and every `repro-` run stays in the database as
   history. A benchmark that still cannot be made valid is left incomplete with
   its specific blocker, not forced green.
+
+### D10.5A-07 · Ingest recovered from 8004scan's offset cap
+
+- **Was** — 8004scan's `/agents` list started rejecting `offset > 10000` with a
+  422, and the ingest cursor had walked to ~310,100 while indexing the registry.
+  Every sweep threw, was swallowed as an empty page, and stopped; the `agent`
+  table sat at 298,817 for ~2 days while the registry grew past 311,000.
+- **Now** — ingest treats the reachable list as a rolling window: it sweeps
+  offsets 0..10000 (the newest ~10k registrations, sorted newest-first), upserts
+  them idempotently, then resets the cursor to 0 for the next pass. A legacy or
+  overshot cursor snaps back to the head. `ScanClient.listAgents` clamps
+  `offset > 10000` to an empty page instead of a 422, and the registry's
+  headline total now comes from a first-page `countAgents` call that still works.
+  One sweep recovered ~10,000 agents (298,817 → 308,821) and the count is live
+  again. `packages/registry/src/ingest.ts`, `scan-client.ts`,
+  `apps/worker/src/ingest.ts`.
+- **Kept** — agents older than the 10k window, indexed while deep offsets still
+  worked, are untouched. The homepage funnel now shows both figures: the number
+  Marque has fully indexed, and the larger number 8004scan reports, with the
+  gap explained rather than hidden.
+- **Why** — this is data accrual recovering after an upstream API change, not a
+  new feature. The count competes on being honest and current; a two-day-stale
+  figure with no explanation is the opposite.

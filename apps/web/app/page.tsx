@@ -137,6 +137,16 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ a
     funnel(56).catch(() => null),
     categoryFunnel(56).catch(() => null),
   ])
+
+  // The registry's own headline total, from the ingest cursor's last sweep.
+  // 8004scan's paginated list is degraded past a shallow offset, so the number
+  // Marque has fully indexed trails the registry's reported count — this shows
+  // both rather than hiding the gap.
+  const registryReported = await db().execute(sql`
+    select (detail->>'reportedTotal')::bigint as n, updated_at
+    from ingest_cursor where source = 'scan:list:56' limit 1
+  `).then((r) => (((r as { rows?: unknown[] }).rows ?? (r as unknown[])) as Array<Record<string, unknown>>)[0] ?? null)
+    .catch(() => null)
   const byCat = new Map((categories ?? []).map((c) => [c.category, c]))
   const stage = (key: string) => stages?.find((s) => s.stage === key)?.count ?? null
 
@@ -340,6 +350,17 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ a
                   </ol>
                 )
               })()}
+              {registryReported && Number(registryReported['n']) > (registered ?? 0) && (
+                <p className={styles.funnelNote}>
+                  <ProvenanceChip provenance="MEASURED" /> The ERC-8004 registry currently reports{' '}
+                  <span className="mono">{Number(registryReported['n']).toLocaleString('en-US')}</span>{' '}
+                  agents on chain 56. Marque has fully indexed{' '}
+                  <span className="mono">{fmt(registered)}</span> of them; 8004scan&rsquo;s list API
+                  stopped serving pages past a shallow offset, so the rest cannot be pulled until
+                  that is fixed upstream. The figure above is what Marque actually holds, not what
+                  the registry claims.
+                </p>
+              )}
               <p className={styles.funnelNote}>
                 <ProvenanceChip provenance="MEASURED" /> The cliff is not where anyone expects.
                 Endpoints are not dead — most answer quickly with valid JSON. The agents behind

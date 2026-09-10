@@ -62,6 +62,17 @@ export default function MethodologyPage() {
             registration timestamp is recorded and never touched by a re-run.
           </p>
 
+          <h2>The human arm is recorded</h2>
+          <p>
+            The manual arm is a person doing the task by hand, on camera. Each benchmark links a
+            screen recording of the analyst reading the contract on BscScan, querying pool state
+            with <code>cast call</code>, or working the health factor — pinned to the benchmark
+            block. The recordings are shown on each benchmark page, not hidden behind a link,
+            because &ldquo;a human really did this&rdquo; is a claim that deserves to be seen
+            rather than asserted. The result the analyst produced is pasted into the intake,
+            which hashes it into the manifest exactly as the agent&rsquo;s answer is hashed.
+          </p>
+
           <h2>Blind grading</h2>
           <p>
             Both outputs have their source labels stripped before scoring. The grader sees two

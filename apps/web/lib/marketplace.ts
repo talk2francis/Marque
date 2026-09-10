@@ -34,6 +34,16 @@ export interface MarketRow {
   owner: string | null
   ownerLabel: string | null
   host: string | null
+  /** Registry-supplied identity (CLAIMED). Null where the registry has nothing. */
+  identity: {
+    imageUrl: string | null
+    description: string | null
+    contractAddress: string | null
+    /** The agent's own website, when it published one distinct from its endpoint. */
+    website: string | null
+    x402: boolean
+    registeredAt: string | null
+  }
   liveness: string | null
   /** measured p95-ish: we store one latency per probe; this is the last one. */
   latencyMs: number | null
@@ -65,6 +75,25 @@ const HIRE_WIRED = new Set(['a2a', 'mcp'])
 function ownerLabel(owner: string | null): string | null {
   if (!owner) return null
   return `${owner.slice(0, 6)}…${owner.slice(-4)}`
+}
+
+/** An https image URL from the registry metadata, or null. */
+function httpImage(v: unknown): string | null {
+  const s = typeof v === 'string' ? v.trim() : ''
+  return /^https:\/\/[^\s]+$/i.test(s) ? s : null
+}
+/** The origin of a registry-supplied URL — a hint at the agent's own site. */
+function originOf(v: unknown): string | null {
+  const s = httpImage(v)
+  if (!s) return null
+  try {
+    const u = new URL(s)
+    // A generic CDN or the 8004scan proxy is not "their website".
+    if (/(^|\.)8004scan\.io$|(^|\.)ipfs\.|(^|\.)arweave\.|githubusercontent\.com$/i.test(u.hostname)) return null
+    return `${u.protocol}//${u.hostname}`
+  } catch {
+    return null
+  }
 }
 
 /** Reference-agent rows, each with its live warrant from conformance_result. */
@@ -105,6 +134,14 @@ async function referenceRows(): Promise<MarketRow[]> {
       owner: null,
       ownerLabel: 'Marque',
       host: `marque.trade/agents/${a.slug}`,
+      identity: {
+        imageUrl: null,
+        description: null,
+        contractAddress: null,
+        website: 'https://marque.trade',
+        x402: false,
+        registeredAt: null,
+      },
       liveness: 'live',
       latencyMs: null,
       interfaces: ['a2a'],
@@ -149,6 +186,8 @@ async function queryThirdParty(): Promise<MarketRow[]> {
     ),
     qualifying as (
       select a.id, a.token_id, a.name, a.owner_address, a.supported_protocols,
+             a.image_url, a.description, a.contract_address, a.x402_supported, a.registry_created_at,
+             (a.raw_metadata #>> '{offchain_content,image}') as meta_image,
              p.liveness, p.latency_ms,
              s.kinds, s.price,
              regexp_replace(coalesce(s.endpoint, ''), '^(https?://[^/]+).*', '\\1') as host,
@@ -174,6 +213,12 @@ async function queryThirdParty(): Promise<MarketRow[]> {
       min(latency_ms) as latency_ms,
       (jsonb_agg(to_jsonb(coalesce(kinds, array[]::text[])) order by (liveness='live') desc) -> 0) as kinds,
       (jsonb_agg(coalesce(supported_protocols, '[]'::jsonb) order by (liveness='live') desc) -> 0) as protocols,
+      (array_agg(image_url order by (liveness='live') desc, (image_url is not null) desc))[1] as image_url,
+      (array_agg(meta_image order by (liveness='live') desc, (meta_image is not null) desc))[1] as meta_image,
+      (array_agg(description order by length(coalesce(description,'')) desc))[1] as description,
+      (array_agg(contract_address order by (contract_address is not null) desc))[1] as contract_address,
+      bool_or(x402_supported) as x402,
+      min(registry_created_at) as registered_at,
       min(price) as price,
       bool_or(conf_pass) as any_pass,
       (array_agg(conf_test order by (conf_pass) desc, conf_at desc))[1] as conf_test,
@@ -198,6 +243,8 @@ async function queryThirdParty(): Promise<MarketRow[]> {
     const name = String(r['name'] ?? 'Unnamed agent') || 'Unnamed agent'
     const owner = r['owner_address'] ? String(r['owner_address']) : null
     const hireable = kinds.some((k) => HIRE_WIRED.has(k))
+    const host = r['host'] ? String(r['host']) : null
+    const website = originOf(r['meta_image']) ?? (host && host !== '' ? null : null)
     return {
       agentId: String(r['agent_id']),
       tokenId: r['token_id'] ? String(r['token_id']) : null,
@@ -207,7 +254,17 @@ async function queryThirdParty(): Promise<MarketRow[]> {
       identityCount: Number(r['identities'] ?? 1),
       owner,
       ownerLabel: ownerLabel(owner),
-      host: r['host'] ? String(r['host']) : null,
+      host,
+      identity: {
+        imageUrl: (r['image_url'] ? String(r['image_url']) : null) ?? httpImage(r['meta_image']),
+        description: r['description'] ? String(r['description']) : null,
+        contractAddress: r['contract_address'] ? String(r['contract_address']) : null,
+        website,
+        x402: r['x402'] === true,
+        registeredAt: r['registered_at'] instanceof Date
+          ? (r['registered_at'] as Date).toISOString()
+          : (r['registered_at'] ? String(r['registered_at']) : null),
+      },
       liveness: live ? 'live' : (r['liveness'] ? String(r['liveness']) : null),
       latencyMs: r['latency_ms'] == null ? null : Number(r['latency_ms']),
       interfaces: kinds,

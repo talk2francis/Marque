@@ -4,6 +4,7 @@ import { Statement, Chip, ProvenanceChip } from '@marque/ui'
 import { SiteHeader, SiteFooter } from '../../_components/SiteHeader'
 import { readBenchmark, type LedgerRun } from '../../../lib/ledger'
 import { Reproduce } from './Reproduce'
+import { HumanArmEvidence } from '../HumanArmEvidence'
 import styles from '../ledger.module.css'
 
 export const dynamic = 'force-dynamic'
@@ -177,7 +178,15 @@ export default async function BenchmarkPage({ params }: { params: Promise<{ id: 
               </p>
             </>
           ) : (
-            manual.map((r) => <Arm key={r.id} run={r} label="Human analyst" />)
+            <>
+              <p className={styles.note}>
+                This arm was run by a person, on camera. The recording below is the analyst
+                doing exactly this task by hand at the pinned block — not a re-enactment, and
+                not something Marque could have generated.
+              </p>
+              <HumanArmEvidence id={b.id} />
+              {manual.map((r) => <Arm key={r.id} run={r} label="Human analyst" />)}
+            </>
           )}
         </section>
 

@@ -17,6 +17,14 @@ interface MarketRow {
   identityCount: number
   ownerLabel: string | null
   host: string | null
+  identity: {
+    imageUrl: string | null
+    description: string | null
+    contractAddress: string | null
+    website: string | null
+    x402: boolean
+    registeredAt: string | null
+  }
   liveness: string | null
   latencyMs: number | null
   interfaces: string[]
@@ -243,7 +251,7 @@ export function Marketplace({ category: fixedCategory }: { category?: string }) 
             return (
               <div className={styles.mktRow} data-agent={a.agentId} key={a.agentId}>
                 <span className={styles.mktAvatar}>
-                  <AgentAvatar id={a.agentId} category={a.category} reference={a.isReference} size={38} />
+                  <AgentAvatar id={a.agentId} category={a.category} reference={a.isReference} size={38} imageUrl={a.identity.imageUrl} />
                 </span>
                 <div className={styles.mktMain}>
                   <div className={styles.mktNameLine}>
@@ -260,6 +268,10 @@ export function Marketplace({ category: fixedCategory }: { category?: string }) 
                   <div className={styles.mktSub}>
                     {a.category && a.category !== 'unclassified' && <Chip>{CATEGORY_LABEL[a.category] ?? a.category}</Chip>}
                     {a.interfaces.slice(0, 2).map((k) => <Chip key={k}>{k}</Chip>)}
+                    {a.identity.x402 && <Chip tone="chain">x402</Chip>}
+                    {a.tokenId && /^\d+$/.test(a.tokenId) && (
+                      <span className={`mono ${styles.identityMeta}`}>ERC-8004 #{a.tokenId}</span>
+                    )}
                     {a.ownerLabel && <span className={styles.owner}>{a.ownerLabel}</span>}
                   </div>
                 </div>

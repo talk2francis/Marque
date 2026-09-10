@@ -101,6 +101,11 @@ function IdentityCell({ a }: { a: MarketRow }) {
           {ref ? ' (Marque)' : ''}
         </span>
       )}
+      {(a.protocols.length > 0 || a.identity.x402) && (
+        <span className={styles.muted}>
+          declares {[...a.protocols, ...(a.identity.x402 ? ['x402'] : [])].join(' · ')} <ProvenanceChip provenance="CLAIMED" />
+        </span>
+      )}
       {a.identityCount > 1 && (
         <span className={styles.muted}>+{a.identityCount - 1} sibling identit{a.identityCount - 1 === 1 ? 'y' : 'ies'} by this operator</span>
       )}

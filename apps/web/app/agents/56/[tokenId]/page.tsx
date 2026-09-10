@@ -3,6 +3,8 @@ import { sql } from 'drizzle-orm'
 import { db } from '@marque/db'
 import { Statement, Chip, DataCell, ProvenanceChip, WarrantBadge, EmptyState, EvidenceDrawer } from '@marque/ui'
 import { SiteHeader, SiteFooter } from '../../../_components/SiteHeader'
+import { AgentAvatar } from '../../../_components/AgentAvatar'
+import { explorerAddress, explorerToken } from '../../../../lib/network'
 import styles from './agent.module.css'
 
 export const dynamic = 'force-dynamic'
@@ -76,22 +78,91 @@ export default async function AgentPage({ params }: { params: Promise<{ tokenId:
 
   const category = a['category'] as string | null
   const name = (a['name'] as string | null) ?? `Agent ${tokenId}`
+  const owner = a['owner_address'] ? String(a['owner_address']) : null
+  const contract = a['contract_address'] ? String(a['contract_address']) : null
+  const wallet = a['agent_wallet'] ? String(a['agent_wallet']) : null
+  const imageUrl = a['image_url'] ? String(a['image_url']) : null
+  const protocols = Array.isArray(a['supported_protocols']) ? (a['supported_protocols'] as string[]).filter(Boolean) : []
+  const x402 = a['x402_supported'] === true
+  const registeredAt = a['registry_created_at'] ? new Date(String(a['registry_created_at'])) : null
+  const meta = (a['raw_metadata'] as Record<string, unknown> | null) ?? null
+  const offchain = (meta?.['offchain_content'] as Record<string, unknown> | undefined) ?? undefined
+  const site = (() => {
+    const cand = [offchain?.['url'], offchain?.['website'], offchain?.['homepage'], offchain?.['image']]
+      .map((v) => (typeof v === 'string' ? v.trim() : ''))
+      .find((v) => /^https:\/\//i.test(v))
+    if (!cand) return null
+    try {
+      const u = new URL(cand)
+      if (/(^|\.)8004scan\.io$|(^|\.)ipfs\.|githubusercontent\.com$/i.test(u.hostname)) return null
+      return `${u.protocol}//${u.hostname}`
+    } catch { return null }
+  })()
 
   return (
     <>
       <SiteHeader active="register" />
       <main className={styles.page}>
       <header className={styles.head}>
-        <div className={styles.headTop}>
-          <Statement as="h1">{name}</Statement>
-          <span className={styles.headChips}>
-            {category && category !== 'unclassified' && <Chip>{CATEGORY_LABEL[category] ?? category}</Chip>}
-            {live ? <Chip tone="holds">callable</Chip> : <Chip tone="breach">not callable</Chip>}
-          </span>
+        <div className={styles.idBlock}>
+          <AgentAvatar id={String(a['id'])} category={category} size={64} imageUrl={imageUrl} />
+          <div className={styles.idText}>
+            <div className={styles.headTop}>
+              <Statement as="h1">{name}</Statement>
+              <span className={styles.headChips}>
+                {category && category !== 'unclassified' && <Chip>{CATEGORY_LABEL[category] ?? category}</Chip>}
+                {live ? <Chip tone="holds">callable</Chip> : <Chip tone="breach">not callable</Chip>}
+              </span>
+            </div>
+            <p className={styles.identity}>
+              <span className={styles.idClaimed}>Registry identity <ProvenanceChip provenance="CLAIMED" /></span>
+            </p>
+          </div>
         </div>
-        <p className={styles.identity}>
-          <span className="mono">ERC-8004 · chain 56 · token {tokenId}</span>
-          {a['owner_address'] ? <span className="mono"> · owner {String(a['owner_address']).slice(0, 10)}…</span> : null}
+
+        <dl className={styles.idGrid}>
+          <div><dt>ERC-8004 token</dt><dd>
+            {contract
+              ? <a className="mono" href={explorerToken(56, contract) + `?a=${tokenId}`} rel="noreferrer noopener" target="_blank">#{tokenId} ↗</a>
+              : <span className="mono">#{tokenId}</span>}
+          </dd></div>
+          <div><dt>Registry contract</dt><dd>
+            {contract
+              ? <a className="mono" href={explorerAddress(56, contract)} rel="noreferrer noopener" target="_blank">{contract.slice(0, 10)}…{contract.slice(-6)} ↗</a>
+              : <span className={styles.muted}>not indexed</span>}
+          </dd></div>
+          <div><dt>Publisher / owner</dt><dd>
+            {owner
+              ? <a className="mono" href={explorerAddress(56, owner)} rel="noreferrer noopener" target="_blank">{owner.slice(0, 10)}…{owner.slice(-6)} ↗</a>
+              : <span className={styles.muted}>not published</span>}
+          </dd></div>
+          {wallet && wallet.toLowerCase() !== (owner ?? '').toLowerCase() && (
+            <div><dt>Agent wallet</dt><dd>
+              <a className="mono" href={explorerAddress(56, wallet)} rel="noreferrer noopener" target="_blank">{wallet.slice(0, 10)}…{wallet.slice(-6)} ↗</a>
+            </dd></div>
+          )}
+          <div><dt>Protocols</dt><dd>
+            {protocols.length || x402
+              ? <span className={styles.idChips}>
+                  {protocols.map((p) => <Chip key={p}>{p}</Chip>)}
+                  {x402 && <Chip tone="chain">x402</Chip>}
+                </span>
+              : <span className={styles.muted}>none declared</span>}
+          </dd></div>
+          {site && (
+            <div><dt>Website</dt><dd>
+              <a href={site} rel="noreferrer noopener" target="_blank">{site.replace(/^https?:\/\//, '')} ↗</a>
+            </dd></div>
+          )}
+          {registeredAt && (
+            <div><dt>Registered</dt><dd>{registeredAt.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</dd></div>
+          )}
+        </dl>
+        <p className={styles.idNote}>
+          <ProvenanceChip provenance="CLAIMED" /> Everything above is what the operator wrote into
+          the ERC-8004 registry. Marque indexes it, does not verify it, and keeps it visually
+          apart from what it measures — <span className="mono">callable</span>,{' '}
+          <span className="mono">latency</span>, and the warrant below.
         </p>
       </header>
 

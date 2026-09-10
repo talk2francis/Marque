@@ -20,6 +20,8 @@ const ENRICH_LIMIT = Number(process.env.INGEST_ENRICH_LIMIT ?? 600)
 const TICK_MS = Number(process.env.INGEST_TICK_MS ?? 5_000)
 /** Funnel snapshots are cheap but there is no point taking one every tick. */
 const FUNNEL_EVERY_MS = Number(process.env.INGEST_FUNNEL_MS ?? 30 * 60_000)
+/** Minimum gap between full 0..MAX_OFFSET list sweeps (each is ~100 API calls). */
+const SWEEP_COOLDOWN_MS = Number(process.env.INGEST_SWEEP_COOLDOWN_MS ?? 5 * 60_000)
 
 const sleep = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
 
@@ -42,11 +44,17 @@ function log(event: string, data: Record<string, unknown>): void {
  * whole tick, so a single slow page at a deep offset starved enrichment for an
  * hour — the sweep is the fragile stage and the enrich is the valuable one.
  */
-async function tick(client: ScanClient, state: { lastFunnelAt: number }): Promise<void> {
-  try {
-    await sweepStage(client)
-  } catch (err) {
-    log('sweep_error', { error: err instanceof Error ? err.message : String(err) })
+async function tick(client: ScanClient, state: { lastFunnelAt: number; lastFullSweepAt: number }): Promise<void> {
+  // The reachable list is a ~10k window swept whole in one pass (~100 calls).
+  // Doing that every tick would blow the daily API budget, and new agents only
+  // trickle in — so a full window sweep runs at most once per cooldown.
+  if (Date.now() - state.lastFullSweepAt >= SWEEP_COOLDOWN_MS) {
+    try {
+      const wrapped = await sweepStage(client)
+      if (wrapped) state.lastFullSweepAt = Date.now()
+    } catch (err) {
+      log('sweep_error', { error: err instanceof Error ? err.message : String(err) })
+    }
   }
 
   try {
@@ -74,23 +82,29 @@ async function tick(client: ScanClient, state: { lastFunnelAt: number }): Promis
   }
 }
 
-async function sweepStage(client: ScanClient): Promise<void> {
-  const sweep = await sweepList({ client, chainId: BSC, maxPages: SWEEP_PAGES })
+/** Returns true when the sweep completed a full pass of the reachable window. */
+async function sweepStage(client: ScanClient): Promise<boolean> {
+  // 8004scan's paginated list is degraded past a shallow offset, but the total
+  // on the first page is reliable — take it directly so the registry's own
+  // headline figure is always current even when a deep sweep returns nothing.
+  const registryTotal = await client.countAgents(BSC).catch(() => null)
+  const sweep = await sweepList({ client, chainId: BSC, maxPages: SWEEP_PAGES, registryTotal })
   log('sweep', {
     pages: sweep.pagesFetched,
     seen: sweep.agentsSeen,
     upserted: sweep.agentsUpserted,
     droppedOffChain: sweep.droppedOffChain,
-    reportedTotal: sweep.reportedTotal,
+    reportedTotal: sweep.reportedTotal ?? registryTotal,
     stopped: sweep.stoppedBecause,
     budgetMinute: client.rateLimit.remainingMinute,
     budgetDay: client.rateLimit.remainingDay,
   })
+  return sweep.stoppedBecause === 'exhausted' || sweep.stoppedBecause === 'empty_page'
 }
 
 async function main(): Promise<void> {
   const client = new ScanClient()
-  const state = { lastFunnelAt: 0 }
+  const state = { lastFunnelAt: 0, lastFullSweepAt: 0 }
   log('start', { once: ONCE, sweepPages: SWEEP_PAGES, enrichLimit: ENRICH_LIMIT })
 
   do {

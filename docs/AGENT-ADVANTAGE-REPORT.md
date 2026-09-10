@@ -108,6 +108,23 @@ replayed against block 120077706 and **answered** — recommends a Venus move at
 APR against the holder's 0%. The refusal runs stay in the database as an earlier sitting.
 This is a fix to a real agent defect, not a change to the grader or the rubric.
 
+## The human arm was actually run — here is the tape
+
+Each benchmark's manual arm is a person doing the task by hand, on camera. The
+recordings are linked on every benchmark page and embedded below. They are not
+re-enactments and not something Marque could have produced.
+
+| | The analyst, on screen | Recording |
+|---|---|---|
+| **ADV-01** | ![ADV-01 human arm](./evidence/adv-01.jpg) | On BscScan, reading the BEP-20 USDT contract source — the exact token the task names — for upgradeability, mint, pause and blacklist powers. [youtu.be/pt0EkL6wY6A](https://youtu.be/pt0EkL6wY6A) |
+| **ADV-02** | ![ADV-02 human arm](./evidence/adv-02.jpg) | `cast call` against the PancakeSwap V3 pool — `getPool`, `slot0`, `tickSpacing` — pinned to block 120077706. [youtu.be/0xT6JBNv1zQ](https://youtu.be/0xT6JBNv1zQ) |
+| **ADV-03** | ![ADV-03 human arm](./evidence/adv-03.jpg) | Venus supply rates — `supplyRatePerBlock`, `venusSupplySpeeds` — against the Comptroller at block 120077706, pricing the route by hand. [youtu.be/eWAAFVw9Hs0](https://youtu.be/eWAAFVw9Hs0) |
+| **ADV-04** | ![ADV-04 human arm](./evidence/adv-04.jpg) | Venus Comptroller and vToken state at block 120707631, computing the exact repayment to restore a 1.35 health factor. [youtu.be/UKWhdf4GwO8](https://youtu.be/UKWhdf4GwO8) |
+
+Both repetitions of each manual sitting carry the recording URL in
+`benchmark_run.evidence_url`; the analyst's output is pasted into the intake and
+hashed into the manifest exactly as the agent's answer is.
+
 ## Method and limits
 
 The rubric uses correctness, completeness, provenance, actionability and stated limits. Scores are language-model judgments produced by `scripts/ledger-grade.mjs` using DeepSeek, with arm labels removed and repeated grading. They are not deterministic MCS results. A zero score is a recorded grade, not missing data. Differences between terse and detailed responses are observable; this alone does not prove systematic grader bias.
