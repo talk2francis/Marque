@@ -1,22 +1,21 @@
 'use client'
 
-import { useEffect, useId, useRef, useState } from 'react'
+import { useCallback, useEffect, useId, useRef, useState } from 'react'
+import type { NavMenuItem } from './nav-items'
 import styles from './site.module.css'
+
+export type { NavMenuItem }
 
 /**
  * One nav group that opens a small menu.
  *
- * Keeps the primary bar to a handful of labels while making the deeper routes —
- * the proof run, receipts, status, the builder pages — reachable in one click
- * from anywhere instead of only from the footer. Hover to open on a pointer,
- * click/Enter for keyboard and touch, Escape and outside-click to close.
+ * Two ways in, and they no longer fight each other:
+ *  - hovering the label opens the menu transiently (closes again on mouse-out);
+ *  - clicking the label *pins* it open, so it stays put while you move the
+ *    pointer down to a row. A second click on the label closes it.
+ * Escape, an outside click, or picking a row also closes and unpins. Touch
+ * devices only ever see the click path, which is exactly the pin toggle.
  */
-export interface NavMenuItem {
-  label: string
-  href: string
-  external?: boolean
-}
-
 export function NavMenu({
   label,
   items,
@@ -27,16 +26,22 @@ export function NavMenu({
   active?: boolean
 }) {
   const [open, setOpen] = useState(false)
+  const pinnedRef = useRef(false)
   const wrapRef = useRef<HTMLDivElement>(null)
   const id = useId()
+
+  const close = useCallback(() => {
+    pinnedRef.current = false
+    setOpen(false)
+  }, [])
 
   useEffect(() => {
     if (!open) return
     const onDown = (e: MouseEvent) => {
-      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) setOpen(false)
+      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) close()
     }
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setOpen(false)
+      if (e.key === 'Escape') close()
     }
     document.addEventListener('mousedown', onDown)
     document.addEventListener('keydown', onKey)
@@ -44,14 +49,16 @@ export function NavMenu({
       document.removeEventListener('mousedown', onDown)
       document.removeEventListener('keydown', onKey)
     }
-  }, [open])
+  }, [open, close])
 
   return (
     <div
       ref={wrapRef}
       className={styles.navGroup}
       onMouseEnter={() => setOpen(true)}
-      onMouseLeave={() => setOpen(false)}
+      onMouseLeave={() => {
+        if (!pinnedRef.current) setOpen(false)
+      }}
     >
       <button
         type="button"
@@ -60,7 +67,14 @@ export function NavMenu({
         aria-haspopup="menu"
         aria-controls={id}
         {...(active ? { 'aria-current': 'page' as const } : {})}
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => {
+          if (pinnedRef.current) {
+            close()
+          } else {
+            pinnedRef.current = true
+            setOpen(true)
+          }
+        }}
       >
         {label}
         <span className={styles.navCaret} aria-hidden="true" />
@@ -73,7 +87,7 @@ export function NavMenu({
             role="menuitem"
             className={styles.navMenuItem}
             {...(it.external ? { target: '_blank', rel: 'noreferrer' } : {})}
-            onClick={() => setOpen(false)}
+            onClick={close}
           >
             {it.label}
             {it.external && <span className={styles.navMenuExt} aria-hidden="true"> ↗</span>}

@@ -185,26 +185,121 @@
 }
 .navConnect:hover { border-color: var(--fg-soft); box-shadow: var(--elev-1); }
 
+/* ---- Mobile drawer (burger + slide-in panel) ---- */
+/* The burger only exists below 900px; the panel and scrim are portalled to
+   <body>, sit above everything, and are kept fully off-canvas + inert until
+   opened so they never affect layout or scroll width at any width. */
+.navBurger { display: none; }
+
+.navBurgerBox {
+  position: relative;
+  width: 18px;
+  height: 12px;
+  display: block;
+}
+.navBurgerBox span {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  border-radius: 2px;
+  background: currentColor;
+  transition: transform 220ms var(--ease), opacity 140ms var(--ease);
+}
+.navBurgerBox span:nth-child(1) { top: 0; }
+.navBurgerBox span:nth-child(2) { top: 5px; }
+.navBurgerBox span:nth-child(3) { top: 10px; }
+.navBurgerBox[data-open] span:nth-child(1) { transform: translateY(5px) rotate(45deg); }
+.navBurgerBox[data-open] span:nth-child(2) { opacity: 0; }
+.navBurgerBox[data-open] span:nth-child(3) { transform: translateY(-5px) rotate(-45deg); }
+
+.navScrim {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  background: color-mix(in srgb, var(--fg) 42%, transparent);
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms var(--ease);
+}
+.navScrim[data-open] { opacity: 1; pointer-events: auto; }
+
+.navPanel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 100;
+  height: 100dvh;
+  width: min(84vw, 328px);
+  padding: calc(var(--s6) + env(safe-area-inset-top, 0px)) var(--s5) calc(var(--s5) + env(safe-area-inset-bottom, 0px));
+  background: var(--ground-raised);
+  border-left: 1px solid var(--line);
+  box-shadow: -24px 0 60px -20px color-mix(in srgb, var(--fg) 30%, transparent);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  transform: translateX(calc(100% + 40px));
+  visibility: hidden;
+  transition: transform 260ms var(--ease), visibility 260ms linear;
+}
+.navPanel[data-open] { transform: none; visibility: visible; }
+
+.navPanelInner { display: flex; flex-direction: column; gap: var(--s5); }
+.navPanelGroup { display: flex; flex-direction: column; gap: 2px; }
+.navPanelGroup + .navPanelGroup { padding-top: var(--s4); border-top: 1px solid var(--line); }
+.navPanelHead {
+  font-size: var(--size-caption);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--fg-faint);
+  padding: 0 12px var(--s1);
+}
+.navPanelLink {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 12px;
+  border-radius: var(--r-sm);
+  font-size: 15px;
+  color: var(--fg-soft);
+  text-decoration: none;
+}
+.navPanelLink:hover,
+.navPanelLink:focus-visible { color: var(--fg); background: color-mix(in srgb, var(--fg) 6%, transparent); }
+.navPanelLink[aria-current='page'] { color: var(--fg); font-weight: 550; }
+
+@media (prefers-reduced-motion: reduce) {
+  .navScrim, .navPanel, .navBurgerBox span { transition: none; }
+}
+
 @media (max-width: 900px) {
   .navInner {
-    grid-template-columns: auto 1fr;
-    grid-template-areas: 'brand right' 'links links';
-    row-gap: var(--s1);
-    padding-block: var(--s2);
+    grid-template-columns: 1fr auto;
+    grid-template-areas: 'brand right';
+    column-gap: var(--s3);
+    min-height: 58px;
   }
   .brand { grid-area: brand; }
-  .navRight { grid-area: right; }
-  .navLinks {
-    grid-area: links;
-    justify-self: stretch;
-    /* Its own row here, so it can wrap instead of scroll — which keeps the
-       dropdown menus from being clipped by an overflow container. */
-    flex-wrap: wrap;
-    overflow: visible;
-    row-gap: 2px;
+  .navRight { grid-area: right; gap: var(--s1); }
+  /* The whole link set now lives in the drawer. */
+  .navLinks { display: none; }
+  .navBurger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    margin-left: 2px;
+    border: 0;
+    background: none;
+    color: var(--fg-soft);
+    cursor: pointer;
+    border-radius: var(--r-sm);
+    transition: color var(--dur-fast) var(--ease), background-color var(--dur-fast) var(--ease);
   }
-  .navMenu { left: 0; transform: none; }
-  @keyframes navMenuIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+  .navBurger:hover { color: var(--fg); background: color-mix(in srgb, var(--fg) 5%, transparent); }
 }
 @media (max-width: 520px) {
   .navInner { padding-inline: var(--s4); }

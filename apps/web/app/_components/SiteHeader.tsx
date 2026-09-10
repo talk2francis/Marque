@@ -1,8 +1,10 @@
 import { BRAND } from '@marque/ui/brand'
 import { CharterStrip } from './CharterStrip'
 import { NavWallet } from './NavWallet'
-import { NavMenu, type NavMenuItem } from './NavMenu'
+import { NavMenu } from './NavMenu'
+import { MobileNav } from './MobileNav'
 import { ThemeToggle } from './ThemeToggle'
+import { NAV, PANCAKE_MENU, PROOF_MENU, BUILD_MENU, type Active } from './nav-items'
 import styles from './site.module.css'
 
 /**
@@ -14,40 +16,14 @@ import styles from './site.module.css'
  * group; a five-column footer that makes every built route reachable.
  */
 
-type Active =
-  | 'register' | 'positions' | 'benchmarks' | 'builders' | 'docs'
-  | 'charters' | 'standard' | 'ledger' | 'pancake' | 'status' | 'me'
-
 /**
  * The primary nav is the buyer's path — find an agent, read a position, your
  * own dashboard — kept to a handful of labels. The deeper routes that used to
  * be footer-only (the proof run, receipts, status, the builder pages, the read
- * API) now hang off three small menus so they are one click from anywhere
- * without crowding the bar.
+ * API) hang off three small menus (see `nav-items.ts`) so they are one click
+ * from anywhere without crowding the bar. Below 900px the whole set moves into
+ * the `MobileNav` drawer.
  */
-const NAV: Array<{ label: string; href: string; key: Active }> = [
-  { label: 'Marketplace', href: '/register', key: 'register' },
-  { label: 'Positions', href: '/positions', key: 'positions' },
-  { label: 'My Marque', href: '/me', key: 'me' },
-]
-
-const PANCAKE_MENU: NavMenuItem[] = [
-  { label: 'Pancake Desk', href: '/pancakeswap' },
-  { label: 'PancakeSwap proof run', href: '/pancakeswap/proof' },
-]
-const PROOF_MENU: NavMenuItem[] = [
-  { label: 'The Ledger', href: '/ledger' },
-  { label: 'The Standard', href: '/standard' },
-  { label: 'Receipts', href: '/receipts/latest' },
-  { label: 'Status', href: '/status' },
-]
-const BUILD_MENU: NavMenuItem[] = [
-  { label: 'Docs', href: '/docs' },
-  { label: 'Test your agent', href: '/builders/test' },
-  { label: 'List your agent', href: '/builders/claim' },
-  { label: 'Read API', href: '/api/v1/agents', external: true },
-  { label: 'GitHub', href: 'https://github.com/talk2francis/Marque', external: true },
-]
 
 function BrandLockup() {
   // Two colourways of the real lockup; the CSS shows one per theme (system
@@ -92,6 +68,7 @@ export function SiteHeader({ active }: { active?: Active }) {
           <div className={styles.navRight}>
             <ThemeToggle />
             <NavWallet />
+            <MobileNav active={active} />
           </div>
         </div>
       </header>
