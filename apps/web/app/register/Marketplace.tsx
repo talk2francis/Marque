@@ -1,142 +1,178 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState, useCallback } from 'react'
-import { track } from '../../lib/track'
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
-import { Chip, DataCell, WarrantBadge, EmptyState, ProvenanceChip, LinkButton } from '@marque/ui'
-import { ReferenceMark } from '../_components/ReferenceMark'
-import { AgentAvatar } from '../_components/AgentAvatar'
+import { EmptyState, LinkButton } from '@marque/ui'
+import { track } from '../../lib/track'
+import { MarketToolbar } from './MarketToolbar'
+import { MarketList } from './MarketList'
+import { MarketGrid } from './MarketGrid'
+import { ifaceLabel, measuredAgo, type MarketRow } from './market-model'
+import {
+  activeFilters,
+  apiQuery,
+  CLEARED_FILTERS,
+  DEFAULT_STATE,
+  paramsToState,
+  readStoredView,
+  stateToParams,
+  storeView,
+  type MarketState,
+} from './market-url'
 import styles from './register.module.css'
 
-interface MarketRow {
-  agentId: string
-  tokenId: string | null
-  name: string
-  category: string | null
-  isReference: boolean
-  identityCount: number
-  ownerLabel: string | null
-  host: string | null
-  identity: {
-    imageUrl: string | null
-    description: string | null
-    contractAddress: string | null
-    website: string | null
-    x402: boolean
-    registeredAt: string | null
-  }
-  liveness: string | null
-  latencyMs: number | null
-  interfaces: string[]
-  protocols: string[]
-  price: string | null
-  warrant: { status: 'warranted' | 'failed' | 'untested'; testId: string | null; date: string | null; failedField: string | null }
-  qual: 'warranted' | 'failed' | 'callable' | 'unbound' | 'dead'
-  previewable: boolean
-  hireBlockedReason: string | null
-}
-
-const CATEGORY_LABEL: Record<string, string> = {
-  rebalancing: 'Rebalancing', grid: 'Grid', yield: 'Yield', health_factor: 'Health factor', security: 'Security',
-}
-const CHIPS: Array<{ v: string | null; label: string }> = [
-  { v: null, label: 'All' }, { v: 'rebalancing', label: 'Rebalancing' }, { v: 'grid', label: 'Grid' },
-  { v: 'yield', label: 'Yield' }, { v: 'health_factor', label: 'Health factor' }, { v: 'security', label: 'Security' },
-]
-const SORTS: Array<{ v: string; label: string }> = [
-  { v: 'best', label: 'Best match' }, { v: 'proven', label: 'Most proven' }, { v: 'price', label: 'Lowest price' },
-  { v: 'fast', label: 'Fastest' }, { v: 'recent', label: 'Recently tested' },
-]
-const IFACES = ['a2a', 'mcp', 'x402', 'erc8183']
-
-function agoDate(iso: string | null): string | null {
-  if (!iso) return null
-  return new Date(iso).toISOString().slice(0, 10)
-}
-
+/**
+ * The marketplace.
+ *
+ * Everything about how this talks to the server is unchanged: the same
+ * `/api/v1/marketplace` call, the same debounce, the same query keys, the same
+ * qualification ordering, the same pagination, the same compare rules, the same
+ * telemetry. What changed is the order a human meets it in — controls and
+ * inventory first, methodology one layer down — and that the whole market view
+ * now lives in the URL so it can be shared and stepped through.
+ */
 export function Marketplace({ category: fixedCategory }: { category?: string }) {
   const [rows, setRows] = useState<MarketRow[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [generatedAt, setGeneratedAt] = useState<string | null>(null)
-
-  const [search, setSearch] = useState('')
-  const [category, setCategory] = useState<string | null>(fixedCategory ?? null)
-  const [sort, setSort] = useState('best')
-  const [liveNow, setLiveNow] = useState(false)
-  const [warranted, setWarranted] = useState(false)
-  const [thirdParty, setThirdParty] = useState(false)
-  const [hasPrice, setHasPrice] = useState(false)
-  const [iface, setIface] = useState<string | null>(null)
-
-  const [selected, setSelected] = useState<MarketRow[]>([])
-  const rowRects = useRef<Map<string, number>>(new Map())
-
-  const qs = useMemo(() => {
-    const p = new URLSearchParams()
-    if (category) p.set('category', category)
-    if (search.trim()) p.set('q', search.trim())
-    if (sort !== 'best') p.set('sort', sort)
-    if (liveNow) p.set('live', '1')
-    if (warranted) p.set('warranted', '1')
-    if (thirdParty) p.set('thirdParty', '1')
-    if (hasPrice) p.set('hasPrice', '1')
-    if (iface) p.set('iface', iface)
-    return p.toString()
-  }, [category, search, sort, liveNow, warranted, thirdParty, hasPrice, iface])
-
-  const [pageSize, setPageSize] = useState(15)
-  const [paging, setPaging] = useState({ query: '', page: 0 })
-  const page = paging.query === qs ? paging.page : 0
   const [total, setTotal] = useState<number | null>(null)
   const [hasMore, setHasMore] = useState(false)
-  const changePage = (next: number) => {
-    setPaging({ query: qs, page: next })
-    listRef.current?.scrollIntoView({ block: 'start', behavior: 'auto' })
-  }
+  const [retry, setRetry] = useState(0)
+  const [rankInfo, setRankInfo] = useState(false)
+
+  const [state, setState] = useState<MarketState>(() => ({
+    ...DEFAULT_STATE,
+    category: fixedCategory ?? null,
+  }))
+  /** Nothing fetches or writes the URL until the URL has been read once. */
+  const [ready, setReady] = useState(false)
+  const replaceNext = useRef(false)
+
+  const resultsId = useId()
+  const listRef = useRef<HTMLDivElement>(null)
+  const rowRects = useRef<Map<string, number>>(new Map())
+
+  /* --- state in, state out ------------------------------------------- */
+
+  const patch = useCallback((p: Partial<MarketState>) => {
+    setState((s) => ({ ...s, ...p }))
+  }, [])
+
+  /** A change that alters the query returns the reader to the first page. */
+  const patchFilter = useCallback((p: Partial<MarketState>) => {
+    // Typing must not push a history entry per keystroke.
+    if ('search' in p) replaceNext.current = true
+    setState((s) => ({ ...s, ...p, page: 0 }))
+  }, [])
+
+  // Read the URL once on mount, ahead of the first fetch, so a shared link
+  // never costs an extra request for the default view it is about to replace.
+  useEffect(() => {
+    const stored = readStoredView()
+    setState((s) =>
+      paramsToState(window.location.search, stored ? { ...s, view: stored } : s, {
+        fixedCategory: fixedCategory ?? null,
+      }),
+    )
+    setReady(true)
+    // Mount only: fixedCategory is fixed by the route.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   useEffect(() => {
+    if (!ready) return
+    const qs = stateToParams(state, { fixedCategory: !!fixedCategory })
+    const next = qs ? `${window.location.pathname}?${qs}` : window.location.pathname
+    if (next === window.location.pathname + window.location.search) return
+    if (replaceNext.current) {
+      window.history.replaceState(null, '', next)
+      replaceNext.current = false
+    } else {
+      window.history.pushState(null, '', next)
+    }
+  }, [state, ready, fixedCategory])
+
+  useEffect(() => {
+    const onPop = () =>
+      setState((s) => paramsToState(window.location.search, s, { fixedCategory: fixedCategory ?? null }))
+    window.addEventListener('popstate', onPop)
+    return () => window.removeEventListener('popstate', onPop)
+  }, [fixedCategory])
+
+  useEffect(() => {
+    if (ready) storeView(state.view)
+  }, [state.view, ready])
+
+  /* --- the fetch: unchanged contract ---------------------------------- */
+
+  const qs = apiQuery(state)
+  const { page, pageSize } = state
+
+  useEffect(() => {
+    if (!ready) return
     let cancelled = false
     const controller = new AbortController()
-    setLoading(true); setError(null)
+    setLoading(true)
+    setError(null)
     const t = setTimeout(() => {
       void (async () => {
         try {
-          const res = await fetch(`/api/v1/marketplace?${qs}&limit=${pageSize}&offset=${page * pageSize}`, { cache: 'no-store', signal: controller.signal })
+          const res = await fetch(`/api/v1/marketplace?${qs}&limit=${pageSize}&offset=${page * pageSize}`, {
+            cache: 'no-store',
+            signal: controller.signal,
+          })
           const j = await res.json()
           if (cancelled) return
-          if (!res.ok) { setError(j.detail ?? j.error ?? 'Could not load the marketplace.'); setRows([]) }
-          else {
+          if (!res.ok) {
+            setError(j.detail ?? j.error ?? 'Could not load the marketplace.')
+            setRows([])
+          } else {
             setRows(j.agents ?? [])
             setTotal(typeof j.total === 'number' ? j.total : null)
             setHasMore(j.hasMore === true)
+            // The API clamps an out-of-range offset; follow it rather than
+            // showing page 9 of 3.
             if (typeof j.offset === 'number' && j.offset !== page * pageSize) {
-              setPaging({ query: qs, page: Math.floor(j.offset / pageSize) })
+              setState((s) => ({ ...s, page: Math.floor(j.offset / s.pageSize) }))
             }
             setGeneratedAt(j.generatedAt ?? null)
-            if (search.trim().length >= 2) track('marketplace_search', { q: search.trim().length })
+            const q = state.search.trim()
+            if (q.length >= 2) track('marketplace_search', { q: q.length })
           }
-        } catch {
-          if (!cancelled) setError('Could not reach the marketplace.')
+        } catch (err) {
+          if (!cancelled && (err as Error)?.name !== 'AbortError') setError('Could not reach the marketplace.')
         } finally {
           if (!cancelled) setLoading(false)
         }
       })()
     }, 180)
-    return () => { cancelled = true; controller.abort(); clearTimeout(t) }
-  }, [qs, page, pageSize])
+    return () => {
+      cancelled = true
+      controller.abort()
+      clearTimeout(t)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [qs, page, pageSize, ready, retry])
 
-  // FLIP: remember row positions before a reorder, animate the delta after.
-  const listRef = useRef<HTMLDivElement>(null)
+  /* --- FLIP: remember row positions, animate the delta ---------------- */
+
+  // Switching view relocates every row; that is a layout change, not a
+  // reorder, so the remembered positions are dropped rather than animated.
+  useEffect(() => {
+    rowRects.current = new Map()
+  }, [state.view])
+
   useEffect(() => {
     const el = listRef.current
     if (!el) return
     const next = new Map<string, number>()
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     el.querySelectorAll<HTMLElement>('[data-agent]').forEach((n) => {
       const id = n.dataset.agent!
       const top = n.getBoundingClientRect().top
       const prev = rowRects.current.get(id)
-      if (prev !== undefined && Math.abs(prev - top) > 1 && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      if (prev !== undefined && Math.abs(prev - top) > 1 && !reduced) {
         n.animate(
           [{ transform: `translateY(${prev - top}px)` }, { transform: 'translateY(0)' }],
           { duration: 260, easing: 'cubic-bezier(.16,1,.3,1)' },
@@ -145,7 +181,12 @@ export function Marketplace({ category: fixedCategory }: { category?: string }) 
       next.set(id, top)
     })
     rowRects.current = next
-  }, [rows])
+  }, [rows, state.view])
+
+  /* --- compare: at most three, unchanged ------------------------------ */
+
+  const [selected, setSelected] = useState<MarketRow[]>([])
+  const selectedIds = useMemo(() => new Set(selected.map((s) => s.agentId)), [selected])
 
   const toggleSelect = useCallback((r: MarketRow) => {
     setSelected((cur) => {
@@ -158,207 +199,192 @@ export function Marketplace({ category: fixedCategory }: { category?: string }) 
 
   const compareHref = `/compare?agents=${selected.map((s) => encodeURIComponent(s.agentId)).join(',')}`
 
-  // Reference agents live at /agents/<slug>; third parties at /agents/56/<tokenId>
-  // when we actually have a numeric token id, else they have no profile page.
-  const profileHref = (a: MarketRow): string | null => {
-    if (a.isReference) return `/agents/${a.tokenId}`
-    if (a.tokenId && /^\d+$/.test(a.tokenId)) return `/agents/56/${a.tokenId}`
-    return null
+  /* --- derived display ------------------------------------------------ */
+
+  const chips = activeFilters(state, ifaceLabel)
+  const ago = measuredAgo(generatedAt)
+  const changePage = (next: number) => {
+    setState((s) => ({ ...s, page: next }))
+    listRef.current?.scrollIntoView({ block: 'start', behavior: 'auto' })
   }
-  const countedAgo = generatedAt
-    ? (() => {
-        const s = Math.round((Date.now() - Date.parse(generatedAt)) / 1000)
-        return s < 90 ? 'just now' : s < 3600 ? `${Math.round(s / 60)}m ago` : `${Math.round(s / 3600)}h ago`
-      })()
-    : null
+  const skeletonCount = Math.min(pageSize, state.view === 'grid' ? 8 : 6)
 
   return (
     <>
-      {/* Controls above the results (P10.5B item 5). */}
-      <div className={styles.controls}>
-        <input
-          className={styles.search}
-          type="search"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search agents, protocols or capabilities"
-          aria-label="Search the marketplace"
-          spellCheck={false}
-        />
-        <div className={styles.chips} role="group" aria-label="Category">
-          {CHIPS.filter((c) => !fixedCategory || c.v === fixedCategory || c.v === null).map((c) => (
-            <button
-              key={c.label}
-              type="button"
-              className={`${styles.chip} ${category === c.v ? styles.chipOn : ''}`}
-              aria-pressed={category === c.v}
-              onClick={() => setCategory(c.v)}
-            >
-              {c.label}
-            </button>
-          ))}
-        </div>
-        <div className={styles.filterRow}>
-          {([
-            ['Live now', liveNow, setLiveNow],
-            ['Warranted', warranted, setWarranted],
-            ['Third-party only', thirdParty, setThirdParty],
-            ['Has a price', hasPrice, setHasPrice],
-          ] as const).map(([label, on, set]) => (
-            <button key={label} type="button" className={`${styles.toggle} ${on ? styles.toggleOn : ''}`} aria-pressed={on} onClick={() => set(!on)}>
-              {label}
-            </button>
-          ))}
-          <select className={styles.select} value={iface ?? ''} onChange={(e) => setIface(e.target.value || null)} aria-label="Interface">
-            <option value="">Any interface</option>
-            {IFACES.map((i) => <option key={i} value={i}>{i}</option>)}
-          </select>
-          <select className={styles.select} value={sort} onChange={(e) => setSort(e.target.value)} aria-label="Sort">
-            {SORTS.map((s) => <option key={s.v} value={s.v}>{s.label}</option>)}
-          </select>
-        </div>
+      <MarketToolbar
+        state={state}
+        patch={patch}
+        patchFilter={patchFilter}
+        fixedCategory={fixedCategory}
+        resultsId={resultsId}
+      />
+
+      {/* Result utility bar: what this set is, and how it was ranked. */}
+      <div className={styles.utility}>
+        <p className={styles.utilityCount} role="status" aria-live="polite">
+          {total === null ? (
+            loading ? 'Counting agents…' : 'Result count unavailable'
+          ) : (
+            <>
+              <strong>{total.toLocaleString()}</strong> {total === 1 ? 'agent' : 'agents'}
+            </>
+          )}
+          {ago && <span className={styles.utilityDot}> · Measured {ago}</span>}
+          <span className={styles.utilityDot}> · Operator-deduplicated</span>
+        </p>
+        <button
+          type="button"
+          className={styles.utilityInfo}
+          aria-expanded={rankInfo}
+          onClick={() => setRankInfo((v) => !v)}
+        >
+          Qualification-first ranking
+          <span className={styles.utilityInfoMark} aria-hidden="true">i</span>
+        </button>
       </div>
 
-      {countedAgo && (
-        <p className={styles.status}>
-          <ProvenanceChip provenance="MEASURED" /> Ranked by qualification — warranted first, then
-          tested-and-failed, then callable. Deduplicated by operator. Measured {countedAgo}.
+      {rankInfo && (
+        <p className={styles.utilityNote}>
+          Qualified agents rank first, then agents that were tested and did not qualify, then agents that are
+          merely callable. Duplicate identities registered by the same operator against the same endpoint are
+          grouped into one row, so a team that registered forty identities is one entry, not forty.
         </p>
       )}
 
-      <p className={styles.listNote}>
-        <b>Preview is free.</b> The agent answers a real question about a real position and Marque
-        grades the answer field by field — before you pay anything. Rows below the warranted ones
-        answered a probe but have not been tested against the Standard; we show exactly what we
-        measured — liveness, latency, identity — and nothing we did not.
+      <p className={styles.trust}>
+        <span className={styles.trustDot} aria-hidden="true" />
+        <span>
+          <b>Preview is free</b> — run a real task and see the result before you pay or grant authority.
+        </span>
+        <Link className={styles.trustLink} href="/standard">
+          How qualification works →
+        </Link>
       </p>
 
-      {loading && <p className={styles.status}>Loading…</p>}
-      {error && <div className={styles.error} role="alert">{error}</div>}
-
-      {!loading && !error && rows.length === 0 && (
-        <EmptyState title="No agent matches these filters yet.">
-          <p>This is the real count, not a loading state. Loosen a filter, or list an agent that belongs here.</p>
-        </EmptyState>
-      )}
-
-      {!loading && rows.length > 0 && (
-        <div className={styles.rows} ref={listRef}>
-          {rows.map((a) => {
-            const live = a.liveness === 'live'
-            const picked = selected.some((s) => s.agentId === a.agentId)
-            const hireable = a.hireBlockedReason === null
-            return (
-              <div className={styles.mktRow} data-agent={a.agentId} key={a.agentId}>
-                <span className={styles.mktAvatar}>
-                  <AgentAvatar id={a.agentId} category={a.category} reference={a.isReference} size={38} imageUrl={a.identity.imageUrl} />
-                </span>
-                <div className={styles.mktMain}>
-                  <div className={styles.mktNameLine}>
-                    {profileHref(a)
-                      ? <Link href={profileHref(a)!} className={styles.name}>{a.name}</Link>
-                      : <span className={styles.name}>{a.name}</span>}
-                    {a.isReference && <ReferenceMark compact />}
-                    {a.identityCount > 1 && profileHref(a) && (
-                      <Link href={profileHref(a)!} className={styles.dupes}>
-                        {a.identityCount.toLocaleString()} registered identities · view all
-                      </Link>
-                    )}
-                  </div>
-                  <div className={styles.mktSub}>
-                    {a.category && a.category !== 'unclassified' && <Chip>{CATEGORY_LABEL[a.category] ?? a.category}</Chip>}
-                    {a.interfaces.slice(0, 2).map((k) => <Chip key={k}>{k}</Chip>)}
-                    {a.identity.x402 && <Chip tone="chain">x402</Chip>}
-                    {a.tokenId && /^\d+$/.test(a.tokenId) && (
-                      <span className={`mono ${styles.identityMeta}`}>ERC-8004 #{a.tokenId}</span>
-                    )}
-                    {a.ownerLabel && <span className={styles.owner}>{a.ownerLabel}</span>}
-                  </div>
-                </div>
-
-                <span className={styles.mktLive}>
-                  <span className={`${styles.dot} ${live ? styles.dotLive : styles.dotDown}`} aria-hidden="true" />
-                  <DataCell muted={!live}>{a.latencyMs != null ? `${a.latencyMs} ms` : live ? 'live' : (a.liveness ?? '—')}</DataCell>
-                </span>
-
-                <span className={styles.mktWarrant}>
-                  <WarrantBadge
-                    status={a.warrant.status}
-                    date={agoDate(a.warrant.date) ?? undefined}
-                    testId={a.warrant.testId ?? undefined}
-                    failedField={a.warrant.failedField ?? undefined}
-                  />
-                </span>
-
-                <span className={styles.mktPrice}>
-                  {a.price ?? <span className={styles.noPrice}>price not advertised</span>}
-                </span>
-
-                <span className={styles.mktActions}>
-                  <button
-                    type="button"
-                    className={`${styles.compareBtn} ${picked ? styles.compareOn : ''}`}
-                    aria-pressed={picked}
-                    disabled={!picked && selected.length >= 3}
-                    onClick={() => toggleSelect(a)}
-                  >
-                    {picked ? 'Selected' : 'Compare'}
-                  </button>
-                  {/* Preview leads for anything not yet warranted — it is the honest
-                      call-to-action when there is no pass to trust. Warranted agents
-                      lead with Hire. Non-previewable third parties show neither, rather
-                      than a row of dead buttons. */}
-                  {a.previewable && profileHref(a) && (
-                    <LinkButton
-                      size="sm"
-                      variant={a.warrant.status === 'warranted' ? 'secondary' : 'primary'}
-                      href={`${profileHref(a)}#preview`}
-                    >
-                      Preview free
-                    </LinkButton>
-                  )}
-                  {hireable
-                    ? <LinkButton size="sm" variant={a.warrant.status === 'warranted' ? 'primary' : 'secondary'} href={`/app/charter?agent=${encodeURIComponent(a.agentId)}${a.category ? `&category=${a.category}` : ''}`}>Hire</LinkButton>
-                    : <button type="button" className={styles.actionMuted} disabled title={a.hireBlockedReason ?? undefined}>Hire — {a.hireBlockedReason}</button>}
-                </span>
-              </div>
-            )
-          })}
+      {error && (
+        <div className={styles.error} role="alert">
+          <span>{error}</span>
+          <button type="button" className={styles.retry} onClick={() => setRetry((n) => n + 1)}>
+            Try again
+          </button>
         </div>
       )}
 
+      <div id={resultsId} ref={listRef} className={styles.results}>
+        {loading && (
+          <div className={state.view === 'grid' ? styles.grid : styles.list} aria-hidden="true">
+            {Array.from({ length: skeletonCount }).map((_, i) => (
+              <div key={i} className={state.view === 'grid' ? styles.cardSkel : styles.rowSkel}>
+                <span className={styles.skelThumb} />
+                <span className={styles.skelLines}>
+                  <span className={styles.skelLine} />
+                  <span className={`${styles.skelLine} ${styles.skelLineShort}`} />
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {!loading && !error && rows.length === 0 && (
+          <EmptyState title="No agent matches these filters.">
+            <p>
+              This is the real count, not a loading state — Marque does not pad a category with agents that do
+              not exist.
+            </p>
+            {(chips.length > 0 || state.search.trim() || state.category) && (
+              <p>
+                <button
+                  type="button"
+                  className={styles.retry}
+                  onClick={() =>
+                    patchFilter({
+                      ...CLEARED_FILTERS,
+                      search: '',
+                      ...(fixedCategory ? {} : { category: null }),
+                    })
+                  }
+                >
+                  Clear filters
+                </button>
+              </p>
+            )}
+          </EmptyState>
+        )}
+
+        {!loading && !error && rows.length > 0 &&
+          (state.view === 'grid' ? (
+            <MarketGrid rows={rows} selectedIds={selectedIds} atLimit={selected.length >= 3} onToggle={toggleSelect} />
+          ) : (
+            <MarketList rows={rows} selectedIds={selectedIds} atLimit={selected.length >= 3} onToggle={toggleSelect} />
+          ))}
+      </div>
+
       <nav className={styles.pagination} aria-label="Marketplace pages">
-        <label>Rows per page{' '}
-          <select className={styles.select} value={pageSize} onChange={(e) => {
-            setPageSize(Number(e.target.value)); setPaging({ query: qs, page: 0 })
-          }}>
-            {[10, 15, 20].map((n) => <option key={n} value={n}>{n}</option>)}
+        <label className={styles.rowsPer}>
+          Rows per page{' '}
+          <select
+            className={styles.sort}
+            value={pageSize}
+            onChange={(e) => setState((s) => ({ ...s, pageSize: Number(e.target.value), page: 0 }))}
+          >
+            {[10, 15, 20].map((n) => (
+              <option key={n} value={n}>{n}</option>
+            ))}
           </select>
         </label>
-        <span role="status" aria-live="polite">
-          {loading ? 'Loading page…' : total === null ? 'Results unavailable' :
-            total === 0 ? 'No matching agents' : `${page * pageSize + 1}–${page * pageSize + rows.length} of ${total} agents`}
+        <span className={styles.pageOf}>
+          {loading
+            ? 'Loading page…'
+            : total === null
+              ? 'Results unavailable'
+              : total === 0
+                ? 'No matching agents'
+                : `${page * pageSize + 1}–${page * pageSize + rows.length} of ${total.toLocaleString()}`}
         </span>
         <div className={styles.pageButtons}>
-          <button type="button" className={styles.toggle} disabled={loading || page === 0} onClick={() => changePage(page - 1)}>Previous</button>
-          <span>Page {page + 1}</span>
-          <button type="button" className={styles.toggle} disabled={loading || !hasMore || !!error} onClick={() => changePage(page + 1)}>Next</button>
+          <button
+            type="button"
+            className={styles.pageBtn}
+            disabled={loading || page === 0}
+            onClick={() => changePage(page - 1)}
+          >
+            Previous
+          </button>
+          <span className={styles.pageNum}>Page {page + 1}</span>
+          <button
+            type="button"
+            className={styles.pageBtn}
+            disabled={loading || !hasMore || !!error}
+            onClick={() => changePage(page + 1)}
+          >
+            Next
+          </button>
         </div>
       </nav>
 
-      {/* Floating compare tray — appears the moment a second agent is picked. */}
       {selected.length >= 1 && (
         <div className={styles.tray} role="region" aria-label="Compare tray">
-          <span className={styles.trayLabel}>{selected.length === 1 ? 'Pick one more to compare' : 'Compare'}</span>
+          <span className={styles.trayLabel}>
+            {selected.length === 1 ? 'Pick one more to compare' : `Comparing ${selected.length}`}
+          </span>
           <span className={styles.trayList}>
             {selected.map((s) => (
               <span key={s.agentId} className={styles.trayChip}>
                 {s.name}
-                <button type="button" aria-label={`Remove ${s.name}`} onClick={() => toggleSelect(s)}>×</button>
+                <button type="button" aria-label={`Remove ${s.name} from comparison`} onClick={() => toggleSelect(s)}>
+                  ×
+                </button>
               </span>
             ))}
           </span>
-          <LinkButton variant="primary" size="sm" href={compareHref} {...(selected.length < 2 ? { 'aria-disabled': true, tabIndex: -1, onClick: (e: React.MouseEvent) => e.preventDefault() } : {})}>
+          <LinkButton
+            variant="primary"
+            size="sm"
+            href={compareHref}
+            {...(selected.length < 2
+              ? { 'aria-disabled': true, tabIndex: -1, onClick: (e: React.MouseEvent) => e.preventDefault() }
+              : {})}
+          >
             Compare{selected.length >= 2 ? ` ${selected.length}` : ''}
           </LinkButton>
         </div>

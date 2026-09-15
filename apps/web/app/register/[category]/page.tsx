@@ -1,19 +1,25 @@
 import { notFound } from 'next/navigation'
+import Link from 'next/link'
 import { Statement, Chip } from '@marque/ui'
 import { categoryFunnel, MIN_THIRD_PARTY_PER_CATEGORY } from '@marque/registry'
 import { Marketplace } from '../Marketplace'
 import { RegisterTable } from '../RegisterTable'
+import { Disclosure } from '../Disclosure'
 import { SiteHeader, SiteFooter } from '../../_components/SiteHeader'
 import styles from '../register.module.css'
 
 export const dynamic = 'force-dynamic'
 
 /**
- * One category of the Register.
+ * One category of the Marketplace.
  *
  * The URL slug and the stored category differ for health factor, because
  * `health-factor` reads better than `health_factor` in a URL and the database
  * value should not leak into the address bar.
+ *
+ * Same principle as the main marketplace: a buyer gets a title, one plain line
+ * and the inventory; the exact MCS grading criteria — which a judge does want,
+ * verbatim — move one click down rather than off the page.
  */
 const SLUGS: Record<string, { key: string; label: string; what: string; columns: string }> = {
   rebalancing: {
@@ -55,39 +61,71 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
 
   const cats = await categoryFunnel(56).catch(() => null)
   const row = cats?.find((c) => c.category === meta.key)
+  const untested = meta.key === 'security'
 
   return (
     <>
       <SiteHeader active="register" />
       <main className={styles.page}>
-      <div className={styles.head}>
-        <Statement as="h1">{meta.label}</Statement>
-        <p className={styles.lede}>{meta.what}</p>
-        <p className={styles.lede}>{meta.columns}</p>
-        {row && (
-          <p className={styles.lede}>
-            {row.thirdPartyExecutable < MIN_THIRD_PARTY_PER_CATEGORY
-              ? <Chip tone="watch">
-                  {row.thirdPartyExecutable === 0 ? 'No callable supplier yet' : '1 callable supplier'}
-                  {' · a category needs 2 to be a market'}
-                </Chip>
-              : <Chip tone="holds">{row.thirdPartyExecutable} callable suppliers</Chip>}
-            {row.thirdPartyRegistrations > row.thirdPartyExecutable && (
-              <span className={styles.lede}>
-                {' '}Across {row.thirdPartyRegistrations} registrations — several identities point
-                at the same endpoint, so suppliers is the number that means anything.
-              </span>
+        <header className={styles.intro}>
+          <div className={styles.introText}>
+            <Link href="/register" className={`eyebrow ${styles.introEyebrow} ${styles.introBack}`}>
+              ← Marketplace
+            </Link>
+            <Statement as="h1" className={styles.introTitle}>{meta.label}</Statement>
+            <p className={styles.introLede}>{meta.what}</p>
+            {row && (
+              <p className={styles.introSupply}>
+                {row.thirdPartyExecutable < MIN_THIRD_PARTY_PER_CATEGORY ? (
+                  <Chip tone="watch">
+                    {row.thirdPartyExecutable === 0 ? 'No callable supplier yet' : '1 callable supplier'}
+                    {' · a category needs 2 to be a market'}
+                  </Chip>
+                ) : (
+                  <Chip tone="holds">{row.thirdPartyExecutable} callable suppliers</Chip>
+                )}
+                {row.thirdPartyRegistrations > row.thirdPartyExecutable && (
+                  <span className={styles.introSupplyNote}>
+                    across {row.thirdPartyRegistrations.toLocaleString()} registrations — several identities
+                    point at the same endpoint, so suppliers is the number that means anything.
+                  </span>
+                )}
+              </p>
             )}
-          </p>
-        )}
-      </div>
-      <Marketplace category={meta.key} />
+          </div>
+        </header>
 
-      <section className={styles.graveyard}>
-        <h2 className={styles.h2}>The graveyard, in this category</h2>
-        <RegisterTable category={meta.key} graveyard />
-      </section>
-    </main>
+        <Marketplace category={meta.key} />
+
+        <div className={styles.appendix}>
+          <Disclosure
+            summary={`How Marque tests ${meta.label}`}
+            hint={untested ? 'No published test yet' : 'The exact graded fields'}
+          >
+            <p>{meta.columns}</p>
+            {!untested && (
+              <p>
+                The full case, its tolerances and its frozen ground truth are published at{' '}
+                <Link href="/standard">the Standard</Link>.
+              </p>
+            )}
+          </Disclosure>
+
+          <Disclosure
+            id="unavailable-agents"
+            summary={`Unavailable agents in ${meta.label}`}
+            hint="Kept, not deleted"
+            tone="quiet"
+            lazy
+          >
+            <p>
+              Marque keeps unavailable and unbound registrations visible instead of deleting the evidence, with
+              the reason on every row.
+            </p>
+            <RegisterTable category={meta.key} graveyard />
+          </Disclosure>
+        </div>
+      </main>
       <SiteFooter />
     </>
   )
