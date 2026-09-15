@@ -310,6 +310,11 @@ export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: Ma
     const s = q.search.toLowerCase()
     all = all.filter((r) =>
       r.name.toLowerCase().includes(s)
+      // The registry description the agent publishes about itself. This is a
+      // predicate over the already-materialised set, not SQL: the column is
+      // read once by the memoised base query, so matching it costs one more
+      // String.includes per row and needs no index and no migration.
+      || (r.identity.description ?? '').toLowerCase().includes(s)
       || (r.owner ?? '').toLowerCase().includes(s)
       || (r.ownerLabel ?? '').toLowerCase().includes(s)
       || r.interfaces.some((k) => k.includes(s))
