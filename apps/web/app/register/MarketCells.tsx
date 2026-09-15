@@ -63,6 +63,17 @@ export function QualCell({ a, compact = false }: { a: MarketRow; compact?: boole
 
 /* --- Availability ------------------------------------------------------ */
 
+/**
+ * Availability, and the one timing figure Marque actually holds.
+ *
+ * The stored value is the latency of the MOST RECENT probe — a single
+ * measurement, not a percentile over a window. It is labelled "Last probe" for
+ * exactly that reason: calling a lone sample "latency" invites a reader to
+ * treat it as a p95 the product does not compute.
+ */
+const PROBE_HINT =
+  'Round-trip time of the most recent probe Marque ran against this agent. A single measurement, not a percentile or an average.'
+
 export function LiveCell({ a }: { a: MarketRow }) {
   const live = a.liveness === 'live'
   return (
@@ -70,8 +81,9 @@ export function LiveCell({ a }: { a: MarketRow }) {
       <span className={`${styles.liveDot} ${live ? styles.liveDotOn : styles.liveDotOff}`} aria-hidden="true" />
       <span className={styles.liveWord}>{live ? 'Live' : (a.liveness ?? 'Unknown')}</span>
       {a.latencyMs != null && (
-        <span className={`mono ${styles.liveLatency}`} title="Latency of the last probe Marque ran.">
-          {a.latencyMs} ms
+        <span className={styles.liveProbe} title={PROBE_HINT}>
+          <span className={styles.liveProbeLabel}>Last probe</span>
+          <span className={`mono ${styles.liveLatency}`}>{a.latencyMs} ms</span>
         </span>
       )}
     </span>
@@ -236,7 +248,10 @@ export function AgentMeta({ a, limit = 3 }: { a: MarketRow; limit?: number }) {
         </span>
       )}
       {a.identityCount > 1 && (
-        <span className={styles.metaDupes} title="Identities this operator registered against the same endpoint, grouped into one row.">
+        <span
+          className={styles.metaDupes}
+          title={`${a.identityCount.toLocaleString()} ERC-8004 identities grouped under this operator.`}
+        >
           {a.identityCount.toLocaleString()} identities
         </span>
       )}

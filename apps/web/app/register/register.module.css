@@ -406,7 +406,7 @@ a.introBack:hover { color: var(--fg); }
 
 .listHead {
   display: grid;
-  grid-template-columns: 28px 44px minmax(0, 1fr) 212px 118px 104px auto;
+  grid-template-columns: 28px 44px minmax(0, 1fr) 208px 132px 100px auto;
   align-items: center;
   gap: var(--s4);
   padding: var(--s2) var(--s3);
@@ -420,7 +420,7 @@ a.introBack:hover { color: var(--fg); }
 .row {
   position: relative;
   display: grid;
-  grid-template-columns: 28px 44px minmax(0, 1fr) 212px 118px 104px auto;
+  grid-template-columns: 28px 44px minmax(0, 1fr) 208px 132px 100px auto;
   align-items: center;
   gap: var(--s4);
   min-height: 84px;
@@ -533,7 +533,11 @@ a.introBack:hover { color: var(--fg); }
 .liveDotOff { background: var(--breach); }
 .liveWord { font-size: var(--size-control); color: var(--fg-soft); line-height: 1.25; }
 .live[data-live] .liveWord { color: var(--fg); }
-.liveLatency { font-size: var(--size-caption); color: var(--fg-faint); }
+/* "Last probe 82 ms" — the label is what stops a single sample from reading as
+   a percentile the product does not compute. */
+.liveProbe { display: inline-flex; align-items: baseline; gap: 5px; flex-wrap: wrap; }
+.liveProbeLabel { font-size: 11px; color: var(--fg-faint); white-space: nowrap; }
+.liveLatency { font-size: var(--size-caption); color: var(--fg-faint); white-space: nowrap; }
 
 /* --- Price ---------------------------------------------------------------- */
 
