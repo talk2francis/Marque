@@ -1,6 +1,6 @@
 # Marque Conformance Standard — MCS v1.0.0
 
-> Generated 2026-09-04T06:36:08.688Z from `packages/conformance/src/tolerances.ts`.
+> Generated 2026-09-19T16:48:41.550Z from `packages/conformance/src/tolerances.ts`.
 > Do not edit by hand — regenerate with `pnpm standard`.
 > Tolerance revision 1.
 
@@ -54,13 +54,13 @@ conformance outcome and belongs in the public record.
 
 **Live case:** `REB-1-btcb-usdc-2500`
 
-*Subject:* owner `0x2e07E0145C0CFdF6D200B0aFAeD36953ef00d0cD` · tokenId `7321916` · pair `BTCB/USDC`
+*Subject:* owner `0x2E7bCA3AC237903BCE134d5bd88145F50f9ad794` · tokenId `7395979` · pair `BTCB/USDC`
 
-*Why this subject:* A live BTCB/USDC position on the 0.25% tier, whose tickSpacing of 50 makes the multiple-of-spacing check bite immediately. It sits near the top of its range, so the distance-to-bound arithmetic is non-trivial.
+*Why this subject:* A live BTCB/USDC position on the 0.25% tier, whose tickSpacing of 50 makes the multiple-of-spacing check bite immediately. Its bounds (109750–114450) sit asymmetrically around spot — currently nearer the upper bound — so the distance-to-bound arithmetic is real rather than a midpoint. Its owner holds exactly one position, which matters: the position reader enumerates an owner and stops at 40, so a subject held by a large LP manager is invisible to the test no matter how live it is. The previous subject (tokenId 7321916) was withdrawn by its owner and the case could no longer be captured at all; a single-position owner is the most durable form this case can take while still being a real stranger’s position.
 
 *Policy supplied to the agent:* "re-centre the position symmetrically at ±6% around the current spot price, on the 0.25% fee tier, keeping the same liquidity"
 
-*Captured at block* `119862131` · *ground-truth hash* `0x69e42d95f32d3be06eae171fc0410e95683361bd7467235402e419728db7a993`
+*Captured at block* `121033740` · *ground-truth hash* `0xf3da88523744b9a47a216bb26057ac5b4d6f43c001f173b1f6faa2d2826f124d`
 
 | Check | Bound | What is asserted |
 |---|---|---|
@@ -95,7 +95,7 @@ conformance outcome and belongs in the public record.
 
 *Policy supplied to the agent:* "build a 12-level grid for BNB/USDT between 600 and 850 using 2,000 USD of capital, with a stop at 580, and disclose the fee drag at 25 bps per trade"
 
-*Captured at block* `119862134` · *ground-truth hash* `0x0f0999d4cf2ae021e22807c41bf744cffff2c3e6902e6edc6155796bf2206ce8`
+*Captured at block* `122829511` · *ground-truth hash* `0x5a3e8e4d0ee3737a1c8c46711b6f63618bdf9ef5a5f3391ecf179c8eef38ee52`
 
 | Check | Bound | What is asserted |
 |---|---|---|
@@ -126,7 +126,7 @@ conformance outcome and belongs in the public record.
 
 *Policy supplied to the agent:* "find the best net-of-cost route for 1,000 USD of USDT across the allowed protocols, only recommending a move that beats the current 0% by at least 50 bps, and excluding leveraged strategies"
 
-*Captured at block* `119862134` · *ground-truth hash* `0xb527ec79a3f789a99ae6b303ca38655f6d0244b866f198195515ba64a295cd85`
+*Captured at block* `122829513` · *ground-truth hash* `0x271c577f8bf960c59bf023dbaee5dd9b464542e223669f5ae018ce6f72a27b37`
 
 | Check | Bound | What is asserted |
 |---|---|---|
@@ -157,7 +157,7 @@ conformance outcome and belongs in the public record.
 
 *Policy supplied to the agent:* "report the account’s current health factor and the exact USD of debt that must be repaid to restore a health factor of 2.5"
 
-*Captured at block* `119862133` · *ground-truth hash* `0x98f02295934c1c38ac9f6302cb393122855767617c4c837f41a35ecaf974c08b`
+*Captured at block* `122829508` · *ground-truth hash* `0x888c6d1bea97bd532e600baf32045b063d84145a7500537122169e7b54e97076`
 
 | Check | Bound | What is asserted |
 |---|---|---|

@@ -143,7 +143,7 @@ export function CharterCard({ charter, subject }: { charter: CharterView; subjec
         body: JSON.stringify({
           agentId: live.agentId, subject, kind, policy,
           maxSpendUsd: 1, charterId: live.id,
-          ...(kind === 'rebalance' ? { positionTokenId: '7321916' } : {}),
+          ...(kind === 'rebalance' ? { positionTokenId: '7395979' } : {}),
           ...(kind === 'grid' ? { pair: 'BNB/USDT' } : {}),
         }),
       })

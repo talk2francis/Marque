@@ -31,8 +31,8 @@ export const CASES: readonly CaseSpec[] = [
     id: 'REB-1-btcb-usdc-2500',
     testId: 'MCS-REB-1',
     subject: {
-      owner: '0x2e07E0145C0CFdF6D200B0aFAeD36953ef00d0cD',
-      tokenId: '7321916',
+      owner: '0x2E7bCA3AC237903BCE134d5bd88145F50f9ad794',
+      tokenId: '7395979',
       pair: 'BTCB/USDC',
     },
     policy: {
@@ -42,7 +42,7 @@ export const CASES: readonly CaseSpec[] = [
         're-centre the position symmetrically at ±6% around the current spot price, on the 0.25% fee tier, keeping the same liquidity',
     } satisfies RebPolicy,
     why:
-      'A live BTCB/USDC position on the 0.25% tier, whose tickSpacing of 50 makes the multiple-of-spacing check bite immediately. It sits near the top of its range, so the distance-to-bound arithmetic is non-trivial.',
+      'A live BTCB/USDC position on the 0.25% tier, whose tickSpacing of 50 makes the multiple-of-spacing check bite immediately. Its bounds (109750–114450) sit asymmetrically around spot — currently nearer the upper bound — so the distance-to-bound arithmetic is real rather than a midpoint. Its owner holds exactly one position, which matters: the position reader enumerates an owner and stops at 40, so a subject held by a large LP manager is invisible to the test no matter how live it is. The previous subject (tokenId 7321916) was withdrawn by its owner and the case could no longer be captured at all; a single-position owner is the most durable form this case can take while still being a real stranger’s position.',
   },
   {
     id: 'HF-1-venus-at-risk',

@@ -52,11 +52,11 @@ function a2aUrl(id: string): string {
 /** The task each agent is asked 50 times, at the current block. */
 function latencyPrompt(id: string, block: string): string {
   const demo = process.env['DEMO_ADDRESS'] ?? '0x60AA3AEE06E2345A17E4d4B12c53E046F4F63CAf'
-  const lp = '0x2e07E0145C0CFdF6D200B0aFAeD36953ef00d0cD'
+  const lp = '0x2E7bCA3AC237903BCE134d5bd88145F50f9ad794'
   const head = `Chain: BNB Smart Chain (56). Block: ${block}.`
   switch (id) {
     case 'bound':
-      return `${head}\nSubject address: ${lp}\n\nTask: re-centre PancakeSwap V3 position 7321916.\nPOLICY YOU MUST FOLLOW: symmetric ±6% around spot on the 2500 fee tier, with a slippage bound no wider than 40 bps.`
+      return `${head}\nSubject address: ${lp}\n\nTask: re-centre PancakeSwap V3 position 7395979.\nPOLICY YOU MUST FOLLOW: symmetric ±6% around spot on the 2500 fee tier, with a slippage bound no wider than 40 bps.`
     case 'lattice':
       return `${head}\nSubject address: ${demo}\n\nTask: plan a grid for BNB/USDT.\nPOLICY YOU MUST FOLLOW: 10 levels between 500 and 800, 1000 USD of capital, stop at 450, 25 bps per trade.`
     case 'sluicegate':
