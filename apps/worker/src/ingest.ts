@@ -7,7 +7,7 @@
  *
  * Run once and exit:  pnpm --filter @marque/worker ingest:once
  */
-import { ScanClient, sweepList, enrichDetails, snapshotFunnel, BSC } from '@marque/registry'
+import { ScanClient, sweepList, sweepListDeep, enrichDetails, snapshotFunnel, BSC } from '@marque/registry'
 import { closeDb } from '@marque/db'
 
 const ONCE = process.argv.includes('--once')
@@ -22,6 +22,14 @@ const TICK_MS = Number(process.env.INGEST_TICK_MS ?? 5_000)
 const FUNNEL_EVERY_MS = Number(process.env.INGEST_FUNNEL_MS ?? 30 * 60_000)
 /** Minimum gap between full 0..MAX_OFFSET list sweeps (each is ~100 API calls). */
 const SWEEP_COOLDOWN_MS = Number(process.env.INGEST_SWEEP_COOLDOWN_MS ?? 5 * 60_000)
+/**
+ * The deep pass walks the whole list by cursor, which the offset ceiling makes
+ * unreachable. It is the slow, patient one: a slice per interval, idempotent,
+ * so it closes the tail without competing with the head sweep for API budget.
+ */
+const DEEP_COOLDOWN_MS = Number(process.env.INGEST_DEEP_COOLDOWN_MS ?? 90_000)
+const DEEP_PAGES = Number(process.env.INGEST_DEEP_PAGES ?? 40)
+const DEEP_ENABLED = process.env.INGEST_DEEP_DISABLED !== '1'
 
 const sleep = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
 
@@ -44,7 +52,7 @@ function log(event: string, data: Record<string, unknown>): void {
  * whole tick, so a single slow page at a deep offset starved enrichment for an
  * hour — the sweep is the fragile stage and the enrich is the valuable one.
  */
-async function tick(client: ScanClient, state: { lastFunnelAt: number; lastFullSweepAt: number }): Promise<void> {
+async function tick(client: ScanClient, state: { lastFunnelAt: number; lastFullSweepAt: number; lastDeepAt: number }): Promise<void> {
   // The reachable list is a ~10k window swept whole in one pass (~100 calls).
   // Doing that every tick would blow the daily API budget, and new agents only
   // trickle in — so a full window sweep runs at most once per cooldown.
@@ -54,6 +62,24 @@ async function tick(client: ScanClient, state: { lastFunnelAt: number; lastFullS
       if (wrapped) state.lastFullSweepAt = Date.now()
     } catch (err) {
       log('sweep_error', { error: err instanceof Error ? err.message : String(err) })
+    }
+  }
+
+  // The deep backfill. Separate cursor, separate cooldown, never blocks enrich.
+  if (DEEP_ENABLED && Date.now() - state.lastDeepAt >= DEEP_COOLDOWN_MS) {
+    state.lastDeepAt = Date.now()
+    try {
+      const deep = await sweepListDeep({ client, chainId: BSC, maxPages: DEEP_PAGES })
+      log('deep_sweep', {
+        pages: deep.pagesFetched,
+        seen: deep.agentsSeen,
+        upserted: deep.agentsUpserted,
+        walked: deep.walked,
+        reportedTotal: deep.reportedTotal,
+        completedPass: deep.completedPass,
+      })
+    } catch (err) {
+      log('deep_sweep_error', { error: err instanceof Error ? err.message : String(err) })
     }
   }
 
@@ -104,7 +130,7 @@ async function sweepStage(client: ScanClient): Promise<boolean> {
 
 async function main(): Promise<void> {
   const client = new ScanClient()
-  const state = { lastFunnelAt: 0, lastFullSweepAt: 0 }
+  const state = { lastFunnelAt: 0, lastFullSweepAt: 0, lastDeepAt: 0 }
   log('start', { once: ONCE, sweepPages: SWEEP_PAGES, enrichLimit: ENRICH_LIMIT })
 
   do {

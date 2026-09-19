@@ -106,6 +106,13 @@ async function readCursor(source: string): Promise<number> {
   return rows[0]?.cursor ?? 0
 }
 
+async function readCursorDetail(source: string): Promise<Record<string, unknown> | null> {
+  const d = db()
+  const rows = await d.select().from(ingestCursor).where(eq(ingestCursor.source, source)).limit(1)
+  const detail = rows[0]?.detail
+  return detail && typeof detail === 'object' ? (detail as Record<string, unknown>) : null
+}
+
 async function writeCursor(source: string, cursor: number, detail: Record<string, unknown>): Promise<void> {
   const d = db()
   await d.insert(ingestCursor).values({ source, cursor, detail, updatedAt: nowIso() })
@@ -210,6 +217,93 @@ export async function sweepList(opts: {
   }
 
   return { pagesFetched, agentsSeen, agentsUpserted, droppedOffChain, reportedTotal, stoppedBecause }
+}
+
+export interface DeepSweepResult {
+  pagesFetched: number
+  agentsSeen: number
+  agentsUpserted: number
+  droppedOffChain: number
+  reportedTotal: number | null
+  /** True when this invocation walked off the end and reset for a fresh pass. */
+  completedPass: boolean
+  /** How far into the list this invocation got, in agents. */
+  walked: number
+}
+
+/**
+ * PASS 1b. The deep backfill.
+ *
+ * `sweepList` can only ever see the newest ~10,100 agents, because 8004scan
+ * refuses `offset > 10000`. Anything registered between two head sweeps that
+ * then slid past the ceiling — and everything older than the day the ceiling
+ * appeared — is unreachable that way, and the shortfall is spread across the
+ * whole id range rather than bunched at the head.
+ *
+ * Cursor pagination has no such ceiling, so this walks the entire list a slice
+ * at a time and upserts idempotently. It keeps its OWN cursor under a separate
+ * source key and never touches the head sweep's, so the two passes cannot
+ * interfere: the head sweep keeps the newest agents fresh, this one closes the
+ * tail. Reaching the end resets the cursor so the next pass starts over.
+ */
+export async function sweepListDeep(opts: {
+  client: ScanClient
+  chainId?: number
+  maxPages?: number
+  restart?: boolean
+}): Promise<DeepSweepResult> {
+  const client = opts.client
+  const chainId = opts.chainId ?? BSC
+  const maxPages = opts.maxPages ?? 40
+  const source = `scan:deep:${chainId}`
+
+  const stored = opts.restart ? null : await readCursorDetail(source)
+  let cursor = typeof stored?.['nextCursor'] === 'string' ? (stored['nextCursor'] as string) : null
+  let walked = typeof stored?.['walked'] === 'number' ? (stored['walked'] as number) : 0
+  if (cursor === null) walked = 0
+
+  let pagesFetched = 0
+  let agentsSeen = 0
+  let agentsUpserted = 0
+  let droppedOffChain = 0
+  let reportedTotal: number | null = null
+  let completedPass = false
+
+  // Cursor pages are strictly sequential — each token is derived from the page
+  // before it — so unlike the offset sweep this cannot be parallelised.
+  while (pagesFetched < maxPages) {
+    let page
+    try {
+      page = await client.listAgents({ chainId, limit: PAGE, ...(cursor ? { cursor } : { offset: 0 }) })
+    } catch {
+      // Leave the cursor where it is and let the next invocation retry from here.
+      break
+    }
+    pagesFetched++
+    reportedTotal = page.total ?? reportedTotal
+    droppedOffChain += page.droppedOffChain
+    agentsSeen += page.items.length
+    walked += page.items.length
+
+    if (page.items.length > 0) {
+      const rows = page.items.map((i) => listItemToRow(i))
+      const deduped = [...new Map(rows.map((r) => [r.id, r])).values()]
+      agentsUpserted += await upsertAgents(deduped)
+    }
+
+    // End of the list: clear the cursor so the next pass starts from the head
+    // again and picks up everything registered since.
+    if (!page.hasMore || !page.nextCursor) {
+      completedPass = true
+      await writeCursor(source, 0, { nextCursor: null, walked: 0, reportedTotal, reason: 'pass_complete', lastPassWalked: walked })
+      break
+    }
+
+    cursor = page.nextCursor
+    await writeCursor(source, 0, { nextCursor: cursor, walked, reportedTotal })
+  }
+
+  return { pagesFetched, agentsSeen, agentsUpserted, droppedOffChain, reportedTotal, completedPass, walked }
 }
 
 function detailToUpdate(detail: ScanAgentDetail): Partial<NewAgent> {

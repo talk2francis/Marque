@@ -34,6 +34,13 @@ const scanListResponse = z.object({
   total: z.number().nullish(),
   limit: z.number().nullish(),
   offset: z.number().nullish(),
+  /**
+   * Cursor pagination. 8004scan rejects `offset > 10000` outright, but it will
+   * keep handing out `next_cursor` for the whole list — which is the only way
+   * to reach the agents that sit deeper than the offset ceiling.
+   */
+  has_more: z.boolean().nullish(),
+  next_cursor: z.string().nullish(),
 })
 
 /**
@@ -298,18 +305,31 @@ export class ScanClient {
     chainId: number
     limit?: number
     offset?: number
+    /**
+     * Continuation token from a previous page's `nextCursor`. When set, the
+     * offset ceiling does not apply — this is how the deep pass reaches agents
+     * past offset 10000.
+     */
+    cursor?: string | null
     extra?: Record<string, string | number | boolean>
-  }): Promise<{ items: ScanAgentListItem[]; total: number | null; droppedOffChain: number }> {
+  }): Promise<{
+    items: ScanAgentListItem[]
+    total: number | null
+    droppedOffChain: number
+    nextCursor: string | null
+    hasMore: boolean
+  }> {
     // 8004scan rejects offset > 10000 with a 422. Past that there is nothing to
-    // fetch, so return an empty page rather than throwing.
-    if ((opts.offset ?? 0) > 10_000) {
+    // fetch by offset, so return an empty page rather than throwing. A caller
+    // that needs to go deeper must page by cursor instead.
+    if (!opts.cursor && (opts.offset ?? 0) > 10_000) {
       const total = await this.countAgents(opts.chainId, opts.extra ?? {}).catch(() => null)
-      return { items: [], total, droppedOffChain: 0 }
+      return { items: [], total, droppedOffChain: 0, nextCursor: null, hasMore: false }
     }
     const raw = await this.get('/agents', {
       chain_id: opts.chainId,
       limit: opts.limit ?? 100,
-      offset: opts.offset ?? 0,
+      ...(opts.cursor ? { cursor: opts.cursor } : { offset: opts.offset ?? 0 }),
       ...(opts.extra ?? {}),
     })
     const parsed = scanListResponse.parse(raw)
@@ -326,7 +346,13 @@ export class ScanClient {
       }
       items.push(r.data)
     }
-    return { items, total: parsed.total ?? null, droppedOffChain }
+    return {
+      items,
+      total: parsed.total ?? null,
+      droppedOffChain,
+      nextCursor: parsed.next_cursor ?? null,
+      hasMore: parsed.has_more ?? false,
+    }
   }
 
   /** Total count for a filter combination, fetched as cheaply as possible. */
