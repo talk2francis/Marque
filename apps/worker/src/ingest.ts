@@ -37,7 +37,7 @@ const DEEP_ENABLED = process.env.INGEST_DEEP_DISABLED !== '1'
  * not the metered aggregator — so it is cheap to run continuously.
  */
 const CHAIN_COOLDOWN_MS = Number(process.env.INGEST_CHAIN_COOLDOWN_MS ?? 60_000)
-const CHAIN_MAX_IDS = Number(process.env.INGEST_CHAIN_MAX_IDS ?? 5_000)
+const CHAIN_MAX_IDS = Number(process.env.INGEST_CHAIN_MAX_IDS ?? 20_000)
 const CHAIN_ENABLED = process.env.INGEST_CHAIN_DISABLED !== '1'
 
 const sleep = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
