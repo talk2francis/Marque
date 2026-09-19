@@ -137,20 +137,19 @@ async function writeState(chainId: number, cursor: number, detail: Record<string
  */
 async function insertChainAgents(rows: NewAgent[]): Promise<number> {
   if (rows.length === 0) return 0
-  const before = await db().execute(sql`select count(*)::int as n from agent where chain_id = ${rows[0]!.chainId}`)
-  const b = Number(resultRows<{ n: number }>(before)[0]?.n ?? 0)
-
-  await db().insert(agent).values(rows).onConflictDoUpdate({
+  // Postgres sets xmax to 0 on a genuine INSERT and non-zero when ON CONFLICT
+  // turned it into an UPDATE. Reading it back is exact and free — the previous
+  // count-before/count-after pair ran two sequential scans of a 300k+ row table
+  // for every 400 ids, which dominated the walk.
+  const written = await db().insert(agent).values(rows).onConflictDoUpdate({
     target: agent.id,
     set: {
       lastSeen: sql`excluded.last_seen`,
       ownerAddress: sql`coalesce(${agent.ownerAddress}, excluded.owner_address)`,
     },
-  })
+  }).returning({ fresh: sql<boolean>`(xmax = 0)` })
 
-  const after = await db().execute(sql`select count(*)::int as n from agent where chain_id = ${rows[0]!.chainId}`)
-  const a = Number(resultRows<{ n: number }>(after)[0]?.n ?? 0)
-  return Math.max(0, a - b)
+  return written.reduce((n, r) => n + (r.fresh ? 1 : 0), 0)
 }
 
 export async function sweepChainIdentities(opts: {
@@ -164,7 +163,7 @@ export async function sweepChainIdentities(opts: {
 } = {}): Promise<ChainSweepResult> {
   const chainId = opts.chainId ?? 56
   const registry = opts.registry ?? BSC_IDENTITY_REGISTRY
-  const maxIds = opts.maxIds ?? 5_000
+  const maxIds = opts.maxIds ?? 20_000
   const batchSize = opts.batchSize ?? 400
 
   const state = opts.restart ? { cursor: 0, highestId: 0 } : await readState(chainId)
