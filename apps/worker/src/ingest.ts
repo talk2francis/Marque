@@ -7,7 +7,7 @@
  *
  * Run once and exit:  pnpm --filter @marque/worker ingest:once
  */
-import { ScanClient, sweepList, sweepListDeep, enrichDetails, snapshotFunnel, BSC } from '@marque/registry'
+import { ScanClient, sweepList, sweepListDeep, sweepChainIdentities, enrichDetails, snapshotFunnel, BSC } from '@marque/registry'
 import { closeDb } from '@marque/db'
 
 const ONCE = process.argv.includes('--once')
@@ -30,6 +30,15 @@ const SWEEP_COOLDOWN_MS = Number(process.env.INGEST_SWEEP_COOLDOWN_MS ?? 5 * 60_
 const DEEP_COOLDOWN_MS = Number(process.env.INGEST_DEEP_COOLDOWN_MS ?? 90_000)
 const DEEP_PAGES = Number(process.env.INGEST_DEEP_PAGES ?? 40)
 const DEEP_ENABLED = process.env.INGEST_DEEP_DISABLED !== '1'
+/**
+ * The chain pass. 8004scan lists ~322k of the ~354k identities actually minted
+ * on BSC, so the registry count can only be right if it is read from the chain.
+ * This walks the token id space over pooled dataseed RPC — our own endpoints,
+ * not the metered aggregator — so it is cheap to run continuously.
+ */
+const CHAIN_COOLDOWN_MS = Number(process.env.INGEST_CHAIN_COOLDOWN_MS ?? 60_000)
+const CHAIN_MAX_IDS = Number(process.env.INGEST_CHAIN_MAX_IDS ?? 5_000)
+const CHAIN_ENABLED = process.env.INGEST_CHAIN_DISABLED !== '1'
 
 const sleep = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
 
@@ -52,7 +61,7 @@ function log(event: string, data: Record<string, unknown>): void {
  * whole tick, so a single slow page at a deep offset starved enrichment for an
  * hour — the sweep is the fragile stage and the enrich is the valuable one.
  */
-async function tick(client: ScanClient, state: { lastFunnelAt: number; lastFullSweepAt: number; lastDeepAt: number }): Promise<void> {
+async function tick(client: ScanClient, state: { lastFunnelAt: number; lastFullSweepAt: number; lastDeepAt: number; lastChainAt: number }): Promise<void> {
   // The reachable list is a ~10k window swept whole in one pass (~100 calls).
   // Doing that every tick would blow the daily API budget, and new agents only
   // trickle in — so a full window sweep runs at most once per cooldown.
@@ -80,6 +89,24 @@ async function tick(client: ScanClient, state: { lastFunnelAt: number; lastFullS
       })
     } catch (err) {
       log('deep_sweep_error', { error: err instanceof Error ? err.message : String(err) })
+    }
+  }
+
+  // The chain pass. Independent cursor, own cooldown, RPC not API budget.
+  if (CHAIN_ENABLED && Date.now() - state.lastChainAt >= CHAIN_COOLDOWN_MS) {
+    state.lastChainAt = Date.now()
+    try {
+      const chain = await sweepChainIdentities({ chainId: BSC, maxIds: CHAIN_MAX_IDS })
+      log('chain_sweep', {
+        scanned: chain.scanned,
+        existing: chain.existing,
+        inserted: chain.inserted,
+        cursor: chain.cursor,
+        highestId: chain.highestId,
+        completedPass: chain.completedPass,
+      })
+    } catch (err) {
+      log('chain_sweep_error', { error: err instanceof Error ? err.message : String(err) })
     }
   }
 
@@ -130,7 +157,7 @@ async function sweepStage(client: ScanClient): Promise<boolean> {
 
 async function main(): Promise<void> {
   const client = new ScanClient()
-  const state = { lastFunnelAt: 0, lastFullSweepAt: 0, lastDeepAt: 0 }
+  const state = { lastFunnelAt: 0, lastFullSweepAt: 0, lastDeepAt: 0, lastChainAt: 0 }
   log('start', { once: ONCE, sweepPages: SWEEP_PAGES, enrichLimit: ENRICH_LIMIT })
 
   do {

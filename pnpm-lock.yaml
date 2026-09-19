@@ -562,6 +562,9 @@ importers:
 
   packages/registry:
     dependencies:
+      '@marque/chain':
+        specifier: workspace:*
+        version: link:../chain
       '@marque/db':
         specifier: workspace:*
         version: link:../db

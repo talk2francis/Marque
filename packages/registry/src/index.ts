@@ -6,3 +6,4 @@ export { sweepList, sweepListDeep, enrichDetails, snapshotFunnel, BSC, type Swee
 export { classifyKeywordPass, classifySemanticPass, type ClassifyResult } from './classify.js'
 export { funnel, categoryFunnel, failureHistogram, MARQUE_REFERENCE_OWNERS, MIN_THIRD_PARTY_PER_CATEGORY, type FunnelRow, type CategoryFunnelRow } from './funnel.js'
 export { buildProspects, rollupByOwner, extractContacts, assessReadiness, type Prospect, type OwnerRollup, type Priority } from './outreach.js'
+export { sweepChainIdentities, highestTokenId, BSC_IDENTITY_REGISTRY, type ChainSweepResult } from './chain-identity.js'
