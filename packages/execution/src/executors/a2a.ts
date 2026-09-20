@@ -1,4 +1,4 @@
-import { safeFetch } from '@marque/probe'
+import { safeFetch, type SafeFetchOptions, type SafeFetchResult } from '@marque/probe'
 import { renderTaskPrompt, type StructuredTask } from '../tasks.js'
 import { extractJson, parseFeeUsd } from '../parse.js'
 import type {
@@ -76,6 +76,7 @@ export class A2AExecutor implements AgentExecutor {
     readonly agentId: string,
     private readonly cardUrl: string,
     private readonly name: string | null = null,
+    private readonly fetcher: (url: string, options?: SafeFetchOptions) => Promise<SafeFetchResult> = safeFetch,
   ) {}
 
   private cached: { endpoint: string; card: A2ACard } | null = null
@@ -84,7 +85,7 @@ export class A2AExecutor implements AgentExecutor {
   private async resolve(): Promise<{ endpoint: string; card: A2ACard } | { ok: false; reason: FailureReason; detail: string }> {
     if (this.cached) return this.cached
 
-    const res = await safeFetch(this.cardUrl, { timeoutMs: 15_000 })
+    const res = await this.fetcher(this.cardUrl, { timeoutMs: 15_000 })
     if (!res.ok) return fail('unreachable', `${res.failure}: ${res.detail}`)
     if (res.status >= 400) return fail('unreachable', `agent card returned http ${res.status}`)
 
@@ -136,7 +137,7 @@ export class A2AExecutor implements AgentExecutor {
     const r = await this.resolve()
     if ('ok' in r) return { ...r, latencyMs: Date.now() - started }
 
-    const res = await safeFetch(r.endpoint, {
+    const res = await this.fetcher(r.endpoint, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({

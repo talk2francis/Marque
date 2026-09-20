@@ -170,6 +170,12 @@ export const probe = pgTable('probe', {
   skills: jsonb('skills').$type<string[]>().notNull().default([]),
   /** The callable endpoint the descriptor pointed at, if any. */
   executableEndpoint: text('executable_endpoint'),
+  /** Negotiated protocol version, where the protocol reports one. */
+  protocolVersion: text('protocol_version'),
+  /** Normalized task kinds demonstrably addressable through this service. */
+  taskKinds: jsonb('task_kinds').$type<string[]>().notNull().default([]),
+  /** Protocol-specific discovery evidence: A2A card fields or MCP tool schemas. */
+  manifest: jsonb('manifest').$type<Record<string, unknown>>(),
 }, (t) => ({
   agentCheckedIdx: index('probe_agent_checked_idx').on(t.agentId, t.checkedAt.desc()),
   checkedIdx: index('probe_checked_idx').on(t.checkedAt.desc()),
@@ -413,6 +419,15 @@ export const run = pgTable('run', {
   id: text('id').primaryKey(),
   agentId: text('agent_id').notNull(),
   agentName: text('agent_name'),
+  /** Immutable service selected before this run was accepted. */
+  serviceId: integer('service_id'),
+  protocol: text('protocol'),
+  discoveryEndpoint: text('discovery_endpoint'),
+  executableEndpoint: text('executable_endpoint'),
+  probeId: integer('probe_id'),
+  capability: text('capability'),
+  inputHash: text('input_hash'),
+  correlationId: text('correlation_id'),
   kind: text('kind').notNull(),
   category: text('category').$type<Category>().notNull(),
   charterId: text('charter_id'),
@@ -429,8 +444,12 @@ export const run = pgTable('run', {
   /** Plain-English statement of what stopped the run. */
   failure: text('failure'),
   failureReason: text('failure_reason'),
+  /** Stable terminal class, distinct from human-readable failure copy. */
+  terminalReason: text('terminal_reason'),
 
   feeUsd: doublePrecision('fee_usd'),
+  /** Exact commercial/quote object, including unsupported or unknown states. */
+  quote: jsonb('quote').$type<Record<string, unknown>>(),
   maxSpendUsd: doublePrecision('max_spend_usd').notNull(),
   latencyMs: integer('latency_ms'),
   txHashes: jsonb('tx_hashes').$type<string[]>().notNull().default([]),
@@ -473,6 +492,8 @@ export const receipt = pgTable('receipt', {
   id: text('id').primaryKey(),
   runId: text('run_id').notNull(),
   agentId: text('agent_id').notNull(),
+  /** execution, settlement, or failure; never infer this from row existence. */
+  artifactType: text('artifact_type').notNull().default('execution'),
   /** Content hash of the canonically serialised receipt. */
   hash: text('hash').notNull(),
   body: jsonb('body').$type<Record<string, unknown>>().notNull(),

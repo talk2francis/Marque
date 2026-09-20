@@ -39,6 +39,20 @@ export interface ProbeOutcome {
   executableEndpoint: string | null
   /** Agent name as the endpoint itself reports it. */
   reportedName: string | null
+  /** Protocol negotiation evidence used for task compatibility, never liveness. */
+  protocolVersion?: string | null
+  taskKinds?: string[]
+  manifest?: Record<string, unknown> | null
+}
+
+export function taskKindsFromText(values: readonly string[]): string[] {
+  const text = values.join(' ')
+  const kinds: string[] = []
+  if (/rebalanc|liquidity\s*range|position\s*range|pancake|clmm|\blp\b/i.test(text)) kinds.push('rebalance')
+  if (/\bgrid\b|ladder|price\s*levels?|\bdca\b/i.test(text)) kinds.push('grid')
+  if (/\byield\b|\bapr\b|\bapy\b|lend|supply|venus|vault|earn/i.test(text)) kinds.push('yield')
+  if (/health\s*factor|liquidat|collateral|borrow|\bltv\b/i.test(text)) kinds.push('health_factor')
+  return kinds
 }
 
 /** Map a transport failure onto our stored taxonomy. */
@@ -86,7 +100,7 @@ const a2aCard = z.object({
   version: z.string().optional(),
   status: z.string().nullish(),
   presence: z.string().nullish(),
-  skills: z.array(z.object({ id: z.string().optional(), name: z.string().optional() }).passthrough()).nullish(),
+  skills: z.array(z.object({ id: z.string().optional(), name: z.string().optional(), description: z.string().optional() }).passthrough()).nullish(),
   capabilities: z.unknown().optional(),
   card: z.unknown().optional(),
 }).passthrough()
@@ -137,6 +151,11 @@ export async function probeA2A(url: string): Promise<ProbeOutcome> {
   // The nested card, when present, can carry skills the envelope omits.
   const nested = d.card && typeof d.card === 'object' ? (d.card as Record<string, unknown>) : {}
   const skills = [...skillNames(d.skills), ...skillNames(nested['skills'])]
+  const skillDescriptions = [
+    ...(d.skills ?? []).flatMap((s) => [s.id, s.name, s.description]),
+    ...(Array.isArray(nested['skills']) ? nested['skills'] as Array<Record<string, unknown>> : [])
+      .flatMap((s) => [s['id'], s['name'], s['description']]),
+  ].filter((v): v is string => typeof v === 'string')
   const executable = d.url ?? d.endpoint ?? (typeof nested['url'] === 'string' ? nested['url'] : null) ?? null
   const name = d.name ?? (typeof nested['name'] === 'string' ? nested['name'] : null) ?? null
 
@@ -166,6 +185,9 @@ export async function probeA2A(url: string): Promise<ProbeOutcome> {
     failureClass: null,
     detail: `bound, ${skills.length} skill(s)`,
     skills, executableEndpoint: executable, reportedName: name,
+    protocolVersion: d.version ?? null,
+    taskKinds: taskKindsFromText(skillDescriptions),
+    manifest: { name, url: executable, skills: d.skills ?? nested['skills'] ?? [] },
   }
 }
 
@@ -219,9 +241,36 @@ export async function probeMCP(url: string): Promise<ProbeOutcome> {
     return dead(`http ${init.status}`, httpFailure(init.status), init.latencyMs, init.status)
   }
 
+  let protocolVersion: string | null = null
+  try {
+    const payload = init.body.includes('data:')
+      ? (init.body.split('\n').find((l) => l.startsWith('data:'))?.slice(5).trim() ?? init.body)
+      : init.body
+    const parsed = JSON.parse(payload) as { result?: { protocolVersion?: unknown } }
+    protocolVersion = typeof parsed.result?.protocolVersion === 'string' ? parsed.result.protocolVersion : null
+  } catch {
+    return {
+      ok: false, liveness: 'bad_schema', latencyMs: init.latencyMs, statusCode: init.status,
+      failureClass: 'bad_schema', detail: 'initialize response was not valid JSON-RPC',
+      skills: [], executableEndpoint: null, reportedName: null,
+      protocolVersion: null, taskKinds: [], manifest: null,
+    }
+  }
+  const sessionId = init.headers['mcp-session-id']
+  const sessionHeaders: Record<string, string> = sessionId ? { 'mcp-session-id': sessionId } : {}
+  const ready = await safeFetch(url, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', accept: 'application/json, text/event-stream', ...sessionHeaders },
+    body: JSON.stringify({ jsonrpc: '2.0', method: 'notifications/initialized', params: {} }),
+    timeoutMs: 8_000,
+  })
+  if (!ready.ok || ready.status >= 400) {
+    return dead(!ready.ok ? ready.detail : `initialized notification returned http ${ready.status}`, 'bad_schema', ready.latencyMs, ready.ok ? ready.status : ready.status ?? null)
+  }
+
   const list = await safeFetch(url, {
     method: 'POST',
-    headers: { 'content-type': 'application/json', accept: 'application/json, text/event-stream' },
+    headers: { 'content-type': 'application/json', accept: 'application/json, text/event-stream', ...sessionHeaders },
     body: rpc(2, 'tools/list', {}),
     timeoutMs: 8_000,
   })
@@ -235,6 +284,8 @@ export async function probeMCP(url: string): Promise<ProbeOutcome> {
     const d = JSON.parse(payload) as { result?: { tools?: unknown[] } }
     const tools = d.result?.tools ?? []
     const names = skillNames(tools)
+    const descriptions = (tools as Array<Record<string, unknown>>).flatMap((tool) => [tool['name'], tool['description']])
+      .filter((v): v is string => typeof v === 'string')
     if (names.length === 0) {
       return {
         ok: false, liveness: 'unbound', latencyMs: list.latencyMs, statusCode: list.status,
@@ -246,6 +297,9 @@ export async function probeMCP(url: string): Promise<ProbeOutcome> {
       ok: true, liveness: 'live', latencyMs: list.latencyMs, statusCode: list.status,
       failureClass: null, detail: `${names.length} tool(s)`,
       skills: names, executableEndpoint: url, reportedName: null,
+      protocolVersion,
+      taskKinds: taskKindsFromText(descriptions),
+      manifest: { tools },
     }
   } catch {
     return {

@@ -81,32 +81,30 @@ function referenceAgent(agentId: string): ResolvedAgent | null {
   }
 }
 
-/**
- * Where work is actually sent.
- *
- * The endpoint we call is the one the agent's own descriptor pointed at, taken
- * from the most recent probe — not the card URL. POSTing at the card instead of
- * the `url` inside it produced roughly thirty phantom dead agents once already,
- * and the bug looked exactly like the agents being broken.
- */
+/** Resolve one service without changing the selected ERC-8004 identity. */
 async function resolveAgent(agentId: string): Promise<ResolvedAgent | null> {
   const reference = referenceAgent(agentId)
   if (reference) return reference
 
   const rows = await db().execute(sql`
     with latest as (
-      select distinct on (service_id) service_id, agent_id, liveness, executable_endpoint
+      select distinct on (service_id) service_id, agent_id, liveness, executable_endpoint, checked_at
       from probe
       where agent_id = ${agentId} and service_id is not null
       order by service_id, checked_at desc
     )
     select a.id as agent_id, a.name, s.kind,
-           coalesce(l.executable_endpoint, s.resolved_endpoint, s.endpoint) as endpoint,
+           case when s.kind in ('a2a', 'termix')
+             then coalesce(s.resolved_endpoint, s.endpoint)
+             else coalesce(l.executable_endpoint, s.resolved_endpoint, s.endpoint)
+           end as endpoint,
            l.liveness
     from latest l
     join agent_service s on s.id = l.service_id
     join agent a on a.id = l.agent_id
-    order by (l.liveness = 'live') desc
+    where l.liveness = 'live' and s.kind in ('a2a', 'termix', 'mcp', 'x402')
+    order by case s.kind when 'a2a' then 0 when 'termix' then 1 when 'mcp' then 2 else 3 end,
+             l.checked_at desc, s.id asc
     limit 1
   `)
   const list = ((rows as unknown as { rows?: unknown[] }).rows ?? (rows as unknown as unknown[])) as Array<Record<string, unknown>>

@@ -191,6 +191,9 @@ export async function runProbeCycle(opts: { limit?: number; concurrency?: number
       liveness: outcome.liveness,
       skills: outcome.skills.slice(0, 50),
       executableEndpoint: outcome.executableEndpoint,
+      protocolVersion: outcome.protocolVersion ?? null,
+      taskKinds: (outcome.taskKinds ?? []).slice(0, 20),
+      manifest: outcome.manifest ?? null,
     }
   })
 
