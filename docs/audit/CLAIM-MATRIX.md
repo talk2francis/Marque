@@ -1,0 +1,32 @@
+# Claim-to-code matrix
+
+Baseline: 2026-09-21. This matrix is intentionally negative where production
+evidence is absent. “Receipt” is not synonymous with settlement or success.
+
+| Claim | Surface | Source file | Code path | Test | Live evidence | Status | Severity | Action |
+|---|---|---|---|---|---|---|---|---|
+| Third-party agents can be hired | README, Marketplace, homepage | `README.md`, `MarketCells.tsx`, `page.tsx` | Marketplace `hireable` is protocol-kind membership | None E2E | No independent third-party run/receipt found in audited candidates | FALSE | P0 | Gate Hire on exact verified service/task path |
+| Marketplace selection remains the Charter counterparty | Marketplace/Charter | `market-model.ts`, Charter page/API | fixed by `7fb5331` direct ID lookup | `agents.test.ts` only | Deep links preserve tested IDs | PARTIALLY PROVEN | P0 | Persist and assert identity/service through run/receipt |
+| Third-party profile leads to Hire | Agent profile | `agents/56/[tokenId]/page.tsx` | No action exists | None | Profile is a dead end | FALSE | P0 | Use shared action model and exact Hire URL |
+| “Callable” means Marque can submit a task | Marketplace, filters, category pages | `marketplace.ts`, `market-model.ts` | latest agent probe + declared kind | None | Hevo is labelled usable while chosen A2A URL returns 405 | FALSE | P0 | Canonical per-service capability resolution |
+| “Live” means the selected interface works | Marketplace, compare, status | multiple | agent-level latest probe in several queries | Probe unit tests | Service-level observations exist, but surfaces collapse them | FALSE | P0 | Always name service and freshness |
+| Preview free runs a real task | Marketplace | `MarketCells.tsx` | link to profile anchor only | None | Third-party profile has no preview execution | FALSE | P0 | Disable/rename until adapter-specific preview succeeds |
+| MCS qualification proves current executability | Standard/Marketplace | `marketplace.ts` | results and liveness independently stored, then merged in UI rank | grading tests | Historical results exist | PARTIALLY PROVEN | P1 | Show qualification and current execution state independently |
+| MCS failure makes an agent non-callable | Marketplace | `marketplace.ts` | failure does not block `hireable` | None | SwapGod remains displayed after MCS failure | PROVEN (negative claim avoided) | P2 | Preserve separation explicitly in canonical model |
+| A2A is supported | Docs/Marketplace | `liveness.ts`, `a2a.ts`, `runs.ts` | probe resolves card; executor is often given executable URL as card | No protocol fixture | Hevo task root returns 405 on card GET | PARTIALLY PROVEN | P0 | Separate card and task URLs; schema/fixture tests |
+| MCP is supported | Docs/Marketplace | `liveness.ts`, `mcp.ts` | probe initializes, executor does not; schema ignored | No protocol fixture | 4LPHA lists tools but fixed call arguments are invalid | PARTIALLY PROVEN | P0 | Session-aware initialize/list/call and schema matching |
+| Every hire has a public receipt | README, My Marque, homepage | `pipeline.ts`, `runs.ts` | quote failure returns before receipt construction | Receipt unit coverage absent | 27 runs versus 23 receipts; four failures | FALSE | P0 | Terminal failure evidence for every accepted run |
+| Failures are published | README, Standard, Run Room | conformance and run paths | MCS failures persist; early run failures lack receipts | grading tests only | Failed runs visible, but no terminal receipt | PARTIALLY PROVEN | P0 | Preserve failure artifacts and render their class |
+| Receipt means settled | Tape, compare, docs wording | `Tape.tsx`, `compare/page.tsx` | receipt counted/labeled as settled while commercial `settled` may be false | None | Existing receipt schema separates settlement | FALSE | P1 | Replace “settled run” with “receipted attempt” unless paid |
+| Charter is bounded and revocable | Charter/Judge/docs | mandates provider and `startRun` | policy recorded; server enforcement requires adversarial audit | store tests | testnet grants/revokes exist | PARTIALLY PROVEN | P0 | Race, expiry, revoked, cap and allowlist integration tests |
+| Works without wallet | README/Judge/positions | page and demo-owner paths | reads and demo flow do not require connected wallet | UI audit only | Public pages load without wallet | PARTIALLY PROVEN | P1 | Browser E2E through signature boundary |
+| Marketplace counts describe distinct states | Homepage/Register | `page.tsx`, `marketplace.ts` | several counts use latest agent probe; grouped row count differs | None | DB stages have materially different totals | PARTIALLY PROVEN | P1 | Canonical funnel definitions and timestamps |
+| One agent has one name | Marketplace/profile/receipt | marketplace group aggregate | longest name can be selected from a different identity | None | token 338481 displayed with another identity’s name | FALSE | P0 | Identity fields only from selected identity row |
+| Reference agents use the same downstream path | Judge/execution | `reference-agents.ts`, `runs.ts` | resolver special-cases references before DB services | reference engine tests | Reference receipts exist | PARTIALLY PROVEN | P1 | Same resolved-service contract and invariant tests |
+| Real task against real chain state | Judge/preview | `JudgeFlow.tsx`, `runs.ts` | block pinned before run; reference path works | No browser E2E | Third-party path unproven | PARTIALLY PROVEN | P0 | External fixture/E2E plus independent live proof |
+| Anchored receipt proves truth | Receipt | receipt page | copy correctly limits anchor claim to existence/immutability | None | 23/23 current receipts anchored | PROVEN | P3 | Retain wording and add artifact-type label |
+| Mainnet writes require explicit approval | Product invariant/docs | mandates/execution/scripts | controls vary by path | No comprehensive test | Not exercised in this audit | UNPROVEN | P0 | Central chain/write policy and negative tests |
+
+This matrix expands during each checkpoint. A release may only promote a row to
+PROVEN when an automated test and an inspectable production artifact both exist
+where the claim concerns production behavior.
