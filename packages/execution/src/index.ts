@@ -6,5 +6,10 @@ export { McpExecutor } from './executors/mcp.js'
 export { X402Executor, parseChallenge, type PaymentChallenge } from './executors/x402.js'
 export { Erc8183Executor, resolveSettlementAsset, erc8183KernelAbi, type Erc8183Config, type SettlementAsset } from './executors/erc8183.js'
 export { buildReceipt, receiptHash, canonicalise, sealedCallHash, type Receipt, type CommercialProof, type ExecutionProof, type AuthorityProof, type QualityProof } from './receipt.js'
+export {
+  CAPABILITY_REASONS, evaluateAgentState,
+  type CapabilityReason, type CanonicalAgentState, type ServiceCapabilityEvidence,
+  type QualificationEvidence, type ExecutableProtocol, type TaskKind,
+} from './capability.js'
 export { runHire, preflight, checkAuthority, type PipelineOutcome, type RunOptions, type RunEventInput } from './pipeline.js'
 export { executorFor } from './factory.js'
