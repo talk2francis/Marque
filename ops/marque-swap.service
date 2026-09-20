@@ -1,0 +1,12 @@
+[Unit]
+Description=VPS emergency swap safety net
+After=local-fs.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/sbin/swapon /root/.marque-swap
+ExecStop=/sbin/swapoff /root/.marque-swap
+
+[Install]
+WantedBy=multi-user.target

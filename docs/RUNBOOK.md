@@ -20,6 +20,7 @@ No containers, no cloud control plane.
 | Superuser | `sudo -u postgres psql` (peer auth) — for CREATE/DROP DATABASE only |
 | Backups | `/root/marque-backups/` + `/var/backups/marque/`, 7-day rotation |
 | Ops scripts | `/root/marque/ops/` |
+| Swap safety net | `/root/.marque-swap` (4 GiB), enabled by `marque-swap.service` |
 | Deploy | `scripts/deploy-web.sh` (build + `pm2 delete && pm2 start` + asset verify) |
 | Live | https://marque.trade |
 | Reference agents | served on paths `/agents/<slug>/*` → local ports 8610–8614 |
@@ -56,6 +57,14 @@ pm2 resurrect
 ```
 Verified: `pm2 kill && pm2 resurrect` brings all 12 apps back and the site
 returns 200 (2026-09-08).
+
+PM2 itself and every child must appear under `/system.slice/pm2-root.service`,
+not `user.slice` or an SSH session. Check with:
+```
+cat /proc/$(cat /root/.pm2/pm2.pid)/cgroup
+```
+If it is in a login session, run `systemctl restart pm2-root`; the saved dump
+brings the 12 apps back under system supervision.
 
 **Caddy:**
 ```
@@ -222,10 +231,14 @@ and lengthen the position-read cache.
 
 ### Out of memory
 
-The box has 12 GB. The build (`next build`) plus a headless-Chromium audit
-running together can OOM. Symptoms: workers logging one line then dying, the
-audit tool being "stopped for low memory". `free -m`; kill any stray
-`node .../audit*.mjs`; never run an audit during a deploy.
+The box has 12 GB plus a 4 GiB emergency swap file managed by
+`ops/marque-swap.service`. The build (`next build`) plus headless Chromium,
+Vitest workers and several interactive coding agents can still create severe
+memory pressure. Symptoms: workers logging one line then dying, the audit tool
+being "stopped for low memory", or `journalctl -k` reporting an OOM kill.
+Check `free -m`, `swapon --show`, and `systemctl status marque-swap`; stop stray
+build/test processes and never run an audit during a deploy. Swap is a safety
+net for a short spike, not permission to run unbounded concurrent builds.
 
 ---
 

@@ -735,6 +735,19 @@ design. What follows is what changed on the way back up.
   agent every 60s and runs `pm2 resurrect` when the daemon is absent, plus an
   alert. Deploy downtime (D2-05) folds into the same work.
 
+**Follow-up, 2026-09-20** — A second global OOM occurred at 18:45 CEST while
+the host had no swap. systemd killed `user@0.service`, which contained tmux,
+interactive agents, PM2, all Marque children and unrelated user-session work.
+The web-only deploy that followed saved an incomplete one-app PM2 dump, leaving
+the five reference-agent ports down and producing public 502s. Recovery started
+the complete 12-app ecosystem and saved it, then deliberately restarted
+`pm2-root.service`; `/proc/<pm2 pid>/cgroup` now reports
+`/system.slice/pm2-root.service`. A boot-persistent 4 GiB emergency swap file is
+managed by `ops/marque-swap.service`. Cost: 4 GiB disk and slower operation
+rather than process loss during a transient spike. Restore: disable the unit,
+swapoff `/root/.marque-swap`, and remove the file only after equivalent host
+memory protection exists.
+
 ---
 
 ## P7 — Cockpit UI
