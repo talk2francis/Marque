@@ -179,65 +179,86 @@ async function marketplaceBase(): Promise<MarketRow[]> {
 async function queryThirdParty(): Promise<MarketRow[]> {
   const rows = await db().execute(sql`
     with latest as (
-      select distinct on (agent_id) agent_id, liveness, latency_ms, failure_class, skills, checked_at
-      from probe order by agent_id, checked_at desc
+      select distinct on (service_id) service_id, agent_id, liveness, latency_ms,
+             failure_class, skills, checked_at, task_kinds, manifest, executable_endpoint
+      from probe where service_id is not null
+      order by service_id, checked_at desc
     ),
     svc as (
-      select agent_id,
-             array_agg(distinct kind) as kinds,
-             min(declared_price) filter (where declared_price is not null) as price,
-             (array_agg(coalesce(resolved_endpoint, endpoint) order by (declared_price is not null) desc))[1] as endpoint
-      from agent_service group by agent_id
+      select s.agent_id,
+             array_agg(distinct s.kind) as kinds,
+             array_agg(distinct s.kind) filter (
+               where p.liveness = 'live' and p.checked_at > now() - interval '24 hours'
+                 and s.kind in ('a2a', 'mcp', 'x402', 'erc8183')
+             ) as live_kinds,
+             coalesce(jsonb_agg(p.task_kinds) filter (
+               where p.liveness = 'live' and p.checked_at > now() - interval '24 hours'
+                 and s.kind in ('a2a', 'mcp', 'x402', 'erc8183')
+             ), '[]'::jsonb) as live_task_kinds,
+             bool_or(p.liveness in ('live', 'unbound', 'bad_schema') and p.checked_at > now() - interval '24 hours') as any_reachable,
+             bool_or(p.liveness = 'live' and p.checked_at > now() - interval '24 hours'
+               and s.kind in ('a2a', 'mcp', 'x402', 'erc8183')) as any_callable,
+             min(p.latency_ms) filter (where p.liveness = 'live' and p.checked_at > now() - interval '24 hours') as latency_ms,
+             min(s.declared_price) filter (where s.declared_price is not null) as price,
+             (array_agg(coalesce(s.resolved_endpoint, s.endpoint) order by (p.liveness='live') desc, s.id))[1] as endpoint
+      from agent_service s left join latest p on p.service_id = s.id
+      group by s.agent_id
     ),
     conf as (
       select distinct on (agent_id) agent_id, test_id, pass, failed_fields, ran_at
       from conformance_result where agent_id like '56:%'
       order by agent_id, (pass) desc, ran_at desc
     ),
+    cat as (
+      select distinct on (agent_id) agent_id, category, confidence
+      from agent_category
+      order by agent_id, (category <> 'unclassified') desc, confidence desc, assigned_at desc
+    ),
     qualifying as (
       select a.id, a.token_id, a.name, a.owner_address, a.supported_protocols,
              a.image_url, a.description, a.contract_address, a.x402_supported, a.registry_created_at,
              (a.raw_metadata #>> '{offchain_content,image}') as meta_image,
-             p.liveness, p.latency_ms,
-             s.kinds, s.price,
+             case when s.any_callable then 'live' when s.any_reachable then 'unbound' else null end as liveness,
+             s.latency_ms,
+             s.kinds, s.live_kinds, s.live_task_kinds, s.price,
              regexp_replace(coalesce(s.endpoint, ''), '^(https?://[^/]+).*', '\\1') as host,
              c.test_id as conf_test, c.pass as conf_pass, c.failed_fields as conf_failed, c.ran_at as conf_at,
              cat.category
       from agent a
-      left join latest p on p.agent_id = a.id
       left join svc s on s.agent_id = a.id
       left join conf c on c.agent_id = a.id
-      left join agent_category cat on cat.agent_id = a.id
+      left join cat on cat.agent_id = a.id
       where a.chain_id = 56
-        and (p.liveness = 'live' or c.agent_id is not null)
+        and (s.any_reachable or c.agent_id is not null)
         and a.id <> 'canary:ssrf'
     )
     select
-      (array_agg(id order by (liveness='live') desc, latency_ms asc nulls last))[1] as agent_id,
-      (array_agg(token_id order by (liveness='live') desc, latency_ms asc nulls last))[1] as token_id,
-      (array_agg(name order by length(coalesce(name,'')) desc))[1] as name,
+      id as agent_id,
+      token_id,
+      name,
       owner_address,
       host,
-      count(*) as identities,
-      bool_or(liveness = 'live') as any_live,
-      min(latency_ms) as latency_ms,
-      (jsonb_agg(to_jsonb(coalesce(kinds, array[]::text[])) order by (liveness='live') desc) -> 0) as kinds,
-      (jsonb_agg(coalesce(supported_protocols, '[]'::jsonb) order by (liveness='live') desc) -> 0) as protocols,
-      (array_agg(image_url order by (liveness='live') desc, (image_url is not null) desc))[1] as image_url,
-      (array_agg(meta_image order by (liveness='live') desc, (meta_image is not null) desc))[1] as meta_image,
-      (array_agg(description order by length(coalesce(description,'')) desc))[1] as description,
-      (array_agg(contract_address order by (contract_address is not null) desc))[1] as contract_address,
-      bool_or(x402_supported) as x402,
-      min(registry_created_at) as registered_at,
-      min(price) as price,
-      bool_or(conf_pass) as any_pass,
-      (array_agg(conf_test order by (conf_pass) desc, conf_at desc))[1] as conf_test,
-      (array_agg(conf_failed order by (conf_pass) desc, conf_at desc))[1] as conf_failed,
-      max(conf_at) as conf_at,
-      (array_agg(category order by (category is not null and category <> 'unclassified') desc))[1] as category
+      count(*) over (partition by owner_address, host) as identities,
+      (liveness = 'live') as any_live,
+      latency_ms,
+      coalesce(kinds, array[]::text[]) as kinds,
+      coalesce(live_kinds, array[]::text[]) as live_kinds,
+      live_task_kinds,
+      supported_protocols as protocols,
+      image_url,
+      meta_image,
+      description,
+      contract_address,
+      x402_supported as x402,
+      registry_created_at as registered_at,
+      price,
+      coalesce(conf_pass, false) as any_pass,
+      conf_test,
+      conf_failed,
+      conf_at,
+      category
     from qualifying
-    group by owner_address, host
-    order by identities desc
+    order by identities desc, agent_id
   `)
 
   const list = (((rows as unknown as { rows?: unknown[] }).rows ?? (rows as unknown as unknown[])) as Array<Record<string, unknown>>)
@@ -249,10 +270,19 @@ async function queryThirdParty(): Promise<MarketRow[]> {
     const failed = Array.isArray(r['conf_failed']) ? (r['conf_failed'] as string[]) : []
     const warrantStatus: 'warranted' | 'failed' | 'untested' = confTest ? (confPass ? 'warranted' : 'failed') : 'untested'
     const kinds = Array.isArray(r['kinds']) ? (r['kinds'] as string[]).filter(Boolean) : []
+    const liveKinds = Array.isArray(r['live_kinds']) ? (r['live_kinds'] as string[]).filter(Boolean) : []
+    const taskKinds = (Array.isArray(r['live_task_kinds']) ? r['live_task_kinds'] as unknown[] : [])
+      .flatMap((value) => Array.isArray(value) ? value : [])
+      .filter((value): value is string => typeof value === 'string')
     const qual: Qual = confPass ? 'warranted' : confTest ? 'failed' : live ? 'callable' : 'unbound'
     const name = String(r['name'] ?? 'Unnamed agent') || 'Unnamed agent'
     const owner = r['owner_address'] ? String(r['owner_address']) : null
-    const hireable = kinds.some((k) => HIRE_WIRED.has(k))
+    const taskForCategory: Record<string, string | undefined> = {
+      rebalancing: 'rebalance', grid: 'grid', yield: 'yield', health_factor: 'health_factor',
+    }
+    const requiredTask = taskForCategory[String(r['category'] ?? '')]
+    const callable = liveKinds.some((k) => HIRE_WIRED.has(k))
+    const hireable = callable && requiredTask !== undefined && taskKinds.includes(requiredTask)
     const host = r['host'] ? String(r['host']) : null
     const website = originOf(r['meta_image']) ?? (host && host !== '' ? null : null)
     return {
@@ -287,8 +317,14 @@ async function queryThirdParty(): Promise<MarketRow[]> {
         failedField: failed[0] ?? null,
       },
       qual,
-      previewable: hireable,
-      hireBlockedReason: hireable ? null : (kinds.length ? `Hire is not wired for a ${kinds.join('/')} interface yet` : 'No callable interface declared'),
+      previewable: false,
+      hireBlockedReason: hireable
+        ? null
+        : !callable
+          ? (kinds.length ? `No fresh executable ${kinds.join('/')} service is verified` : 'No callable interface declared')
+          : requiredTask === undefined
+            ? 'No Charter task exists for this category'
+            : `No live service has proved compatibility with ${requiredTask}`,
     }
   })
 

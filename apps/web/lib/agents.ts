@@ -1,6 +1,7 @@
 import 'server-only'
 import { sql } from 'drizzle-orm'
 import { db } from '@marque/db'
+import { agentState, TASK_FOR_CATEGORY } from './agent-state'
 
 /**
  * Agents that can actually be hired in a category.
@@ -19,6 +20,9 @@ export interface CallableAgent {
   host: string
   latencyMs: number | null
   isReference: boolean
+  serviceId?: number
+  executableEndpoint?: string | null
+  probeId?: number | null
 }
 
 import { REFERENCE_AGENTS, isReferenceAgent } from './reference-agents'
@@ -64,40 +68,33 @@ function referenceAgents(category: string): CallableAgent[] {
  * reference agent. Looking the requested agent up directly is what stops the
  * desk substituting a different counterparty for the one that was asked for.
  */
-export async function callableAgentById(agentId: string): Promise<CallableAgent | null> {
+export async function callableAgentById(agentId: string, category: string): Promise<CallableAgent | null> {
   const ref = REFERENCE_AGENTS.find((a) => a.id === agentId)
-  if (ref) return referenceAgents(ref.category).find((a) => a.agentId === agentId) ?? null
+  if (ref) return ref.category === category
+    ? referenceAgents(ref.category).find((a) => a.agentId === agentId) ?? null
+    : null
 
-  const rows = await db().execute(sql`
-    with latest as (
-      select distinct on (agent_id) agent_id, liveness, latency_ms
-      from probe where agent_id = ${agentId}
-      order by agent_id, checked_at desc
-    )
-    select a.id as agent_id, a.token_id, coalesce(a.name, 'Unnamed agent') as name,
-           s.kind, coalesce(s.resolved_endpoint, s.endpoint) as endpoint,
-           regexp_replace(coalesce(s.resolved_endpoint, s.endpoint), '^(https?://[^/]+).*', '\\1') as host,
-           l.latency_ms
-    from latest l
-    join agent a on a.id = l.agent_id
-    join agent_service s on s.agent_id = a.id
-    where a.id = ${agentId} and l.liveness = 'live' and a.id <> 'canary:ssrf'
-      and a.chain_id = 56 and s.kind in ('a2a', 'mcp')
-    order by case s.kind when 'a2a' then 0 else 1 end
-    limit 1
-  `)
-  const list = ((rows as unknown as { rows?: unknown[] }).rows ?? (rows as unknown as unknown[])) as Array<Record<string, unknown>>
-  const r = list[0]
-  if (!r) return null
+  const task = TASK_FOR_CATEGORY[category]
+  if (!task) return null
+  const state = await agentState(agentId, task)
+  const service = state?.selectedService
+  if (!state?.hireable || !service) return null
+  const endpoint = service.protocol === 'a2a' || service.protocol === 'termix'
+    ? service.discoveryEndpoint
+    : service.executableEndpoint
+  if (!endpoint) return null
   return {
-    agentId: String(r['agent_id']),
-    tokenId: String(r['token_id']),
-    name: String(r['name']),
-    kind: String(r['kind']),
-    endpoint: String(r['endpoint']),
-    host: String(r['host']),
-    latencyMs: r['latency_ms'] === null ? null : Number(r['latency_ms']),
-    isReference: isReferenceAgent(String(r['agent_id'])),
+    agentId: state.agentId,
+    tokenId: state.tokenId ?? '',
+    name: state.name,
+    kind: service.protocol,
+    endpoint,
+    host: new URL(endpoint).origin,
+    latencyMs: null,
+    isReference: isReferenceAgent(state.agentId),
+    serviceId: service.serviceId,
+    executableEndpoint: service.executableEndpoint,
+    probeId: service.probeId,
   }
 }
 

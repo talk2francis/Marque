@@ -104,7 +104,10 @@ function unique<T>(values: T[]): T[] {
  */
 export function evaluateAgentState(input: EvaluateAgentInput): CanonicalAgentState {
   const now = input.now ?? new Date()
-  const maxAge = input.maxProbeAgeMs ?? 30 * 60_000
+  // The production worker covers tens of thousands of declared services in a
+  // bounded, polite cycle. Twenty-four hours is the published freshness SLA;
+  // anything older remains historical evidence but cannot enable Hire.
+  const maxAge = input.maxProbeAgeMs ?? 24 * 60 * 60_000
   const reasons: CapabilityReason[] = []
 
   if (!input.registered) reasons.push('NOT_REGISTERED')
@@ -183,4 +186,3 @@ export function evaluateAgentState(input: EvaluateAgentInput): CanonicalAgentSta
     reasons: unique(reasons),
   }
 }
-

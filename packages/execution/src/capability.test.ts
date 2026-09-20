@@ -52,7 +52,7 @@ describe('evaluateAgentState', () => {
   })
 
   it('invalidates stale probes without erasing their historical evidence', () => {
-    const state = evaluate({ services: [service({ probedAt: '2026-09-20T22:00:00.000Z' })] })
+    const state = evaluate({ services: [service({ probedAt: '2026-09-19T22:00:00.000Z' })] })
     expect(state.serviceDeclared).toBe(true)
     expect(state.reachable).toBe(false)
     expect(state.hireable).toBe(false)
@@ -77,4 +77,3 @@ describe('evaluateAgentState', () => {
     expect(state.selectedService?.serviceId).toBe(7)
   })
 })
-

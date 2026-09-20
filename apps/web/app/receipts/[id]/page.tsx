@@ -28,6 +28,7 @@ export const revalidate = 0
 
 interface ReceiptBody {
   version: string
+  artifactType?: 'execution' | 'settlement' | 'failure'
   runId: string
   issuedAt: string
   task: Record<string, unknown> & { kind: string; subject: string; blockNumber: string; chainId: number }
@@ -50,6 +51,7 @@ interface ReceiptBody {
     failedFields: string[]; caseId: string | null; groundTruthHash: string | null
   }
   agentResponse: unknown
+  failure?: { stage: string; class: string; detail: string } | null
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
@@ -113,7 +115,9 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
       <main className={styles.page}>
         <header className={styles.head}>
           <div>
-            <Statement as="h1" className={styles.title}>Receipt</Statement>
+            <Statement as="h1" className={styles.title}>
+              {body.artifactType === 'failure' ? 'Failure receipt' : body.artifactType === 'settlement' ? 'Settlement receipt' : 'Execution receipt'}
+            </Statement>
             <p className={styles.sub}>
               {body.task.kind.replace('_', ' ')} · agent{' '}
               <span className="mono">{body.commercial.agentId}</span> · issued{' '}

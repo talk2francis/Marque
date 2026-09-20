@@ -1,6 +1,6 @@
 import 'server-only'
-import { randomUUID } from 'node:crypto'
-import { asc, desc, eq, sql } from 'drizzle-orm'
+import { createHash, randomUUID } from 'node:crypto'
+import { asc, desc, eq } from 'drizzle-orm'
 import { db, run as runTable, runEvent as runEventTable, receipt as receiptTable } from '@marque/db'
 import {
   executorFor, runHire, structuredTask,
@@ -10,6 +10,7 @@ import { publicClient } from '@marque/chain'
 import { readCharter } from './charters'
 import { anchorReceipt } from './anchor'
 import { referenceAgent as refAgentMeta, displayName } from './reference-agents'
+import { agentState } from './agent-state'
 
 /**
  * The run record.
@@ -49,7 +50,15 @@ const CATEGORY_FOR_KIND: Record<StructuredTask['kind'], string> = {
   health_factor: 'health_factor',
 }
 
-interface ResolvedAgent { agentId: string; name: string | null; kind: string; endpoint: string }
+interface ResolvedAgent {
+  agentId: string
+  name: string | null
+  kind: string
+  endpoint: string
+  serviceId: number | null
+  executableEndpoint: string | null
+  probeId: number | null
+}
 
 /**
  * Marque's own reference agents.
@@ -78,43 +87,31 @@ function referenceAgent(agentId: string): ResolvedAgent | null {
     name: displayName(agentId),
     kind: 'a2a',
     endpoint: `${base.replace(/\/$/, '')}/.well-known/agent-card.json`,
+    serviceId: null,
+    executableEndpoint: null,
+    probeId: null,
   }
 }
 
 /** Resolve one service without changing the selected ERC-8004 identity. */
-async function resolveAgent(agentId: string): Promise<ResolvedAgent | null> {
+async function resolveAgent(agentId: string, taskKind: StructuredTask['kind']): Promise<ResolvedAgent | null> {
   const reference = referenceAgent(agentId)
   if (reference) return reference
-
-  const rows = await db().execute(sql`
-    with latest as (
-      select distinct on (service_id) service_id, agent_id, liveness, executable_endpoint, checked_at
-      from probe
-      where agent_id = ${agentId} and service_id is not null
-      order by service_id, checked_at desc
-    )
-    select a.id as agent_id, a.name, s.kind,
-           case when s.kind in ('a2a', 'termix')
-             then coalesce(s.resolved_endpoint, s.endpoint)
-             else coalesce(l.executable_endpoint, s.resolved_endpoint, s.endpoint)
-           end as endpoint,
-           l.liveness
-    from latest l
-    join agent_service s on s.id = l.service_id
-    join agent a on a.id = l.agent_id
-    where l.liveness = 'live' and s.kind in ('a2a', 'termix', 'mcp', 'x402')
-    order by case s.kind when 'a2a' then 0 when 'termix' then 1 when 'mcp' then 2 else 3 end,
-             l.checked_at desc, s.id asc
-    limit 1
-  `)
-  const list = ((rows as unknown as { rows?: unknown[] }).rows ?? (rows as unknown as unknown[])) as Array<Record<string, unknown>>
-  const r = list[0]
-  if (!r) return null
+  const state = await agentState(agentId, taskKind)
+  const service = state?.selectedService
+  if (!state?.hireable || !service) return null
+  const endpoint = service.protocol === 'a2a' || service.protocol === 'termix'
+    ? service.discoveryEndpoint
+    : service.executableEndpoint
+  if (!endpoint) return null
   return {
-    agentId: String(r['agent_id']),
-    name: r['name'] === null ? null : String(r['name']),
-    kind: String(r['kind']),
-    endpoint: String(r['endpoint']),
+    agentId: state.agentId,
+    name: state.name,
+    kind: service.protocol,
+    endpoint,
+    serviceId: service.serviceId,
+    executableEndpoint: service.executableEndpoint,
+    probeId: service.probeId,
   }
 }
 
@@ -130,15 +127,6 @@ async function recordEvent(runId: string, event: RunEventInput): Promise<void> {
 }
 
 export async function startRun(input: StartRunInput): Promise<StartRunResult> {
-  const agent = await resolveAgent(input.agentId)
-  if (!agent) {
-    return { ok: false, error: 'we have no reachable endpoint on record for this agent' }
-  }
-  const executor = executorFor(agent.kind, agent.agentId, agent.endpoint, agent.name)
-  if (!executor) {
-    return { ok: false, error: `a ${agent.kind} endpoint exposes no task interface we can address` }
-  }
-
   let blockNumber: string
   try {
     blockNumber = (await publicClient().getBlockNumber()).toString()
@@ -163,6 +151,15 @@ export async function startRun(input: StartRunInput): Promise<StartRunResult> {
     return { ok: false, error: `that task is not well formed: ${detail}` }
   }
 
+  const agent = await resolveAgent(input.agentId, task.kind)
+  if (!agent) {
+    return { ok: false, error: 'that exact agent has no fresh service proven compatible with this task' }
+  }
+  const executor = executorFor(agent.kind, agent.agentId, agent.endpoint, agent.name)
+  if (!executor) {
+    return { ok: false, error: `a ${agent.kind} endpoint exposes no task interface we can address` }
+  }
+
   // Authority comes from the charter, read at start. An allowlist copied from a
   // form field would let the caller widen their own authority.
   const charter = input.charterId ? await readCharter(input.charterId) : null
@@ -172,12 +169,27 @@ export async function startRun(input: StartRunInput): Promise<StartRunResult> {
   if (charter && charter.status !== 'active') {
     return { ok: false, error: `that charter is ${charter.status}, so nothing may run under it` }
   }
+  if (charter && charter.agentId !== input.agentId) {
+    return { ok: false, error: `that charter belongs to ${charter.agentId}, not ${input.agentId}` }
+  }
+  if (charter && charter.category !== CATEGORY_FOR_KIND[input.kind]) {
+    return { ok: false, error: `that charter authorizes ${charter.category}, not ${CATEGORY_FOR_KIND[input.kind]}` }
+  }
 
   const runId = randomUUID()
+  const inputHash = `0x${createHash('sha256').update(JSON.stringify(task)).digest('hex')}`
   await db().insert(runTable).values({
     id: runId,
     agentId: agent.agentId,
     agentName: agent.name,
+    serviceId: agent.serviceId,
+    protocol: agent.kind,
+    discoveryEndpoint: agent.endpoint,
+    executableEndpoint: agent.executableEndpoint,
+    probeId: agent.probeId,
+    capability: input.kind,
+    inputHash,
+    correlationId: runId,
     kind: input.kind,
     category: CATEGORY_FOR_KIND[input.kind] as 'rebalancing',
     charterId: charter?.id ?? null,
@@ -193,7 +205,7 @@ export async function startRun(input: StartRunInput): Promise<StartRunResult> {
     kind: 'quote',
     label: `Hired ${agent.name ?? agent.agentId} over ${executor.kind}`,
     detail: `pinned to block ${blockNumber}`,
-    data: { endpoint: agent.endpoint },
+    data: { serviceId: agent.serviceId, protocol: agent.kind, probeId: agent.probeId, capability: input.kind, inputHash },
   })
 
   // Deliberately not awaited: the buyer gets the run URL now and watches the
@@ -237,7 +249,9 @@ async function execute(
     ok: outcome.ok,
     failure: outcome.failure,
     failureReason: outcome.run?.reason ?? null,
+    terminalReason: outcome.receipt?.failure?.class ?? (outcome.ok ? 'SUCCEEDED' : 'EXECUTION_FAILED'),
     feeUsd: outcome.quote?.feeUsd ?? null,
+    quote: outcome.quote as unknown as Record<string, unknown> | null,
     latencyMs: outcome.elapsedMs,
     txHashes: outcome.run?.txHashes ?? [],
     result: (outcome.run?.result ?? null) as Record<string, unknown> | null,
@@ -252,6 +266,7 @@ async function execute(
       id: runId,
       runId,
       agentId: outcome.receipt.commercial.agentId,
+      artifactType: outcome.receipt.artifactType ?? (outcome.receipt.execution.ok ? 'execution' : 'failure'),
       hash: outcome.receiptHash,
       body: outcome.receipt as unknown as Record<string, unknown>,
     }).onConflictDoNothing()

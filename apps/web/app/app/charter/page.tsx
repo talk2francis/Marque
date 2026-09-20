@@ -47,13 +47,12 @@ export default async function CharterDeskPage({
    * first in that list — always a Marque reference agent. Choosing a different
    * counterparty than the one asked for is the one thing this desk must never do.
    */
-  const requestedId = params.agent ?? null
-  const requested = requestedId ? await callableAgentById(requestedId).catch(() => null) : null
-
   const category = params.category && isCharterCategory(params.category)
     ? params.category
     : 'rebalancing'
   const template = TEMPLATES[category]
+  const requestedId = params.agent ?? null
+  const requested = requestedId ? await callableAgentById(requestedId, category).catch(() => null) : null
 
   const listed = await callableAgents(category).catch(() => [])
   // Put the requested agent in the list if the category query missed it.

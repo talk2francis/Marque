@@ -182,6 +182,51 @@ export async function runHire(opts: RunOptions): Promise<PipelineOutcome> {
   const emit = async (event: RunEventInput) => {
     if (opts.onEvent) await opts.onEvent(event)
   }
+  const failureReceipt = (
+    stage: 'quote' | 'authority',
+    reason: string,
+    detail: string,
+    quote: Quote | null,
+  ): Pick<PipelineOutcome, 'receipt' | 'receiptHash'> => {
+    const at = new Date().toISOString()
+    const failedRun: RunResult = {
+      ok: false,
+      agentId: opts.executor.agentId,
+      kind: opts.executor.kind,
+      result: null,
+      txHashes: [],
+      feeUsd: quote?.feeUsd ?? null,
+      latencyMs: Date.now() - started,
+      startedAt: new Date(started).toISOString(),
+      finishedAt: at,
+      reason: stage === 'authority' ? 'outside_authority' : (quote?.reason ?? 'blocked'),
+      detail,
+    }
+    const built = buildReceipt({
+      runId,
+      task: opts.task,
+      run: failedRun,
+      commercial: {
+        declaredPrice: quote?.declaredPrice ?? null,
+        paidAmount: null,
+        paidAsset: quote?.settlementAsset ?? null,
+        maxSpendUsd: opts.ctx.maxSpendUsd,
+        settled: false,
+        settlementNote: `no settlement: ${stage} failed`,
+      },
+      authority: {
+        charterId: opts.ctx.charterId ?? null,
+        allowlist: opts.ctx.allowlist ?? [],
+        spendCapUsd: opts.ctx.maxSpendUsd,
+        expiresAt: null,
+        withinAuthority: stage !== 'authority',
+      },
+      quality: { testId: null, pass: null, failedFields: [], caseId: null, groundTruthHash: null },
+      artifactType: 'failure',
+      failure: { stage, class: reason, detail },
+    })
+    return { receipt: built.receipt, receiptHash: built.hash }
+  }
 
   // ---- 1. Quote -----------------------------------------------------------
   const quote = await opts.executor.quote(opts.task)
@@ -191,8 +236,10 @@ export async function runHire(opts: RunOptions): Promise<PipelineOutcome> {
       label: 'No quote',
       detail: quote.detail ?? quote.reason ?? 'the agent did not answer with a price',
     })
+    const evidence = failureReceipt('quote', quote.reason ?? 'QUOTE_FAILED', quote.detail ?? quote.reason ?? 'unknown', quote)
+    await emit({ kind: 'receipt', label: 'Failure receipt issued', detail: evidence.receiptHash })
     return {
-      ...base, ok: false, stage: 'quote', quote,
+      ...base, ...evidence, ok: false, stage: 'quote', quote,
       failure: `could not get a quote: ${quote.detail ?? quote.reason ?? 'unknown'}`,
       elapsedMs: Date.now() - started,
     }
@@ -212,8 +259,11 @@ export async function runHire(opts: RunOptions): Promise<PipelineOutcome> {
       label: 'Refused on price',
       detail: `the agent asks ${quote.feeUsd} USD, above the ${opts.ctx.maxSpendUsd} USD ceiling set for this run`,
     })
+    const detail = `the agent asks ${quote.feeUsd} USD, above the ${opts.ctx.maxSpendUsd} USD ceiling set for this run`
+    const evidence = failureReceipt('quote', 'PRICE_ABOVE_CEILING', detail, quote)
+    await emit({ kind: 'receipt', label: 'Failure receipt issued', detail: evidence.receiptHash })
     return {
-      ...base, ok: false, stage: 'quote', quote,
+      ...base, ...evidence, ok: false, stage: 'quote', quote,
       failure: `the agent asks ${quote.feeUsd} USD, above the ${opts.ctx.maxSpendUsd} USD ceiling set for this run`,
       elapsedMs: Date.now() - started,
     }
@@ -223,8 +273,10 @@ export async function runHire(opts: RunOptions): Promise<PipelineOutcome> {
   const authority = checkAuthority(opts.task, opts.ctx)
   if (!authority.ok) {
     await emit({ kind: 'refused', label: 'Refused before execution', detail: authority.detail })
+    const evidence = failureReceipt('authority', 'AUTHORIZATION_FAILED', authority.detail, quote)
+    await emit({ kind: 'receipt', label: 'Failure receipt issued', detail: evidence.receiptHash })
     return {
-      ...base, ok: false, stage: 'authority', quote,
+      ...base, ...evidence, ok: false, stage: 'authority', quote,
       failure: `refused before execution: ${authority.detail}`,
       elapsedMs: Date.now() - started,
     }
@@ -300,6 +352,12 @@ export async function runHire(opts: RunOptions): Promise<PipelineOutcome> {
       failedFields: graded?.failedFields ?? [],
       caseId: loaded?.testCase.id ?? null,
       groundTruthHash: loaded?.groundTruthHash ?? null,
+    },
+    artifactType: run.ok ? 'execution' : 'failure',
+    failure: run.ok ? null : {
+      stage: 'execute',
+      class: run.reason ?? 'EXECUTION_FAILED',
+      detail: run.detail ?? 'the agent returned no detail',
     },
   })
 

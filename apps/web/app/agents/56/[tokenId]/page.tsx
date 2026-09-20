@@ -1,10 +1,11 @@
 import { notFound } from 'next/navigation'
 import { sql } from 'drizzle-orm'
 import { db } from '@marque/db'
-import { Statement, Chip, DataCell, ProvenanceChip, WarrantBadge, EmptyState, EvidenceDrawer } from '@marque/ui'
+import { Statement, Chip, DataCell, ProvenanceChip, WarrantBadge, EmptyState, EvidenceDrawer, LinkButton } from '@marque/ui'
 import { SiteHeader, SiteFooter } from '../../../_components/SiteHeader'
 import { AgentAvatar } from '../../../_components/AgentAvatar'
 import { explorerAddress, explorerToken } from '../../../../lib/network'
+import { agentState, TASK_FOR_CATEGORY } from '../../../../lib/agent-state'
 import styles from './agent.module.css'
 
 export const dynamic = 'force-dynamic'
@@ -54,7 +55,12 @@ export default async function AgentPage({ params }: { params: Promise<{ tokenId:
   const d = db()
   const agentRows = unwrap(await d.execute(sql`
     select a.*, c.category, c.confidence, c.method, c.rationale
-    from agent a left join agent_category c on c.agent_id = a.id
+    from agent a left join lateral (
+      select category, confidence, method, rationale
+      from agent_category c where c.agent_id = a.id
+      order by (category <> 'unclassified') desc, confidence desc, assigned_at desc
+      limit 1
+    ) c on true
     where a.chain_id = 56 and a.token_id = ${tokenId} limit 1
   `))
   const a = agentRows[0]
@@ -69,14 +75,16 @@ export default async function AgentPage({ params }: { params: Promise<{ tokenId:
                   from conformance_result where agent_id = ${a['id']} order by ran_at desc limit 8`).then(unwrap),
   ])
 
+  const category = a['category'] as string | null
+  const requestedTask = TASK_FOR_CATEGORY[category ?? ''] ?? null
+  const capability = await agentState(String(a['id']), requestedTask).catch(() => null)
   const latest = probes[0]
-  const live = latest?.['liveness'] === 'live'
+  const live = capability?.callable === true
   const skills = Array.isArray(latest?.['skills']) ? (latest['skills'] as string[]) : []
   const okCount = probes.filter((p) => p['ok'] === true).length
   const latencies = probes.map((p) => Number(p['latency_ms'] ?? 0)).filter((n) => n > 0).sort((x, y) => x - y)
   const p95 = latencies.length ? latencies[Math.min(latencies.length - 1, Math.floor(latencies.length * 0.95))] : null
 
-  const category = a['category'] as string | null
   const name = (a['name'] as string | null) ?? `Agent ${tokenId}`
   const owner = a['owner_address'] ? String(a['owner_address']) : null
   const contract = a['contract_address'] ? String(a['contract_address']) : null
@@ -330,21 +338,25 @@ export default async function AgentPage({ params }: { params: Promise<{ tokenId:
       {/* ---------- 3. What it needs from you ---------- */}
       <section className={styles.section}>
         <h2 className={styles.h2}>What it needs from you</h2>
-        {live ? (
-          <EmptyState title="Hiring opens with the Charter Desk.">
+        {capability?.hireable && category ? (
+          <div>
             <p>
-              When it does, this section states the exact contracts this agent may touch, the
-              spend cap, the expiry, and the worst case if it misbehaves — before anything is
-              signed. Nothing here is estimated in the meantime.
+              This exact identity has a fresh, compatible {capability.selectedService?.protocol.toUpperCase()} service.
+              The Charter Desk will preserve ERC-8004 token #{tokenId}; it will not substitute a reference agent.
             </p>
-          </EmptyState>
+            <LinkButton href={`/app/charter?agent=${encodeURIComponent(String(a['id']))}&category=${encodeURIComponent(category)}`}>
+              Hire {name}
+            </LinkButton>
+          </div>
         ) : (
-          <EmptyState title="This agent cannot be hired.">
+          <EmptyState title={live ? 'Reachable, but not hireable for this task.' : 'This agent cannot be hired.'}>
             <p>
-              {latest?.['failure_class']
-                ? FAILURE_COPY[String(latest['failure_class'])] ?? 'Its endpoint does not answer.'
-                : 'It exposes no callable endpoint.'}
-              {' '}It stays listed with the reason rather than being hidden.
+              {capability?.reasons.length
+                ? capability.reasons.join(' · ')
+                : latest?.['failure_class']
+                  ? FAILURE_COPY[String(latest['failure_class'])] ?? 'Its endpoint does not answer.'
+                  : 'No compatible, fresh executable service is proven.'}
+              {' '}It stays listed with the reason rather than being hidden or replaced.
             </p>
           </EmptyState>
         )}

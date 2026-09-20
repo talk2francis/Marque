@@ -66,7 +66,7 @@ export async function POST(request: Request) {
 
   let agent
   try {
-    agent = await callableAgentById(body.agentId)
+    agent = await callableAgentById(body.agentId, body.category)
   } catch {
     return NextResponse.json({ error: 'Agent availability could not be checked. Please try again.' }, { status: 503 })
   }

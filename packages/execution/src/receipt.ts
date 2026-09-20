@@ -65,7 +65,8 @@ export interface QualityProof {
 }
 
 export interface Receipt {
-  version: '1'
+  version: '1' | '2'
+  artifactType?: 'execution' | 'settlement' | 'failure'
   runId: string
   issuedAt: string
   task: StructuredTask
@@ -75,6 +76,11 @@ export interface Receipt {
   quality: QualityProof
   /** Exactly what the agent returned. Kept whole; the hash covers it. */
   agentResponse: unknown
+  failure?: {
+    stage: 'quote' | 'authority' | 'execute' | 'settlement' | 'internal'
+    class: string
+    detail: string
+  } | null
 }
 
 /** Deterministic ordering so identical content always hashes identically. */
@@ -111,9 +117,12 @@ export function buildReceipt(input: {
   commercial: Omit<CommercialProof, 'agentId' | 'executorKind'>
   authority: AuthorityProof
   quality: QualityProof
+  artifactType?: 'execution' | 'settlement' | 'failure'
+  failure?: Receipt['failure']
 }): { receipt: Receipt; hash: string } {
   const receipt: Receipt = {
-    version: '1',
+    version: input.artifactType || input.failure ? '2' : '1',
+    ...(input.artifactType ? { artifactType: input.artifactType } : {}),
     runId: input.runId,
     issuedAt: new Date().toISOString(),
     task: input.task,
@@ -135,6 +144,7 @@ export function buildReceipt(input: {
     authority: input.authority,
     quality: input.quality,
     agentResponse: input.run.result,
+    ...(input.failure !== undefined ? { failure: input.failure } : {}),
   }
   return { receipt, hash: receiptHash(receipt) }
 }
