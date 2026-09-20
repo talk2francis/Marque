@@ -57,6 +57,8 @@ export interface ChainSweepResult {
   highestId: number
   /** True when the walk reached the top and reset for another pass. */
   completedPass: boolean
+  /** 'frontier' scans only ids above what we hold; 'full' re-walks everything. */
+  mode: 'frontier' | 'full'
 }
 
 function ownerCall(registry: `0x${string}`, id: number): ReadCall {
@@ -106,17 +108,44 @@ function resultRows<T>(r: unknown): T[] {
   return Array.isArray(r) ? (r as T[]) : []
 }
 
-async function readState(chainId: number): Promise<{ cursor: number; highestId: number }> {
+interface ChainState {
+  cursor: number
+  highestId: number
+  /** Highest id we have confirmed indexed. Everything at or below is done. */
+  frontier: number
+  /** When the last full reconciliation finished. */
+  lastFullAt: number
+  /** A full pass that has not reached the top yet. */
+  fullInProgress: boolean
+}
+
+async function readState(chainId: number): Promise<ChainState> {
   const rows = await db().execute(sql`
     select cursor, detail from ingest_cursor where source = ${CURSOR_SOURCE(chainId)} limit 1
   `)
   const row = resultRows<Record<string, unknown>>(rows)[0]
-  if (!row) return { cursor: 0, highestId: 0 }
-  const detail = (row['detail'] ?? {}) as Record<string, unknown>
+  const empty: ChainState = { cursor: 0, highestId: 0, frontier: -1, lastFullAt: 0, fullInProgress: false }
+  if (!row) return empty
+  const d = (row['detail'] ?? {}) as Record<string, unknown>
+  const num = (k: string, fallback: number) => (typeof d[k] === 'number' ? (d[k] as number) : fallback)
   return {
     cursor: Number(row['cursor'] ?? 0),
-    highestId: typeof detail['highestId'] === 'number' ? (detail['highestId'] as number) : 0,
+    highestId: num('highestId', 0),
+    frontier: num('frontier', -1),
+    lastFullAt: num('lastFullAt', 0),
+    fullInProgress: d['fullInProgress'] === true,
   }
+}
+
+/** The highest token id already in the table — used to seed the frontier once. */
+async function highestIndexed(chainId: number, registry: string): Promise<number> {
+  const r = await db().execute(sql`
+    select coalesce(max(token_id::bigint), -1)::bigint as m
+    from agent
+    where chain_id = ${chainId} and contract_address = ${registry.toLowerCase()}
+      and token_id ~ '^[0-9]+$'
+  `)
+  return Number(resultRows<{ m: string | number }>(r)[0]?.m ?? -1)
 }
 
 async function writeState(chainId: number, cursor: number, detail: Record<string, unknown>): Promise<void> {
@@ -159,76 +188,105 @@ export async function sweepChainIdentities(opts: {
   maxIds?: number
   /** Ids per multicall. */
   batchSize?: number
+  /** Force a full re-walk of the id space. */
+  full?: boolean
+  /** How stale a full reconciliation may get before one is scheduled. */
+  fullEveryMs?: number
   restart?: boolean
 } = {}): Promise<ChainSweepResult> {
   const chainId = opts.chainId ?? 56
   const registry = opts.registry ?? BSC_IDENTITY_REGISTRY
   const maxIds = opts.maxIds ?? 20_000
   const batchSize = opts.batchSize ?? 400
+  const fullEveryMs = opts.fullEveryMs ?? 24 * 60 * 60_000
 
-  const state = opts.restart ? { cursor: 0, highestId: 0 } : await readState(chainId)
-  let cursor = state.cursor
-  let highestId = state.highestId
+  const st = opts.restart
+    ? { cursor: 0, highestId: 0, frontier: -1, lastFullAt: 0, fullInProgress: false }
+    : await readState(chainId)
 
-  // Re-probe the top when starting a pass, and whenever the walk catches up to
-  // what we last believed the top was — the registry keeps minting.
-  if (highestId === 0 || cursor >= highestId) {
-    highestId = await highestTokenId(registry, Math.max(1, highestId))
-    if (cursor >= highestId) cursor = 0
+  const highestId = await highestTokenId(registry, Math.max(1, st.highestId))
+  if (highestId === 0) {
+    return { scanned: 0, existing: 0, inserted: 0, cursor: 0, highestId: 0, completedPass: false, mode: 'frontier' }
   }
+
+  // Seed the frontier from the table the first time, so an existing install
+  // does not re-walk everything just because this field is new.
+  let frontier = st.frontier
+  if (frontier < 0) frontier = await highestIndexed(chainId, registry)
+
+  /*
+   * Steady state is a frontier scan. The registry mints sequentially, so once
+   * the id space has been walked the only ids that can be new are the ones
+   * above the highest we hold — usually a few hundred, often none. Re-walking
+   * all ~354k every pass cost 354k reads and 354k no-op upserts, and every one
+   * of those upserts left a dead tuple: the agent table reached 1.6M dead rows
+   * against 354k live, which is what put Postgres into constant disk reads.
+   *
+   * A full reconciliation still runs, but on a slow schedule, to catch anything
+   * a frontier scan structurally cannot (a gap left by an earlier failure).
+   */
+  const wantFull = opts.full === true || opts.restart === true || st.fullInProgress
+    || st.lastFullAt === 0 || Date.now() - st.lastFullAt >= fullEveryMs
+  const mode: 'frontier' | 'full' = wantFull ? 'full' : 'frontier'
+
+  let cursor = mode === 'full' ? (st.fullInProgress ? st.cursor : 0) : frontier + 1
+  const stopAt = highestId
 
   let scanned = 0
   let existing = 0
   let inserted = 0
   let completedPass = false
 
-  while (scanned < maxIds && cursor <= highestId) {
+  while (scanned < maxIds && cursor <= stopAt) {
     const ids: number[] = []
-    for (let i = 0; i < batchSize && cursor + i <= highestId && scanned + i < maxIds; i++) {
-      ids.push(cursor + i)
-    }
+    for (let i = 0; i < batchSize && cursor + i <= stopAt && scanned + i < maxIds; i++) ids.push(cursor + i)
     if (ids.length === 0) break
 
     let results
     try {
       results = await multicallAllowFailure<string>(ids.map((id) => ownerCall(registry, id)))
     } catch {
-      // Leave the cursor put; the next invocation retries this slice.
-      break
+      break // leave the cursor put; the next invocation retries this slice
     }
 
     const rows: NewAgent[] = []
     for (let i = 0; i < ids.length; i++) {
       const r = results[i]
       if (!r || r.status !== 'success') continue
-      const owner = String(r.result).toLowerCase()
       existing++
       rows.push({
         id: `${chainId}:${registry.toLowerCase()}:${ids[i]}`,
         chainId,
         tokenId: String(ids[i]),
         contractAddress: registry.toLowerCase(),
-        ownerAddress: owner,
+        ownerAddress: String(r.result).toLowerCase(),
       } as NewAgent)
     }
 
     inserted += await insertChainAgents(rows)
     scanned += ids.length
     cursor += ids.length
-
-    if (cursor > highestId) {
-      completedPass = true
-      cursor = 0
-      break
-    }
   }
 
-  await writeState(chainId, cursor, {
+  const reachedTop = cursor > stopAt
+  if (reachedTop) {
+    completedPass = true
+    frontier = stopAt
+  } else if (mode === 'frontier') {
+    // Partial frontier scan: only claim what was actually covered.
+    frontier = Math.max(frontier, cursor - 1)
+  }
+
+  const fullDone = mode === 'full' && reachedTop
+  await writeState(chainId, mode === 'full' && !reachedTop ? cursor : 0, {
     highestId,
+    frontier,
+    lastFullAt: fullDone ? Date.now() : st.lastFullAt,
+    fullInProgress: mode === 'full' && !reachedTop,
+    mode,
     lastScanned: scanned,
     lastInserted: inserted,
-    completedPass,
   })
 
-  return { scanned, existing, inserted, cursor, highestId, completedPass }
+  return { scanned, existing, inserted, cursor: reachedTop ? 0 : cursor, highestId, completedPass, mode }
 }
