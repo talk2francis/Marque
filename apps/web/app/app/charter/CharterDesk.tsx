@@ -115,7 +115,7 @@ export function CharterDesk({
   }, [sealActive])
 
   const agent = useMemo(
-    () => agents.find((a) => a.agentId === agentId) ?? agents[0] ?? null,
+    () => agents.find((a) => a.agentId === agentId) ?? null,
     [agents, agentId],
   )
   const who = agent?.name ?? 'This agent'
@@ -270,6 +270,7 @@ export function CharterDesk({
             onChange={(e) => setAgentId(e.target.value)}
             disabled={sealing}
           >
+            <option value="" disabled>Choose an agent</option>
             {agents.map((a) => (
               <option key={a.agentId} value={a.agentId}>
                 {a.name} — {a.kind}{a.latencyMs !== null ? ` · ${a.latencyMs}ms` : ''}

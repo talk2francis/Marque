@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { toSmallestUnit, type CharterGrant } from '@marque/mandates/types'
 import { charterService, charterServiceAvailable, listCharters, readCharter, CHARTER_CHAIN_ID } from '../../../../lib/charters'
 import { TEMPLATES, isCharterCategory } from '../../../../lib/charter-templates'
+import { callableAgentById } from '../../../../lib/agents'
 import { checkBurst, checkDailyCeiling, clientKey } from '../../../../lib/limits'
 
 export const dynamic = 'force-dynamic'
@@ -63,6 +64,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: detail }, { status: 400 })
   }
 
+  let agent
+  try {
+    agent = await callableAgentById(body.agentId)
+  } catch {
+    return NextResponse.json({ error: 'Agent availability could not be checked. Please try again.' }, { status: 503 })
+  }
+  if (!agent) {
+    return NextResponse.json({ error: 'The selected agent has no supported live interface on record. Choose another agent.' }, { status: 409 })
+  }
+
   const template = TEMPLATES[body.category as keyof typeof TEMPLATES]
   const service = charterService()
   const owner = await service.provisionWallet({ label: 'marque-demo' })
@@ -87,7 +98,7 @@ export async function POST(request: Request) {
 
   try {
     const charter = await service.grant(grant, {
-      agentName: body.agentName ?? null,
+      agentName: agent.name,
       grantedBy: 'visitor',
       label: body.label ?? template.name,
       category: body.category,

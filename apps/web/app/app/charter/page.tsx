@@ -3,7 +3,7 @@ import { SiteHeader, SiteFooter } from '../../_components/SiteHeader'
 import { NetworkBadge } from '../../_components/NetworkBadge'
 import { CharterDesk } from './CharterDesk'
 import { TEMPLATES, CATEGORY_ORDER, isCharterCategory, UNIVERSAL_MAY_NOT } from '../../../lib/charter-templates'
-import { callableAgents } from '../../../lib/agents'
+import { callableAgents, callableAgentById } from '../../../lib/agents'
 import { charterServiceAvailable, CHARTER_CHAIN_NAME, CHARTER_CHAIN_ID } from '../../../lib/charters'
 import styles from './charter.module.css'
 
@@ -36,12 +36,34 @@ export default async function CharterDeskPage({
   searchParams: Promise<{ category?: string; agent?: string }>
 }) {
   const params = await searchParams
-  const category = params.category && isCharterCategory(params.category) ? params.category : 'rebalancing'
+
+  /*
+   * A buyer who clicked Hire in the marketplace has already chosen someone.
+   * Honour that choice: look the agent up directly rather than hoping it falls
+   * inside `callableAgents`, which is capped at twelve, deduplicated by host
+   * and filtered to one category. Most third-party agents are `unclassified`,
+   * so their Hire link carried no usable category, the desk defaulted to
+   * rebalancing, and the requested agent was silently replaced by whoever was
+   * first in that list — always a Marque reference agent. Choosing a different
+   * counterparty than the one asked for is the one thing this desk must never do.
+   */
+  const requestedId = params.agent ?? null
+  const requested = requestedId ? await callableAgentById(requestedId).catch(() => null) : null
+
+  const category = params.category && isCharterCategory(params.category)
+    ? params.category
+    : 'rebalancing'
   const template = TEMPLATES[category]
-  const agents = await callableAgents(category).catch(() => [])
-  const preselected = params.agent && agents.some((a) => a.agentId === params.agent)
-    ? params.agent
-    : agents[0]?.agentId ?? null
+
+  const listed = await callableAgents(category).catch(() => [])
+  // Put the requested agent in the list if the category query missed it.
+  const agents = requested && !listed.some((a) => a.agentId === requested.agentId)
+    ? [requested, ...listed]
+    : listed
+
+  const preselected = requestedId !== null ? requested?.agentId ?? null : agents[0]?.agentId ?? null
+  // Asked for someone we cannot reach: say so rather than quietly swapping them.
+  const requestedUnavailable = requestedId !== null && requested === null
 
   return (
     <>
@@ -64,13 +86,28 @@ export default async function CharterDeskPage({
             <a
               key={key}
               className={styles.tab}
-              href={`/app/charter?category=${key}`}
+              href={`/app/charter?category=${key}${requestedId !== null ? `&agent=${encodeURIComponent(requestedId)}` : ''}`}
               aria-current={key === category ? 'page' : undefined}
             >
               {CATEGORY_LABEL[key]}
             </a>
           ))}
         </nav>
+
+        {requested && !isCharterCategory(params.category ?? '') && (
+          <p className={styles.note}>
+            Hiring {requested.name}. Choose the scope above and review its limits before granting.
+            These permissions do not verify that the agent can perform the task.
+          </p>
+        )}
+
+        {requestedUnavailable && (
+          <p className={styles.note} role="status">
+            The selected agent has no supported live interface on record, or its availability could not be checked. Nothing
+            has been selected on your behalf — pick another agent below, or{' '}
+            <a href="/register">go back to the marketplace</a>.
+          </p>
+        )}
 
         {!charterServiceAvailable() ? (
           <EmptyState title="Charters are not configured on this deployment.">
@@ -94,6 +131,7 @@ export default async function CharterDeskPage({
           </EmptyState>
         ) : (
           <CharterDesk
+            key={`${category}:${requestedId ?? 'browse'}`}
             category={category}
             template={template}
             universalMayNot={UNIVERSAL_MAY_NOT}

@@ -120,9 +120,21 @@ export function profileHref(a: MarketRow): string | null {
   return null
 }
 
-/** The charter desk URL. Unchanged. */
+/** The four categories the charter desk has a template for. */
+const CHARTER_CATEGORIES = new Set(['rebalancing', 'grid', 'yield', 'health_factor'])
+
+/**
+ * The charter desk URL.
+ *
+ * Only pass a category the desk actually has a template for. Most third-party
+ * agents are `unclassified`, and sending that made the desk fall back to
+ * rebalancing — which is how a Hire click on a third party ended up on a
+ * Marque agent's charter. The agent id is the part that matters; the desk
+ * resolves it directly.
+ */
 export function hireHref(a: MarketRow): string {
-  return `/app/charter?agent=${encodeURIComponent(a.agentId)}${a.category ? `&category=${a.category}` : ''}`
+  const cat = a.category && CHARTER_CATEGORIES.has(a.category) ? `&category=${a.category}` : ''
+  return `/app/charter?agent=${encodeURIComponent(a.agentId)}${cat}`
 }
 
 export function isoDay(iso: string | null): string | null {

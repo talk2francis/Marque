@@ -77,7 +77,6 @@ export function Marketplace({ category: fixedCategory }: { category?: string }) 
     )
     setReady(true)
     // Mount only: fixedCategory is fixed by the route.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   useEffect(() => {
@@ -152,7 +151,6 @@ export function Marketplace({ category: fixedCategory }: { category?: string }) 
       controller.abort()
       clearTimeout(t)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [qs, page, pageSize, ready, retry])
 
   /* --- FLIP: remember row positions, animate the delta ---------------- */

@@ -52,6 +52,55 @@ function referenceAgents(category: string): CallableAgent[] {
   })
 }
 
+/**
+ * One specific agent, by id, if it is callable right now.
+ *
+ * `callableAgents` answers "who can serve this category", which is the right
+ * question for browsing the desk but the wrong one when a buyer arrived from
+ * the marketplace having already chosen someone. That list is capped at twelve,
+ * deduplicated by host and filtered to a single category, so a perfectly
+ * callable agent can be absent from it — and the desk used to respond by
+ * quietly selecting whoever was first, which on every category is a Marque
+ * reference agent. Looking the requested agent up directly is what stops the
+ * desk substituting a different counterparty for the one that was asked for.
+ */
+export async function callableAgentById(agentId: string): Promise<CallableAgent | null> {
+  const ref = REFERENCE_AGENTS.find((a) => a.id === agentId)
+  if (ref) return referenceAgents(ref.category).find((a) => a.agentId === agentId) ?? null
+
+  const rows = await db().execute(sql`
+    with latest as (
+      select distinct on (agent_id) agent_id, liveness, latency_ms
+      from probe where agent_id = ${agentId}
+      order by agent_id, checked_at desc
+    )
+    select a.id as agent_id, a.token_id, coalesce(a.name, 'Unnamed agent') as name,
+           s.kind, coalesce(s.resolved_endpoint, s.endpoint) as endpoint,
+           regexp_replace(coalesce(s.resolved_endpoint, s.endpoint), '^(https?://[^/]+).*', '\\1') as host,
+           l.latency_ms
+    from latest l
+    join agent a on a.id = l.agent_id
+    join agent_service s on s.agent_id = a.id
+    where a.id = ${agentId} and l.liveness = 'live' and a.id <> 'canary:ssrf'
+      and a.chain_id = 56 and s.kind in ('a2a', 'mcp')
+    order by case s.kind when 'a2a' then 0 else 1 end
+    limit 1
+  `)
+  const list = ((rows as unknown as { rows?: unknown[] }).rows ?? (rows as unknown as unknown[])) as Array<Record<string, unknown>>
+  const r = list[0]
+  if (!r) return null
+  return {
+    agentId: String(r['agent_id']),
+    tokenId: String(r['token_id']),
+    name: String(r['name']),
+    kind: String(r['kind']),
+    endpoint: String(r['endpoint']),
+    host: String(r['host']),
+    latencyMs: r['latency_ms'] === null ? null : Number(r['latency_ms']),
+    isReference: isReferenceAgent(String(r['agent_id'])),
+  }
+}
+
 export async function callableAgents(category: string, limit = 12): Promise<CallableAgent[]> {
   const rows = await db().execute(sql`
     with latest as (
@@ -69,6 +118,7 @@ export async function callableAgents(category: string, limit = 12): Promise<Call
     join agent a on a.id = l.agent_id
     join agent_category c on c.agent_id = a.id
     where l.liveness = 'live' and c.category = ${category} and a.id <> 'canary:ssrf'
+      and a.chain_id = 56 and s.kind in ('a2a', 'mcp')
     order by host, l.latency_ms asc nulls last
     limit ${limit}
   `)
