@@ -286,19 +286,19 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ a
                     <div className={styles.categoryHead}>
                       <span className={styles.categoryName}>{copy.name}</span>
                       {live >= 2
-                        ? <Chip tone="holds">{live} callable</Chip>
-                        : <Chip tone="watch">{live === 0 ? 'none callable yet' : '1 callable'}</Chip>}
+                        ? <Chip tone="holds">{live} callable descriptors</Chip>
+                        : <Chip tone="watch">{live === 0 ? 'none callable yet' : '1 callable descriptor'}</Chip>}
                     </div>
                     <p className={styles.categoryProblem}>{copy.problem}</p>
                   </div>
                   <div className={styles.categoryMeasure}>
                     <MeasureRule
-                      label={`${copy.name}: ${live} callable of ${total} classified`}
+                      label={`${copy.name}: ${live} callable descriptors of ${total} classified`}
                       value={live} lower={0} upper={Math.max(total, 2)}
                       threshold={2} thresholdLabel="market = 2"
                       lowerLabel="0"
                       upperLabel={`${fmt(total)}`}
-                      valueLabel={`${live} callable`}
+                      valueLabel={`${live} callable descriptors`}
                       state={live >= 2 ? 'holds' : live === 1 ? 'watch' : 'breach'}
                       index={i}
                     />
@@ -327,7 +327,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ a
                   ['Registered on BNB Smart Chain', registered, 'indexed from the ERC-8004 registry'],
                   ['Declares a service we can parse', declaring, 'has at least one endpoint in its metadata'],
                   ['Endpoint responds', responding, 'answered our probe with a well-formed reply'],
-                  ['Bound and callable', bound, 'exposes something a buyer could actually hire'],
+                  ['Callable descriptor found', bound, 'a fresh probe found an executable protocol interface'],
                   ['Classified into a category', classified, 'matched a category-defining term'],
                 ]
                 const top = rows[0]?.[1] ?? 1

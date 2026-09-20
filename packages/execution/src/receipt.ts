@@ -23,6 +23,8 @@ export interface CommercialProof {
   executorKind: ExecutorKind
   /** What the agent said it would charge, in its own words. */
   declaredPrice: string | null
+  quoteStatus?: 'quoted' | 'free' | 'price_unknown' | 'failed'
+  quoteProvenance?: 'protocol' | 'declared_metadata' | 'none'
   /** What was actually paid, when anything was. */
   paidAmount: number | null
   paidAsset: string | null

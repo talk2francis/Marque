@@ -15,7 +15,10 @@ const TOKENS: Address[] = [
   '0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c', // BTCB
 ]
 
-describe('RpcPool', () => {
+// These are production-RPC smoke tests, not unit tests. Run explicitly in the
+// network-enabled release gate; ordinary CI must not turn DNS policy into a
+// false code failure.
+describe.runIf(process.env['RUN_NETWORK_TESTS'] === '1')('RpcPool network smoke', () => {
   it('completes a 50-read multicall with one endpoint forced to fail', async () => {
     // Dead endpoint first in rotation, so the very first request hits it.
     const client = clientFor([DEAD_RPC, ...DEFAULT_BSC_RPCS.slice(0, 3)])

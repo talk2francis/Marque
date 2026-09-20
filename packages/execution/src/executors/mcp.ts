@@ -186,7 +186,7 @@ export class McpExecutor implements AgentExecutor {
     const tools = await this.listTools()
     if ('ok' in tools) {
       return {
-        ok: false, agentId: this.agentId, kind: this.kind, feeUsd: null,
+        ok: false, status: 'failed', provenance: 'none', agentId: this.agentId, kind: this.kind, feeUsd: null,
         declaredPrice: null, settlementAsset: null,
         latencyMs: Date.now() - started, reason: tools.reason, detail: tools.detail,
       }
@@ -194,14 +194,14 @@ export class McpExecutor implements AgentExecutor {
     const compatible = this.compatibleTool(tools, task)
     if (!compatible) {
       return {
-        ok: false, agentId: this.agentId, kind: this.kind, feeUsd: null,
+        ok: false, status: 'failed', provenance: 'none', agentId: this.agentId, kind: this.kind, feeUsd: null,
         declaredPrice: null, settlementAsset: null, latencyMs: Date.now() - started,
         reason: 'no_compatible_interface',
         detail: `none of the ${tools.length} exposed tools answer a ${task.kind} task`,
       }
     }
     return {
-      ok: true, agentId: this.agentId, kind: this.kind,
+      ok: true, status: 'price_unknown', provenance: 'none', agentId: this.agentId, kind: this.kind,
       feeUsd: null, declaredPrice: null, settlementAsset: null,
       latencyMs: Date.now() - started,
       detail: `tool "${compatible.tool.name}" accepts this task schema; no price protocol is declared`,

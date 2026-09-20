@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { runHire } from './pipeline'
+import { checkCharterBinding, runHire } from './pipeline'
 import type { AgentExecutor } from './types'
 import type { StructuredTask } from './tasks'
 
@@ -18,7 +18,7 @@ function executor(overrides: Partial<AgentExecutor> = {}): AgentExecutor {
     kind: 'a2a', agentId: '56:registry:1',
     inspect: vi.fn(),
     quote: vi.fn(async () => ({
-      ok: true, agentId: '56:registry:1', kind: 'a2a', feeUsd: null,
+      ok: true, status: 'price_unknown', provenance: 'none', agentId: '56:registry:1', kind: 'a2a', feeUsd: null,
       declaredPrice: null, settlementAsset: null, latencyMs: 1,
     })),
     execute: vi.fn(async () => ({
@@ -35,7 +35,7 @@ describe('terminal evidence', () => {
     const out = await runHire({
       runId: 'quote-failure', task,
       executor: executor({ quote: vi.fn(async () => ({
-        ok: false, agentId: '56:registry:1', kind: 'a2a', feeUsd: null,
+        ok: false, status: 'failed', provenance: 'none', agentId: '56:registry:1', kind: 'a2a', feeUsd: null,
         declaredPrice: null, settlementAsset: null, latencyMs: 2,
         reason: 'unreachable', detail: 'agent card returned http 502',
       })) }),
@@ -63,3 +63,21 @@ describe('terminal evidence', () => {
   })
 })
 
+describe('Charter binding', () => {
+  const valid = {
+    selectedAgentId: '56:registry:1', charterAgentId: '56:registry:1',
+    requestedCategory: 'yield', charterCategory: 'yield', charterStatus: 'active',
+    expiresAt: '2026-09-21T01:00:00Z', now: new Date('2026-09-21T00:00:00Z'),
+  }
+  it('accepts only the exact active, unexpired agent/category binding', () => {
+    expect(checkCharterBinding(valid)).toEqual({ ok: true })
+  })
+  it.each([
+    [{ ...valid, charterAgentId: 'marque:sluicegate' }, 'IDENTITY_MISMATCH'],
+    [{ ...valid, charterCategory: 'grid' }, 'CATEGORY_MISMATCH'],
+    [{ ...valid, charterStatus: 'revoked' }, 'REVOKED'],
+    [{ ...valid, expiresAt: '2026-09-20T23:00:00Z' }, 'EXPIRED'],
+  ] as const)('rejects invalid binding %#', (input, reason) => {
+    expect(checkCharterBinding(input)).toMatchObject({ ok: false, reason })
+  })
+})

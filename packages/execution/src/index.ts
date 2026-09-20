@@ -11,5 +11,5 @@ export {
   type CapabilityReason, type CanonicalAgentState, type ServiceCapabilityEvidence,
   type QualificationEvidence, type ExecutableProtocol, type TaskKind,
 } from './capability.js'
-export { runHire, preflight, checkAuthority, type PipelineOutcome, type RunOptions, type RunEventInput } from './pipeline.js'
+export { runHire, preflight, checkAuthority, checkCharterBinding, type PipelineOutcome, type RunOptions, type RunEventInput } from './pipeline.js'
 export { executorFor } from './factory.js'

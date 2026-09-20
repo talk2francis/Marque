@@ -56,6 +56,9 @@ export interface CapabilityManifest {
 
 export interface Quote {
   ok: boolean
+  /** Commercial fact; `ok` only says discovery and compatibility succeeded. */
+  status: 'quoted' | 'free' | 'price_unknown' | 'failed'
+  provenance: 'protocol' | 'declared_metadata' | 'none'
   agentId: string
   kind: ExecutorKind
   /** Agent fee in USD, when the agent states one we can parse. */

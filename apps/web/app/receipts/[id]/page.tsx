@@ -34,6 +34,8 @@ interface ReceiptBody {
   task: Record<string, unknown> & { kind: string; subject: string; blockNumber: string; chainId: number }
   commercial: {
     agentId: string; executorKind: string; declaredPrice: string | null
+    quoteStatus?: 'quoted' | 'free' | 'price_unknown' | 'failed'
+    quoteProvenance?: 'protocol' | 'declared_metadata' | 'none'
     paidAmount: number | null; paidAsset: string | null; maxSpendUsd: number
     settled: boolean; settlementNote: string | null
   }
@@ -135,6 +137,11 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
             verdict={settled ? 'Settled' : 'Not settled'}
             tone={settled ? 'holds' : 'neutral'}
           >
+            <RowItem label="Quote">
+              {body.commercial.quoteStatus === 'price_unknown'
+                ? <span className={styles.absent}>unsupported by protocol — price unknown</span>
+                : body.commercial.quoteStatus ?? 'legacy receipt'}
+            </RowItem>
             <RowItem label="Agent asked">
               {body.commercial.declaredPrice ?? <span className={styles.absent}>no machine-readable price</span>}
             </RowItem>

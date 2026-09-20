@@ -51,7 +51,7 @@ The Main Track is scored on three things. Here is where each one lives.
 
 | Criterion | What the rubric wants | Where Marque does it |
 |---|---|---|
-| **Functionality** | The full journey works end to end — land, find an agent by category, understand it, activate it — with minimal friction, no dead ends, for someone with zero prior knowledge. | `/judge` runs the whole path in six steps **with no wallet**. `/register` → category page → agent profile → **Preview** (dry-run free) → `/app/charter` (one signature) → Run Room → **Receipt**. A dead-button audit (`scripts/audit-interactions.mjs`) is part of the build. |
+| **Functionality** | The full journey works end to end — land, find an agent by category, understand it, activate it — with minimal friction, no dead ends, for someone with zero prior knowledge. | `/judge` demonstrates the reference-agent path **with no wallet**. Third-party profiles expose Hire only when the exact identity has a fresh service proven compatible with the selected task; unavailable agents stay visible with the reason. |
 | **Data Quality** | Real-time, accurate data beyond basic counts. A user can make a genuinely informed hire from what is shown. | Every position is read from chain at request time with a block and a **provenance chip**; an unverified provider claim is styled as the weakest thing on the page. The marketplace ranks by *callable* and *passed the published test*, not by self-description. Compare shows on-chain track record, not star ratings. Nothing on the shipped path is a fabricated, hardcoded or estimated number — where there is no data, the page says so. |
 | **Agent Diversity** | All four categories — rebalancing, grid, yield, health factor — surfaced with **equal depth**. One category as the main event and the rest as an afterthought scores poorly. | Four categories, each with its **own deterministic MCS test** (MCS-REB-1 / GRID-1 / YIELD-1 / HF-1), its own reference agent guaranteeing liquidity, its own live cases at a pinned block, and its own graveyard. `/standard` and `/register/<category>` are the same depth for all four. |
 
@@ -133,7 +133,7 @@ an unverified provider claim is styled as the weakest thing on the page.
   transaction, immediate, on chain.
 - **Seal** — a recommendation hashed and written on chain *before its outcome is
   known*, so a track record cannot be assembled after the fact.
-- **Receipt** — a settled run's public record: four proof blocks (commercial,
+- **Receipt** — an accepted attempt's public evidence: success, execution failure, or pre-execution failure, with commercial,
   execution, authority, quality), a canonical hash, the anchor transaction.
 
 ### What no other entry has

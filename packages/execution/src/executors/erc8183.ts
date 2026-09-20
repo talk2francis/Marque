@@ -131,13 +131,13 @@ export class Erc8183Executor implements AgentExecutor {
     const asset = await resolveSettlementAsset(this.config.kernel, null, this.client)
     if (!asset) {
       return {
-        ok: false, agentId: this.agentId, kind: this.kind, feeUsd: null,
+        ok: false, status: 'failed', provenance: 'none', agentId: this.agentId, kind: this.kind, feeUsd: null,
         declaredPrice: null, settlementAsset: null, latencyMs: Date.now() - started,
         reason: 'unreachable', detail: 'could not read the settlement asset from the kernel',
       }
     }
     return {
-      ok: true, agentId: this.agentId, kind: this.kind,
+      ok: true, status: 'price_unknown', provenance: 'none', agentId: this.agentId, kind: this.kind,
       // The kernel names the asset; it does not name this job's price. Quoting
       // a number here would be inventing one.
       feeUsd: null,

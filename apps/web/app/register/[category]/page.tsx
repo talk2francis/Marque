@@ -78,11 +78,11 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
               <p className={styles.introSupply}>
                 {row.thirdPartyExecutable < MIN_THIRD_PARTY_PER_CATEGORY ? (
                   <Chip tone="watch">
-                    {row.thirdPartyExecutable === 0 ? 'No callable supplier yet' : '1 callable supplier'}
+                    {row.thirdPartyExecutable === 0 ? 'No fresh callable descriptor' : '1 fresh callable descriptor'}
                     {' · a category needs 2 to be a market'}
                   </Chip>
                 ) : (
-                  <Chip tone="holds">{row.thirdPartyExecutable} callable suppliers</Chip>
+                  <Chip tone="holds">{row.thirdPartyExecutable} callable descriptors</Chip>
                 )}
                 {row.thirdPartyRegistrations > row.thirdPartyExecutable && (
                   <span className={styles.introSupplyNote}>

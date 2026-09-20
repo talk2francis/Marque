@@ -130,7 +130,7 @@ export class X402Executor implements AgentExecutor {
     const res = await safeFetch(this.endpoint, { timeoutMs: 15_000 })
     if (!res.ok) {
       return {
-        ok: false, agentId: this.agentId, kind: this.kind, feeUsd: null,
+        ok: false, status: 'failed', provenance: 'none', agentId: this.agentId, kind: this.kind, feeUsd: null,
         declaredPrice: null, settlementAsset: null, latencyMs: Date.now() - started,
         reason: res.failure === 'timeout' ? 'timeout' : 'unreachable', detail: res.detail,
       }
@@ -140,14 +140,14 @@ export class X402Executor implements AgentExecutor {
       const c = parseChallenge(res.headers, res.body)
       if (!c) {
         return {
-          ok: false, agentId: this.agentId, kind: this.kind, feeUsd: null,
+          ok: false, status: 'failed', provenance: 'none', agentId: this.agentId, kind: this.kind, feeUsd: null,
           declaredPrice: null, settlementAsset: null, latencyMs: Date.now() - started,
           reason: 'unusable_response',
           detail: '402 returned with no parseable payment challenge',
         }
       }
       return {
-        ok: true, agentId: this.agentId, kind: this.kind,
+        ok: true, status: 'quoted', provenance: 'protocol', agentId: this.agentId, kind: this.kind,
         // Only call it USD when the asset actually is a dollar stablecoin.
         feeUsd: c.asset && /^(USD|USDC|USDT|BUSD|DAI)/i.test(c.asset) ? c.amount : null,
         declaredPrice: c.amount !== null ? `${c.amount}${c.asset ? ` ${c.asset}` : ''}` : null,
@@ -157,7 +157,7 @@ export class X402Executor implements AgentExecutor {
     }
 
     return {
-      ok: true, agentId: this.agentId, kind: this.kind, feeUsd: 0,
+      ok: true, status: 'free', provenance: 'protocol', agentId: this.agentId, kind: this.kind, feeUsd: 0,
       declaredPrice: 'free', settlementAsset: null,
       latencyMs: Date.now() - started,
       detail: 'endpoint answered without requiring payment',

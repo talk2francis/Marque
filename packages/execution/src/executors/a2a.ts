@@ -179,7 +179,7 @@ export class A2AExecutor implements AgentExecutor {
     const r = await this.resolve()
     if ('ok' in r) {
       return {
-        ok: false, agentId: this.agentId, kind: this.kind, feeUsd: null,
+        ok: false, status: 'failed', provenance: 'none', agentId: this.agentId, kind: this.kind, feeUsd: null,
         declaredPrice: null, settlementAsset: null,
         latencyMs: Date.now() - started, reason: r.reason, detail: r.detail,
       }
@@ -187,10 +187,10 @@ export class A2AExecutor implements AgentExecutor {
     // A2A carries no price field. We report that honestly rather than
     // inventing a number: an unpriced agent is a fact about the agent.
     return {
-      ok: true, agentId: this.agentId, kind: this.kind,
+      ok: true, status: 'price_unknown', provenance: 'none', agentId: this.agentId, kind: this.kind,
       feeUsd: null, declaredPrice: null, settlementAsset: null,
       latencyMs: Date.now() - started,
-      detail: 'A2A declares no price; cost is settled out of band or is free',
+      detail: 'A2A exposes no standard quote operation; price is unknown',
     }
   }
 

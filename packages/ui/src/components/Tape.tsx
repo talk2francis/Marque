@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 
 /**
- * The Tape — a slow horizontal ticker of REAL settled events.
+ * The Tape — a slow horizontal ticker of real receipted events.
  *
  * AGENTS.md is unambiguous: every item is a real event and clicks through to
  * its receipt. If there are none, the Tape does not render. A ticker of
@@ -30,7 +30,7 @@ export function Tape({ events }: { events: readonly TapeEvent[] }) {
   ))
 
   return (
-    <div className="tape" aria-label="Recent settled activity">
+    <div className="tape" aria-label="Recent receipted activity">
       {/* Duplicated once so the marquee can loop without a visible seam. */}
       <div className="tape__track">
         {items}

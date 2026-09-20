@@ -3,8 +3,8 @@ import { createHash, randomUUID } from 'node:crypto'
 import { asc, desc, eq } from 'drizzle-orm'
 import { db, run as runTable, runEvent as runEventTable, receipt as receiptTable } from '@marque/db'
 import {
-  executorFor, runHire, structuredTask,
-  type RunEventInput, type StructuredTask,
+  checkCharterBinding, executorFor, runHire, structuredTask,
+  buildReceipt, type Receipt, type RunEventInput, type StructuredTask,
 } from '@marque/execution'
 import { publicClient } from '@marque/chain'
 import { readCharter } from './charters'
@@ -147,7 +147,7 @@ export async function startRun(input: StartRunInput): Promise<StartRunResult> {
       ...(input.pair ? { pair: input.pair } : {}),
     })
   } catch (err) {
-    const detail = err instanceof Error ? err.message.split('\n')[0] : String(err)
+    const detail = err instanceof Error ? (err.message.split('\n')[0] ?? err.message) : String(err)
     return { ok: false, error: `that task is not well formed: ${detail}` }
   }
 
@@ -166,14 +166,13 @@ export async function startRun(input: StartRunInput): Promise<StartRunResult> {
   if (input.charterId && !charter) {
     return { ok: false, error: 'that charter does not exist' }
   }
-  if (charter && charter.status !== 'active') {
-    return { ok: false, error: `that charter is ${charter.status}, so nothing may run under it` }
-  }
-  if (charter && charter.agentId !== input.agentId) {
-    return { ok: false, error: `that charter belongs to ${charter.agentId}, not ${input.agentId}` }
-  }
-  if (charter && charter.category !== CATEGORY_FOR_KIND[input.kind]) {
-    return { ok: false, error: `that charter authorizes ${charter.category}, not ${CATEGORY_FOR_KIND[input.kind]}` }
+  if (charter) {
+    const binding = checkCharterBinding({
+      selectedAgentId: input.agentId, charterAgentId: charter.agentId,
+      requestedCategory: CATEGORY_FOR_KIND[input.kind], charterCategory: charter.category,
+      charterStatus: charter.status, expiresAt: charter.expiresAt,
+    })
+    if (!binding.ok) return { ok: false, error: binding.detail }
   }
 
   const runId = randomUUID()
@@ -212,11 +211,36 @@ export async function startRun(input: StartRunInput): Promise<StartRunResult> {
   // timeline fill in. Failures are recorded on the run, never thrown into the
   // void — an unhandled rejection here would leave a run "running" forever.
   void execute(runId, executor, task, charter, input.maxSpendUsd).catch(async (err: unknown) => {
-    const detail = err instanceof Error ? err.message.split('\n')[0] : String(err)
+    const detail = err instanceof Error ? (err.message.split('\n')[0] ?? err.message) : String(err)
     await recordEvent(runId, { kind: 'error', label: 'The run stopped unexpectedly', detail })
+    const at = new Date().toISOString()
+    const evidence = buildReceipt({
+      runId, task,
+      run: {
+        ok: false, agentId: agent.agentId, kind: executor.kind, result: null,
+        txHashes: [], feeUsd: null, latencyMs: 0, startedAt: at, finishedAt: at,
+        reason: 'blocked', detail,
+      },
+      commercial: {
+        declaredPrice: null, quoteStatus: 'failed', quoteProvenance: 'none',
+        paidAmount: null, paidAsset: null, maxSpendUsd: input.maxSpendUsd,
+        settled: false, settlementNote: 'no settlement: internal failure',
+      },
+      authority: {
+        charterId: charter?.id ?? null,
+        allowlist: charter?.contracts.map((c) => c.to) ?? [],
+        spendCapUsd: input.maxSpendUsd, expiresAt: charter?.expiresAt ?? null,
+        withinAuthority: false,
+      },
+      quality: { testId: null, pass: null, failedFields: [], caseId: null, groundTruthHash: null },
+      artifactType: 'failure',
+      failure: { stage: 'internal', class: 'INTERNAL_FAILURE', detail },
+    })
     await db().update(runTable).set({
-      status: 'failed', ok: false, failure: detail, finishedAt: new Date(),
+      status: 'failed', stage: 'internal', ok: false, failure: detail,
+      failureReason: 'blocked', terminalReason: 'INTERNAL_FAILURE', finishedAt: new Date(),
     }).where(eq(runTable.id, runId))
+    await persistReceipt(runId, evidence.receipt, evidence.hash)
   })
 
   return { ok: true, runId }
@@ -229,6 +253,11 @@ async function execute(
   charter: Awaited<ReturnType<typeof readCharter>>,
   maxSpendUsd: number,
 ): Promise<void> {
+  // Re-read immediately before the external call. A Charter can be revoked or
+  // expire after run acceptance; the accepted run must then terminate as an
+  // authorization failure, never execute under the stale earlier read.
+  const currentCharter = charter ? await readCharter(charter.id) : null
+  const authorityCharter = currentCharter?.status === 'active' ? currentCharter : null
   const outcome = await runHire({
     executor,
     task,
@@ -237,7 +266,7 @@ async function execute(
       buyer: task.subject,
       maxSpendUsd,
       charterId: charter?.id ?? null,
-      allowlist: charter?.contracts.map((c) => c.to) ?? [],
+      allowlist: authorityCharter?.contracts.map((c) => c.to) ?? [],
       deadlineMs: 60_000,
     },
     onEvent: (event) => recordEvent(runId, event),
@@ -258,42 +287,33 @@ async function execute(
     finishedAt: new Date(),
   }).where(eq(runTable.id, runId))
 
-  if (outcome.receipt && outcome.receiptHash) {
-    // The receipt is issued for failures too. A failed run with a legible
-    // reason is evidence the system is real, and publishing failures is the
-    // most credible thing this marketplace does.
-    await db().insert(receiptTable).values({
-      id: runId,
-      runId,
-      agentId: outcome.receipt.commercial.agentId,
-      artifactType: outcome.receipt.artifactType ?? (outcome.receipt.execution.ok ? 'execution' : 'failure'),
-      hash: outcome.receiptHash,
-      body: outcome.receipt as unknown as Record<string, unknown>,
-    }).onConflictDoNothing()
+  if (outcome.receipt && outcome.receiptHash) await persistReceipt(runId, outcome.receipt, outcome.receiptHash)
+}
 
-    // Anchor the hash so the receipt page can offer a transaction anyone can
-    // open. Best effort: a receipt that could not be anchored is still real,
-    // and the page shows it as unanchored rather than pretending.
-    const anchored = await anchorReceipt(outcome.receiptHash)
-    if (anchored.ok) {
-      await db().update(receiptTable).set({
-        anchorTxHash: anchored.txHash,
-        anchorBlock: anchored.blockNumber,
-        anchoredAt: new Date(),
-      }).where(eq(receiptTable.id, runId))
-      await recordEvent(runId, {
-        kind: 'receipt',
-        label: 'Receipt anchored on BNB Smart Chain testnet',
-        detail: outcome.receiptHash,
-        txHash: anchored.txHash,
-      })
-    } else {
-      await recordEvent(runId, {
-        kind: 'receipt',
-        label: 'Receipt issued but not anchored',
-        detail: anchored.detail ?? 'the anchor transaction did not land',
-      })
-    }
+async function persistReceipt(runId: string, receipt: Receipt, hash: string): Promise<void> {
+  const inserted = await db().insert(receiptTable).values({
+    id: runId, runId, agentId: receipt.commercial.agentId,
+    artifactType: receipt.artifactType ?? (receipt.execution.ok ? 'execution' : 'failure'),
+    hash, body: receipt as unknown as Record<string, unknown>,
+  }).onConflictDoNothing().returning({ id: receiptTable.id })
+  // Evidence is immutable. A retry may observe the existing row but must never
+  // anchor a newly generated hash for a body it did not insert.
+  if (inserted.length === 0) return
+
+  const anchored = await anchorReceipt(hash)
+  if (anchored.ok) {
+    await db().update(receiptTable).set({
+      anchorTxHash: anchored.txHash, anchorBlock: anchored.blockNumber, anchoredAt: new Date(),
+    }).where(eq(receiptTable.id, runId))
+    await recordEvent(runId, {
+      kind: 'receipt', label: 'Receipt anchored on BNB Smart Chain testnet',
+      detail: hash, txHash: anchored.txHash,
+    })
+  } else {
+    await recordEvent(runId, {
+      kind: 'receipt', label: 'Receipt issued but not anchored',
+      detail: anchored.detail ?? 'the anchor transaction did not land',
+    })
   }
 }
 

@@ -93,6 +93,30 @@ export function checkAuthority(
   return { ok: true }
 }
 
+export function checkCharterBinding(input: {
+  selectedAgentId: string
+  charterAgentId: string
+  requestedCategory: string
+  charterCategory: string
+  charterStatus: string
+  expiresAt: string
+  now?: Date
+}): { ok: true } | { ok: false; reason: 'REVOKED' | 'EXPIRED' | 'INACTIVE' | 'IDENTITY_MISMATCH' | 'CATEGORY_MISMATCH'; detail: string } {
+  if (input.charterAgentId !== input.selectedAgentId) {
+    return { ok: false, reason: 'IDENTITY_MISMATCH', detail: `charter belongs to ${input.charterAgentId}, not ${input.selectedAgentId}` }
+  }
+  if (input.charterCategory !== input.requestedCategory) {
+    return { ok: false, reason: 'CATEGORY_MISMATCH', detail: `charter authorizes ${input.charterCategory}, not ${input.requestedCategory}` }
+  }
+  if (input.charterStatus === 'revoked') return { ok: false, reason: 'REVOKED', detail: 'charter is revoked' }
+  const expiresAt = Date.parse(input.expiresAt)
+  if (!Number.isFinite(expiresAt) || expiresAt <= (input.now ?? new Date()).getTime()) {
+    return { ok: false, reason: 'EXPIRED', detail: 'charter is expired' }
+  }
+  if (input.charterStatus !== 'active') return { ok: false, reason: 'INACTIVE', detail: `charter is ${input.charterStatus}` }
+  return { ok: true }
+}
+
 /** A dry run. Nothing is submitted, and the result says so in those words. */
 export async function preflight(executor: AgentExecutor, task: StructuredTask): Promise<PreflightResult> {
   if (!executor.preflight) {
@@ -208,6 +232,8 @@ export async function runHire(opts: RunOptions): Promise<PipelineOutcome> {
       run: failedRun,
       commercial: {
         declaredPrice: quote?.declaredPrice ?? null,
+        quoteStatus: quote?.status ?? 'failed',
+        quoteProvenance: quote?.provenance ?? 'none',
         paidAmount: null,
         paidAsset: quote?.settlementAsset ?? null,
         maxSpendUsd: opts.ctx.maxSpendUsd,
@@ -246,11 +272,13 @@ export async function runHire(opts: RunOptions): Promise<PipelineOutcome> {
   }
   await emit({
     kind: 'quote',
-    label: quote.feeUsd === null
-      ? `Quoted, no machine-readable price (${quote.kind})`
-      : `Quoted ${quote.feeUsd} USD (${quote.kind})`,
-    detail: quote.declaredPrice,
-    data: { feeUsd: quote.feeUsd, latencyMs: quote.latencyMs, settlementAsset: quote.settlementAsset },
+    label: quote.status === 'price_unknown'
+      ? `Interface validated; price unknown (${quote.kind})`
+      : quote.status === 'free'
+        ? `Validated as free (${quote.kind})`
+        : `Quoted ${quote.feeUsd ?? quote.declaredPrice ?? 'an unparsed amount'} (${quote.kind})`,
+    detail: quote.status === 'price_unknown' ? 'the protocol exposes no quote operation; no price was invented' : quote.declaredPrice,
+    data: { status: quote.status, provenance: quote.provenance, feeUsd: quote.feeUsd, latencyMs: quote.latencyMs, settlementAsset: quote.settlementAsset },
   })
 
   if (quote.feeUsd !== null && quote.feeUsd > opts.ctx.maxSpendUsd) {
@@ -333,6 +361,8 @@ export async function runHire(opts: RunOptions): Promise<PipelineOutcome> {
     run,
     commercial: {
       declaredPrice: quote.declaredPrice,
+      quoteStatus: quote.status,
+      quoteProvenance: quote.provenance,
       paidAmount: null,
       paidAsset: quote.settlementAsset,
       maxSpendUsd: opts.ctx.maxSpendUsd,

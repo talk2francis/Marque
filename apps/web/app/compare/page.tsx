@@ -29,7 +29,7 @@ interface TrackRecord {
 }
 
 /**
- * The on-chain track record for a set of agents: settled runs, how many of
+ * The evidence record for a set of agents: receipted attempts, how many of
  * those receipts are anchored, sealed recommendations, and the last run. This
  * is the honest analogue of a star rating — a count of things that happened on
  * chain, not an average of opinions.
@@ -73,7 +73,7 @@ async function trackRecords(ids: string[]): Promise<Map<string, TrackRecord>> {
       })
     }
   } catch {
-    /* empty map — the row renders an honest "no settled run yet" */
+    /* empty map — the row renders an honest "no receipted attempt yet" */
   }
   return out
 }
@@ -201,14 +201,14 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
                   {has ? (
                     <>
                       <span>
-                        {t!.receipts} settled run{t!.receipts === 1 ? '' : 's'}
+                        {t!.receipts} receipted attempt{t!.receipts === 1 ? '' : 's'}
                         {t!.anchored > 0 && <span className={styles.muted}> · {t!.anchored} anchored</span>}
                       </span>
                       {t!.sealed > 0 && <span className={styles.muted}>{t!.sealed} sealed recommendation{t!.sealed === 1 ? '' : 's'}</span>}
                       {t!.lastRunAt && <span className={styles.muted}>last {t!.lastRunAt}</span>}
                     </>
                   ) : (
-                    <span className={styles.muted}>no settled run yet</span>
+                    <span className={styles.muted}>no receipted attempt yet</span>
                   )}
                 </div>
               )

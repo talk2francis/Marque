@@ -43,6 +43,21 @@ describe('pinned agent requests', () => {
     expect(mocks.request).toHaveBeenCalledTimes(1)
   })
 
+  it('caps a public redirect loop deterministically', async () => {
+    mocks.lookup.mockResolvedValue([{ address: '8.8.8.8', family: 4 }])
+    mocks.request.mockImplementation(reply(302, { location: 'https://agent.example/loop' }))
+    expect(await safeFetch('https://agent.example/start', { maxRedirects: 2 }))
+      .toMatchObject({ ok: false, failure: 'too_many_redirects' })
+    expect(mocks.request).toHaveBeenCalledTimes(3)
+  })
+
+  it('enforces the byte cap while reading a pinned response', async () => {
+    mocks.lookup.mockResolvedValue([{ address: '8.8.8.8', family: 4 }])
+    mocks.request.mockImplementation(reply(200, {}, 'this response is too large'))
+    expect(await safeFetch('https://agent.example/', { maxBytes: 4 }))
+      .toMatchObject({ ok: false, failure: 'too_large' })
+  })
+
   it('drops credentials on a cross-origin redirect', async () => {
     mocks.lookup.mockResolvedValue([{ address: '8.8.8.8', family: 4 }])
     mocks.request.mockImplementationOnce(reply(302, { location: 'https://other.example/' }))
