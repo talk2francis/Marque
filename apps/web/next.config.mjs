@@ -71,11 +71,6 @@ const nextConfig = {
           { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
         ],
       },
-      {
-        // The read API is meant to be consumed from anywhere.
-        source: '/api/v1/:path*',
-        headers: [{ key: 'Access-Control-Allow-Origin', value: '*' }],
-      },
     ]
   },
 }

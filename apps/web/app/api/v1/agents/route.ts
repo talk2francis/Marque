@@ -35,10 +35,10 @@ export async function GET(req: NextRequest) {
   }
 
   const statusFilter =
-    status === 'working' ? sql`and p.liveness = 'live'`
-    : status === 'unbound' ? sql`and p.liveness in ('unbound','bad_schema')`
-    : status === 'dead' ? sql`and p.liveness = 'dead'`
-    : status === 'unprobed' ? sql`and p.liveness is null`
+    status === 'working' ? sql`and ss.callable = true`
+    : status === 'unbound' ? sql`and ss.reachable = true and coalesce(ss.callable, false) = false`
+    : status === 'dead' ? sql`and ss.agent_id is not null and coalesce(ss.reachable, false) = false`
+    : status === 'unprobed' ? sql`and ss.checked_at is null`
     : sql``
 
   const categoryFilter = category ? sql`and c.category = ${category}` : sql``
@@ -47,22 +47,36 @@ export async function GET(req: NextRequest) {
   try {
     const d = db()
     const rows = await d.execute(sql`
-      with latest as (
-        select distinct on (agent_id) agent_id, liveness, latency_ms, failure_class, skills, checked_at
-        from probe order by agent_id, checked_at desc
+      with latest_service as (
+        select distinct on (service_id) service_id, liveness, latency_ms, failure_class, skills,
+               checked_at, executable_endpoint, protocol_version, task_kinds
+        from probe where service_id is not null order by service_id, checked_at desc
+      ), service_state as (
+        select s.agent_id,
+               bool_or(p.liveness = 'live' and p.executable_endpoint is not null) as callable,
+               bool_or(p.liveness in ('live','unbound','bad_schema')) as reachable,
+               min(p.latency_ms) filter (where p.liveness = 'live') as latency_ms,
+               max(p.checked_at) as checked_at,
+               json_agg(json_build_object(
+                 'id', s.id, 'kind', s.kind, 'endpoint', s.endpoint,
+                 'resolvedEndpoint', s.resolved_endpoint, 'isTemplate', s.is_template,
+                 'version', s.version, 'declaredPrice', s.declared_price, 'source', s.source,
+                 'liveness', p.liveness, 'failureClass', p.failure_class,
+                 'skills', p.skills, 'measuredAt', p.checked_at,
+                 'executableEndpoint', p.executable_endpoint,
+                 'protocolVersion', p.protocol_version, 'taskKinds', p.task_kinds
+               ) order by s.id) as services
+        from agent_service s left join latest_service p on p.service_id = s.id
+        group by s.agent_id
       )
       select a.id, a.chain_id, a.token_id, a.name, a.description, a.owner_address,
              a.image_url, a.x402_supported, a.supported_protocols, a.tags,
              c.category, c.confidence, c.method, c.rationale,
-             p.liveness, p.latency_ms, p.failure_class, p.skills, p.checked_at as probed_at,
-             (select json_agg(json_build_object(
-                'kind', s.kind, 'endpoint', s.endpoint,
-                'resolvedEndpoint', s.resolved_endpoint, 'isTemplate', s.is_template,
-                'version', s.version, 'declaredPrice', s.declared_price, 'source', s.source))
-              from agent_service s where s.agent_id = a.id) as services
+             case when ss.callable then 'live' when ss.reachable then 'unbound' else null end as liveness,
+             ss.latency_ms, ss.checked_at as probed_at, ss.services
       from agent a
       left join agent_category c on c.agent_id = a.id
-      left join latest p on p.agent_id = a.id
+      left join service_state ss on ss.agent_id = a.id
       where a.chain_id = 56
         ${statusFilter} ${categoryFilter} ${protocolFilter}
       order by (p.liveness = 'live') desc nulls last, a.registry_created_at desc nulls last
@@ -95,8 +109,6 @@ export async function GET(req: NextRequest) {
           ? {
               status: r['liveness'],
               latencyMs: r['latency_ms'],
-              failureClass: r['failure_class'],
-              skills: r['skills'],
               // Our own probe, never 8004scan's stale health field (gotcha 6).
               measuredAt: r['probed_at'],
               provenance: 'MEASURED',

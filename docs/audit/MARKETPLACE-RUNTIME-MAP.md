@@ -18,6 +18,7 @@ This document describes the code that runs, not the intended architecture.
 | MCP discovery | `packages/probe/src/liveness.ts::probeMCP` | protocol version, session, tools and schema-compatible task kinds | Successful `initialize` → `notifications/initialized` → `tools/list`; a GET descriptor is not callable proof |
 | Conformance | `apps/worker/src/conform.ts` -> `packages/conformance` | `conformance_case`, append-only `conformance_result` | Pinned test case and raw response |
 | Marketplace projection | `apps/web/lib/marketplace.ts::queryThirdParty` | none; reconstructed SQL/TS view | Currently mixes identity-level and service-level facts |
+| Register API | `GET /api/v1/agents` | per-service latest probe embedded beside its exact service | Identity state is aggregated from service evidence; one service cannot donate its probe to another |
 | Third-party profile | `apps/web/app/agents/56/[tokenId]/page.tsx` | none | Independently reconstructs latest probe and MCS state |
 | Preview | Marketplace links to profile `#preview` | none | Third-party profile currently has no executable preview control |
 | Charter eligibility | `apps/web/lib/agents.ts::callableAgentById` -> canonical `agentState` | exact identity/service/probe tuple | Category and service compatibility fail closed |
@@ -71,3 +72,6 @@ Every action carries an immutable tuple from selection through evidence:
 Marketplace, profile, Charter admission and run execution must consume one
 server-side capability result for that tuple. Qualification remains an
 independent observation and never supplies missing execution compatibility.
+
+Public API CORS is read-only. `GET`/`HEAD` evidence may be consumed cross-origin;
+grant, run, claim and revoke mutations never receive a wildcard origin header.
