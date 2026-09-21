@@ -2,6 +2,7 @@ import 'server-only'
 import { createHash, randomUUID } from 'node:crypto'
 import { asc, desc, eq } from 'drizzle-orm'
 import { db, run as runTable, runEvent as runEventTable, receipt as receiptTable } from '@marque/db'
+import { verifyCharterCapability } from './charter-capability'
 import {
   checkCharterBinding, executorFor, runHire, structuredTask,
   buildReceipt, type Receipt, type RunEventInput, type StructuredTask,
@@ -35,6 +36,7 @@ export interface StartRunInput {
   pair?: string
   maxSpendUsd: number
   charterId?: string | null
+  charterToken?: string | null
 }
 
 export interface StartRunResult {
@@ -167,6 +169,9 @@ export async function startRun(input: StartRunInput): Promise<StartRunResult> {
     return { ok: false, error: 'that charter does not exist' }
   }
   if (charter) {
+    if (!verifyCharterCapability(input.charterToken, charter.id, charter.agentId)) {
+      return { ok: false, error: 'control of that charter was not proven' }
+    }
     const binding = checkCharterBinding({
       selectedAgentId: input.agentId, charterAgentId: charter.agentId,
       requestedCategory: CATEGORY_FOR_KIND[input.kind], charterCategory: charter.category,

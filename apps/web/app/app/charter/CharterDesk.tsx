@@ -5,6 +5,7 @@ import { Statement, Chip, Button } from '@marque/ui'
 import type { CharterTemplate } from '../../../lib/charter-templates'
 import { scanAddress, scanTx } from '../../../lib/charter-templates'
 import { MarqueMark } from '../../_components/MarqueMark'
+import { storeCharterControl } from '../../../lib/charter-control-client'
 import styles from './charter.module.css'
 
 /**
@@ -189,13 +190,14 @@ export function CharterDesk({
 
     try {
       const res = await request
-      const data = (await res.json()) as { charter?: Granted; error?: string }
-      if (!res.ok || !data.charter) {
+      const data = (await res.json()) as { charter?: Granted; controlToken?: string; error?: string }
+      if (!res.ok || !data.charter || !data.controlToken) {
         timers.current.forEach(clearTimeout)
         setError(data.error ?? 'the grant did not land')
         setPhase('failed')
         return
       }
+      storeCharterControl(data.charter.id, data.controlToken)
       setGranted(data.charter)
       setPhase((p) => (p === 'failed' ? p : 'writing'))
       // The mark is not final until the transaction is. Sealing before the

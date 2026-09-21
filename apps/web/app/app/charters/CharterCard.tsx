@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { Chip, DataCell, MeasureRule } from '@marque/ui'
 import { announceChartersChanged } from '../../_components/CharterStrip'
 import { scanAddress, scanTx } from '../../../lib/charter-templates'
+import { forgetCharterControl, readCharterControl } from '../../../lib/charter-control-client'
 import styles from './charters.module.css'
 
 /**
@@ -80,8 +81,11 @@ export function CharterCard({ charter, subject }: { charter: CharterView; subjec
   const [busy, setBusy] = useState<null | 'revoking' | 'hiring'>(null)
   const [error, setError] = useState<string | null>(null)
   const [pulse, setPulse] = useState(false)
+  const [controlToken, setControlToken] = useState<string | null>(null)
 
   const active = live.status === 'active' && (seconds === null || seconds > 0)
+
+  useEffect(() => { setControlToken(readCharterControl(live.id)) }, [live.id])
 
   // The clock ticks locally; the state comes from the server. Extrapolating a
   // spend meter between polls would be an estimate rendered as a measurement.
@@ -115,10 +119,14 @@ export function CharterCard({ charter, subject }: { charter: CharterView; subjec
     setBusy('revoking')
     setError(null)
     try {
-      const res = await fetch(`/api/v1/charters/${encodeURIComponent(live.id)}/revoke`, { method: 'POST' })
+      const res = await fetch(`/api/v1/charters/${encodeURIComponent(live.id)}/revoke`, {
+        method: 'POST', headers: controlToken ? { authorization: `Bearer ${controlToken}` } : {},
+      })
       const data = (await res.json()) as { charter?: CharterView; error?: string }
       if (!res.ok || !data.charter) { setError(data.error ?? 'the revocation did not land'); return }
       setLive(data.charter)
+      forgetCharterControl(live.id)
+      setControlToken(null)
       // Tell the strip at once. Its poll is fifteen seconds, and a strip still
       // saying "Charter active" after the revoke has landed is the one stale
       // state a safety product may never show.
@@ -128,7 +136,7 @@ export function CharterCard({ charter, subject }: { charter: CharterView; subjec
     } finally {
       setBusy(null)
     }
-  }, [live.id])
+  }, [controlToken, live.id])
 
   const hire = useCallback(async () => {
     setBusy('hiring')
@@ -139,7 +147,10 @@ export function CharterCard({ charter, subject }: { charter: CharterView; subjec
       if (!kind || !policy) { setError('this charter has no task shape on record'); return }
       const res = await fetch('/api/v1/runs', {
         method: 'POST',
-        headers: { 'content-type': 'application/json' },
+        headers: {
+          'content-type': 'application/json',
+          ...(controlToken ? { authorization: `Bearer ${controlToken}` } : {}),
+        },
         body: JSON.stringify({
           agentId: live.agentId, subject, kind, policy,
           maxSpendUsd: 1, charterId: live.id,
@@ -155,7 +166,7 @@ export function CharterCard({ charter, subject }: { charter: CharterView; subjec
     } finally {
       setBusy(null)
     }
-  }, [live.agentId, live.category, live.id, subject])
+  }, [controlToken, live.agentId, live.category, live.id, subject])
 
   const cap = live.caps[0]
   const spentPct = cap && cap.limit > 0 ? cap.spent / cap.limit : 0
@@ -247,7 +258,7 @@ export function CharterCard({ charter, subject }: { charter: CharterView; subjec
 
       {error && <p className={styles.error} role="alert">{error}</p>}
 
-      {active && (
+      {active && controlToken && (
         <div className={styles.actions}>
           <button type="button" className={styles.revoke} onClick={() => void revoke()} disabled={busy !== null}>
             {busy === 'revoking' ? 'Revoking…' : 'Revoke now'}
@@ -256,6 +267,9 @@ export function CharterCard({ charter, subject }: { charter: CharterView; subjec
             {busy === 'hiring' ? 'Starting…' : 'Put it to work'}
           </button>
         </div>
+      )}
+      {active && !controlToken && (
+        <p className={styles.error}>Public evidence only. This browser does not hold the capability required to use or revoke this charter.</p>
       )}
     </article>
   )

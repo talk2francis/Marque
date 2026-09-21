@@ -5,6 +5,7 @@ import { charterService, charterServiceAvailable, listCharters, readCharter, CHA
 import { TEMPLATES, isCharterCategory } from '../../../../lib/charter-templates'
 import { callableAgentById } from '../../../../lib/agents'
 import { checkBurst, checkDailyCeiling, clientKey } from '../../../../lib/limits'
+import { issueCharterCapability } from '../../../../lib/charter-capability'
 
 export const dynamic = 'force-dynamic'
 
@@ -104,7 +105,9 @@ export async function POST(request: Request) {
       category: body.category,
     })
     const view = await readCharter(charter.id)
-    return NextResponse.json({ charter: view }, { status: 201 })
+    if (!view) throw new Error('the granted charter could not be read back')
+    const controlToken = issueCharterCapability(view.id, view.agentId, view.expiresAt)
+    return NextResponse.json({ charter: view, controlToken }, { status: 201 })
   } catch (err) {
     // The grant is a transaction. When it does not land, say what the chain
     // said — a charter that silently failed to exist is the one failure a

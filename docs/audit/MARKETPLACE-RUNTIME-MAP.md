@@ -20,14 +20,14 @@ This document describes the code that runs, not the intended architecture.
 | Marketplace projection | `apps/web/lib/marketplace.ts::queryThirdParty` | none; reconstructed SQL/TS view | Currently mixes identity-level and service-level facts |
 | Third-party profile | `apps/web/app/agents/56/[tokenId]/page.tsx` | none | Independently reconstructs latest probe and MCS state |
 | Preview | Marketplace links to profile `#preview` | none | Third-party profile currently has no executable preview control |
-| Charter eligibility | `apps/web/lib/agents.ts::callableAgentById` | none | Currently treats an agent-level live probe as proof for an A2A/MCP row |
-| Charter grant | `POST /api/v1/charters` -> `CharterService.grant` | append-only `charter` plus testnet transaction | BSC testnet; public endpoint provisions a demo owner |
-| Run acceptance | `POST /api/v1/runs` -> `apps/web/lib/runs.ts::startRun` | `run`, then `run_event` | Re-resolves service independently of Marketplace/Charter |
+| Charter eligibility | `apps/web/lib/agents.ts::callableAgentById` -> canonical `agentState` | exact identity/service/probe tuple | Category and service compatibility fail closed |
+| Charter grant | `POST /api/v1/charters` -> `CharterService.grant` | append-only `charter` plus testnet transaction | Returns a signed, scoped control capability once; public records do not expose it |
+| Run acceptance | `POST /api/v1/runs` -> `apps/web/lib/runs.ts::startRun` | immutable identity/service/probe fields, then `run_event` | Exact service is re-resolved; charter-bound runs require its control capability |
 | Adapter selection | `packages/execution/src/factory.ts::executorFor` | not persisted | First live row wins; no requested-capability resolver |
 | A2A execution | `A2AExecutor` validates the selected card and POSTs `message/send` only to its declared task endpoint | raw result in `run.result` | Card and task URL remain separate evidence |
 | MCP execution | `McpExecutor` initializes a session, lists tools, selects a category/schema-compatible tool, and calls only schema-declared arguments | raw result in `run.result` | Unknown required inputs fail closed; no argument is invented |
 | x402/ERC-8183 | protocol-specific executors in `packages/execution/src/executors` | run events/result | Present but not a general third-party marketplace path |
-| Authority | `startRun` reads Charter; `runHire` calls `checkAuthority` | run authority block inside receipt | Must be audited for expiry, revocation, cap and race enforcement |
+| Authority | `startRun` verifies control capability and Charter binding; `execute` re-reads live state; `runHire` calls `checkAuthority` | run authority block inside receipt | Public Charter IDs grant no control; expiry/revocation are rechecked before the external call |
 | Grading | `pipeline.ts::gradeAgainstCase` | receipt quality block | Only meaningful for matching published cases |
 | Settlement | executor output plus commercial receipt fields | receipt commercial block | Most runs explicitly remain unsettled |
 | Evidence | `pipeline.ts::buildReceipt`, `apps/web/lib/runs.ts` insert/anchor | `receipt`, receipt events, optional testnet anchor | Currently absent for failures before successful quote |

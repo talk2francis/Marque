@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { startRun } from '../../../../lib/runs'
 import { recentRuns } from '../../../../lib/runs'
 import { checkBurst, clientKey } from '../../../../lib/limits'
+import { bearerToken } from '../../../../lib/charter-capability'
 
 export const dynamic = 'force-dynamic'
 
@@ -35,7 +36,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: detail }, { status: 400 })
   }
 
-  const result = await startRun(input)
+  const result = await startRun({ ...input, charterToken: bearerToken(request) })
   if (!result.ok) return NextResponse.json({ error: result.error }, { status: 400 })
   return NextResponse.json({ runId: result.runId, url: `/runs/${result.runId}` }, { status: 202 })
 }

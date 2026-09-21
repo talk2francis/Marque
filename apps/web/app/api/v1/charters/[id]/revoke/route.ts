@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { charterService, charterServiceAvailable, readCharter } from '../../../../../../lib/charters'
 import { checkBurst, clientKey } from '../../../../../../lib/limits'
+import { bearerToken, verifyCharterCapability } from '../../../../../../lib/charter-capability'
 
 export const dynamic = 'force-dynamic'
 
@@ -22,6 +23,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const charterId = decodeURIComponent(id)
   const existing = await readCharter(charterId)
   if (!existing) return NextResponse.json({ error: 'no such charter' }, { status: 404 })
+  if (!verifyCharterCapability(bearerToken(request), existing.id, existing.agentId)) {
+    return NextResponse.json({ error: 'control of this charter was not proven' }, { status: 403 })
+  }
   if (existing.status === 'revoked') {
     return NextResponse.json({ charter: existing, alreadyRevoked: true })
   }

@@ -21,7 +21,7 @@ interface State {
   error: string | null
   hf: { value: number; symbol: string; liqPrice: number | null } | null
   agents: RankedAgent[]
-  charter: { id: string; txHash: string | null; capBnb: number; minutes: number } | null
+  charter: { id: string; txHash: string | null; capBnb: number; minutes: number; controlToken: string } | null
   run: { id: string; status: string } | null
   receipt: { id: string; hash: string; anchorTx: string | null } | null
   revoke: { txHash: string | null } | null
@@ -127,11 +127,11 @@ export function JudgeFlow({ demoAddress }: { demoAddress: string }) {
           capBnb: 0.002, minutes: 15, label: 'Judge mode',
         }),
       })
-      const b = await res.json() as { charter?: { id: string; grantTxHash?: string | null }; error?: string; detail?: string }
-      if (!res.ok || !b.charter) { fail(b.detail ?? b.error ?? 'the grant was refused'); return }
+      const b = await res.json() as { charter?: { id: string; grantTxHash?: string | null }; controlToken?: string; error?: string; detail?: string }
+      if (!res.ok || !b.charter || !b.controlToken) { fail(b.detail ?? b.error ?? 'the grant was refused'); return }
       announceChartersChanged()
       finish('charter', {
-        charter: { id: b.charter.id, txHash: b.charter.grantTxHash ?? null, capBnb: 0.002, minutes: 15 },
+        charter: { id: b.charter.id, txHash: b.charter.grantTxHash ?? null, capBnb: 0.002, minutes: 15, controlToken: b.controlToken },
       })
     } catch (e) { fail(e instanceof Error ? e.message : 'the grant failed') }
   }, [])
@@ -142,7 +142,7 @@ export function JudgeFlow({ demoAddress }: { demoAddress: string }) {
     setS((p) => ({ ...p, busy: 'run', error: null }))
     try {
       const res = await fetch('/api/v1/runs', {
-        method: 'POST', headers: { 'content-type': 'application/json' },
+        method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${s.charter.controlToken}` },
         body: JSON.stringify({
           agentId: 'marque:keel', subject: demoAddress, kind: 'health_factor',
           policy: { targetHealthFactor: 2.5 }, maxSpendUsd: 1, charterId: s.charter.id,
@@ -192,7 +192,9 @@ export function JudgeFlow({ demoAddress }: { demoAddress: string }) {
     if (!s.charter) return
     setS((p) => ({ ...p, busy: 'revoke', error: null }))
     try {
-      const res = await fetch(`/api/v1/charters/${encodeURIComponent(s.charter.id)}/revoke`, { method: 'POST' })
+      const res = await fetch(`/api/v1/charters/${encodeURIComponent(s.charter.id)}/revoke`, {
+        method: 'POST', headers: { authorization: `Bearer ${s.charter.controlToken}` },
+      })
       const b = await res.json() as { txHash?: string | null; error?: string; detail?: string }
       if (!res.ok) { fail(b.detail ?? b.error ?? 'the revoke failed'); return }
       announceChartersChanged()
