@@ -14,6 +14,7 @@ out/
 artifacts/
 cache/
 playwright-report/
+test-results/
 
 # Agent wallets and their secrets. The keystore lives beside the agent so the
 # scaffold can find it; it must never reach the repo (AGENTS.md: keys stay
