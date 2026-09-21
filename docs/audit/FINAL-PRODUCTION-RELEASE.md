@@ -169,3 +169,54 @@ No mainnet state change occurred during this release audit.
 - Final recommendation: **DEPLOYED / GREEN for truthful limited inventory**.
   Breadth remains narrow: one independent operator/service is compatible and
   hireable; A2A execution and third-party settlement remain unproven.
+
+## Final terminal summary
+
+```text
+MARQUE FINAL RELEASE
+====================
+
+STATUS: DEPLOYED
+
+PRODUCTION SHA: ecee45d29983ce9dc07779dba8a084e81a2b84ec
+MAIN SHA: documentation head containing this report (use `git rev-parse origin/main`)
+MIGRATION: 0012 and 0013 applied through Drizzle; journal and evidence rows verified
+TESTS: 273 passed, 3 live-RPC tests explicitly skipped; typecheck/lint/build passed
+BROWSER: candidate 10/10; production desktop/mobile 6/6
+SECURITY: adversarial suite passed; no known P0/P1; no mainnet write
+PRODUCTION SMOKE: passed over HTTPS and native PM2/Caddy/Postgres/Redis stack
+
+REGISTRY
+registered: 355,699
+metadata readable: 114,331
+service declared: 39,958 identities / 41,001 exact services
+freshly evaluated: 2,608 identities / 2,628 exact services
+reachable: 22,737 identities with fresh 24-hour evidence
+callable: 6,894 identities with fresh 24-hour evidence
+compatible: 1 identity / 1 exact service
+qualified: 0 identities
+hireable: 1 independent identity
+
+EXTERNAL PROOF
+services inspected: 128 targeted independent services
+independent operators: 1 proven through the complete production lifecycle
+complete external lifecycles: 1
+A2A: discovery/card semantics implemented; real message/send execution unproven
+MCP: one independent complete initialize -> tools/list -> tools/call lifecycle proven
+x402/ERC-8183: discovery/reference support only; no independent paid lifecycle proven
+payment/settlement: not executed and not claimed
+
+REMAINING
+P0: none known
+P1: none known
+P2: narrow compatible inventory; incomplete fresh-universe coverage; A2A execution and third-party settlement unproven; optional build warnings
+
+DEFENSIBLE CLAIMS: exact third-party selection; canonical fail-closed Hire; one independent read-only MCP Charter-to-receipt lifecycle; typed evidence; bounded/revocable server-side authority
+FORBIDDEN CLAIMS: all indexed agents are callable/hireable; readable A2A card means callable; arbitrary third-party execution; general third-party payment/settlement; MCS qualification of the proven external run
+
+PRODUCTION:
+https://marque.trade
+
+AUDIT:
+docs/audit/FINAL-PRODUCTION-RELEASE.md
+```
