@@ -5,6 +5,75 @@ Branch: `hardening/third-party-marketplace`
 Baseline: `a7aedb1`  
 Recommendation: **NO — do not deploy**
 
+## 2026-09-21 semantic-hardening follow-up
+
+The generic Charter Desk now performs only a bounded candidate-ID query and
+passes every identity through the same `callableAgentById → agentState →
+evaluateAgentState` decision used by exact deep links. Unsupported categories
+fail closed. Regression fixtures reproduce ClawdMint #2468 as card-readable
+but not hireable and prove it is absent from generic inventory while an exact,
+compatible MCP service is accepted by both paths.
+
+New A2A probes now preserve `cardReadable`, `endpointDiscovered`, advertised
+skills and advertised task hints, but record `messageSendCallable: null`, no
+verified task kinds, and `liveness: unbound`. Historical evidence is unchanged.
+Canonical evaluation additionally requires explicit genuine
+`messageSendCallable: true` evidence before an A2A service can become callable.
+
+MCP matching was tightened: a category keyword plus a schema whose required
+arguments happen to be known is insufficient. The schema must be able to
+represent the typed task (generic prompt/task input, or the necessary category
+policy fields). This removed every false task-compatible match in the fresh
+30-service sample.
+
+Receipts now preserve exact `serviceId`, protocol, discovery endpoint,
+executable endpoint and probe ID. Quote, authority, timeout, malformed response
+and incompatible-interface tests assert the true terminal stage and immutable
+service identity.
+
+### Updated fresh discovery result
+
+- 30 exact services inspected: 10 A2A, 10 MCP, 10 x402.
+- 29 were protocol-reachable: ten readable A2A cards, nine successful MCP
+  initialize/tools-list handshakes, ten x402 HTTP endpoints.
+- 19 were demonstrably protocol-callable without an A2A task: nine MCP and ten
+  x402. This is transport callability, not Marque task compatibility.
+- 0 exposed a schema proven compatible with one of the four complete Marque
+  tasks under the tightened matcher.
+- 0 were canonical third-party Hire candidates in this fresh sample.
+- 0 were safely invoked through a Marque lifecycle, because the three class-A
+  read-only MCP tools were not task-compatible. See
+  `EXTERNAL-EXECUTION-SAFETY.md`.
+
+The production-derived database currently contains 355,603 registered
+identities, 114,263 detail/metadata-readable identities, 39,927 identities with
+a declared service, and 5 distinct identities with a historical passing
+conformance result. Its pre-0012 probe rows report 26,775 fresh reachable and
+6,199 legacy “live” non-A2A identities, but **6,199 is not publishable as a
+canonical callable count**: legacy MCP observations include descriptor-only
+GET probes and lack the new manifest/task fields. Compatible and hireable
+global counts therefore remain unavailable until 0012 is applied and services
+are freshly reprobed. Reporting zero or 6,199 as the global canonical value
+would both be false.
+
+### Browser, performance and security follow-up
+
+The freshly built application passed 4/4 desktop/mobile candidate tests:
+generic/exact equivalence, stale/card-only exclusion, exact compatible
+selection, no reference fallback, and unsupported-category fail-closed. The
+earlier live read-only suite remains 6/6. No Grant button was clicked.
+
+The new candidate-ID query used category, service and primary-key indexes on
+the 355,603-identity database, returned 84 identities in 13.161 ms, used an
+in-memory 30 kB quicksort, and wrote no temp blocks. Canonical evaluation is
+correct but still fan-outs per identity; batching those reads is a remaining
+P2 performance improvement before large category expansion.
+
+SSRF/private-address/redirect/size/timeout coverage, exact service mixing,
+stale probe, category tampering, identity mismatch, revoked/expired binding and
+duplicate receipt persistence tests pass. No mainnet write, external task call,
+production migration or deployment occurred.
+
 This is a release-gate report, not a declaration of completion. Production was
 not migrated, modified, or deployed during verification.
 

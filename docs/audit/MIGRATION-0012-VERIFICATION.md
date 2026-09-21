@@ -47,3 +47,9 @@ assessment. This verification does not authorize that application.
 - Lint: passed with zero warnings.
 - Production build: passed. Existing optional wallet-connector dependency
   warnings remain visible and are not treated as failures.
+# Re-verification — 2026-09-21
+
+After the canonical-hireability/A2A changes, the isolated database was checked
+again without reapplying or mutating the migration. All seven added columns and
+all three indexes remain present. Fixture counts remain 1 probe, 1 conformance
+result, 3 runs and 3 receipts; no historical row was lost.
