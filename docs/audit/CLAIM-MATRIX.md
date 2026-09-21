@@ -10,9 +10,9 @@ These corrections supersede conflicting statuses without erasing the failure:
 
 | Claim | Current status | Current evidence |
 |---|---|---|
-| Third-party Hire uses the exact selected identity/service | PROVEN in tests | Canonical batched state, deep-link/generic equivalence, immutable run/receipt service tuple. |
+| Third-party Hire uses the exact selected identity/service | PROVEN in tests and production | Canonical batched state, deep-link/generic equivalence, and production run `5e3a6cab-d203-491e-bff3-7df5ce06d7fc` preserve the immutable agent/service tuple. |
 | A readable A2A card is callable | FALSE by design | Card readability and endpoint discovery do not set `messageSendCallable`. |
-| MCP is protocol-correct | PROVEN for discovery; live execution scoped | initialize → initialized → tools/list; schema-derived tools/call exactly once. |
+| MCP is protocol-correct | PROVEN for one compatible independent service | Production completed initialize → initialized → tools/list → schema-derived tools/call exactly once for service 32467. |
 | Every accepted attempt terminates in evidence | PROVEN in tests | Typed success/failure receipt; pre-acceptance rejection is a separate immutable artifact. |
 | Receipt means settlement | FALSE | Artifact type and commercial settlement remain separate. |
 | All indexed identities are callable/hireable | FALSE | The UI/API expose distinct stages and fresh coverage. |
@@ -30,7 +30,7 @@ These corrections supersede conflicting statuses without erasing the failure:
 | MCS qualification proves current executability | Standard/Marketplace | `marketplace.ts` | results and liveness independently stored, then merged in UI rank | grading tests | Historical results exist | PARTIALLY PROVEN | P1 | Show qualification and current execution state independently |
 | MCS failure makes an agent non-callable | Marketplace | `marketplace.ts` | failure does not block `hireable` | None | SwapGod remains displayed after MCS failure | PROVEN (negative claim avoided) | P2 | Preserve separation explicitly in canonical model |
 | A2A is supported | Docs/Marketplace | `liveness.ts`, `a2a.ts`, `runs.ts` | card and declared task endpoint are resolved separately; absent task URL fails closed | Protocol fixtures pass | Production third-party lifecycle not yet repeated | PARTIALLY PROVEN | P0 | Complete external lifecycle evidence |
-| MCP is supported | Docs/Marketplace | `liveness.ts`, `mcp.ts` | initialize/session/list/call; tool schema controls compatibility and arguments | Protocol and schema fixtures pass | Production third-party lifecycle not yet repeated | PARTIALLY PROVEN | P0 | Complete external lifecycle evidence |
+| MCP is supported | Docs/Marketplace | `liveness.ts`, `mcp.ts` | initialize/session/list/call; tool schema controls compatibility and arguments | Protocol and schema fixtures pass | Production run `5e3a6cab-d203-491e-bff3-7df5ce06d7fc` completed against independent service 32467 | PROVEN | P2 | Broaden compatible inventory; do not generalize one proof to all MCP servers |
 | Every hire has a public receipt | README, My Marque, homepage | `pipeline.ts`, `runs.ts` | quote failure returns before receipt construction | Receipt unit coverage absent | 27 runs versus 23 receipts; four failures | FALSE | P0 | Terminal failure evidence for every accepted run |
 | Failures are published | README, Standard, Run Room | conformance and run paths | MCS failures persist; early run failures lack receipts | grading tests only | Failed runs visible, but no terminal receipt | PARTIALLY PROVEN | P0 | Preserve failure artifacts and render their class |
 | Receipt means settled | Tape, compare, docs wording | `Tape.tsx`, `compare/page.tsx` | receipt counted/labeled as settled while commercial `settled` may be false | None | Existing receipt schema separates settlement | FALSE | P1 | Replace “settled run” with “receipted attempt” unless paid |

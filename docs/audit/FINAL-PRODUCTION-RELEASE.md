@@ -9,9 +9,8 @@ This document is the authoritative release record. It distinguishes software
 safety from the breadth of independent supply. Unsupported registry entries
 remain discoverable but cannot expose Hire.
 
-The final production SHA, merge SHA, deployment result and post-deployment
-smoke results are filled from the deployed host after the release commit is
-merged and verified.
+The hardened application was merged and deployed. Production verification
+completed against the public HTTPS service and production database.
 
 ## Database migration
 
@@ -35,21 +34,21 @@ merged and verified.
 
 ## Canonical fresh funnel
 
-Measured 2026-09-21 after migration, with fresh-model coverage beginning
-2026-09-21T15:25:00Z:
+Measured 2026-09-21T17:58:40Z after migration. Fresh-model coverage began at
+2026-09-21T15:25:00Z and continued in the background:
 
 | State | Count |
 |---|---:|
-| Registered identities | 355,688 |
-| Metadata-readable identities | 114,324 |
-| Identities declaring a service | 39,957 |
-| Exact declared services | 41,000 |
-| Freshly evaluated exact services | 2,128 |
-| Freshly evaluated identities | 2,111 |
-| Reachable services / identities | 256 / 245 |
-| Callable services / identities | 54 / 45 |
+| Registered identities | 355,699 |
+| Metadata-readable identities | 114,331 |
+| Identities declaring a service | 39,958 |
+| Exact declared services | 41,001 |
+| Freshly evaluated exact services | 2,628 |
+| Freshly evaluated identities | 2,608 |
+| Reachable identities, fresh 24h | 22,737 |
+| Callable identities, fresh 24h | 6,894 |
 | Complete-task-compatible services / identities | 1 / 1 |
-| Fresh qualified identities | 4 |
+| Qualified identities | 0 |
 | Canonically hireable independent identities | 1 |
 
 These are coverage-bounded measurements, not estimates of the unprobed
@@ -68,10 +67,20 @@ prioritises services lacking current-model evidence.
   deterministic aliases `borrower` and `targetHealthFactor`.
 - The historical `unclassified` label was preserved. A new additive
   capability-derived `health_factor` label records service 32467 as provenance.
-- No external payment, signature, approval, transaction or state-changing tool
-  was invoked.
+- Production completed one independent lifecycle for that exact service:
+  Marketplace/profile → bounded testnet Charter → MCP initialize/initialized/
+  tools/list/tools/call → external result → immutable receipt → testnet anchor.
+- Identity and service continuity held throughout: agent `338480`, service
+  `32467`, probe `2438821`, run/receipt
+  `5e3a6cab-d203-491e-bff3-7df5ce06d7fc`.
+- External execution succeeded in 818 ms. Its response then failed MCS-HF-1,
+  proving that callable/executed and qualified remain separate states.
+- No external payment, wallet signature, token approval, delegated authority,
+  provider mutation, mainnet transaction or state-changing tool was invoked.
 - Raw evidence:
   `docs/evidence/third-party/candidate-discovery/2026-09-21T15-29-49Z.json`.
+- Production lifecycle manifest:
+  `docs/evidence/third-party/338480/production-lifecycle-2026-09-21.json`.
 
 ## Engineering results
 
@@ -100,6 +109,8 @@ prioritises services lacking current-model evidence.
   webpack warnings remain; no build error.
 - Playwright: 10/10 passed across desktop Chromium and Pixel 7 against the
   migrated, isolated release-candidate database.
+- Production Playwright: 6/6 read-only no-wallet, fail-closed and navigation
+  tests passed across desktop Chromium and Pixel 7.
 - Production query plans: health-factor Charter candidate lookup used category,
   service and identity indexes and completed in 38.664 ms; exact service probe
   lookup completed in 34.811 ms. Neither spilled to disk.
@@ -114,9 +125,8 @@ No mainnet state change occurred during this release audit.
 
 ## Remaining issues
 
-- P0: none known before deployment.
-- P1: production deployment and smoke verification pending at the time this
-  section was written.
+- P0: none known after production smoke.
+- P1: none known after production smoke.
 - P2: most indexed services still lack fresh-model evidence; broad external
   compatibility remains narrow; third-party payment/settlement is unproven;
   A2A task callability remains unproven without a real work interaction.
@@ -131,6 +141,8 @@ No mainnet state change occurred during this release audit.
 - Unsupported agents fail closed and remain inspectable.
 - Every accepted run terminates in evidence; pre-acceptance rejection is a
   different immutable artifact.
+- One independent external MCP operator has completed the production Charter
+  → external result → receipt lifecycle without payment or mutation.
 
 ## Forbidden claims
 
@@ -142,9 +154,18 @@ No mainnet state change occurred during this release audit.
 
 ## Deployment record
 
-- Production commit: pending
-- Main merge commit: pending
-- Deployment: pending
-- Production smoke: pending
+- Production application commit: `ecee45d29983ce9dc07779dba8a084e81a2b84ec`.
+- Main merge commit: `ecee45d29983ce9dc07779dba8a084e81a2b84ec`.
+- Deployment: successful through `scripts/deploy-web.sh`; `marque-web` and all
+  Marque workers are online under PM2; Caddy, PostgreSQL and Redis are active.
+- Production migration: Drizzle journal rows 13/14 present. Post-proof counts:
+  355,699 agents, 41,001 services, 2,441,380 probes, 28 runs, 24 receipts and
+  0 pre-acceptance rejections.
+- Production smoke: public health, homepage, Register/category, third-party
+  profile, exact Hire, Charter Desk, run, latest receipt, Judge, Ledger,
+  PancakeSwap proof, positions, Standard, Compare, Docs, Status and funnel API
+  returned 200. Canonical routes were used.
 - Production URL: https://marque.trade
-- Final recommendation: pending post-deployment smoke
+- Final recommendation: **DEPLOYED / GREEN for truthful limited inventory**.
+  Breadth remains narrow: one independent operator/service is compatible and
+  hireable; A2A execution and third-party settlement remain unproven.

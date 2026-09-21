@@ -19,7 +19,7 @@ Where an older section says OPEN or recommends NO, this section is authoritative
 | Revoked/expired attempts had ambiguous receipt semantics | **RESOLVED** | Pre-acceptance attempts create immutable `run_rejection` evidence, never an execution receipt. |
 | Charter inventory N+1 | **RESOLVED** | Candidate IDs are evaluated in three bounded queries by `agentStates`. |
 | Global legacy capability counts | **ACCEPTED LIMITATION** | Migration 0012 is applied; current counts publish fresh coverage separately while the resumable worker re-probes the remaining population. |
-| Broad independent interoperability | **OPEN P2 / ecosystem breadth** | 128 targeted services inspected; one exact MCP health-factor schema is compatible. No unsupported service is offered for Hire. |
+| Broad independent interoperability | **PARTIALLY PROVEN / OPEN P2 breadth** | 128 targeted services inspected; independent agent 338480/service 32467 completed the production Charter → MCP result → receipt lifecycle. No unsupported service is offered for Hire. |
 | Third-party payment/settlement | **OPEN P2** | Discovery is represented separately; no external payment was made or claimed. |
 
 Production migration 0012 and additive rejection migration 0013 were applied
@@ -118,7 +118,7 @@ not migrated, modified, or deployed during verification.
   had Grant enabled.
 - **Status:** OPEN. Release rule 5 fails.
 
-### P0 — No independent external end-to-end lifecycle is proven
+### Historical P0 — No independent external end-to-end lifecycle was proven (RESOLVED)
 
 - **Symptom:** zero independent external agents have yet completed
   Marketplace → profile → exact Charter → external task → result → receipt in
@@ -127,7 +127,11 @@ not migrated, modified, or deployed during verification.
   real external task pass was prepared, but the execution environment refused
   remote `execute()` calls because an operator may implement side effects even
   for a plan-only prompt. No call was sent.
-- **Status:** OPEN. Release rule 3 requires recommendation NO.
+- **Status:** RESOLVED on 2026-09-21. Independent identity `338480`, exact MCP
+  service `32467`, completed production Charter → external read-only result →
+  immutable receipt. Its result failed MCS-HF-1 and remains unqualified. See
+  run `5e3a6cab-d203-491e-bff3-7df5ce06d7fc` and
+  `docs/evidence/third-party/338480/production-lifecycle-2026-09-21.json`.
 
 ### P1 — A2A “live” is not proof of callability
 
