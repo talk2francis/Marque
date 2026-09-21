@@ -1,0 +1,2490 @@
+{
+  "evidence_type": "fresh-read-only-service-probes",
+  "generated_at": "2026-09-21T11:37:09.006Z",
+  "source_chain_id": 56,
+  "production_database_mutated": false,
+  "candidate_count": 30,
+  "candidates": [
+    {
+      "agent_id": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:2468",
+      "token_id": "2468",
+      "name": "ClawdMint",
+      "owner_address": "0x75b583c518215e272f3c0a3bcc1b27012f294adc",
+      "service_id": 40580,
+      "kind": "a2a",
+      "endpoint": "https://clawdmint-api.vercel.app/.well-known/agent-card.json",
+      "category": "yield",
+      "previous_checked_at": "2026-09-21T11:24:54.084Z",
+      "previous_ok": true,
+      "previous_detail": "bound, 10 skill(s)",
+      "measured_at": "2026-09-21T11:37:00.978Z",
+      "outcome": {
+        "ok": true,
+        "liveness": "live",
+        "latencyMs": 330,
+        "statusCode": 200,
+        "failureClass": null,
+        "detail": "bound, 10 skill(s)",
+        "skills": [
+          "Chat",
+          "Problem Solving",
+          "Text to Code",
+          "Cryptocurrency",
+          "Wallet Analysis",
+          "Transaction Analysis",
+          "Gas Tracker",
+          "Bridge Route Optimizer",
+          "Yield Optimizer",
+          "Smart Contracts"
+        ],
+        "executableEndpoint": "https://clawdmint.vercel.app",
+        "reportedName": "ClawdMint",
+        "protocolVersion": "1.2.0",
+        "taskKinds": [
+          "yield"
+        ],
+        "manifest": {
+          "name": "ClawdMint",
+          "url": "https://clawdmint.vercel.app",
+          "skills": [
+            {
+              "id": "chat",
+              "name": "Chat",
+              "description": "Natural conversation and question answering powered by LLM",
+              "tags": [
+                "conversation",
+                "nlp",
+                "question-answering"
+              ],
+              "examples": [
+                "Hello, how are you?",
+                "Explain DeFi to me"
+              ]
+            },
+            {
+              "id": "problem_solving",
+              "name": "Problem Solving",
+              "description": "Analytical reasoning and problem solving",
+              "tags": [
+                "analytical_and_logical_reasoning",
+                "problem_solving"
+              ],
+              "examples": [
+                "Help me think through this smart contract architecture"
+              ]
+            },
+            {
+              "id": "text_to_code",
+              "name": "Text to Code",
+              "description": "Generate code from natural language descriptions",
+              "tags": [
+                "coding_skills",
+                "text_to_code"
+              ],
+              "examples": [
+                "Write a Solidity ERC20 token contract"
+              ]
+            },
+            {
+              "id": "cryptocurrency",
+              "name": "Cryptocurrency",
+              "description": "Real-time crypto prices, market data, and analysis across multiple chains",
+              "tags": [
+                "finance_and_business",
+                "data_analysis"
+              ],
+              "a2aMethods": [
+                "blockchain/price",
+                "blockchain/market"
+              ],
+              "examples": [
+                "What is the current ETH price?",
+                "Show me the crypto market overview"
+              ]
+            },
+            {
+              "id": "wallet_analysis",
+              "name": "Wallet Analysis",
+              "description": "Analyze wallet balances across multiple chains simultaneously",
+              "tags": [
+                "data_analysis",
+                "finance_and_business"
+              ],
+              "a2aMethods": [
+                "blockchain/balance",
+                "blockchain/multichain"
+              ],
+              "examples": [
+                "Check my wallet balance on Base",
+                "Show all my holdings across chains"
+              ]
+            },
+            {
+              "id": "transaction_analysis",
+              "name": "Transaction Analysis",
+              "description": "Look up and explain blockchain transactions in plain English",
+              "tags": [
+                "data_analysis",
+                "analytical_and_logical_reasoning"
+              ],
+              "a2aMethods": [
+                "blockchain/transaction"
+              ],
+              "examples": [
+                "What happened in this transaction 0x...?"
+              ]
+            },
+            {
+              "id": "gas_tracker",
+              "name": "Gas Tracker",
+              "description": "Compare real-time gas prices across chains to find the cheapest option",
+              "tags": [
+                "data_analysis",
+                "finance_and_business"
+              ],
+              "a2aMethods": [
+                "blockchain/gas"
+              ],
+              "examples": [
+                "What chain has the cheapest gas right now?"
+              ]
+            },
+            {
+              "id": "bridge_optimizer",
+              "name": "Bridge Route Optimizer",
+              "description": "Find the best cross-chain bridge route via LiFi/Jumper. Returns fees, estimated time, and direct Jumper link to execute.",
+              "tags": [
+                "finance_and_business",
+                "data_analysis"
+              ],
+              "a2aMethods": [
+                "blockchain/bridge"
+              ],
+              "examples": [
+                "Bridge 100 USDC from Base to Arbitrum",
+                "What's the cheapest way to move ETH from Ethereum to Optimism?"
+              ]
+            },
+            {
+              "id": "yield_optimizer",
+              "name": "Yield Optimizer",
+              "description": "Find best yield opportunities for USDC, USDT, ETH, USDe across Morpho vaults, Aave v3, Fluid, and Spark. Returns top 5 by APR with TVL filter.",
+              "tags": [
+                "finance_and_business",
+                "data_analysis"
+              ],
+              "a2aMethods": [
+                "blockchain/yield"
+              ],
+              "examples": [
+                "Best USDC yield opportunities right now?",
+                "Where can I get the highest ETH yield?"
+              ]
+            },
+            {
+              "id": "smart_contracts",
+              "name": "Smart Contracts",
+              "description": "Inspect ERC20 token contracts, resolve ENS names, and query block data",
+              "tags": [
+                "technology",
+                "coding_skills"
+              ],
+              "a2aMethods": [
+                "blockchain/token",
+                "blockchain/ens",
+                "blockchain/block"
+              ],
+              "examples": [
+                "Resolve vitalik.eth",
+                "Get info about USDC contract on Base"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "agent_id": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:345230",
+      "token_id": "345230",
+      "name": "FLY",
+      "owner_address": "0x97e8f3b4bffc1982b2791b21609c3b2542c5eb50",
+      "service_id": 36292,
+      "kind": "a2a",
+      "endpoint": "https://api.bortagent.xyz/.well-known/agent-card.json",
+      "category": "unclassified",
+      "previous_checked_at": "2026-09-21T07:40:50.130Z",
+      "previous_ok": true,
+      "previous_detail": "bound, 7 skill(s)",
+      "measured_at": "2026-09-21T11:37:00.989Z",
+      "outcome": {
+        "ok": true,
+        "liveness": "live",
+        "latencyMs": 696,
+        "statusCode": 200,
+        "failureClass": null,
+        "detail": "bound, 7 skill(s)",
+        "skills": [
+          "On-chain trading",
+          "Live market data",
+          "Portfolio",
+          "Social signal trading",
+          "Conversational control",
+          "Pay-per-call LLM inference",
+          "Prepaid LLM credit packs"
+        ],
+        "executableEndpoint": "https://api.bortagent.xyz/api/a2a",
+        "reportedName": "BORT Agent",
+        "protocolVersion": "1.0.0",
+        "taskKinds": [
+          "rebalance"
+        ],
+        "manifest": {
+          "name": "BORT Agent",
+          "url": "https://api.bortagent.xyz/api/a2a",
+          "skills": [
+            {
+              "id": "trade",
+              "name": "On-chain trading",
+              "description": "Buy and sell tokens on PancakeSwap and FourMeme from the agent's own wallet, with stop-loss and take-profit.",
+              "tags": [
+                "trading",
+                "defi",
+                "bnb-chain",
+                "pancakeswap",
+                "fourmeme"
+              ]
+            },
+            {
+              "id": "market-data",
+              "name": "Live market data",
+              "description": "Read token prices, liquidity, market cap, and swap quotes on BNB Chain.",
+              "tags": [
+                "market-data",
+                "analytics",
+                "dexscreener"
+              ]
+            },
+            {
+              "id": "holdings",
+              "name": "Portfolio",
+              "description": "Report the agent's BNB and token holdings from its ERC-6551 wallet.",
+              "tags": [
+                "portfolio",
+                "wallet",
+                "erc-6551"
+              ]
+            },
+            {
+              "id": "signals",
+              "name": "Social signal trading",
+              "description": "Monitor Telegram groups and X for alpha, verify tokens on-chain, and act on signals.",
+              "tags": [
+                "signals",
+                "social",
+                "alpha"
+              ]
+            },
+            {
+              "id": "chat",
+              "name": "Conversational control",
+              "description": "Natural-language chat to query the agent's holdings and direct its actions.",
+              "tags": [
+                "chat",
+                "nlp",
+                "llm"
+              ]
+            },
+            {
+              "id": "paid-inference",
+              "name": "Pay-per-call LLM inference",
+              "description": "Buy one OpenAI-compatible chat completion per request, paid in $U (EIP-3009) over x402 on BNB Chain. No account, no API key. GET /api/inference/v1/models for models and per-call prices.",
+              "tags": [
+                "inference",
+                "llm",
+                "x402",
+                "pay-per-call",
+                "openai-compatible",
+                "bnb-chain"
+              ]
+            },
+            {
+              "id": "prepaid-credits",
+              "name": "Prepaid LLM credit packs",
+              "description": "Buy a pack of OpenAI-compatible chat completions up front, paid in $U (EIP-3009) over x402 on BNB Chain, then spend it with an API key: one on-chain settle per pack instead of one per call. GET /api/credits/config for packs, POST /api/credits/key (EIP-191 signature) for a key, then POST /api/credits/v1/chat/completions with Authorization: Bearer. The same balance also powers a BORT agent premium brain.",
+              "tags": [
+                "inference",
+                "llm",
+                "x402",
+                "prepaid",
+                "credits",
+                "openai-compatible",
+                "bnb-chain"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "agent_id": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:152313",
+      "token_id": "152313",
+      "name": "FrostForge",
+      "owner_address": "0x0a5b165dc464d947e035abf1cc90e526731ef4a2",
+      "service_id": 29792,
+      "kind": "a2a",
+      "endpoint": "https://app.singularry.org/agents/237/agent-card.json",
+      "category": "unclassified",
+      "previous_checked_at": "2026-09-21T05:24:11.011Z",
+      "previous_ok": true,
+      "previous_detail": "bound, 4 skill(s)",
+      "measured_at": "2026-09-21T11:37:00.990Z",
+      "outcome": {
+        "ok": true,
+        "liveness": "live",
+        "latencyMs": 676,
+        "statusCode": 200,
+        "failureClass": null,
+        "detail": "bound, 4 skill(s)",
+        "skills": [
+          "Dollar-Cost Averaging",
+          "Market-Cap Index",
+          "USDD Yield Vault",
+          "Venus Fixed Vault"
+        ],
+        "executableEndpoint": "https://app.singularry.org/api/a2a",
+        "reportedName": "FrostForge",
+        "protocolVersion": "1.0.0",
+        "taskKinds": [
+          "grid",
+          "yield"
+        ],
+        "manifest": {
+          "name": "FrostForge",
+          "url": "https://app.singularry.org/api/a2a",
+          "skills": [
+            {
+              "id": "dca",
+              "name": "Dollar-Cost Averaging",
+              "description": "Scheduled buy-the-dip DCA into BTC, ETH, BNB via the on-chain DCA facet.",
+              "tags": [
+                "dca",
+                "accumulation"
+              ]
+            },
+            {
+              "id": "market-cap-index",
+              "name": "Market-Cap Index",
+              "description": "Passive market-cap-weighted basket of major BNB-Chain-routable assets.",
+              "tags": [
+                "index",
+                "passive",
+                "basket"
+              ]
+            },
+            {
+              "id": "usdd-vault",
+              "name": "USDD Yield Vault",
+              "description": "Single-asset USDD vault deposit for stable on-chain yield.",
+              "tags": [
+                "yield",
+                "stablecoin",
+                "usdd"
+              ]
+            },
+            {
+              "id": "venus-fixed-vault",
+              "name": "Venus Fixed Vault",
+              "description": "Fixed-term Venus supply position at a locked rate.",
+              "tags": [
+                "lending",
+                "venus",
+                "fixed-rate"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "agent_id": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:2146",
+      "token_id": "2146",
+      "name": "CryptoX by Unibase",
+      "owner_address": "0xd7fa5db858a22927c6535fc1647e5b226b6968ad",
+      "service_id": 31179,
+      "kind": "a2a",
+      "endpoint": "https://bitagent.s3.ap-southeast-1.amazonaws.com/0xD7Fa5dB858a22927C6535FC1647e5b226b6968Ad/.well-known/agent-card.json",
+      "category": "unclassified",
+      "previous_checked_at": "2026-09-21T05:08:13.260Z",
+      "previous_ok": true,
+      "previous_detail": "bound, 1 skill(s)",
+      "measured_at": "2026-09-21T11:37:01.686Z",
+      "outcome": {
+        "ok": true,
+        "liveness": "live",
+        "latencyMs": 573,
+        "statusCode": 200,
+        "failureClass": null,
+        "detail": "bound, 1 skill(s)",
+        "skills": [
+          "CryptoX by Unibase"
+        ],
+        "executableEndpoint": "https://testnet-api.bitagent.io/aip/0x4203d3e66a344d65ad7ab065045f4110d569af23764e78485ce7dc70c0e5fcea",
+        "reportedName": "CryptoX by Unibase",
+        "protocolVersion": "1.0.0",
+        "taskKinds": [],
+        "manifest": {
+          "name": "CryptoX by Unibase",
+          "url": "https://testnet-api.bitagent.io/aip/0x4203d3e66a344d65ad7ab065045f4110d569af23764e78485ce7dc70c0e5fcea",
+          "skills": [
+            {
+              "id": "cryptox_by_unibase",
+              "name": "CryptoX by Unibase",
+              "description": "",
+              "tags": []
+            }
+          ]
+        }
+      }
+    },
+    {
+      "agent_id": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:152240",
+      "token_id": "152240",
+      "name": "VerdantGlyph",
+      "owner_address": "0xaf732de120d181f0677e4f84d9483883e7facf59",
+      "service_id": 29816,
+      "kind": "a2a",
+      "endpoint": "https://app.singularry.org/agents/229/agent-card.json",
+      "category": "unclassified",
+      "previous_checked_at": "2026-09-21T04:37:56.900Z",
+      "previous_ok": true,
+      "previous_detail": "bound, 4 skill(s)",
+      "measured_at": "2026-09-21T11:37:01.686Z",
+      "outcome": {
+        "ok": true,
+        "liveness": "live",
+        "latencyMs": 423,
+        "statusCode": 200,
+        "failureClass": null,
+        "detail": "bound, 4 skill(s)",
+        "skills": [
+          "Dollar-Cost Averaging",
+          "Market-Cap Index",
+          "USDD Yield Vault",
+          "Venus Fixed Vault"
+        ],
+        "executableEndpoint": "https://app.singularry.org/api/a2a",
+        "reportedName": "VerdantGlyph",
+        "protocolVersion": "1.0.0",
+        "taskKinds": [
+          "grid",
+          "yield"
+        ],
+        "manifest": {
+          "name": "VerdantGlyph",
+          "url": "https://app.singularry.org/api/a2a",
+          "skills": [
+            {
+              "id": "dca",
+              "name": "Dollar-Cost Averaging",
+              "description": "Scheduled buy-the-dip DCA into BTC, ETH, BNB via the on-chain DCA facet.",
+              "tags": [
+                "dca",
+                "accumulation"
+              ]
+            },
+            {
+              "id": "market-cap-index",
+              "name": "Market-Cap Index",
+              "description": "Passive market-cap-weighted basket of major BNB-Chain-routable assets.",
+              "tags": [
+                "index",
+                "passive",
+                "basket"
+              ]
+            },
+            {
+              "id": "usdd-vault",
+              "name": "USDD Yield Vault",
+              "description": "Single-asset USDD vault deposit for stable on-chain yield.",
+              "tags": [
+                "yield",
+                "stablecoin",
+                "usdd"
+              ]
+            },
+            {
+              "id": "venus-fixed-vault",
+              "name": "Venus Fixed Vault",
+              "description": "Fixed-term Venus supply position at a locked rate.",
+              "tags": [
+                "lending",
+                "venus",
+                "fixed-rate"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "agent_id": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:152266",
+      "token_id": "152266",
+      "name": "TwilightRanger",
+      "owner_address": "0xb0ec4b5af18388fe1065eb825000d9d152d414da",
+      "service_id": 29807,
+      "kind": "a2a",
+      "endpoint": "https://app.singularry.org/agents/232/agent-card.json",
+      "category": "unclassified",
+      "previous_checked_at": "2026-09-21T04:25:35.714Z",
+      "previous_ok": true,
+      "previous_detail": "bound, 4 skill(s)",
+      "measured_at": "2026-09-21T11:37:01.687Z",
+      "outcome": {
+        "ok": true,
+        "liveness": "live",
+        "latencyMs": 438,
+        "statusCode": 200,
+        "failureClass": null,
+        "detail": "bound, 4 skill(s)",
+        "skills": [
+          "Dollar-Cost Averaging",
+          "Market-Cap Index",
+          "USDD Yield Vault",
+          "Venus Fixed Vault"
+        ],
+        "executableEndpoint": "https://app.singularry.org/api/a2a",
+        "reportedName": "TwilightRanger",
+        "protocolVersion": "1.0.0",
+        "taskKinds": [
+          "grid",
+          "yield"
+        ],
+        "manifest": {
+          "name": "TwilightRanger",
+          "url": "https://app.singularry.org/api/a2a",
+          "skills": [
+            {
+              "id": "dca",
+              "name": "Dollar-Cost Averaging",
+              "description": "Scheduled buy-the-dip DCA into BTC, ETH, BNB via the on-chain DCA facet.",
+              "tags": [
+                "dca",
+                "accumulation"
+              ]
+            },
+            {
+              "id": "market-cap-index",
+              "name": "Market-Cap Index",
+              "description": "Passive market-cap-weighted basket of major BNB-Chain-routable assets.",
+              "tags": [
+                "index",
+                "passive",
+                "basket"
+              ]
+            },
+            {
+              "id": "usdd-vault",
+              "name": "USDD Yield Vault",
+              "description": "Single-asset USDD vault deposit for stable on-chain yield.",
+              "tags": [
+                "yield",
+                "stablecoin",
+                "usdd"
+              ]
+            },
+            {
+              "id": "venus-fixed-vault",
+              "name": "Venus Fixed Vault",
+              "description": "Fixed-term Venus supply position at a locked rate.",
+              "tags": [
+                "lending",
+                "venus",
+                "fixed-rate"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "agent_id": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:152261",
+      "token_id": "152261",
+      "name": "CrimsonPilgrim",
+      "owner_address": "0xe293af3c9621174da2cfa902f6f21bed3c1c00c6",
+      "service_id": 29810,
+      "kind": "a2a",
+      "endpoint": "https://app.singularry.org/agents/231/agent-card.json",
+      "category": "unclassified",
+      "previous_checked_at": "2026-09-21T04:25:35.714Z",
+      "previous_ok": true,
+      "previous_detail": "bound, 4 skill(s)",
+      "measured_at": "2026-09-21T11:37:02.260Z",
+      "outcome": {
+        "ok": true,
+        "liveness": "live",
+        "latencyMs": 694,
+        "statusCode": 200,
+        "failureClass": null,
+        "detail": "bound, 4 skill(s)",
+        "skills": [
+          "Dollar-Cost Averaging",
+          "Market-Cap Index",
+          "USDD Yield Vault",
+          "Venus Fixed Vault"
+        ],
+        "executableEndpoint": "https://app.singularry.org/api/a2a",
+        "reportedName": "CrimsonPilgrim",
+        "protocolVersion": "1.0.0",
+        "taskKinds": [
+          "grid",
+          "yield"
+        ],
+        "manifest": {
+          "name": "CrimsonPilgrim",
+          "url": "https://app.singularry.org/api/a2a",
+          "skills": [
+            {
+              "id": "dca",
+              "name": "Dollar-Cost Averaging",
+              "description": "Scheduled buy-the-dip DCA into BTC, ETH, BNB via the on-chain DCA facet.",
+              "tags": [
+                "dca",
+                "accumulation"
+              ]
+            },
+            {
+              "id": "market-cap-index",
+              "name": "Market-Cap Index",
+              "description": "Passive market-cap-weighted basket of major BNB-Chain-routable assets.",
+              "tags": [
+                "index",
+                "passive",
+                "basket"
+              ]
+            },
+            {
+              "id": "usdd-vault",
+              "name": "USDD Yield Vault",
+              "description": "Single-asset USDD vault deposit for stable on-chain yield.",
+              "tags": [
+                "yield",
+                "stablecoin",
+                "usdd"
+              ]
+            },
+            {
+              "id": "venus-fixed-vault",
+              "name": "Venus Fixed Vault",
+              "description": "Fixed-term Venus supply position at a locked rate.",
+              "tags": [
+                "lending",
+                "venus",
+                "fixed-rate"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "agent_id": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:152251",
+      "token_id": "152251",
+      "name": "VerdantReaver",
+      "owner_address": "0x1b285d6efc7099c2a3a98429382e6d155cb130eb",
+      "service_id": 29813,
+      "kind": "a2a",
+      "endpoint": "https://app.singularry.org/agents/230/agent-card.json",
+      "category": "unclassified",
+      "previous_checked_at": "2026-09-21T04:25:35.714Z",
+      "previous_ok": true,
+      "previous_detail": "bound, 4 skill(s)",
+      "measured_at": "2026-09-21T11:37:02.264Z",
+      "outcome": {
+        "ok": true,
+        "liveness": "live",
+        "latencyMs": 544,
+        "statusCode": 200,
+        "failureClass": null,
+        "detail": "bound, 4 skill(s)",
+        "skills": [
+          "Dollar-Cost Averaging",
+          "Market-Cap Index",
+          "USDD Yield Vault",
+          "Venus Fixed Vault"
+        ],
+        "executableEndpoint": "https://app.singularry.org/api/a2a",
+        "reportedName": "VerdantReaver",
+        "protocolVersion": "1.0.0",
+        "taskKinds": [
+          "grid",
+          "yield"
+        ],
+        "manifest": {
+          "name": "VerdantReaver",
+          "url": "https://app.singularry.org/api/a2a",
+          "skills": [
+            {
+              "id": "dca",
+              "name": "Dollar-Cost Averaging",
+              "description": "Scheduled buy-the-dip DCA into BTC, ETH, BNB via the on-chain DCA facet.",
+              "tags": [
+                "dca",
+                "accumulation"
+              ]
+            },
+            {
+              "id": "market-cap-index",
+              "name": "Market-Cap Index",
+              "description": "Passive market-cap-weighted basket of major BNB-Chain-routable assets.",
+              "tags": [
+                "index",
+                "passive",
+                "basket"
+              ]
+            },
+            {
+              "id": "usdd-vault",
+              "name": "USDD Yield Vault",
+              "description": "Single-asset USDD vault deposit for stable on-chain yield.",
+              "tags": [
+                "yield",
+                "stablecoin",
+                "usdd"
+              ]
+            },
+            {
+              "id": "venus-fixed-vault",
+              "name": "Venus Fixed Vault",
+              "description": "Fixed-term Venus supply position at a locked rate.",
+              "tags": [
+                "lending",
+                "venus",
+                "fixed-rate"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "agent_id": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:146831",
+      "token_id": "146831",
+      "name": "VoidScout",
+      "owner_address": "0x1522171622708ffc268a6225cd82bb488c87f1db",
+      "service_id": 30066,
+      "kind": "a2a",
+      "endpoint": "https://app.singularry.org/agents/146/agent-card.json",
+      "category": "unclassified",
+      "previous_checked_at": "2026-09-21T04:25:35.714Z",
+      "previous_ok": true,
+      "previous_detail": "bound, 4 skill(s)",
+      "measured_at": "2026-09-21T11:37:02.264Z",
+      "outcome": {
+        "ok": true,
+        "liveness": "live",
+        "latencyMs": 1469,
+        "statusCode": 200,
+        "failureClass": null,
+        "detail": "bound, 4 skill(s)",
+        "skills": [
+          "Dollar-Cost Averaging",
+          "Market-Cap Index",
+          "USDD Yield Vault",
+          "Venus Fixed Vault"
+        ],
+        "executableEndpoint": "https://app.singularry.org/api/a2a",
+        "reportedName": "VoidScout",
+        "protocolVersion": "1.0.0",
+        "taskKinds": [
+          "grid",
+          "yield"
+        ],
+        "manifest": {
+          "name": "VoidScout",
+          "url": "https://app.singularry.org/api/a2a",
+          "skills": [
+            {
+              "id": "dca",
+              "name": "Dollar-Cost Averaging",
+              "description": "Scheduled buy-the-dip DCA into BTC, ETH, BNB via the on-chain DCA facet.",
+              "tags": [
+                "dca",
+                "accumulation"
+              ]
+            },
+            {
+              "id": "market-cap-index",
+              "name": "Market-Cap Index",
+              "description": "Passive market-cap-weighted basket of major BNB-Chain-routable assets.",
+              "tags": [
+                "index",
+                "passive",
+                "basket"
+              ]
+            },
+            {
+              "id": "usdd-vault",
+              "name": "USDD Yield Vault",
+              "description": "Single-asset USDD vault deposit for stable on-chain yield.",
+              "tags": [
+                "yield",
+                "stablecoin",
+                "usdd"
+              ]
+            },
+            {
+              "id": "venus-fixed-vault",
+              "name": "Venus Fixed Vault",
+              "description": "Fixed-term Venus supply position at a locked rate.",
+              "tags": [
+                "lending",
+                "venus",
+                "fixed-rate"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "agent_id": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:138077",
+      "token_id": "138077",
+      "name": "SolarAegis",
+      "owner_address": "0xbf4a78b3eaf4df777439b25ebd5b8e31bf43c2ea",
+      "service_id": 30217,
+      "kind": "a2a",
+      "endpoint": "https://app.singularry.org/agents/97/agent-card.json",
+      "category": "unclassified",
+      "previous_checked_at": "2026-09-21T04:25:35.714Z",
+      "previous_ok": true,
+      "previous_detail": "bound, 4 skill(s)",
+      "measured_at": "2026-09-21T11:37:03.734Z",
+      "outcome": {
+        "ok": true,
+        "liveness": "live",
+        "latencyMs": 414,
+        "statusCode": 200,
+        "failureClass": null,
+        "detail": "bound, 4 skill(s)",
+        "skills": [
+          "Dollar-Cost Averaging",
+          "Market-Cap Index",
+          "USDD Yield Vault",
+          "Venus Fixed Vault"
+        ],
+        "executableEndpoint": "https://app.singularry.org/api/a2a",
+        "reportedName": "SolarAegis",
+        "protocolVersion": "1.0.0",
+        "taskKinds": [
+          "grid",
+          "yield"
+        ],
+        "manifest": {
+          "name": "SolarAegis",
+          "url": "https://app.singularry.org/api/a2a",
+          "skills": [
+            {
+              "id": "dca",
+              "name": "Dollar-Cost Averaging",
+              "description": "Scheduled buy-the-dip DCA into BTC, ETH, BNB via the on-chain DCA facet.",
+              "tags": [
+                "dca",
+                "accumulation"
+              ]
+            },
+            {
+              "id": "market-cap-index",
+              "name": "Market-Cap Index",
+              "description": "Passive market-cap-weighted basket of major BNB-Chain-routable assets.",
+              "tags": [
+                "index",
+                "passive",
+                "basket"
+              ]
+            },
+            {
+              "id": "usdd-vault",
+              "name": "USDD Yield Vault",
+              "description": "Single-asset USDD vault deposit for stable on-chain yield.",
+              "tags": [
+                "yield",
+                "stablecoin",
+                "usdd"
+              ]
+            },
+            {
+              "id": "venus-fixed-vault",
+              "name": "Venus Fixed Vault",
+              "description": "Fixed-term Venus supply position at a locked rate.",
+              "tags": [
+                "lending",
+                "venus",
+                "fixed-rate"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "agent_id": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:138039",
+      "token_id": "138039",
+      "name": "FrostHarbinger",
+      "owner_address": "0xd2193dfad348fec74c99e9f3428cd096a9476854",
+      "service_id": 30220,
+      "kind": "a2a",
+      "endpoint": "https://app.singularry.org/agents/96/agent-card.json",
+      "category": "unclassified",
+      "previous_checked_at": "2026-09-21T04:25:35.714Z",
+      "previous_ok": true,
+      "previous_detail": "bound, 4 skill(s)",
+      "measured_at": "2026-09-21T11:37:03.734Z",
+      "outcome": {
+        "ok": true,
+        "liveness": "live",
+        "latencyMs": 663,
+        "statusCode": 200,
+        "failureClass": null,
+        "detail": "bound, 4 skill(s)",
+        "skills": [
+          "Dollar-Cost Averaging",
+          "Market-Cap Index",
+          "USDD Yield Vault",
+          "Venus Fixed Vault"
+        ],
+        "executableEndpoint": "https://app.singularry.org/api/a2a",
+        "reportedName": "FrostHarbinger",
+        "protocolVersion": "1.0.0",
+        "taskKinds": [
+          "grid",
+          "yield"
+        ],
+        "manifest": {
+          "name": "FrostHarbinger",
+          "url": "https://app.singularry.org/api/a2a",
+          "skills": [
+            {
+              "id": "dca",
+              "name": "Dollar-Cost Averaging",
+              "description": "Scheduled buy-the-dip DCA into BTC, ETH, BNB via the on-chain DCA facet.",
+              "tags": [
+                "dca",
+                "accumulation"
+              ]
+            },
+            {
+              "id": "market-cap-index",
+              "name": "Market-Cap Index",
+              "description": "Passive market-cap-weighted basket of major BNB-Chain-routable assets.",
+              "tags": [
+                "index",
+                "passive",
+                "basket"
+              ]
+            },
+            {
+              "id": "usdd-vault",
+              "name": "USDD Yield Vault",
+              "description": "Single-asset USDD vault deposit for stable on-chain yield.",
+              "tags": [
+                "yield",
+                "stablecoin",
+                "usdd"
+              ]
+            },
+            {
+              "id": "venus-fixed-vault",
+              "name": "Venus Fixed Vault",
+              "description": "Fixed-term Venus supply position at a locked rate.",
+              "tags": [
+                "lending",
+                "venus",
+                "fixed-rate"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "agent_id": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:2149",
+      "token_id": "2149",
+      "name": "NWEN by Unibase",
+      "owner_address": "0x2d3c0f463d4014a23fcc544b637efb9465a7623c",
+      "service_id": 31181,
+      "kind": "a2a",
+      "endpoint": "https://bitagent.s3.ap-southeast-1.amazonaws.com/0x2D3C0f463d4014a23FCC544b637efb9465a7623C/.well-known/agent-card.json",
+      "category": "unclassified",
+      "previous_checked_at": "2026-09-21T04:25:35.714Z",
+      "previous_ok": true,
+      "previous_detail": "bound, 1 skill(s)",
+      "measured_at": "2026-09-21T11:37:03.734Z",
+      "outcome": {
+        "ok": true,
+        "liveness": "live",
+        "latencyMs": 579,
+        "statusCode": 200,
+        "failureClass": null,
+        "detail": "bound, 1 skill(s)",
+        "skills": [
+          "NWEN by Unibase"
+        ],
+        "executableEndpoint": "https://testnet-api.bitagent.io/aip/0x790f5b444dadb6f42847de8f0bcf856c45c895777ad66c1ed24fdcf8058573a9",
+        "reportedName": "NWEN by Unibase",
+        "protocolVersion": "1.0.0",
+        "taskKinds": [],
+        "manifest": {
+          "name": "NWEN by Unibase",
+          "url": "https://testnet-api.bitagent.io/aip/0x790f5b444dadb6f42847de8f0bcf856c45c895777ad66c1ed24fdcf8058573a9",
+          "skills": [
+            {
+              "id": "nwen_by_unibase",
+              "name": "NWEN by Unibase",
+              "description": "Hi I’m $NWEN. Let's play together?",
+              "tags": []
+            }
+          ]
+        }
+      }
+    },
+    {
+      "agent_id": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:2144",
+      "token_id": "2144",
+      "name": "Clawdbot by Unibase",
+      "owner_address": "0xe66712a57dfe7be3571ed73eb3972b50c46a5347",
+      "service_id": 31187,
+      "kind": "a2a",
+      "endpoint": "https://bitagent.s3.ap-southeast-1.amazonaws.com/0xE66712A57dFe7Be3571ed73EB3972b50C46a5347/.well-known/agent-card.json",
+      "category": "unclassified",
+      "previous_checked_at": "2026-09-21T04:25:35.714Z",
+      "previous_ok": true,
+      "previous_detail": "bound, 1 skill(s)",
+      "measured_at": "2026-09-21T11:37:04.398Z",
+      "outcome": {
+        "ok": true,
+        "liveness": "live",
+        "latencyMs": 877,
+        "statusCode": 200,
+        "failureClass": null,
+        "detail": "bound, 1 skill(s)",
+        "skills": [
+          "Clawdbot by Unibase"
+        ],
+        "executableEndpoint": "https://testnet-api.bitagent.io/aip/0x7c7ddb5e9893e546b064c329278bac560f667ee67db401903f5712d096c5f965",
+        "reportedName": "Clawdbot by Unibase",
+        "protocolVersion": "1.0.0",
+        "taskKinds": [],
+        "manifest": {
+          "name": "Clawdbot by Unibase",
+          "url": "https://testnet-api.bitagent.io/aip/0x7c7ddb5e9893e546b064c329278bac560f667ee67db401903f5712d096c5f965",
+          "skills": [
+            {
+              "id": "clawdbot_by_unibase",
+              "name": "Clawdbot by Unibase",
+              "description": "Legit Clawdbot on base launched by bankrr with fees going to Elon Musk, based on his last tweet.",
+              "tags": []
+            }
+          ]
+        }
+      }
+    },
+    {
+      "agent_id": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:142906",
+      "token_id": "142906",
+      "name": "EmberMariner",
+      "owner_address": "0x5751db16cb9bdbc87bf0a824193c6f7e6c836666",
+      "service_id": 30100,
+      "kind": "a2a",
+      "endpoint": "https://app.singularry.org/agents/137/agent-card.json",
+      "category": "unclassified",
+      "previous_checked_at": "2026-09-21T03:52:58.257Z",
+      "previous_ok": true,
+      "previous_detail": "bound, 4 skill(s)",
+      "measured_at": "2026-09-21T11:37:04.398Z",
+      "outcome": {
+        "ok": true,
+        "liveness": "live",
+        "latencyMs": 447,
+        "statusCode": 200,
+        "failureClass": null,
+        "detail": "bound, 4 skill(s)",
+        "skills": [
+          "Dollar-Cost Averaging",
+          "Market-Cap Index",
+          "USDD Yield Vault",
+          "Venus Fixed Vault"
+        ],
+        "executableEndpoint": "https://app.singularry.org/api/a2a",
+        "reportedName": "EmberMariner",
+        "protocolVersion": "1.0.0",
+        "taskKinds": [
+          "grid",
+          "yield"
+        ],
+        "manifest": {
+          "name": "EmberMariner",
+          "url": "https://app.singularry.org/api/a2a",
+          "skills": [
+            {
+              "id": "dca",
+              "name": "Dollar-Cost Averaging",
+              "description": "Scheduled buy-the-dip DCA into BTC, ETH, BNB via the on-chain DCA facet.",
+              "tags": [
+                "dca",
+                "accumulation"
+              ]
+            },
+            {
+              "id": "market-cap-index",
+              "name": "Market-Cap Index",
+              "description": "Passive market-cap-weighted basket of major BNB-Chain-routable assets.",
+              "tags": [
+                "index",
+                "passive",
+                "basket"
+              ]
+            },
+            {
+              "id": "usdd-vault",
+              "name": "USDD Yield Vault",
+              "description": "Single-asset USDD vault deposit for stable on-chain yield.",
+              "tags": [
+                "yield",
+                "stablecoin",
+                "usdd"
+              ]
+            },
+            {
+              "id": "venus-fixed-vault",
+              "name": "Venus Fixed Vault",
+              "description": "Fixed-term Venus supply position at a locked rate.",
+              "tags": [
+                "lending",
+                "venus",
+                "fixed-rate"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "agent_id": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:140479",
+      "token_id": "140479",
+      "name": "EmberReaver",
+      "owner_address": "0x546f95cbbad5f2875072aee85a005363b6420e80",
+      "service_id": 30189,
+      "kind": "a2a",
+      "endpoint": "https://app.singularry.org/agents/108/agent-card.json",
+      "category": "unclassified",
+      "previous_checked_at": "2026-09-21T03:52:58.257Z",
+      "previous_ok": true,
+      "previous_detail": "bound, 4 skill(s)",
+      "measured_at": "2026-09-21T11:37:04.398Z",
+      "outcome": {
+        "ok": true,
+        "liveness": "live",
+        "latencyMs": 1407,
+        "statusCode": 200,
+        "failureClass": null,
+        "detail": "bound, 4 skill(s)",
+        "skills": [
+          "Dollar-Cost Averaging",
+          "Market-Cap Index",
+          "USDD Yield Vault",
+          "Venus Fixed Vault"
+        ],
+        "executableEndpoint": "https://app.singularry.org/api/a2a",
+        "reportedName": "EmberReaver",
+        "protocolVersion": "1.0.0",
+        "taskKinds": [
+          "grid",
+          "yield"
+        ],
+        "manifest": {
+          "name": "EmberReaver",
+          "url": "https://app.singularry.org/api/a2a",
+          "skills": [
+            {
+              "id": "dca",
+              "name": "Dollar-Cost Averaging",
+              "description": "Scheduled buy-the-dip DCA into BTC, ETH, BNB via the on-chain DCA facet.",
+              "tags": [
+                "dca",
+                "accumulation"
+              ]
+            },
+            {
+              "id": "market-cap-index",
+              "name": "Market-Cap Index",
+              "description": "Passive market-cap-weighted basket of major BNB-Chain-routable assets.",
+              "tags": [
+                "index",
+                "passive",
+                "basket"
+              ]
+            },
+            {
+              "id": "usdd-vault",
+              "name": "USDD Yield Vault",
+              "description": "Single-asset USDD vault deposit for stable on-chain yield.",
+              "tags": [
+                "yield",
+                "stablecoin",
+                "usdd"
+              ]
+            },
+            {
+              "id": "venus-fixed-vault",
+              "name": "Venus Fixed Vault",
+              "description": "Fixed-term Venus supply position at a locked rate.",
+              "tags": [
+                "lending",
+                "venus",
+                "fixed-rate"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "agent_id": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:138825",
+      "token_id": "138825",
+      "name": "MysticDrifter",
+      "owner_address": "0x0f7d5349b895458d0a6e93c6710bdf0b83268e86",
+      "service_id": 30193,
+      "kind": "a2a",
+      "endpoint": "https://app.singularry.org/agents/105/agent-card.json",
+      "category": "unclassified",
+      "previous_checked_at": "2026-09-21T03:52:58.257Z",
+      "previous_ok": true,
+      "previous_detail": "bound, 4 skill(s)",
+      "measured_at": "2026-09-21T11:37:05.806Z",
+      "outcome": {
+        "ok": true,
+        "liveness": "live",
+        "latencyMs": 424,
+        "statusCode": 200,
+        "failureClass": null,
+        "detail": "bound, 4 skill(s)",
+        "skills": [
+          "Dollar-Cost Averaging",
+          "Market-Cap Index",
+          "USDD Yield Vault",
+          "Venus Fixed Vault"
+        ],
+        "executableEndpoint": "https://app.singularry.org/api/a2a",
+        "reportedName": "MysticDrifter",
+        "protocolVersion": "1.0.0",
+        "taskKinds": [
+          "grid",
+          "yield"
+        ],
+        "manifest": {
+          "name": "MysticDrifter",
+          "url": "https://app.singularry.org/api/a2a",
+          "skills": [
+            {
+              "id": "dca",
+              "name": "Dollar-Cost Averaging",
+              "description": "Scheduled buy-the-dip DCA into BTC, ETH, BNB via the on-chain DCA facet.",
+              "tags": [
+                "dca",
+                "accumulation"
+              ]
+            },
+            {
+              "id": "market-cap-index",
+              "name": "Market-Cap Index",
+              "description": "Passive market-cap-weighted basket of major BNB-Chain-routable assets.",
+              "tags": [
+                "index",
+                "passive",
+                "basket"
+              ]
+            },
+            {
+              "id": "usdd-vault",
+              "name": "USDD Yield Vault",
+              "description": "Single-asset USDD vault deposit for stable on-chain yield.",
+              "tags": [
+                "yield",
+                "stablecoin",
+                "usdd"
+              ]
+            },
+            {
+              "id": "venus-fixed-vault",
+              "name": "Venus Fixed Vault",
+              "description": "Fixed-term Venus supply position at a locked rate.",
+              "tags": [
+                "lending",
+                "venus",
+                "fixed-rate"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "agent_id": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:137935",
+      "token_id": "137935",
+      "name": "CrimsonHarbinger",
+      "owner_address": "0xa84a74201f8701ac7515c4557ef1103c01eda31c",
+      "service_id": 30235,
+      "kind": "a2a",
+      "endpoint": "https://app.singularry.org/agents/91/agent-card.json",
+      "category": "unclassified",
+      "previous_checked_at": "2026-09-21T03:52:58.257Z",
+      "previous_ok": true,
+      "previous_detail": "bound, 4 skill(s)",
+      "measured_at": "2026-09-21T11:37:05.806Z",
+      "outcome": {
+        "ok": true,
+        "liveness": "live",
+        "latencyMs": 459,
+        "statusCode": 200,
+        "failureClass": null,
+        "detail": "bound, 4 skill(s)",
+        "skills": [
+          "Dollar-Cost Averaging",
+          "Market-Cap Index",
+          "USDD Yield Vault",
+          "Venus Fixed Vault"
+        ],
+        "executableEndpoint": "https://app.singularry.org/api/a2a",
+        "reportedName": "CrimsonHarbinger",
+        "protocolVersion": "1.0.0",
+        "taskKinds": [
+          "grid",
+          "yield"
+        ],
+        "manifest": {
+          "name": "CrimsonHarbinger",
+          "url": "https://app.singularry.org/api/a2a",
+          "skills": [
+            {
+              "id": "dca",
+              "name": "Dollar-Cost Averaging",
+              "description": "Scheduled buy-the-dip DCA into BTC, ETH, BNB via the on-chain DCA facet.",
+              "tags": [
+                "dca",
+                "accumulation"
+              ]
+            },
+            {
+              "id": "market-cap-index",
+              "name": "Market-Cap Index",
+              "description": "Passive market-cap-weighted basket of major BNB-Chain-routable assets.",
+              "tags": [
+                "index",
+                "passive",
+                "basket"
+              ]
+            },
+            {
+              "id": "usdd-vault",
+              "name": "USDD Yield Vault",
+              "description": "Single-asset USDD vault deposit for stable on-chain yield.",
+              "tags": [
+                "yield",
+                "stablecoin",
+                "usdd"
+              ]
+            },
+            {
+              "id": "venus-fixed-vault",
+              "name": "Venus Fixed Vault",
+              "description": "Fixed-term Venus supply position at a locked rate.",
+              "tags": [
+                "lending",
+                "venus",
+                "fixed-rate"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "agent_id": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:137831",
+      "token_id": "137831",
+      "name": "shelya",
+      "owner_address": "0x0d40c0c184eb936260cb3a8d96a16e75267d290f",
+      "service_id": 30247,
+      "kind": "a2a",
+      "endpoint": "https://app.singularry.org/agents/87/agent-card.json",
+      "category": "unclassified",
+      "previous_checked_at": "2026-09-21T03:52:58.257Z",
+      "previous_ok": true,
+      "previous_detail": "bound, 4 skill(s)",
+      "measured_at": "2026-09-21T11:37:05.806Z",
+      "outcome": {
+        "ok": true,
+        "liveness": "live",
+        "latencyMs": 456,
+        "statusCode": 200,
+        "failureClass": null,
+        "detail": "bound, 4 skill(s)",
+        "skills": [
+          "Dollar-Cost Averaging",
+          "Market-Cap Index",
+          "USDD Yield Vault",
+          "Venus Fixed Vault"
+        ],
+        "executableEndpoint": "https://app.singularry.org/api/a2a",
+        "reportedName": "shelya",
+        "protocolVersion": "1.0.0",
+        "taskKinds": [
+          "grid",
+          "yield"
+        ],
+        "manifest": {
+          "name": "shelya",
+          "url": "https://app.singularry.org/api/a2a",
+          "skills": [
+            {
+              "id": "dca",
+              "name": "Dollar-Cost Averaging",
+              "description": "Scheduled buy-the-dip DCA into BTC, ETH, BNB via the on-chain DCA facet.",
+              "tags": [
+                "dca",
+                "accumulation"
+              ]
+            },
+            {
+              "id": "market-cap-index",
+              "name": "Market-Cap Index",
+              "description": "Passive market-cap-weighted basket of major BNB-Chain-routable assets.",
+              "tags": [
+                "index",
+                "passive",
+                "basket"
+              ]
+            },
+            {
+              "id": "usdd-vault",
+              "name": "USDD Yield Vault",
+              "description": "Single-asset USDD vault deposit for stable on-chain yield.",
+              "tags": [
+                "yield",
+                "stablecoin",
+                "usdd"
+              ]
+            },
+            {
+              "id": "venus-fixed-vault",
+              "name": "Venus Fixed Vault",
+              "description": "Fixed-term Venus supply position at a locked rate.",
+              "tags": [
+                "lending",
+                "venus",
+                "fixed-rate"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "agent_id": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:124595",
+      "token_id": "124595",
+      "name": "SLY Agent #45",
+      "owner_address": "0xd79beadb142d87d6d625991a1f59f69890c447a5",
+      "service_id": 30530,
+      "kind": "a2a",
+      "endpoint": "https://app.singularry.org/agents/45/agent-card.json",
+      "category": "unclassified",
+      "previous_checked_at": "2026-09-21T03:52:58.257Z",
+      "previous_ok": true,
+      "previous_detail": "bound, 5 skill(s)",
+      "measured_at": "2026-09-21T11:37:06.265Z",
+      "outcome": {
+        "ok": true,
+        "liveness": "live",
+        "latencyMs": 410,
+        "statusCode": 200,
+        "failureClass": null,
+        "detail": "bound, 5 skill(s)",
+        "skills": [
+          "Dollar-Cost Averaging",
+          "Market-Cap Index",
+          "USDD Yield Vault",
+          "Hierarchical Risk Parity",
+          "Venus Fixed Vault"
+        ],
+        "executableEndpoint": "https://app.singularry.org/api/a2a",
+        "reportedName": "SLY Agent #45",
+        "protocolVersion": "1.0.0",
+        "taskKinds": [
+          "grid",
+          "yield"
+        ],
+        "manifest": {
+          "name": "SLY Agent #45",
+          "url": "https://app.singularry.org/api/a2a",
+          "skills": [
+            {
+              "id": "dca",
+              "name": "Dollar-Cost Averaging",
+              "description": "Scheduled buy-the-dip DCA into BTC, ETH, BNB via the on-chain DCA facet.",
+              "tags": [
+                "dca",
+                "accumulation"
+              ]
+            },
+            {
+              "id": "market-cap-index",
+              "name": "Market-Cap Index",
+              "description": "Passive market-cap-weighted basket of major BNB-Chain-routable assets.",
+              "tags": [
+                "index",
+                "passive",
+                "basket"
+              ]
+            },
+            {
+              "id": "usdd-vault",
+              "name": "USDD Yield Vault",
+              "description": "Single-asset USDD vault deposit for stable on-chain yield.",
+              "tags": [
+                "yield",
+                "stablecoin",
+                "usdd"
+              ]
+            },
+            {
+              "id": "hrp-portfolio",
+              "name": "Hierarchical Risk Parity",
+              "description": "Diversified portfolio allocation via HRP clustering of the asset covariance.",
+              "tags": [
+                "portfolio",
+                "diversification"
+              ]
+            },
+            {
+              "id": "venus-fixed-vault",
+              "name": "Venus Fixed Vault",
+              "description": "Fixed-term Venus supply position at a locked rate.",
+              "tags": [
+                "lending",
+                "venus",
+                "fixed-rate"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "agent_id": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:124242",
+      "token_id": "124242",
+      "name": "QuantumVanguard",
+      "owner_address": "0x6fa507121975c4b61cac21bec74be4b6430446cb",
+      "service_id": 30536,
+      "kind": "a2a",
+      "endpoint": "https://app.singularry.org/agents/42/agent-card.json",
+      "category": "unclassified",
+      "previous_checked_at": "2026-09-21T03:52:58.257Z",
+      "previous_ok": true,
+      "previous_detail": "bound, 4 skill(s)",
+      "measured_at": "2026-09-21T11:37:06.266Z",
+      "outcome": {
+        "ok": true,
+        "liveness": "live",
+        "latencyMs": 530,
+        "statusCode": 200,
+        "failureClass": null,
+        "detail": "bound, 4 skill(s)",
+        "skills": [
+          "Dollar-Cost Averaging",
+          "Market-Cap Index",
+          "USDD Yield Vault",
+          "Venus Fixed Vault"
+        ],
+        "executableEndpoint": "https://app.singularry.org/api/a2a",
+        "reportedName": "QuantumVanguard",
+        "protocolVersion": "1.0.0",
+        "taskKinds": [
+          "grid",
+          "yield"
+        ],
+        "manifest": {
+          "name": "QuantumVanguard",
+          "url": "https://app.singularry.org/api/a2a",
+          "skills": [
+            {
+              "id": "dca",
+              "name": "Dollar-Cost Averaging",
+              "description": "Scheduled buy-the-dip DCA into BTC, ETH, BNB via the on-chain DCA facet.",
+              "tags": [
+                "dca",
+                "accumulation"
+              ]
+            },
+            {
+              "id": "market-cap-index",
+              "name": "Market-Cap Index",
+              "description": "Passive market-cap-weighted basket of major BNB-Chain-routable assets.",
+              "tags": [
+                "index",
+                "passive",
+                "basket"
+              ]
+            },
+            {
+              "id": "usdd-vault",
+              "name": "USDD Yield Vault",
+              "description": "Single-asset USDD vault deposit for stable on-chain yield.",
+              "tags": [
+                "yield",
+                "stablecoin",
+                "usdd"
+              ]
+            },
+            {
+              "id": "venus-fixed-vault",
+              "name": "Venus Fixed Vault",
+              "description": "Fixed-term Venus supply position at a locked rate.",
+              "tags": [
+                "lending",
+                "venus",
+                "fixed-rate"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "agent_id": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:49637",
+      "token_id": "49637",
+      "name": "OpenOdds.Ai",
+      "owner_address": "0x0d68a153897b73a6e4d2eaa9b0d4802bae69532d",
+      "service_id": 30763,
+      "kind": "a2a",
+      "endpoint": "https://openodds.ai/.well-known/a2a-agent-card.json",
+      "category": "unclassified",
+      "previous_checked_at": "2026-09-21T03:52:58.257Z",
+      "previous_ok": true,
+      "previous_detail": "bound, 12 skill(s)",
+      "measured_at": "2026-09-21T11:37:06.266Z",
+      "outcome": {
+        "ok": true,
+        "liveness": "live",
+        "latencyMs": 927,
+        "statusCode": 200,
+        "failureClass": null,
+        "detail": "bound, 12 skill(s)",
+        "skills": [
+          "Odds Snapshot Query",
+          "Prediction Lookup and Verify",
+          "Settlement Readiness Diagnosis",
+          "Unsettled Queue Monitoring",
+          "League Coverage Reporting",
+          "xG Head-to-Head Comparison",
+          "xG Form Trend Analysis",
+          "xG League Ranking Analysis",
+          "Multi-League Prediction Screening",
+          "Onchain Commit-Reveal Audit",
+          "Market Signal Consistency Check",
+          "Settlement Reveal Gap Monitoring"
+        ],
+        "executableEndpoint": "https://openodds.ai",
+        "reportedName": "OpenOdds.Ai",
+        "protocolVersion": "1.0.0",
+        "taskKinds": [],
+        "manifest": {
+          "name": "OpenOdds.Ai",
+          "url": "https://openodds.ai",
+          "skills": [
+            {
+              "id": "odds_snapshot_query",
+              "name": "Odds Snapshot Query",
+              "description": "Query bookmaker 1X2 odds snapshots for upcoming matches.",
+              "tags": [
+                "odds",
+                "snapshot",
+                "market-data"
+              ]
+            },
+            {
+              "id": "prediction_lookup_and_verify",
+              "name": "Prediction Lookup and Verify",
+              "description": "Lookup prediction records and verify commit-reveal integrity.",
+              "tags": [
+                "prediction",
+                "verification",
+                "onchain"
+              ]
+            },
+            {
+              "id": "settlement_readiness_diagnosis",
+              "name": "Settlement Readiness Diagnosis",
+              "description": "Diagnose whether predictions are ready for settlement.",
+              "tags": [
+                "settlement",
+                "diagnostics"
+              ]
+            },
+            {
+              "id": "unsettled_queue_monitoring",
+              "name": "Unsettled Queue Monitoring",
+              "description": "Monitor unsettled prediction queues and reveal bottlenecks.",
+              "tags": [
+                "queue",
+                "monitoring"
+              ]
+            },
+            {
+              "id": "league_coverage_reporting",
+              "name": "League Coverage Reporting",
+              "description": "Report league coverage and market-data freshness.",
+              "tags": [
+                "league",
+                "coverage"
+              ]
+            },
+            {
+              "id": "xg_head_to_head_comparison",
+              "name": "xG Head-to-Head Comparison",
+              "description": "Compare two teams' xG profiles for process-quality context.",
+              "tags": [
+                "xg",
+                "comparison"
+              ]
+            },
+            {
+              "id": "xg_form_trend_analysis",
+              "name": "xG Form Trend Analysis",
+              "description": "Analyze short-term xG form trends for a selected team.",
+              "tags": [
+                "xg",
+                "trend"
+              ]
+            },
+            {
+              "id": "xg_league_ranking_analysis",
+              "name": "xG League Ranking Analysis",
+              "description": "Generate league-level xG ranking tables.",
+              "tags": [
+                "xg",
+                "ranking"
+              ]
+            },
+            {
+              "id": "multi_league_prediction_screening",
+              "name": "Multi-League Prediction Screening",
+              "description": "Screen upcoming fixtures across leagues with model signals.",
+              "tags": [
+                "screening",
+                "signals"
+              ]
+            },
+            {
+              "id": "onchain_commit_reveal_audit",
+              "name": "Onchain Commit-Reveal Audit",
+              "description": "Audit commitment timing, hash integrity, and reveal status.",
+              "tags": [
+                "audit",
+                "commit-reveal"
+              ]
+            },
+            {
+              "id": "market_signal_consistency_check",
+              "name": "Market Signal Consistency Check",
+              "description": "Check consistency between model baseline and market pricing.",
+              "tags": [
+                "market",
+                "signal"
+              ]
+            },
+            {
+              "id": "settlement_reveal_gap_monitoring",
+              "name": "Settlement Reveal Gap Monitoring",
+              "description": "Identify gaps between settled results and reveal publication.",
+              "tags": [
+                "settlement",
+                "reveal"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "agent_id": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:46573",
+      "token_id": "46573",
+      "name": "Synergix",
+      "owner_address": "0xad96b8bad50b5938924dda41961f26f2f83108f7",
+      "service_id": 30924,
+      "kind": "a2a",
+      "endpoint": "https://www.synergix.lol/api/a2a",
+      "category": "unclassified",
+      "previous_checked_at": "2026-09-21T03:52:58.257Z",
+      "previous_ok": true,
+      "previous_detail": "bound, 0 skill(s)",
+      "measured_at": "2026-09-21T11:37:07.193Z",
+      "outcome": {
+        "ok": true,
+        "liveness": "live",
+        "latencyMs": 737,
+        "statusCode": 200,
+        "failureClass": null,
+        "detail": "bound, 0 skill(s)",
+        "skills": [],
+        "executableEndpoint": "https://www.synergix.lol/api/a2a",
+        "reportedName": null,
+        "protocolVersion": "2.0.0",
+        "taskKinds": [],
+        "manifest": {
+          "name": null,
+          "url": "https://www.synergix.lol/api/a2a",
+          "skills": []
+        }
+      }
+    },
+    {
+      "agent_id": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:143562",
+      "token_id": "143562",
+      "name": "RadiantPhoenix",
+      "owner_address": "0x1292c9d48546cdf0d7092dcedf2d4e5f172b791e",
+      "service_id": 30081,
+      "kind": "a2a",
+      "endpoint": "https://app.singularry.org/agents/143/agent-card.json",
+      "category": "unclassified",
+      "previous_checked_at": "2026-09-21T03:40:01.954Z",
+      "previous_ok": true,
+      "previous_detail": "bound, 4 skill(s)",
+      "measured_at": "2026-09-21T11:37:07.194Z",
+      "outcome": {
+        "ok": true,
+        "liveness": "live",
+        "latencyMs": 379,
+        "statusCode": 200,
+        "failureClass": null,
+        "detail": "bound, 4 skill(s)",
+        "skills": [
+          "Dollar-Cost Averaging",
+          "Market-Cap Index",
+          "USDD Yield Vault",
+          "Venus Fixed Vault"
+        ],
+        "executableEndpoint": "https://app.singularry.org/api/a2a",
+        "reportedName": "RadiantPhoenix",
+        "protocolVersion": "1.0.0",
+        "taskKinds": [
+          "grid",
+          "yield"
+        ],
+        "manifest": {
+          "name": "RadiantPhoenix",
+          "url": "https://app.singularry.org/api/a2a",
+          "skills": [
+            {
+              "id": "dca",
+              "name": "Dollar-Cost Averaging",
+              "description": "Scheduled buy-the-dip DCA into BTC, ETH, BNB via the on-chain DCA facet.",
+              "tags": [
+                "dca",
+                "accumulation"
+              ]
+            },
+            {
+              "id": "market-cap-index",
+              "name": "Market-Cap Index",
+              "description": "Passive market-cap-weighted basket of major BNB-Chain-routable assets.",
+              "tags": [
+                "index",
+                "passive",
+                "basket"
+              ]
+            },
+            {
+              "id": "usdd-vault",
+              "name": "USDD Yield Vault",
+              "description": "Single-asset USDD vault deposit for stable on-chain yield.",
+              "tags": [
+                "yield",
+                "stablecoin",
+                "usdd"
+              ]
+            },
+            {
+              "id": "venus-fixed-vault",
+              "name": "Venus Fixed Vault",
+              "description": "Fixed-term Venus supply position at a locked rate.",
+              "tags": [
+                "lending",
+                "venus",
+                "fixed-rate"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "agent_id": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:142975",
+      "token_id": "142975",
+      "name": "PrismaticGlyph",
+      "owner_address": "0x43cb60f7e54c5e50a6807c2701fc8fe679a9e19d",
+      "service_id": 30085,
+      "kind": "a2a",
+      "endpoint": "https://app.singularry.org/agents/142/agent-card.json",
+      "category": "unclassified",
+      "previous_checked_at": "2026-09-21T03:40:01.954Z",
+      "previous_ok": true,
+      "previous_detail": "bound, 4 skill(s)",
+      "measured_at": "2026-09-21T11:37:07.194Z",
+      "outcome": {
+        "ok": true,
+        "liveness": "live",
+        "latencyMs": 479,
+        "statusCode": 200,
+        "failureClass": null,
+        "detail": "bound, 4 skill(s)",
+        "skills": [
+          "Dollar-Cost Averaging",
+          "Market-Cap Index",
+          "USDD Yield Vault",
+          "Venus Fixed Vault"
+        ],
+        "executableEndpoint": "https://app.singularry.org/api/a2a",
+        "reportedName": "PrismaticGlyph",
+        "protocolVersion": "1.0.0",
+        "taskKinds": [
+          "grid",
+          "yield"
+        ],
+        "manifest": {
+          "name": "PrismaticGlyph",
+          "url": "https://app.singularry.org/api/a2a",
+          "skills": [
+            {
+              "id": "dca",
+              "name": "Dollar-Cost Averaging",
+              "description": "Scheduled buy-the-dip DCA into BTC, ETH, BNB via the on-chain DCA facet.",
+              "tags": [
+                "dca",
+                "accumulation"
+              ]
+            },
+            {
+              "id": "market-cap-index",
+              "name": "Market-Cap Index",
+              "description": "Passive market-cap-weighted basket of major BNB-Chain-routable assets.",
+              "tags": [
+                "index",
+                "passive",
+                "basket"
+              ]
+            },
+            {
+              "id": "usdd-vault",
+              "name": "USDD Yield Vault",
+              "description": "Single-asset USDD vault deposit for stable on-chain yield.",
+              "tags": [
+                "yield",
+                "stablecoin",
+                "usdd"
+              ]
+            },
+            {
+              "id": "venus-fixed-vault",
+              "name": "Venus Fixed Vault",
+              "description": "Fixed-term Venus supply position at a locked rate.",
+              "tags": [
+                "lending",
+                "venus",
+                "fixed-rate"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "agent_id": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:142932",
+      "token_id": "142932",
+      "name": "TempestWarden",
+      "owner_address": "0xbf91aa269acffeac7cc6de9d2c152e3a7b372a88",
+      "service_id": 30088,
+      "kind": "a2a",
+      "endpoint": "https://app.singularry.org/agents/141/agent-card.json",
+      "category": "unclassified",
+      "previous_checked_at": "2026-09-21T03:40:01.954Z",
+      "previous_ok": true,
+      "previous_detail": "bound, 4 skill(s)",
+      "measured_at": "2026-09-21T11:37:07.930Z",
+      "outcome": {
+        "ok": true,
+        "liveness": "live",
+        "latencyMs": 597,
+        "statusCode": 200,
+        "failureClass": null,
+        "detail": "bound, 4 skill(s)",
+        "skills": [
+          "Dollar-Cost Averaging",
+          "Market-Cap Index",
+          "USDD Yield Vault",
+          "Venus Fixed Vault"
+        ],
+        "executableEndpoint": "https://app.singularry.org/api/a2a",
+        "reportedName": "TempestWarden",
+        "protocolVersion": "1.0.0",
+        "taskKinds": [
+          "grid",
+          "yield"
+        ],
+        "manifest": {
+          "name": "TempestWarden",
+          "url": "https://app.singularry.org/api/a2a",
+          "skills": [
+            {
+              "id": "dca",
+              "name": "Dollar-Cost Averaging",
+              "description": "Scheduled buy-the-dip DCA into BTC, ETH, BNB via the on-chain DCA facet.",
+              "tags": [
+                "dca",
+                "accumulation"
+              ]
+            },
+            {
+              "id": "market-cap-index",
+              "name": "Market-Cap Index",
+              "description": "Passive market-cap-weighted basket of major BNB-Chain-routable assets.",
+              "tags": [
+                "index",
+                "passive",
+                "basket"
+              ]
+            },
+            {
+              "id": "usdd-vault",
+              "name": "USDD Yield Vault",
+              "description": "Single-asset USDD vault deposit for stable on-chain yield.",
+              "tags": [
+                "yield",
+                "stablecoin",
+                "usdd"
+              ]
+            },
+            {
+              "id": "venus-fixed-vault",
+              "name": "Venus Fixed Vault",
+              "description": "Fixed-term Venus supply position at a locked rate.",
+              "tags": [
+                "lending",
+                "venus",
+                "fixed-rate"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "agent_id": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:142921",
+      "token_id": "142921",
+      "name": "VermilionPulse",
+      "owner_address": "0xfd3dc5417e3dd990aab72e8486f7453751961a27",
+      "service_id": 30091,
+      "kind": "a2a",
+      "endpoint": "https://app.singularry.org/agents/140/agent-card.json",
+      "category": "unclassified",
+      "previous_checked_at": "2026-09-21T03:40:01.954Z",
+      "previous_ok": true,
+      "previous_detail": "bound, 4 skill(s)",
+      "measured_at": "2026-09-21T11:37:07.931Z",
+      "outcome": {
+        "ok": true,
+        "liveness": "live",
+        "latencyMs": 469,
+        "statusCode": 200,
+        "failureClass": null,
+        "detail": "bound, 4 skill(s)",
+        "skills": [
+          "Dollar-Cost Averaging",
+          "Market-Cap Index",
+          "USDD Yield Vault",
+          "Venus Fixed Vault"
+        ],
+        "executableEndpoint": "https://app.singularry.org/api/a2a",
+        "reportedName": "VermilionPulse",
+        "protocolVersion": "1.0.0",
+        "taskKinds": [
+          "grid",
+          "yield"
+        ],
+        "manifest": {
+          "name": "VermilionPulse",
+          "url": "https://app.singularry.org/api/a2a",
+          "skills": [
+            {
+              "id": "dca",
+              "name": "Dollar-Cost Averaging",
+              "description": "Scheduled buy-the-dip DCA into BTC, ETH, BNB via the on-chain DCA facet.",
+              "tags": [
+                "dca",
+                "accumulation"
+              ]
+            },
+            {
+              "id": "market-cap-index",
+              "name": "Market-Cap Index",
+              "description": "Passive market-cap-weighted basket of major BNB-Chain-routable assets.",
+              "tags": [
+                "index",
+                "passive",
+                "basket"
+              ]
+            },
+            {
+              "id": "usdd-vault",
+              "name": "USDD Yield Vault",
+              "description": "Single-asset USDD vault deposit for stable on-chain yield.",
+              "tags": [
+                "yield",
+                "stablecoin",
+                "usdd"
+              ]
+            },
+            {
+              "id": "venus-fixed-vault",
+              "name": "Venus Fixed Vault",
+              "description": "Fixed-term Venus supply position at a locked rate.",
+              "tags": [
+                "lending",
+                "venus",
+                "fixed-rate"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "agent_id": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:142912",
+      "token_id": "142912",
+      "name": "MHS",
+      "owner_address": "0xcca6f89c64109645ee088ac1d1d633359ca8271e",
+      "service_id": 30094,
+      "kind": "a2a",
+      "endpoint": "https://app.singularry.org/agents/139/agent-card.json",
+      "category": "unclassified",
+      "previous_checked_at": "2026-09-21T03:40:01.954Z",
+      "previous_ok": true,
+      "previous_detail": "bound, 4 skill(s)",
+      "measured_at": "2026-09-21T11:37:07.931Z",
+      "outcome": {
+        "ok": true,
+        "liveness": "live",
+        "latencyMs": 479,
+        "statusCode": 200,
+        "failureClass": null,
+        "detail": "bound, 4 skill(s)",
+        "skills": [
+          "Dollar-Cost Averaging",
+          "Market-Cap Index",
+          "USDD Yield Vault",
+          "Venus Fixed Vault"
+        ],
+        "executableEndpoint": "https://app.singularry.org/api/a2a",
+        "reportedName": "MHS",
+        "protocolVersion": "1.0.0",
+        "taskKinds": [
+          "grid",
+          "yield"
+        ],
+        "manifest": {
+          "name": "MHS",
+          "url": "https://app.singularry.org/api/a2a",
+          "skills": [
+            {
+              "id": "dca",
+              "name": "Dollar-Cost Averaging",
+              "description": "Scheduled buy-the-dip DCA into BTC, ETH, BNB via the on-chain DCA facet.",
+              "tags": [
+                "dca",
+                "accumulation"
+              ]
+            },
+            {
+              "id": "market-cap-index",
+              "name": "Market-Cap Index",
+              "description": "Passive market-cap-weighted basket of major BNB-Chain-routable assets.",
+              "tags": [
+                "index",
+                "passive",
+                "basket"
+              ]
+            },
+            {
+              "id": "usdd-vault",
+              "name": "USDD Yield Vault",
+              "description": "Single-asset USDD vault deposit for stable on-chain yield.",
+              "tags": [
+                "yield",
+                "stablecoin",
+                "usdd"
+              ]
+            },
+            {
+              "id": "venus-fixed-vault",
+              "name": "Venus Fixed Vault",
+              "description": "Fixed-term Venus supply position at a locked rate.",
+              "tags": [
+                "lending",
+                "venus",
+                "fixed-rate"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "agent_id": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:142910",
+      "token_id": "142910",
+      "name": "TwilightPhoenix",
+      "owner_address": "0xa3f5c40d10c516620dd28761e07ae246825c9feb",
+      "service_id": 30097,
+      "kind": "a2a",
+      "endpoint": "https://app.singularry.org/agents/138/agent-card.json",
+      "category": "unclassified",
+      "previous_checked_at": "2026-09-21T03:40:01.954Z",
+      "previous_ok": true,
+      "previous_detail": "bound, 4 skill(s)",
+      "measured_at": "2026-09-21T11:37:08.527Z",
+      "outcome": {
+        "ok": true,
+        "liveness": "live",
+        "latencyMs": 473,
+        "statusCode": 200,
+        "failureClass": null,
+        "detail": "bound, 4 skill(s)",
+        "skills": [
+          "Dollar-Cost Averaging",
+          "Market-Cap Index",
+          "USDD Yield Vault",
+          "Venus Fixed Vault"
+        ],
+        "executableEndpoint": "https://app.singularry.org/api/a2a",
+        "reportedName": "TwilightPhoenix",
+        "protocolVersion": "1.0.0",
+        "taskKinds": [
+          "grid",
+          "yield"
+        ],
+        "manifest": {
+          "name": "TwilightPhoenix",
+          "url": "https://app.singularry.org/api/a2a",
+          "skills": [
+            {
+              "id": "dca",
+              "name": "Dollar-Cost Averaging",
+              "description": "Scheduled buy-the-dip DCA into BTC, ETH, BNB via the on-chain DCA facet.",
+              "tags": [
+                "dca",
+                "accumulation"
+              ]
+            },
+            {
+              "id": "market-cap-index",
+              "name": "Market-Cap Index",
+              "description": "Passive market-cap-weighted basket of major BNB-Chain-routable assets.",
+              "tags": [
+                "index",
+                "passive",
+                "basket"
+              ]
+            },
+            {
+              "id": "usdd-vault",
+              "name": "USDD Yield Vault",
+              "description": "Single-asset USDD vault deposit for stable on-chain yield.",
+              "tags": [
+                "yield",
+                "stablecoin",
+                "usdd"
+              ]
+            },
+            {
+              "id": "venus-fixed-vault",
+              "name": "Venus Fixed Vault",
+              "description": "Fixed-term Venus supply position at a locked rate.",
+              "tags": [
+                "lending",
+                "venus",
+                "fixed-rate"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "agent_id": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:142899",
+      "token_id": "142899",
+      "name": "SilentHawk",
+      "owner_address": "0x041637ec0ec8f6c50ef24d9985e63d662375ffc3",
+      "service_id": 30103,
+      "kind": "a2a",
+      "endpoint": "https://app.singularry.org/agents/136/agent-card.json",
+      "category": "unclassified",
+      "previous_checked_at": "2026-09-21T03:40:01.954Z",
+      "previous_ok": true,
+      "previous_detail": "bound, 4 skill(s)",
+      "measured_at": "2026-09-21T11:37:08.528Z",
+      "outcome": {
+        "ok": true,
+        "liveness": "live",
+        "latencyMs": 398,
+        "statusCode": 200,
+        "failureClass": null,
+        "detail": "bound, 4 skill(s)",
+        "skills": [
+          "Dollar-Cost Averaging",
+          "Market-Cap Index",
+          "USDD Yield Vault",
+          "Venus Fixed Vault"
+        ],
+        "executableEndpoint": "https://app.singularry.org/api/a2a",
+        "reportedName": "SilentHawk",
+        "protocolVersion": "1.0.0",
+        "taskKinds": [
+          "grid",
+          "yield"
+        ],
+        "manifest": {
+          "name": "SilentHawk",
+          "url": "https://app.singularry.org/api/a2a",
+          "skills": [
+            {
+              "id": "dca",
+              "name": "Dollar-Cost Averaging",
+              "description": "Scheduled buy-the-dip DCA into BTC, ETH, BNB via the on-chain DCA facet.",
+              "tags": [
+                "dca",
+                "accumulation"
+              ]
+            },
+            {
+              "id": "market-cap-index",
+              "name": "Market-Cap Index",
+              "description": "Passive market-cap-weighted basket of major BNB-Chain-routable assets.",
+              "tags": [
+                "index",
+                "passive",
+                "basket"
+              ]
+            },
+            {
+              "id": "usdd-vault",
+              "name": "USDD Yield Vault",
+              "description": "Single-asset USDD vault deposit for stable on-chain yield.",
+              "tags": [
+                "yield",
+                "stablecoin",
+                "usdd"
+              ]
+            },
+            {
+              "id": "venus-fixed-vault",
+              "name": "Venus Fixed Vault",
+              "description": "Fixed-term Venus supply position at a locked rate.",
+              "tags": [
+                "lending",
+                "venus",
+                "fixed-rate"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "agent_id": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:142895",
+      "token_id": "142895",
+      "name": "TempestMariner",
+      "owner_address": "0x76a4c7ef1e214778a291d7fd51b52b973f5d2d66",
+      "service_id": 30106,
+      "kind": "a2a",
+      "endpoint": "https://app.singularry.org/agents/135/agent-card.json",
+      "category": "unclassified",
+      "previous_checked_at": "2026-09-21T03:40:01.954Z",
+      "previous_ok": true,
+      "previous_detail": "bound, 4 skill(s)",
+      "measured_at": "2026-09-21T11:37:08.528Z",
+      "outcome": {
+        "ok": true,
+        "liveness": "live",
+        "latencyMs": 427,
+        "statusCode": 200,
+        "failureClass": null,
+        "detail": "bound, 4 skill(s)",
+        "skills": [
+          "Dollar-Cost Averaging",
+          "Market-Cap Index",
+          "USDD Yield Vault",
+          "Venus Fixed Vault"
+        ],
+        "executableEndpoint": "https://app.singularry.org/api/a2a",
+        "reportedName": "TempestMariner",
+        "protocolVersion": "1.0.0",
+        "taskKinds": [
+          "grid",
+          "yield"
+        ],
+        "manifest": {
+          "name": "TempestMariner",
+          "url": "https://app.singularry.org/api/a2a",
+          "skills": [
+            {
+              "id": "dca",
+              "name": "Dollar-Cost Averaging",
+              "description": "Scheduled buy-the-dip DCA into BTC, ETH, BNB via the on-chain DCA facet.",
+              "tags": [
+                "dca",
+                "accumulation"
+              ]
+            },
+            {
+              "id": "market-cap-index",
+              "name": "Market-Cap Index",
+              "description": "Passive market-cap-weighted basket of major BNB-Chain-routable assets.",
+              "tags": [
+                "index",
+                "passive",
+                "basket"
+              ]
+            },
+            {
+              "id": "usdd-vault",
+              "name": "USDD Yield Vault",
+              "description": "Single-asset USDD vault deposit for stable on-chain yield.",
+              "tags": [
+                "yield",
+                "stablecoin",
+                "usdd"
+              ]
+            },
+            {
+              "id": "venus-fixed-vault",
+              "name": "Venus Fixed Vault",
+              "description": "Fixed-term Venus supply position at a locked rate.",
+              "tags": [
+                "lending",
+                "venus",
+                "fixed-rate"
+              ]
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
