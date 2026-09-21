@@ -3,6 +3,21 @@
 Baseline: 2026-09-21. This matrix is intentionally negative where production
 evidence is absent. “Receipt” is not synonymous with settlement or success.
 
+## Authoritative current-state corrections
+
+The original rows below are preserved as the claim audit at discovery time.
+These corrections supersede conflicting statuses without erasing the failure:
+
+| Claim | Current status | Current evidence |
+|---|---|---|
+| Third-party Hire uses the exact selected identity/service | PROVEN in tests | Canonical batched state, deep-link/generic equivalence, immutable run/receipt service tuple. |
+| A readable A2A card is callable | FALSE by design | Card readability and endpoint discovery do not set `messageSendCallable`. |
+| MCP is protocol-correct | PROVEN for discovery; live execution scoped | initialize → initialized → tools/list; schema-derived tools/call exactly once. |
+| Every accepted attempt terminates in evidence | PROVEN in tests | Typed success/failure receipt; pre-acceptance rejection is a separate immutable artifact. |
+| Receipt means settlement | FALSE | Artifact type and commercial settlement remain separate. |
+| All indexed identities are callable/hireable | FALSE | The UI/API expose distinct stages and fresh coverage. |
+| Third-party settlement is supported generally | UNPROVEN | No claim or enabled fallback; no external funds spent. |
+
 | Claim | Surface | Source file | Code path | Test | Live evidence | Status | Severity | Action |
 |---|---|---|---|---|---|---|---|---|
 | Third-party agents can be hired | README, Marketplace, homepage | `README.md`, `MarketCells.tsx`, `page.tsx` | Marketplace `hireable` is protocol-kind membership | None E2E | No independent third-party run/receipt found in audited candidates | FALSE | P0 | Gate Hire on exact verified service/task path |
@@ -22,6 +37,7 @@ evidence is absent. “Receipt” is not synonymous with settlement or success.
 | Charter is bounded and revocable | Charter/Judge/docs | mandates provider, signed control capability, `startRun` live re-read | public IDs cannot use/revoke; exact agent/category, expiry and revocation enforced before execution | capability/binding/store tests | Existing testnet grants/revokes; production capability flow not deployed | PARTIALLY PROVEN | P0 | Add route E2E and verify production after release gate |
 | Works without wallet | README/Judge/positions | page and demo-owner paths | reads and demo flow do not require connected wallet | UI audit only | Public pages load without wallet | PARTIALLY PROVEN | P1 | Browser E2E through signature boundary |
 | Production build is reproducible offline | Deployment/runtime | `layout.tsx`, committed font assets | `next/font/local`; no build-time font network request | `pnpm --filter @marque/web build` passes | Not deployed | PROVEN | P1 | Retain local assets and smoke standalone output |
+| Migration 0012 preserves historical evidence | Database release | `0012_capability_evidence.sql` | additive transaction with receipt-type backfill and service/run indexes | Isolated pre-0012 candidate fixtures preserved; replay rolls back | Production deliberately untouched | PROVEN (candidate) | P0 | Backup/restore drill and approved maintenance window before production |
 | Marketplace counts describe distinct states | Homepage/Register | `funnel.ts`, `page.tsx`, `marketplace.ts` | explicit registered → metadata → service → reachable → callable → compatible → qualified → hireable identity counts | Type/lint; DB integration pending migration | Existing production shows older collapsed stages | PARTIALLY PROVEN | P1 | Apply migration, capture production counts and reconcile Marketplace total |
 | One agent has one name | Marketplace/profile/receipt | marketplace group aggregate | longest name can be selected from a different identity | None | token 338481 displayed with another identity’s name | FALSE | P0 | Identity fields only from selected identity row |
 | Reference agents use the same downstream path | Judge/execution | `reference-agents.ts`, `runs.ts` | resolver special-cases references before DB services | reference engine tests | Reference receipts exist | PARTIALLY PROVEN | P1 | Same resolved-service contract and invariant tests |

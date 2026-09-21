@@ -158,7 +158,7 @@ export function CharterCard({ charter, subject }: { charter: CharterView; subjec
           ...(kind === 'grid' ? { pair: 'BNB/USDT' } : {}),
         }),
       })
-      const data = (await res.json()) as { url?: string; error?: string }
+      const data = (await res.json()) as { url?: string; error?: string; rejectionId?: string }
       if (!res.ok || !data.url) { setError(data.error ?? 'the run could not be started'); return }
       window.location.href = data.url
     } catch {

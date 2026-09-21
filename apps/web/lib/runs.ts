@@ -1,7 +1,7 @@
 import 'server-only'
 import { createHash, randomUUID } from 'node:crypto'
 import { asc, desc, eq } from 'drizzle-orm'
-import { db, run as runTable, runEvent as runEventTable, receipt as receiptTable } from '@marque/db'
+import { db, run as runTable, runEvent as runEventTable, runRejection as runRejectionTable, receipt as receiptTable } from '@marque/db'
 import { verifyCharterCapability } from './charter-capability'
 import {
   checkCharterBinding, executorFor, runHire, structuredTask,
@@ -42,6 +42,7 @@ export interface StartRunInput {
 export interface StartRunResult {
   ok: boolean
   runId?: string
+  rejectionId?: string
   error?: string
 }
 
@@ -128,6 +129,22 @@ async function recordEvent(runId: string, event: RunEventInput): Promise<void> {
   })
 }
 
+async function rejectBeforeAcceptance(input: StartRunInput, agent: ResolvedAgent, reason: string, detail: string): Promise<StartRunResult> {
+  const id = randomUUID()
+  await db().insert(runRejectionTable).values({
+    id,
+    charterId: input.charterId!,
+    agentId: agent.agentId,
+    serviceId: agent.serviceId,
+    protocol: agent.kind,
+    taskKind: input.kind,
+    subject: input.subject,
+    reason,
+    detail,
+  })
+  return { ok: false, rejectionId: id, error: `${detail} Rejected before run acceptance; evidence ${id}.` }
+}
+
 export async function startRun(input: StartRunInput): Promise<StartRunResult> {
   let blockNumber: string
   try {
@@ -166,18 +183,23 @@ export async function startRun(input: StartRunInput): Promise<StartRunResult> {
   // form field would let the caller widen their own authority.
   const charter = input.charterId ? await readCharter(input.charterId) : null
   if (input.charterId && !charter) {
-    return { ok: false, error: 'that charter does not exist' }
+    return rejectBeforeAcceptance(input, agent, 'CHARTER_NOT_FOUND', 'that charter does not exist')
   }
   if (charter) {
     if (!verifyCharterCapability(input.charterToken, charter.id, charter.agentId)) {
-      return { ok: false, error: 'control of that charter was not proven' }
+      return rejectBeforeAcceptance(input, agent, 'AUTHORIZATION_FAILED', 'control of that charter was not proven')
     }
     const binding = checkCharterBinding({
       selectedAgentId: input.agentId, charterAgentId: charter.agentId,
       requestedCategory: CATEGORY_FOR_KIND[input.kind], charterCategory: charter.category,
       charterStatus: charter.status, expiresAt: charter.expiresAt,
     })
-    if (!binding.ok) return { ok: false, error: binding.detail }
+    if (!binding.ok) {
+      const reason = charter.status === 'revoked' ? 'CHARTER_REVOKED'
+        : charter.status === 'expired' || new Date(charter.expiresAt).getTime() <= Date.now() ? 'CHARTER_EXPIRED'
+          : 'CHARTER_BINDING_REJECTED'
+      return rejectBeforeAcceptance(input, agent, reason, binding.detail)
+    }
   }
 
   const runId = randomUUID()
@@ -215,7 +237,12 @@ export async function startRun(input: StartRunInput): Promise<StartRunResult> {
   // Deliberately not awaited: the buyer gets the run URL now and watches the
   // timeline fill in. Failures are recorded on the run, never thrown into the
   // void — an unhandled rejection here would leave a run "running" forever.
-  void execute(runId, executor, task, charter, input.maxSpendUsd).catch(async (err: unknown) => {
+  const serviceEvidence: NonNullable<Receipt['service']> = {
+    serviceId: agent.serviceId, protocol: executor.kind,
+    discoveryEndpoint: agent.endpoint, executableEndpoint: agent.executableEndpoint,
+    probeId: agent.probeId,
+  }
+  void execute(runId, executor, task, charter, input.maxSpendUsd, serviceEvidence).catch(async (err: unknown) => {
     const detail = err instanceof Error ? (err.message.split('\n')[0] ?? err.message) : String(err)
     await recordEvent(runId, { kind: 'error', label: 'The run stopped unexpectedly', detail })
     const at = new Date().toISOString()
@@ -240,6 +267,13 @@ export async function startRun(input: StartRunInput): Promise<StartRunResult> {
       quality: { testId: null, pass: null, failedFields: [], caseId: null, groundTruthHash: null },
       artifactType: 'failure',
       failure: { stage: 'internal', class: 'INTERNAL_FAILURE', detail },
+      service: {
+        serviceId: agent.serviceId,
+        protocol: executor.kind,
+        discoveryEndpoint: agent.endpoint,
+        executableEndpoint: agent.executableEndpoint,
+        probeId: agent.probeId,
+      },
     })
     await db().update(runTable).set({
       status: 'failed', stage: 'internal', ok: false, failure: detail,
@@ -257,6 +291,7 @@ async function execute(
   task: StructuredTask,
   charter: Awaited<ReturnType<typeof readCharter>>,
   maxSpendUsd: number,
+  service: NonNullable<Receipt['service']>,
 ): Promise<void> {
   // Re-read immediately before the external call. A Charter can be revoked or
   // expire after run acceptance; the accepted run must then terminate as an
@@ -267,6 +302,7 @@ async function execute(
     executor,
     task,
     runId,
+    service,
     ctx: {
       buyer: task.subject,
       maxSpendUsd,

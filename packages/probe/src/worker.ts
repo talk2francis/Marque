@@ -1,5 +1,5 @@
 import { sql, eq, and, inArray, desc } from 'drizzle-orm'
-import { db, agent, agentService, probe, type ServiceKind } from '@marque/db'
+import { db, agent, agentCategory, agentService, probe, type Category, type ServiceKind } from '@marque/db'
 import { probeService } from './liveness.js'
 
 /**
@@ -72,6 +72,11 @@ async function mapLimit<T, R>(items: readonly T[], limit: number, fn: (t: T) => 
  * one in our own results. Politeness here is measurement accuracy.
  */
 const PER_HOST_CONCURRENCY = Number(process.env.PROBE_PER_HOST_CONCURRENCY ?? 3)
+/** Rows measured after this worker boot use the current capability model. */
+const CAPABILITY_MODEL_STARTED_AT = new Date()
+const CATEGORY_FOR_TASK: Readonly<Record<string, Category | undefined>> = {
+  rebalance: 'rebalancing', grid: 'grid', yield: 'yield', health_factor: 'health_factor',
+}
 
 class HostLimiter {
   private readonly active = new Map<string, number>()
@@ -116,7 +121,7 @@ interface Candidate {
  * only re-probed after BACKOFF_MINUTES[N]. Implemented in SQL so the worker
  * never pulls a candidate it is going to skip.
  */
-async function dueServices(limit: number): Promise<Candidate[]> {
+async function dueServices(limit: number, capabilityModelStartedAt: Date): Promise<Candidate[]> {
   const d = db()
   const rows = await d.execute(sql`
     with latest as (
@@ -147,7 +152,14 @@ async function dueServices(limit: number): Promise<Candidate[]> {
         l.checked_at is null
         or l.checked_at < now() - make_interval(mins => ${sql.raw(backoffCaseSql())})
       )
-    order by l.checked_at asc nulls first
+    order by
+      (l.checked_at >= ${capabilityModelStartedAt}) asc,
+      case s.kind when 'mcp' then 0 when 'a2a' then 1 when 'x402' then 2 when 'erc8183' then 3 else 4 end,
+      exists (
+        select 1 from agent_category c
+        where c.agent_id = s.agent_id and c.category <> 'unclassified'
+      ) desc,
+      l.checked_at asc nulls first
     limit ${limit}
   `)
 
@@ -165,7 +177,7 @@ export async function runProbeCycle(opts: { limit?: number; concurrency?: number
   const concurrency = opts.concurrency ?? 12
   const d = db()
 
-  const candidates = await dueServices(limit)
+  const candidates = await dueServices(limit, CAPABILITY_MODEL_STARTED_AT)
   const result: ProbeCycleResult = {
     attempted: candidates.length, live: 0, unbound: 0, badSchema: 0, dead: 0, skippedBackoff: 0,
   }
@@ -200,6 +212,20 @@ export async function runProbeCycle(opts: { limit?: number; concurrency?: number
   // Probe history is a first-party observation: append only, never updated.
   for (let i = 0; i < rows.length; i += 500) {
     await d.insert(probe).values(rows.slice(i, i + 500))
+  }
+  // A single schema-proven task kind is stronger category evidence than copy.
+  // Add the derived label without deleting the historical unclassified row.
+  for (const row of rows) {
+    if (row.taskKinds.length !== 1) continue
+    const category = CATEGORY_FOR_TASK[row.taskKinds[0] ?? '']
+    if (!category) continue
+    await d.insert(agentCategory).values({
+      agentId: row.agentId, category, confidence: 1, method: 'owner_declared',
+      rationale: `service ${row.serviceId} schema supports ${row.taskKinds[0]}`,
+    }).onConflictDoUpdate({
+      target: [agentCategory.agentId, agentCategory.category],
+      set: { confidence: 1, method: 'owner_declared', rationale: `service ${row.serviceId} schema supports ${row.taskKinds[0]}`, assignedAt: sql`now()` },
+    })
   }
   return result
 }

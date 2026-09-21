@@ -72,6 +72,14 @@ export interface Receipt {
   runId: string
   issuedAt: string
   task: StructuredTask
+  /** Exact counterparty service selected for this run; null only for legacy/local runs. */
+  service?: {
+    serviceId: number | null
+    protocol: ExecutorKind
+    discoveryEndpoint: string | null
+    executableEndpoint: string | null
+    probeId: number | null
+  }
   commercial: CommercialProof
   execution: ExecutionProof
   authority: AuthorityProof
@@ -121,6 +129,7 @@ export function buildReceipt(input: {
   quality: QualityProof
   artifactType?: 'execution' | 'settlement' | 'failure'
   failure?: Receipt['failure']
+  service?: Receipt['service']
 }): { receipt: Receipt; hash: string } {
   const receipt: Receipt = {
     version: input.artifactType || input.failure ? '2' : '1',
@@ -128,6 +137,7 @@ export function buildReceipt(input: {
     runId: input.runId,
     issuedAt: new Date().toISOString(),
     task: input.task,
+    ...(input.service ? { service: input.service } : {}),
     commercial: {
       agentId: input.run.agentId,
       executorKind: input.run.kind,

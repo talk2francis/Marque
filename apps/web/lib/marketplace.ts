@@ -2,6 +2,7 @@ import 'server-only'
 import { sql } from 'drizzle-orm'
 import { db } from '@marque/db'
 import { REFERENCE_AGENTS, type ReferenceAgent } from './reference-agents'
+import { agentState, TASK_FOR_CATEGORY } from './agent-state'
 
 /**
  * The Marketplace view of the Register (P10.5B).
@@ -380,6 +381,28 @@ export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: Ma
   const limit = Number.isFinite(q.limit) ? Math.max(1, Math.min(Math.floor(q.limit!), 300)) : 120
   const requestedOffset = Number.isFinite(q.offset) ? Math.max(0, Math.floor(q.offset!)) : 0
   const offset = all.length ? Math.min(requestedOffset, Math.floor((all.length - 1) / limit) * limit) : 0
-  return { rows: all.slice(offset, offset + limit), total: all.length, offset,
+  const page = all.slice(offset, offset + limit)
+  const rows = await Promise.all(page.map(async (row) => {
+    if (row.isReference) return row
+    const task = TASK_FOR_CATEGORY[row.category ?? '']
+    const state = await agentState(row.agentId, task ?? null).catch(() => null)
+    const hireBlockedReason = state?.hireable
+      ? null
+      : !task
+        ? 'No Charter task exists for this category'
+        : state?.reasons.includes('PROBE_STALE')
+          ? 'The latest service evidence is stale'
+          : state?.reasons.includes('A2A_TASK_ENDPOINT_UNRESOLVED')
+            ? 'The A2A card is readable, but message/send has not been verified'
+            : `No live service has proved compatibility with ${task}`
+    return {
+      ...row,
+      liveness: state?.callable ? 'live' : state?.reachable ? 'reachable' : row.liveness,
+      qual: row.qual === 'warranted' || row.qual === 'failed' ? row.qual : state?.callable ? 'callable' : 'unbound',
+      previewable: state?.previewable === true,
+      hireBlockedReason,
+    } satisfies MarketRow
+  }))
+  return { rows, total: all.length, offset,
     hasMore: offset + limit < all.length, generatedAt: new Date(baseMemo?.at ?? Date.now()).toISOString() }
 }

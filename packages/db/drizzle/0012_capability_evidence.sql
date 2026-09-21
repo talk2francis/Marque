@@ -13,7 +13,14 @@ ALTER TABLE "run" ADD COLUMN "correlation_id" text;
 ALTER TABLE "run" ADD COLUMN "terminal_reason" text;
 ALTER TABLE "run" ADD COLUMN "quote" jsonb;
 
-ALTER TABLE "receipt" ADD COLUMN "artifact_type" text DEFAULT 'execution' NOT NULL;
+ALTER TABLE "receipt" ADD COLUMN "artifact_type" text;
+UPDATE "receipt" SET "artifact_type" = CASE
+  WHEN "body" ? 'failure' OR "body" #>> '{execution,ok}' = 'false' THEN 'failure'
+  WHEN "body" #>> '{commercial,settled}' = 'true' THEN 'settlement'
+  ELSE 'execution'
+END;
+ALTER TABLE "receipt" ALTER COLUMN "artifact_type" SET DEFAULT 'execution';
+ALTER TABLE "receipt" ALTER COLUMN "artifact_type" SET NOT NULL;
 
 CREATE INDEX "probe_service_checked_idx" ON "probe" USING btree ("service_id", "checked_at" DESC NULLS LAST);
 CREATE INDEX "run_service_idx" ON "run" USING btree ("service_id", "started_at" DESC NULLS LAST);

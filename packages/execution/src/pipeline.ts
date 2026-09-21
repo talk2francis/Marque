@@ -47,6 +47,7 @@ export interface RunOptions {
    * buyer can be handed a URL before the work finishes.
    */
   runId?: string
+  service?: Receipt['service']
   /**
    * Called as each stage completes. Awaited, so an event is durable before the
    * next stage runs — a timeline that loses the step before a crash is worse
@@ -250,6 +251,7 @@ export async function runHire(opts: RunOptions): Promise<PipelineOutcome> {
       quality: { testId: null, pass: null, failedFields: [], caseId: null, groundTruthHash: null },
       artifactType: 'failure',
       failure: { stage, class: reason, detail },
+      service: opts.service,
     })
     return { receipt: built.receipt, receiptHash: built.hash }
   }
@@ -389,6 +391,7 @@ export async function runHire(opts: RunOptions): Promise<PipelineOutcome> {
       class: run.reason ?? 'EXECUTION_FAILED',
       detail: run.detail ?? 'the agent returned no detail',
     },
+    service: opts.service,
   })
 
   await emit({

@@ -175,6 +175,20 @@ then `pm2 restart marque-health`. Without them it still logs failures to
    the affected category just loses its reference counterparty until it is back.
    Do not stay up all night for it.
 
+### Capability-evidence migrations and re-probe
+
+Migrations must run through `pnpm --filter @marque/db migrate`; never replay
+individual SQL files. Migration 0012 adds service-scoped protocol evidence and
+0013 adds immutable pre-acceptance run rejections. Before migrating, create a
+new timestamped `pg_dump` in both configured backup locations and verify both
+hashes. Pause `marque-probe` while the probe index is built, then restart it.
+
+The probe worker is append-only and resumable. On boot it prioritises services
+whose latest observation predates the current capability model, with MCP/A2A
+and classified category supply first. The public funnel must always show how
+many exact services and identities have fresh-model evidence; never relabel a
+partial sweep as the global callable population.
+
 ---
 
 ## 5. Rotating keys

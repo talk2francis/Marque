@@ -1,4 +1,4 @@
-import { safeFetch, type SafeFetchOptions, type SafeFetchResult } from '@marque/probe'
+import { compatibleMcpTaskKinds, safeFetch, type SafeFetchOptions, type SafeFetchResult } from '@marque/probe'
 import { renderTaskPrompt, type StructuredTask } from '../tasks.js'
 import { extractJson, parseFeeUsd } from '../parse.js'
 import type {
@@ -61,15 +61,18 @@ export function argumentsForTool(tool: McpTool, task: StructuredTask, prompt = r
     query: prompt, prompt, message: prompt,
     task: task, input: task,
     address: task.subject, subject: task.subject, wallet: task.subject, account: task.subject,
+    borrower: task.subject,
     blockNumber: task.blockNumber, block_number: task.blockNumber, block: task.blockNumber,
     chainId: task.chainId, chain_id: task.chainId,
     maxSpendUsd: task.maxSpendUsd, max_spend_usd: task.maxSpendUsd,
     policy: task.policy,
+    ...('asset' in task.policy ? { asset: task.policy.asset } : {}),
     ...(task.kind === 'rebalance' ? {
       positionTokenId: task.positionTokenId, tokenId: task.positionTokenId,
       position_id: task.positionTokenId,
     } : {}),
     ...(task.kind === 'grid' ? { pair: task.pair } : {}),
+    ...(task.kind === 'health_factor' ? { targetHealthFactor: task.policy.targetHealthFactor } : {}),
   }
   const args: Record<string, unknown> = {}
   for (const key of Object.keys(schema.properties)) {
@@ -158,6 +161,7 @@ export class McpExecutor implements AgentExecutor {
   private compatibleTool(tools: McpTool[], task: StructuredTask): { tool: McpTool; args: Record<string, unknown> } | null {
     for (const tool of tools) {
       if (!TOOL_HINTS[task.kind].test(`${tool.name ?? ''} ${tool.description ?? ''}`)) continue
+      if (!compatibleMcpTaskKinds(tool).includes(task.kind)) continue
       const args = argumentsForTool(tool, task)
       if (args) return { tool, args }
     }
@@ -250,19 +254,28 @@ export class McpExecutor implements AgentExecutor {
   }
 
   async preflight(task: StructuredTask): Promise<PreflightResult> {
-    const r = await this.callTool(task, 45_000)
-    if (!r.ok) {
+    const started = Date.now()
+    const tools = await this.listTools()
+    if ('ok' in tools) {
       return {
         ok: false, agentId: this.agentId, plan: null, calls: [],
         estimatedGasNative: null, feeUsd: null, maxSlippageBps: null,
-        conformance: null, latencyMs: r.latencyMs, nothingSubmitted: true,
-        reason: r.reason, detail: r.detail,
+        conformance: null, latencyMs: Date.now() - started, nothingSubmitted: true,
+        reason: tools.reason, detail: tools.detail,
       }
     }
+    const compatible = this.compatibleTool(tools, task)
+    if (!compatible?.tool.name) return {
+      ok: false, agentId: this.agentId, plan: null, calls: [],
+      estimatedGasNative: null, feeUsd: null, maxSlippageBps: null,
+      conformance: null, latencyMs: Date.now() - started, nothingSubmitted: true,
+      reason: 'no_compatible_interface', detail: `none of the ${tools.length} exposed tools answer a ${task.kind} task`,
+    }
     return {
-      ok: true, agentId: this.agentId, plan: r.payload, calls: [],
-      estimatedGasNative: null, feeUsd: parseFeeUsd(r.payload), maxSlippageBps: null,
-      conformance: null, latencyMs: r.latencyMs, nothingSubmitted: true,
+      ok: true, agentId: this.agentId,
+      plan: { protocol: 'mcp', tool: compatible.tool.name, arguments: compatible.args }, calls: [],
+      estimatedGasNative: null, feeUsd: null, maxSlippageBps: null,
+      conformance: null, latencyMs: Date.now() - started, nothingSubmitted: true,
     }
   }
 

@@ -125,10 +125,16 @@ export function evaluateAgentState(input: EvaluateAgentInput): CanonicalAgentSta
   const reachableServices = fresh.filter((s) => ['live', 'unbound', 'bad_schema'].includes(s.liveness ?? ''))
   if (fresh.length > 0 && reachableServices.length === 0) reasons.push('ENDPOINT_UNREACHABLE')
 
-  const callableServices = fresh.filter((s) =>
-    s.liveness === 'live' && EXECUTABLE.has(s.protocol) && s.executableEndpoint !== null,
-  )
+  const callableServices = fresh.filter((s) => {
+    if (s.liveness !== 'live' || !EXECUTABLE.has(s.protocol) || s.executableEndpoint === null) return false
+    if (s.protocol !== 'a2a') return true
+    const evidence = s.manifest?.['capabilityEvidence']
+    return evidence !== null && typeof evidence === 'object'
+      && (evidence as Record<string, unknown>)['messageSendCallable'] === true
+  })
   if (reachableServices.length > 0 && callableServices.length === 0) reasons.push('NO_EXECUTABLE_INTERFACE')
+  if (fresh.some((s) => s.protocol === 'a2a' && s.executableEndpoint !== null)
+      && !callableServices.some((s) => s.protocol === 'a2a')) reasons.push('A2A_TASK_ENDPOINT_UNRESOLVED')
 
   const compatibleServices = input.requestedTask === null
     ? callableServices

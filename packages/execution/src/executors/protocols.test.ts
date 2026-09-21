@@ -70,5 +70,37 @@ describe('McpExecutor', () => {
   it('rejects tools without an input schema instead of inventing arguments', () => {
     expect(argumentsForTool({ name: 'find_yield', description: 'Find yield' }, task)).toBeNull()
   })
-})
 
+  it('maps equivalent health-factor fields without inventing values', () => {
+    const healthTask: StructuredTask = {
+      kind: 'health_factor', chainId: 56, blockNumber: '123',
+      subject: task.subject, maxSpendUsd: 1, policy: { targetHealthFactor: 2.5 },
+    }
+    expect(argumentsForTool({
+      name: 'analyse', description: 'Health factor and liquidation risk',
+      inputSchema: {
+        type: 'object', properties: {
+          borrower: { type: 'string' }, chainId: { type: 'integer' }, targetHealthFactor: { type: 'number' },
+        }, required: ['borrower'], additionalProperties: false,
+      },
+    }, healthTask)).toEqual({ borrower: healthTask.subject, chainId: 56, targetHealthFactor: 2.5 })
+  })
+
+  it('preflight validates the selected MCP tool without invoking it', async () => {
+    const methods: string[] = []
+    const fetcher = vi.fn(async (_url: string, options?: SafeFetchOptions) => {
+      const body = JSON.parse(options?.body ?? '{}') as { method?: string }
+      methods.push(body.method ?? '')
+      if (body.method === 'initialize') return response({ jsonrpc: '2.0', id: 1, result: { protocolVersion: '2024-11-05', capabilities: {} } })
+      if (body.method === 'notifications/initialized') return response('')
+      if (body.method === 'tools/list') return response({ jsonrpc: '2.0', id: 2, result: { tools: [{
+        name: 'find_yield', description: 'Find yield',
+        inputSchema: { type: 'object', properties: { address: { type: 'string' }, policy: { type: 'object' } }, required: ['address', 'policy'] },
+      }] } })
+      throw new Error(`unexpected method ${body.method}`)
+    })
+    const result = await new McpExecutor('56:registry:2', 'https://mcp.example/mcp', null, fetcher).preflight(task)
+    expect(result.ok).toBe(true)
+    expect(methods).not.toContain('tools/call')
+  })
+})

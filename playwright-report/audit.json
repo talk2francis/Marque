@@ -1,13 +1,13 @@
 {
-  "base": "https://marque.trade",
-  "ranAt": "2026-09-09T11:39:57.946Z",
+  "base": "http://127.0.0.1:3310",
+  "ranAt": "2026-09-21T17:39:04.568Z",
   "results": [
     {
       "route": "/",
       "viewport": "1440",
       "status": 200,
       "issues": [
-        "horizontal overflow: 1459px in 1440px (widest: div.tape__track)"
+        "1 tap target(s) under 24px"
       ],
       "consoleErrors": [],
       "pageErrors": [],
@@ -18,14 +18,12 @@
         "outline": "rgb(201, 154, 63) solid 2px",
         "boxShadow": "none"
       },
-      "overflow": {
-        "scrollWidth": 1459,
-        "clientWidth": 1440,
-        "worst": "div.tape__track"
-      },
+      "overflow": null,
       "missingAlt": [],
       "lowContrast": [],
-      "tinyTapTargets": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
       "allCapsLabels": []
     },
     {
@@ -33,11 +31,634 @@
       "viewport": "1024",
       "status": 200,
       "issues": [
-        "horizontal overflow: 1117px in 1024px (widest: div.tape__track)"
+        "1 tap target(s) under 24px"
       ],
       "consoleErrors": [],
       "pageErrors": [],
       "failedRequests": [],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(201, 154, 63) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/",
+      "viewport": "768",
+      "status": 200,
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(201, 154, 63) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/",
+      "viewport": "390",
+      "status": 200,
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(201, 154, 63) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/_ui",
+      "viewport": "1440",
+      "status": 200,
+      "issues": [],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(201, 154, 63) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/_ui",
+      "viewport": "1024",
+      "status": 200,
+      "issues": [],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(201, 154, 63) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/_ui",
+      "viewport": "768",
+      "status": 200,
+      "issues": [],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(201, 154, 63) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/_ui",
+      "viewport": "390",
+      "status": 200,
+      "issues": [],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(201, 154, 63) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/register",
+      "viewport": "1440",
+      "status": 200,
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:3310/agents/56/900001?_rsc=rRcpm0zrXFALismt — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/agents/bound?_rsc=rRcpm0zrXFALismt — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/agents/keel?_rsc=rRcpm0zrXFALismt — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/agents/lattice?_rsc=rRcpm0zrXFALismt — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/agents/redcell?_rsc=rRcpm0zrXFALismt — net::ERR_ABORTED"
+      ],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(201, 154, 63) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/register",
+      "viewport": "1024",
+      "status": 200,
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:3310/agents/bound?_rsc=rRcpm0zrXFALismt — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/agents/keel?_rsc=rRcpm0zrXFALismt — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/agents/lattice?_rsc=rRcpm0zrXFALismt — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/agents/56/900001?_rsc=rRcpm0zrXFALismt — net::ERR_ABORTED"
+      ],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(201, 154, 63) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/register",
+      "viewport": "768",
+      "status": 200,
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:3310/standard?_rsc=rRcpm0zrXFALismt — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/agents/56/900001?_rsc=rRcpm0zrXFALismt — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/agents/bound?_rsc=rRcpm0zrXFALismt — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/agents/keel?_rsc=rRcpm0zrXFALismt — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/agents/lattice?_rsc=rRcpm0zrXFALismt — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/agents/redcell?_rsc=rRcpm0zrXFALismt — net::ERR_ABORTED"
+      ],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(201, 154, 63) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/register",
+      "viewport": "390",
+      "status": 200,
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:3310/standard?_rsc=rRcpm0zrXFALismt — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/agents/56/900001?_rsc=rRcpm0zrXFALismt — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/agents/bound?_rsc=rRcpm0zrXFALismt — net::ERR_ABORTED"
+      ],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(201, 154, 63) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/register/rebalancing",
+      "viewport": "1440",
+      "status": 200,
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:3310/register/security?_rsc=5GsFh-kdAe6bll5q — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/register?_rsc=5GsFh-kdAe6bll5q — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/register/grid?_rsc=5GsFh-kdAe6bll5q — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/register/health-factor?_rsc=5GsFh-kdAe6bll5q — net::ERR_ABORTED"
+      ],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(201, 154, 63) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/register/rebalancing",
+      "viewport": "1024",
+      "status": 200,
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:3310/register?_rsc=5GsFh-kdAe6bll5q — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/register/grid?_rsc=5GsFh-kdAe6bll5q — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/register/yield?_rsc=5GsFh-kdAe6bll5q — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/register/health-factor?_rsc=5GsFh-kdAe6bll5q — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/register/security?_rsc=5GsFh-kdAe6bll5q — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/standard?_rsc=5GsFh-kdAe6bll5q — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/agents/bound?_rsc=5GsFh-kdAe6bll5q — net::ERR_ABORTED"
+      ],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(201, 154, 63) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/register/rebalancing",
+      "viewport": "768",
+      "status": 200,
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:3310/register?_rsc=5GsFh-kdAe6bll5q — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/register/grid?_rsc=5GsFh-kdAe6bll5q — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/register/yield?_rsc=5GsFh-kdAe6bll5q — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/register/health-factor?_rsc=5GsFh-kdAe6bll5q — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/register/security?_rsc=5GsFh-kdAe6bll5q — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/standard?_rsc=5GsFh-kdAe6bll5q — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/agents/bound?_rsc=5GsFh-kdAe6bll5q — net::ERR_ABORTED"
+      ],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(201, 154, 63) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/register/rebalancing",
+      "viewport": "390",
+      "status": 200,
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:3310/register/yield?_rsc=5GsFh-kdAe6bll5q — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/register?_rsc=5GsFh-kdAe6bll5q — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/register/grid?_rsc=5GsFh-kdAe6bll5q — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/register/health-factor?_rsc=5GsFh-kdAe6bll5q — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/standard?_rsc=5GsFh-kdAe6bll5q — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/agents/bound?_rsc=5GsFh-kdAe6bll5q — net::ERR_ABORTED"
+      ],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(201, 154, 63) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/register/grid",
+      "viewport": "1440",
+      "status": 200,
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:3310/register?_rsc=AS4s7LtkMlH_W629 — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/register/yield?_rsc=AS4s7LtkMlH_W629 — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/register/rebalancing?_rsc=AS4s7LtkMlH_W629 — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/register/health-factor?_rsc=AS4s7LtkMlH_W629 — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/standard?_rsc=AS4s7LtkMlH_W629 — net::ERR_ABORTED"
+      ],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(201, 154, 63) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/register/grid",
+      "viewport": "1024",
+      "status": 200,
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:3310/register?_rsc=AS4s7LtkMlH_W629 — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/register/rebalancing?_rsc=AS4s7LtkMlH_W629 — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/register/yield?_rsc=AS4s7LtkMlH_W629 — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/register/health-factor?_rsc=AS4s7LtkMlH_W629 — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/standard?_rsc=AS4s7LtkMlH_W629 — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/agents/lattice?_rsc=AS4s7LtkMlH_W629 — net::ERR_ABORTED"
+      ],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(201, 154, 63) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/register/grid",
+      "viewport": "768",
+      "status": 200,
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:3310/register?_rsc=AS4s7LtkMlH_W629 — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/register/rebalancing?_rsc=AS4s7LtkMlH_W629 — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/register/yield?_rsc=AS4s7LtkMlH_W629 — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/register/health-factor?_rsc=AS4s7LtkMlH_W629 — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/register/security?_rsc=AS4s7LtkMlH_W629 — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/standard?_rsc=AS4s7LtkMlH_W629 — net::ERR_ABORTED"
+      ],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(201, 154, 63) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/register/grid",
+      "viewport": "390",
+      "status": 200,
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:3310/register?_rsc=AS4s7LtkMlH_W629 — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/register/rebalancing?_rsc=AS4s7LtkMlH_W629 — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/register/yield?_rsc=AS4s7LtkMlH_W629 — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/register/health-factor?_rsc=AS4s7LtkMlH_W629 — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/standard?_rsc=AS4s7LtkMlH_W629 — net::ERR_ABORTED"
+      ],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(201, 154, 63) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/register/yield",
+      "viewport": "1440",
+      "status": 200,
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:3310/register/rebalancing?_rsc=Se72N_57dcXNRI7d — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/register?_rsc=Se72N_57dcXNRI7d — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/register/grid?_rsc=Se72N_57dcXNRI7d — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/register/health-factor?_rsc=Se72N_57dcXNRI7d — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/register/security?_rsc=Se72N_57dcXNRI7d — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/agents/sluicegate?_rsc=Se72N_57dcXNRI7d — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/agents/56/900001?_rsc=Se72N_57dcXNRI7d — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/agents/56/2468?_rsc=Se72N_57dcXNRI7d — net::ERR_ABORTED"
+      ],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(201, 154, 63) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/register/yield",
+      "viewport": "1024",
+      "status": 200,
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:3310/register?_rsc=Se72N_57dcXNRI7d — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/register/rebalancing?_rsc=Se72N_57dcXNRI7d — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/register/grid?_rsc=Se72N_57dcXNRI7d — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/register/health-factor?_rsc=Se72N_57dcXNRI7d — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/register/security?_rsc=Se72N_57dcXNRI7d — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/agents/56/900001?_rsc=Se72N_57dcXNRI7d — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/agents/sluicegate?_rsc=Se72N_57dcXNRI7d — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/agents/56/2468?_rsc=Se72N_57dcXNRI7d — net::ERR_ABORTED"
+      ],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(201, 154, 63) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/register/yield",
+      "viewport": "768",
+      "status": 200,
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:3310/register?_rsc=Se72N_57dcXNRI7d — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/register/rebalancing?_rsc=Se72N_57dcXNRI7d — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/register/grid?_rsc=Se72N_57dcXNRI7d — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/register/health-factor?_rsc=Se72N_57dcXNRI7d — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/register/security?_rsc=Se72N_57dcXNRI7d — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/standard?_rsc=Se72N_57dcXNRI7d — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/agents/56/900001?_rsc=Se72N_57dcXNRI7d — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/agents/sluicegate?_rsc=Se72N_57dcXNRI7d — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/agents/56/2468?_rsc=Se72N_57dcXNRI7d — net::ERR_ABORTED"
+      ],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(201, 154, 63) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/register/yield",
+      "viewport": "390",
+      "status": 200,
+      "issues": [
+        "horizontal overflow: 400px in 390px (widest: span.chip.chip--watch)",
+        "1 tap target(s) under 24px"
+      ],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:3310/register?_rsc=Se72N_57dcXNRI7d — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/register/grid?_rsc=Se72N_57dcXNRI7d — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/register/health-factor?_rsc=Se72N_57dcXNRI7d — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/agents/sluicegate?_rsc=Se72N_57dcXNRI7d — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/agents/56/900001?_rsc=Se72N_57dcXNRI7d — net::ERR_ABORTED"
+      ],
       "focusVisible": {
         "ok": true,
         "tag": "a",
@@ -45,507 +666,33 @@
         "boxShadow": "none"
       },
       "overflow": {
-        "scrollWidth": 1117,
-        "clientWidth": 1024,
-        "worst": "div.tape__track"
+        "scrollWidth": 400,
+        "clientWidth": 390,
+        "worst": "span.chip.chip--watch"
       },
       "missingAlt": [],
       "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/",
-      "viewport": "768",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(201, 154, 63) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/",
-      "viewport": "390",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(201, 154, 63) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/_ui",
-      "viewport": "1440",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(201, 154, 63) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/_ui",
-      "viewport": "1024",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(201, 154, 63) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/_ui",
-      "viewport": "768",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(201, 154, 63) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/_ui",
-      "viewport": "390",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(201, 154, 63) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/register",
-      "viewport": "1440",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(201, 154, 63) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/register",
-      "viewport": "1024",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [
-        "GET https://marque.trade/agents/sluicegate?_rsc=1ynhk — net::ERR_ABORTED",
-        "GET https://marque.trade/agents/lattice?_rsc=1ynhk — net::ERR_ABORTED"
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
       ],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(201, 154, 63) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/register",
-      "viewport": "768",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(201, 154, 63) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/register",
-      "viewport": "390",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(201, 154, 63) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/register/rebalancing",
-      "viewport": "1440",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [
-        "GET https://marque.trade/register?_rsc=cqsbe — net::ERR_ABORTED",
-        "GET https://marque.trade/agents/56/331750?_rsc=cqsbe — net::ERR_ABORTED",
-        "GET https://marque.trade/agents/56/154032?_rsc=cqsbe — net::ERR_ABORTED"
-      ],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(201, 154, 63) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/register/rebalancing",
-      "viewport": "1024",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [
-        "GET https://marque.trade/register?_rsc=cqsbe — net::ERR_ABORTED",
-        "GET https://marque.trade/agents/56/331750?_rsc=cqsbe — net::ERR_ABORTED"
-      ],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(201, 154, 63) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/register/rebalancing",
-      "viewport": "768",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [
-        "GET https://marque.trade/agents/bound?_rsc=cqsbe — net::ERR_ABORTED",
-        "GET https://marque.trade/agents/56/331750?_rsc=cqsbe — net::ERR_ABORTED",
-        "GET https://marque.trade/register?_rsc=cqsbe — net::ERR_ABORTED",
-        "GET https://marque.trade/agents/56/154032?_rsc=cqsbe — net::ERR_ABORTED"
-      ],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(201, 154, 63) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/register/rebalancing",
-      "viewport": "390",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [
-        "GET https://marque.trade/agents/bound?_rsc=cqsbe — net::ERR_ABORTED",
-        "GET https://marque.trade/register?_rsc=cqsbe — net::ERR_ABORTED"
-      ],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(201, 154, 63) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/register/grid",
-      "viewport": "1440",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [
-        "GET https://marque.trade/register?_rsc=1b2n2 — net::ERR_ABORTED"
-      ],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(201, 154, 63) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/register/grid",
-      "viewport": "1024",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(201, 154, 63) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/register/grid",
-      "viewport": "768",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [
-        "GET https://marque.trade/agents/lattice?_rsc=1b2n2 — net::ERR_ABORTED",
-        "GET https://marque.trade/register?_rsc=1b2n2 — net::ERR_ABORTED"
-      ],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(201, 154, 63) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/register/grid",
-      "viewport": "390",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [
-        "GET https://marque.trade/register?_rsc=1b2n2 — net::ERR_ABORTED",
-        "GET https://marque.trade/agents/lattice?_rsc=1b2n2 — net::ERR_ABORTED"
-      ],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(201, 154, 63) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/register/yield",
-      "viewport": "1440",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [
-        "GET https://marque.trade/agents/56/6443?_rsc=ahu35 — net::ERR_ABORTED",
-        "GET https://marque.trade/agents/sluicegate?_rsc=ahu35 — net::ERR_ABORTED",
-        "GET https://marque.trade/agents/56/149180?_rsc=ahu35 — net::ERR_ABORTED",
-        "GET https://marque.trade/agents/56/133238?_rsc=ahu35 — net::ERR_ABORTED"
-      ],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(201, 154, 63) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/register/yield",
-      "viewport": "1024",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [
-        "GET https://marque.trade/register?_rsc=ahu35 — net::ERR_ABORTED",
-        "GET https://marque.trade/agents/sluicegate?_rsc=ahu35 — net::ERR_ABORTED",
-        "GET https://marque.trade/agents/56/133238?_rsc=ahu35 — net::ERR_ABORTED"
-      ],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(201, 154, 63) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/register/yield",
-      "viewport": "768",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [
-        "GET https://marque.trade/agents/sluicegate?_rsc=ahu35 — net::ERR_ABORTED",
-        "GET https://marque.trade/register?_rsc=ahu35 — net::ERR_ABORTED"
-      ],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(201, 154, 63) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/register/yield",
-      "viewport": "390",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [
-        "GET https://marque.trade/agents/sluicegate?_rsc=ahu35 — net::ERR_ABORTED",
-        "GET https://marque.trade/register?_rsc=ahu35 — net::ERR_ABORTED"
-      ],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(201, 154, 63) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
       "allCapsLabels": []
     },
     {
       "route": "/register/health-factor",
       "viewport": "1440",
       "status": 200,
-      "issues": [],
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
       "consoleErrors": [],
       "pageErrors": [],
       "failedRequests": [
-        "GET https://marque.trade/agents/keel?_rsc=1gnl8 — net::ERR_ABORTED",
-        "GET https://marque.trade/register?_rsc=1gnl8 — net::ERR_ABORTED",
-        "GET https://marque.trade/agents/56/331625?_rsc=1gnl8 — net::ERR_ABORTED"
+        "GET http://127.0.0.1:3310/register?_rsc=_soiStcR7JCqtqMz — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/register/grid?_rsc=_soiStcR7JCqtqMz — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/register/yield?_rsc=_soiStcR7JCqtqMz — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/register/security?_rsc=_soiStcR7JCqtqMz — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/standard?_rsc=_soiStcR7JCqtqMz — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/agents/keel?_rsc=_soiStcR7JCqtqMz — net::ERR_ABORTED"
       ],
       "focusVisible": {
         "ok": true,
@@ -556,20 +703,26 @@
       "overflow": null,
       "missingAlt": [],
       "lowContrast": [],
-      "tinyTapTargets": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
       "allCapsLabels": []
     },
     {
       "route": "/register/health-factor",
       "viewport": "1024",
       "status": 200,
-      "issues": [],
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
       "consoleErrors": [],
       "pageErrors": [],
       "failedRequests": [
-        "GET https://marque.trade/agents/keel?_rsc=1gnl8 — net::ERR_ABORTED",
-        "GET https://marque.trade/agents/56/45650?_rsc=1gnl8 — net::ERR_ABORTED",
-        "GET https://marque.trade/register?_rsc=1gnl8 — net::ERR_ABORTED"
+        "GET http://127.0.0.1:3310/register/rebalancing?_rsc=_soiStcR7JCqtqMz — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/register/grid?_rsc=_soiStcR7JCqtqMz — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/register/yield?_rsc=_soiStcR7JCqtqMz — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/register/security?_rsc=_soiStcR7JCqtqMz — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/register?_rsc=_soiStcR7JCqtqMz — net::ERR_ABORTED"
       ],
       "focusVisible": {
         "ok": true,
@@ -580,21 +733,28 @@
       "overflow": null,
       "missingAlt": [],
       "lowContrast": [],
-      "tinyTapTargets": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
       "allCapsLabels": []
     },
     {
       "route": "/register/health-factor",
       "viewport": "768",
       "status": 200,
-      "issues": [],
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
       "consoleErrors": [],
       "pageErrors": [],
       "failedRequests": [
-        "GET https://marque.trade/agents/keel?_rsc=1gnl8 — net::ERR_ABORTED",
-        "GET https://marque.trade/register?_rsc=1gnl8 — net::ERR_ABORTED",
-        "GET https://marque.trade/agents/56/331625?_rsc=1gnl8 — net::ERR_ABORTED",
-        "GET https://marque.trade/agents/56/45650?_rsc=1gnl8 — net::ERR_ABORTED"
+        "GET http://127.0.0.1:3310/register/grid?_rsc=_soiStcR7JCqtqMz — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/register/yield?_rsc=_soiStcR7JCqtqMz — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/register/security?_rsc=_soiStcR7JCqtqMz — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/register?_rsc=_soiStcR7JCqtqMz — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/register/rebalancing?_rsc=_soiStcR7JCqtqMz — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/standard?_rsc=_soiStcR7JCqtqMz — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/agents/keel?_rsc=_soiStcR7JCqtqMz — net::ERR_ABORTED"
       ],
       "focusVisible": {
         "ok": true,
@@ -605,19 +765,27 @@
       "overflow": null,
       "missingAlt": [],
       "lowContrast": [],
-      "tinyTapTargets": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
       "allCapsLabels": []
     },
     {
       "route": "/register/health-factor",
       "viewport": "390",
       "status": 200,
-      "issues": [],
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
       "consoleErrors": [],
       "pageErrors": [],
       "failedRequests": [
-        "GET https://marque.trade/agents/keel?_rsc=1gnl8 — net::ERR_ABORTED",
-        "GET https://marque.trade/register?_rsc=1gnl8 — net::ERR_ABORTED"
+        "GET http://127.0.0.1:3310/register?_rsc=_soiStcR7JCqtqMz — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/register/rebalancing?_rsc=_soiStcR7JCqtqMz — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/register/grid?_rsc=_soiStcR7JCqtqMz — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/register/yield?_rsc=_soiStcR7JCqtqMz — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/standard?_rsc=_soiStcR7JCqtqMz — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/agents/keel?_rsc=_soiStcR7JCqtqMz — net::ERR_ABORTED"
       ],
       "focusVisible": {
         "ok": true,
@@ -628,14 +796,18 @@
       "overflow": null,
       "missingAlt": [],
       "lowContrast": [],
-      "tinyTapTargets": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
       "allCapsLabels": []
     },
     {
       "route": "/standard",
       "viewport": "1440",
       "status": 200,
-      "issues": [],
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
       "consoleErrors": [],
       "pageErrors": [],
       "failedRequests": [],
@@ -648,14 +820,18 @@
       "overflow": null,
       "missingAlt": [],
       "lowContrast": [],
-      "tinyTapTargets": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
       "allCapsLabels": []
     },
     {
       "route": "/standard",
       "viewport": "1024",
       "status": 200,
-      "issues": [],
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
       "consoleErrors": [],
       "pageErrors": [],
       "failedRequests": [],
@@ -668,14 +844,18 @@
       "overflow": null,
       "missingAlt": [],
       "lowContrast": [],
-      "tinyTapTargets": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
       "allCapsLabels": []
     },
     {
       "route": "/standard",
       "viewport": "768",
       "status": 200,
-      "issues": [],
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
       "consoleErrors": [],
       "pageErrors": [],
       "failedRequests": [],
@@ -688,14 +868,18 @@
       "overflow": null,
       "missingAlt": [],
       "lowContrast": [],
-      "tinyTapTargets": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
       "allCapsLabels": []
     },
     {
       "route": "/standard",
       "viewport": "390",
       "status": 200,
-      "issues": [],
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
       "consoleErrors": [],
       "pageErrors": [],
       "failedRequests": [],
@@ -708,14 +892,18 @@
       "overflow": null,
       "missingAlt": [],
       "lowContrast": [],
-      "tinyTapTargets": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
       "allCapsLabels": []
     },
     {
       "route": "/app/charter",
       "viewport": "1440",
       "status": 200,
-      "issues": [],
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
       "consoleErrors": [],
       "pageErrors": [],
       "failedRequests": [],
@@ -728,14 +916,18 @@
       "overflow": null,
       "missingAlt": [],
       "lowContrast": [],
-      "tinyTapTargets": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
       "allCapsLabels": []
     },
     {
       "route": "/app/charter",
       "viewport": "1024",
       "status": 200,
-      "issues": [],
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
       "consoleErrors": [],
       "pageErrors": [],
       "failedRequests": [],
@@ -748,14 +940,18 @@
       "overflow": null,
       "missingAlt": [],
       "lowContrast": [],
-      "tinyTapTargets": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
       "allCapsLabels": []
     },
     {
       "route": "/app/charter",
       "viewport": "768",
       "status": 200,
-      "issues": [],
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
       "consoleErrors": [],
       "pageErrors": [],
       "failedRequests": [],
@@ -768,14 +964,18 @@
       "overflow": null,
       "missingAlt": [],
       "lowContrast": [],
-      "tinyTapTargets": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
       "allCapsLabels": []
     },
     {
       "route": "/app/charter",
       "viewport": "390",
       "status": 200,
-      "issues": [],
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
       "consoleErrors": [],
       "pageErrors": [],
       "failedRequests": [],
@@ -788,14 +988,18 @@
       "overflow": null,
       "missingAlt": [],
       "lowContrast": [],
-      "tinyTapTargets": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
       "allCapsLabels": []
     },
     {
       "route": "/app/charter?category=grid",
       "viewport": "1440",
       "status": 200,
-      "issues": [],
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
       "consoleErrors": [],
       "pageErrors": [],
       "failedRequests": [],
@@ -808,14 +1012,18 @@
       "overflow": null,
       "missingAlt": [],
       "lowContrast": [],
-      "tinyTapTargets": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
       "allCapsLabels": []
     },
     {
       "route": "/app/charter?category=grid",
       "viewport": "1024",
       "status": 200,
-      "issues": [],
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
       "consoleErrors": [],
       "pageErrors": [],
       "failedRequests": [],
@@ -828,14 +1036,18 @@
       "overflow": null,
       "missingAlt": [],
       "lowContrast": [],
-      "tinyTapTargets": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
       "allCapsLabels": []
     },
     {
       "route": "/app/charter?category=grid",
       "viewport": "768",
       "status": 200,
-      "issues": [],
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
       "consoleErrors": [],
       "pageErrors": [],
       "failedRequests": [],
@@ -848,14 +1060,18 @@
       "overflow": null,
       "missingAlt": [],
       "lowContrast": [],
-      "tinyTapTargets": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
       "allCapsLabels": []
     },
     {
       "route": "/app/charter?category=grid",
       "viewport": "390",
       "status": 200,
-      "issues": [],
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
       "consoleErrors": [],
       "pageErrors": [],
       "failedRequests": [],
@@ -868,14 +1084,18 @@
       "overflow": null,
       "missingAlt": [],
       "lowContrast": [],
-      "tinyTapTargets": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
       "allCapsLabels": []
     },
     {
       "route": "/app/charter?category=yield",
       "viewport": "1440",
       "status": 200,
-      "issues": [],
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
       "consoleErrors": [],
       "pageErrors": [],
       "failedRequests": [],
@@ -888,14 +1108,18 @@
       "overflow": null,
       "missingAlt": [],
       "lowContrast": [],
-      "tinyTapTargets": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
       "allCapsLabels": []
     },
     {
       "route": "/app/charter?category=yield",
       "viewport": "1024",
       "status": 200,
-      "issues": [],
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
       "consoleErrors": [],
       "pageErrors": [],
       "failedRequests": [],
@@ -908,14 +1132,18 @@
       "overflow": null,
       "missingAlt": [],
       "lowContrast": [],
-      "tinyTapTargets": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
       "allCapsLabels": []
     },
     {
       "route": "/app/charter?category=yield",
       "viewport": "768",
       "status": 200,
-      "issues": [],
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
       "consoleErrors": [],
       "pageErrors": [],
       "failedRequests": [],
@@ -928,14 +1156,18 @@
       "overflow": null,
       "missingAlt": [],
       "lowContrast": [],
-      "tinyTapTargets": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
       "allCapsLabels": []
     },
     {
       "route": "/app/charter?category=yield",
       "viewport": "390",
       "status": 200,
-      "issues": [],
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
       "consoleErrors": [],
       "pageErrors": [],
       "failedRequests": [],
@@ -948,14 +1180,18 @@
       "overflow": null,
       "missingAlt": [],
       "lowContrast": [],
-      "tinyTapTargets": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
       "allCapsLabels": []
     },
     {
       "route": "/app/charter?category=health_factor",
       "viewport": "1440",
       "status": 200,
-      "issues": [],
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
       "consoleErrors": [],
       "pageErrors": [],
       "failedRequests": [],
@@ -968,14 +1204,18 @@
       "overflow": null,
       "missingAlt": [],
       "lowContrast": [],
-      "tinyTapTargets": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
       "allCapsLabels": []
     },
     {
       "route": "/app/charter?category=health_factor",
       "viewport": "1024",
       "status": 200,
-      "issues": [],
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
       "consoleErrors": [],
       "pageErrors": [],
       "failedRequests": [],
@@ -988,14 +1228,18 @@
       "overflow": null,
       "missingAlt": [],
       "lowContrast": [],
-      "tinyTapTargets": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
       "allCapsLabels": []
     },
     {
       "route": "/app/charter?category=health_factor",
       "viewport": "768",
       "status": 200,
-      "issues": [],
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
       "consoleErrors": [],
       "pageErrors": [],
       "failedRequests": [],
@@ -1008,14 +1252,18 @@
       "overflow": null,
       "missingAlt": [],
       "lowContrast": [],
-      "tinyTapTargets": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
       "allCapsLabels": []
     },
     {
       "route": "/app/charter?category=health_factor",
       "viewport": "390",
       "status": 200,
-      "issues": [],
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
       "consoleErrors": [],
       "pageErrors": [],
       "failedRequests": [],
@@ -1028,14 +1276,18 @@
       "overflow": null,
       "missingAlt": [],
       "lowContrast": [],
-      "tinyTapTargets": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
       "allCapsLabels": []
     },
     {
       "route": "/app/charters",
       "viewport": "1440",
       "status": 200,
-      "issues": [],
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
       "consoleErrors": [],
       "pageErrors": [],
       "failedRequests": [],
@@ -1048,14 +1300,18 @@
       "overflow": null,
       "missingAlt": [],
       "lowContrast": [],
-      "tinyTapTargets": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
       "allCapsLabels": []
     },
     {
       "route": "/app/charters",
       "viewport": "1024",
       "status": 200,
-      "issues": [],
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
       "consoleErrors": [],
       "pageErrors": [],
       "failedRequests": [],
@@ -1068,14 +1324,18 @@
       "overflow": null,
       "missingAlt": [],
       "lowContrast": [],
-      "tinyTapTargets": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
       "allCapsLabels": []
     },
     {
       "route": "/app/charters",
       "viewport": "768",
       "status": 200,
-      "issues": [],
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
       "consoleErrors": [],
       "pageErrors": [],
       "failedRequests": [],
@@ -1088,14 +1348,18 @@
       "overflow": null,
       "missingAlt": [],
       "lowContrast": [],
-      "tinyTapTargets": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
       "allCapsLabels": []
     },
     {
       "route": "/app/charters",
       "viewport": "390",
       "status": 200,
-      "issues": [],
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
       "consoleErrors": [],
       "pageErrors": [],
       "failedRequests": [],
@@ -1108,19 +1372,21 @@
       "overflow": null,
       "missingAlt": [],
       "lowContrast": [],
-      "tinyTapTargets": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
       "allCapsLabels": []
     },
     {
       "route": "/ledger",
       "viewport": "1440",
       "status": 200,
-      "issues": [],
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
       "consoleErrors": [],
       "pageErrors": [],
-      "failedRequests": [
-        "GET https://marque.trade/ledger/ADV-01?_rsc=1fsoy — net::ERR_ABORTED"
-      ],
+      "failedRequests": [],
       "focusVisible": {
         "ok": true,
         "tag": "a",
@@ -1130,14 +1396,18 @@
       "overflow": null,
       "missingAlt": [],
       "lowContrast": [],
-      "tinyTapTargets": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
       "allCapsLabels": []
     },
     {
       "route": "/ledger",
       "viewport": "1024",
       "status": 200,
-      "issues": [],
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
       "consoleErrors": [],
       "pageErrors": [],
       "failedRequests": [],
@@ -1150,37 +1420,18 @@
       "overflow": null,
       "missingAlt": [],
       "lowContrast": [],
-      "tinyTapTargets": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
       "allCapsLabels": []
     },
     {
       "route": "/ledger",
       "viewport": "768",
       "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [
-        "GET https://marque.trade/ledger/ADV-02?_rsc=1fsoy — net::ERR_ABORTED",
-        "GET https://marque.trade/ledger/ADV-01?_rsc=1fsoy — net::ERR_ABORTED"
+      "issues": [
+        "1 tap target(s) under 24px"
       ],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(201, 154, 63) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/ledger",
-      "viewport": "390",
-      "status": 200,
-      "issues": [],
       "consoleErrors": [],
       "pageErrors": [],
       "failedRequests": [],
@@ -1193,14 +1444,42 @@
       "overflow": null,
       "missingAlt": [],
       "lowContrast": [],
-      "tinyTapTargets": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/ledger",
+      "viewport": "390",
+      "status": 200,
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(201, 154, 63) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
       "allCapsLabels": []
     },
     {
       "route": "/ledger/methodology",
       "viewport": "1440",
       "status": 200,
-      "issues": [],
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
       "consoleErrors": [],
       "pageErrors": [],
       "failedRequests": [],
@@ -1213,58 +1492,22 @@
       "overflow": null,
       "missingAlt": [],
       "lowContrast": [],
-      "tinyTapTargets": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
       "allCapsLabels": []
     },
     {
       "route": "/ledger/methodology",
       "viewport": "1024",
       "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(201, 154, 63) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/ledger/methodology",
-      "viewport": "768",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(201, 154, 63) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/ledger/methodology",
-      "viewport": "390",
-      "status": 200,
-      "issues": [],
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
       "consoleErrors": [],
       "pageErrors": [],
       "failedRequests": [
-        "GET https://marque.trade/ledger?_rsc=nw86a — net::ERR_ABORTED"
+        "GET http://127.0.0.1:3310/ledger?_rsc=DUwqzpmujW60V8bw — net::ERR_ABORTED"
       ],
       "focusVisible": {
         "ok": true,
@@ -1275,17 +1518,73 @@
       "overflow": null,
       "missingAlt": [],
       "lowContrast": [],
-      "tinyTapTargets": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/ledger/methodology",
+      "viewport": "768",
+      "status": 200,
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(201, 154, 63) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/ledger/methodology",
+      "viewport": "390",
+      "status": 200,
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:3310/ledger?_rsc=DUwqzpmujW60V8bw — net::ERR_ABORTED"
+      ],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(201, 154, 63) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
       "allCapsLabels": []
     },
     {
       "route": "/ledger/intake",
       "viewport": "1440",
       "status": 200,
-      "issues": [],
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
       "consoleErrors": [],
       "pageErrors": [],
-      "failedRequests": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:3310/ledger?_rsc=vWdfrkGxx82wsc90 — net::ERR_ABORTED"
+      ],
       "focusVisible": {
         "ok": true,
         "tag": "a",
@@ -1295,18 +1594,22 @@
       "overflow": null,
       "missingAlt": [],
       "lowContrast": [],
-      "tinyTapTargets": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
       "allCapsLabels": []
     },
     {
       "route": "/ledger/intake",
       "viewport": "1024",
       "status": 200,
-      "issues": [],
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
       "consoleErrors": [],
       "pageErrors": [],
       "failedRequests": [
-        "GET https://marque.trade/ledger?_rsc=1honf — net::ERR_ABORTED"
+        "GET http://127.0.0.1:3310/ledger?_rsc=vWdfrkGxx82wsc90 — net::ERR_ABORTED"
       ],
       "focusVisible": {
         "ok": true,
@@ -1317,38 +1620,22 @@
       "overflow": null,
       "missingAlt": [],
       "lowContrast": [],
-      "tinyTapTargets": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
       "allCapsLabels": []
     },
     {
       "route": "/ledger/intake",
       "viewport": "768",
       "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(201, 154, 63) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/ledger/intake",
-      "viewport": "390",
-      "status": 200,
-      "issues": [],
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
       "consoleErrors": [],
       "pageErrors": [],
       "failedRequests": [
-        "GET https://marque.trade/ledger?_rsc=1honf — net::ERR_ABORTED"
+        "GET http://127.0.0.1:3310/ledger?_rsc=vWdfrkGxx82wsc90 — net::ERR_ABORTED"
       ],
       "focusVisible": {
         "ok": true,
@@ -1359,22 +1646,50 @@
       "overflow": null,
       "missingAlt": [],
       "lowContrast": [],
-      "tinyTapTargets": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/ledger/intake",
+      "viewport": "390",
+      "status": 200,
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:3310/ledger?_rsc=vWdfrkGxx82wsc90 — net::ERR_ABORTED"
+      ],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(201, 154, 63) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
       "allCapsLabels": []
     },
     {
       "route": "/ledger/ADV-01",
       "viewport": "1440",
       "status": 200,
-      "issues": [],
+      "issues": [
+        "focus ring not visible on first tab stop (nothing focusable)"
+      ],
       "consoleErrors": [],
       "pageErrors": [],
       "failedRequests": [],
       "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(201, 154, 63) solid 2px",
-        "boxShadow": "none"
+        "ok": false,
+        "reason": "nothing focusable"
       },
       "overflow": null,
       "missingAlt": [],
@@ -1386,17 +1701,15 @@
       "route": "/ledger/ADV-01",
       "viewport": "1024",
       "status": 200,
-      "issues": [],
+      "issues": [
+        "focus ring not visible on first tab stop (nothing focusable)"
+      ],
       "consoleErrors": [],
       "pageErrors": [],
-      "failedRequests": [
-        "GET https://marque.trade/ledger?_rsc=yf7qh — net::ERR_ABORTED"
-      ],
+      "failedRequests": [],
       "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(201, 154, 63) solid 2px",
-        "boxShadow": "none"
+        "ok": false,
+        "reason": "nothing focusable"
       },
       "overflow": null,
       "missingAlt": [],
@@ -1408,15 +1721,15 @@
       "route": "/ledger/ADV-01",
       "viewport": "768",
       "status": 200,
-      "issues": [],
+      "issues": [
+        "focus ring not visible on first tab stop (nothing focusable)"
+      ],
       "consoleErrors": [],
       "pageErrors": [],
       "failedRequests": [],
       "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(201, 154, 63) solid 2px",
-        "boxShadow": "none"
+        "ok": false,
+        "reason": "nothing focusable"
       },
       "overflow": null,
       "missingAlt": [],
@@ -1428,15 +1741,15 @@
       "route": "/ledger/ADV-01",
       "viewport": "390",
       "status": 200,
-      "issues": [],
+      "issues": [
+        "focus ring not visible on first tab stop (nothing focusable)"
+      ],
       "consoleErrors": [],
       "pageErrors": [],
       "failedRequests": [],
       "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(201, 154, 63) solid 2px",
-        "boxShadow": "none"
+        "ok": false,
+        "reason": "nothing focusable"
       },
       "overflow": null,
       "missingAlt": [],
@@ -1448,10 +1761,14 @@
       "route": "/pancakeswap",
       "viewport": "1440",
       "status": 200,
-      "issues": [],
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
       "consoleErrors": [],
       "pageErrors": [],
-      "failedRequests": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:3310/pancakeswap/proof?_rsc=QrB9ctEkowCLR9tb — net::ERR_ABORTED"
+      ],
       "focusVisible": {
         "ok": true,
         "tag": "a",
@@ -1461,14 +1778,18 @@
       "overflow": null,
       "missingAlt": [],
       "lowContrast": [],
-      "tinyTapTargets": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
       "allCapsLabels": []
     },
     {
       "route": "/pancakeswap",
       "viewport": "1024",
       "status": 200,
-      "issues": [],
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
       "consoleErrors": [],
       "pageErrors": [],
       "failedRequests": [],
@@ -1481,14 +1802,18 @@
       "overflow": null,
       "missingAlt": [],
       "lowContrast": [],
-      "tinyTapTargets": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
       "allCapsLabels": []
     },
     {
       "route": "/pancakeswap",
       "viewport": "768",
       "status": 200,
-      "issues": [],
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
       "consoleErrors": [],
       "pageErrors": [],
       "failedRequests": [],
@@ -1501,14 +1826,18 @@
       "overflow": null,
       "missingAlt": [],
       "lowContrast": [],
-      "tinyTapTargets": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
       "allCapsLabels": []
     },
     {
       "route": "/pancakeswap",
       "viewport": "390",
       "status": 200,
-      "issues": [],
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
       "consoleErrors": [],
       "pageErrors": [],
       "failedRequests": [],
@@ -1521,19 +1850,22 @@
       "overflow": null,
       "missingAlt": [],
       "lowContrast": [],
-      "tinyTapTargets": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
       "allCapsLabels": []
     },
     {
       "route": "/builders/test",
       "viewport": "1440",
       "status": 200,
-      "issues": [],
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
       "consoleErrors": [],
       "pageErrors": [],
       "failedRequests": [
-        "GET https://marque.trade/standard?_rsc=ft2ac — net::ERR_ABORTED",
-        "GET https://marque.trade/ledger?_rsc=ft2ac — net::ERR_ABORTED"
+        "GET http://127.0.0.1:3310/ledger?_rsc=e8QXVP_FQoiVPxlD — net::ERR_ABORTED"
       ],
       "focusVisible": {
         "ok": true,
@@ -1544,18 +1876,22 @@
       "overflow": null,
       "missingAlt": [],
       "lowContrast": [],
-      "tinyTapTargets": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
       "allCapsLabels": []
     },
     {
       "route": "/builders/test",
       "viewport": "1024",
       "status": 200,
-      "issues": [],
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
       "consoleErrors": [],
       "pageErrors": [],
       "failedRequests": [
-        "GET https://marque.trade/standard?_rsc=ft2ac — net::ERR_ABORTED"
+        "GET http://127.0.0.1:3310/ledger?_rsc=e8QXVP_FQoiVPxlD — net::ERR_ABORTED"
       ],
       "focusVisible": {
         "ok": true,
@@ -1566,18 +1902,22 @@
       "overflow": null,
       "missingAlt": [],
       "lowContrast": [],
-      "tinyTapTargets": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
       "allCapsLabels": []
     },
     {
       "route": "/builders/test",
       "viewport": "768",
       "status": 200,
-      "issues": [],
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
       "consoleErrors": [],
       "pageErrors": [],
       "failedRequests": [
-        "GET https://marque.trade/standard?_rsc=ft2ac — net::ERR_ABORTED"
+        "GET http://127.0.0.1:3310/standard?_rsc=e8QXVP_FQoiVPxlD — net::ERR_ABORTED"
       ],
       "focusVisible": {
         "ok": true,
@@ -1588,18 +1928,22 @@
       "overflow": null,
       "missingAlt": [],
       "lowContrast": [],
-      "tinyTapTargets": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
       "allCapsLabels": []
     },
     {
       "route": "/builders/test",
       "viewport": "390",
       "status": 200,
-      "issues": [],
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
       "consoleErrors": [],
       "pageErrors": [],
       "failedRequests": [
-        "GET https://marque.trade/standard?_rsc=ft2ac — net::ERR_ABORTED"
+        "GET http://127.0.0.1:3310/standard?_rsc=e8QXVP_FQoiVPxlD — net::ERR_ABORTED"
       ],
       "focusVisible": {
         "ok": true,
@@ -1610,17 +1954,23 @@
       "overflow": null,
       "missingAlt": [],
       "lowContrast": [],
-      "tinyTapTargets": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
       "allCapsLabels": []
     },
     {
       "route": "/status",
       "viewport": "1440",
       "status": 200,
-      "issues": [],
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
       "consoleErrors": [],
       "pageErrors": [],
-      "failedRequests": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:3310/pancakeswap?_rsc=doD_FWmrzap9lcdp — net::ERR_ABORTED"
+      ],
       "focusVisible": {
         "ok": true,
         "tag": "a",
@@ -1630,17 +1980,23 @@
       "overflow": null,
       "missingAlt": [],
       "lowContrast": [],
-      "tinyTapTargets": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
       "allCapsLabels": []
     },
     {
       "route": "/status",
       "viewport": "1024",
       "status": 200,
-      "issues": [],
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
       "consoleErrors": [],
       "pageErrors": [],
-      "failedRequests": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:3310/pancakeswap?_rsc=doD_FWmrzap9lcdp — net::ERR_ABORTED"
+      ],
       "focusVisible": {
         "ok": true,
         "tag": "a",
@@ -1650,17 +2006,23 @@
       "overflow": null,
       "missingAlt": [],
       "lowContrast": [],
-      "tinyTapTargets": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
       "allCapsLabels": []
     },
     {
       "route": "/status",
       "viewport": "768",
       "status": 200,
-      "issues": [],
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
       "consoleErrors": [],
       "pageErrors": [],
-      "failedRequests": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:3310/pancakeswap?_rsc=doD_FWmrzap9lcdp — net::ERR_ABORTED"
+      ],
       "focusVisible": {
         "ok": true,
         "tag": "a",
@@ -1670,14 +2032,18 @@
       "overflow": null,
       "missingAlt": [],
       "lowContrast": [],
-      "tinyTapTargets": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
       "allCapsLabels": []
     },
     {
       "route": "/status",
       "viewport": "390",
       "status": 200,
-      "issues": [],
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
       "consoleErrors": [],
       "pageErrors": [],
       "failedRequests": [],
@@ -1690,18 +2056,22 @@
       "overflow": null,
       "missingAlt": [],
       "lowContrast": [],
-      "tinyTapTargets": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
       "allCapsLabels": []
     },
     {
       "route": "/standard/MCS-REB-1",
       "viewport": "1440",
       "status": 200,
-      "issues": [],
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
       "consoleErrors": [],
       "pageErrors": [],
       "failedRequests": [
-        "GET https://marque.trade/standard?_rsc=1qbm7 — net::ERR_ABORTED"
+        "GET http://127.0.0.1:3310/standard?_rsc=meGwbJHaAOXWmjsV — net::ERR_ABORTED"
       ],
       "focusVisible": {
         "ok": true,
@@ -1712,18 +2082,22 @@
       "overflow": null,
       "missingAlt": [],
       "lowContrast": [],
-      "tinyTapTargets": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
       "allCapsLabels": []
     },
     {
       "route": "/standard/MCS-REB-1",
       "viewport": "1024",
       "status": 200,
-      "issues": [],
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
       "consoleErrors": [],
       "pageErrors": [],
       "failedRequests": [
-        "GET https://marque.trade/standard?_rsc=1qbm7 — net::ERR_ABORTED"
+        "GET http://127.0.0.1:3310/standard?_rsc=meGwbJHaAOXWmjsV — net::ERR_ABORTED"
       ],
       "focusVisible": {
         "ok": true,
@@ -1734,18 +2108,22 @@
       "overflow": null,
       "missingAlt": [],
       "lowContrast": [],
-      "tinyTapTargets": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
       "allCapsLabels": []
     },
     {
       "route": "/standard/MCS-REB-1",
       "viewport": "768",
       "status": 200,
-      "issues": [],
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
       "consoleErrors": [],
       "pageErrors": [],
       "failedRequests": [
-        "GET https://marque.trade/standard?_rsc=1qbm7 — net::ERR_ABORTED"
+        "GET http://127.0.0.1:3310/standard?_rsc=meGwbJHaAOXWmjsV — net::ERR_ABORTED"
       ],
       "focusVisible": {
         "ok": true,
@@ -1756,17 +2134,23 @@
       "overflow": null,
       "missingAlt": [],
       "lowContrast": [],
-      "tinyTapTargets": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
       "allCapsLabels": []
     },
     {
       "route": "/standard/MCS-REB-1",
       "viewport": "390",
       "status": 200,
-      "issues": [],
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
       "consoleErrors": [],
       "pageErrors": [],
-      "failedRequests": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:3310/standard?_rsc=meGwbJHaAOXWmjsV — net::ERR_ABORTED"
+      ],
       "focusVisible": {
         "ok": true,
         "tag": "a",
@@ -1776,18 +2160,22 @@
       "overflow": null,
       "missingAlt": [],
       "lowContrast": [],
-      "tinyTapTargets": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
       "allCapsLabels": []
     },
     {
       "route": "/standard/MCS-HF-1",
       "viewport": "1440",
       "status": 200,
-      "issues": [],
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
       "consoleErrors": [],
       "pageErrors": [],
       "failedRequests": [
-        "GET https://marque.trade/standard?_rsc=jzefu — net::ERR_ABORTED"
+        "GET http://127.0.0.1:3310/standard?_rsc=7JDYkLAdItB3QoNS — net::ERR_ABORTED"
       ],
       "focusVisible": {
         "ok": true,
@@ -1798,58 +2186,22 @@
       "overflow": null,
       "missingAlt": [],
       "lowContrast": [],
-      "tinyTapTargets": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
       "allCapsLabels": []
     },
     {
       "route": "/standard/MCS-HF-1",
       "viewport": "1024",
       "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(201, 154, 63) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/standard/MCS-HF-1",
-      "viewport": "768",
-      "status": 200,
-      "issues": [],
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "focusVisible": {
-        "ok": true,
-        "tag": "a",
-        "outline": "rgb(201, 154, 63) solid 2px",
-        "boxShadow": "none"
-      },
-      "overflow": null,
-      "missingAlt": [],
-      "lowContrast": [],
-      "tinyTapTargets": [],
-      "allCapsLabels": []
-    },
-    {
-      "route": "/standard/MCS-HF-1",
-      "viewport": "390",
-      "status": 200,
-      "issues": [],
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
       "consoleErrors": [],
       "pageErrors": [],
       "failedRequests": [
-        "GET https://marque.trade/standard?_rsc=jzefu — net::ERR_ABORTED"
+        "GET http://127.0.0.1:3310/standard?_rsc=7JDYkLAdItB3QoNS — net::ERR_ABORTED"
       ],
       "focusVisible": {
         "ok": true,
@@ -1860,17 +2212,76 @@
       "overflow": null,
       "missingAlt": [],
       "lowContrast": [],
-      "tinyTapTargets": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/standard/MCS-HF-1",
+      "viewport": "768",
+      "status": 200,
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:3310/standard?_rsc=7JDYkLAdItB3QoNS — net::ERR_ABORTED"
+      ],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(201, 154, 63) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
+      "allCapsLabels": []
+    },
+    {
+      "route": "/standard/MCS-HF-1",
+      "viewport": "390",
+      "status": 200,
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:3310/standard?_rsc=7JDYkLAdItB3QoNS — net::ERR_ABORTED"
+      ],
+      "focusVisible": {
+        "ok": true,
+        "tag": "a",
+        "outline": "rgb(201, 154, 63) solid 2px",
+        "boxShadow": "none"
+      },
+      "overflow": null,
+      "missingAlt": [],
+      "lowContrast": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
       "allCapsLabels": []
     },
     {
       "route": "/judge",
       "viewport": "1440",
       "status": 200,
-      "issues": [],
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
       "consoleErrors": [],
       "pageErrors": [],
-      "failedRequests": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:3310/status?_rsc=6rD3gMJjRX1hEfIz — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/standard?_rsc=6rD3gMJjRX1hEfIz — net::ERR_ABORTED"
+      ],
       "focusVisible": {
         "ok": true,
         "tag": "a",
@@ -1880,17 +2291,24 @@
       "overflow": null,
       "missingAlt": [],
       "lowContrast": [],
-      "tinyTapTargets": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
       "allCapsLabels": []
     },
     {
       "route": "/judge",
       "viewport": "1024",
       "status": 200,
-      "issues": [],
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
       "consoleErrors": [],
       "pageErrors": [],
-      "failedRequests": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:3310/standard?_rsc=6rD3gMJjRX1hEfIz — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/status?_rsc=6rD3gMJjRX1hEfIz — net::ERR_ABORTED"
+      ],
       "focusVisible": {
         "ok": true,
         "tag": "a",
@@ -1900,17 +2318,24 @@
       "overflow": null,
       "missingAlt": [],
       "lowContrast": [],
-      "tinyTapTargets": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
       "allCapsLabels": []
     },
     {
       "route": "/judge",
       "viewport": "768",
       "status": 200,
-      "issues": [],
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
       "consoleErrors": [],
       "pageErrors": [],
-      "failedRequests": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:3310/status?_rsc=6rD3gMJjRX1hEfIz — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/standard?_rsc=6rD3gMJjRX1hEfIz — net::ERR_ABORTED"
+      ],
       "focusVisible": {
         "ok": true,
         "tag": "a",
@@ -1920,17 +2345,24 @@
       "overflow": null,
       "missingAlt": [],
       "lowContrast": [],
-      "tinyTapTargets": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
       "allCapsLabels": []
     },
     {
       "route": "/judge",
       "viewport": "390",
       "status": 200,
-      "issues": [],
+      "issues": [
+        "1 tap target(s) under 24px"
+      ],
       "consoleErrors": [],
       "pageErrors": [],
-      "failedRequests": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:3310/status?_rsc=6rD3gMJjRX1hEfIz — net::ERR_ABORTED",
+        "GET http://127.0.0.1:3310/standard?_rsc=6rD3gMJjRX1hEfIz — net::ERR_ABORTED"
+      ],
       "focusVisible": {
         "ok": true,
         "tag": "a",
@@ -1940,7 +2372,9 @@
       "overflow": null,
       "missingAlt": [],
       "lowContrast": [],
-      "tinyTapTargets": [],
+      "tinyTapTargets": [
+        "a @marquetrade 107x19"
+      ],
       "allCapsLabels": []
     }
   ]
