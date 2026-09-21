@@ -101,34 +101,64 @@ async function funnelUncached(chainId = 56): Promise<FunnelRow[]> {
     svc as (
       select distinct agent_id from agent_service
     ),
-    latest_probe as (
-      select distinct on (agent_id) agent_id, ok, liveness
-      from probe order by agent_id, checked_at desc
+    latest_service_probe as (
+      select distinct on (service_id) service_id, liveness, executable_endpoint, task_kinds, checked_at
+      from probe where service_id is not null order by service_id, checked_at desc
+    ),
+    service_state as (
+      select s.agent_id,
+        bool_or(p.liveness in ('live','unbound','bad_schema') and p.checked_at > now() - interval '24 hours') as reachable,
+        bool_or(p.liveness = 'live' and p.executable_endpoint is not null
+          and p.checked_at > now() - interval '24 hours' and s.kind in ('a2a','mcp')) as callable,
+        bool_or(p.liveness = 'live' and p.executable_endpoint is not null
+          and p.checked_at > now() - interval '24 hours' and s.kind in ('a2a','mcp')
+          and jsonb_array_length(coalesce(p.task_kinds, '[]'::jsonb)) > 0) as compatible
+      from agent_service s left join latest_service_probe p on p.service_id = s.id
+      group by s.agent_id
+    ),
+    latest_category as (
+      select distinct on (agent_id) agent_id, category
+      from agent_category order by agent_id, (category <> 'unclassified') desc, confidence desc, assigned_at desc
+    ),
+    qualified as (
+      select distinct agent_id from conformance_result where pass = true
+    ),
+    hireable as (
+      select distinct s.agent_id
+      from agent_service s
+      join latest_service_probe p on p.service_id = s.id
+      join latest_category c on c.agent_id = s.agent_id
+      where p.liveness = 'live' and p.executable_endpoint is not null
+        and p.checked_at > now() - interval '24 hours' and s.kind in ('a2a','mcp')
+        and p.task_kinds ? case c.category
+          when 'rebalancing' then 'rebalance'
+          when 'grid' then 'grid'
+          when 'yield' then 'yield'
+          when 'health_factor' then 'health_factor'
+          else '__unsupported__' end
     )
     select
       (select count(*) from base) as registered,
+      (select count(*) from base where detail_fetched = true) as metadata_readable,
       (select count(*) from base b join svc s on s.agent_id = b.id) as with_parseable_service,
-      (select count(*) from base b join latest_probe p on p.agent_id = b.id
-         where p.liveness in ('live','unbound','bad_schema')) as responding_now,
-      (select count(*) from base b join latest_probe p on p.agent_id = b.id
-         where p.liveness = 'live') as bound_now,
-      (select count(*) from base b join agent_category c on c.agent_id = b.id
-         where c.category <> 'unclassified') as classified,
-      (select count(*) from base b
-         join agent_category c on c.agent_id = b.id
-         join latest_probe p on p.agent_id = b.id
-         where c.category <> 'unclassified' and p.liveness = 'live') as classified_and_live
+      (select count(*) from base b join service_state s on s.agent_id = b.id where s.reachable) as reachable,
+      (select count(*) from base b join service_state s on s.agent_id = b.id where s.callable) as callable,
+      (select count(*) from base b join service_state s on s.agent_id = b.id where s.compatible) as compatible,
+      (select count(*) from base b join qualified q on q.agent_id = b.id) as qualified,
+      (select count(*) from base b join hireable h on h.agent_id = b.id) as hireable
   `)
   const r = (((rows as unknown as { rows?: unknown[] }).rows ?? (rows as unknown as unknown[]))[0] ?? {}) as Record<string, unknown>
   const n = (k: string): number => Number(r[k] ?? 0)
 
   return [
     { stage: 'registered_bsc', label: 'Registered on BSC', count: n('registered'), method: 'count of indexed agents on chain 56' },
-    { stage: 'with_parseable_service', label: 'Declares a service we can parse', count: n('with_parseable_service'), method: 'agents with at least one agent_service row' },
-    { stage: 'responding_now', label: 'Endpoint responds', count: n('responding_now'), method: 'latest probe returned a well-formed response' },
-    { stage: 'bound_now', label: 'Bound and callable', count: n('bound_now'), method: 'latest probe found an executable endpoint or declared skills' },
-    { stage: 'classified', label: 'Classified into a category', count: n('classified'), method: 'has a non-unclassified category label' },
-    { stage: 'marked', label: 'Classified and callable', count: n('classified_and_live'), method: 'classified AND latest probe liveness = live' },
+    { stage: 'metadata_readable', label: 'Metadata readable', count: n('metadata_readable'), method: 'identity detail was fetched and parsed' },
+    { stage: 'service_declared', label: 'Declares a service', count: n('with_parseable_service'), method: 'identity has at least one normalized service row' },
+    { stage: 'reachable', label: 'Reachable', count: n('reachable'), method: 'at least one exact service returned protocol-shaped evidence within 24 hours' },
+    { stage: 'callable', label: 'Callable', count: n('callable'), method: 'fresh exact A2A/MCP service declares an executable endpoint' },
+    { stage: 'compatible', label: 'Task compatible', count: n('compatible'), method: 'fresh callable service exposes at least one schema-addressable Marque task kind' },
+    { stage: 'qualified', label: 'Qualified', count: n('qualified'), method: 'identity has at least one stored passing MCS result' },
+    { stage: 'hireable', label: 'Hireable', count: n('hireable'), method: 'fresh compatible service matches the identity current category and Charter task' },
   ]
 }
 

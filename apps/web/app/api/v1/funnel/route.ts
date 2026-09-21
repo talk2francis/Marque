@@ -25,7 +25,7 @@ export async function GET() {
       stages,
       categories,
       failures,
-      note: 'Counts are live. "responding" means the endpoint answered; "bound" means something is actually callable.',
+      note: 'Counts are live and state-specific. Reachable, callable, compatible, qualified and hireable are never treated as synonyms.',
     })
   } catch (err) {
     return NextResponse.json(

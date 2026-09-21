@@ -151,10 +151,13 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ a
   const stage = (key: string) => stages?.find((s) => s.stage === key)?.count ?? null
 
   const registered = stage('registered_bsc')
-  const declaring = stage('with_parseable_service')
-  const responding = stage('responding_now')
-  const bound = stage('bound_now')
-  const classified = stage('classified')
+  const metadataReadable = stage('metadata_readable')
+  const declaring = stage('service_declared')
+  const reachable = stage('reachable')
+  const callable = stage('callable')
+  const compatible = stage('compatible')
+  const qualified = stage('qualified')
+  const hireableCount = stage('hireable')
 
   const fmt = (n: number | null) => (n === null ? '—' : n.toLocaleString('en-US'))
 
@@ -202,7 +205,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ a
         <section className={styles.stats} data-reveal>
           {([
             ['Registered on BNB Chain', registered, 'from the ERC-8004 registry'],
-            ['Callable right now', bound, 'answer and expose a hireable interface'],
+            ['Hireable right now', hireableCount, 'fresh compatible service matches its Charter task'],
             ['Warranted', homeCounts['warranted'] == null ? null : Number(homeCounts['warranted']), 'passed a published MCS case'],
             ['Public receipts', homeCounts['receipts'] == null ? null : Number(homeCounts['receipts']), 'execution and quality recorded separately'],
           ] as Array<[string, number | null, string]>).map(([label, n, sub]) => (
@@ -325,10 +328,13 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ a
               {(() => {
                 const rows: Array<[string, number | null, string]> = [
                   ['Registered on BNB Smart Chain', registered, 'indexed from the ERC-8004 registry'],
-                  ['Declares a service we can parse', declaring, 'has at least one endpoint in its metadata'],
-                  ['Endpoint responds', responding, 'answered our probe with a well-formed reply'],
-                  ['Callable descriptor found', bound, 'a fresh probe found an executable protocol interface'],
-                  ['Classified into a category', classified, 'matched a category-defining term'],
+                  ['Metadata readable', metadataReadable, 'identity detail was fetched and parsed'],
+                  ['Declares a service', declaring, 'has at least one normalized endpoint'],
+                  ['Reachable', reachable, 'an exact service returned protocol-shaped evidence within 24 hours'],
+                  ['Callable', callable, 'a fresh A2A or MCP service declares an executable endpoint'],
+                  ['Task compatible', compatible, 'a callable service accepts a Marque task schema'],
+                  ['Qualified', qualified, 'has passed a published MCS case'],
+                  ['Hireable', hireableCount, 'compatible service matches its current category and Charter task'],
                 ]
                 const top = rows[0]?.[1] ?? 1
                 return (
@@ -363,9 +369,9 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ a
               )}
               <p className={styles.funnelNote}>
                 <ProvenanceChip provenance="MEASURED" /> The cliff is not where anyone expects.
-                Endpoints are not dead — most answer quickly with valid JSON. The agents behind
-                them were never bound to a runtime, so they expose nothing to call. A directory
-                that counts HTTP 200 as health would report almost all of these as working.
+                Reachability, callability, compatibility, qualification and Hire are counted
+                separately. An HTTP 200, a declared tool, or a historical MCS pass cannot promote
+                an identity into a later state by itself.
               </p>
             </>
           ) : (

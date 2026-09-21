@@ -53,6 +53,11 @@ First-party observations and never deletable: probes, funnel snapshots,
 conformance cases/results, builder listings, charters, runs/events, receipts,
 Ledger records, sealed calls, and pool observations.
 
+The live supply funnel computes independent identity counts for registered,
+metadata-readable, service-declaring, reachable, callable, task-compatible,
+qualified and hireable. Freshness is 24 hours and probe evidence is joined by
+exact service ID; qualification never supplies missing execution capability.
+
 ## Broken joins and duplicated decisions
 
 There is no canonical capability resolver. `marketplace.ts`, the third-party
