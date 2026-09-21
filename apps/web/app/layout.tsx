@@ -1,31 +1,31 @@
 import type { Metadata, Viewport } from 'next'
-import { Geist, Geist_Mono, Fraunces } from 'next/font/google'
+import localFont from 'next/font/local'
 import { BRAND } from '@marque/ui/brand'
 import { Reveal } from './_components/Reveal'
 import { WalletProvider } from './_components/WalletProvider'
 import './globals.css'
 
 /**
- * Fonts are self-hosted by next/font at build time, so the page makes no
- * request to a font CDN. That keeps the CSP strict and the LCP budget intact.
+ * Font binaries are committed local assets. Builds and page loads therefore
+ * make no request to a font CDN, keeping deployment reproducible and CSP tight.
  */
-const geist = Geist({
-  subsets: ['latin'],
+const geist = localFont({
+  src: '../public/fonts/geist-latin.woff2',
+  weight: '100 900',
   variable: '--font-geist',
   display: 'swap',
 })
 
-const geistMono = Geist_Mono({
-  subsets: ['latin'],
+const geistMono = localFont({
+  src: '../public/fonts/geist-mono-latin.woff2',
+  weight: '100 900',
   variable: '--font-geist-mono',
   display: 'swap',
 })
 
-const fraunces = Fraunces({
-  subsets: ['latin'],
-  // Variable font: axes require weight to be variable/omitted. The single
-  // weight and the SOFT/WONK settings are pinned in tokens.css (.statement).
-  axes: ['SOFT', 'WONK'],
+const fraunces = localFont({
+  src: '../public/fonts/fraunces-latin.woff2',
+  weight: '100 900',
   variable: '--font-fraunces',
   display: 'swap',
 })

@@ -41,6 +41,9 @@ Pancake watcher, conformance worker, five reference agents, and health monitor.
 Postgres and Redis are native services. All twelve were online with zero PM2
 restarts at baseline capture.
 
+The web build uses committed local Geist, Geist Mono and Fraunces binaries via
+`next/font/local`; neither a build nor a page load depends on Google Fonts.
+
 ## Data ownership
 
 Derived and rebuildable: `agent`, `agent_service`, `agent_category`,
