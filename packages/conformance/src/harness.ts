@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto'
-import { sql, eq, and, desc } from 'drizzle-orm'
+import { eq, and, desc } from 'drizzle-orm'
 import { db, conformanceCase, conformanceResult, type NewConformanceCase } from '@marque/db'
 import { publicClient } from '@marque/chain'
 import { MCS_VERSION, MCS_TOLERANCE_REVISION, type TestId } from './tolerances.js'
@@ -123,17 +123,22 @@ export async function captureCase(spec: {
     prompt,
     active: true,
   }
-  await db().insert(conformanceCase).values(row).onConflictDoUpdate({
-    target: conformanceCase.id,
-    set: {
-      blockNumber: sql`excluded.block_number`,
-      groundTruth: sql`excluded.ground_truth`,
-      groundTruthHash: sql`excluded.ground_truth_hash`,
-      prompt: sql`excluded.prompt`,
-      policy: sql`excluded.policy`,
-      capturedAt: sql`now()`,
-    },
-  })
+  const inserted = await db().insert(conformanceCase).values(row)
+    .onConflictDoNothing()
+    .returning({ id: conformanceCase.id })
+  if (inserted.length === 0) {
+    const [existing] = await db().select({
+      blockNumber: conformanceCase.blockNumber,
+      groundTruthHash: conformanceCase.groundTruthHash,
+      prompt: conformanceCase.prompt,
+    }).from(conformanceCase).where(eq(conformanceCase.id, spec.id)).limit(1)
+    const same = existing?.blockNumber === row.blockNumber
+      && existing.groundTruthHash === groundTruthHash
+      && existing.prompt === prompt
+    if (!same) {
+      throw new Error(`conformance case ${spec.id} already exists with different immutable evidence; use a new case id`)
+    }
+  }
 
   return { testCase, groundTruth, groundTruthHash, prompt }
 }

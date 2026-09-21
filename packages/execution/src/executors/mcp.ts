@@ -54,11 +54,11 @@ function schemaOf(tool: McpTool): JsonSchema | null {
  * Build only arguments explicitly named by the MCP tool schema. Unknown
  * required fields make the tool incompatible; Marque never guesses values.
  */
-export function argumentsForTool(tool: McpTool, task: StructuredTask): Record<string, unknown> | null {
+export function argumentsForTool(tool: McpTool, task: StructuredTask, prompt = renderTaskPrompt(task)): Record<string, unknown> | null {
   const schema = schemaOf(tool)
   if (!schema || schema.type !== 'object' || !schema.properties) return null
   const values: Record<string, unknown> = {
-    query: renderTaskPrompt(task), prompt: renderTaskPrompt(task), message: renderTaskPrompt(task),
+    query: prompt, prompt, message: prompt,
     task: task, input: task,
     address: task.subject, subject: task.subject, wallet: task.subject, account: task.subject,
     blockNumber: task.blockNumber, block_number: task.blockNumber, block: task.blockNumber,

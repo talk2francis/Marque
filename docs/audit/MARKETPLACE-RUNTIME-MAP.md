@@ -14,8 +14,8 @@ This document describes the code that runs, not the intended architecture.
 | Service extraction | `packages/registry/src/normalize.ts::extractServices` reads top-level, off-chain array, and flat fields | `agent_service` | Untrusted URLs, protocol and price claims |
 | Classification | `apps/worker/src/classify.ts`, `packages/registry/src/classify.ts` | `agent_category` | Derived heuristic, not executable proof |
 | Service probing | `apps/worker/src/probe.ts` -> `packages/probe/src/worker.ts::runProbeCycle` -> `probeService` | append-only `probe` | Hostile network endpoint through `safeFetch` |
-| A2A discovery | `packages/probe/src/liveness.ts::probeA2A` | probe liveness, skills, executable endpoint | Agent card claim |
-| MCP discovery | `packages/probe/src/liveness.ts::probeMCP` | probe liveness, tool names, executable endpoint | MCP JSON-RPC server |
+| A2A discovery | `packages/probe/src/liveness.ts::probeA2A` | probe liveness, skills, separately declared executable endpoint | Validated agent card; no endpoint is inferred from its URL |
+| MCP discovery | `packages/probe/src/liveness.ts::probeMCP` | protocol version, session, tools and schema-compatible task kinds | Successful `initialize` → `notifications/initialized` → `tools/list`; a GET descriptor is not callable proof |
 | Conformance | `apps/worker/src/conform.ts` -> `packages/conformance` | `conformance_case`, append-only `conformance_result` | Pinned test case and raw response |
 | Marketplace projection | `apps/web/lib/marketplace.ts::queryThirdParty` | none; reconstructed SQL/TS view | Currently mixes identity-level and service-level facts |
 | Third-party profile | `apps/web/app/agents/56/[tokenId]/page.tsx` | none | Independently reconstructs latest probe and MCS state |
@@ -24,8 +24,8 @@ This document describes the code that runs, not the intended architecture.
 | Charter grant | `POST /api/v1/charters` -> `CharterService.grant` | append-only `charter` plus testnet transaction | BSC testnet; public endpoint provisions a demo owner |
 | Run acceptance | `POST /api/v1/runs` -> `apps/web/lib/runs.ts::startRun` | `run`, then `run_event` | Re-resolves service independently of Marketplace/Charter |
 | Adapter selection | `packages/execution/src/factory.ts::executorFor` | not persisted | First live row wins; no requested-capability resolver |
-| A2A execution | `A2AExecutor` GETs constructor URL as a card, then POSTs `message/send` | raw result in `run.result` | Constructor currently receives task URL in common cases |
-| MCP execution | `McpExecutor` lists tools, regex-selects one, calls fixed arguments | raw result in `run.result` | No initialize/session negotiation in executor; input schema ignored |
+| A2A execution | `A2AExecutor` validates the selected card and POSTs `message/send` only to its declared task endpoint | raw result in `run.result` | Card and task URL remain separate evidence |
+| MCP execution | `McpExecutor` initializes a session, lists tools, selects a category/schema-compatible tool, and calls only schema-declared arguments | raw result in `run.result` | Unknown required inputs fail closed; no argument is invented |
 | x402/ERC-8183 | protocol-specific executors in `packages/execution/src/executors` | run events/result | Present but not a general third-party marketplace path |
 | Authority | `startRun` reads Charter; `runHire` calls `checkAuthority` | run authority block inside receipt | Must be audited for expiry, revocation, cap and race enforcement |
 | Grading | `pipeline.ts::gradeAgainstCase` | receipt quality block | Only meaningful for matching published cases |
@@ -71,4 +71,3 @@ Every action carries an immutable tuple from selection through evidence:
 Marketplace, profile, Charter admission and run execution must consume one
 server-side capability result for that tuple. Qualification remains an
 independent observation and never supplies missing execution compatibility.
-

@@ -55,6 +55,35 @@ export function taskKindsFromText(values: readonly string[]): string[] {
   return kinds
 }
 
+type TaskKind = 'rebalance' | 'grid' | 'yield' | 'health_factor'
+interface McpToolDescriptor { name?: unknown; description?: unknown; inputSchema?: unknown }
+
+const MCP_INPUTS: Record<TaskKind, ReadonlySet<string>> = {
+  rebalance: new Set(['query', 'prompt', 'message', 'task', 'input', 'address', 'subject', 'wallet', 'account', 'blockNumber', 'block_number', 'block', 'chainId', 'chain_id', 'maxSpendUsd', 'max_spend_usd', 'policy', 'positionTokenId', 'tokenId', 'position_id']),
+  grid: new Set(['query', 'prompt', 'message', 'task', 'input', 'address', 'subject', 'wallet', 'account', 'blockNumber', 'block_number', 'block', 'chainId', 'chain_id', 'maxSpendUsd', 'max_spend_usd', 'policy', 'pair']),
+  yield: new Set(['query', 'prompt', 'message', 'task', 'input', 'address', 'subject', 'wallet', 'account', 'blockNumber', 'block_number', 'block', 'chainId', 'chain_id', 'maxSpendUsd', 'max_spend_usd', 'policy']),
+  health_factor: new Set(['query', 'prompt', 'message', 'task', 'input', 'address', 'subject', 'wallet', 'account', 'blockNumber', 'block_number', 'block', 'chainId', 'chain_id', 'maxSpendUsd', 'max_spend_usd', 'policy']),
+}
+
+/**
+ * Categories an MCP tool can be addressed for without inventing arguments.
+ * This is discovery compatibility, not a claim that execution will succeed.
+ */
+export function compatibleMcpTaskKinds(tool: McpToolDescriptor): TaskKind[] {
+  const schema = tool.inputSchema && typeof tool.inputSchema === 'object'
+    ? tool.inputSchema as { type?: unknown; properties?: unknown; required?: unknown }
+    : null
+  if (schema?.type !== 'object' || !schema.properties || typeof schema.properties !== 'object') return []
+  const required = Array.isArray(schema.required)
+    ? schema.required.filter((key): key is string => typeof key === 'string')
+    : []
+  const hinted = taskKindsFromText([
+    typeof tool.name === 'string' ? tool.name : '',
+    typeof tool.description === 'string' ? tool.description : '',
+  ]) as TaskKind[]
+  return hinted.filter((kind) => required.every((key) => MCP_INPUTS[kind].has(key)))
+}
+
 /** Map a transport failure onto our stored taxonomy. */
 function failureFromFetch(f: SafeFetchFailure): FailureClass {
   switch (f) {
@@ -212,31 +241,7 @@ export async function probeMCP(url: string): Promise<ProbeOutcome> {
     timeoutMs: 8_000,
   })
 
-  // Some MCP deployments expose a plain descriptor on GET instead of JSON-RPC.
   if (!init.ok || init.status >= 400) {
-    const info = await safeFetch(url, { timeoutMs: 8_000 })
-    if (info.ok && info.status === 200) {
-      try {
-        const d = JSON.parse(info.body) as Record<string, unknown>
-        const tools = Array.isArray(d['tools']) ? (d['tools'] as unknown[]) : []
-        const names = skillNames(tools)
-        const name = typeof d['name'] === 'string' ? d['name'] : null
-        if (names.length > 0) {
-          return {
-            ok: true, liveness: 'live', latencyMs: info.latencyMs, statusCode: info.status,
-            failureClass: null, detail: `descriptor lists ${names.length} tool(s)`,
-            skills: names, executableEndpoint: url, reportedName: name,
-          }
-        }
-        return {
-          ok: false, liveness: 'unbound', latencyMs: info.latencyMs, statusCode: info.status,
-          failureClass: 'empty_tools', detail: 'descriptor served but exposes no tools',
-          skills: [], executableEndpoint: url, reportedName: name,
-        }
-      } catch {
-        // fall through to the transport failure below
-      }
-    }
     if (!init.ok) return dead(init.detail, failureFromFetch(init.failure), init.latencyMs, init.status ?? null)
     return dead(`http ${init.status}`, httpFailure(init.status), init.latencyMs, init.status)
   }
@@ -284,8 +289,6 @@ export async function probeMCP(url: string): Promise<ProbeOutcome> {
     const d = JSON.parse(payload) as { result?: { tools?: unknown[] } }
     const tools = d.result?.tools ?? []
     const names = skillNames(tools)
-    const descriptions = (tools as Array<Record<string, unknown>>).flatMap((tool) => [tool['name'], tool['description']])
-      .filter((v): v is string => typeof v === 'string')
     if (names.length === 0) {
       return {
         ok: false, liveness: 'unbound', latencyMs: list.latencyMs, statusCode: list.status,
@@ -298,7 +301,7 @@ export async function probeMCP(url: string): Promise<ProbeOutcome> {
       failureClass: null, detail: `${names.length} tool(s)`,
       skills: names, executableEndpoint: url, reportedName: null,
       protocolVersion,
-      taskKinds: taskKindsFromText(descriptions),
+      taskKinds: [...new Set((tools as McpToolDescriptor[]).flatMap(compatibleMcpTaskKinds))],
       manifest: { tools },
     }
   } catch {

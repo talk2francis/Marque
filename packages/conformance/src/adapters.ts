@@ -1,6 +1,8 @@
 import { safeFetch } from '@marque/probe'
 import type { ConformanceAdapter, TestCase } from './types.js'
 
+interface McpTool { name?: string; description?: string; inputSchema?: unknown }
+
 /**
  * Adapters for real agents.
  *
@@ -23,7 +25,7 @@ export type AdapterError =
   | 'unusable_response'
 
 /** Pull the callable JSON-RPC endpoint out of an A2A agent card. */
-export function endpointFromCard(card: unknown, cardUrl: string): string | null {
+export function endpointFromCard(card: unknown, _cardUrl: string): string | null {
   if (!card || typeof card !== 'object') return null
   const rec = card as Record<string, unknown>
   const nested = rec['card'] && typeof rec['card'] === 'object' ? (rec['card'] as Record<string, unknown>) : {}
@@ -44,15 +46,30 @@ export function endpointFromCard(card: unknown, cardUrl: string): string | null 
     }
   }
 
-  // Last resort: a card served at /.well-known/... usually sits alongside the
-  // service root. Only used when the card names nothing at all.
-  try {
-    const u = new URL(cardUrl)
-    if (u.pathname.includes('/.well-known/')) {
-      return `${u.origin}${u.pathname.split('/.well-known/')[0] || ''}`
-    }
-  } catch { /* fall through */ }
   return null
+}
+
+export function argumentsForCase(tool: McpTool, testCase: TestCase, prompt: string): Record<string, unknown> | null {
+  if (!tool.inputSchema || typeof tool.inputSchema !== 'object') return null
+  const schema = tool.inputSchema as {
+    type?: unknown; properties?: Record<string, unknown>; required?: unknown
+  }
+  if (schema.type !== 'object' || !schema.properties) return null
+  const subject = Object.values(testCase.subject).find((value) => /^0x[a-fA-F0-9]{40}$/.test(value))
+  const values: Record<string, unknown> = {
+    query: prompt, prompt, message: prompt,
+    task: { testId: testCase.testId, subject: testCase.subject, policy: testCase.policy, blockNumber: testCase.blockNumber.toString() },
+    input: { testId: testCase.testId, subject: testCase.subject, policy: testCase.policy, blockNumber: testCase.blockNumber.toString() },
+    address: subject, subject, wallet: subject, account: subject,
+    blockNumber: testCase.blockNumber.toString(), block_number: testCase.blockNumber.toString(),
+    chainId: 56, chain_id: 56, policy: testCase.policy,
+    positionTokenId: testCase.subject['tokenId'], tokenId: testCase.subject['tokenId'],
+    pair: (testCase.policy as Record<string, unknown>)['pair'],
+  }
+  const args: Record<string, unknown> = {}
+  for (const key of Object.keys(schema.properties)) if (values[key] !== undefined) args[key] = values[key]
+  const required = Array.isArray(schema.required) ? schema.required.filter((key): key is string => typeof key === 'string') : []
+  return required.every((key) => key in args) ? args : null
 }
 
 /** Extract a JSON object from a response that may wrap or stringify it. */
@@ -175,25 +192,57 @@ export function mcpAdapter(agentId: string, name: string, endpoint: string): Con
   return {
     agentId,
     name,
-    async ask(_testCase: TestCase, prompt: string) {
+    async ask(testCase: TestCase, prompt: string) {
       const started = Date.now()
       const rpc = (id: number, method: string, params: unknown) =>
         JSON.stringify({ jsonrpc: '2.0', id, method, params })
 
-      const list = await safeFetch(endpoint, {
+      const init = await safeFetch(endpoint, {
         method: 'POST',
         headers: { 'content-type': 'application/json', accept: 'application/json, text/event-stream' },
-        body: rpc(1, 'tools/list', {}),
+        body: rpc(1, 'initialize', {
+          protocolVersion: '2024-11-05', capabilities: {},
+          clientInfo: { name: 'marque-mcs', version: '0.1.0' },
+        }),
+        timeoutMs: 20_000,
+      })
+      if (!init.ok) return { response: null, latencyMs: Date.now() - started, error: `unreachable: ${init.failure}` }
+      if (init.status >= 400) return { response: null, latencyMs: Date.now() - started, error: `no_compatible_interface: MCP initialize returned http ${init.status}` }
+      let protocolVersion: string | null = null
+      try {
+        const body = init.body.includes('data:')
+          ? (init.body.split('\n').find((line) => line.startsWith('data:'))?.slice(5).trim() ?? init.body)
+          : init.body
+        const parsed = JSON.parse(body) as { result?: { protocolVersion?: unknown } }
+        protocolVersion = typeof parsed.result?.protocolVersion === 'string' ? parsed.result.protocolVersion : null
+      } catch { /* checked below */ }
+      if (!protocolVersion) return { response: null, latencyMs: Date.now() - started, error: 'no_compatible_interface: MCP initialize returned no protocol version' }
+      const sessionId = init.headers['mcp-session-id']
+      const sessionHeaders: Record<string, string> = sessionId ? { 'mcp-session-id': sessionId } : {}
+      const ready = await safeFetch(endpoint, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', accept: 'application/json, text/event-stream', ...sessionHeaders },
+        body: JSON.stringify({ jsonrpc: '2.0', method: 'notifications/initialized', params: {} }),
+        timeoutMs: 20_000,
+      })
+      if (!ready.ok || ready.status >= 400) {
+        return { response: null, latencyMs: Date.now() - started, error: 'no_compatible_interface: MCP initialized notification failed' }
+      }
+
+      const list = await safeFetch(endpoint, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', accept: 'application/json, text/event-stream', ...sessionHeaders },
+        body: rpc(2, 'tools/list', {}),
         timeoutMs: 20_000,
       })
       if (!list.ok) return { response: null, latencyMs: Date.now() - started, error: `unreachable: ${list.failure}` }
 
-      let tools: Array<{ name?: string; description?: string }> = []
+      let tools: McpTool[] = []
       try {
         const payload = list.body.includes('data:')
           ? (list.body.split('\n').find((l) => l.startsWith('data:'))?.slice(5).trim() ?? list.body)
           : list.body
-        const d = JSON.parse(payload) as { result?: { tools?: Array<{ name?: string; description?: string }> } }
+        const d = JSON.parse(payload) as { result?: { tools?: McpTool[] } }
         tools = d.result?.tools ?? []
       } catch { /* handled below */ }
 
@@ -205,8 +254,9 @@ export function mcpAdapter(agentId: string, name: string, endpoint: string): Con
       // calling. Guessing at an unrelated tool would produce a meaningless
       // failure attributed to the agent.
       const wanted = /position|liquid|health|factor|yield|apr|apy|grid|rebalanc|venus|pancake/i
-      const tool = tools.find((t) => wanted.test(`${t.name ?? ''} ${t.description ?? ''}`))
-      if (!tool?.name) {
+      const compatible = tools.map((tool) => ({ tool, args: argumentsForCase(tool, testCase, prompt) }))
+        .find(({ tool, args }) => wanted.test(`${tool.name ?? ''} ${tool.description ?? ''}`) && args !== null)
+      if (!compatible?.tool.name || !compatible.args) {
         return {
           response: { availableTools: tools.map((t) => t.name).filter(Boolean) },
           latencyMs: Date.now() - started,
@@ -216,8 +266,8 @@ export function mcpAdapter(agentId: string, name: string, endpoint: string): Con
 
       const call = await safeFetch(endpoint, {
         method: 'POST',
-        headers: { 'content-type': 'application/json', accept: 'application/json, text/event-stream' },
-        body: rpc(2, 'tools/call', { name: tool.name, arguments: { query: prompt } }),
+        headers: { 'content-type': 'application/json', accept: 'application/json, text/event-stream', ...sessionHeaders },
+        body: rpc(3, 'tools/call', { name: compatible.tool.name, arguments: compatible.args }),
         timeoutMs: 45_000,
       })
       const latencyMs = Date.now() - started
