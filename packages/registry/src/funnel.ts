@@ -175,36 +175,46 @@ export async function categoryFunnel(chainId = 56): Promise<CategoryFunnelRow[]>
 async function categoryFunnelUncached(chainId = 56): Promise<CategoryFunnelRow[]> {
   const d = db()
   const owners = MARQUE_REFERENCE_OWNERS.length > 0
-    ? sql`lower(a.owner_address) in (${sql.join(MARQUE_REFERENCE_OWNERS.map((o) => sql`${o.toLowerCase()}`), sql`, `)})`
+    ? sql`lower(b.owner_address) in (${sql.join(MARQUE_REFERENCE_OWNERS.map((o) => sql`${o.toLowerCase()}`), sql`, `)})`
     : sql`false`
 
   const rows = await d.execute(sql`
     with base as (select * from agent where chain_id = ${chainId}),
-    latest_probe as (
-      select distinct on (agent_id) agent_id, ok, liveness
-      from probe order by agent_id, checked_at desc
+    latest_service_probe as (
+      select distinct on (service_id) service_id, liveness, executable_endpoint, task_kinds, checked_at
+      from probe where service_id is not null order by service_id, checked_at desc
     ),
-    labelled as (
+    labelled_services as (
       select c.category, b.id, b.owner_address,
              (${owners}) as is_reference,
-             exists (select 1 from agent_service s where s.agent_id = b.id) as has_service,
-             p.liveness,
-             (select regexp_replace(coalesce(s2.resolved_endpoint, s2.endpoint), '^(https?://[^/]+).*', '\\1')
-              from agent_service s2 where s2.agent_id = b.id limit 1) as host
+             s.id as service_id, s.kind, p.liveness, p.executable_endpoint, p.task_kinds, p.checked_at,
+             regexp_replace(coalesce(s.resolved_endpoint, s.endpoint), '^(https?://[^/]+).*', '\\1') as host
       from base b
       join agent_category c on c.agent_id = b.id
-      left join latest_probe p on p.agent_id = b.id
+      left join agent_service s on s.agent_id = b.id
+      left join latest_service_probe p on p.service_id = s.id
       where c.category <> 'unclassified'
     )
     select category,
-           count(*) as registered,
-           count(*) filter (where has_service) as has_service_metadata,
-           count(distinct host) filter (where liveness in ('live','unbound','bad_schema')) as reachable_now,
-           count(*) as classified,
-           count(distinct host) filter (where liveness = 'live' and not is_reference) as third_party_executable,
-           count(*) filter (where liveness = 'live' and not is_reference) as third_party_registrations,
+           count(distinct id) as registered,
+           count(distinct id) filter (where service_id is not null) as has_service_metadata,
+           count(distinct host) filter (where liveness in ('live','unbound','bad_schema')
+             and checked_at > now() - interval '24 hours') as reachable_now,
+           count(distinct id) as classified,
+           count(distinct host) filter (where liveness = 'live' and executable_endpoint is not null
+             and checked_at > now() - interval '24 hours' and kind in ('a2a','mcp') and not is_reference
+             and task_kinds ? case category
+               when 'rebalancing' then 'rebalance' when 'grid' then 'grid'
+               when 'yield' then 'yield' when 'health_factor' then 'health_factor'
+               else '__unsupported__' end) as third_party_executable,
+           count(distinct id) filter (where liveness = 'live' and executable_endpoint is not null
+             and checked_at > now() - interval '24 hours' and kind in ('a2a','mcp') and not is_reference
+             and task_kinds ? case category
+               when 'rebalancing' then 'rebalance' when 'grid' then 'grid'
+               when 'yield' then 'yield' when 'health_factor' then 'health_factor'
+               else '__unsupported__' end) as third_party_registrations,
            count(distinct owner_address) filter (where is_reference) as reference_agents
-    from labelled
+    from labelled_services
     group by category
     order by category
   `)

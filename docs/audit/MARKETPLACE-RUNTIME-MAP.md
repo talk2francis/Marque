@@ -57,6 +57,9 @@ The live supply funnel computes independent identity counts for registered,
 metadata-readable, service-declaring, reachable, callable, task-compatible,
 qualified and hireable. Freshness is 24 hours and probe evidence is joined by
 exact service ID; qualification never supplies missing execution capability.
+Per-category “executable supplier” counts apply the same category/task match,
+then deduplicate hosts only for presentation; the underlying identity remains
+unchanged.
 
 ## Broken joins and duplicated decisions
 
