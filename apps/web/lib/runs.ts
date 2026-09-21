@@ -215,7 +215,12 @@ export async function startRun(input: StartRunInput): Promise<StartRunResult> {
   // Deliberately not awaited: the buyer gets the run URL now and watches the
   // timeline fill in. Failures are recorded on the run, never thrown into the
   // void — an unhandled rejection here would leave a run "running" forever.
-  void execute(runId, executor, task, charter, input.maxSpendUsd).catch(async (err: unknown) => {
+  const serviceEvidence: NonNullable<Receipt['service']> = {
+    serviceId: agent.serviceId, protocol: executor.kind,
+    discoveryEndpoint: agent.endpoint, executableEndpoint: agent.executableEndpoint,
+    probeId: agent.probeId,
+  }
+  void execute(runId, executor, task, charter, input.maxSpendUsd, serviceEvidence).catch(async (err: unknown) => {
     const detail = err instanceof Error ? (err.message.split('\n')[0] ?? err.message) : String(err)
     await recordEvent(runId, { kind: 'error', label: 'The run stopped unexpectedly', detail })
     const at = new Date().toISOString()
@@ -240,6 +245,13 @@ export async function startRun(input: StartRunInput): Promise<StartRunResult> {
       quality: { testId: null, pass: null, failedFields: [], caseId: null, groundTruthHash: null },
       artifactType: 'failure',
       failure: { stage: 'internal', class: 'INTERNAL_FAILURE', detail },
+      service: {
+        serviceId: agent.serviceId,
+        protocol: executor.kind,
+        discoveryEndpoint: agent.endpoint,
+        executableEndpoint: agent.executableEndpoint,
+        probeId: agent.probeId,
+      },
     })
     await db().update(runTable).set({
       status: 'failed', stage: 'internal', ok: false, failure: detail,
@@ -257,6 +269,7 @@ async function execute(
   task: StructuredTask,
   charter: Awaited<ReturnType<typeof readCharter>>,
   maxSpendUsd: number,
+  service: NonNullable<Receipt['service']>,
 ): Promise<void> {
   // Re-read immediately before the external call. A Charter can be revoked or
   // expire after run acceptance; the accepted run must then terminate as an
@@ -267,6 +280,7 @@ async function execute(
     executor,
     task,
     runId,
+    service,
     ctx: {
       buyer: task.subject,
       maxSpendUsd,

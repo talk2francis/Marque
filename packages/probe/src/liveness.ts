@@ -81,7 +81,15 @@ export function compatibleMcpTaskKinds(tool: McpToolDescriptor): TaskKind[] {
     typeof tool.name === 'string' ? tool.name : '',
     typeof tool.description === 'string' ? tool.description : '',
   ]) as TaskKind[]
-  return hinted.filter((kind) => required.every((key) => MCP_INPUTS[kind].has(key)))
+  const properties = new Set(Object.keys(schema.properties as Record<string, unknown>))
+  const acceptsStructuredTask = ['query', 'prompt', 'message', 'task', 'input'].some((key) => properties.has(key))
+  const representsTask: Record<TaskKind, boolean> = {
+    rebalance: acceptsStructuredTask || (properties.has('policy') && ['positionTokenId', 'tokenId', 'position_id'].some((key) => properties.has(key))),
+    grid: acceptsStructuredTask || (properties.has('policy') && properties.has('pair')),
+    yield: acceptsStructuredTask || properties.has('policy'),
+    health_factor: acceptsStructuredTask || (properties.has('policy') && ['address', 'subject', 'wallet', 'account'].some((key) => properties.has(key))),
+  }
+  return hinted.filter((kind) => representsTask[kind] && required.every((key) => MCP_INPUTS[kind].has(key)))
 }
 
 /** Map a transport failure onto our stored taxonomy. */
@@ -148,7 +156,11 @@ function skillNames(raw: unknown): string[] {
   return out
 }
 
-/** A2A: fetch the agent card and decide whether anything is actually callable. */
+/**
+ * A2A discovery reads the card only. A2A defines no side-effect-free
+ * capability RPC proving that `message/send` accepts work, so discovery must
+ * not promote a service to callable or task-compatible.
+ */
 export async function probeA2A(url: string): Promise<ProbeOutcome> {
   const res = await safeFetch(url, { timeoutMs: 8_000, maxBytes: 512 * 1024 })
   if (!res.ok) return dead(res.detail, failureFromFetch(res.failure), res.latencyMs, res.status ?? null)
@@ -209,14 +221,24 @@ export async function probeA2A(url: string): Promise<ProbeOutcome> {
     }
   }
 
+  const advertisedTaskKinds = taskKindsFromText(skillDescriptions)
   return {
-    ok: true, liveness: 'live', latencyMs: res.latencyMs, statusCode: res.status,
-    failureClass: null,
-    detail: `bound, ${skills.length} skill(s)`,
+    ok: false, liveness: 'unbound', latencyMs: res.latencyMs, statusCode: res.status,
+    failureClass: 'unbound',
+    detail: `card readable; task endpoint discovered; message/send not validated (${skills.length} advertised skill(s))`,
     skills, executableEndpoint: executable, reportedName: name,
     protocolVersion: d.version ?? null,
-    taskKinds: taskKindsFromText(skillDescriptions),
-    manifest: { name, url: executable, skills: d.skills ?? nested['skills'] ?? [] },
+    taskKinds: [],
+    manifest: {
+      name, url: executable, skills: d.skills ?? nested['skills'] ?? [], advertisedTaskKinds,
+      capabilityEvidence: {
+        cardReadable: true,
+        endpointDiscovered: executable !== null,
+        endpointReachable: null,
+        messageSendCallable: null,
+        taskCompatible: [],
+      },
+    },
   }
 }
 

@@ -47,14 +47,15 @@ export default async function CharterDeskPage({
    * first in that list — always a Marque reference agent. Choosing a different
    * counterparty than the one asked for is the one thing this desk must never do.
    */
-  const category = params.category && isCharterCategory(params.category)
-    ? params.category
-    : 'rebalancing'
+  const unsupportedCategory = params.category !== undefined && !isCharterCategory(params.category)
+  const category = params.category && isCharterCategory(params.category) ? params.category : 'rebalancing'
   const template = TEMPLATES[category]
   const requestedId = params.agent ?? null
-  const requested = requestedId ? await callableAgentById(requestedId, category).catch(() => null) : null
+  const requested = requestedId && !unsupportedCategory
+    ? await callableAgentById(requestedId, category).catch(() => null)
+    : null
 
-  const listed = await callableAgents(category).catch(() => [])
+  const listed = unsupportedCategory ? [] : await callableAgents(category).catch(() => [])
   // Put the requested agent in the list if the category query missed it.
   const agents = requested && !listed.some((a) => a.agentId === requested.agentId)
     ? [requested, ...listed]
@@ -108,7 +109,11 @@ export default async function CharterDeskPage({
           </p>
         )}
 
-        {!charterServiceAvailable() ? (
+        {unsupportedCategory ? (
+          <EmptyState title="This Charter category is not supported.">
+            <p>No agent was selected. Choose one of the four published Charter categories above.</p>
+          </EmptyState>
+        ) : !charterServiceAvailable() ? (
           <EmptyState title="Charters are not configured on this deployment.">
             <p>
               The charter service needs a testnet signer and the MarqueRegistry address. Without

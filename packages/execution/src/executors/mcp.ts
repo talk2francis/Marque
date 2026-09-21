@@ -1,4 +1,4 @@
-import { safeFetch, type SafeFetchOptions, type SafeFetchResult } from '@marque/probe'
+import { compatibleMcpTaskKinds, safeFetch, type SafeFetchOptions, type SafeFetchResult } from '@marque/probe'
 import { renderTaskPrompt, type StructuredTask } from '../tasks.js'
 import { extractJson, parseFeeUsd } from '../parse.js'
 import type {
@@ -65,6 +65,7 @@ export function argumentsForTool(tool: McpTool, task: StructuredTask, prompt = r
     chainId: task.chainId, chain_id: task.chainId,
     maxSpendUsd: task.maxSpendUsd, max_spend_usd: task.maxSpendUsd,
     policy: task.policy,
+    ...('asset' in task.policy ? { asset: task.policy.asset } : {}),
     ...(task.kind === 'rebalance' ? {
       positionTokenId: task.positionTokenId, tokenId: task.positionTokenId,
       position_id: task.positionTokenId,
@@ -158,6 +159,7 @@ export class McpExecutor implements AgentExecutor {
   private compatibleTool(tools: McpTool[], task: StructuredTask): { tool: McpTool; args: Record<string, unknown> } | null {
     for (const tool of tools) {
       if (!TOOL_HINTS[task.kind].test(`${tool.name ?? ''} ${tool.description ?? ''}`)) continue
+      if (!compatibleMcpTaskKinds(tool).includes(task.kind)) continue
       const args = argumentsForTool(tool, task)
       if (args) return { tool, args }
     }

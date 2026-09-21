@@ -40,6 +40,7 @@ describe('terminal evidence', () => {
         reason: 'unreachable', detail: 'agent card returned http 502',
       })) }),
       ctx: { buyer: task.subject, maxSpendUsd: 1, charterId: 'charter:1', allowlist: [] },
+      service: { serviceId: 77, protocol: 'a2a', discoveryEndpoint: 'https://agent.example/card', executableEndpoint: 'https://agent.example/a2a', probeId: 9 },
     })
     expect(out.ok).toBe(false)
     expect(out.stage).toBe('quote')
@@ -48,6 +49,7 @@ describe('terminal evidence', () => {
       failure: { stage: 'quote', class: 'unreachable' },
       execution: { ok: false, txHashes: [] },
       commercial: { settled: false },
+      service: { serviceId: 77, protocol: 'a2a', probeId: 9 },
     })
     expect(out.receiptHash).toMatch(/^0x[0-9a-f]{64}$/)
   })
@@ -60,6 +62,29 @@ describe('terminal evidence', () => {
     expect(out.stage).toBe('authority')
     expect(out.receipt?.failure).toMatchObject({ stage: 'authority', class: 'AUTHORIZATION_FAILED' })
     expect(out.receipt?.authority.withinAuthority).toBe(false)
+  })
+
+  it.each([
+    ['timeout', 'agent timed out'],
+    ['unusable_response', 'response was malformed'],
+    ['no_compatible_interface', 'no compatible tool'],
+  ] as const)('issues an execute-stage receipt for %s', async (reason, detail) => {
+    const out = await runHire({
+      runId: `execute-${reason}`, task,
+      executor: executor({ execute: vi.fn(async () => ({
+        ok: false, agentId: '56:registry:1', kind: 'a2a', result: null,
+        txHashes: [], feeUsd: null, latencyMs: 5,
+        startedAt: '2026-09-21T00:00:00Z', finishedAt: '2026-09-21T00:00:01Z',
+        reason, detail,
+      })) }),
+      ctx: { buyer: task.subject, maxSpendUsd: 1, allowlist: [] },
+      service: { serviceId: 77, protocol: 'a2a', discoveryEndpoint: 'https://agent.example/card', executableEndpoint: 'https://agent.example/a2a', probeId: 9 },
+    })
+    expect(out.stage).toBe('execute')
+    expect(out.receipt).toMatchObject({
+      artifactType: 'failure', failure: { stage: 'execute', class: reason },
+      service: { serviceId: 77, protocol: 'a2a', probeId: 9 },
+    })
   })
 })
 

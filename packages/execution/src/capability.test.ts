@@ -15,7 +15,7 @@ function service(overrides: Partial<ServiceCapabilityEvidence> = {}): ServiceCap
     liveness: 'live',
     failureClass: null,
     taskKinds: ['yield'],
-    manifest: { skills: [{ id: 'yield' }] },
+    manifest: { skills: [{ id: 'yield' }], capabilityEvidence: { messageSendCallable: true } },
     ...overrides,
   }
 }
@@ -51,6 +51,17 @@ describe('evaluateAgentState', () => {
     expect(state.reasons).toContain('TASK_CAPABILITY_UNVERIFIED')
   })
 
+  it('never mixes task evidence from one service with liveness from another', () => {
+    const state = evaluate({ services: [
+      service({ serviceId: 1, liveness: 'unbound', taskKinds: ['yield'] }),
+      service({ serviceId: 2, protocol: 'mcp', liveness: 'live', taskKinds: ['grid'] }),
+    ] })
+    expect(state.callable).toBe(true)
+    expect(state.compatible).toBe(false)
+    expect(state.selectedService).toBeNull()
+    expect(state.hireable).toBe(false)
+  })
+
   it('invalidates stale probes without erasing their historical evidence', () => {
     const state = evaluate({ services: [service({ probedAt: '2026-09-19T22:00:00.000Z' })] })
     expect(state.serviceDeclared).toBe(true)
@@ -75,5 +86,15 @@ describe('evaluateAgentState', () => {
       service({ serviceId: 7, protocol: 'a2a' }),
     ] })
     expect(state.selectedService?.serviceId).toBe(7)
+  })
+
+  it('does not promote a readable A2A card without message/send evidence', () => {
+    const state = evaluate({ services: [service({
+      manifest: { capabilityEvidence: { cardReadable: true, endpointDiscovered: true, messageSendCallable: null } },
+    })] })
+    expect(state.reachable).toBe(true)
+    expect(state.callable).toBe(false)
+    expect(state.hireable).toBe(false)
+    expect(state.reasons).toContain('A2A_TASK_ENDPOINT_UNRESOLVED')
   })
 })

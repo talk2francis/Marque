@@ -5,7 +5,7 @@ vi.mock('./agent-state', () => ({
   agentState,
   TASK_FOR_CATEGORY: { rebalancing: 'rebalance', grid: 'grid', yield: 'yield', health_factor: 'health_factor' },
 }))
-import { callableAgentById } from './agents'
+import { callableAgentById, callableAgents } from './agents'
 
 describe('explicit charter agent lookup', () => {
   beforeEach(() => { execute.mockReset(); agentState.mockReset(); vi.unstubAllEnvs() })
@@ -33,5 +33,29 @@ describe('explicit charter agent lookup', () => {
   it('never substitutes a reference agent when category does not match', async () => {
     vi.stubEnv('BOUND_PUBLIC_URL', 'https://example.com/bound/')
     expect(await callableAgentById('marque:bound', 'yield')).toBeNull()
+  })
+  it('uses canonical state for generic inventory and excludes an exact-Hire rejection', async () => {
+    execute.mockResolvedValue([{ agent_id: '56:registry:2468' }, { agent_id: '56:registry:9' }])
+    agentState.mockImplementation(async (id: string) => id.endsWith(':2468') ? {
+      agentId: id, tokenId: '2468', name: 'ClawdMint', hireable: false, selectedService: null,
+    } : {
+      agentId: id, tokenId: '9', name: 'Compatible', hireable: true,
+      selectedService: { serviceId: 12, protocol: 'mcp', discoveryEndpoint: 'https://ok.example/mcp', executableEndpoint: 'https://ok.example/mcp', probeId: 8 },
+    })
+    expect((await callableAgents('yield')).map((a) => a.agentId)).toEqual(['56:registry:9'])
+    expect(await callableAgentById('56:registry:2468', 'yield')).toBeNull()
+  })
+  it('fails unsupported categories closed', async () => {
+    expect(await callableAgents('not-a-category')).toEqual([])
+    expect(execute).not.toHaveBeenCalled()
+  })
+  it('generic and exact paths both reject stale evidence from canonical state', async () => {
+    execute.mockResolvedValue([{ agent_id: '56:registry:stale' }])
+    agentState.mockResolvedValue({
+      agentId: '56:registry:stale', tokenId: '10', name: 'Stale', hireable: false,
+      selectedService: null, reasons: ['PROBE_STALE'],
+    })
+    expect(await callableAgents('yield')).toEqual([])
+    expect(await callableAgentById('56:registry:stale', 'yield')).toBeNull()
   })
 })
