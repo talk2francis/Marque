@@ -1,14 +1,15 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-const { execute, agentState } = vi.hoisted(() => ({ execute: vi.fn(), agentState: vi.fn() }))
+const { execute, agentState, agentStates } = vi.hoisted(() => ({ execute: vi.fn(), agentState: vi.fn(), agentStates: vi.fn() }))
 vi.mock('@marque/db', () => ({ db: () => ({ execute }) }))
 vi.mock('./agent-state', () => ({
   agentState,
+  agentStates,
   TASK_FOR_CATEGORY: { rebalancing: 'rebalance', grid: 'grid', yield: 'yield', health_factor: 'health_factor' },
 }))
 import { callableAgentById, callableAgents } from './agents'
 
 describe('explicit charter agent lookup', () => {
-  beforeEach(() => { execute.mockReset(); agentState.mockReset(); vi.unstubAllEnvs() })
+  beforeEach(() => { execute.mockReset(); agentState.mockReset(); agentStates.mockReset(); vi.unstubAllEnvs() })
   it('resolves a third-party identity independently of category and the shortlist', async () => {
     agentState.mockResolvedValue({
       agentId: '56:registry:999', tokenId: '999', name: 'Third party', hireable: true,
@@ -42,6 +43,10 @@ describe('explicit charter agent lookup', () => {
       agentId: id, tokenId: '9', name: 'Compatible', hireable: true,
       selectedService: { serviceId: 12, protocol: 'mcp', discoveryEndpoint: 'https://ok.example/mcp', executableEndpoint: 'https://ok.example/mcp', probeId: 8 },
     })
+    agentStates.mockResolvedValue(new Map([
+      ['56:registry:2468', { agentId: '56:registry:2468', tokenId: '2468', name: 'ClawdMint', hireable: false, selectedService: null }],
+      ['56:registry:9', { agentId: '56:registry:9', tokenId: '9', name: 'Compatible', hireable: true, selectedService: { serviceId: 12, protocol: 'mcp', discoveryEndpoint: 'https://ok.example/mcp', executableEndpoint: 'https://ok.example/mcp', probeId: 8 } }],
+    ]))
     expect((await callableAgents('yield')).map((a) => a.agentId)).toEqual(['56:registry:9'])
     expect(await callableAgentById('56:registry:2468', 'yield')).toBeNull()
   })
@@ -55,6 +60,10 @@ describe('explicit charter agent lookup', () => {
       agentId: '56:registry:stale', tokenId: '10', name: 'Stale', hireable: false,
       selectedService: null, reasons: ['PROBE_STALE'],
     })
+    agentStates.mockResolvedValue(new Map([['56:registry:stale', {
+      agentId: '56:registry:stale', tokenId: '10', name: 'Stale', hireable: false,
+      selectedService: null, reasons: ['PROBE_STALE'],
+    }]]))
     expect(await callableAgents('yield')).toEqual([])
     expect(await callableAgentById('56:registry:stale', 'yield')).toBeNull()
   })

@@ -3,7 +3,31 @@
 Date: 2026-09-21  
 Branch: `hardening/third-party-marketplace`  
 Baseline: `a7aedb1`  
-Recommendation: **NO — do not deploy**
+Recommendation: **SUPERSEDED — see the authoritative current state below**
+
+## Authoritative current state — 2026-09-21 final release pass
+
+All findings below this section are retained as historical audit evidence.
+Where an older section says OPEN or recommends NO, this section is authoritative.
+
+| Finding | Current status | Evidence |
+|---|---|---|
+| Generic/exact Hire split and reference fallback | **RESOLVED** | Both paths call the same batched canonical evaluator; desktop/mobile equivalence tests pass. |
+| A2A card readability labelled callable | **RESOLVED** | Card-only evidence remains `unbound`; `messageSendCallable` must be explicitly proven. |
+| MCP preflight invoked the external tool | **RESOLVED** | Preflight now performs initialize/initialized/tools-list and schema selection only; `tools/call` occurs once during execution. |
+| Accepted failures lacked terminal evidence | **RESOLVED** | Accepted runs produce typed terminal receipts with exact service identity. |
+| Revoked/expired attempts had ambiguous receipt semantics | **RESOLVED** | Pre-acceptance attempts create immutable `run_rejection` evidence, never an execution receipt. |
+| Charter inventory N+1 | **RESOLVED** | Candidate IDs are evaluated in three bounded queries by `agentStates`. |
+| Global legacy capability counts | **ACCEPTED LIMITATION** | Migration 0012 is applied; current counts publish fresh coverage separately while the resumable worker re-probes the remaining population. |
+| Broad independent interoperability | **OPEN P2 / ecosystem breadth** | 128 targeted services inspected; one exact MCP health-factor schema is compatible. No unsupported service is offered for Hire. |
+| Third-party payment/settlement | **OPEN P2** | Discovery is represented separately; no external payment was made or claimed. |
+
+Production migration 0012 and additive rejection migration 0013 were applied
+through Drizzle after a dual-location verified backup. Post-migration counts
+showed no loss of agents, services, probes, runs or receipts. Final deployment
+and smoke evidence is recorded in `FINAL-PRODUCTION-RELEASE.md`.
+
+## Historical release-verification record (superseded where noted above)
 
 ## 2026-09-21 semantic-hardening follow-up
 

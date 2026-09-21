@@ -32,6 +32,24 @@ export async function agentState(
   requestedTask: TaskKind | null,
   now = new Date(),
 ): Promise<AgentStateView | null> {
+  return (await agentStates([agentId], requestedTask, now)).get(agentId) ?? null
+}
+
+/**
+ * Canonically evaluate several identities from three bounded queries.
+ *
+ * This is deliberately the implementation behind `agentState`, rather than a
+ * second SQL approximation of hireability.  Inventory and exact deep links
+ * therefore consume the same evaluator, evidence tuple and freshness clock.
+ */
+export async function agentStates(
+  agentIds: readonly string[],
+  requestedTask: TaskKind | null,
+  now = new Date(),
+): Promise<Map<string, AgentStateView>> {
+  const ids = [...new Set(agentIds)].filter(Boolean)
+  if (ids.length === 0) return new Map()
+  const idList = sql.join(ids.map((id) => sql`${id}`), sql`, `)
   const [identityResult, serviceResult, qualificationResult] = await Promise.all([
     db().execute(sql`
       select a.id, a.token_id, coalesce(a.name, 'Unnamed agent') as name,
@@ -43,8 +61,7 @@ export async function agentState(
         order by (category <> 'unclassified') desc, confidence desc, assigned_at desc
         limit 1
       ) c on true
-      where a.id = ${agentId} and a.chain_id = 56 and a.id <> 'canary:ssrf'
-      limit 1
+      where a.id in (${idList}) and a.chain_id = 56 and a.id <> 'canary:ssrf'
     `),
     db().execute(sql`
       with latest as (
@@ -52,7 +69,7 @@ export async function agentState(
           id as probe_id, service_id, checked_at, liveness, failure_class,
           executable_endpoint, task_kinds, manifest
         from probe
-        where agent_id = ${agentId} and service_id is not null
+        where agent_id in (${idList}) and service_id is not null
         order by service_id, checked_at desc
       )
       select s.id as service_id, s.agent_id, s.kind,
@@ -63,22 +80,25 @@ export async function agentState(
              coalesce(l.task_kinds, '[]'::jsonb) as task_kinds, l.manifest
       from agent_service s
       left join latest l on l.service_id = s.id
-      where s.agent_id = ${agentId}
+      where s.agent_id in (${idList})
       order by s.id
     `),
     db().execute(sql`
-      select test_id, pass, ran_at
+      select distinct on (agent_id) agent_id, test_id, pass, ran_at
       from conformance_result
-      where agent_id = ${agentId}
-      order by ran_at desc
-      limit 1
+      where agent_id in (${idList})
+      order by agent_id, ran_at desc
     `),
   ])
 
-  const identity = rowsOf(identityResult)[0]
-  if (!identity) return null
-
-  const services: ServiceCapabilityEvidence[] = rowsOf(serviceResult).map((row) => ({
+  const serviceRows = rowsOf(serviceResult)
+  const qualificationRows = rowsOf(qualificationResult)
+  const result = new Map<string, AgentStateView>()
+  for (const identity of rowsOf(identityResult)) {
+    const agentId = String(identity['id'])
+    const services: ServiceCapabilityEvidence[] = serviceRows
+      .filter((row) => String(row['agent_id']) === agentId)
+      .map((row) => ({
     serviceId: Number(row['service_id']),
     agentId: String(row['agent_id']),
     protocol: String(row['kind']),
@@ -94,36 +114,37 @@ export async function agentState(
     manifest: row['manifest'] && typeof row['manifest'] === 'object'
       ? row['manifest'] as Record<string, unknown>
       : null,
-  }))
+      }))
 
-  const q = rowsOf(qualificationResult)[0]
-  const qualification: QualificationEvidence | null = q ? {
+    const q = qualificationRows.find((row) => String(row['agent_id']) === agentId)
+    const qualification: QualificationEvidence | null = q ? {
     testId: String(q['test_id']),
     passed: q['pass'] === true,
     measuredAt: q['ran_at'] instanceof Date ? (q['ran_at'] as Date).toISOString() : String(q['ran_at']),
     stale: now.getTime() - new Date(q['ran_at'] as string | Date).getTime() > 72 * 60 * 60_000,
-  } : null
+    } : null
 
-  const category = identity['category'] == null ? null : String(identity['category'])
-  const state = evaluateAgentState({
-    agentId,
-    registered: true,
-    metadataReadable: identity['detail_fetched'] === true,
-    category,
-    requestedTask,
-    services,
-    qualification,
-    authorizable: requestedTask !== null && TASK_FOR_CATEGORY[category ?? ''] === requestedTask,
-    quoteableProtocols: ['x402', 'erc8183'],
-    settleableServiceIds: [],
-    now,
-  })
+    const category = identity['category'] == null ? null : String(identity['category'])
+    const state = evaluateAgentState({
+      agentId,
+      registered: true,
+      metadataReadable: identity['detail_fetched'] === true,
+      category,
+      requestedTask,
+      services,
+      qualification,
+      authorizable: requestedTask !== null && TASK_FOR_CATEGORY[category ?? ''] === requestedTask,
+      quoteableProtocols: ['x402', 'erc8183'],
+      settleableServiceIds: [],
+      now,
+    })
 
-  return {
-    ...state,
-    tokenId: identity['token_id'] == null ? null : String(identity['token_id']),
-    name: String(identity['name']),
-    ownerAddress: identity['owner_address'] == null ? null : String(identity['owner_address']),
+    result.set(agentId, {
+      ...state,
+      tokenId: identity['token_id'] == null ? null : String(identity['token_id']),
+      name: String(identity['name']),
+      ownerAddress: identity['owner_address'] == null ? null : String(identity['owner_address']),
+    })
   }
+  return result
 }
-

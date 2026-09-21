@@ -3,6 +3,21 @@
 Baseline: 2026-09-21. This matrix is intentionally negative where production
 evidence is absent. “Receipt” is not synonymous with settlement or success.
 
+## Authoritative current-state corrections
+
+The original rows below are preserved as the claim audit at discovery time.
+These corrections supersede conflicting statuses without erasing the failure:
+
+| Claim | Current status | Current evidence |
+|---|---|---|
+| Third-party Hire uses the exact selected identity/service | PROVEN in tests | Canonical batched state, deep-link/generic equivalence, immutable run/receipt service tuple. |
+| A readable A2A card is callable | FALSE by design | Card readability and endpoint discovery do not set `messageSendCallable`. |
+| MCP is protocol-correct | PROVEN for discovery; live execution scoped | initialize → initialized → tools/list; schema-derived tools/call exactly once. |
+| Every accepted attempt terminates in evidence | PROVEN in tests | Typed success/failure receipt; pre-acceptance rejection is a separate immutable artifact. |
+| Receipt means settlement | FALSE | Artifact type and commercial settlement remain separate. |
+| All indexed identities are callable/hireable | FALSE | The UI/API expose distinct stages and fresh coverage. |
+| Third-party settlement is supported generally | UNPROVEN | No claim or enabled fallback; no external funds spent. |
+
 | Claim | Surface | Source file | Code path | Test | Live evidence | Status | Severity | Action |
 |---|---|---|---|---|---|---|---|---|
 | Third-party agents can be hired | README, Marketplace, homepage | `README.md`, `MarketCells.tsx`, `page.tsx` | Marketplace `hireable` is protocol-kind membership | None E2E | No independent third-party run/receipt found in audited candidates | FALSE | P0 | Gate Hire on exact verified service/task path |

@@ -40,6 +40,17 @@ describe('MCP task compatibility discovery', () => {
       inputSchema: { type: 'object', properties: { asset: { type: 'string' } }, required: [] },
     })).toEqual([])
   })
+
+  it('recognises an explicit borrower and target-health-factor schema', () => {
+    expect(compatibleMcpTaskKinds({
+      name: 'analyse_health_factor',
+      inputSchema: {
+        type: 'object',
+        properties: { borrower: { type: 'string' }, targetHealthFactor: { type: 'number' } },
+        required: ['borrower', 'targetHealthFactor'],
+      },
+    })).toEqual(['health_factor'])
+  })
 })
 
 describe('A2A discovery evidence', () => {

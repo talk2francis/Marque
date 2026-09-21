@@ -487,6 +487,29 @@ export const runEvent = pgTable('run_event', {
   runAtIdx: index('run_event_run_idx').on(t.runId, t.at),
 }))
 
+/**
+ * FIRST-PARTY. An attempted run rejected before acceptance.
+ *
+ * These are not execution receipts: no run was accepted and no external work
+ * occurred.  The append-only row makes revoked/expired/unauthorised attempts
+ * inspectable without corrupting receipt semantics.
+ */
+export const runRejection = pgTable('run_rejection', {
+  id: text('id').primaryKey(),
+  charterId: text('charter_id').notNull(),
+  agentId: text('agent_id').notNull(),
+  serviceId: integer('service_id'),
+  protocol: text('protocol'),
+  taskKind: text('task_kind').notNull(),
+  subject: text('subject').notNull(),
+  reason: text('reason').notNull(),
+  detail: text('detail').notNull(),
+  rejectedAt: timestamp('rejected_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({
+  charterAtIdx: index('run_rejection_charter_idx').on(t.charterId, t.rejectedAt.desc()),
+  agentAtIdx: index('run_rejection_agent_idx').on(t.agentId, t.rejectedAt.desc()),
+}))
+
 /** FIRST-PARTY. The four-proof receipt, and its anchor. */
 export const receipt = pgTable('receipt', {
   /** Same id as the run. One run, one receipt. */
@@ -514,6 +537,8 @@ export type Run = typeof run.$inferSelect
 export type NewRun = typeof run.$inferInsert
 export type RunEvent = typeof runEvent.$inferSelect
 export type NewRunEvent = typeof runEvent.$inferInsert
+export type RunRejection = typeof runRejection.$inferSelect
+export type NewRunRejection = typeof runRejection.$inferInsert
 export type ReceiptRow = typeof receipt.$inferSelect
 export type NewReceiptRow = typeof receipt.$inferInsert
 

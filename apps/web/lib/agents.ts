@@ -1,7 +1,7 @@
 import 'server-only'
 import { sql } from 'drizzle-orm'
 import { db } from '@marque/db'
-import { agentState, TASK_FOR_CATEGORY } from './agent-state'
+import { agentState, agentStates, TASK_FOR_CATEGORY } from './agent-state'
 
 /**
  * Agents that can actually be hired in a category.
@@ -112,7 +112,30 @@ export async function callableAgents(category: string, limit = 12): Promise<Call
     limit ${Math.max(limit * 8, 48)}
   `)
   const list = ((rows as unknown as { rows?: unknown[] }).rows ?? (rows as unknown as unknown[])) as Array<Record<string, unknown>>
-  const evaluated = await Promise.all(list.map((r) => callableAgentById(String(r['agent_id']), category)))
+  const ids = list.map((r) => String(r['agent_id']))
+  const states = await agentStates(ids, task)
+  const evaluated = ids.map((agentId): CallableAgent | null => {
+    const state = states.get(agentId)
+    const service = state?.selectedService
+    if (!state?.hireable || !service) return null
+    const endpoint = service.protocol === 'a2a' || service.protocol === 'termix'
+      ? service.discoveryEndpoint
+      : service.executableEndpoint
+    if (!endpoint) return null
+    return {
+      agentId: state.agentId,
+      tokenId: state.tokenId ?? '',
+      name: state.name,
+      kind: service.protocol,
+      endpoint,
+      host: new URL(endpoint).origin,
+      latencyMs: null,
+      isReference: false,
+      serviceId: service.serviceId,
+      executableEndpoint: service.executableEndpoint,
+      probeId: service.probeId,
+    }
+  })
   const seenHosts = new Set<string>()
   const indexed: CallableAgent[] = []
   for (const candidate of evaluated) {

@@ -96,23 +96,12 @@ with real money at risk — is the proof run above.
 
 ## What Marque is
 
-There are ~311,000 agents registered on BSC. Almost none of them work: they
-answer an HTTP probe but were never bound to a runtime, or they answer with
-numbers that do not survive arithmetic. Our own measured funnel (live — the
-homepage recomputes it, and shows the registry's own headline count beside the
-number Marque has fully indexed):
-
-```
-Registered on BSC          ~308,800   indexed from the ERC-8004 registry
-Declares a parseable service  30,357   has an endpoint in its metadata
-Endpoint responds             30,028   answered our probe with a well-formed response
-Bound and callable             6,105   exposes something a buyer could hire
-Classified into a category       508   matched a category-defining term
-Classified and callable now      100   both of the above, at the last probe
-```
-
-Those are a snapshot (2026-09-08). The live figures are at
-**https://marque.trade/api/v1/funnel** and move as the index sweeps.
+Marque indexes the BSC ERC-8004 registry, but registration is not execution.
+The live funnel at **https://marque.trade/api/v1/funnel** separately reports
+metadata readability, declared services, fresh reachability, protocol
+callability, task compatibility, qualification and Hire eligibility, together
+with fresh-evaluation coverage. It never presents the indexed identity count
+as a count of working agents.
 
 Marque makes that difference legible. Four categories, each a different kind of
 arithmetic with its own published test — **Rebalancing**, **Grid trading**,

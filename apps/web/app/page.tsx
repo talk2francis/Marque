@@ -331,7 +331,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ a
                   ['Metadata readable', metadataReadable, 'identity detail was fetched and parsed'],
                   ['Declares a service', declaring, 'has at least one normalized endpoint'],
                   ['Reachable', reachable, 'an exact service returned protocol-shaped evidence within 24 hours'],
-                  ['Callable', callable, 'a fresh A2A or MCP service declares an executable endpoint'],
+                  ['Callable', callable, 'a fresh protocol interaction proves an executable interface'],
                   ['Task compatible', compatible, 'a callable service accepts a Marque task schema'],
                   ['Qualified', qualified, 'has passed a published MCS case'],
                   ['Hireable', hireableCount, 'compatible service matches its current category and Charter task'],

@@ -16,7 +16,7 @@ describe('canonical database-backed agent state', () => {
         probe_id: 11, checked_at: new Date('2026-09-20T23:00:00Z'), liveness: 'live', failure_class: null,
         task_kinds: ['yield'], manifest: { skills: [{ id: 'yield' }], capabilityEvidence: { messageSendCallable: true } },
       }] })
-      .mockResolvedValueOnce({ rows: [{ test_id: 'MCS-YIELD-1', pass: false, ran_at: new Date('2026-09-20T22:00:00Z') }] })
+      .mockResolvedValueOnce({ rows: [{ agent_id: '56:registry:9', test_id: 'MCS-YIELD-1', pass: false, ran_at: new Date('2026-09-20T22:00:00Z') }] })
 
     const state = await agentState('56:registry:9', 'yield', new Date('2026-09-21T00:00:00Z'))
     expect(state).toMatchObject({

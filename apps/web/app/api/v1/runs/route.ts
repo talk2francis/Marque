@@ -37,6 +37,6 @@ export async function POST(request: Request) {
   }
 
   const result = await startRun({ ...input, charterToken: bearerToken(request) })
-  if (!result.ok) return NextResponse.json({ error: result.error }, { status: 400 })
+  if (!result.ok) return NextResponse.json({ error: result.error, rejectionId: result.rejectionId }, { status: 400 })
   return NextResponse.json({ runId: result.runId, url: `/runs/${result.runId}` }, { status: 202 })
 }

@@ -51,7 +51,7 @@ export function taskKindsFromText(values: readonly string[]): string[] {
   if (/rebalanc|liquidity\s*range|position\s*range|pancake|clmm|\blp\b/i.test(text)) kinds.push('rebalance')
   if (/\bgrid\b|ladder|price\s*levels?|\bdca\b/i.test(text)) kinds.push('grid')
   if (/\byield\b|\bapr\b|\bapy\b|lend|supply|venus|vault|earn/i.test(text)) kinds.push('yield')
-  if (/health\s*factor|liquidat|collateral|borrow|\bltv\b/i.test(text)) kinds.push('health_factor')
+  if (/health[\s_-]*factor|liquidat|collateral|borrow|\bltv\b/i.test(text)) kinds.push('health_factor')
   return kinds
 }
 
@@ -62,7 +62,7 @@ const MCP_INPUTS: Record<TaskKind, ReadonlySet<string>> = {
   rebalance: new Set(['query', 'prompt', 'message', 'task', 'input', 'address', 'subject', 'wallet', 'account', 'blockNumber', 'block_number', 'block', 'chainId', 'chain_id', 'maxSpendUsd', 'max_spend_usd', 'policy', 'positionTokenId', 'tokenId', 'position_id']),
   grid: new Set(['query', 'prompt', 'message', 'task', 'input', 'address', 'subject', 'wallet', 'account', 'blockNumber', 'block_number', 'block', 'chainId', 'chain_id', 'maxSpendUsd', 'max_spend_usd', 'policy', 'pair']),
   yield: new Set(['query', 'prompt', 'message', 'task', 'input', 'address', 'subject', 'wallet', 'account', 'blockNumber', 'block_number', 'block', 'chainId', 'chain_id', 'maxSpendUsd', 'max_spend_usd', 'policy']),
-  health_factor: new Set(['query', 'prompt', 'message', 'task', 'input', 'address', 'subject', 'wallet', 'account', 'blockNumber', 'block_number', 'block', 'chainId', 'chain_id', 'maxSpendUsd', 'max_spend_usd', 'policy']),
+  health_factor: new Set(['query', 'prompt', 'message', 'task', 'input', 'address', 'subject', 'wallet', 'account', 'borrower', 'blockNumber', 'block_number', 'block', 'chainId', 'chain_id', 'maxSpendUsd', 'max_spend_usd', 'policy', 'targetHealthFactor']),
 }
 
 /**
@@ -87,7 +87,10 @@ export function compatibleMcpTaskKinds(tool: McpToolDescriptor): TaskKind[] {
     rebalance: acceptsStructuredTask || (properties.has('policy') && ['positionTokenId', 'tokenId', 'position_id'].some((key) => properties.has(key))),
     grid: acceptsStructuredTask || (properties.has('policy') && properties.has('pair')),
     yield: acceptsStructuredTask || properties.has('policy'),
-    health_factor: acceptsStructuredTask || (properties.has('policy') && ['address', 'subject', 'wallet', 'account'].some((key) => properties.has(key))),
+    health_factor: acceptsStructuredTask || (
+      ['address', 'subject', 'wallet', 'account', 'borrower'].some((key) => properties.has(key))
+      && (properties.has('policy') || properties.has('targetHealthFactor'))
+    ),
   }
   return hinted.filter((kind) => representsTask[kind] && required.every((key) => MCP_INPUTS[kind].has(key)))
 }

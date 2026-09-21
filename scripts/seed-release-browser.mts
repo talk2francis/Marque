@@ -11,7 +11,7 @@ const now = new Date()
 
 await sql.begin(async (tx) => {
   for (const row of [
-    { id: `56:${registry}:2468`, token: '2468', name: 'ClawdMint release fixture', owner: '0x75b583c518215e272f3c0a3bcc1b27012f294adc' },
+    { id: `56:${registry}:2468`, token: '2468', name: 'ClawdMint', owner: '0x75b583c518215e272f3c0a3bcc1b27012f294adc' },
     { id: `56:${registry}:900001`, token: '900001', name: 'Compatible release fixture', owner: '0x0000000000000000000000000000000000090001' },
   ]) {
     await tx`insert into agent (id,chain_id,token_id,contract_address,owner_address,name,detail_fetched,detail_fetched_at)
