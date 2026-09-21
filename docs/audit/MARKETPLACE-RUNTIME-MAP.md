@@ -13,7 +13,7 @@ This document describes the code that runs, not the intended architecture.
 | Metadata enrichment | `packages/registry/src/ingest.ts` and `normalize.ts` | `agent.raw_metadata`, normalized identity fields | Untrusted registry metadata |
 | Service extraction | `packages/registry/src/normalize.ts::extractServices` reads top-level, off-chain array, and flat fields | `agent_service` | Untrusted URLs, protocol and price claims |
 | Classification | `apps/worker/src/classify.ts`, `packages/registry/src/classify.ts` | `agent_category` | Derived heuristic, not executable proof |
-| Service probing | `apps/worker/src/probe.ts` -> `packages/probe/src/worker.ts::runProbeCycle` -> `probeService` | append-only `probe` | Hostile network endpoint through `safeFetch` |
+| Service probing | `apps/worker/src/probe.ts` -> `packages/probe/src/worker.ts::runProbeCycle` -> `probeService` | append-only `probe`, indexed by `(service_id, checked_at desc)` | Hostile network endpoint through `safeFetch` |
 | A2A discovery | `packages/probe/src/liveness.ts::probeA2A` | probe liveness, skills, separately declared executable endpoint | Validated agent card; no endpoint is inferred from its URL |
 | MCP discovery | `packages/probe/src/liveness.ts::probeMCP` | protocol version, session, tools and schema-compatible task kinds | Successful `initialize` → `notifications/initialized` → `tools/list`; a GET descriptor is not callable proof |
 | Conformance | `apps/worker/src/conform.ts` -> `packages/conformance` | `conformance_case`, append-only `conformance_result` | Pinned test case and raw response |

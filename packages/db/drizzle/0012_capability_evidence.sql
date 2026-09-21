@@ -15,5 +15,6 @@ ALTER TABLE "run" ADD COLUMN "quote" jsonb;
 
 ALTER TABLE "receipt" ADD COLUMN "artifact_type" text DEFAULT 'execution' NOT NULL;
 
+CREATE INDEX "probe_service_checked_idx" ON "probe" USING btree ("service_id", "checked_at" DESC NULLS LAST);
 CREATE INDEX "run_service_idx" ON "run" USING btree ("service_id", "started_at" DESC NULLS LAST);
 CREATE INDEX "run_correlation_idx" ON "run" USING btree ("correlation_id");
