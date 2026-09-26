@@ -1,6 +1,7 @@
 import { sql, eq, and, inArray, desc } from 'drizzle-orm'
-import { db, agent, agentCategory, agentService, probe, type Category, type ServiceKind } from '@marque/db'
+import { db, agent, agentCategory, agentService, probe, type Category } from '@marque/db'
 import { probeService } from './liveness.js'
+import { syncSchedule, dueByTier, recordVerdicts, firstPartyAgentIds, type DueService, type Tier } from './schedule.js'
 
 /**
  * The probe worker.
@@ -22,28 +23,9 @@ export interface ProbeCycleResult {
   badSchema: number
   dead: number
   skippedBackoff: number
-}
-
-/**
- * Backoff schedule, in minutes, indexed by recent failure count.
- *
- * A dead endpoint is re-probed ever less often but is NEVER dropped — the
- * graveyard is a product feature. The SQL CASE that applies this is generated
- * from this array so the schedule lives in exactly one place.
- */
-export const BACKOFF_MINUTES = [5, 5, 15, 30, 60, 180, 360, 720, 1440] as const
-
-export function backoffFor(recentFailures: number): number {
-  const idx = Math.min(Math.max(0, recentFailures), BACKOFF_MINUTES.length - 1)
-  return BACKOFF_MINUTES[idx] as number
-}
-
-/** The schedule as a SQL CASE expression, so it can never drift from the array. */
-function backoffCaseSql(): string {
-  const branches = BACKOFF_MINUTES.slice(0, -1)
-    .map((mins, i) => `when coalesce(st.recent_failures, 0) = ${i} then ${mins}`)
-    .join('\n               ')
-  return `case\n               ${branches}\n               else ${BACKOFF_MINUTES[BACKOFF_MINUTES.length - 1]} end`
+  byTier?: Record<Tier, number>
+  scheduleInserted?: number
+  scheduleBackfilled?: boolean
 }
 
 async function mapLimit<T, R>(items: readonly T[], limit: number, fn: (t: T) => Promise<R>): Promise<R[]> {
@@ -72,8 +54,6 @@ async function mapLimit<T, R>(items: readonly T[], limit: number, fn: (t: T) => 
  * one in our own results. Politeness here is measurement accuracy.
  */
 const PER_HOST_CONCURRENCY = Number(process.env.PROBE_PER_HOST_CONCURRENCY ?? 3)
-/** Rows measured after this worker boot use the current capability model. */
-const CAPABILITY_MODEL_STARTED_AT = new Date()
 const CATEGORY_FOR_TASK: Readonly<Record<string, Category | undefined>> = {
   rebalance: 'rebalancing', grid: 'grid', yield: 'yield', health_factor: 'health_factor',
 }
@@ -107,79 +87,20 @@ class HostLimiter {
   }
 }
 
-interface Candidate {
-  serviceId: number
-  agentId: string
-  kind: ServiceKind
-  url: string
-}
-
-/**
- * Services due for a probe.
- *
- * "Due" accounts for backoff: an endpoint that has failed N times in a row is
- * only re-probed after BACKOFF_MINUTES[N]. Implemented in SQL so the worker
- * never pulls a candidate it is going to skip.
- */
-async function dueServices(limit: number, capabilityModelStartedAt: Date): Promise<Candidate[]> {
-  const d = db()
-  const rows = await d.execute(sql`
-    with latest as (
-      select distinct on (service_id)
-        service_id, checked_at, ok, liveness
-      from probe
-      where service_id is not null
-      order by service_id, checked_at desc
-    ),
-    streak as (
-      select p.service_id, count(*) filter (where not p.ok) as recent_failures
-      from probe p
-      where p.service_id is not null
-        and p.checked_at > now() - interval '2 days'
-      group by p.service_id
-    )
-    select s.id as service_id,
-           s.agent_id,
-           s.kind,
-           coalesce(s.resolved_endpoint, s.endpoint) as url,
-           coalesce(st.recent_failures, 0) as failures,
-           l.checked_at
-    from agent_service s
-    left join latest l on l.service_id = s.id
-    left join streak st on st.service_id = s.id
-    where (s.is_template = false or s.resolved_endpoint is not null)
-      and (
-        l.checked_at is null
-        or l.checked_at < now() - make_interval(mins => ${sql.raw(backoffCaseSql())})
-      )
-    order by
-      (l.checked_at >= ${capabilityModelStartedAt}) asc,
-      case s.kind when 'mcp' then 0 when 'a2a' then 1 when 'x402' then 2 when 'erc8183' then 3 else 4 end,
-      exists (
-        select 1 from agent_category c
-        where c.agent_id = s.agent_id and c.category <> 'unclassified'
-      ) desc,
-      l.checked_at asc nulls first
-    limit ${limit}
-  `)
-
-  const list = (rows as unknown as { rows?: unknown[] }).rows ?? (rows as unknown as unknown[])
-  return (list as Array<Record<string, unknown>>).map((r) => ({
-    serviceId: Number(r['service_id']),
-    agentId: String(r['agent_id']),
-    kind: String(r['kind']) as ServiceKind,
-    url: String(r['url']),
-  }))
-}
-
-export async function runProbeCycle(opts: { limit?: number; concurrency?: number } = {}): Promise<ProbeCycleResult> {
+export async function runProbeCycle(opts: { limit?: number; concurrency?: number; deadCap?: number } = {}): Promise<ProbeCycleResult> {
   const limit = opts.limit ?? 400
   const concurrency = opts.concurrency ?? 12
+  const deadCap = opts.deadCap ?? Number(process.env.PROBE_DEAD_CAP ?? 150)
   const d = db()
 
-  const candidates = await dueServices(limit, CAPABILITY_MODEL_STARTED_AT)
+  const sync = await syncSchedule()
+  const fpIds = await firstPartyAgentIds()
+  const candidates = await dueByTier(limit, deadCap, fpIds)
+  const byTier: Record<Tier, number> = { T0: 0, T1: 0, T1b: 0, T2: 0, T3: 0 }
+  for (const c of candidates) byTier[c.tier]++
   const result: ProbeCycleResult = {
     attempted: candidates.length, live: 0, unbound: 0, badSchema: 0, dead: 0, skippedBackoff: 0,
+    byTier, scheduleInserted: sync.inserted, scheduleBackfilled: sync.backfilled,
   }
   if (candidates.length === 0) return result
 
@@ -195,6 +116,7 @@ export async function runProbeCycle(opts: { limit?: number; concurrency?: number
     return {
       agentId: c.agentId,
       serviceId: c.serviceId,
+      checkedAt: new Date(),
       ok: outcome.ok,
       latencyMs: outcome.latencyMs,
       statusCode: outcome.statusCode,
@@ -210,9 +132,12 @@ export async function runProbeCycle(opts: { limit?: number; concurrency?: number
   })
 
   // Probe history is a first-party observation: append only, never updated.
+  const probeIds = new Map<number, number>()
   for (let i = 0; i < rows.length; i += 500) {
-    await d.insert(probe).values(rows.slice(i, i + 500))
+    const ins = await d.insert(probe).values(rows.slice(i, i + 500)).returning({ id: probe.id, serviceId: probe.serviceId })
+    for (const r of ins) if (r.serviceId !== null) probeIds.set(r.serviceId, r.id)
   }
+  await recordVerdicts(rows.map((r, i) => ({ due: candidates[i] as DueService, liveness: r.liveness, checkedAt: r.checkedAt, probeId: probeIds.get(r.serviceId) ?? null })))
   // A single schema-proven task kind is stronger category evidence than copy.
   // Add the derived label without deleting the historical unclassified row.
   for (const row of rows) {

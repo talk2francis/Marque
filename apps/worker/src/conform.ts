@@ -9,13 +9,19 @@
  * retains only ~64 blocks of state and a stale case grades agents against a
  * position that may no longer resemble the chain.
  */
-import { CASES, captureCase, runConformance, formatOutcome, type TestId } from '@marque/conformance'
-import { safeFetch } from '@marque/probe'
-import { db, closeDb } from '@marque/db'
+import { CASES, captureCase, runConformance, formatOutcome, a2aAdapter, type TestId } from '@marque/conformance'
+import { safeFetch, firstPartyAgentIds } from '@marque/probe'
+import { db, closeDb, firstPartyAgents } from '@marque/db'
 import { sql } from 'drizzle-orm'
 
 const ONCE = process.argv.includes('--once')
 const CYCLE_MS = Number(process.env.CONFORM_CYCLE_MS ?? 24 * 60 * 60_000)
+/** Reference agents are re-tested more often than third parties (P2-00 step 7). */
+const REFERENCE_CYCLE_MS = Number(process.env.CONFORM_REFERENCE_CYCLE_MS ?? 12 * 60 * 60_000)
+const PUBLIC_URL = process.env.MARQUE_PUBLIC_URL ?? 'https://marque.trade'
+const TEST_FOR_CATEGORY: Readonly<Record<string, TestId | undefined>> = {
+  rebalancing: 'MCS-REB-1', grid: 'MCS-GRID-1', yield: 'MCS-YIELD-1', health_factor: 'MCS-HF-1',
+}
 
 const sleep = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
 let stopping = false
@@ -70,16 +76,7 @@ async function liveAgents(): Promise<Array<{ id: string; name: string; endpoint:
 }
 
 async function sweep(): Promise<void> {
-  for (const c of CASES) {
-    try {
-      const { testCase, groundTruthHash } = await captureCase({
-        id: c.id, testId: c.testId, subject: c.subject, policy: c.policy,
-      })
-      log('case_captured', { case: c.id, block: testCase.blockNumber.toString(), hash: groundTruthHash })
-    } catch (err) {
-      log('case_capture_failed', { case: c.id, error: err instanceof Error ? err.message : String(err) })
-    }
-  }
+  await captureAll()
 
   const agents = await liveAgents()
   log('agents', { live: agents.length })
@@ -107,15 +104,83 @@ async function sweep(): Promise<void> {
   void formatOutcome
 }
 
-async function main(): Promise<void> {
-  log('start', { once: ONCE, cycleMs: CYCLE_MS })
-  do {
-    try { await sweep() } catch (err) {
-      log('sweep_error', { error: err instanceof Error ? err.message : String(err) })
-      if (ONCE) throw err
+async function captureAll(): Promise<void> {
+  for (const c of CASES) {
+    try {
+      const { testCase, groundTruthHash } = await captureCase({ id: c.id, testId: c.testId, subject: c.subject, policy: c.policy })
+      log('case_captured', { case: c.id, block: testCase.blockNumber.toString(), hash: groundTruthHash })
+    } catch (err) {
+      log('case_capture_failed', { case: c.id, error: err instanceof Error ? err.message : String(err) })
     }
-    if (!ONCE && !stopping) await sleep(CYCLE_MS)
-  } while (!ONCE && !stopping)
+  }
+}
+
+/**
+ * Re-test every first-party agent against its own category's published test, through
+ * its public free A2A face, exactly as a third party is tested. Results are stored under
+ * the agent's canonical ERC-8004 row id. The Warrant shows the most recent PASS, so a
+ * transient failed retest is published but never flips a warranted badge by itself;
+ * "retest due" appears only when the last pass is older than 72 h.
+ */
+async function referenceSweep(): Promise<void> {
+  await captureAll()
+  const ids = new Map<string, string>()
+  const fp = firstPartyAgents()
+  for (const id of await firstPartyAgentIds()) {
+    const tokenId = id.split(':').pop()
+    const a = fp.find((x) => String(x.tokenId) === tokenId)
+    if (a) ids.set(a.slug, id)
+  }
+  let pass = 0
+  let fail = 0
+  for (const a of fp) {
+    const testId = TEST_FOR_CATEGORY[a.category]
+    const agentId = ids.get(a.slug)
+    if (!testId || !agentId) {
+      log('reference_skip', { agent: a.slug, reason: !testId ? 'no published test for this category' : 'registry row not ingested' })
+      continue
+    }
+    const adapter = a2aAdapter(agentId, a.slug, `${PUBLIC_URL}/agents/${a.slug}/.well-known/agent-card.json`)
+    try {
+      const outcome = await runConformance({ adapter, testId })
+      if (outcome.pass) pass++
+      else fail++
+      log('reference_result', { agent: a.slug, agentId, test: testId, pass: outcome.pass, failed: outcome.failedFields, latencyMs: outcome.latencyMs, error: outcome.error })
+    } catch (err) {
+      fail++
+      log('reference_error', { agent: a.slug, test: testId, error: err instanceof Error ? err.message : String(err) })
+    }
+  }
+  log('reference_sweep_done', { pass, fail })
+}
+
+async function main(): Promise<void> {
+  const referenceOnly = process.argv.includes('--reference')
+  log('start', { once: ONCE, cycleMs: CYCLE_MS, referenceCycleMs: REFERENCE_CYCLE_MS, referenceOnly })
+  if (ONCE) {
+    if (referenceOnly) await referenceSweep()
+    else await sweep()
+    await closeDb()
+    log('stop', {})
+    return
+  }
+  let nextFull = Date.now()
+  let nextReference = Date.now()
+  while (!stopping) {
+    if (Date.now() >= nextReference) {
+      try { await referenceSweep() } catch (err) {
+        log('reference_sweep_error', { error: err instanceof Error ? err.message : String(err) })
+      }
+      nextReference = Date.now() + REFERENCE_CYCLE_MS
+    }
+    if (Date.now() >= nextFull) {
+      try { await sweep() } catch (err) {
+        log('sweep_error', { error: err instanceof Error ? err.message : String(err) })
+      }
+      nextFull = Date.now() + CYCLE_MS
+    }
+    await sleep(Math.max(60_000, Math.min(nextReference, nextFull) - Date.now()))
+  }
   await closeDb()
   log('stop', {})
 }

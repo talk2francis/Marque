@@ -10,7 +10,7 @@ import { closeDb } from '@marque/db'
 const ONCE = process.argv.includes('--once')
 const CYCLE_MS = Number(process.env.PROBE_CYCLE_MS ?? 5 * 60_000)
 const LIMIT = Number(process.env.PROBE_LIMIT ?? 500)
-const CONCURRENCY = Number(process.env.PROBE_CONCURRENCY ?? 12)
+const CONCURRENCY = Number(process.env.PROBE_CONCURRENCY ?? 32)
 
 const sleep = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
 
@@ -26,15 +26,17 @@ function log(event: string, data: Record<string, unknown>): void {
 async function main(): Promise<void> {
   log('start', { once: ONCE, limit: LIMIT, concurrency: CONCURRENCY })
   do {
+    // Fixed-rate cycles: a slow cycle eats into the wait, so T0 (5 min) stays on time.
+    const started = Date.now()
     try {
       const r = await runProbeCycle({ limit: LIMIT, concurrency: CONCURRENCY })
-      log('cycle', { ...r })
+      log('cycle', { ...r, ms: Date.now() - started })
     } catch (err) {
-      log('cycle_error', { error: err instanceof Error ? err.message : String(err) })
+      log('cycle_error', { error: err instanceof Error ? err.message : String(err), stack: err instanceof Error ? err.stack?.split('\n').slice(0, 4).join(' | ') : undefined })
       if (ONCE) throw err
       await sleep(15_000)
     }
-    if (!ONCE && !stopping) await sleep(CYCLE_MS)
+    if (!ONCE && !stopping) await sleep(Math.max(10_000, CYCLE_MS - (Date.now() - started)))
   } while (!ONCE && !stopping)
   await closeDb()
   log('stop', {})

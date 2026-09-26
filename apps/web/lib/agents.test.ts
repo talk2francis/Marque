@@ -9,7 +9,11 @@ vi.mock('./agent-state', () => ({
 import { callableAgentById, callableAgents } from './agents'
 
 describe('explicit charter agent lookup', () => {
-  beforeEach(() => { execute.mockReset(); agentState.mockReset(); agentStates.mockReset(); vi.unstubAllEnvs() })
+  beforeEach(() => {
+    execute.mockReset(); agentState.mockReset(); agentStates.mockReset(); vi.unstubAllEnvs()
+    // Hermetic: an operator shell that has sourced secrets.env must not add reference agents.
+    for (const slug of ['BOUND', 'LATTICE', 'SLUICEGATE', 'KEEL', 'REDCELL']) vi.stubEnv(`${slug}_PUBLIC_URL`, '')
+  })
   it('resolves a third-party identity independently of category and the shortlist', async () => {
     agentState.mockResolvedValue({
       agentId: '56:registry:999', tokenId: '999', name: 'Third party', hireable: true,

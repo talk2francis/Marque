@@ -2,7 +2,7 @@ import type { CSSProperties } from 'react'
 import { Statement, DataCell, EmptyState, LinkButton, Chip, MeasureRule, Tape, ProvenanceChip, WarrantBadge } from '@marque/ui'
 import { BRAND } from '@marque/ui/brand'
 import { sql, desc, eq } from 'drizzle-orm'
-import { db, receipt as receiptTable, run as runTable } from '@marque/db'
+import { db, receipt as receiptTable, run as runTable, firstPartyIdListSql, oneAgentIdSql } from '@marque/db'
 import { funnel, categoryFunnel } from '@marque/registry'
 import { marketplaceAgents } from '../lib/marketplace'
 import { Desk } from './desk/Desk'
@@ -99,7 +99,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ a
   // a pass proves the thing works.
   const passExample = await db().execute(sql`
     select agent_id, test_id, diffs from conformance_result
-    where pass = true and agent_id like 'marque:%' order by ran_at desc limit 1
+    where pass = true and agent_id in ${firstPartyIdListSql()} order by ran_at desc limit 1
   `).then((r) => (((r as { rows?: unknown[] }).rows ?? (r as unknown[])) as Array<Record<string, unknown>>)[0] ?? null)
     .catch(() => null)
 
@@ -109,14 +109,14 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ a
     select
       (select count(*)::int from benchmark) as benchmarks,
       (select count(*)::int from receipt) as receipts,
-      (select count(distinct agent_id)::int from conformance_result
+      (select count(distinct ${oneAgentIdSql(sql`agent_id`)})::int from conformance_result
         where pass = true and agent_id not like 'stub:%'
       ) as warranted,
       (select count(*)::int from conformance_result
-        where agent_id not like 'stub:%' and agent_id not like 'marque:%'
+        where agent_id not like 'stub:%' and agent_id not in ${firstPartyIdListSql()}
       ) as third_party_runs,
       (select count(*)::int from conformance_result
-        where pass = true and agent_id not like 'stub:%' and agent_id not like 'marque:%'
+        where pass = true and agent_id not like 'stub:%' and agent_id not in ${firstPartyIdListSql()}
       ) as third_party_passes
   `).then((r) => (((r as { rows?: unknown[] }).rows ?? (r as unknown[])) as Array<Record<string, unknown>>)[0] ?? {})
     .catch(() => ({} as Record<string, unknown>))
@@ -128,7 +128,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ a
     select cr.agent_id, cr.test_id, a.name, jsonb_array_length(cr.failed_fields) as n
     from conformance_result cr join agent a on a.id = cr.agent_id
     where cr.pass = false and cr.error is null and cr.agent_id not like 'stub:%'
-      and cr.agent_id not like 'marque:%' and jsonb_array_length(cr.failed_fields) > 0
+      and cr.agent_id not in ${firstPartyIdListSql()} and jsonb_array_length(cr.failed_fields) > 0
     order by jsonb_array_length(cr.failed_fields) desc, cr.ran_at desc limit 1
   `).then((r) => (((r as { rows?: unknown[] }).rows ?? (r as unknown[])) as Array<Record<string, unknown>>)[0] ?? null)
     .catch(() => null)

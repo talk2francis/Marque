@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { sql } from 'drizzle-orm'
 import { db } from '@marque/db'
 import { publicClient } from '@marque/chain'
+import { tierFreshness } from '@marque/probe'
 import { Statement, Chip, ProvenanceChip } from '@marque/ui'
 import { SiteHeader, SiteFooter } from '../_components/SiteHeader'
 import styles from './status.module.css'
@@ -90,11 +91,15 @@ async function agentHealth(): Promise<Array<{ id: string; ok: boolean; ms: numbe
 }
 
 export default async function StatusPage() {
-  const [head, cursorQ, probesQ, confQ, watchQ, usageQ, agents] = await Promise.all([
+  const [head, cursorQ, probesQ, confQ, watchQ, usageQ, agents, tiers] = await Promise.all([
     publicClient().getBlockNumber().then((b) => b.toString()).catch(() => null),
     queried('ingest cursor', db().execute(sql`select source, cursor, updated_at from ingest_cursor order by source`)),
     queried('probe rollup', db().execute(sql`
-      with latest as (select distinct on (agent_id) agent_id, liveness from probe order by agent_id, checked_at desc)
+      with latest as (
+        select distinct on (agent_id) agent_id, last_liveness as liveness
+        from probe_schedule where last_checked_at is not null
+        order by agent_id, last_checked_at desc
+      )
       select liveness, count(*)::int as n from latest group by liveness order by n desc
     `)),
     queried('conformance rollup', db().execute(sql`
@@ -111,6 +116,7 @@ export default async function StatusPage() {
       select name, count(*)::int as n, min(at) as since from product_event group by name
     `)),
     agentHealth(),
+    tierFreshness().catch(() => null),
   ])
 
   const cursor = cursorQ.rows
@@ -267,6 +273,36 @@ export default async function StatusPage() {
         </section>
 
         <section className={styles.section}>
+          <h2 className={styles.h2}>Probe freshness</h2>
+          {tiers === null ? (
+            <p className={styles.muted}>The probe schedule could not be read just now.</p>
+          ) : (
+            <>
+              <table className={styles.table}>
+                <thead><tr><th>Tier</th><th>Services</th><th>Fresh</th><th>Window</th><th>Oldest check</th></tr></thead>
+                <tbody>
+                  {tiers.map((t) => (
+                    <tr key={t.tier}>
+                      <td>{t.tier === 'T0' ? 'Marque reference agents' : 'Agents in a category'}</td>
+                      <td className="mono">{t.services.toLocaleString('en-US')}</td>
+                      <td className="mono">{t.services ? `${t.fresh.toLocaleString('en-US')} (${((t.fresh / t.services) * 100).toFixed(1)}%)` : '0'}</td>
+                      <td className="mono">{t.freshWithinMinutes} min</td>
+                      <td className="mono">{t.oldestCheckAt ? new Date(t.oldestCheckAt).toISOString().replace('T', ' ').slice(0, 16) + ' UTC' : 'never'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <p className={styles.note}>
+                Every declared service has a place in the probe schedule. Reference agents are
+                re-probed every 5 minutes and agents classified into a category every 30. Other
+                answering services are re-checked every 12 hours, new ones as soon as they appear,
+                and dead ones back off from an hour to three days. None is ever dropped.
+              </p>
+            </>
+          )}
+        </section>
+
+        <section className={styles.section}>
           <h2 className={styles.h2}>Probe coverage</h2>
           {probes.length === 0 ? (
             <p className={styles.muted}>No agent has been probed yet.</p>
@@ -285,7 +321,7 @@ export default async function StatusPage() {
                 </tbody>
               </table>
               <p className={styles.note}>
-                One row per agent, its most recent verdict only. <strong>unbound</strong> is a
+                One row per agent, the most recent verdict across its services. <strong>unbound</strong> is a
                 first-class outcome, not an error: the endpoint answers with a valid card that
                 declares no endpoint and no skills, so there is nothing to call. A probe that only
                 checked for HTTP 200 would count every one of those as healthy.

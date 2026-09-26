@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { marked } from 'marked'
 import { sql } from 'drizzle-orm'
-import { db } from '@marque/db'
+import { db, firstPartyIdListSql } from '@marque/db'
 import { Statement, Chip, DataCell, EmptyState, ProvenanceChip } from '@marque/ui'
 import { SiteHeader, SiteFooter } from '../_components/SiteHeader'
 import styles from './standard.module.css'
@@ -68,8 +68,8 @@ export default async function StandardPage() {
       select
         count(*)::int as total,
         count(*) filter (where error is not null)::int as errored,
-        count(*) filter (where pass and agent_id not like 'marque:%')::int as third_party_pass
-      from conformance_result where agent_id not like 'stub:%' and agent_id not like 'marque:%'
+        count(*) filter (where pass)::int as third_party_pass
+      from conformance_result where agent_id not like 'stub:%' and agent_id not in ${firstPartyIdListSql()}
     `).then(unwrap).catch(() => [{ total: 0, errored: 0, third_party_pass: 0 }]),
     db().execute(sql`
       select test_id, id, block_number, ground_truth_hash, captured_at

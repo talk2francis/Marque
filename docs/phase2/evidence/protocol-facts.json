@@ -1,0 +1,484 @@
+{
+  "sdk": "@bnbagent/sdk@0.6.0",
+  "chains": [
+    {
+      "chainId": 56,
+      "network": "bsc-mainnet",
+      "headBlock": 124086054,
+      "measuredAt": "2026-09-26T05:37:14.034Z",
+      "contracts": {
+        "identityRegistry": "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432",
+        "identityRegistryHasCode": true,
+        "reputationRegistry": "0x8004BAa17C55a88189AE136b182e5fdA19dE9b63",
+        "reputationRegistryProxyCodeBytes": 130,
+        "reputationRegistryImplementation": "0x16e0fa7f7c56b9a767e34b192b51f921be31da34",
+        "reputationImplCodeBytes": 10491,
+        "reputationSelectors": {
+          "giveFeedback(uint256,int128,uint8,string,string,string,string,bytes32)": true,
+          "revokeFeedback(uint256,uint64)": true,
+          "getSummary(uint256,address[],string,string)": true,
+          "readFeedback(uint256,address,uint64)": true,
+          "getClients(uint256)": true,
+          "getLastIndex(uint256,address)": true
+        },
+        "agenticCommerce": "0xea4daa3100a767e86fded867729ae7446476eba6",
+        "commerceImpl": "0xd5f9b570c96b5d67702d508c0BFb8B3b09209787",
+        "evaluatorRouter": "0x51895229e12f9876011789b04f8698af06ccd6da",
+        "optimisticPolicy": "0x9c01845705b3078aa2e8cff7520a6376fd766de5",
+        "sdkPaymentToken": "0xcE24439F2D9C6a2289F741120FE202248B666666"
+      },
+      "commerce": {
+        "paymentToken": "0xcE24439F2D9C6a2289F741120FE202248B666666",
+        "paymentTokenMatchesSdk": true,
+        "jobCounter": "56802",
+        "platformFeeBP": "0",
+        "platformTreasury": "0x000000000000000000000000000000000000dEaD",
+        "maxExpiryDurationSeconds": 31536000,
+        "maxExpiryDurationHours": 8760,
+        "paused": false,
+        "tokens": [
+          {
+            "symbol": "U",
+            "address": "0xcE24439F2D9C6a2289F741120FE202248B666666",
+            "decimals": 18,
+            "kernelDefault": true,
+            "supported": true
+          },
+          {
+            "symbol": "USD1",
+            "address": "0x8d0D000Ee44948FC98c9B98A4FA4921476f08B0d",
+            "decimals": 18,
+            "kernelDefault": false,
+            "supported": true
+          },
+          {
+            "symbol": "USDC",
+            "address": "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d",
+            "decimals": 18,
+            "kernelDefault": false,
+            "supported": true
+          },
+          {
+            "symbol": "USDT",
+            "address": "0x55d398326f99059fF775485246999027B3197955",
+            "decimals": 18,
+            "kernelDefault": false,
+            "supported": true
+          }
+        ]
+      },
+      "policy": {
+        "disputeWindowSeconds": 604800,
+        "disputeWindowHours": 168,
+        "voteQuorum": 3,
+        "activeVoterCount": 5,
+        "whitelistedOnRouter": true
+      },
+      "router": {
+        "paused": false
+      },
+      "paymaster": {
+        "url": "https://bsc-megafuel.nodereal.io/",
+        "usePaymaster": true
+      },
+      "events": [
+        {
+          "contract": "commerce",
+          "signature": "JobCreated(uint256,address,address,address,uint256,address)",
+          "topic0Computed": "0xb0f0239bfdd96453e24733e18bfc24b70d8fadf123dd977473518dd577ee79b9",
+          "topic0Pack": "0xb0f0239bfdd96453e24733e18bfc24b70d8fadf123dd977473518dd577ee79b9",
+          "packMatches": true,
+          "liveLog": null,
+          "liveTopicMatches": null,
+          "error": "Invalid parameters were provided to the RPC method."
+        },
+        {
+          "contract": "commerce",
+          "signature": "BudgetSet(uint256,uint256)",
+          "topic0Computed": "0x869e2577b006bf47ee981cf6fec2e25583548081c14b98deab587f77b5068038",
+          "topic0Pack": "0x869e2577b006bf47ee981cf6fec2e25583548081c14b98deab587f77b5068038",
+          "packMatches": true,
+          "liveLog": null,
+          "liveTopicMatches": null,
+          "error": "Invalid parameters were provided to the RPC method."
+        },
+        {
+          "contract": "commerce",
+          "signature": "JobFunded(uint256,address,address,uint256)",
+          "topic0Computed": "0xbdb056de345bfeadca7c9fd7df6430bdb83c677c8eefbb601dff56f34d3dac52",
+          "topic0Pack": "0xbdb056de345bfeadca7c9fd7df6430bdb83c677c8eefbb601dff56f34d3dac52",
+          "packMatches": true,
+          "liveLog": null,
+          "liveTopicMatches": null,
+          "error": "Invalid parameters were provided to the RPC method."
+        },
+        {
+          "contract": "commerce",
+          "signature": "JobSubmitted(uint256,address,bytes32)",
+          "topic0Computed": "0x80c17db79857f338a6a6df68a6883ecc0ce78e2202fe61ed979733573f40538e",
+          "topic0Pack": "0x80c17db79857f338a6a6df68a6883ecc0ce78e2202fe61ed979733573f40538e",
+          "packMatches": true,
+          "liveLog": null,
+          "liveTopicMatches": null,
+          "error": "Invalid parameters were provided to the RPC method."
+        },
+        {
+          "contract": "commerce",
+          "signature": "JobCompleted(uint256,address,bytes32)",
+          "topic0Computed": "0x0fd54bd364fa9e67f17b091aefe930932c09fe7651cf5ad02c71a418f3341444",
+          "topic0Pack": "0x0fd54bd364fa9e67f17b091aefe930932c09fe7651cf5ad02c71a418f3341444",
+          "packMatches": true,
+          "liveLog": null,
+          "liveTopicMatches": null,
+          "error": "Invalid parameters were provided to the RPC method."
+        },
+        {
+          "contract": "commerce",
+          "signature": "PaymentReleased(uint256,address,uint256)",
+          "topic0Computed": "0x21d71db5be59bb9fa133895586b7404307dd33fb93b16db09dc6f1d9d7d231b0",
+          "topic0Pack": "0x21d71db5be59bb9fa133895586b7404307dd33fb93b16db09dc6f1d9d7d231b0",
+          "packMatches": true,
+          "liveLog": null,
+          "liveTopicMatches": null,
+          "error": "Invalid parameters were provided to the RPC method."
+        },
+        {
+          "contract": "commerce",
+          "signature": "JobRejected(uint256,address,bytes32)",
+          "topic0Computed": "0xae7362b1af91f4492868987b9c73990d780060811551b58728fbe96fd1bab275",
+          "topic0Pack": "0xae7362b1af91f4492868987b9c73990d780060811551b58728fbe96fd1bab275",
+          "packMatches": true,
+          "liveLog": null,
+          "liveTopicMatches": null,
+          "error": "Invalid parameters were provided to the RPC method."
+        },
+        {
+          "contract": "commerce",
+          "signature": "JobExpired(uint256)",
+          "topic0Computed": "0x97237956f8810192811e2c3f273fd02c5d6295206fdd9c62e6fe2bfc19ba9232",
+          "topic0Pack": "0x97237956f8810192811e2c3f273fd02c5d6295206fdd9c62e6fe2bfc19ba9232",
+          "packMatches": true,
+          "liveLog": null,
+          "liveTopicMatches": null,
+          "error": "Invalid parameters were provided to the RPC method."
+        },
+        {
+          "contract": "commerce",
+          "signature": "Refunded(uint256,address,uint256)",
+          "topic0Computed": "0x7ca5472b7ea78c2c0141c5a12ee6d170cf4ce8ed06be3d22c8252ddfc7a6a2c4",
+          "topic0Pack": "0x7ca5472b7ea78c2c0141c5a12ee6d170cf4ce8ed06be3d22c8252ddfc7a6a2c4",
+          "packMatches": true,
+          "liveLog": null,
+          "liveTopicMatches": null,
+          "error": "Invalid parameters were provided to the RPC method."
+        },
+        {
+          "contract": "router",
+          "signature": "JobRegistered(uint256,address,address)",
+          "topic0Computed": "0xab6d9121f9311dd45d0b932fc9fb1a6562295bda63d5bab95e364ff926515715",
+          "topic0Pack": "0xab6d9121f9311dd45d0b932fc9fb1a6562295bda63d5bab95e364ff926515715",
+          "packMatches": true,
+          "liveLog": null,
+          "liveTopicMatches": null,
+          "error": "Invalid parameters were provided to the RPC method."
+        },
+        {
+          "contract": "router",
+          "signature": "JobSettled(uint256,address,uint8,bytes32)",
+          "topic0Computed": "0x771fbd01246ab044986d0a55b6d9b732fcfd6d7eaa5ee0d05110b0d23cf496fc",
+          "topic0Pack": "0x771fbd01246ab044986d0a55b6d9b732fcfd6d7eaa5ee0d05110b0d23cf496fc",
+          "packMatches": true,
+          "liveLog": null,
+          "liveTopicMatches": null,
+          "error": "Invalid parameters were provided to the RPC method."
+        },
+        {
+          "contract": "policy",
+          "signature": "Disputed(uint256,address)",
+          "topic0Computed": "0xcde8e21e97a7f6ec4bbf0ee44450212e0ba73be8fdfbfb2b155e861d86756bac",
+          "topic0Pack": "0xcde8e21e97a7f6ec4bbf0ee44450212e0ba73be8fdfbfb2b155e861d86756bac",
+          "packMatches": true,
+          "liveLog": null,
+          "liveTopicMatches": null,
+          "error": "Invalid parameters were provided to the RPC method."
+        },
+        {
+          "contract": "reputation",
+          "signature": "NewFeedback(uint256,address,uint64,int128,uint8,string,string,string,string,string,bytes32)",
+          "topic0Computed": "0x6a4a61743519c9d648a14e6493f47dbe3ff1aa29e7785c96c8326a205e58febc",
+          "topic0Pack": "0x6a4a61743519c9d648a14e6493f47dbe3ff1aa29e7785c96c8326a205e58febc",
+          "packMatches": true,
+          "liveLog": null,
+          "liveTopicMatches": null,
+          "error": "Invalid parameters were provided to the RPC method."
+        },
+        {
+          "contract": "reputation",
+          "signature": "FeedbackRevoked(uint256,address,uint64)",
+          "topic0Computed": "0x25156fd3288212246d8b008d5921fde376c71ed14ac2e072a506eb06fde6d09d",
+          "topic0Pack": "0x25156fd3288212246d8b008d5921fde376c71ed14ac2e072a506eb06fde6d09d",
+          "packMatches": true,
+          "liveLog": null,
+          "liveTopicMatches": null,
+          "error": "Invalid parameters were provided to the RPC method."
+        }
+      ]
+    },
+    {
+      "chainId": 97,
+      "network": "bsc-testnet",
+      "headBlock": 133231335,
+      "measuredAt": "2026-09-26T05:37:16.943Z",
+      "contracts": {
+        "identityRegistry": "0x8004A818BFB912233c491871b3d84c89A494BD9e",
+        "identityRegistryHasCode": true,
+        "reputationRegistry": "0x8004B663056A597Dffe9eCcC1965A193B7388713",
+        "reputationRegistryProxyCodeBytes": 130,
+        "reputationRegistryImplementation": "0x16e0fa7f7c56b9a767e34b192b51f921be31da34",
+        "reputationImplCodeBytes": 10491,
+        "reputationSelectors": {
+          "giveFeedback(uint256,int128,uint8,string,string,string,string,bytes32)": true,
+          "revokeFeedback(uint256,uint64)": true,
+          "getSummary(uint256,address[],string,string)": true,
+          "readFeedback(uint256,address,uint64)": true,
+          "getClients(uint256)": true,
+          "getLastIndex(uint256,address)": true
+        },
+        "agenticCommerce": "0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de",
+        "commerceImpl": "0x153783DdBDF5233c591965F04644b1df2d1A7815",
+        "evaluatorRouter": "0xd7d36d66d2f1b608a0f943f722d27e3744f66f25",
+        "optimisticPolicy": "0xd6a4217588f6b1f5657a92a3e94e6422ad771cea",
+        "sdkPaymentToken": "0xc70B8741B8B07A6d61E54fd4B20f22Fa648E5565"
+      },
+      "commerce": {
+        "paymentToken": "0xc70B8741B8B07A6d61E54fd4B20f22Fa648E5565",
+        "paymentTokenMatchesSdk": true,
+        "jobCounter": "1334",
+        "platformFeeBP": "0",
+        "platformTreasury": "0x1001b2C085345f388778A975648aA50bcfd0D134",
+        "maxExpiryDurationSeconds": 31536000,
+        "maxExpiryDurationHours": 8760,
+        "paused": false,
+        "tokens": [
+          {
+            "symbol": "U",
+            "address": "0xc70B8741B8B07A6d61E54fd4B20f22Fa648E5565",
+            "decimals": 18,
+            "kernelDefault": true,
+            "supported": true
+          },
+          {
+            "symbol": "USDC",
+            "address": "0x64544969ed7EBf5f083679233325356EbE738930",
+            "decimals": 18,
+            "kernelDefault": false,
+            "supported": true
+          },
+          {
+            "symbol": "USDT",
+            "address": "0x337610d27c682E347C9cD60BD4b3b107C9d34dDd",
+            "decimals": 18,
+            "kernelDefault": false,
+            "supported": true
+          }
+        ]
+      },
+      "policy": {
+        "disputeWindowSeconds": 900,
+        "disputeWindowHours": 0.25,
+        "voteQuorum": 1,
+        "activeVoterCount": 2,
+        "whitelistedOnRouter": true
+      },
+      "router": {
+        "paused": false
+      },
+      "paymaster": {
+        "url": "https://bsc-megafuel-testnet.nodereal.io",
+        "usePaymaster": true
+      },
+      "events": [
+        {
+          "contract": "commerce",
+          "signature": "JobCreated(uint256,address,address,address,uint256,address)",
+          "topic0Computed": "0xb0f0239bfdd96453e24733e18bfc24b70d8fadf123dd977473518dd577ee79b9",
+          "topic0Pack": "0xb0f0239bfdd96453e24733e18bfc24b70d8fadf123dd977473518dd577ee79b9",
+          "packMatches": true,
+          "liveLog": {
+            "tx": "0x4c35e06dc2c1849997791c7d8a468d565f27a0fa85614e7108c3821843d7a983",
+            "block": 133221925,
+            "topic0": "0xb0f0239bfdd96453e24733e18bfc24b70d8fadf123dd977473518dd577ee79b9",
+            "scannedFrom": 133221336
+          },
+          "liveTopicMatches": true,
+          "error": null
+        },
+        {
+          "contract": "commerce",
+          "signature": "BudgetSet(uint256,uint256)",
+          "topic0Computed": "0x869e2577b006bf47ee981cf6fec2e25583548081c14b98deab587f77b5068038",
+          "topic0Pack": "0x869e2577b006bf47ee981cf6fec2e25583548081c14b98deab587f77b5068038",
+          "packMatches": true,
+          "liveLog": {
+            "tx": "0xc198e47f76ea39a2cd4445d4db7973606c8a6381b20013fdbf771c8cedb1f9dc",
+            "block": 133221942,
+            "topic0": "0x869e2577b006bf47ee981cf6fec2e25583548081c14b98deab587f77b5068038",
+            "scannedFrom": 133221336
+          },
+          "liveTopicMatches": true,
+          "error": null
+        },
+        {
+          "contract": "commerce",
+          "signature": "JobFunded(uint256,address,address,uint256)",
+          "topic0Computed": "0xbdb056de345bfeadca7c9fd7df6430bdb83c677c8eefbb601dff56f34d3dac52",
+          "topic0Pack": "0xbdb056de345bfeadca7c9fd7df6430bdb83c677c8eefbb601dff56f34d3dac52",
+          "packMatches": true,
+          "liveLog": {
+            "tx": "0xeef61a10c29fe60fd7e36fef96280700af5325b8e5344f178608f85ddd28a19c",
+            "block": 133221951,
+            "topic0": "0xbdb056de345bfeadca7c9fd7df6430bdb83c677c8eefbb601dff56f34d3dac52",
+            "scannedFrom": 133221336
+          },
+          "liveTopicMatches": true,
+          "error": null
+        },
+        {
+          "contract": "commerce",
+          "signature": "JobSubmitted(uint256,address,bytes32)",
+          "topic0Computed": "0x80c17db79857f338a6a6df68a6883ecc0ce78e2202fe61ed979733573f40538e",
+          "topic0Pack": "0x80c17db79857f338a6a6df68a6883ecc0ce78e2202fe61ed979733573f40538e",
+          "packMatches": true,
+          "liveLog": {
+            "tx": "0xa55e6179004c99d5c0d950c756cbdb5af9bc430bd4413ce00b4b99cbb2fa950f",
+            "block": 133221996,
+            "topic0": "0x80c17db79857f338a6a6df68a6883ecc0ce78e2202fe61ed979733573f40538e",
+            "scannedFrom": 133221336
+          },
+          "liveTopicMatches": true,
+          "error": null
+        },
+        {
+          "contract": "commerce",
+          "signature": "JobCompleted(uint256,address,bytes32)",
+          "topic0Computed": "0x0fd54bd364fa9e67f17b091aefe930932c09fe7651cf5ad02c71a418f3341444",
+          "topic0Pack": "0x0fd54bd364fa9e67f17b091aefe930932c09fe7651cf5ad02c71a418f3341444",
+          "packMatches": true,
+          "liveLog": {
+            "tx": "0xc70172d10f179ca452891c86eed4a1bdff7b31bd15596e57ea6e97bdf1b340a5",
+            "block": 133228375,
+            "topic0": "0x0fd54bd364fa9e67f17b091aefe930932c09fe7651cf5ad02c71a418f3341444",
+            "scannedFrom": 133226336
+          },
+          "liveTopicMatches": true,
+          "error": null
+        },
+        {
+          "contract": "commerce",
+          "signature": "PaymentReleased(uint256,address,uint256)",
+          "topic0Computed": "0x21d71db5be59bb9fa133895586b7404307dd33fb93b16db09dc6f1d9d7d231b0",
+          "topic0Pack": "0x21d71db5be59bb9fa133895586b7404307dd33fb93b16db09dc6f1d9d7d231b0",
+          "packMatches": true,
+          "liveLog": {
+            "tx": "0xc70172d10f179ca452891c86eed4a1bdff7b31bd15596e57ea6e97bdf1b340a5",
+            "block": 133228375,
+            "topic0": "0x21d71db5be59bb9fa133895586b7404307dd33fb93b16db09dc6f1d9d7d231b0",
+            "scannedFrom": 133226336
+          },
+          "liveTopicMatches": true,
+          "error": null
+        },
+        {
+          "contract": "commerce",
+          "signature": "JobRejected(uint256,address,bytes32)",
+          "topic0Computed": "0xae7362b1af91f4492868987b9c73990d780060811551b58728fbe96fd1bab275",
+          "topic0Pack": "0xae7362b1af91f4492868987b9c73990d780060811551b58728fbe96fd1bab275",
+          "packMatches": true,
+          "liveLog": null,
+          "liveTopicMatches": null,
+          "error": "RPC Request failed."
+        },
+        {
+          "contract": "commerce",
+          "signature": "JobExpired(uint256)",
+          "topic0Computed": "0x97237956f8810192811e2c3f273fd02c5d6295206fdd9c62e6fe2bfc19ba9232",
+          "topic0Pack": "0x97237956f8810192811e2c3f273fd02c5d6295206fdd9c62e6fe2bfc19ba9232",
+          "packMatches": true,
+          "liveLog": null,
+          "liveTopicMatches": null,
+          "error": "RPC Request failed."
+        },
+        {
+          "contract": "commerce",
+          "signature": "Refunded(uint256,address,uint256)",
+          "topic0Computed": "0x7ca5472b7ea78c2c0141c5a12ee6d170cf4ce8ed06be3d22c8252ddfc7a6a2c4",
+          "topic0Pack": "0x7ca5472b7ea78c2c0141c5a12ee6d170cf4ce8ed06be3d22c8252ddfc7a6a2c4",
+          "packMatches": true,
+          "liveLog": null,
+          "liveTopicMatches": null,
+          "error": "RPC Request failed."
+        },
+        {
+          "contract": "router",
+          "signature": "JobRegistered(uint256,address,address)",
+          "topic0Computed": "0xab6d9121f9311dd45d0b932fc9fb1a6562295bda63d5bab95e364ff926515715",
+          "topic0Pack": "0xab6d9121f9311dd45d0b932fc9fb1a6562295bda63d5bab95e364ff926515715",
+          "packMatches": true,
+          "liveLog": {
+            "tx": "0xc597a1c53d6d39db4280596aee22093266fde698c6c53d710605769d48db512a",
+            "block": 133221936,
+            "topic0": "0xab6d9121f9311dd45d0b932fc9fb1a6562295bda63d5bab95e364ff926515715",
+            "scannedFrom": 133221336
+          },
+          "liveTopicMatches": true,
+          "error": null
+        },
+        {
+          "contract": "router",
+          "signature": "JobSettled(uint256,address,uint8,bytes32)",
+          "topic0Computed": "0x771fbd01246ab044986d0a55b6d9b732fcfd6d7eaa5ee0d05110b0d23cf496fc",
+          "topic0Pack": "0x771fbd01246ab044986d0a55b6d9b732fcfd6d7eaa5ee0d05110b0d23cf496fc",
+          "packMatches": true,
+          "liveLog": {
+            "tx": "0xc70172d10f179ca452891c86eed4a1bdff7b31bd15596e57ea6e97bdf1b340a5",
+            "block": 133228375,
+            "topic0": "0x771fbd01246ab044986d0a55b6d9b732fcfd6d7eaa5ee0d05110b0d23cf496fc",
+            "scannedFrom": 133226336
+          },
+          "liveTopicMatches": true,
+          "error": null
+        },
+        {
+          "contract": "policy",
+          "signature": "Disputed(uint256,address)",
+          "topic0Computed": "0xcde8e21e97a7f6ec4bbf0ee44450212e0ba73be8fdfbfb2b155e861d86756bac",
+          "topic0Pack": "0xcde8e21e97a7f6ec4bbf0ee44450212e0ba73be8fdfbfb2b155e861d86756bac",
+          "packMatches": true,
+          "liveLog": null,
+          "liveTopicMatches": null,
+          "error": "RPC Request failed."
+        },
+        {
+          "contract": "reputation",
+          "signature": "NewFeedback(uint256,address,uint64,int128,uint8,string,string,string,string,string,bytes32)",
+          "topic0Computed": "0x6a4a61743519c9d648a14e6493f47dbe3ff1aa29e7785c96c8326a205e58febc",
+          "topic0Pack": "0x6a4a61743519c9d648a14e6493f47dbe3ff1aa29e7785c96c8326a205e58febc",
+          "packMatches": true,
+          "liveLog": null,
+          "liveTopicMatches": null,
+          "error": "RPC Request failed."
+        },
+        {
+          "contract": "reputation",
+          "signature": "FeedbackRevoked(uint256,address,uint64)",
+          "topic0Computed": "0x25156fd3288212246d8b008d5921fde376c71ed14ac2e072a506eb06fde6d09d",
+          "topic0Pack": "0x25156fd3288212246d8b008d5921fde376c71ed14ac2e072a506eb06fde6d09d",
+          "packMatches": true,
+          "liveLog": null,
+          "liveTopicMatches": null,
+          "error": "RPC Request failed."
+        }
+      ]
+    }
+  ]
+}

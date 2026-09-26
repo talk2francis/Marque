@@ -1,0 +1,11 @@
+{
+  "$comment": "Marque's own reference agents, applied to rows ingested from the ERC-8004 registry (AGENTS invariant 29). Owners and token ids are public on-chain facts; the registry is the source of every other field.",
+  "identityRegistry": { "56": "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432", "97": "0x8004A818BFB912233c491871b3d84c89A494BD9e" },
+  "agents": [
+    { "chainId": 56, "tokenId": 341553, "slug": "bound", "category": "rebalancing",      "owner": "0x5B1c9fBc684a1722Bb5C66C0B22F149dA69768d6", "legacyId": "marque:bound",      "testnet": { "chainId": 97, "tokenId": 2234 } },
+    { "chainId": 56, "tokenId": 341554, "slug": "lattice", "category": "grid",    "owner": "0x5aAF7b5B2170986C59279682Bd714c475ae8C718", "legacyId": "marque:lattice",    "testnet": { "chainId": 97, "tokenId": 2236 } },
+    { "chainId": 56, "tokenId": 341555, "slug": "sluicegate", "category": "yield", "owner": "0x253F7Ad5D52099C4a2293418a661e9974DfB5e84", "legacyId": "marque:sluicegate", "testnet": { "chainId": 97, "tokenId": 2237 } },
+    { "chainId": 56, "tokenId": 341556, "slug": "keel", "category": "health_factor",       "owner": "0xdF1074a272C53A1a10b96Fa0201Eb58bbbaaFe00", "legacyId": "marque:keel",       "testnet": { "chainId": 97, "tokenId": 2238 } },
+    { "chainId": 56, "tokenId": 341557, "slug": "redcell", "category": "security",    "owner": "0x1F0D0eF5a279888E3b86c8a99A8A99F19fCEc587", "legacyId": "marque:redcell",    "testnet": { "chainId": 97, "tokenId": 2239 } }
+  ]
+}

@@ -1,0 +1,145 @@
+{
+  "measuredAt": "2026-09-26T05:39:29.219Z",
+  "rows": [
+    {
+      "slug": "keel",
+      "latencyMs": 125,
+      "chain_id": 97,
+      "verifying_contract": "0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de",
+      "verifyingContractIsCanonical": true,
+      "price": "50000000000000000",
+      "currency": "0xc70B8741B8B07A6d61E54fd4B20f22Fa648E5565",
+      "quote_expires_at": 1790402068,
+      "ttlSeconds": 900,
+      "estimated_completion_seconds": 600,
+      "identityOnQuoteChain": {
+        "tokenId": "2238",
+        "agentWallet": "0xdF1074a272C53A1a10b96Fa0201Eb58bbbaaFe00",
+        "owner": "0xdF1074a272C53A1a10b96Fa0201Eb58bbbaaFe00"
+      },
+      "identityMainnet": {
+        "tokenId": "341556",
+        "agentWallet": "0xdF1074a272C53A1a10b96Fa0201Eb58bbbaaFe00",
+        "owner": "0xdF1074a272C53A1a10b96Fa0201Eb58bbbaaFe00"
+      },
+      "sigCheckedAgainst": "0xdF1074a272C53A1a10b96Fa0201Eb58bbbaaFe00",
+      "sdkVerify": {
+        "valid": true,
+        "method": "eip191",
+        "signer": "0xdF1074a272C53A1a10b96Fa0201Eb58bbbaaFe00"
+      }
+    },
+    {
+      "slug": "sluicegate",
+      "latencyMs": 64,
+      "chain_id": 97,
+      "verifying_contract": "0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de",
+      "verifyingContractIsCanonical": true,
+      "price": "100000000000000000",
+      "currency": "0xc70B8741B8B07A6d61E54fd4B20f22Fa648E5565",
+      "quote_expires_at": 1790402068,
+      "ttlSeconds": 900,
+      "estimated_completion_seconds": 600,
+      "identityOnQuoteChain": {
+        "tokenId": "2237",
+        "agentWallet": "0x253F7Ad5D52099C4a2293418a661e9974DfB5e84",
+        "owner": "0x253F7Ad5D52099C4a2293418a661e9974DfB5e84"
+      },
+      "identityMainnet": {
+        "tokenId": "341555",
+        "agentWallet": "0x253F7Ad5D52099C4a2293418a661e9974DfB5e84",
+        "owner": "0x253F7Ad5D52099C4a2293418a661e9974DfB5e84"
+      },
+      "sigCheckedAgainst": "0x253F7Ad5D52099C4a2293418a661e9974DfB5e84",
+      "sdkVerify": {
+        "valid": true,
+        "method": "eip191",
+        "signer": "0x253F7Ad5D52099C4a2293418a661e9974DfB5e84"
+      }
+    },
+    {
+      "slug": "lattice",
+      "latencyMs": 91,
+      "chain_id": 97,
+      "verifying_contract": "0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de",
+      "verifyingContractIsCanonical": true,
+      "price": "100000000000000000",
+      "currency": "0xc70B8741B8B07A6d61E54fd4B20f22Fa648E5565",
+      "quote_expires_at": 1790402068,
+      "ttlSeconds": 900,
+      "estimated_completion_seconds": 600,
+      "identityOnQuoteChain": {
+        "tokenId": "2236",
+        "agentWallet": "0x5aAF7b5B2170986C59279682Bd714c475ae8C718",
+        "owner": "0x5aAF7b5B2170986C59279682Bd714c475ae8C718"
+      },
+      "identityMainnet": {
+        "tokenId": "341554",
+        "agentWallet": "0x5aAF7b5B2170986C59279682Bd714c475ae8C718",
+        "owner": "0x5aAF7b5B2170986C59279682Bd714c475ae8C718"
+      },
+      "sigCheckedAgainst": "0x5aAF7b5B2170986C59279682Bd714c475ae8C718",
+      "sdkVerify": {
+        "valid": true,
+        "method": "eip191",
+        "signer": "0x5aAF7b5B2170986C59279682Bd714c475ae8C718"
+      }
+    },
+    {
+      "slug": "bound",
+      "latencyMs": 88,
+      "chain_id": 97,
+      "verifying_contract": "0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de",
+      "verifyingContractIsCanonical": true,
+      "price": "150000000000000000",
+      "currency": "0xc70B8741B8B07A6d61E54fd4B20f22Fa648E5565",
+      "quote_expires_at": 1790402068,
+      "ttlSeconds": 900,
+      "estimated_completion_seconds": 600,
+      "identityOnQuoteChain": {
+        "tokenId": "2234",
+        "agentWallet": "0x5B1c9fBc684a1722Bb5C66C0B22F149dA69768d6",
+        "owner": "0x5B1c9fBc684a1722Bb5C66C0B22F149dA69768d6"
+      },
+      "identityMainnet": {
+        "tokenId": "341553",
+        "agentWallet": "0x5B1c9fBc684a1722Bb5C66C0B22F149dA69768d6",
+        "owner": "0x5B1c9fBc684a1722Bb5C66C0B22F149dA69768d6"
+      },
+      "sigCheckedAgainst": "0x5B1c9fBc684a1722Bb5C66C0B22F149dA69768d6",
+      "sdkVerify": {
+        "valid": true,
+        "method": "eip191",
+        "signer": "0x5B1c9fBc684a1722Bb5C66C0B22F149dA69768d6"
+      }
+    },
+    {
+      "slug": "redcell",
+      "latencyMs": 41,
+      "chain_id": 97,
+      "verifying_contract": "0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de",
+      "verifyingContractIsCanonical": true,
+      "price": "250000000000000000",
+      "currency": "0xc70B8741B8B07A6d61E54fd4B20f22Fa648E5565",
+      "quote_expires_at": 1790402069,
+      "ttlSeconds": 900,
+      "estimated_completion_seconds": 600,
+      "identityOnQuoteChain": {
+        "tokenId": "2239",
+        "agentWallet": "0x1F0D0eF5a279888E3b86c8a99A8A99F19fCEc587",
+        "owner": "0x1F0D0eF5a279888E3b86c8a99A8A99F19fCEc587"
+      },
+      "identityMainnet": {
+        "tokenId": "341557",
+        "agentWallet": "0x1F0D0eF5a279888E3b86c8a99A8A99F19fCEc587",
+        "owner": "0x1F0D0eF5a279888E3b86c8a99A8A99F19fCEc587"
+      },
+      "sigCheckedAgainst": "0x1F0D0eF5a279888E3b86c8a99A8A99F19fCEc587",
+      "sdkVerify": {
+        "valid": true,
+        "method": "eip191",
+        "signer": "0x1F0D0eF5a279888E3b86c8a99A8A99F19fCEc587"
+      }
+    }
+  ]
+}

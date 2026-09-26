@@ -1,6 +1,6 @@
 import 'server-only'
 import { sql } from 'drizzle-orm'
-import { db } from '@marque/db'
+import { db, firstPartyAgents, firstPartyIdListSql } from '@marque/db'
 import { REFERENCE_AGENTS, type ReferenceAgent } from './reference-agents'
 import { agentState, TASK_FOR_CATEGORY } from './agent-state'
 
@@ -107,28 +107,46 @@ function originOf(v: unknown): string | null {
   }
 }
 
-/** Reference-agent rows, each with its live warrant from conformance_result. */
+/**
+ * Reference-agent rows, each with its live warrant from conformance_result.
+ *
+ * Results are read under both the legacy `marque:<slug>` id and the canonical ERC-8004
+ * row id (config/first-party.json). The warrant is the most recent PASS: a later failed
+ * retest is published on the agent's record but never flips a warranted badge by
+ * itself; the badge goes "retest due" when that pass is older than 72 h.
+ */
 async function referenceRows(): Promise<MarketRow[]> {
+  const fp = firstPartyAgents()
+  const canonical = new Map<string, string>()
+  const idRows = await db().execute(sql`
+    select id, token_id from agent
+    where chain_id = 56 and token_id in (${sql.join(fp.map((a) => sql`${String(a.tokenId)}`), sql`, `)})`)
+  for (const r of ((idRows as unknown as { rows?: unknown[] }).rows ?? (idRows as unknown as unknown[])) as Array<Record<string, unknown>>) {
+    const a = fp.find((x) => String(x.tokenId) === String(r['token_id']))
+    if (a) canonical.set(String(r['id']), a.legacyId)
+  }
+  const ids = [...fp.map((a) => a.legacyId), ...canonical.keys()]
   const warrants = await db().execute(sql`
-    select distinct on (agent_id, test_id) agent_id, test_id, pass, failed_fields, ran_at
-    from conformance_result
-    where agent_id like 'marque:%'
-    order by agent_id, test_id, ran_at desc
+    select agent_id, test_id, pass, failed_fields, ran_at from (
+      select distinct on (agent_id, test_id, pass) agent_id, test_id, pass, failed_fields, ran_at
+      from conformance_result
+      where agent_id in (${sql.join(ids.map((id) => sql`${id}`), sql`, `)})
+      order by agent_id, test_id, pass, ran_at desc
+    ) x
   `)
   const wl = (((warrants as unknown as { rows?: unknown[] }).rows ?? (warrants as unknown as unknown[])) as Array<Record<string, unknown>>)
   const byAgent = new Map<string, { pass: boolean; testId: string; failedField: string | null; date: string }>()
   for (const w of wl) {
-    const id = String(w['agent_id'])
+    const raw = String(w['agent_id'])
+    const id = canonical.get(raw) ?? raw
     const pass = w['pass'] === true
+    const date = w['ran_at'] instanceof Date ? (w['ran_at'] as Date).toISOString() : String(w['ran_at'])
     const prev = byAgent.get(id)
-    // Prefer a pass; otherwise keep the most recent.
-    if (!prev || (pass && !prev.pass)) {
+    // The newest pass wins; a failure only shows when the agent has never passed.
+    const better = !prev || (pass && !prev.pass) || (pass === prev.pass && date > prev.date)
+    if (better) {
       const ff = Array.isArray(w['failed_fields']) ? (w['failed_fields'] as string[]) : []
-      byAgent.set(id, {
-        pass, testId: String(w['test_id']),
-        failedField: ff[0] ?? null,
-        date: w['ran_at'] instanceof Date ? (w['ran_at'] as Date).toISOString() : String(w['ran_at']),
-      })
+      byAgent.set(id, { pass, testId: String(w['test_id']), failedField: pass ? null : (ff[0] ?? null), date })
     }
   }
 
@@ -207,7 +225,7 @@ async function queryThirdParty(): Promise<MarketRow[]> {
     ),
     conf as (
       select distinct on (agent_id) agent_id, test_id, pass, failed_fields, ran_at
-      from conformance_result where agent_id like '56:%'
+      from conformance_result where agent_id like '56:%' and agent_id not in ${firstPartyIdListSql()}
       order by agent_id, (pass) desc, ran_at desc
     ),
     cat as (
@@ -232,6 +250,8 @@ async function queryThirdParty(): Promise<MarketRow[]> {
       where a.chain_id = 56
         and (s.any_reachable or c.agent_id is not null)
         and a.id <> 'canary:ssrf'
+        -- First-party identities are listed once, as reference rows (invariant 17).
+        and a.id not in ${firstPartyIdListSql()}
     )
     select
       id as agent_id,

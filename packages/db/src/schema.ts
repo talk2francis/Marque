@@ -183,6 +183,31 @@ export const probe = pgTable('probe', {
 }))
 
 /**
+ * DERIVED. When each service is next due for a probe, and why.
+ *
+ * Rebuildable at any time from `probe` history (the worker backfills it when empty),
+ * so it is never a first-party observation. It exists so the scheduler reads one
+ * index instead of re-deriving "latest probe per service" from millions of rows every
+ * cycle, and so a live, classified or first-party service is never queued behind
+ * thousands of dead endpoints burning their full timeout (P2-00 probe incident).
+ */
+export const probeSchedule = pgTable('probe_schedule', {
+  serviceId: integer('service_id').primaryKey(),
+  agentId: text('agent_id').notNull(),
+  lastCheckedAt: timestamp('last_checked_at', { withTimezone: true }),
+  lastLiveness: text('last_liveness').$type<Liveness>(),
+  /** Dead verdicts in a row at the tail of this service's history. */
+  consecutiveDead: integer('consecutive_dead').notNull().default(0),
+  /** The newest probe row for this service, so readers join one row by primary key. */
+  lastProbeId: integer('last_probe_id'),
+  nextDueAt: timestamp('next_due_at', { withTimezone: true }).notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({
+  dueIdx: index('probe_schedule_due_idx').on(t.nextDueAt),
+  agentIdx: index('probe_schedule_agent_idx').on(t.agentId),
+}))
+
+/**
  * FIRST-PARTY. A dated count of the supply funnel, straight from the source.
  * This is what the homepage funnel renders. Because every row is a real
  * measurement with a timestamp, no ratio is ever hardcoded (AGENTS.md gotcha 7).
