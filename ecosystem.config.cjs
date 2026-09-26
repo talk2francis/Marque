@@ -178,6 +178,22 @@ module.exports = {
       error_file: '/root/.pm2/logs/marque-indexer-err.log',
     },
     {
+      name: 'marque-keeper',
+      cwd: `${ROOT}/apps/worker`,
+      script: 'node_modules/.bin/tsx',
+      args: 'src/keeper.ts',
+      interpreter: 'none',
+      // Mainnet only (G-M1, G-M2). Settles are MegaFuel-sponsored; own gas only above the floor.
+      env: { ...env, NODE_ENV: 'production', KEEPER_CHAINS: '56', KEEPER_MAX_PER_HOUR: '50', KEEPER_MIN_BNB: '0.0003' },
+      autorestart: true,
+      max_restarts: 20,
+      restart_delay: 30000,
+      max_memory_restart: '200M',
+      time: true,
+      out_file: '/root/.pm2/logs/marque-keeper-out.log',
+      error_file: '/root/.pm2/logs/marque-keeper-err.log',
+    },
+    {
       name: 'marque-quotes',
       cwd: `${ROOT}/apps/worker`,
       script: 'node_modules/.bin/tsx',
@@ -215,7 +231,8 @@ module.exports = {
       cwd: `${ROOT}/apps/web`,
       script: process.env.MARQUE_WEB_SERVER || '.next/standalone/apps/web/server.js',
       interpreter: 'node',
-      env: { ...env, NODE_ENV: 'production', PORT: env.WEB_PORT || '3200', HOSTNAME: '127.0.0.1' },
+      // Set and Earn runs on BSC mainnet (P2-05 step 8); testnet 97 stays as staging.
+      env: { ...env, NODE_ENV: 'production', PORT: env.WEB_PORT || '3200', HOSTNAME: '127.0.0.1', MARQUE_CAMPAIGN_CHAIN: '56', NEXT_PUBLIC_MARQUE_CAMPAIGN_CHAIN: '56' },
       autorestart: true,
       max_restarts: 50,
       restart_delay: 3000,

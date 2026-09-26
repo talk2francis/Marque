@@ -12,3 +12,4 @@ export { agenticCommerceAbi, evaluatorRouterAbi, optimisticPolicyAbi, SDK_VERSIO
 export * from './indexer.js'
 export * from './quest.js'
 export * from './rating.js'
+export { loadKeystore } from './keystore.js'

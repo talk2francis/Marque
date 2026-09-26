@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { readFileSync } from 'node:fs'
 import { sql } from 'drizzle-orm'
 import { db } from '@marque/db'
 import { publicClient } from '@marque/chain'
@@ -124,6 +125,8 @@ export default async function StatusPage() {
     indexerStatus().catch(() => null),
     questStats(campaignChainId()).catch(() => null),
   ])
+  let keeper: { at: string; keeper: string; settlesLastHour: number; capPerHour: number; chains: Record<string, { balanceBnb: string | null; floorBnb: string; submittedBound: number; due: number }> } | null = null
+  try { keeper = JSON.parse(readFileSync(process.env.KEEPER_STATUS ?? '/root/.marque/keeper/status.json', 'utf8')) } catch { keeper = null }
   const cursor = cursorQ.rows
   const probes = probesQ.rows
   const conf = confQ.rows
@@ -293,6 +296,12 @@ export default async function StatusPage() {
               ))}
             </tbody>
           </table>
+          {keeper && Object.entries(keeper.chains).map(([c, k]) => (
+            <p key={c} className={styles.note}>
+              Keeper <span className="mono">{keeper.keeper}</span> on chain {c}: {k.submittedBound} delivered Marque jobs in their review window, {k.due} due to settle,{' '}
+              {keeper.settlesLastHour} settled in the last hour (cap {keeper.capPerHour}); balance {k.balanceBnb ?? 'unreadable'} BNB, alarm below {k.floorBnb}. Last run {keeper.at}.
+            </p>
+          ))}
           {questTotals && (
             <p className={styles.note}>
               Set and Earn on chain {questTotals.chainId}, eligible activity only: {questTotals.walletsWithHire} wallets hired,{' '}
