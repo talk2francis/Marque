@@ -20,6 +20,8 @@ const BASE = process.argv[2] ?? 'http://127.0.0.1:3299'
 // An address with real first-party history — charters, hires, receipts, seals —
 // so the profile renders populated sections rather than only empty states.
 const ACTIVE_ADDR = '0x60AA3AEE06E2345A17E4d4B12c53E046F4F63CAf'
+// The P2-05 mainnet smoke wallet: five real hires, delivered and rated.
+const HIRER_ADDR = '0x5aC2448FC79Ef8d33710b1Bced5AEff90138b452'
 const DEAD_ADDR = '0x000000000000000000000000000000000000dEaD'
 const ROUTES = [
   '/', '/judge', '/ledger', '/ledger/methodology', '/register', '/docs', '/standard',
@@ -94,16 +96,18 @@ for (const line of body.split('\n')) {
   console.log(bad === 400 ? 'ok   /api/v1/profile rejects a bad address (400)' : `FAIL bad address returned ${bad}`)
   if (bad !== 400) failures++
 
+  // My Marque (P2-08, DESIGN-SYSTEM 8.7) for a wallet with real mainnet hires: every section
+  // renders and the job history is populated from the Quest API.
   const page = await browser.newPage({ viewport: { width: 1280, height: 900 } })
-  await page.goto(`${BASE}/me?addr=${ACTIVE_ADDR}`, { waitUntil: 'networkidle' })
+  await page.goto(`${BASE}/me?addr=${HIRER_ADDR}`, { waitUntil: 'networkidle' })
   await page.waitForTimeout(3500)
   const text = await page.evaluate(() => document.body.innerText)
-  const hasSections = /At a glance|Positions/i.test(text) && /Hires|Sealed calls|Activity/i.test(text)
-  const hasActivity = /ago\b/.test(text)
-  console.log(hasSections && hasActivity
-    ? 'ok   /me?addr= renders populated dashboard (sections + dated activity)'
-    : `FAIL /me?addr= dashboard incomplete (sections=${hasSections} activity=${hasActivity})`)
-  if (!(hasSections && hasActivity)) failures++
+  const hasSections = ['Set and Earn', 'Active jobs', 'History', 'Spending controls', 'Ratings you gave', 'Your agents'].every((h) => new RegExp(h, 'i').test(text))
+  const hasJobs = /job \d{3,}/i.test(text)
+  console.log(hasSections && hasJobs
+    ? 'ok   /me?addr= renders every My Marque section with a populated job history'
+    : `FAIL /me?addr= incomplete (sections=${hasSections} jobs=${hasJobs})`)
+  if (!(hasSections && hasJobs)) failures++
   await page.close()
 }
 
