@@ -10,39 +10,43 @@ import { readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { createWalletClient, http, type Hex } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
-import { bscTestnet } from 'viem/chains'
+import { bsc, bscTestnet } from 'viem/chains'
 import { chainClient } from '../src/chain.js'
 import { reputationAbi, REPUTATION_REGISTRY } from '../src/reputation.js'
 import { friendlyError } from '../src/errors.js'
 
 const args = process.argv.slice(2)
 const BASE = args.includes('--base') ? args[args.indexOf('--base') + 1]! : 'https://marque.trade'
-const pk = (JSON.parse(readFileSync('/root/.marque/test-wallets/p2-02-testnet.json', 'utf8')) as { privateKey: Hex }).privateKey
+// --mainnet: the Francis-funded smoke wallet rates its four mainnet hires (no self-rating test, no revoke).
+const MAINNET = args.includes('--mainnet')
+const CHAIN = (MAINNET ? 56 : 97) as 56 | 97
+const pk = (JSON.parse(readFileSync(`/root/.marque/test-wallets/${MAINNET ? 'p2-05-mainnet' : 'p2-02-testnet'}.json`, 'utf8')) as { privateKey: Hex }).privateKey
 const account = privateKeyToAccount(pk)
-const pub = chainClient(97)
-const wallet = createWalletClient({ account, chain: bscTestnet, transport: http('https://bsc-testnet-rpc.publicnode.com') })
+const pub = MAINNET ? (await import('viem')).createPublicClient({ chain: bsc, transport: http('https://bsc-dataseed.bnbchain.org', { retryCount: 3 }) }) as unknown as ReturnType<typeof chainClient> : chainClient(97)
+const wallet = createWalletClient({ account, chain: MAINNET ? bsc : bscTestnet, transport: http(MAINNET ? 'https://bsc-dataseed.bnbchain.org' : 'https://bsc-testnet-rpc.publicnode.com') })
 const log = (...m: unknown[]) => console.log(`[${new Date().toISOString().slice(11, 19)}]`, ...m)
 
 type Prepared = { call: { to: Hex; args: string[] }; feedbackHash: Hex; agentId: string }
 async function prepare(jobId: string, stars: number, comment?: string, who = account.address): Promise<Prepared | { error: string; detail: string }> {
-  const r = await fetch(`${BASE}/api/v1/phase2/rate`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ chainId: 97, jobId, wallet: who, stars, ...(comment ? { comment } : {}) }) })
+  const r = await fetch(`${BASE}/api/v1/phase2/rate`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ chainId: CHAIN, jobId, wallet: who, stars, ...(comment ? { comment } : {}) }) })
   return r.json() as Promise<Prepared | { error: string; detail: string }>
 }
 const asArgs = (a: string[]) => [BigInt(a[0]!), BigInt(a[1]!), Number(a[2]), a[3]!, a[4]!, a[5]!, a[6]!, a[7] as Hex] as const
 
-const q = await (await fetch(`${BASE}/api/v1/phase2/wallet/${account.address}?chainId=97`)).json() as { quest: { categories: Record<string, { jobKey: string | null }> } }
+const q = await (await fetch(`${BASE}/api/v1/phase2/wallet/${account.address}?chainId=${CHAIN}`)).json() as { quest: { categories: Record<string, { jobKey: string | null }> } }
 const plan: Array<[string, string, number, string]> = Object.entries(q.quest.categories).map(([cat, c], i) => [cat, c.jobKey!.split(':')[1]!, [5, 4, 5, 3][i]!, `Testnet proof rating for the ${cat.replace('_', ' ')} hire.`])
-const evidence: Record<string, unknown> = { chainId: 97, base: BASE, wallet: account.address, startedAt: new Date().toISOString(), ratings: [] as unknown[] }
+const evidence: Record<string, unknown> = { chainId: CHAIN, base: BASE, wallet: account.address, startedAt: new Date().toISOString(), ratings: [] as unknown[] }
 
 for (const [category, jobId, stars, comment] of plan) {
   const p = await prepare(jobId, stars, comment)
   if ('error' in p) { log(category, jobId, 'REFUSED', p.error, p.detail); (evidence.ratings as unknown[]).push({ category, jobId, refused: p }); continue }
   const tx = await wallet.writeContract({ address: p.call.to, abi: reputationAbi, functionName: 'giveFeedback', args: asArgs(p.call.args) })
   const r = await pub.waitForTransactionReceipt({ hash: tx })
-  log(`${category.padEnd(14)} job ${jobId} agent ${p.agentId} ${stars}/5 -> ${r.status} https://testnet.bscscan.com/tx/${tx}`)
+  log(`${category.padEnd(14)} job ${jobId} agent ${p.agentId} ${stars}/5 -> ${r.status} https://${MAINNET ? '' : 'testnet.'}bscscan.com/tx/${tx}`)
   ;(evidence.ratings as unknown[]).push({ category, jobId, agentId: p.agentId, stars, feedbackHash: p.feedbackHash, tx, status: r.status })
 }
 
+if (!MAINNET) {
 // Owner self-rating: Keel's own wallet tries to rate Keel (testnet agent 2238). Simulated, so
 // no gas is spent; the contract's revert is decoded and mapped to the buyer-facing sentence.
 const keelOwner = '0xdF1074a272C53A1a10b96Fa0201Eb58bbbaaFe00' as Hex
@@ -71,8 +75,9 @@ if (!('error' in dup)) {
   log(`revoke: rated job 1348 (${tx}), revoked index ${idx} -> ${rr.status} https://testnet.bscscan.com/tx/${rtx}`)
   evidence.revoke = { jobId: '1348', agentId: dup.agentId, rateTx: tx, feedbackIndex: idx.toString(), revokeTx: rtx, status: rr.status }
 } else { log('dup prepare refused', dup); evidence.revoke = { refused: dup } }
+}
 
 evidence.finishedAt = new Date().toISOString()
-const file = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../../../docs/phase2/evidence/testnet-rating-proof.json')
+const file = path.resolve(path.dirname(new URL(import.meta.url).pathname), `../../../docs/phase2/evidence/${MAINNET ? 'mainnet' : 'testnet'}-rating-proof.json`)
 writeFileSync(file, JSON.stringify(evidence, (_, v) => (typeof v === 'bigint' ? v.toString() : v), 2) + '\n')
 log('evidence written', file)

@@ -44,7 +44,7 @@ for (const [name, spec] of Object.entries(SPEC)) {
   const abiTopic = abiSelectors[0] ?? null
   let seen: { chainId: number; tx: string; block: number; topic0: string } | null = null
   // A stored event first: re-read its receipt from chain and take topic0 from the raw log.
-  const [stored] = rows(await db().execute(sql`select chain_id, tx_hash, log_index from commerce_event where name = ${name} order by chain_id desc, block_number desc limit 1`))
+  const [stored] = rows(await db().execute(sql`select chain_id, tx_hash, log_index from commerce_event where name = ${name} order by (chain_id = 56) desc, block_number desc limit 1`))
   if (stored) {
     const chainId = Number(stored['chain_id']) as ChainId
     const r = await chainClient(chainId).getTransactionReceipt({ hash: stored['tx_hash'] as `0x${string}` })

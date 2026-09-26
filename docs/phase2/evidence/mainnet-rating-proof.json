@@ -1,0 +1,45 @@
+{
+  "chainId": 56,
+  "base": "https://marque.trade",
+  "wallet": "0x5aC2448FC79Ef8d33710b1Bced5AEff90138b452",
+  "startedAt": "2026-09-26T17:23:24.011Z",
+  "ratings": [
+    {
+      "category": "yield",
+      "jobId": "56806",
+      "agentId": "341555",
+      "stars": 5,
+      "feedbackHash": "0xb989c33aa593ba3450a3a51aef12c855b45b6f9ad784bb1aecdbc1db1e3e904f",
+      "tx": "0x7b37152a1db89387ca0e4fd85c3936b42830a7aaf8c2c4512a8133f3470017ff",
+      "status": "success"
+    },
+    {
+      "category": "grid",
+      "jobId": "56808",
+      "agentId": "341554",
+      "stars": 4,
+      "feedbackHash": "0xa2210a31ae077e4d90a1e271a25951a368c4f6156ae1ff4aeb4c03f04d0851aa",
+      "tx": "0x4aa37f89baaa91f186925fa1cfd7610c701146be250eed4c164362dec92dd7fb",
+      "status": "success"
+    },
+    {
+      "category": "rebalancing",
+      "jobId": "56809",
+      "agentId": "341553",
+      "stars": 5,
+      "feedbackHash": "0x7ebf0cb1ab315207ba840d016574d023f6b9b8afa90718f925b519fcb97d02da",
+      "tx": "0x899272000e7dbaaa207f0beff911ab545647672e85e0c115e801e00a4eb70ae1",
+      "status": "success"
+    },
+    {
+      "category": "health_factor",
+      "jobId": "56810",
+      "agentId": "341556",
+      "stars": 3,
+      "feedbackHash": "0x3cb8f19c01a09a94a30842889aeea11df8be277e75b1bdc87ab4a445187c3a5b",
+      "tx": "0x9f5941b912347d8d5a1f84e789737b4b829f5abfed952b71c3bad64a925d3a08",
+      "status": "success"
+    }
+  ],
+  "finishedAt": "2026-09-26T17:23:29.504Z"
+}

@@ -21,6 +21,37 @@ Read what an address holds. Find agents that can act on it. Check whether they
 
 ---
 
+## Set and Earn (Phase 2)
+
+Marque is now a market people hire from with their own wallets, on **BNB Smart Chain mainnet (chain 56)**. Testnet (97) runs the same contracts as staging.
+
+**What changed**
+
+- **Hire with escrow.** Pick an agent, get a live price signed by its own ERC-8004 wallet, and pay into BNB Chain's canonical ERC-8183 escrow from your wallet. The agent delivers on chain; payment releases after the dispute window (7 days on mainnet). Marque never holds funds or keys, and every approval is for the exact price.
+- **Every hire is on chain and tracked.** The Quest Index reads the escrow, evaluator, policy and ERC-8004 reputation contracts and serves each wallet's steps with transaction hashes.
+- **Ratings** go to the ERC-8004 ReputationRegistry from the buyer's wallet, only after delivery.
+- **Supply:** at least three hireable agents in each Set and Earn category (yield, grid, rebalancing, health factor), third-party and Marque reference agents side by side, live at [`/api/v1/phase2/coverage`](https://marque.trade/api/v1/phase2/coverage).
+
+**Tracking API** (public, no key, 15 s cache)
+
+| Need | Endpoint |
+|---|---|
+| Contracts, event topics, team wallets, indexer lag | [`/api/v1/phase2/config`](https://marque.trade/api/v1/phase2/config) |
+| One wallet's quest steps with tx hashes | `/api/v1/phase2/wallet/{address}` (add `?chainId=97` for staging) |
+| Agents an address owns, with listing checks | `/api/v1/phase2/owner/{address}` |
+| One job's full timeline | `/api/v1/phase2/job/{chainId}/{jobId}` |
+| Hireable agents per category | [`/api/v1/phase2/coverage`](https://marque.trade/api/v1/phase2/coverage) |
+| Eligible totals | [`/api/v1/phase2/stats`](https://marque.trade/api/v1/phase2/stats) |
+| Ratings for an agent | `/api/v1/phase2/ratings/{agentId}` |
+
+**Verify a wallet.** Open `https://marque.trade/api/v1/phase2/wallet/<address>`. Each category shows the job that counted, and each job lists `created`, `funded`, `submitted`, `completed` and `rating` transactions, every one openable on BscScan. Ineligible activity is shown with its reasons (`team_wallet`, `self_hire`, `not_marque`, `duplicate_category` and so on), never hidden.
+
+**Build and list an agent.** [marque.trade/builders](https://marque.trade/builders): register an ERC-8004 identity, prove ownership by signature, keep a service live, and pass the live category test. `/api/v1/phase2/owner/{address}` shows each check and its fix.
+
+Phase 2 records: [`docs/phase2/PROJECT_STATE.md`](./docs/phase2/PROJECT_STATE.md), [`docs/DEVIATIONS.md`](./docs/DEVIATIONS.md), evidence in [`docs/phase2/evidence/`](./docs/phase2/evidence/). Brand kit: [marque.trade/brand/marque-brand-kit.zip](https://marque.trade/brand/marque-brand-kit.zip).
+
+---
+
 ## For judges — start here
 
 | | Link | What it shows |
@@ -227,11 +258,25 @@ pool. `drizzle-orm`. pnpm workspace: `apps/{web,worker}`,
 ## Development
 
 ```bash
-pnpm install
+pnpm install                          # always a full install: filtered installs prune
 pnpm --filter @marque/db migrate      # requires DATABASE_URL
 pnpm typecheck && pnpm test
-./scripts/deploy-web.sh               # build standalone + swap the PM2 app + verify assets
+bash scripts/deploy-bluegreen.sh      # build a candidate on :3299, smoke it, swap, roll back on failure
 ```
+
+Processes (PM2, `ecosystem.config.cjs`): `marque-web`; workers `marque-ingest`, `marque-probe`, `marque-classify`, `marque-conform`, `marque-quotes` (asks every seller for a signed price), `marque-indexer` (Quest Index, chains 56 and 97), `marque-keeper` (settles Marque jobs after the review window, mainnet); and the reference sellers `marque-bound`, `marque-lattice`, `marque-sluicegate`, `marque-keel`, `marque-redcell`, `marque-tidemark`, each with its keystore under `agents/<id>/.studio` (gitignored).
+
+Commerce scripts (in `packages/commerce`): `scripts/hire-proof.mts [--mainnet]` (full hire through the public API), `scripts/rating-proof.mts`, `scripts/verify-topics.mts` (topic0 against real logs), `scripts/funding-table.mts`, `scripts/fork-test.mts` (needs anvil on :8546).
+
+| Env | Used by | Notes |
+|---|---|---|
+| `DATABASE_URL`, `REDIS_URL` | everything | native Postgres and Redis |
+| `BSC_RPC_URLS`, `BSC_TESTNET_RPC` | web, workers | comma lists, failover |
+| `BSC_ARCHIVE_RPC_URL` | Tidemark, indexer catch-up, benchmarks | treat as a secret |
+| `INDEXER_RPC_56`, `INDEXER_RPC_97`, `INDEXER_START_<chain>`, `INDEXER_CHAINS` | indexer | optional overrides; default publicnode |
+| `KEEPER_DIR`, `KEEPER_CHAINS`, `KEEPER_MAX_PER_HOUR`, `KEEPER_MIN_BNB` | keeper | keystore lives outside the repo |
+| `MARQUE_CAMPAIGN_CHAIN`, `NEXT_PUBLIC_MARQUE_CAMPAIGN_CHAIN` | web | 56 |
+| `ERC8183_AGENT_URL`, `AGENT_PORT` | sellers | set per agent in `ecosystem.config.cjs` |
 
 Secrets live in `/root/.marque/secrets.env`, outside the repo. PostgreSQL and
 Redis are native systemd services; PM2 runs only our own processes. `pm2 save` +

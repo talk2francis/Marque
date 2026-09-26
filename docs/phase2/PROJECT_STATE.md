@@ -11,8 +11,9 @@ Live record of Phase 2. Newest first inside each section. Times are UTC.
 | P2-02 ERC-8183 buyer rail | DONE on testnet | Hire API, sheet, job page live. Proof: all 4 categories paid and answered (jobs 1343-1346), cancel 1347, revoke to zero. Browser check passed 14:31 (desktop and phone, from /register) |
 | P2-03 Quest Index and API | DONE (Sat 15:17) | marque-indexer on 56 and 97; /api/v1/phase2/{config,wallet,owner,job,coverage,stats} live; drill passed; 9 of 14 topics verified on real logs (ratings, dispute, expiry, refund pending real events) |
 | P2-04 Ratings | DONE (Sat 15:45) | Test wallet rated all four on testnet, /wallet ratedAll true; self-rating refused and mapped; all 14 quest topics verified on real logs |
-| P2-05 Mainnet cutover | PART 1 DONE, waiting on G-M2 funding | Fork test passed (USDT and U); sellers prepared on branch phase2-mainnet-sellers (U, max 2x); keeper 0x781e...556a; funding table below |
-| P2-06 Handoff | queued, due Sun 27 Sep 10:00 | |
+| P2-05 Mainnet cutover | DONE (Sat 17:13) | Sellers on 56 in U; keeper live; smoke hires 56806-56810 delivered and rated on mainnet; Francis runs the browser flow himself later |
+| (was) P2-05 | PART 1 DONE, waiting on G-M2 funding | Fork test passed (USDT and U); sellers prepared on branch phase2-mainnet-sellers (U, max 2x); keeper 0x781e...556a; funding table below |
+| P2-06 Handoff | DRAFTED (Sat 17:40), Francis sends | HANDOFF-BNB.md filled from measured values; paste-ready HANDOFF-BNB-send.md; brand kit at /brand/marque-brand-kit.zip; README Set and Earn section. Open: send date, Francis's Telegram handle | |
 
 ## Production baseline (P2-00, Sat 26 Sep 05:16)
 
@@ -56,6 +57,20 @@ Logged in `docs/DEVIATIONS.md` under "Phase 2". Index:
 - [Sat 05:20] [build] [Francis] Support channel for real users, and personal public wallet addresses for `config/team-wallets.json`.
 
 ## Evidence
+
+### P2-05 part 2 (Sat 26 Sep 17:13)
+
+Mainnet smoke (`docs/phase2/evidence/mainnet-smoke.json`), wallet 0x5aC2448FC79Ef8d33710b1Bced5AEff90138b452 (team, funded by Francis), through the public hire API:
+
+| Category | Agent | Job | Fund tx | Delivered tx | Rating tx |
+|---|---|---|---|---|---|
+| yield | Sluicegate | 56806 | 0x34f1567a... | 0x37ad4a6c... | 0x7b37152a... |
+| yield | Tidemark | 56807 | 0x5dc97243... | 0x8a332f73... | none |
+| grid | Lattice | 56808 | 0x04683248... | 0xe860ae36... | 0x4aa37f89... |
+| rebalancing | Bound | 56809 | 0x6feee514... | 0x3beecda0... | 0x89927200... |
+| health_factor | Keel | 56810 | 0x767be68f... | 0xdc4a2b97... | 0x9f5941b9... |
+
+Cancel 56811 (0xa9a03fed...), orphan 56805 cancelled (0xd8a41fa3...), approve then revoke to 0 (0x6bdf3f4c...). Full hashes in the evidence files. Keeper 0x781e...556a live on 56 (MegaFuel-sponsored settles); first settle due Sat 3 Oct.
 
 ### P2-05 part 1 (Sat 26 Sep 15:55)
 
