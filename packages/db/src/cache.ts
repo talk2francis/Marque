@@ -86,7 +86,10 @@ export async function cachedProjection<T>(
   // One computation per key per process, however many requests arrive together.
   let run = inflight.get(key) as Promise<T> | undefined
   if (!run) {
-    run = compute().then(async (value) => {
+    // A hard ceiling on the refresh itself: a compute that never settles (a hung RPC or
+    // query) once stayed in `inflight` for hours, so every reader waited on it, timed
+    // out and got the stale value (the coverage snapshot sat 4.5 h old on 26 Sep).
+    run = withTimeout(compute(), Math.max(timeoutMs * 6, 60_000)).then(async (value) => {
       await writeStored(key, { at: Date.now(), value }, keepMs)
       return value
     })
