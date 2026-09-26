@@ -82,6 +82,9 @@ const agentApps = REFERENCE_AGENTS.map(({ name, port }) => ({
     AGENT_PORT: String(port),
     AGENT_BIND_HOST: '127.0.0.1',
     MARQUE_AGENT_PUBLIC_URL: `${env.MARQUE_PUBLIC_URL || 'https://marque.trade'}/agents/${name}`,
+    // Where the seller runtime publishes each ERC-8183 deliverable; the URL goes on chain
+    // with submit(), so it must be public (Caddy routes /agents/<name>/* to this agent).
+    ERC8183_AGENT_URL: `${env.MARQUE_PUBLIC_URL || 'https://marque.trade'}/agents/${name}/erc8183`,
   },
   autorestart: true,
   max_restarts: 50,

@@ -1,0 +1,40 @@
+{
+  "chainId": 97,
+  "base": "https://marque.trade",
+  "wallet": "0xC83d716523C1958bcC48d19854ef1eb360bEf878",
+  "startedAt": "2026-09-26T12:54:35.229Z",
+  "funding": {
+    "tbnb": "0x0f1b14e3f913f6ad2f52ae74d90bb8f16322ca1892f82d08d53d24ae27e41310",
+    "faucetU": "0x1efff0e36bbc3e9a13865039941d99addaecd2b42d01edf9420c52ff18eb259c"
+  },
+  "hires": [
+    {
+      "category": "health_factor",
+      "agent": "Keel",
+      "agentId": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341556",
+      "jobId": "1337",
+      "price": "0.05 U",
+      "signedQuote": true,
+      "signatures": 5,
+      "batched": false,
+      "tx": {
+        "createJob": "0x4efcfcb6d9719c48801e3e254c6044e4f89ee7dc32253b1bccfb0f7f32c523c8",
+        "registerJob": "0x55c874cd6a446317dcb008c3c500069125aa0774a27623c0699156ca8f9272f5",
+        "setBudget": "0x0ffc4ba4a901b82aadd4d9ba7ee2ad7e0beb887fe51dbd6a99b1781a5747766c",
+        "approve": "0xbd924ea553c4708e54186e8abaa851dc1bda9856d6fc32f826ff81c61bd05a51",
+        "fund": "0xd4d6bf52904f2047e7447b5c3dcc3d3946186e3b086ab9087a1eef0a203accd8",
+        "submit": null
+      },
+      "intentId": "f7f06bb0-6a47-4272-a4c2-ba2ec1cf32c5",
+      "notified": true,
+      "seconds": 635
+    }
+  ],
+  "cancel": null,
+  "revoke": {
+    "approve": "0x0df25473ee90a5f320edfd5db4447c9b034fb4aabdba2c23546511b71a8afba3",
+    "revoke": "0x93c10eeb331e2af48200c6f4000972bdc9fd1ead1b1d4d678dda3562c5118dc9",
+    "allowanceAfter": "0"
+  },
+  "finishedAt": "2026-09-26T13:05:26.674Z"
+}
