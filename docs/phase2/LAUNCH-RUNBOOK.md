@@ -5,7 +5,7 @@
 
 ## 1. Capacity reality
 
-The VPS is a Contabo Cloud VPS 20 (per the invoice ChatGPT read): **6 shared vCPU, about 12 GB RAM, about 200 GB SSD, 300 Mbit/s**, not 16 GB. It runs Postgres, Redis, Caddy, the web app, six workers (ingest, probe, classify, conform, pancake-watch, indexer, plus keeper and job worker in Phase 2) and five to ten seller processes.
+The VPS is a Contabo Cloud VPS 20: **6 shared vCPU, about 12 GB RAM, about 200 GB SSD, 300 Mbit/s**, not 16 GB. It runs Postgres, Redis, Caddy, the web app, six workers (ingest, probe, classify, conform, pancake-watch, indexer, plus keeper and job worker in Phase 2) and five to ten seller processes.
 
 Rules:
 - User traffic never waits on the chain or the registry: every public page reads cached projections (Redis or precomputed tables). Only the hire sheet and Job Room make live calls, and those are small.

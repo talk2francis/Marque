@@ -49,3 +49,15 @@ demo-video/marque-poster-v2.png
 
 # Isolated web builds for pre-deployment verification
 apps/web/.next-*/
+
+# Phase 2 hygiene (AGENTS invariant 30): planning, personal and scratch files live in
+# /root/.marque/private on the VPS, never in this public repo.
+/Marque-Rough-Plan-Build-Critique-Preparedness.md
+/Forms-Funding.md
+/Marque -Master-Plan.md
+/claude demo plan/
+/demo/
+/_*.png
+/docs/phase2/DECISIONS.md
+/docs/phase2/00_START_HERE.md
+/docs/phase2/*.zip
