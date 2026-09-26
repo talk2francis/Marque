@@ -31,7 +31,7 @@ smoke() {
   local base="$1" fails=0
   # /register renders its list client-side, so its data API is checked directly:
   # it once returned 503 for every visitor while /register itself answered 200.
-  for u in / /status /register /standard /api/health "/api/v1/agents?limit=2" /api/v1/funnel "/api/v1/marketplace?limit=3&offset=0"; do
+  for u in / /status /register /standard /api/health "/api/v1/agents?limit=2" /api/v1/funnel "/api/v1/marketplace?limit=3&offset=0" /api/v1/phase2/config /api/v1/phase2/stats; do
     code="$(curl -s -o /dev/null -w '%{http_code}' -m 90 "$base$u" || echo 000)"
     echo "  $code $u" | tee -a "$LOG"
     [ "$code" = "200" ] || fails=$((fails + 1))
