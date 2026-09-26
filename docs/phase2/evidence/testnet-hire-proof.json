@@ -2,39 +2,194 @@
   "chainId": 97,
   "base": "https://marque.trade",
   "wallet": "0xC83d716523C1958bcC48d19854ef1eb360bEf878",
-  "startedAt": "2026-09-26T12:54:35.229Z",
-  "funding": {
-    "tbnb": "0x0f1b14e3f913f6ad2f52ae74d90bb8f16322ca1892f82d08d53d24ae27e41310",
-    "faucetU": "0x1efff0e36bbc3e9a13865039941d99addaecd2b42d01edf9420c52ff18eb259c"
-  },
+  "startedAt": "2026-09-26T14:01:17.283Z",
+  "funding": {},
   "hires": [
+    {
+      "category": "yield",
+      "agent": "Sluicegate",
+      "agentId": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341555",
+      "jobId": "1343",
+      "price": "0.1 U",
+      "signedQuote": true,
+      "signatures": 5,
+      "batched": false,
+      "tx": {
+        "createJob": "0x9a7a579f742cfc4e3d56c72bacdde7cba94a799fb28b0edc37b502fbb75fa39e",
+        "registerJob": "0x1331c317f2d76c72e5b1707feb81d2fb7e4a6119a1771f339353713d8f40b98c",
+        "setBudget": "0xfe7349a6416fd3282b3956de509ebe58028f1d33a32be69f967157cf6706746c",
+        "approve": "0xd4197265ab05545560897e32eba9d3a56b16b19b5b3379aa7264fcb991eb6442",
+        "fund": "0xcc17a2b4eca85728a03be4ddf77ff82db09c7bc167d6760bbef75ac37257627c",
+        "submit": "0x194ef657b354288d88c39a55bc8eca8916046f8a9e3072a26b3c7cbbe53023c6"
+      },
+      "intentId": "0988b4af-bc51-4089-8da5-a47e72abba05",
+      "notified": true,
+      "deliverable": {
+        "url": "https://marque.trade/agents/sluicegate/erc8183/job/1343/response",
+        "ok": true,
+        "error": null,
+        "keys": [
+          "recommend",
+          "venue",
+          "netAprPct",
+          "aprSources",
+          "switchingCost",
+          "usesLeverage",
+          "improvementBps",
+          "thresholdBps",
+          "declineReason",
+          "breakEvenUsd",
+          "grossAprPct",
+          "sizeUsd",
+          "alternatives",
+          "excluded",
+          "blockNumber",
+          "readAt",
+          "source",
+          "assumptions"
+        ]
+      },
+      "seconds": 40
+    },
+    {
+      "category": "grid",
+      "agent": "Lattice",
+      "agentId": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341554",
+      "jobId": "1344",
+      "price": "0.1 U",
+      "signedQuote": true,
+      "signatures": 5,
+      "batched": false,
+      "tx": {
+        "createJob": "0x57cd96cd68470e21cc5db906e3c16a1d93232e8c3980ed92b512017c9cb0c9e0",
+        "registerJob": "0x11acc8bd78f261395ff216563295e9aba301d58d183ec98a14b01cd4362ec2c7",
+        "setBudget": "0xd5989ed2322c4a4c3d1725f4de5df6df554126a5e7b58552f04e22b41a6ac548",
+        "approve": "0xe30bf234d5a39da85fbfa51b052892414a5917e75ad5df7a55040dc25547afa0",
+        "fund": "0x715b9009f231ae7c9a0d3eb0e36781f92b44f9707760a53b1b7bf9972bf35368",
+        "submit": "0x6a95ca4111abcccfb295a408b6216f42e958caf47ee4632fdd2df921d77786b6"
+      },
+      "intentId": "21f93c23-bf00-4854-a755-2fa257d4999e",
+      "notified": true,
+      "deliverable": {
+        "url": "https://marque.trade/agents/lattice/erc8183/job/1344/response",
+        "ok": true,
+        "error": null,
+        "keys": [
+          "spacingType",
+          "levels",
+          "feeDragPct",
+          "levelCount",
+          "allocationTotalUsd",
+          "capitalUsd",
+          "bandLow",
+          "bandHigh",
+          "narrowedToClearStop",
+          "narrowedNote",
+          "feeDragBasis",
+          "assumptions",
+          "blockNumber",
+          "source"
+        ]
+      },
+      "seconds": 38
+    },
+    {
+      "category": "rebalancing",
+      "agent": "Bound",
+      "agentId": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341553",
+      "jobId": "1345",
+      "price": "0.15 U",
+      "signedQuote": true,
+      "signatures": 5,
+      "batched": false,
+      "tx": {
+        "createJob": "0x43909c25b136de9f42c7cfa380cdefa718eadef1d8308b11c4a2de3e4dc08467",
+        "registerJob": "0xb7aa67e65825025ee368924f1631769d2b006511e8685d97fa49e606e99652f5",
+        "setBudget": "0xef4c01ccf6a415abe893bfab21575de34f3da26b3e235ee52c392cca73c259b8",
+        "approve": "0x35dc585c2c3183f04ab947910284b5d2fcf1021b9fbda532675909adaaa56943",
+        "fund": "0xc489c30f3d8f0525f4772f889559e9fb4be24ccbad89b4e2433c6f67647d5362",
+        "submit": "0x1ac355740fa6422efad24727ad22807b5c3b9e303720abba3ec11c4907eedd49"
+      },
+      "intentId": "1670f3a7-8858-42cf-8dff-e79e7c2a8906",
+      "notified": true,
+      "deliverable": {
+        "url": "https://marque.trade/agents/bound/erc8183/job/1345/response",
+        "ok": true,
+        "error": null,
+        "keys": [
+          "currentTick",
+          "inRange",
+          "pctToNearestBound",
+          "proposedTickLower",
+          "proposedTickUpper",
+          "distanceToBound",
+          "amount0",
+          "amount1",
+          "maxSlippageBps",
+          "slippageBasis",
+          "tokenId",
+          "owner",
+          "pool",
+          "tickSpacing",
+          "feeTier",
+          "pair",
+          "rangeHalfWidthPct",
+          "assumptions",
+          "blockNumber",
+          "readAt",
+          "source"
+        ]
+      },
+      "seconds": 47
+    },
     {
       "category": "health_factor",
       "agent": "Keel",
       "agentId": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341556",
-      "jobId": "1337",
+      "jobId": "1346",
       "price": "0.05 U",
       "signedQuote": true,
       "signatures": 5,
       "batched": false,
       "tx": {
-        "createJob": "0x4efcfcb6d9719c48801e3e254c6044e4f89ee7dc32253b1bccfb0f7f32c523c8",
-        "registerJob": "0x55c874cd6a446317dcb008c3c500069125aa0774a27623c0699156ca8f9272f5",
-        "setBudget": "0x0ffc4ba4a901b82aadd4d9ba7ee2ad7e0beb887fe51dbd6a99b1781a5747766c",
-        "approve": "0xbd924ea553c4708e54186e8abaa851dc1bda9856d6fc32f826ff81c61bd05a51",
-        "fund": "0xd4d6bf52904f2047e7447b5c3dcc3d3946186e3b086ab9087a1eef0a203accd8",
-        "submit": null
+        "createJob": "0x29328a036aaa31255bbf54075d0dfe0ecf85faca19ba6cad68ca7a602ce696e6",
+        "registerJob": "0x4240032c4891b10257b0d33ed4fa3257907eb9f2b73840f904376ae22cf1215d",
+        "setBudget": "0x1c52a74cd527254f28fd9213f91c01c6075521054c40fe6535c68dfc179c7221",
+        "approve": "0x1f4439cd29edd783eb238a684329a662c8c6da1ba494609d8334387204190c4b",
+        "fund": "0xea7aba146847cdd3199dcba37be985352c501c934194b4301205bd69e86f1798",
+        "submit": "0x024bc968bade5d0808844a9a2d452a3a4a5b39664d4c9dae47feaf5e41d86124"
       },
-      "intentId": "f7f06bb0-6a47-4272-a4c2-ba2ec1cf32c5",
+      "intentId": "90a54c0b-31f7-4352-9edb-5bf419b80f3a",
       "notified": true,
-      "seconds": 635
+      "deliverable": {
+        "url": "https://marque.trade/agents/keel/erc8183/job/1346/response",
+        "ok": true,
+        "error": null,
+        "keys": [
+          "healthFactor",
+          "primaryCollateralSymbol",
+          "primaryCollateralFactor",
+          "primaryLiquidationPriceUsd",
+          "repayUsdToReachTarget",
+          "targetHealthFactor",
+          "assumptions",
+          "blockNumber",
+          "readAt",
+          "source"
+        ]
+      },
+      "seconds": 42
     }
   ],
-  "cancel": null,
+  "cancel": {
+    "jobId": "1347",
+    "createJob": "0x865a46938f62ee170ad2d18062d85da42970221bdfca2ec49c38515bc5805457",
+    "cancel": "0x5d4ebe582ca495d6b3670dc2b3d2db38961874052c32ea6d46d7452cfea1ca5f"
+  },
   "revoke": {
-    "approve": "0x0df25473ee90a5f320edfd5db4447c9b034fb4aabdba2c23546511b71a8afba3",
-    "revoke": "0x93c10eeb331e2af48200c6f4000972bdc9fd1ead1b1d4d678dda3562c5118dc9",
+    "approve": "0x0cbdb5a015b94f2e37de803d138a4e73eabb8a96d321cce0c2020cb29ba2f1fe",
+    "revoke": "0x9ae5bffee0bf574a7abdabd8fba13aeecc3272587c206fd17c74b920e46b26d5",
     "allowanceAfter": "0"
   },
-  "finishedAt": "2026-09-26T13:05:26.674Z"
+  "finishedAt": "2026-09-26T14:04:25.960Z"
 }

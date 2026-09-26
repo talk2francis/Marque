@@ -130,9 +130,21 @@ for (const a of AGENTS) {
   }
   if (submitted) log(`  DELIVERED ${explorer(submitted)} after ${Math.round((Date.now() - started) / 1000)}s`)
   else log('  not delivered within 10 minutes (the job stays refundable after', i.refundAfter, ')')
+  // Delivered is not the same as useful: job 1337 was delivered and its answer was
+  // an error. Read the public deliverable and record which it was.
+  let deliverable: { url: string; ok: boolean; error: string | null; keys: string[] } | null = null
+  if (submitted) {
+    const url = `${BASE}/agents/${a.slug}/erc8183/job/${jobId}/response`
+    const body = await fetch(url).then((r) => r.json()).catch(() => null) as { response?: { content?: string } } | null
+    let content: Record<string, unknown> | null = null
+    try { content = JSON.parse(body?.response?.content ?? 'null') } catch { content = null }
+    const error = content === null ? 'deliverable unreadable' : typeof content.error === 'string' ? content.error : null
+    deliverable = { url, ok: error === null, error, keys: content ? Object.keys(content) : [] }
+    log(error === null ? `  ANSWER OK (${deliverable.keys.slice(0, 5).join(', ')})` : `  ANSWER IS AN ERROR: ${error}`)
+  }
   ;(evidence.hires as unknown[]).push({
     category: a.category, agent: q.agentName, agentId: a.agentId, jobId: jobId.toString(), price: q.priceLabel, signedQuote: q.signed,
-    signatures: Object.keys(tx).length, batched: false, tx: { ...tx, submit: submitted }, intentId: i.intentId, notified: n.accepted,
+    signatures: Object.keys(tx).length, batched: false, tx: { ...tx, submit: submitted }, intentId: i.intentId, notified: n.accepted, deliverable,
     seconds: Math.round((Date.now() - started) / 1000),
   })
 }

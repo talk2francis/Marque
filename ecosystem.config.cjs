@@ -67,6 +67,7 @@ const REFERENCE_AGENTS = [
   { name: 'sluicegate', port: 8613 },
   { name: 'redcell', port: 8614 },
   { name: 'keel', port: 8610 },
+  { name: 'tidemark', port: 8615 },
 ]
 
 const agentApps = REFERENCE_AGENTS.map(({ name, port }) => ({

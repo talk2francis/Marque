@@ -172,9 +172,24 @@ export function marqueCard(engine: Engine, publicUrl: string): Record<string, un
  * what makes it gradeable and what keeps AGENTS.md invariant 10 true — the LLM
  * never signs and never prices, and here it does not even compute.
  */
-export function engineRunWork(engine: Engine) {
+/**
+ * The PAID work step (ERC-8183 delivery, x402). A paid job has minutes to
+ * deliver, not the free preview's few seconds, so a slow upstream gets a longer
+ * budget and two more tries before the buyer is handed an error. Testnet job
+ * 1341 paid Keel and received "the Venus Comptroller did not answer within
+ * 6000ms". Refusals about the task itself are never retried: asking the same
+ * question again cannot fill in a missing fact.
+ */
+const UPSTREAM_FAILURE = /did not answer within|could not read|fetch failed|HTTP request failed|timed? ?out|ECONNRESET|rate limit|429|503|502/i
+
+export function engineRunWork(engine: Engine, opts: { attempts?: number; deadlineMs?: number; backoffMs?: number } = {}) {
+  const attempts = opts.attempts ?? 3
   return async (prompt: string): Promise<string> => {
-    const answer = await engine.run(prompt)
+    let answer = await engine.run(prompt, { deadlineMs: opts.deadlineMs ?? 20_000 })
+    for (let i = 1; i < attempts && typeof answer.error === 'string' && UPSTREAM_FAILURE.test(answer.error); i++) {
+      await new Promise((r) => setTimeout(r, (opts.backoffMs ?? 2_000) * i))
+      answer = await engine.run(prompt, { deadlineMs: opts.deadlineMs ?? 20_000 })
+    }
     return JSON.stringify(answer)
   }
 }

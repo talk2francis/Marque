@@ -42,6 +42,14 @@
       ]
     },
     {
+      "address": "0x8122991297DC98Dc5c735fDE90a501528922aFdC",
+      "role": "reference seller Tidemark (second first-party yield agent)",
+      "chainIds": [
+        56,
+        97
+      ]
+    },
+    {
       "address": "0x9598AB46aAB33389C2e9Ffe0511effD330f67F9B",
       "role": "testnet operator (charter sandbox, receipt anchors)",
       "chainIds": [

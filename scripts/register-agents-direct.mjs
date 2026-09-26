@@ -67,6 +67,7 @@ const AGENTS = [
   { id: 'sluicegate', name: 'Sluicegate', description: 'Marque reference agent: net-APR-at-size yield routing across BNB Chain venues.' },
   { id: 'keel', name: 'Keel', description: 'Marque reference agent: Venus health factor, liquidation price and exact restore amount.' },
   { id: 'redcell', name: 'Redcell', description: 'Marque reference agent: BNB Chain approval and privileged-function risk triage.' },
+  { id: 'tidemark', name: 'Tidemark', description: 'Marque reference agent: realised yield, measured from on-chain exchange-rate growth over a trailing window, compared with what each venue quotes today.' },
 ]
 
 function walletPassword(id) {
