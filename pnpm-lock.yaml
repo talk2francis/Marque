@@ -254,6 +254,9 @@ importers:
       '@marque/chain':
         specifier: workspace:*
         version: link:../../packages/chain
+      '@marque/commerce':
+        specifier: workspace:*
+        version: link:../../packages/commerce
       '@marque/conformance':
         specifier: workspace:*
         version: link:../../packages/conformance

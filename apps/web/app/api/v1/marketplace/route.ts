@@ -18,6 +18,8 @@ export async function GET(req: NextRequest) {
     liveNow: bool('live'),
     warranted: bool('warranted'),
     thirdPartyOnly: bool('thirdParty'),
+    hireableOnly: bool('hireable'),
+    includeUnclassified: bool('includeUnclassified'),
     hasPrice: bool('hasPrice'),
     iface: p.get('iface'),
     sort: (p.get('sort') as MarketQuery['sort']) ?? 'best',

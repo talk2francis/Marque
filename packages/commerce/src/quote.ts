@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { recoverMessageAddress, getAddress, keccak256, toBytes, type PublicClient } from 'viem'
+import { recoverMessageAddress, getAddress, keccak256, toBytes } from 'viem'
 import { safeFetch } from '@marque/probe'
 import { assetAt, isSupportedChain, network, type ChainId } from './config.js'
 
@@ -37,6 +37,28 @@ export const NegotiationSchema = z.object({
 }).passthrough()
 export type Negotiation = z.infer<typeof NegotiationSchema>
 
+/**
+ * The plain quote some production sellers return instead of a signed NegotiationResult
+ * (for example Brain on BNB): the provider address, price, token, chain and escrow
+ * contract, with no provider signature.
+ */
+export const SimpleQuoteSchema = z.object({
+  accepted: z.boolean(),
+  provider: z.string().regex(/^0x[0-9a-fA-F]{40}$/),
+  price: z.string().regex(/^\d+$/),
+  payment_token: z.string().regex(/^0x[0-9a-fA-F]{40}$/).optional(),
+  currency: z.string().optional(),
+  chain_id: z.number().int().positive(),
+  verifying_contract: z.string().regex(/^0x[0-9a-fA-F]{40}$/),
+  estimated_completion_seconds: z.number().int().nonnegative().optional(),
+  quote_expires_at: z.number().int().positive().optional(),
+  service: z.string().optional(),
+  deliverables: z.string().optional(),
+  needs: z.record(z.unknown()).optional(),
+  instructions: z.string().optional(),
+}).passthrough()
+export type SimpleQuote = z.infer<typeof SimpleQuoteSchema>
+
 export type QuoteFailure =
   | 'unreachable'
   | 'not_a2a'
@@ -54,7 +76,12 @@ export type QuoteFailure =
 
 export interface VerifiedQuote {
   ok: true
-  negotiation: Negotiation
+  /** True for a provider-signed NegotiationResult; false for a plain quote whose provider is the registered wallet. */
+  signed: boolean
+  /** Present when signed. */
+  negotiation: Negotiation | null
+  /** Present when unsigned. */
+  simple: SimpleQuote | null
   chainId: ChainId
   provider: `0x${string}`
   price: bigint
@@ -72,6 +99,7 @@ export interface FailedQuote {
   detail: string
   latencyMs: number
   negotiation?: Negotiation
+  simple?: SimpleQuote
   chainId?: number
   provider?: `0x${string}`
 }
@@ -160,7 +188,9 @@ export async function verifyNegotiation(neg: Negotiation, ctx: QuoteVerifyContex
   }
   return {
     ok: true,
+    signed: true,
     negotiation: neg,
+    simple: null,
     chainId,
     provider: getAddress(signer),
     price,
@@ -172,16 +202,66 @@ export async function verifyNegotiation(neg: Negotiation, ctx: QuoteVerifyContex
   }
 }
 
+/** Unsigned quotes live 15 minutes from when we received them (the SDK's cap for signed quotes). */
+export const UNSIGNED_QUOTE_TTL_S = 900
+
 /**
- * Deep check with the SDK's own verifier: recomputes negotiation_hash over the signed
- * content and checks chain and expiry against a live block. Server only (loads the SDK).
+ * Verify a plain (unsigned) quote. Without a signature, the protection is the provider:
+ * it must be the agent's own ERC-8004 wallet (or owner), so escrowed money can only ever
+ * be released to the identity the buyer chose, never to a substitute.
  */
-export async function sdkVerify(neg: Negotiation, provider: `0x${string}`, client: PublicClient): Promise<{ valid: boolean; reason?: string }> {
-  const { verifyQuoteSignature } = await import('@bnbagent/sdk/erc8183')
-  const chainId = neg.chain_id
-  const expected = isSupportedChain(chainId) ? network(chainId).commerce : undefined
-  const r = await verifyQuoteSignature({ envelope: neg as never, provider, publicClient: client as never, expectedVerifyingContract: expected } as never) as { valid: boolean; reason?: string }
-  return r
+export function verifySimpleQuote(q: SimpleQuote, ctx: QuoteVerifyContext, latencyMs = 0): QuoteResult {
+  const fail = (reason: QuoteFailure, detail: string, extra: Partial<FailedQuote> = {}): FailedQuote => ({ ok: false, reason, detail, latencyMs, simple: q, ...extra })
+  if (!q.accepted) return fail('declined', 'the seller declined the task')
+  const chainId = q.chain_id
+  if (!isSupportedChain(chainId)) return fail('chain_unsupported', `quote is bound to chain ${chainId}`, { chainId })
+  const net = network(chainId)
+  if (q.verifying_contract.toLowerCase() !== net.commerce.toLowerCase()) {
+    return fail('wrong_contract', `quote names ${q.verifying_contract}, expected ${net.commerce}`, { chainId })
+  }
+  const asset = q.payment_token ? assetAt(chainId, q.payment_token) : null
+  if (!asset) return fail('currency_unsupported', `payment token ${q.payment_token ?? 'missing'} is not a catalog asset on chain ${chainId}`, { chainId })
+  const price = BigInt(q.price)
+  if (price <= 0n) return fail('no_price', 'quote has no positive price', { chainId })
+  const provider = getAddress(q.provider)
+  const allowed = [ctx.agentWallet, ctx.agentOwner].filter((a): a is string => typeof a === 'string' && /^0x[0-9a-fA-F]{40}$/.test(a) && !/^0x0{40}$/i.test(a))
+  if (!allowed.some((a) => a.toLowerCase() === provider.toLowerCase())) {
+    return fail('provider_mismatch', `quote names provider ${provider}, which is not this agent's registered wallet`, { chainId, provider })
+  }
+  const now = ctx.now ?? Math.floor(Date.now() / 1000)
+  const expiresAt = q.quote_expires_at && q.quote_expires_at > now ? q.quote_expires_at : now + UNSIGNED_QUOTE_TTL_S
+  return {
+    ok: true,
+    signed: false,
+    negotiation: null,
+    simple: q,
+    chainId,
+    provider,
+    price,
+    token: { address: asset.address, symbol: asset.symbol, decimals: asset.decimals, isDefault: asset.isDefault },
+    expiresAt,
+    estimatedCompletionSeconds: q.estimated_completion_seconds ?? null,
+    quoteHash: keccak256(toBytes(JSON.stringify(q))),
+    latencyMs,
+  }
+}
+
+/** Find a plain quote object anywhere in an A2A response. */
+export function extractSimpleQuote(body: unknown): unknown {
+  const seen = new Set<unknown>()
+  let found: unknown = null
+  const visit = (v: unknown, depth: number): void => {
+    if (found || depth > 8 || v === null || typeof v !== 'object' || seen.has(v)) return
+    seen.add(v)
+    const o = v as Record<string, unknown>
+    if (typeof o['provider'] === 'string' && typeof o['price'] === 'string' && 'verifying_contract' in o && 'accepted' in o) { found = o; return }
+    if (typeof o['text'] === 'string' && o['text'].includes('verifying_contract')) {
+      try { const j = JSON.parse(o['text'] as string); visit(j, depth + 1) } catch { /* not JSON */ }
+    }
+    for (const k of Object.keys(o)) visit(o[k], depth + 1)
+  }
+  visit(body, 0)
+  return found
 }
 
 /** Send negotiate to one exact service and verify the answer. */
@@ -200,8 +280,9 @@ export async function requestQuote(endpoint: string, task: NegotiateTask, ctx: Q
   let res = await attempt(false)
   let found: unknown = res.ok ? parseJson(res.body) : null
   let neg = found ? extractNegotiation(found) : null
-  // Text-only A2A adapters (Foundry) take the skill envelope as a JSON string.
-  if (!neg && res.ok && res.status < 500) {
+  // Text-only A2A adapters (Foundry) take the skill envelope as a JSON string. Retry that
+  // way only when the first answer held no quote of either shape.
+  if (!neg && !(found && extractSimpleQuote(found)) && res.ok && res.status < 500) {
     res = await attempt(true)
     found = res.ok ? parseJson(res.body) : null
     neg = found ? extractNegotiation(found) : null
@@ -210,7 +291,15 @@ export async function requestQuote(endpoint: string, task: NegotiateTask, ctx: Q
   if (!res.ok) return { ok: false, reason: 'unreachable', detail: `${res.failure}: ${res.detail}`.slice(0, 200), latencyMs }
   if (res.status >= 400) return { ok: false, reason: 'unreachable', detail: `http ${res.status}`, latencyMs }
   if (found === null) return { ok: false, reason: 'not_a2a', detail: 'response was not JSON', latencyMs }
-  if (!neg) return { ok: false, reason: 'no_quote', detail: 'no NegotiationResult in the A2A response', latencyMs }
+  if (!neg) {
+    const simple = extractSimpleQuote(found)
+    if (simple) {
+      const parsedSimple = SimpleQuoteSchema.safeParse(simple)
+      if (parsedSimple.success) return verifySimpleQuote(parsedSimple.data, ctx, latencyMs)
+      return { ok: false, reason: 'malformed', detail: parsedSimple.error.issues.slice(0, 3).map((i) => `${i.path.join('.')}: ${i.message}`).join('; '), latencyMs }
+    }
+    return { ok: false, reason: 'no_quote', detail: 'no quote in the A2A response', latencyMs }
+  }
   const parsed = NegotiationSchema.safeParse(neg)
   if (!parsed.success) return { ok: false, reason: 'malformed', detail: parsed.error.issues.slice(0, 3).map((i) => `${i.path.join('.')}: ${i.message}`).join('; '), latencyMs }
   return verifyNegotiation(parsed.data, ctx, latencyMs)
@@ -221,9 +310,14 @@ function parseJson(body: string): unknown {
 }
 
 /** The fixed, harmless probe task (SPEC-COMMERCE 4.2). Never carries user data. */
+const CATEGORY_WORDS: Record<string, string> = {
+  yield: 'yield optimization', grid: 'grid trading', rebalancing: 'portfolio rebalancing',
+  health_factor: 'health factor monitoring', security: 'security review',
+}
+
 export function probeTask(category: string): NegotiateTask {
   return {
-    task_description: `marque-quote-probe: price check for a ${category} task. No job will be created from this quote.`,
+    task_description: `marque-quote-probe: price check for a ${CATEGORY_WORDS[category] ?? category} task. No job will be created from this quote.`,
     terms: { deliverables: 'price quote only', quality_standards: 'n/a', client_ref: 'marque.trade', category },
   }
 }

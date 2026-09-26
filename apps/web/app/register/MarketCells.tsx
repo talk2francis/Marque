@@ -1,4 +1,5 @@
 'use client'
+import { ProvenanceChip } from '@marque/ui'
 
 import Link from 'next/link'
 import { Chip, LinkButton } from '@marque/ui'
@@ -95,10 +96,17 @@ export function LiveCell({ a }: { a: MarketRow }) {
 export function PriceCell({ a }: { a: MarketRow }) {
   const p = priceParts(a.price)
   if (!p) return <span className={styles.priceNone}>No listed price</span>
+  const net = a.commerce.chainId === 56 ? 'BSC mainnet' : a.commerce.chainId === 97 ? 'BSC testnet' : null
   return (
     <span className={styles.price}>
       <span className={`mono ${styles.priceValue}`}>{p.value}</span>
       {p.note && <span className={styles.priceNote}>{p.note}</span>}
+      {a.priceProvenance && (
+        <span title={a.priceProvenance === 'MEASURED' ? `Live quote from this agent${net ? ` on ${net}` : ''}` : 'Declared by the agent, not measured'}>
+          <ProvenanceChip provenance={a.priceProvenance} />
+        </span>
+      )}
+      {a.priceProvenance === 'MEASURED' && net && <span className={styles.priceNote}>{net}</span>}
     </span>
   )
 }

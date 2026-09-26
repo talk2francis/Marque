@@ -34,6 +34,8 @@ export interface SellerCandidate {
   agentWallet: string | null
   owner: string | null
   firstParty: FirstPartyAgent | null
+  /** The card advertises an ERC-8183 skill (negotiate / notify_funded) or names ERC-8183. */
+  advertisesCommerce: boolean
 }
 
 /**
@@ -56,13 +58,22 @@ export async function sellerCandidates(): Promise<SellerCandidate[]> {
     )
     select lp.service_id, a.id as agent_id, a.chain_id, a.token_id, a.name, a.agent_wallet, a.owner_address,
            coalesce(lp.manifest->>'url', lp.executable_endpoint, s.resolved_endpoint, s.endpoint) as endpoint,
-           case when cat.category = 'unclassified' then null else cat.category end as category
+           case when cat.category = 'unclassified' then null else cat.category end as category,
+           exists (
+             select 1 from jsonb_array_elements(case when jsonb_typeof(lp.manifest->'skills') = 'array' then lp.manifest->'skills' else '[]'::jsonb end) x
+             where x->>'id' in ('negotiate', 'notify_funded') or (x->>'id') ilike '%8183%' or (x->>'name') ilike '%erc-8183%'
+           ) or coalesce(lp.manifest->>'description', '') ilike '%8183%' as advertises
     from lp
     join agent a on a.id = lp.agent_id
     join agent_service s on s.id = lp.service_id
     left join cat on cat.agent_id = a.id
     where s.kind = 'a2a' and (
       a.id in (${sql.join(fpIds.map((id) => sql`${id}`), sql`, `)})
+      -- Any answering A2A agent classified into a hireable category gets a harmless price
+      -- check: some production sellers (plain quotes) do not list a negotiate skill.
+      or (cat.category in ('yield', 'grid', 'rebalancing', 'health_factor', 'security')
+          and exists (select 1 from probe_schedule ps2 join probe p2 on p2.id = ps2.last_probe_id
+                      where ps2.service_id = lp.service_id and p2.liveness in ('live', 'unbound', 'bad_schema')))
       or exists (
         select 1 from jsonb_array_elements(case when jsonb_typeof(lp.manifest->'skills') = 'array' then lp.manifest->'skills' else '[]'::jsonb end) x
         where x->>'id' in ('negotiate', 'notify_funded') or (x->>'id') ilike '%8183%' or (x->>'name') ilike '%erc-8183%'
@@ -83,13 +94,15 @@ export async function sellerCandidates(): Promise<SellerCandidate[]> {
       agentWallet: r['agent_wallet'] ? String(r['agent_wallet']) : null,
       owner: r['owner_address'] ? String(r['owner_address']) : null,
       firstParty: first,
+      advertisesCommerce: r['advertises'] === true,
     }
   })
 }
 
 /** Store one quote attempt (first-party observation). */
 export async function recordQuote(source: 'probe' | 'user', c: Pick<SellerCandidate, 'agentId' | 'serviceId' | 'endpoint'>, q: QuoteResult): Promise<number> {
-  const neg = q.ok ? q.negotiation : q.negotiation
+  const neg = q.negotiation ?? undefined
+  const simple = q.simple ?? undefined
   const [row] = await db().insert(commerceQuote).values({
     source,
     agentId: c.agentId,
@@ -100,17 +113,18 @@ export async function recordQuote(source: 'probe' | 'user', c: Pick<SellerCandid
     detail: q.ok ? null : q.detail.slice(0, 500),
     chainId: q.ok ? q.chainId : (q.chainId ?? neg?.chain_id ?? null),
     provider: q.ok ? q.provider : (q.provider ?? null),
-    priceRaw: q.ok ? q.price.toString() : (neg?.response.terms?.price ?? null),
-    token: q.ok ? q.token.address : (neg?.response.terms?.currency ?? null),
+    priceRaw: q.ok ? q.price.toString() : (neg?.response.terms?.price ?? simple?.price ?? null),
+    token: q.ok ? q.token.address : (neg?.response.terms?.currency ?? simple?.payment_token ?? null),
     tokenSymbol: q.ok ? q.token.symbol : null,
     tokenDecimals: q.ok ? q.token.decimals : null,
-    quoteExpiresAt: neg?.response.quote_expires_at ? new Date(neg.response.quote_expires_at * 1000) : null,
-    estimatedCompletionSeconds: neg?.response.estimated_completion_seconds ?? null,
+    quoteExpiresAt: q.ok ? new Date(q.expiresAt * 1000) : (neg?.response.quote_expires_at ? new Date(neg.response.quote_expires_at * 1000) : null),
+    estimatedCompletionSeconds: q.ok ? q.estimatedCompletionSeconds : (neg?.response.estimated_completion_seconds ?? null),
     negotiationHash: neg?.negotiation_hash ?? null,
     providerSig: neg?.provider_sig ?? null,
     quoteHash: q.ok ? q.quoteHash : null,
     latencyMs: q.latencyMs,
-    raw: (neg as Record<string, unknown> | undefined) ?? null,
+    signed: q.ok ? q.signed : Boolean(neg?.provider_sig),
+    raw: ((neg ?? simple) as Record<string, unknown> | undefined) ?? null,
   }).returning({ id: commerceQuote.id })
   return row?.id ?? 0
 }
@@ -185,6 +199,8 @@ export interface ServiceCommerce {
   failure: string | null
   failureDetail: string | null
   deliveredJobs: number
+  /** Null when no quote succeeded; false for a plain quote bound to the registered wallet. */
+  signed: boolean | null
 }
 
 /**
@@ -195,7 +211,7 @@ export interface ServiceCommerce {
 export async function commercialStates(): Promise<Map<number, ServiceCommerce>> {
   const quotes = rowsOf(await db().execute(sql`
     select distinct on (service_id) service_id, agent_id, ok, failure, detail, chain_id, provider, price_raw, token,
-           token_symbol, token_decimals, created_at, quote_expires_at, negotiation_hash, provider_sig
+           token_symbol, token_decimals, created_at, quote_expires_at, negotiation_hash, provider_sig, signed
     from commerce_quote where service_id is not null
     order by service_id, created_at desc`))
   const delivered = new Map<string, number>()
@@ -229,6 +245,7 @@ export async function commercialStates(): Promise<Map<number, ServiceCommerce>> 
       failure: q['ok'] === true ? null : (q['failure'] ? String(q['failure']) : null),
       failureDetail: q['ok'] === true ? null : (q['detail'] ? String(q['detail']) : null),
       deliveredJobs: n,
+      signed: q['ok'] === true ? q['signed'] !== false : null,
     })
   }
   return out
@@ -245,6 +262,8 @@ export interface CoverageAgent {
   serviceId: number
   endpoint: string
   state: CommercialState
+  advertisesCommerce: boolean
+  signed: boolean | null
   quote: { chainId: number | null; priceRaw: string | null; token: string | null; decimals: number | null; quotedAt: string | null; ageSeconds: number | null } | null
   failure: string | null
   failureDetail: string | null
@@ -279,6 +298,8 @@ export async function coverage(): Promise<{ measuredAt: string; categories: Cate
       endpoint: c.endpoint,
       category: c.category,
       state: s?.state ?? 'unavailable',
+      advertisesCommerce: c.advertisesCommerce,
+      signed: s?.signed ?? null,
       quote: s ? {
         chainId: s.chainId, priceRaw: s.priceRaw, token: s.token?.symbol ?? null, decimals: s.token?.decimals ?? null,
         quotedAt: s.quotedAt, ageSeconds: s.quotedAt ? Math.round((now - Date.parse(s.quotedAt)) / 1000) : null,

@@ -120,6 +120,13 @@
       "when": 1790406909070,
       "tag": "0016_phase2_commerce",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1790425564581,
+      "tag": "0017_quote_signed",
+      "breakpoints": true
     }
   ]
 }

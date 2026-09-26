@@ -1,7 +1,7 @@
 import 'server-only'
 import { sql } from 'drizzle-orm'
-import { db, firstPartyAgents, firstPartyIdListSql } from '@marque/db'
-import { REFERENCE_AGENTS, type ReferenceAgent } from './reference-agents'
+import { db, firstPartyIds, canonicalAgentIdSql } from '@marque/db'
+import { commercialStates, formatAmount, type CommercialState } from '@marque/commerce'
 import { agentState, TASK_FOR_CATEGORY } from './agent-state'
 
 /**
@@ -51,6 +51,24 @@ export interface MarketRow {
   interfaces: string[]
   protocols: string[]
   price: string | null
+  /** MEASURED: from a live quote this agent returned. CLAIMED: declared in its registry metadata. */
+  priceProvenance: 'MEASURED' | 'CLAIMED' | null
+  /**
+   * The commercial axis (SPEC-COMMERCE 4.1), independent of the warrant: can a buyer's
+   * wallet hire this exact service through ERC-8183 escrow right now, and at what price.
+   */
+  commerce: {
+    state: CommercialState
+    serviceId: number | null
+    chainId: number | null
+    provider: string | null
+    priceRaw: string | null
+    token: { address: string; symbol: string; decimals: number } | null
+    signedQuote: boolean | null
+    quotedAt: string | null
+    deliveredJobs: number
+    failure: string | null
+  }
   warrant: { status: 'warranted' | 'failed' | 'untested'; testId: string | null; date: string | null; failedField: string | null }
   qual: Qual
   /** Whether a free read-only preview is possible (adapter + read method). */
@@ -65,6 +83,10 @@ export interface MarketQuery {
   liveNow?: boolean
   warranted?: boolean
   thirdPartyOnly?: boolean
+  /** Only agents a buyer's wallet can hire through ERC-8183 right now. */
+  hireableOnly?: boolean
+  /** The default view never shows Unclassified agents (Phase 2 requirement 4.3). */
+  includeUnclassified?: boolean
   hasPrice?: boolean
   iface?: string | null
   sort?: 'best' | 'proven' | 'price' | 'fast' | 'recent'
@@ -107,95 +129,20 @@ function originOf(v: unknown): string | null {
   }
 }
 
-/**
- * Reference-agent rows, each with its live warrant from conformance_result.
- *
- * Results are read under both the legacy `marque:<slug>` id and the canonical ERC-8004
- * row id (config/first-party.json). The warrant is the most recent PASS: a later failed
- * retest is published on the agent's record but never flips a warranted badge by
- * itself; the badge goes "retest due" when that pass is older than 72 h.
- */
-async function referenceRows(): Promise<MarketRow[]> {
-  const fp = firstPartyAgents()
-  const canonical = new Map<string, string>()
-  const idRows = await db().execute(sql`
-    select id, token_id from agent
-    where chain_id = 56 and token_id in (${sql.join(fp.map((a) => sql`${String(a.tokenId)}`), sql`, `)})`)
-  for (const r of ((idRows as unknown as { rows?: unknown[] }).rows ?? (idRows as unknown as unknown[])) as Array<Record<string, unknown>>) {
-    const a = fp.find((x) => String(x.tokenId) === String(r['token_id']))
-    if (a) canonical.set(String(r['id']), a.legacyId)
-  }
-  const ids = [...fp.map((a) => a.legacyId), ...canonical.keys()]
-  const warrants = await db().execute(sql`
-    select agent_id, test_id, pass, failed_fields, ran_at from (
-      select distinct on (agent_id, test_id, pass) agent_id, test_id, pass, failed_fields, ran_at
-      from conformance_result
-      where agent_id in (${sql.join(ids.map((id) => sql`${id}`), sql`, `)})
-      order by agent_id, test_id, pass, ran_at desc
-    ) x
-  `)
-  const wl = (((warrants as unknown as { rows?: unknown[] }).rows ?? (warrants as unknown as unknown[])) as Array<Record<string, unknown>>)
-  const byAgent = new Map<string, { pass: boolean; testId: string; failedField: string | null; date: string }>()
-  for (const w of wl) {
-    const raw = String(w['agent_id'])
-    const id = canonical.get(raw) ?? raw
-    const pass = w['pass'] === true
-    const date = w['ran_at'] instanceof Date ? (w['ran_at'] as Date).toISOString() : String(w['ran_at'])
-    const prev = byAgent.get(id)
-    // The newest pass wins; a failure only shows when the agent has never passed.
-    const better = !prev || (pass && !prev.pass) || (pass === prev.pass && date > prev.date)
-    if (better) {
-      const ff = Array.isArray(w['failed_fields']) ? (w['failed_fields'] as string[]) : []
-      byAgent.set(id, { pass, testId: String(w['test_id']), failedField: pass ? null : (ff[0] ?? null), date })
-    }
-  }
-
-  return REFERENCE_AGENTS.map((a: ReferenceAgent): MarketRow => {
-    const w = byAgent.get(a.id)
-    const status = w ? (w.pass ? 'warranted' : 'failed') : 'untested'
-    return {
-      agentId: a.id,
-      tokenId: a.slug,
-      name: a.name,
-      category: a.category,
-      isReference: true,
-      identityCount: 1,
-      owner: null,
-      ownerLabel: 'Marque',
-      host: `marque.trade/agents/${a.slug}`,
-      identity: {
-        imageUrl: null,
-        description: null,
-        contractAddress: null,
-        website: 'https://marque.trade',
-        x402: false,
-        registeredAt: null,
-      },
-      liveness: 'live',
-      latencyMs: null,
-      interfaces: ['a2a'],
-      protocols: ['A2A'],
-      price: a.category === 'security' ? '0.25 U per call' : '0.15 U per call',
-      warrant: { status, testId: w?.testId ?? null, date: w?.date ?? null, failedField: w?.failedField ?? null },
-      qual: status === 'warranted' ? 'warranted' : status === 'failed' ? 'failed' : 'callable',
-      previewable: true,
-      hireBlockedReason: null,
-    }
-  })
-}
-
 /** The base set (dedup + reference merge) is expensive (~2.4s); memoise it. */
 let baseMemo: { at: number; rows: MarketRow[] } | null = null
 const BASE_TTL_MS = 3 * 60_000
 
 async function marketplaceBase(): Promise<MarketRow[]> {
   if (baseMemo && Date.now() - baseMemo.at < BASE_TTL_MS) return baseMemo.rows
-  const rows = [...(await referenceRows()), ...(await queryThirdParty())]
+  const rows = await queryAgents()
   baseMemo = { at: Date.now(), rows }
   return rows
 }
 
-async function queryThirdParty(): Promise<MarketRow[]> {
+async function queryAgents(): Promise<MarketRow[]> {
+  const fp = new Set(firstPartyIds())
+  const commerce = await commercialStates().catch(() => new Map())
   const rows = await db().execute(sql`
     with latest as (
       -- Newest probe per service by primary key (probe_schedule), not a scan of history.
@@ -224,9 +171,11 @@ async function queryThirdParty(): Promise<MarketRow[]> {
       group by s.agent_id
     ),
     conf as (
-      select distinct on (agent_id) agent_id, test_id, pass, failed_fields, ran_at
-      from conformance_result where agent_id like '56:%' and agent_id not in ${firstPartyIdListSql()}
-      order by agent_id, (pass) desc, ran_at desc
+      -- Legacy marque:<slug> results fold onto the reference agent's registry row.
+      select distinct on (${canonicalAgentIdSql(sql`agent_id`)}) ${canonicalAgentIdSql(sql`agent_id`)} as agent_id,
+             test_id, pass, failed_fields, ran_at
+      from conformance_result where agent_id like '56:%' or agent_id like 'marque:%'
+      order by ${canonicalAgentIdSql(sql`agent_id`)}, (pass) desc, ran_at desc
     ),
     cat as (
       select distinct on (agent_id) agent_id, category, confidence
@@ -250,8 +199,6 @@ async function queryThirdParty(): Promise<MarketRow[]> {
       where a.chain_id = 56
         and (s.any_reachable or c.agent_id is not null)
         and a.id <> 'canary:ssrf'
-        -- First-party identities are listed once, as reference rows (invariant 17).
-        and a.id not in ${firstPartyIdListSql()}
     )
     select
       id as agent_id,
@@ -284,6 +231,15 @@ async function queryThirdParty(): Promise<MarketRow[]> {
 
   const list = (((rows as unknown as { rows?: unknown[] }).rows ?? (rows as unknown as unknown[])) as Array<Record<string, unknown>>)
 
+  // Best commercial state per agent across its services.
+  const RANK: Record<CommercialState, number> = { settleable: 0, hireable: 1, quoteable: 2, preview_only: 3, unavailable: 4 }
+  const bestByAgent = new Map<string, ReturnType<typeof commerce.get>>()
+  for (const c of commerce.values()) {
+    const prev = bestByAgent.get(c.agentId)
+    if (!prev || RANK[c.state as CommercialState] < RANK[prev.state as CommercialState]
+      || (c.state === prev.state && c.signed === true && prev.signed !== true)) bestByAgent.set(c.agentId, c)
+  }
+
   const thirdParty: MarketRow[] = list.map((r) => {
     const live = r['any_live'] === true
     const confTest = r['conf_test'] ? String(r['conf_test']) : null
@@ -311,7 +267,7 @@ async function queryThirdParty(): Promise<MarketRow[]> {
       tokenId: r['token_id'] ? String(r['token_id']) : null,
       name,
       category: r['category'] ? String(r['category']) : null,
-      isReference: false,
+      isReference: fp.has(String(r['agent_id'])),
       identityCount: Number(r['identities'] ?? 1),
       owner,
       ownerLabel: ownerLabel(owner),
@@ -330,7 +286,7 @@ async function queryThirdParty(): Promise<MarketRow[]> {
       latencyMs: r['latency_ms'] == null ? null : Number(r['latency_ms']),
       interfaces: kinds,
       protocols: Array.isArray(r['protocols']) ? (r['protocols'] as string[]) : [],
-      price: r['price'] ? String(r['price']) : null,
+      ...priceAndCommerce(bestByAgent.get(String(r['agent_id'])), live, r['price'] ? String(r['price']) : null),
       warrant: {
         status: warrantStatus,
         testId: confTest,
@@ -352,12 +308,38 @@ async function queryThirdParty(): Promise<MarketRow[]> {
   return thirdParty
 }
 
+type ServiceCommerceRow = Awaited<ReturnType<typeof commercialStates>> extends Map<number, infer V> ? V : never
+
+/** A live quote wins (MEASURED); a declared price is shown as CLAIMED; never a constant. */
+function priceAndCommerce(c: ServiceCommerceRow | undefined, live: boolean, declared: string | null): Pick<MarketRow, 'price' | 'priceProvenance' | 'commerce'> {
+  const hire = c && (c.state === 'hireable' || c.state === 'settleable')
+  const measured = hire && c.priceRaw && c.token ? `${formatAmount(c.priceRaw, c.token.decimals)} ${c.token.symbol}` : null
+  return {
+    price: measured ?? declared,
+    priceProvenance: measured ? 'MEASURED' : declared ? 'CLAIMED' : null,
+    commerce: {
+      state: c && c.state !== 'unavailable' ? c.state : live ? 'preview_only' : 'unavailable',
+      serviceId: c?.serviceId ?? null,
+      chainId: c?.chainId ?? null,
+      provider: c?.provider ?? null,
+      priceRaw: hire ? c.priceRaw : null,
+      token: hire ? c.token : null,
+      signedQuote: c?.signed ?? null,
+      quotedAt: c?.quotedAt ?? null,
+      deliveredJobs: c?.deliveredJobs ?? 0,
+      failure: c?.failure ?? null,
+    },
+  }
+}
+
 export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: MarketRow[]; generatedAt: string; total: number; offset: number; hasMore: boolean }> {
   // Clone: the base is memoised and the sort below is in place.
   let all = [...(await marketplaceBase())]
 
   // Filters (TS side — the qualifying set is small).
   if (q.category) all = all.filter((r) => r.category === q.category)
+  else if (!q.includeUnclassified) all = all.filter((r) => r.category !== null && r.category !== 'unclassified')
+  if (q.hireableOnly) all = all.filter((r) => r.commerce.state === 'hireable' || r.commerce.state === 'settleable')
   if (q.liveNow) all = all.filter((r) => r.liveness === 'live')
   if (q.warranted) all = all.filter((r) => r.warrant.status === 'warranted')
   if (q.thirdPartyOnly) all = all.filter((r) => !r.isReference)
@@ -379,6 +361,11 @@ export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: Ma
       || (r.category ?? '').includes(s))
   }
 
+  const COMMERCE_RANK: Record<CommercialState, number> = { settleable: 0, hireable: 1, quoteable: 2, preview_only: 3, unavailable: 4 }
+  // Hireable first (signed quotes before unsigned), then quality. Two axes, never merged into one badge.
+  const byCommerce = (a: MarketRow, b: MarketRow) =>
+    COMMERCE_RANK[a.commerce.state] - COMMERCE_RANK[b.commerce.state]
+    || Number(b.commerce.signedQuote === true) - Number(a.commerce.signedQuote === true)
   const byQual = (a: MarketRow, b: MarketRow) => QUAL_RANK[a.qual] - QUAL_RANK[b.qual]
   const byWarrantDate = (a: MarketRow, b: MarketRow) => (b.warrant.date ?? '').localeCompare(a.warrant.date ?? '')
   const priceNum = (r: MarketRow) => {
@@ -394,7 +381,7 @@ export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: Ma
       case 'fast': return (a.latencyMs ?? 1e9) - (b.latencyMs ?? 1e9) || byQual(a, b) || tie
       case 'recent': return (b.warrant.date ?? '').localeCompare(a.warrant.date ?? '') || byQual(a, b) || tie
       default:
-        return byQual(a, b) || byWarrantDate(a, b) || b.identityCount - a.identityCount || (a.latencyMs ?? 1e9) - (b.latencyMs ?? 1e9) || tie
+        return byCommerce(a, b) || byQual(a, b) || byWarrantDate(a, b) || b.identityCount - a.identityCount || (a.latencyMs ?? 1e9) - (b.latencyMs ?? 1e9) || tie
     }
   })
 
@@ -403,7 +390,8 @@ export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: Ma
   const offset = all.length ? Math.min(requestedOffset, Math.floor((all.length - 1) / limit) * limit) : 0
   const page = all.slice(offset, offset + limit)
   const rows = await Promise.all(page.map(async (row) => {
-    if (row.isReference) return row
+    // Reference agents answer their free face directly; their Hire is the ERC-8183 rail.
+    if (row.isReference) return { ...row, previewable: true, hireBlockedReason: null } satisfies MarketRow
     const task = TASK_FOR_CATEGORY[row.category ?? '']
     const state = await agentState(row.agentId, task ?? null).catch(() => null)
     const hireBlockedReason = state?.hireable

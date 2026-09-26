@@ -1,0 +1,1 @@
+ALTER TABLE "commerce_quote" ADD COLUMN "signed" boolean;

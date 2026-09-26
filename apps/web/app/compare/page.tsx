@@ -230,7 +230,7 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
             {chosen.map((a) => (
               <div key={a.agentId} className={styles.cell}>
                 {a.price
-                  ? <><span>{a.price}</span>{!a.isReference && <ProvenanceChip provenance="CLAIMED" />}</>
+                  ? <><span>{a.price}</span>{a.priceProvenance && <ProvenanceChip provenance={a.priceProvenance} />}</>
                   : <span className={styles.muted}>price not advertised</span>}
               </div>
             ))}

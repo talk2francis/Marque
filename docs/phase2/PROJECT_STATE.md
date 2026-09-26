@@ -55,3 +55,9 @@ Logged in `docs/DEVIATIONS.md` under "Phase 2". Index:
 ### P2-00 checkpoint (Sat 26 Sep)
 
 See the checkpoint block in the P2-00 report, reproduced here as it is finalised.
+
+## Decisions from Francis
+
+- [Sat 26 Sep] **"I APPROVE MAINNET"** (G-M1) for Phase 2: reference sellers, keeper and smoke hires on BSC mainnet. Funding (G-M2) per the P2-05 table; Francis sends from his own wallet, no private key is ever shared.
+- [Sat 26 Sep] Support channels: X @marquetrade (official) and a Marque Telegram community group (link to follow).
+- [Sat 26 Sep] Damian acknowledgement sent. Gwen's six questions pending; Francis is following up.

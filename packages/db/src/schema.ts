@@ -881,6 +881,8 @@ export const commerceQuote = pgTable('commerce_quote', {
   estimatedCompletionSeconds: integer('estimated_completion_seconds'),
   negotiationHash: text('negotiation_hash'),
   providerSig: text('provider_sig'),
+  /** False for a plain quote accepted only because its provider is the registered wallet. */
+  signed: boolean('signed'),
   quoteHash: text('quote_hash'),
   latencyMs: integer('latency_ms'),
   raw: jsonb('raw').$type<Record<string, unknown>>(),

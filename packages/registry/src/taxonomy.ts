@@ -81,6 +81,8 @@ export const TAXONOMY: Readonly<Record<Exclude<Category, 'unclassified'>, Catego
     strong: [
       ['yield optimi', 6], ['yield aggregat', 6], ['yield farming', 5], ['apy optimi', 6],
       ['auto-compound', 5], ['autocompound', 5], ['best yield', 5], ['vault strategy', 4],
+      // A service that ranks venues by what they pay is yield comparison (e.g. "Venus Yield Ranking").
+      ['yield rank', 5],
       ['lending rate', 4], ['venus protocol', 4], ['staking reward', 3], ['lista dao', 4],
     ],
     weak: [

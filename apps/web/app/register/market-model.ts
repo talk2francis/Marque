@@ -36,6 +36,19 @@ export interface MarketRow {
   interfaces: string[]
   protocols: string[]
   price: string | null
+  priceProvenance: 'MEASURED' | 'CLAIMED' | null
+  commerce: {
+    state: 'unavailable' | 'preview_only' | 'quoteable' | 'hireable' | 'settleable'
+    serviceId: number | null
+    chainId: number | null
+    provider: string | null
+    priceRaw: string | null
+    token: { address: string; symbol: string; decimals: number } | null
+    signedQuote: boolean | null
+    quotedAt: string | null
+    deliveredJobs: number
+    failure: string | null
+  }
   warrant: {
     status: 'warranted' | 'failed' | 'untested'
     testId: string | null
