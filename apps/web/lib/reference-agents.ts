@@ -77,7 +77,14 @@ export function isReferenceAgent(agentId: string | null | undefined): boolean {
 
 export function referenceAgent(idOrSlug: string | null | undefined): ReferenceAgent | undefined {
   if (!idOrSlug) return undefined
-  return BY_ID.get(idOrSlug as ReferenceAgent['id']) ?? BY_SLUG.get(idOrSlug)
+  return BY_ID.get(idOrSlug as ReferenceAgent['id']) ?? BY_SLUG.get(idOrSlug) ?? referenceAgentByToken(idOrSlug)
+}
+
+/** The reference agent behind a canonical ERC-8004 row id or a mainnet token id, if any. */
+export function referenceAgentByToken(idOrToken: string | null | undefined): ReferenceAgent | undefined {
+  if (!idOrToken) return undefined
+  const token = idOrToken.split(':').pop()
+  return REFERENCE_AGENTS.find((a) => String(a.erc8004.tokenId) === token)
 }
 
 /** THE name for an agent id: the reference name if it is ours, else the fallback. */

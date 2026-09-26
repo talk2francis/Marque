@@ -1,12 +1,66 @@
 {
   "$comment": "Every wallet Marque or its team controls. Activity from these is flagged team_wallet and never counts toward the Set and Earn quest (SPEC-TRACKING 9). Francis adds his personal wallets here.",
   "wallets": [
-    { "address": "0x5B1c9fBc684a1722Bb5C66C0B22F149dA69768d6", "role": "reference seller Bound (agent wallet and owner)", "chainIds": [56, 97] },
-    { "address": "0x5aAF7b5B2170986C59279682Bd714c475ae8C718", "role": "reference seller Lattice", "chainIds": [56, 97] },
-    { "address": "0x253F7Ad5D52099C4a2293418a661e9974DfB5e84", "role": "reference seller Sluicegate", "chainIds": [56, 97] },
-    { "address": "0xdF1074a272C53A1a10b96Fa0201Eb58bbbaaFe00", "role": "reference seller Keel", "chainIds": [56, 97] },
-    { "address": "0x1F0D0eF5a279888E3b86c8a99A8A99F19fCEc587", "role": "reference seller Redcell", "chainIds": [56, 97] },
-    { "address": "0x9598AB46aAB33389C2e9Ffe0511effD330f67F9B", "role": "testnet operator (charter sandbox, receipt anchors)", "chainIds": [97] },
-    { "address": "0x2e010AaDFdFEbC2AdFCAFA5F83e9687ffA47C573", "role": "mainnet deployer (PancakeSwap proof run)", "chainIds": [56] }
+    {
+      "address": "0x5B1c9fBc684a1722Bb5C66C0B22F149dA69768d6",
+      "role": "reference seller Bound (agent wallet and owner)",
+      "chainIds": [
+        56,
+        97
+      ]
+    },
+    {
+      "address": "0x5aAF7b5B2170986C59279682Bd714c475ae8C718",
+      "role": "reference seller Lattice",
+      "chainIds": [
+        56,
+        97
+      ]
+    },
+    {
+      "address": "0x253F7Ad5D52099C4a2293418a661e9974DfB5e84",
+      "role": "reference seller Sluicegate",
+      "chainIds": [
+        56,
+        97
+      ]
+    },
+    {
+      "address": "0xdF1074a272C53A1a10b96Fa0201Eb58bbbaaFe00",
+      "role": "reference seller Keel",
+      "chainIds": [
+        56,
+        97
+      ]
+    },
+    {
+      "address": "0x1F0D0eF5a279888E3b86c8a99A8A99F19fCEc587",
+      "role": "reference seller Redcell",
+      "chainIds": [
+        56,
+        97
+      ]
+    },
+    {
+      "address": "0x9598AB46aAB33389C2e9Ffe0511effD330f67F9B",
+      "role": "testnet operator (charter sandbox, receipt anchors)",
+      "chainIds": [
+        97
+      ]
+    },
+    {
+      "address": "0x2e010AaDFdFEbC2AdFCAFA5F83e9687ffA47C573",
+      "role": "mainnet deployer (PancakeSwap proof run)",
+      "chainIds": [
+        56
+      ]
+    },
+    {
+      "address": "0xC83d716523C1958bcC48d19854ef1eb360bEf878",
+      "role": "test wallet (P2-02 testnet hire proof)",
+      "chainIds": [
+        97
+      ]
+    }
   ]
 }

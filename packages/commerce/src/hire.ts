@@ -261,3 +261,31 @@ export async function retryPendingNotifies(limit = 20): Promise<{ checked: numbe
   }
   return { checked: rows.length, notified }
 }
+
+export interface SheetAgent {
+  agentId: string
+  tokenId: string
+  registryChainId: number
+  name: string
+  category: string | null
+  owner: string | null
+  firstParty: boolean
+  state: string
+  lastQuote: { chainId: number | null; priceLabel: string | null; signed: boolean | null; quotedAt: string | null } | null
+}
+
+/** What the hire sheet shows before the buyer asks for a price. */
+export async function agentForSheet(agentId: string): Promise<SheetAgent> {
+  const seller = await sellerFor(agentId)
+  const { commercialStates } = await import('./supply.js')
+  const s = (await commercialStates()).get(seller.serviceId)
+  return {
+    agentId: seller.agentId, tokenId: seller.tokenId, registryChainId: seller.chainId, name: seller.name,
+    category: seller.category, owner: seller.owner, firstParty: seller.firstParty !== null, state: s?.state ?? 'unavailable',
+    lastQuote: s ? {
+      chainId: s.chainId,
+      priceLabel: s.priceRaw && s.token ? `${formatAmount(BigInt(s.priceRaw), s.token.decimals)} ${s.token.symbol}` : null,
+      signed: s.signed, quotedAt: s.quotedAt,
+    } : null,
+  }
+}

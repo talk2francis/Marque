@@ -1,0 +1,70 @@
+/* The hire sheet: the Chamber surface for a money moment. Tokens only. */
+.overlay {
+  position: fixed; inset: 0; z-index: 80;
+  background: color-mix(in srgb, var(--night) 70%, transparent);
+  display: flex; justify-content: flex-end;
+  animation: fade var(--dur-fast, 160ms) var(--ease-out, ease-out);
+}
+.sheet {
+  width: min(520px, 100%); height: 100%; overflow-y: auto;
+  background: var(--deck); color: var(--deck-ink);
+  border-left: 1px solid var(--deck-rule);
+  padding: 24px 24px 32px; display: flex; flex-direction: column; gap: 18px;
+  box-shadow: var(--elev-3);
+  animation: slide var(--dur, 220ms) var(--ease-settle, ease-out);
+}
+.head { display: flex; justify-content: space-between; gap: 16px; align-items: flex-start; }
+.kicker { margin: 0 0 6px; font-size: var(--size-caption); color: var(--night-ink-soft, var(--deck-ink)); opacity: 0.8; }
+.title { margin: 0; font-family: var(--font-statement); font-size: 26px; line-height: 1.15; font-weight: 400; }
+.meta { margin: 6px 0 0; font-size: var(--size-caption); opacity: 0.75; }
+.close { background: none; border: 1px solid var(--deck-rule); color: inherit; border-radius: var(--r-pill); padding: 6px 12px; cursor: pointer; font: inherit; font-size: var(--size-caption); }
+.close:disabled { opacity: 0.4; cursor: not-allowed; }
+.block { display: flex; flex-direction: column; gap: 10px; }
+.label { font-size: var(--size-caption); opacity: 0.8; margin: 0; }
+.task {
+  width: 100%; resize: vertical; min-height: 80px; font: inherit; font-size: var(--size-body);
+  background: var(--deck-raised); color: var(--deck-ink); border: 1px solid var(--deck-rule);
+  border-radius: var(--r-md); padding: 10px 12px;
+}
+.task:focus-visible { outline: 2px solid var(--brass); outline-offset: 1px; }
+.note { margin: 0; font-size: var(--size-caption); opacity: 0.75; }
+.price { display: flex; flex-direction: column; gap: 4px; padding: 14px 16px; border: 1px solid var(--deck-rule); border-radius: var(--r-lg); background: var(--deck-raised); }
+.priceValue { font-size: 30px; line-height: 1.1; color: var(--brass-lit); font-variant-numeric: tabular-nums; }
+.priceNote { font-size: var(--size-caption); opacity: 0.8; }
+.facts { display: grid; grid-template-columns: max-content 1fr; gap: 6px 14px; margin: 0; font-size: var(--size-caption); }
+.facts dt { opacity: 0.65; }
+.facts dd { margin: 0; overflow-wrap: anywhere; }
+.steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+.step { display: grid; grid-template-columns: 14px 1fr auto; gap: 10px; align-items: start; padding: 9px 0; border-bottom: 1px solid var(--deck-rule); }
+.stepDot { width: 10px; height: 10px; margin-top: 5px; border-radius: 50%; border: 1.5px solid var(--deck-rule); }
+.step_active .stepDot { border-color: var(--brass-lit); background: var(--brass); animation: pulse 1.2s ease-in-out infinite; }
+.step_done .stepDot { border-color: var(--holds); background: var(--holds); }
+.step_failed .stepDot { border-color: var(--breach); background: var(--breach); }
+.step_skipped { opacity: 0.5; }
+.stepText { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.stepLabel { font-size: var(--size-body); }
+.stepDetail { font-size: var(--size-caption); opacity: 0.7; }
+.stepTx { font-size: var(--size-caption); color: var(--brass-lit); }
+.warn { border: 1px solid var(--watch); border-radius: var(--r-md); padding: 12px 14px; font-size: var(--size-caption); }
+.warn p { margin: 0; }
+.warn a, .done a:not(:global(.btn)) { color: var(--brass-lit); }
+.errorBox { border: 1px solid var(--breach); border-radius: var(--r-md); padding: 12px 14px; font-size: var(--size-caption); }
+.errorBox p { margin: 0; }
+.errorTitle { font-weight: 600; }
+.error { color: var(--breach); font-size: var(--size-caption); margin: 0; }
+.done { border: 1px solid var(--holds); border-radius: var(--r-lg); padding: 16px; }
+.done p { margin: 0; font-size: var(--size-caption); }
+.doneTitle { margin: 0; font-family: var(--font-statement); font-weight: 400; font-size: 20px; }
+.foot { margin-top: auto; display: flex; flex-direction: column; gap: 8px; position: sticky; bottom: -32px; padding: 14px 0 0; background: var(--deck); }
+.fine { margin: 0; font-size: var(--size-caption); opacity: 0.65; }
+@keyframes slide { from { transform: translateX(24px); opacity: 0 } to { transform: none; opacity: 1 } }
+@keyframes fade { from { opacity: 0 } to { opacity: 1 } }
+@keyframes pulse { 50% { opacity: 0.45 } }
+@media (max-width: 640px) {
+  .overlay { align-items: flex-end; }
+  .sheet { width: 100%; height: auto; max-height: 92vh; border-left: 0; border-top: 1px solid var(--deck-rule); border-radius: var(--r-xl) var(--r-xl) 0 0; padding: 20px 16px 24px; }
+  @keyframes slide { from { transform: translateY(24px); opacity: 0 } to { transform: none; opacity: 1 } }
+}
+@media (prefers-reduced-motion: reduce) {
+  .overlay, .sheet, .step_active .stepDot { animation: none; }
+}

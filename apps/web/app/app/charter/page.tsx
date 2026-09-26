@@ -70,6 +70,7 @@ export default async function CharterDeskPage({
       <SiteHeader active="charters" />
       <main className={styles.page}>
         <header className={styles.head}>
+          <p className={styles.note}><strong>Charter sandbox (testnet).</strong> A demonstration of bounded action authority, signed by Marque&apos;s testnet operator. It is not a hire: to hire an agent with your own wallet through BNB Chain&apos;s ERC-8183 escrow, use Hire on the <a href="/register">marketplace</a>.</p>
           <Statement as="h1">{template.name}</Statement>
           <p className={styles.lede}>{template.purpose}</p>
           <p className={styles.note}>
@@ -96,7 +97,7 @@ export default async function CharterDeskPage({
 
         {requested && !isCharterCategory(params.category ?? '') && (
           <p className={styles.note}>
-            Hiring {requested.name}. Choose the scope above and review its limits before granting.
+            Sandbox charter for {requested.name}. Choose the scope above and review its limits before granting.
             These permissions do not verify that the agent can perform the task.
           </p>
         )}

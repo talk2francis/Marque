@@ -9,6 +9,8 @@ import {
   CATEGORY_LABEL,
   describe,
   hireHref,
+  hireBlocked,
+  isHireable,
   priceParts,
   profileHref,
   qualView,
@@ -151,7 +153,7 @@ export function CompareToggle({
 export function RowActions({ a }: { a: MarketRow }) {
   const href = profileHref(a)
   const warranted = a.warrant.status === 'warranted'
-  const hireable = a.hireBlockedReason === null
+  const hireable = isHireable(a)
   return (
     <span className={styles.actions}>
       {a.previewable && href && (
@@ -165,16 +167,16 @@ export function RowActions({ a }: { a: MarketRow }) {
         </LinkButton>
       )}
       {hireable ? (
-        <LinkButton size="sm" variant={warranted ? 'primary' : 'secondary'} href={hireHref(a)}>
-          Hire
-        </LinkButton>
+        <Link className="btn btn--primary btn--sm" href={hireHref(a)} scroll={false} prefetch={false}>
+          {a.price && a.priceProvenance === 'MEASURED' ? `Hire for ${a.price}` : 'Hire'}
+        </Link>
       ) : (
         <span className={styles.hireBlocked}>
-          <button type="button" className={styles.hireBlockedBtn} disabled title={a.hireBlockedReason ?? undefined}>
+          <button type="button" className={styles.hireBlockedBtn} disabled title={hireBlocked(a)}>
             Hire
           </button>
-          <span className={styles.hireBlockedWhy} title={a.hireBlockedReason ?? undefined}>
-            {a.hireBlockedReason}
+          <span className={styles.hireBlockedWhy} title={hireBlocked(a)}>
+            {hireBlocked(a)}
           </span>
         </span>
       )}

@@ -2,7 +2,9 @@ import type { Metadata, Viewport } from 'next'
 import localFont from 'next/font/local'
 import { BRAND } from '@marque/ui/brand'
 import { Reveal } from './_components/Reveal'
+import { Suspense } from 'react'
 import { WalletProvider } from './_components/WalletProvider'
+import { HireSheet } from './_components/HireSheet'
 import './globals.css'
 
 /**
@@ -71,6 +73,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="no-js">
         <WalletProvider>
           {children}
+          <Suspense fallback={null}><HireSheet /></Suspense>
           <Reveal />
         </WalletProvider>
       </body>

@@ -128,7 +128,7 @@ export function ifaceLabel(v: string | null): string {
  * the rule the marketplace has always used.
  */
 export function profileHref(a: MarketRow): string | null {
-  if (a.isReference) return `/agents/${a.tokenId}`
+  if (a.isReference) return `/agents/${referenceAgent(a.agentId)?.slug ?? a.tokenId}`
   if (a.tokenId && /^\d+$/.test(a.tokenId)) return `/agents/56/${a.tokenId}`
   return null
 }
@@ -145,9 +145,31 @@ const CHARTER_CATEGORIES = new Set(['rebalancing', 'grid', 'yield', 'health_fact
  * Marque agent's charter. The agent id is the part that matters; the desk
  * resolves it directly.
  */
-export function hireHref(a: MarketRow): string {
+/** The charter sandbox (testnet action authority), kept for the demonstration only. */
+export function charterHref(a: MarketRow): string {
   const cat = a.category && CHARTER_CATEGORIES.has(a.category) ? `&category=${a.category}` : ''
   return `/app/charter?agent=${encodeURIComponent(a.agentId)}${cat}`
+}
+
+/** Hire opens the ERC-8183 hire sheet over the current page (deep link: ?hire=<agentId>). */
+export function hireHref(a: MarketRow): string {
+  return `?hire=${encodeURIComponent(a.agentId)}`
+}
+
+/** Can a buyer's wallet hire this exact agent through ERC-8183 escrow right now? */
+export function isHireable(a: MarketRow): boolean {
+  return a.commerce.state === 'hireable' || a.commerce.state === 'settleable'
+}
+
+/** Why Hire is not offered, in plain words. */
+export function hireBlocked(a: MarketRow): string {
+  switch (a.commerce.failure) {
+    case 'provider_mismatch': return 'Its quotes name a wallet that is not its registered identity'
+    case 'unsigned': case 'malformed': return 'Its quotes are not in a verifiable form'
+    case 'unreachable': case 'no_quote': case 'not_a2a': return 'It does not answer price requests'
+    default:
+      return a.commerce.state === 'preview_only' ? 'Free preview only; it does not take paid jobs' : 'No live quote in the last 2 hours'
+  }
 }
 
 export function isoDay(iso: string | null): string | null {

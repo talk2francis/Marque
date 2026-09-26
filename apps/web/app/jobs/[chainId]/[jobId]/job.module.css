@@ -1,0 +1,8 @@
+.main { max-width: var(--measure-prose, 680px); margin: 0 auto; padding: 48px 16px 80px; }
+.kicker { font-size: var(--size-caption); opacity: 0.75; margin: 0 0 8px; }
+.title { font-family: var(--font-statement); font-weight: 400; font-size: var(--size-statement, 30px); margin: 0; }
+.status { margin: 12px 0 24px; font-size: var(--size-title, 18px); color: var(--brass); }
+.facts { display: grid; grid-template-columns: max-content 1fr; gap: 10px 18px; font-size: var(--size-data, 13.5px); }
+.facts dt { opacity: 0.7; }
+.facts dd { margin: 0; overflow-wrap: anywhere; }
+@media (max-width: 560px) { .facts { grid-template-columns: 1fr; gap: 2px; } .facts dd { margin-bottom: 10px; } }
