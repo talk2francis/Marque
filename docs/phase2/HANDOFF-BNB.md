@@ -20,7 +20,7 @@ Everything below is filled from values we measured on chain or from our live API
 | Support for users | X @marquetrade (https://x.com/marquetrade) and the Marque Telegram community group (link added before launch) |
 | Repository | https://github.com/talk2francis/Marque |
 | Brand kit | https://marque.trade/brand/marque-brand-kit.zip |
-| Quest page for users | https://marque.trade/quest (in build, live by Tue 29 Sep 2026; until then a wallet's progress is at https://marque.trade/api/v1/phase2/wallet/{address}) |
+| Quest page for users | https://marque.trade/quest (live since Sat 26 Sep 2026: each step, its recommended agent and price, and the wallet's progress read from the chain; any wallet at https://marque.trade/quest?addr={address}). Contracts and events: https://marque.trade/protocol |
 
 ## 2. Network
 
