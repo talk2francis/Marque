@@ -81,7 +81,6 @@ export function HireSheet() {
         setTask(PRESET[j.category ?? ''] ?? '')
       })
       .catch((e: Error) => setLoadError(e.message))
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- reset is stable in intent; re-run only for a new agent
   }, [agentId])
 
   const close = () => {
