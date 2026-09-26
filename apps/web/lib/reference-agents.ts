@@ -65,6 +65,10 @@ export const REFERENCE_AGENTS: readonly ReferenceAgent[] = [
     blurb: 'BNB Chain approval and privileged-function risk triage.', publicUrlEnv: 'REDCELL_PUBLIC_URL',
     erc8004: { chainId: 56, tokenId: 341557, wallet: '0x1F0D0eF5a279888E3b86c8a99A8A99F19fCEc587', registerTx: '0x6d5347aa692e150c4010233c3e18c294fad56ce504301f415825f214cc1ea657' },
     erc8004Testnet: { chainId: 97, tokenId: 2239 } },
+  { id: 'marque:tidemark', slug: 'tidemark', name: 'Tidemark', category: 'yield', port: 8615,
+    blurb: 'Realised yield: what venues actually paid, measured on chain, against what they quote.', publicUrlEnv: 'TIDEMARK_PUBLIC_URL',
+    erc8004: { chainId: 56, tokenId: 358786, wallet: '0x8122991297DC98Dc5c735fDE90a501528922aFdC', registerTx: '0x1a336b78de387dbe546aad18f75822c1d38edba2c0b08e7b2006b3fe4ef6a7e0' },
+    erc8004Testnet: { chainId: 97, tokenId: 2495 } },
 ] as const
 
 const BY_ID = new Map(REFERENCE_AGENTS.map((a) => [a.id, a]))

@@ -53,7 +53,7 @@ async function queried(label: string, run: Promise<unknown>): Promise<Queried> {
   }
 }
 
-const AGENTS = ['bound', 'lattice', 'sluicegate', 'keel', 'redcell'] as const
+const AGENTS = ['bound', 'lattice', 'sluicegate', 'keel', 'redcell', 'tidemark'] as const
 
 /** How long each moving part may go quiet before the page calls it stale. */
 const CADENCE_MINUTES: Record<string, number> = {

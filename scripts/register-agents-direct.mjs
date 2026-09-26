@@ -79,6 +79,36 @@ function walletPassword(id) {
 
 console.log(`network: ${NETWORK}${NETWORK === 'bsc-mainnet' ? '  ⚠  MAINNET — real BNB gas per agent' : ''}\n`)
 
+/**
+ * `--retire <tokenId>` (with --only <id>): point a DUPLICATE registration owned by that
+ * agent's wallet at a record with no services, so no crawler can list or hire it. Used once:
+ * a repeated command minted Tidemark twice on mainnet (358786 kept, 358787 retired).
+ */
+const retireIx = process.argv.indexOf('--retire')
+if (retireIx > -1) {
+  const tokenId = Number(process.argv[retireIx + 1])
+  const a = AGENTS.find((x) => x.id === ONLY)
+  if (!a || !Number.isInteger(tokenId)) throw new Error('usage: --only <id> --retire <tokenId> [--mainnet] [--go]')
+  const { pk } = agentPrivateKey(a.id)
+  const walletProvider = new EVMWalletProvider({ password: walletPassword(a.id), privateKey: pk, persist: false, walletsDir: mkdtempSync(join(tmpdir(), 'marque-ks-')) })
+  const agent = await ERC8004Agent.create({ walletProvider, network: NETWORK })
+  // Written by hand: the SDK's builder requires an endpoint, and the point is to have none.
+  const record = {
+    type: 'https://eips.ethereum.org/EIPS/eip-8004#registration-v1',
+    name: `${a.name} (retired duplicate)`,
+    description: `Duplicate registration, not in service. The live ${a.name} is a different token id.`,
+    image: '',
+    services: [],
+    active: false,
+  }
+  const uri = `data:application/json;base64,${Buffer.from(JSON.stringify(record)).toString('base64')}`
+  console.log(`retire ${a.id} token ${tokenId} on ${NETWORK}`)
+  if (!GO) { console.log('(dry run — pass --go)'); process.exit(0) }
+  const res = await agent.setAgentUri(tokenId, uri)
+  console.log('done', JSON.stringify(res, (_, v) => (typeof v === 'bigint' ? v.toString() : v)).slice(0, 300))
+  process.exit(0)
+}
+
 const results = []
 for (const a of AGENTS) {
   if (ONLY && a.id !== ONLY) continue
