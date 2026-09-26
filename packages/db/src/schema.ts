@@ -99,6 +99,7 @@ export const agent = pgTable('agent', {
   chainTokenUq: uniqueIndex('agent_chain_token_uq').on(t.chainId, t.tokenId),
   chainIdx: index('agent_chain_idx').on(t.chainId),
   ownerIdx: index('agent_owner_idx').on(t.ownerAddress),
+  walletIdx: index('agent_wallet_idx').on(t.agentWallet),
   detailIdx: index('agent_detail_idx').on(t.chainId, t.detailFetched),
 }))
 

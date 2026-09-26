@@ -3,6 +3,7 @@ import { sql } from 'drizzle-orm'
 import { db } from '@marque/db'
 import { publicClient } from '@marque/chain'
 import { tierFreshness } from '@marque/probe'
+import { indexerStatus, questStats, campaignChainId } from '@marque/commerce'
 import { Statement, Chip, ProvenanceChip } from '@marque/ui'
 import { SiteHeader, SiteFooter } from '../_components/SiteHeader'
 import styles from './status.module.css'
@@ -119,6 +120,10 @@ export default async function StatusPage() {
     tierFreshness().catch(() => null),
   ])
 
+  const [quest, questTotals] = await Promise.all([
+    indexerStatus().catch(() => null),
+    questStats(campaignChainId()).catch(() => null),
+  ])
   const cursor = cursorQ.rows
   const probes = probesQ.rows
   const conf = confQ.rows
@@ -270,6 +275,32 @@ export default async function StatusPage() {
             must not go quiet — the hours-out-of-range figure on{' '}
             <Link href="/pancakeswap">the PancakeSwap Desk</Link> is only as dense as this series.
           </p>
+        </section>
+
+        <section className={styles.section}>
+          <h2 className={styles.h2}>Quest index</h2>
+          <table className={styles.table}>
+            <thead><tr><th>Chain</th><th>Indexed to</th><th>Head</th><th>Behind</th><th /></tr></thead>
+            <tbody>
+              {(quest ?? []).map((q) => (
+                <tr key={q.chainId}>
+                  <td>{q.chainId === 56 ? 'BSC mainnet' : 'BSC testnet'}</td>
+                  <td className="mono">{q.cursorBlock ?? 'not started'}</td>
+                  <td className="mono">{q.headBlock ?? 'unreadable'}</td>
+                  <td className="mono">{q.lagBlocks === null ? 'unknown' : `${q.lagBlocks} blocks`}</td>
+                  <td>{q.lagBlocks === null ? <Chip tone="breach">unknown</Chip> : q.lagBlocks > 200 ? <Chip tone="breach">behind</Chip> : <Chip tone="holds">current</Chip>}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {questTotals && (
+            <p className={styles.note}>
+              Set and Earn on chain {questTotals.chainId}, eligible activity only: {questTotals.walletsWithHire} wallets hired,{' '}
+              {Object.entries(questTotals.hiresPerCategory).map(([c, n]) => `${n} ${c.replace('_', ' ')}`).join(', ')};{' '}
+              {questTotals.delivered} delivered, {questTotals.ratings} rated. Excluded (team, self, duplicate or not on Marque):{' '}
+              {questTotals.excluded.hires} hires. Per wallet: <span className="mono">/api/v1/phase2/wallet/&lt;address&gt;</span>.
+            </p>
+          )}
         </section>
 
         <section className={styles.section}>

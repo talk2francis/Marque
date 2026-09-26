@@ -163,6 +163,21 @@ module.exports = {
     },
     {
       // P2-01: signed ERC-8183 quotes from every seller, on a schedule. Read only.
+      name: 'marque-indexer',
+      cwd: `${ROOT}/apps/worker`,
+      script: 'node_modules/.bin/tsx',
+      args: 'src/indexer.ts',
+      interpreter: 'none',
+      env: { ...env, NODE_ENV: 'production' },
+      autorestart: true,
+      max_restarts: 50,
+      restart_delay: 5000,
+      max_memory_restart: '400M',
+      time: true,
+      out_file: '/root/.pm2/logs/marque-indexer-out.log',
+      error_file: '/root/.pm2/logs/marque-indexer-err.log',
+    },
+    {
       name: 'marque-quotes',
       cwd: `${ROOT}/apps/worker`,
       script: 'node_modules/.bin/tsx',

@@ -127,6 +127,13 @@
       "when": 1790425564581,
       "tag": "0017_quote_signed",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1790434853856,
+      "tag": "0018_agent_wallet_idx",
+      "breakpoints": true
     }
   ]
 }

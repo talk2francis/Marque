@@ -50,7 +50,7 @@ export async function agentStates(
   const ids = [...new Set(agentIds)].filter(Boolean)
   if (ids.length === 0) return new Map()
   const idList = sql.join(ids.map((id) => sql`${id}`), sql`, `)
-  const [identityResult, serviceResult, qualificationResult] = await Promise.all([
+  const [identityResult, serviceResult, qualificationResult, settledResult] = await Promise.all([
     db().execute(sql`
       select a.id, a.token_id, coalesce(a.name, 'Unnamed agent') as name,
              a.owner_address, a.detail_fetched, c.category
@@ -89,7 +89,17 @@ export async function agentStates(
       where agent_id in (${idList})
       order by agent_id, ran_at desc
     `),
+    // Settleable evidence (P2-03): an indexed ERC-8183 job paid to this agent's wallet
+    // that was delivered and then settled (JobCompleted or PaymentReleased).
+    db().execute(sql`
+      select distinct s.id as service_id
+      from agent_service s
+      join agent a on a.id = s.agent_id
+      join commerce_job j on j.provider = a.agent_wallet and j.state in ('COMPLETED', 'PAID')
+      where s.agent_id in (${idList}) and s.kind = 'a2a'
+    `).catch(() => []),
   ])
+  const settleableServiceIds = rowsOf(settledResult).map((r) => Number(r['service_id']))
 
   const serviceRows = rowsOf(serviceResult)
   const qualificationRows = rowsOf(qualificationResult)
@@ -135,8 +145,7 @@ export async function agentStates(
       qualification,
       authorizable: requestedTask !== null && TASK_FOR_CATEGORY[category ?? ''] === requestedTask,
       quoteableProtocols: ['x402', 'erc8183'],
-      // P2-03: fed from indexed commerce_job once the indexer runs (see packages/commerce supply.ts).
-      settleableServiceIds: [],
+      settleableServiceIds,
       now,
     })
 

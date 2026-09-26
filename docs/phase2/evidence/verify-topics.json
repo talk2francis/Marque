@@ -1,0 +1,159 @@
+{
+  "generatedAt": "2026-09-26T15:04:50.327Z",
+  "events": {
+    "JobCreated": {
+      "topic0": "0xb0f0239bfdd96453e24733e18bfc24b70d8fadf123dd977473518dd577ee79b9",
+      "abiTopic0": "0xb0f0239bfdd96453e24733e18bfc24b70d8fadf123dd977473518dd577ee79b9",
+      "abiMatchesSpec": true,
+      "contract": "commerce",
+      "verified": true,
+      "chainId": 97,
+      "tx": "0x865a46938f62ee170ad2d18062d85da42970221bdfca2ec49c38515bc5805457",
+      "block": 133298928,
+      "note": "topic0 read from a real log"
+    },
+    "BudgetSet": {
+      "topic0": "0x869e2577b006bf47ee981cf6fec2e25583548081c14b98deab587f77b5068038",
+      "abiTopic0": "0x869e2577b006bf47ee981cf6fec2e25583548081c14b98deab587f77b5068038",
+      "abiMatchesSpec": true,
+      "contract": "commerce",
+      "verified": true,
+      "chainId": 97,
+      "tx": "0x1c52a74cd527254f28fd9213f91c01c6075521054c40fe6535c68dfc179c7221",
+      "block": 133298856,
+      "note": "topic0 read from a real log"
+    },
+    "JobFunded": {
+      "topic0": "0xbdb056de345bfeadca7c9fd7df6430bdb83c677c8eefbb601dff56f34d3dac52",
+      "abiTopic0": "0xbdb056de345bfeadca7c9fd7df6430bdb83c677c8eefbb601dff56f34d3dac52",
+      "abiMatchesSpec": true,
+      "contract": "commerce",
+      "verified": true,
+      "chainId": 97,
+      "tx": "0xea7aba146847cdd3199dcba37be985352c501c934194b4301205bd69e86f1798",
+      "block": 133298875,
+      "note": "topic0 read from a real log"
+    },
+    "JobSubmitted": {
+      "topic0": "0x80c17db79857f338a6a6df68a6883ecc0ce78e2202fe61ed979733573f40538e",
+      "abiTopic0": "0x80c17db79857f338a6a6df68a6883ecc0ce78e2202fe61ed979733573f40538e",
+      "abiMatchesSpec": true,
+      "contract": "commerce",
+      "verified": true,
+      "chainId": 97,
+      "tx": "0x024bc968bade5d0808844a9a2d452a3a4a5b39664d4c9dae47feaf5e41d86124",
+      "block": 133298910,
+      "note": "topic0 read from a real log"
+    },
+    "JobCompleted": {
+      "topic0": "0x0fd54bd364fa9e67f17b091aefe930932c09fe7651cf5ad02c71a418f3341444",
+      "abiTopic0": "0x0fd54bd364fa9e67f17b091aefe930932c09fe7651cf5ad02c71a418f3341444",
+      "abiMatchesSpec": true,
+      "contract": "commerce",
+      "verified": true,
+      "chainId": 97,
+      "tx": "0xbfea5732e1c732a2bd2a181beec4857aba5df37ee5ea3079291466d982afeec8",
+      "block": 133299838,
+      "note": "topic0 read from a real log"
+    },
+    "PaymentReleased": {
+      "topic0": "0x21d71db5be59bb9fa133895586b7404307dd33fb93b16db09dc6f1d9d7d231b0",
+      "abiTopic0": "0x21d71db5be59bb9fa133895586b7404307dd33fb93b16db09dc6f1d9d7d231b0",
+      "abiMatchesSpec": true,
+      "contract": "commerce",
+      "verified": true,
+      "chainId": 97,
+      "tx": "0xbfea5732e1c732a2bd2a181beec4857aba5df37ee5ea3079291466d982afeec8",
+      "block": 133299838,
+      "note": "topic0 read from a real log"
+    },
+    "JobRejected": {
+      "topic0": "0xae7362b1af91f4492868987b9c73990d780060811551b58728fbe96fd1bab275",
+      "abiTopic0": "0xae7362b1af91f4492868987b9c73990d780060811551b58728fbe96fd1bab275",
+      "abiMatchesSpec": true,
+      "contract": "commerce",
+      "verified": true,
+      "chainId": 97,
+      "tx": "0x5d4ebe582ca495d6b3670dc2b3d2db38961874052c32ea6d46d7452cfea1ca5f",
+      "block": 133298934,
+      "note": "topic0 read from a real log"
+    },
+    "JobExpired": {
+      "topic0": "0x97237956f8810192811e2c3f273fd02c5d6295206fdd9c62e6fe2bfc19ba9232",
+      "abiTopic0": "0x97237956f8810192811e2c3f273fd02c5d6295206fdd9c62e6fe2bfc19ba9232",
+      "abiMatchesSpec": true,
+      "contract": "commerce",
+      "verified": false,
+      "chainId": null,
+      "tx": null,
+      "block": null,
+      "note": "no log in reach yet (public RPCs serve only the newest blocks)"
+    },
+    "Refunded": {
+      "topic0": "0x7ca5472b7ea78c2c0141c5a12ee6d170cf4ce8ed06be3d22c8252ddfc7a6a2c4",
+      "abiTopic0": "0x7ca5472b7ea78c2c0141c5a12ee6d170cf4ce8ed06be3d22c8252ddfc7a6a2c4",
+      "abiMatchesSpec": true,
+      "contract": "commerce",
+      "verified": false,
+      "chainId": null,
+      "tx": null,
+      "block": null,
+      "note": "no log in reach yet (public RPCs serve only the newest blocks)"
+    },
+    "JobRegistered": {
+      "topic0": "0xab6d9121f9311dd45d0b932fc9fb1a6562295bda63d5bab95e364ff926515715",
+      "abiTopic0": "0xab6d9121f9311dd45d0b932fc9fb1a6562295bda63d5bab95e364ff926515715",
+      "abiMatchesSpec": true,
+      "contract": "router",
+      "verified": true,
+      "chainId": 97,
+      "tx": "0x4240032c4891b10257b0d33ed4fa3257907eb9f2b73840f904376ae22cf1215d",
+      "block": 133298838,
+      "note": "topic0 read from a real log"
+    },
+    "JobSettled": {
+      "topic0": "0x771fbd01246ab044986d0a55b6d9b732fcfd6d7eaa5ee0d05110b0d23cf496fc",
+      "abiTopic0": "0x771fbd01246ab044986d0a55b6d9b732fcfd6d7eaa5ee0d05110b0d23cf496fc",
+      "abiMatchesSpec": true,
+      "contract": "router",
+      "verified": true,
+      "chainId": 97,
+      "tx": "0xbfea5732e1c732a2bd2a181beec4857aba5df37ee5ea3079291466d982afeec8",
+      "block": 133299838,
+      "note": "topic0 read from a real log"
+    },
+    "Disputed": {
+      "topic0": "0xcde8e21e97a7f6ec4bbf0ee44450212e0ba73be8fdfbfb2b155e861d86756bac",
+      "abiTopic0": "0xcde8e21e97a7f6ec4bbf0ee44450212e0ba73be8fdfbfb2b155e861d86756bac",
+      "abiMatchesSpec": true,
+      "contract": "policy",
+      "verified": false,
+      "chainId": null,
+      "tx": null,
+      "block": null,
+      "note": "no log in reach yet (public RPCs serve only the newest blocks)"
+    },
+    "NewFeedback": {
+      "topic0": "0x6a4a61743519c9d648a14e6493f47dbe3ff1aa29e7785c96c8326a205e58febc",
+      "abiTopic0": "0x6a4a61743519c9d648a14e6493f47dbe3ff1aa29e7785c96c8326a205e58febc",
+      "abiMatchesSpec": true,
+      "contract": "reputation",
+      "verified": false,
+      "chainId": null,
+      "tx": null,
+      "block": null,
+      "note": "no log in reach yet (public RPCs serve only the newest blocks)"
+    },
+    "FeedbackRevoked": {
+      "topic0": "0x25156fd3288212246d8b008d5921fde376c71ed14ac2e072a506eb06fde6d09d",
+      "abiTopic0": "0x25156fd3288212246d8b008d5921fde376c71ed14ac2e072a506eb06fde6d09d",
+      "abiMatchesSpec": true,
+      "contract": "reputation",
+      "verified": false,
+      "chainId": null,
+      "tx": null,
+      "block": null,
+      "note": "no log in reach yet (public RPCs serve only the newest blocks)"
+    }
+  }
+}

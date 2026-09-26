@@ -11,7 +11,7 @@ import { requestQuote, probeTask, type QuoteResult } from './quote.js'
  *                 but the quote fails a hire check (wrong signer, chain, contract, token)
  *   hireable      quoteable and every check passes: supported chain, canonical escrow,
  *                 catalog token, positive price, signer = the agent's registered wallet
- *   settleable    hireable, and at least one indexed job for this provider was delivered
+ *   settleable    hireable, and at least one indexed job for this provider was delivered and settled (JobCompleted or PaymentReleased)
  *                 (JobSubmitted) and settled (JobCompleted / PaymentReleased)
  */
 export type CommercialState = 'unavailable' | 'preview_only' | 'quoteable' | 'hireable' | 'settleable'
@@ -217,7 +217,7 @@ export async function commercialStates(): Promise<Map<number, ServiceCommerce>> 
   const delivered = new Map<string, number>()
   for (const r of rowsOf(await db().execute(sql`
     select chain_id, lower(provider) as provider, count(*)::int as n
-    from commerce_job where state in ('SUBMITTED', 'COMPLETED', 'PAID') group by 1, 2`).catch(() => []))) {
+    from commerce_job where state in ('COMPLETED', 'PAID') group by 1, 2`).catch(() => []))) {
     delivered.set(`${r['chain_id']}:${r['provider']}`, Number(r['n']))
   }
   const out = new Map<number, ServiceCommerce>()

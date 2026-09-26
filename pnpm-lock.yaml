@@ -430,6 +430,9 @@ importers:
       '@bnbagent/sdk':
         specifier: 0.6.0
         version: 0.6.0(@altananetwork/sdk@0.9.0(@tanstack/react-query@5.102.8(react@19.2.8))(@types/react@19.2.18)(@wagmi/core@3.6.5(@tanstack/query-core@5.102.8)(@types/react@19.2.18)(react@19.2.8)(typescript@5.9.3)(use-sync-external-store@1.4.0(react@19.2.8))(viem@2.56.3(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.5.4)))(bufferutil@4.1.0)(react@19.2.8)(typescript@5.9.3)(use-sync-external-store@1.4.0(react@19.2.8))(utf-8-validate@5.0.10)(wagmi@2.19.5(@azure/identity@4.13.2)(@azure/storage-blob@12.33.0)(@tanstack/query-core@5.102.8)(@tanstack/react-query@5.102.8(react@19.2.8))(@types/react@19.2.18)(aws4fetch@1.0.20)(bufferutil@4.1.0)(ioredis@5.11.1)(react@19.2.8)(typescript@5.9.3)(utf-8-validate@5.0.10)(viem@2.56.3(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.5.4))(zod@4.5.4))(zod@4.5.4))(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76)
+      '@marque/chain':
+        specifier: workspace:*
+        version: link:../chain
       '@marque/db':
         specifier: workspace:*
         version: link:../db
