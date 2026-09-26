@@ -198,10 +198,10 @@ async function marketplaceBase(): Promise<MarketRow[]> {
 async function queryThirdParty(): Promise<MarketRow[]> {
   const rows = await db().execute(sql`
     with latest as (
-      select distinct on (service_id) service_id, agent_id, liveness, latency_ms,
-             failure_class, skills, checked_at, task_kinds, manifest, executable_endpoint
-      from probe where service_id is not null
-      order by service_id, checked_at desc
+      -- Newest probe per service by primary key (probe_schedule), not a scan of history.
+      select ps.service_id, ps.agent_id, p.liveness, p.latency_ms,
+             p.failure_class, p.skills, p.checked_at, p.task_kinds, p.manifest, p.executable_endpoint
+      from probe_schedule ps join probe p on p.id = ps.last_probe_id
     ),
     svc as (
       select s.agent_id,

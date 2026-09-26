@@ -83,8 +83,9 @@ async function rankAgentsForPool(): Promise<RankedAgent[]> {
   try {
     const r = await db().execute(sql`
       with latest_probe as (
-        select distinct on (agent_id) agent_id, liveness, latency_ms, checked_at
-        from probe order by agent_id, checked_at desc
+        select distinct on (ps.agent_id) ps.agent_id, p.liveness, p.latency_ms, p.checked_at
+        from probe_schedule ps join probe p on p.id = ps.last_probe_id
+        order by ps.agent_id, p.checked_at desc
       ),
       latest_conf as (
         select distinct on (agent_id) agent_id, pass, test_id, ran_at

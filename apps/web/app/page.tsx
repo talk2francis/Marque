@@ -98,7 +98,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ a
   // One pass and one fail, side by side (P10.5E item 7). Failure proves honesty;
   // a pass proves the thing works.
   const passExample = await db().execute(sql`
-    select agent_id, test_id, diffs from conformance_result
+    select ${oneAgentIdSql(sql`agent_id`)} as agent_id, test_id, diffs from conformance_result
     where pass = true and agent_id in ${firstPartyIdListSql()} order by ran_at desc limit 1
   `).then((r) => (((r as { rows?: unknown[] }).rows ?? (r as unknown[])) as Array<Record<string, unknown>>)[0] ?? null)
     .catch(() => null)

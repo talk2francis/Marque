@@ -59,8 +59,8 @@ function liveAdapter(agentId: string, name: string, endpoint: string) {
 async function liveAgents(): Promise<Array<{ id: string; name: string; endpoint: string }>> {
   const rows = await db().execute(sql`
     with latest as (
-      select distinct on (service_id) service_id, agent_id, liveness
-      from probe where service_id is not null order by service_id, checked_at desc
+      select ps.service_id, ps.agent_id, p.liveness
+      from probe_schedule ps join probe p on p.id = ps.last_probe_id
     )
     select distinct on (host) a.id, a.name,
            coalesce(s.resolved_endpoint, s.endpoint) as endpoint,

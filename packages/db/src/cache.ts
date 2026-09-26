@@ -18,14 +18,18 @@ export interface Projection<T> {
 }
 
 let client: Redis | null = null
+let closed = false
 const memory = new Map<string, { at: number; value: unknown }>()
 const inflight = new Map<string, Promise<unknown>>()
 
 function redis(): Redis | null {
+  if (closed) return null
   if (client) return client
   const url = process.env.REDIS_URL
   if (!url) return null
-  client = new Redis(url, { maxRetriesPerRequest: 1, connectTimeout: 1_000, lazyConnect: false, enableOfflineQueue: false })
+  // Commands queue until the connection is up (so the first read after a restart still
+  // hits Redis) but each one gives up after 500 ms, so an outage degrades to memory fast.
+  client = new Redis(url, { maxRetriesPerRequest: 1, connectTimeout: 1_000, commandTimeout: 500, enableOfflineQueue: true })
   client.on('error', () => {
     // Swallowed on purpose: a cache outage must degrade to memory, never break a page.
   })
@@ -68,7 +72,7 @@ function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {
 export async function cachedProjection<T>(
   key: string,
   compute: () => Promise<T>,
-  opts: { freshMs?: number; timeoutMs?: number; keepMs?: number } = {},
+  opts: { freshMs?: number; timeoutMs?: number; keepMs?: number; staleWhileRevalidate?: boolean } = {},
 ): Promise<Projection<T>> {
   const freshMs = opts.freshMs ?? 60_000
   const timeoutMs = opts.timeoutMs ?? 5_000
@@ -90,6 +94,12 @@ export async function cachedProjection<T>(
     run.finally(() => inflight.delete(key)).catch(() => undefined)
   }
 
+  // Stale-while-revalidate: answer from the last good value now; the refresh above
+  // lands for the next reader.
+  if (opts.staleWhileRevalidate && stored) {
+    return { value: stored.value as T, computedAt: new Date(stored.at).toISOString(), ageMs: now - stored.at, stale: true }
+  }
+
   try {
     const value = await withTimeout(run, timeoutMs)
     return { value, computedAt: new Date().toISOString(), ageMs: 0, stale: false }
@@ -103,6 +113,7 @@ export async function cachedProjection<T>(
 
 /** For tests and shutdown. */
 export async function closeCache(): Promise<void> {
+  closed = true
   memory.clear()
   if (client) {
     const c = client

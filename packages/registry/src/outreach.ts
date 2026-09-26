@@ -157,8 +157,9 @@ export async function buildProspects(opts: { limit?: number } = {}): Promise<Pro
 
   const rows = await d.execute(sql`
     with latest as (
-      select distinct on (agent_id) agent_id, liveness, latency_ms, failure_class, skills
-      from probe order by agent_id, checked_at desc
+      select distinct on (ps.agent_id) ps.agent_id, p.liveness, p.latency_ms, p.failure_class, p.skills
+      from probe_schedule ps join probe p on p.id = ps.last_probe_id
+      order by ps.agent_id, p.checked_at desc
     ),
     owner_counts as (
       select owner_address, count(*) as n from agent where chain_id = 56 group by owner_address

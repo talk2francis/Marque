@@ -1,7 +1,7 @@
 import { sql, eq, and, inArray, desc } from 'drizzle-orm'
 import { db, agent, agentCategory, agentService, probe, type Category } from '@marque/db'
 import { probeService } from './liveness.js'
-import { syncSchedule, dueByTier, recordVerdicts, firstPartyAgentIds, type DueService, type Tier } from './schedule.js'
+import { syncSchedule, dueByTier, recordVerdicts, deferServices, firstPartyAgentIds, type DueService, type Tier } from './schedule.js'
 
 /**
  * The probe worker.
@@ -24,6 +24,10 @@ export interface ProbeCycleResult {
   dead: number
   skippedBackoff: number
   byTier?: Record<Tier, number>
+  /** Not started before the cycle deadline; still due, picked up next cycle. */
+  skippedDeadline?: number
+  /** Host failed at the connection level 3 times in a row this cycle; deferred 60 min, not recorded as a verdict. */
+  deferredHostDown?: number
   scheduleInserted?: number
   scheduleBackfilled?: boolean
 }
@@ -87,7 +91,7 @@ class HostLimiter {
   }
 }
 
-export async function runProbeCycle(opts: { limit?: number; concurrency?: number; deadCap?: number } = {}): Promise<ProbeCycleResult> {
+export async function runProbeCycle(opts: { limit?: number; concurrency?: number; deadCap?: number; deadlineMs?: number } = {}): Promise<ProbeCycleResult> {
   const limit = opts.limit ?? 400
   const concurrency = opts.concurrency ?? 12
   const deadCap = opts.deadCap ?? Number(process.env.PROBE_DEAD_CAP ?? 150)
@@ -104,9 +108,32 @@ export async function runProbeCycle(opts: { limit?: number; concurrency?: number
   }
   if (candidates.length === 0) return result
 
+  // A cycle never runs past its deadline, so the 5-minute tier is never late behind a
+  // wall of timeouts. Unstarted candidates stay due and lead the next cycle.
+  const deadline = Date.now() + (opts.deadlineMs ?? Number(process.env.PROBE_CYCLE_DEADLINE_MS ?? 240_000))
   const limiter = new HostLimiter()
-  const rows = await mapLimit(candidates, concurrency, async (c) => {
-    const outcome = await limiter.run(c.url, () => probeService(c.kind, c.url))
+  // Per-cycle host breaker: after 3 connection-level failures in a row on one host, the
+  // rest of that host's services this cycle are deferred, not probed and not recorded.
+  // An unobserved endpoint gets no verdict; it is simply asked again later.
+  const hostFails = new Map<string, number>()
+  const hostOf = (u: string) => { try { return new URL(u).host } catch { return u } }
+  const CONNECTION_FAILURES = new Set(['timeout', 'refused', 'dns', 'tls'])
+  const deferred: DueService[] = []
+  let skippedDeadline = 0
+  const results = await mapLimit(candidates, concurrency, async (c) => {
+    const host = hostOf(c.url)
+    if (Date.now() > deadline) { skippedDeadline++; return null }
+    if (c.tier !== 'T0' && (hostFails.get(host) ?? 0) >= 3) { deferred.push(c); return null }
+    // Re-check after waiting in the host's queue: the deadline or the breaker may have tripped.
+    const outcome = await limiter.run(c.url, async () => {
+      if (Date.now() > deadline) return 'deadline' as const
+      if (c.tier !== 'T0' && (hostFails.get(host) ?? 0) >= 3) return 'deferred' as const
+      return probeService(c.kind, c.url)
+    })
+    if (outcome === 'deadline') { skippedDeadline++; return null }
+    if (outcome === 'deferred') { deferred.push(c); return null }
+    if (outcome.failureClass && CONNECTION_FAILURES.has(outcome.failureClass)) hostFails.set(host, (hostFails.get(host) ?? 0) + 1)
+    else hostFails.set(host, 0)
     switch (outcome.liveness) {
       case 'live': result.live++; break
       case 'unbound': result.unbound++; break
@@ -114,22 +141,31 @@ export async function runProbeCycle(opts: { limit?: number; concurrency?: number
       default: result.dead++; break
     }
     return {
-      agentId: c.agentId,
-      serviceId: c.serviceId,
-      checkedAt: new Date(),
-      ok: outcome.ok,
-      latencyMs: outcome.latencyMs,
-      statusCode: outcome.statusCode,
-      failureClass: outcome.failureClass,
-      detail: outcome.detail.slice(0, 500),
-      liveness: outcome.liveness,
-      skills: outcome.skills.slice(0, 50),
-      executableEndpoint: outcome.executableEndpoint,
-      protocolVersion: outcome.protocolVersion ?? null,
-      taskKinds: (outcome.taskKinds ?? []).slice(0, 20),
-      manifest: outcome.manifest ?? null,
+      due: c,
+      row: {
+        agentId: c.agentId,
+        serviceId: c.serviceId,
+        checkedAt: new Date(),
+        ok: outcome.ok,
+        latencyMs: outcome.latencyMs,
+        statusCode: outcome.statusCode,
+        failureClass: outcome.failureClass,
+        detail: outcome.detail.slice(0, 500),
+        liveness: outcome.liveness,
+        skills: outcome.skills.slice(0, 50),
+        executableEndpoint: outcome.executableEndpoint,
+        protocolVersion: outcome.protocolVersion ?? null,
+        taskKinds: (outcome.taskKinds ?? []).slice(0, 20),
+        manifest: outcome.manifest ?? null,
+      },
     }
   })
+  const done = results.filter((r): r is NonNullable<typeof r> => r !== null)
+  const rows = done.map((r) => r.row)
+  result.attempted = rows.length
+  result.skippedDeadline = skippedDeadline
+  result.deferredHostDown = deferred.length
+  await deferServices(deferred, 60)
 
   // Probe history is a first-party observation: append only, never updated.
   const probeIds = new Map<number, number>()
@@ -137,7 +173,7 @@ export async function runProbeCycle(opts: { limit?: number; concurrency?: number
     const ins = await d.insert(probe).values(rows.slice(i, i + 500)).returning({ id: probe.id, serviceId: probe.serviceId })
     for (const r of ins) if (r.serviceId !== null) probeIds.set(r.serviceId, r.id)
   }
-  await recordVerdicts(rows.map((r, i) => ({ due: candidates[i] as DueService, liveness: r.liveness, checkedAt: r.checkedAt, probeId: probeIds.get(r.serviceId) ?? null })))
+  await recordVerdicts(done.map(({ due, row }) => ({ due, liveness: row.liveness, checkedAt: row.checkedAt, probeId: probeIds.get(row.serviceId) ?? null })))
   // A single schema-proven task kind is stronger category evidence than copy.
   // Add the derived label without deleting the historical unclassified row.
   for (const row of rows) {

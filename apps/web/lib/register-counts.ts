@@ -41,8 +41,9 @@ export async function getRegisterCounts(category?: string | null): Promise<Regis
 
   const rows = await db().execute(sql`
     with latest as (
-      select distinct on (agent_id) agent_id, liveness
-      from probe order by agent_id, checked_at desc
+      select distinct on (ps.agent_id) ps.agent_id, p.liveness
+      from probe_schedule ps join probe p on p.id = ps.last_probe_id
+      order by ps.agent_id, p.checked_at desc
     )
     select
       count(distinct a.id) filter (where p.liveness = 'live')                       as working,

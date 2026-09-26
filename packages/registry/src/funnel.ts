@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm'
-import { db } from '@marque/db'
+import { db, cachedProjection } from '@marque/db'
 
 /**
  * The supply funnel.
@@ -57,37 +57,20 @@ export const MARQUE_REFERENCE_OWNERS: readonly string[] = [
 export const MIN_THIRD_PARTY_PER_CATEGORY = 2
 
 /**
- * A short in-process memo for the funnel aggregates.
+ * The funnel aggregates, cached as last-good projections in Redis.
  *
- * `funnel()` and `categoryFunnel()` each do a "latest probe per agent" scan over
- * the whole probe table — ~7s as the table grew, and the homepage awaits both
- * before it can stream. The numbers only move when the ingest/probe workers
- * finish a sweep (minutes apart), so recomputing them per request bought
- * nothing but a slow first paint. 90s keeps them effectively live.
+ * Each aggregate costs several seconds over the whole registry. The numbers only
+ * move when the ingest and probe workers finish a sweep, minutes apart, so a page
+ * never waits for them: a fresh value (under 90 s) is returned as-is, a stale one is
+ * returned at once and refreshed in the background, and because the value lives in
+ * Redis a restart or a blue/green swap still answers instantly. Only a first-ever
+ * read with nothing stored awaits the query.
  */
 const MEMO_TTL_MS = 90_000
-const memo = new Map<string, { at: number; value: unknown; refreshing?: boolean }>()
 
-/**
- * Stale-while-revalidate: once primed, a caller never waits again. A fresh entry
- * is returned as-is; a stale one is returned immediately and refreshed in the
- * background; only the very first call (cold process) awaits the query.
- */
 async function memoised<T>(key: string, fn: () => Promise<T>): Promise<T> {
-  const hit = memo.get(key)
-  const now = Date.now()
-  if (hit) {
-    if (now - hit.at >= MEMO_TTL_MS && !hit.refreshing) {
-      hit.refreshing = true
-      void fn()
-        .then((value) => memo.set(key, { at: Date.now(), value }))
-        .catch(() => { hit.refreshing = false })
-    }
-    return hit.value as T
-  }
-  const value = await fn()
-  memo.set(key, { at: Date.now(), value })
-  return value
+  const p = await cachedProjection(`registry:${key}`, fn, { freshMs: MEMO_TTL_MS, timeoutMs: 60_000, staleWhileRevalidate: true })
+  return p.value
 }
 
 export async function funnel(chainId = 56): Promise<FunnelRow[]> {
@@ -97,13 +80,13 @@ export async function funnel(chainId = 56): Promise<FunnelRow[]> {
 async function funnelUncached(chainId = 56): Promise<FunnelRow[]> {
   const d = db()
   const rows = await d.execute(sql`
-    with base as (select * from agent where chain_id = ${chainId}),
+    with base as (select id, detail_fetched, owner_address from agent where chain_id = ${chainId}),
     svc as (
       select distinct agent_id from agent_service
     ),
     latest_service_probe as (
-      select distinct on (service_id) service_id, liveness, executable_endpoint, task_kinds, checked_at
-      from probe where service_id is not null order by service_id, checked_at desc
+      select ps.service_id, p.liveness, p.executable_endpoint, p.task_kinds, p.checked_at
+      from probe_schedule ps join probe p on p.id = ps.last_probe_id
     ),
     service_state as (
       select s.agent_id,
@@ -179,10 +162,10 @@ async function categoryFunnelUncached(chainId = 56): Promise<CategoryFunnelRow[]
     : sql`false`
 
   const rows = await d.execute(sql`
-    with base as (select * from agent where chain_id = ${chainId}),
+    with base as (select id, detail_fetched, owner_address from agent where chain_id = ${chainId}),
     latest_service_probe as (
-      select distinct on (service_id) service_id, liveness, executable_endpoint, task_kinds, checked_at
-      from probe where service_id is not null order by service_id, checked_at desc
+      select ps.service_id, p.liveness, p.executable_endpoint, p.task_kinds, p.checked_at
+      from probe_schedule ps join probe p on p.id = ps.last_probe_id
     ),
     labelled_services as (
       select c.category, b.id, b.owner_address,
@@ -245,9 +228,8 @@ async function failureHistogramUncached(): Promise<Array<{ failureClass: string;
   const d = db()
   const rows = await d.execute(sql`
     with latest as (
-      select distinct on (service_id) service_id, ok, failure_class
-      from probe where service_id is not null
-      order by service_id, checked_at desc
+      select ps.service_id, p.ok, p.failure_class
+      from probe_schedule ps join probe p on p.id = ps.last_probe_id
     )
     select coalesce(failure_class, 'none') as failure_class, count(*) as n
     from latest group by 1 order by n desc

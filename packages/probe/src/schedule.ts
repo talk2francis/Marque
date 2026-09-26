@@ -221,6 +221,15 @@ export async function recordVerdicts(results: ReadonlyArray<{ due: DueService; l
   }
 }
 
+/** Push services back without a verdict (their host was down this cycle). */
+export async function deferServices(services: readonly DueService[], minutes: number): Promise<void> {
+  if (!services.length) return
+  const ids = sql.join(services.map((s) => sql`${s.serviceId}`), sql`, `)
+  await db().execute(sql`
+    update probe_schedule set next_due_at = now() + make_interval(mins => ${minutes}::int), updated_at = now()
+    where service_id in (${ids})`)
+}
+
 export interface TierFreshness {
   tier: 'T0' | 'T1'
   services: number
@@ -243,7 +252,7 @@ export async function tierFreshness(): Promise<TierFreshness[]> {
       where (s.is_template = false or s.resolved_endpoint is not null)
     )
     select tier, count(*)::int as services,
-           count(*) filter (where last_checked_at > now() - make_interval(mins => case when tier = 'T0' then ${FRESH_WITHIN_MINUTES.T0} else ${FRESH_WITHIN_MINUTES.T1} end))::int as fresh,
+           count(*) filter (where last_checked_at > now() - make_interval(mins => case when tier = 'T0' then ${FRESH_WITHIN_MINUTES.T0}::int else ${FRESH_WITHIN_MINUTES.T1}::int end))::int as fresh,
            min(last_checked_at) as oldest
     from t where tier is not null group by tier order by tier`))
   return r.map((x) => ({

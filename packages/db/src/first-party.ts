@@ -25,7 +25,7 @@ function locate(): string | null {
   const starts = [process.env.MARQUE_ROOT, process.cwd()].filter((s): s is string => Boolean(s))
   for (const start of starts) {
     let dir = path.resolve(start)
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < 10; i++) {
       const p = path.join(dir, 'config', 'first-party.json')
       if (existsSync(p)) return p
       const up = path.dirname(dir)

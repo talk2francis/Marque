@@ -1410,3 +1410,16 @@ reference merge) took most of it.
 - **Why** — this is data accrual recovering after an upstream API change, not a
   new feature. The count competes on being honest and current; a two-day-stale
   figure with no explanation is the opposite.
+
+---
+
+## Phase 2 (Set and Earn), from 26 Sep 2026
+
+Format: planned, shipped, why, cost, restore.
+
+- **D2-00-01 Probe tiers resized.** Planned: T1 = services live, unbound or bad_schema within 7 days, or classified, every 30 min. Shipped: T1 = services of classified agents (about 650) every 30 min; answering but unclassified services (about 24,000) every 12 h as T1b. Why: the planned T1 was about 24,000 services on 93 hosts, which at 30 min would put roughly 3 requests a second on single third-party hosts for agents the marketplace does not list. Cost: an unclassified agent's liveness can be up to 13 h old (still inside the 24 h reachable window). Restore: lower `INTERVAL_MINUTES.T1b` in `packages/probe/src/schedule.ts`.
+- **D2-00-02 Probe cycles bounded.** Planned: fill T0, then T1, then T2 and T3 each cycle. Shipped: the same order, plus a 4 min cycle deadline (unstarted services stay due) and a per-cycle host breaker (3 connection failures in a row defer that host's remaining services 60 min, with no probe row written). Why: measured cycles of 12 to 18 min, because hundreds of services sit on a few dead hosts and each costs a full timeout under the per-host cap. Cost: a service on a flapping host can wait an extra hour. Restore: `PROBE_CYCLE_DEADLINE_MS`, or remove the breaker in `packages/probe/src/worker.ts`.
+- **D2-00-03 lint:copy is a ratchet.** Planned: fail on any em or en dash. Shipped: fail when a file gains a dash or a new file has one; `docs/phase2/**` is held to zero; 936 historical dashes in 57 files recorded in `scripts/lint-copy-baseline.json`. Why: AGENTS 13.6 says fix touched files only, and a check that fails on day one gets ignored. Cost: old copy keeps its dashes until touched. Restore: `node scripts/lint-copy.mjs --update` after each cleanup lowers the baseline.
+- **D2-00-04 Pack planning files moved off the public repo.** Planned: commit the whole pack to `docs/phase2/`. Shipped: specs, prompts, matrix, design system, runbook and roadmap stay; `DECISIONS.md` (names and critiques a competing project), `00_START_HERE.md` (private message drafts and schedule) and the pack zip moved to `/root/.marque/private/phase2-pack/`. Why: invariant 30. Cost: none for the build; the files remain in git history, which is never rewritten. Restore: copy back.
+- **D2-00-05 Conformance cases are not re-captured.** Planned: re-capture each case before a retest. Shipped: capture is refused ("immutable evidence, use a new case id") since the 21 Sep release made cases append-only, so retests grade the pinned case at its recorded block. Cost: the test subject does not move with the chain. Restore: rotate case ids on a schedule (new id per capture) in `packages/conformance/src/cases.ts`.
+- **D2-00-06 `config/first-party.json` landed in P2-00.** Planned for P2-01. Why: the probe T0 tier and the third-party exclusions need one source of first-party identity now. Cost: none.

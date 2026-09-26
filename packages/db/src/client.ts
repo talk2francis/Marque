@@ -1,3 +1,4 @@
+import { closeCache } from './cache.js'
 import { drizzle } from 'drizzle-orm/postgres-js'
 import postgres from 'postgres'
 import * as schema from './schema.js'
@@ -33,6 +34,8 @@ export function raw(): postgres.Sql {
 }
 
 export async function closeDb(): Promise<void> {
+  // The projection cache's Redis connection would otherwise keep a script alive.
+  await closeCache()
   if (sql) {
     await sql.end({ timeout: 5 })
     sql = undefined
