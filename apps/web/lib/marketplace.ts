@@ -172,10 +172,15 @@ async function queryAgents(): Promise<MarketRow[]> {
     ),
     conf as (
       -- Legacy marque:<slug> results fold onto the reference agent's registry row.
-      select distinct on (${canonicalAgentIdSql(sql`agent_id`)}) ${canonicalAgentIdSql(sql`agent_id`)} as agent_id,
-             test_id, pass, failed_fields, ran_at
-      from conformance_result where agent_id like '56:%' or agent_id like 'marque:%'
-      order by ${canonicalAgentIdSql(sql`agent_id`)}, (pass) desc, ran_at desc
+      -- Canonicalised once in a subquery: the helper binds its ids as parameters, so
+      -- writing it in both DISTINCT ON and ORDER BY gives Postgres two different
+      -- expressions and the query fails ("must match initial ORDER BY").
+      select distinct on (cid) cid as agent_id, test_id, pass, failed_fields, ran_at
+      from (
+        select ${canonicalAgentIdSql(sql`agent_id`)} as cid, test_id, pass, failed_fields, ran_at
+        from conformance_result where agent_id like '56:%' or agent_id like 'marque:%'
+      ) cr
+      order by cid, (pass) desc, ran_at desc
     ),
     cat as (
       select distinct on (agent_id) agent_id, category, confidence
