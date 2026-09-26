@@ -575,6 +575,20 @@ async function main(): Promise<void> {
     }
   });
 
+  // The public ERC-8183 deliverable (ERC8183_AGENT_URL points here). Only a numeric job id,
+  // only the runtime's own deliverable file: no other path on disk is reachable.
+  app.get("/erc8183/job/:id/response", async (req, res) => {
+    const id = String(req.params.id ?? "");
+    if (!/^\d{1,20}$/.test(id)) return res.status(400).json({ error: "bad job id" });
+    try {
+      const { readFile } = await import("node:fs/promises");
+      const body = await readFile(`${process.cwd()}/.agent-data/erc8183-job-${id}.json`, "utf8");
+      res.type("application/json").set("Cache-Control", "public, max-age=60").send(body);
+    } catch {
+      res.status(404).json({ error: "no deliverable for this job" });
+    }
+  });
+
   app.use(createEnvelopeMiddleware({ port }));
 
   // Foundry Invocations is a pass-through JSON contract. bnbagent-deploy's
