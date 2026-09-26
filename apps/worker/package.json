@@ -21,7 +21,8 @@
     "@marque/chain": "workspace:*",
     "drizzle-orm": "^0.38.2",
     "@marque/probe": "workspace:*",
-    "@marque/conformance": "workspace:*"
+    "@marque/conformance": "workspace:*",
+    "@marque/commerce": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.7.2",

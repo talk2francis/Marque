@@ -23,7 +23,8 @@
     "p6": "tsx scripts/p6-acceptance.mts",
     "p8a": "tsx scripts/p8a-acceptance.mts",
     "p8b": "tsx scripts/p8b-run.mts",
-    "lint:copy": "node scripts/lint-copy.mjs"
+    "lint:copy": "node scripts/lint-copy.mjs",
+    "supply:audit": "pnpm --filter @marque/commerce exec tsx scripts/supply-audit.mts"
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",

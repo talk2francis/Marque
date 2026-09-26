@@ -14,7 +14,7 @@
  * Tables in the first-party tier are marked FIRST-PARTY below.
  */
 import {
-  pgTable, text, integer, bigint, boolean, timestamp, jsonb, doublePrecision,
+  pgTable, text, integer, bigint, boolean, timestamp, jsonb, doublePrecision, uuid,
   uniqueIndex, index, primaryKey, serial,
 } from 'drizzle-orm/pg-core'
 
@@ -835,3 +835,196 @@ export const benchmarkRunProvenance = pgTable('benchmark_run_provenance', {
 
 export type BenchmarkRunProvenance = typeof benchmarkRunProvenance.$inferSelect
 export type NewBenchmarkRunProvenance = typeof benchmarkRunProvenance.$inferInsert
+
+// ---------------------------------------------------------------------------
+// PHASE 2: commerce, quest tracking and ratings (SPEC-COMMERCE 11, SPEC-TRACKING)
+//
+// First-party (never deleted): agent_alias, commerce_quote, hire_intent,
+// notify_attempt, rating_comment.
+// Derived (rebuildable from chain): commerce_job, commerce_event, rating,
+// chain_cursor.
+// ---------------------------------------------------------------------------
+
+/**
+ * FIRST-PARTY. Legacy agent ids that resolve to a canonical ERC-8004 identity. Old runs,
+ * receipts and conformance results keep `marque:<slug>`; display and search resolve it.
+ */
+export const agentAlias = pgTable('agent_alias', {
+  alias: text('alias').primaryKey(),
+  chainId: integer('chain_id').notNull(),
+  tokenId: text('token_id').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
+/**
+ * FIRST-PARTY. Every signed ERC-8183 quote we asked for: `probe` (the quote worker's
+ * harmless price check, never used to create a job) or `user` (a buyer's real task).
+ * Failed attempts are stored too, with the reason: a seller that will not quote is a
+ * published observation.
+ */
+export const commerceQuote = pgTable('commerce_quote', {
+  id: serial('id').primaryKey(),
+  source: text('source').$type<'probe' | 'user'>().notNull(),
+  agentId: text('agent_id').notNull(),
+  serviceId: integer('service_id'),
+  endpoint: text('endpoint').notNull(),
+  ok: boolean('ok').notNull(),
+  failure: text('failure'),
+  detail: text('detail'),
+  chainId: integer('chain_id'),
+  provider: text('provider'),
+  priceRaw: text('price_raw'),
+  token: text('token'),
+  tokenSymbol: text('token_symbol'),
+  tokenDecimals: integer('token_decimals'),
+  quoteExpiresAt: timestamp('quote_expires_at', { withTimezone: true }),
+  estimatedCompletionSeconds: integer('estimated_completion_seconds'),
+  negotiationHash: text('negotiation_hash'),
+  providerSig: text('provider_sig'),
+  quoteHash: text('quote_hash'),
+  latencyMs: integer('latency_ms'),
+  raw: jsonb('raw').$type<Record<string, unknown>>(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({
+  agentCreatedIdx: index('commerce_quote_agent_created_idx').on(t.agentId, t.createdAt.desc()),
+  serviceCreatedIdx: index('commerce_quote_service_created_idx').on(t.serviceId, t.createdAt.desc()),
+  hashIdx: index('commerce_quote_hash_idx').on(t.quoteHash),
+}))
+
+/**
+ * FIRST-PARTY. A buyer's intent to hire one exact service at one signed quote. Binds to an
+ * on-chain job only when that wallet itself sends the matching createJob (SPEC-TRACKING 5).
+ * The category is Marque's classification at hire time, frozen so a later reclassification
+ * cannot move a completed quest step.
+ */
+export const hireIntent = pgTable('hire_intent', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  wallet: text('wallet').notNull(),
+  agentId: text('agent_id').notNull(),
+  serviceId: integer('service_id'),
+  category: text('category').notNull(),
+  chainId: integer('chain_id').notNull(),
+  quoteId: integer('quote_id').notNull(),
+  provider: text('provider').notNull(),
+  token: text('token').notNull(),
+  priceRaw: text('price_raw').notNull(),
+  description: text('description').notNull(),
+  descriptionHash: text('description_hash').notNull(),
+  expiredAt: bigint('expired_at', { mode: 'number' }).notNull(),
+  state: text('state').notNull().default('intent'),
+  jobId: text('job_id'),
+  createTx: text('create_tx'),
+  bindSource: text('bind_source').$type<'browser' | 'indexer'>(),
+  clientIp: text('client_ip'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  boundAt: timestamp('bound_at', { withTimezone: true }),
+}, (t) => ({
+  walletIdx: index('hire_intent_wallet_idx').on(t.wallet, t.createdAt.desc()),
+  jobUq: uniqueIndex('hire_intent_job_uq').on(t.chainId, t.jobId),
+  descIdx: index('hire_intent_desc_idx').on(t.descriptionHash),
+}))
+
+/** FIRST-PARTY. Every notify_funded we sent, with the seller's answer. */
+export const notifyAttempt = pgTable('notify_attempt', {
+  id: serial('id').primaryKey(),
+  chainId: integer('chain_id').notNull(),
+  jobId: text('job_id').notNull(),
+  intentId: uuid('intent_id'),
+  endpoint: text('endpoint').notNull(),
+  attempt: integer('attempt').notNull(),
+  ok: boolean('ok').notNull(),
+  status: text('status'),
+  detail: text('detail'),
+  latencyMs: integer('latency_ms'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({
+  jobIdx: index('notify_attempt_job_idx').on(t.chainId, t.jobId),
+}))
+
+/** DERIVED. Every indexed ERC-8183 / ERC-8004 reputation event. Idempotent on (chain, tx, log). */
+export const commerceEvent = pgTable('commerce_event', {
+  chainId: integer('chain_id').notNull(),
+  txHash: text('tx_hash').notNull(),
+  logIndex: integer('log_index').notNull(),
+  blockNumber: bigint('block_number', { mode: 'number' }).notNull(),
+  blockTime: timestamp('block_time', { withTimezone: true }),
+  contract: text('contract').notNull(),
+  name: text('name').notNull(),
+  jobId: text('job_id'),
+  args: jsonb('args').$type<Record<string, unknown>>().notNull(),
+}, (t) => ({
+  pk: primaryKey({ columns: [t.chainId, t.txHash, t.logIndex] }),
+  jobIdx: index('commerce_event_job_idx').on(t.chainId, t.jobId),
+  nameIdx: index('commerce_event_name_idx').on(t.chainId, t.name, t.blockNumber),
+}))
+
+/** DERIVED. One row per ERC-8183 job, recomputed from its events (packages/commerce state.ts). */
+export const commerceJob = pgTable('commerce_job', {
+  chainId: integer('chain_id').notNull(),
+  jobId: text('job_id').notNull(),
+  client: text('client').notNull(),
+  provider: text('provider').notNull(),
+  evaluator: text('evaluator'),
+  hook: text('hook'),
+  token: text('token'),
+  budgetRaw: text('budget_raw'),
+  fundedRaw: text('funded_raw'),
+  expiredAt: bigint('expired_at', { mode: 'number' }),
+  deliverable: text('deliverable'),
+  state: text('state').notNull(),
+  intentId: uuid('intent_id'),
+  createdBlock: bigint('created_block', { mode: 'number' }),
+  updatedBlock: bigint('updated_block', { mode: 'number' }),
+  createdAt: timestamp('created_at', { withTimezone: true }),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({
+  pk: primaryKey({ columns: [t.chainId, t.jobId] }),
+  clientIdx: index('commerce_job_client_idx').on(t.client),
+  providerIdx: index('commerce_job_provider_idx').on(t.provider),
+  intentIdx: index('commerce_job_intent_idx').on(t.intentId),
+}))
+
+/** DERIVED. ERC-8004 feedback (NewFeedback / FeedbackRevoked). */
+export const rating = pgTable('rating', {
+  chainId: integer('chain_id').notNull(),
+  agentTokenId: text('agent_token_id').notNull(),
+  client: text('client').notNull(),
+  feedbackIndex: text('feedback_index').notNull(),
+  value: text('value').notNull(),
+  valueDecimals: integer('value_decimals').notNull(),
+  tag1: text('tag1'),
+  tag2: text('tag2'),
+  endpoint: text('endpoint'),
+  feedbackUri: text('feedback_uri'),
+  feedbackHash: text('feedback_hash'),
+  txHash: text('tx_hash').notNull(),
+  blockNumber: bigint('block_number', { mode: 'number' }).notNull(),
+  blockTime: timestamp('block_time', { withTimezone: true }),
+  revoked: boolean('revoked').notNull().default(false),
+}, (t) => ({
+  pk: primaryKey({ columns: [t.chainId, t.agentTokenId, t.client, t.feedbackIndex] }),
+  clientIdx: index('rating_client_idx').on(t.client),
+}))
+
+/** FIRST-PARTY. The optional comment behind a rating's feedbackURI, keyed by its hash. */
+export const ratingComment = pgTable('rating_comment', {
+  feedbackHash: text('feedback_hash').primaryKey(),
+  chainId: integer('chain_id').notNull(),
+  jobId: text('job_id').notNull(),
+  agentTokenId: text('agent_token_id').notNull(),
+  client: text('client').notNull(),
+  stars: integer('stars').notNull(),
+  comment: text('comment'),
+  canonical: text('canonical').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
+/** DERIVED. Indexer progress per chain and contract. */
+export const chainCursor = pgTable('chain_cursor', {
+  chainId: integer('chain_id').notNull(),
+  contract: text('contract').notNull(),
+  lastBlock: bigint('last_block', { mode: 'number' }).notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({
+  pk: primaryKey({ columns: [t.chainId, t.contract] }),
+}))

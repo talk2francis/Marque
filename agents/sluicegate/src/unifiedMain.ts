@@ -92,11 +92,13 @@ import { SellerAgentExecutor } from "./executor.js";
 import { requestLimitContext } from "./requestLimits.js";
 import type { RunWork } from "./sellerCore.js";
 import {
+  a2aDataResult,
   a2aError,
   a2aResult,
   engineFor,
   engineRunWork,
   marqueCard,
+  skillEnvelopeFromA2ABody,
   textFromA2ABody,
 } from "@marque/agent-engines";
 
@@ -549,6 +551,16 @@ async function main(): Promise<void> {
    */
   app.post("/a2a", async (req, res) => {
     const id = (req.body as { id?: unknown })?.id;
+    // ERC-8183 skills (negotiate, notify_funded) arrive at the card's URL like any
+    // other A2A message; route them to the seller core, never to the free engine.
+    const envelope = skillEnvelopeFromA2ABody(req.body);
+    if (envelope) {
+      try {
+        return res.json(a2aDataResult(id, await executor.dispatch(envelope)));
+      } catch (e) {
+        return res.json(a2aError(id, e instanceof Error ? e.message : String(e)));
+      }
+    }
     const text = textFromA2ABody(req.body);
     if (!text) {
       return res.json(a2aError(id, "no task text found in the message parts"));

@@ -62,6 +62,58 @@ export function a2aResult(id: unknown, answer: unknown): Record<string, unknown>
   }
 }
 
+/** A JSON-RPC result carrying structured data, the shape the Agent Studio runtime returns for skills. */
+export function a2aDataResult(id: unknown, data: unknown): Record<string, unknown> {
+  return {
+    jsonrpc: '2.0',
+    id: id ?? 1,
+    result: { kind: 'message', role: 'agent', messageId: `m-${Date.now().toString(36)}`, parts: [{ kind: 'data', data }] },
+  }
+}
+
+/**
+ * The ERC-8183 skill envelope in an A2A message, if there is one: a data part carrying
+ * `{"skill": "negotiate" | "notify_funded", ...}`, or a text part holding that JSON
+ * (text-only A2A clients send it that way). Anything else is a free-face task.
+ */
+export function skillEnvelopeFromA2ABody(body: unknown): Record<string, unknown> | null {
+  const b = body as { params?: { message?: { parts?: Array<{ kind?: string; text?: string; data?: unknown }> } } }
+  for (const p of b?.params?.message?.parts ?? []) {
+    let rec: unknown = null
+    if (p?.data && typeof p.data === 'object') rec = p.data
+    else if (typeof p?.text === 'string' && p.text.trim().startsWith('{')) {
+      try { rec = JSON.parse(p.text) } catch { rec = null }
+    }
+    if (rec && typeof rec === 'object' && !Array.isArray(rec)) {
+      const skill = (rec as Record<string, unknown>)['skill']
+      if (skill === 'negotiate' || skill === 'notify_funded') return rec as Record<string, unknown>
+    }
+  }
+  return null
+}
+
+/** The two ERC-8183 seller skills, as Agent Studio sellers advertise them. */
+export const COMMERCE_SKILLS = [
+  {
+    id: 'negotiate',
+    name: 'Negotiate an ERC-8183 job',
+    description:
+      'Send a data part {"skill": "negotiate", "task_description": "...", "terms": {"deliverables": "...", "quality_standards": "..."}} and receive a wallet-signed price quote (price, currency, negotiation_hash, provider_sig, chain_id, verifying_contract). Anchor it on chain with createJob, registerJob, setBudget and fund, then send notify_funded.',
+    tags: ['erc8183', 'negotiation', 'bnb-chain'],
+    inputModes: ['application/json'],
+    outputModes: ['application/json'],
+  },
+  {
+    id: 'notify_funded',
+    name: 'Notify the seller a job is funded',
+    description:
+      'After funding the job on chain, send {"skill": "notify_funded", "job_id": <int>}. The seller verifies the funded job carries its signed quote, answers at once, and submits the deliverable on chain.',
+    tags: ['erc8183', 'delivery', 'bnb-chain'],
+    inputModes: ['application/json'],
+    outputModes: ['application/json'],
+  },
+] as const
+
 export function a2aError(id: unknown, message: string): Record<string, unknown> {
   return { jsonrpc: '2.0', id: id ?? 1, error: { code: -32000, message } }
 }
@@ -85,11 +137,15 @@ export function marqueCard(engine: Engine, publicUrl: string): Record<string, un
     capabilities: { streaming: false, pushNotifications: false },
     defaultInputModes: ['text/plain', 'application/json'],
     defaultOutputModes: ['application/json'],
-    skills: engine.meta.skills.map((s) => ({
-      ...s,
-      inputModes: ['text/plain'],
-      outputModes: ['application/json'],
-    })),
+    skills: [
+      ...engine.meta.skills.map((s) => ({
+        ...s,
+        inputModes: ['text/plain'],
+        outputModes: ['application/json'],
+      })),
+      // Paid work, through BNB Chain's ERC-8183 escrow, at the same URL as the free face.
+      ...COMMERCE_SKILLS,
+    ],
     /**
      * Stated on the card itself, because a buyer reading it deserves to know
      * three things before they call: this agent is first-party, its free face

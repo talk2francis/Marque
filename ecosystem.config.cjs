@@ -158,6 +158,22 @@ module.exports = {
       error_file: '/root/.pm2/logs/marque-pancake-watch-err.log',
     },
     {
+      // P2-01: signed ERC-8183 quotes from every seller, on a schedule. Read only.
+      name: 'marque-quotes',
+      cwd: `${ROOT}/apps/worker`,
+      script: 'node_modules/.bin/tsx',
+      args: 'src/quotes.ts',
+      interpreter: 'none',
+      env: { ...env, NODE_ENV: 'production' },
+      autorestart: true,
+      max_restarts: 50,
+      restart_delay: 5000,
+      max_memory_restart: '300M',
+      time: true,
+      out_file: '/root/.pm2/logs/marque-quotes-out.log',
+      error_file: '/root/.pm2/logs/marque-quotes-err.log',
+    },
+    {
       // Re-runs every MCS test on a 24h cycle so a Warrant has a date and can
       // go stale (P10.5C item 4). Depends on the reference agents being up.
       name: 'marque-conform',

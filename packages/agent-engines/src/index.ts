@@ -1,5 +1,5 @@
 export * from './types.js'
-export { textFromA2ABody, a2aResult, a2aError, marqueCard, engineRunWork } from './serve.js'
+export { textFromA2ABody, a2aResult, a2aError, a2aDataResult, skillEnvelopeFromA2ABody, COMMERCE_SKILLS, marqueCard, engineRunWork } from './serve.js'
 export * as parse from './parse.js'
 export { boundEngine, BOUND_META } from './bound.js'
 export { latticeEngine, LATTICE_META } from './lattice.js'
