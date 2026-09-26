@@ -33,6 +33,9 @@ export const INTERVAL_MINUTES = {
 } as const
 
 /** Freshness bars the status page reports against, per tier. */
+/** Seconds of lead a cycle takes on services about to fall due (see dueByTier). */
+export const DUE_GRACE_SECONDS = 90
+
 export const FRESH_WITHIN_MINUTES: Readonly<Record<'T0' | 'T1', number>> = { T0: 10, T1: 60 }
 
 export interface ScheduleInput {
@@ -160,6 +163,11 @@ export async function syncSchedule(): Promise<{ inserted: number; backfilled: bo
 /**
  * Services due now, best tier first. Dead services (T3) are capped per cycle so a cycle
  * stays short and the next T0/T1 pass is never late behind a wall of timeouts.
+ *
+ * "Due" includes the next DUE_GRACE_SECONDS: cycles start about every 5 min, so a T0
+ * service due a few seconds after a cycle began used to wait for the next one and was
+ * checked every ~10 min, flapping the header's status pill against the 10 min T0
+ * freshness window (found 26 Sep).
  */
 export async function dueByTier(limit: number, deadCap: number, fpIds: readonly string[]): Promise<DueService[]> {
   const fpList = fpIds.length ? sql.join(fpIds.map((id) => sql`${id}`), sql`, `) : sql`''`
@@ -170,7 +178,7 @@ export async function dueByTier(limit: number, deadCap: number, fpIds: readonly 
            exists (select 1 from agent_category c where c.agent_id = ps.agent_id and c.category <> 'unclassified') as classified
     from probe_schedule ps
     join agent_service s on s.id = ps.service_id
-    where ps.next_due_at <= now()
+    where ps.next_due_at <= now() + make_interval(secs => ${DUE_GRACE_SECONDS}::int)
       and (s.is_template = false or s.resolved_endpoint is not null)
     order by
       case

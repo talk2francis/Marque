@@ -44,6 +44,15 @@ page.on('pageerror', (e) => log('PAGEERROR', e.message.slice(0, 200)))
 const evidence = { base: BASE, width: WIDTH, wallet: address, startedAt: new Date().toISOString(), hires: [] }
 const shot = (n) => page.screenshot({ path: join(OUT, `p2-08-${TAG}-${n}.png`) }).catch(() => {})
 
+async function rateHere(c) {
+  await page.locator('.ja-rate').waitFor({ timeout: 60000 })
+  await page.getByLabel('5 of 5').check({ force: true })
+  await page.getByRole('button', { name: /rate 5 of 5 on chain/i }).click()
+  await page.getByText(/rated on chain/i).first().waitFor({ timeout: 180000 })
+  log(c.row, 'rated')
+  await shot(`${c.key}-4-rated`)
+}
+
 async function rowFor(name) { return page.locator('.qt-row').filter({ has: page.locator('strong', { hasText: new RegExp(`^${name}$`) }) }) }
 
 try {
@@ -56,7 +65,20 @@ try {
   for (const c of CATS) {
     const t0 = Date.now()
     const row = await rowFor(c.row)
-    if ((await row.getAttribute('data-state')) === 'done') { log(c.row, 'already done'); continue }
+    if ((await row.getAttribute('data-state')) === 'done') {
+      // Resume: a hire delivered in an earlier attempt still needs its rating.
+      const w = await (await fetch(`${BASE}/api/v1/phase2/wallet/${address}`)).json()
+      const key = w.quest?.categories?.[c.key]?.jobKey
+      const h = w.hires?.find((x) => x.jobKey === key)
+      if (h && !h.rating && !h.tx?.rating) {
+        log(c.row, 'delivered earlier, rating job', h.jobId)
+        await page.goto(`${BASE}/jobs/${h.chainId}/${h.jobId}`, { waitUntil: 'networkidle', timeout: 90000 })
+        await rateHere(c)
+        evidence.hires.push({ category: c.key, agent: h.agent?.name, job: `/jobs/${h.chainId}/${h.jobId}`, resumed: true })
+        await page.goto(`${BASE}/quest`, { waitUntil: 'networkidle', timeout: 90000 })
+      } else log(c.row, 'already done')
+      continue
+    }
     log(c.row, 'opening the hire sheet')
     await row.getByRole('link', { name: 'Hire' }).click()
     const sheet = page.locator('.sheet')
@@ -87,12 +109,7 @@ try {
     // Rate it in the Job Room.
     await sheet.getByRole('link', { name: /open the job room/i }).click()
     await page.waitForURL(/\/jobs\//, { timeout: 30000 })
-    await page.locator('.ja-rate').waitFor({ timeout: 60000 })
-    await page.getByLabel('5 of 5').check({ force: true })
-    await page.getByRole('button', { name: /rate 5 of 5 on chain/i }).click()
-    await page.getByText(/rated on chain/i).first().waitFor({ timeout: 180000 })
-    log(c.row, 'rated')
-    await shot(`${c.key}-4-rated`)
+    await rateHere(c)
     evidence.hires.push({ category: c.key, agent, job: jobHref, secondsToDelivered: delivered, secondsTotal: Math.round((Date.now() - t0) / 1000) })
     // Back to the quest: the row ticks once the indexer has the events.
     await page.goto(`${BASE}/quest`, { waitUntil: 'networkidle', timeout: 90000 })

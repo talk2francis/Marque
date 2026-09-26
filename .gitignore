@@ -64,3 +64,9 @@ apps/web/.next-*/
 
 # Design screenshots stay on the VPS (AGENTS 13.2 invariant 30: no screenshots in the public repo)
 docs/phase2/screens/
+
+# Acceptance recordings and stills stay on the VPS (invariant 30)
+docs/phase2/evidence/*.png
+docs/phase2/evidence/*.mp4
+docs/phase2/evidence/*.webm
+docs/phase2/evidence/.video-*/

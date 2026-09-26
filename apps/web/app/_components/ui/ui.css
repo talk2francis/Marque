@@ -49,6 +49,15 @@
     .toaster { top: calc(var(--header-h) + 8px); bottom: auto; right: 16px; left: 16px; width: auto; }
     @keyframes toast-in { from { transform: translateY(-10px); opacity: 0; } to { transform: none; opacity: 1; } }
   }
+  /* A toast must never cover the sheet's own next action (found in the P2-08 run:
+     "Delivered" sat on top of "Open the job room"). Beside the panel on desktop,
+     above the bottom sheet below 1024. */
+  @media (min-width: 1024px) {
+    body:has(.sheet) .toaster { right: calc(min(520px, 100vw - 24px) + 28px); }
+  }
+  @media (max-width: 1023.98px) {
+    body:has(.sheet) .toaster { top: calc(8px + env(safe-area-inset-top)); bottom: auto; right: 16px; left: 16px; width: auto; }
+  }
 
   /* ================= TxStepper ================= */
   .txs { list-style: none; margin: 0; padding: 0; display: grid; }
