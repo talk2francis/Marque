@@ -109,7 +109,7 @@ export default async function ReferenceAgentPage({ params }: { params: Promise<{
                 <span className="mono">{testId}</span>. Every run is graded field by field against
                 numbers Marque computes itself from chain state at a pinned block.
               </p>
-              <table className={styles.table}>
+              <div className={styles.tableWrap}><table className={styles.table}>
                 <thead><tr><th>Test</th><th>Verdict</th><th>Block</th><th>Latency</th><th>Ran</th></tr></thead>
                 <tbody>
                   {conf.map((r, i) => (
@@ -122,7 +122,7 @@ export default async function ReferenceAgentPage({ params }: { params: Promise<{
                     </tr>
                   ))}
                 </tbody>
-              </table>
+              </table></div>
             </>
           )}
           <p className={styles.muted}>

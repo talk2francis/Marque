@@ -1,24 +1,21 @@
+/* One layer order for the whole site. Page modules are unlayered, so they win. */
+@layer reset, tokens, base, components, utilities;
 @import '@marque/ui/tokens.css';
+@import '@marque/ui/base.css';
 @import '@marque/ui/components.css';
-
-/* next/font supplies the real families; the token file names the fallbacks. */
-:root {
-  --font-ui: var(--font-geist), ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
-  --font-statement: var(--font-fraunces), 'Iowan Old Style', Georgia, serif;
-}
+@import './_components/ui/ui.css';
+@import './_components/shell/shell.css';
 
 /* The loading mark.
-   1. The whole screen holds at opacity 0 for 380ms — a fast in-app navigation
-      finishes inside that and never shows a flash.
-   2. Then the two wing strokes draw themselves in (like ink being laid, the
-      line tapering closed at the end) and the fill rises behind them.
-   3. It holds. One slow, shallow breath. No bounce, no rotation, no spinner. */
+   1. The screen holds at opacity 0 for 380ms, so a fast in-app navigation
+      finishes inside that and never flashes.
+   2. The two wing strokes draw in and the fill rises behind them.
+   3. It holds. One slow, shallow breath. No bounce, no spinner. */
 .marque-loading-screen {
   min-height: 100dvh;
   display: grid;
   place-items: center;
-  background: var(--ground);
+  background: var(--canvas);
   background-image: var(--backdrop);
   opacity: 0;
   animation: mlm-screen-in 260ms ease 380ms forwards;
@@ -28,7 +25,7 @@
 .marque-loading-mark {
   display: block;
   overflow: visible;
-  color: var(--fg-soft);
+  color: var(--ink-2);
   animation: mlm-breath 3200ms var(--ease-settle) 1500ms infinite;
 }
 .mlm-wing {
@@ -37,7 +34,6 @@
   stroke-width: 1.25;
   stroke-linejoin: round;
   fill-opacity: 0;
-  /* path length of each wing outline is ~250; overshoot the dash so it fully hides */
   stroke-dasharray: 260;
   stroke-dashoffset: 260;
   animation:
@@ -45,36 +41,32 @@
     mlm-fill 700ms ease 1000ms forwards;
 }
 .mlm-wing--r { animation-delay: 520ms, 1080ms; }
-
 @keyframes mlm-draw { to { stroke-dashoffset: 0; } }
-@keyframes mlm-fill {
-  to { fill-opacity: 1; stroke-opacity: 0; }
-}
+@keyframes mlm-fill { to { fill-opacity: 1; stroke-opacity: 0; } }
 @keyframes mlm-breath {
   0%, 100% { opacity: 0.62; transform: scale(0.985); }
   50%      { opacity: 1;    transform: scale(1); }
 }
-
 @media (prefers-reduced-motion: reduce) {
   .marque-loading-screen { animation: none; opacity: 1; }
   .marque-loading-mark { animation: none; }
   .mlm-wing { animation: none; fill-opacity: 1; stroke-opacity: 0; stroke-dashoffset: 0; }
 }
 
-/* ===== Scroll-reveal — the page has motion now (P10.5 rev) ===== */
-/* Elements marked [data-reveal] start slightly down and faded, then settle when
-   they enter the viewport. Once. IntersectionObserver adds .is-in. No JS / no
-   reduced motion => visible immediately (the :not fallback + the media query). */
-[data-reveal] {
-  opacity: 0;
-  transform: translateY(14px);
-  transition: opacity 620ms var(--ease-settle), transform 620ms var(--ease-settle);
-  transition-delay: var(--reveal-delay, 0ms);
-  will-change: opacity, transform;
+/* Reveal: an element marked [data-reveal] settles in as it enters the viewport.
+   Pure CSS (a scroll-driven animation), so nothing touches the DOM before React
+   hydrates. Where scroll timelines are unsupported, or motion is reduced, the
+   content is simply there. */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    [data-reveal] {
+      animation: reveal-in linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 55%;
+    }
+  }
 }
-[data-reveal].is-in { opacity: 1; transform: none; }
-@media (prefers-reduced-motion: reduce) {
-  [data-reveal] { opacity: 1; transform: none; transition: none; }
+@keyframes reveal-in {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
 }
-/* If the observer never runs (JS disabled), don't leave content invisible. */
-.no-js [data-reveal] { opacity: 1; transform: none; }

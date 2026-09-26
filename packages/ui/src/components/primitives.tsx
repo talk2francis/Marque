@@ -9,7 +9,7 @@ import type { ReactNode, ButtonHTMLAttributes, AnchorHTMLAttributes } from 'reac
  */
 
 // ---------------------------------------------------------------------------
-// Statement — Fraunces. Four uses only: hero, section statements, charter
+// Statement: Instrument Serif. Statement lines only: hero, section statements, charter
 // headings, receipt title. Never card titles, never buttons.
 // ---------------------------------------------------------------------------
 
@@ -29,7 +29,7 @@ export function Statement({
 }
 
 // ---------------------------------------------------------------------------
-// DataCell — Geist Mono, tabular. Numerals in tables, receipts and hashes only.
+// DataCell: IBM Plex Mono, tabular. Numerals in tables, receipts and hashes only.
 // ---------------------------------------------------------------------------
 
 export function DataCell({

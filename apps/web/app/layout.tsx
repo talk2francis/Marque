@@ -1,39 +1,53 @@
 import type { Metadata, Viewport } from 'next'
 import localFont from 'next/font/local'
 import { BRAND } from '@marque/ui/brand'
-import { Reveal } from './_components/Reveal'
 import { Suspense } from 'react'
 import { WalletProvider } from './_components/WalletProvider'
 import { HireSheet } from './_components/HireSheet'
+import { Toaster } from './_components/ui/Toaster'
+import { THEME_BOOTSTRAP } from '../lib/theme'
 import './globals.css'
 
 /**
- * Font binaries are committed local assets. Builds and page loads therefore
- * make no request to a font CDN, keeping deployment reproducible and CSP tight.
+ * Fonts (DESIGN-SYSTEM.md section 4), self-hosted from apps/web/fonts through
+ * next/font/local: no request to a font CDN, so builds are reproducible and the
+ * CSP stays tight. Licences: docs/THIRD_PARTY.md.
  */
-const geist = localFont({
-  src: '../public/fonts/geist-latin.woff2',
-  weight: '100 900',
-  variable: '--font-geist',
+const generalSans = localFont({
+  src: [
+    { path: '../fonts/GeneralSans-Regular.woff2', weight: '400', style: 'normal' },
+    { path: '../fonts/GeneralSans-Medium.woff2', weight: '500', style: 'normal' },
+    { path: '../fonts/GeneralSans-Semibold.woff2', weight: '600', style: 'normal' },
+  ],
+  variable: '--ff-general-sans',
   display: 'swap',
+  // Metric-matched (packages/ui/src/base.css), so the swap does not move a line.
+  fallback: ['Marque Sans Fallback', 'Hanken Grotesk', 'ui-sans-serif', 'system-ui', 'sans-serif'],
 })
 
-const geistMono = localFont({
-  src: '../public/fonts/geist-mono-latin.woff2',
-  weight: '100 900',
-  variable: '--font-geist-mono',
+const instrumentSerif = localFont({
+  src: [
+    { path: '../fonts/instrument-serif-400-latin.woff2', weight: '400', style: 'normal' },
+    { path: '../fonts/instrument-serif-400-italic-latin.woff2', weight: '400', style: 'italic' },
+  ],
+  variable: '--ff-instrument-serif',
   display: 'swap',
+  fallback: ['Iowan Old Style', 'Georgia', 'serif'],
 })
 
-const fraunces = localFont({
-  src: '../public/fonts/fraunces-latin.woff2',
-  weight: '100 900',
-  variable: '--font-fraunces',
+const plexMono = localFont({
+  src: [
+    { path: '../fonts/ibm-plex-mono-400-latin.woff2', weight: '400', style: 'normal' },
+    { path: '../fonts/ibm-plex-mono-500-latin.woff2', weight: '500', style: 'normal' },
+  ],
+  variable: '--ff-plex-mono',
   display: 'swap',
+  preload: false,
+  fallback: ['ui-monospace', 'SF Mono', 'Menlo', 'monospace'],
 })
 
 export const metadata: Metadata = {
-  title: { default: BRAND.name, template: `%s — ${BRAND.name}` },
+  title: { default: BRAND.name, template: `%s · ${BRAND.name}` },
   description: BRAND.tagline,
   metadataBase: new URL(BRAND.url),
   applicationName: BRAND.name,
@@ -53,28 +67,26 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  // Night is the product default, so the browser chrome matches it out of the box.
-  themeColor: '#101109',
+  themeColor: [
+    { media: '(prefers-color-scheme: dark)', color: '#0E0F0B' },
+    { media: '(prefers-color-scheme: light)', color: '#F2EFE7' },
+  ],
+  colorScheme: 'dark light',
   width: 'device-width',
   initialScale: 1,
 }
-// Dark is the default. A visitor who has explicitly chosen light keeps it
-// (stored); everyone else — every judge landing cold — gets night, which is the
-// theme the product was designed around. The attribute is set before first
-// paint so there is no flash.
-const THEME_BOOTSTRAP = `(function(){try{var t=localStorage.getItem('marque-theme');document.documentElement.setAttribute('data-theme',(t==='light'||t==='dark')?t:'dark');}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();`
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${geist.variable} ${geistMono.variable} ${fraunces.variable}`} suppressHydrationWarning>
+    <html lang="en" data-theme="night" className={`${generalSans.variable} ${instrumentSerif.variable} ${plexMono.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_BOOTSTRAP }} />
       </head>
-      <body className="no-js">
+      <body>
         <WalletProvider>
           {children}
           <Suspense fallback={null}><HireSheet /></Suspense>
-          <Reveal />
+          <Toaster />
         </WalletProvider>
       </body>
     </html>

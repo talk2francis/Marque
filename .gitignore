@@ -61,3 +61,6 @@ apps/web/.next-*/
 /docs/phase2/DECISIONS.md
 /docs/phase2/00_START_HERE.md
 /docs/phase2/*.zip
+
+# Design screenshots stay on the VPS (AGENTS 13.2 invariant 30: no screenshots in the public repo)
+docs/phase2/screens/

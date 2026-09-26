@@ -1,0 +1,128 @@
+/**
+ * Reset and element defaults (DESIGN-SYSTEM.md sections 4, 5 and 12).
+ * Layered, so any page module (unlayered) still wins where it says something.
+ */
+
+@layer reset {
+  *, *::before, *::after { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; }
+  img, svg, video { max-width: 100%; }
+  svg { flex-shrink: 0; }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  button:disabled { cursor: not-allowed; }
+  [hidden] { display: none !important; }
+}
+
+/*
+ * A metric-matched stand-in for General Sans while it loads, so the swap does
+ * not move a line (same overrides next/font computes for Arial, also applied to
+ * the fonts drawn on Arial's metrics).
+ */
+@font-face {
+  font-family: 'Marque Sans Fallback';
+  src: local('Arial'), local('ArialMT'), local('Liberation Sans'), local('LiberationSans'), local('Arimo'), local('Helvetica Neue'), local('Helvetica');
+  ascent-override: 99.89%; descent-override: 23.74%; line-gap-override: 9.89%; size-adjust: 101.11%;
+}
+
+@layer base {
+  html {
+    background: var(--canvas);
+    color: var(--ink);
+    scroll-padding-top: calc(var(--header-h) + 16px);
+  }
+  body {
+    position: relative;
+    min-height: 100dvh;
+    /* Full-bleed bands are 100vw, a scrollbar wider than the content box. `clip`
+       (not `hidden`) removes the stray axis without making body a scroll
+       container, so position: sticky keeps working. */
+    overflow-x: clip;
+    background: var(--canvas);
+    background-image: var(--backdrop);
+    background-repeat: no-repeat;
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: var(--fs-body);
+    line-height: 1.55;
+    font-feature-settings: 'ss01', 'cv11';
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+  /* A whisper of grain so large flat grounds have tooth. Fixed, non-interactive. */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 2147483000;
+    pointer-events: none;
+    opacity: var(--grain-opacity);
+    mix-blend-mode: var(--grain-blend);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  [data-surface] { color: var(--ink); color-scheme: dark; }
+
+  ::selection { background: color-mix(in srgb, var(--moss) 35%, transparent); color: var(--ink); }
+
+  a { color: inherit; }
+  :focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+    border-radius: var(--r-1);
+  }
+
+  h1, h2, h3, h4 { font-weight: 500; color: var(--ink); text-wrap: balance; }
+  h1 { font-size: var(--fs-h1); line-height: var(--lh-h1); letter-spacing: -0.03em; }
+  h2 { font-size: var(--fs-h2); line-height: var(--lh-h2); letter-spacing: -0.02em; }
+  h3 { font-size: var(--fs-h3); line-height: var(--lh-h3); letter-spacing: -0.01em; }
+  p { text-wrap: pretty; }
+
+  code, kbd, samp, pre, .mono {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0;
+  }
+  .mono { font-size: var(--size-data); }
+
+  hr { border: 0; border-top: 1px solid var(--hair); margin: var(--s-6) 0; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/* ---- Type classes (section 4) ------------------------------------------ */
+@layer base {
+  .t-display {
+    font-family: var(--font-serif);
+    font-weight: 400;
+    font-size: var(--fs-display);
+    line-height: var(--lh-display);
+    letter-spacing: -0.012em;
+  }
+  .t-h1 { font-weight: 500; font-size: var(--fs-h1); line-height: var(--lh-h1); letter-spacing: -0.03em; }
+  .t-h2 { font-weight: 500; font-size: var(--fs-h2); line-height: var(--lh-h2); letter-spacing: -0.02em; }
+  .t-h3 { font-weight: 500; font-size: var(--fs-h3); line-height: var(--lh-h3); letter-spacing: -0.01em; }
+  .t-body-l { font-size: var(--fs-body-l); line-height: 1.55; }
+  .t-body { font-size: var(--fs-body); line-height: 1.55; }
+  .t-small { font-size: var(--fs-small); line-height: 1.45; }
+  .t-label, .eyebrow {
+    font-size: var(--fs-label);
+    line-height: 1.2;
+    font-weight: 500;
+    letter-spacing: var(--tracking-eyebrow);
+    text-transform: uppercase;
+    color: var(--ink-2);
+  }
+  .t-num-l { font-weight: 500; font-size: var(--fs-num-l); line-height: 1.05; letter-spacing: -0.015em; font-variant-numeric: tabular-nums; }
+  .t-num { font-weight: 500; font-size: var(--fs-num); line-height: 1.3; font-variant-numeric: tabular-nums; }
+  .t-serif { font-family: var(--font-serif); font-weight: 400; letter-spacing: -0.005em; }
+  .t-serif em, .t-display em { font-style: italic; }
+}

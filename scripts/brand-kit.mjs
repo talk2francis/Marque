@@ -17,20 +17,28 @@ const OUT = join(ROOT, 'docs/phase2/brand-kit/marque-brand-kit')
 rmSync(OUT, { recursive: true, force: true }); mkdirSync(OUT, { recursive: true })
 const L = 'M50 21C43 13 27 5 17 2.5C9 1 0 3 0 8.5L0 63L1 67.5C15 54 33 32 50 21Z'
 const R = 'M50 21C57 13 73 5 83 2.5C91 1 100 3 100 8.5L100 63L99 67.5C85 54 67 32 50 21Z'
-const C = { ink: '#191a14', paper: '#f4f1e9', night: '#101109', nightInk: '#ece9e1', brass: '#8a6a22', brassMark: '#b0892c', brassLit: '#d9ae45' }
-const geist = readFileSync(join(ROOT, 'apps/web/public/fonts/geist-latin.woff2')).toString('base64')
-
+// Phase 2 tokens (packages/ui/src/tokens.css): Day ink and canvas, Night canvas and ink, brass per ground.
+const C = { ink: '#17170F', paper: '#F2EFE7', night: '#0E0F0B', nightInk: '#ECE8DE', brass: '#8A6A22', brassMark: '#B0892C', brassLit: '#D6A64F' }
+// The vector lockup and wordmark are the potrace outlines of Francis's artwork that the site
+// itself renders (apps/web/app/_components/brand/Wordmark.tsx), read from that file so the kit
+// and the site can never drift.
+const WM = readFileSync(join(ROOT, 'apps/web/app/_components/brand/Wordmark.tsx'), 'utf8')
+const grab = (name) => { const m = WM.match(new RegExp(`const ${name} = ([^\\n]+)`)); if (!m) throw new Error(`brand-kit: ${name} not found in Wordmark.tsx`); return JSON.parse(m[1].replace(/^'(.*)'$/, '"$1"')) }
+const traced = (prefix, fill, w) => {
+  const [x, y, vw, vh] = grab(`${prefix}_VIEWBOX`).split(' ').map(Number)
+  const h = Math.round((w * vh) / vw)
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${x} ${y} ${vw} ${vh}" width="${w}" height="${h}"><title>Marque</title><g fill="${fill}" transform="${grab(`${prefix}_TRANSFORM`)}">${grab(`${prefix}_PATHS`).map((d) => `<path d="${d}"/>`).join('')}</g></svg>\n`
+}
 const mark = (fill) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 69" width="400" height="276"><title>Marque</title><g fill="${fill}"><path d="${L}"/><path d="${R}"/></g></svg>\n`
-// Lockup: mark, then the wordmark set in Geist 600 (embedded), cap height matched to the mark.
-const lockup = (fill) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 100" width="840" height="200"><title>Marque</title>
-<style>@font-face{font-family:'Geist';src:url(data:font/woff2;base64,${geist}) format('woff2');font-weight:100 900}text{font-family:'Geist',Helvetica,Arial,sans-serif;font-weight:600;letter-spacing:-1px}</style>
-<g fill="${fill}" transform="translate(10 15.5) scale(1)"><path d="${L}"/><path d="${R}"/></g>
-<text x="130" y="72" font-size="66" fill="${fill}">Marque</text></svg>\n`
+const lockup = (fill, w = 840) => traced('LOCKUP', fill, w)
+const wordmark = (fill, w = 840) => traced('WORDMARK', fill, w)
 
 writeFileSync(join(OUT, 'marque-mark-dark.svg'), mark(C.ink))          // dark mark, for light backgrounds
 writeFileSync(join(OUT, 'marque-mark-light.svg'), mark(C.nightInk))    // light mark, for dark backgrounds
 writeFileSync(join(OUT, 'marque-lockup-dark.svg'), lockup(C.ink))
 writeFileSync(join(OUT, 'marque-lockup-light.svg'), lockup(C.nightInk))
+writeFileSync(join(OUT, 'marque-wordmark-dark.svg'), wordmark(C.ink))
+writeFileSync(join(OUT, 'marque-wordmark-light.svg'), wordmark(C.nightInk))
 copyFileSync(join(ROOT, 'apps/web/public/brand/lockup-ink.png'), join(OUT, 'marque-lockup-dark.png'))
 copyFileSync(join(ROOT, 'apps/web/public/brand/lockup-cream.png'), join(OUT, 'marque-lockup-light.png'))
 
@@ -48,8 +56,9 @@ for (const size of [1024, 512]) {
   await render(square(C.paper, C.ink, size), size, size, `marque-square-${size}-light.png`)
   await render(square(C.night, C.nightInk, size), size, size, `marque-square-${size}-dark.png`)
 }
-await render(`<div style="padding:0">${lockup(C.ink).replace(/width="840" height="200"/, 'width="1680" height="400"')}</div>`, 1680, 400, 'marque-lockup-dark-vector.png', true)
-await render(`<div style="padding:0">${lockup(C.nightInk).replace(/width="840" height="200"/, 'width="1680" height="400"')}</div>`, 1680, 400, 'marque-lockup-light-vector.png', true)
+const lockH = Number(lockup(C.ink, 1680).match(/height="(\d+)"/)[1])
+await render(`<div style="line-height:0">${lockup(C.ink, 1680)}</div>`, 1680, lockH, 'marque-lockup-dark-vector.png', true)
+await render(`<div style="line-height:0">${lockup(C.nightInk, 1680)}</div>`, 1680, lockH, 'marque-lockup-light-vector.png', true)
 await b.close()
 
 const og = await fetch('https://marque.trade/opengraph-image')
@@ -70,8 +79,9 @@ writeFileSync(join(OUT, 'BRAND.md'), `# Marque brand kit
 |---|---|
 | marque-mark-dark.svg / marque-mark-light.svg | The winged M. Dark on light backgrounds, light on dark. |
 | marque-lockup-dark.png / marque-lockup-light.png | The official lockup (mark and wordmark) from the brand art. Prefer these. |
-| marque-lockup-dark.svg / marque-lockup-light.svg | Vector lockup: exact mark paths, wordmark set in Geist 600 (font embedded). For print and large sizes. |
-| marque-lockup-*-vector.png | The vector lockup rendered at 1680 x 400, transparent. |
+| marque-lockup-dark.svg / marque-lockup-light.svg | Vector lockup: an outline trace of the official lockup art, no font needed. For print and large sizes. |
+| marque-wordmark-dark.svg / marque-wordmark-light.svg | The wordmark alone, outline trace of the official art. |
+| marque-lockup-*-vector.png | The vector lockup rendered 1680 px wide, transparent. |
 | marque-square-1024-*.png / marque-square-512-*.png | App and avatar tiles, light and dark. |
 | marque-og-1200x630.png | Social share image, as served by the site. |
 
@@ -86,6 +96,14 @@ writeFileSync(join(OUT, 'BRAND.md'), `# Marque brand kit
 | Brass | ${C.brass} | Accent on light (text-safe) |
 | Brass mark | ${C.brassMark} | Accent fills |
 | Brass lit | ${C.brassLit} | Accent on dark |
+
+## Type
+
+| Family | Use |
+|---|---|
+| General Sans (400, 500, 600) | Everything: UI, headings, body |
+| Instrument Serif (400, italic) | Statement lines only: hero, section statements |
+| IBM Plex Mono (400, 500) | Hashes, addresses, prices in tables |
 
 ## Clear space and size
 

@@ -27,6 +27,7 @@
     "supply:audit": "pnpm --filter @marque/commerce exec tsx scripts/supply-audit.mts"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
     "@eslint/js": "^9.17.0",
     "@marque/agent-engines": "workspace:*",
     "@marque/chain": "workspace:*",

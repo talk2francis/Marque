@@ -19,7 +19,7 @@
 }
 
 .what { white-space: nowrap; }
-.who { color: #9a9d8e; }
+.who { color: var(--ink-2); }
 
 .meter {
   flex: 1 1 120px; min-width: 60px; max-width: 260px; height: 3px;
@@ -32,7 +32,7 @@
 }
 
 .figure { color: var(--deck-ink); white-space: nowrap; font-size: var(--size-caption); }
-.urgent { color: #d0a06a; }
+.urgent { color: var(--amber); }
 
 .revoke {
   margin-left: auto; white-space: nowrap;

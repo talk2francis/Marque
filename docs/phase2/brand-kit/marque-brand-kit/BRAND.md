@@ -13,8 +13,9 @@
 |---|---|
 | marque-mark-dark.svg / marque-mark-light.svg | The winged M. Dark on light backgrounds, light on dark. |
 | marque-lockup-dark.png / marque-lockup-light.png | The official lockup (mark and wordmark) from the brand art. Prefer these. |
-| marque-lockup-dark.svg / marque-lockup-light.svg | Vector lockup: exact mark paths, wordmark set in Geist 600 (font embedded). For print and large sizes. |
-| marque-lockup-*-vector.png | The vector lockup rendered at 1680 x 400, transparent. |
+| marque-lockup-dark.svg / marque-lockup-light.svg | Vector lockup: an outline trace of the official lockup art, no font needed. For print and large sizes. |
+| marque-wordmark-dark.svg / marque-wordmark-light.svg | The wordmark alone, outline trace of the official art. |
+| marque-lockup-*-vector.png | The vector lockup rendered 1680 px wide, transparent. |
 | marque-square-1024-*.png / marque-square-512-*.png | App and avatar tiles, light and dark. |
 | marque-og-1200x630.png | Social share image, as served by the site. |
 
@@ -22,13 +23,21 @@
 
 | Token | Hex | Use |
 |---|---|---|
-| Ink | #191a14 | Mark and text on light |
-| Paper | #f4f1e9 | Light background |
-| Night | #101109 | Dark background |
-| Night ink | #ece9e1 | Mark and text on dark |
-| Brass | #8a6a22 | Accent on light (text-safe) |
-| Brass mark | #b0892c | Accent fills |
-| Brass lit | #d9ae45 | Accent on dark |
+| Ink | #17170F | Mark and text on light |
+| Paper | #F2EFE7 | Light background |
+| Night | #0E0F0B | Dark background |
+| Night ink | #ECE8DE | Mark and text on dark |
+| Brass | #8A6A22 | Accent on light (text-safe) |
+| Brass mark | #B0892C | Accent fills |
+| Brass lit | #D6A64F | Accent on dark |
+
+## Type
+
+| Family | Use |
+|---|---|
+| General Sans (400, 500, 600) | Everything: UI, headings, body |
+| Instrument Serif (400, italic) | Statement lines only: hero, section statements |
+| IBM Plex Mono (400, 500) | Hashes, addresses, prices in tables |
 
 ## Clear space and size
 

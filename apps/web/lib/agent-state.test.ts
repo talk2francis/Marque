@@ -5,7 +5,8 @@ vi.mock('@marque/db', () => ({ db: () => ({ execute }) }))
 import { agentState } from './agent-state'
 
 describe('canonical database-backed agent state', () => {
-  beforeEach(() => execute.mockReset())
+  // Queries beyond the ones a test scripts (the settled-jobs lookup added in P2-05) read as empty.
+  beforeEach(() => { execute.mockReset(); execute.mockResolvedValue({ rows: [] }) })
 
   it('binds compatibility to the exact service probe', async () => {
     execute

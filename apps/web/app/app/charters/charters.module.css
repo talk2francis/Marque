@@ -87,10 +87,10 @@ a.proof { text-decoration: underline; text-underline-offset: 3px; }
   flex: 1 1 160px;
   min-height: 44px; padding-inline: var(--s4);
   font: inherit; font-size: var(--size-body); cursor: pointer;
-  background: var(--breach-mark); color: #fff;
+  background: var(--oxide); color: var(--ink-inverse);
   border: 1px solid var(--breach-mark);
 }
-.revoke:hover:not(:disabled) { background: #8e2f23; border-color: #8e2f23; }
+.revoke:hover:not(:disabled) { filter: brightness(0.9); }
 .revoke:disabled { opacity: 0.55; cursor: progress; }
 
 .hire {

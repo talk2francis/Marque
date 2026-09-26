@@ -43,7 +43,8 @@ const nextConfig = {
     // nonce middleware; everything else is locked down.
     const csp = [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline'",
+      // Dev only: webpack's dev runtime evaluates modules. Production stays without eval.
+      `script-src 'self' 'unsafe-inline'${process.env.NODE_ENV === 'development' ? " 'unsafe-eval'" : ''}`,
       "style-src 'self' 'unsafe-inline'",
       // 8004scan's own image infrastructure hosts the registry-supplied agent
       // avatars we already index (api = the media proxy, blob = the sanitized

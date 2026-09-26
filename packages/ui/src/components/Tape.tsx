@@ -23,9 +23,9 @@ export function Tape({ events }: { events: readonly TapeEvent[] }) {
   // No events, no Tape. Not a placeholder, not a skeleton — absent.
   if (events.length === 0) return null
 
-  const items: ReactNode[] = events.map((e) => (
-    <span className="tape__item" key={e.id}>
-      {e.href ? <a href={e.href}>{e.text}</a> : e.text}
+  const row = (copy: boolean): ReactNode[] => events.map((e) => (
+    <span className="tape__item" key={`${copy ? 'b' : 'a'}-${e.id}`}>
+      {e.href ? <a href={e.href} tabIndex={copy ? -1 : undefined}>{e.text}</a> : e.text}
     </span>
   ))
 
@@ -33,8 +33,9 @@ export function Tape({ events }: { events: readonly TapeEvent[] }) {
     <div className="tape" aria-label="Recent receipted activity">
       {/* Duplicated once so the marquee can loop without a visible seam. */}
       <div className="tape__track">
-        {items}
-        <span aria-hidden="true" style={{ display: 'contents' }}>{items}</span>
+        {row(false)}
+        {/* The loop copy is hidden from assistive tech and kept out of the tab order. */}
+        <span aria-hidden="true" style={{ display: 'contents' }}>{row(true)}</span>
       </div>
     </div>
   )

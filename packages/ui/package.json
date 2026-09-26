@@ -10,7 +10,8 @@
     "./brand": "./src/brand.ts",
     "./tokens.css": "./src/tokens.css",
     "./components/*": "./src/components/*",
-    "./components.css": "./src/components.css"
+    "./components.css": "./src/components.css",
+    "./base.css": "./src/base.css"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",

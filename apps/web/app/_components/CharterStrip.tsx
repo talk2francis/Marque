@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { usePathname } from 'next/navigation'
 import styles from './strip.module.css'
 
 /**
@@ -52,11 +53,22 @@ function remainingLabel(expiresAt: string, now: number): string {
   return `${s}s`
 }
 
+/**
+ * Phase 2: charters are the testnet sandbox (DESIGN-SYSTEM.md section 7), not the
+ * buyer path, so the strip shows only on the sandbox's own routes. On the
+ * marketplace a strip about Marque's testnet charter would read as the
+ * visitor's own authority.
+ */
+const SANDBOX = ['/app', '/runs', '/judge']
+
 export function CharterStrip() {
+  const pathname = usePathname() ?? ''
+  const inSandbox = SANDBOX.some((p) => pathname === p || pathname.startsWith(`${p}/`))
   const [charters, setCharters] = useState<StripCharter[] | null>(null)
   const [now, setNow] = useState(() => Date.now())
 
   useEffect(() => {
+    if (!inSandbox) return
     let cancelled = false
     const load = async () => {
       try {
@@ -88,10 +100,10 @@ export function CharterStrip() {
       clearInterval(poll); clearInterval(tick)
       window.removeEventListener(CHARTERS_CHANGED, onChanged)
     }
-  }, [])
+  }, [inSandbox])
 
   const live = (charters ?? []).filter((c) => new Date(c.expiresAt).getTime() > now)
-  if (live.length === 0) return null
+  if (!inSandbox || live.length === 0) return null
 
   const first = live[0]!
   const cap = first.caps[0]
@@ -103,7 +115,7 @@ export function CharterStrip() {
     <div className={styles.strip} role="status" aria-live="polite">
       <span className={styles.mark} aria-hidden="true" />
       <span className={styles.what}>
-        {live.length > 1 ? `${live.length} charters active` : 'Charter active'}
+        {live.length > 1 ? `${live.length} sandbox charters active` : 'Sandbox charter active'}
         <span className={styles.who}> · {first.agentName ?? first.agentId}</span>
       </span>
 

@@ -13,7 +13,9 @@
 .muted { margin: var(--s2) 0 0; font-size: var(--size-caption); color: var(--fg-faint); }
 .muted a, .body a { color: var(--chain); text-decoration: none; }
 
-.table { width: 100%; border-collapse: collapse; font-size: var(--size-data); margin-top: var(--s3); }
+.tableWrap { overflow-x: auto; margin-top: var(--s3); }
+.table td { white-space: nowrap; }
+.table { width: 100%; border-collapse: collapse; font-size: var(--size-data); }
 .table th { text-align: left; font-weight: 500; color: var(--fg-faint); padding: var(--s2) var(--s3); border-bottom: 1px solid var(--line); font-size: var(--size-caption); }
 .table td { padding: var(--s3); border-bottom: 1px solid var(--line); }
 

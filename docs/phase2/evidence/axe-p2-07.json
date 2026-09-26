@@ -1,0 +1,66 @@
+{
+  "base": "http://127.0.0.1:3299",
+  "at": "2026-09-26T19:33:09.591Z",
+  "report": [
+    {
+      "route": "/",
+      "theme": "night",
+      "passes": 30,
+      "violations": []
+    },
+    {
+      "route": "/register",
+      "theme": "night",
+      "passes": 25,
+      "violations": []
+    },
+    {
+      "route": "/agents/keel",
+      "theme": "night",
+      "passes": 25,
+      "violations": []
+    },
+    {
+      "route": "/protocol",
+      "theme": "night",
+      "passes": 27,
+      "violations": []
+    },
+    {
+      "route": "/status",
+      "theme": "night",
+      "passes": 23,
+      "violations": []
+    },
+    {
+      "route": "/",
+      "theme": "day",
+      "passes": 30,
+      "violations": []
+    },
+    {
+      "route": "/register",
+      "theme": "day",
+      "passes": 25,
+      "violations": []
+    },
+    {
+      "route": "/agents/keel",
+      "theme": "day",
+      "passes": 25,
+      "violations": []
+    },
+    {
+      "route": "/protocol",
+      "theme": "day",
+      "passes": 27,
+      "violations": []
+    },
+    {
+      "route": "/status",
+      "theme": "day",
+      "passes": 23,
+      "violations": []
+    }
+  ]
+}

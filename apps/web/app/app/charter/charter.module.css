@@ -127,10 +127,10 @@
   border-top: 2px solid var(--brass-mark);
   border-radius: 3px;
   background: color-mix(in srgb, var(--deck-ink) 3%, var(--deck));
-  box-shadow: 0 30px 90px -30px rgba(0, 0, 0, 0.7);
+  box-shadow: var(--elev-3);
 }
 .sealTitle { font-size: var(--size-statement); margin: 0; letter-spacing: -0.015em; }
-.sealWho { margin: var(--s2) 0 var(--s5); font-size: var(--size-caption); color: #9a9d8e; }
+.sealWho { margin: var(--s2) 0 var(--s5); font-size: var(--size-caption); color: var(--ink-2); }
 
 .sealLines { margin: 0; padding: 0; }
 .sealLine {
@@ -148,7 +148,7 @@
   to { opacity: 1; transform: none; }
 }
 
-.sealLabel { margin: 0; font-size: var(--size-caption); color: #9a9d8e; }
+.sealLabel { margin: 0; font-size: var(--size-caption); color: var(--ink-2); }
 .sealValue { margin: 0; font-size: var(--size-data); overflow-wrap: anywhere; }
 .sealValue a { text-decoration: underline; text-underline-offset: 3px; }
 
@@ -174,7 +174,7 @@
   40% { box-shadow: 0 0 0 8px color-mix(in srgb, var(--brass-lit) 26%, transparent); }
   100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--brass-lit) 0%, transparent); }
 }
-.markText { font-size: var(--size-caption); color: #9a9d8e; }
+.markText { font-size: var(--size-caption); color: var(--ink-2); }
 
 /* The hash and the two actions read as one considered group at the foot of the
    document, divided from the mark by a hairline rather than floating loose. */
@@ -188,7 +188,7 @@
   text-decoration: underline; text-underline-offset: 3px;
   display: inline-flex; align-items: center; min-height: 32px;
 }
-.sealPending { font-size: var(--size-caption); color: #9a9d8e; }
+.sealPending { font-size: var(--size-caption); color: var(--ink-2); }
 .caret {
   display: inline-block; width: 7px; height: 14px; margin-left: 2px;
   background: var(--brass-lit); animation: blink 900ms steps(2, start) infinite;

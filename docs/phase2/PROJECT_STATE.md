@@ -14,6 +14,7 @@ Live record of Phase 2. Newest first inside each section. Times are UTC.
 | P2-05 Mainnet cutover | DONE (Sat 17:13) | Sellers on 56 in U; keeper live; smoke hires 56806-56810 delivered and rated on mainnet; Francis runs the browser flow himself later |
 | (was) P2-05 | PART 1 DONE, waiting on G-M2 funding | Fork test passed (USDT and U); sellers prepared on branch phase2-mainnet-sellers (U, max 2x); keeper 0x781e...556a; funding table below |
 | P2-06 Handoff | DRAFTED (Sat 17:40), Francis sends | HANDOFF-BNB.md filled from measured values; paste-ready HANDOFF-BNB-send.md; brand kit at /brand/marque-brand-kit.zip; README Set and Earn section. Open: send date, Francis's Telegram handle | |
+| P2-07 Kerbstone foundation | DONE (Sat 22:00) | Tokens (Night/Day/System, Chamber), General Sans + Instrument Serif + Plex Mono self-hosted, new shell (header pills, nav capsule, Proof menu, account menu, drawer, quest bar, footer), 20-part component set on /_ui, /protocol, every route re-shot; axe 0 serious on 5 routes x 2 themes |
 
 ## Production baseline (P2-00, Sat 26 Sep 05:16)
 
@@ -57,6 +58,14 @@ Logged in `docs/DEVIATIONS.md` under "Phase 2". Index:
 - [Sat 05:20] [build] [Francis] Support channel for real users, and personal public wallet addresses for `config/team-wallets.json`.
 
 ## Evidence
+
+### P2-07 (Sat 26 Sep 22:00)
+
+- Screens: 23 routes x 390/768/1440 x Night/Day = 138 full-page PNGs in `docs/phase2/screens/p2-07/` (on the VPS, gitignored per invariant 30; D2-07-05). Every route 200, no horizontal scroll, no console errors or hydration warnings (`scripts/shots.mjs`).
+- Fonts (`scripts/verify-fonts.mjs`, computed in Chromium): body General Sans 400 15px; h1 and statements Instrument Serif 400; buttons General Sans 500; hashes IBM Plex Mono 400. Faces loaded: General Sans 400/500, Instrument Serif 400 and italic, Plex Mono 400/500. No Geist or Fraunces file requested; both removed (licences in `docs/THIRD_PARTY.md`).
+- Components (`apps/web/app/_components/ui`, stories on `/_ui`): Button/ButtonLink/IconButton, Badge (Hireable, Preview only, Warranted date, Tested: failed, Untested, Retest due, Marque reference, network), PriceTag (live quote countdown MEASURED / declared CLAIMED), Stars + StarInput, Kpi, Skeleton/EmptyState/ErrorState, AddressChip/HashChip, SectionHead, Disclosure, Tabs, Tooltip, Drawer, Sheet (bottom sheet < 1024, right panel >= 1024, Chamber surface), Modal, Field/SelectField, TxStepper (waiting, wallet, confirming, done, failed, skipped, batch), ErrorNote, Toaster (+ `lib/toast.ts`), QuestTracker + QuestProgress, Tape. Shell: SiteHeader, NavLinks + Proof menu, NetworkPill + StatusPill (`/api/v1/pulse`), WalletButton (RainbowKit custom theme from tokens, account menu with quest n/5), ThemeMenu (Night/Day/System), MobileNav drawer, QuestBar, SiteFooter with the traced giant wordmark.
+- axe (`scripts/axe.mjs`, WCAG 2.1 A/AA, `docs/phase2/evidence/axe-p2-07.json`): /, /register, /agents/keel, /protocol, /status in Night and Day: 0 serious or critical, 0 other. First pass found Day brass buttons at 4.39:1 (fixed, D2-07-01) and focusable links inside the Tape's hidden loop copy (fixed).
+- Brand: wordmark and lockup are potrace outlines of the brand art (`scripts/trace-brand.sh`); the brand kit zip now carries the traced vector lockup and wordmark and the Phase 2 colours.
 
 ### P2-05 part 2 (Sat 26 Sep 17:13)
 

@@ -48,7 +48,7 @@ Replace `packages/ui/src/tokens.css` values with this set, keeping the existing 
     --canvas: #F2EFE7;  --canvas-2: #EAE6DB;  --panel: #F8F6F0;  --panel-2: #FCFBF7;
     --hair: rgba(20,20,16,.10);  --hair-2: rgba(20,20,16,.18);  --scrim: rgba(242,239,231,.8);
     --ink: #17170F;  --ink-2: #4A4740;  --ink-3: #6B675E;  --ink-inverse: #F2EFE7;
-    --brass: #8A6A22;  --brass-mark: #B0892C;  --brass-dim: #E6D3A8;
+    --brass: #7D5F1D;  --brass-mark: #B0892C;  --brass-dim: #E6D3A8;   /* was #8A6A22: 4.39:1 on canvas, below AA (D2-07-01) */
     --moss: #4E6128;   --moss-dim: #A9B48C;
     --amber: #8F5A14;  --oxide: #A5402A;  --chain: #2B5A85;
     --grid-line: rgba(20,20,16,.05);  --cross: rgba(20,20,16,.3);

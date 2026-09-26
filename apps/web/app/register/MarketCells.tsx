@@ -152,14 +152,13 @@ export function CompareToggle({
 
 export function RowActions({ a }: { a: MarketRow }) {
   const href = profileHref(a)
-  const warranted = a.warrant.status === 'warranted'
   const hireable = isHireable(a)
   return (
     <span className={styles.actions}>
       {a.previewable && href && (
         <LinkButton
           size="sm"
-          variant={warranted ? 'secondary' : 'primary'}
+          variant="secondary"
           href={`${href}#preview`}
           title={PREVIEW_HINT}
         >
@@ -167,7 +166,7 @@ export function RowActions({ a }: { a: MarketRow }) {
         </LinkButton>
       )}
       {hireable ? (
-        <Link className="btn btn--primary btn--sm" href={hireHref(a)} scroll={false} prefetch={false}>
+        <Link className="btn btn--sm btn--hire" href={hireHref(a)} scroll={false} prefetch={false}>
           {a.price && a.priceProvenance === 'MEASURED' ? `Hire for ${a.price}` : 'Hire'}
         </Link>
       ) : (

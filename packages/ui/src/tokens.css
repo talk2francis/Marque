@@ -1,295 +1,228 @@
 /**
- * Marque design tokens.
+ * Marque tokens (Phase 2, DESIGN-SYSTEM.md section 3). The only file with raw colours.
  *
- * ONE product, three grounds:
- *   - daylight (default light theme)
- *   - night    (global dark theme — [data-theme="dark"] or system preference)
- *   - cockpit  (per-surface deep dark for the charter desk / receipts, set with
- *              [data-surface="cockpit"] — a state change, not a theme)
+ * Two themes on <html data-theme>: night (default) and day. One surface,
+ * [data-surface="chamber"], that is dark in both themes: it means money is moving.
  *
- * Only ground / ink / rule / elevation swap between themes. Type scale, spacing,
- * radii, motion and the brass accent are identical everywhere.
+ * A custom property that references another is resolved on the element that
+ * declares it, and children inherit the resolved value. So every element that
+ * redefines the palette (the root, and each chamber) must also redeclare the
+ * derived and legacy names; that is why the alias block below is keyed to
+ * `:root, [data-surface]` and not to `:root` alone.
  */
 
-:root {
-  color-scheme: light;
+@layer tokens {
+  /* ---- NIGHT (default) and the palette every Chamber starts from -------- */
+  :root,
+  [data-theme='night'],
+  [data-surface] {
+    --canvas: #0E0F0B;
+    --canvas-2: #12130E;
+    --panel: #16180F;
+    --panel-2: #1C1E15;
+    --sunk: #0A0B07;
+    --hair: rgba(236, 232, 222, 0.09);
+    --hair-2: rgba(236, 232, 222, 0.17);
+    --scrim: rgba(14, 15, 11, 0.74);
 
-  /* ---- DAYLIGHT ------------------------------------------------------- */
-  --paper: #f4f1e9;         /* warm near-white, matches the brand art ground */
-  --paper-raised: #fbfaf4;
-  --paper-sunk: #ece7db;
-  --ink: #191a14;
-  --ink-soft: #494c3f;     /* ~7.3:1 on paper */
-  --ink-faint: #636557;    /* ~5:1 on paper — clears AA for small text */
-  --rule: #dcd7c7;
-  --rule-strong: #c6c0ab;
+    --ink: #ECE8DE;
+    --ink-2: #B8B3A6;
+    --ink-3: #8C8779;
+    --ink-inverse: #0E0F0B;
 
-  /* ---- NIGHT (global dark) ------------------------------------------- */
-  --night: #101109;
-  --night-raised: #191a10;
-  --night-sunk: #0a0b05;
-  --night-ink: #ece9e1;
-  --night-ink-soft: #b0b4a1;   /* ~7.5:1 on --night */
-  --night-ink-faint: #8d9180;  /* ~5:1 on --night */
-  --night-rule: #2f3123;
-  --night-rule-strong: #43462f;
+    --brass: #D6A64F;
+    --brass-lit: #E4BC6C;
+    --brass-mark: #B0892C;
+    --brass-dim: #6B5428;
+    --moss: #8FA35E;
+    --moss-dim: #56633A;
+    --amber: #D9963A;
+    --oxide: #D2694C;
+    --chain: #7FA3C8;
 
-  /* ---- COCKPIT (per-surface) --------------------------------------- */
-  --deck: #12140e;
-  --deck-raised: #1b1e15;
-  --deck-ink: #e8e9e0;
-  --deck-rule: #2c3023;
+    --grid-line: rgba(236, 232, 222, 0.045);
+    --cross: rgba(236, 232, 222, 0.28);
 
-  /* ---- BRAND — oxidised brass. Never Binance yellow. <=8% of a screen. */
-  --brass-mark: #b0892c;
-  --brass: #8a6a22;
-  --brass-lit: #d9ae45;
-  --brass-tint: color-mix(in srgb, var(--brass-mark) 12%, transparent);
+    --shadow-ink: 0, 0, 0;
+    --shadow-a: 0.5;
+    --glow: rgba(214, 166, 79, 0.07);
+    --on-media: #FFFFFF;
+    --grain-opacity: 0.035;
+    --grain-blend: overlay;
 
-  /* ---- SIGNAL — state only, never decoration. Two values each:
-   * `-mark` is the exact hue for markers/rules/borders where shape carries the
-   * meaning; the base value is the text variant, tuned per ground for AA. */
-  --holds-mark: #2e7351;
-  --watch-mark: #b8721a;
-  --breach-mark: #a83a2c;
-  --chain-mark: #2b5a85;
-  --holds: #2e7351;
-  --watch: #8f5a14;
-  --breach: #a83a2c;
-  --chain: #2b5a85;
-
-  /* ---- ACTIVE — surfaces remap these, everything else stays put. */
-  --ground: var(--paper);
-  --ground-raised: var(--paper-raised);
-  --ground-sunk: var(--paper-sunk);
-  --fg: var(--ink);
-  --fg-soft: var(--ink-soft);
-  --fg-faint: var(--ink-faint);
-  --line: var(--rule);
-  --line-strong: var(--rule-strong);
-
-  /* The page ground. On light this is nearly flat — just a whisper of warmth at
-     the very top — because a visible gradient on paper reads as a smudge. Dark
-     carries a slightly stronger glow (see the theme block). */
-  --backdrop:
-    radial-gradient(90% 40% at 78% -8%, color-mix(in srgb, var(--brass-mark) 4%, transparent), transparent 70%);
-  --dotgrid: color-mix(in srgb, var(--ink) 4%, transparent);
-
-  /* ---- ELEVATION — warm, layered, subtle. Theme-aware. */
-  --elev-1: 0 1px 2px color-mix(in srgb, var(--ink) 6%, transparent),
-            0 4px 12px -6px color-mix(in srgb, var(--ink) 10%, transparent);
-  --elev-2: 0 2px 4px color-mix(in srgb, var(--ink) 6%, transparent),
-            0 12px 32px -12px color-mix(in srgb, var(--ink) 16%, transparent);
-  --elev-3: 0 8px 24px -8px color-mix(in srgb, var(--ink) 14%, transparent),
-            0 40px 80px -24px color-mix(in srgb, var(--ink) 24%, transparent);
-  --ring: 0 0 0 3px color-mix(in srgb, var(--brass-mark) 22%, transparent);
-
-  /* ---- RADII — the "boxy" problem was 2px everywhere. */
-  --r-xs: 4px;
-  --r-sm: 8px;
-  --r-md: 12px;
-  --r-lg: 18px;
-  --r-xl: 26px;
-  --r-pill: 999px;
-
-  /* ---- TYPE ---------------------------------------------------------- */
-  --font-ui: 'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-mono: 'Geist Mono', ui-monospace, 'SF Mono', 'Roboto Mono', monospace;
-  --font-statement: 'Fraunces', 'Iowan Old Style', Georgia, serif;
-
-  --size-hero: 54px;
-  --size-page-title: 38px;
-  --size-statement: 30px;
-  --size-title: 17px;
-  --size-control: 14px;
-  --size-body: 15.5px;
-  --size-data: 13.5px;
-  --size-caption: 12px;
-  --size-eyebrow: 11.5px;
-  --lh-hero: 1.04;
-  --lh-statement: 1.15;
-  --lh-body: 1.6;
-  --tracking-eyebrow: 0.14em;
-
-  /* ---- SPACE — 4px base. */
-  --s1: 4px;  --s2: 8px;  --s3: 12px; --s4: 16px; --s5: 24px;
-  --s6: 32px; --s7: 48px; --s8: 64px; --s9: 96px; --s10: 128px;
-
-  /* ---- MEASURE — two widths, never one for both. */
-  --measure-prose: 680px;
-  --measure-data: 1240px;
-  --measure: 68ch;
-
-  /* ---- MOTION ------------------------------------------------------- */
-  --dur-fast: 130ms;
-  --dur: 220ms;
-  --dur-slow: 420ms;
-  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
-  --ease-settle: cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-/* ---- NIGHT: system preference, unless the user forced light -------- */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) {
     color-scheme: dark;
-    --ground: var(--night);
-    --ground-raised: var(--night-raised);
-    --ground-sunk: var(--night-sunk);
-    --fg: var(--night-ink);
-    --fg-soft: var(--night-ink-soft);
-    --fg-faint: var(--night-ink-faint);
-    --line: var(--night-rule);
-    --line-strong: var(--night-rule-strong);
-    --brass: #c99a3f;
-    --holds: #57957a;
-    --watch: #c8843b;
-    --breach: #cd6f63;
-    --chain: #6f92b4;
-    --backdrop:
-      radial-gradient(110% 55% at 82% -12%, color-mix(in srgb, var(--brass-lit) 7%, transparent), transparent 60%),
-      linear-gradient(180deg, color-mix(in srgb, var(--night-raised) 65%, var(--night)) 0%, var(--night) 40%);
-    --dotgrid: color-mix(in srgb, var(--night-ink) 6%, transparent);
-    --elev-1: 0 1px 2px rgba(0, 0, 0, 0.4), 0 4px 14px -6px rgba(0, 0, 0, 0.5);
-    --elev-2: 0 2px 6px rgba(0, 0, 0, 0.45), 0 16px 40px -14px rgba(0, 0, 0, 0.6);
-    --elev-3: 0 10px 30px -10px rgba(0, 0, 0, 0.55), 0 50px 90px -30px rgba(0, 0, 0, 0.7);
   }
-}
 
-/* ---- NIGHT: explicit user choice (wins over system either way) ---- */
-:root[data-theme='dark'] {
-  color-scheme: dark;
-  --ground: var(--night);
-  --ground-raised: var(--night-raised);
-  --ground-sunk: var(--night-sunk);
-  --fg: var(--night-ink);
-  --fg-soft: var(--night-ink-soft);
-  --fg-faint: var(--night-ink-faint);
-  --line: var(--night-rule);
-  --line-strong: var(--night-rule-strong);
-  --brass: #c99a3f;
-  --holds: #57957a;
-  --watch: #c8843b;
-  --breach: #cd6f63;
-  --chain: #6f92b4;
-  --backdrop:
-    radial-gradient(110% 55% at 82% -12%, color-mix(in srgb, var(--brass-lit) 7%, transparent), transparent 60%),
-    linear-gradient(180deg, color-mix(in srgb, var(--night-raised) 65%, var(--night)) 0%, var(--night) 40%);
-  --dotgrid: color-mix(in srgb, var(--night-ink) 6%, transparent);
-  --elev-1: 0 1px 2px rgba(0, 0, 0, 0.4), 0 4px 14px -6px rgba(0, 0, 0, 0.5);
-  --elev-2: 0 2px 6px rgba(0, 0, 0, 0.45), 0 16px 40px -14px rgba(0, 0, 0, 0.6);
-  --elev-3: 0 10px 30px -10px rgba(0, 0, 0, 0.55), 0 50px 90px -30px rgba(0, 0, 0, 0.7);
-}
+  /* ---- DAY ------------------------------------------------------------ */
+  [data-theme='day'] {
+    --canvas: #F2EFE7;
+    --canvas-2: #EAE6DB;
+    --panel: #F8F6F0;
+    --panel-2: #FCFBF7;
+    --sunk: #E6E1D5;
+    --hair: rgba(20, 20, 16, 0.10);
+    --hair-2: rgba(20, 20, 16, 0.18);
+    --scrim: rgba(242, 239, 231, 0.8);
 
-/* ---- COCKPIT — per-surface, unchanged semantics. */
-[data-surface='cockpit'] {
-  --ground: var(--deck);
-  --ground-raised: var(--deck-raised);
-  --ground-sunk: #0d0f09;
-  --fg: var(--deck-ink);
-  --fg-soft: #9a9d8e;
-  --fg-faint: #6b6f5d;
-  --line: var(--deck-rule);
-  --line-strong: #3a3f2c;
-  --holds: #4f896c;
-  --watch: #c8843b;
-  --breach: #bb655a;
-  --chain: #6f92b4;
-  --brass: #c99a3f;
-}
+    --ink: #17170F;
+    --ink-2: #4A4740;
+    --ink-3: #6B675E;
+    --ink-inverse: #F2EFE7;
 
-@media (max-width: 768px) {
+    /* Spec #8A6A22 measured 4.39:1 on the Day canvas (axe, P2-07): deepened to clear AA (D2-07-01).
+       Hover goes darker on Day, lighter on Night, so it always gains contrast. */
+    --brass: #7D5F1D;
+    --brass-lit: #6A5018;
+    --brass-mark: #B0892C;
+    --brass-dim: #E6D3A8;
+    --moss: #4E6128;
+    --moss-dim: #A9B48C;
+    --amber: #8F5A14;
+    --oxide: #A5402A;
+    --chain: #2B5A85;
+
+    --grid-line: rgba(20, 20, 16, 0.05);
+    --cross: rgba(20, 20, 16, 0.3);
+
+    --shadow-ink: 40, 34, 20;
+    --shadow-a: 0.16;
+    --glow: rgba(176, 137, 44, 0.05);
+    --grain-opacity: 0.012;
+    --grain-blend: multiply;
+
+    color-scheme: light;
+  }
+
+  /* ---- CHAMBER: deep ground, brass hairline, in both themes ------------ */
+  [data-surface='chamber'],
+  [data-surface='cockpit'] {
+    --canvas: #0A0B07;
+    --canvas-2: #0E0F0A;
+    --panel: #12140E;
+    --panel-2: #1B1E15;
+    --sunk: #070805;
+    --ink: #E8E9E0;
+    --ink-2: #B0B4A1;
+    --ink-3: #8A8E7C;
+    --hair: rgba(214, 166, 79, 0.16);
+    --hair-2: rgba(214, 166, 79, 0.32);
+    --glow: rgba(214, 166, 79, 0.1);
+  }
+
+  /* ---- Scale: identical in every theme and surface --------------------- */
   :root {
-    --size-hero: 34px;
-    --size-page-title: 27px;
-    --size-statement: 23px;
-    --size-title: 16px;
+    --font-sans: var(--ff-general-sans, 'General Sans'), 'Hanken Grotesk', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --font-serif: var(--ff-instrument-serif, 'Instrument Serif'), 'Iowan Old Style', Georgia, serif;
+    --font-mono: var(--ff-plex-mono, 'IBM Plex Mono'), ui-monospace, 'SF Mono', Menlo, monospace;
+
+    --r-1: 4px; --r-2: 8px; --r-3: 14px; --r-pill: 999px;
+    --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px; --s-5: 24px;
+    --s-6: 32px; --s-7: 48px; --s-8: 72px; --s-9: 112px;
+    --maxw: 1280px; --gutter: 24px; --margin: clamp(16px, 3.2vw, 48px);
+    --header-h: 64px;
+
+    --ease: cubic-bezier(0.2, 0.7, 0.1, 1);
+    --ease-settle: cubic-bezier(0.16, 1, 0.3, 1);
+    --t-fast: 160ms; --t-panel: 320ms; --t-hero: 800ms;
+
+    /* Type (section 4). Mobile values below. */
+    --fs-display: 60px; --lh-display: 1;
+    --fs-h1: 40px; --lh-h1: 1.08;
+    --fs-h2: 28px; --lh-h2: 1.15;
+    --fs-h3: 18px; --lh-h3: 1.3;
+    --fs-body-l: 17px;
+    --fs-body: 15px;
+    --fs-small: 13px;
+    --fs-label: 11px;
+    --fs-num-l: 30px;
+    --fs-num: 14.5px;
   }
-}
 
-*,
-*::before,
-*::after { box-sizing: border-box; }
+  /* ---- Derived and legacy names, re-resolved wherever the palette changes */
+  :root,
+  [data-surface] {
+    --focus: var(--moss);
+    --backdrop:
+      radial-gradient(90% 55% at 80% -10%, var(--glow), transparent 62%),
+      linear-gradient(180deg, var(--canvas-2) 0%, var(--canvas) 36rem);
+    --elev-1: 0 1px 2px rgba(var(--shadow-ink), calc(var(--shadow-a) * 0.5)),
+              0 4px 14px -6px rgba(var(--shadow-ink), calc(var(--shadow-a) * 0.8));
+    --elev-2: 0 2px 6px rgba(var(--shadow-ink), calc(var(--shadow-a) * 0.6)),
+              0 16px 40px -14px rgba(var(--shadow-ink), var(--shadow-a));
+    --elev-3: 0 10px 30px -10px rgba(var(--shadow-ink), var(--shadow-a)),
+              0 50px 90px -30px rgba(var(--shadow-ink), calc(var(--shadow-a) * 1.3));
+    --ring: 0 0 0 3px color-mix(in srgb, var(--moss) 28%, transparent);
+    --brass-tint: color-mix(in srgb, var(--brass-mark) 12%, transparent);
+    --dotgrid: color-mix(in srgb, var(--ink) 5%, transparent);
 
-html {
-  -webkit-text-size-adjust: 100%;
-}
+    /* Phase 1 names, kept so no page breaks (section 3). */
+    --ground: var(--canvas);
+    --ground-raised: var(--panel);
+    --ground-sunk: var(--sunk);
+    --fg: var(--ink);
+    --fg-soft: var(--ink-2);
+    --fg-faint: var(--ink-3);
+    --line: var(--hair);
+    --line-strong: var(--hair-2);
+    --rule: var(--hair-2);
+    --holds: var(--moss);
+    --holds-mark: var(--moss);
+    --watch: var(--amber);
+    --watch-mark: var(--amber);
+    --breach: var(--oxide);
+    --breach-mark: var(--oxide);
+    --chain-mark: var(--chain);
+    --ink-soft: var(--ink-2);
+    --paper: var(--ink-inverse);
+    --paper-raised: var(--ink-inverse);
+    --night: #0A0B07;
+    --night-ink-soft: #B0B4A1;
+    --deck: #12140E;
+    --deck-raised: #1B1E15;
+    --deck-ink: #E8E9E0;
+    --deck-rule: rgba(214, 166, 79, 0.16);
 
-body {
-  margin: 0;
-  position: relative;
-  /* Full-bleed bands are `100vw`, a scrollbar-width wider than the content box.
-     `clip` (not `hidden`) removes the stray horizontal axis WITHOUT turning the
-     body into a scroll container, so `position: sticky` on the nav and the docs
-     rail keeps working. */
-  overflow-x: clip;
-  background: var(--ground);
-  background-image: var(--backdrop);
-  background-attachment: fixed;
-  color: var(--fg);
-  font-family: var(--font-ui);
-  font-size: var(--size-body);
-  line-height: var(--lh-body);
-  font-feature-settings: 'cv11', 'ss01';
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
-  transition: background-color var(--dur) var(--ease), color var(--dur) var(--ease);
-}
-/* A whisper of film grain so large flat areas have tooth rather than reading as
-   dead fill — the thing that separates a considered surface from a wireframe. */
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: 2147483000;
-  pointer-events: none;
-  opacity: 0.012;
-  mix-blend-mode: multiply;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-}
-:root[data-theme='dark'] body::before,
-:root:not([data-theme='light']) body::before { opacity: 0.04; mix-blend-mode: overlay; }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) body::before { opacity: 0.04; mix-blend-mode: overlay; }
-}
+    --font-ui: var(--font-sans);
+    --font-statement: var(--font-serif);
 
-.mono {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  font-size: var(--size-data);
-}
+    --size-hero: var(--fs-display);
+    --size-page-title: var(--fs-h1);
+    --size-statement: var(--fs-h2);
+    --size-title: var(--fs-h3);
+    --size-control: 14px;
+    --size-body: var(--fs-body);
+    --size-data: 14px;
+    --size-caption: 13px;
+    --size-eyebrow: var(--fs-label);
+    --lh-hero: var(--lh-display);
+    --lh-statement: var(--lh-h2);
+    --lh-body: 1.55;
+    --tracking-eyebrow: 0.18em;
 
-.statement {
-  font-family: var(--font-statement);
-  font-weight: 400;
-  font-variation-settings: 'SOFT' 20, 'WONK' 0;
-  letter-spacing: -0.015em;
-}
+    --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px;
+    --s6: 32px; --s7: 48px; --s8: 64px; --s9: 96px; --s10: 128px;
+    --r-xs: var(--r-1); --r-sm: var(--r-2); --r-md: 10px; --r-lg: var(--r-3); --r-xl: 20px;
 
-a { color: inherit; }
+    --measure-prose: 680px;
+    --measure-data: 1240px;
+    --measure: 68ch;
 
-:focus-visible {
-  outline: 2px solid var(--brass);
-  outline-offset: 2px;
-  border-radius: var(--r-xs);
-}
+    --dur-fast: var(--t-fast);
+    --dur: 220ms;
+    --dur-slow: var(--t-panel);
+    --ease-out: var(--ease-settle);
+  }
 
-/* A shared eyebrow: wide-tracked caps, used for section kickers everywhere. */
-.eyebrow {
-  font-size: var(--size-eyebrow);
-  letter-spacing: var(--tracking-eyebrow);
-  text-transform: uppercase;
-  color: var(--fg-soft);
-  font-weight: 500;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
+  @media (max-width: 760px) {
+    :root {
+      --fs-display: 38px; --lh-display: 1.05;
+      --fs-h1: 30px; --lh-h1: 1.1;
+      --fs-h2: 22px; --lh-h2: 1.2;
+      --fs-h3: 17px;
+      --fs-body-l: 16px;
+      --fs-num-l: 26px;
+      --fs-num: 14px;
+      --header-h: 56px;
+    }
   }
 }

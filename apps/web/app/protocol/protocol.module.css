@@ -1,0 +1,47 @@
+.page { max-width: calc(var(--maxw) + 2 * var(--margin)); margin: 0 auto; padding: var(--s-7) var(--margin) 0; }
+.head { position: relative; padding: var(--s-6) 0 var(--s-7); }
+.head h1 { margin: var(--s-4) 0 0; max-width: 20ch; }
+.lede { margin: var(--s-4) 0 0; max-width: 68ch; font-size: var(--fs-body-l); color: var(--ink-2); }
+.section { margin-top: var(--s-8); }
+.panel { display: grid; gap: var(--s-5); }
+.kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; border: 1px solid var(--hair); border-radius: var(--r-3); overflow: hidden; background: var(--hair); }
+.kpi { display: flex; flex-direction: column; gap: 8px; padding: 18px 20px; background: var(--canvas); min-width: 0; }
+.kpiNum { font-size: 24px; font-weight: 500; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.kpiNote { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 12.5px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.small { margin: 0; font-size: var(--fs-small); color: var(--ink-3); max-width: 80ch; }
+.tableWrap { overflow-x: auto; border: 1px solid var(--hair); border-radius: var(--r-3); margin-bottom: var(--s-3); }
+.table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.table th, .table td { text-align: left; vertical-align: top; padding: 14px 16px; border-bottom: 1px solid var(--hair); }
+.table tbody tr:last-child th, .table tbody tr:last-child td { border-bottom: 0; }
+.table thead th { font-size: 11px; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-3); background: color-mix(in srgb, var(--panel) 60%, transparent); white-space: nowrap; }
+.table tbody th { font-weight: 500; color: var(--ink); min-width: 180px; }
+.table td { color: var(--ink-2); line-height: 1.5; }
+.who { display: block; margin-top: 4px; font-size: 12.5px; color: var(--ink-3); }
+.mono { font-family: var(--font-mono); font-size: 13px; font-weight: 500; }
+.muted { color: var(--ink-3); }
+.api { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--hair); }
+.api li { display: grid; grid-template-columns: minmax(0, 360px) minmax(0, 1fr); gap: 8px 24px; padding: 14px 0; border-bottom: 1px solid var(--hair); }
+.apiPath { font-family: var(--font-mono); font-size: 13px; color: var(--chain); text-decoration: none; overflow-wrap: anywhere; }
+a.apiPath:hover { text-decoration: underline; text-underline-offset: 3px; }
+.apiWhat { color: var(--ink-2); font-size: 14px; }
+@media (max-width: 900px) {
+  .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .api li { grid-template-columns: 1fr; }
+}
+@media (max-width: 760px) {
+  .table { font-size: 13.5px; }
+  .table th, .table td { padding: 12px; }
+  .table tbody th { min-width: 140px; }
+}
+/* Phones: each row becomes a small card with its column names, instead of a table to pan. */
+@media (max-width: 760px) {
+  .stack thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .stack, .stack tbody, .stack tr, .stack th, .stack td { display: block; width: 100%; }
+  .stack tr { padding: 14px 16px; border-bottom: 1px solid var(--hair); }
+  .stack tbody tr:last-child { border-bottom: 0; }
+  .stack th, .stack td { padding: 0; border: 0; }
+  .stack tbody th { min-width: 0; margin-bottom: 8px; font-size: 15px; }
+  .stack td { display: grid; grid-template-columns: 104px minmax(0, 1fr); gap: 10px; padding: 5px 0; font-size: 13.5px; }
+  .stack td::before { content: attr(data-label); font-size: 12px; color: var(--ink-3); padding-top: 2px; }
+  .tableWrap:has(.stack) { overflow: visible; }
+}

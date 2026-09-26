@@ -175,23 +175,6 @@
 }
 .sectionQuiet { padding: var(--s7) 0 var(--s8); border-top: 1px solid var(--line); }
 
-/* The lower half was "plain": each section revealed as one flat block. Now the
-   heading, lede and body of a section cascade in when it lands. Guarded by
-   reduced-motion in globals.css via the [data-reveal] rules. */
-@media (prefers-reduced-motion: no-preference) {
-  .section[data-reveal].is-in > *,
-  .sectionQuiet[data-reveal].is-in > * {
-    animation: sectionChild 560ms var(--ease-settle) both;
-  }
-  .section[data-reveal].is-in > *:nth-child(2) { animation-delay: 70ms; }
-  .section[data-reveal].is-in > *:nth-child(3) { animation-delay: 140ms; }
-  .section[data-reveal].is-in > *:nth-child(4) { animation-delay: 210ms; }
-  .section[data-reveal].is-in > *:nth-child(n+5) { animation-delay: 280ms; }
-}
-@keyframes sectionChild {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: none; }
-}
 .section :global(.statement) { max-width: 30ch; }
 .sectionLede {
   margin: 0;
@@ -419,8 +402,8 @@
   margin: var(--s10) calc(50% - 50vw) 0;
   width: 100vw;
   padding: var(--s10) max(var(--s5), calc(50vw - var(--measure-data) / 2 + var(--s5)));
-  background: #101109;
-  color: #ECE9E1;
+  background: var(--canvas);
+  color: var(--ink);
   overflow: hidden;
   isolation: isolate;
 }
@@ -447,19 +430,19 @@
   .chamberBg { animation: none; }
 }
 .chamberInner { max-width: 640px; display: flex; flex-direction: column; gap: var(--s4); }
-.chamberInner :global(.statement) { color: #ECE9E1; }
+.chamberInner :global(.statement) { color: var(--ink); }
 .actLabelDark {
   margin: 0;
   padding: 0;
   border: 0;
-  color: #9B9E8D;
+  color: var(--ink-2);
 }
-.actLabelDark span { border-color: color-mix(in srgb, #d9ae45 55%, transparent); color: #d9ae45; }
+.actLabelDark span { border-color: color-mix(in srgb, var(--brass) 55%, transparent); color: var(--brass); }
 .chamberLede {
   margin: 0;
   font-size: var(--size-body);
   line-height: var(--lh-body);
-  color: #C7C8BC;
+  color: var(--ink-2);
   max-width: 58ch;
 }
 .chamberActs { display: flex; gap: var(--s3); flex-wrap: wrap; margin-top: var(--s2); }
