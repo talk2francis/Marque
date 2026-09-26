@@ -135,6 +135,7 @@ export async function agentStates(
       qualification,
       authorizable: requestedTask !== null && TASK_FOR_CATEGORY[category ?? ''] === requestedTask,
       quoteableProtocols: ['x402', 'erc8183'],
+      // P2-03: fed from indexed commerce_job once the indexer runs (see packages/commerce supply.ts).
       settleableServiceIds: [],
       now,
     })
