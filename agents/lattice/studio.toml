@@ -17,7 +17,7 @@ runtime = "agentcore"
 protocols = ["A2A","X402"]
 
 [network]
-default = "bsc-testnet"
+default = "bsc-mainnet"
 
 [wallet]
 # Local keystore signer. The Agent is the SOLE key-holder/signer.
@@ -37,11 +37,11 @@ model = "claude-sonnet-4-5"
 # Read by the Agent: it quotes the FIXED `price`, CLAMPS it to [min,max],
 # freezes a short-TTL offer, and EIP-191 signs it — pricing is rule-based, the
 # LLM never prices. price=0 is FREE and is supported by the canonical stack.
-currency = "0xc70B8741B8B07A6d61E54fd4B20f22Fa648E5565"   # $U token address — prefilled from [network].default; rarely changed
+currency = "0xcE24439F2D9C6a2289F741120FE202248B666666"   # U on BSC mainnet: the escrow's paymentToken(). SDK 0.5.5 verifyJob rejects any other currency, so not USDT (P2-05)
 # All prices are in wei of the currency token. U has 18 decimals (not 6 like USDC).
 price = "100000000000000000"                    # wei; 0 = FREE (zero token escrow)
 min_price = "0"                                # wei — clamp floor
-max_price = ""                                 # wei — clamp ceiling; empty = unbounded; SET before going live
+max_price = "200000000000000000"                  # wei; 2 x price (SPEC-COMMERCE 8)
 quote_ttl_seconds = 900                        # seconds a signed quote stays valid; SDK caps at 900 (~15min work window)
 default_estimated_completion_seconds = 600
 poll_interval_seconds = 30
