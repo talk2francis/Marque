@@ -38,3 +38,15 @@ describe('friendlyError', () => {
     expect(`${g.title}${g.action}`).not.toMatch(/deadbeef|JSON-RPC|foo\.js/)
   })
 })
+
+describe('rating reverts', () => {
+  it('maps the ReputationRegistry self-feedback require string', async () => {
+    const { ContractFunctionRevertedError, ContractFunctionExecutionError, parseAbi } = await import('viem')
+    const abi = parseAbi(['function giveFeedback(uint256,int128,uint8,string,string,string,string,bytes32)'])
+    // The exact revert data returned by testnet when Keel's owner rated Keel (P2-04).
+    const data = '0x08c379a00000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000001953656c662d666565646261636b206e6f7420616c6c6f77656400000000000000'
+    const revert = new ContractFunctionRevertedError({ abi, data, functionName: 'giveFeedback' })
+    const err = new ContractFunctionExecutionError(revert, { abi, functionName: 'giveFeedback', args: [] })
+    expect(friendlyError(err).title).toBe('You cannot rate an agent you own or operate.')
+  })
+})

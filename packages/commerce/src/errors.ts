@@ -107,6 +107,9 @@ export function friendlyError(err: unknown): FriendlyError {
     const revert = err.walk((e) => e instanceof ContractFunctionRevertedError) as ContractFunctionRevertedError | null
     const name = revert?.data?.errorName
     if (name && CONTRACT_ERRORS[name]) return CONTRACT_ERRORS[name]
+    // The deployed ReputationRegistry reverts with require("Self-feedback not allowed"),
+    // not a custom error (measured on testnet, P2-04).
+    if (revert?.reason && /self-feedback/i.test(revert.reason)) return CONTRACT_ERRORS['SelfFeedback']!
     if (revert?.reason && /insufficient|exceeds balance/i.test(revert.reason)) {
       return E('ERC20InsufficientBalance', 'Your token balance is too low for this payment.', 'Top up the token shown in the price, then pay again.', true)
     }
@@ -123,6 +126,7 @@ export function friendlyError(err: unknown): FriendlyError {
   if (/ERC20InsufficientBalance|transfer amount exceeds balance/i.test(text)) return E('ERC20InsufficientBalance', 'Your token balance is too low for this payment.', 'Top up the token shown in the price, then pay again.', true)
   if (/ERC20InsufficientAllowance|insufficient allowance/i.test(text)) return E('ERC20InsufficientAllowance', 'The escrow is not allowed to take this amount yet.', 'Approve exactly the price, then pay again.', true)
   if (/chain mismatch|does not match the target chain/i.test(text)) return WALLET_ERRORS['4901']!
+  if (/self-feedback not allowed/i.test(text)) return CONTRACT_ERRORS['SelfFeedback']!
   const named = Object.keys(CONTRACT_ERRORS).find((n) => new RegExp(`\\b${n}\\b`).test(text))
   if (named) return CONTRACT_ERRORS[named]!
   return GENERIC

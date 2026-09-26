@@ -1,0 +1,67 @@
+{
+  "chainId": 97,
+  "base": "https://marque.trade",
+  "wallet": "0xC83d716523C1958bcC48d19854ef1eb360bEf878",
+  "startedAt": "2026-09-26T15:31:17.352Z",
+  "ratings": [
+    {
+      "category": "yield",
+      "jobId": "1338",
+      "agentId": "2237",
+      "stars": 5,
+      "feedbackHash": "0xf4d7f64b121ab292eee443770a178a2ebc3962aaeb86be525f1b2a1a135d0477",
+      "tx": "0x757e823955500167e0ab1c83b9bdb6dcfe0e545208917eaecc9df9cca0034a4c",
+      "status": "success"
+    },
+    {
+      "category": "grid",
+      "jobId": "1339",
+      "agentId": "2236",
+      "stars": 4,
+      "feedbackHash": "0x51f01fafa29a10e5879bffcd134d34be1b5fccdb8e186e2c6855c535c78e4ee7",
+      "tx": "0x58c7c730e15d996a40f9ee5671681a51d4b2fe7d2b527af7f9ac0818c1e92040",
+      "status": "success"
+    },
+    {
+      "category": "rebalancing",
+      "jobId": "1340",
+      "agentId": "2234",
+      "stars": 5,
+      "feedbackHash": "0x0aafa702cb3af75a7a7e49e631ce237521337c5a764530b959923e32f336ef8d",
+      "tx": "0xc63ba0bd3e5d346c29cfdfff0888f644dc43c7735ef2a07acc9d8d6bfa5a0a08",
+      "status": "success"
+    },
+    {
+      "category": "health_factor",
+      "jobId": "1337",
+      "agentId": "2238",
+      "stars": 3,
+      "feedbackHash": "0x8b9aa38c1881dff595ac27e488c33c1de32cf9250de133e55a69598be45bb87c",
+      "tx": "0x35fcb86703c9b0b2b04b56a334a4755d7889ce7cb29c6ccb152db3f2a4d0841b",
+      "status": "success"
+    }
+  ],
+  "selfRating": {
+    "refused": true,
+    "raw": "The contract function \"giveFeedback\" reverted with the following reason:",
+    "mapped": {
+      "code": "unknown",
+      "title": "Something went wrong before the transaction was sent.",
+      "action": "Nothing was charged. Try again, and contact support if it keeps happening.",
+      "retryable": true
+    }
+  },
+  "selfRatingApi": {
+    "error": "not_client",
+    "detail": "Only the wallet that paid for this job can rate it."
+  },
+  "revoke": {
+    "jobId": "1348",
+    "agentId": "2236",
+    "rateTx": "0x343c676d54e758e103e370fb162247be39fa63191a6fbc36651f6a5f92349c34",
+    "feedbackIndex": "2",
+    "revokeTx": "0x281c9039179c5c23ededf514b29ef465fa7d964991247fce3cb329dfc5766ab7",
+    "status": "success"
+  },
+  "finishedAt": "2026-09-26T15:31:43.826Z"
+}
