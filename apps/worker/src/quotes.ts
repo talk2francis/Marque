@@ -7,7 +7,7 @@
  * Cadence: first-party sellers every 10 min, hireable third parties every 30 min,
  * everyone else every 6 h. Every outbound call goes through safeFetch.
  */
-import { runQuoteProbe, syncFirstPartyCategories } from '@marque/commerce'
+import { runQuoteProbe, syncFirstPartyCategories, retryPendingNotifies } from '@marque/commerce'
 import { closeDb } from '@marque/db'
 
 const ONCE = process.argv.includes('--once')
@@ -30,6 +30,8 @@ async function main(): Promise<void> {
     try {
       const r = await runQuoteProbe({ concurrency: 4 })
       if (r.attempted) log('pass', { ...r, ms: Date.now() - started })
+      const n = await retryPendingNotifies()
+      if (n.checked) log('notify_retry', n)
     } catch (err) {
       log('pass_error', { error: err instanceof Error ? err.message : String(err) })
       if (ONCE) throw err

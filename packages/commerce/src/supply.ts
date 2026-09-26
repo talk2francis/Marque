@@ -100,7 +100,7 @@ export async function sellerCandidates(): Promise<SellerCandidate[]> {
 }
 
 /** Store one quote attempt (first-party observation). */
-export async function recordQuote(source: 'probe' | 'user', c: Pick<SellerCandidate, 'agentId' | 'serviceId' | 'endpoint'>, q: QuoteResult): Promise<number> {
+export async function recordQuote(source: 'probe' | 'user', c: Pick<SellerCandidate, 'agentId' | 'serviceId' | 'endpoint'>, q: QuoteResult, extra?: Record<string, unknown>): Promise<number> {
   const neg = q.negotiation ?? undefined
   const simple = q.simple ?? undefined
   const [row] = await db().insert(commerceQuote).values({
@@ -124,7 +124,7 @@ export async function recordQuote(source: 'probe' | 'user', c: Pick<SellerCandid
     quoteHash: q.ok ? q.quoteHash : null,
     latencyMs: q.latencyMs,
     signed: q.ok ? q.signed : Boolean(neg?.provider_sig),
-    raw: ((neg ?? simple) as Record<string, unknown> | undefined) ?? null,
+    raw: (neg ?? simple) ? { ...((neg ?? simple) as Record<string, unknown>), ...(extra ?? {}) } : (extra ?? null),
   }).returning({ id: commerceQuote.id })
   return row?.id ?? 0
 }

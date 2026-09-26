@@ -2,6 +2,7 @@ import { z } from 'zod'
 import { recoverMessageAddress, getAddress, keccak256, toBytes } from 'viem'
 import { safeFetch } from '@marque/probe'
 import { assetAt, isSupportedChain, network, type ChainId } from './config.js'
+import { negotiationHashOf } from './description.js'
 
 /**
  * ERC-8183 quotes, server side (SPEC-COMMERCE 4.2 and 7.1).
@@ -176,6 +177,13 @@ export async function verifyNegotiation(neg: Negotiation, ctx: QuoteVerifyContex
   const expiresAt = neg.response.quote_expires_at ?? 0
   if (!expiresAt || expiresAt <= now) return fail('expired', `quote expired at ${expiresAt}`, { chainId })
 
+  // The seller recomputes this hash from the description we put on chain; if it does not
+  // match the content now, the seller would refuse the funded job.
+  let recomputed: string
+  try { recomputed = negotiationHashOf(neg) } catch (e) { return fail('malformed', e instanceof Error ? e.message : 'unbuildable description', { chainId }) }
+  if (recomputed.toLowerCase() !== neg.negotiation_hash.toLowerCase()) {
+    return fail('bad_signature', 'negotiation_hash does not match the quoted terms', { chainId })
+  }
   let signer: `0x${string}`
   try {
     signer = await recoverMessageAddress({ message: neg.negotiation_hash, signature: neg.provider_sig as `0x${string}` })

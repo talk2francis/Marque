@@ -125,3 +125,20 @@ export async function checkDailyCeiling(): Promise<LimitVerdict> {
   }
   return { ok: true }
 }
+
+const buckets = new Map<string, number[]>()
+
+/** A named sliding-window limit, for the hire rail (quote 20/min per IP, intent 10/min per wallet). */
+export function checkWindow(bucket: string, key: string, max: number, windowMs: number, reason: string): LimitVerdict {
+  const k = `${bucket}:${key.toLowerCase()}`
+  const now = Date.now()
+  const recent = (buckets.get(k) ?? []).filter((t) => now - t < windowMs)
+  if (recent.length >= max) {
+    const retry = Math.ceil((windowMs - (now - (recent[0] ?? now))) / 1000)
+    return { ok: false, retryAfterSeconds: retry, detail: `${reason} Try again in ${retry}s.` }
+  }
+  recent.push(now)
+  buckets.set(k, recent)
+  if (buckets.size > 50_000) buckets.clear()
+  return { ok: true }
+}
