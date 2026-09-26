@@ -67,6 +67,19 @@ export interface Engine {
    * reason. An exception loses the evidence, and the evidence is the product.
    */
   run(prompt: string, opts?: { deadlineMs?: number }): Promise<EngineAnswer>
+  /**
+   * Parse only, no chain reads. `missing` lists FACTS the task must state (an
+   * address, a position id, a size): the hire rail refuses to quote while any
+   * is missing, so a buyer never pays for a refusal. `assumptions` lists the
+   * policy settings the task left out and the stated default the answer will
+   * use; `run()` repeats them in its answer, so a default is never silent.
+   */
+  inspect(prompt: string): Inspection
+}
+
+export interface Inspection {
+  missing: string[]
+  assumptions: string[]
 }
 
 /** The refusal helper. Using it is how a wrong answer stays unwritten. */

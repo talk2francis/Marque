@@ -44,27 +44,47 @@ export const KEEL_META: EngineMeta = {
   ],
 }
 
+/**
+ * Stated only when the task names no target. A report of the health factor is
+ * the core of the job; the repayment is to a conventional safety margin, and
+ * the answer says so in `assumptions` rather than presenting it as the buyer's.
+ */
+const DEFAULT_TARGET_HF = 2
+
+export function readTarget(prompt: string): { target: number | null; assumptions: string[] } {
+  const target = num(
+    prompt,
+    // restore / restores / restoring / restored ... (it|the account|...) (back) to N
+    String.raw`restor(?:e|es|ed|ing)\b(?:0x[a-fA-F0-9]{40}|[^.?!\d]){0,60}?\bto\s+(?:a\s+)?(?:health factor\s+(?:of\s+)?)?%N%`,
+    String.raw`(?:bring|get|move|lift|raise|take)s?\b(?:0x[a-fA-F0-9]{40}|[^.?!\d]){0,60}?\bto\s+(?:a\s+)?(?:health factor\s+(?:of\s+)?)?%N%`,
+    String.raw`target(?:\s+health factor)?(?:\s+of|\s+is|\s*[:=])?\s+%N%`,
+    String.raw`health factor(?:\s+(?:of|to|at|above))?\s+%N%`,
+    String.raw`\bHF\s*(?:of|to|at|above|[:=]|>=?)?\s*%N%`,
+  )
+  return target === null
+    ? { target: null, assumptions: [`no target health factor stated; the repayment shown restores ${DEFAULT_TARGET_HF}`] }
+    : { target, assumptions: [] }
+}
+
 export const keelEngine: Engine = {
   meta: KEEL_META,
+  inspect(prompt) {
+    const missing = address(prompt) ? [] : ['the 0x address of the Venus account']
+    return { missing, assumptions: readTarget(prompt).assumptions }
+  },
   async run(prompt, opts = {}): Promise<EngineAnswer> {
     const deadline = opts.deadlineMs ?? 6_000
     const subject = address(prompt)
     if (!subject) return refuse('no BNB Smart Chain address found in the task', 'a 0x address to read')
 
-    const target = num(
-      prompt,
-      String.raw`restore it to\s+%N%`,
-      String.raw`target(?:\s+health factor)?(?:\s+of)?\s+%N%`,
-      String.raw`health factor(?:\s+of)?\s+%N%`,
-    )
-    if (target === null || target <= 1) {
-      // Refusing beats guessing. An answer to the wrong question is worse than
-      // no answer, because it looks like an answer.
+    const { target, assumptions } = readTarget(prompt)
+    if (target !== null && target <= 1) {
       return refuse(
-        'no target health factor found in the task',
-        'state it explicitly, e.g. "restore it to 2.5"',
+        `a target health factor of ${target} is at or below liquidation`,
+        'state a target above 1, e.g. "restore it to 2.5"',
       )
     }
+    const goal = target ?? DEFAULT_TARGET_HF
 
     try {
       const head = await within(publicClient().getBlockNumber(), 3_000, 'BNB Smart Chain')
@@ -102,9 +122,10 @@ export const keelEngine: Engine = {
         primaryCollateralFactor: primary?.collateralFactor ?? null,
         primaryLiquidationPriceUsd: primary?.liquidationPriceUsd ?? null,
         repayUsdToReachTarget: exactRepayToReachTargetHf(
-          d.weightedCollateralUsd.value, d.totalBorrowedUsd.value, target,
+          d.weightedCollateralUsd.value, d.totalBorrowedUsd.value, goal,
         ),
-        targetHealthFactor: target,
+        targetHealthFactor: goal,
+        assumptions,
         blockNumber: r.blockNumber.toString(),
         readAt: r.readAt,
         source: 'Venus Comptroller, read on-chain',

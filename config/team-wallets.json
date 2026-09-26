@@ -50,15 +50,32 @@
     },
     {
       "address": "0x2e010AaDFdFEbC2AdFCAFA5F83e9687ffA47C573",
-      "role": "mainnet deployer (PancakeSwap proof run)",
+      "role": "mainnet deployer (PancakeSwap proof run); also Francis personal wallet",
       "chainIds": [
-        56
+        56,
+        97
       ]
     },
     {
       "address": "0xC83d716523C1958bcC48d19854ef1eb360bEf878",
       "role": "test wallet (P2-02 testnet hire proof)",
       "chainIds": [
+        97
+      ]
+    },
+    {
+      "address": "0x0d8c9ad8eebb6879fefa218f0799219bcaabe999",
+      "role": "Francis personal wallet",
+      "chainIds": [
+        56,
+        97
+      ]
+    },
+    {
+      "address": "0x99186e9a933fd83c0813d7ee694464ca55aeb7f9",
+      "role": "Francis personal wallet",
+      "chainIds": [
+        56,
         97
       ]
     }

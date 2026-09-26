@@ -36,10 +36,19 @@ describe('sluicegate parseAsk', () => {
     if (!('missing' in ask)) expect(ask.currentAprPct).toBe(3.2)
   })
 
-  it('still refuses when the current APR is genuinely absent', () => {
-    const ask = parseAsk('Route 1,000 USD of USDT. allowed protocols venus. at least 50 bps net.')
+  it('still refuses when a current APR is mentioned but not given', () => {
+    const ask = parseAsk('Route 1,000 USD of USDT, currently in a vault. allowed protocols venus. at least 50 bps net.')
     expect('missing' in ask).toBe(true)
     if ('missing' in ask) expect(ask.missing).toContain('the APR currently earned')
+  })
+
+  it('treats unmentioned current APR as idle money and says so', () => {
+    const ask = parseAsk('Route 1,000 USD of USDT. allowed protocols venus. at least 50 bps net.')
+    expect('missing' in ask).toBe(false)
+    if (!('missing' in ask)) {
+      expect(ask.currentAprPct).toBe(0)
+      expect(ask.assumptions.join(' ')).toMatch(/idle/)
+    }
   })
 
   it('reads a thousands-separated size as the whole number, not the tail', () => {

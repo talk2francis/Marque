@@ -50,8 +50,34 @@ export const BOUND_META: EngineMeta = {
   ],
 }
 
+export function readRangePct(prompt: string): number | null {
+  return num(
+    prompt,
+    String.raw`(?:symmetric(?:ally)?\s+(?:at\s+)?)?±\s*%N%\s*%`,
+    String.raw`\+/?-\s*%N%\s*%`,
+    String.raw`%N%\s*%\s+(?:around|either side of|each side of|on each side|on either side|above and below)`,
+    String.raw`range(?:\s+of)?\s+%N%\s*%`,
+    String.raw`(?:width|half[- ]width)(?:\s+of)?\s+%N%\s*%`,
+  )
+}
+
+/**
+ * A range width is the buyer's policy. When the task gives none, the plan keeps
+ * the width the position already has and only moves it back around spot: the
+ * one choice that adds no opinion of ours, and the answer says it was made.
+ */
+function rangeAssumptions(rangePct: number | null): string[] {
+  return rangePct === null ? ['no range width stated; the position keeps its current width, re-centred on spot'] : []
+}
+
 export const boundEngine: Engine = {
   meta: BOUND_META,
+  inspect(prompt) {
+    const missing = positionTokenId(prompt) || address(prompt)
+      ? []
+      : ['the position NFT id, or the 0x address that holds the position']
+    return { missing, assumptions: rangeAssumptions(readRangePct(prompt)) }
+  },
   async run(prompt, opts = {}): Promise<EngineAnswer> {
     const deadline = opts.deadlineMs ?? 7_000
     const wantTokenId = positionTokenId(prompt)
@@ -62,22 +88,11 @@ export const boundEngine: Engine = {
         'give a position NFT id, or the 0x address that holds the position',
       )
     }
-    const rangePct = num(
-      prompt,
-      String.raw`(?:symmetric\s+)?±\s*%N%\s*%`,
-      String.raw`\+/-\s*%N%\s*%`,
-      String.raw`%N%\s*%\s+(?:around|either side of)\s+spot`,
-      String.raw`range(?:\s+of)?\s+%N%\s*%`,
-    )
-    if (rangePct === null || rangePct <= 0) {
-      // A range width is a policy, not a fact, and it is the buyer's to set.
-      // Choosing one here would put this agent's opinion into a number the
-      // buyer will read as their own instruction.
-      return refuse(
-        'no range policy found in the task',
-        'state the symmetric half-width, e.g. "symmetric ±6% around spot"',
-      )
+    const rangePct = readRangePct(prompt)
+    if (rangePct !== null && rangePct <= 0) {
+      return refuse('the range half-width must be above 0%', 'e.g. "symmetric ±6% around spot"')
     }
+    const assumptions = rangeAssumptions(rangePct)
     const maxSlippageBps = num(prompt, String.raw`%N%\s*bps`, String.raw`slippage[^0-9]{0,20}%N%`)
 
     try {
@@ -148,17 +163,27 @@ export const boundEngine: Engine = {
 
       const spacing = tickSpacingForFee(position.fee)
       const spot = position.priceCurrent.value
-
       // The policy range, snapped to ticks the pool will accept. Snapping is
       // what makes the plan executable rather than merely arithmetic.
-      const proposedTickLower = nearestUsableTick(
-        priceToTick(spot * (1 - rangePct / 100), position.token0.decimals, position.token1.decimals),
-        spacing,
-      )
-      const proposedTickUpper = nearestUsableTick(
-        priceToTick(spot * (1 + rangePct / 100), position.token0.decimals, position.token1.decimals),
-        spacing,
-      )
+      let proposedTickLower: number
+      let proposedTickUpper: number
+      if (rangePct !== null) {
+        proposedTickLower = nearestUsableTick(
+          priceToTick(spot * (1 - rangePct / 100), position.token0.decimals, position.token1.decimals),
+          spacing,
+        )
+        proposedTickUpper = nearestUsableTick(
+          priceToTick(spot * (1 + rangePct / 100), position.token0.decimals, position.token1.decimals),
+          spacing,
+        )
+      } else {
+        // No width stated: the same tick span the position has now, centred on the
+        // current tick. Working in ticks keeps it exactly as wide as before.
+        const span = position.tickUpper - position.tickLower
+        proposedTickLower = nearestUsableTick(position.tickCurrent - Math.floor(span / 2), spacing)
+        proposedTickUpper = proposedTickLower + span
+      }
+      const halfPct = rangePct ?? Number(((1.0001 ** ((proposedTickUpper - proposedTickLower) / 2) - 1) * 100).toFixed(4))
 
       // Amounts from the V3 liquidity formula at the CURRENT price, using the
       // exact integer sqrt rather than a float shortcut.
@@ -224,6 +249,8 @@ export const boundEngine: Engine = {
         tickSpacing: spacing,
         feeTier: position.fee,
         pair: `${position.token0.symbol}/${position.token1.symbol}`,
+        rangeHalfWidthPct: halfPct,
+        assumptions,
         blockNumber: read.blockNumber.toString(),
         readAt: read.readAt,
         source: 'PancakeSwap V3 NonfungiblePositionManager and pool slot0, read on-chain',

@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { z } from 'zod'
-import { quoteForBuyer } from '@marque/commerce'
+import { quoteForBuyer, sellerFor } from '@marque/commerce'
+import { engineFor } from '@marque/agent-engines'
 import { checkWindow, clientKey } from '../../../../../lib/limits'
 import { hireError, limited } from '../../../../../lib/hire-api'
 
@@ -24,11 +25,23 @@ export async function POST(req: NextRequest) {
   if (!parsed.success) return NextResponse.json({ error: 'bad_request', detail: 'Send the agent and a short task description.' }, { status: 400 })
   try {
     const { agentId, serviceId, task } = parsed.data
+    // Marque's own agents can say, before any money moves, whether the task names
+    // what they need. Missing facts stop the quote; left-out settings come back as
+    // the stated defaults the answer will use.
+    const seller = await sellerFor(agentId, serviceId ?? null)
+    const engine = seller.firstParty ? engineFor(seller.firstParty.slug) : null
+    const check = engine?.inspect(task) ?? { missing: [], assumptions: [] }
+    if (check.missing.length) {
+      return NextResponse.json(
+        { error: 'task_incomplete', detail: `${seller.name} needs ${check.missing.join(' and ')} in the task before it can quote.`, missing: check.missing },
+        { status: 422, headers: { 'Cache-Control': 'no-store' } },
+      )
+    }
     const q = await quoteForBuyer(agentId, serviceId ?? null, {
       task_description: task,
       terms: { deliverables: 'Complete the task as described, with the result delivered on chain.', quality_standards: 'Figures read from BNB Chain at delivery time, with sources.' },
     })
-    return NextResponse.json(q, { headers: { 'Cache-Control': 'no-store' } })
+    return NextResponse.json({ ...q, assumptions: check.assumptions }, { headers: { 'Cache-Control': 'no-store' } })
   } catch (err) {
     return hireError(err, 'quote')
   }

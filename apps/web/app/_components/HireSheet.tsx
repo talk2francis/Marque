@@ -20,9 +20,9 @@ interface SheetAgent {
 const PRESET: Record<string, string> = {
   yield: 'Where should 1000 USDT earn the most on BNB Chain right now, after switching costs?',
   grid: 'Plan a grid for BNB/USDT between 550 and 700 with 500 USDT, stop below 520.',
-  rebalancing: 'My PancakeSwap V3 position has drifted out of range. What range and swaps restore it?',
-  health_factor: 'What is the health factor of Venus account 0x... and what repay restores it to 2.5?',
-  security: 'Review token 0x... for risky approvals and privileged functions.',
+  rebalancing: 'My PancakeSwap V3 position #____ has drifted out of range. Re-centre it at ±5% around the current price.',
+  health_factor: 'What is the health factor of Venus account 0x____ and what repay restores it to 2.5?',
+  security: 'Review token 0x____ for risky approvals and privileged functions.',
 }
 
 const NET: Record<number, string> = { 56: 'BSC mainnet', 97: 'BSC testnet' }
@@ -153,6 +153,13 @@ export function HireSheet() {
               <dt>Held by</dt><dd>BNB Chain&apos;s ERC-8183 escrow contract until delivery</dd>
               <dt>If nothing is delivered</dt><dd>{refundDate ? `You can reclaim it after ${refundDate}` : 'You can reclaim it after the job expires; the date is set when the job opens'}</dd>
             </dl>
+            {q.assumptions && q.assumptions.length > 0 && (
+              <div className={styles.note}>
+                <p>Your task left some settings out. {q.agentName} will use these, and its answer states them:</p>
+                <ul>{q.assumptions.map((a) => <li key={a}>{a}</li>)}</ul>
+                <p>To set one yourself, choose Change the task and add it.</p>
+              </div>
+            )}
           </section>
         )}
 
@@ -202,6 +209,9 @@ export function HireSheet() {
               <button type="button" className="btn btn--primary" disabled={signing} onClick={() => start()}>
                 {signing ? 'Follow the steps in your wallet' : state.jobId ? 'Continue the hire' : `Hire ${q.agentName} for ${q.priceLabel}`}
               </button>
+            )}
+            {!state.jobId && !signing && (
+              <button type="button" className="btn btn--quiet btn--sm" onClick={reset}>Change the task</button>
             )}
             <p className={styles.fine}>Marque never holds your funds or keys. Every approval is for the exact price.</p>
           </footer>

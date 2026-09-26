@@ -147,6 +147,9 @@ function slotAddress(word: string | null | undefined): Address | null {
 
 export const redcellEngine: Engine = {
   meta: REDCELL_META,
+  inspect(prompt) {
+    return { missing: addresses(prompt).length > 0 ? [] : ['the 0x address of the contract to review'], assumptions: [] }
+  },
   async run(prompt, opts = {}): Promise<EngineAnswer> {
     const deadline = opts.deadlineMs ?? 7_000
     const found = addresses(prompt)

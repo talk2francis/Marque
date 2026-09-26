@@ -59,30 +59,65 @@ interface GridPolicy {
   feeBps: number
 }
 
-function parsePolicy(prompt: string): GridPolicy | { missing: string[] } {
-  const lowerBound = num(prompt, String.raw`lower bound\s+%N%`, String.raw`between\s+%N%`)
-  const upperBound = num(prompt, String.raw`upper bound\s+%N%`, String.raw`and\s+%N%\s*,?\s*(?:with|using)?\s*\d*\s*USD`)
-  const capitalUsd = num(prompt, String.raw`capital\s+%N%`, String.raw`%N%\s*USD of capital`)
-  const levels = num(prompt, String.raw`levels\s+%N%`, String.raw`%N%\s+levels`)
-  const stopPrice = num(prompt, String.raw`stop price\s+%N%`, String.raw`stop at\s+%N%`)
-  const feeBps = num(prompt, String.raw`fee per trade\s+%N%`, String.raw`%N%\s*bps per trade`, String.raw`%N%\s*bps`)
+/** Stated defaults for the two settings a plain request usually leaves out. */
+const DEFAULT_LEVELS = 10
+// PancakeSwap's swap fee on BNB/USDT, the venue a BNB Chain grid actually fills on.
+const DEFAULT_FEE_BPS = 25
+
+// A price or amount, optionally written with a leading "$".
+const P = String.raw`\$?\s*%N%`
+const Q = String.raw`\$?\s*\d[\d,]*(?:\.\d+)?`
+
+export function parsePolicy(prompt: string): (GridPolicy & { assumptions: string[] }) | { missing: string[] } {
+  const lowerBound = num(
+    prompt,
+    String.raw`lower bound(?:\s+of|\s*[:=])?\s+${P}`,
+    String.raw`between\s+${P}`,
+    String.raw`from\s+${P}\s*(?:to|-|–)\s*${Q}`,
+    String.raw`range\s+(?:of\s+)?${P}\s*(?:to|-|–)\s*${Q}`,
+  )
+  const upperBound = num(
+    prompt,
+    String.raw`upper bound(?:\s+of|\s*[:=])?\s+${P}`,
+    String.raw`between\s+${Q}\s*(?:and|to|-|–)\s*${P}`,
+    String.raw`from\s+${Q}\s*(?:to|-|–)\s*${P}`,
+    String.raw`range\s+(?:of\s+)?${Q}\s*(?:to|-|–)\s*${P}`,
+  )
+  const capitalUsd = num(
+    prompt,
+    String.raw`capital(?:\s+of|\s*[:=])?\s+${P}`,
+    String.raw`%N%\s*USD of capital`,
+    String.raw`(?:with|using|deploy(?:ing)?|invest(?:ing)?)\s+${P}(?!\s*(?:[-\s]?levels?|lines|steps|orders|bps|%))`,
+    String.raw`%N%\s*(?:USDT|USDC|USD1?|FDUSD)\b`,
+  )
+  const levelsRaw = num(prompt, String.raw`levels(?:\s*[:=])?\s+%N%`, String.raw`%N%[\s-]+levels?\b`, String.raw`%N%[\s-]+(?:grid\s+)?(?:lines|steps|orders)\b`)
+  const stopRaw = num(
+    prompt,
+    String.raw`stop(?:[\s-]*loss)?\s+price(?:\s*[:=])?\s+${P}`,
+    String.raw`stop(?:[\s-]*loss)?\s+(?:at|below|under|of|[:=])?\s*${P}`,
+  )
+  const feeRaw = num(prompt, String.raw`fee per trade\s+%N%`, String.raw`%N%\s*bps per trade`, String.raw`%N%\s*bps`)
 
   const missing: string[] = []
-  if (lowerBound === null) missing.push('lower bound')
-  if (upperBound === null) missing.push('upper bound')
-  if (capitalUsd === null) missing.push('capital')
-  if (levels === null) missing.push('levels')
-  if (stopPrice === null) missing.push('stop price')
-  if (feeBps === null) missing.push('fee per trade in bps')
+  if (lowerBound === null) missing.push('the lower price bound')
+  if (upperBound === null) missing.push('the upper price bound')
+  if (capitalUsd === null) missing.push('the capital to deploy')
   if (missing.length > 0) return { missing }
+
+  const assumptions: string[] = []
+  if (levelsRaw === null) assumptions.push(`no level count stated; ${DEFAULT_LEVELS} levels used`)
+  if (feeRaw === null) assumptions.push(`no trading fee stated; ${DEFAULT_FEE_BPS} bps per trade used (PancakeSwap's swap fee)`)
+  if (stopRaw === null) assumptions.push('no stop stated; the plan places no stop')
 
   return {
     lowerBound: lowerBound as number,
     upperBound: upperBound as number,
     capitalUsd: capitalUsd as number,
-    levels: levels as number,
-    stopPrice: stopPrice as number,
-    feeBps: feeBps as number,
+    levels: levelsRaw ?? DEFAULT_LEVELS,
+    // No stop: 0 keeps every level inside the band, and the answer says so.
+    stopPrice: stopRaw ?? 0,
+    feeBps: feeRaw ?? DEFAULT_FEE_BPS,
+    assumptions,
   }
 }
 
@@ -116,12 +151,16 @@ function buildLevels(policy: GridPolicy): { price: number; allocationUsd: number
 
 export const latticeEngine: Engine = {
   meta: LATTICE_META,
+  inspect(prompt) {
+    const p = parsePolicy(prompt)
+    return 'missing' in p ? { missing: p.missing, assumptions: [] } : { missing: [], assumptions: p.assumptions }
+  },
   async run(prompt, opts = {}): Promise<EngineAnswer> {
     const parsed = parsePolicy(prompt)
     if ('missing' in parsed) {
       return refuse(
         `the task does not state ${parsed.missing.join(', ')}`,
-        'a grid needs bounds, capital, a level count, a stop and a per-trade fee before it can be planned',
+        'a grid needs a price band and the capital to spread across it',
       )
     }
     if (parsed.upperBound <= parsed.lowerBound) {
@@ -165,6 +204,7 @@ export const latticeEngine: Engine = {
         ? `the stop at ${parsed.stopPrice} sits inside the requested band, so the lowest level was raised above it — a level at or below the stop fills and is immediately stopped out`
         : null,
       feeDragBasis: `${parsed.levels} levels × ${parsed.feeBps} bps × 2 legs`,
+      assumptions: parsed.assumptions,
       blockNumber: block,
       source: 'arithmetic over the constraints supplied in the request; no position was read',
     }

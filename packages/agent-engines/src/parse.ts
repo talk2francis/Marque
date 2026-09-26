@@ -15,7 +15,9 @@
 // but a trailing "," (a list or a sentence) is not swallowed. Still never
 // `[\d.]+` — a trailing sentence period must not parse as ".", which once
 // turned "restore it to 1.6." into NaN and then a silent default.
-const NUMBER = String.raw`(\d[\d,]*(?:\.\d+)?)`
+// The trailing guard stops "health factor of 0x60AA..." reading as 0: the
+// leading digit of a hex address is not a number the buyer stated.
+const NUMBER = String.raw`(\d[\d,]*(?:\.\d+)?)(?![\dxX])`
 
 export function num(text: string, ...patterns: string[]): number | null {
   for (const p of patterns) {

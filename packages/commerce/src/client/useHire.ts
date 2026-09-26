@@ -24,6 +24,8 @@ export interface HireQuote {
   chainId: ChainId; provider: `0x${string}`; price: string; priceLabel: string
   token: { address: `0x${string}`; symbol: string; decimals: number; isDefault: boolean }
   signed: boolean; expiresAt: number; estimatedCompletionSeconds: number | null
+  /** Settings the task left out and the stated default the agent will use (Marque's own agents). */
+  assumptions?: string[]
 }
 interface IntentResponse { intentId: string; expiredAt: string; refundAfter: string; description: string; disputeWindowSeconds: number }
 
@@ -82,7 +84,8 @@ export function useHire() {
       return quote
     } catch (err) {
       const e = err as { code?: string; detail?: string }
-      set({ phase: 'error', error: { code: e.code ?? 'quote', title: e.detail ?? 'The agent could not be quoted.', action: 'Try again, or pick another agent.', retryable: true } })
+      const action = e.code === 'task_incomplete' ? 'Add it to the task above, then ask for a price again.' : 'Try again, or pick another agent.'
+      set({ phase: 'error', error: { code: e.code ?? 'quote', title: e.detail ?? 'The agent could not be quoted.', action, retryable: true } })
       return null
     }
   }, [])

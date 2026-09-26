@@ -58,10 +58,23 @@ interface YieldAsk {
   minImprovementBps: number
   leverageAllowed: boolean
   currentAprPct: number
+  /** Settings the task left out, with the stated default used for each. */
+  assumptions: string[]
 }
 
+// Venus is the only venue this engine reads, so it is the honest default.
+const DEFAULT_PROTOCOLS = ['venus']
+const STABLES = String.raw`USDT|USDC|USD1|FDUSD|DAI|BUSD|TUSD|WBNB|BNB|BTCB|ETH`
+
 export function parseAsk(prompt: string): YieldAsk | { missing: string[] } {
-  const sizeUsd = num(prompt, String.raw`size\s+%N%\s*USD`, String.raw`%N%\s*USD of`, String.raw`for\s+%N%\s*USD`)
+  const sizeUsd = num(
+    prompt,
+    String.raw`size\s+%N%\s*USD`,
+    String.raw`%N%\s*USD of`,
+    String.raw`for\s+%N%\s*USD`,
+    String.raw`\$\s*%N%`,
+    String.raw`%N%\s*(?:${STABLES})\b`,
+  )
   const minImprovementBps = num(
     prompt,
     String.raw`minimum improvement\s+%N%\s*bps`,
@@ -82,37 +95,51 @@ export function parseAsk(prompt: string): YieldAsk | { missing: string[] } {
   const assetMatch = prompt.match(/asset\s+([A-Za-z0-9]{2,12})/i)
     ?? prompt.match(/USD of\s+([A-Za-z0-9]{2,12})/i)
     ?? prompt.match(/\bfor\s+[\d.]+\s+USD of\s+([A-Za-z0-9]{2,12})/i)
+    ?? prompt.match(new RegExp(String.raw`\d\s*(${STABLES})\b`, 'i'))
+    ?? prompt.match(new RegExp(String.raw`\b(?:of|my|in)\s+(${STABLES})\b`, 'i'))
   const allowed = listAfter(prompt, 'allowed protocols') ?? listAfter(prompt, 'only')
 
   const missing: string[] = []
   if (!assetMatch?.[1]) missing.push('the asset')
   if (sizeUsd === null) missing.push('the size in USD')
-  if (!allowed || allowed.length === 0) missing.push('the allowed protocols')
-  if (minImprovementBps === null) missing.push('the minimum improvement in bps')
-  if (currentAprPct === null) missing.push('the APR currently earned')
   if (missing.length > 0) return { missing }
 
+  // A task that says "currently" but gives no number is not idle money, and
+  // guessing its rate would decide the answer: that one still refuses.
+  const mentionsCurrent = /\bcurrent(?:ly)?\b/i.test(prompt)
+  if (currentAprPct === null && mentionsCurrent) return { missing: ['the APR currently earned'] }
+
+  const assumptions: string[] = []
+  if (!allowed || allowed.length === 0) assumptions.push('no protocols named; Venus, the venue this agent reads, is used')
+  if (currentAprPct === null) assumptions.push('no current APR stated; the money is treated as idle, earning 0%')
+  if (minImprovementBps === null) assumptions.push('no threshold stated; any move that beats the current rate after costs is recommended')
+
   return {
-    asset: (assetMatch as RegExpMatchArray)[1] as string,
+    asset: ((assetMatch as RegExpMatchArray)[1] as string).toUpperCase(),
     sizeUsd: sizeUsd as number,
-    allowedProtocols: allowed as string[],
-    minImprovementBps: minImprovementBps as number,
+    allowedProtocols: allowed && allowed.length > 0 ? allowed : DEFAULT_PROTOCOLS,
+    minImprovementBps: minImprovementBps ?? 0,
     // Absence is NOT permission. A prompt silent on leverage is read as
     // excluding it, which is the direction that cannot hurt the buyer.
     leverageAllowed: /leverage\s+allowed/i.test(prompt) && !/NOT allowed/i.test(prompt),
-    currentAprPct: currentAprPct as number,
+    currentAprPct: currentAprPct ?? 0,
+    assumptions,
   }
 }
 
 export const sluicegateEngine: Engine = {
   meta: SLUICEGATE_META,
+  inspect(prompt) {
+    const ask = parseAsk(prompt)
+    return 'missing' in ask ? { missing: ask.missing, assumptions: [] } : { missing: [], assumptions: ask.assumptions }
+  },
   async run(prompt, opts = {}): Promise<EngineAnswer> {
     const deadline = opts.deadlineMs ?? 7_000
     const ask = parseAsk(prompt)
     if ('missing' in ask) {
       return refuse(
         `the task does not state ${ask.missing.join(', ')}`,
-        'net APR is size-dependent and the threshold is the buyer’s to set, so neither can be assumed',
+        'net APR depends on the asset and the size being moved, so neither can be assumed',
       )
     }
 
@@ -150,6 +177,7 @@ export const sluicegateEngine: Engine = {
           declineReason: `no ${ask.asset} market on ${ask.allowedProtocols.join(', ')} could be priced at block ${read.blockNumber}`,
           excluded: read.data.excluded.map((e) => ({ symbol: e.underlyingSymbol, reason: e.reason, detail: e.detail })),
           blockNumber: read.blockNumber.toString(),
+          assumptions: ask.assumptions,
         }
       }
 
@@ -206,6 +234,7 @@ export const sluicegateEngine: Engine = {
         blockNumber: read.blockNumber.toString(),
         readAt: readAtIso,
         source: 'Venus Comptroller and vToken rate reads, on-chain',
+        assumptions: ask.assumptions,
       }
     } catch (err) {
       return refuse(err instanceof Error ? err.message : String(err))
