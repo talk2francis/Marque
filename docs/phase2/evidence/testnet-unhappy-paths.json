@@ -1,0 +1,16 @@
+{
+  "startedAt": "2026-09-26T15:34:00.579Z",
+  "expiry": {
+    "jobId": "1350",
+    "provider": "0x993286a8F49e61273ECBeFaE30398648a9e7E4b4",
+    "createTx": "0xacebf036b0572725ce97bd17c79b3099b4c5f463d26abeba60734681a060a808",
+    "expiresAt": "2026-09-26T15:50:29.000Z",
+    "refundTx": "0xd27b2a540bf94390a71df3a5c956f896d30e5b59f4b9a91a27219c81b191570e"
+  },
+  "dispute": {
+    "jobId": "1349",
+    "createTx": "0x3760d2315cca2dab99247ee98f890c57e6ae647bb9ed9cf05a67e9cf404446e4",
+    "disputeTx": "0xab4ad32cf88c9955417e605c06c894109be42a6a8ba156c46d8199a58ace250a"
+  },
+  "finishedAt": "2026-09-26T15:50:55.062Z"
+}

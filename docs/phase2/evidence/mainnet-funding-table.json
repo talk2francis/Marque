@@ -1,0 +1,90 @@
+{
+  "measuredAt": "2026-09-26T15:41:22.735Z",
+  "mainnetGasPriceGwei": 0.05,
+  "gasMeasuredFrom": {
+    "submit": "0x024bc968bade5d0808844a9a2d452a3a4a5b39664d4c9dae47feaf5e41d86124",
+    "settle": "0xbfea5732e1c732a2bd2a181beec4857aba5df37ee5ea3079291466d982afeec8"
+  },
+  "rows": [
+    {
+      "name": "Bound",
+      "address": "0x5B1c9fBc684a1722Bb5C66C0B22F149dA69768d6",
+      "call": "AgenticCommerce submit (seller delivers)",
+      "balanceBnb": "0",
+      "gasPerCall": "204611",
+      "bnbFor100": "0.001023055",
+      "sponsorable": {
+        "sponsorable": false
+      }
+    },
+    {
+      "name": "Lattice",
+      "address": "0x5aAF7b5B2170986C59279682Bd714c475ae8C718",
+      "call": "AgenticCommerce submit (seller delivers)",
+      "balanceBnb": "0",
+      "gasPerCall": "204611",
+      "bnbFor100": "0.001023055",
+      "sponsorable": {
+        "sponsorable": false
+      }
+    },
+    {
+      "name": "Sluicegate",
+      "address": "0x253F7Ad5D52099C4a2293418a661e9974DfB5e84",
+      "call": "AgenticCommerce submit (seller delivers)",
+      "balanceBnb": "0",
+      "gasPerCall": "204611",
+      "bnbFor100": "0.001023055",
+      "sponsorable": {
+        "sponsorable": false
+      }
+    },
+    {
+      "name": "Keel",
+      "address": "0xdF1074a272C53A1a10b96Fa0201Eb58bbbaaFe00",
+      "call": "AgenticCommerce submit (seller delivers)",
+      "balanceBnb": "0",
+      "gasPerCall": "204611",
+      "bnbFor100": "0.001023055",
+      "sponsorable": {
+        "sponsorable": false
+      }
+    },
+    {
+      "name": "Redcell",
+      "address": "0x1F0D0eF5a279888E3b86c8a99A8A99F19fCEc587",
+      "call": "AgenticCommerce submit (seller delivers)",
+      "balanceBnb": "0",
+      "gasPerCall": "204611",
+      "bnbFor100": "0.001023055",
+      "sponsorable": {
+        "sponsorable": false
+      }
+    },
+    {
+      "name": "Tidemark",
+      "address": "0x8122991297DC98Dc5c735fDE90a501528922aFdC",
+      "call": "AgenticCommerce submit (seller delivers)",
+      "balanceBnb": "0.0021",
+      "gasPerCall": "204611",
+      "bnbFor100": "0.001023055",
+      "sponsorable": {
+        "sponsorable": false
+      }
+    },
+    {
+      "name": "Keeper",
+      "address": "0x781ee69bf9f9C14E2BC496181714f4DF5348556a",
+      "call": "EvaluatorRouter.settle",
+      "balanceBnb": "0",
+      "gasPerCall": "135224",
+      "bnbFor100": "0.00067612",
+      "sponsorable": {
+        "sponsorable": true,
+        "sponsorName": "Pieverse",
+        "sponsorIcon": "https://r2-image-worker.pieverse-img.workers.dev/logo.png",
+        "sponsorWebsite": "https://pieverse.io"
+      }
+    }
+  ]
+}

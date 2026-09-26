@@ -6,6 +6,7 @@
  * Prints the address only. Refuses if the agent already has a keystore.
  *
  *   node scripts/new-agent-wallet.mjs tidemark
+ *   node scripts/new-agent-wallet.mjs keeper --out /root/.marque/keeper   (a wallet outside the repo)
  */
 import { existsSync, mkdirSync, readdirSync, writeFileSync } from 'node:fs'
 import { join, dirname } from 'node:path'
@@ -17,7 +18,8 @@ import { EVMWalletProvider } from '@bnbagent/sdk'
 const id = process.argv[2]
 if (!id || !/^[a-z][a-z0-9-]{1,30}$/.test(id)) throw new Error('usage: new-agent-wallet.mjs <agent-id>')
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
-const studio = join(ROOT, 'agents', id, '.studio')
+const outIx = process.argv.indexOf('--out')
+const studio = outIx > -1 ? process.argv[outIx + 1] : join(ROOT, 'agents', id, '.studio')
 const wallets = join(studio, 'wallets')
 if (existsSync(wallets) && readdirSync(wallets).some((f) => f.endsWith('.json'))) throw new Error(`agents/${id} already has a keystore`)
 mkdirSync(wallets, { recursive: true })

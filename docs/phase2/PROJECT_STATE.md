@@ -10,8 +10,8 @@ Live record of Phase 2. Newest first inside each section. Times are UTC.
 | P2-01 Canonical supply | DONE | Quote engine, worker, supply audit; yield short one agent, filled by Tidemark (D2-02-03) once it has a mainnet identity |
 | P2-02 ERC-8183 buyer rail | DONE on testnet | Hire API, sheet, job page live. Proof: all 4 categories paid and answered (jobs 1343-1346), cancel 1347, revoke to zero. Browser check passed 14:31 (desktop and phone, from /register) |
 | P2-03 Quest Index and API | DONE (Sat 15:17) | marque-indexer on 56 and 97; /api/v1/phase2/{config,wallet,owner,job,coverage,stats} live; drill passed; 9 of 14 topics verified on real logs (ratings, dispute, expiry, refund pending real events) |
-| P2-04 Ratings | NEXT | |
-| P2-05 Mainnet cutover | queued, gated (G-M1, G-M2) | Needs Francis: "approved, mainnet" and funding |
+| P2-04 Ratings | DONE (Sat 15:45) | Test wallet rated all four on testnet, /wallet ratedAll true; self-rating refused and mapped; all 14 quest topics verified on real logs |
+| P2-05 Mainnet cutover | PART 1 DONE, waiting on G-M2 funding | Fork test passed (USDT and U); sellers prepared on branch phase2-mainnet-sellers (U, max 2x); keeper 0x781e...556a; funding table below |
 | P2-06 Handoff | queued, due Sun 27 Sep 10:00 | |
 
 ## Production baseline (P2-00, Sat 26 Sep 05:16)
@@ -56,6 +56,21 @@ Logged in `docs/DEVIATIONS.md` under "Phase 2". Index:
 - [Sat 05:20] [build] [Francis] Support channel for real users, and personal public wallet addresses for `config/team-wallets.json`.
 
 ## Evidence
+
+### P2-05 part 1 (Sat 26 Sep 15:55)
+
+- Fork (`docs/phase2/evidence/mainnet-fork-test.json`, anvil on the archive node at block 124166260, real mainnet contracts): USDT via createJobWithToken and U via createJob both reach FUNDED through register, setBudget, approve exact, fund.
+- Token choice: **U**. Mainnet `paymentToken()` is U, and seller SDK 0.5.5 `verifyJob` rejects a signed currency that differs from it, so USDT fails SPEC-COMMERCE 3 rule 2 for the reference sellers.
+- Sellers prepared on branch `phase2-mainnet-sellers` (worktree /root/marque-mainnet, commit ee582d0): bsc-mainnet, U, prices unchanged, max_price 2 x price. Not started.
+- Keeper wallet 0x781ee69bf9f9C14E2BC496181714f4DF5348556a (keystore /root/.marque/keeper, outside the repo). Mainnet smoke wallet 0x5aC2448FC79Ef8d33710b1Bced5AEff90138b452. Both in team-wallets.json.
+- Funding (`docs/phase2/evidence/mainnet-funding-table.json`): gas measured from testnet receipts (submit 204,611, settle 135,224), mainnet 0.05 gwei. MegaFuel pm_isSponsorable: settle from the keeper SPONSORED (Pieverse); seller submit NOT sponsorable. 100 submits = 0.00102 BNB per seller.
+
+### P2-04 checkpoint (Sat 26 Sep 15:45)
+
+- Ratings (`docs/phase2/evidence/testnet-rating-proof.json`): yield job 1338 Sluicegate 5/5, grid 1339 Lattice 4/5, rebalancing 1340 Bound 5/5, health factor 1337 Keel 3/5, all through /api/v1/phase2/rate and the wallet's own signature. `/wallet` returns ratedAll true with each tx.
+- Owner self-rating: the registry reverts `Self-feedback not allowed` (a require string, not a custom error); mapped to "You cannot rate an agent you own or operate."
+- Unhappy paths staged (`docs/phase2/evidence/testnet-unhappy-paths.json`): job 1349 delivered then disputed (DISPUTED); job 1350 paid to an address that cannot deliver, expired, refunded (REFUNDED; claimRefund logs Refunded before JobExpired).
+- verify-topics: all 14 events read from real logs, equal to spec and ABI.
 
 ### P2-03 checkpoint (Sat 26 Sep 15:17)
 

@@ -50,6 +50,14 @@
       ]
     },
     {
+      "address": "0x781ee69bf9f9C14E2BC496181714f4DF5348556a",
+      "role": "keeper (router.settle, P2-05)",
+      "chainIds": [
+        56,
+        97
+      ]
+    },
+    {
       "address": "0x9598AB46aAB33389C2e9Ffe0511effD330f67F9B",
       "role": "testnet operator (charter sandbox, receipt anchors)",
       "chainIds": [
@@ -85,6 +93,13 @@
       "chainIds": [
         56,
         97
+      ]
+    },
+    {
+      "address": "0x5aC2448FC79Ef8d33710b1Bced5AEff90138b452",
+      "role": "test wallet (P2-05 mainnet smoke hires)",
+      "chainIds": [
+        56
       ]
     }
   ]

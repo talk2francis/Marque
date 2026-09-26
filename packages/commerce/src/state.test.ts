@@ -121,3 +121,16 @@ describe('hire calls', () => {
     expect(() => computeExpiredAt(0, 400 * 86400, 1)).toThrow()
   })
 })
+
+describe('claimRefund log order (testnet job 1350)', () => {
+  it('Refunded then JobExpired in one tx ends REFUNDED with no anomaly', () => {
+    const e = (name: string, i: number, args: Record<string, unknown> = {}) => ({ name: name as never, blockNumber: 1, logIndex: i, txHash: '0xt', args })
+    const p = projectJob([
+      { ...e('JobCreated', 0, { client: '0xc', provider: '0xp' }), blockNumber: 0 },
+      { ...e('JobFunded', 1, { amount: 10n }), blockNumber: 0 },
+      e('Refunded', 2, { amount: 10n }), e('JobExpired', 3),
+    ])
+    expect(p.state).toBe('REFUNDED')
+    expect(p.anomalies).toEqual([])
+  })
+})

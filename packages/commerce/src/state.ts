@@ -69,7 +69,8 @@ const TRANSITIONS: Record<JobEventName, Partial<Record<JobState | 'NONE', JobSta
   JobCompleted: { SUBMITTED: 'COMPLETED', DISPUTED: 'COMPLETED' },
   PaymentReleased: { COMPLETED: 'PAID' },
   JobRejected: { OPEN: 'CANCELLED', FUNDED: 'REJECTED', SUBMITTED: 'REJECTED', DISPUTED: 'REJECTED' },
-  JobExpired: { FUNDED: 'EXPIRED', SUBMITTED: 'EXPIRED' },
+  // claimRefund emits Refunded BEFORE JobExpired in the same tx (testnet job 1350), so both orders are legal.
+  JobExpired: { FUNDED: 'EXPIRED', SUBMITTED: 'EXPIRED', REFUNDED: 'REFUNDED' },
   Refunded: { REJECTED: 'REFUNDED', EXPIRED: 'REFUNDED', FUNDED: 'REFUNDED' },
 }
 
