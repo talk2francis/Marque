@@ -1,0 +1,40 @@
+{
+  "forkBlock": "124166260",
+  "contracts": {
+    "commerce": "0xea4daa3100a767e86fded867729ae7446476eba6",
+    "router": "0x51895229e12f9876011789b04f8698af06ccd6da",
+    "policy": "0x9c01845705b3078aa2e8cff7520a6376fd766de5"
+  },
+  "USDT": {
+    "ok": true,
+    "createFunction": "createJobWithToken",
+    "jobId": "56805",
+    "status": "FUNDED",
+    "budget": "50000000000000000",
+    "boundToken": "0x55d398326f99059fF775485246999027B3197955",
+    "clientBalanceAfter": "0",
+    "steps": {
+      "createJob:createJobWithToken": "success",
+      "registerJob:registerJob": "success",
+      "setBudget:setBudget": "success",
+      "approve:approve": "success",
+      "fund:fund": "success"
+    }
+  },
+  "U": {
+    "ok": true,
+    "createFunction": "createJob",
+    "jobId": "56806",
+    "status": "FUNDED",
+    "budget": "50000000000000000",
+    "boundToken": "0xcE24439F2D9C6a2289F741120FE202248B666666",
+    "clientBalanceAfter": "0",
+    "steps": {
+      "createJob:createJob": "success",
+      "registerJob:registerJob": "success",
+      "setBudget:setBudget": "success",
+      "approve:approve": "success",
+      "fund:fund": "success"
+    }
+  }
+}
