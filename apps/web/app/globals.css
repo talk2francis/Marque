@@ -5,6 +5,7 @@
 @import '@marque/ui/components.css';
 @import './_components/ui/ui.css';
 @import './_components/shell/shell.css';
+@import './_components/hire/hire.css';
 
 /* The loading mark.
    1. The screen holds at opacity 0 for 380ms, so a fast in-app navigation

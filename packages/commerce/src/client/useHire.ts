@@ -3,7 +3,7 @@ import { useCallback, useRef, useState } from 'react'
 import { useConfig, useAccount } from 'wagmi'
 import {
   writeContract, waitForTransactionReceipt, switchChain, readContract, getBalance,
-  getCapabilities, sendCalls, waitForCallsStatus,
+  getCapabilities, sendCalls, waitForCallsStatus, getGasPrice,
 } from '@wagmi/core'
 import { erc20Abi, encodeFunctionData, type Abi, type Hex } from 'viem'
 import { createJobCall, paymentCalls, cancelCall, type Call, type HireTerms, type StepId } from '../calls.js'
@@ -16,7 +16,8 @@ import { network, type ChainId } from '../config.js'
  * EIP-5792 atomic batch when the wallet supports it on this chain; otherwise one at a
  * time. The chain is the source of truth: the Job Room reads the job from chain events.
  */
-export type StepStatus = 'todo' | 'active' | 'done' | 'skipped' | 'failed'
+/** `active` = waiting in the wallet; `confirming` = sent, waiting for the block (tx known). */
+export type StepStatus = 'todo' | 'active' | 'confirming' | 'done' | 'skipped' | 'failed'
 export interface HireStep { id: StepId | 'quote' | 'notify'; label: string; detail: string; status: StepStatus; tx?: Hex }
 
 export interface HireQuote {
@@ -39,9 +40,19 @@ export interface HireState {
   error: FriendlyError | null
   /** Balance problems found before the first signature. */
   shortfall: { token: boolean; gas: boolean } | null
+  /** What the connected wallet holds on the quote's chain, read before any signature. */
+  balances: { token: string; gas: string; gasNeeded: string } | null
+  /** Whether this wallet can sign the payment steps as one EIP-5792 batch here (null = not checked yet). */
+  batchCapable: boolean | null
 }
 
-const initial: HireState = { phase: 'idle', quote: null, intent: null, jobId: null, steps: [], batched: false, error: null, shortfall: null }
+const initial: HireState = { phase: 'idle', quote: null, intent: null, jobId: null, steps: [], batched: false, error: null, shortfall: null, balances: null, batchCapable: null }
+
+/**
+ * Gas for createJob, registerJob, setBudget, approve and fund together. Measured on mainnet
+ * job 56810: 812,219 + 151,530 + 96,341 + 60,233 + 105,368 = 1,225,691; about 15% headroom.
+ */
+const HIRE_GAS = 1_400_000n
 
 async function api<T>(route: string, body: unknown): Promise<T> {
   const res = await fetch(`/api/v1/${route}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) })
@@ -90,8 +101,10 @@ export function useHire() {
     }
   }, [])
 
-  const send = async (c: Call): Promise<Hex> => {
+  const send = async (c: Call, step?: HireStep['id']): Promise<Hex> => {
+    if (step) mark(step, 'active')
     const hash = await writeContract(config, { address: c.to, abi: c.abi, functionName: c.functionName, args: c.args as unknown[], chainId: c.chainId })
+    if (step) mark(step, 'confirming', hash)
     const r = await waitForTransactionReceipt(config, { hash, chainId: c.chainId })
     if (r.status !== 'success') throw Object.assign(new Error('reverted'), { code: 'reverted' })
     return hash
@@ -109,7 +122,10 @@ export function useHire() {
         readContract(config, { address: q.token.address, abi: erc20Abi, functionName: 'balanceOf', args: [address], chainId: q.chainId }),
         getBalance(config, { address, chainId: q.chainId }),
       ])
-      const shortfall = { token: tokenBal < BigInt(q.price), gas: gasBal.value === 0n }
+      const gasPrice = await getGasPrice(config, { chainId: q.chainId }).catch(() => 0n)
+      const gasNeeded = state.jobId ? 0n : gasPrice * HIRE_GAS
+      const shortfall = { token: tokenBal < BigInt(q.price), gas: gasBal.value === 0n || gasBal.value < gasNeeded }
+      set({ balances: { token: tokenBal.toString(), gas: gasBal.value.toString(), gasNeeded: gasNeeded.toString() } })
       if (shortfall.token || shortfall.gas) { set({ phase: 'quoted', shortfall }); busy.current = false; return }
       set({ phase: 'signing', shortfall: null })
 
@@ -127,8 +143,7 @@ export function useHire() {
 
       let jobId = state.jobId
       if (!jobId) {
-        mark('createJob', 'active')
-        const createTx = await send(createJobCall(terms))
+        const createTx = await send(createJobCall(terms), 'createJob')
         mark('createJob', 'done', createTx)
         let bound: { jobId: string } | null = null
         for (let i = 0; i < 6 && !bound; i++) {
@@ -162,6 +177,7 @@ export function useHire() {
           chainId: quote.chainId, forceAtomic: true,
           calls: calls.map((c) => ({ to: c.to, data: encodeFunctionData({ abi: c.abi as Abi, functionName: c.functionName, args: c.args as unknown[] }) })),
         })
+        for (const c of calls) mark(c.step, 'confirming')
         const res = await waitForCallsStatus(config, { id, timeout: 180_000 })
         if (res.status !== 'success') throw Object.assign(new Error('batch failed'), { code: 'reverted' })
         const tx = res.receipts?.[0]?.transactionHash as Hex | undefined
@@ -169,8 +185,7 @@ export function useHire() {
         set({ batched: true })
       } else {
         for (const c of calls) {
-          mark(c.step, 'active')
-          const tx = await send(c)
+          const tx = await send(c, c.step)
           mark(c.step, 'done', tx)
         }
       }
@@ -190,10 +205,40 @@ export function useHire() {
     }
   }, [state.quote, state.intent, state.jobId, address, walletChain, config])
 
+  /**
+   * Read, before any signature, what the wallet holds on the quote's chain and whether it
+   * can batch. Safe to call repeatedly; never opens the wallet.
+   */
+  const precheck = useCallback(async () => {
+    const q = state.quote
+    if (!q || !address) return
+    try {
+      const [tokenBal, gasBal, gasPrice] = await Promise.all([
+        readContract(config, { address: q.token.address, abi: erc20Abi, functionName: 'balanceOf', args: [address], chainId: q.chainId }),
+        getBalance(config, { address, chainId: q.chainId }),
+        getGasPrice(config, { chainId: q.chainId }).catch(() => 0n),
+      ])
+      const gasNeeded = state.jobId ? 0n : gasPrice * HIRE_GAS
+      let batchCapable = false
+      try {
+        const caps = await getCapabilities(config, { account: address, chainId: q.chainId }) as unknown as Record<string, unknown>
+        type Atomic = { status?: string; supported?: boolean } | undefined
+        const atomic = (caps?.['atomic'] as Atomic) ?? ((caps?.[String(q.chainId)] as { atomic?: Atomic } | undefined)?.atomic)
+        batchCapable = atomic?.status === 'supported' || atomic?.status === 'ready' || atomic?.supported === true
+      } catch { batchCapable = false }
+      set({
+        balances: { token: tokenBal.toString(), gas: gasBal.value.toString(), gasNeeded: gasNeeded.toString() },
+        shortfall: { token: tokenBal < BigInt(q.price), gas: gasBal.value === 0n || gasBal.value < gasNeeded },
+        batchCapable,
+      })
+    } catch { /* a failed read shows no balance line; start() checks again before signing */ }
+  }, [state.quote, state.jobId, address, config])
+
   /** Cancel an opened job before paying (registerJob or payment failed). */
   const cancel = useCallback(async () => {
     if (!state.jobId || !state.quote) return
     try {
+      set({ phase: 'signing', error: null })
       await send(cancelCall(state.quote.chainId, BigInt(state.jobId)))
       set({ phase: 'idle', jobId: null, intent: null, error: null })
     } catch (err) {
@@ -201,5 +246,5 @@ export function useHire() {
     }
   }, [state.jobId, state.quote])
 
-  return { state, getQuote, start, cancel, reset }
+  return { state, getQuote, start, cancel, reset, precheck }
 }

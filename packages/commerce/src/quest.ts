@@ -149,16 +149,22 @@ async function attachRatings(wallet: string, hires: QuestHire[]): Promise<void> 
   const rows = rowsOf(await db().execute(sql`
     select chain_id, agent_token_id, value, value_decimals, tx_hash, block_number, revoked from rating
     where client = ${wallet} order by block_number`))
-  for (const h of hires) {
-    const tid = tokenOnChain(h)
-    if (!tid) continue
-    const submittedBlock = h.tx.submitted ? await submittedAt(h.chainId, h.jobId) : null
-    const r = rows.find((x) => Number(x['chain_id']) === h.chainId && String(x['agent_token_id']) === tid)
-    if (!r) continue
+  // Each rating belongs to exactly one hire: the latest job of that agent delivered at or
+  // before the rating's block. A rating no delivery precedes attaches to the agent's latest
+  // hire flagged rating_unbound, so it is shown but never counts.
+  const cand = await Promise.all(hires.map(async (h) => ({ h, tid: tokenOnChain(h), submitted: h.tx.submitted ? await submittedAt(h.chainId, h.jobId) : null })))
+  const taken = new Set<QuestHire>()
+  for (const r of rows) {
+    const block = Number(r['block_number'])
+    const same = cand.filter((c) => c.tid && c.h.chainId === Number(r['chain_id']) && c.tid === String(r['agent_token_id']) && !taken.has(c.h))
+    if (!same.length) continue
+    const delivered = same.filter((c) => c.submitted !== null && c.submitted <= block).sort((a, b) => (b.submitted ?? 0) - (a.submitted ?? 0))
+    const pick = delivered[0] ?? same[same.length - 1]!
     const value = Number(r['value']) / 10 ** Number(r['value_decimals'] ?? 0)
-    h.rating = { value, stars: Math.round(value / 20), tx: String(r['tx_hash']), revoked: Boolean(r['revoked']) }
-    h.tx.rating = String(r['tx_hash'])
-    if (submittedBlock === null || Number(r['block_number']) < submittedBlock) h.reasons.push('rating_unbound')
+    pick.h.rating = { value, stars: Math.round(value / 20), tx: String(r['tx_hash']), revoked: Boolean(r['revoked']) }
+    pick.h.tx.rating = String(r['tx_hash'])
+    if (!delivered[0]) pick.h.reasons.push('rating_unbound')
+    taken.add(pick.h)
   }
 }
 

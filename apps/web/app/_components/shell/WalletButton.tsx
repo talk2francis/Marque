@@ -4,6 +4,7 @@ import { ArrowUpRight, Check, ChevronDown, Copy, LogOut, Repeat, ShieldCheck, Ta
 import { useEffect, useRef, useState } from 'react'
 import { useDisconnect } from 'wagmi'
 import { explorerAddress } from '../../../lib/network'
+import { copyText } from '../../../lib/clipboard'
 import { QuestProgress } from '../ui/QuestTracker'
 import { questStates, useWalletQuest } from './useQuest'
 
@@ -61,7 +62,7 @@ function AccountMenu({ address, display, chainId, compact, openChainModal }: { a
   }, [open])
 
   const copy = async () => {
-    try { await navigator.clipboard.writeText(address); setCopied(true); setTimeout(() => setCopied(false), 1400) } catch { /* refused */ }
+    if (await copyText(address)) { setCopied(true); setTimeout(() => setCopied(false), 1400) }
   }
 
   return (

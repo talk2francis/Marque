@@ -7,6 +7,7 @@ import { REPUTATION_REGISTRY, reputationAbi } from './indexer.js'
 import { DELIVERED, type JobState } from './state.js'
 import { HireError } from './hire.js'
 import type { Call } from './calls.js'
+import { teamWallets } from './quest.js'
 
 /**
  * Ratings (SPEC-TRACKING 8, P2-04). The server never signs: it checks the guards, stores
@@ -101,7 +102,10 @@ export async function agentRatings(chainId: ChainId, agentTokenId: string, provi
     from rating r where r.chain_id = ${chainId} and r.agent_token_id = ${agentTokenId} and not r.revoked`))
   const score = (r: Record<string, unknown>) => Number(r['value']) / 10 ** Number(r['value_decimals'] ?? 0)
   const avg = (xs: Array<Record<string, unknown>>) => (xs.length ? Number((xs.reduce((a, r) => a + score(r), 0) / xs.length / 20).toFixed(2)) : null)
-  const verified = rows.filter((r) => r['verified'] === true && String(r['tag1']) === 'starred')
+  // Team wallets (config/team-wallets.json) test the product; their ratings are real but never
+  // count as a verified buyer's (SPEC-TRACKING anti-wash, invariant 27).
+  const team = new Set(teamWallets())
+  const verified = rows.filter((r) => r['verified'] === true && String(r['tag1']) === 'starred' && !team.has(String(r['client']).toLowerCase()))
   return {
     chainId, agentId: agentTokenId,
     verifiedBuyers: { count: verified.length, averageStars: avg(verified) },

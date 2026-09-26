@@ -40,6 +40,9 @@ function stepsAt(n: number, failed: boolean): TxStep[] {
   })
 }
 
+/** Fixture buttons say what they would do, so nothing on this page is inert. */
+const fx = (label: string) => () => toast({ tone: 'info', title: `${label}`, body: 'A fixture: in the product this runs the real action.' })
+
 export function Gallery() {
   const [step, setStep] = useState(2)
   const [failed, setFailed] = useState(false)
@@ -56,20 +59,20 @@ export function Gallery() {
     <div className={styles.gallery}>
       <Story id="buttons" title="Button" note="Primary is brass: the one action a screen is for">
         <div className={styles.inline}>
-          <Button variant="primary">Hire Keel</Button>
-          <Button>Try free</Button>
-          <Button variant="ink">Continue in wallet</Button>
-          <Button variant="quiet">Show the graveyard</Button>
-          <Button variant="danger">Cancel job</Button>
+          <Button variant="primary" onClick={fx('Hire Keel')}>Hire Keel</Button>
+          <Button onClick={fx('Try free')}>Try free</Button>
+          <Button variant="ink" onClick={fx('Continue in wallet')}>Continue in wallet</Button>
+          <Button variant="quiet" onClick={fx('Show the graveyard')}>Show the graveyard</Button>
+          <Button variant="danger" onClick={fx('Cancel job')}>Cancel job</Button>
           <Button disabled>Unavailable</Button>
           <Button variant="primary" loading={loading} onClick={() => { setLoading(true); setTimeout(() => setLoading(false), 1600) }}>Pay 0.05 U into escrow</Button>
         </div>
         <div className={styles.inline}>
-          <Button size="sm">Small</Button>
-          <Button size="lg" variant="primary">Start the Set and Earn quest</Button>
+          <Button size="sm" onClick={fx('Small')}>Small</Button>
+          <Button size="lg" variant="primary" onClick={fx('Start the Set and Earn quest')}>Start the Set and Earn quest</Button>
           <ButtonLink href="#buttons">A link as a button</ButtonLink>
-          <IconButton label="Settings"><Settings /></IconButton>
-          <IconButton label="Add" bare><Plus /></IconButton>
+          <IconButton label="Settings" onClick={fx('This control')}><Settings /></IconButton>
+          <IconButton label="Add" bare onClick={fx('This control')}><Plus /></IconButton>
         </div>
       </Story>
 
@@ -127,7 +130,7 @@ export function Gallery() {
 
       <Story id="errors" title="ErrorMap" note="Mapped sentence and next step; never raw text">
         <div className={styles.stack}>
-          <ErrorNote error={{ title: 'Your wallet is on another network.', action: 'Switch to BNB Smart Chain to continue.' }} action={<Button size="sm">Switch network</Button>} />
+          <ErrorNote error={{ title: 'Your wallet is on another network.', action: 'Switch to BNB Smart Chain to continue.' }} action={<Button size="sm" onClick={fx('Switch network')}>Switch network</Button>} />
           <ErrorNote error={{ title: 'You need 0.05 U and have 0.02.', action: 'Swap USDT to U on PancakeSwap, then come back.' }} action={<ButtonLink size="sm" href="https://pancakeswap.finance/swap" external>Get U</ButtonLink>} />
         </div>
       </Story>
@@ -165,11 +168,11 @@ export function Gallery() {
 
       <Story id="quest" title="QuestTracker" note="States come from the Quest API only">
         <QuestTracker steps={[
-          { key: 'y', name: 'Yield', state: 'done', detail: <>Sluicegate · 0.10 U · rated 5 of 5</>, actions: <Button size="sm">View job</Button> },
+          { key: 'y', name: 'Yield', state: 'done', detail: <>Sluicegate · 0.10 U · rated 5 of 5</>, actions: <Button size="sm" onClick={fx('View job')}>View job</Button> },
           { key: 'g', name: 'Grid', state: 'waiting', detail: <>Lattice · payment confirming · <a href="https://bscscan.com/tx/0x046832487aad390b059110a9abaafebdc36ac835a6444005a271728c52154412">0x0468…4412</a></> },
-          { key: 'r', name: 'Rebalancing', state: 'next', detail: <>Recommended: Bound · 0.15 U</>, actions: <><Button size="sm" variant="primary">Hire</Button><Button size="sm" variant="quiet">See all 4</Button></> },
-          { key: 'h', name: 'Health factor', state: 'todo', detail: <>Recommended: Keel · 0.05 U</>, actions: <Button size="sm">Hire</Button> },
-          { key: 'l', name: 'List your agent', state: 'todo', detail: <>0 of 5 checks passed</>, actions: <Button size="sm">Start</Button> },
+          { key: 'r', name: 'Rebalancing', state: 'next', detail: <>Recommended: Bound · 0.15 U</>, actions: <><Button size="sm" variant="primary" onClick={fx('Hire')}>Hire</Button><Button size="sm" variant="quiet" onClick={fx('See all 4')}>See all 4</Button></> },
+          { key: 'h', name: 'Health factor', state: 'todo', detail: <>Recommended: Keel · 0.05 U</>, actions: <Button size="sm" onClick={fx('Hire')}>Hire</Button> },
+          { key: 'l', name: 'List your agent', state: 'todo', detail: <>0 of 5 checks passed</>, actions: <Button size="sm" onClick={fx('Start')}>Start</Button> },
         ]} />
         <div className={styles.inline} style={{ marginTop: 20 }}>
           <QuestProgress states={['done', 'waiting', 'todo', 'todo', 'todo']} />
@@ -196,8 +199,8 @@ export function Gallery() {
             <Skeleton h={14} w="85%" />
             <Skeleton h={42} w={160} r={8} />
           </div>
-          <EmptyState title="No jobs yet" action={<Button size="sm" variant="primary">Start the quest</Button>}>Hires you pay for appear here with every step read from the chain.</EmptyState>
-          <ErrorState source="The Quest Index" action={<Button size="sm">Try again</Button>} />
+          <EmptyState title="No jobs yet" action={<Button size="sm" variant="primary" onClick={fx('Start the quest')}>Start the quest</Button>}>Hires you pay for appear here with every step read from the chain.</EmptyState>
+          <ErrorState source="The Quest Index" action={<Button size="sm" onClick={fx('Try again')}>Try again</Button>} />
         </div>
       </Story>
 
@@ -279,7 +282,7 @@ export function Gallery() {
           <div className={styles.inline}>
             <ProvenanceChip provenance="ONCHAIN" /><Chip tone="holds">Delivered in 21 s</Chip><HashChip value={FUND_TX} chainId={56} />
           </div>
-          <div className={styles.inline}><Button variant="primary">Rate Keel</Button><Button>Open the job room</Button></div>
+          <div className={styles.inline}><Button variant="primary" onClick={fx('Rate Keel')}>Rate Keel</Button><Button onClick={fx('Open the job room')}>Open the job room</Button></div>
         </div>
       </Story>
     </div>

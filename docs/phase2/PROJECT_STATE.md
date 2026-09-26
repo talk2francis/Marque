@@ -15,6 +15,7 @@ Live record of Phase 2. Newest first inside each section. Times are UTC.
 | (was) P2-05 | PART 1 DONE, waiting on G-M2 funding | Fork test passed (USDT and U); sellers prepared on branch phase2-mainnet-sellers (U, max 2x); keeper 0x781e...556a; funding table below |
 | P2-06 Handoff | DRAFTED (Sat 17:40), Francis sends | HANDOFF-BNB.md filled from measured values; paste-ready HANDOFF-BNB-send.md; brand kit at /brand/marque-brand-kit.zip; README Set and Earn section. Open: send date, Francis's Telegram handle | |
 | P2-07 Kerbstone foundation | DONE (Sat 22:00) | Tokens (Night/Day/System, Chamber), General Sans + Instrument Serif + Plex Mono self-hosted, new shell (header pills, nav capsule, Proof menu, account menu, drawer, quest bar, footer), 20-part component set on /_ui, /protocol, every route re-shot; axe 0 serious on 5 routes x 2 themes |
+| P2-08 Hire sheet, Job Room, Quest, My Marque | BUILT (Sat 23:00), acceptance run waits on funding | Hire sheet (per-category task forms checked against each agent's parser, live price, balance and gas check before any signature, named stepper, controls), Job Room (chain timeline, deliverable per category, raw file with hash check, actions per state incl. resume, reclaim, report, rate), /quest (recommendations, live progress, completion card), /me (spending controls with revoke). Recording needs ~0.4 U and ~0.003 BNB in each of two fresh wallets (Request below) |
 
 ## Production baseline (P2-00, Sat 26 Sep 05:16)
 
@@ -48,6 +49,8 @@ Logged in `docs/DEVIATIONS.md` under "Phase 2". Index:
 
 ## Requests
 
+- [Sat 23:00] [P2-08] [Francis] Fund the two P2-08 acceptance wallets on BSC mainnet: **0x4bfD3f9c81a743F852Fb424FD487A1c53d7786D5** (desktop run) and **0x317C5DddfE27D7d9bAaf41f2AD38E9B83B40f99D** (390 px mobile run), each **0.45 U** (the four hires cost 0.40 U at today's quotes) and **0.003 BNB** for gas (measured 1,225,691 gas per hire at 0.05 gwei, plus four ratings). Both are on the team list, so nothing they do counts for the campaign. Then `node scripts/p2-08-accept.mjs --wallet=/root/.marque/test-wallets/p2-08-desktop.json` records the run to docs/phase2/evidence/.
+
 - [Sat 15:20] [P2-05] Tidemark wallet holds Francis's 0.0021 BNB (registration was sponsored). Kept for mainnet submit gas pending the P2-05 funding table; whatever is not needed goes back to 0x0d8c9ad8eebb6879fefa218f0799219bcaabe999.
 
 - [Sat 14:10] [P2-05] [Francis] Send about 0.002 BNB on BSC mainnet to Tidemark's wallet 0x8122991297DC98Dc5c735fDE90a501528922aFdC for its ERC-8004 mainnet registration (needed before it can be listed and hired). The full P2-05 funding table follows before cutover.
@@ -58,6 +61,16 @@ Logged in `docs/DEVIATIONS.md` under "Phase 2". Index:
 - [Sat 05:20] [build] [Francis] Support channel for real users, and personal public wallet addresses for `config/team-wallets.json`.
 
 ## Evidence
+
+### P2-08 (Sat 26 Sep 23:20)
+
+- Hire sheet (`_components/HireSheet.tsx`, `hire/TaskForm.tsx`): opens from `?hire=` on any page (the marketplace URL sync now keeps it), Chamber surface, bottom sheet under 1024 px. Task forms per category compose sentences each agent's own parser accepts (`lib/hire-tasks.test.ts`: Keel, Lattice, Bound, Sluicegate, Tidemark). Live signed price with countdown, live escrow fee (`platformFeeBP` 0) and review window (604,800 s) from chain, network fee from the live gas price x 1,225,691 gas (measured on job 56810). Balance and gas checked before the first signature with a Swap to U link; batch rendering when the wallet reports EIP-5792 atomic support; `useHire` now separates "in wallet" from "confirming" with the tx link.
+- Job Room (`/jobs/[chainId]/[jobId]`): chain-event timeline with plain names, the buyer's own task, the deliverable rendered per category (health factor with MeasureRule and exact repay, range plan with ticks, yield ranking with sources, grid ladder with fee drag), the raw file with a keccak256 check against the on-chain hash (job 56810: matches), actions per state (finish paying, cancel, reclaim, report a problem, rate on chain, hire again), live refresh until final.
+- /quest: recommendations per category (Warranted, verified-buyer rating, delivered jobs, price), five live rows from the Quest API, wallet balances with Get U, honest team-wallet note, completion card with tx links and a share link; readable with no wallet; `?addr=` for any wallet. /me: quest, active jobs, history, spending controls (allowance per token to the escrow, revoke to zero), ratings given, owned agents with their five checks and jobs received.
+- Screens: 80 state PNGs (no wallet, read-only connected wallet, hire sheet from form to live price to shortfall, Job Rooms: delivered, cancelled, testnet settled) at 1440/768/390 in Night and Day, `docs/phase2/screens/p2-08/` (on the VPS). No page errors.
+- axe (`docs/phase2/evidence/axe-p2-08.json`): /quest, /me, /jobs/56/56810, /protocol, /register, Night and Day: 0 violations.
+- Dead-button sweep (`scripts/audit-interactions.mjs` on /quest, /me, two Job Rooms, /protocol, /_ui): copy buttons now fall back when the Clipboard API is refused; every /_ui fixture button now says what it would do. The toast buttons were flagged by the audit but do render (checked separately).
+- Acceptance (fresh wallet completes the quest from /quest, recorded): `scripts/p2-08-accept.mjs` + `scripts/headless-wallet.mjs` validated up to the first signature on the candidate with fresh wallet 0x4bfD...86D5 (connect, Quest 0/5, live quote, shortfall correctly blocks). The paid run waits on the funding Request.
 
 ### P2-07 (Sat 26 Sep 22:00)
 

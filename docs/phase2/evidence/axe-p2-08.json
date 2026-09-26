@@ -1,0 +1,66 @@
+{
+  "base": "http://127.0.0.1:3299",
+  "at": "2026-09-26T20:51:47.088Z",
+  "report": [
+    {
+      "route": "/quest",
+      "theme": "night",
+      "passes": 25,
+      "violations": []
+    },
+    {
+      "route": "/me",
+      "theme": "night",
+      "passes": 23,
+      "violations": []
+    },
+    {
+      "route": "/jobs/56/56810",
+      "theme": "night",
+      "passes": 28,
+      "violations": []
+    },
+    {
+      "route": "/protocol",
+      "theme": "night",
+      "passes": 27,
+      "violations": []
+    },
+    {
+      "route": "/register",
+      "theme": "night",
+      "passes": 25,
+      "violations": []
+    },
+    {
+      "route": "/quest",
+      "theme": "day",
+      "passes": 25,
+      "violations": []
+    },
+    {
+      "route": "/me",
+      "theme": "day",
+      "passes": 23,
+      "violations": []
+    },
+    {
+      "route": "/jobs/56/56810",
+      "theme": "day",
+      "passes": 28,
+      "violations": []
+    },
+    {
+      "route": "/protocol",
+      "theme": "day",
+      "passes": 27,
+      "violations": []
+    },
+    {
+      "route": "/register",
+      "theme": "day",
+      "passes": 25,
+      "violations": []
+    }
+  ]
+}

@@ -1,32 +1,28 @@
+import { Suspense } from 'react'
+import { campaignChainId } from '@marque/commerce'
 import { SiteHeader, SiteFooter } from '../_components/SiteHeader'
-import { Profile } from './Profile'
+import { MyMarque } from './MyMarque'
 import styles from './me.module.css'
 
 export const dynamic = 'force-dynamic'
-export const revalidate = 0
 export const metadata = {
   title: 'My Marque',
-  description:
-    'One place for an address: live positions, every charter granted, every agent hired and the receipt it left, and the recommendations sealed before their outcome. Connect a wallet, or pass ?addr= for any address. Nothing is stored.',
+  description: 'Your hires, quest progress, spending controls, ratings and agents, read from BNB Chain. Connect a wallet, or pass ?addr= for any address. Nothing is stored.',
 }
 
 /**
- * "My Marque" — the profile.
- *
- * Connected, it is the buyer's own dashboard. With ?addr= it is any address,
- * shareable and wallet-free, exactly like /positions. Either way it is a
- * projection of records already keyed by that address plus a live chain read —
- * no account, no stored profile, no PII. The wallet is the identity.
+ * My Marque (DESIGN-SYSTEM.md 8.7). Connected, the buyer's own dashboard; with ?addr=
+ * any address, shareable and wallet-free. A projection of chain records keyed by the
+ * address: no account, no stored profile, no PII.
  */
 export default async function MePage({ searchParams }: { searchParams: Promise<{ addr?: string }> }) {
   const { addr } = await searchParams
   const addrParam = addr && /^0x[a-fA-F0-9]{40}$/.test(addr) ? addr : null
-
   return (
     <>
       <SiteHeader active="me" />
       <main className={styles.page}>
-        <Profile addrParam={addrParam} />
+        <Suspense fallback={null}><MyMarque addrParam={addrParam} chainId={campaignChainId()} /></Suspense>
       </main>
       <SiteFooter />
     </>

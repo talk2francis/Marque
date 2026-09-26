@@ -101,6 +101,20 @@
       "chainIds": [
         56
       ]
+    },
+    {
+      "address": "0x4bfD3f9c81a743F852Fb424FD487A1c53d7786D5",
+      "role": "P2-08 acceptance wallet (desktop browser run, funded by Francis)",
+      "chainIds": [
+        56
+      ]
+    },
+    {
+      "address": "0x317C5DddfE27D7d9bAaf41f2AD38E9B83B40f99D",
+      "role": "P2-08 acceptance wallet (390 px mobile browser run, funded by Francis)",
+      "chainIds": [
+        56
+      ]
     }
   ]
 }
