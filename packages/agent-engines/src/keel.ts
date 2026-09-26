@@ -62,7 +62,7 @@ export function readTarget(prompt: string): { target: number | null; assumptions
     String.raw`\bHF\s*(?:of|to|at|above|[:=]|>=?)?\s*%N%`,
   )
   return target === null
-    ? { target: null, assumptions: [`no target health factor stated; the repayment shown restores ${DEFAULT_TARGET_HF}`] }
+    ? { target: null, assumptions: [`no target health factor stated; the repayment shown restores a health factor of ${DEFAULT_TARGET_HF}`] }
     : { target, assumptions: [] }
 }
 
