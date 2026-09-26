@@ -1,9 +1,11 @@
+import { Fragment } from 'react'
 import { notFound } from 'next/navigation'
 import { sql } from 'drizzle-orm'
 import { db } from '@marque/db'
 import { chainClient, network, isSupportedChain, formatAmount, assetAt, explorerTx, explorerAddress, agenticCommerceAbi, disputeWindowSeconds, timeline } from '@marque/commerce'
 import { SiteHeader, SiteFooter } from '../../../_components/SiteHeader'
 import styles from './job.module.css'
+import { RateJob } from './RateJob'
 
 export const dynamic = 'force-dynamic'
 
@@ -29,6 +31,10 @@ export default async function JobPage({ params }: { params: Promise<{ chainId: s
   const state = (['OPEN', 'FUNDED', 'SUBMITTED', 'COMPLETED', 'REJECTED', 'EXPIRED'] as const)[job.status] ?? 'OPEN'
   const t = window === null ? null : timeline({ state, expiredAt: Number(job.expiredAt) }, job.submittedAt > 0n ? Number(job.submittedAt) : null, window, now)
   const when = (s: number | null) => (s ? new Date(s * 1000).toUTCString().replace(' GMT', ' UTC') : 'not set')
+  const ratings = (await db().execute(sql`
+    select r.value, r.value_decimals, r.tx_hash, r.revoked, c.stars, c.comment from rating_comment c
+    join rating r on r.feedback_hash = c.feedback_hash and r.chain_id = c.chain_id
+    where c.chain_id = ${chainId} and c.job_id = ${jobId} order by r.block_number`) as unknown as Array<Record<string, unknown>>)
   const amount = asset ? `${formatAmount(job.budget, asset.decimals)} ${asset.symbol}` : job.budget.toString()
 
   return (
@@ -49,7 +55,13 @@ export default async function JobPage({ params }: { params: Promise<{ chainId: s
           {t && job.status <= 1 && <><dt>Reclaimable if not delivered after</dt><dd>{when(t.refundFrom)}</dd></>}
           {intent?.['create_tx'] ? <><dt>Opened in</dt><dd className="mono"><a href={explorerTx(chainId, String(intent['create_tx']))}>{String(intent['create_tx']).slice(0, 18)}...</a></dd></> : null}
           <dt>Started on Marque</dt><dd>{intent ? 'yes' : 'no, this job was opened elsewhere'}</dd>
+          {ratings.map((r) => (
+            <Fragment key={String(r['tx_hash'])}><dt>Buyer rating</dt><dd>{String(r['stars'])} of 5{r['comment'] ? `: ${String(r['comment'])}` : ''}{r['revoked'] ? ' (revoked)' : ''} <a className="mono" href={explorerTx(chainId, String(r['tx_hash']))}>on chain</a></dd></Fragment>
+          ))}
         </dl>
+        {job.status >= 2 && job.status <= 3 && ratings.length === 0 && (
+          <RateJob chainId={chainId} jobId={jobId} client={job.client} agentName={intent?.['name'] ? String(intent['name']) : 'this agent'} />
+        )}
       </main>
       <SiteFooter />
     </>

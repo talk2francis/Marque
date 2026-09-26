@@ -219,13 +219,18 @@ export async function questJob(chainId: ChainId, jobId: string) {
   if (h) await attachRatings((await clientOf(chainId, jobId)) ?? '', [h])
   const [j] = rowsOf(await db().execute(sql`select * from commerce_job where chain_id = ${chainId} and job_id = ${jobId}`))
   const [intent] = h?.intentId ? rowsOf(await db().execute(sql`select id, wallet, agent_id, category, quote_id, description_hash, created_at, bound_at, bind_source from hire_intent where id = ${h.intentId}`)) : []
+  // The feedbackURI of a Marque rating points here, so the comment behind each hash is served too.
+  const feedback = rowsOf(await db().execute(sql`
+    select feedback_hash, stars, comment, canonical, client, agent_token_id, created_at from rating_comment
+    where chain_id = ${chainId} and job_id = ${jobId} order by created_at`))
   const slug = h?.agent.agentId ? firstPartyAgents().find((f) => String(f.tokenId) === h.agent.agentId)?.slug : undefined
   return {
     chainId, jobId, state: h?.state ?? null, client: s(j?.['client']), provider: s(j?.['provider']), evaluator: s(j?.['evaluator']),
     agent: h?.agent ?? null, amount: h?.amount ?? null, token: h?.token ?? null,
     deliverable: { hash: s(j?.['deliverable']), url: slug ? `https://marque.trade/agents/${slug}/erc8183/job/${jobId}/response` : null },
     expiresAt: j?.['expired_at'] ? new Date(Number(j['expired_at']) * 1000).toISOString() : null,
-    intent: intent ?? null, rating: h?.rating ?? null, tx: h?.tx ?? null, eligible: h?.eligible ?? false, reasons: h?.reasons ?? ['unknown_job'],
+    intent: intent ?? null, rating: h?.rating ?? null,
+    feedback: feedback.map((f) => ({ feedbackHash: f['feedback_hash'], stars: Number(f['stars']), comment: f['comment'] ?? null, canonical: f['canonical'], client: f['client'], agentId: f['agent_token_id'], preparedAt: iso(f['created_at']) })), tx: h?.tx ?? null, eligible: h?.eligible ?? false, reasons: h?.reasons ?? ['unknown_job'],
     events: events.map((e) => ({ name: e['name'], contract: e['contract'], tx: e['tx_hash'], logIndex: e['log_index'], block: Number(e['block_number']), at: iso(e['block_time']), args: e['args'] })),
   }
 }

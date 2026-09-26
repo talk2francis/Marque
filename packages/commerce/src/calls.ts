@@ -11,7 +11,7 @@ import { network, type ChainId } from './config.js'
  * Sequence (SPEC-COMMERCE 5.1): createJob (evaluator = router, hook = router), then
  * registerJob, setBudget, approve (exact, only if the allowance is short), fund.
  */
-export type StepId = 'createJob' | 'registerJob' | 'setBudget' | 'approve' | 'fund' | 'cancel' | 'claimRefund' | 'dispute' | 'revokeAllowance' | 'settle'
+export type StepId = 'createJob' | 'registerJob' | 'setBudget' | 'approve' | 'fund' | 'cancel' | 'claimRefund' | 'dispute' | 'revokeAllowance' | 'settle' | 'rate'
 
 export interface Call {
   step: StepId
