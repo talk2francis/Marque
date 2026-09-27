@@ -1,7 +1,7 @@
 'use client'
 import { ChevronDown } from 'lucide-react'
 import { useCallback, useEffect, useId, useRef, useState } from 'react'
-import { NAV, PROOF_GROUPS, PROOF_KEYS, type Active } from '../nav-items'
+import { NAV, DOC_GROUPS, PROOF_GROUPS, PROOF_KEYS, type Active } from '../nav-items'
 import { NavGlyph } from './icons'
 
 /**
@@ -19,17 +19,18 @@ export function NavLinks({ active }: { active?: Active }) {
   return (
     <nav ref={wrap} className="nav-capsule" aria-label="Main" onPointerLeave={() => setHi(null)}>
       <span className="nav-hi" data-on={hi ? '' : undefined} style={hi ? { width: hi.w, transform: `translateX(${hi.x}px)` } : undefined} aria-hidden="true" />
-      {NAV.map((n) => (
+      {NAV.filter(n => n.key !== 'docs').map((n) => (
         <a key={n.key} href={n.href} className="nav-link" aria-current={active === n.key ? 'page' : undefined} onPointerEnter={(e) => track(e.currentTarget)} onFocus={(e) => track(e.currentTarget)}>
           {n.label}
         </a>
       ))}
-      <ProofMenu current={active ? PROOF_KEYS.includes(active) : false} onHover={track} />
+      <ProofMenu label="Docs" groups={DOC_GROUPS} current={active === 'docs'} onHover={track} />
+      <ProofMenu label="Proof" groups={PROOF_GROUPS} current={active ? PROOF_KEYS.includes(active) : false} onHover={track} />
     </nav>
   )
 }
 
-function ProofMenu({ current, onHover }: { current: boolean; onHover: (el: HTMLElement | null) => void }) {
+function ProofMenu({ label, groups, current, onHover }: { label: string; groups: typeof PROOF_GROUPS; current: boolean; onHover: (el: HTMLElement | null) => void }) {
   const [open, setOpen] = useState(false)
   const pinned = useRef(false)
   const ref = useRef<HTMLDivElement>(null)
@@ -47,6 +48,7 @@ function ProofMenu({ current, onHover }: { current: boolean; onHover: (el: HTMLE
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') { close(true); return }
       if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return
+      if (!ref.current?.contains(document.activeElement)) return
       const items = Array.from(ref.current?.querySelectorAll<HTMLElement>('.navm-item') ?? [])
       if (!items.length) return
       e.preventDefault()
@@ -64,6 +66,7 @@ function ProofMenu({ current, onHover }: { current: boolean; onHover: (el: HTMLE
       ref={ref}
       className="navm"
       data-open={open ? '' : undefined}
+      onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node | null)) close() }}
       onPointerEnter={(e) => { if (e.pointerType === 'mouse') setOpen(true) }}
       onPointerLeave={(e) => { if (e.pointerType === 'mouse' && !pinned.current) setOpen(false) }}
     >
@@ -79,11 +82,11 @@ function ProofMenu({ current, onHover }: { current: boolean; onHover: (el: HTMLE
         onFocus={(e) => onHover(e.currentTarget)}
         onClick={() => { if (pinned.current) close(); else { pinned.current = true; setOpen(true) } }}
       >
-        Proof<ChevronDown size={14} aria-hidden="true" />
+        {label}<ChevronDown size={14} aria-hidden="true" />
       </button>
       <div className="navm-panel" id={id} hidden={!open}>
         <div className="navm-groups">
-          {PROOF_GROUPS.map((g) => (
+          {groups.map((g) => (
             <div key={g.label} className="navm-group">
               <span className="t-label navm-head">{g.label}</span>
               {g.items.map((it) => (

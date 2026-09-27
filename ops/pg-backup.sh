@@ -6,8 +6,14 @@
 # — pushes it offsite. A single-disk VPS has no true offsite by itself; that
 # env var is the hook, and RUNBOOK.md says what to point it at.
 set -euo pipefail
+umask 077
+exec 9>/root/.marque/backup.lock
+flock -n 9 || { echo "A backup is already running"; exit 1; }
 
 set -a; . /root/.marque/secrets.env; set +a
+if [ -f /root/.marque/backup.env ]; then
+  set -a; . /root/.marque/backup.env; set +a
+fi
 
 PRIMARY="/root/marque-backups"
 SECONDARY="/var/backups/marque"
@@ -19,7 +25,7 @@ mkdir -p "$PRIMARY" "$SECONDARY"
 
 # --- dump (custom format would be smaller, but plain SQL is trivially inspectable
 #     and restores with psql on any box; the restore test relies on that).
-pg_dump "$DATABASE_URL" --no-owner --no-privileges \
+node /root/marque/ops/pg-command.mjs pg_dump --no-owner --no-privileges \
   | gzip -9 > "${PRIMARY}/${NAME}.partial"
 mv "${PRIMARY}/${NAME}.partial" "${PRIMARY}/${NAME}"
 cp "${PRIMARY}/${NAME}" "${SECONDARY}/${NAME}"
@@ -27,10 +33,22 @@ cp "${PRIMARY}/${NAME}" "${SECONDARY}/${NAME}"
 SIZE="$(du -h "${PRIMARY}/${NAME}" | cut -f1)"
 echo "$(date -u +%FT%TZ) backup ${NAME} (${SIZE}) -> ${PRIMARY}, ${SECONDARY}"
 
-# --- offsite, if configured
-if [ -n "${MARQUE_BACKUP_REMOTE:-}" ] && command -v rclone >/dev/null 2>&1; then
-  rclone copy "${PRIMARY}/${NAME}" "${MARQUE_BACKUP_REMOTE}" \
-    && echo "$(date -u +%FT%TZ) offsite -> ${MARQUE_BACKUP_REMOTE}/${NAME}"
+# Record local success independently of the offsite result.
+echo "${STAMP}" > "${PRIMARY}/LATEST"
+
+# Offsite copies are always encrypted. Never silently skip a configured remote.
+if [ -n "${MARQUE_BACKUP_REMOTE:-}" ]; then
+  command -v rclone >/dev/null
+  command -v age >/dev/null
+  : "${MARQUE_BACKUP_RECIPIENT:?Set the age public recipient in backup.env}"
+  age -r "$MARQUE_BACKUP_RECIPIENT" -o "${PRIMARY}/${NAME}.age.partial" "${PRIMARY}/${NAME}"
+  mv "${PRIMARY}/${NAME}.age.partial" "${PRIMARY}/${NAME}.age"
+  rclone --config /root/.marque/rclone.conf copyto "${PRIMARY}/${NAME}.age" "${MARQUE_BACKUP_REMOTE}/${NAME}.age"
+  rclone --config /root/.marque/rclone.conf check "${PRIMARY}" "${MARQUE_BACKUP_REMOTE}" --include "/${NAME}.age" --one-way
+  echo "${STAMP}" > "${PRIMARY}/OFFSITE_LATEST"
+  echo "$(date -u +%FT%TZ) encrypted offsite copy verified"
+else
+  echo "$(date -u +%FT%TZ) WARNING: offsite backup is not configured" >&2
 fi
 
 # --- rotate

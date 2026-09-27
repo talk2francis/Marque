@@ -310,7 +310,10 @@ function detailToUpdate(detail: ScanAgentDetail): Partial<NewAgent> {
   return {
     agentWallet: detail.agent_wallet ?? null,
     tags: extractTags(detail),
-    rawMetadata: (detail.raw_metadata ?? null) as Record<string, unknown> | null,
+    rawMetadata: {
+      ...(detail.raw_metadata && typeof detail.raw_metadata === 'object' && !Array.isArray(detail.raw_metadata) ? detail.raw_metadata as Record<string, unknown> : {}),
+      scan_created_tx_hash: detail.created_tx_hash ?? null,
+    },
     scanHealthStatus: detail.health_status ?? null,
     scanHealthCheckedAt: toDate(detail.health_checked_at),
     scanParseStatus:

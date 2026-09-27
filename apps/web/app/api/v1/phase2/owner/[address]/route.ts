@@ -26,6 +26,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ address
       return {
         agentKey: v.identity.agentKey, chainId: v.identity.chainId, agentId: v.identity.tokenId, name: v.identity.name, category: v.category,
         listedOnMarque: listed, qualityListing: v.verdict.qualityListing,
+        availability: v.availability,
         quality: {
           listing: v.verdict.qualityListing, passed: v.verdict.passed,
           checks: v.verdict.checks.map((c) => ({ id: c.id, label: c.label, pass: c.state === 'pass', state: c.state, reason: c.reason, fix: c.fix, note: c.note ?? null })),

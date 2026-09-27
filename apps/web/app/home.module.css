@@ -45,7 +45,9 @@
 .ctas { display: flex; flex-wrap: wrap; gap: 12px; }
 .noWallet { margin: 0; font-size: 13.5px; color: var(--ink-3); }
 
-.heroArt { position: relative; min-width: 0; align-self: stretch; display: flex; flex-direction: column; justify-content: center; }
+.heroArt { position: relative; min-width: 0; align-self: stretch; display: flex; flex-direction: column; justify-content: center; gap:24px; padding:36px; background:var(--ground-raised); border:1px solid var(--hair-2); border-radius:var(--r-3); }
+.evidenceLabel { font-family:var(--font-serif); font-size:32px; line-height:1.15; margin:0; color:var(--ink); }
+.evidenceLink { color:var(--brass); font-size:14px; text-underline-offset:4px; }
 .art {
   display: block; position: relative; width: 100%; aspect-ratio: 1160 / 520;
   border-radius: var(--r-3); overflow: hidden;
@@ -60,15 +62,14 @@
 /* The latest real hire, over the art: the product proving itself, not a picture of it. */
 .proof {
   position: relative;
-  margin: -84px 0 0 auto;
-  width: min(360px, 92%);
+  margin: 0;
+  width: 100%;
   padding: 16px 18px 14px;
   border: 1px solid var(--hair-2);
   border-radius: var(--r-3);
-  background: color-mix(in srgb, var(--canvas) 88%, transparent);
-  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  background: var(--canvas);
   color: var(--ink);
-  box-shadow: var(--elev-3);
+  box-shadow: none;
 }
 .proofHead { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 0 0 8px; }
 .proofHead :global(.t-label) { color: var(--ink-2); }
@@ -184,14 +185,15 @@
   .hero { grid-template-columns: 1fr; gap: var(--s-6); }
   .display { max-width: 14ch; }
   .whyGrid, .build { grid-template-columns: 1fr; }
-  .proof { margin-top: -64px; }
+  .proof { margin-top: 0; }
 }
 @media (max-width: 640px) {
   .tiles, .cards, .steps, .protections, .pf { grid-template-columns: 1fr; }
   .steps li { border-left: 0; border-top: 1px solid var(--hair); }
   .steps li:first-child { border-top: 0; }
   .tileJob { min-height: 0; }
-  .proof { width: 100%; margin-top: -40px; }
+  .proof { width: 100%; margin-top: 0; }
+  .heroArt { padding: 22px; }
   .ctas :global(.btn) { flex: 1 1 100%; }
   .headNote { display: none; }
 }

@@ -4,7 +4,7 @@
 .section { padding: var(--s6) 0; border-top: 1px solid var(--line); display: flex; flex-direction: column; gap: var(--s3); }
 .h2 { margin: 0 0 var(--s2); font-family: var(--font-statement); font-weight: 400; font-size: var(--size-statement); letter-spacing: -0.015em; }
 .muted { margin: 0; color: var(--fg-soft); font-size: var(--size-body); }
-.note { margin: 0; max-width: 68ch; font-size: var(--size-caption); line-height: 1.55; color: var(--fg-soft); }
+.note { margin: 0; max-width: 68ch; font-size: var(--size-caption); line-height: 1.55; color: var(--fg-soft); overflow-wrap: anywhere; }
 .note > span { margin-right: var(--s2); }
 
 /* One benchmark. Deliberately not a rounded card in a grid — AGENTS.md lists

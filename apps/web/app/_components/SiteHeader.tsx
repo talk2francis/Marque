@@ -87,18 +87,22 @@ const COLS: Array<{ label: string; links: Array<{ label: string; href: string; e
     ],
   },
   {
-    label: 'Ecosystem',
+    label: 'Documentation',
     links: [
-      { label: 'BNB Agent Studio', href: 'https://docs.bnbchain.org/bnb-smart-chain/developers/agents/', external: true },
-      { label: '8004scan', href: 'https://8004scan.io', external: true },
-      { label: 'PancakeSwap', href: 'https://pancakeswap.finance', external: true },
-      { label: 'Venus', href: 'https://venus.io', external: true },
+      { label: 'Getting started', href: '/docs' },
+      { label: 'FAQ', href: '/docs/faq' },
+      { label: 'Whitepaper', href: '/docs/whitepaper' },
+      { label: 'Changelog', href: '/docs/changelog' },
+      { label: 'Terms of use', href: '/docs/terms' },
+      { label: 'Privacy policy', href: '/docs/privacy' },
+      { label: 'Risk disclosure', href: '/docs/risks' },
     ],
   },
   {
     label: 'Follow',
     links: [
       { label: '@marquetrade on X', href: 'https://x.com/marquetrade', external: true },
+      { label: 'Telegram support', href: 'https://t.me/marque_marketplace', external: true },
       { label: 'Source on GitHub', href: 'https://github.com/talk2francis/Marque', external: true },
       { label: 'Report a problem', href: 'https://github.com/talk2francis/Marque/issues', external: true },
       { label: 'Brand kit', href: '/brand/marque-brand-kit.zip' },
@@ -117,7 +121,7 @@ export function SiteFooter() {
         <div className="footer-top">
           <div className="footer-brand">
             <LockupLink height={26} />
-            <p>Hire BNB Chain agents that were tested before you pay. Your payment waits in BNB Chain&apos;s escrow until the work is delivered.</p>
+            <p>Find a BNB Chain agent, inspect its evidence and pay for a specific job. Delivery and escrow settlement are tracked separately.</p>
           </div>
           <div className="footer-cta">
             <a className="btn btn--primary" href="/quest">Start the quest</a>

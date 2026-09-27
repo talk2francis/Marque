@@ -14,6 +14,16 @@ const base: QualityFacts = {
 }
 
 describe('qualityVerdict', () => {
+  it('does not let an earlier success hide a newer failure', () => {
+    const v = qualityVerdict({ ...base, lastProbeFailure: {at:'2026-09-27T00:55:00Z',reason:'timeout'} })
+    expect(v.qualityListing).toBe(false)
+    expect(v.checks[2]!.reason).toContain('timeout')
+  })
+  it('rejects future and invalid callable timestamps', () => {
+    for (const at of ['2026-09-28T00:00:00Z', 'invalid']) {
+      expect(qualityVerdict({...base, callable:{...base.callable!,at}}).qualityListing).toBe(false)
+    }
+  })
   it('passes all five, and a failed-but-well-formed test still counts', () => {
     const v = qualityVerdict(base)
     expect(v.qualityListing).toBe(true)

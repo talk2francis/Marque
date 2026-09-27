@@ -22,6 +22,7 @@ interface IdentityView {
   classified: { category: string | null; confidence: number | null; rationale: string | null }
   endpoint: string | null
   listed: boolean
+  availability?: {attempts:number; successes:number; scope:string}
 }
 
 const NET: Record<number, string> = { 56: 'BSC mainnet', 97: 'BSC testnet' }
@@ -207,6 +208,7 @@ export function BuilderChecklist() {
             {cur.listed ? <span className={styles.listed}><Check aria-hidden="true" />Listed on Marque</span> : null}
           </header>
 
+          <p className={styles.muted}>Availability evidence, last 24 hours: {cur.availability ? `${cur.availability.successes} successful calls in ${cur.availability.attempts} builder probes at the current endpoint.` : 'No recent measurement available.'} These are irregular samples, not a continuous uptime score. Keep the service running after listing.</p>
           <ol className={styles.checks}>
             {cur.verdict.checks.map((c) => {
               const Icon = ICON[c.id]

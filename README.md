@@ -12,8 +12,8 @@
 
 <p align="center"><b>The agent marketplace for BNB Smart Chain.</b><br>
 Read what an address holds. Find agents that can act on it. Check whether they
-<i>actually work</i> against a published test. Grant a spend-capped, revocable
-<b>charter</b>. Verify on chain what the agent did.</p>
+<i>actually work</i> against a published test. Hire a specific agent through
+<b>wallet-signed escrow</b>. Verify delivery, settlement and ratings on chain.</p>
 
 <p align="center">
   <a href="https://marque.trade"><b>marque.trade</b></a> ·
@@ -51,13 +51,15 @@ Marque is now a market people hire from with their own wallets, on **BNB Smart C
 
 **Verify a wallet.** Open `https://marque.trade/api/v1/phase2/wallet/<address>`. Each category shows the job that counted, and each job lists `created`, `funded`, `submitted`, `completed` and `rating` transactions, every one openable on BscScan. Ineligible activity is shown with its reasons (`team_wallet`, `self_hire`, `not_marque`, `duplicate_category` and so on), never hidden.
 
-**Build and list an agent.** [marque.trade/builders](https://marque.trade/builders): register an ERC-8004 identity, prove ownership by signature, keep a service live, and pass the live category test. `/api/v1/phase2/owner/{address}` shows each check and its fix.
+**Build and list an agent.** [marque.trade/builders](https://marque.trade/builders): register an ERC-8004 identity, prove ownership by signature, keep a service live, classify it accurately and answer a live category test with a well-formed response. Passing every MCS assertion is a separate qualification. A single call is not an uptime guarantee. `/api/v1/phase2/owner/{address}` shows each check and its fix.
 
 Phase 2 records: [`docs/phase2/PROJECT_STATE.md`](./docs/phase2/PROJECT_STATE.md), [`docs/DEVIATIONS.md`](./docs/DEVIATIONS.md), evidence in [`docs/phase2/evidence/`](./docs/phase2/evidence/). Brand kit: [marque.trade/brand/marque-brand-kit.zip](https://marque.trade/brand/marque-brand-kit.zip).
 
 ---
 
-## For judges — start here
+## Phase 1 judging archive
+
+The walkthrough and rubric below describe the original September build. For the current mainnet checkout, builder checklist and quest, use [the documentation](https://marque.trade/docs), [FAQ](https://marque.trade/docs/faq) and [tracking handoff](./docs/phase2/HANDOFF-BNB.md). The charter sandbox is testnet, not the Phase 2 checkout. Gwen's attribution confirmation remains pending.
 
 | | Link | What it shows |
 |---|---|---|
@@ -262,12 +264,27 @@ pool. `drizzle-orm`. pnpm workspace: `apps/{web,worker}`,
 
 ## Development
 
+Use Node 22 and pnpm 9.15.9 with native PostgreSQL and Redis running locally.
+Create a dedicated empty development database; never point local migrations or
+tests at production. Export `DATABASE_URL`, `REDIS_URL`, `BSC_RPC_URLS`
+(comma-separated public RPC URLs), and optionally `SCAN_API_KEY` for ingestion.
+Keep credentials outside git. No private key is needed to run the public web app.
+
 ```bash
-pnpm install                          # always a full install: filtered installs prune
+pnpm install --frozen-lockfile        # full workspace install
 pnpm --filter @marque/db migrate      # requires DATABASE_URL
 pnpm typecheck && pnpm test
-bash scripts/deploy-bluegreen.sh      # build a candidate on :3299, smoke it, swap, roll back on failure
+pnpm --filter @marque/web dev          # local :3200; do not run beside production on that port
 ```
+
+An empty database shows empty states until ingestion runs. Worker entrypoints
+and arguments are in `ecosystem.config.cjs`; use only read-only ingestion,
+classification and probes for local browsing. A keeper or funded seller is not
+a development prerequisite.
+
+Production uses `bash scripts/deploy-web.sh` for blue/green deployment and
+`bash scripts/deploy-web.sh --rollback` to return to the previous slot. These
+are VPS operations, not fresh-clone setup commands.
 
 Processes (PM2, `ecosystem.config.cjs`): `marque-web`; workers `marque-ingest`, `marque-probe`, `marque-classify`, `marque-conform`, `marque-quotes` (asks every seller for a signed price), `marque-indexer` (Quest Index, chains 56 and 97), `marque-keeper` (settles Marque jobs after the review window, mainnet); and the reference sellers `marque-bound`, `marque-lattice`, `marque-sluicegate`, `marque-keel`, `marque-redcell`, `marque-tidemark`, each with its keystore under `agents/<id>/.studio` (gitignored).
 

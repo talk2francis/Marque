@@ -16,10 +16,10 @@
   :root,
   [data-theme='night'],
   [data-surface] {
-    --canvas: #0E0F0B;
-    --canvas-2: #12130E;
-    --panel: #16180F;
-    --panel-2: #1C1E15;
+    --canvas: #0B0E0B;
+    --canvas-2: #10150F;
+    --panel: #141B13;
+    --panel-2: #1A2318;
     --sunk: #0A0B07;
     --hair: rgba(236, 232, 222, 0.09);
     --hair-2: rgba(236, 232, 222, 0.17);
@@ -30,10 +30,11 @@
     --ink-3: #8C8779;
     --ink-inverse: #0E0F0B;
 
-    --brass: #D6A64F;
-    --brass-lit: #E4BC6C;
-    --brass-mark: #B0892C;
-    --brass-dim: #6B5428;
+    --accent: #A8C995;
+    --brass: var(--accent);
+    --brass-lit: #BED9AD;
+    --brass-mark: #8DB477;
+    --brass-dim: #425A37;
     --moss: #8FA35E;
     --moss-dim: #56633A;
     --amber: #D9963A;
@@ -45,7 +46,7 @@
 
     --shadow-ink: 0, 0, 0;
     --shadow-a: 0.5;
-    --glow: rgba(214, 166, 79, 0.07);
+    --glow: rgba(141, 180, 119, 0.04);
     --on-media: #FFFFFF;
     --grain-opacity: 0.035;
     --grain-blend: overlay;
@@ -71,10 +72,11 @@
 
     /* Spec #8A6A22 measured 4.39:1 on the Day canvas (axe, P2-07): deepened to clear AA (D2-07-01).
        Hover goes darker on Day, lighter on Night, so it always gains contrast. */
-    --brass: #7D5F1D;
-    --brass-lit: #6A5018;
-    --brass-mark: #B0892C;
-    --brass-dim: #E6D3A8;
+    --accent: #365D2C;
+    --brass: var(--accent);
+    --brass-lit: #284821;
+    --brass-mark: #527747;
+    --brass-dim: #D5E1CB;
     --moss: #4E6128;
     --moss-dim: #A9B48C;
     --amber: #8F5A14;
@@ -86,7 +88,7 @@
 
     --shadow-ink: 40, 34, 20;
     --shadow-a: 0.16;
-    --glow: rgba(176, 137, 44, 0.05);
+    --glow: rgba(82, 119, 71, 0.025);
     --grain-opacity: 0.012;
     --grain-blend: multiply;
 
@@ -104,9 +106,9 @@
     --ink: #E8E9E0;
     --ink-2: #B0B4A1;
     --ink-3: #8A8E7C;
-    --hair: rgba(214, 166, 79, 0.16);
-    --hair-2: rgba(214, 166, 79, 0.32);
-    --glow: rgba(214, 166, 79, 0.1);
+    --hair: rgba(141, 180, 119, 0.16);
+    --hair-2: rgba(141, 180, 119, 0.32);
+    --glow: rgba(141, 180, 119, 0.06);
   }
 
   /* ---- Scale: identical in every theme and surface --------------------- */
@@ -180,7 +182,7 @@
     --deck: #12140E;
     --deck-raised: #1B1E15;
     --deck-ink: #E8E9E0;
-    --deck-rule: rgba(214, 166, 79, 0.16);
+    --deck-rule: rgba(141, 180, 119, 0.16);
 
     --font-ui: var(--font-sans);
     --font-statement: var(--font-serif);

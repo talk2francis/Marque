@@ -1,260 +1,41 @@
-/* ===== /docs — tabbed reference, sticky rail ===== */
-
-.pageHead {
-  max-width: var(--measure-data);
-  margin: 0 auto;
-  padding: var(--s7) var(--s5) 0;
-}
-.kicker {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--s2);
-  font-size: var(--size-eyebrow);
-  letter-spacing: var(--tracking-eyebrow);
-  text-transform: uppercase;
-  color: var(--fg-soft);
-  font-weight: 600;
-  margin-bottom: var(--s3);
-}
-.kicker::before {
-  content: '';
-  width: 20px;
-  height: 2px;
-  background: var(--brass);
-  border-radius: var(--r-pill);
-}
-.pageHead :global(.statement) { max-width: 22ch; margin-bottom: var(--s4); }
-.lede { font-size: 17px; line-height: 1.6; color: var(--fg-soft); margin: 0; max-width: 64ch; }
-
-/* ---- A fixed reading frame, not a scrolling page --------------------
-   The page itself does not move. The header and the rail hold their place and
-   ONLY the section content scrolls, so the reader never loses the nav, the
-   contents list, or the prev/next control. Below 900px this collapses back to
-   normal document flow, where a fixed frame would be hostile. */
-.wrap {
-  max-width: var(--measure-data);
-  margin: 0 auto;
-  padding: var(--s5) var(--s5) var(--s5);
-  display: grid;
-  grid-template-columns: 244px minmax(0, 1fr);
-  gap: var(--s8);
-  align-items: stretch;
-  /* viewport minus the sticky nav and this page's own header */
-  height: calc(100dvh - var(--docs-chrome, 232px));
-  min-height: 380px;
-  overflow: hidden;
-}
-
-/* ---- The rail: holds its place; scrolls only if the list overflows ---- */
-.rail {
-  align-self: stretch;
-  min-height: 0;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  scrollbar-width: thin;
-  padding-right: var(--s2);
-}
-.railHead {
-  display: block;
-  font-size: var(--size-eyebrow);
-  letter-spacing: var(--tracking-eyebrow);
-  text-transform: uppercase;
-  color: var(--fg-soft);
-  font-weight: 600;
-  margin-bottom: var(--s3);
-}
-.railList { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
-.railList a {
-  display: flex;
-  gap: var(--s2);
-  align-items: baseline;
-  min-height: 34px;
-  padding: 9px 10px 9px 12px;
-  font-size: var(--size-control);
-  line-height: 1.35;
-  color: var(--fg-soft);
-  text-decoration: none;
-  border-left: 2px solid transparent;
-  border-radius: 0 var(--r-xs) var(--r-xs) 0;
-  transition: color var(--dur-fast) var(--ease), background-color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease);
-}
-.railList a:hover { color: var(--fg); background: color-mix(in srgb, var(--fg) 4%, transparent); }
-.railActive {
-  color: var(--fg) !important;
-  border-left-color: var(--brass) !important;
-  background: color-mix(in srgb, var(--brass-mark) 9%, transparent) !important;
-  font-weight: 500;
-}
-.railNum { font-family: var(--font-mono); font-size: 10.5px; color: var(--fg-soft); flex: none; }
-.railActive .railNum { color: var(--fg); }
-
-/* ---- The content column: the ONLY thing that scrolls ---- */
-.docCol {
-  min-width: 0;
-  min-height: 0;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  scrollbar-width: thin;
-  padding-right: var(--s5);
-  /* the pager sits at the end of the flow, always reachable by scrolling */
-  display: flex;
-  flex-direction: column;
-}
-/* A hairline that says "there is more below" without a scrollbar shouting it. */
-.docCol::after {
-  content: '';
-  position: sticky;
-  bottom: 0;
-  flex: none;
-  height: 32px;
-  margin-top: calc(-1 * var(--s5));
-  background: linear-gradient(180deg, transparent, var(--ground));
-  pointer-events: none;
-}
-.docSection {
-  font-size: var(--size-body);
-  line-height: 1.75;
-  color: var(--fg-soft);
-  max-width: 720px;
-  animation: docIn 320ms var(--ease-settle) both;
-}
-@keyframes docIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
-@media (prefers-reduced-motion: reduce) { .docSection { animation: none; } }
-
-.docSection p { margin: 0 0 var(--s4); }
-.docSection > *:last-child { margin-bottom: 0; }
-.docSection b { color: var(--fg); font-weight: 600; }
-.docSection a {
-  color: var(--chain);
-  text-decoration: none;
-  border-bottom: 1px solid color-mix(in srgb, var(--chain) 30%, transparent);
-  padding-bottom: 1px;
-}
-.docSection a:hover { border-bottom-color: var(--chain); }
-.docSection .mono {
-  color: var(--fg);
-  background: color-mix(in srgb, var(--fg) 6%, transparent);
-  padding: 1px 6px;
-  border-radius: var(--r-xs);
-  font-size: 12.5px;
-  white-space: nowrap;
-}
-
-.h2 {
-  margin: 0 0 var(--s4);
-  font-size: 24px;
-  font-weight: 600;
-  letter-spacing: -0.015em;
-  color: var(--fg);
-}
-
-.list { margin: 0 0 var(--s4); padding-left: var(--s5); display: flex; flex-direction: column; gap: var(--s2); }
-.list li { padding-left: var(--s1); }
-.list li::marker { color: var(--fg-faint); }
-
-.foot {
-  margin-top: var(--s6) !important;
-  padding-top: var(--s5);
-  border-top: 1px solid var(--line);
-  font-size: var(--size-caption);
-  color: var(--fg-faint);
-}
-
-/* ---- Prev / Next ---- */
-.pager {
-  display: flex;
-  justify-content: space-between;
-  gap: var(--s4);
-  margin-top: var(--s7);
-  padding-top: var(--s5);
-  border-top: 1px solid var(--line);
-}
-.pagerPrev, .pagerNext {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  max-width: 46%;
-  text-align: left;
-  cursor: pointer;
-  font: inherit;
-  background: transparent;
-  border: 1px solid var(--line);
-  border-radius: var(--r-md);
-  padding: var(--s3) var(--s4);
-  color: inherit;
-  transition: border-color var(--dur-fast) var(--ease), background-color var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
-}
-.pagerNext { text-align: right; align-items: flex-end; }
-.pagerPrev:hover, .pagerNext:hover {
-  border-color: var(--fg-soft);
-  background: color-mix(in srgb, var(--fg) 3%, transparent);
-  transform: translateY(-1px);
-}
-.pagerDir {
-  font-size: var(--size-eyebrow);
-  letter-spacing: var(--tracking-eyebrow);
-  text-transform: uppercase;
-  color: var(--fg-faint);
-}
-.pagerPrev .pagerDir::before { content: '← '; }
-.pagerNext .pagerDir::after { content: ' →'; }
-.pagerTitle { font-size: var(--size-control); color: var(--fg); font-weight: 500; }
-
-/* Below 900px the fixed frame is hostile — hand the page back to normal flow. */
-@media (max-width: 900px) {
-  .wrap {
-    grid-template-columns: 1fr;
-    gap: var(--s5);
-    height: auto;
-    min-height: 0;
-    overflow: visible;
-    padding-bottom: var(--s9);
-  }
-  .rail {
-    position: static;
-    max-height: none;
-    overflow: visible;
-    border: 1px solid var(--line);
-    border-radius: var(--r-md);
-    padding: var(--s4);
-    background: color-mix(in srgb, var(--ground-raised) 40%, transparent);
-  }
-  .docCol { overflow: visible; padding-right: 0; display: block; }
-  .docCol::after { display: none; }
-  .railList { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
-  .railList a { border-left: 0; border-radius: var(--r-xs); }
-  .railActive { border-left: 0 !important; }
-}
-@media (max-width: 560px) {
-  .pageHead, .wrap { padding-inline: var(--s4); }
-  .railList { grid-template-columns: 1fr; }
-  .pager { flex-direction: column; }
-  .pagerPrev, .pagerNext { max-width: none; text-align: left; align-items: flex-start; }
-}
-
-/* Keep the desktop rail and pager in a stable workspace; short/mobile screens use document flow. */
-.docsLayout { height: calc(100dvh - 66px); display: flex; flex-direction: column; min-height: 0; }
-.docsLayout .pageHead { width: 100%; padding-top: var(--s5); flex: none; }
-.docsLayout .pageHead :global(.statement) { font-size: 30px; max-width: none; margin-bottom: var(--s3); }
-.docsLayout .lede { font-size: var(--size-body); max-width: 85ch; }
-.docsLayout .wrap { height: auto; flex: 1; min-height: 0; width: 100%; gap: var(--s6); }
-.docSection[hidden] { display: none; }
-.docSection { flex: 1 0 auto; max-width: 680px; }
-.docSection h2:focus { outline: none; }
-.pager { flex: none; margin-top: var(--s6); margin-bottom: var(--s4); }
-.docCol::after { display: none; }
-.docsFooter { display: none; }
-.mobilePicker { display: none; }
-@media (max-width: 900px), (max-height: 600px) {
-  .docsLayout { height: auto; }
-  .docsLayout .wrap { flex: none; display: block; overflow: visible; }
-  .rail { display: none; }
-  .mobilePicker { display: flex; flex-direction: column; gap: 8px; margin-bottom: var(--s5); font-size: var(--size-caption); }
-  .mobilePicker select { width: 100%; min-height: 44px; font: inherit; color: var(--fg); background: var(--ground-raised); border: 1px solid var(--line); border-radius: var(--r-sm); padding: 10px; }
-  .docCol { overflow: visible; padding: 0; }
-  .docsFooter { display: block; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .railList a, .pagerPrev, .pagerNext { transition: none; }
-  .pagerPrev:hover, .pagerNext:hover { transform: none; }
+.pageHead { max-width:var(--measure-data); margin:0 auto; padding:72px 24px 48px; border-bottom:1px solid var(--line); }
+.kicker { display:block; font-size:13px; font-weight:500; color:var(--brass); margin-bottom:20px; }
+.pageHead :global(.statement) { font-family:var(--font-serif); font-weight:400; font-size:clamp(38px,5vw,62px); line-height:1.05; max-width:22ch; margin:0 0 24px; }
+.mobileContents { display:none; }
+.lede { font-size:18px; line-height:1.7; color:var(--fg-soft); max-width:64ch; margin:0; }
+.wrap { max-width:var(--measure-data); margin:0 auto; padding:48px 24px 96px; display:grid; grid-template-columns:240px minmax(0,1fr); gap:clamp(32px,6vw,88px); align-items:start; }
+.rail { position:sticky; top:96px; max-height:calc(100dvh - 120px); overflow:auto; padding-right:20px; }
+.railHead { display:block; font-size:12px; font-weight:600; color:var(--fg-faint); margin:0 0 12px; }
+.library { display:flex; flex-direction:column; gap:4px; margin-bottom:32px; padding-bottom:24px; border-bottom:1px solid var(--line); }
+.library a,.railList a { display:block; padding:9px 10px; font-size:14px; line-height:1.4; color:var(--fg-soft); text-decoration:none; border-left:2px solid transparent; }
+.library a:hover,.railList a:hover { color:var(--fg); background:var(--ground-raised); }
+.railList { list-style:none; margin:0; padding:0; }
+.railActive { color:var(--brass)!important; border-left-color:var(--brass)!important; background:var(--brass-tint); }
+.docCol { min-width:0; max-width:680px; }
+.docSection { scroll-margin-top:100px; padding:0 0 40px; margin:0 0 40px; border-bottom:1px solid var(--line); color:var(--fg-soft); font-size:16px; line-height:1.8; overflow-wrap:anywhere; }
+.docSection p { margin:0 0 20px; }
+.docSection h3 { color:var(--fg); font-size:18px; margin:28px 0 12px; }
+.docSection b,.docSection strong { color:var(--fg); font-weight:600; }
+.docSection a,.help a { color:var(--brass); text-decoration:underline; text-underline-offset:4px; }
+.docSection code { font-size:12px; padding:2px 5px; background:var(--ground-raised); border:1px solid var(--line); border-radius:4px; }
+.h2 { font-family:var(--font-serif); font-size:34px; line-height:1.15; font-weight:400; color:var(--fg); margin:0 0 22px; }
+.list { padding-left:22px; margin:0 0 22px; }
+.list li { padding-left:4px; margin-bottom:12px; }
+.help { border-left:2px solid var(--brass); padding:20px 24px; background:var(--ground-raised); color:var(--fg-soft); line-height:1.7; }
+.docsLayout { min-height:60vh; }
+.docsFooter { display:block; }
+.meta { font-size:13px; color:var(--fg-faint); margin-top:24px; }
+@media(max-width:800px) {
+ .pageHead { padding:40px 20px 32px; } .lede { font-size:16px; }
+ .wrap { grid-template-columns:1fr; padding:28px 20px 64px; gap:32px; }
+ .rail { display:none; }
+ .mobileContents { display:block; padding:16px; border:1px solid var(--line); border-radius:var(--r-sm); background:var(--ground-raised); }
+ .mobileContents summary { cursor:pointer; color:var(--fg); font-size:14px; min-height:24px; }
+ .mobileContents[open] summary { margin-bottom:24px; }
+ .library { display:grid; grid-template-columns:1fr 1fr; gap:0; margin-bottom:20px; padding-bottom:20px; }
+ .library .railHead { grid-column:1/-1; }
+ .railList { display:flex; flex-wrap:wrap; gap:4px; }
+ .railList a { border:1px solid var(--line); border-radius:4px; padding:8px 10px; font-size:13px; }
+ .docSection { font-size:15px; padding-bottom:28px; margin-bottom:28px; }
+ .h2 { font-size:29px; }
 }

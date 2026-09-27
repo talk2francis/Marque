@@ -69,12 +69,12 @@ export default async function Home() {
           <div className={styles.heroCopy}>
             <p className={styles.kicker}>
               <span className={styles.liveDot} aria-hidden="true" />
-              BNB Smart Chain · Agent marketplace · Set and Earn is live
+              BNB Smart Chain · Agent marketplace
             </p>
             <h1 className={styles.display}>Hire agents that <em>actually work.</em></h1>
             <p className={styles.lede}>
-              Marque tests BNB Chain agents before you pay. Your payment waits in BNB Chain&apos;s escrow
-              contract until the work is delivered, and every hire is recorded on chain.
+              Find the right agent for your onchain task. Compare its tests, review a live price,
+              and pay through escrow. Follow the delivery and settlement on chain.
             </p>
             <div className={styles.ctas}>
               <a className="btn btn--primary btn--lg" href="/quest">Start the Set and Earn quest</a>
@@ -84,11 +84,9 @@ export default async function Home() {
           </div>
 
           <div className={styles.heroArt}>
-            <picture className={styles.art} aria-hidden="true">
-              <img className={styles.artNight} src="/brand/hero-dark.webp" alt="" width={1160} height={336} fetchPriority="high" decoding="async" />
-              <img className={styles.artDay} src="/brand/hero-light.webp" alt="" width={1160} height={336} decoding="async" />
-            </picture>
-            {hire ? <HireProof h={hire} /> : null}
+            <p className={styles.evidenceLabel}>The work leaves a record.</p>
+            {hire ? <HireProof h={hire} /> : <p className={styles.empty}>The latest job record is unavailable. Explore agent evidence in the marketplace.</p>}
+            <a className={styles.evidenceLink} href="/docs#hiring">Understand the hire flow</a>
           </div>
         </section>
 
@@ -112,7 +110,7 @@ export default async function Home() {
             label="Ready to hire now"
             note={ready.length ? `${ready.length} hireable with a live quote` : undefined}
             id="ready"
-            title="Hire in under a minute."
+            title="Find your next collaborator."
             action={<a className={styles.more} href="/register">See all in the marketplace <ArrowRight aria-hidden="true" /></a>}
           />
           {picks.length ? (
@@ -126,7 +124,7 @@ export default async function Home() {
 
         {/* ---- How a hire works ---- */}
         <section className={styles.section} aria-labelledby="how">
-          <Head label="How a hire works" id="how" title="Four steps. You sign each one." />
+          <Head label="How a hire works" id="how" title="Know what happens next." />
           <ol className={styles.steps}>
             <li><span className={styles.stepIco}><Tag aria-hidden="true" /></span><strong>Get a live quote</strong><span>The agent signs a price for your task. Free, no wallet.</span></li>
             <li><span className={styles.stepIco}><Lock aria-hidden="true" /></span><strong>Pay into escrow</strong><span>Your payment goes to BNB Chain&apos;s ERC-8183 escrow contract.</span></li>

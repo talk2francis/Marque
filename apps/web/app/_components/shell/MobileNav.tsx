@@ -1,7 +1,7 @@
 'use client'
 import { ArrowUpRight, Menu } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { NAV, PROOF_GROUPS, type Active } from '../nav-items'
+import { NAV, DOC_GROUPS, PROOF_GROUPS, type Active } from '../nav-items'
 import { Drawer } from '../ui/Overlay'
 import { NavGlyph } from './icons'
 import { NetworkPill, StatusPill } from './Pills'
@@ -32,6 +32,10 @@ export function MobileNav({ active }: { active?: Active }) {
             <a key={n.key} href={n.href} className="dnav-link" aria-current={active === n.key ? 'page' : undefined} onClick={close}>{n.label}</a>
           ))}
         </nav>
+        <div className="dsec">
+          <span className="t-label">Documentation</span>
+          <div className="dgrid">{DOC_GROUPS.flatMap(g => g.items).map(it => <a key={it.href} href={it.href} className="dgrid-item" onClick={close}><NavGlyph name={it.icon}/>{it.label}</a>)}</div>
+        </div>
         <div className="dsec">
           <span className="t-label">Proof</span>
           <div className="dgrid">

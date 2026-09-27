@@ -320,3 +320,18 @@ Zero horizontal page scroll anywhere. Long hashes truncate in the middle with co
 ## 12. Accessibility
 
 AA contrast, visible focus (moss ring), full keyboard path through the hire sheet, tx status in `aria-live`, state never by colour alone (icon + word), charts with text equivalents, reduced motion honoured, touch targets 44 px.
+# 27 September refinement: green actions and a reading library
+
+The owner requested this direction after P2-11. It supersedes older brass-only
+branding guidance for the refreshed interface. Shared tokens use sage action
+accent #A8C995 on Night and forest #365D2C on Day, with theme-specific hover
+colors. Legacy --brass variables alias this action palette to avoid fragmented
+page colors. Amber warnings and oxide errors keep their semantic meaning; green
+branding alone must not be interpreted as a passed test.
+
+Retain General Sans for interface copy, Instrument Serif for editorial headings
+and IBM Plex Mono for data. Docs use a normal document scroll, 680px reading
+column, sticky library and contents rail, real anchor links, and a stacked
+mobile layout. Do not hide the article sections behind imperative tabs or put
+the body inside a second scrolling viewport. The home evidence panel contains
+a real indexed job, never an illustrative success counter.

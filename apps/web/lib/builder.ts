@@ -93,6 +93,7 @@ export interface BuilderView {
   classified: QualityFacts['classified']
   endpoint: string | null
   listed: boolean
+  availability: { windowHours: number; attempts: number; successes: number; firstAt: string | null; lastAt: string | null; scope: string }
 }
 
 /** Everything the checklist shows for one identity, from the view of one wallet. */
@@ -104,7 +105,11 @@ export async function builderView(wallet: string, chainId: ChainId, tokenId: str
     db().execute(sql`select owner_address, verified_at from builder_proof where agent_key = ${key} order by verified_at desc limit 5`).then(rowsOf),
     db().execute(sql`select owner_address, verified_at from builder_listing where agent_id = ${key} and withdrawn_at is null order by id desc limit 1`).then(rowsOf),
     db().execute(sql`select kind, ok, endpoint, result, checked_at from builder_check where agent_key = ${key} order by checked_at desc limit 40`).then(rowsOf),
-    db().execute(sql`select liveness, checked_at, executable_endpoint from probe where agent_id = ${key} and liveness = 'live' order by checked_at desc limit 1`).then(rowsOf).catch(() => []),
+    db().execute(sql`select p.liveness, p.checked_at, p.executable_endpoint, p.detail,
+      coalesce(s.resolved_endpoint, s.endpoint) as declared_endpoint
+      from probe_schedule q join probe p on p.id = q.last_probe_id
+      join agent_service s on s.id = q.service_id
+      where q.agent_id = ${key} order by p.checked_at desc`).then(rowsOf).catch(() => []),
     db().execute(sql`select category, confidence, rationale from agent_category where agent_id = ${key} and method <> 'owner_declared' order by (category <> 'unclassified') desc, confidence desc limit 1`).then(rowsOf).catch(() => []),
     db().execute(sql`select test_id, pass, error, ran_at from conformance_result where agent_id = ${key} order by ran_at desc limit 1`).then(rowsOf),
     db().execute(sql`select status from builder_listing where agent_id = ${key} and withdrawn_at is null limit 1`).then(rowsOf),
@@ -114,15 +119,20 @@ export async function builderView(wallet: string, chainId: ChainId, tokenId: str
   const allProofs = [...proofs, ...legacyProof].map((p) => ({ owner: String(p['owner_address']).toLowerCase(), at: iso(p['verified_at'])! }))
   const proof = allProofs.find((p) => p.owner === id.owner) ?? allProofs[0] ?? null
 
-  const probeRows = checks.filter((c) => c['kind'] === 'probe')
+  const declaredEndpoints = new Set(id.services.map(s => s.endpoint))
+  const probeRows = checks.filter((c) => c['kind'] === 'probe' && declaredEndpoints.has(String(c['endpoint'])))
   const lastOk = probeRows.find((c) => c['ok'] === true) ?? null
-  const scheduled = probes[0] ?? null
+  const currentProbes = probes.filter(p => declaredEndpoints.has(String(p['declared_endpoint'])))
+  const scheduled = currentProbes.find(p => p['liveness'] === 'live') ?? null
   const okAt = [lastOk ? { at: iso(lastOk['checked_at'])!, endpoint: String(lastOk['endpoint'] ?? ''), via: 'builder' as const } : null,
     scheduled ? { at: iso(scheduled['checked_at'])!, endpoint: scheduled['executable_endpoint'] ? String(scheduled['executable_endpoint']) : null, via: 'probe' as const } : null]
     .filter((x): x is NonNullable<typeof x> => x !== null)
     .sort((a, b) => Date.parse(b.at) - Date.parse(a.at))[0] ?? null
-  const lastFail = probeRows[0] && probeRows[0]['ok'] !== true
+  const manualFailure = probeRows[0] && probeRows[0]['ok'] !== true
     ? { at: iso(probeRows[0]['checked_at'])!, reason: String((probeRows[0]['result'] as Record<string, unknown>)?.['detail'] ?? 'no callable service') } : null
+  const scheduledFailure = currentProbes.find(p => p['liveness'] === 'dead' || p['liveness'] === 'bad_schema')
+  const lastFail = [manualFailure, scheduledFailure ? {at:iso(scheduledFailure['checked_at'])!,reason:String(scheduledFailure['detail'] ?? 'scheduled check failed')} : null]
+    .filter((x): x is NonNullable<typeof x> => x !== null).sort((a,b) => Date.parse(b.at)-Date.parse(a.at))[0] ?? null
 
   // Classified: Marque's classifier (ingest) if it ran, else the keyword pass over the record now.
   const kw = classifyByKeyword({ name: id.name, description: id.description })
@@ -136,14 +146,21 @@ export async function builderView(wallet: string, chainId: ChainId, tokenId: str
   const t = tests[0]
   const facts: QualityFacts = {
     chainId, tokenId, wallet: w, owner: id.owner, ownerReadFailed: id.readFailed,
-    proof, callable: okAt, lastProbeFailure: lastFail && (!okAt || Date.parse(lastFail.at) > Date.parse(okAt.at)) ? lastFail : null,
+    proof, callable: okAt, lastProbeFailure: lastFail && (!okAt || Date.parse(lastFail.at) >= Date.parse(okAt.at)) ? lastFail : null,
     classified, declared,
     test: t ? { at: iso(t['ran_at'])!, testId: String(t['test_id']), wellFormed: t['error'] == null, pass: t['pass'] === true, error: t['error'] ? String(t['error']) : null } : null,
   }
   const verdict = qualityVerdict(facts)
+  const endpoint = lastOk ? String(lastOk['endpoint']) : id.services[0]?.endpoint ?? null
+  const [availability] = rowsOf(await db().execute(sql`
+    select count(*)::int as attempts, count(*) filter (where ok)::int as successes,
+      min(checked_at) as first_at, max(checked_at) as last_at
+    from builder_check where agent_key = ${key} and kind = 'probe'
+      and endpoint = ${endpoint} and checked_at > now() - interval '24 hours'`))
   return {
     identity: id, verdict, category: effectiveCategory(facts).category, declared, classified,
-    endpoint: lastOk ? String(lastOk['endpoint']) : id.services[0]?.endpoint ?? null,
+    endpoint,
+    availability: {windowHours:24, attempts:Number(availability?.['attempts'] ?? 0), successes:Number(availability?.['successes'] ?? 0), firstAt:iso(availability?.['first_at']), lastAt:iso(availability?.['last_at']), scope:'Builder-initiated task probes at the current declared endpoint. Irregular samples, not a continuous uptime measurement.'},
     listed: listing[0]?.['status'] === 'published',
   }
 }
@@ -154,7 +171,8 @@ export async function builderView(wallet: string, chainId: ChainId, tokenId: str
  * counted and the test that answered. The quest's fifth row reads it.
  */
 export async function listIfQualified(v: BuilderView): Promise<boolean> {
-  if (!v.verdict.qualityListing || v.listed) return v.listed
+  if (!v.verdict.qualityListing) return false
+  if (v.listed) return true
   const key = v.identity.agentKey
   const [p] = rowsOf(await db().execute(sql`
     select message, signature, nonce from builder_proof where agent_key = ${key} and owner_address = ${v.identity.owner} order by verified_at desc limit 1`))

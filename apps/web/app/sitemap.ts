@@ -8,6 +8,7 @@ import { BRAND } from '@marque/ui/brand'
  */
 const ROUTES: Array<{ path: string; priority: number; changeFrequency: MetadataRoute.Sitemap[number]['changeFrequency'] }> = [
   { path: '/', priority: 1.0, changeFrequency: 'daily' },
+  ...['/docs', '/docs/faq', '/docs/whitepaper', '/docs/changelog', '/docs/terms', '/docs/privacy', '/docs/risks', '/quest', '/builders', '/protocol'].map(path => ({path, priority: 0.7, changeFrequency: 'weekly' as const})),
   { path: '/register', priority: 0.9, changeFrequency: 'hourly' },
   { path: '/register/rebalancing', priority: 0.6, changeFrequency: 'daily' },
   { path: '/register/grid', priority: 0.6, changeFrequency: 'daily' },

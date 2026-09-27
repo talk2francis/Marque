@@ -31,7 +31,7 @@ a.introBack {
   transition: color var(--dur-fast) var(--ease);
 }
 a.introBack:hover { color: var(--fg); }
-.introTitle { font-size: clamp(27px, 3.3vw, 38px); line-height: 1.1; max-width: 22ch; }
+.introTitle { font-family:var(--font-serif); font-weight:400; font-size: clamp(34px, 4vw, 52px); line-height: 1.08; max-width: 22ch; }
 .introLede {
   margin: 0; max-width: 62ch; color: var(--fg-soft);
   font-size: var(--size-body); line-height: 1.55;

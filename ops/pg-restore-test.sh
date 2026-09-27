@@ -6,12 +6,15 @@
 # back non-empty, prints a row-count comparison against production, and drops
 # the scratch database. It NEVER touches production.
 set -euo pipefail
+umask 077
 
 set -a; . /root/.marque/secrets.env; set +a
 
 PRIMARY="/root/marque-backups"
 LATEST="$(ls -1t ${PRIMARY}/marque-*.sql.gz 2>/dev/null | head -1 || true)"
+if [ "$#" -gt 0 ]; then LATEST="$1"; fi
 [ -n "$LATEST" ] || { echo "no backup found in ${PRIMARY}"; exit 1; }
+[ -f "$LATEST" ] && [ -r "$LATEST" ] || { echo "backup is not a readable file"; exit 1; }
 
 SCRATCH="marque_restore_test_$(date -u +%s)"
 PGADMIN="sudo -u postgres psql"
@@ -30,9 +33,12 @@ for T in agent agent_service agent_category probe conformance_result conformance
          pool_tick_observation sealed_call product_event \
          commerce_job commerce_event hire_intent commerce_quote rating rating_comment notify_attempt \
          builder_proof builder_check chain_cursor; do
-  P=$(psql "$DATABASE_URL" -tAc "select count(*) from ${T}" 2>/dev/null || echo ERR)
+  P=$(node /root/marque/ops/pg-command.mjs psql -tAc "select count(*) from ${T}" 2>/dev/null || echo ERR)
   R=$(sudo -u postgres psql -tAc "select count(*) from ${T}" -d "${SCRATCH}" 2>/dev/null || echo ERR)
   printf '%-24s %12s %12s\n' "$T" "$P" "$R"
+  if [ "$P" = "ERR" ] || [ "$R" = "ERR" ]; then
+    echo "  !! comparison failed for ${T}"; FAIL=1
+  fi
   case "$T" in
     probe|conformance_result|receipt|sealed_call|pool_tick_observation|benchmark_run|commerce_quote|hire_intent|notify_attempt|rating_comment|builder_proof|builder_check)
       if [ "$P" != "0" ] && [ "$P" != "ERR" ] && { [ "$R" = "0" ] || [ "$R" = "ERR" ]; }; then

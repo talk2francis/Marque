@@ -1,119 +1,31 @@
 'use client'
-
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import styles from './docs.module.css'
-
 export interface DocSection { id: string; title: string }
-
-/**
- * The docs are a tabbed reference, not one long scroll: the rail on the left is
- * sticky, and only the selected section's content is shown, with Previous / Next
- * to move between them. The section markup is rendered server-side inside
- * `children`; this component just picks which one is visible and keeps the URL
- * hash and the rail in step.
- */
 export function DocsShell({ sections, children }: { sections: DocSection[]; children: React.ReactNode }) {
   const [active, setActive] = useState(sections[0]?.id ?? '')
-  const contentRef = useRef<HTMLDivElement>(null)
-  const firstRender = useRef(true)
-
-  // Initial section from the hash, if valid.
   useEffect(() => {
-    const h = window.location.hash.replace('#', '')
-    if (sections.some((s) => s.id === h)) setActive(h)
-      else if (!h) setActive(sections[0]?.id ?? '')
+    const observer = new IntersectionObserver((entries) => {
+      const visible = entries.filter(e => e.isIntersecting).sort((a,b) => a.boundingClientRect.top-b.boundingClientRect.top)
+      if (visible[0]) setActive(visible[0].target.id)
+    }, {rootMargin: '-100px 0px -55% 0px'})
+    sections.forEach(({id}) => { const el=document.getElementById(id); if(el) observer.observe(el) })
+    return () => observer.disconnect()
   }, [sections])
-
-  // Show only the active section.
-  useEffect(() => {
-    const root = contentRef.current
-    if (!root) return
-    root.querySelectorAll<HTMLElement>('[data-doc-section]').forEach((el) => {
-      el.hidden = el.dataset.docSection !== active
-    })
-    if (!firstRender.current) {
-      // URL history is updated only for explicit navigation, not back/forward events.
-      // The content column is its own scroll container on desktop, so reset IT
-      // rather than the window — scrolling the window would move nothing and
-      // leave the reader halfway down the previous section's scroll position.
-      if (root.scrollHeight > root.clientHeight || root.scrollTop > 0) {
-        root.scrollTo({ top: 0, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' })
-      } else {
-        const top = root.getBoundingClientRect().top + window.scrollY - 96
-        window.scrollTo({ top: Math.max(0, top), behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' })
-      }
-    }
-    firstRender.current = false
-  }, [active])
-
-  // Respond to back/forward.
-  useEffect(() => {
-    const onHash = () => {
-      const h = window.location.hash.replace('#', '')
-      if (sections.some((s) => s.id === h)) setActive(h)
-      else if (!h) setActive(sections[0]?.id ?? '')
-    }
-    window.addEventListener('hashchange', onHash)
-    return () => window.removeEventListener('hashchange', onHash)
-  }, [sections])
-
-  const navigate = (id: string) => {
-    if (id === active) return
-    history.pushState(null, '', `#${id}`)
-    setActive(id)
-    requestAnimationFrame(() => {
-      const heading = contentRef.current?.querySelector<HTMLElement>(`[data-doc-section="${id}"] h2`)
-      heading?.focus({ preventScroll: true })
-    })
-  }
-
-  const i = sections.findIndex((s) => s.id === active)
-  const prev = i > 0 ? sections[i - 1] : null
-  const next = i >= 0 && i < sections.length - 1 ? sections[i + 1] : null
-
-  return (
-    <div className={styles.wrap}>
-      <label className={styles.mobilePicker}>Section
-        <select value={active} onChange={(e) => navigate(e.target.value)}>
-          {sections.map((s) => <option key={s.id} value={s.id}>{s.title}</option>)}
-        </select>
-      </label>
-      <nav className={styles.rail} aria-label="Documentation sections">
-        <span className={styles.railHead}>Documentation</span>
-        <ol className={styles.railList}>
-          {sections.map((s, n) => (
-            <li key={s.id}>
-              <a
-                href={`#${s.id}`}
-                onClick={(e) => { e.preventDefault(); navigate(s.id) }}
-                className={active === s.id ? styles.railActive : undefined}
-                aria-current={active === s.id ? 'true' : undefined}
-              >
-                <span className={styles.railNum}>{String(n + 1).padStart(2, '0')}</span>
-                {s.title}
-              </a>
-            </li>
-          ))}
-        </ol>
+  const contents = <>
+      <nav aria-label="Documentation library" className={styles.library}>
+        <span className={styles.railHead}>Library</span>
+        <a href="/docs">Getting started</a><a href="/docs/faq">Frequently asked questions</a>
+        <a href="/docs/whitepaper">Whitepaper</a><a href="/docs/changelog">Changelog</a>
+        <a href="/docs/terms">Terms of use</a><a href="/docs/privacy">Privacy policy</a><a href="/docs/risks">Risk disclosure</a>
       </nav>
-
-      <div className={styles.docCol} ref={contentRef}>
-        {children}
-        <nav className={styles.pager} aria-label="Section navigation">
-          {prev ? (
-            <button type="button" className={styles.pagerPrev} onClick={() => navigate(prev.id)}>
-              <span className={styles.pagerDir}>Previous</span>
-              <span className={styles.pagerTitle}>{prev.title}</span>
-            </button>
-          ) : <span />}
-          {next ? (
-            <button type="button" className={styles.pagerNext} onClick={() => navigate(next.id)}>
-              <span className={styles.pagerDir}>Next</span>
-              <span className={styles.pagerTitle}>{next.title}</span>
-            </button>
-          ) : <span />}
-        </nav>
-      </div>
-    </div>
-  )
+      <nav aria-label="On this page"><span className={styles.railHead}>On this page</span>
+        <ol className={styles.railList}>{sections.map(s=><li key={s.id}><a href={'#'+s.id} className={active===s.id ? styles.railActive : undefined} aria-current={active===s.id ? 'location':undefined}>{s.title}</a></li>)}</ol>
+      </nav>
+    </>
+  return <div className={styles.wrap}>
+    <aside className={styles.rail}>{contents}</aside>
+    <details className={styles.mobileContents}><summary>Explore the library and this page</summary>{contents}</details>
+    <div className={styles.docCol}>{children}<div className={styles.help}>Still have a question? <a href="https://t.me/marque_marketplace">Talk to the team on Telegram</a>. Never share a private key or recovery phrase.</div></div>
+  </div>
 }

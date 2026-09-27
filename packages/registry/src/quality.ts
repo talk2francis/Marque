@@ -95,7 +95,11 @@ export function qualityVerdict(f: QualityFacts): QualityVerdict {
       : { id: 'proved', label: 'You proved it with a signature', state: owned ? 'fail' : 'pending', reason: f.proof && !same(f.proof.owner, f.owner) ? 'The stored proof was signed by a previous owner.' : 'No signature from the owner yet.', fix: owned ? 'Sign the proof message. It authorises nothing on chain and costs no gas.' : 'Needs the owning wallet first.' },
   )
 
-  const fresh = f.callable !== null && now - Date.parse(f.callable.at) <= CALLABLE_WITHIN_MS
+  const callableAt = f.callable ? Date.parse(f.callable.at) : NaN
+  const failedAt = f.lastProbeFailure ? Date.parse(f.lastProbeFailure.at) : NaN
+  const fresh = Number.isFinite(callableAt) && callableAt <= now
+    && now - callableAt <= CALLABLE_WITHIN_MS
+    && !(Number.isFinite(failedAt) && failedAt >= callableAt)
   checks.push(
     fresh
       ? { id: 'callable', label: 'Its endpoint answers a live call', state: 'pass', reason: `Answered as callable ${f.callable!.via === 'builder' ? 'to a probe run from this page' : "to Marque's scheduled probe"} at ${f.callable!.at.slice(0, 16).replace('T', ' ')} UTC.`, fix: null, note: f.callable!.endpoint }

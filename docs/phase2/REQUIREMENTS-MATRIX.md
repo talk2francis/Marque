@@ -1,4 +1,29 @@
 # REQUIREMENTS-MATRIX.md
+## Current follow-up, 27 September 2026
+
+The table below this section is the **26 September baseline**, not the current
+launch verdict. Do not use its old FAIL labels as present-state claims.
+
+| Requirement | Current evidence / remaining condition |
+|---|---|
+| Own live domain, public browsing | marque.trade; logged-out browser checks must be repeated for this refresh |
+| Network | BSC mainnet hires recorded; testnet demonstrations labelled separately |
+| Registry data | Canonical ERC-8004 identities; receipt-verified registration lookup added in this refresh |
+| Category coverage | Last audit measured yield/grid/rebalancing/health factor as 3/4/4/3; current counts are the coverage API, not this snapshot |
+| Hire flow | Eight funded P2-08 acceptance hires delivered and rated; team tests, not organic users |
+| Scoped payments | Exact approval and budget code; revocation is distinct from escrow refund |
+| Tracking | Contract/event tables and wallet/owner APIs documented; Gwen attribution approval still pending |
+| Team disclosures | Both handoffs now match the 16-wallet config |
+| Builder quality | Five-check baseline plus sampled availability disclosure; no continuous task-uptime threshold implemented |
+| Operations | Blue/green and 100-user target evidence in LOAD-TEST.md; private Telegram test delivered |
+| Backups | Local restore evidence exists; encrypted Drive setup in progress, recurring OAuth still requires operator authorization |
+| Repository | Public main/phase2 history; current refresh is not published until commit/push evidence is recorded |
+| Public docs | Phase 2 guide and library added; operational legal drafts require owner/legal review |
+
+See REFRESH-2026-09-27.md for verification and open conditions. P2-12 stays held.
+
+---
+
 ## BNB Phase 2 requirements against Marque, 26 Sep 2026
 
 "Now" is what I verified on the live site and in the repo at commit `9b47e39` on 26 Sep. "Evidence" is what must exist before the row is marked PASS in `docs/phase2/PROJECT_STATE.md`.

@@ -5,6 +5,7 @@ import { commercialStates, disputeWindowSeconds, formatAmount, sellerFor, teamWa
 import { agentTrack, type AgentTrack } from './agent-track'
 import { readManifest, type Manifest } from './manifest'
 import { referenceAgent } from './reference-agents'
+import { registrationTx } from './registration'
 
 /**
  * Everything one storefront shows (DESIGN-SYSTEM.md 8.4), for a reference agent or a
@@ -41,8 +42,8 @@ export interface Storefront {
   commerce: (ServiceCommerce & { priceLabel: string | null }) | null
   track: AgentTrack
   tests: StoreTest[]
-  lastProbe: { at: string; liveness: string; latencyMs: number | null; failure: string | null } | null
-  probes24h: { total: number; live: number }
+  lastProbe: { at: string; liveness: string; latencyMs: number | null; failure: string | null; detail: string | null } | null
+  probes24h: { total: number; live: number; reachable: number }
   reviews: StoreReview[]
   sample: StoreSample | null
   disputeWindowSeconds: number | null
@@ -54,7 +55,7 @@ export interface Storefront {
  */
 export async function storefront(agentId: string): Promise<Storefront | null> {
   try {
-    const p = await cachedProjection(`storefront:v1:${agentId}`, () => computeStorefront(agentId), { freshMs: 30_000, timeoutMs: 12_000, staleWhileRevalidate: true })
+    const p = await cachedProjection(`storefront:v2:${agentId}`, () => computeStorefront(agentId), { freshMs: 30_000, timeoutMs: 12_000, staleWhileRevalidate: true })
     return p.value
   } catch {
     return computeStorefront(agentId)
@@ -77,10 +78,11 @@ async function computeStorefront(agentId: string): Promise<Storefront | null> {
       select test_id, pass, failed_fields, ran_at, block_number, error, latency_ms from conformance_result
       where ${canonicalAgentIdSql(sql`agent_id`)} = ${agentId} order by ran_at desc limit 8`).then(rowsOf).catch(() => []),
     db().execute(sql`
-      select p.checked_at, p.liveness, p.latency_ms, p.failure_class from probe p
+      select p.checked_at, p.liveness, p.latency_ms, p.failure_class, p.detail from probe p
       where p.agent_id = ${agentId} order by p.checked_at desc limit 1`).then(rowsOf).catch(() => []),
     db().execute(sql`
-      select count(*)::int as total, count(*) filter (where liveness = 'live')::int as live from probe
+      select count(*)::int as total, count(*) filter (where liveness = 'live')::int as live,
+        count(*) filter (where status_code between 200 and 299)::int as reachable from probe
       where agent_id = ${agentId} and checked_at > now() - interval '24 hours'`).then(rowsOf).catch(() => []),
     db().execute(sql`
       select r.client, r.value, r.value_decimals, r.tx_hash, r.block_time, r.feedback_hash, c.comment, c.job_id,
@@ -118,6 +120,7 @@ async function computeStorefront(agentId: string): Promise<Storefront | null> {
   }
 
   const lp = probe[0]
+  const mintTx = s(a['contract_address']) ? await registrationTx(tokenId, String(a['contract_address']), (a['raw_metadata'] as Record<string,unknown> | null)?.['scan_created_tx_hash'] ?? ref?.erc8004.registerTx) : null
   return {
     agentId,
     tokenId,
@@ -132,7 +135,7 @@ async function computeStorefront(agentId: string): Promise<Storefront | null> {
     registry: s(a['contract_address']),
     registeredAt: iso(a['registry_created_at']),
     metadataReadAt: iso(a['detail_fetched_at']),
-    registerTx: ref?.erc8004.registerTx ?? null,
+    registerTx: mintTx,
     testnetTokenId: fp?.testnet?.tokenId ?? null,
     endpoint: seller?.endpoint ?? null,
     services: services.map((x) => ({ kind: String(x['kind']), endpoint: String(x['endpoint']) })),
@@ -142,8 +145,8 @@ async function computeStorefront(agentId: string): Promise<Storefront | null> {
       testId: String(t['test_id']), pass: t['pass'] === true, failedFields: Array.isArray(t['failed_fields']) ? (t['failed_fields'] as string[]) : [],
       ranAt: iso(t['ran_at']), block: s(t['block_number']), error: s(t['error']), latencyMs: t['latency_ms'] == null ? null : Number(t['latency_ms']),
     })),
-    lastProbe: lp ? { at: iso(lp['checked_at'])!, liveness: String(lp['liveness']), latencyMs: lp['latency_ms'] == null ? null : Number(lp['latency_ms']), failure: s(lp['failure_class']) } : null,
-    probes24h: { total: Number(probes24[0]?.['total'] ?? 0), live: Number(probes24[0]?.['live'] ?? 0) },
+    lastProbe: lp ? { at: iso(lp['checked_at'])!, liveness: String(lp['liveness']), latencyMs: lp['latency_ms'] == null ? null : Number(lp['latency_ms']), failure: s(lp['failure_class']), detail: s(lp['detail']) } : null,
+    probes24h: { total: Number(probes24[0]?.['total'] ?? 0), live: Number(probes24[0]?.['live'] ?? 0), reachable: Number(probes24[0]?.['reachable'] ?? 0) },
     reviews: reviewsRaw.map((r) => ({
       stars: Math.round(Number(r['value']) / 10 ** Number(r['value_decimals'] ?? 0) / 20),
       client: String(r['client']), at: iso(r['block_time']), tx: String(r['tx_hash']),

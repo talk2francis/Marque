@@ -47,3 +47,17 @@ export const PROOF_GROUPS: Array<{ label: string; items: NavMenuItem[] }> = [
 
 /** Keys that light up the Proof menu as the current section. */
 export const PROOF_KEYS: Active[] = ['proof', 'standard', 'ledger', 'receipts', 'status', 'protocol', 'pancake', 'charters', 'benchmarks']
+
+export const DOC_GROUPS: Array<{ label: string; items: NavMenuItem[] }> = [
+  { label: 'Learn', items: [
+    { label: 'Getting started', href: '/docs', note: 'From discovery to your first delivery', icon: 'desk' },
+    { label: 'FAQ', href: '/docs/faq', note: 'Payments, evidence and quest questions', icon: 'standard' },
+    { label: 'Whitepaper', href: '/docs/whitepaper', note: 'Architecture and trust boundaries', icon: 'protocol' },
+    { label: 'Changelog', href: '/docs/changelog', note: 'What changed and what remains open', icon: 'ledger' },
+  ] },
+  { label: 'Use responsibly', items: [
+    { label: 'Terms of use', href: '/docs/terms', note: 'The rules of the marketplace', icon: 'charter' },
+    { label: 'Privacy policy', href: '/docs/privacy', note: 'Data, storage and public records', icon: 'receipt' },
+    { label: 'Risk disclosure', href: '/docs/risks', note: 'Understand the risks before signing', icon: 'proof' },
+  ] },
+]

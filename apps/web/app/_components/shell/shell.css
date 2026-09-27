@@ -229,7 +229,7 @@
   .footer-cols .t-label { display: block; margin-bottom: 14px; color: var(--ink-3); }
   .footer-cols a {
     display: flex; align-items: center; gap: 4px; width: fit-content;
-    margin: 9px 0; font-size: 14px; color: var(--ink-2); text-decoration: none;
+    margin: 5px 0; min-height: 30px; font-size: 14px; color: var(--ink-2); text-decoration: none;
     transition: color var(--t-fast) var(--ease), transform var(--t-fast) var(--ease);
   }
   .footer-cols a svg { opacity: 0.5; transition: opacity var(--t-fast) var(--ease), transform var(--t-fast) var(--ease); }
@@ -237,7 +237,7 @@
   .footer-cols a:hover svg { opacity: 1; transform: translate(1px, -1px); }
   .footer-bottom { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px 32px; flex-wrap: wrap; margin-top: var(--s-7); padding-top: var(--s-5); border-top: 1px solid var(--hair); }
   .footer-chain { display: flex; flex-direction: column; gap: 6px; }
-  .footer-chain a { font-size: 12.5px; color: var(--ink-3); text-decoration: none; font-variant-numeric: tabular-nums; }
+  .footer-chain a { display:inline-flex; align-items:center; min-height:28px; font-size: 12.5px; color: var(--ink-3); text-decoration: none; font-variant-numeric: tabular-nums; }
   .footer-chain a:hover { color: var(--chain); }
   .footer-social { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; }
   .footer-social a { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--ink-2); text-decoration: none; min-height: 32px; }

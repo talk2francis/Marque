@@ -44,7 +44,8 @@ for (const theme of THEMES) {
     page.on('pageerror', (e) => errors.push(`${theme} ${w} ${page.url()}: PAGEERROR ${e.message.slice(0, 200)}`))
     for (const r of ROUTES) {
       try {
-        const res = await page.goto(BASE + r, { waitUntil: 'networkidle', timeout: 45000 }).catch(() => null)
+        const res = await page.goto(BASE + r, { waitUntil: args.load ?? 'networkidle', timeout: 45000 }).catch(() => null)
+        await page.evaluate(() => Promise.race([document.fonts.ready, new Promise(resolve => setTimeout(resolve, 3000))]))
         await page.waitForTimeout(Number(args.wait ?? 900))
         // Reveal everything that animates in on scroll, so full-page shots are complete.
         await page.evaluate(() => document.querySelectorAll('[data-reveal]').forEach((n) => n.setAttribute('data-in', '')))

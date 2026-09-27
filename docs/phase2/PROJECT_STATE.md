@@ -2,6 +2,23 @@
 
 Live record of Phase 2. Newest first inside each section. Times are UTC.
 
+## User-requested post-handoff refresh (27 September, in verification)
+
+P2-12 remains held. See [REFRESH-2026-09-27.md](./REFRESH-2026-09-27.md).
+Both handoffs now contain all 16 configured team wallets. Private Telegram test
+delivered successfully; both monitors restarted. Green action palette, rewritten
+Phase 2 docs and six library pages, desktop Docs dropdown and mobile library links
+are implemented. Registration evidence is receipt-checked for third parties.
+Builder callability no longer lets an earlier success hide a later failed attempt;
+availability sample scope is explicit. Continuous task uptime is not yet a gate.
+
+Verification so far: typecheck and lint pass; 383 tests pass, 3 RPC tests skipped;
+copy lint passes. Isolated production build succeeds with existing wallet-library
+optional-dependency warnings. Browser iteration is in progress, not yet deployed.
+Initial encrypted Drive archive uploaded in three parts with owner-only access;
+download hashes, decryption and the scratch database restore drill passed.
+Recurring OAuth setup and an independent copy of the recovery key remain outstanding.
+
 ## Phase status
 
 | Phase | State | Notes |
@@ -52,7 +69,7 @@ Logged in `docs/DEVIATIONS.md` under "Phase 2". Index:
 
 ## Requests
 
-- [Sun 10:40] [P2-11] [Francis] Add `@MarqueTradeBot` to the Marque Telegram supergroup. Bot token and chat id are in `/root/.marque/secrets.env`, both alert monitors have been restarted, but Telegram returned `403: bot is not a member of the supergroup chat` for the configuration test.
+- [RESOLVED by private-chat configuration] [P2-11] The earlier group-membership request is superseded. The user supplied a private chat destination; delivery succeeded and both alert monitors reloaded their private configuration. The public group remains the support channel, not the operational-alert destination.
 
 - [Sun 10:40] [P2-06] Gwen confirmed `JobCreated` for hire, nonzero `JobFunded` for deposit, both `JobSubmitted` and `JobCompleted` for completion reporting, and client-sent ERC-8004 `NewFeedback` for rating. She accepted the documented JSON shape, requested good uptime as an additional quality signal, and is still checking marketplace attribution. Recorded in both handoff files.
 

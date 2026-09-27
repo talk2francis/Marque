@@ -87,6 +87,7 @@ export interface ScanAgentDetail {
   x402_supported?: boolean | null
   total_score?: number | null
   created_at?: string | null
+  created_tx_hash?: string | null
   services: unknown
   raw_metadata: unknown
   parse_status: unknown
@@ -137,6 +138,7 @@ function coerceDetail(raw: RawScanAgentDetail): ScanAgentDetail {
     x402_supported: raw.x402_supported ?? false,
     total_score: raw.total_score ?? null,
     created_at: raw.created_at ?? null,
+    created_tx_hash: typeof raw.created_tx_hash === 'string' && /^0x[0-9a-fA-F]{64}$/.test(raw.created_tx_hash) ? raw.created_tx_hash : null,
     services: raw.services ?? null,
     raw_metadata: raw.raw_metadata ?? null,
     parse_status: raw.parse_status ?? null,

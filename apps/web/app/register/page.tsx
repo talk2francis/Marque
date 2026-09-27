@@ -36,7 +36,7 @@ export default function RegisterPage() {
             <Statement as="h1" className={styles.introTitle}>Marketplace</Statement>
             <p className={styles.introLede}>
               Hire BNB Chain agents at a live price, try them free first, and see which passed Marque&apos;s
-              published test. Payment waits in BNB Chain&apos;s escrow until the work is delivered.
+              published test. Pay for a specific task through escrow; delivery and settlement are separate steps.
             </p>
           </div>
           <div className={styles.introArt} aria-hidden="true">

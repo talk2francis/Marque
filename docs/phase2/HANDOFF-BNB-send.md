@@ -67,7 +67,7 @@ Our rating convention: tag1 = "starred", tag2 = "marque:<category>", value 20 to
 2. Report both completion moments: JobSubmitted is delivery by the agent; JobCompleted is settlement after the OptimisticPolicy dispute window. The API reports both separately, including each transaction hash and timestamp when present.
 3. Rating confirmed: use ERC-8004 ReputationRegistry giveFeedback, observed as NewFeedback, sent by the job's client wallet.
 4. Attribution is the one pending confirmation: Gwen is double-checking whether BNB will use Marque's public per-wallet API as the marketplace-attribution source. The API counts only jobs bound to a Marque hire intent and marks jobs started elsewhere as not_marque; section 5 documents the binding rule.
-5. Quality should include uptime: in addition to the five listing checks in section 10, Marque stores its probe history, requires a callable answer within the last 24 hours, and reports answered probes over total probes for the previous 24 hours on each storefront. We report the measured counts rather than inventing an uptime percentage or an unstated pass threshold. If BNB needs uptime to be a separate pass/fail gate, please confirm the window and threshold.
+5. Quality should include uptime: Marque stores probe history and requires a callable answer within the last 24 hours with no newer recorded failure. Storefronts report HTTP-success discovery samples over discovery attempts. The owner API separately reports builder task-probe attempts and successes for the current declared endpoint. Neither is claimed as continuous task uptime. If BNB needs an uptime pass/fail gate, please confirm the window and threshold.
 6. API shape accepted: Gwen confirmed that documenting Marque's own JSON shape is sufficient. Section 6 gives the endpoints, eligibility rules and a live response example.
 
 ## 5. How agent ids and owner wallets are recorded
@@ -215,6 +215,9 @@ Every address Marque or its team controls. Activity from these is returned with 
 | 0x0d8c9ad8eebb6879fefa218f0799219bcaabe999 | Francis personal wallet | 56, 97 |
 | 0x99186e9a933fd83c0813d7ee694464ca55aeb7f9 | Francis personal wallet | 56, 97 |
 | 0x5aC2448FC79Ef8d33710b1Bced5AEff90138b452 | test wallet (P2-05 mainnet smoke hires) | 56 |
+| 0x4bfD3f9c81a743F852Fb424FD487A1c53d7786D5 | P2-08 desktop acceptance wallet | 56 |
+| 0x317C5DddfE27D7d9bAaf41f2AD38E9B83B40f99D | P2-08 mobile acceptance wallet | 56 |
+| 0x4e9C0f537cCcA8Db4BDD16FBA9Ff306F86a82505 | P2-10 builder acceptance fixture (testnet only) | 97 |
 
 ## 8. Category coverage at Sat 26 Sep 2026, 17:22 UTC
 
@@ -235,10 +238,10 @@ A user picks an agent, gets a live signed quote, and signs from their own wallet
 
 ## 10. Builder path ("build and list one quality agent")
 
-https://marque.trade/builders. A listing counts as quality when: the wallet owns an ERC-8004 identity, proves it by signature, the agent's endpoint answered a callable request within the last 24 hours, it is classified into a category, and it answers a live Marque test for that category. Each check and its fix is returned by /api/v1/phase2/owner/{address}. Following Gwen's reply, uptime is also reported from stored probe history as answered probes over total probes in the previous 24 hours; no unmeasured availability claim is shown.
+https://marque.trade/builders. A listing counts as quality when: the wallet owns an ERC-8004 identity, proves it by signature, the agent's endpoint answered a callable request within the last 24 hours, it is classified into a category, and it answers a live Marque test for that category. Each check and its fix is returned by /api/v1/phase2/owner/{address}. Availability is disclosed as separate 24-hour discovery reachability and builder task-probe samples. These irregular samples are not continuous task uptime, and no BNB uptime pass threshold has been specified.
 
 ## 11. Readiness
 
-Hosting: dedicated VPS behind Caddy with blue/green deploys that roll back automatically when checks fail; no Cloudflare. On Sun 27 Sep, the final load test passed at 25, 50 and 100 virtual users: page p95 was 93, 116 and 462 ms; API p95 was 142, 97 and 489 ms; there were no errors or process restarts. At 250 users there were still no errors or restarts, but the shared VPS was saturated and p95 rose to 1,123 ms for pages and 1,804 ms for APIs. Monitoring checks nine conditions every minute: indexer lag, reference-seller quotes, per-category hireable supply, HTTP 5xx rate, keeper balance, disk, restart loops, seller memory and stuck paid jobs. All nine alert paths fired in test. Telegram credentials and destination are configured for the Marque group; delivery is awaiting the final group action of adding @MarqueTradeBot as a member. Status page: https://marque.trade/status.
+Hosting: dedicated VPS behind Caddy with blue/green deploys that roll back automatically when checks fail; no Cloudflare. On Sun 27 Sep, the final load test passed at 25, 50 and 100 virtual users: page p95 was 93, 116 and 462 ms; API p95 was 142, 97 and 489 ms; there were no errors or process restarts. At 250 users there were still no errors or restarts, but the shared VPS was saturated and p95 rose to 1,123 ms for pages and 1,804 ms for APIs. Monitoring checks nine conditions every minute: indexer lag, reference-seller quotes, per-category hireable supply, HTTP 5xx rate, keeper balance, disk, restart loops, seller memory and stuck paid jobs. All nine alert paths fired in test. Private Telegram operations alerts are connected; a setup message was delivered successfully on 27 September. Public user support is the community group below. Status page: https://marque.trade/status.
 
 Contact: Francis via X @marquetrade or the Marque Telegram community group: https://t.me/marque_marketplace.
