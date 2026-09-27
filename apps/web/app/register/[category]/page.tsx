@@ -11,6 +11,9 @@ import styles from '../register.module.css'
 // Same for every visitor, so served from Next's cache and re-rendered at most every 30 s
 // (P2-11 load test: rendering per request capped the site near 15 requests a second).
 export const revalidate = 30
+// A dynamic segment is only page-cached when it declares its params; none are
+// prerendered at build, each renders on its first request and is then cached.
+export async function generateStaticParams() { return [] }
 
 /**
  * One category of the Marketplace.

@@ -277,7 +277,7 @@ module.exports = {
       autorestart: true,
       max_restarts: 50,
       restart_delay: 10000,
-      max_memory_restart: '150M',
+      max_memory_restart: '300M',
       time: true,
       out_file: '/root/.pm2/logs/marque-alerts-out.log',
       error_file: '/root/.pm2/logs/marque-alerts-err.log',

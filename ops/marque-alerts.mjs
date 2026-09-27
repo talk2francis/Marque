@@ -90,7 +90,9 @@ const SIGNALS = [
     read: async () => {
       if (!existsSync(ACCESS_LOG)) return { bad: false, detail: 'no access log yet' }
       const since = Date.now() / 1000 - 300
-      const lines = execFileSync('tail', ['-n', '20000', ACCESS_LOG], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 }).split('\n')
+      // The last 4 MB is minutes of traffic even under load; reading by bytes keeps the
+      // monitor small (reading 20k lines of a load test pushed it past its ceiling).
+      const lines = execFileSync('tail', ['-c', '4000000', ACCESS_LOG], { encoding: 'utf8', maxBuffer: 8 * 1024 * 1024 }).split('\n')
       let total = 0; let err = 0
       for (const l of lines) {
         if (!l) continue
