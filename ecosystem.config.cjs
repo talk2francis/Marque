@@ -226,21 +226,24 @@ module.exports = {
       error_file: '/root/.pm2/logs/marque-conform-err.log',
     },
     ...agentApps,
-    {
-      name: 'marque-web',
-      cwd: `${ROOT}/apps/web`,
-      script: process.env.MARQUE_WEB_SERVER || '.next/standalone/apps/web/server.js',
+    // Blue/green web (P2-11): two slots behind Caddy. scripts/deploy-web.sh points
+    // releases/slot-<port> at a build, starts the idle slot, health-checks it, switches the
+    // Caddy upstream (/etc/caddy/marque-upstream.caddy) and stops the old slot 5 min later.
+    ...[['marque-web', '3200'], ['marque-web-b', '3201']].map(([name, port]) => ({
+      name,
+      cwd: `${ROOT}/releases/slot-${port}/apps/web`,
+      script: `${ROOT}/releases/slot-${port}/apps/web/server.js`,
       interpreter: 'node',
       // Set and Earn runs on BSC mainnet (P2-05 step 8); testnet 97 stays as staging.
-      env: { ...env, NODE_ENV: 'production', PORT: env.WEB_PORT || '3200', HOSTNAME: '127.0.0.1', MARQUE_CAMPAIGN_CHAIN: '56', NEXT_PUBLIC_MARQUE_CAMPAIGN_CHAIN: '56' },
+      env: { ...env, NODE_ENV: 'production', PORT: port, HOSTNAME: '127.0.0.1', MARQUE_ROOT: ROOT, MARQUE_CAMPAIGN_CHAIN: '56', NEXT_PUBLIC_MARQUE_CAMPAIGN_CHAIN: '56' },
       autorestart: true,
       max_restarts: 50,
       restart_delay: 3000,
       max_memory_restart: '800M',
       time: true,
-      out_file: '/root/.pm2/logs/marque-web-out.log',
-      error_file: '/root/.pm2/logs/marque-web-err.log',
-    },
+      out_file: `/root/.pm2/logs/${name}-out.log`,
+      error_file: `/root/.pm2/logs/${name}-err.log`,
+    })),
     {
       // P11 item 4 — health monitor: /status + each agent /health every 60s,
       // Telegram alert on two consecutive failures.

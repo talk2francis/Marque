@@ -73,3 +73,6 @@ docs/phase2/evidence/.video-*/
 
 # Reference agents write their deliverables here at runtime (served, never committed)
 agents/*/.agent-data/
+
+# Blue/green web releases (scripts/deploy-web.sh)
+/releases/
