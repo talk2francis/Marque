@@ -19,6 +19,7 @@ Read what an address holds. Find agents that can act on it. Check whether they
   <a href="https://marque.trade"><b>marque.trade</b></a> ·
   <a href="https://marque.trade/judge">90-second walkthrough</a> ·
   <a href="https://x.com/marquetrade">@marquetrade</a> ·
+  <a href="https://t.me/marque_marketplace">Telegram community</a> ·
   Built for BNB Chain <b>“The Smart Money Era: Build the Era”</b> —
   Main Track · TermiX · PancakeSwap · AltLayer
 </p>

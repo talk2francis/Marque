@@ -13,12 +13,12 @@ Live record of Phase 2. Newest first inside each section. Times are UTC.
 | P2-04 Ratings | DONE (Sat 15:45) | Test wallet rated all four on testnet, /wallet ratedAll true; self-rating refused and mapped; all 14 quest topics verified on real logs |
 | P2-05 Mainnet cutover | DONE (Sat 17:13) | Sellers on 56 in U; keeper live; smoke hires 56806-56810 delivered and rated on mainnet; Francis runs the browser flow himself later |
 | (was) P2-05 | PART 1 DONE, waiting on G-M2 funding | Fork test passed (USDT and U); sellers prepared on branch phase2-mainnet-sellers (U, max 2x); keeper 0x781e...556a; funding table below |
-| P2-06 Handoff | DRAFTED (Sat 17:40), Francis sends | HANDOFF-BNB.md filled from measured values; paste-ready HANDOFF-BNB-send.md; brand kit at /brand/marque-brand-kit.zip; README Set and Earn section. Open: send date, Francis's Telegram handle | |
+| P2-06 Handoff | READY TO SEND (Sun 10:40), Francis sends | Gwen's six replies recorded; hire/deposit/rating confirmed, both completion events reported, API shape accepted, measured uptime added, attribution remains with Gwen for confirmation; Telegram support link added; placeholders removed |
 | P2-07 Kerbstone foundation | DONE (Sat 22:00) | Tokens (Night/Day/System, Chamber), General Sans + Instrument Serif + Plex Mono self-hosted, new shell (header pills, nav capsule, Proof menu, account menu, drawer, quest bar, footer), 20-part component set on /_ui, /protocol, every route re-shot; axe 0 serious on 5 routes x 2 themes |
 | P2-08 Hire sheet, Job Room, Quest, My Marque | DONE (Sun 00:05), acceptance passed on mainnet, desktop and 390 px |
 | P2-09 Home, marketplace, storefronts | DONE (Sun 02:30) | Home per 8.1 (Phase 1 funnel moved to /why), marketplace tabs and filters with the two-axis card, one storefront for every agent with a sticky purchase panel, Try free on the agent's own endpoint; 5-second test passed first time | Hire sheet (per-category task forms checked against each agent's parser, live price, balance and gas check before any signature, named stepper, controls), Job Room (chain timeline, deliverable per category, raw file with hash check, actions per state incl. resume, reclaim, report, rate), /quest (recommendations, live progress, completion card), /me (spending controls with revoke). Recording needs ~0.4 U and ~0.003 BNB in each of two fresh wallets (Request below) |
 | P2-10 Builder path | DONE (Sun 03:00) | /builders five-check list for BSC mainnet and testnet identities; verdict in packages/registry/src/quality.ts; Probe now; owner-declared category checked against the classifier; /owner returns qualityListing; throwaway testnet agent #2501 went 2 to 5 of 5 in the browser |
-| P2-11 Launch hardening | DONE (Sun 04:35), two items wait on Francis | Blue/green behind Caddy proven under load of requests (4 switches, 0 non-200); CI green; load targets met to 100 users; alerts wired (Telegram needs his bot); memory budget; restore drill passed (offsite target needed) |
+| P2-11 Launch hardening | DONE (Sun 04:35), one external item remains | Blue/green behind Caddy proven under load of requests (4 switches, 0 non-200); CI green; load targets met to 100 users; Telegram bot and group destination configured (bot still needs to be added as a group member); memory budget; restore drill passed (offsite target needed) |
 
 ## Production baseline (P2-00, Sat 26 Sep 05:16)
 
@@ -52,6 +52,10 @@ Logged in `docs/DEVIATIONS.md` under "Phase 2". Index:
 
 ## Requests
 
+- [Sun 10:40] [P2-11] [Francis] Add `@MarqueTradeBot` to the Marque Telegram supergroup. Bot token and chat id are in `/root/.marque/secrets.env`, both alert monitors have been restarted, but Telegram returned `403: bot is not a member of the supergroup chat` for the configuration test.
+
+- [Sun 10:40] [P2-06] Gwen confirmed `JobCreated` for hire, nonzero `JobFunded` for deposit, both `JobSubmitted` and `JobCompleted` for completion reporting, and client-sent ERC-8004 `NewFeedback` for rating. She accepted the documented JSON shape, requested good uptime as an additional quality signal, and is still checking marketplace attribution. Recorded in both handoff files.
+
 - [DONE Sat 23:50, funded by Francis] [P2-08] [Francis] Fund the two P2-08 acceptance wallets on BSC mainnet: **0x4bfD3f9c81a743F852Fb424FD487A1c53d7786D5** (desktop run) and **0x317C5DddfE27D7d9bAaf41f2AD38E9B83B40f99D** (390 px mobile run), each **0.45 U** (the four hires cost 0.40 U at today's quotes) and **0.003 BNB** for gas (measured 1,225,691 gas per hire at 0.05 gwei, plus four ratings). Both are on the team list, so nothing they do counts for the campaign. Then `node scripts/p2-08-accept.mjs --wallet=/root/.marque/test-wallets/p2-08-desktop.json` records the run to docs/phase2/evidence/.
 
 - [Sat 15:20] [P2-05] Tidemark wallet holds Francis's 0.0021 BNB (registration was sponsored). Kept for mainnet submit gas pending the P2-05 funding table; whatever is not needed goes back to 0x0d8c9ad8eebb6879fefa218f0799219bcaabe999.
@@ -72,7 +76,7 @@ Logged in `docs/DEVIATIONS.md` under "Phase 2". Index:
 - CI: `.github/workflows/ci.yml`, run https://github.com/talk2francis/Marque/actions/runs/36286561485 green (typecheck, lint, lint:copy, unit tests, web build against an empty migrated Postgres; Playwright smoke of home, marketplace, a storefront and /quest with no wallet). Badge in README. Two earlier runs failed at the smoke job's Playwright install (fixed).
 - Load: `docs/phase2/LOAD-TEST.md`. Final run: 25 / 50 / 100 users page p95 93 / 116 / 462 ms, API p95 142 / 97 / 489 ms, 0 5xx, 0 restarts; 250 users 1,123 / 1,804 ms (D2-11-04). First run (every page rendered per request) was 2.7 s p95 at 25 users; fixed by page-caching the visitor-independent pages for 30 s and two web processes per slot.
 - Memory budget: in LOAD-TEST.md. Workers now run as one process so PM2's ceilings watch the real worker (they watched a 19 MB tsx wrapper); ceilings set from measured peaks; Redis capped at 256 MB.
-- Alerts: `ops/marque-alerts.mjs` (PM2 `marque-alerts`, every minute): indexer lag over 200 blocks for 2 min, a reference seller with no good quote in 25 min, a quest category under 3 hireable for 5 min, 5xx over 1% for 5 min (new Caddy JSON access log), keeper BNB under 0.0005, disk over 80%, restart loops (3 in 10 min), seller process-tree memory, paid jobs with no successful notify after 10 min. `--test` fired all nine at 01:34 UTC; Telegram delivery waits on credentials (D2-11-01).
+- Alerts: `ops/marque-alerts.mjs` (PM2 `marque-alerts`, every minute): indexer lag over 200 blocks for 2 min, a reference seller with no good quote in 25 min, a quest category under 3 hireable for 5 min, 5xx over 1% for 5 min (new Caddy JSON access log), keeper BNB under 0.0005, disk over 80%, restart loops (3 in 10 min), seller process-tree memory, paid jobs with no successful notify after 10 min. `--test` fired all nine at 01:34 UTC. Bot token and group chat id were configured at 10:40 UTC; the bot must still be added as a group member before Telegram permits delivery.
 - Backups: nightly dump runs (103 MB on 27 Sep); restore drill into a scratch DB passed on the 27 Sep dump with the Phase 2 tables added to the check (`/root/.marque/p2-logs/restore-drill.txt`). Offsite target needed (D2-11-02).
 - Cloudflare: not touched (no approval).
 
@@ -184,5 +188,5 @@ See the checkpoint block in the P2-00 report, reproduced here as it is finalised
 - [Sat 26 Sep] Team public wallets sent and added to `config/team-wallets.json`. Deployer key held back until the mainnet phase; he funds addresses himself.
 
 - [Sat 26 Sep] **"I APPROVE MAINNET"** (G-M1) for Phase 2: reference sellers, keeper and smoke hires on BSC mainnet. Funding (G-M2) per the P2-05 table; Francis sends from his own wallet, no private key is ever shared.
-- [Sat 26 Sep] Support channels: X @marquetrade (official) and a Marque Telegram community group (link to follow).
+- [Sun 27 Sep] Support channels: X @marquetrade (official) and the Marque Telegram community group at https://t.me/marque_marketplace.
 - [Sat 26 Sep] Damian acknowledgement sent. Gwen's six questions pending; Francis is following up.

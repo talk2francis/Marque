@@ -1,10 +1,10 @@
-<!-- Paste-ready copy of HANDOFF-BNB.md for Google Docs (P2-06). Plain headings and tables. Fill the two open items (send date, Telegram handle) before sending. -->
+<!-- Paste-ready copy of HANDOFF-BNB.md for Google Docs (P2-06). Plain headings and tables. -->
 
 # Marque: Set and Earn technical handoff
 
 To: Damian (@bnb_damian), Gwen (@gwenbnb)
 From: Francis, Marque (Xyndicate Labs)
-Date: [set by Francis when sending] (facts measured Sat 26 Sep 2026, 17:25 UTC)
+Date: Sun 27 Sep 2026 (facts measured through Sun 27 Sep 2026, 10:40 UTC)
 
 Everything below is filled from values we measured on chain or from our live API. Where something is still being finished, it says so with a date. Launch is Wed 30 Sep 2026.
 
@@ -19,7 +19,7 @@ Everything below is filled from values we measured on chain or from our live API
 | One-line description | Marque is the BNB Smart Chain agent marketplace that tests agents before you hire them, holds your payment in on-chain escrow until the work is delivered, and records every hire on chain. |
 | Short version (if needed, under 100 characters) | Hire BNB Chain agents that actually work, with escrowed payment and on-chain proof. |
 | X | https://x.com/marquetrade |
-| Support for users | X @marquetrade (https://x.com/marquetrade) and the Marque Telegram community group (link added before launch) |
+| Support for users | X @marquetrade (https://x.com/marquetrade) and the Marque Telegram community group (https://t.me/marque_marketplace) |
 | Repository | https://github.com/talk2francis/Marque |
 | Brand kit | https://marque.trade/brand/marque-brand-kit.zip |
 | Quest page for users | https://marque.trade/quest (live since Sat 26 Sep 2026: each step, its recommended agent and price, and the wallet's progress read from the chain; any wallet at https://marque.trade/quest?addr={address}). Contracts and events: https://marque.trade/protocol |
@@ -60,6 +60,15 @@ Topic0 values verified against real logs on Sat 26 Sep 2026: hire 0xb1e53c47… 
 Refund path, for completeness: Refunded(uint256 indexed jobId, address indexed client, uint256 amount), topic0 0x7ca5472b7ea78c2c0141c5a12ee6d170cf4ce8ed06be3d22c8252ddfc7a6a2c4.
 
 Our rating convention: tag1 = "starred", tag2 = "marque:<category>", value 20 to 100 for 1 to 5 stars, valueDecimals = 0, feedbackURI = our job URL, feedbackHash = keccak256 of that JSON.
+
+### BNB confirmations received from Gwen on Sun 27 Sep 2026
+
+1. Hire and deposit confirmed: report JobCreated as the hire and JobFunded with amount > 0 as the deposit, from the canonical AgenticCommerce contract.
+2. Report both completion moments: JobSubmitted is delivery by the agent; JobCompleted is settlement after the OptimisticPolicy dispute window. The API reports both separately, including each transaction hash and timestamp when present.
+3. Rating confirmed: use ERC-8004 ReputationRegistry giveFeedback, observed as NewFeedback, sent by the job's client wallet.
+4. Attribution is the one pending confirmation: Gwen is double-checking whether BNB will use Marque's public per-wallet API as the marketplace-attribution source. The API counts only jobs bound to a Marque hire intent and marks jobs started elsewhere as not_marque; section 5 documents the binding rule.
+5. Quality should include uptime: in addition to the five listing checks in section 10, Marque stores its probe history, requires a callable answer within the last 24 hours, and reports answered probes over total probes for the previous 24 hours on each storefront. We report the measured counts rather than inventing an uptime percentage or an unstated pass threshold. If BNB needs uptime to be a separate pass/fail gate, please confirm the window and threshold.
+6. API shape accepted: Gwen confirmed that documenting Marque's own JSON shape is sufficient. Section 6 gives the endpoints, eligibility rules and a live response example.
 
 ## 5. How agent ids and owner wallets are recorded
 
@@ -226,10 +235,10 @@ A user picks an agent, gets a live signed quote, and signs from their own wallet
 
 ## 10. Builder path ("build and list one quality agent")
 
-https://marque.trade/builders. A listing counts as quality when: the wallet owns an ERC-8004 identity, proves it by signature, the agent's endpoint is live and callable, it is classified into a category, and it answers a live Marque test for that category. This is our default until Gwen confirms BNB's definition; each check and its fix is returned by /api/v1/phase2/owner/{address}.
+https://marque.trade/builders. A listing counts as quality when: the wallet owns an ERC-8004 identity, proves it by signature, the agent's endpoint answered a callable request within the last 24 hours, it is classified into a category, and it answers a live Marque test for that category. Each check and its fix is returned by /api/v1/phase2/owner/{address}. Following Gwen's reply, uptime is also reported from stored probe history as answered probes over total probes in the previous 24 hours; no unmeasured availability claim is shown.
 
 ## 11. Readiness
 
-Hosting: dedicated VPS behind Caddy with blue/green deploys that roll back automatically when checks fail; no Cloudflare. Load test at 100 virtual users: scheduled for Tue 29 Sep 2026, before the launch freeze (results added then). Monitoring: the status page shows the quest indexer's position and lag per chain, the keeper, and each reference agent's health; Telegram alerts on indexer lag are being added by Tue 29 Sep. Status page: https://marque.trade/status.
+Hosting: dedicated VPS behind Caddy with blue/green deploys that roll back automatically when checks fail; no Cloudflare. On Sun 27 Sep, the final load test passed at 25, 50 and 100 virtual users: page p95 was 93, 116 and 462 ms; API p95 was 142, 97 and 489 ms; there were no errors or process restarts. At 250 users there were still no errors or restarts, but the shared VPS was saturated and p95 rose to 1,123 ms for pages and 1,804 ms for APIs. Monitoring checks nine conditions every minute: indexer lag, reference-seller quotes, per-category hireable supply, HTTP 5xx rate, keeper balance, disk, restart loops, seller memory and stuck paid jobs. All nine alert paths fired in test. Telegram credentials and destination are configured for the Marque group; delivery is awaiting the final group action of adding @MarqueTradeBot as a member. Status page: https://marque.trade/status.
 
-Contact: Francis, [Francis adds his Telegram handle].
+Contact: Francis via X @marquetrade or the Marque Telegram community group: https://t.me/marque_marketplace.
