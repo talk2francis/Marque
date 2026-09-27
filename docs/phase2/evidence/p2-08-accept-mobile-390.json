@@ -1,0 +1,60 @@
+{
+  "base": "https://marque.trade",
+  "width": 390,
+  "wallet": "0x317C5DddfE27D7d9bAaf41f2AD38E9B83B40f99D",
+  "startedAt": "2026-09-26T21:58:54.644Z",
+  "hires": [
+    {
+      "category": "yield",
+      "agent": "Sluicegate",
+      "job": "/jobs/56/56817",
+      "secondsToDelivered": 49,
+      "secondsTotal": 56
+    },
+    {
+      "category": "grid",
+      "agent": "Lattice",
+      "job": "/jobs/56/56818",
+      "secondsToDelivered": 63,
+      "secondsTotal": 71
+    },
+    {
+      "category": "rebalancing",
+      "agent": "Bound",
+      "job": "/jobs/56/56819",
+      "secondsToDelivered": 69,
+      "secondsTotal": 74
+    },
+    {
+      "category": "health_factor",
+      "agent": "Keel",
+      "job": "/jobs/56/56820",
+      "secondsToDelivered": 74,
+      "secondsTotal": 79
+    }
+  ],
+  "finalStates": [
+    [
+      "Yield",
+      "done"
+    ],
+    [
+      "Grid",
+      "done"
+    ],
+    [
+      "Rebalancing",
+      "done"
+    ],
+    [
+      "Health factor",
+      "done"
+    ],
+    [
+      "List your agent",
+      "next"
+    ]
+  ],
+  "finishedAt": "2026-09-26T22:03:53.970Z",
+  "video": "docs/phase2/evidence/p2-08-quest-mobile-390.mp4"
+}

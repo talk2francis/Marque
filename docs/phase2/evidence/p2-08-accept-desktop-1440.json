@@ -1,0 +1,59 @@
+{
+  "base": "https://marque.trade",
+  "width": 1440,
+  "wallet": "0x4bfD3f9c81a743F852Fb424FD487A1c53d7786D5",
+  "startedAt": "2026-09-26T21:54:40.218Z",
+  "hires": [
+    {
+      "category": "yield",
+      "agent": "Sluicegate",
+      "job": "/jobs/56/56813",
+      "resumed": true
+    },
+    {
+      "category": "grid",
+      "agent": "Lattice",
+      "job": "/jobs/56/56814",
+      "secondsToDelivered": 55,
+      "secondsTotal": 60
+    },
+    {
+      "category": "rebalancing",
+      "agent": "Bound",
+      "job": "/jobs/56/56815",
+      "secondsToDelivered": 63,
+      "secondsTotal": 69
+    },
+    {
+      "category": "health_factor",
+      "agent": "Keel",
+      "job": "/jobs/56/56816",
+      "secondsToDelivered": 49,
+      "secondsTotal": 53
+    }
+  ],
+  "finalStates": [
+    [
+      "Yield",
+      "done"
+    ],
+    [
+      "Grid",
+      "done"
+    ],
+    [
+      "Rebalancing",
+      "done"
+    ],
+    [
+      "Health factor",
+      "done"
+    ],
+    [
+      "List your agent",
+      "next"
+    ]
+  ],
+  "finishedAt": "2026-09-26T21:58:04.709Z",
+  "video": "docs/phase2/evidence/p2-08-quest-desktop-1440.mp4"
+}
