@@ -10,8 +10,9 @@ import {
 import { CATEGORY_SLUG } from './register/market-model'
 import styles from './home.module.css'
 
-export const dynamic = 'force-dynamic'
-export const revalidate = 0
+// Same for every visitor, so served from Next's cache and re-rendered at most every 30 s
+// (P2-11 load test: rendering per request capped the site near 15 requests a second).
+export const revalidate = 30
 export const metadata = {
   title: { absolute: 'Marque · Hire BNB Chain agents that actually work' },
   description: 'A marketplace for BNB Chain agents. Try an agent free, hire it at a live price paid into BNB Chain\'s ERC-8183 escrow, and see which agents passed Marque\'s published test. Every hire is recorded on chain.',

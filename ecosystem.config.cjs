@@ -253,6 +253,10 @@ module.exports = {
       cwd: `${ROOT}/releases/slot-${port}/apps/web`,
       script: `${ROOT}/releases/slot-${port}/apps/web/server.js`,
       interpreter: 'node',
+      // Two processes per slot (Node cluster, one shared port): one Next process is one
+      // core, and the P2-11 load test saturated it at about 15 requests a second.
+      instances: 2,
+      exec_mode: 'cluster',
       // Set and Earn runs on BSC mainnet (P2-05 step 8); testnet 97 stays as staging.
       env: { ...env, NODE_ENV: 'production', PORT: port, HOSTNAME: '127.0.0.1', MARQUE_ROOT: ROOT, MARQUE_CAMPAIGN_CHAIN: '56', NEXT_PUBLIC_MARQUE_CAMPAIGN_CHAIN: '56' },
       autorestart: true,

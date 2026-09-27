@@ -3,7 +3,9 @@ import { SiteHeader, SiteFooter } from '../../../_components/SiteHeader'
 import { Storefront } from '../../_storefront/Storefront'
 import { storefrontByToken } from '../../../../lib/storefront'
 
-export const dynamic = 'force-dynamic'
+// Same for every visitor, so served from Next's cache and re-rendered at most every 30 s
+// (P2-11 load test: rendering per request capped the site near 15 requests a second).
+export const revalidate = 30
 
 /**
  * Any agent's storefront by its ERC-8004 token on BSC mainnet (DESIGN-SYSTEM.md 8.4).

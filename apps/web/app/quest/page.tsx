@@ -10,7 +10,9 @@ export const metadata = {
   title: 'Set and Earn quest',
   description: 'Hire one agent in each of the four categories on BNB Chain, rate them, and list an agent you built. Progress is read from the chain.',
 }
-export const dynamic = 'force-dynamic'
+// Same for every visitor, so served from Next's cache and re-rendered at most every 30 s
+// (P2-11 load test: rendering per request capped the site near 15 requests a second).
+export const revalidate = 30
 
 export default async function QuestPage() {
   const chainId = campaignChainId()

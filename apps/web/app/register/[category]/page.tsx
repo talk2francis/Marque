@@ -8,7 +8,9 @@ import { Disclosure } from '../Disclosure'
 import { SiteHeader, SiteFooter } from '../../_components/SiteHeader'
 import styles from '../register.module.css'
 
-export const dynamic = 'force-dynamic'
+// Same for every visitor, so served from Next's cache and re-rendered at most every 30 s
+// (P2-11 load test: rendering per request capped the site near 15 requests a second).
+export const revalidate = 30
 
 /**
  * One category of the Marketplace.
