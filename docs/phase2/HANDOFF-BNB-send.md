@@ -192,7 +192,9 @@ Example, live response for our mainnet smoke-test wallet (a team wallet, so elig
       }
     }
 
-All responses are cached 15 s, open to any origin, and accept ?chainId=97 for staging. Also available: https://marque.trade/api/v1/phase2/ratings/{agentId} (verified-buyer and registry-wide averages, kept apart).
+Tracking responses use a 15-second cache and open CORS. Wallet and stats endpoints accept ?chainId=97; job URLs include the chain in the path. Owner results include a chainId on each identity and can contain both networks. Also available: https://marque.trade/api/v1/phase2/ratings/{agentId} (verified-buyer and registry-wide averages, kept apart).
+
+Owner JSON shape: { owner, qualityListing, agents }. Each agent includes agentKey, chainId, agentId, name, category, listedOnMarque, qualityListing, quality, availability, jobsReceived and jobsPaid. quality contains listing, passed and checks; each check contains id, label, pass, state, reason, fix and note. availability contains windowHours, attempts, successes, firstAt, lastAt and scope. Timestamps are ISO strings or null; sample counts are integers, not uptime percentages. The current response evaluates up to eight discovered identities per owner, not an exhaustive owner inventory. An owner with more identities should contact us if their intended listing is absent.
 
 Eligibility rules (reasons are returned, nothing is hidden): team wallets excluded; self-hire (client is the provider, owner or operator) excluded; zero deposits excluded; jobs not started on Marque excluded; ratings count only from the job's client after delivery; one hire counted per category per wallet.
 

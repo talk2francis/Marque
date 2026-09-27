@@ -21,6 +21,8 @@
 .h2 { font-family:var(--font-serif); font-size:34px; line-height:1.15; font-weight:400; color:var(--fg); margin:0 0 22px; }
 .list { padding-left:22px; margin:0 0 22px; }
 .list li { padding-left:4px; margin-bottom:12px; }
+.list a { display:inline-flex; align-items:center; min-height:32px; }
+.help a { display:inline-block; min-height:28px; }
 .help { border-left:2px solid var(--brass); padding:20px 24px; background:var(--ground-raised); color:var(--fg-soft); line-height:1.7; }
 .docsLayout { min-height:60vh; }
 .docsFooter { display:block; }

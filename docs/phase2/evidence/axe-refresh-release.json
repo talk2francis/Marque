@@ -1,0 +1,138 @@
+{
+  "base": "http://127.0.0.1:3201",
+  "at": "2026-09-27T22:43:32.639Z",
+  "report": [
+    {
+      "route": "/",
+      "theme": "night",
+      "passes": 25,
+      "violations": []
+    },
+    {
+      "route": "/register",
+      "theme": "night",
+      "passes": 27,
+      "violations": []
+    },
+    {
+      "route": "/docs",
+      "theme": "night",
+      "passes": 24,
+      "violations": []
+    },
+    {
+      "route": "/docs/faq",
+      "theme": "night",
+      "passes": 25,
+      "violations": []
+    },
+    {
+      "route": "/docs/whitepaper",
+      "theme": "night",
+      "passes": 24,
+      "violations": []
+    },
+    {
+      "route": "/docs/changelog",
+      "theme": "night",
+      "passes": 24,
+      "violations": []
+    },
+    {
+      "route": "/docs/terms",
+      "theme": "night",
+      "passes": 24,
+      "violations": []
+    },
+    {
+      "route": "/docs/privacy",
+      "theme": "night",
+      "passes": 24,
+      "violations": []
+    },
+    {
+      "route": "/docs/risks",
+      "theme": "night",
+      "passes": 24,
+      "violations": []
+    },
+    {
+      "route": "/builders",
+      "theme": "night",
+      "passes": 24,
+      "violations": []
+    },
+    {
+      "route": "/ledger/ADV-01",
+      "theme": "night",
+      "passes": 24,
+      "violations": []
+    },
+    {
+      "route": "/",
+      "theme": "day",
+      "passes": 25,
+      "violations": []
+    },
+    {
+      "route": "/register",
+      "theme": "day",
+      "passes": 27,
+      "violations": []
+    },
+    {
+      "route": "/docs",
+      "theme": "day",
+      "passes": 24,
+      "violations": []
+    },
+    {
+      "route": "/docs/faq",
+      "theme": "day",
+      "passes": 25,
+      "violations": []
+    },
+    {
+      "route": "/docs/whitepaper",
+      "theme": "day",
+      "passes": 24,
+      "violations": []
+    },
+    {
+      "route": "/docs/changelog",
+      "theme": "day",
+      "passes": 24,
+      "violations": []
+    },
+    {
+      "route": "/docs/terms",
+      "theme": "day",
+      "passes": 24,
+      "violations": []
+    },
+    {
+      "route": "/docs/privacy",
+      "theme": "day",
+      "passes": 24,
+      "violations": []
+    },
+    {
+      "route": "/docs/risks",
+      "theme": "day",
+      "passes": 24,
+      "violations": []
+    },
+    {
+      "route": "/builders",
+      "theme": "day",
+      "passes": 24,
+      "violations": []
+    },
+    {
+      "route": "/ledger/ADV-01",
+      "theme": "day",
+      "passes": 24,
+      "violations": []
+    }
+  ]
+}

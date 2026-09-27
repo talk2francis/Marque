@@ -174,7 +174,7 @@
   display: inline-flex; align-items: center; gap: var(--s2); flex-wrap: wrap;
 }
 .evBody { font-size: var(--size-caption); line-height: 1.6; color: var(--fg-soft); }
-.evLink { font-size: var(--size-caption); color: var(--chain); text-decoration: none; }
+.evLink { display:inline-flex; align-items:center; min-height:28px; font-size: var(--size-caption); color: var(--chain); text-decoration: none; }
 .evLink:hover { text-decoration: underline; }
 
 .evThumbCompact { width: 160px; }
