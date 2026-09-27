@@ -56,6 +56,9 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 22
+          # v5 enables caching from package.json's packageManager (pnpm) by default;
+          # this job only needs Playwright, installed outside the workspace below.
+          package-manager-cache: false
       # Outside the pnpm workspace: npm cannot install into a workspace root.
       - name: Install Playwright
         run: |
