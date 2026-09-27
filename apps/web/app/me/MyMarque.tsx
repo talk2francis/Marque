@@ -25,7 +25,7 @@ const CAT: Record<string, string> = { yield: 'Yield', grid: 'Grid', rebalancing:
 const amt = (h: WalletHire) => (h.amount && h.token ? `${Number(formatUnits(BigInt(h.amount), h.token.decimals)).toLocaleString('en-US', { maximumFractionDigits: 4 })} ${h.token.symbol}` : 'unpaid')
 
 interface OwnerAgent { agentKey: string; chainId: number; agentId: string; name: string; category: string | null; listedOnMarque: boolean; liveness: string | null; quality: { checks: Array<{ id: string; pass: boolean; fix: string | null }> }; jobsReceived: number; jobsPaid: number }
-const CHECK: Record<string, string> = { identity: 'ERC-8004 identity', owner_verified: 'Ownership proved', callable_24h: 'Answers live calls', classified: 'In a quest category', test_call: 'Passed the live test' }
+const CHECK: Record<string, string> = { identity: 'You own its ERC-8004 identity', proved: 'Ownership proved with a signature', callable: 'Answers live calls', classified: 'In a quest category', tested: 'Answered a live Marque test' }
 
 export function MyMarque({ addrParam, chainId }: { addrParam: string | null; chainId: ChainId }) {
   const { address: connected, isConnected } = useAccount()

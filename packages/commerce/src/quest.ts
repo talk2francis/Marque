@@ -197,8 +197,12 @@ export async function walletQuest(address: string, chainId: ChainId = campaignCh
   })
   const walletReasons: string[] = []
   if (teamWallets().includes(wallet)) walletReasons.push('team_wallet')
-  const own = await ownerAgents(wallet)
-  const listed = own.find((a) => a.listedOnMarque) ?? null
+  // Listed on Marque = a published listing owned by this wallet, on BSC mainnet or testnet,
+  // written only when all five quality checks passed (apps/web/lib/builder.ts, SPEC-TRACKING 10).
+  const [lr] = rowsOf(await db().execute(sql`
+    select agent_id from builder_listing where owner_address = ${wallet} and status = 'published' and withdrawn_at is null
+    order by published_at desc limit 1`))
+  const listed = lr ? { agentKey: String(lr['agent_id']) } : null
   const cursor = await cursorOf(chainId)
   return {
     wallet, chainId, asOfBlock: { [chainId]: cursor },
@@ -244,40 +248,6 @@ export async function questJob(chainId: ChainId, jobId: string) {
 async function clientOf(chainId: number, jobId: string): Promise<string | null> {
   const [r] = rowsOf(await db().execute(sql`select client from commerce_job where chain_id = ${chainId} and job_id = ${jobId}`))
   return r ? String(r['client']) : null
-}
-
-/** GET /api/v1/phase2/owner/:address (SPEC-TRACKING 6.3, quality checks per section 10). */
-export async function ownerAgents(address: string) {
-  const owner = address.toLowerCase()
-  const rows = rowsOf(await db().execute(sql`
-    select a.id, a.chain_id, a.token_id, a.name, a.agent_wallet,
-      (select category from agent_category c where c.agent_id = a.id order by (category <> 'unclassified') desc, confidence desc, assigned_at desc limit 1) as category,
-      (select json_build_object('status', b.status, 'verifiedAt', b.verified_at, 'publishedAt', b.published_at) from builder_listing b
-         where b.agent_id = a.id and b.withdrawn_at is null order by b.id desc limit 1) as listing,
-      (select json_build_object('liveness', p.liveness, 'at', p.checked_at) from probe p join agent_service sv on sv.id = p.service_id
-         where sv.agent_id = a.id order by p.checked_at desc limit 1) as probe,
-      (select count(*) from commerce_job j where j.provider = a.agent_wallet) as jobs,
-      (select count(*) from commerce_job j where j.provider = a.agent_wallet and j.funded_raw is not null) as paid
-    from agent a where a.owner_address = ${owner} order by a.token_id::numeric desc nulls last limit 200`))
-  return rows.map((r) => {
-    const listing = r['listing'] as { status: string; verifiedAt: string | null; publishedAt: string | null } | null
-    const probe = r['probe'] as { liveness: string; at: string } | null
-    const category = s(r['category'])
-    const fresh = probe ? Date.now() - new Date(probe.at).getTime() < 24 * 3600_000 : false
-    const checks = [
-      { id: 'identity', pass: true, fix: null },
-      { id: 'owner_verified', pass: Boolean(listing?.verifiedAt), fix: 'Prove ownership at https://marque.trade/builders/claim' },
-      { id: 'callable_24h', pass: fresh && probe?.liveness === 'live', fix: 'A declared service must answer a live call within 24 h' },
-      { id: 'classified', pass: Boolean(category && category !== 'unclassified'), fix: 'Describe the agent so it classifies into a Set and Earn category' },
-      { id: 'test_call', pass: listing?.status === 'published', fix: 'Pass the live test call at https://marque.trade/builders' },
-    ]
-    return {
-      agentKey: String(r['id']), chainId: Number(r['chain_id']), agentId: String(r['token_id']), name: s(r['name']), category,
-      listedOnMarque: listing?.status === 'published', listing, liveness: probe?.liveness ?? null, lastProbe: probe?.at ?? null,
-      quality: { listing: checks.every((c) => c.pass), checks },
-      jobsReceived: Number(r['jobs']), jobsPaid: Number(r['paid']),
-    }
-  })
 }
 
 /** GET /api/v1/phase2/stats: eligible activity only, since launch, on the campaign network. */

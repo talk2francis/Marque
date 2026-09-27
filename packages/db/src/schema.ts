@@ -371,6 +371,47 @@ export const builderListing = pgTable('builder_listing', {
 export type BuilderListing = typeof builderListing.$inferSelect
 export type NewBuilderListing = typeof builderListing.$inferInsert
 
+/**
+ * P2-10: a builder's signed proof that they own an ERC-8004 identity, on 56 or 97,
+ * kept apart from the listing so the checklist can show "proved" before anything is
+ * listed. The signature is stored so anyone can re-check it against ownerOf.
+ */
+export const builderProof = pgTable('builder_proof', {
+  id: serial('id').primaryKey(),
+  /** "chainId:registry:tokenId", the same key as agent.id. */
+  agentKey: text('agent_key').notNull(),
+  chainId: integer('chain_id').notNull(),
+  tokenId: text('token_id').notNull(),
+  registry: text('registry').notNull(),
+  ownerAddress: text('owner_address').notNull(),
+  message: text('message').notNull(),
+  signature: text('signature').notNull(),
+  nonce: text('nonce').notNull(),
+  verifiedAt: timestamp('verified_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({
+  keyIdx: index('builder_proof_key_idx').on(t.agentKey, t.ownerAddress),
+  ownerIdx: index('builder_proof_owner_idx').on(t.ownerAddress),
+}))
+
+/**
+ * P2-10: what the builder checklist measured, one row per check run: a single safeFetch
+ * probe of the endpoint ("Probe now"), or the owner's declared category. First-party
+ * observations (invariant 12): appended, never rewritten or dropped.
+ */
+export const builderCheck = pgTable('builder_check', {
+  id: serial('id').primaryKey(),
+  agentKey: text('agent_key').notNull(),
+  kind: text('kind').$type<'probe' | 'declare'>().notNull(),
+  chainId: integer('chain_id').notNull(),
+  tokenId: text('token_id').notNull(),
+  endpoint: text('endpoint'),
+  ok: boolean('ok').notNull(),
+  result: jsonb('result').$type<Record<string, unknown>>().notNull(),
+  checkedAt: timestamp('checked_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({
+  keyIdx: index('builder_check_key_idx').on(t.agentKey, t.kind, t.checkedAt),
+}))
+
 // ---------------------------------------------------------------------------
 // FIRST-PARTY OBSERVATIONS — the charter, run and receipt record (P7)
 //

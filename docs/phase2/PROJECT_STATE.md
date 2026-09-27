@@ -17,6 +17,7 @@ Live record of Phase 2. Newest first inside each section. Times are UTC.
 | P2-07 Kerbstone foundation | DONE (Sat 22:00) | Tokens (Night/Day/System, Chamber), General Sans + Instrument Serif + Plex Mono self-hosted, new shell (header pills, nav capsule, Proof menu, account menu, drawer, quest bar, footer), 20-part component set on /_ui, /protocol, every route re-shot; axe 0 serious on 5 routes x 2 themes |
 | P2-08 Hire sheet, Job Room, Quest, My Marque | DONE (Sun 00:05), acceptance passed on mainnet, desktop and 390 px |
 | P2-09 Home, marketplace, storefronts | DONE (Sun 02:30) | Home per 8.1 (Phase 1 funnel moved to /why), marketplace tabs and filters with the two-axis card, one storefront for every agent with a sticky purchase panel, Try free on the agent's own endpoint; 5-second test passed first time | Hire sheet (per-category task forms checked against each agent's parser, live price, balance and gas check before any signature, named stepper, controls), Job Room (chain timeline, deliverable per category, raw file with hash check, actions per state incl. resume, reclaim, report, rate), /quest (recommendations, live progress, completion card), /me (spending controls with revoke). Recording needs ~0.4 U and ~0.003 BNB in each of two fresh wallets (Request below) |
+| P2-10 Builder path | DONE (Sun 03:00) | /builders five-check list for BSC mainnet and testnet identities; verdict in packages/registry/src/quality.ts; Probe now; owner-declared category checked against the classifier; /owner returns qualityListing; throwaway testnet agent #2501 went 2 to 5 of 5 in the browser |
 
 ## Production baseline (P2-00, Sat 26 Sep 05:16)
 
@@ -62,6 +63,14 @@ Logged in `docs/DEVIATIONS.md` under "Phase 2". Index:
 - [Sat 05:20] [build] [Francis] Support channel for real users, and personal public wallet addresses for `config/team-wallets.json`.
 
 ## Evidence
+
+### P2-10 (Sun 27 Sep 03:00)
+
+- `/builders` (`app/builders/BuilderChecklist.tsx`): connect, pick an identity (indexed mainnet agents the wallet owns, any it has proved, or look one up by network and token id), and each check shows pass, "Needs a fix" with the exact fix, or "Not yet", with its action inline: Sign the proof (no gas), Probe now (endpoint prefilled from the identity's own record), Declare a category, Run the category's MCS test. All five: "Listed on Marque", with the quest link. Build-one panel: `pip install bnbagent-studio`, `bag` in Claude Code or Cursor, the docs, the open-source reference agents as templates, and the note that the quest needs your own agent.
+- Verdict: `packages/registry/src/quality.ts` (8 unit tests), facts in `apps/web/lib/builder.ts`: ownerOf and tokenURI read live on 56 or 97; stored proofs (`builder_proof`) count only when signed by the current owner; callable within 24 h from Marque's probe or Probe now (`builder_check`, first-party observations, additive migration 0019); the owner's category counts when the classifier agrees or has no signal, otherwise it is flagged; the test counts when the answer was well-formed (a pass also earns a Warrant). When all five pass, a published `builder_listing` row is written and the quest's fifth row reads it.
+- APIs: `GET /api/v1/builders/checks`, `POST /api/v1/builders/probe`, `POST /api/v1/builders/declare`; claim identity and verify take `chainId: 97`; `GET /api/v1/phase2/owner/:address` returns `qualityListing` and each agent's checks with state, reason and fix (same shape for /me and /quest).
+- Acceptance (candidate, real Chromium, headless wallet): throwaway ERC-8004 #2501 on BSC testnet (registered by `scripts/p2-10-throwaway.mjs`, tx 0xb37c868e962a2a001be60712b81f980647f1d29cb0a16c59579916513111d56c, owner 0x4e9C0f537cCcA8Db4BDD16FBA9Ff306F86a82505 on the team list). States: found `pass fail fail pass pending`, proved `pass pass fail pass pending`, probed `pass pass pass pass fail`, tested `pass pass pass pass pass`, listed. `/owner` returned `qualityListing: true` with all five `pass`; `/wallet` returned `ownAgentListed: { done: true, agentKey: 97:0x8004a818...:2501 }` (`docs/phase2/evidence/p2-10-accept.json`). A non-owner wallet sees `fail pending pass pass pass`. Screens in `docs/phase2/screens/p2-10/` (on the VPS).
+- Found and fixed: the public Test-your-agent harness had failed on every run since 21 Sep (D2-10-03).
 
 ### P2-09 (Sun 27 Sep 02:30)
 

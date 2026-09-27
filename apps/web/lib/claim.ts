@@ -1,7 +1,7 @@
 import 'server-only'
 import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto'
 import { getAddress, isAddress, recoverMessageAddress, type Address } from 'viem'
-import { publicClient, BSC_MAINNET_ID } from '@marque/chain'
+import { chainClient, isSupportedChain, type ChainId } from '@marque/commerce'
 
 /**
  * The claim rail's proof-of-control (P10a).
@@ -53,9 +53,9 @@ function verify(token: string): Record<string, unknown> | null {
 
 // ── nonce ──────────────────────────────────────────────────────────────────
 
-export function issueNonce(tokenId: string, contract: string, owner: string): { nonce: string; token: string } {
+export function issueNonce(tokenId: string, contract: string, owner: string, chainId: number = 56): { nonce: string; token: string } {
   const nonce = randomBytes(12).toString('hex')
-  const token = sign({ k: 'nonce', nonce, tokenId, contract: contract.toLowerCase(), owner: owner.toLowerCase(), iat: Date.now() })
+  const token = sign({ k: 'nonce', nonce, tokenId, contract: contract.toLowerCase(), owner: owner.toLowerCase(), chainId, iat: Date.now() })
   return { nonce, token }
 }
 
@@ -67,6 +67,8 @@ export interface ClaimMessageParts {
   owner: string
   nonce: string
   issuedAt: string
+  /** 56 (default) or 97: the network whose identity registry is being proved against. */
+  chainId?: number
 }
 
 /**
@@ -80,7 +82,7 @@ export function buildClaimMessage(p: ClaimMessageParts): string {
     `Identity: #${p.tokenId}`,
     `Contract: ${getAddress(p.contract)}`,
     `Owner: ${getAddress(p.owner)}`,
-    `Chain ID: ${BSC_MAINNET_ID}`,
+    `Chain ID: ${p.chainId ?? 56}`,
     `Nonce: ${p.nonce}`,
     `Issued At: ${p.issuedAt}`,
     ``,
@@ -93,7 +95,7 @@ export function buildClaimMessage(p: ClaimMessageParts): string {
 // ── verification ───────────────────────────────────────────────────────────
 
 export type VerifyResult =
-  | { ok: true; agentId: string; owner: Address; claimToken: string }
+  | { ok: true; agentId: string; owner: Address; claimToken: string; chainId: number; tokenId: string; nonce: string }
   | { ok: false; detail: string }
 
 export async function verifyClaim(args: {
@@ -112,6 +114,11 @@ export async function verifyClaim(args: {
   const contract = String(claim['contract'])
   const nonce = String(claim['nonce'])
   const declaredOwner = String(claim['owner'])
+  const chainId = Number(claim['chainId'] ?? 56)
+  if (!isSupportedChain(chainId)) return { ok: false, detail: 'The proof request names an unsupported network.' }
+  if (!args.message.includes(`Chain ID: ${chainId}`)) {
+    return { ok: false, detail: 'The signed message is for a different network than the one being claimed.' }
+  }
 
   if (!args.message.includes(`Nonce: ${nonce}`)) {
     return { ok: false, detail: 'The signed message does not carry the nonce we issued.' }
@@ -132,7 +139,7 @@ export async function verifyClaim(args: {
   // the value we cached.
   let onchainOwner: Address
   try {
-    const res = await publicClient().readContract({
+    const res = await chainClient(chainId as ChainId).readContract({
       address: getAddress(contract),
       abi: [{ type: 'function', name: 'ownerOf', stateMutability: 'view', inputs: [{ name: 'tokenId', type: 'uint256' }], outputs: [{ type: 'address' }] }],
       functionName: 'ownerOf',
@@ -159,12 +166,13 @@ export async function verifyClaim(args: {
     owner: onchainOwner.toLowerCase(),
     tokenId,
     contract,
+    chainId,
     nonce,
     message: args.message,
     signature: args.signature,
     iat: Date.now(),
   })
-  return { ok: true, agentId: args.agentId, owner: onchainOwner, claimToken }
+  return { ok: true, agentId: args.agentId, owner: onchainOwner, claimToken, chainId, tokenId, nonce }
 }
 
 export interface AuthorisedClaim {
@@ -172,6 +180,7 @@ export interface AuthorisedClaim {
   owner: Address
   tokenId: string
   contract: Address
+  chainId: number
   /** The exact message and signature that proved control, for the stored record. */
   proofMessage: string
   proofSignature: string
@@ -194,6 +203,7 @@ export function readClaimToken(token: string): AuthorisedClaim | null {
     owner: getAddress(owner),
     tokenId: String(claim['tokenId'] ?? ''),
     contract: getAddress(contract),
+    chainId: Number(claim['chainId'] ?? 56),
     proofMessage: String(claim['message'] ?? ''),
     proofSignature: String(claim['signature'] ?? ''),
     proofNonce: String(claim['nonce'] ?? ''),

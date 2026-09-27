@@ -115,6 +115,13 @@
       "chainIds": [
         56
       ]
+    },
+    {
+      "address": "0x4e9C0f537cCcA8Db4BDD16FBA9Ff306F86a82505",
+      "role": "P2-10 builder checklist acceptance fixture (throwaway, testnet only)",
+      "chainIds": [
+        97
+      ]
     }
   ]
 }

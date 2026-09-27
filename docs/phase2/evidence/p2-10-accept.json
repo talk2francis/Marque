@@ -1,0 +1,61 @@
+{
+  "base": "http://127.0.0.1:3299",
+  "wallet": "0x4e9C0f537cCcA8Db4BDD16FBA9Ff306F86a82505",
+  "chainId": 97,
+  "tokenId": "2501",
+  "startedAt": "2026-09-27T00:56:35.820Z",
+  "states": [
+    {
+      "step": "found",
+      "states": [
+        "pass",
+        "pass",
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    {
+      "step": "probed",
+      "states": [
+        "pass",
+        "pass",
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    {
+      "step": "listed",
+      "states": [
+        "pass",
+        "pass",
+        "pass",
+        "pass",
+        "pass"
+      ]
+    }
+  ],
+  "owner": {
+    "qualityListing": true,
+    "agents": [
+      {
+        "agentKey": "97:0x8004a818bfb912233c491871b3d84c89a494bd9e:2501",
+        "qualityListing": true,
+        "listedOnMarque": true,
+        "checks": [
+          "identity:pass",
+          "proved:pass",
+          "callable:pass",
+          "classified:pass",
+          "tested:pass"
+        ]
+      }
+    ]
+  },
+  "questOwnAgentListed": {
+    "done": true,
+    "agentKey": "97:0x8004a818bfb912233c491871b3d84c89a494bd9e:2501"
+  },
+  "finishedAt": "2026-09-27T00:56:54.938Z"
+}

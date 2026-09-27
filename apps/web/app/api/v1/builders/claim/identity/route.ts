@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { resolveIdentity } from '../../../../../../lib/identity'
 import { issueNonce, buildClaimMessage } from '../../../../../../lib/claim'
 import { checkClaimBurst, clientKey } from '../../../../../../lib/limits'
+import { readIdentity } from '../../../../../../lib/builder'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -12,7 +13,7 @@ export const revalidate = 0
  * on-chain identity back plus the exact message to sign. No wallet yet.
  */
 
-const body = z.object({ input: z.string().min(1).max(200) })
+const body = z.object({ input: z.string().min(1).max(200), chainId: z.union([z.literal(56), z.literal(97)]).optional() })
 
 export async function POST(request: Request) {
   const burst = checkClaimBurst(clientKey(request.headers))
@@ -23,6 +24,26 @@ export async function POST(request: Request) {
     input = body.parse(await request.json())
   } catch {
     return NextResponse.json({ error: 'bad_request', detail: 'Provide an ERC-8004 token id or the owner address.' }, { status: 400 })
+  }
+
+  // BSC testnet identities are not in Marque's index: read them straight from the registry.
+  if (input.chainId === 97) {
+    const tokenId = input.input.trim()
+    if (!/^\d{1,12}$/.test(tokenId)) return NextResponse.json({ error: 'bad_request', detail: 'On BSC testnet, give the token id.' }, { status: 400 })
+    const id = await readIdentity(97, tokenId)
+    if (id.readFailed) return NextResponse.json({ error: 'lookup_failed', detail: 'The BSC testnet identity registry did not answer. Try again in a minute.' }, { status: 502 })
+    if (!id.owner) return NextResponse.json({ error: 'not_found', detail: `No identity #${tokenId} exists on BSC testnet.` }, { status: 404 })
+    const { nonce, token } = issueNonce(tokenId, id.registry, id.owner, 97)
+    const message = buildClaimMessage({ tokenId, contract: id.registry, owner: id.owner, nonce, issuedAt: new Date().toISOString(), chainId: 97 })
+    return NextResponse.json({
+      identity: {
+        agentId: id.agentKey, chainId: 97, tokenId, contract: id.registry, owner: id.owner, ownerProvenance: 'ONCHAIN',
+        indexerOwner: null, indexerLag: false, name: id.name, description: id.description, imageUrl: null,
+        cardUrl: id.services[0]?.endpoint ?? null, declaredProtocols: id.services.map((x) => x.kind),
+      },
+      nonce, nonceToken: token, message,
+      note: 'Sign this message with the wallet that owns the identity. It authorises nothing on chain.',
+    })
   }
 
   const lookup = await resolveIdentity(input.input)

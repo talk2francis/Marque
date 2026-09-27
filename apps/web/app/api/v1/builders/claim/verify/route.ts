@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { verifyClaim } from '../../../../../../lib/claim'
+import { recordProof } from '../../../../../../lib/builder'
+import type { ChainId } from '@marque/commerce'
 import { checkClaimBurst, clientKey } from '../../../../../../lib/limits'
 
 export const dynamic = 'force-dynamic'
@@ -39,6 +41,9 @@ export async function POST(request: Request) {
   }
 
   if (!result.ok) return NextResponse.json({ error: 'not_verified', detail: result.detail }, { status: 401 })
+  // The proof is kept apart from any listing, so the builder checklist shows "proved"
+  // before anything is listed, and anyone can re-check the signature later.
+  await recordProof({ chainId: result.chainId as ChainId, tokenId: result.tokenId, owner: result.owner, message: input.message, signature: input.signature, nonce: result.nonce })
 
   return NextResponse.json({
     verified: true,

@@ -43,13 +43,19 @@ export async function POST(request: Request) {
   const spec = CASES.find((c) => c.testId === input.testId)
   if (!spec) return NextResponse.json({ error: 'no_such_test' }, { status: 404 })
 
-  try {
-    await captureCase({ id: spec.id, testId: spec.testId, subject: spec.subject, policy: spec.policy })
-  } catch (err) {
-    return NextResponse.json({ error: 'could_not_capture_case', detail: err instanceof Error ? err.message : 'the chain read failed' }, { status: 503 })
-  }
 
-  const loaded = await loadCase(input.testId as TestId)
+  // Cases are immutable once captured (D2-00-05): run against the pinned case, whose
+  // prompt names its block, and capture only when a test has no case at all. Before
+  // this, every run failed with "already exists with different immutable evidence".
+  let loaded = await loadCase(input.testId as TestId)
+  if (!loaded) {
+    try {
+      await captureCase({ id: spec.id, testId: spec.testId, subject: spec.subject, policy: spec.policy })
+    } catch {
+      return NextResponse.json({ error: 'could_not_capture_case', detail: 'The test case could not be read from BNB Chain just now. Try again in a minute.' }, { status: 503 })
+    }
+    loaded = await loadCase(input.testId as TestId)
+  }
   if (!loaded) return NextResponse.json({ error: 'no_active_case' }, { status: 503 })
 
   const adapter = adapterFor(input.kind, claim.agentId, 'listed by owner', input.endpoint)

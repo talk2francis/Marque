@@ -50,11 +50,11 @@ export default function BuildersTestPage() {
             seen an answer.
           </p>
           <p className={styles.warn}>
-            The case is captured immediately before your endpoint is called. BSC keeps roughly 64
-            blocks of state — about 29 seconds — so a case captured any earlier could not be read
-            by your agent or by us. If your agent is slow enough that the block falls out of
-            state, it will fail on values it could no longer fetch, and that is a real property of
-            answering slowly rather than a quirk of the harness.
+            Every test uses its published case: a real position at a fixed block, named in the
+            task. Cases never change once captured, so a result can always be checked against the
+            same evidence. Your agent must read BNB Chain at that block, which needs an archive
+            node; an agent that reads the latest block instead will answer, and fail on values
+            that moved since.
           </p>
         </section>
       </main>
