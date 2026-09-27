@@ -18,6 +18,7 @@ Live record of Phase 2. Newest first inside each section. Times are UTC.
 | P2-08 Hire sheet, Job Room, Quest, My Marque | DONE (Sun 00:05), acceptance passed on mainnet, desktop and 390 px |
 | P2-09 Home, marketplace, storefronts | DONE (Sun 02:30) | Home per 8.1 (Phase 1 funnel moved to /why), marketplace tabs and filters with the two-axis card, one storefront for every agent with a sticky purchase panel, Try free on the agent's own endpoint; 5-second test passed first time | Hire sheet (per-category task forms checked against each agent's parser, live price, balance and gas check before any signature, named stepper, controls), Job Room (chain timeline, deliverable per category, raw file with hash check, actions per state incl. resume, reclaim, report, rate), /quest (recommendations, live progress, completion card), /me (spending controls with revoke). Recording needs ~0.4 U and ~0.003 BNB in each of two fresh wallets (Request below) |
 | P2-10 Builder path | DONE (Sun 03:00) | /builders five-check list for BSC mainnet and testnet identities; verdict in packages/registry/src/quality.ts; Probe now; owner-declared category checked against the classifier; /owner returns qualityListing; throwaway testnet agent #2501 went 2 to 5 of 5 in the browser |
+| P2-11 Launch hardening | DONE (Sun 04:35), two items wait on Francis | Blue/green behind Caddy proven under load of requests (4 switches, 0 non-200); CI green; load targets met to 100 users; alerts wired (Telegram needs his bot); memory budget; restore drill passed (offsite target needed) |
 
 ## Production baseline (P2-00, Sat 26 Sep 05:16)
 
@@ -63,6 +64,17 @@ Logged in `docs/DEVIATIONS.md` under "Phase 2". Index:
 - [Sat 05:20] [build] [Francis] Support channel for real users, and personal public wallet addresses for `config/team-wallets.json`.
 
 ## Evidence
+
+### P2-11 (Sun 27 Sep 04:35)
+
+- Deploy (`scripts/deploy-web.sh`): builds HEAD into `releases/<sha>`, starts it on the idle port (PM2 `marque-web` on 3200 or `marque-web-b` on 3201, two processes each), health-checks `/api/health` and key pages, runs verify-candidate, warms the pages, rewrites `/etc/caddy/marque-upstream.caddy` and reloads Caddy (graceful), smoke-tests through the public URL (switching back on failure), and stops the old slot after 5 min. Rollback: `bash scripts/deploy-web.sh --rollback` (restarts the previous slot if needed, switches back, cancels its pending stop); `--status` shows both slots.
+- Swap proof: a curl loop on `/`, `/api/health`, `/register`, `/quest` every 0.2 s ran through four switches (3200 to 3201 at 01:06:45; 3201 to 3200 at 01:39:53; rollback to 3201 at 01:40:18; forward to 3200 at 01:40:35): 348 requests inside the switch windows, 0 not 200; 4,660 requests in all, every status 200 (4 home loads took over 20 s during a build on the old release; fixed by serving the marketplace set stale while it refreshes). Logs: `/root/.marque/p2-logs/swap-proof*.log`.
+- CI: `.github/workflows/ci.yml`, run https://github.com/talk2francis/Marque/actions/runs/36286561485 green (typecheck, lint, lint:copy, unit tests, web build against an empty migrated Postgres; Playwright smoke of home, marketplace, a storefront and /quest with no wallet). Badge in README. Two earlier runs failed at the smoke job's Playwright install (fixed).
+- Load: `docs/phase2/LOAD-TEST.md`. Final run: 25 / 50 / 100 users page p95 93 / 116 / 462 ms, API p95 142 / 97 / 489 ms, 0 5xx, 0 restarts; 250 users 1,123 / 1,804 ms (D2-11-04). First run (every page rendered per request) was 2.7 s p95 at 25 users; fixed by page-caching the visitor-independent pages for 30 s and two web processes per slot.
+- Memory budget: in LOAD-TEST.md. Workers now run as one process so PM2's ceilings watch the real worker (they watched a 19 MB tsx wrapper); ceilings set from measured peaks; Redis capped at 256 MB.
+- Alerts: `ops/marque-alerts.mjs` (PM2 `marque-alerts`, every minute): indexer lag over 200 blocks for 2 min, a reference seller with no good quote in 25 min, a quest category under 3 hireable for 5 min, 5xx over 1% for 5 min (new Caddy JSON access log), keeper BNB under 0.0005, disk over 80%, restart loops (3 in 10 min), seller process-tree memory, paid jobs with no successful notify after 10 min. `--test` fired all nine at 01:34 UTC; Telegram delivery waits on credentials (D2-11-01).
+- Backups: nightly dump runs (103 MB on 27 Sep); restore drill into a scratch DB passed on the 27 Sep dump with the Phase 2 tables added to the check (`/root/.marque/p2-logs/restore-drill.txt`). Offsite target needed (D2-11-02).
+- Cloudflare: not touched (no approval).
 
 ### P2-10 (Sun 27 Sep 03:00)
 
