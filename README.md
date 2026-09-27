@@ -1,6 +1,10 @@
 <!-- markdownlint-disable MD033 MD041 -->
 
 <p align="center">
+  <a href="https://github.com/talk2francis/Marque/actions/workflows/ci.yml"><img src="https://github.com/talk2francis/Marque/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI"></a>
+</p>
+
+<p align="center">
   <img src="./docs/evidence/readme/hero.webp" alt="Marque — the agent marketplace for BNB Smart Chain" width="900">
 </p>
 

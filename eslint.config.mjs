@@ -2,7 +2,7 @@ import js from '@eslint/js'
 import tseslint from 'typescript-eslint'
 
 export default tseslint.config(
-  { ignores: ['**/dist/**', '**/.next/**', '**/.next-*/**', '**/node_modules/**', '**/drizzle/**', 'packages/db/drizzle/**'] },
+  { ignores: ['**/dist/**', '**/.next/**', '**/.next-*/**', '**/node_modules/**', '**/drizzle/**', 'packages/db/drizzle/**', 'releases/**'] },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
@@ -13,6 +13,11 @@ export default tseslint.config(
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
       'no-console': 'off',
     },
+  },
+  {
+    // k6 scripts run inside k6, which provides __ENV.
+    files: ['scripts/load/**/*.js'],
+    languageOptions: { globals: { __ENV: 'readonly' } },
   },
   {
     files: ['**/*.test.ts'],
@@ -29,7 +34,7 @@ export default tseslint.config(
   {
     // Audit scripts run in Node but evaluate code inside a browser page, so
     // both sets of globals are legitimate in the same file.
-    files: ['scripts/**/*.mjs', 'scripts/**/*.mts', 'demo-video/**/*.mjs'],
+    files: ['scripts/**/*.mjs', 'scripts/**/*.mts', 'demo-video/**/*.mjs', 'ops/**/*.mjs'],
     languageOptions: {
       globals: {
         process: 'readonly', console: 'readonly', URL: 'readonly',

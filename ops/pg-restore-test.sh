@@ -27,12 +27,14 @@ printf '%-24s %12s %12s\n' "table" "production" "restored"
 FAIL=0
 for T in agent agent_service agent_category probe conformance_result conformance_case \
          funnel_snapshot builder_listing charter run receipt benchmark benchmark_run \
-         pool_tick_observation sealed_call product_event; do
+         pool_tick_observation sealed_call product_event \
+         commerce_job commerce_event hire_intent commerce_quote rating rating_comment notify_attempt \
+         builder_proof builder_check chain_cursor; do
   P=$(psql "$DATABASE_URL" -tAc "select count(*) from ${T}" 2>/dev/null || echo ERR)
   R=$(sudo -u postgres psql -tAc "select count(*) from ${T}" -d "${SCRATCH}" 2>/dev/null || echo ERR)
   printf '%-24s %12s %12s\n' "$T" "$P" "$R"
   case "$T" in
-    probe|conformance_result|receipt|sealed_call|pool_tick_observation|benchmark_run)
+    probe|conformance_result|receipt|sealed_call|pool_tick_observation|benchmark_run|commerce_quote|hire_intent|notify_attempt|rating_comment|builder_proof|builder_check)
       if [ "$P" != "0" ] && [ "$P" != "ERR" ] && { [ "$R" = "0" ] || [ "$R" = "ERR" ]; }; then
         echo "  !! first-party table ${T} restored empty"; FAIL=1
       fi ;;

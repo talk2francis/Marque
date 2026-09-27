@@ -73,6 +73,9 @@ const REFERENCE_AGENTS = [
 const agentApps = REFERENCE_AGENTS.map(({ name, port }) => ({
   name: `marque-${name}`,
   cwd: `${ROOT}/agents/${name}`,
+  // Sellers stay on the tsx wrapper: under PM2, `node --import tsx` exits at startup for the
+  // seller runtime (it runs fine by hand; 27 Sep). PM2's ceiling below therefore sees the
+  // wrapper, so ops/marque-alerts.mjs watches each seller's real process-tree memory.
   script: `${ROOT}/node_modules/.bin/tsx`,
   args: 'src/unifiedMain.ts',
   interpreter: 'none',
@@ -104,14 +107,16 @@ module.exports = {
     {
       name: 'marque-ingest',
       cwd: `${ROOT}/apps/worker`,
-      script: 'node_modules/.bin/tsx',
-      args: 'src/ingest.ts',
-      interpreter: 'none',
+      script: 'src/ingest.ts',
+      // One process, so PM2's memory limit watches the worker itself (a tsx wrapper
+      // spawns a child and PM2 saw only the 19 MB wrapper; P2-11 memory budget).
+      interpreter: 'node',
+      node_args: '--import tsx',
       env: { ...env, NODE_ENV: 'production' },
       autorestart: true,
       max_restarts: 50,
       restart_delay: 5000,
-      max_memory_restart: '600M',
+      max_memory_restart: '500M',
       time: true,
       out_file: '/root/.pm2/logs/marque-ingest-out.log',
       error_file: '/root/.pm2/logs/marque-ingest-err.log',
@@ -119,14 +124,16 @@ module.exports = {
     {
       name: 'marque-probe',
       cwd: `${ROOT}/apps/worker`,
-      script: 'node_modules/.bin/tsx',
-      args: 'src/probe.ts',
-      interpreter: 'none',
+      script: 'src/probe.ts',
+      // One process, so PM2's memory limit watches the worker itself (a tsx wrapper
+      // spawns a child and PM2 saw only the 19 MB wrapper; P2-11 memory budget).
+      interpreter: 'node',
+      node_args: '--import tsx',
       env: { ...env, NODE_ENV: 'production' },
       autorestart: true,
       max_restarts: 50,
       restart_delay: 5000,
-      max_memory_restart: '600M',
+      max_memory_restart: '400M',
       time: true,
       out_file: '/root/.pm2/logs/marque-probe-out.log',
       error_file: '/root/.pm2/logs/marque-probe-err.log',
@@ -134,14 +141,16 @@ module.exports = {
     {
       name: 'marque-classify',
       cwd: `${ROOT}/apps/worker`,
-      script: 'node_modules/.bin/tsx',
-      args: 'src/classify.ts',
-      interpreter: 'none',
+      script: 'src/classify.ts',
+      // One process, so PM2's memory limit watches the worker itself (a tsx wrapper
+      // spawns a child and PM2 saw only the 19 MB wrapper; P2-11 memory budget).
+      interpreter: 'node',
+      node_args: '--import tsx',
       env: { ...env, NODE_ENV: 'production' },
       autorestart: true,
       max_restarts: 50,
       restart_delay: 5000,
-      max_memory_restart: '600M',
+      max_memory_restart: '300M',
       time: true,
       out_file: '/root/.pm2/logs/marque-classify-out.log',
       error_file: '/root/.pm2/logs/marque-classify-err.log',
@@ -149,14 +158,16 @@ module.exports = {
     {
       name: 'marque-pancake-watch',
       cwd: `${ROOT}/apps/worker`,
-      script: 'node_modules/.bin/tsx',
-      args: 'src/pancake-watch.ts',
-      interpreter: 'none',
+      script: 'src/pancake-watch.ts',
+      // One process, so PM2's memory limit watches the worker itself (a tsx wrapper
+      // spawns a child and PM2 saw only the 19 MB wrapper; P2-11 memory budget).
+      interpreter: 'node',
+      node_args: '--import tsx',
       env: { ...env, NODE_ENV: 'production' },
       autorestart: true,
       max_restarts: 50,
       restart_delay: 5000,
-      max_memory_restart: '600M',
+      max_memory_restart: '350M',
       time: true,
       out_file: '/root/.pm2/logs/marque-pancake-watch-out.log',
       error_file: '/root/.pm2/logs/marque-pancake-watch-err.log',
@@ -165,9 +176,11 @@ module.exports = {
       // P2-01: signed ERC-8183 quotes from every seller, on a schedule. Read only.
       name: 'marque-indexer',
       cwd: `${ROOT}/apps/worker`,
-      script: 'node_modules/.bin/tsx',
-      args: 'src/indexer.ts',
-      interpreter: 'none',
+      script: 'src/indexer.ts',
+      // One process, so PM2's memory limit watches the worker itself (a tsx wrapper
+      // spawns a child and PM2 saw only the 19 MB wrapper; P2-11 memory budget).
+      interpreter: 'node',
+      node_args: '--import tsx',
       env: { ...env, NODE_ENV: 'production' },
       autorestart: true,
       max_restarts: 50,
@@ -180,15 +193,17 @@ module.exports = {
     {
       name: 'marque-keeper',
       cwd: `${ROOT}/apps/worker`,
-      script: 'node_modules/.bin/tsx',
-      args: 'src/keeper.ts',
-      interpreter: 'none',
+      script: 'src/keeper.ts',
+      // One process, so PM2's memory limit watches the worker itself (a tsx wrapper
+      // spawns a child and PM2 saw only the 19 MB wrapper; P2-11 memory budget).
+      interpreter: 'node',
+      node_args: '--import tsx',
       // Mainnet only (G-M1, G-M2). Settles are MegaFuel-sponsored; own gas only above the floor.
       env: { ...env, NODE_ENV: 'production', KEEPER_CHAINS: '56', KEEPER_MAX_PER_HOUR: '50', KEEPER_MIN_BNB: '0.0003' },
       autorestart: true,
       max_restarts: 20,
       restart_delay: 30000,
-      max_memory_restart: '200M',
+      max_memory_restart: '350M',
       time: true,
       out_file: '/root/.pm2/logs/marque-keeper-out.log',
       error_file: '/root/.pm2/logs/marque-keeper-err.log',
@@ -196,14 +211,16 @@ module.exports = {
     {
       name: 'marque-quotes',
       cwd: `${ROOT}/apps/worker`,
-      script: 'node_modules/.bin/tsx',
-      args: 'src/quotes.ts',
-      interpreter: 'none',
+      script: 'src/quotes.ts',
+      // One process, so PM2's memory limit watches the worker itself (a tsx wrapper
+      // spawns a child and PM2 saw only the 19 MB wrapper; P2-11 memory budget).
+      interpreter: 'node',
+      node_args: '--import tsx',
       env: { ...env, NODE_ENV: 'production' },
       autorestart: true,
       max_restarts: 50,
       restart_delay: 5000,
-      max_memory_restart: '300M',
+      max_memory_restart: '400M',
       time: true,
       out_file: '/root/.pm2/logs/marque-quotes-out.log',
       error_file: '/root/.pm2/logs/marque-quotes-err.log',
@@ -213,14 +230,16 @@ module.exports = {
       // go stale (P10.5C item 4). Depends on the reference agents being up.
       name: 'marque-conform',
       cwd: `${ROOT}/apps/worker`,
-      script: 'node_modules/.bin/tsx',
-      args: 'src/conform.ts',
-      interpreter: 'none',
+      script: 'src/conform.ts',
+      // One process, so PM2's memory limit watches the worker itself (a tsx wrapper
+      // spawns a child and PM2 saw only the 19 MB wrapper; P2-11 memory budget).
+      interpreter: 'node',
+      node_args: '--import tsx',
       env: { ...env, NODE_ENV: 'production' },
       autorestart: true,
       max_restarts: 50,
       restart_delay: 30000,
-      max_memory_restart: '600M',
+      max_memory_restart: '400M',
       time: true,
       out_file: '/root/.pm2/logs/marque-conform-out.log',
       error_file: '/root/.pm2/logs/marque-conform-err.log',
@@ -244,6 +263,21 @@ module.exports = {
       out_file: `/root/.pm2/logs/${name}-out.log`,
       error_file: `/root/.pm2/logs/${name}-err.log`,
     })),
+    {
+      // P2-11 item 5, LAUNCH-RUNBOOK 3: indexer lag, seller quotes, hireable per category,
+      // 5xx rate, keeper BNB, disk, restart loops, stuck jobs. Telegram when configured.
+      name: 'marque-alerts',
+      cwd: ROOT,
+      script: `${ROOT}/ops/marque-alerts.mjs`,
+      interpreter: 'node',
+      autorestart: true,
+      max_restarts: 50,
+      restart_delay: 10000,
+      max_memory_restart: '150M',
+      time: true,
+      out_file: '/root/.pm2/logs/marque-alerts-out.log',
+      error_file: '/root/.pm2/logs/marque-alerts-err.log',
+    },
     {
       // P11 item 4 — health monitor: /status + each agent /health every 60s,
       // Telegram alert on two consecutive failures.

@@ -150,15 +150,26 @@ function originOf(v: unknown): string | null {
   }
 }
 
-/** The base set (dedup + reference merge) is expensive (~2.4s); memoise it. */
+/**
+ * The base set (dedup + reference merge) is expensive (~2.4 s); memoise it. Past its TTL the
+ * last set is served while ONE refresh runs in the background, and concurrent callers share
+ * that refresh. Recomputing inline stalled whichever request came next for 2 to 5 s, and on a
+ * cold process after a deploy, concurrent home loads piled onto it for 20 s (P2-11 swap proof).
+ */
 let baseMemo: { at: number; rows: MarketRow[] } | null = null
+let baseInflight: Promise<MarketRow[]> | null = null
 const BASE_TTL_MS = 3 * 60_000
 
 async function marketplaceBase(): Promise<MarketRow[]> {
   if (baseMemo && Date.now() - baseMemo.at < BASE_TTL_MS) return baseMemo.rows
-  const rows = await queryAgents()
-  baseMemo = { at: Date.now(), rows }
-  return rows
+  if (!baseInflight) {
+    baseInflight = queryAgents()
+      .then((rows) => { baseMemo = { at: Date.now(), rows }; return rows })
+      .finally(() => { baseInflight = null })
+    // A background refresh that fails keeps serving the last good set.
+    if (baseMemo) baseInflight.catch(() => undefined)
+  }
+  return baseMemo ? baseMemo.rows : baseInflight
 }
 
 async function queryAgents(): Promise<MarketRow[]> {

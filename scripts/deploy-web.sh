@@ -39,6 +39,8 @@ switch_to() {
     say "caddy config did not validate; restoring the previous upstream"
     cp "$UPSTREAM.prev" "$UPSTREAM"; return 1
   fi
+  # `caddy validate` runs as root and opens the access log; keep the file Caddy's own.
+  chown -R caddy:caddy /var/log/caddy 2>/dev/null || true
   systemctl reload caddy
   say "caddy now routes marque.trade to :$port"
 }
@@ -66,8 +68,12 @@ start_slot() {
 }
 
 retire_later() {
-  local name="$1" unit="marque-retire-$1-$STAMP"
-  systemd-run --unit "$unit" --on-active="$RETIRE_AFTER" /bin/bash -c "HOME=/root PM2_HOME=/root/.pm2 pm2 stop $name" >/dev/null 2>&1 \
+  # systemd runs the stop with a bare PATH, so pm2 is called by its absolute path
+  # (the first retire, 27 Sep, failed with "pm2: command not found").
+  local name="$1" unit="marque-retire-$1-$STAMP" pm2bin
+  pm2bin="$(command -v pm2)"
+  systemd-run --unit "$unit" --on-active="$RETIRE_AFTER" --setenv=HOME=/root --setenv=PM2_HOME=/root/.pm2 \
+    --setenv=PATH="$(dirname "$pm2bin"):$(dirname "$(command -v node)"):/usr/bin:/bin" "$pm2bin" stop "$name" >/dev/null 2>&1 \
     && say "$name stops in ${RETIRE_AFTER}s (systemd unit $unit)" \
     || say "could not schedule the stop of $name; stop it by hand: pm2 stop $name"
 }
@@ -115,6 +121,12 @@ if ! node scripts/verify-candidate.mjs "http://127.0.0.1:$IDLE" >>"$LOG" 2>&1; t
   pm2 stop "$(name_of "$IDLE")" >/dev/null 2>&1 || true
   exit 1
 fi
+
+# Warm the new slot's projections right before it takes traffic (a cold home page
+# recomputes the marketplace, coverage and ledger reads on first hit).
+for u in / /register /register/yield /agents/keel /quest /builders /api/v1/phase2/coverage; do
+  curl -s -o /dev/null -m 60 "http://127.0.0.1:$IDLE$u" || true
+done
 
 switch_to "$IDLE"
 
