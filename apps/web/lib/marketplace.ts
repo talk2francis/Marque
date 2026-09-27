@@ -3,6 +3,7 @@ import { sql } from 'drizzle-orm'
 import { db, firstPartyIds, canonicalAgentIdSql } from '@marque/db'
 import { commercialStates, formatAmount, type CommercialState } from '@marque/commerce'
 import { agentState, TASK_FOR_CATEGORY } from './agent-state'
+import { agentTracks, EMPTY_TRACK, type AgentTrack } from './agent-track'
 
 /**
  * The Marketplace view of the Register (P10.5B).
@@ -75,6 +76,11 @@ export interface MarketRow {
   previewable: boolean
   /** Null when Hire is wired; otherwise the reason it is not. */
   hireBlockedReason: string | null
+  /**
+   * Its record as a seller on BSC mainnet, from the chain index: verified-buyer rating
+   * (kept apart from all feedback), jobs by outcome, measured delivery time.
+   */
+  track: AgentTrack
 }
 
 export interface MarketQuery {
@@ -89,7 +95,22 @@ export interface MarketQuery {
   includeUnclassified?: boolean
   hasPrice?: boolean
   iface?: string | null
-  sort?: 'best' | 'proven' | 'price' | 'fast' | 'recent'
+  /**
+   * The marketplace tab (DESIGN-SYSTEM.md 8.3). ready: hireable now. free: answers a free
+   * task at its own endpoint. tested: has a conformance result, pass or fail.
+   */
+  tab?: 'ready' | 'free' | 'tested' | 'all' | null
+  /** Only Marque reference agents. `thirdPartyOnly` is the opposite toggle. */
+  firstPartyOnly?: boolean
+  /** The network its live quote is on (56 or 97). */
+  network?: number | null
+  /** The token its live quote is in, by symbol. */
+  token?: string | null
+  /** Live quote at or under this amount, in the quote token's units. */
+  maxPrice?: number | null
+  /** Verified-buyer average at or over this many stars. */
+  minRating?: number | null
+  sort?: 'best' | 'proven' | 'price' | 'fast' | 'recent' | 'rated'
   limit?: number
   offset?: number
 }
@@ -245,7 +266,7 @@ async function queryAgents(): Promise<MarketRow[]> {
       || (c.state === prev.state && c.signed === true && prev.signed !== true)) bestByAgent.set(c.agentId, c)
   }
 
-  const thirdParty: MarketRow[] = list.map((r) => {
+  const thirdParty: Array<Omit<MarketRow, 'track'>> = list.map((r) => {
     const live = r['any_live'] === true
     const confTest = r['conf_test'] ? String(r['conf_test']) : null
     const confPass = r['any_pass'] === true
@@ -310,7 +331,8 @@ async function queryAgents(): Promise<MarketRow[]> {
     }
   })
 
-  return thirdParty
+  const tracks = await agentTracks(56)
+  return thirdParty.map((r) => ({ ...r, track: (r.tokenId && tracks[r.tokenId]) || EMPTY_TRACK(56) }))
 }
 
 type ServiceCommerceRow = Awaited<ReturnType<typeof commercialStates>> extends Map<number, infer V> ? V : never
@@ -337,6 +359,21 @@ function priceAndCommerce(c: ServiceCommerceRow | undefined, live: boolean, decl
   }
 }
 
+/** A live quote as a number in token units, or null (a declared price never filters as a quote). */
+export function quotedPrice(r: Pick<MarketRow, 'commerce'>): number | null {
+  const c = r.commerce
+  if (!c.priceRaw || !c.token) return null
+  return Number(c.priceRaw) / 10 ** c.token.decimals
+}
+
+/**
+ * Answers a free task at its own endpoint: Marque's reference agents (their free face
+ * runs the paid engine), and any agent with a live A2A service measured in the last 24 h.
+ */
+export function answersFree(r: Pick<MarketRow, 'isReference' | 'liveness' | 'interfaces'>): boolean {
+  return r.isReference || (r.liveness === 'live' && r.interfaces.includes('a2a'))
+}
+
 export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: MarketRow[]; generatedAt: string; total: number; offset: number; hasMore: boolean }> {
   // Clone: the base is memoised and the sort below is in place.
   let all = [...(await marketplaceBase())]
@@ -348,6 +385,14 @@ export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: Ma
   if (q.liveNow) all = all.filter((r) => r.liveness === 'live')
   if (q.warranted) all = all.filter((r) => r.warrant.status === 'warranted')
   if (q.thirdPartyOnly) all = all.filter((r) => !r.isReference)
+  if (q.firstPartyOnly) all = all.filter((r) => r.isReference)
+  if (q.tab === 'ready') all = all.filter((r) => r.commerce.state === 'hireable' || r.commerce.state === 'settleable')
+  if (q.tab === 'free') all = all.filter(answersFree)
+  if (q.tab === 'tested') all = all.filter((r) => r.warrant.status !== 'untested')
+  if (q.network) all = all.filter((r) => r.commerce.chainId === q.network)
+  if (q.token) all = all.filter((r) => r.commerce.token?.symbol.toLowerCase() === q.token!.toLowerCase())
+  if (q.maxPrice != null && Number.isFinite(q.maxPrice)) all = all.filter((r) => { const p = quotedPrice(r); return p !== null && p <= q.maxPrice! })
+  if (q.minRating != null && Number.isFinite(q.minRating)) all = all.filter((r) => (r.track.verified.averageStars ?? 0) >= q.minRating!)
   if (q.hasPrice) all = all.filter((r) => !!r.price)
   if (q.iface) all = all.filter((r) => r.interfaces.includes(q.iface as string) || (q.iface === 'erc8183' && r.protocols.some((p) => /8183/.test(p))))
   if (q.search) {
@@ -378,15 +423,22 @@ export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: Ma
     return m ? Number(m[0]) : Number.POSITIVE_INFINITY
   }
 
+  // Measured delivery (paid to delivered) when the agent has sold on chain, else probe latency.
+  const speed = (r: MarketRow) => (r.track.delivery.medianSeconds !== null ? r.track.delivery.medianSeconds * 1000 : r.latencyMs ?? 1e12)
+  const byRating = (a: MarketRow, b: MarketRow) =>
+    (b.track.verified.averageStars ?? -1) - (a.track.verified.averageStars ?? -1) || b.track.verified.count - a.track.verified.count
   all.sort((a, b) => {
     const tie = a.agentId.localeCompare(b.agentId)
     switch (q.sort) {
       case 'proven': return byQual(a, b) || byWarrantDate(a, b) || (a.latencyMs ?? 1e9) - (b.latencyMs ?? 1e9) || tie
       case 'price': return priceNum(a) - priceNum(b) || byQual(a, b) || tie
-      case 'fast': return (a.latencyMs ?? 1e9) - (b.latencyMs ?? 1e9) || byQual(a, b) || tie
+      case 'fast': return speed(a) - speed(b) || byQual(a, b) || tie
       case 'recent': return (b.warrant.date ?? '').localeCompare(a.warrant.date ?? '') || byQual(a, b) || tie
+      case 'rated': return byRating(a, b) || byCommerce(a, b) || byQual(a, b) || tie
       default:
-        return byCommerce(a, b) || byQual(a, b) || byWarrantDate(a, b) || b.identityCount - a.identityCount || (a.latencyMs ?? 1e9) - (b.latencyMs ?? 1e9) || tie
+        // Recommended: hireable first, then quality, then verified rating, then price.
+        return byCommerce(a, b) || byQual(a, b) || byRating(a, b) || priceNum(a) - priceNum(b)
+          || byWarrantDate(a, b) || b.identityCount - a.identityCount || (a.latencyMs ?? 1e9) - (b.latencyMs ?? 1e9) || tie
     }
   })
 

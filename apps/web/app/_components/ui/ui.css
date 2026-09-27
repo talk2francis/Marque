@@ -389,11 +389,17 @@
   .tp-agent { color: var(--ink); font-weight: 500; transition: color var(--t-fast) var(--ease); }
   .tp-mono { font-family: var(--font-mono); font-size: 12px; color: var(--chain); }
   .tp-age { color: var(--ink-3); font-variant-numeric: tabular-nums; }
+  .tp-team { white-space: nowrap; font-size: 11px; color: var(--ink-3); border: 1px dashed var(--hair-2); border-radius: var(--r-pill); padding: 1px 7px; }
   .tp-label { position: absolute; left: 0; top: 0; bottom: 0; z-index: 1; display: flex; align-items: center; padding-right: 18px; background: linear-gradient(90deg, var(--canvas) 70%, transparent); }
   @media (prefers-reduced-motion: reduce) {
     .tp { height: auto; -webkit-mask-image: none; mask-image: none; }
     .tp-track { position: static; animation: none; flex-wrap: wrap; row-gap: 8px; padding: 10px 0; white-space: normal; }
     .tp-track [aria-hidden='true'] { display: none; }
+  }
+  /* Still and narrow, the Tape is a short list, not a wall: the newest four events. */
+  @media (prefers-reduced-motion: reduce) and (max-width: 640px) {
+    .tp-track > .tp-item:nth-child(n + 5) { display: none; }
+    .tp-item { flex-wrap: wrap; row-gap: 2px; }
   }
 
   /* ================= Menus (popover) ================= */

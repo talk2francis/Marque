@@ -1,0 +1,66 @@
+{
+  "base": "http://127.0.0.1:3299",
+  "at": "2026-09-27T00:20:02.219Z",
+  "report": [
+    {
+      "route": "/",
+      "theme": "night",
+      "passes": 25,
+      "violations": []
+    },
+    {
+      "route": "/register",
+      "theme": "night",
+      "passes": 27,
+      "violations": []
+    },
+    {
+      "route": "/agents/keel",
+      "theme": "night",
+      "passes": 29,
+      "violations": []
+    },
+    {
+      "route": "/agents/56/304493",
+      "theme": "night",
+      "passes": 24,
+      "violations": []
+    },
+    {
+      "route": "/why",
+      "theme": "night",
+      "passes": 25,
+      "violations": []
+    },
+    {
+      "route": "/",
+      "theme": "day",
+      "passes": 25,
+      "violations": []
+    },
+    {
+      "route": "/register",
+      "theme": "day",
+      "passes": 27,
+      "violations": []
+    },
+    {
+      "route": "/agents/keel",
+      "theme": "day",
+      "passes": 29,
+      "violations": []
+    },
+    {
+      "route": "/agents/56/304493",
+      "theme": "day",
+      "passes": 24,
+      "violations": []
+    },
+    {
+      "route": "/why",
+      "theme": "day",
+      "passes": 25,
+      "violations": []
+    }
+  ]
+}

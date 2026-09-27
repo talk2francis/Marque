@@ -1,6 +1,5 @@
 import { notFound } from 'next/navigation'
 import { sql } from 'drizzle-orm'
-import { keccak256, toBytes } from 'viem'
 import { Check, X } from 'lucide-react'
 import { db } from '@marque/db'
 import {
@@ -13,6 +12,7 @@ import { AddressChip, Badge, Disclosure, HashChip } from '../../../_components/u
 import { network as net } from '../../../../lib/network'
 import { utcStamp } from '../../../../lib/time'
 import { DeliverableView } from './Deliverable'
+import { readManifest } from '../../../../lib/manifest'
 import { JobActions } from './JobActions'
 import styles from './job.module.css'
 
@@ -49,19 +49,6 @@ function headline(state: string, agent: string, price: string, reviewEnds: numbe
     case 'CANCELLED': return { title: 'Cancelled', body: 'The job was closed before payment. Nothing was charged.' }
     default: return { title: 'Job', body: '' }
   }
-}
-
-async function readManifest(url: string, onchainHash: string | null) {
-  try {
-    const r = await fetch(url, { next: { revalidate: 3600 }, signal: AbortSignal.timeout(8000) })
-    if (!r.ok) return null
-    const raw = await r.text()
-    const hash = keccak256(toBytes(raw))
-    const doc = JSON.parse(raw) as { response?: { content?: string } }
-    let content: Record<string, unknown> | null = null
-    try { content = doc.response?.content ? JSON.parse(doc.response.content) as Record<string, unknown> : null } catch { content = null }
-    return { raw, hash, matches: onchainHash ? hash.toLowerCase() === onchainHash.toLowerCase() : null, content, pretty: JSON.stringify(doc, null, 2) }
-  } catch { return null }
 }
 
 export default async function JobRoom({ params }: { params: Promise<{ chainId: string; jobId: string }> }) {

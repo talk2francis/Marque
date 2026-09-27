@@ -1,5 +1,7 @@
 import type { CSSProperties } from 'react'
-import { middle } from './AddressChip'
+
+/** 0x3a…080a: a local copy, since AddressChip's helper lives in a client module. */
+const middle = (v: string, head = 6, tail = 4) => (v.length <= head + tail + 1 ? v : `${v.slice(0, head)}…${v.slice(-tail)}`)
 
 /**
  * A slow ticker of real recent Marque hires and ratings (agent, category,
@@ -17,19 +19,22 @@ export interface TapeItem {
   href: string
   /** Age, already worded ("2m"). */
   age: string
+  /** A wallet on the published team list: a real event, marked, never counted for the campaign. */
+  team?: boolean
 }
 
 export function Tape({ items, label = 'Recent hires and ratings on Marque' }: { items: TapeItem[]; label?: string }) {
   if (items.length === 0) return null
   const row = (hidden: boolean) =>
     items.map((e) => (
-      <a key={`${hidden ? 'b' : 'a'}-${e.id}`} className="tp-item" data-kind={e.kind} href={e.href} tabIndex={hidden ? -1 : undefined} aria-hidden={hidden || undefined}>
+      <a key={`${hidden ? 'b' : 'a'}-${e.id}`} className="tp-item" data-kind={e.kind} href={e.href} tabIndex={hidden ? -1 : undefined} aria-hidden={hidden || undefined} {...(e.href.startsWith('http') ? { target: '_blank', rel: 'noreferrer' } : {})}>
         <span className="tp-kind" aria-hidden="true" />
         <span className="tp-agent">{e.agent}</span>
         <span>{e.category}</span>
         <span className="num">{e.value}</span>
         <span className="tp-mono">{middle(e.tx, 4, 4)}</span>
         <span className="tp-age">{e.age}</span>
+        {e.team ? <span className="tp-team" title="A wallet on Marque's published team list. Real on chain, never counted for the campaign.">team wallet</span> : null}
       </a>
     ))
   const speed = { '--tape-s': `${Math.max(40, items.length * 9)}s` } as CSSProperties

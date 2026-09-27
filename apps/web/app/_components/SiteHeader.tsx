@@ -11,6 +11,7 @@ import { NetworkPill, StatusPill } from './shell/Pills'
 import { QuestBar } from './shell/QuestBar'
 import { ThemeMenu } from './shell/ThemeMenu'
 import { WalletButton } from './shell/WalletButton'
+import { FooterPulse } from './shell/FooterPulse'
 import type { Active } from './nav-items'
 
 /**
@@ -53,9 +54,10 @@ const COLS: Array<{ label: string; links: Array<{ label: string; href: string; e
     label: 'Market',
     links: [
       { label: 'Marketplace', href: '/register' },
+      { label: 'Try an agent free', href: '/register?tab=free' },
+      { label: 'Compare agents', href: '/compare' },
       { label: 'Positions', href: '/positions' },
       { label: 'Pancake Desk', href: '/pancakeswap' },
-      { label: 'Compare agents', href: '/compare' },
       { label: 'My Marque', href: '/me' },
     ],
   },
@@ -63,16 +65,16 @@ const COLS: Array<{ label: string; links: Array<{ label: string; href: string; e
     label: 'Quest and builders',
     links: [
       { label: 'Set and Earn quest', href: '/quest' },
-      { label: 'List your agent', href: '/builders/claim' },
+      { label: 'List your agent', href: '/builders' },
       { label: 'Test your agent', href: '/builders/test' },
       { label: 'Docs', href: '/docs' },
       { label: 'Quest API', href: '/api/v1/phase2/config', external: true },
-      { label: 'Source on GitHub', href: 'https://github.com/talk2francis/Marque', external: true },
     ],
   },
   {
     label: 'Proof',
     links: [
+      { label: 'Why Marque', href: '/why' },
       { label: 'The Standard', href: '/standard' },
       { label: 'The Ledger', href: '/ledger' },
       { label: 'Receipts', href: '/receipts/latest' },
@@ -80,6 +82,8 @@ const COLS: Array<{ label: string; links: Array<{ label: string; href: string; e
       { label: 'Status', href: '/status' },
       { label: 'Protocol', href: '/protocol' },
       { label: 'Charter sandbox (testnet)', href: '/app/charter' },
+      { label: 'Charters granted', href: '/app/charters' },
+      { label: '90-second walkthrough', href: '/judge' },
     ],
   },
   {
@@ -89,6 +93,15 @@ const COLS: Array<{ label: string; links: Array<{ label: string; href: string; e
       { label: '8004scan', href: 'https://8004scan.io', external: true },
       { label: 'PancakeSwap', href: 'https://pancakeswap.finance', external: true },
       { label: 'Venus', href: 'https://venus.io', external: true },
+    ],
+  },
+  {
+    label: 'Follow',
+    links: [
+      { label: '@marquetrade on X', href: 'https://x.com/marquetrade', external: true },
+      { label: 'Source on GitHub', href: 'https://github.com/talk2francis/Marque', external: true },
+      { label: 'Report a problem', href: 'https://github.com/talk2francis/Marque/issues', external: true },
+      { label: 'Brand kit', href: '/brand/marque-brand-kit.zip' },
     ],
   },
 ]
@@ -136,17 +149,8 @@ export function SiteFooter() {
               MarqueRegistry {short(REGISTRY_TESTNET)} · BSC testnet · 97
             </a>
           </div>
-          <div className="footer-social">
-            <a href="https://x.com/marquetrade" target="_blank" rel="noreferrer">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-              </svg>
-              @marquetrade
-            </a>
-            <a href="https://x.com/marquetrade" target="_blank" rel="noreferrer">Support</a>
-            <a href="https://github.com/talk2francis/Marque/issues" target="_blank" rel="noreferrer">Report a problem</a>
-            <span className="footer-legal">{BRAND.name} · {BRAND.domain}</span>
-          </div>
+          <FooterPulse />
+          <span className="footer-legal">© 2026 {BRAND.name} · {BRAND.domain} · Not investment advice. Agents answer; you decide.</span>
         </div>
       </div>
       <div className="footer-giant" aria-hidden="true">

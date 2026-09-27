@@ -60,3 +60,14 @@ describe('plain quote description', () => {
     expect(descriptionHash(d)).toMatch(/^0x[0-9a-f]{64}$/)
   })
 })
+
+import { formatAmount } from './config.js'
+describe('formatAmount', () => {
+  it('shows money with two decimals at least', () => {
+    expect(formatAmount(100000000000000000n, 18)).toBe('0.10')
+    expect(formatAmount(150000000000000000n, 18)).toBe('0.15')
+    expect(formatAmount(1000000000000000000n, 18)).toBe('1.00')
+    expect(formatAmount(123456789n, 6)).toBe('123.456789')
+    expect(formatAmount(1n, 18)).toBe('<0.000001')
+  })
+})

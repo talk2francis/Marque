@@ -17,12 +17,38 @@ import styles from './register.module.css'
  * the site header instead of over the page.
  */
 
-const TOGGLES: Array<{ key: keyof MarketState; group: string; label: string; hint: string }> = [
+const TOGGLES: Array<{ key: keyof MarketState; group: string; label: string; hint: string; off?: keyof MarketState }> = [
+  { key: 'warranted', group: 'Marque test', label: 'Warranted only', hint: 'Passed the published conformance test for its category.' },
   { key: 'liveNow', group: 'Availability', label: 'Live now', hint: 'Answered Marque’s most recent probe.' },
-  { key: 'warranted', group: 'Qualification', label: 'Qualified', hint: 'Passed the published conformance test for its category.' },
-  { key: 'thirdParty', group: 'Provider', label: 'Third-party only', hint: 'Hide the reference agents Marque operates.' },
-  { key: 'hasPrice', group: 'Commerce', label: 'Price listed', hint: 'The provider advertises a price.' },
+  { key: 'thirdParty', group: 'Provider', label: 'Third-party only', hint: 'Hide the reference agents Marque operates.', off: 'firstParty' },
+  { key: 'firstParty', group: 'Provider', label: 'Marque reference only', hint: 'Only the agents Marque runs, one or two per category.', off: 'thirdParty' },
+  { key: 'hasPrice', group: 'Commerce', label: 'Price listed', hint: 'A live quote or a declared price.' },
 ]
+
+/** One row of mutually exclusive options, the same control the interface facet uses. */
+function Choice<T extends string | number | null>({ id, group, value, options, onPick }: {
+  id: string; group: string; value: T; options: Array<{ value: T; label: string }>; onPick: (v: T) => void
+}) {
+  return (
+    <div className={styles.facet}>
+      <span className={styles.facetGroup} id={id}>{group}</span>
+      <div className={styles.ifaceRow} role="radiogroup" aria-labelledby={id}>
+        {options.map((o) => (
+          <button
+            key={String(o.value)}
+            type="button"
+            role="radio"
+            aria-checked={value === o.value}
+            className={`${styles.ifaceOpt} ${value === o.value ? styles.ifaceOptOn : ''}`}
+            onClick={() => onPick(o.value)}
+          >
+            {o.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
 
 function useIsNarrow(): boolean {
   const [narrow, setNarrow] = useState(false)
@@ -54,7 +80,7 @@ function Facets({
             type="button"
             className={styles.facetToggle}
             aria-pressed={state[t.key] as boolean}
-            onClick={() => patch({ [t.key]: !state[t.key] } as Partial<MarketState>)}
+            onClick={() => patch({ [t.key]: !state[t.key], ...(t.off && !state[t.key] ? { [t.off]: false } : {}) } as Partial<MarketState>)}
           >
             <span className={styles.facetBox} aria-hidden="true">
               <svg viewBox="0 0 12 12" width="10" height="10" focusable="false">
@@ -68,6 +94,34 @@ function Facets({
           </button>
         </div>
       ))}
+
+      <Choice id="net-group" group="Network" value={state.network}
+        options={[{ value: null, label: 'Any' }, { value: 56, label: 'BSC mainnet' }, { value: 97, label: 'BSC testnet' }]}
+        onPick={(v) => patch({ network: v })} />
+      <Choice id="token-group" group="Paid in" value={state.token}
+        options={[{ value: null, label: 'Any' }, { value: 'U', label: 'U' }, { value: 'USDT', label: 'USDT' }, { value: 'USDC', label: 'USDC' }]}
+        onPick={(v) => patch({ token: v })} />
+      <Choice id="rating-group" group="Verified rating" value={state.minRating}
+        options={[{ value: null, label: 'Any' }, { value: 3, label: '3+' }, { value: 4, label: '4+' }, { value: 4.5, label: '4.5+' }]}
+        onPick={(v) => patch({ minRating: v })} />
+      <div className={styles.facet}>
+        <label className={styles.facetGroup} htmlFor="max-price">Max price per job</label>
+        <input
+          id="max-price"
+          className={styles.priceInput}
+          type="number"
+          inputMode="decimal"
+          min={0}
+          step="0.01"
+          placeholder="Any"
+          value={state.maxPrice ?? ''}
+          onChange={(e) => {
+            const v = e.target.value.trim()
+            patch({ maxPrice: v === '' || !Number.isFinite(Number(v)) || Number(v) < 0 ? null : Number(v) })
+          }}
+        />
+        <span className={styles.facetHint}>Live quotes only, in the quote&apos;s own token.</span>
+      </div>
 
       <div className={styles.facet}>
         <span className={styles.facetGroup} id="iface-group">Interface</span>

@@ -4,7 +4,12 @@
  */
 export async function copyText(text: string): Promise<boolean> {
   try {
-    await navigator.clipboard.writeText(text)
+    // A permission prompt that is never answered leaves writeText pending for good, and the
+    // button would look dead: give it a moment, then use the fallback.
+    await Promise.race([
+      navigator.clipboard.writeText(text),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('clipboard timeout')), 700)),
+    ])
     return true
   } catch {
     try {

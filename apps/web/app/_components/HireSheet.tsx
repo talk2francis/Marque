@@ -12,6 +12,7 @@ import { AddressChip, Badge, Button, ButtonLink, Disclosure, ErrorNote, PriceTag
 import { toast } from '../../lib/toast'
 import { explorerTx } from '../../lib/network'
 import { utcStamp } from '../../lib/time'
+import { DeliverableView } from '../jobs/[chainId]/[jobId]/Deliverable'
 
 /**
  * The hire sheet (DESIGN-SYSTEM.md 8.5). Opens over any page from `?hire=<agentKey>`,
@@ -24,7 +25,12 @@ interface SheetAgent {
   owner: string | null; firstParty: boolean; state: string
   lastQuote: { chainId: number | null; priceLabel: string | null; signed: boolean | null; quotedAt: string | null } | null
   reviewWindowSeconds: number | null; platformFeeBP: number | null; reviewWindowChainId: number
+  /** False for an agent that answers free at its own endpoint but takes no paid jobs. */
+  sellsJobs?: boolean
 }
+
+/** What a free run returned: the agent's own answer, never graded here. */
+interface FreeRun { content: Record<string, unknown> | null; text: string | null; latencyMs: number; at: string; assumptions?: string[] }
 
 const NET: Record<number, string> = { 56: 'BSC mainnet', 97: 'BSC testnet' }
 const CAT: Record<string, string> = { yield: 'Yield', grid: 'Grid', rebalancing: 'Rebalancing', health_factor: 'Health factor', security: 'Security' }
@@ -64,6 +70,7 @@ function stepperSteps(steps: HireStep[], chainId: number, batch: boolean): TxSte
 export function HireSheet() {
   const params = useSearchParams()
   const agentId = params.get('hire')
+  const tryFirst = params.get('try') === '1'
   const router = useRouter()
   const pathname = usePathname()
   const { address, isConnected, chainId: walletChain } = useAccount()
@@ -74,7 +81,28 @@ export function HireSheet() {
   const [task, setTask] = useState<TaskValue>({ task: '', ready: false, missing: null })
   const [spotBnb, setSpotBnb] = useState<number | null>(null)
   const [job, setJob] = useState<{ state: string | null; submittedAt: string | null } | null>(null)
+  const [free, setFree] = useState<FreeRun | null>(null)
+  const [trying, setTrying] = useState(false)
+  const [tryError, setTryError] = useState<string | null>(null)
   const announced = useRef<string | null>(null)
+
+  /** Run the task on the agent's free face: no wallet, no quote, nothing on chain. */
+  const runFree = useCallback(async () => {
+    if (!agentId || !task.ready) return
+    setTrying(true)
+    setTryError(null)
+    setFree(null)
+    try {
+      const r = await fetch('/api/v1/hire/try', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ agentId, task: task.task }) })
+      const j = await r.json().catch(() => ({}))
+      if (!r.ok) throw new Error(typeof j.detail === 'string' ? j.detail : 'The free run did not complete. Try again in a minute.')
+      setFree(j as FreeRun)
+    } catch (e) {
+      setTryError(e instanceof Error ? e.message : 'The free run did not complete. Try again in a minute.')
+    } finally {
+      setTrying(false)
+    }
+  }, [agentId, task])
 
   useEffect(() => {
     if (!agentId) return
@@ -82,8 +110,10 @@ export function HireSheet() {
     setAgent(null)
     setLoadError(null)
     setJob(null)
+    setFree(null)
+    setTryError(null)
     announced.current = null
-    fetch(`/api/v1/hire/agent?agentId=${encodeURIComponent(agentId)}`)
+    fetch(`/api/v1/hire/agent?agentId=${encodeURIComponent(agentId)}${tryFirst ? '&try=1' : ''}`)
       .then(async (r) => {
         const j = await r.json()
         if (!r.ok) throw new Error(j.detail ?? 'This agent cannot be hired right now.')
@@ -91,11 +121,12 @@ export function HireSheet() {
       })
       .catch((e: Error) => setLoadError(e.message))
     fetch('/api/v1/spot?symbol=BNB').then((r) => (r.ok ? r.json() : null)).then((j) => setSpotBnb(typeof j?.price === 'number' ? j.price : null)).catch(() => undefined)
-  }, [agentId]) // reset is stable
+  }, [agentId, tryFirst]) // reset is stable
 
   const close = useCallback(() => {
     const next = new URLSearchParams(params.toString())
     next.delete('hire')
+    next.delete('try')
     router.replace(next.size ? `${pathname}?${next}` : pathname, { scroll: false })
   }, [params, pathname, router])
 
@@ -148,6 +179,15 @@ export function HireSheet() {
     if (!agent) return null
     if (state.phase === 'done' && q) return <ButtonLink href={`/jobs/${q.chainId}/${state.jobId}`} variant="primary" block>Open the job room</ButtonLink>
     if (!q) {
+      const sells = agent.sellsJobs !== false
+      // Try-first mode leads with the free run until there is an answer; after it, the price.
+      if ((tryFirst && !free) || !sells) {
+        return (
+          <Button variant="primary" block disabled={!task.ready || trying} loading={trying} onClick={runFree}>
+            {free ? 'Run it free again' : 'Run it free'}
+          </Button>
+        )
+      }
       return (
         <Button variant="primary" block disabled={!task.ready || state.phase === 'quoting'} loading={state.phase === 'quoting'} onClick={() => getQuote(agent.agentId, task.task)}>
           Get a live price
@@ -169,13 +209,18 @@ export function HireSheet() {
     <Sheet
       open
       onClose={() => { if (!signing) close() }}
-      label={`Hire ${agent?.name ?? 'an agent'}`}
+      label={`${tryFirst && !q ? 'Try' : 'Hire'} ${agent?.name ?? 'an agent'}`}
       surface="chamber"
-      title={<span className="t-label">Hire · {NET[chainId] ?? 'BNB Chain'}</span>}
+      title={<span className="t-label">{tryFirst && !q ? 'Try free' : 'Hire'} · {NET[chainId] ?? 'BNB Chain'}</span>}
       footer={agent ? (
         <div className="hs-foot">
           {primary}
           {!q && task.missing && !task.ready ? <p className="hs-fine">{task.missing}</p> : null}
+          {!q && agent.sellsJobs !== false && task.ready && !trying && state.phase !== 'quoting' ? (
+            tryFirst && !free
+              ? <button type="button" className="hs-quiet" onClick={() => getQuote(agent.agentId, task.task)}>Skip the free run and get a live price</button>
+              : !free ? <button type="button" className="hs-quiet" onClick={runFree}>Try it free first (no wallet)</button> : null
+          ) : null}
           {q && !signing && state.phase !== 'done' && !state.jobId ? <button type="button" className="hs-quiet" onClick={reset}>Change the task</button> : null}
           {state.jobId && state.phase === 'error' ? <button type="button" className="hs-quiet" onClick={cancel}>Cancel job {state.jobId} (nothing is charged)</button> : null}
         </div>
@@ -220,6 +265,30 @@ export function HireSheet() {
                 )}
               </section>
 
+              {(free || trying || tryError) && !q ? (
+                <section className="hs-block hs-free" aria-labelledby="hs-free" aria-live="polite">
+                  <h3 id="hs-free" className="hs-h"><span className="hs-n hs-n--free">F</span>Free answer</h3>
+                  {trying ? <p className="hs-note">Asking {agent.name} at its own endpoint. Nothing is signed or paid.</p> : null}
+                  {tryError ? <ErrorNote error={{ title: tryError, action: 'Change the task or try again. A paid hire is not affected.' }} /> : null}
+                  {free ? (
+                    <>
+                      <p className="hs-note">
+                        {agent.name} answered in {free.latencyMs < 1000 ? `${free.latencyMs} ms` : `${(free.latencyMs / 1000).toFixed(1)} s`}, free, at its own endpoint.
+                        {agent.firstParty ? ' A paid job runs the same engine and posts this answer on chain with a hash.' : ' This is the agent\'s own reply, shown as it gave it; Marque has not graded it.'}
+                      </p>
+                      {free.assumptions && free.assumptions.length > 0 ? (
+                        <div className="hs-assume"><p>Settings your task left out, and what it used:</p><ul>{free.assumptions.map((a) => <li key={a}>{a}</li>)}</ul></div>
+                      ) : null}
+                      <div className="hs-free-body">
+                        {free.content ? <DeliverableView category={agent.category} content={free.content} /> : <p className="hs-free-text">{free.text}</p>}
+                      </div>
+                      {agent.sellsJobs === false ? <p className="hs-note">{agent.name} does not take paid jobs through BNB Chain&apos;s escrow, so there is no Hire here.</p> : null}
+                    </>
+                  ) : null}
+                </section>
+              ) : null}
+
+              {agent.sellsJobs === false ? null : (
               <section className="hs-block" aria-labelledby="hs-2">
                 <h3 id="hs-2" className="hs-h"><span className="hs-n">2</span>Price</h3>
                 {q ? (
@@ -247,6 +316,7 @@ export function HireSheet() {
                   </p>
                 )}
               </section>
+              )}
 
               {q ? (
                 <section className="hs-block" aria-labelledby="hs-3">

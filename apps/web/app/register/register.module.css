@@ -864,3 +864,37 @@ a.introBack:hover { color: var(--fg); }
   .rows :global(.row) { grid-template-columns: minmax(0, 1fr) auto; }
   .warrant, .meta { display: none; }
 }
+
+/* P2-09: more facets (network, token, rating, price). Two columns on desktop, scrolls if tall. */
+.filterPop { max-height: min(72vh, 680px); overflow-y: auto; overscroll-behavior: contain; }
+@media (min-width: 900px) {
+  .filterPop { width: min(640px, calc(100vw - 48px)); display: grid; grid-template-columns: 1fr 1fr; column-gap: var(--s5); }
+  .filterPop .facetFoot { grid-column: 1 / -1; }
+}
+.priceInput {
+  font: inherit; font-size: var(--size-control); font-variant-numeric: tabular-nums;
+  height: 38px; width: 100%; max-width: 200px; padding: 0 12px;
+  color: var(--fg); background: var(--ground);
+  border: 1px solid var(--line-strong); border-radius: var(--r-sm);
+}
+.priceInput:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
+
+/* The four marketplace tabs (DESIGN-SYSTEM.md 8.3). */
+.marketTabs { display: flex; gap: 4px; flex-wrap: wrap; margin: 0 0 var(--s4); padding: 4px; border: 1px solid var(--hair); border-radius: var(--r-pill); width: fit-content; max-width: 100%; }
+.marketTab {
+  font: inherit; font-size: 14px; font-weight: 500; min-height: 38px; padding: 0 16px;
+  border: 0; border-radius: var(--r-pill); background: transparent; color: var(--ink-2); cursor: pointer;
+  display: inline-flex; align-items: center; gap: 8px;
+  transition: background-color var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
+}
+.marketTab:hover { color: var(--ink); }
+.marketTab[aria-selected='true'] { background: var(--ink); color: var(--ink-inverse); }
+.marketTabHint { margin: calc(var(--s2) * -1) 0 var(--s4); font-size: 13.5px; color: var(--ink-3); }
+.cardGrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+@media (max-width: 1100px) { .cardGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 640px) {
+  .cardGrid { grid-template-columns: 1fr; }
+  .marketTabs { border-radius: var(--r-3); width: 100%; }
+  .marketTab { flex: 1 1 calc(50% - 4px); justify-content: center; padding: 0 10px; }
+}
+@media (pointer: coarse) { .marketTab { min-height: 44px; } }

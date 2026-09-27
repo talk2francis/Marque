@@ -22,7 +22,13 @@ export async function GET(req: NextRequest) {
     includeUnclassified: bool('includeUnclassified'),
     hasPrice: bool('hasPrice'),
     iface: p.get('iface'),
-    sort: (p.get('sort') as MarketQuery['sort']) ?? 'best',
+    tab: (['ready', 'free', 'tested', 'all'] as const).find((t) => t === p.get('tab')) ?? null,
+    firstPartyOnly: bool('firstParty'),
+    network: p.get('network') === '56' ? 56 : p.get('network') === '97' ? 97 : null,
+    token: p.get('token') && /^[A-Za-z0-9]{1,12}$/.test(p.get('token')!) ? p.get('token') : null,
+    maxPrice: p.get('maxPrice') && Number.isFinite(Number(p.get('maxPrice'))) ? Number(p.get('maxPrice')) : null,
+    minRating: p.get('minRating') && Number.isFinite(Number(p.get('minRating'))) ? Number(p.get('minRating')) : null,
+    sort: (['best', 'proven', 'price', 'fast', 'recent', 'rated'] as const).find((x) => x === p.get('sort')) ?? 'best',
     // The page size belongs to the caller, not to this endpoint. The table
     // sends its own limit; an agent reading the marketplace without one still
     // gets the full first page it has always got, so adding pagination here

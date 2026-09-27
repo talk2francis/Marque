@@ -6,8 +6,9 @@ import { EmptyState, LinkButton } from '@marque/ui'
 import { track } from '../../lib/track'
 import { MarketToolbar } from './MarketToolbar'
 import { MarketList } from './MarketList'
-import { MarketGrid } from './MarketGrid'
-import { ifaceLabel, measuredAgo, type MarketRow } from './market-model'
+import { RegisterTable } from './RegisterTable'
+import { AgentCard } from '../_components/market/AgentCard'
+import { TABS, ifaceLabel, measuredAgo, type MarketRow, type MarketTab } from './market-model'
 import {
   activeFilters,
   apiQuery,
@@ -114,6 +115,8 @@ export function Marketplace({ category: fixedCategory }: { category?: string }) 
 
   useEffect(() => {
     if (!ready) return
+    // The Registry tab is the graveyard table, which pages its own data.
+    if (state.tab === 'registry') { setLoading(false); setError(null); return }
     let cancelled = false
     const controller = new AbortController()
     setLoading(true)
@@ -155,7 +158,7 @@ export function Marketplace({ category: fixedCategory }: { category?: string }) 
       controller.abort()
       clearTimeout(t)
     }
-  }, [qs, page, pageSize, ready, retry])
+  }, [qs, page, pageSize, ready, retry, state.tab])
 
   /* --- FLIP: remember row positions, animate the delta ---------------- */
 
@@ -211,8 +214,34 @@ export function Marketplace({ category: fixedCategory }: { category?: string }) 
   }
   const skeletonCount = Math.min(pageSize, state.view === 'grid' ? 8 : 6)
 
+  const tabHint = TABS.find((t) => t.value === state.tab)?.hint
+  const pickTab = (t: MarketTab) => patchFilter({ tab: t })
+
   return (
     <>
+      <div className={styles.marketTabs} role="tablist" aria-label="What to show">
+        {TABS.map((t) => (
+          <button
+            key={t.value}
+            type="button"
+            role="tab"
+            aria-selected={state.tab === t.value}
+            aria-controls={resultsId}
+            className={styles.marketTab}
+            onClick={() => pickTab(t.value)}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+      {tabHint ? <p className={styles.marketTabHint}>{tabHint}.</p> : null}
+
+      {state.tab === 'registry' ? (
+        <div id={resultsId} className={styles.results}>
+          <RegisterTable graveyard />
+        </div>
+      ) : (
+      <>
       <MarketToolbar
         state={state}
         patch={patch}
@@ -256,10 +285,10 @@ export function Marketplace({ category: fixedCategory }: { category?: string }) 
       <p className={styles.trust}>
         <span className={styles.trustDot} aria-hidden="true" />
         <span>
-          <b>Preview is free</b> — run a real task and see the result before you pay or grant authority.
+          <b>Try free</b> runs your task on the agent&apos;s own endpoint before you pay. No wallet, nothing signed.
         </span>
         <Link className={styles.trustLink} href="/standard">
-          How qualification works →
+          How Marque tests agents
         </Link>
       </p>
 
@@ -315,7 +344,11 @@ export function Marketplace({ category: fixedCategory }: { category?: string }) 
 
         {!loading && !error && rows.length > 0 &&
           (state.view === 'grid' ? (
-            <MarketGrid rows={rows} selectedIds={selectedIds} atLimit={selected.length >= 3} onToggle={toggleSelect} />
+            <div className={styles.cardGrid}>
+              {rows.map((a) => (
+                <AgentCard key={a.agentId} a={a} compare={{ picked: selectedIds.has(a.agentId), atLimit: selected.length >= 3, onToggle: toggleSelect }} />
+              ))}
+            </div>
           ) : (
             <MarketList rows={rows} selectedIds={selectedIds} atLimit={selected.length >= 3} onToggle={toggleSelect} />
           ))}
@@ -363,6 +396,9 @@ export function Marketplace({ category: fixedCategory }: { category?: string }) 
           </button>
         </div>
       </nav>
+
+      </>
+      )}
 
       {selected.length >= 1 && (
         <div className={styles.tray} role="region" aria-label="Compare tray">

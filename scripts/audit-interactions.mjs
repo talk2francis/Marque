@@ -70,6 +70,7 @@ for (const route of ROUTES) {
     const before = await btn.evaluate((el) => ({
       len: document.body.innerHTML.length,
       pressed: el.getAttribute('aria-pressed'),
+      label: el.getAttribute('aria-label'),
       expanded: el.getAttribute('aria-expanded'),
       cls: el.className,
     })).catch(() => ({ len: 0 }))
@@ -91,6 +92,7 @@ for (const route of ROUTES) {
     const after = await btn.evaluate((el) => ({
       len: document.body.innerHTML.length,
       pressed: el.getAttribute('aria-pressed'),
+      label: el.getAttribute('aria-label'),
       expanded: el.getAttribute('aria-expanded'),
       cls: el.className,
       text: el.textContent,
@@ -100,12 +102,15 @@ for (const route of ROUTES) {
       Math.abs(after.len - before.len) > 30 ||
       after.pressed !== before.pressed ||
       after.expanded !== before.expanded ||
-      after.cls !== before.cls
+      after.cls !== before.cls ||
+      after.label !== before.label
 
     if (!navigated && !responded && !cerr.length && !perr.length) {
       const isSubmit = await btn.evaluate((el) => el.type === 'submit' || !!el.closest('form')).catch(() => false)
       const menuish = await btn.evaluate((el) => el.hasAttribute('aria-haspopup')).catch(() => false)
-      if (!isSubmit && !menuish) findings.push({ route, kind: 'button-inert', detail: `"${label || '(no label)'}" — click produced no navigation, state change or error` })
+      // A toggle that is already on (the current tab, the current view) rightly does nothing.
+      const alreadyOn = before.pressed === 'true' || (await btn.evaluate((el) => el.getAttribute('aria-selected') === 'true' || el.getAttribute('aria-current') === 'page').catch(() => false))
+      if (!isSubmit && !menuish && !alreadyOn) findings.push({ route, kind: 'button-inert', detail: `"${label || '(no label)'}" — click produced no navigation, state change or error` })
     }
 
     if (navigated) {

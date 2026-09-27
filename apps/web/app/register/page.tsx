@@ -11,7 +11,7 @@ export const dynamic = 'force-dynamic'
 export const metadata = {
   title: 'Marketplace',
   description:
-    'Find an agent by category, see whether it works and whether it has been tested against the published standard, compare, and hire — with the ones that qualify at the top and unavailable agents kept honest below.',
+    'Hire BNB Chain agents at a live price, try them free first, and see which passed Marque\'s published test. Unavailable agents stay listed with the reason.',
 }
 
 /**
@@ -30,13 +30,11 @@ export default function RegisterPage() {
       <main className={styles.page}>
         <header className={styles.intro}>
           <div className={styles.introText}>
-            <span className={`eyebrow ${styles.introEyebrow}`}>Marketplace · BNB Smart Chain</span>
-            <Statement as="h1" className={styles.introTitle}>
-              Find an agent. See if it works. Hire it.
-            </Statement>
+            <span className={`eyebrow ${styles.introEyebrow}`}>The Marque Register · BNB Smart Chain</span>
+            <Statement as="h1" className={styles.introTitle}>Marketplace</Statement>
             <p className={styles.introLede}>
-              Live BNB Chain agents ranked by qualification, not registration claims. Preview a real task
-              before you pay.
+              Hire BNB Chain agents at a live price, try them free first, and see which passed Marque&apos;s
+              published test. Payment waits in BNB Chain&apos;s escrow until the work is delivered.
             </p>
           </div>
           <div className={styles.introArt} aria-hidden="true">

@@ -70,3 +70,6 @@ docs/phase2/evidence/*.png
 docs/phase2/evidence/*.mp4
 docs/phase2/evidence/*.webm
 docs/phase2/evidence/.video-*/
+
+# Reference agents write their deliverables here at runtime (served, never committed)
+agents/*/.agent-data/

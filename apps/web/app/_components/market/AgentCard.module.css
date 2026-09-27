@@ -1,0 +1,59 @@
+/* The marketplace card (DESIGN-SYSTEM.md 8.3). Hairlines, not shadows; state in words. */
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+  padding: 18px 18px 16px;
+  border: 1px solid var(--hair);
+  border-radius: var(--r-3);
+  background: color-mix(in srgb, var(--panel) 72%, transparent);
+  transition: border-color var(--t-fast) var(--ease), background-color var(--t-fast) var(--ease);
+}
+.card:hover { border-color: var(--hair-2); }
+.card[data-hireable] { border-top-color: color-mix(in srgb, var(--moss) 42%, var(--hair)); }
+.card[data-picked] { border-color: color-mix(in srgb, var(--brass) 60%, transparent); }
+
+.head { display: flex; align-items: flex-start; gap: 12px; min-width: 0; }
+.title { display: flex; flex-direction: column; gap: 4px; min-width: 0; flex: 1; }
+.name { margin: 0; font-size: 17px; font-weight: 500; line-height: 1.25; letter-spacing: -0.01em; overflow-wrap: anywhere; }
+.nameLink { color: var(--ink); text-decoration: none; }
+.nameLink:hover { text-decoration: underline; text-decoration-color: var(--hair-2); text-underline-offset: 3px; }
+.nameLink::after { content: ''; position: absolute; inset: 0; border-radius: inherit; }
+.where { font-size: 11px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); }
+.ref { position: relative; z-index: 1; flex: none; text-decoration: none; }
+
+.blurb, .blurbNone {
+  margin: 0; font-size: 14px; line-height: 1.5; color: var(--ink-2);
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  min-height: calc(1.5em * 2);
+}
+.blurbNone { color: var(--ink-3); }
+
+.facts { display: flex; flex-direction: column; gap: 10px; padding-top: 14px; border-top: 1px solid var(--hair); }
+.row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; min-width: 0; font-size: 13px; }
+.cell { display: inline-flex; min-width: 0; max-width: 100%; }
+.cell :global(.pill) { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cellEnd { margin-left: auto; }
+.price { display: inline-flex; align-items: center; gap: 6px; font-weight: 500; font-size: 14.5px; color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.price[data-src='CLAIMED'] { color: var(--ink-2); font-weight: 400; }
+.muted { color: var(--ink-3); font-size: 13px; }
+.off { font-size: 12.5px; color: var(--ink-3); border: 1px dashed var(--hair-2); border-radius: var(--r-pill); padding: 3px 9px; }
+
+.actions { position: relative; z-index: 1; display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: auto; }
+.buttons { display: inline-flex; gap: 8px; }
+.why { margin: -4px 0 0; font-size: 12.5px; line-height: 1.45; color: var(--ink-3); }
+
+.compare { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ink-2); cursor: pointer; min-height: 34px; }
+.compare input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.compareBox { display: grid; place-items: center; width: 18px; height: 18px; border: 1px solid var(--hair-2); border-radius: 5px; color: transparent; }
+.compareBox svg { width: 12px; height: 12px; }
+.compare input:checked + .compareBox { background: var(--brass); border-color: var(--brass); color: var(--ink-inverse); }
+.compare input:focus-visible + .compareBox { outline: 2px solid var(--focus); outline-offset: 2px; }
+.compare[data-disabled] { opacity: 0.5; cursor: not-allowed; }
+
+@media (max-width: 520px) {
+  .card { padding: 16px; }
+}
+@media (pointer: coarse) { .compare { min-height: 44px; } }

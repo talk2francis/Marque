@@ -1,503 +1,282 @@
-import type { CSSProperties } from 'react'
-import { Statement, DataCell, EmptyState, LinkButton, Chip, MeasureRule, Tape, ProvenanceChip, WarrantBadge } from '@marque/ui'
-import { BRAND } from '@marque/ui/brand'
-import { sql, desc, eq } from 'drizzle-orm'
-import { db, receipt as receiptTable, run as runTable, firstPartyIdListSql, oneAgentIdSql } from '@marque/db'
-import { funnel, categoryFunnel } from '@marque/registry'
-import { marketplaceAgents } from '../lib/marketplace'
-import { Desk } from './desk/Desk'
-import { CountUp } from './_components/CountUp'
-import { GlossaryStrip } from './_components/Glossary'
+import { ArrowRight, BadgeCheck, Check, HandCoins, Lock, PackageCheck, RotateCcw, ShieldCheck, Star, Tag } from 'lucide-react'
+import { MeasureRule, ProvenanceChip } from '@marque/ui'
 import { SiteHeader, SiteFooter } from './_components/SiteHeader'
+import { AgentCard } from './_components/market/AgentCard'
+import { Stars, Tape } from './_components/ui'
+import {
+  categoryTiles, funnelLine, latestHire, ledgerHeadline, passFail, readyToHire, tapeItems,
+  type CategoryTile, type LatestHire,
+} from '../lib/home-data'
+import { CATEGORY_SLUG } from './register/market-model'
 import styles from './home.module.css'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
-
-/**
- * The Desk — the landing surface.
- *
- * The hero IS the product: an address and its live positions, not a search box
- * over a taxonomy. Everything below earns its place by strengthening one link
- * in read → rank → preview → charter → run → receipt.
- *
- * Every number on this page is measured at request time. Where there is no data
- * yet, the section says so in plain words rather than showing a placeholder —
- * an empty state is honest, and a fabricated number is not (AGENTS.md 4).
- */
-
-const DEMO = process.env['DEMO_ADDRESS'] ?? '0x60AA3AEE06E2345A17E4d4B12c53E046F4F63CAf'
-
-/**
- * Four real mainnet addresses, one per shape of problem (P10.5E item 3), so the
- * flagship categories are never empty on the most-viewed screen. Each is a one-
- * click read.
- */
-const DEMO_ADDRESSES: Array<{ label: string; addr: string }> = [
-  { label: 'A loan near liquidation', addr: DEMO },
-  { label: 'A live LP position', addr: process.env['PANCAKE_DEMO_ADDRESS'] ?? '0x2e07E0145C0CFdF6D200B0aFAeD36953ef00d0cD' },
-  { label: 'Idle capital', addr: '0x8894E0a0c962CB723c1976a4421c95949bE2D4E3' },
-  { label: 'A grid candidate', addr: '0x0eD7e52944161450477ee417DE9Cd3a859b14fD0' },
-]
-
-const CATEGORY_LABEL: Record<string, string> = {
-  rebalancing: 'Rebalancing', grid: 'Grid', yield: 'Yield', health_factor: 'Health factor', security: 'Security',
+export const metadata = {
+  title: { absolute: 'Marque · Hire BNB Chain agents that actually work' },
+  description: 'A marketplace for BNB Chain agents. Try an agent free, hire it at a live price paid into BNB Chain\'s ERC-8183 escrow, and see which agents passed Marque\'s published test. Every hire is recorded on chain.',
 }
 
-const CATEGORY_COPY: Record<string, { name: string; problem: string; href: string }> = {
-  rebalancing: {
-    name: 'Rebalancing',
-    problem: 'A concentrated liquidity position earns fees only while price stays inside the range you set. Prices move overnight.',
-    href: '/register/rebalancing',
-  },
-  grid: {
-    name: 'Grid trading',
-    problem: 'A grid is arithmetic anyone can get wrong: levels below your stop, allocations over your capital, and fee drag nobody discloses.',
-    href: '/register/grid',
-  },
-  yield: {
-    name: 'Yield optimisation',
-    problem: 'A headline APR is not what you earn. At your size, after gas and swap costs, the best-looking venue is often the worse one.',
-    href: '/register/yield',
-  },
-  health_factor: {
-    name: 'Health factor',
-    problem: 'Your liquidation price is one number, and an agent that gets it wrong is worse than no agent at all.',
-    href: '/register/health-factor',
-  },
+/**
+ * Home (DESIGN-SYSTEM.md 8.1): sell the hire in five seconds and route quest users.
+ *
+ * One primary action (start the quest), the market one tap away, and the evidence
+ * that makes the market worth trusting kept short and linked, never removed: the
+ * full Phase 1 argument lives on /why. Every figure is live; a section with no data
+ * either says so or does not render (AGENTS.md 4).
+ */
+
+const JOB: Record<string, { name: string; job: string }> = {
+  yield: { name: 'Yield', job: 'Finds where your stablecoins earn most at your size, after costs.' },
+  grid: { name: 'Grid trading', job: 'Lays out a grid you can check: levels, spacing, allocation and fee drag.' },
+  rebalancing: { name: 'Rebalancing', job: 'Re-centres a PancakeSwap V3 position that drifted out of range.' },
+  health_factor: { name: 'Health factor', job: 'Keeps your Venus loan away from liquidation, with the exact repay.' },
 }
 
-const ORDER = ['rebalancing', 'grid', 'yield', 'health_factor'] as const
+/** Three hireable agents per category is the supply target (AGENTS.md 13.8, rung 1). */
+const MARKET = 3
 
-export default async function Home({ searchParams }: { searchParams: Promise<{ addr?: string }> }) {
-  const { addr } = await searchParams
-  const deskAddress = addr && /^0x[a-fA-F0-9]{40}$/.test(addr) ? addr : DEMO
+const fmt = (n: number | null) => (n === null ? null : n.toLocaleString('en-US'))
+function time(ms: number): string {
+  if (ms < 1000) return `${Math.round(ms)} ms`
+  if (ms < 90_000) return `${(ms / 1000).toFixed(ms < 10_000 ? 1 : 0)} s`
+  return `${Math.round(ms / 60_000)} min`
+}
 
-  // The marketplace strip (P10.5E item 5): a handful of agents a buyer could
-  // hire right now, most-proven first. Measured, deduplicated, reference agents
-  // labelled — the same data /register renders.
-  const hireable = await marketplaceAgents({ sort: 'proven', limit: 6 })
-    .then((m) => m.rows.filter((r) => r.hireBlockedReason === null).slice(0, 5))
-    .catch(() => [])
-
-  // Real settled runs for the Tape (P10.5E — the homepage had zero motion).
-  const tape = await db()
-    .select({ id: receiptTable.id, agentId: receiptTable.agentId, issuedAt: receiptTable.issuedAt })
-    .from(receiptTable)
-    .innerJoin(runTable, eq(runTable.id, receiptTable.runId))
-    .orderBy(desc(receiptTable.issuedAt))
-    .limit(8)
-    .then((rows) => rows.map((r) => ({
-      id: r.id,
-      text: `${r.agentId.replace('marque:', '')} — receipt issued`,
-      href: `/receipts/${r.id}`,
-      at: r.issuedAt.toISOString(),
-    })))
-    .catch(() => [])
-
-  // One pass and one fail, side by side (P10.5E item 7). Failure proves honesty;
-  // a pass proves the thing works.
-  const passExample = await db().execute(sql`
-    select ${oneAgentIdSql(sql`agent_id`)} as agent_id, test_id, diffs from conformance_result
-    where pass = true and agent_id in ${firstPartyIdListSql()} order by ran_at desc limit 1
-  `).then((r) => (((r as { rows?: unknown[] }).rows ?? (r as unknown[])) as Array<Record<string, unknown>>)[0] ?? null)
-    .catch(() => null)
-
-  // Measured at request time. If the database is unreachable the sections that
-  // depend on it say so, rather than rendering a zero that looks like a fact.
-  const homeCounts = await db().execute(sql`
-    select
-      (select count(*)::int from benchmark) as benchmarks,
-      (select count(*)::int from receipt) as receipts,
-      (select count(distinct ${oneAgentIdSql(sql`agent_id`)})::int from conformance_result
-        where pass = true and agent_id not like 'stub:%'
-      ) as warranted,
-      (select count(*)::int from conformance_result
-        where agent_id not like 'stub:%' and agent_id not in ${firstPartyIdListSql()}
-      ) as third_party_runs,
-      (select count(*)::int from conformance_result
-        where pass = true and agent_id not like 'stub:%' and agent_id not in ${firstPartyIdListSql()}
-      ) as third_party_passes
-  `).then((r) => (((r as { rows?: unknown[] }).rows ?? (r as unknown[])) as Array<Record<string, unknown>>)[0] ?? {})
-    .catch(() => ({} as Record<string, unknown>))
-
-  // One real, named public failure to link. An agent that calls itself a health
-  // factor monitor and fails every field of the health factor test is the most
-  // honest thing on this page, and it is linked rather than described.
-  const namedFailure = await db().execute(sql`
-    select cr.agent_id, cr.test_id, a.name, jsonb_array_length(cr.failed_fields) as n
-    from conformance_result cr join agent a on a.id = cr.agent_id
-    where cr.pass = false and cr.error is null and cr.agent_id not like 'stub:%'
-      and cr.agent_id not in ${firstPartyIdListSql()} and jsonb_array_length(cr.failed_fields) > 0
-    order by jsonb_array_length(cr.failed_fields) desc, cr.ran_at desc limit 1
-  `).then((r) => (((r as { rows?: unknown[] }).rows ?? (r as unknown[])) as Array<Record<string, unknown>>)[0] ?? null)
-    .catch(() => null)
-
-  const [stages, categories] = await Promise.all([
-    funnel(56).catch(() => null),
-    categoryFunnel(56).catch(() => null),
+export default async function Home() {
+  const [{ all: ready, picks }, tape, hire, pf, ledger] = await Promise.all([
+    readyToHire().catch(() => ({ all: [], picks: [] })),
+    tapeItems().catch(() => []),
+    latestHire().catch(() => null),
+    passFail().catch(() => ({ pass: null, fail: null })),
+    ledgerHeadline().catch(() => null),
   ])
-
-  // The registry's own headline total, from the ingest cursor's last sweep.
-  // 8004scan's paginated list is degraded past a shallow offset, so the number
-  // Marque has fully indexed trails the registry's reported count — this shows
-  // both rather than hiding the gap.
-  const registryReported = await db().execute(sql`
-    select (detail->>'reportedTotal')::bigint as n, updated_at
-    from ingest_cursor where source = 'scan:list:56' limit 1
-  `).then((r) => (((r as { rows?: unknown[] }).rows ?? (r as unknown[])) as Array<Record<string, unknown>>)[0] ?? null)
-    .catch(() => null)
-  const byCat = new Map((categories ?? []).map((c) => [c.category, c]))
-  const stage = (key: string) => stages?.find((s) => s.stage === key)?.count ?? null
-
-  const registered = stage('registered_bsc')
-  const metadataReadable = stage('metadata_readable')
-  const declaring = stage('service_declared')
-  const reachable = stage('reachable')
-  const callable = stage('callable')
-  const compatible = stage('compatible')
-  const qualified = stage('qualified')
-  const hireableCount = stage('hireable')
-
-  const fmt = (n: number | null) => (n === null ? '—' : n.toLocaleString('en-US'))
+  const [tiles, line] = await Promise.all([categoryTiles(ready).catch(() => null), funnelLine(ready).catch(() => null)])
 
   return (
     <>
       <SiteHeader />
-
       <main className={styles.main}>
-        {/* ---- Hero: the product, not a picture of it ---- */}
+        {/* ---- Hero ---- */}
         <section className={styles.hero}>
+          <div className={styles.construct} aria-hidden="true">
+            {Array.from({ length: 13 }).map((_, i) => <span key={i} />)}
+          </div>
+          <span className={`${styles.cross} ${styles.crossTl}`} aria-hidden="true" />
+          <span className={`${styles.cross} ${styles.crossBr}`} aria-hidden="true" />
+
           <div className={styles.heroCopy}>
-            <span className={styles.eyebrow}>The agent marketplace for {BRAND.chain}</span>
-            <Statement as="h1" size="hero">{BRAND.tagline}</Statement>
+            <p className={styles.kicker}>
+              <span className={styles.liveDot} aria-hidden="true" />
+              BNB Smart Chain · Agent marketplace · Set and Earn is live
+            </p>
+            <h1 className={styles.display}>Hire agents that <em>actually work.</em></h1>
             <p className={styles.lede}>
-              Marque reads what an address holds, finds the agents that can act on it, and gives
-              them only the authority you set.
+              Marque tests BNB Chain agents before you pay. Your payment waits in BNB Chain&apos;s escrow
+              contract until the work is delivered, and every hire is recorded on chain.
             </p>
-            <p className={styles.noWallet}>
-              <strong>No wallet needed.</strong> Nothing is connected and nothing is signed. A judge
-              with no wallet can grant, watch and revoke a real charter — Marque signs with its own
-              testnet wallet.
-            </p>
-            <div className={styles.heroCtas}>
-              <LinkButton href="/register" variant="primary">Find an agent</LinkButton>
-              <LinkButton href="/judge" variant="secondary">See the 90-second flow</LinkButton>
+            <div className={styles.ctas}>
+              <a className="btn btn--primary btn--lg" href="/quest">Start the Set and Earn quest</a>
+              <a className="btn btn--lg" href="/register">Browse agents</a>
             </div>
-            <div className={styles.demoChips}>
-              {DEMO_ADDRESSES.map((d) => (
-                <a
-                  key={d.addr}
-                  href={`/?addr=${d.addr}`}
-                  className={`${styles.demoChip} ${deskAddress.toLowerCase() === d.addr.toLowerCase() ? styles.demoChipOn : ''}`}
-                >
-                  {d.label}
-                </a>
+            <p className={styles.noWallet}>No wallet needed to look around. Prices, answers and records are all public.</p>
+          </div>
+
+          <div className={styles.heroArt}>
+            <picture className={styles.art} aria-hidden="true">
+              <img className={styles.artNight} src="/brand/hero-dark.webp" alt="" width={1160} height={336} fetchPriority="high" decoding="async" />
+              <img className={styles.artDay} src="/brand/hero-light.webp" alt="" width={1160} height={336} decoding="async" />
+            </picture>
+            {hire ? <HireProof h={hire} /> : null}
+          </div>
+        </section>
+
+        <Tape items={tape} label="Recent hires and ratings on Marque, BSC mainnet" />
+
+        {/* ---- Four categories ---- */}
+        <section className={styles.section} aria-labelledby="cats">
+          <Head label="Categories" note={tiles ? 'Live count · BSC mainnet' : undefined} id="cats" title="Four jobs agents do on BNB Chain." />
+          {tiles ? (
+            <div className={styles.tiles}>
+              {tiles.map((t, i) => <CategoryTileView key={t.category} t={t} i={i} />)}
+            </div>
+          ) : (
+            <p className={styles.empty}>Live category counts are unavailable right now. The <a href="/register">marketplace</a> lists every agent with its state.</p>
+          )}
+        </section>
+
+        {/* ---- Ready to hire now ---- */}
+        <section className={styles.section} aria-labelledby="ready">
+          <Head
+            label="Ready to hire now"
+            note={ready.length ? `${ready.length} hireable with a live quote` : undefined}
+            id="ready"
+            title="Hire in under a minute."
+            action={<a className={styles.more} href="/register">See all in the marketplace <ArrowRight aria-hidden="true" /></a>}
+          />
+          {picks.length ? (
+            <div className={styles.cards}>
+              {picks.map((a) => <AgentCard key={a.agentId} a={a} base="/" />)}
+            </div>
+          ) : (
+            <p className={styles.empty}>No agent has a live quote in the last two hours. That is the measured state, not a loading screen; the <a href="/register?tab=free">free tab</a> lists agents you can still try.</p>
+          )}
+        </section>
+
+        {/* ---- How a hire works ---- */}
+        <section className={styles.section} aria-labelledby="how">
+          <Head label="How a hire works" id="how" title="Four steps. You sign each one." />
+          <ol className={styles.steps}>
+            <li><span className={styles.stepIco}><Tag aria-hidden="true" /></span><strong>Get a live quote</strong><span>The agent signs a price for your task. Free, no wallet.</span></li>
+            <li><span className={styles.stepIco}><Lock aria-hidden="true" /></span><strong>Pay into escrow</strong><span>Your payment goes to BNB Chain&apos;s ERC-8183 escrow contract.</span></li>
+            <li><span className={styles.stepIco}><PackageCheck aria-hidden="true" /></span><strong>Agent delivers</strong><span>The answer is posted on chain with a hash you can check.</span></li>
+            <li><span className={styles.stepIco}><Star aria-hidden="true" /></span><strong>Rate it</strong><span>Your rating is written to the ERC-8004 registry, tied to the job.</span></li>
+          </ol>
+          <ul className={styles.protections}>
+            <li><ShieldCheck aria-hidden="true" />Your payment sits in BNB Chain&apos;s escrow contract, not with Marque.</li>
+            <li><HandCoins aria-hidden="true" />Exact amount only, never an open-ended approval.</li>
+            <li><RotateCcw aria-hidden="true" />If the agent doesn&apos;t deliver, you reclaim it.</li>
+          </ul>
+        </section>
+
+        {/* ---- Why Marque ---- */}
+        <section className={styles.section} aria-labelledby="why">
+          <Head label="Why Marque" id="why" title="We test agents before you do." action={<a className={styles.more} href="/why">The full record <ArrowRight aria-hidden="true" /></a>} />
+          <div className={styles.whyGrid}>
+            <div className={styles.pf}>
+              {pf.pass ? (
+                <div className={styles.pfCol} data-tone="pass">
+                  <span className={styles.pfHead}><BadgeCheck aria-hidden="true" />Passed <a href={`/standard/${pf.pass.testId}`} className="mono">{pf.pass.testId}</a></span>
+                  <span className={styles.pfWho}>{pf.pass.agent}</span>
+                  <ul>{pf.pass.fields.map((f) => <li key={f}><Check aria-hidden="true" /><span className="mono">{f}</span></li>)}</ul>
+                </div>
+              ) : null}
+              {pf.fail ? (
+                <div className={styles.pfCol} data-tone="fail">
+                  <span className={styles.pfHead}>Failed <a href={`/standard/${pf.fail.testId}`} className="mono">{pf.fail.testId}</a></span>
+                  <span className={styles.pfWho}>{pf.fail.agent}</span>
+                  <p>Registered on BNB Chain, answers when called, and got {pf.fail.failedFields} checked {pf.fail.failedFields === 1 ? 'field' : 'fields'} wrong. It stays on the record with its reasons.</p>
+                </div>
+              ) : null}
+            </div>
+            <div className={styles.whyFacts}>
+              {line && line.registered !== null ? (
+                <p className={styles.funnel}>
+                  <ProvenanceChip provenance="MEASURED" />
+                  <span><b className="num">{fmt(line.registered)}</b> registered</span>
+                  {line.answering !== null ? <span><b className="num">{fmt(line.answering)}</b> answering</span> : null}
+                  <span><b className="num">{line.hireable}</b> hireable</span>
+                  {line.warranted !== null ? <span><b className="num">{line.warranted}</b> warranted</span> : null}
+                  <a href="/why" className={styles.inline}>How we count</a>
+                </p>
+              ) : null}
+              {ledger ? (
+                <p className={styles.ledger}>
+                  <span className={styles.ledgerHead}>The Ledger</span>
+                  In {ledger.complete} complete head-to-head {ledger.complete === 1 ? 'benchmark' : 'benchmarks'} on the same task and block, the agent answered in{' '}
+                  <b className="num">{time(ledger.agentMs)}</b> on average and a human analyst took <b className="num">{time(ledger.humanMs)}</b>
+                  {ledger.agentScore !== null && ledger.humanScore !== null
+                    ? <>, scoring <b className="num">{Math.round(ledger.agentScore)}%</b> against <b className="num">{Math.round(ledger.humanScore)}%</b> on a rubric registered before either ran, graded blind.</>
+                    : '.'}{' '}
+                  <a href="/ledger" className={styles.inline}>Read the Ledger</a>
+                </p>
+              ) : null}
+            </div>
+          </div>
+        </section>
+
+        {/* ---- Build your own ---- */}
+        <section className={styles.section} aria-labelledby="build">
+          <div className={styles.build}>
+            <div className={styles.buildCopy}>
+              <span className="t-label">Builders</span>
+              <h2 id="build">Built an agent? List it here.</h2>
+              <p>Five checks read from your wallet and your endpoint. When all five pass, your agent is listed on Marque and the quest&apos;s fifth step ticks.</p>
+              <div className={styles.ctas}>
+                <a className="btn btn--primary" href="/builders">Check my agent</a>
+                <a className="btn" href="/builders/test">Test an endpoint free</a>
+              </div>
+            </div>
+            <ol className={styles.checks} aria-label="The five checks">
+              {['You own its ERC-8004 identity', 'You proved it with a signature', 'Its endpoint answers a live call', 'It classifies into a quest category', 'It answered a live Marque test'].map((c) => (
+                <li key={c}><span className={styles.checkBox} aria-hidden="true" />{c}</li>
               ))}
-            </div>
-          </div>
-          <div className={styles.heroDesk} data-reveal style={{ '--reveal-delay': '340ms' } as CSSProperties}>
-            <Desk initialAddress={deskAddress} />
-          </div>
-        </section>
-
-        {/* ---- Stats band: four measured numbers, no rounding in our favour ---- */}
-        <section className={styles.stats} data-reveal>
-          {([
-            ['Registered on BNB Chain', registered, 'from the ERC-8004 registry'],
-            ['Hireable right now', hireableCount, 'fresh compatible service matches its Charter task'],
-            ['Warranted', homeCounts['warranted'] == null ? null : Number(homeCounts['warranted']), 'passed a published MCS case'],
-            ['Public receipts', homeCounts['receipts'] == null ? null : Number(homeCounts['receipts']), 'execution and quality recorded separately'],
-          ] as Array<[string, number | null, string]>).map(([label, n, sub]) => (
-            <div className={styles.stat} key={label}>
-              <CountUp value={n} className={styles.statN} />
-              <span className={styles.statLabel}>{label}</span>
-              <span className={styles.statSub}>{sub}</span>
-            </div>
-          ))}
-          <p className={styles.statsNote}><ProvenanceChip provenance="MEASURED" /> Counted from chain-indexed data, refreshed continuously. Never a hand-entered figure.</p>
-          <GlossaryStrip />
-        </section>
-
-        {/* ---- Brand band: the one cinematic breath between hero and Act I ---- */}
-        <section className={styles.band} aria-hidden="true" data-reveal>
-          <img className={styles.bandLight} src="/brand/field-light.webp" alt="" loading="lazy" decoding="async" />
-          <img className={styles.bandDark} src="/brand/field-dark.webp" alt="" loading="lazy" decoding="async" />
-        </section>
-
-        {/* ===== ACT I — THE FIELD ===== */}
-        <p className={styles.actLabel} data-reveal><span>I</span> The Field — see what an address holds, and who can act on it</p>
-
-        {/* ---- Agents that can work now (P10.5E item 5) ---- */}
-        <section className={styles.section} data-reveal>
-          <Statement>Agents that can work now.</Statement>
-          {hireable.length === 0 ? (
-            <EmptyState title="No agent is callable right now.">
-              <p>This is the live state, not a loading screen. The marketplace lists every one, with the reason.</p>
-            </EmptyState>
-          ) : (
-            <>
-              <div className={styles.strip}>
-                {hireable.map((a) => (
-                  <div className={styles.stripRow} key={a.agentId}>
-                    <div className={styles.stripMain}>
-                      <span className={styles.stripName}>{a.name}</span>
-                      {a.isReference && <Chip tone="watch">Marque agent</Chip>}
-                      {a.category && <Chip>{CATEGORY_LABEL[a.category] ?? a.category}</Chip>}
-                    </div>
-                    <WarrantBadge
-                      status={a.warrant.status}
-                      date={a.warrant.date ? a.warrant.date.slice(0, 10) : undefined}
-                      testId={a.warrant.testId ?? undefined}
-                      failedField={a.warrant.failedField ?? undefined}
-                    />
-                    <span className={styles.stripMeta}>{a.price ?? 'price not advertised'}</span>
-                    <span className={styles.stripMeta}>{a.latencyMs != null ? `${a.latencyMs} ms` : 'live'}</span>
-                    <LinkButton
-                      href={`/app/charter?agent=${encodeURIComponent(a.agentId)}${a.category ? `&category=${a.category}` : ''}`}
-                      variant="primary"
-                    >
-                      Hire
-                    </LinkButton>
-                  </div>
-                ))}
-              </div>
-              <a href="/register" className={styles.exploreLink}>Explore the marketplace →</a>
-            </>
-          )}
-        </section>
-
-        {/* ---- 1. The four categories, as problems ---- */}
-        <section className={styles.section} data-reveal>
-          <Statement>Four positions. Four kinds of arithmetic to get wrong.</Statement>
-          <p className={styles.sectionLede}>
-            The four categories are four kinds of position, each with its own reader, its own
-            arithmetic and its own published test. Counts are live, and they count distinct
-            suppliers rather than registrations — one operator can register the same endpoint
-            under dozens of identities, and on this chain one does.
-          </p>
-          <div className={styles.categories}>
-            {ORDER.map((key, i) => {
-              const c = byCat.get(key)
-              const copy = CATEGORY_COPY[key]!
-              const live = c?.thirdPartyExecutable ?? 0
-              const reachable = c?.reachableNow ?? 0
-              const total = c?.classified ?? 0
-              return (
-                <a className={styles.category} href={copy.href} key={key}>
-                  <div className={styles.categoryText}>
-                    <div className={styles.categoryHead}>
-                      <span className={styles.categoryName}>{copy.name}</span>
-                      {live >= 2
-                        ? <Chip tone="holds">{live} callable descriptors</Chip>
-                        : <Chip tone="watch">{live === 0 ? 'none callable yet' : '1 callable descriptor'}</Chip>}
-                    </div>
-                    <p className={styles.categoryProblem}>{copy.problem}</p>
-                  </div>
-                  <div className={styles.categoryMeasure}>
-                    <MeasureRule
-                      label={`${copy.name}: ${live} callable descriptors of ${total} classified`}
-                      value={live} lower={0} upper={Math.max(total, 2)}
-                      threshold={2} thresholdLabel="market = 2"
-                      lowerLabel="0"
-                      upperLabel={`${fmt(total)}`}
-                      valueLabel={`${live} callable descriptors`}
-                      state={live >= 2 ? 'holds' : live === 1 ? 'watch' : 'breach'}
-                      index={i}
-                    />
-                    <span className={styles.categoryReach}>{reachable} reachable now</span>
-                  </div>
-                </a>
-              )
-            })}
-          </div>
-        </section>
-
-        {/* ===== ACT II — THE PASSAGE ===== */}
-        <p className={styles.actLabel} data-reveal><span>II</span> The Passage — what a listing has to survive to rank</p>
-
-        {/* ---- 2. The funnel. The number nobody else will show. ---- */}
-        <section className={styles.section} data-reveal>
-          <Statement>A registration is not a résumé.</Statement>
-          <p className={styles.sectionLede}>
-            Every stage below is a live count over data we measured ourselves. Nothing here is
-            a stored ratio and nothing is rounded in our favour.
-          </p>
-          {stages ? (
-            <>
-              {(() => {
-                const rows: Array<[string, number | null, string]> = [
-                  ['Registered on BNB Smart Chain', registered, 'indexed from the ERC-8004 registry'],
-                  ['Metadata readable', metadataReadable, 'identity detail was fetched and parsed'],
-                  ['Declares a service', declaring, 'has at least one normalized endpoint'],
-                  ['Reachable', reachable, 'an exact service returned protocol-shaped evidence within 24 hours'],
-                  ['Callable', callable, 'a fresh protocol interaction proves an executable interface'],
-                  ['Task compatible', compatible, 'a callable service accepts a Marque task schema'],
-                  ['Qualified', qualified, 'has passed a published MCS case'],
-                  ['Hireable', hireableCount, 'compatible service matches its current category and Charter task'],
-                ]
-                const top = rows[0]?.[1] ?? 1
-                return (
-                  <ol className={styles.funnel}>
-                    {rows.map(([label, count, how]) => (
-                      <li className={styles.funnelRow} key={label}>
-                        <span className={styles.funnelLabel}>{label}</span>
-                        {/* Width proportional to the real number — a narrowing
-                            field, not five equal rows (P10.5E item 6). */}
-                        <span
-                          className={styles.funnelBar}
-                          style={{ width: `${Math.max(2, Math.round(((count ?? 0) / Math.max(top, 1)) * 100))}%` }}
-                        >
-                          <DataCell>{fmt(count)}</DataCell>
-                        </span>
-                        <span className={styles.funnelHow}>{how}</span>
-                      </li>
-                    ))}
-                  </ol>
-                )
-              })()}
-              {registryReported && Number(registryReported['n']) > (registered ?? 0) && (
-                <p className={styles.funnelNote}>
-                  <ProvenanceChip provenance="MEASURED" /> The ERC-8004 registry currently reports{' '}
-                  <span className="mono">{Number(registryReported['n']).toLocaleString('en-US')}</span>{' '}
-                  agents on chain 56. Marque has fully indexed{' '}
-                  <span className="mono">{fmt(registered)}</span> of them; 8004scan&rsquo;s list API
-                  stopped serving pages past a shallow offset, so the rest cannot be pulled until
-                  that is fixed upstream. The figure above is what Marque actually holds, not what
-                  the registry claims.
-                </p>
-              )}
-              <p className={styles.funnelNote}>
-                <ProvenanceChip provenance="MEASURED" /> The cliff is not where anyone expects.
-                Reachability, callability, compatibility, qualification and Hire are counted
-                separately. An HTTP 200, a declared tool, or a historical MCS pass cannot promote
-                an identity into a later state by itself.
-              </p>
-            </>
-          ) : (
-            <EmptyState title="The funnel is unavailable right now.">
-              <p>These numbers are counted live, so rather than show a stale figure we show none.</p>
-            </EmptyState>
-          )}
-        </section>
-
-        {/* ---- 4 + 5. Evidence, as a two-up rather than two lonely paragraphs ---- */}
-        <section className={styles.section} data-reveal>
-          <Statement>Measured, not asserted.</Statement>
-          <div className={styles.evidenceTwoUp}>
-            <div>
-              <h3 className={styles.evHead}>The Ledger — better, not just correct</h3>
-              <p className={styles.sectionLede}>
-                Because we compute the correct answer ourselves before asking an agent, &ldquo;does
-                hiring this beat doing it yourself&rdquo; is measurable rather than claimed.
-                {' '}{homeCounts['benchmarks'] == null ? 'The' : Number(homeCounts['benchmarks'])} benchmarks are registered, each with its
-                rubric hashed before any arm ran. Human submissions and blind grades are recorded. Each benchmark discloses
-                any missing grades or task and block provenance needed for a valid comparison. <a href="/ledger">See the Ledger</a> · <a href="/ledger/methodology">the method</a>.
-              </p>
-            </div>
-            <div>
-              <h3 className={styles.evHead}>Receipts — what it has already done</h3>
-              <p className={styles.sectionLede}>
-                {homeCounts['receipts'] == null ? 'Recorded runs carry a public receipt' : `${Number(homeCounts['receipts'])} public receipts record runs`} with four
-                proof blocks — commercial, execution, authority and quality — the canonical hash, and
-                the anchor status. Completion, payment and test quality are separate facts. <a href="/receipts/latest">The latest receipt →</a>
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* ---- 5b. One pass, one fail — side by side (P10.5E item 7) ---- */}
-        <section className={styles.section} data-reveal>
-          <Statement>The Standard: a pass and a fail.</Statement>
-          <p className={styles.sectionLede}>
-            Failure proves the test is honest. A pass proves the thing works. Both are computed
-            by us from chain state at a pinned block, field by field.
-          </p>
-          <div className={styles.passFail}>
-            {passExample && (
-              <div className={styles.pfCol}>
-                <span className={styles.pfHead}>
-                  <Chip tone="holds">PASS</Chip>{' '}
-                  <a href={`/standard/${String(passExample['test_id'])}`}>{String(passExample['test_id'])}</a>{' '}
-                  · {String(passExample['agent_id']).replace('marque:', '')}
-                </span>
-                <ul className={styles.pfFields}>
-                  {(Array.isArray(passExample['diffs']) ? (passExample['diffs'] as Array<Record<string, unknown>>) : [])
-                    .slice(0, 6)
-                    .map((d) => (
-                      <li key={String(d['field'])}>
-                        <span className="mono">{String(d['field'])}</span>
-                        <span className={styles.pfOk}>ok</span>
-                      </li>
-                    ))}
-                </ul>
-              </div>
-            )}
-            {namedFailure !== null && (
-              <div className={styles.pfCol}>
-                <span className={styles.pfHead}>
-                  <Chip tone="breach">FAIL</Chip>{' '}
-                  <a href={`/standard/${String(namedFailure['test_id'])}`}>{String(namedFailure['test_id'])}</a>{' '}
-                  · {String(namedFailure['name'])}
-                </span>
-                <p className={styles.pfFailNote}>
-                  Registered on BNB Smart Chain, answers when called, and failed{' '}
-                  {Number(namedFailure['n'])} of its checked fields. Of{' '}
-                  {Number(homeCounts['third_party_runs'] ?? 0).toLocaleString('en-US')} conformance
-                  runs against third-party agents on this chain,{' '}
-                  {Number(homeCounts['third_party_passes'] ?? 0) === 0
-                    ? 'zero have passed'
-                    : `${Number(homeCounts['third_party_passes']).toLocaleString('en-US')} have passed`}
-                  . A directory that only listed its passes would be a brochure.
-                </p>
-              </div>
-            )}
-          </div>
-        </section>
-
-        {/* ===== ACT III — THE CHAMBER (the one cockpit band) ===== */}
-        <section className={styles.chamber} data-surface="cockpit" data-reveal>
-          <img className={styles.chamberBg} src="/brand/chamber.webp" alt="" aria-hidden="true" loading="lazy" decoding="async" />
-          <div className={styles.chamberInner}>
-            <p className={styles.actLabelDark}><span>III</span> The Chamber — grant authority, cap the damage</p>
-            <Statement size="statement">Trust the agent. Cap the damage.</Statement>
-            <p className={styles.chamberLede}>
-              Evidence tells you how good an agent has been. It does not tell you how bad this run
-              can get. A charter answers the second question: an allowlist of contracts, a spend
-              cap, an expiry, and a revoke that fires a real transaction. Granting one dims the
-              screen to a cockpit and composes the charter line by line before it is sealed on chain.
-            </p>
-            <div className={styles.chamberActs}>
-              <LinkButton href="/app/charter" variant="primary">Grant a charter</LinkButton>
-              <LinkButton href="/app/charters" variant="secondary">See every charter granted</LinkButton>
-            </div>
-          </div>
-        </section>
-
-        {/* ---- 6. Builders ---- */}
-        <section className={styles.sectionQuiet} data-reveal>
-          <div className={styles.builders}>
-            <div>
-              <span className={styles.buildersTitle}>Run an agent on BNB Smart Chain?</span>
-              <p className={styles.buildersCopy}>
-                Test it against the published standard for free, with no signup and no wallet —
-                the same per-field diff we publish, kept nowhere. Or, if it already has an
-                ERC-8004 identity, prove you own it and list it in about six minutes: no email,
-                no approval queue.
-              </p>
-            </div>
-            <div className={styles.buildersActions}>
-              <LinkButton href="/builders/claim" variant="primary">List your agent</LinkButton>
-              <LinkButton href="/builders/test" variant="secondary">Test your agent</LinkButton>
-            </div>
+            </ol>
           </div>
         </section>
       </main>
-
-      {/* Real settled runs only. With none, the Tape does not render at all. */}
-      <Tape events={tape} />
-
       <SiteFooter />
     </>
+  )
+}
+
+function Head({ label, note, title, id, action }: { label: string; note?: string; title: string; id: string; action?: React.ReactNode }) {
+  return (
+    <div className={styles.head}>
+      <div className={styles.headRule}>
+        <span className={styles.headCross} aria-hidden="true" />
+        <span className="t-label">{label}</span>
+        {note ? <span className={styles.headNote}>{note}</span> : null}
+      </div>
+      <div className={styles.headRow}>
+        <h2 id={id}>{title}</h2>
+        {action}
+      </div>
+    </div>
+  )
+}
+
+function CategoryTileView({ t, i }: { t: CategoryTile; i: number }) {
+  const j = JOB[t.category]!
+  const state = t.hireable >= MARKET ? 'holds' : t.hireable >= 1 ? 'watch' : 'breach'
+  return (
+    <a className={styles.tile} href={`/register/${CATEGORY_SLUG[t.category] ?? t.category}`}>
+      <span className={styles.tileName}>{j.name}</span>
+      <span className={styles.tileJob}>{j.job}</span>
+      <span className={styles.tileMeasure}>
+        <MeasureRule
+          label={`${j.name}: ${t.hireable} hireable now, ${MARKET} makes a market`}
+          value={t.hireable} lower={0} upper={Math.max(MARKET + 2, t.hireable)}
+          threshold={MARKET} thresholdLabel={`${MARKET} makes a market`} lowerLabel="0" upperLabel=""
+          valueLabel={`${t.hireable} hireable`} state={state} index={i}
+        />
+      </span>
+      <span className={styles.tileFacts}>
+        <span><b className="num">{t.hireable}</b> hireable{t.operators ? ` from ${t.operators} ${t.operators === 1 ? 'operator' : 'operators'}` : ''}</span>
+        {t.cheapest ? <span>from <b className="num">{t.cheapest}</b></span> : <span>no live quote</span>}
+        <span className={styles.tileRating}>
+          {t.bestRating ? <Stars value={t.bestRating.stars} count={t.bestRating.count} label="verified" /> : 'No verified ratings yet'}
+        </span>
+      </span>
+      <span className={styles.tileGo}>Browse {j.name.toLowerCase()} <ArrowRight aria-hidden="true" /></span>
+    </a>
+  )
+}
+
+function HireProof({ h }: { h: LatestHire }) {
+  return (
+    <aside className={styles.proof} data-surface="chamber" aria-label="The latest hire on BSC mainnet">
+      <p className={styles.proofHead}>
+        <span className="t-label">Latest hire · BSC mainnet</span>
+        {h.team ? <span className={styles.proofTeam} title="A wallet on Marque's published team list. Real on chain, never counted for the campaign.">Marque team wallet</span> : null}
+      </p>
+      <p className={styles.proofTitle}>
+        <b>{h.agent}</b> · {h.category}{h.price ? <> · <span className="num">{h.price}</span></> : null}
+      </p>
+      <ol className={styles.proofSteps}>
+        {h.steps.map((s) => (
+          <li key={s.label} data-done={s.tx || s.label.startsWith('Live quote') ? '' : undefined}>
+            <span className={styles.proofDot} aria-hidden="true">{s.tx || s.label.startsWith('Live quote') ? <Check /> : null}</span>
+            <span>{s.label}</span>
+            {s.tx ? <a className={styles.proofTx} href={`https://bscscan.com/tx/${s.tx}`} target="_blank" rel="noreferrer">{s.tx.slice(0, 6)}…{s.tx.slice(-4)}</a> : null}
+          </li>
+        ))}
+      </ol>
+      <p className={styles.proofFoot}>
+        {h.deliveredSeconds !== null ? <>Delivered <b className="num">{h.deliveredSeconds} s</b> after payment. </> : null}
+        <a href={`/jobs/56/${h.jobId}`}>Open job {h.jobId}</a>
+      </p>
+      {h.team ? <p className={styles.proofNote}>Paid from a Marque team wallet: a real mainnet hire, never counted for the quest.</p> : null}
+    </aside>
   )
 }

@@ -11,6 +11,7 @@
  * dropped, softened or invented on the way through.
  */
 import { referenceAgent } from '../../lib/reference-agents'
+import type { AgentTrack } from '../../lib/agent-track'
 
 /** Mirrors the `/api/v1/marketplace` row exactly. Nothing added, nothing renamed. */
 export interface MarketRow {
@@ -58,6 +59,7 @@ export interface MarketRow {
   qual: 'warranted' | 'failed' | 'callable' | 'unbound' | 'dead'
   previewable: boolean
   hireBlockedReason: string | null
+  track: AgentTrack
 }
 
 export const CATEGORY_LABEL: Record<string, string> = {
@@ -102,12 +104,57 @@ export const SUPPLEMENTAL_CATEGORIES: CategoryTab[] = [{ value: 'security', labe
 
 /** Unchanged backend sort values. No invented ordering. */
 export const SORTS: Array<{ value: string; label: string }> = [
-  { value: 'best', label: 'Best match' },
-  { value: 'proven', label: 'Most proven' },
-  { value: 'price', label: 'Lowest price' },
+  { value: 'best', label: 'Recommended' },
+  { value: 'price', label: 'Cheapest' },
   { value: 'fast', label: 'Fastest' },
+  { value: 'rated', label: 'Best rated' },
   { value: 'recent', label: 'Recently tested' },
 ]
+
+/** The four marketplace tabs (DESIGN-SYSTEM.md 8.3). Registry is the graveyard, kept one tap away. */
+export type MarketTab = 'ready' | 'free' | 'tested' | 'registry'
+export const TABS: Array<{ value: MarketTab; label: string; hint: string }> = [
+  { value: 'ready', label: 'Ready to hire', hint: 'A live price from the agent itself, payable into BNB Chain escrow now' },
+  { value: 'free', label: 'Try free', hint: 'Answers a real task at its own endpoint, no wallet and no payment' },
+  { value: 'tested', label: 'All tested', hint: 'Ran a published Marque test, pass or fail, with the result kept' },
+  { value: 'registry', label: 'Registry', hint: 'Registered but not answering, with the measured reason' },
+]
+
+export const NETWORK_LABEL: Record<number, string> = { 56: 'BSC mainnet', 97: 'BSC testnet' }
+
+/** Where this row lives: the network of its live quote, else the registry's own chain. */
+export function networkOf(a: MarketRow): string {
+  return NETWORK_LABEL[a.commerce.chainId ?? 56] ?? 'BNB Smart Chain'
+}
+
+/** "3 min ago" from an ISO time, or null. */
+export function agoWords(iso: string | null): string | null {
+  if (!iso) return null
+  const t = Date.parse(iso)
+  if (Number.isNaN(t)) return null
+  const s = Math.max(0, Math.round((Date.now() - t) / 1000))
+  if (s < 90) return 'just now'
+  if (s < 5400) return `${Math.round(s / 60)} min ago`
+  if (s < 172800) return `${Math.round(s / 3600)} h ago`
+  return `${Math.round(s / 86400)} days ago`
+}
+
+/** A measured median delivery time, worded, or null. */
+export function deliveryWords(seconds: number | null): string | null {
+  if (seconds === null) return null
+  if (seconds < 90) return `${Math.max(1, Math.round(seconds))} s`
+  if (seconds < 5400) return `${Math.round(seconds / 60)} min`
+  return `${Math.round(seconds / 3600)} h`
+}
+
+/** Try free opens the same sheet in its free mode. */
+export function tryHref(a: MarketRow): string {
+  return `?hire=${encodeURIComponent(a.agentId)}&try=1`
+}
+
+export function answersFree(a: MarketRow): boolean {
+  return a.isReference || (a.liveness === 'live' && a.interfaces.includes('a2a'))
+}
 
 /** Unchanged `iface` query values; only the labels are cased for reading. */
 export const IFACES: Array<{ value: string | null; label: string }> = [

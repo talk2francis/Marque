@@ -69,4 +69,9 @@
   .ja-rate { display: grid; gap: 12px; justify-items: start; max-width: 560px; padding: 18px; border: 1px solid var(--hair-2); border-radius: var(--r-3); background: color-mix(in srgb, var(--panel) 60%, transparent); }
   .ja-comment { min-height: 64px; }
   .ja-fine { margin: 0; font-size: 12.5px; color: var(--ink-3); line-height: 1.5; }
+
+  /* Try free: the agent's own answer, before any price or signature. */
+  .hs-n--free { color: var(--moss); border-color: color-mix(in srgb, var(--moss) 50%, transparent); font-family: var(--font-sans); font-weight: 600; }
+  .hs-free-body { max-height: 46vh; overflow: auto; padding: 14px; border: 1px solid var(--hair); border-radius: var(--r-2); background: color-mix(in srgb, var(--panel) 70%, transparent); }
+  .hs-free-text { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 14px; line-height: 1.55; color: var(--ink); }
 }
