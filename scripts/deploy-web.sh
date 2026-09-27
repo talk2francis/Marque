@@ -87,6 +87,11 @@ fi
 if [ "${1:-}" = "--rollback" ]; then
   LIVE="$(live_port)"; PREV="$(other "$LIVE")"
   [ -L "$REL/slot-$PREV" ] || { say "no previous slot to roll back to"; exit 1; }
+  # The deploy that made LIVE live scheduled PREV's retirement: cancel it, or the slot
+  # we are about to serve from would be stopped under traffic.
+  for t in $(systemctl list-units --all --plain --no-legend "marque-retire-$(name_of "$PREV")-*.timer" | awk '{print $1}'); do
+    systemctl stop "$t" && say "cancelled $t"
+  done
   if ! curl -s -o /dev/null -m 3 "http://127.0.0.1:$PREV/api/health"; then start_slot "$PREV"; fi
   healthy "$PREV" || { say "previous slot is not healthy; not switching"; exit 1; }
   switch_to "$PREV"

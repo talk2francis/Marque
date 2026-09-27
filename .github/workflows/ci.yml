@@ -29,9 +29,9 @@ jobs:
       MARQUE_CLAIM_SECRET: ci-only-not-a-secret
       NEXT_TELEMETRY_DISABLED: '1'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: pnpm
@@ -52,15 +52,17 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
+      # Outside the pnpm workspace: npm cannot install into a workspace root.
       - name: Install Playwright
         run: |
-          npm install --no-save --no-package-lock playwright@1
+          mkdir -p "$RUNNER_TEMP/smoke" && cp scripts/ci-smoke.mjs "$RUNNER_TEMP/smoke/"
+          cd "$RUNNER_TEMP/smoke" && npm init -y >/dev/null && npm install --no-audit --no-fund playwright@1
           npx playwright install --with-deps chromium
       - name: Smoke the live site
         env:
           SMOKE_BASE: https://marque.trade
-        run: node scripts/ci-smoke.mjs
+        run: node "$RUNNER_TEMP/smoke/ci-smoke.mjs"
