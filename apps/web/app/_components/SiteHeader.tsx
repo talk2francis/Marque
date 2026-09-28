@@ -88,7 +88,7 @@ const COLS: Array<{ label: string; links: Array<{ label: string; href: string; e
   {
     label: 'Documentation',
     links: [
-      { label: 'Getting started', href: '/docs' },
+      { label: 'How to use Marque', href: '/docs' },
       { label: 'FAQ', href: '/docs/faq' },
       { label: 'Whitepaper', href: '/docs/whitepaper' },
       { label: 'Changelog', href: '/docs/changelog' },

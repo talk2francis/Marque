@@ -888,3 +888,11 @@ a.introBack:hover { color: var(--fg); }
   .marketTab { flex: 1 1 calc(50% - 4px); justify-content: center; padding: 0 10px; }
 }
 @media (pointer: coarse) { .marketTab { min-height: 44px; } }
+
+/* Category materials on the category row (27 Sep identity pass): identity only. */
+.tabMark { flex: none; display: inline-block; width: 6px; height: 6px; margin-right: 8px; border-radius: 1px; transform: rotate(45deg); background: var(--ink-3); vertical-align: middle; }
+.tabMark[data-cat='yield'] { background: var(--cat-yield); }
+.tabMark[data-cat='grid'] { background: var(--cat-grid); }
+.tabMark[data-cat='rebalancing'] { background: var(--cat-rebalancing); }
+.tabMark[data-cat='health_factor'] { background: var(--cat-health); }
+.tabMark[data-cat='security'] { background: var(--cat-security); }

@@ -58,13 +58,15 @@ export function MarketToolbar({
    * own fixed category, so switching category means changing page. On /register
    * they stay client state, exactly as they always were.
    */
+  /** The category's material, from its reference agent: identity, never state. */
+  const mark = (v: string | null) => (v ? <span className={styles.tabMark} data-cat={v} aria-hidden="true" /> : null)
   const renderTab = (c: CategoryTab, supplemental = false) => {
     const cls = `${styles.tab} ${isOn(c.value) ? styles.tabOn : ''} ${supplemental ? styles.tabSupplemental : ''}`
     if (fixedCategory) {
       const href = c.value ? `/register/${CATEGORY_SLUG[c.value] ?? c.value}` : '/register'
       return (
         <Link key={c.label} href={href} className={cls} aria-current={isOn(c.value) ? 'page' : undefined}>
-          {c.label}
+          {mark(c.value)}{c.label}
         </Link>
       )
     }
@@ -76,7 +78,7 @@ export function MarketToolbar({
         aria-pressed={isOn(c.value)}
         onClick={() => patchFilter({ category: c.value })}
       >
-        {c.label}
+        {mark(c.value)}{c.label}
       </button>
     )
   }

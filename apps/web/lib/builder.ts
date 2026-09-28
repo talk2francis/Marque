@@ -106,7 +106,7 @@ export async function builderView(wallet: string, chainId: ChainId, tokenId: str
     db().execute(sql`select owner_address, verified_at from builder_listing where agent_id = ${key} and withdrawn_at is null order by id desc limit 1`).then(rowsOf),
     db().execute(sql`select kind, ok, endpoint, result, checked_at from builder_check where agent_key = ${key} order by checked_at desc limit 40`).then(rowsOf),
     db().execute(sql`select p.liveness, p.checked_at, p.executable_endpoint, p.detail,
-      coalesce(s.resolved_endpoint, s.endpoint) as declared_endpoint
+      s.endpoint as declared_endpoint, s.resolved_endpoint
       from probe_schedule q join probe p on p.id = q.last_probe_id
       join agent_service s on s.id = q.service_id
       where q.agent_id = ${key} order by p.checked_at desc`).then(rowsOf).catch(() => []),
@@ -122,7 +122,8 @@ export async function builderView(wallet: string, chainId: ChainId, tokenId: str
   const declaredEndpoints = new Set(id.services.map(s => s.endpoint))
   const probeRows = checks.filter((c) => c['kind'] === 'probe' && declaredEndpoints.has(String(c['endpoint'])))
   const lastOk = probeRows.find((c) => c['ok'] === true) ?? null
-  const currentProbes = probes.filter(p => declaredEndpoints.has(String(p['declared_endpoint'])))
+  // A templated endpoint ({agentId}) is declared raw and probed resolved: either form is the current service.
+  const currentProbes = probes.filter(p => declaredEndpoints.has(String(p['declared_endpoint'])) || declaredEndpoints.has(String(p['resolved_endpoint'])))
   const scheduled = currentProbes.find(p => p['liveness'] === 'live') ?? null
   const okAt = [lastOk ? { at: iso(lastOk['checked_at'])!, endpoint: String(lastOk['endpoint'] ?? ''), via: 'builder' as const } : null,
     scheduled ? { at: iso(scheduled['checked_at'])!, endpoint: scheduled['executable_endpoint'] ? String(scheduled['executable_endpoint']) : null, via: 'probe' as const } : null]

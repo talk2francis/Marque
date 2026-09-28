@@ -30,6 +30,11 @@
   @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
     .site-header, .site-header[data-scrolled] { background: var(--canvas); }
   }
+  /* Phones: a solid header. A backdrop blur on a sticky bar is recomputed on every
+     scroll frame, the main source of scroll jank on mid-range devices. */
+  @media (max-width: 900px) {
+    .site-header, .site-header[data-scrolled] { background: color-mix(in srgb, var(--canvas) 96%, transparent); backdrop-filter: none; -webkit-backdrop-filter: none; }
+  }
   .site-header-inner {
     height: 100%;
     max-width: calc(var(--maxw) + 2 * var(--margin)); margin: 0 auto; padding: 0 var(--margin);
@@ -220,6 +225,7 @@
     border-top: 1px solid var(--hair);
     background: linear-gradient(to bottom, transparent, color-mix(in srgb, var(--canvas-2) 80%, transparent));
   }
+  .site-footer { content-visibility: auto; contain-intrinsic-size: auto 640px; }
   .footer-top { display: flex; justify-content: space-between; align-items: flex-end; gap: var(--s-6); flex-wrap: wrap; padding-bottom: var(--s-7); border-bottom: 1px solid var(--hair); }
   .footer-brand { display: flex; flex-direction: column; gap: 16px; max-width: 46ch; }
   .footer-brand .brand-link svg { height: 26px; }

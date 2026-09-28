@@ -50,8 +50,8 @@ export const PROOF_KEYS: Active[] = ['proof', 'standard', 'ledger', 'receipts', 
 
 export const DOC_GROUPS: Array<{ label: string; items: NavMenuItem[] }> = [
   { label: 'Learn', items: [
-    { label: 'Getting started', href: '/docs', note: 'From discovery to your first delivery', icon: 'desk' },
-    { label: 'FAQ', href: '/docs/faq', note: 'Payments, evidence and quest questions', icon: 'standard' },
+    { label: 'How to use Marque', href: '/docs', note: 'Hire, follow, rate, list, verify', icon: 'desk' },
+    { label: 'Questions, answered', href: '/docs/faq', note: 'Plain answers, searchable', icon: 'standard' },
     { label: 'Whitepaper', href: '/docs/whitepaper', note: 'Architecture and trust boundaries', icon: 'protocol' },
     { label: 'Changelog', href: '/docs/changelog', note: 'What changed and what remains open', icon: 'ledger' },
   ] },

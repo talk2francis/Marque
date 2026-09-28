@@ -144,6 +144,10 @@
 
 /* ---------- Sections ---------- */
 .section { padding-top: clamp(72px, 9vw, 120px); }
+/* Below the fold: skip rendering until near the viewport (less style and layout at load). */
+.section, .band { content-visibility: auto; contain-intrinsic-size: auto 720px; }
+/* Containment clips paint to the box: room for the heading crosshair that sits 6 px outside. */
+.section { margin-inline: -8px; padding-inline: 8px; }
 .head { display: flex; flex-direction: column; gap: 14px; margin-bottom: var(--s-6); }
 .headRule { position: relative; display: flex; align-items: center; gap: 14px; padding-top: 14px; border-top: 1px solid var(--hair-2); }
 .headCross { position: absolute; left: -6px; top: -7px; width: 13px; height: 13px; }
