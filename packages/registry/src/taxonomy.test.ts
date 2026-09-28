@@ -178,4 +178,18 @@ describe('recall audit against live BSC agents', () => {
       expect(classifyByKeyword(input).category, input.name).toBe('unclassified')
     }
   })
+
+  // 28 Sep recall audit: real BSC agents whose descriptions never used the older terms.
+  it('classifies yield services that never say "optimise"', () => {
+    expect(classifyByKeyword({ name: 'Yield Allocator', description: 'Deterministic yield allocation: risk adjusted ranking with concentration and TVL caps.' }).category).toBe('yield')
+    expect(classifyByKeyword({ name: 'Mandate Yield-1', description: 'Compares USDT supply rates on Venus and Aave at the current block and supplies only where it pays.' }).category).toBe('yield')
+  })
+
+  it('puts a basis-point grid on Pancake V3 in Grid, not Rebalancing', () => {
+    expect(classifyByKeyword({ name: 'Mandate Grid-1', description: 'Trades a 25 basis point grid on PancakeSwap V3 WBNB/USDT 0.05% through SwapBound.' }).category).toBe('grid')
+  })
+
+  it('treats LP fee tier placement as range work', () => {
+    expect(classifyByKeyword({ name: 'Fee Tier Placement', description: 'A pair on PancakeSwap lives in up to five pools at once. Fee tier placement picks the pool for your liquidity.' }).category).toBe('rebalancing')
+  })
 })

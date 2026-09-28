@@ -1,9 +1,11 @@
 /** The classifier worker. Deterministic pass, then an optional semantic pass. */
-import { classifyKeywordPass, classifySemanticPass } from '@marque/registry'
+import { classifyKeywordPass, classifySemanticPass, reclassifyUnclassified } from '@marque/registry'
 import { closeDb } from '@marque/db'
 
 const ONCE = process.argv.includes('--once')
 const SEMANTIC = process.argv.includes('--semantic')
+/** `--relabel`: one full relabel of keyword `unclassified` agents (run after a taxonomy change). */
+const RELABEL = process.argv.includes('--relabel')
 const CYCLE_MS = Number(process.env.CLASSIFY_CYCLE_MS ?? 10 * 60_000)
 const LIMIT = Number(process.env.CLASSIFY_LIMIT ?? 5000)
 
@@ -29,10 +31,21 @@ async function main(): Promise<void> {
     return
   }
 
+  if (RELABEL) {
+    const r = await reclassifyUnclassified(400_000)
+    log('relabel_pass', { ...r })
+    await closeDb()
+    log('stop', {})
+    return
+  }
+
   do {
     try {
       const r = await classifyKeywordPass(LIMIT)
       log('pass', { ...r })
+      // Labels written before an agent's metadata arrived are looked at again.
+      const rl = await reclassifyUnclassified(LIMIT, { staleOnly: true })
+      if (rl.classified) log('relabel', { ...rl })
       if (r.examined === 0 && !ONCE) await sleep(CYCLE_MS)
     } catch (err) {
       log('pass_error', { error: err instanceof Error ? err.message : String(err) })

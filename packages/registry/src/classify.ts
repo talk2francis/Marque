@@ -231,6 +231,52 @@ export async function classifySemanticPass(opts: {
   return result
 }
 
+/**
+ * Relabel pass: agents whose only label is a keyword `unclassified`. Pass 1 labels
+ * an agent once, often before its registry detail (the description) has been
+ * fetched, and never looked again, so real category agents stayed unclassified
+ * (28 Sep: 220 labels predated their own metadata). Re-running the same auditable
+ * rules on today's metadata is free; only a changed verdict is written, and the
+ * `unclassified` row it replaces is removed, exactly as the semantic pass does.
+ */
+export async function reclassifyUnclassified(limit = 20000, opts: { staleOnly?: boolean } = {}): Promise<ClassifyResult> {
+  // Routine cycles look only at labels older than the agent's own metadata; a full run
+  // (after a taxonomy change) looks at every keyword `unclassified`.
+  const stale = opts.staleOnly
+    ? sql`and a.detail_fetched_at > (select max(c.assigned_at) from agent_category c where c.agent_id = a.id)`
+    : sql``
+  const rows = await db().execute(sql`
+    select a.id, a.name, a.description, a.tags,
+           coalesce((
+             select p.skills from probe p
+             where p.agent_id = a.id and jsonb_array_length(p.skills) > 0
+             order by p.checked_at desc limit 1
+           ), '[]'::jsonb) as skills
+    from agent a
+    where a.chain_id = 56
+      and exists (select 1 from agent_category c where c.agent_id = a.id and c.category = 'unclassified' and c.method = 'keyword')
+      and not exists (select 1 from agent_category c where c.agent_id = a.id and c.category <> 'unclassified')
+      and coalesce(a.description, '') <> ''
+      ${stale}
+    limit ${limit}
+  `)
+  const list = ((rows as unknown as { rows?: unknown[] }).rows ?? (rows as unknown as unknown[])) as Array<Record<string, unknown>>
+  const result: ClassifyResult = { examined: list.length, classified: 0, unclassified: 0, byCategory: {}, llmCalls: 0, llmUsdSpent: 0 }
+  await mapLimit(list, 8, async (r) => {
+    const c = classifyByKeyword({
+      name: (r['name'] as string | null) ?? null, description: (r['description'] as string | null) ?? null,
+      tags: Array.isArray(r['tags']) ? (r['tags'] as string[]) : [], skills: Array.isArray(r['skills']) ? (r['skills'] as string[]) : [],
+    })
+    if (c.category === 'unclassified') { result.unclassified++; return }
+    const id = String(r['id'])
+    await db().execute(sql`delete from agent_category where agent_id = ${id} and category = 'unclassified'`)
+    await writeLabel(id, c.category, c.confidence, 'keyword', c.rationale)
+    result.classified++
+    result.byCategory[c.category] = (result.byCategory[c.category] ?? 0) + 1
+  })
+  return result
+}
+
 /** Pass 1 across every unlabelled agent with metadata. */
 export async function classifyKeywordPass(limit = 5000): Promise<ClassifyResult> {
   const rows = await candidates(limit, false)

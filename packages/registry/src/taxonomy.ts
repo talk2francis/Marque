@@ -51,6 +51,9 @@ export const TAXONOMY: Readonly<Record<Exclude<Category, 'unclassified'>, Catego
       ['range order', 5], ['tick range', 5], ['out of range', 5], ['in-range', 4],
       ['lp position', 4], ['uniswap v3', 4], ['pancakeswap v3', 5], ['pancake v3', 5],
       ['clmm', 5], ['re-center', 5], ['recenter', 5], ['position manager', 4],
+      // 28 Sep recall audit: an LP placement service ("which pool and fee tier to put a
+      // pair's liquidity in") is range work, and said so only as "fee tier placement".
+      ['fee tier placement', 5], ['lp placement', 5], ['liquidity placement', 5],
     ],
     weak: [
       ['liquidity', 1], ['pool', 1], ['lp', 1], ['pancakeswap', 2], ['amm', 1],
@@ -68,6 +71,9 @@ export const TAXONOMY: Readonly<Record<Exclude<Category, 'unclassified'>, Catego
       // BSC describes itself as a "Grid planning seller" that computes a "Grid
       // plan", and matched none of the terms above.
       ['grid plan', 6], ['grid planner', 6], ['grid planning', 6],
+      // 28 Sep recall audit: "trades a 25 basis point grid on PancakeSwap V3" matched only
+      // the Pancake V3 term and landed in Rebalancing.
+      ['basis point grid', 7], ['bps grid', 7], ['bp grid', 7], ['grid ladder', 6], ['grid order', 5],
     ],
     weak: [
       ['grid', 2], ['bot', 1], ['spot trading', 2], ['limit order', 2],
@@ -84,6 +90,10 @@ export const TAXONOMY: Readonly<Record<Exclude<Category, 'unclassified'>, Catego
       // A service that ranks venues by what they pay is yield comparison (e.g. "Venus Yield Ranking").
       ['yield rank', 5],
       ['lending rate', 4], ['venus protocol', 4], ['staking reward', 3], ['lista dao', 4],
+      // 28 Sep recall audit: yield services that never say "optimise" ("deterministic
+      // yield allocation", "compares USDT supply rates on Venus and Aave").
+      ['yield allocat', 5], ['yield rout', 5], ['supply rate', 5], ['supply apy', 5],
+      ['realised yield', 5], ['realized yield', 5], ['net apr', 5], ['net apy', 5],
     ],
     weak: [
       ['yield', 2], ['apy', 2], ['apr', 2], ['farming', 2], ['staking', 2],
