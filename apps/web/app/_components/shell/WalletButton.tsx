@@ -1,5 +1,5 @@
 'use client'
-import { ConnectButton } from '@rainbow-me/rainbowkit'
+import { ConnectButton, useConnectModal } from '@rainbow-me/rainbowkit'
 import { ArrowUpRight, Check, ChevronDown, Copy, LogOut, Repeat, ShieldCheck, Target, User, Wallet } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useDisconnect } from 'wagmi'
@@ -24,7 +24,7 @@ export function WalletButton({ compact, openOnLoad }: { compact?: boolean; openO
         if (!mounted) return <span className="wallet-slot" data-compact={compact ? '' : undefined} aria-hidden="true" />
         if (!connected) {
           return (
-            <>{openOnLoad ? <OpenOnce open={openConnectModal} /> : null}<button type="button" className="btn btn--sm wallet-connect" onClick={openConnectModal} data-compact={compact ? '' : undefined} aria-label="Connect wallet">
+            <>{openOnLoad ? <OpenOnce /> : null}<button type="button" className="btn btn--sm wallet-connect" onClick={openConnectModal} data-compact={compact ? '' : undefined} aria-label="Connect wallet">
               <Wallet aria-hidden="true" />{compact ? null : <span>Connect</span>}
             </button></>
           )
@@ -42,10 +42,15 @@ export function WalletButton({ compact, openOnLoad }: { compact?: boolean; openO
   )
 }
 
-/** The visitor pressed Connect before the island arrived: open the dialog once it can. */
-function OpenOnce({ open }: { open: () => void }) {
+/**
+ * The visitor pressed Connect before the island arrived: open the dialog once it can.
+ * RainbowKit only hands out openConnectModal while the wallet is disconnected (not
+ * while wagmi is still reconnecting), so wait for it rather than calling once blind.
+ */
+function OpenOnce() {
+  const { openConnectModal } = useConnectModal()
   const done = useRef(false)
-  useEffect(() => { if (!done.current) { done.current = true; open() } }, [open])
+  useEffect(() => { if (!done.current && openConnectModal) { done.current = true; openConnectModal() } }, [openConnectModal])
   return null
 }
 

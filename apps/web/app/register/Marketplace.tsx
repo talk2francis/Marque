@@ -384,7 +384,7 @@ export function Marketplace({ category: fixedCategory, initial }: { category?: s
               ? 'Results unavailable'
               : total === 0
                 ? 'No matching agents'
-                : `${page * pageSize + 1}–${page * pageSize + rows.length} of ${total.toLocaleString()}`}
+                : `${page * pageSize + 1} to ${page * pageSize + rows.length} of ${total.toLocaleString()}`}
         </span>
         <div className={styles.pageButtons}>
           <button

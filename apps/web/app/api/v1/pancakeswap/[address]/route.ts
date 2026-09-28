@@ -3,7 +3,8 @@ import { and, desc, eq, gte, sql } from 'drizzle-orm'
 import { isAddress, type Address } from 'viem'
 import { db, poolTickObservation, poolWatch } from '@marque/db'
 import { pancakeV3Reader, measureOutOfRange } from '@marque/positions'
-import { displayName } from '../../../../../lib/reference-agents'
+import { displayName, referenceAgent } from '../../../../../lib/reference-agents'
+import { storefrontByToken } from '../../../../../lib/storefront'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -62,19 +63,27 @@ interface RankedAgent {
 async function rankAgentsForPool(): Promise<RankedAgent[]> {
   // Our own rebalancing agent works on any V3 pool and fee tier, because it
   // reads the pool's own tickSpacing rather than carrying a hardcoded table.
+  // Every figure is read, never typed (invariants 4 and 28): the live quote, the
+  // latest MCS-REB-1 result and the latest probe, from Bound's storefront record.
+  const ref = referenceAgent('marque:bound')
+  const sf = ref ? await storefrontByToken(String(ref.erc8004.tokenId)).catch(() => null) : null
+  const reb = sf?.tests.find((t) => t.testId === 'MCS-REB-1') ?? null
+  const mcs: RankedAgent['mcs'] = reb ? (reb.pass ? 'pass' : 'fail') : 'untested'
   const first: RankedAgent = {
     id: 'marque:bound',
     name: displayName('marque:bound'),
     kind: 'first-party',
-    mcs: 'pass',
-    liveness: 'working',
+    mcs,
+    liveness: sf?.lastProbe?.liveness ?? null,
     supportsThisPool: 'yes',
-    price: '0.15 U',
+    price: sf?.commerce?.priceLabel ?? null,
     endpoint: '/agents/bound',
     reasons: [
-      'Passes MCS-REB-1, the published rebalancing test, against a case captured at the current block.',
-      'Reads the pool’s own tickSpacing, so it supports every fee tier rather than a fixed list.',
-      'First-party reference agent — it exists to guarantee this category has liquidity, and is labelled as ours.',
+      mcs === 'pass'
+        ? `Passed MCS-REB-1, the published rebalancing test${reb?.ranAt ? `, on ${reb.ranAt.slice(0, 10)}` : ''}.`
+        : mcs === 'fail' ? `Its latest MCS-REB-1 run failed${reb?.failedFields[0] ? ` on ${reb.failedFields[0]}` : ''}; the record is on its storefront.` : 'Not yet tested against MCS-REB-1.',
+      'Reads the pool\u2019s own tickSpacing, so it supports every fee tier rather than a fixed list.',
+      'First-party reference agent: it exists so this category always has a seller, and is labelled as ours.',
     ],
   }
 
