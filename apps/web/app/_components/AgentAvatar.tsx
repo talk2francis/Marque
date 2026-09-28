@@ -1,15 +1,20 @@
 'use client'
 
 import { useState } from 'react'
+import { avatarSource } from '../../lib/avatar-source'
 
 /**
  * An agent's avatar.
  *
- * A registry-supplied image when there is one (CLAIMED — it is whatever the
- * operator uploaded), falling back on error or absence to a deterministic
- * generated emblem: the winged mark on a tile whose hue and corner ticks are
- * seeded from the agent's id. The generated form needs no network and never
+ * Precedence (lib/avatar-source.ts): a Marque reference agent shows its own
+ * operative portrait, served locally at card size, never its registry image.
+ * Anyone else shows the registry-supplied image when there is one (CLAIMED:
+ * whatever the operator uploaded). Either falls back on error or absence to a
+ * deterministic generated emblem: the winged mark on a tile whose hue and corner
+ * ticks are seeded from the agent's id. The emblem needs no network and never
  * fails, so a row is never a blank square.
+ *
+ * A rounded square, never a circle: 8 to 10 px at card size, up to 16 px large.
  */
 
 const CATEGORY_HUE: Record<string, number> = {
@@ -67,29 +72,43 @@ export function AgentAvatar({
   size = 40,
   reference = false,
   imageUrl = null,
+  priority = false,
 }: {
   id: string
   category?: string | null
   size?: number
   reference?: boolean
-  /** Registry-supplied image. Falls back to the generated emblem on error. */
+  /** Registry-supplied image. Ignored for a reference agent; falls back to the emblem on error. */
   imageUrl?: string | null
+  /** Above the fold on its page (the storefront head): fetch eagerly. */
+  priority?: boolean
 }) {
   const [failed, setFailed] = useState(false)
+  const src = avatarSource({ id, reference, imageUrl, size })
+  const radius = avatarRadius(size)
 
-  if (imageUrl && !failed) {
+  if (src.kind !== 'emblem' && !failed) {
     return (
       <img
-        src={imageUrl}
+        src={src.src}
+        srcSet={src.srcSet}
         alt=""
         aria-hidden="true"
         width={size}
         height={size}
-        loading="lazy"
+        loading={priority ? 'eager' : 'lazy'}
+        decoding="async"
         onError={() => setFailed(true)}
-        style={{ flex: 'none', width: size, height: size, borderRadius: 8, objectFit: 'cover', display: 'block', background: 'var(--ground-sunk)' }}
+        className="agent-avatar"
+        data-kind={src.kind}
+        style={{ flex: 'none', width: size, height: size, borderRadius: radius, objectFit: 'cover', display: 'block', background: 'var(--ground-sunk)' }}
       />
     )
   }
   return <Emblem id={id} category={category} size={size} reference={reference} />
+}
+
+/** 8 px at 40, 10 px at 48 to 64, 14 px from 88: soft enough to breathe, never a circle. */
+export function avatarRadius(size: number): number {
+  return size >= 88 ? 14 : size >= 72 ? 12 : size >= 48 ? 10 : 8
 }

@@ -428,3 +428,8 @@
   .menu-head { padding: 8px 10px 6px; }
   @keyframes menu-in { from { opacity: 0; transform: translateY(-4px) scale(0.98); } }
 }
+
+@layer components {
+  /* Agent portraits and registry images: a hairline edge, drawn inside the image. */
+  .agent-avatar { outline: 1px solid var(--hair); outline-offset: -1px; }
+}

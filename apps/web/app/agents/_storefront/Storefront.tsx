@@ -1,6 +1,8 @@
 import { ArrowUpRight, Check, KeyRound, ShieldCheck, X } from 'lucide-react'
 import { ProvenanceChip } from '@marque/ui'
 import { AgentAvatar } from '../../_components/AgentAvatar'
+import { AgentBrandHero } from '../../_components/AgentBrandHero'
+import { agentBrand } from '../../../lib/agent-brand'
 import { AddressChip, Badge, HashChip, Stars } from '../../_components/ui'
 import { DeliverableView } from '../../jobs/[chainId]/[jobId]/Deliverable'
 import { explorerAddress, explorerTx } from '../../../lib/network'
@@ -50,6 +52,8 @@ export function Storefront({ d }: { d: Data }) {
   const hireHref = `?hire=${encodeURIComponent(d.agentId)}`
   const tryHref = `?hire=${encodeURIComponent(d.agentId)}&try=1`
   const quoteAge = ago(c?.quotedAt ?? null)
+  // First-party identity art only when this row is a Marque reference agent with a local brand.
+  const brand = d.isReference ? agentBrand(d.agentId) : null
 
   const panel = (
     <aside className={styles.panel} aria-label={`Hire ${d.name}`}>
@@ -99,6 +103,17 @@ export function Storefront({ d }: { d: Data }) {
 
       <div className={styles.grid}>
         <div className={styles.main}>
+          {brand ? (
+            <AgentBrandHero brand={brand} agentId={d.agentId} category={d.category}>
+              <h1 className={styles.title}>{d.name}</h1>
+              <div className={styles.badges}>
+                <Badge kind="network" label={net} />
+                {hireable ? <Badge kind="hireable" /> : answersFree ? <Badge kind="preview" /> : null}
+                {passed && passed === latest && passed.ranAt ? (Date.now() - Date.parse(passed.ranAt) > 72 * 3_600_000 ? <Badge kind="retest" /> : <Badge kind="warranted" date={passed.ranAt} />) : latest && !latest.pass ? <Badge kind="failed" test={latest.testId} field={latest.failedFields[0]} date={latest.ranAt ?? undefined} /> : <Badge kind="untested" />}
+                {d.isReference ? <a href="/register#reference-agents" className={styles.refLink}><Badge kind="reference" /></a> : null}
+              </div>
+            </AgentBrandHero>
+          ) : (
           <header className={styles.head}>
             <AgentAvatar id={d.agentId} category={d.category} reference={d.isReference} imageUrl={d.imageUrl} size={64} />
             <div className={styles.headTxt}>
@@ -111,6 +126,7 @@ export function Storefront({ d }: { d: Data }) {
               </div>
             </div>
           </header>
+          )}
 
           {/* 1. What it does */}
           <section className={styles.section} aria-labelledby="sf-does">
