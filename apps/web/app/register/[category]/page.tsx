@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { Statement, Chip } from '@marque/ui'
 import { categoryFunnel, MIN_THIRD_PARTY_PER_CATEGORY } from '@marque/registry'
 import { Marketplace } from '../Marketplace'
+import { initialMarket } from '../initial'
 import { RegisterTable } from '../RegisterTable'
 import { Disclosure } from '../Disclosure'
 import { SiteHeader, SiteFooter } from '../../_components/SiteHeader'
@@ -64,7 +65,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
   const meta = SLUGS[slug]
   if (!meta) notFound()
 
-  const cats = await categoryFunnel(56).catch(() => null)
+  const [cats, initial] = await Promise.all([categoryFunnel(56).catch(() => null), initialMarket(meta.key)])
   const row = cats?.find((c) => c.category === meta.key)
   const untested = meta.key === 'security'
 
@@ -93,7 +94,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
                 )}
                 {row.thirdPartyRegistrations > row.thirdPartyExecutable && (
                   <span className={styles.introSupplyNote}>
-                    across {row.thirdPartyRegistrations.toLocaleString()} registrations — several identities
+                    across {row.thirdPartyRegistrations.toLocaleString()} registrations; several identities
                     point at the same endpoint, so suppliers is the number that means anything.
                   </span>
                 )}
@@ -102,7 +103,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
           </div>
         </header>
 
-        <Marketplace category={meta.key} />
+        <Marketplace category={meta.key} initial={initial} />
 
         <div className={styles.appendix}>
           <Disclosure

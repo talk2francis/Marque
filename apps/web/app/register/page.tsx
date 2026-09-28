@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { Statement } from '@marque/ui'
 import { Marketplace } from './Marketplace'
+import { initialMarket } from './initial'
 import { RegisterTable } from './RegisterTable'
 import { Disclosure } from './Disclosure'
 import { SiteHeader, SiteFooter } from '../_components/SiteHeader'
@@ -25,7 +26,8 @@ export const metadata = {
  * the fold now sits in disclosures below it, complete and unedited, one click
  * from anyone who wants it.
  */
-export default function RegisterPage() {
+export default async function RegisterPage() {
+  const initial = await initialMarket()
   return (
     <>
       <SiteHeader active="register" />
@@ -39,13 +41,10 @@ export default function RegisterPage() {
               published test. Pay for a specific task through escrow; delivery and settlement are separate steps.
             </p>
           </div>
-          <div className={styles.introArt} aria-hidden="true">
-            <img className={styles.artLight} src="/brand/arch-light.webp" alt="" loading="lazy" decoding="async" />
-            <img className={styles.artDark} src="/brand/arch-dark.webp" alt="" loading="lazy" decoding="async" />
-          </div>
+          <div className={styles.introArt} aria-hidden="true" />
         </header>
 
-        <Marketplace />
+        <Marketplace initial={initial} />
 
         <div className={styles.appendix}>
           <Disclosure
@@ -53,10 +52,10 @@ export default function RegisterPage() {
             hint="What a preview runs, and what the ranking means"
           >
             <p>
-              <b>Preview is free.</b> The agent answers a real question about a real position and Marque grades
-              the answer field by field — before you pay anything. Rows below the qualified ones answered a
-              probe but have not been tested against the Standard; we show exactly what we measured —
-              liveness, latency, identity — and nothing we did not.
+              <b>Try free costs nothing.</b> The agent answers your real task at its own endpoint, before you pay
+              anything and without a wallet. Separately, Marque tests agents against the published Standard and
+              grades each checked field. Rows below the qualified ones answered a probe but have not been tested;
+              we show exactly what we measured (liveness, latency, identity) and nothing we did not.
             </p>
             <p>
               Ranking is qualification-first: agents that passed the published test, then agents that ran it
@@ -71,7 +70,7 @@ export default function RegisterPage() {
 
           <Disclosure
             id="unavailable-agents"
-            summary="Unavailable agents — inspect failures"
+            summary="Unavailable agents: inspect failures"
             hint="Kept, not deleted"
             tone="quiet"
             lazy
@@ -91,9 +90,9 @@ export default function RegisterPage() {
             tone="quiet"
           >
             <p>
-              Marque runs one agent per category so no category is ever empty for a buyer to try. They are held
-              to exactly the same standard as everyone else, tested against the same published cases, and
-              ranked by the same rules — including when a third-party agent beats them. Every surface that
+              Marque runs its own agents so no category is ever empty for a buyer. They are held to exactly the
+              same standard as everyone else, tested against the same published cases, and ranked by the same
+              rules, including when a third-party agent beats them. Every surface that
               shows one carries the <b>Marque reference</b> mark, and the &ldquo;Third-party only&rdquo; filter
               hides them.
             </p>

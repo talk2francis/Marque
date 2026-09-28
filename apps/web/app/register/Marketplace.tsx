@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { EmptyState, LinkButton } from '@marque/ui'
+import type { InitialMarket } from './initial'
 import { track } from '../../lib/track'
 import { MarketToolbar } from './MarketToolbar'
 import { MarketList } from './MarketList'
@@ -32,13 +33,16 @@ import styles from './register.module.css'
  * inventory first, methodology one layer down — and that the whole market view
  * now lives in the URL so it can be shared and stepped through.
  */
-export function Marketplace({ category: fixedCategory }: { category?: string }) {
-  const [rows, setRows] = useState<MarketRow[]>([])
-  const [loading, setLoading] = useState(true)
+export function Marketplace({ category: fixedCategory, initial }: { category?: string; initial?: InitialMarket | null }) {
+  // The server rendered the default view's first page: it is on screen at first paint,
+  // and the first fetch is skipped when the URL asks for exactly that view.
+  const [rows, setRows] = useState<MarketRow[]>(initial?.agents ?? [])
+  const [loading, setLoading] = useState(!initial)
   const [error, setError] = useState<string | null>(null)
-  const [generatedAt, setGeneratedAt] = useState<string | null>(null)
-  const [total, setTotal] = useState<number | null>(null)
-  const [hasMore, setHasMore] = useState(false)
+  const [generatedAt, setGeneratedAt] = useState<string | null>(initial?.generatedAt ?? null)
+  const [total, setTotal] = useState<number | null>(initial?.total ?? null)
+  const [hasMore, setHasMore] = useState(initial?.hasMore ?? false)
+  const seeded = useRef(initial?.key ?? null)
   const [retry, setRetry] = useState(0)
   const [rankInfo, setRankInfo] = useState(false)
 
@@ -117,6 +121,12 @@ export function Marketplace({ category: fixedCategory }: { category?: string }) 
     if (!ready) return
     // The Registry tab is the graveyard table, which pages its own data.
     if (state.tab === 'registry') { setLoading(false); setError(null); return }
+    const key = `${qs}|${page}|${pageSize}`
+    if (seeded.current !== null) {
+      const same = seeded.current === key
+      seeded.current = null
+      if (same && retry === 0) return
+    }
     let cancelled = false
     const controller = new AbortController()
     setLoading(true)
