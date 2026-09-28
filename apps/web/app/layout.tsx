@@ -2,8 +2,8 @@ import type { Metadata, Viewport } from 'next'
 import localFont from 'next/font/local'
 import { BRAND } from '@marque/ui/brand'
 import { Suspense } from 'react'
-import { WalletProvider } from './_components/WalletProvider'
-import { HireSheet } from './_components/HireSheet'
+import { Providers } from './_components/Providers'
+import { HireSheetGate } from './_components/HireSheetGate'
 import { Toaster } from './_components/ui/Toaster'
 import { THEME_BOOTSTRAP } from '../lib/theme'
 import './globals.css'
@@ -68,8 +68,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: '(prefers-color-scheme: dark)', color: '#0E0F0B' },
-    { media: '(prefers-color-scheme: light)', color: '#F2EFE7' },
+    { media: '(prefers-color-scheme: dark)', color: '#0E0E0D' },
+    { media: '(prefers-color-scheme: light)', color: '#F3F0EA' },
   ],
   colorScheme: 'dark light',
   width: 'device-width',
@@ -83,11 +83,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script dangerouslySetInnerHTML={{ __html: THEME_BOOTSTRAP }} />
       </head>
       <body>
-        <WalletProvider>
+        <Providers>
           {children}
-          <Suspense fallback={null}><HireSheet /></Suspense>
+          <Suspense fallback={null}><HireSheetGate /></Suspense>
           <Toaster />
-        </WalletProvider>
+        </Providers>
       </body>
     </html>
   )

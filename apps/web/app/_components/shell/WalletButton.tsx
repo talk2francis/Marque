@@ -16,7 +16,7 @@ const CHAIN_SHORT: Record<number, string> = { 56: 'BSC', 97: 'BSC testnet' }
  * an account menu (My Marque, the quest, spending controls, explorer, switch
  * network, disconnect). A wallet is never needed to look around (invariant 2).
  */
-export function WalletButton({ compact }: { compact?: boolean }) {
+export function WalletButton({ compact, openOnLoad }: { compact?: boolean; openOnLoad?: boolean }) {
   return (
     <ConnectButton.Custom>
       {({ account, chain, openChainModal, openConnectModal, mounted }) => {
@@ -24,9 +24,9 @@ export function WalletButton({ compact }: { compact?: boolean }) {
         if (!mounted) return <span className="wallet-slot" data-compact={compact ? '' : undefined} aria-hidden="true" />
         if (!connected) {
           return (
-            <button type="button" className="btn btn--sm wallet-connect" onClick={openConnectModal} data-compact={compact ? '' : undefined} aria-label="Connect wallet">
+            <>{openOnLoad ? <OpenOnce open={openConnectModal} /> : null}<button type="button" className="btn btn--sm wallet-connect" onClick={openConnectModal} data-compact={compact ? '' : undefined} aria-label="Connect wallet">
               <Wallet aria-hidden="true" />{compact ? null : <span>Connect</span>}
-            </button>
+            </button></>
           )
         }
         if (chain.unsupported) {
@@ -40,6 +40,13 @@ export function WalletButton({ compact }: { compact?: boolean }) {
       }}
     </ConnectButton.Custom>
   )
+}
+
+/** The visitor pressed Connect before the island arrived: open the dialog once it can. */
+function OpenOnce({ open }: { open: () => void }) {
+  const done = useRef(false)
+  useEffect(() => { if (!done.current) { done.current = true; open() } }, [open])
+  return null
 }
 
 function AccountMenu({ address, display, chainId, compact, openChainModal }: { address: string; display: string; chainId: number; compact?: boolean; openChainModal: () => void }) {

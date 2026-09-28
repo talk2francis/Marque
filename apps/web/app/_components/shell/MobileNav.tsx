@@ -4,9 +4,9 @@ import { useEffect, useState } from 'react'
 import { NAV, DOC_GROUPS, PROOF_GROUPS, type Active } from '../nav-items'
 import { Drawer } from '../ui/Overlay'
 import { NavGlyph } from './icons'
-import { NetworkPill, StatusPill } from './Pills'
+import { NetworkPill } from './Pills'
 import { ThemeChoices } from './ThemeMenu'
-import { WalletButton } from './WalletButton'
+import { LazyWallet } from './LazyWallet'
 import { LockupLink } from './Brand'
 
 /**
@@ -48,11 +48,11 @@ export function MobileNav({ active }: { active?: Active }) {
         </div>
         <div className="dsec">
           <span className="t-label">Wallet</span>
-          <div className="dsec-row"><WalletButton /></div>
+          <div className="dsec-row"><LazyWallet /></div>
         </div>
         <div className="dsec">
           <span className="t-label">Network</span>
-          <div className="dsec-row"><NetworkPill /><StatusPill /></div>
+          <div className="dsec-row"><NetworkPill /></div>
         </div>
         <div className="dsec">
           <span className="t-label">Theme</span>

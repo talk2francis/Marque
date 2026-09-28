@@ -7,10 +7,10 @@ import { LockupLink } from './shell/Brand'
 import { HeaderScroll } from './shell/HeaderScroll'
 import { MobileNav } from './shell/MobileNav'
 import { NavLinks } from './shell/NavLinks'
-import { NetworkPill, StatusPill } from './shell/Pills'
-import { QuestBar } from './shell/QuestBar'
+import { NetworkPill } from './shell/Pills'
+import { LazyQuestBar } from './shell/LazyQuestBar'
 import { ThemeMenu } from './shell/ThemeMenu'
-import { WalletButton } from './shell/WalletButton'
+import { LazyWallet } from './shell/LazyWallet'
 import { FooterPulse } from './shell/FooterPulse'
 import type { Active } from './nav-items'
 
@@ -20,8 +20,8 @@ import type { Active } from './nav-items'
  * theme, drawer, quest bar) are client islands inside.
  *
  * Sticky, 64 px, the canvas blurred through it, firmer once the page scrolls.
- * Left: the lockup. Centre: the nav capsule. Right: network and status pills,
- * Connect, theme. Under 1024 px the nav and pills move into the drawer.
+ * Left: the lockup. Centre: the nav capsule. Right: the network pill (health
+ * folded into its dot), Connect, theme. Under 1024 px the nav and pills move into the drawer.
  */
 export function SiteHeader({ active }: { active?: Active }) {
   return (
@@ -34,14 +34,13 @@ export function SiteHeader({ active }: { active?: Active }) {
           <NavLinks active={active} />
           <div className="header-tools">
             <span className="hide-lt-lg"><NetworkPill /></span>
-            <span className="hide-lt-xl"><StatusPill /></span>
-            <span className="hide-lt-md"><WalletButton /></span>
-            <span className="show-lt-md"><WalletButton compact /></span>
+            <span className="hide-lt-md"><LazyWallet /></span>
+            <span className="show-lt-md"><LazyWallet compact /></span>
             <span className="hide-lt-lg"><ThemeMenu /></span>
             <MobileNav active={active} />
           </div>
         </div>
-        <QuestBar />
+        <LazyQuestBar />
         <HeaderScroll />
       </header>
       <span id="main" className="main-anchor" tabIndex={-1} />
