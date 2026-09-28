@@ -375,8 +375,29 @@ export class SellerCore {
     } finally {
       if (!terminal) {
         this.inflight.delete(jobId);
+        this.scheduleRetry(jobId);
+      } else {
+        this.retries.delete(jobId);
       }
     }
+  }
+
+  /**
+   * Retry a named job whose delivery failed transiently (28 Sep, job 56839: the
+   * notify arrived seconds after payment, the RPC had not yet served that block,
+   * and the read failed). The periodic sweep was the only retry and it was timing
+   * out, so the paid job waited. Six tries from 15 s to 8 min; delivery re-verifies
+   * on chain each time, so a job that moved on is skipped, never delivered twice.
+   */
+  private readonly retries = new Map<number, number>();
+  private scheduleRetry(jobId: number): void {
+    const n = (this.retries.get(jobId) ?? 0) + 1;
+    if (n > 6) { this.retries.delete(jobId); return; }
+    this.retries.set(jobId, n);
+    const delay = Math.min(15_000 * 2 ** (n - 1), 480_000);
+    log.warn(`job ${jobId}: retry ${n} of 6 in ${Math.round(delay / 1000)}s`);
+    const t = setTimeout(() => this.spawnJob(jobId, { verified: false }), delay);
+    t.unref?.();
   }
 
   private requireCommerceRail(): void {

@@ -4,7 +4,7 @@ import { db, hireIntent, commerceQuote, notifyAttempt, firstPartyAgents, canonic
 import { safeFetch } from '@marque/probe'
 import { agenticCommerceAbi } from './generated.js'
 import { network, isSupportedChain, formatAmount, type ChainId } from './config.js'
-import { chainClient, disputeWindowSeconds } from './chain.js'
+import { chainClient, disputeWindowSeconds, fromAny, receiptFromAny } from './chain.js'
 import { buildJobDescription, buildPlainDescription, descriptionHash } from './description.js'
 import { computeExpiredAt, createJobCall } from './calls.js'
 import { requestQuote, type NegotiateTask, type QuoteResult, NegotiationSchema, SimpleQuoteSchema } from './quote.js'
@@ -161,8 +161,7 @@ export async function bindIntent(input: { intentId: string; txHash: string; sour
   if (!intent) throw new HireError('no_intent', 'That hire was not started on Marque.', 404)
   if (intent.jobId) return { jobId: intent.jobId, chainId: intent.chainId, alreadyBound: true }
   const chainId = intent.chainId as ChainId
-  const client = chainClient(chainId)
-  const receipt = await client.waitForTransactionReceipt({ hash: input.txHash as Hex, timeout: 60_000, confirmations: 1 }).catch(() => null)
+  const receipt = await receiptFromAny(chainId, input.txHash as Hex, 45_000)
   if (!receipt) throw new HireError('tx_pending', 'The transaction is not confirmed yet. Marque will pick it up automatically.', 409)
   if (receipt.status !== 'success') throw new HireError('tx_failed', 'That transaction failed on chain, so no job was opened.', 422)
   const commerce = network(chainId).commerce.toLowerCase()
@@ -182,9 +181,9 @@ export async function bindIntent(input: { intentId: string; txHash: string; sour
   if (jobId === null) throw new HireError('no_job', 'That transaction did not open an escrow job.', 422)
   if (client_!.toLowerCase() !== intent.wallet) throw new HireError('wrong_client', 'The job was opened by a different wallet than this hire.', 422)
   if (provider!.toLowerCase() !== intent.provider) throw new HireError('wrong_provider', 'The job names a different agent than the one quoted.', 422)
-  const job = await client.readContract({ address: network(chainId).commerce, abi: agenticCommerceAbi, functionName: 'getJob', args: [jobId] }) as { description: string }
+  const job = await fromAny(chainId, (c) => c.readContract({ address: network(chainId).commerce, abi: agenticCommerceAbi, functionName: 'getJob', args: [jobId!] }) as Promise<{ description: string }>, (j) => Boolean(j?.description))
   if (descriptionHash(job.description) !== intent.descriptionHash) throw new HireError('wrong_description', 'The job terms on chain differ from the quote.', 422)
-  const block = await client.getBlock({ blockNumber: receipt.blockNumber })
+  const block = await fromAny(chainId, (c) => c.getBlock({ blockNumber: receipt.blockNumber }))
   if (Number(block.timestamp) * 1000 - intent.createdAt.getTime() > 30 * 60_000) throw new HireError('too_late', 'The job was opened more than 30 minutes after the quote.', 422)
   await db().update(hireIntent).set({ jobId: jobId.toString(), createTx: input.txHash, state: 'bound', bindSource: input.source ?? 'browser', boundAt: new Date() })
     .where(and(eq(hireIntent.id, intent.id), sql`${hireIntent.jobId} is null`))
@@ -197,12 +196,12 @@ export async function bindIntent(input: { intentId: string; txHash: string; sour
  * re-verifies the funded job on chain before working, so this can never cause work
  * that was not paid for.
  */
-export async function notifySeller(chainId: number, jobId: string, opts: { params?: Record<string, unknown> } = {}): Promise<{ accepted: boolean; status: string | null; attempts: number }> {
+export async function notifySeller(chainId: number, jobId: string, opts: { params?: Record<string, unknown>; force?: boolean } = {}): Promise<{ accepted: boolean; status: string | null; attempts: number }> {
   if (!isSupportedChain(chainId)) throw new HireError('bad_chain', 'Unsupported network.')
   const [intent] = await db().select().from(hireIntent).where(and(eq(hireIntent.chainId, chainId), eq(hireIntent.jobId, jobId))).limit(1)
   if (!intent) throw new HireError('not_marque', 'That job was not started on Marque.', 404)
   const done = await db().select().from(notifyAttempt).where(and(eq(notifyAttempt.chainId, chainId), eq(notifyAttempt.jobId, jobId), eq(notifyAttempt.ok, true))).orderBy(desc(notifyAttempt.createdAt)).limit(1)
-  if (done[0]) return { accepted: true, status: done[0].status, attempts: 0 }
+  if (done[0] && !opts.force) return { accepted: true, status: done[0].status, attempts: 0 }
   const job = await chainClient(chainId as ChainId).readContract({ address: network(chainId).commerce, abi: agenticCommerceAbi, functionName: 'getJob', args: [BigInt(jobId)] }) as { status: number }
   if (job.status < 1) throw new HireError('not_funded', 'The job is not paid yet, so the agent has not been asked to start.', 409)
   const [q] = await db().select().from(commerceQuote).where(eq(commerceQuote.id, intent.quoteId)).limit(1)
@@ -259,7 +258,25 @@ export async function retryPendingNotifies(limit = 20): Promise<{ checked: numbe
       if (err instanceof HireError && err.code === 'not_funded') continue
     }
   }
-  return { checked: rows.length, notified }
+  // Accepted is not delivered (28 Sep, job 56839: the seller accepted the notify, then
+  // could not read the brand-new block and dropped it). A job still FUNDED with no new
+  // notify for 4 min is told again; the seller re-verifies on chain, so this is safe.
+  const stuck = rowsOf(await db().execute(sql`
+    select j.chain_id, j.job_id from commerce_job j
+    join hire_intent h on h.id = j.intent_id
+    where j.state = 'FUNDED' and j.updated_at > now() - interval '2 days'
+      and (select max(n.created_at) from notify_attempt n where n.chain_id = j.chain_id and n.job_id = j.job_id) < now() - interval '4 minutes'
+      and (select count(*) from notify_attempt n where n.chain_id = j.chain_id and n.job_id = j.job_id) < 12
+    order by j.updated_at asc limit ${limit}`))
+  for (const r of stuck) {
+    try {
+      const out = await notifySeller(Number(r['chain_id']), String(r['job_id']), { force: true })
+      if (out.accepted) notified++
+    } catch (err) {
+      if (err instanceof HireError && err.code === 'not_funded') continue
+    }
+  }
+  return { checked: rows.length + stuck.length, notified }
 }
 
 export interface SheetAgent {
