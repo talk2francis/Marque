@@ -4,17 +4,17 @@ Live record of Phase 2. Newest first inside each section. Times are UTC.
 
 ## P2-12 Crucible (in progress, Mon 28 Sep)
 
-Verdict so far: **SHIP AFTER LISTED FIXES**. Everything that needs no new funds is
-done and passing; the golden path (B, C, D) waits on funding of the fixture wallet.
+Verdict: **SHIP**. Golden path passed on BSC mainnet at 390 px on 28 Sep (funded and
+"approved, mainnet" by Francis); every item below is PASS or PARTIAL with its reason.
 
 ### Crucible checklist (LAUNCH-RUNBOOK section 7)
 
 | Item | Status | Evidence |
 |---|---|---|
 | A. Eligibility | PASS / PARTIAL (reasons below) | Matrix walk, 28 Sep 03:10 UTC |
-| B. Golden path | WAITING (funds) | Fixture `0xDa53362d304D7970Db19547C52208a35C6D83C8a` generated, on the published team list (17) and in both handoffs; needs 0.45 U and 0.004 BNB on BSC mainnet |
-| C. Protocol | WAITING (B) | Decode each tx after B; allowance after the run must be 0 |
-| D. Tracking | PARTIAL | topic0 verified (`evidence/verify-topics.json`); team wallets flagged (config API lists 17); `/wallet` vs BscScan after B |
+| B. Golden path | PASS | Fixture `0xDa53...3C8a` (team list), 390 px, mainnet: yield 56839 (Sluicegate), grid 56840 (Lattice), rebalancing 56841 (Bound), health factor 56842 (Keel), each paid, delivered and rated; /quest 4 of 5 (the fifth needs an agent the wallet built; /builders shows exactly that); /me spending controls; revoke from the phone UI took a 0.01 U allowance to 0 (approve 0xcfeefa57...). Two stalls on the way were real bugs, fixed (below). Evidence `evidence/p2-12/*.json` |
+| C. Protocol | PASS | All 29 transactions the wallet API lists for the fixture succeeded on chain, to AgenticCommerce (20), EvaluatorRouter (5) and the ERC-8004 ReputationRegistry (4); allowance to the escrow 0 before and after the run |
+| D. Tracking | PASS | `/wallet` for the fixture: 5 hires, every hash on chain, ratedAll true, eligible false with reason team_wallet; topic0 verified (`evidence/verify-topics.json`) |
 | E. Security | PASS | No `maxUint256` approval anywhere (the only hit is Redcell detecting them); `approveFloor` unused; no API route (44 scanned) takes a key or phrase; every agent call goes through `safeFetch` (27 files), 23 SSRF tests pass; quotes verified (`quote.ts` wrong_contract, negotiation hash); the five test-wallet private keys appear nowhere in the repo; no token patterns in tracked files |
 | F. UX | PARTIAL | Hire-sheet messages checked live (below). A fresh 5-second test was not re-run after the refresh (the API keys are revoked); the P2-09 one passed. Job Room states: delivered and cancelled captured in P2-08; settled arrives after the 7-day window (first keeper settle due Sat 3 Oct) |
 | G. Responsive, a11y | PASS | 156 captures (26 routes, 390/768/1440, Night and Day) on the release candidate: zero horizontal scroll, zero console errors after the hydration fix. Axe on 13 routes in both themes: one serious finding (a `<p>` in the home record's `<dl>`), fixed in ef6294c; all others zero (`evidence/axe-p2-12.json`). Keyboard: Hire reached by Tab, focus trapped in the sheet, fields typed, Escape closes |
@@ -39,9 +39,17 @@ field, which raises the browser's own validation bubble).
 | Seller down | `marque-redcell` stopped 03:29:25; out of Ready to hire at 03:32:48 (3 min 23 s, inside one 5 min T0 cycle); restarted 03:32:57, back at 03:33:29. The storefront page cache (30 s) still offered Hire for up to that long |
 | Indexer restart | Restarted 03:33:40; resumed from its cursor, lag 6 to 16 blocks throughout, Quest API 200 |
 | Web restart during a job | Five blue/green swaps today, every smoke check 200; job state is chain-derived, nothing held in the web process |
-| Closing the tab after funding | Waits for B (needs a funded job) |
+| Closing the tab after funding | Job 56843: the browser was closed the moment the payment was sent (13:16:23), before its notify. Marque's worker notified Keel at 13:16:55, Keel worked at 13:16:58, the delivery confirmed on chain at 13:20:30 |
 
 ### Bugs found and fixed in this pass
+
+- Golden path, job 56839: the seller accepted the notify, could not read the block
+  that was seconds old, and dropped the job; its only retry was a sweep that was
+  timing out. Sellers now retry a named job (6 tries, re-verified on chain), and
+  Marque re-notifies a job still FUNDED 4 min after its last notify.
+- Golden path, job 56842: bind waited on one lagging RPC node for the createJob
+  receipt and the sheet stopped with the job open (the Job Room's Finish paying
+  recovered it). Bind now takes the first real answer from every node in the pool.
 
 - Hire sheet: typing into a field kept only the first character; the focus trap
   re-ran on every render and threw focus to Close (since P2-08; scripted runs used
@@ -101,11 +109,20 @@ field, which raises the browser's own validation bubble).
 
 ### Waiting on Francis
 
-1. Fund the golden-path fixture `0xDa53362d304D7970Db19547C52208a35C6D83C8a` on BSC
-   mainnet with 0.45 U and 0.004 BNB, and write "approved, mainnet" for this run
-   (it is a Marque test wallet, so G-M1 applies). Then B, C, D and the
-   close-the-tab check run in one pass.
-2. Google Drive OAuth for recurring offsite backups (BACKUP-DRIVE.md).
+1. Google Drive OAuth for recurring offsite backups (BACKUP-DRIVE.md).
+2. Add @MarqueTradeBot to the Telegram group for alerts.
+
+### Supply (28 Sep)
+
+Hireable means a live quote signed for Marque, payable into BNB Chain's ERC-8183
+escrow now. Measured on 28 Sep: 30 agents, 16 in the four jobs plus security
+(yield 4, grid 4, rebalancing 5, health factor 3, security 1) and 14 outside them,
+listed as Other. A deep sweep asked 1,407 never-asked live A2A agents on all 22
+hosts for a price: no escrow seller among them (TermiX, bortagent and singularry,
+97% of the registry's live A2A endpoints, do not quote). The classifier relabel
+moved 234 agents into categories. Mandate lists 23 "hireable": its rule is an
+endpoint that answered its census; 2 of those have dead escrow endpoints, 2 are web
+pages, 4 are its own x402 agents with no services declared on chain.
 
 ## User-requested post-handoff refresh (27 September, deployed)
 

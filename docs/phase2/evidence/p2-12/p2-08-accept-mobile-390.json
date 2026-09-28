@@ -1,0 +1,38 @@
+{
+  "base": "https://marque.trade",
+  "width": 390,
+  "wallet": "0xDa53362d304D7970Db19547C52208a35C6D83C8a",
+  "startedAt": "2026-09-28T13:10:05.348Z",
+  "hires": [
+    {
+      "category": "health_factor",
+      "agent": "Keel",
+      "job": "/jobs/56/56842",
+      "resumed": true
+    }
+  ],
+  "finalStates": [
+    [
+      "Yield",
+      "done"
+    ],
+    [
+      "Grid",
+      "done"
+    ],
+    [
+      "Rebalancing",
+      "done"
+    ],
+    [
+      "Health factor",
+      "done"
+    ],
+    [
+      "List your agent",
+      "next"
+    ]
+  ],
+  "finishedAt": "2026-09-28T13:10:27.384Z",
+  "video": "docs/phase2/evidence/p2-12/p2-08-quest-mobile-390.mp4"
+}

@@ -109,8 +109,12 @@ export async function connectInPage(page) {
   await page.waitForTimeout(2500)
   if (await account.count()) return
   await page.getByRole('button', { name: /connect/i }).locator('visible=true').first().click()
+  // Where the wallet stack loads lazily (28 Sep), pressing Connect loads it and wagmi may
+  // connect an injected wallet that already exposes its account, with no dialog at all.
   const option = page.locator('[data-testid^="rk-wallet-option"]').filter({ hasText: /headless|injected|browser wallet/i }).first()
-  await option.waitFor({ timeout: 15000 })
-  await option.click()
+  await Promise.race([
+    account.first().waitFor({ timeout: 20000 }),
+    option.waitFor({ timeout: 20000 }).then(() => option.click()),
+  ])
   await account.first().waitFor({ timeout: 15000 })
 }

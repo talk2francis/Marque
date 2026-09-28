@@ -1,0 +1,46 @@
+{
+  "wallet": "0xDa53362d304D7970Db19547C52208a35C6D83C8a",
+  "at": "2026-09-28T13:12:21.499Z",
+  "allowanceBefore": "0.01",
+  "quest": [
+    [
+      "Yield",
+      "done"
+    ],
+    [
+      "Grid",
+      "done"
+    ],
+    [
+      "Rebalancing",
+      "done"
+    ],
+    [
+      "Health factor",
+      "done"
+    ],
+    [
+      "List your agent",
+      "next"
+    ]
+  ],
+  "builders": [
+    "Five checks, read from your wallet, the chain and your agent's endpoint. When all five pass, your agent is listed on Marque and the Set and Earn quest's fifth step ticks. No email, no approval queue.",
+    "No ERC-8004 identity owned by this wallet is indexed yet. Check one by its token id below.",
+    "Check another identity",
+    "Check",
+    "BNB Agent Studio scaffolds an ERC-8004 agent, its A2A card and its ERC-8183 selling side.",
+    "The quest's fifth step needs an agent you built and own. Marque's own reference agents never count, and neither does an agent owned by a wallet on Marque's published team list."
+  ],
+  "controls": [
+    "SPENDING CONTROLS",
+    "What the escrow may take",
+    "Your allowance to BNB Chain's ERC-8183 escrow contract, per token. Marque only ever asks for the exact price of a hire, so these are normally zero. Revoking does not touch money already in escrow for a job.",
+    "ALLOWED TO THE ESCROW",
+    "U · escrow default",
+    "Revoke to zero",
+    "Nothing to revoke",
+    "Nothing to revoke"
+  ],
+  "allowanceAfter": "0"
+}
