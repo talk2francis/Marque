@@ -6,7 +6,7 @@ launch verdict. Do not use its old FAIL labels as present-state claims.
 
 | Requirement | Current evidence / remaining condition |
 |---|---|
-| Own live domain, public browsing | marque.trade; logged-out browser checks must be repeated for this refresh |
+| Own live domain, public browsing | marque.trade; refreshed release passed logged-out candidate browser checks and public HTTP smoke checks on 27 September |
 | Network | BSC mainnet hires recorded; testnet demonstrations labelled separately |
 | Registry data | Canonical ERC-8004 identities; receipt-verified registration lookup added in this refresh |
 | Category coverage | Last audit measured yield/grid/rebalancing/health factor as 3/4/4/3; current counts are the coverage API, not this snapshot |
@@ -16,8 +16,8 @@ launch verdict. Do not use its old FAIL labels as present-state claims.
 | Team disclosures | Both handoffs now match the 16-wallet config |
 | Builder quality | Five-check baseline plus sampled availability disclosure; no continuous task-uptime threshold implemented |
 | Operations | Blue/green and 100-user target evidence in LOAD-TEST.md; private Telegram test delivered |
-| Backups | Local restore evidence exists; encrypted Drive setup in progress, recurring OAuth still requires operator authorization |
-| Repository | Public main/phase2 history; current refresh is not published until commit/push evidence is recorded |
+| Backups | Initial encrypted Drive archive downloaded, hash-checked and restored; recurring OAuth and independent recovery-key custody still require operator action |
+| Repository | Refresh committed and pushed to main/phase2 as 6b0f2b5; click-target follow-up 62caff0 also pushed |
 | Public docs | Phase 2 guide and library added; operational legal drafts require owner/legal review |
 
 See REFRESH-2026-09-27.md for verification and open conditions. P2-12 stays held.

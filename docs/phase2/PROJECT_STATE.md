@@ -2,7 +2,7 @@
 
 Live record of Phase 2. Newest first inside each section. Times are UTC.
 
-## User-requested post-handoff refresh (27 September, in verification)
+## User-requested post-handoff refresh (27 September, deployed)
 
 P2-12 remains held. See [REFRESH-2026-09-27.md](./REFRESH-2026-09-27.md).
 Both handoffs now contain all 16 configured team wallets. Private Telegram test
@@ -13,8 +13,12 @@ Builder callability no longer lets an earlier success hide a later failed attemp
 availability sample scope is explicit. Continuous task uptime is not yet a gate.
 
 Verification so far: typecheck and lint pass; 383 tests pass, 3 RPC tests skipped;
-copy lint passes. Isolated production build succeeds with existing wallet-library
-optional-dependency warnings. Browser iteration is in progress, not yet deployed.
+copy lint passes. Release `6b0f2b5` deployed at 22:42 UTC after candidate browser,
+CSP, wallet-modal and populated My Marque checks passed; all seven public smoke
+checks returned HTTP 200. Initial review covered 42 routes at three widths in both
+themes, followed by 72 release captures. Axe found zero violations on 11 release
+routes in both themes. The click-target follow-up `62caff0` is pushed to both branches
+and is deploying. No mainnet transaction was sent during this refresh.
 Initial encrypted Drive archive uploaded in three parts with owner-only access;
 download hashes, decryption and the scratch database restore drill passed.
 Recurring OAuth setup and an independent copy of the recovery key remain outstanding.
@@ -35,7 +39,7 @@ Recurring OAuth setup and an independent copy of the recovery key remain outstan
 | P2-08 Hire sheet, Job Room, Quest, My Marque | DONE (Sun 00:05), acceptance passed on mainnet, desktop and 390 px |
 | P2-09 Home, marketplace, storefronts | DONE (Sun 02:30) | Home per 8.1 (Phase 1 funnel moved to /why), marketplace tabs and filters with the two-axis card, one storefront for every agent with a sticky purchase panel, Try free on the agent's own endpoint; 5-second test passed first time | Hire sheet (per-category task forms checked against each agent's parser, live price, balance and gas check before any signature, named stepper, controls), Job Room (chain timeline, deliverable per category, raw file with hash check, actions per state incl. resume, reclaim, report, rate), /quest (recommendations, live progress, completion card), /me (spending controls with revoke). Recording needs ~0.4 U and ~0.003 BNB in each of two fresh wallets (Request below) |
 | P2-10 Builder path | DONE (Sun 03:00) | /builders five-check list for BSC mainnet and testnet identities; verdict in packages/registry/src/quality.ts; Probe now; owner-declared category checked against the classifier; /owner returns qualityListing; throwaway testnet agent #2501 went 2 to 5 of 5 in the browser |
-| P2-11 Launch hardening | DONE (Sun 04:35), one external item remains | Blue/green behind Caddy proven under load of requests (4 switches, 0 non-200); CI green; load targets met to 100 users; Telegram bot and group destination configured (bot still needs to be added as a group member); memory budget; restore drill passed (offsite target needed) |
+| P2-11 Launch hardening | Core shipped; recurring offsite setup pending | Blue/green proven under request load; original CI and 100-user load evidence below. Private Telegram delivery tested. Initial encrypted Google Drive archive downloaded and restored successfully; recurring OAuth and an independent recovery-key copy remain pending. |
 
 ## Production baseline (P2-00, Sat 26 Sep 05:16)
 
