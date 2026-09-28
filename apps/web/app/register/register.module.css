@@ -45,18 +45,38 @@ a.introBack:hover { color: var(--fg); }
 .introArt {
   position: absolute; z-index: -1; top: -48px; bottom: -8px;
   right: calc(-1 * var(--s5)); width: min(56%, 720px);
-  background: center 42% / cover no-repeat url('/brand/plate-night-1100.webp');
-  opacity: 0.8;
+  overflow: hidden;
   -webkit-mask-image: linear-gradient(to right, transparent 0, #000 45%), linear-gradient(to top, transparent 0, #000 40%), linear-gradient(to bottom, transparent 0, #000 25%);
   -webkit-mask-composite: source-in, source-in;
   mask-image: linear-gradient(to right, transparent 0, #000 45%), linear-gradient(to top, transparent 0, #000 40%), linear-gradient(to bottom, transparent 0, #000 25%);
   mask-composite: intersect;
   pointer-events: none;
 }
-:global([data-theme='day']) .introArt { background-image: url('/brand/plate-day-1100.webp'); opacity: 0.9; }
+.introPlate { position: absolute; inset: -4%; background: center 42% / cover no-repeat url('/brand/plate-night-1100.webp'); opacity: 0.8; }
+/* Construction lines behind the intro, with light that travels down two of them. */
+.introLines {
+  position: absolute; z-index: -1; inset: -48px calc(-1 * var(--s5)) -8px;
+  display: grid; grid-template-columns: repeat(8, 1fr); pointer-events: none;
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 20%, #000 70%, transparent);
+  mask-image: linear-gradient(180deg, transparent, #000 20%, #000 70%, transparent);
+}
+.introLines span { position: relative; overflow: hidden; border-left: 1px solid var(--grid-line); }
+.introLines span:first-child { border-left: 0; }
+.introLines span::after {
+  content: ''; position: absolute; left: -1px; top: 0; width: 1px; height: 90px; opacity: 0;
+  background: linear-gradient(to bottom, transparent, color-mix(in srgb, var(--accent) 55%, transparent), transparent);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .introPlate { animation: intro-drift 40s ease-in-out infinite alternate; will-change: transform; }
+  @keyframes intro-drift { to { transform: scale(1.07) translate3d(-1.5%, -1%, 0); } }
+  .introLines span:nth-child(3)::after { animation: intro-travel 8s linear 0.8s infinite; }
+  .introLines span:nth-child(6)::after { animation: intro-travel 11s linear 4s infinite; }
+  @keyframes intro-travel { 0% { opacity: 0; transform: translateY(-100px); } 10% { opacity: 1; } 75% { opacity: 1; } 100% { opacity: 0; transform: translateY(260px); } }
+}
+:global([data-theme='day']) .introPlate { background-image: url('/brand/plate-day-1100.webp'); opacity: 0.9; }
 @media (max-width: 1100px) {
   .intro { grid-template-columns: minmax(0, 1fr); }
-  .introArt { display: none; }
+  .introArt, .introLines { display: none; }
 }
 
 /* --- Sticky discovery bar ------------------------------------------------- */

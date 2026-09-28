@@ -168,7 +168,7 @@ export default async function Home() {
           />
           {picks.length ? (
             <div className={styles.cards}>
-              {picks.map((a) => <AgentCard key={a.agentId} a={a} base="/" />)}
+              {picks.map((a) => <AgentCard key={a.agentId} a={a} base="/" variant="feature" />)}
             </div>
           ) : (
             <p className={styles.empty}>No agent has a live quote in the last two hours. That is the measured state, not a loading screen; the <a href="/register?tab=free">free tab</a> lists agents you can still try.</p>

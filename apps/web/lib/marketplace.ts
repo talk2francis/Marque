@@ -401,13 +401,50 @@ export function answersFree(r: Pick<MarketRow, 'isReference' | 'liveness' | 'int
   return r.isReference || (r.liveness === 'live' && r.interfaces.includes('a2a'))
 }
 
+const isOther = (r: Pick<MarketRow, 'category'>) => r.category === null || r.category === 'unclassified'
+
+/** Registrable domain of an endpoint host ("a.b.workers.dev" -> "workers.dev"). */
+function domainOf(host: string | null): string {
+  if (!host) return ''
+  const h = host.replace(/^https?:\/\//, '').split('/')[0] ?? ''
+  return h.split('.').slice(-2).join('.')
+}
+
+/**
+ * Outside the quest jobs, one template deployed by many wallets (same name, same
+ * registrable domain) is one row with its identity count, not a wall of clones.
+ * Classified rows are untouched: they are already deduplicated by operator.
+ */
+function groupClones(rows: MarketRow[]): MarketRow[] {
+  const seen = new Map<string, MarketRow>()
+  const out: MarketRow[] = []
+  for (const r of rows) {
+    if (!isOther(r)) { out.push(r); continue }
+    const key = `${r.name.trim().toLowerCase()}|${domainOf(r.host)}`
+    const first = seen.get(key)
+    if (first) { first.identityCount += r.identityCount; continue }
+    const copy = { ...r }
+    seen.set(key, copy)
+    out.push(copy)
+  }
+  return out
+}
+
+/** The four jobs (and security) first, in their sort order; "Other" after them. */
+function otherLast(rows: MarketRow[]): MarketRow[] {
+  return [...rows.filter((r) => !isOther(r)), ...rows.filter(isOther)]
+}
+
 export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: MarketRow[]; generatedAt: string; total: number; offset: number; hasMore: boolean }> {
   // Clone: the base is memoised and the sort below is in place.
   let all = [...(await marketplaceBase())]
 
   // Filters (TS side — the qualifying set is small).
+  // Ready to hire, all categories: every agent a wallet can pay into escrow right now,
+  // including ones outside the four quest jobs (listed after them as "Other", 28 Sep).
+  const readyAll = q.tab === 'ready' && !q.category
   if (q.category) all = all.filter((r) => r.category === q.category)
-  else if (!q.includeUnclassified) all = all.filter((r) => r.category !== null && r.category !== 'unclassified')
+  else if (!q.includeUnclassified && !readyAll) all = all.filter((r) => r.category !== null && r.category !== 'unclassified')
   if (q.hireableOnly) all = all.filter((r) => r.commerce.state === 'hireable' || r.commerce.state === 'settleable')
   if (q.liveNow) all = all.filter((r) => r.liveness === 'live')
   if (q.warranted) all = all.filter((r) => r.warrant.status === 'warranted')
@@ -468,6 +505,8 @@ export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: Ma
           || byWarrantDate(a, b) || b.identityCount - a.identityCount || (a.latencyMs ?? 1e9) - (b.latencyMs ?? 1e9) || tie
     }
   })
+
+  if (readyAll) all = otherLast(groupClones(all))
 
   const limit = Number.isFinite(q.limit) ? Math.max(1, Math.min(Math.floor(q.limit!), 300)) : 120
   const requestedOffset = Number.isFinite(q.offset) ? Math.max(0, Math.floor(q.offset!)) : 0

@@ -41,7 +41,8 @@ export default async function RegisterPage() {
               published test. Pay for a specific task through escrow; delivery and settlement are separate steps.
             </p>
           </div>
-          <div className={styles.introArt} aria-hidden="true" />
+          <div className={styles.introArt} aria-hidden="true"><span className={styles.introPlate} /></div>
+          <div className={styles.introLines} aria-hidden="true">{Array.from({ length: 8 }).map((_, i) => <span key={i} />)}</div>
         </header>
 
         <Marketplace initial={initial} />
