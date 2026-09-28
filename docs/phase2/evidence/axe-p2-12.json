@@ -1,0 +1,182 @@
+{
+  "base": "https://marque.trade",
+  "at": "2026-09-28T02:42:01.235Z",
+  "report": [
+    {
+      "route": "/",
+      "theme": "night",
+      "passes": 27,
+      "violations": [
+        {
+          "id": "definition-list",
+          "impact": "serious",
+          "nodes": 1,
+          "help": "<dl> elements must only directly contain properly-ordered <dt> and <dd> groups, <script>, <template> or <div> elements",
+          "targets": [
+            ".home_kpis___XapJ"
+          ]
+        }
+      ]
+    },
+    {
+      "route": "/register",
+      "theme": "night",
+      "passes": 27,
+      "violations": []
+    },
+    {
+      "route": "/register/yield",
+      "theme": "night",
+      "passes": 27,
+      "violations": []
+    },
+    {
+      "route": "/agents/keel",
+      "theme": "night",
+      "passes": 29,
+      "violations": []
+    },
+    {
+      "route": "/agents/56/304493",
+      "theme": "night",
+      "passes": 24,
+      "violations": []
+    },
+    {
+      "route": "/quest",
+      "theme": "night",
+      "passes": 25,
+      "violations": []
+    },
+    {
+      "route": "/me",
+      "theme": "night",
+      "passes": 23,
+      "violations": []
+    },
+    {
+      "route": "/builders",
+      "theme": "night",
+      "passes": 24,
+      "violations": []
+    },
+    {
+      "route": "/docs",
+      "theme": "night",
+      "passes": 28,
+      "violations": []
+    },
+    {
+      "route": "/docs/faq",
+      "theme": "night",
+      "passes": 28,
+      "violations": []
+    },
+    {
+      "route": "/protocol",
+      "theme": "night",
+      "passes": 27,
+      "violations": []
+    },
+    {
+      "route": "/status",
+      "theme": "night",
+      "passes": 23,
+      "violations": []
+    },
+    {
+      "route": "/jobs/56/56820",
+      "theme": "night",
+      "passes": 28,
+      "violations": []
+    },
+    {
+      "route": "/",
+      "theme": "day",
+      "passes": 27,
+      "violations": [
+        {
+          "id": "definition-list",
+          "impact": "serious",
+          "nodes": 1,
+          "help": "<dl> elements must only directly contain properly-ordered <dt> and <dd> groups, <script>, <template> or <div> elements",
+          "targets": [
+            ".home_kpis___XapJ"
+          ]
+        }
+      ]
+    },
+    {
+      "route": "/register",
+      "theme": "day",
+      "passes": 27,
+      "violations": []
+    },
+    {
+      "route": "/register/yield",
+      "theme": "day",
+      "passes": 27,
+      "violations": []
+    },
+    {
+      "route": "/agents/keel",
+      "theme": "day",
+      "passes": 29,
+      "violations": []
+    },
+    {
+      "route": "/agents/56/304493",
+      "theme": "day",
+      "passes": 24,
+      "violations": []
+    },
+    {
+      "route": "/quest",
+      "theme": "day",
+      "passes": 25,
+      "violations": []
+    },
+    {
+      "route": "/me",
+      "theme": "day",
+      "passes": 23,
+      "violations": []
+    },
+    {
+      "route": "/builders",
+      "theme": "day",
+      "passes": 24,
+      "violations": []
+    },
+    {
+      "route": "/docs",
+      "theme": "day",
+      "passes": 28,
+      "violations": []
+    },
+    {
+      "route": "/docs/faq",
+      "theme": "day",
+      "passes": 28,
+      "violations": []
+    },
+    {
+      "route": "/protocol",
+      "theme": "day",
+      "passes": 27,
+      "violations": []
+    },
+    {
+      "route": "/status",
+      "theme": "day",
+      "passes": 23,
+      "violations": []
+    },
+    {
+      "route": "/jobs/56/56820",
+      "theme": "day",
+      "passes": 28,
+      "violations": []
+    }
+  ]
+}

@@ -170,8 +170,8 @@
 .kpis > div + div { padding-left: 22px; border-left: 1px solid var(--hair); }
 .kpis dt { font-size: var(--fs-label); font-weight: 500; letter-spacing: var(--tracking-eyebrow); text-transform: uppercase; color: var(--ink-3); }
 .kpiNum { margin: 0; font-size: clamp(38px, 4.2vw, 56px); font-weight: 300; line-height: 1; letter-spacing: -0.02em; color: var(--ink); font-variant-numeric: tabular-nums; }
-.kpis p { margin: 0; font-size: 13.5px; line-height: 1.5; color: var(--ink-2); max-width: 30ch; }
-.kpis p a { color: var(--ink); }
+.kpiNote { margin: 0; font-size: 13.5px; line-height: 1.5; color: var(--ink-2); max-width: 30ch; }
+.kpiNote a { color: var(--ink); }
 .kpiFoot { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: var(--s-5) 0 0; font-size: 13px; color: var(--ink-3); }
 .kpiFoot a { color: var(--ink-2); }
 
@@ -333,7 +333,7 @@
   .kpis > div:nth-child(odd) { padding-left: 0; border-left: 0; }
   .kpis > div:nth-child(n + 3) { border-top: 1px solid var(--hair); margin-top: 14px; }
   .kpiNum { font-size: 34px; }
-  .kpis p { font-size: 12.5px; }
+  .kpiNote { font-size: 12.5px; }
   .tileJob { min-height: 0; }
   .ctas :global(.btn) { flex: 1 1 100%; }
   .headNote { display: none; }

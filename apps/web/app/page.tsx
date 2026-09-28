@@ -112,10 +112,10 @@ export default async function Home() {
           <section className={styles.section} aria-labelledby="record" data-reveal>
             <Head label="The record so far" note="Measured by Marque · BSC mainnet" id="record" title="Measured, not claimed." />
             <dl className={styles.kpis}>
-              <div><dt>Registered on BNB Chain</dt><dd className={styles.kpiNum}>{fmt(line.registered)}</dd><p>ERC-8004 identities Marque has indexed. Registration says who, never how good.</p></div>
-              {line.answering !== null ? <div><dt>Answering a live call</dt><dd className={styles.kpiNum}>{fmt(line.answering)}</dd><p>Endpoints that answered Marque&apos;s own probe, timestamped.</p></div> : null}
-              <div><dt>Hireable right now</dt><dd className={styles.kpiNum}>{line.hireable}</dd><p>Signed a live quote payable into BNB Chain&apos;s escrow.</p></div>
-              {line.warranted !== null ? <div><dt>Warranted</dt><dd className={styles.kpiNum}>{line.warranted}</dd><p>Passed a published test with one right answer. <a href="/standard">The Standard</a></p></div> : null}
+              <div><dt>Registered on BNB Chain</dt><dd className={styles.kpiNum}>{fmt(line.registered)}</dd><dd className={styles.kpiNote}>ERC-8004 identities Marque has indexed. Registration says who, never how good.</dd></div>
+              {line.answering !== null ? <div><dt>Answering a live call</dt><dd className={styles.kpiNum}>{fmt(line.answering)}</dd><dd className={styles.kpiNote}>Endpoints that answered Marque&apos;s own probe, timestamped.</dd></div> : null}
+              <div><dt>Hireable right now</dt><dd className={styles.kpiNum}>{line.hireable}</dd><dd className={styles.kpiNote}>Signed a live quote payable into BNB Chain&apos;s escrow.</dd></div>
+              {line.warranted !== null ? <div><dt>Warranted</dt><dd className={styles.kpiNum}>{line.warranted}</dd><dd className={styles.kpiNote}>Passed a published test with one right answer. <a href="/standard">The Standard</a></dd></div> : null}
             </dl>
             <p className={styles.kpiFoot}><ProvenanceChip provenance="MEASURED" /> Counted from Marque&apos;s index, not quoted from a provider. <a href="/why">How we count</a></p>
           </section>
