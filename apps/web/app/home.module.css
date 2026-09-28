@@ -265,8 +265,11 @@
 
 /* ---------- Motion: quiet, informative, off under reduced motion ---------- */
 @media (prefers-reduced-motion: no-preference) {
-  .plateImg { animation: plate-in 1100ms var(--ease) both, plate-drift 46s ease-in-out 1100ms infinite alternate; will-change: transform; }
-  @keyframes plate-in { from { opacity: 0; transform: scale(1.04); } }
+  /* One transform animation per element: two on the same property is not
+     composited and costs a style pass every frame (measured, 27 Sep). */
+  .plate { animation: plate-in 1100ms var(--ease) both; }
+  @keyframes plate-in { from { opacity: 0; } }
+  .plateImg { animation: plate-drift 46s ease-in-out infinite alternate; will-change: transform; }
   @keyframes plate-drift { from { transform: scale(1) translate3d(0, 0, 0); } to { transform: scale(1.06) translate3d(-1.4%, -0.8%, 0); } }
   .line { animation: line-in 760ms var(--ease) both; }
   .line + .line { animation-delay: 80ms; }

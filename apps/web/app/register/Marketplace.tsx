@@ -270,7 +270,7 @@ export function Marketplace({ category: fixedCategory, initial }: { category?: s
               <strong>{total.toLocaleString()}</strong> {total === 1 ? 'agent' : 'agents'}
             </>
           )}
-          {ago && <span className={styles.utilityDot}> · Measured {ago}</span>}
+          {ago && <span className={styles.utilityDot} suppressHydrationWarning> · Measured {ago}</span>}
           <span className={styles.utilityDot}> · Operator-deduplicated</span>
         </p>
         <button

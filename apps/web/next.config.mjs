@@ -33,6 +33,10 @@ const nextConfig = {
     }
     return config
   },
+  // No CSS chunk merging: both of Next's modes merged the CSS modules of many
+  // routes into one 80+ KB render-blocking file on the home page (27 Sep measure).
+  // Each page now loads the CSS of its own chunks.
+  experimental: { cssChunking: false },
   poweredByHeader: false,
   eslint: { ignoreDuringBuilds: true },
   async headers() {

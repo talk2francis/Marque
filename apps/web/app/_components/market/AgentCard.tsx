@@ -75,7 +75,7 @@ export function AgentCard({ a, compare, base = '' }: {
               ? <span title={`Median time from payment into escrow to delivery, over ${a.track.delivery.samples} paid ${a.track.delivery.samples === 1 ? 'job' : 'jobs'} on BNB Chain.`}>delivers in {delivery}</span>
               : a.latencyMs !== null ? <span title="Round trip of Marque's latest probe. Not a paid job.">answers in {a.latencyMs} ms</span> : 'No paid jobs yet'}
           </span>
-          {priced ? <span className={`${styles.muted} ${styles.cellEnd}`}>priced {priced}</span> : null}
+          {priced ? <span className={`${styles.muted} ${styles.cellEnd}`} suppressHydrationWarning>priced {priced}</span> : null}
         </div>
       </div>
 
