@@ -1,13 +1,27 @@
-import { Statement } from '@marque/ui'
-import { SiteHeader, SiteFooter } from '../_components/SiteHeader'
-import { DocsShell } from './DocsShell'
+import { DocSection, DocShell } from './_ui/DocShell'
 import type { Article } from './articles'
 import styles from './docs.module.css'
-export function ArticleView({article}:{article:Article}) {
- return <><SiteHeader active="docs"/><main className={styles.docsLayout}>
- <header className={styles.pageHead}><span className={styles.kicker}>The documentation library</span><Statement as="h1" size="page">{article.title}</Statement><p className={styles.lede}>{article.description}</p></header>
- <DocsShell sections={article.sections.map(({id,title})=>({id,title}))}>{article.sections.map(s=><section id={s.id} key={s.id} className={styles.docSection}>
- <h2 className={styles.h2}>{s.title}</h2>{s.paragraphs.map((p,i)=><p key={i}>{p}</p>)}
- {s.links && <ul className={styles.list}>{s.links.map(l=><li key={l.href}><a href={l.href}>{l.label}</a></li>)}</ul>}
- </section>)}</DocsShell></main><SiteFooter/></>
+
+/** A library article (whitepaper, changelog, risks, terms, privacy) in the docs shell. */
+export function ArticleView({ slug, article }: { slug: string; article: Article }) {
+  return (
+    <DocShell
+      current={slug}
+      label={article.label}
+      title={article.title}
+      lede={article.description}
+      sections={article.sections.map(({ id, title }) => ({ id, label: title.replace(/^\d{1,2} \w+ \d{4} · /, '') }))}
+    >
+      {article.sections.map((s) => (
+        <DocSection key={s.id} id={s.id} title={s.title}>
+          {s.paragraphs.map((p, i) => <p key={i}>{p}</p>)}
+          {s.links?.length ? (
+            <ul className={styles.links}>
+              {s.links.map((l) => <li key={l.href}><a href={l.href} {...(l.href.startsWith('http') ? { target: '_blank', rel: 'noreferrer' } : {})}>{l.label}</a></li>)}
+            </ul>
+          ) : null}
+        </DocSection>
+      ))}
+    </DocShell>
+  )
 }
