@@ -44,8 +44,13 @@ export function Storefront({ d }: { d: Data }) {
   const hireable = c !== null && (c.state === 'hireable' || c.state === 'settleable')
   const net = NET[c?.chainId ?? 56] ?? 'BNB Smart Chain'
   const cat = d.category && d.category !== 'unclassified' ? CAT[d.category] ?? d.category : 'Unclassified'
-  const latest = d.tests[0] ?? null
-  const passed = d.tests.find((t) => t.pass) ?? null
+  // The badge and verdict read the agent's own category test: the conformance worker runs
+  // all four on a third party, and failing another category's test says nothing about it.
+  // Every result still lists in the table below.
+  const ownTest = d.category ? TEST[d.category] : undefined
+  const own = d.category && d.category !== 'unclassified' ? d.tests.filter((t) => t.testId === ownTest) : d.tests
+  const latest = own[0] ?? null
+  const passed = own.find((t) => t.pass) ?? null
   const answersFree = d.endpoint !== null || d.isReference || (d.lastProbe?.liveness === 'live' && d.services.some((x) => x.kind === 'a2a'))
   const t = d.track
   const delivery = secs(t.delivery.medianSeconds)

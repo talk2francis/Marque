@@ -207,17 +207,33 @@ async function queryAgents(): Promise<MarketRow[]> {
       -- Canonicalised once in a subquery: the helper binds its ids as parameters, so
       -- writing it in both DISTINCT ON and ORDER BY gives Postgres two different
       -- expressions and the query fails ("must match initial ORDER BY").
-      select distinct on (cid) cid as agent_id, test_id, pass, failed_fields, ran_at
+      -- One row per agent and test; the row shown is chosen below, preferring the test
+      -- for the agent's own category (the conformance worker runs all four on a third
+      -- party, and a grid agent failing the yield test says nothing about it).
+      select distinct on (cid, test_id) cid as agent_id, test_id, pass, failed_fields, ran_at
       from (
         select ${canonicalAgentIdSql(sql`agent_id`)} as cid, test_id, pass, failed_fields, ran_at
         from conformance_result where agent_id like '56:%' or agent_id like 'marque:%'
       ) cr
-      order by cid, (pass) desc, ran_at desc
+      order by cid, test_id, (pass) desc, ran_at desc
     ),
     cat as (
       select distinct on (agent_id) agent_id, category, confidence
       from agent_category
       order by agent_id, (category <> 'unclassified') desc, confidence desc, assigned_at desc
+    ),
+    conf_pick as (
+      -- Only agents with a result (hundreds, not the whole registry): a pass first, then the newest.
+      -- A classified agent is shown only its own category's test (security has none yet).
+      select distinct on (conf.agent_id) conf.*
+      from conf left join cat on cat.agent_id = conf.agent_id
+      where cat.category is null or cat.category = 'unclassified'
+         or conf.test_id = case cat.category when 'yield' then 'MCS-YIELD-1' when 'grid' then 'MCS-GRID-1'
+              when 'rebalancing' then 'MCS-REB-1' when 'health_factor' then 'MCS-HF-1' end
+      order by conf.agent_id,
+               (conf.test_id = case cat.category when 'yield' then 'MCS-YIELD-1' when 'grid' then 'MCS-GRID-1'
+                  when 'rebalancing' then 'MCS-REB-1' when 'health_factor' then 'MCS-HF-1' end) desc nulls last,
+               conf.pass desc, conf.ran_at desc
     ),
     qualifying as (
       select a.id, a.token_id, a.name, a.owner_address, a.supported_protocols,
@@ -231,7 +247,7 @@ async function queryAgents(): Promise<MarketRow[]> {
              cat.category
       from agent a
       left join svc s on s.agent_id = a.id
-      left join conf c on c.agent_id = a.id
+      left join conf_pick c on c.agent_id = a.id
       left join cat on cat.agent_id = a.id
       where a.chain_id = 56
         and (s.any_reachable or c.agent_id is not null)
