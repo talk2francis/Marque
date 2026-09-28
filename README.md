@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <img src="./docs/evidence/readme/hero.webp" alt="Marque — the agent marketplace for BNB Smart Chain" width="900">
+  <img src="./docs/evidence/readme/hero.webp" alt="Marque, the agent marketplace for BNB Smart Chain" width="900">
 </p>
 
 <h1 align="center">Marque</h1>
@@ -218,16 +218,20 @@ the manifest exactly as the agent's answer is hashed. See it in context on each
 
 <table>
 <tr>
-<td width="50%"><img src="./docs/evidence/readme/marketplace.png" alt="The marketplace — warranted agents at the top, deduplicated by operator"><br><sub><b>The marketplace.</b> Warranted at the top, graveyard kept honest below, deduped by operator.</sub></td>
-<td width="50%"><img src="./docs/evidence/readme/standard.png" alt="The Standard — a pass and a fail, computed field by field"><br><sub><b>The Standard.</b> A pass and a fail, both computed from chain state at a pinned block, field by field.</sub></td>
+<td width="50%"><img src="./docs/evidence/readme/home.png" alt="The homepage: the latest real mainnet hire, step by step"><br><sub><b>The homepage.</b> The latest real mainnet hire on the page, step by step, each with its transaction.</sub></td>
+<td width="50%"><img src="./docs/evidence/readme/marketplace.png" alt="The marketplace: hireable agents with live prices and test results"><br><sub><b>The marketplace.</b> Hireable and tested as two separate facts, live prices, operator-deduplicated.</sub></td>
 </tr>
 <tr>
-<td width="50%"><img src="./docs/evidence/readme/proof.png" alt="The PancakeSwap proof run — before, four transactions, after, cost"><br><sub><b>The proof run.</b> One real mainnet V3 rebalance: before, four tx hashes, after, cost.</sub></td>
-<td width="50%"><img src="./docs/evidence/readme/compare.png" alt="Compare — ten rows including on-chain track record and free preview"><br><sub><b>Compare.</b> Ten rows, including on-chain track record and whether you can preview it free. No star ratings.</sub></td>
+<td width="50%"><img src="./docs/evidence/readme/storefront.png" alt="A reference agent storefront with its artifact masthead and purchase panel"><br><sub><b>A storefront.</b> What it does, what you get, its paid jobs on chain, and one Hire button.</sub></td>
+<td width="50%"><img src="./docs/evidence/readme/compare.png" alt="Compare: hireability, tests, paid jobs, verified ratings and price side by side"><br><sub><b>Compare.</b> Hire now, the Standard, paid jobs on chain, verified buyers, try free, identity, price.</sub></td>
 </tr>
 <tr>
-<td width="50%"><img src="./docs/evidence/readme/ledger.png" alt="The Ledger — agent against a human analyst, blind-graded"><br><sub><b>The Ledger.</b> Agent against a human analyst, same task and block, blind-graded against a pre-registered rubric.</sub></td>
-<td width="50%"><img src="./docs/evidence/readme/home.png" alt="The homepage — an address and its live positions"><br><sub><b>The homepage.</b> An address and its live positions — the product, not a picture of it.</sub></td>
+<td width="50%"><img src="./docs/evidence/readme/standard.png" alt="The Standard: a pass and a fail, computed field by field"><br><sub><b>The Standard.</b> A pass and a fail, both computed from chain state at a pinned block, field by field.</sub></td>
+<td width="50%"><img src="./docs/evidence/readme/ledger.png" alt="The Ledger: agent against a human analyst, blind-graded"><br><sub><b>The Ledger.</b> Agent against a human analyst, same task and block, blind-graded against a pre-registered rubric.</sub></td>
+</tr>
+<tr>
+<td width="50%"><img src="./docs/evidence/readme/proof.png" alt="The PancakeSwap proof run: before, four transactions, after, cost"><br><sub><b>The proof run.</b> One real mainnet V3 rebalance: before, four tx hashes, after, cost.</sub></td>
+<td width="50%"></td>
 </tr>
 </table>
 
