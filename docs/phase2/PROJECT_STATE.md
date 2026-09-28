@@ -54,6 +54,15 @@ field, which raises the browser's own validation bubble).
 - Re-quote after an expired quote reused the old hire intent (useHire).
 - The `/_ui` component gallery (fixture rows) was publicly reachable; it now 404s
   in production unless `MARQUE_UI_GALLERY=1`.
+- Compare: its Hire button went to /app/charter (the testnet charter sandbox), not
+  the mainnet hire; its rows read Phase 1 receipts ("no receipted attempt yet" for an
+  agent with paid mainnet jobs) and showed "reachable" with a red dot. Rebuilt on
+  Phase 2 data: hireable with live quote, paid ERC-8183 jobs, verified buyers, Try
+  free; Hire opens the hire sheet (1b8d570).
+- Marketplace and storefront verdicts: the conformance worker runs all four MCS tests
+  on a third party and the page showed whichever failure sorted first, so grid and
+  rebalancing agents read "failed MCS-YIELD-1". A classified agent now shows only its
+  own category's test; the storefront table still lists every result (1cf1f4d).
 
 ### Matrix walk (A)
 
