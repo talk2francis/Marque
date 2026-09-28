@@ -1,81 +1,23 @@
 import Link from 'next/link'
-import { sql } from 'drizzle-orm'
-import { db } from '@marque/db'
-import { Statement, Chip, WarrantBadge, EmptyState, LinkButton, ProvenanceChip } from '@marque/ui'
+import { Statement, Chip, WarrantBadge, EmptyState, ProvenanceChip } from '@marque/ui'
 import { SiteHeader, SiteFooter } from '../_components/SiteHeader'
-import { ReferenceMark } from '../_components/ReferenceMark'
+import { Badge, Stars } from '../_components/ui'
 import { AgentAvatar } from '../_components/AgentAvatar'
 import { marketplaceAgents, type MarketRow } from '../../lib/marketplace'
 import { referenceAgent } from '../../lib/reference-agents'
 import { explorerAddress } from '../../lib/network'
+import { agoWords, answersFree, deliveryWords, hireBlocked, isHireable, profileHref } from '../register/market-model'
 import styles from './compare.module.css'
 
 export const dynamic = 'force-dynamic'
 export const metadata = {
   title: 'Compare agents',
   description:
-    'Agents side by side on the things that decide a hire: what it does, the protocols it declares, whether it is live, whether it passed the standard, its on-chain track record, whether you can preview it free, its identity, and what it costs.',
+    'Agents side by side on the things that decide a hire: what it does, whether you can hire it now, whether it passed the standard, its paid jobs on chain, verified ratings, whether you can try it free, its identity, and what it costs.',
 }
 
 const CATEGORY_LABEL: Record<string, string> = {
   rebalancing: 'Rebalancing', grid: 'Grid', yield: 'Yield', health_factor: 'Health factor', security: 'Security',
-}
-
-interface TrackRecord {
-  receipts: number
-  anchored: number
-  sealed: number
-  lastRunAt: string | null
-}
-
-/**
- * The evidence record for a set of agents: receipted attempts, how many of
- * those receipts are anchored, sealed recommendations, and the last run. This
- * is the honest analogue of a star rating — a count of things that happened on
- * chain, not an average of opinions.
- */
-async function trackRecords(ids: string[]): Promise<Map<string, TrackRecord>> {
-  const out = new Map<string, TrackRecord>()
-  if (ids.length === 0) return out
-  try {
-    const r = await db().execute(sql`
-      with r as (
-        select agent_id,
-               count(*)::int as receipts,
-               count(anchor_tx_hash)::int as anchored,
-               max(issued_at) as last_receipt
-        from receipt where agent_id = any(${ids}) group by agent_id
-      ),
-      s as (
-        select agent_id, count(*)::int as sealed, max(issued_at) as last_seal
-        from sealed_call where agent_id = any(${ids}) group by agent_id
-      ),
-      ru as (
-        select agent_id, max(started_at) as last_run
-        from run where agent_id = any(${ids}) group by agent_id
-      )
-      select coalesce(r.agent_id, s.agent_id, ru.agent_id) as agent_id,
-             coalesce(r.receipts, 0) as receipts,
-             coalesce(r.anchored, 0) as anchored,
-             coalesce(s.sealed, 0) as sealed,
-             greatest(r.last_receipt, s.last_seal, ru.last_run) as last_run_at
-      from r
-      full outer join s on s.agent_id = r.agent_id
-      full outer join ru on ru.agent_id = coalesce(r.agent_id, s.agent_id)
-    `)
-    const rows = ((r as { rows?: unknown[] }).rows ?? (r as unknown[])) as Array<Record<string, unknown>>
-    for (const row of rows) {
-      out.set(String(row['agent_id']), {
-        receipts: Number(row['receipts'] ?? 0),
-        anchored: Number(row['anchored'] ?? 0),
-        sealed: Number(row['sealed'] ?? 0),
-        lastRunAt: row['last_run_at'] ? new Date(String(row['last_run_at'])).toISOString().slice(0, 10) : null,
-      })
-    }
-  } catch {
-    /* empty map — the row renders an honest "no receipted attempt yet" */
-  }
-  return out
 }
 
 function IdentityCell({ a }: { a: MarketRow }) {
@@ -119,7 +61,6 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
 
   const { rows } = await marketplaceAgents({ limit: 300 }).catch(() => ({ rows: [] as MarketRow[] }))
   const chosen = ids.map((id) => rows.find((r) => r.agentId === id)).filter((r): r is MarketRow => Boolean(r))
-  const records = await trackRecords(chosen.map((a) => a.agentId))
 
   return (
     <>
@@ -128,10 +69,9 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
         <header className={styles.head}>
           <Statement as="h1">Compare</Statement>
           <p className={styles.lede}>
-            The same questions for each, in the order they decide a hire — capability, liveness,
-            whether it passed the standard, what it has actually done on chain, whether you can try
-            it for free, who it is, and price. No star ratings: a track record here is a count of
-            things that happened, not an average of opinions.
+            The same questions for each, in the order they decide a hire: what it does, whether you
+            can hire it now, whether it passed the standard, what it has done on chain, whether you
+            can try it free, who it is, and what it costs. Ratings count only verified buyers.
           </p>
         </header>
 
@@ -145,13 +85,8 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
             {chosen.map((a) => (
               <div key={a.agentId} className={styles.colHead}>
                 <AgentAvatar id={a.agentId} category={a.category} reference={a.isReference} size={44} />
-                <Link
-                  href={a.isReference ? `/agents/${a.tokenId}` : (a.tokenId && /^\d+$/.test(a.tokenId) ? `/agents/56/${a.tokenId}` : '/register')}
-                  className={styles.colName}
-                >
-                  {a.name}
-                </Link>
-                {a.isReference && <ReferenceMark compact />}
+                <Link href={profileHref(a) ?? '/register'} className={styles.colName}>{a.name}</Link>
+                {a.isReference ? <a href="/register#reference-agents" className={styles.refLink}><Badge kind="reference" /></a> : null}
               </div>
             ))}
 
@@ -159,7 +94,7 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
             {chosen.map((a) => (
               <div key={a.agentId} className={styles.cell}>
                 {a.category ? <Chip>{CATEGORY_LABEL[a.category] ?? a.category}</Chip> : <span className={styles.muted}>uncategorised</span>}
-                <div className={styles.muted}>{a.interfaces.join(' · ') || '—'}</div>
+                {a.interfaces.length ? <div className={styles.muted}>{a.interfaces.join(' · ')}</div> : null}
               </div>
             ))}
 
@@ -172,11 +107,12 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
               </div>
             ))}
 
-            <div className={styles.rowLabel}>Is it live</div>
+            <div className={styles.rowLabel}>Can you hire it now</div>
             {chosen.map((a) => (
               <div key={a.agentId} className={styles.cell}>
-                <span className={`${styles.dot} ${a.liveness === 'live' ? styles.dotLive : styles.dotDown}`} />
-                {a.liveness === 'live' ? (a.latencyMs != null ? `${a.latencyMs} ms` : 'live') : (a.liveness ?? 'not probed')}
+                {isHireable(a)
+                  ? <><Badge kind="hireable" /><span className={styles.muted}>{a.commerce.quotedAt ? `live quote ${agoWords(a.commerce.quotedAt)}` : 'live quote'}</span></>
+                  : <span className={styles.muted}>{hireBlocked(a)}</span>}
               </div>
             ))}
 
@@ -192,34 +128,36 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
               </div>
             ))}
 
-            <div className={styles.rowLabel}>Track record (on chain)</div>
+            <div className={styles.rowLabel}>Paid jobs (on chain)</div>
             {chosen.map((a) => {
-              const t = records.get(a.agentId)
-              const has = t && (t.receipts > 0 || t.sealed > 0)
+              const j = a.track.jobs
+              const d = deliveryWords(a.track.delivery.medianSeconds)
               return (
                 <div key={a.agentId} className={styles.cell}>
-                  {has ? (
+                  {j.funded > 0 ? (
                     <>
-                      <span>
-                        {t!.receipts} receipted attempt{t!.receipts === 1 ? '' : 's'}
-                        {t!.anchored > 0 && <span className={styles.muted}> · {t!.anchored} anchored</span>}
-                      </span>
-                      {t!.sealed > 0 && <span className={styles.muted}>{t!.sealed} sealed recommendation{t!.sealed === 1 ? '' : 's'}</span>}
-                      {t!.lastRunAt && <span className={styles.muted}>last {t!.lastRunAt}</span>}
+                      <span>{j.funded} paid · {j.delivered} delivered{j.refunded ? ` · ${j.refunded} refunded` : ''}{j.disputed ? ` · ${j.disputed} disputed` : ''} <ProvenanceChip provenance="ONCHAIN" /></span>
+                      {d ? <span className={styles.muted}>delivers in {d} (median)</span> : null}
+                      {j.fromTeam ? <span className={styles.muted}>{j.fromTeam} from Marque team wallets</span> : null}
                     </>
-                  ) : (
-                    <span className={styles.muted}>no receipted attempt yet</span>
-                  )}
+                  ) : <span className={styles.muted}>No paid jobs yet</span>}
                 </div>
               )
             })}
 
-            <div className={styles.rowLabel}>Free preview</div>
+            <div className={styles.rowLabel}>Verified buyers</div>
             {chosen.map((a) => (
               <div key={a.agentId} className={styles.cell}>
-                {a.previewable
-                  ? <span>Yes — dry-run against a real position before you pay</span>
-                  : <span className={styles.muted}>not available</span>}
+                <Stars value={a.track.verified.averageStars} count={a.track.verified.count} label="verified" />
+              </div>
+            ))}
+
+            <div className={styles.rowLabel}>Try it free</div>
+            {chosen.map((a) => (
+              <div key={a.agentId} className={styles.cell}>
+                {answersFree(a) && profileHref(a)
+                  ? <><span>Yes: it runs your task at its own endpoint before you pay</span><a className="btn btn--sm" href={`${profileHref(a)}?hire=${encodeURIComponent(a.agentId)}&try=1`}>Try free</a></>
+                  : <span className={styles.muted}>Not available</span>}
               </div>
             ))}
 
@@ -238,19 +176,19 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
             <div className={styles.rowLabel}>Hire</div>
             {chosen.map((a) => (
               <div key={a.agentId} className={styles.cell}>
-                {a.hireBlockedReason
-                  ? <span className={styles.muted}>{a.hireBlockedReason}</span>
-                  : <LinkButton size="sm" variant="primary" href={`/app/charter?agent=${encodeURIComponent(a.agentId)}${a.category ? `&category=${a.category}` : ''}`}>Hire</LinkButton>}
+                {isHireable(a) && profileHref(a)
+                  ? <a className="btn btn--sm btn--primary" href={`${profileHref(a)}?hire=${encodeURIComponent(a.agentId)}`}>Hire {a.name.length <= 18 ? a.name : 'this agent'}</a>
+                  : <span className={styles.muted}>{hireBlocked(a)}</span>}
               </div>
             ))}
           </div>
         )}
 
         <p className={styles.note}>
-          <ProvenanceChip provenance="MEASURED" /> Liveness, latency and track record are our own
-          records. A warrant is a pass on the published MCS case; a failure names the field.
-          A <ProvenanceChip provenance="CLAIMED" /> price is taken from the agent&apos;s own
-          metadata and not verified.
+          <ProvenanceChip provenance="ONCHAIN" /> Paid jobs and ratings are read from BNB Chain&apos;s
+          escrow and reputation contracts. <ProvenanceChip provenance="MEASURED" /> A live quote is one
+          the agent signed for Marque. A warrant is a pass on the published MCS case; a failure names the
+          field. A <ProvenanceChip provenance="CLAIMED" /> price is the one the agent declares.
         </p>
       </main>
       <SiteFooter />
