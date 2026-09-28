@@ -47,11 +47,11 @@
     --oxide: #D2694C;
     --chain: #8FB0D3;
 
-    /* The feature band (How a hire is made): deep bottle green, dark in both themes. */
-    --forest: #101A17;
-    --on-forest: #E9ECE6;
-    --on-forest-2: #A9B4AC;
-    --on-forest-hair: rgba(233, 236, 230, 0.14);
+    /* The feature band (How a hire is made): a soft sage-graphite, never a deep green (28 Sep). */
+    --forest: #1E2925;
+    --on-forest: #EDF0EA;
+    --on-forest-2: #B3BEB6;
+    --on-forest-hair: rgba(237, 240, 234, 0.14);
 
     /* Category materials, from the six reference agents' artifacts. Identity only:
        a small mark beside a category name, never a state and never a field. */
@@ -99,6 +99,12 @@
     --amber: #8F5A14;
     --oxide: #A5402A;
     --chain: #2B5A85;
+
+    /* Day: the band turns to a pale sage, the same object in daylight. */
+    --forest: #E1E8E1;
+    --on-forest: #1A2320;
+    --on-forest-2: #4C5A53;
+    --on-forest-hair: rgba(26, 35, 32, 0.13);
 
     --cat-health: #5C6873;
     --cat-grid: #3D6C8C;
