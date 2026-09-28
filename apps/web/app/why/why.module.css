@@ -236,11 +236,11 @@
 /* Swap by theme, not by prefers-color-scheme, so it follows the toggle and the
    dark default. */
 .bandDark { display: none; }
-:root[data-theme='dark'] .bandLight { display: none; }
-:root[data-theme='dark'] .bandDark { display: block; filter: brightness(0.92); }
+:root[data-theme='night'] .bandLight { display: none; }
+:root[data-theme='night'] .bandDark { display: block; filter: brightness(0.92); }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) .bandLight { display: none; }
-  :root:not([data-theme='light']) .bandDark { display: block; filter: brightness(0.92); }
+  :root:not([data-theme='day']) .bandLight { display: none; }
+  :root:not([data-theme='day']) .bandDark { display: block; filter: brightness(0.92); }
 }
 .band::after {
   content: '';

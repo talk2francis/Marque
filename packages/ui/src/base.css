@@ -51,20 +51,11 @@
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
   }
-  /* A whisper of grain so large flat grounds have tooth. Fixed, non-interactive. */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    z-index: 2147483000;
-    pointer-events: none;
-    opacity: var(--grain-opacity);
-    mix-blend-mode: var(--grain-blend);
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  }
+  /* No full-screen grain layer: a fixed blended overlay repaints on every scroll
+     frame on phones for a texture nobody could see (27 Sep performance pass). */
   [data-surface] { color: var(--ink); color-scheme: dark; }
 
-  ::selection { background: color-mix(in srgb, var(--moss) 35%, transparent); color: var(--ink); }
+  ::selection { background: color-mix(in srgb, var(--accent) 32%, transparent); color: var(--ink); }
 
   a { color: inherit; }
   :focus-visible {

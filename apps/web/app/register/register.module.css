@@ -31,7 +31,7 @@ a.introBack {
   transition: color var(--dur-fast) var(--ease);
 }
 a.introBack:hover { color: var(--fg); }
-.introTitle { font-family:var(--font-serif); font-weight:400; font-size: clamp(34px, 4vw, 52px); line-height: 1.08; max-width: 22ch; }
+.introTitle { font-family: var(--font-sans); font-weight: 500; font-size: clamp(34px, 4vw, 48px); line-height: 1.05; letter-spacing: -0.03em; max-width: 22ch; }
 .introLede {
   margin: 0; max-width: 62ch; color: var(--fg-soft);
   font-size: var(--size-body); line-height: 1.55;
@@ -39,31 +39,21 @@ a.introBack:hover { color: var(--fg); }
 .introSupply { margin: var(--s1) 0 0; display: flex; align-items: center; gap: var(--s2); flex-wrap: wrap; }
 .introSupplyNote { font-size: var(--size-caption); color: var(--fg-faint); max-width: 60ch; }
 
-/* The brand arch, cropped to a companion rather than a barrier. Decoration
-   never delays inventory, so it is the first thing dropped when space is short. */
+/* The brand arch as a quiet plate behind the intro's right side, faded into the
+   canvas by an alpha mask. A background, so only the active theme's file loads. */
+.intro { isolation: isolate; min-height: 150px; }
 .introArt {
-  width: clamp(180px, 22vw, 300px);
-  height: 104px;
-  border-radius: var(--r-md);
-  overflow: hidden;
-  border: 1px solid var(--line);
-  position: relative;
-  flex: none;
+  position: absolute; z-index: -1; top: -48px; bottom: -8px;
+  right: calc(-1 * var(--s5)); width: min(56%, 720px);
+  background: center 42% / cover no-repeat url('/brand/plate-night-1100.webp');
+  opacity: 0.8;
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 45%), linear-gradient(to top, transparent 0, #000 40%), linear-gradient(to bottom, transparent 0, #000 25%);
+  -webkit-mask-composite: source-in, source-in;
+  mask-image: linear-gradient(to right, transparent 0, #000 45%), linear-gradient(to top, transparent 0, #000 40%), linear-gradient(to bottom, transparent 0, #000 25%);
+  mask-composite: intersect;
+  pointer-events: none;
 }
-.introArt img { width: 100%; height: 100%; object-fit: cover; object-position: center 38%; display: block; }
-.introArt::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(90deg, var(--ground) 0%, color-mix(in srgb, var(--ground) 30%, transparent) 42%, transparent 100%);
-}
-.artDark { display: none; }
-:root[data-theme='dark'] .artLight { display: none; }
-:root[data-theme='dark'] .artDark { display: block; }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) .artLight { display: none; }
-  :root:not([data-theme='light']) .artDark { display: block; }
-}
+:global([data-theme='day']) .introArt { background-image: url('/brand/plate-day-1100.webp'); opacity: 0.9; }
 @media (max-width: 1100px) {
   .intro { grid-template-columns: minmax(0, 1fr); }
   .introArt { display: none; }
@@ -566,7 +556,7 @@ a.introBack:hover { color: var(--fg); }
   transition: background-color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease);
 }
 .compare[aria-checked='true'] { color: var(--fg); }
-.compare[aria-checked='true'] .compareBox { background: var(--brass-mark); border-color: var(--brass-mark); color: var(--paper); }
+.compare[aria-checked='true'] .compareBox { background: var(--ink); border-color: var(--ink); color: var(--ink-inverse); }
 /* The word is for the card and the phone; the list keeps the column to a box. */
 .compareText { display: none; }
 

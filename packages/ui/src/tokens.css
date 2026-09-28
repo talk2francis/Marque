@@ -12,103 +12,130 @@
  */
 
 @layer tokens {
-  /* ---- NIGHT (default) and the palette every Chamber starts from -------- */
+  /* ---- NIGHT (default) and the palette every Chamber starts from --------
+     Graphite and porcelain, lit by one warm edge (the brand art: concrete,
+     daylight through the arch, a sliver of champagne light). No tinted
+     ground: the ground is neutral so the agents' mineral tones and the state
+     colours read as themselves. 27 Sep refresh, DESIGN-SYSTEM.md section 3. */
   :root,
   [data-theme='night'],
   [data-surface] {
-    --canvas: #0B0E0B;
-    --canvas-2: #10150F;
-    --panel: #141B13;
-    --panel-2: #1A2318;
-    --sunk: #0A0B07;
-    --hair: rgba(236, 232, 222, 0.09);
-    --hair-2: rgba(236, 232, 222, 0.17);
-    --scrim: rgba(14, 15, 11, 0.74);
+    --canvas: #0E0E0D;
+    --canvas-2: #121211;
+    --panel: #161615;
+    --panel-2: #1D1D1B;
+    --sunk: #0A0A09;
+    --hair: rgba(238, 235, 228, 0.08);
+    --hair-2: rgba(238, 235, 228, 0.16);
+    --scrim: rgba(10, 10, 9, 0.74);
 
-    --ink: #ECE8DE;
-    --ink-2: #B8B3A6;
-    --ink-3: #8C8779;
-    --ink-inverse: #0E0F0B;
+    --ink: #EEEBE4;
+    --ink-2: #B7B3AA;
+    --ink-3: #8C8880;
+    --ink-inverse: #0E0E0D;
 
-    --accent: #A8C995;
+    /* The warm edge: brand accent, the Warrant, the current page. Never a field colour. */
+    --accent: #D6C29A;
     --brass: var(--accent);
-    --brass-lit: #BED9AD;
-    --brass-mark: #8DB477;
-    --brass-dim: #425A37;
-    --moss: #8FA35E;
-    --moss-dim: #56633A;
+    --brass-lit: #E6D6B4;
+    --brass-mark: #C4AC7C;
+    --brass-dim: #3D3628;
+    /* State: live, hireable, done. */
+    --moss: #86B596;
+    --moss-dim: #3E5646;
     --amber: #D9963A;
     --oxide: #D2694C;
-    --chain: #7FA3C8;
+    --chain: #8FB0D3;
 
-    --grid-line: rgba(236, 232, 222, 0.045);
-    --cross: rgba(236, 232, 222, 0.28);
+    /* The feature band (How a hire is made): deep bottle green, dark in both themes. */
+    --forest: #101A17;
+    --on-forest: #E9ECE6;
+    --on-forest-2: #A9B4AC;
+    --on-forest-hair: rgba(233, 236, 230, 0.14);
+
+    /* Category materials, from the six reference agents' artifacts. Identity only:
+       a small mark beside a category name, never a state and never a field. */
+    --cat-health: #AEB8C2;       /* Keel: steel */
+    --cat-grid: #9DC0D8;         /* Lattice: ice */
+    --cat-rebalancing: #D3BD92;  /* Bound: champagne */
+    --cat-yield: #93C2AC;        /* Sluicegate: verdigris */
+    --cat-security: #C98585;     /* Redcell: garnet */
+
+    --grid-line: rgba(238, 235, 228, 0.045);
+    --cross: rgba(238, 235, 228, 0.26);
 
     --shadow-ink: 0, 0, 0;
     --shadow-a: 0.5;
-    --glow: rgba(141, 180, 119, 0.04);
+    --glow: rgba(214, 194, 154, 0.05);
     --on-media: #FFFFFF;
-    --grain-opacity: 0.035;
-    --grain-blend: overlay;
 
     color-scheme: dark;
   }
 
-  /* ---- DAY ------------------------------------------------------------ */
+  /* ---- DAY: porcelain, the same ivory as the agents' skies ---------------- */
   [data-theme='day'] {
-    --canvas: #F2EFE7;
-    --canvas-2: #EAE6DB;
-    --panel: #F8F6F0;
-    --panel-2: #FCFBF7;
-    --sunk: #E6E1D5;
-    --hair: rgba(20, 20, 16, 0.10);
-    --hair-2: rgba(20, 20, 16, 0.18);
-    --scrim: rgba(242, 239, 231, 0.8);
+    --canvas: #F3F0EA;
+    --canvas-2: #ECE8E0;
+    --panel: #F9F7F3;
+    --panel-2: #FDFCFA;
+    --sunk: #E8E3DA;
+    --hair: rgba(26, 25, 22, 0.10);
+    --hair-2: rgba(26, 25, 22, 0.18);
+    --scrim: rgba(243, 240, 234, 0.8);
 
-    --ink: #17170F;
-    --ink-2: #4A4740;
-    --ink-3: #6B675E;
-    --ink-inverse: #F2EFE7;
+    --ink: #1A1916;
+    --ink-2: #4B4841;
+    --ink-3: #6A665E;
+    --ink-inverse: #F3F0EA;
 
-    /* Spec #8A6A22 measured 4.39:1 on the Day canvas (axe, P2-07): deepened to clear AA (D2-07-01).
-       Hover goes darker on Day, lighter on Night, so it always gains contrast. */
-    --accent: #365D2C;
+    /* Bronze: the warm edge at AA on porcelain. Hover goes darker. */
+    --accent: #7A6135;
     --brass: var(--accent);
-    --brass-lit: #284821;
-    --brass-mark: #527747;
-    --brass-dim: #D5E1CB;
-    --moss: #4E6128;
-    --moss-dim: #A9B48C;
+    --brass-lit: #5E4A27;
+    --brass-mark: #A88A52;
+    --brass-dim: #E6DCC8;
+    --moss: #2F6A47;
+    --moss-dim: #B9D0C0;
     --amber: #8F5A14;
     --oxide: #A5402A;
     --chain: #2B5A85;
 
-    --grid-line: rgba(20, 20, 16, 0.05);
-    --cross: rgba(20, 20, 16, 0.3);
+    --cat-health: #5C6873;
+    --cat-grid: #3D6C8C;
+    --cat-rebalancing: #87683A;
+    --cat-yield: #3E7A62;
+    --cat-security: #9A4545;
 
-    --shadow-ink: 40, 34, 20;
-    --shadow-a: 0.16;
-    --glow: rgba(82, 119, 71, 0.025);
-    --grain-opacity: 0.012;
-    --grain-blend: multiply;
+    --grid-line: rgba(26, 25, 22, 0.05);
+    --cross: rgba(26, 25, 22, 0.28);
+
+    --shadow-ink: 40, 34, 24;
+    --shadow-a: 0.14;
+    --glow: rgba(168, 138, 82, 0.05);
 
     color-scheme: light;
   }
 
-  /* ---- CHAMBER: deep ground, brass hairline, in both themes ------------ */
+  /* ---- CHAMBER: deep graphite, a champagne hairline, in both themes ------ */
   [data-surface='chamber'],
   [data-surface='cockpit'] {
-    --canvas: #0A0B07;
-    --canvas-2: #0E0F0A;
-    --panel: #12140E;
-    --panel-2: #1B1E15;
-    --sunk: #070805;
-    --ink: #E8E9E0;
-    --ink-2: #B0B4A1;
-    --ink-3: #8A8E7C;
-    --hair: rgba(141, 180, 119, 0.16);
-    --hair-2: rgba(141, 180, 119, 0.32);
-    --glow: rgba(141, 180, 119, 0.06);
+    --canvas: #0B0B0A;
+    --canvas-2: #0F0F0E;
+    --panel: #141413;
+    --panel-2: #1B1B19;
+    --sunk: #080807;
+    --ink: #EEEBE4;
+    --ink-2: #B7B3AA;
+    --ink-3: #8C8880;
+    --ink-inverse: #0E0E0D;
+    --hair: rgba(214, 194, 154, 0.14);
+    --hair-2: rgba(214, 194, 154, 0.28);
+    --accent: #D6C29A;
+    --brass: var(--accent);
+    --brass-lit: #E6D6B4;
+    --moss: #86B596;
+    --chain: #8FB0D3;
+    --glow: rgba(214, 194, 154, 0.06);
   }
 
   /* ---- Scale: identical in every theme and surface --------------------- */
@@ -143,7 +170,7 @@
   /* ---- Derived and legacy names, re-resolved wherever the palette changes */
   :root,
   [data-surface] {
-    --focus: var(--moss);
+    --focus: var(--accent);
     --backdrop:
       radial-gradient(90% 55% at 80% -10%, var(--glow), transparent 62%),
       linear-gradient(180deg, var(--canvas-2) 0%, var(--canvas) 36rem);
@@ -153,7 +180,7 @@
               0 16px 40px -14px rgba(var(--shadow-ink), var(--shadow-a));
     --elev-3: 0 10px 30px -10px rgba(var(--shadow-ink), var(--shadow-a)),
               0 50px 90px -30px rgba(var(--shadow-ink), calc(var(--shadow-a) * 1.3));
-    --ring: 0 0 0 3px color-mix(in srgb, var(--moss) 28%, transparent);
+    --ring: 0 0 0 3px color-mix(in srgb, var(--accent) 26%, transparent);
     --brass-tint: color-mix(in srgb, var(--brass-mark) 12%, transparent);
     --dotgrid: color-mix(in srgb, var(--ink) 5%, transparent);
 
@@ -177,12 +204,12 @@
     --ink-soft: var(--ink-2);
     --paper: var(--ink-inverse);
     --paper-raised: var(--ink-inverse);
-    --night: #0A0B07;
-    --night-ink-soft: #B0B4A1;
-    --deck: #12140E;
-    --deck-raised: #1B1E15;
-    --deck-ink: #E8E9E0;
-    --deck-rule: rgba(141, 180, 119, 0.16);
+    --night: #0B0B0A;
+    --night-ink-soft: #B7B3AA;
+    --deck: #141413;
+    --deck-raised: #1B1B19;
+    --deck-ink: #EEEBE4;
+    --deck-rule: rgba(214, 194, 154, 0.14);
 
     --font-ui: var(--font-sans);
     --font-statement: var(--font-serif);

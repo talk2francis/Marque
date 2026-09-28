@@ -7,14 +7,19 @@ import { NavGlyph } from './icons'
 /**
  * The desktop nav: five links and the Proof menu in one hairline capsule. A
  * soft highlight glides to whichever entry the pointer is on; the current page
- * carries a brass dot.
+ * carries an accent dot.
  */
 export function NavLinks({ active }: { active?: Active }) {
   const wrap = useRef<HTMLElement>(null)
   const [hi, setHi] = useState<{ x: number; w: number } | null>(null)
+  // Measured against the capsule, not offsetLeft: a menu button sits inside its own
+  // positioned wrapper, so its offsetLeft is 0 and the highlight used to jump back
+  // to the first link.
   const track = (el: HTMLElement | null) => {
     if (!el || !wrap.current) return
-    setHi({ x: el.offsetLeft, w: el.offsetWidth })
+    const box = wrap.current.getBoundingClientRect()
+    const r = el.getBoundingClientRect()
+    setHi({ x: r.left - box.left - wrap.current.clientLeft, w: r.width })
   }
   return (
     <nav ref={wrap} className="nav-capsule" aria-label="Main" onPointerLeave={() => setHi(null)}>

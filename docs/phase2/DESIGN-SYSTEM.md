@@ -320,18 +320,69 @@ Zero horizontal page scroll anywhere. Long hashes truncate in the middle with co
 ## 12. Accessibility
 
 AA contrast, visible focus (moss ring), full keyboard path through the hire sheet, tx status in `aria-live`, state never by colour alone (icon + word), charts with text equivalents, reduced motion honoured, touch targets 44 px.
-# 27 September refinement: green actions and a reading library
+## 13. 28 September refresh: graphite and porcelain, and the reference-agent identities
 
-The owner requested this direction after P2-11. It supersedes older brass-only
-branding guidance for the refreshed interface. Shared tokens use sage action
-accent #A8C995 on Night and forest #365D2C on Day, with theme-specific hover
-colors. Legacy --brass variables alias this action palette to avoid fragmented
-page colors. Amber warnings and oxide errors keep their semantic meaning; green
-branding alone must not be interpreted as a passed test.
+Supersedes the 27 September "green actions" note (sage accent and green-tinted
+grounds, withdrawn at the owner's request) and, for colour, section 3's brass
+action rule. Tokens live in `packages/ui/src/tokens.css`; this is the summary.
 
-Retain General Sans for interface copy, Instrument Serif for editorial headings
-and IBM Plex Mono for data. Docs use a normal document scroll, 680px reading
-column, sticky library and contents rail, real anchor links, and a stacked
-mobile layout. Do not hide the article sections behind imperative tabs or put
-the body inside a second scrolling viewport. The home evidence panel contains
-a real indexed job, never an illustrative success counter.
+**Palette.** Night is neutral graphite (`--canvas #0E0E0D`, panels `#161615` and
+`#1D1D1B`) with porcelain ink (`#EEEBE4`). Day is the ivory of the agents' skies
+(`--canvas #F3F0EA`) with warm near-black ink. No ground is tinted. One warm
+edge, `--accent` (champagne `#D6C29A` on Night, bronze `#7A6135` on Day), marks the
+brand: the current page, focus, the hero's italic line, the Warrant, stars. It is
+never a field colour. Primary buttons are the ink itself (porcelain on Night,
+graphite on Day); Hire in a list is an ink outline that fills on hover.
+
+**One band.** `--forest #101A17` is the only field of colour: the home page's
+"How a hire is made" band, dark in both themes.
+
+**State colours keep their meaning** and nothing else may borrow them: moss
+(hireable, live, done), amber (waiting, stale), oxide (failed), chain (explorer
+links).
+
+**Category materials.** `--cat-health` steel, `--cat-grid` ice,
+`--cat-rebalancing` champagne, `--cat-yield` verdigris, `--cat-security` garnet,
+taken from the reference agents' artifacts. Identity only: a small mark beside a
+category name. Never a state, never a field.
+
+**Reference-agent identity.** Six agents, two layers each. The avatar is the
+operative (the "who"); the hero is the instrument (the "what").
+- First-party only. `lib/agent-brand.ts` is the one manifest (slug, avatar,
+  hero, heroPosition, tone), resolved through `reference-agents.ts` by `marque:*`
+  id, slug or canonical ERC-8004 id, never by display name. A third party never
+  resolves, so it keeps its registry image, then the generated emblem.
+- `AgentAvatar` precedence (`lib/avatar-source.ts`): reference portrait, else
+  registry image, else emblem. Rounded square, 8 px at 40, 14 px at 88 and up,
+  a hairline drawn inside. Never a circle.
+- Portraits go everywhere an agent is named (cards, panel, hire sheet, job
+  room, compare). The hero is used once: the storefront masthead
+  (`AgentBrandHero`), in the main column beside the sticky purchase panel. Three
+  layers of the same image: sharp artifact, a blurred echo for ambience, an
+  alpha mask so there is no edge. Night dims the art (brightness 0.6); Day shows
+  it near source. The portrait overlaps the stage's lower edge. Name, network and
+  state stay as text below the art. No hero on cards, the home page or any
+  money surface.
+- Masters: `brand-assets/agents-brand/avatars_and_hero_banners/` (never edited).
+  Web copies: `node scripts/prepare-brand-assets.mjs` writes
+  `apps/web/public/brand/agents/<slug>/{avatar,avatar-160,hero,hero-900}.webp`
+  (3 to 49 KB each). Cards load the 160 px portrait only.
+
+**Home plate.** The two hero concepts with the lockup and captions painted out,
+kept as masters in `brand-assets/web-plates/`, served as CSS backgrounds so only
+the active theme's file is fetched.
+
+**Motion.** Quiet and informative, all off under reduced motion: the plate
+drifts over 46 s, light travels down three construction lines, the latest-hire
+card ticks its steps once, the band's layers light in turn, sections settle in
+once. No hover lifts, no parallax, no glow.
+
+**Performance.** No full-screen grain layer. The wallet stack (wagmi, viem,
+RainbowKit) is not in the root layout: it wraps /quest, /me, /builders and
+/jobs, and elsewhere loads as an island (header Connect, quest bar, hire sheet)
+on intent or idle.
+
+**Docs.** One shell for the library (`app/docs/_ui/DocShell.tsx`): page head
+with label, sans title, lede and actions; a sticky rail with a scroll-spy
+contents list and the library; one reading column in the normal scroll. The
+FAQ is searchable, grouped and numbered, answers in native `<details>`.

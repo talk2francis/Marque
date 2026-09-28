@@ -13,7 +13,7 @@
 }
 .card:hover { border-color: var(--hair-2); }
 .card[data-hireable] { border-top-color: color-mix(in srgb, var(--moss) 42%, var(--hair)); }
-.card[data-picked] { border-color: color-mix(in srgb, var(--brass) 60%, transparent); }
+.card[data-picked] { border-color: color-mix(in srgb, var(--ink) 45%, transparent); }
 
 .head { display: flex; align-items: flex-start; gap: 12px; min-width: 0; }
 .title { display: flex; flex-direction: column; gap: 4px; min-width: 0; flex: 1; }
@@ -49,7 +49,7 @@
 .compare input { position: absolute; opacity: 0; width: 1px; height: 1px; }
 .compareBox { display: grid; place-items: center; width: 18px; height: 18px; border: 1px solid var(--hair-2); border-radius: 5px; color: transparent; }
 .compareBox svg { width: 12px; height: 12px; }
-.compare input:checked + .compareBox { background: var(--brass); border-color: var(--brass); color: var(--ink-inverse); }
+.compare input:checked + .compareBox { background: var(--ink); border-color: var(--ink); color: var(--ink-inverse); }
 .compare input:focus-visible + .compareBox { outline: 2px solid var(--focus); outline-offset: 2px; }
 .compare[data-disabled] { opacity: 0.5; cursor: not-allowed; }
 
