@@ -190,6 +190,9 @@ export interface LatestHire {
   steps: Array<{ label: string; tx: string | null; at: string | null }>
   deliveredSeconds: number | null
   stars: number | null
+  /** The job's first chain event (JobCreated), and its settlement (JobCompleted) once the review window closed. */
+  openedTx: string | null
+  settledTx: string | null
 }
 
 /**
@@ -230,5 +233,7 @@ export async function latestHire(): Promise<LatestHire | null> {
     ],
     deliveredSeconds: funded !== null && submitted !== null ? Math.max(0, Math.round((submitted - funded) / 1000)) : null,
     stars: r ? Math.round(Number(r['value']) / 10 ** Number(r['value_decimals'] ?? 0) / 20) : null,
+    openedTx: ev['JobCreated']?.tx ?? null,
+    settledTx: ev['JobCompleted']?.tx ?? null,
   }
 }

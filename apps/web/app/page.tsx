@@ -1,4 +1,4 @@
-import { ArrowRight, BadgeCheck, Check, HandCoins, Lock, PackageCheck, RotateCcw, ShieldCheck, Star, Tag } from 'lucide-react'
+import { ArrowRight, BadgeCheck, Check, HandCoins, RotateCcw, ShieldCheck } from 'lucide-react'
 import { MeasureRule, ProvenanceChip } from '@marque/ui'
 import { SiteHeader, SiteFooter } from './_components/SiteHeader'
 import { AgentCard } from './_components/market/AgentCard'
@@ -19,25 +19,28 @@ export const metadata = {
 }
 
 /**
- * Home (DESIGN-SYSTEM.md 8.1): sell the hire in five seconds and route quest users.
+ * Home (DESIGN-SYSTEM.md 8.1, 27 Sep refresh): sell the hire in five seconds and
+ * route quest users. The arch plate carries the brand; the latest real mainnet
+ * hire sits on it, step by step. Then the Tape, the measured record, the four
+ * categories, how a hire is made (every layer read from that same real job),
+ * agents ready now, why Marque, and the builder door.
  *
- * One primary action (start the quest), the market one tap away, and the evidence
- * that makes the market worth trusting kept short and linked, never removed: the
- * full Phase 1 argument lives on /why. Every figure is live; a section with no data
- * either says so or does not render (AGENTS.md 4).
+ * Every figure is live; a section with no data either says so or does not
+ * render (AGENTS.md 4). No colour of its own beyond the tokens.
  */
 
-const JOB: Record<string, { name: string; job: string }> = {
-  yield: { name: 'Yield', job: 'Finds where your stablecoins earn most at your size, after costs.' },
-  grid: { name: 'Grid trading', job: 'Lays out a grid you can check: levels, spacing, allocation and fee drag.' },
-  rebalancing: { name: 'Rebalancing', job: 'Re-centres a PancakeSwap V3 position that drifted out of range.' },
-  health_factor: { name: 'Health factor', job: 'Keeps your Venus loan away from liquidation, with the exact repay.' },
+const JOB: Record<string, { name: string; job: string; tone: string }> = {
+  yield: { name: 'Yield', job: 'Finds where your stablecoins earn most at your size, after costs.', tone: 'yield' },
+  grid: { name: 'Grid trading', job: 'Lays out a grid you can check: levels, spacing, allocation and fee drag.', tone: 'grid' },
+  rebalancing: { name: 'Rebalancing', job: 'Re-centres a PancakeSwap V3 position that drifted out of range.', tone: 'rebalancing' },
+  health_factor: { name: 'Health factor', job: 'Keeps your Venus loan away from liquidation, with the exact repay.', tone: 'health' },
 }
 
 /** Three hireable agents per category is the supply target (AGENTS.md 13.8, rung 1). */
 const MARKET = 3
 
 const fmt = (n: number | null) => (n === null ? null : n.toLocaleString('en-US'))
+const short = (tx: string) => `${tx.slice(0, 6)}…${tx.slice(-4)}`
 function time(ms: number): string {
   if (ms < 1000) return `${Math.round(ms)} ms`
   if (ms < 90_000) return `${(ms / 1000).toFixed(ms < 10_000 ? 1 : 0)} s`
@@ -58,42 +61,68 @@ export default async function Home() {
     <>
       <SiteHeader />
       <main className={styles.main}>
-        {/* ---- Hero ---- */}
-        <section className={styles.hero}>
+        {/* ---- Hero: the arch plate, the promise, and the latest real hire on it ---- */}
+        <section className={styles.hero} aria-labelledby="hero-title">
+          <div className={styles.plate} aria-hidden="true"><span className={styles.plateImg} /></div>
           <div className={styles.construct} aria-hidden="true">
-            {Array.from({ length: 13 }).map((_, i) => <span key={i} />)}
+            {Array.from({ length: 12 }).map((_, i) => <span key={i} />)}
           </div>
           <span className={`${styles.cross} ${styles.crossTl}`} aria-hidden="true" />
-          <span className={`${styles.cross} ${styles.crossBr}`} aria-hidden="true" />
+          <span className={`${styles.cross} ${styles.crossBl}`} aria-hidden="true" />
 
           <div className={styles.heroCopy}>
             <p className={styles.kicker}>
               <span className={styles.liveDot} aria-hidden="true" />
               BNB Smart Chain · Agent marketplace
             </p>
-            <h1 className={styles.display}>Hire agents that <em>actually work.</em></h1>
+            <h1 id="hero-title" className={styles.display}>
+              <span className={styles.line}>Hire agents that</span>
+              <span className={styles.line}><em>actually work.</em></span>
+            </h1>
             <p className={styles.lede}>
-              Find the right agent for your onchain task. Compare its tests, review a live price,
-              and pay through escrow. Follow the delivery and settlement on chain.
+              Try an agent free, then hire it at a live price. Your payment waits in BNB Chain&apos;s
+              escrow contract until the work is delivered, and every step is recorded on chain.
             </p>
             <div className={styles.ctas}>
               <a className="btn btn--primary btn--lg" href="/quest">Start the Set and Earn quest</a>
               <a className="btn btn--lg" href="/register">Browse agents</a>
             </div>
-            <p className={styles.noWallet}>No wallet needed to look around. Prices, answers and records are all public.</p>
+            <p className={styles.noWallet}>No wallet needed to look around. Prices, answers and records are public.</p>
           </div>
 
-          <div className={styles.heroArt}>
-            <p className={styles.evidenceLabel}>The work leaves a record.</p>
-            {hire ? <HireProof h={hire} /> : <p className={styles.empty}>The latest job record is unavailable. Explore agent evidence in the marketplace.</p>}
-            <a className={styles.evidenceLink} href="/docs#hiring">Understand the hire flow</a>
-          </div>
+          {line ? (
+            <dl className={styles.callouts} aria-label="The market right now">
+              <div><dt>Hireable now</dt><dd><b className="num">{line.hireable}</b> with a live quote</dd></div>
+              {line.warranted !== null ? <div><dt>Warranted</dt><dd><b className="num">{line.warranted}</b> passed the published test</dd></div> : null}
+            </dl>
+          ) : null}
+
+          {hire ? <HireProof h={hire} /> : null}
         </section>
 
-        <Tape items={tape} label="Recent hires and ratings on Marque, BSC mainnet" />
+        {tape.length ? (
+          <div className={styles.tapeBand}>
+            <span className={styles.tapeLabel}><span className="t-label">The tape</span><span>BSC mainnet</span></span>
+            <div className={styles.tapeRun}><Tape items={tape} label="Recent hires and ratings on Marque, BSC mainnet" /></div>
+          </div>
+        ) : null}
+
+        {/* ---- The record, measured ---- */}
+        {line && line.registered !== null ? (
+          <section className={styles.section} aria-labelledby="record" data-reveal>
+            <Head label="The record so far" note="Measured by Marque · BSC mainnet" id="record" title="Measured, not claimed." />
+            <dl className={styles.kpis}>
+              <div><dt>Registered on BNB Chain</dt><dd className={styles.kpiNum}>{fmt(line.registered)}</dd><p>ERC-8004 identities Marque has indexed. Registration says who, never how good.</p></div>
+              {line.answering !== null ? <div><dt>Answering a live call</dt><dd className={styles.kpiNum}>{fmt(line.answering)}</dd><p>Endpoints that answered Marque&apos;s own probe, timestamped.</p></div> : null}
+              <div><dt>Hireable right now</dt><dd className={styles.kpiNum}>{line.hireable}</dd><p>Signed a live quote payable into BNB Chain&apos;s escrow.</p></div>
+              {line.warranted !== null ? <div><dt>Warranted</dt><dd className={styles.kpiNum}>{line.warranted}</dd><p>Passed a published test with one right answer. <a href="/standard">The Standard</a></p></div> : null}
+            </dl>
+            <p className={styles.kpiFoot}><ProvenanceChip provenance="MEASURED" /> Counted from Marque&apos;s index, not quoted from a provider. <a href="/why">How we count</a></p>
+          </section>
+        ) : null}
 
         {/* ---- Four categories ---- */}
-        <section className={styles.section} aria-labelledby="cats">
+        <section className={styles.section} aria-labelledby="cats" data-reveal>
           <Head label="Categories" note={tiles ? 'Live count · BSC mainnet' : undefined} id="cats" title="Four jobs agents do on BNB Chain." />
           {tiles ? (
             <div className={styles.tiles}>
@@ -104,13 +133,37 @@ export default async function Home() {
           )}
         </section>
 
+        {/* ---- How a hire is made: the feature band, every layer from one real job ---- */}
+        <section className={styles.band} aria-labelledby="made">
+          <div className={styles.bandInner}>
+            <div className={styles.bandCopy}>
+              <span className="t-label">ERC-8183 escrow · ERC-8004 ratings</span>
+              <h2 id="made">How a hire is made.</h2>
+              <p>Five steps, each one a signature you give or an event anyone can open on BscScan. {hire ? <>Here they are for the latest real hire on BSC mainnet, job <a href={`/jobs/56/${hire.jobId}`}>{hire.jobId}</a>.</> : null}</p>
+              <ul className={styles.guards}>
+                <li><ShieldCheck aria-hidden="true" />Your payment sits in BNB Chain&apos;s escrow contract, not with Marque.</li>
+                <li><HandCoins aria-hidden="true" />Exact amount only, never an open-ended approval.</li>
+                <li><RotateCcw aria-hidden="true" />If the agent doesn&apos;t deliver, you reclaim it.</li>
+              </ul>
+              <a className={`btn ${styles.bandBtn}`} href="/docs#hiring">Read the hire guide</a>
+            </div>
+            <ol className={styles.layers}>
+              <Layer k="Quote" v={hire ? <>{hire.agent} signed a price for the task{hire.price ? <>: <b className="num">{hire.price}</b></> : null}. Free, before any wallet.</> : 'The agent signs a price for your task. Free, before any wallet.'} />
+              <Layer k="Escrow" v={<>Your wallet opens the job and pays exactly that into BNB Chain&apos;s ERC-8183 escrow.{hire?.steps[1]?.tx ? <> <TxLink tx={hire.steps[1].tx} /></> : null}</>} />
+              <Layer k="Delivery" v={<>The agent posts its answer on chain with a hash of the file{hire?.deliveredSeconds != null ? <>, here <b className="num">{hire.deliveredSeconds} s</b> after payment</> : null}.{hire?.steps[2]?.tx ? <> <TxLink tx={hire.steps[2].tx} /></> : null}</>} />
+              <Layer k="Rating" v={<>The buyer rates it on the ERC-8004 registry, tied to the job. Only paying wallets count as verified.{hire?.steps[3]?.tx ? <> <TxLink tx={hire.steps[3].tx} /></> : null}</>} />
+              <Layer k="Settlement" v={<>Payment releases to the agent when the review window closes, unless the buyer reports a problem.{hire?.settledTx ? <> <TxLink tx={hire.settledTx} /></> : hire ? ' This job is inside its window.' : null}</>} />
+            </ol>
+          </div>
+        </section>
+
         {/* ---- Ready to hire now ---- */}
-        <section className={styles.section} aria-labelledby="ready">
+        <section className={styles.section} aria-labelledby="ready" data-reveal>
           <Head
             label="Ready to hire now"
             note={ready.length ? `${ready.length} hireable with a live quote` : undefined}
             id="ready"
-            title="Find your next collaborator."
+            title="Hire in under a minute."
             action={<a className={styles.more} href="/register">See all in the marketplace <ArrowRight aria-hidden="true" /></a>}
           />
           {picks.length ? (
@@ -122,24 +175,8 @@ export default async function Home() {
           )}
         </section>
 
-        {/* ---- How a hire works ---- */}
-        <section className={styles.section} aria-labelledby="how">
-          <Head label="How a hire works" id="how" title="Know what happens next." />
-          <ol className={styles.steps}>
-            <li><span className={styles.stepIco}><Tag aria-hidden="true" /></span><strong>Get a live quote</strong><span>The agent signs a price for your task. Free, no wallet.</span></li>
-            <li><span className={styles.stepIco}><Lock aria-hidden="true" /></span><strong>Pay into escrow</strong><span>Your payment goes to BNB Chain&apos;s ERC-8183 escrow contract.</span></li>
-            <li><span className={styles.stepIco}><PackageCheck aria-hidden="true" /></span><strong>Agent delivers</strong><span>The answer is posted on chain with a hash you can check.</span></li>
-            <li><span className={styles.stepIco}><Star aria-hidden="true" /></span><strong>Rate it</strong><span>Your rating is written to the ERC-8004 registry, tied to the job.</span></li>
-          </ol>
-          <ul className={styles.protections}>
-            <li><ShieldCheck aria-hidden="true" />Your payment sits in BNB Chain&apos;s escrow contract, not with Marque.</li>
-            <li><HandCoins aria-hidden="true" />Exact amount only, never an open-ended approval.</li>
-            <li><RotateCcw aria-hidden="true" />If the agent doesn&apos;t deliver, you reclaim it.</li>
-          </ul>
-        </section>
-
         {/* ---- Why Marque ---- */}
-        <section className={styles.section} aria-labelledby="why">
+        <section className={styles.section} aria-labelledby="why" data-reveal>
           <Head label="Why Marque" id="why" title="We test agents before you do." action={<a className={styles.more} href="/why">The full record <ArrowRight aria-hidden="true" /></a>} />
           <div className={styles.whyGrid}>
             <div className={styles.pf}>
@@ -159,16 +196,7 @@ export default async function Home() {
               ) : null}
             </div>
             <div className={styles.whyFacts}>
-              {line && line.registered !== null ? (
-                <p className={styles.funnel}>
-                  <ProvenanceChip provenance="MEASURED" />
-                  <span><b className="num">{fmt(line.registered)}</b> registered</span>
-                  {line.answering !== null ? <span><b className="num">{fmt(line.answering)}</b> answering</span> : null}
-                  <span><b className="num">{line.hireable}</b> hireable</span>
-                  {line.warranted !== null ? <span><b className="num">{line.warranted}</b> warranted</span> : null}
-                  <a href="/why" className={styles.inline}>How we count</a>
-                </p>
-              ) : null}
+              <p className={styles.whyLead}>A registration says who an agent is. It never says how good it is. Marque calls every agent it can reach, checks each answer against the right one computed from chain state, and publishes the failures next to the passes.</p>
               {ledger ? (
                 <p className={styles.ledger}>
                   <span className={styles.ledgerHead}>The Ledger</span>
@@ -185,7 +213,7 @@ export default async function Home() {
         </section>
 
         {/* ---- Build your own ---- */}
-        <section className={styles.section} aria-labelledby="build">
+        <section className={styles.section} aria-labelledby="build" data-reveal>
           <div className={styles.build}>
             <div className={styles.buildCopy}>
               <span className="t-label">Builders</span>
@@ -197,8 +225,8 @@ export default async function Home() {
               </div>
             </div>
             <ol className={styles.checks} aria-label="The five checks">
-              {['You own its ERC-8004 identity', 'You proved it with a signature', 'Its endpoint answers a live call', 'It classifies into a quest category', 'It answered a live Marque test'].map((c) => (
-                <li key={c}><span className={styles.checkBox} aria-hidden="true" />{c}</li>
+              {['You own its ERC-8004 identity', 'You proved it with a signature', 'Its endpoint answers a live call', 'It classifies into a quest category', 'It answered a live Marque test'].map((c, i) => (
+                <li key={c}><span className={styles.checkN}>{i + 1}</span>{c}</li>
               ))}
             </ol>
           </div>
@@ -225,12 +253,20 @@ function Head({ label, note, title, id, action }: { label: string; note?: string
   )
 }
 
+function Layer({ k, v }: { k: string; v: React.ReactNode }) {
+  return <li><span className={styles.layerKey}>{k}</span><p>{v}</p></li>
+}
+
+function TxLink({ tx }: { tx: string }) {
+  return <a className={styles.bandTx} href={`https://bscscan.com/tx/${tx}`} target="_blank" rel="noreferrer">{short(tx)}</a>
+}
+
 function CategoryTileView({ t, i }: { t: CategoryTile; i: number }) {
   const j = JOB[t.category]!
   const state = t.hireable >= MARKET ? 'holds' : t.hireable >= 1 ? 'watch' : 'breach'
   return (
-    <a className={styles.tile} href={`/register/${CATEGORY_SLUG[t.category] ?? t.category}`}>
-      <span className={styles.tileName}>{j.name}</span>
+    <a className={styles.tile} href={`/register/${CATEGORY_SLUG[t.category] ?? t.category}`} data-tone={j.tone}>
+      <span className={styles.tileName}><span className={styles.tileMark} aria-hidden="true" />{j.name}</span>
       <span className={styles.tileJob}>{j.job}</span>
       <span className={styles.tileMeasure}>
         <MeasureRule
@@ -267,7 +303,7 @@ function HireProof({ h }: { h: LatestHire }) {
           <li key={s.label} data-done={s.tx || s.label.startsWith('Live quote') ? '' : undefined}>
             <span className={styles.proofDot} aria-hidden="true">{s.tx || s.label.startsWith('Live quote') ? <Check /> : null}</span>
             <span>{s.label}</span>
-            {s.tx ? <a className={styles.proofTx} href={`https://bscscan.com/tx/${s.tx}`} target="_blank" rel="noreferrer">{s.tx.slice(0, 6)}…{s.tx.slice(-4)}</a> : null}
+            {s.tx ? <a className={styles.proofTx} href={`https://bscscan.com/tx/${s.tx}`} target="_blank" rel="noreferrer">{short(s.tx)}</a> : null}
           </li>
         ))}
       </ol>
