@@ -90,7 +90,8 @@ export function AgentCard({ a, compare, base = '', variant = 'default' }: {
         <div>
           <dt>Price</dt>
           <dd className={a.priceProvenance === 'MEASURED' ? styles.live : styles.claimed}>{a.price ?? 'None'}</dd>
-          <dd className={styles.src}>{a.price ? (a.priceProvenance === 'MEASURED' ? (priced ? `live quote, ${priced}` : 'live quote') : 'declared') : 'not published'}</dd>
+          {/* Relative time is computed at render: server and browser clocks differ by the page's age. */}
+          <dd className={styles.src} suppressHydrationWarning>{a.price ? (a.priceProvenance === 'MEASURED' ? (priced ? `live quote, ${priced}` : 'live quote') : 'declared') : 'not published'}</dd>
         </div>
         <div>
           <dt>Delivers</dt>
