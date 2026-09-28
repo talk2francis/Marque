@@ -1,8 +1,12 @@
+import { notFound } from 'next/navigation'
 import { SiteHeader, SiteFooter } from '../_components/SiteHeader'
 import { Gallery } from './Gallery'
 import styles from './ui.module.css'
 
 export const metadata = { title: 'Design system', robots: { index: false } }
+// Fixtures are not a product surface (AGENTS.md invariant 4): the gallery is off in
+// production unless MARQUE_UI_GALLERY=1 is set for a design session.
+export const dynamic = 'force-dynamic'
 
 /**
  * The component set of DESIGN-SYSTEM.md section 6, each with its states.
@@ -11,6 +15,7 @@ export const metadata = { title: 'Design system', robots: { index: false } }
  * magnitudes, but nothing here is fetched and nothing here is a product surface.
  */
 export default function UiPage() {
+  if (process.env.NODE_ENV === 'production' && process.env['MARQUE_UI_GALLERY'] !== '1') notFound()
   return (
     <>
       <SiteHeader />

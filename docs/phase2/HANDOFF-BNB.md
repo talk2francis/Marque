@@ -220,6 +220,7 @@ Every address Marque or its team controls. Activity from these is returned with 
 | `0x4bfD3f9c81a743F852Fb424FD487A1c53d7786D5` | P2-08 desktop acceptance wallet | 56 |
 | `0x317C5DddfE27D7d9bAaf41f2AD38E9B83B40f99D` | P2-08 mobile acceptance wallet | 56 |
 | `0x4e9C0f537cCcA8Db4BDD16FBA9Ff306F86a82505` | P2-10 builder acceptance fixture (testnet only) | 97 |
+| `0xDa53362d304D7970Db19547C52208a35C6D83C8a` | P2-12 golden path fixture: four hires, four ratings, builder checks, revoke (mainnet, phone) | 56 |
 
 ## 8. Category coverage at Sat 26 Sep 2026, 17:22 UTC
 

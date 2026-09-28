@@ -122,6 +122,13 @@
       "chainIds": [
         97
       ]
+    },
+    {
+      "address": "0xDa53362d304D7970Db19547C52208a35C6D83C8a",
+      "role": "P2-12 golden path fixture: four hires, four ratings, builder checks and a revoke on BSC mainnet at 390 px",
+      "chainIds": [
+        56
+      ]
     }
   ]
 }

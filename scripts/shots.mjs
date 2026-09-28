@@ -24,7 +24,7 @@ const DEFAULT_ROUTES = [
   '/', '/register', '/register/yield', '/agents/sluicegate', '/compare', '/positions', '/pancakeswap',
   '/pancakeswap/proof', '/me', '/builders/claim', '/builders/test', '/docs', '/standard', '/ledger',
   '/ledger/methodology', '/receipts/latest', '/status', '/judge', '/app/charter', '/app/charters',
-  '/protocol', '/_ui', '/jobs/56/56810',
+  '/protocol', '/jobs/56/56810',
 ]
 const ROUTES = args.routes ? String(args.routes).split(',') : DEFAULT_ROUTES
 const HEIGHTS = { 390: 844, 768: 1024, 1440: 900 }

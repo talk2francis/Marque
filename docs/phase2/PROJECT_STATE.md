@@ -2,6 +2,102 @@
 
 Live record of Phase 2. Newest first inside each section. Times are UTC.
 
+## P2-12 Crucible (in progress, Mon 28 Sep)
+
+Verdict so far: **SHIP AFTER LISTED FIXES**. Everything that needs no new funds is
+done and passing; the golden path (B, C, D) waits on funding of the fixture wallet.
+
+### Crucible checklist (LAUNCH-RUNBOOK section 7)
+
+| Item | Status | Evidence |
+|---|---|---|
+| A. Eligibility | PASS / PARTIAL (reasons below) | Matrix walk, 28 Sep 03:10 UTC |
+| B. Golden path | WAITING (funds) | Fixture `0xDa53362d304D7970Db19547C52208a35C6D83C8a` generated, on the published team list (17) and in both handoffs; needs 0.45 U and 0.004 BNB on BSC mainnet |
+| C. Protocol | WAITING (B) | Decode each tx after B; allowance after the run must be 0 |
+| D. Tracking | PARTIAL | topic0 verified (`evidence/verify-topics.json`); team wallets flagged (config API lists 17); `/wallet` vs BscScan after B |
+| E. Security | PASS | No `maxUint256` approval anywhere (the only hit is Redcell detecting them); `approveFloor` unused; no API route (44 scanned) takes a key or phrase; every agent call goes through `safeFetch` (27 files), 23 SSRF tests pass; quotes verified (`quote.ts` wrong_contract, negotiation hash); the five test-wallet private keys appear nowhere in the repo; no token patterns in tracked files |
+| F. UX | PARTIAL | Hire-sheet messages checked live (below). A fresh 5-second test was not re-run after the refresh (the API keys are revoked); the P2-09 one passed. Job Room states: delivered and cancelled captured in P2-08; settled arrives after the 7-day window (first keeper settle due Sat 3 Oct) |
+| G. Responsive, a11y | PASS | 156 captures (26 routes, 390/768/1440, Night and Day) on the release candidate: zero horizontal scroll, zero console errors after the hydration fix. Axe on 13 routes in both themes: one serious finding (a `<p>` in the home record's `<dl>`), fixed in ef6294c; all others zero (`evidence/axe-p2-12.json`). Keyboard: Hire reached by Tab, focus trapped in the sheet, fields typed, Escape closes |
+| H. Reliability | PASS | LOAD-TEST.md within targets to 100 users; five blue/green swaps today with every public smoke check 200; restore drill passed (27 Sep); nightly backup ran 01:18 (109 MB); offsite OAuth still pending |
+| I. Claims | PASS | Visible text of home, /quest, marketplace, a storefront and the hire sheet scanned against AGENTS 13.7: no custody, guarantee, "verified agent", instant-refund, volume or competitor claims. Marketplace appendix corrected (it said a free preview is graded, and "one agent per category"). Remaining dashes on /register are inside third-party registry text (CLAIMED), not ours; README keeps Phase 1 dashes (baseline) |
+| J. Handoff | PARTIAL | Ready and answered by Gwen (27 Sep); attribution confirmation still with Gwen |
+
+Dead-button sweep (Night, 24 routes): 81 unique internal links, 0 broken; 159
+buttons clicked on fresh loads, 2 without a DOM change, both correct (the already
+selected network tab on /protocol, and "Find identity" with an empty required
+field, which raises the browser's own validation bubble).
+
+### Hostile checks (live, read-only fixture wallet: nothing can be sent)
+
+| Check | Result |
+|---|---|
+| Wrong network (wallet on 97) | The action reads "Switch to BSC mainnet and hire" |
+| Rejected signature | "You declined the request in your wallet. Nothing was sent. Continue when you are ready." |
+| Insufficient token (0.05 U for a 0.15 U hire) | "You need 0.15 U and have 0.05 U." with "Check my balance again"; no signature asked |
+| Insufficient gas | Preflight balance check and error map (`insufficient_gas`: "Your wallet does not have enough BNB to pay the network fee"). No fixture holds U without BNB, so not exercised live |
+| Quote expiry mid-flow | Quote shown with 14:56 left, sheet left open 16 min: it reads "Quote expired"; pressing Hire re-quoted and went on to "Lock the price at 0.05 U" (then declined in the read-only wallet). Code review found an edge case, fixed: after an earlier declined attempt, a re-quote reused the intent bound to the old quote; a fresh quote now always gets a fresh intent |
+| Seller down | `marque-redcell` stopped 03:29:25; out of Ready to hire at 03:32:48 (3 min 23 s, inside one 5 min T0 cycle); restarted 03:32:57, back at 03:33:29. The storefront page cache (30 s) still offered Hire for up to that long |
+| Indexer restart | Restarted 03:33:40; resumed from its cursor, lag 6 to 16 blocks throughout, Quest API 200 |
+| Web restart during a job | Five blue/green swaps today, every smoke check 200; job state is chain-derived, nothing held in the web process |
+| Closing the tab after funding | Waits for B (needs a funded job) |
+
+### Bugs found and fixed in this pass
+
+- Hire sheet: typing into a field kept only the first character; the focus trap
+  re-ran on every render and threw focus to Close (since P2-08; scripted runs used
+  `fill`). Fixed in ef6294c, verified live by typing a full address.
+- Connect pressed before the wallet island loaded could open nothing (e63346f).
+- Pancake Desk: Bound's price, MCS status and liveness were typed constants; now
+  read from its storefront record (e63346f).
+- Home record list markup (axe serious), marketplace pagination dash, marketplace
+  appendix copy.
+- Re-quote after an expired quote reused the old hire intent (useHire).
+- The `/_ui` component gallery (fixture rows) was publicly reachable; it now 404s
+  in production unless `MARQUE_UI_GALLERY=1`.
+
+### Matrix walk (A)
+
+| Row | Status | Evidence / reason |
+|---|---|---|
+| C1 URL, socials, one-liner | PASS | marque.trade, @marquetrade, t.me/marque_marketplace, one-liner in HANDOFF |
+| C2 Tracking details | PASS | `/api/v1/phase2/{config,wallet,owner,job}` live; 14 topics |
+| C3 Ready for traffic, support | PASS | Blue/green, LOAD-TEST.md, Telegram support in footer and docs |
+| C4 Brand kit | PASS | /brand/marque-brand-kit.zip |
+| C5 Fair play | PASS | Team wallets (17) excluded; anti-wash reasons in API; no incentives of our own |
+| 1.1 Own domain | PASS | marque.trade |
+| 1.2 Public, no wallet to browse | PASS | Logged-out sweep of 26 routes, 3 widths, 2 themes |
+| 1.3 Live | PASS | |
+| 1.4 Stable | PASS | `/api/v1/agents` p50 65 ms, p95 131 ms (20 requests, 03:10); zero-error swaps |
+| 2.1 Mainnet | PASS | Mainnet hires 56806 to 56820 |
+| 2.2 Network stated | PASS | Header pill; every price, hire, job and receipt carries its chain |
+| 2.3 Mainnet after campaign | PASS | Already mainnet |
+| 3.1 Agents from ERC-8004 | PASS | `REFERENCE_AGENTS` absent from lib/marketplace.ts; reference rows are registry rows |
+| 3.2 No mock or typed data | PASS | Last typed price (Pancake Desk) removed in e63346f; the rest are layout copy in `/_ui` stories |
+| 3.3 Contract addresses shown | PASS | /protocol, /docs#contracts (read from the pinned SDK) |
+| 3.4 Per-agent evidence | PASS | Third-party 304493 shows its receipt-verified registration tx 0x1f1c…8492 |
+| 3.5 Stale agents said so | PASS | T0 6 of 6 fresh; seller-down check above |
+| 4.1 Four categories | PASS | |
+| 4.2 Three per category | PARTIAL | Hireable 3/4/4/3 (yield/grid/rebalancing/health factor). Non-Marque operators 1/3/3/2: yield sits on rung 3 of 13.8 (a second first-party agent, Tidemark, with a different method) |
+| 4.3 Few unclassified | PASS | 0 unclassified in the default view (15 rows) |
+| 4.4 Detail pages | PASS | Storefront spec 8.4 on every agent |
+| 5.1 Hire end to end | PASS | Eight funded acceptance hires, desktop and 390 px (P2-08) |
+| 5.2 Names the agent | PASS | Hire sheet: portrait, name, category, ERC-8004 id |
+| 5.3 Scoped permissions | PASS | Exact approval equal to the price |
+| 5.4 Caps and revoke | PASS | Cancel 56811, approve then revoke to 0 (0x6bdf3f4c…), testnet refund on job 1350 |
+| 6.1 to 6.4 Tracking | PASS | HANDOFF tables, verify-topics.json, live APIs |
+| 6.5 Team wallets | PASS | 17 in config and both handoffs |
+| 7.1 to 7.3 Repository | PASS | Public, README Phase 2 section, real history |
+| 7.4 Nothing embarrassing | PASS | Root clean since P2-00 |
+| Q1 to Q5 | PASS | /quest, /me, named stepper, /builders, support and error map |
+
+### Waiting on Francis
+
+1. Fund the golden-path fixture `0xDa53362d304D7970Db19547C52208a35C6D83C8a` on BSC
+   mainnet with 0.45 U and 0.004 BNB, and write "approved, mainnet" for this run
+   (it is a Marque test wallet, so G-M1 applies). Then B, C, D and the
+   close-the-tab check run in one pass.
+2. Google Drive OAuth for recurring offsite backups (BACKUP-DRIVE.md).
+
 ## User-requested post-handoff refresh (27 September, deployed)
 
 P2-12 remains held. See [REFRESH-2026-09-27.md](./REFRESH-2026-09-27.md).

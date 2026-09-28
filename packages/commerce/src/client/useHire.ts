@@ -131,13 +131,15 @@ export function useHire() {
 
       // Quotes last at most 15 minutes; re-quote if this one is about to lapse.
       let quote = q
-      let intentNow = state.jobId ? state.intent : null
+      let requoted = false
       if (!state.jobId && quote.expiresAt - Date.now() / 1000 < 60 && lastRequest.current) {
         quote = await api<HireQuote>('hire/quote', lastRequest.current)
-        intentNow = null
+        requoted = true
         set({ quote })
       }
-      const intent = intentNow ?? state.intent ?? await api<IntentResponse>('hire/intent', { wallet: address, quoteId: quote.quoteId })
+      // An intent is bound to the quote it was made for: a fresh quote always gets a fresh
+      // intent, even when an earlier attempt (declined in the wallet) already made one.
+      const intent = (state.jobId || !requoted ? state.intent : null) ?? await api<IntentResponse>('hire/intent', { wallet: address, quoteId: quote.quoteId })
       set({ intent })
       const terms: HireTerms = { chainId: quote.chainId, provider: quote.provider, token: quote.token, price: BigInt(quote.price), priceLabel: quote.priceLabel, agentName: quote.agentName, expiredAt: BigInt(intent.expiredAt), description: intent.description }
 
