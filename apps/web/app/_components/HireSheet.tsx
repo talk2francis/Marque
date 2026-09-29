@@ -27,6 +27,8 @@ interface SheetAgent {
   reviewWindowSeconds: number | null; platformFeeBP: number | null; reviewWindowChainId: number
   /** False for an agent that answers free at its own endpoint but takes no paid jobs. */
   sellsJobs?: boolean
+  /** The seller's example task when it works from a JSON object (chainhelix). */
+  taskExample?: string | null
 }
 
 /** What a free run returned: the agent's own answer, never graded here. */
@@ -261,7 +263,7 @@ export function HireSheet() {
                 {q ? (
                   <p className="hs-task">{task.task || 'Your task'}</p>
                 ) : (
-                  <TaskForm category={agent.category} agentName={agent.name} onChange={setTask} disabled={state.phase === 'quoting'} />
+                  <TaskForm category={agent.category} agentName={agent.name} onChange={setTask} disabled={state.phase === 'quoting'} taskExample={agent.taskExample} />
                 )}
               </section>
 

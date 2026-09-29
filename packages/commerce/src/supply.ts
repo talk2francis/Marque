@@ -36,6 +36,12 @@ export interface SellerCandidate {
   firstParty: FirstPartyAgent | null
   /** The card advertises an ERC-8183 skill (negotiate / notify_funded) or names ERC-8183. */
   advertisesCommerce: boolean
+  /**
+   * The work skill's own example task, when the card gives one as a JSON object. Sellers that
+   * work from numbers (chainhelix) refuse plain-English tasks, so the price check re-asks with
+   * the seller's example and the hire sheet composes that shape.
+   */
+  taskExample: string | null
 }
 
 /**
@@ -62,7 +68,11 @@ export async function sellerCandidates(): Promise<SellerCandidate[]> {
            exists (
              select 1 from jsonb_array_elements(case when jsonb_typeof(lp.manifest->'skills') = 'array' then lp.manifest->'skills' else '[]'::jsonb end) x
              where x->>'id' in ('negotiate', 'notify_funded') or (x->>'id') ilike '%8183%' or (x->>'name') ilike '%erc-8183%'
-           ) or coalesce(lp.manifest->>'description', '') ilike '%8183%' as advertises
+           ) or coalesce(lp.manifest->>'description', '') ilike '%8183%' as advertises,
+           (select x->'examples'->>0
+              from jsonb_array_elements(case when jsonb_typeof(lp.manifest->'skills') = 'array' then lp.manifest->'skills' else '[]'::jsonb end) x
+             where coalesce(x->>'id', '') not in ('negotiate', 'notify_funded') and jsonb_typeof(x->'examples') = 'array'
+             limit 1) as task_example
     from lp
     join agent a on a.id = lp.agent_id
     join agent_service s on s.id = lp.service_id
@@ -95,8 +105,20 @@ export async function sellerCandidates(): Promise<SellerCandidate[]> {
       owner: r['owner_address'] ? String(r['owner_address']) : null,
       firstParty: first,
       advertisesCommerce: r['advertises'] === true,
+      taskExample: jsonTaskExample(r['task_example']),
     }
   })
+}
+
+/** A card example usable as a task: a JSON object, as text. Prose examples are not. */
+export function jsonTaskExample(v: unknown): string | null {
+  if (typeof v !== 'string' || v.length > 2000) return null
+  try {
+    const j = JSON.parse(v) as unknown
+    return j && typeof j === 'object' && !Array.isArray(j) ? v : null
+  } catch {
+    return null
+  }
 }
 
 /** Store one quote attempt (first-party observation). */
@@ -161,7 +183,12 @@ export async function runQuoteProbe(opts: { concurrency?: number; limit?: number
     for (;;) {
       const c = due[cursor++]
       if (!c) return
-      const q = await requestQuote(c.endpoint, probeTask(c.category ?? 'general'), { agentWallet: c.agentWallet, agentOwner: c.owner })
+      const task = probeTask(c.category ?? 'general')
+      let q = await requestQuote(c.endpoint, task, { agentWallet: c.agentWallet, agentOwner: c.owner })
+      // Declined in plain English: ask once more with the seller's own example task.
+      if (!q.ok && q.reason === 'declined' && c.taskExample) {
+        q = await requestQuote(c.endpoint, { ...task, task_description: c.taskExample }, { agentWallet: c.agentWallet, agentOwner: c.owner })
+      }
       await recordQuote('probe', c, q)
       if (q.ok) ok++
       else failures[q.reason] = (failures[q.reason] ?? 0) + 1

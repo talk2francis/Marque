@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
       const row = (((res as unknown as { rows?: unknown[] }).rows ?? (res as unknown as unknown[])) as Array<Record<string, unknown>>)[0]
       return {
         agentId, tokenId: String(row?.['token_id'] ?? ''), registryChainId: 56, name: free.name, category: free.category,
-        owner: row?.['owner_address'] ? String(row['owner_address']) : null, firstParty: false, state: 'preview_only', lastQuote: null,
+        owner: row?.['owner_address'] ? String(row['owner_address']) : null, firstParty: false, state: 'preview_only', lastQuote: null, taskExample: null,
         sellsJobs: false,
       }
     })

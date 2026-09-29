@@ -289,6 +289,8 @@ export interface SheetAgent {
   firstParty: boolean
   state: string
   lastQuote: { chainId: number | null; priceLabel: string | null; signed: boolean | null; quotedAt: string | null } | null
+  /** The seller's own example task when it works from a JSON object (see SellerCandidate). */
+  taskExample: string | null
 }
 
 /** What the hire sheet shows before the buyer asks for a price. */
@@ -299,6 +301,7 @@ export async function agentForSheet(agentId: string): Promise<SheetAgent> {
   return {
     agentId: seller.agentId, tokenId: seller.tokenId, registryChainId: seller.chainId, name: seller.name,
     category: seller.category, owner: seller.owner, firstParty: seller.firstParty !== null, state: s?.state ?? 'unavailable',
+    taskExample: seller.taskExample,
     lastQuote: s ? {
       chainId: s.chainId,
       priceLabel: s.priceRaw && s.token ? `${formatAmount(BigInt(s.priceRaw), s.token.decimals)} ${s.token.symbol}` : null,

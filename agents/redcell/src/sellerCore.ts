@@ -43,6 +43,47 @@ import { getWallet } from "@bnbagent/studio-runtime/wallet";
 import { limitCommerceOperation } from "./requestLimits.js";
 import * as defaultSigning from "./signing.js";
 
+/**
+ * Where a submit's receipt is confirmed when the SDK's own wait gives up. 28 Sep, job 56843:
+ * Keel's submit mined one second after broadcast, but the runtime's receipt poll (publicnode)
+ * never saw it in 300 s, so the job was reported failed and retried six times against a job
+ * that was already SUBMITTED. Every node is asked; the first receipt wins.
+ */
+const RECEIPT_RPCS = (process.env.SELLER_RECEIPT_RPCS ??
+  "https://bsc-dataseed.bnbchain.org,https://bsc-dataseed1.bnbchain.org,https://bsc-rpc.publicnode.com,https://bsc.drpc.org")
+  .split(",").map((s) => s.trim()).filter(Boolean);
+
+async function receiptFromAny(hash: string): Promise<{ status: string } | null> {
+  const ask = async (url: string): Promise<{ status: string }> => {
+    const r = await fetch(url, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "eth_getTransactionReceipt", params: [hash] }),
+      signal: AbortSignal.timeout(8_000),
+    });
+    const j = (await r.json()) as { result?: { status: string } | null };
+    if (!j.result) throw new Error("no receipt");
+    return j.result;
+  };
+  try {
+    return await Promise.any(RECEIPT_RPCS.map(ask));
+  } catch {
+    return null;
+  }
+}
+
+/** A submit the SDK called pending: its hash, when the message carries one. */
+function pendingSubmitHash(e: unknown): string | null {
+  if (!(e instanceof Error)) return null;
+  const pending = e.name === "TransactionPendingError" || /broadcast but not confirmed/.test(e.message);
+  if (!pending) return null;
+  const m = /0x[0-9a-fA-F]{64}/.exec(e.message);
+  return m ? m[0] : null;
+}
+
+/** The job has moved past FUNDED (delivered, completed, refunded): nothing left to do. */
+const MOVED_ON = /status (SUBMITTED|COMPLETED|REJECTED|EXPIRED|REFUNDED)\b/i;
+
 const log = {
   info: (msg: string) => console.log(`[seller-agent.core] ${msg}`),
   warn: (msg: string) => console.warn(`[seller-agent.core] WARNING ${msg}`),
@@ -422,7 +463,8 @@ export class SellerCore {
   ): Promise<Record<string, unknown>> {
     const v = await this.signing.verifySignedJob(jobId);
     if (!v.ok) {
-      return { ok: false, job_id: jobId, skip: v.permanent, reason: v.reason };
+      const done = MOVED_ON.test(String(v.reason ?? ""));
+      return { ok: false, job_id: jobId, skip: v.permanent || done, reason: v.reason };
     }
     return this.doWorkAndSubmit(jobId, abortSignal);
   }
@@ -461,6 +503,14 @@ export class SellerCore {
         built_with: "https://github.com/bnb-chain/bnbagent-studio",
       });
     } catch (e) {
+      const pendingHash = pendingSubmitHash(e);
+      if (pendingHash) {
+        const receipt = await receiptFromAny(pendingHash);
+        if (receipt?.status === "0x1") {
+          log.warn(`job ${jobId}: submit ${pendingHash} was reported pending but is mined; delivered`);
+          return { ok: true, job_id: jobId, tx_hash: pendingHash, deliverable_url: null };
+        }
+      }
       if (
         e instanceof SubmitPermanentlyUnsupportedError ||
         (e instanceof Error && e.name === "SubmitPermanentlyUnsupportedError")

@@ -21,12 +21,17 @@ const EXAMPLE_POSITION = '7367728'
 const num = (v: string) => (v.trim() === '' ? null : Number(v))
 const fmt = (n: number) => (Number.isInteger(n) ? String(n) : String(Number(n.toFixed(4))))
 
-export function TaskForm({ category, agentName, onChange, disabled }: {
+export function TaskForm({ category, agentName, onChange, disabled, taskExample }: {
   category: string | null; agentName: string; onChange: (v: TaskValue) => void; disabled?: boolean
+  /** The seller's own example task when it works from a JSON object instead of a sentence. */
+  taskExample?: string | null
 }) {
   const [own, setOwn] = useState(false)
   const [free, setFree] = useState('')
-  const inner = <Inner category={category} agentName={agentName} onChange={own ? () => undefined : onChange} disabled={disabled} />
+  const shape = jsonShape(taskExample)
+  const inner = shape
+    ? <Structured shape={shape} category={category} agentName={agentName} onChange={own ? () => undefined : onChange} disabled={disabled} />
+    : <Inner category={category} agentName={agentName} onChange={own ? () => undefined : onChange} disabled={disabled} />
   useEffect(() => {
     if (own) onChange({ task: free.trim(), ready: free.trim().length >= 12, missing: free.trim().length >= 12 ? null : 'Describe the task in a sentence.' })
   }, [own, free])
@@ -49,7 +54,7 @@ export function TaskForm({ category, agentName, onChange, disabled }: {
 
 function Inner({ category, agentName, onChange, disabled }: { category: string | null; agentName: string; onChange: (v: TaskValue) => void; disabled?: boolean }) {
   switch (category) {
-    case 'health_factor': return <HealthFactor onChange={onChange} disabled={disabled} />
+    case 'health_factor': return <HealthFactor agentName={agentName} onChange={onChange} disabled={disabled} />
     case 'grid': return <Grid onChange={onChange} disabled={disabled} />
     case 'rebalancing': return <Rebalance onChange={onChange} disabled={disabled} />
     case 'yield': return <Yield onChange={onChange} disabled={disabled} />
@@ -62,7 +67,7 @@ function useEmit(onChange: (v: TaskValue) => void, v: TaskValue) {
   useEffect(() => { onChange(v) }, [v.task, v.ready, v.missing])
 }
 
-function HealthFactor({ onChange, disabled }: { onChange: (v: TaskValue) => void; disabled?: boolean }) {
+function HealthFactor({ agentName, onChange, disabled }: { agentName: string; onChange: (v: TaskValue) => void; disabled?: boolean }) {
   const { address } = useAccount()
   const [addr, setAddr] = useState('')
   const [target, setTarget] = useState('2.5')
@@ -82,7 +87,7 @@ function HealthFactor({ onChange, disabled }: { onChange: (v: TaskValue) => void
         error={addr && !addrOk ? 'A BNB Smart Chain address starts 0x and has 40 more characters.' : null}
         help={<span className="taskform-help">{address && addr.toLowerCase() === address.toLowerCase() ? 'Your connected wallet. ' : ''}No Venus loan? <button type="button" className="taskform-link" onClick={() => setAddr(EXAMPLE_LOAN)}>Use a real account with a live loan</button></span>} />
       <Field label="Restore it to" value={target} onChange={setTarget} unit="health factor" disabled={disabled}
-        error={target && !targetOk ? 'Choose a target between 1 and 10.' : null} help="Keel works out the exact repay to reach this." />
+        error={target && !targetOk ? 'Choose a target between 1 and 10.' : null} help={`${agentName} works out the exact repay to reach this.`} />
     </div>
   )
 }
@@ -205,6 +210,92 @@ function Free({ agentName, onChange, disabled }: { agentName: string; onChange: 
     <div className="fld">
       <label className="fld-label" htmlFor="free-task"><span>Your task for {agentName}</span></label>
       <textarea id="free-task" className="taskform-text" rows={4} maxLength={1200} value={text} disabled={disabled} onChange={(e) => setText(e.target.value)} placeholder={`Say what ${agentName} should work on, with the numbers it needs.`} />
+    </div>
+  )
+}
+
+/**
+ * Sellers that work from numbers, not sentences (chainhelix since 28 Sep): their card's
+ * example task is a JSON object. A loan-shaped example (collateral, debt, prices) gets a
+ * small loan form; any other shape gets the example itself to edit, checked as JSON.
+ */
+type Shape = { kind: 'loan' } | { kind: 'json'; example: string }
+
+function jsonShape(example: string | null | undefined): Shape | null {
+  if (!example) return null
+  try {
+    const j = JSON.parse(example) as Record<string, unknown>
+    if (!j || typeof j !== 'object' || Array.isArray(j)) return null
+    if ('collateral' in j && 'debt' in j && 'prices' in j) return { kind: 'loan' }
+    return { kind: 'json', example: JSON.stringify(j, null, 2) }
+  } catch {
+    return null
+  }
+}
+
+const LOAN_ASSETS = [{ value: 'BNB', label: 'BNB' }, { value: 'BTCB', label: 'BTCB' }, { value: 'ETH', label: 'ETH' }]
+
+function Structured({ shape, category, agentName, onChange, disabled }: {
+  shape: Shape; category: string | null; agentName: string; onChange: (v: TaskValue) => void; disabled?: boolean
+}) {
+  if (shape.kind === 'loan') return <LoanNumbers agentName={agentName} onChange={onChange} disabled={disabled} />
+  return <JsonTask example={shape.example} agentName={agentName} category={category} onChange={onChange} disabled={disabled} />
+}
+
+function LoanNumbers({ agentName, onChange, disabled }: { agentName: string; onChange: (v: TaskValue) => void; disabled?: boolean }) {
+  const [asset, setAsset] = useState('BNB')
+  const [amount, setAmount] = useState('2')
+  const [lt, setLt] = useState('0.8')
+  const [debt, setDebt] = useState('600')
+  const [price, setPrice] = useState('')
+  const [spotBlock, setSpotBlock] = useState<string | null>(null)
+  useEffect(() => {
+    let live = true
+    setSpotBlock(null)
+    fetch(`/api/v1/spot?symbol=${asset}`).then((r) => (r.ok ? r.json() : null)).then((j) => {
+      if (live && j && typeof j.price === 'number') { setPrice(fmt(j.price)); setSpotBlock(String(j.blockNumber ?? '')) }
+    }).catch(() => undefined)
+    return () => { live = false }
+  }, [asset])
+  const A = num(amount), T = num(lt), D = num(debt), P = num(price)
+  const aOk = A !== null && A > 0
+  const tOk = T !== null && T > 0 && T < 1
+  const dOk = D !== null && D > 0
+  const pOk = P !== null && P > 0
+  const v = useMemo<TaskValue>(() => ({
+    task: JSON.stringify({ collateral: { [asset]: { amount: A, liqThreshold: T } }, debt: { USDT: D }, prices: { [asset]: P, USDT: 1 } }),
+    ready: aOk && tOk && dOk && pOk,
+    missing: !aOk ? 'Enter the collateral amount.' : !tOk ? 'The liquidation threshold is a fraction between 0 and 1.' : !dOk ? 'Enter the USDT debt.' : !pOk ? 'Enter the collateral price.' : null,
+  }), [asset, A, T, D, P, aOk, tOk, dOk, pOk])
+  useEmit(onChange, v)
+  return (
+    <div className="taskform-grid">
+      <SelectField label="Collateral" value={asset} onChange={setAsset} options={LOAN_ASSETS} help={`${agentName} works from the numbers you send, not from an address.`} />
+      <Field label="Amount" value={amount} onChange={setAmount} unit={asset} disabled={disabled} error={amount && !aOk ? 'Above 0.' : null} />
+      <Field label="Liquidation threshold" value={lt} onChange={setLt} disabled={disabled} error={lt && !tOk ? 'Between 0 and 1, e.g. 0.8.' : null} help="Venus shows it per market as the collateral factor." />
+      <Field label="Debt" value={debt} onChange={setDebt} unit="USDT" disabled={disabled} error={debt && !dOk ? 'Above 0.' : null} />
+      <Field label={`${asset} price`} value={price} onChange={setPrice} unit="USDT" disabled={disabled} error={price && !pOk ? 'Above 0.' : null}
+        help={spotBlock ? `PancakeSwap spot at block ${Number(spotBlock).toLocaleString('en-US')}.` : 'Reading the current price…'} />
+    </div>
+  )
+}
+
+function JsonTask({ example, agentName, category, onChange, disabled }: {
+  example: string; agentName: string; category: string | null; onChange: (v: TaskValue) => void; disabled?: boolean
+}) {
+  const [text, setText] = useState(example)
+  let ok = false
+  try { const j = JSON.parse(text) as unknown; ok = Boolean(j) && typeof j === 'object' && !Array.isArray(j) } catch { ok = false }
+  const v = useMemo<TaskValue>(() => ({
+    task: ok ? JSON.stringify(JSON.parse(text)) : text,
+    ready: ok,
+    missing: ok ? null : `${agentName} reads a JSON object; this one does not parse.`,
+  }), [text, ok])
+  useEmit(onChange, v)
+  return (
+    <div className="fld" data-category={category ?? undefined}>
+      <label className="fld-label" htmlFor="json-task"><span>Task for {agentName}, in the shape its card asks for</span></label>
+      <textarea id="json-task" className="taskform-text taskform-mono" rows={6} maxLength={2000} value={text} disabled={disabled} onChange={(e) => setText(e.target.value)} spellCheck={false} />
     </div>
   )
 }

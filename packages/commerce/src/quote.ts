@@ -308,9 +308,23 @@ export async function requestQuote(endpoint: string, task: NegotiateTask, ctx: Q
     }
     return { ok: false, reason: 'no_quote', detail: 'no quote in the A2A response', latencyMs }
   }
+  // An explicit refusal is a decline with the seller's own reason, not a malformed quote
+  // (29 Sep: chainhelix began refusing plain-English tasks; we logged it as malformed).
+  const refusal = declineOf(neg)
+  if (refusal !== null) return { ok: false, reason: 'declined', detail: refusal.slice(0, 300), latencyMs }
   const parsed = NegotiationSchema.safeParse(neg)
   if (!parsed.success) return { ok: false, reason: 'malformed', detail: parsed.error.issues.slice(0, 3).map((i) => `${i.path.join('.')}: ${i.message}`).join('; '), latencyMs }
   return verifyNegotiation(parsed.data, ctx, latencyMs)
+}
+
+/** The seller's stated reason when a negotiation says accepted: false, else null. */
+export function declineOf(neg: unknown): string | null {
+  if (!neg || typeof neg !== 'object') return null
+  const o = neg as Record<string, unknown>
+  const r = (o['response'] && typeof o['response'] === 'object' ? o['response'] : {}) as Record<string, unknown>
+  if (o['accepted'] !== false && r['accepted'] !== false) return null
+  const why = [r['reason'], o['reason'], r['reason_code']].find((x) => typeof x === 'string' && x.trim() !== '')
+  return typeof why === 'string' ? why : 'the seller declined the task'
 }
 
 function parseJson(body: string): unknown {

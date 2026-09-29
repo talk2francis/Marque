@@ -56,6 +56,7 @@
   .taskform-toggle:hover { color: var(--ink); }
   .taskform-text { width: 100%; resize: vertical; min-height: 96px; padding: 12px 14px; border-radius: var(--r-2); border: 1px solid var(--hair-2); background: var(--sunk); color: var(--ink); font: inherit; font-size: 14.5px; line-height: 1.5; }
   .taskform-text:focus { outline: none; border-color: var(--moss); box-shadow: var(--ring); }
+  .taskform-mono { font-family: var(--font-mono); font-size: 13px; }
   @media (max-width: 560px) { .taskform-grid { grid-template-columns: minmax(0, 1fr); } .hs-facts > div { grid-template-columns: 1fr; gap: 2px; } }
 }
 

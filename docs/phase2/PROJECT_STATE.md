@@ -39,7 +39,7 @@ field, which raises the browser's own validation bubble).
 | Seller down | `marque-redcell` stopped 03:29:25; out of Ready to hire at 03:32:48 (3 min 23 s, inside one 5 min T0 cycle); restarted 03:32:57, back at 03:33:29. The storefront page cache (30 s) still offered Hire for up to that long |
 | Indexer restart | Restarted 03:33:40; resumed from its cursor, lag 6 to 16 blocks throughout, Quest API 200 |
 | Web restart during a job | Five blue/green swaps today, every smoke check 200; job state is chain-derived, nothing held in the web process |
-| Closing the tab after funding | Job 56843: the browser was closed the moment the payment was sent (13:16:23), before its notify. Marque's worker notified Keel at 13:16:55, Keel worked at 13:16:58, the delivery confirmed on chain at 13:20:30 |
+| Closing the tab after funding | Job 56843: the browser was closed the moment the payment was sent (13:16:23), before its notify. Marque's worker notified Keel at 13:16:55, Keel worked at 13:16:58 and its submit was mined at 13:16:59 (block 124531233). Correction 29 Sep: an earlier note said 13:20:30; the chain says one second. Keel's runtime still waited 300 s on a receipt its RPC never served, then retried six times against the delivered job; fixed in agents/*/src/sellerCore.ts (receipt from any node; a job past FUNDED ends the retries) |
 
 ### Bugs found and fixed in this pass
 

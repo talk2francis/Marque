@@ -20,14 +20,18 @@ function log(event: string, data: Record<string, unknown>): void {
 
 async function main(): Promise<void> {
   log('start', { once: ONCE, tickMs: TICK_MS, chains: CHAINS })
-  let quiet = 0
+  // One heartbeat counter per chain: a shared one let a single chain take every 50th tick
+  // (29 Sep: mainnet looked silent for six hours while its cursor was current).
+  const quiet = new Map<ChainId, number>()
   do {
     for (const chainId of CHAINS) {
       if (stopping) break
       try {
         const r = await indexChain(chainId)
         // Log anything that happened, and a heartbeat every ~5 min otherwise.
-        if (r.stored || r.bound || ++quiet % 50 === 0) log('pass', { ...r, lag: r.head - r.to })
+        const q = (quiet.get(chainId) ?? 0) + 1
+        quiet.set(chainId, q)
+        if (r.stored || r.bound || q % 50 === 0) log('pass', { ...r, lag: r.head - r.to })
       } catch (err) {
         log('pass_error', { chainId, error: err instanceof Error ? err.message.slice(0, 300) : String(err) })
         if (ONCE) throw err
