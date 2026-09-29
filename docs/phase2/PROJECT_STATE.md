@@ -2,6 +2,17 @@
 
 Live record of Phase 2. Newest first inside each section. Times are UTC.
 
+## Pre-freeze pass (Tue 29 Sep, live 36e422a)
+
+| Item | Result |
+|---|---|
+| Keel "slow" delivery (job 56843) | The submit mined 1 s after broadcast (block 124531233). The seller runtime's receipt poll (publicnode) missed it for 300 s, then retried six times against a SUBMITTED job. Sellers now confirm a pending submit against several nodes and stop retrying once a job is past FUNDED (ac05f8b). No buyer-visible delay: the Job Room read the delivery from the indexer. |
+| Health factor supply | Back to 3 hireable: Keel, Brain on BNB, and chainhelix Health Factor Monitor (0.5 U, signed by its registered wallet). chainhelix began refusing plain-English tasks on 28 Sep 17:00; its refusal is now recorded as declined with its reason, the price check re-asks with the card's own JSON example, and the hire sheet composes that shape (loan form). |
+| Mandate's list | Checked each escrow seller Mandate shows. Hevo Sentinel, LingoAI Health Factor Sentinel and BNB Lending Guardian quote with a payout wallet that is not their registered ERC-8004 wallet or owner, so Marque keeps them unhireable (escrow could release to an address the identity never named). HyperliquidVault, the Agripinaa family, Venus Health Factor Watch and the HeyAnon agents sell over x402 or not at all; Mandate's own agents use its own market contract. |
+| Design | Lit ground (key light, light pools, frame rules, grain), 16:9 world plates on Home, Marketplace and Quest, native night agent heroes, compare as a sheet, grid default (28f0cf0). DESIGN-SYSTEM.md section 13. |
+| Bugs | Negative indexer lag from a lagging node (36e422a); phone blurs on the storefront bar and compare tray; 5 px horizontal scroll on reference storefronts at 390; indexer heartbeat per chain. |
+| Gates | vitest 400 passed; tsc; eslint 0 warnings; lint:copy; audit on the candidate (remaining: inline links under 24 px, exempt); CI green on main and phase2. Lighthouse mobile home on live: 63 / 72 / 85 (median 72, CLS 0). |
+
 ## P2-12 Crucible (in progress, Mon 28 Sep)
 
 Verdict: **SHIP**. Golden path passed on BSC mainnet at 390 px on 28 Sep (funded and
@@ -109,8 +120,8 @@ field, which raises the browser's own validation bubble).
 
 ### Waiting on Francis
 
-1. Google Drive OAuth for recurring offsite backups (BACKUP-DRIVE.md).
-2. Add @MarqueTradeBot to the Telegram group for alerts.
+1. Google Drive OAuth for recurring offsite backups (BACKUP-DRIVE.md): link sent 29 Sep.
+2. Telegram: the bot is in the group (Francis, 29 Sep), but alerts go to his DM because the stored chat id is the private chat. One `/start@MarqueTradeBot` in the group gives the group id.
 
 ### Supply (28 Sep)
 
