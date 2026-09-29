@@ -20,14 +20,25 @@
   :root,
   [data-theme='night'],
   [data-surface] {
-    --canvas: #0E0E0D;
-    --canvas-2: #121211;
-    --panel: #161615;
-    --panel-2: #1D1D1B;
-    --sunk: #0A0A09;
-    --hair: rgba(238, 235, 228, 0.08);
+    --canvas: #111110;
+    --canvas-2: #171715;
+    --panel: #191917;
+    --panel-2: #20201D;
+    --sunk: #0C0C0B;
+    --hair: rgba(238, 235, 228, 0.085);
     --hair-2: rgba(238, 235, 228, 0.16);
     --scrim: rgba(10, 10, 9, 0.74);
+
+    /* Atmosphere (29 Sep): the ground is lit, never an empty field. One key light from the
+       upper left, where the moon sits in the night plates; a champagne ember from their lit
+       windows; a cool slate floor light further down. Grain breaks the gradients' banding. */
+    --atmo-key: rgba(158, 174, 200, 0.115);
+    --atmo-key-soft: rgba(158, 174, 200, 0.06);
+    --atmo-warm: rgba(214, 186, 132, 0.075);
+    --atmo-floor: rgba(122, 140, 166, 0.07);
+    --grain: url('/brand/grain-night.png');
+    --frame-rule: rgba(238, 235, 228, 0.05);
+    --panel-edge: rgba(238, 235, 228, 0.05);
 
     --ink: #EEEBE4;
     --ink-2: #B7B3AA;
@@ -74,11 +85,21 @@
 
   /* ---- DAY: porcelain, the same ivory as the agents' skies ---------------- */
   [data-theme='day'] {
-    --canvas: #F3F0EA;
-    --canvas-2: #ECE8E0;
-    --panel: #F9F7F3;
+    --canvas: #F2EFE8;
+    --canvas-2: #F7F4EE;
+    --panel: #FAF8F4;
     --panel-2: #FDFCFA;
     --sunk: #E8E3DA;
+
+    /* Atmosphere: daylight from the upper left, where the sun sits in the day plates; warm
+       sand low on the right; a faint sky-blue far down. Same geometry as Night. */
+    --atmo-key: rgba(255, 250, 238, 0.95);
+    --atmo-key-soft: rgba(255, 250, 238, 0.6);
+    --atmo-warm: rgba(222, 202, 162, 0.22);
+    --atmo-floor: rgba(184, 198, 214, 0.2);
+    --grain: url('/brand/grain-day.png');
+    --frame-rule: rgba(26, 25, 22, 0.06);
+    --panel-edge: rgba(255, 255, 255, 0.7);
     --hair: rgba(26, 25, 22, 0.10);
     --hair-2: rgba(26, 25, 22, 0.18);
     --scrim: rgba(243, 240, 234, 0.8);
@@ -142,6 +163,7 @@
     --moss: #86B596;
     --chain: #8FB0D3;
     --glow: rgba(214, 194, 154, 0.06);
+    --panel-edge: rgba(214, 194, 154, 0.07);
   }
 
   /* ---- Scale: identical in every theme and surface --------------------- */
@@ -177,9 +199,27 @@
   :root,
   [data-surface] {
     --focus: var(--accent);
+    /* The lit ground. Light pools sit at fixed depths down the page, alternating sides,
+       so a long page keeps its atmosphere past the fold; a short one simply ends sooner.
+       Painted once as the body's background and scrolled with it (no fixed layer). */
     --backdrop:
-      radial-gradient(90% 55% at 80% -10%, var(--glow), transparent 62%),
-      linear-gradient(180deg, var(--canvas-2) 0%, var(--canvas) 36rem);
+      var(--grain),
+      linear-gradient(var(--frame-rule), var(--frame-rule)),
+      linear-gradient(var(--frame-rule), var(--frame-rule)),
+      radial-gradient(76rem 44rem at 6% -8rem, var(--atmo-key), transparent 70%),
+      radial-gradient(58rem 38rem at 100% 6rem, var(--atmo-warm), transparent 72%),
+      radial-gradient(70rem 46rem at 96% 110rem, var(--atmo-floor), transparent 70%),
+      radial-gradient(64rem 42rem at 0% 190rem, var(--atmo-warm), transparent 70%),
+      radial-gradient(70rem 46rem at 100% 270rem, var(--atmo-key-soft), transparent 70%),
+      radial-gradient(64rem 42rem at 0% 350rem, var(--atmo-floor), transparent 70%),
+      linear-gradient(180deg, var(--canvas-2) 0, var(--canvas) 52rem);
+    --backdrop-size: 160px 160px, 1px 100%, 1px 100%, auto, auto, auto, auto, auto, auto, auto;
+    --backdrop-repeat: repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat;
+    --backdrop-position: 0 0, calc(50% - var(--maxw) / 2) 0, calc(50% + var(--maxw) / 2) 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0;
+    /* Material: a panel is lit from above, so it reads as a surface on the lit ground,
+       not a hole in it. A faint top-down fill and a one-pixel top edge. */
+    --panel-fill: linear-gradient(180deg, color-mix(in srgb, var(--panel-2) 72%, transparent) 0%, color-mix(in srgb, var(--panel) 62%, transparent) 100%);
+    --panel-sheen: inset 0 1px 0 var(--panel-edge);
     --elev-1: 0 1px 2px rgba(var(--shadow-ink), calc(var(--shadow-a) * 0.5)),
               0 4px 14px -6px rgba(var(--shadow-ink), calc(var(--shadow-a) * 0.8));
     --elev-2: 0 2px 6px rgba(var(--shadow-ink), calc(var(--shadow-a) * 0.6)),

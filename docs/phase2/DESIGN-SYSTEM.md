@@ -357,27 +357,56 @@ operative (the "who"); the hero is the instrument (the "what").
   a hairline drawn inside. Never a circle.
 - Portraits go everywhere an agent is named (cards, panel, hire sheet, job
   room, compare). The hero is used once: the storefront masthead
-  (`AgentBrandHero`), in the main column beside the sticky purchase panel. Three
-  layers of the same image: sharp artifact, a blurred echo for ambience, an
-  alpha mask so there is no edge. Night dims the art (brightness 0.6); Day shows
-  it near source. The portrait overlaps the stage's lower edge. Name, network and
-  state stay as text below the art. No hero on cards, the home page or any
-  money surface.
-- Masters: `brand-assets/agents-brand/avatars_and_hero_banners/` (never edited).
-  Web copies: `node scripts/prepare-brand-assets.mjs` writes
-  `apps/web/public/brand/agents/<slug>/{avatar,avatar-160,hero,hero-900}.webp`
-  (3 to 49 KB each). Cards load the 160 px portrait only.
+  (`AgentBrandHero`), in the main column beside the sticky purchase panel. Two
+  layers of the same image: the sharp artifact under an alpha mask (no edge to
+  point at) and a blurred echo for ambience. The portrait overlaps the stage's
+  lower edge. Name, network and state stay as text below the art. No hero on
+  cards, the home page or any money surface.
+- Day and Night (29 Sep). Each artifact has a Day master (the ivory banners) and
+  a purpose-built Night master (the same artifact after nightfall). The avatar
+  is theme-independent. The hero follows the resolved `<html data-theme>`: the
+  four URLs travel as CSS custom properties and the stylesheet picks one, so only
+  the active image is requested, with no React theme state, no hydration branch
+  and no wrong-theme flash. System needs no asset logic of its own: the
+  bootstrap resolves it to day or night before paint. The Night art is shown as
+  drawn; the old brightness filter that faked night from the day art is gone.
+- Masters: `brand-assets/agents-brand/avatars_and_hero_banners/` (never edited;
+  Night files are `<Name>-Agent-Nighttime-Hero-banner.png`). Web copies:
+  `node scripts/prepare-brand-assets.mjs` writes
+  `apps/web/public/brand/agents/<slug>/{avatar,avatar-160,hero-day,hero-day-900,hero-night,hero-night-900}.webp`
+  (7 to 62 KB each). Cards load the 160 px portrait only. A third-party agent
+  never receives this artwork.
 
-**Home plate.** The two hero concepts with the lockup and captions painted out,
-kept as masters in `brand-assets/web-plates/`, served as CSS backgrounds so only
-the active theme's file is fetched.
+**World plates (29 Sep).** Three 16:9 photographs, each in Day and Night, one
+per principal page: Home = the Marque Monument, Marketplace = the Registry Field
+(many monoliths), Quest = the Proof Causeway (five markers to a destination).
+Monument, field, causeway: identity, discovery, progress. They are plates, not
+backgrounds: an intact photograph bled to the viewport's right edge, whose left
+and bottom dissolve into the canvas through alpha masks. Never blurred, dimmed,
+stretched or given a frame; each page tunes its own width, crop and mask
+(Marketplace crops sky and foreground so the inventory starts high; Quest keeps
+the whole route; Home keeps the whole monument). Masters are
+`brand-assets/{Homepage,Marketplace,Quest}-{light,dark}-theme.png`; note that
+the Marketplace and Quest file names are swapped relative to their pictures, and
+the pipeline maps by picture. Web copies: `apps/web/public/brand/world/<page>-{day,night}[-1100].webp`.
 
-**Motion.** Quiet and informative, all off under reduced motion: the plate
-drifts over 46 s, light travels down three construction lines, the latest-hire
+**The ground (29 Sep).** The canvas is lit, never an empty field. `--backdrop` on
+the body carries: one key light from the upper left (moonlight slate on Night,
+sunlight on Day, where the plates put the moon and the sun); a warm pool on the
+right from the lit windows; alternating light pools at fixed depths down the page
+so long pages keep their atmosphere; two hairline frame rules at the content
+edges (only on screens wider than the column); and a 160 px grain tile that
+also removes gradient banding. Night's canvas lifted from `#0E0E0D` to `#111110`.
+Panels are lit from above (`--panel-fill`, `--panel-sheen`): a faint top-down fill
+and a one-pixel top edge. It is painted as the body's background and scrolls
+with it: no fixed or blended layer.
+
+**Motion.** Quiet and informative, all off under reduced motion: the world
+plates are still photographs, light travels down three construction lines, the latest-hire
 card ticks its steps once, the band's layers light in turn, sections settle in
 once. No hover lifts, no parallax, no glow.
 
-**Performance.** No full-screen grain layer. The wallet stack (wagmi, viem,
+**Performance.** No full-screen grain overlay (the grain is a background tile). The wallet stack (wagmi, viem,
 RainbowKit) is not in the root layout: it wraps /quest, /me, /builders and
 /jobs, and elsewhere loads as an island (header Connect, quest bar, hire sheet)
 on intent or idle.

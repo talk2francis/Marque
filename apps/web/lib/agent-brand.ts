@@ -5,6 +5,8 @@ import { referenceAgent } from './reference-agents'
  * DESIGN-SYSTEM.md section 13). One manifest, one source of truth for tuning.
  *
  * Avatar = the operative, the "who". Hero = the instrument, the "what".
+ * Each hero has a Day and a Night master; the avatar is the same in both.
+ * The page picks a hero by the resolved <html data-theme> (CSS only, no state).
  * First-party only: a third-party agent never resolves here, so it keeps its
  * registry image or the generated emblem (invariant 1, 17). Identity never
  * changes ranking, state colours or any figure.
@@ -22,10 +24,14 @@ export interface AgentBrand {
   avatar: string
   /** 160 px square, for cards and lists. */
   avatarSmall: string
-  /** 1800 px, about 3:1 (Sluicegate 2:1), the storefront masthead. */
-  hero: string
-  /** 900 px, phones. */
-  heroSmall: string
+  /** Daylight masthead: 1800 px, about 3:1 (Sluicegate 2:1). */
+  heroDay: string
+  /** Daylight masthead, 900 px, phones. */
+  heroDaySmall: string
+  /** The same artifact after nightfall (29 Sep masters), 1800 px. */
+  heroNight: string
+  /** Night masthead, 900 px, phones. */
+  heroNightSmall: string
   /** object-position that keeps the artifact in frame when the stage crops. */
   heroPosition: string
   tone: AgentTone
@@ -48,8 +54,10 @@ function build(slug: string): AgentBrand | null {
     slug,
     avatar: `${base}/avatar.webp`,
     avatarSmall: `${base}/avatar-160.webp`,
-    hero: `${base}/hero.webp`,
-    heroSmall: `${base}/hero-900.webp`,
+    heroDay: `${base}/hero-day.webp`,
+    heroDaySmall: `${base}/hero-day-900.webp`,
+    heroNight: `${base}/hero-night.webp`,
+    heroNightSmall: `${base}/hero-night-900.webp`,
     heroPosition: m.heroPosition,
     tone: m.tone,
   }

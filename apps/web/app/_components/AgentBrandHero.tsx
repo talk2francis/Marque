@@ -1,27 +1,33 @@
+import type { CSSProperties } from 'react'
 import type { AgentBrand } from '../../lib/agent-brand'
 import { AgentAvatar } from './AgentAvatar'
 import styles from './AgentBrandHero.module.css'
 
 /**
- * The reference-agent masthead on a storefront (27 Sep identity pass). Only for
- * the six Marque reference agents with a local brand: a third party keeps the
+ * The reference-agent masthead on a storefront (27 Sep identity pass; night art 29 Sep).
+ * Only for the six Marque reference agents with a local brand: a third party keeps the
  * plain identity header, with no placeholder in its place.
  *
- * Three layers, all the same image, no colour of our own: the sharp artifact,
- * a blurred echo that lets its atmosphere bleed into the page, and an alpha mask
- * so there is no edge to point at. The portrait sits on the stage's lower edge.
- * Everything that matters (name, network, state, the reference mark) is text in
- * `children`, below the art, never on it. Server-rendered, CSS only.
+ * The artifact comes in two lighting states, Day and Night, and the resolved
+ * <html data-theme> picks one in CSS: the four URLs travel as custom properties and only
+ * the matching background is ever requested, so there is no wrong-theme flash, no
+ * hydration branch and no double download. Two layers of the same image: the sharp
+ * artifact under an alpha mask, and a blurred echo that lets its air reach the page.
+ * Everything that matters (name, network, state) is text in `children`, below the art.
  */
 export function AgentBrandHero({ brand, agentId, category, children }: { brand: AgentBrand; agentId: string; category: string | null; children: React.ReactNode }) {
+  const art = {
+    '--hero-day': `url("${brand.heroDay}")`,
+    '--hero-day-small': `url("${brand.heroDaySmall}")`,
+    '--hero-night': `url("${brand.heroNight}")`,
+    '--hero-night-small': `url("${brand.heroNightSmall}")`,
+    '--hero-position': brand.heroPosition,
+  } as CSSProperties
   return (
     <header className={styles.masthead} data-tone={brand.tone}>
-      <div className={styles.stage} aria-hidden="true">
-        <img className={styles.echo} src={brand.heroSmall} alt="" width={900} height={300} decoding="async" />
-        <picture className={styles.art}>
-          <source media="(max-width: 720px)" srcSet={brand.heroSmall} />
-          <img src={brand.hero} alt="" width={1800} height={600} fetchPriority="high" decoding="async" style={{ objectPosition: brand.heroPosition }} />
-        </picture>
+      <div className={styles.stage} style={art} aria-hidden="true">
+        <span className={styles.echo} />
+        <span className={styles.art} />
       </div>
       <div className={styles.id}>
         <div className={styles.portrait}>

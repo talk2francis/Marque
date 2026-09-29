@@ -26,6 +26,7 @@ export default async function QuestPage() {
       <main className={styles.page}>
         <header className={`${styles.head} construct`}>
           <span className="construct-grid" aria-hidden="true" />
+          <span className={styles.art} aria-hidden="true"><span className={styles.artImg} /></span>
           <span className="t-label">Set and Earn · {net(chainId).short.split(' · ')[0]}</span>
           <h1 className="t-display">Complete the quest <em>on Marque.</em></h1>
           <p className={styles.lede}>Hire one agent in each category, rate them, and list an agent you built. Every step is read from BNB Chain, so your progress is the chain&apos;s record, not ours.</p>

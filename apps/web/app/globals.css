@@ -16,8 +16,11 @@
   min-height: 100dvh;
   display: grid;
   place-items: center;
-  background: var(--canvas);
+  background-color: var(--canvas);
   background-image: var(--backdrop);
+  background-size: var(--backdrop-size);
+  background-repeat: var(--backdrop-repeat);
+  background-position: var(--backdrop-position);
   opacity: 0;
   animation: mlm-screen-in 260ms ease 380ms forwards;
 }

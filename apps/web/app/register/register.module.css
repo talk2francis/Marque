@@ -39,20 +39,29 @@ a.introBack:hover { color: var(--fg); }
 .introSupply { margin: var(--s1) 0 0; display: flex; align-items: center; gap: var(--s2); flex-wrap: wrap; }
 .introSupplyNote { font-size: var(--size-caption); color: var(--fg-faint); max-width: 60ch; }
 
-/* The brand arch as a quiet plate behind the intro's right side, faded into the
-   canvas by an alpha mask. A background, so only the active theme's file loads. */
-.intro { isolation: isolate; min-height: 150px; }
+/* The Registry Field (29 Sep world plates): many monoliths, one qualification system.
+   An intact photograph on the right, bled to the viewport edge; its left and bottom
+   dissolve into the canvas before the search bar begins, so the inventory stays the
+   page. It crops sky and foreground only, never the monoliths. A background, so only
+   the resolved theme's file loads. */
+.intro { isolation: isolate; min-height: clamp(210px, 19vw, 280px); }
 .introArt {
-  position: absolute; z-index: -1; top: -48px; bottom: -8px;
-  right: calc(-1 * var(--s5)); width: min(56%, 720px);
-  overflow: hidden;
-  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 45%), linear-gradient(to top, transparent 0, #000 40%), linear-gradient(to bottom, transparent 0, #000 25%);
-  -webkit-mask-composite: source-in, source-in;
-  mask-image: linear-gradient(to right, transparent 0, #000 45%), linear-gradient(to top, transparent 0, #000 40%), linear-gradient(to bottom, transparent 0, #000 25%);
-  mask-composite: intersect;
+  position: absolute; z-index: -1; top: calc(-1 * var(--s6)); right: calc(50% - 50vw);
+  width: min(64vw, 1120px); aspect-ratio: 2.75 / 1;
   pointer-events: none;
+  -webkit-mask-image:
+    linear-gradient(to right, transparent 0, rgba(0, 0, 0, 0.2) 12%, rgba(0, 0, 0, 0.6) 22%, #000 36%),
+    linear-gradient(to top, transparent 0, rgba(0, 0, 0, 0.55) 16%, #000 36%),
+    linear-gradient(to bottom, transparent 0, rgba(0, 0, 0, 0.5) 10%, #000 24%);
+  -webkit-mask-composite: source-in, source-in;
+  mask-image:
+    linear-gradient(to right, transparent 0, rgba(0, 0, 0, 0.2) 12%, rgba(0, 0, 0, 0.6) 22%, #000 36%),
+    linear-gradient(to top, transparent 0, rgba(0, 0, 0, 0.55) 16%, #000 36%),
+    linear-gradient(to bottom, transparent 0, rgba(0, 0, 0, 0.5) 10%, #000 24%);
+  mask-composite: intersect;
 }
-.introPlate { position: absolute; inset: -4%; background: center 42% / cover no-repeat url('/brand/plate-night-1100.webp'); opacity: 0.8; }
+.introPlate { position: absolute; inset: 0; background: 62% 58% / cover no-repeat url('/brand/world/marketplace-night.webp'); }
+:global([data-theme='day']) .introPlate { background-image: url('/brand/world/marketplace-day.webp'); }
 /* Construction lines behind the intro, with light that travels down two of them. */
 .introLines {
   position: absolute; z-index: -1; inset: -48px calc(-1 * var(--s5)) -8px;
@@ -67,16 +76,27 @@ a.introBack:hover { color: var(--fg); }
   background: linear-gradient(to bottom, transparent, color-mix(in srgb, var(--accent) 55%, transparent), transparent);
 }
 @media (prefers-reduced-motion: no-preference) {
-  .introPlate { animation: intro-drift 40s ease-in-out infinite alternate; will-change: transform; }
-  @keyframes intro-drift { to { transform: scale(1.07) translate3d(-1.5%, -1%, 0); } }
   .introLines span:nth-child(3)::after { animation: intro-travel 8s linear 0.8s infinite; }
   .introLines span:nth-child(6)::after { animation: intro-travel 11s linear 4s infinite; }
   @keyframes intro-travel { 0% { opacity: 0; transform: translateY(-100px); } 10% { opacity: 1; } 75% { opacity: 1; } 100% { opacity: 0; transform: translateY(260px); } }
 }
-:global([data-theme='day']) .introPlate { background-image: url('/brand/plate-day-1100.webp'); opacity: 0.9; }
+/* Tablet: a smaller plate, still beside the copy, faded earlier. */
 @media (max-width: 1100px) {
   .intro { grid-template-columns: minmax(0, 1fr); }
-  .introArt, .introLines { display: none; }
+  .introLines { display: none; }
+  .introArt { width: 70vw; aspect-ratio: 2.4 / 1; opacity: 0.9; }
+}
+/* Phones and small tablets: copy, then an edge-to-edge strip, then the controls. */
+@media (max-width: 760px) {
+  .intro { min-height: 0; }
+  .introArt {
+    position: relative; top: auto; right: auto; z-index: 0; opacity: 1;
+    width: 100vw; margin: var(--s2) calc(50% - 50vw) calc(-1 * var(--s3)); aspect-ratio: 2.2 / 1; max-height: 34svh;
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 18%, #000 68%, transparent 100%);
+    mask-image: linear-gradient(to bottom, transparent 0, #000 18%, #000 68%, transparent 100%);
+  }
+  .introPlate { background-image: url('/brand/world/marketplace-night-1100.webp'); background-position: 70% 58%; }
+  :global([data-theme='day']) .introPlate { background-image: url('/brand/world/marketplace-day-1100.webp'); }
 }
 
 /* --- Sticky discovery bar ------------------------------------------------- */
@@ -93,10 +113,11 @@ a.introBack:hover { color: var(--fg); }
   padding: var(--s3) 0;
   /* Opaque, not frosted: a backdrop-filter here would become the containing
      block for the filter sheet and trap it under the site header. */
-  background: var(--ground);
-  transition: box-shadow var(--dur) var(--ease), padding var(--dur) var(--ease);
+  background: transparent;
+  transition: box-shadow var(--dur) var(--ease), padding var(--dur) var(--ease), background-color var(--dur) var(--ease);
 }
 .toolbarWrap[data-stuck] {
+  background: var(--ground);
   border-bottom: 1px solid var(--line);
   box-shadow: var(--elev-1);
   padding-bottom: var(--s3);
@@ -746,6 +767,10 @@ a.introBack:hover { color: var(--fg); }
   box-shadow: var(--elev-3);
   animation: trayIn 260ms var(--ease-settle) both;
 }
+@media (max-width: 900px) {
+  /* Phones: solid, so scrolling the list under the tray costs no blur per frame. */
+  .tray { -webkit-backdrop-filter: none; backdrop-filter: none; background: var(--ground-raised); }
+}
 @keyframes trayIn { from { opacity: 0; transform: translate(-50%, 12px); } to { opacity: 1; transform: translate(-50%, 0); } }
 .trayLabel { font-size: var(--size-caption); color: var(--fg-soft); white-space: nowrap; }
 .trayList { display: flex; gap: var(--s2); flex-wrap: wrap; min-width: 0; overflow: hidden; }
@@ -916,3 +941,7 @@ a.introBack:hover { color: var(--fg); }
 .tabMark[data-cat='rebalancing'] { background: var(--cat-rebalancing); }
 .tabMark[data-cat='health_factor'] { background: var(--cat-health); }
 .tabMark[data-cat='security'] { background: var(--cat-security); }
+
+/* The compare sheet's footer: the provenance line and a way out to the shareable page. */
+.compareFoot { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); flex-wrap: wrap; font-size: var(--size-caption); color: var(--fg-soft); }
+.compareFoot a { color: var(--fg); }

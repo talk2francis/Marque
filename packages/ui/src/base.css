@@ -39,9 +39,11 @@
        (not `hidden`) removes the stray axis without making body a scroll
        container, so position: sticky keeps working. */
     overflow-x: clip;
-    background: var(--canvas);
+    background-color: var(--canvas);
     background-image: var(--backdrop);
-    background-repeat: no-repeat;
+    background-size: var(--backdrop-size);
+    background-repeat: var(--backdrop-repeat);
+    background-position: var(--backdrop-position);
     color: var(--ink);
     font-family: var(--font-sans);
     font-size: var(--fs-body);
@@ -51,8 +53,11 @@
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
   }
-  /* No full-screen grain layer: a fixed blended overlay repaints on every scroll
-     frame on phones for a texture nobody could see (27 Sep performance pass). */
+  /* No full-screen grain overlay: a fixed blended layer repaints on every scroll frame
+     on phones (27 Sep performance pass). The grain is a tile in the body background
+     instead, painted with the page. The frame rules show only where the page is wider
+     than the content column. */
+  @media (max-width: 1359.98px) { :root { --frame-rule: transparent; } }
   [data-surface] { color: var(--ink); color-scheme: dark; }
 
   ::selection { background: color-mix(in srgb, var(--accent) 32%, transparent); color: var(--ink); }

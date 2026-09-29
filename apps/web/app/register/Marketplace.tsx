@@ -2,14 +2,16 @@
 
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
-import { EmptyState, LinkButton } from '@marque/ui'
+import { EmptyState } from '@marque/ui'
 import type { InitialMarket } from './initial'
 import { track } from '../../lib/track'
 import { MarketToolbar } from './MarketToolbar'
 import { MarketList } from './MarketList'
 import { RegisterTable } from './RegisterTable'
 import { AgentCard } from '../_components/market/AgentCard'
-import { TABS, ifaceLabel, measuredAgo, type MarketRow, type MarketTab } from './market-model'
+import { Sheet } from '../_components/ui'
+import { CompareTable } from '../compare/CompareTable'
+import { TABS, hireHref, ifaceLabel, measuredAgo, type MarketRow, type MarketTab } from './market-model'
 import {
   activeFilters,
   apiQuery,
@@ -108,8 +110,12 @@ export function Marketplace({ category: fixedCategory, initial }: { category?: s
     return () => window.removeEventListener('popstate', onPop)
   }, [fixedCategory])
 
+  // Remember a view only once the buyer changes it; the default is never written.
+  const viewAtLoad = useRef<string | null>(null)
   useEffect(() => {
-    if (ready) storeView(state.view)
+    if (!ready) return
+    if (viewAtLoad.current === null) { viewAtLoad.current = state.view; return }
+    if (state.view !== viewAtLoad.current) { storeView(state.view); viewAtLoad.current = state.view }
   }, [state.view, ready])
 
   /* --- the fetch: unchanged contract ---------------------------------- */
@@ -213,6 +219,11 @@ export function Marketplace({ category: fixedCategory, initial }: { category?: s
   }, [])
 
   const compareHref = `/compare?agents=${selected.map((s) => encodeURIComponent(s.agentId)).join(',')}`
+  // Compare opens over the marketplace (29 Sep): the rows are already here, so the sheet
+  // is instant and closing it returns to the same scroll and filters. /compare stays as
+  // the shareable page.
+  const [comparing, setComparing] = useState(false)
+  useEffect(() => { if (selected.length < 2) setComparing(false) }, [selected.length])
 
   /* --- derived display ------------------------------------------------ */
 
@@ -425,18 +436,37 @@ export function Marketplace({ category: fixedCategory, initial }: { category?: s
               </span>
             ))}
           </span>
-          <LinkButton
-            variant="primary"
-            size="sm"
-            href={compareHref}
-            {...(selected.length < 2
-              ? { 'aria-disabled': true, tabIndex: -1, onClick: (e: React.MouseEvent) => e.preventDefault() }
-              : {})}
+          <button
+            type="button"
+            className="btn btn--sm btn--primary"
+            disabled={selected.length < 2}
+            onClick={() => setComparing(true)}
           >
             Compare{selected.length >= 2 ? ` ${selected.length}` : ''}
-          </LinkButton>
+          </button>
         </div>
       )}
+
+      <Sheet
+        open={comparing && selected.length >= 2}
+        onClose={() => setComparing(false)}
+        size="wide"
+        label="Compare agents"
+        title={<span className="t-h3">Comparing {selected.length} agents</span>}
+        footer={
+          <div className={styles.compareFoot}>
+            <span>Ratings count verified buyers only. Paid jobs are read from BNB Chain.</span>
+            <Link href={compareHref} prefetch={false}>Open as a page</Link>
+          </div>
+        }
+      >
+        <CompareTable
+          chosen={selected}
+          hireLink={(a) => hireHref(a)}
+          tryLink={(a) => `${hireHref(a)}&try=1`}
+          onNavigate={() => setComparing(false)}
+        />
+      </Sheet>
     </>
   )
 }

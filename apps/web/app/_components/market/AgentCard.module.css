@@ -9,7 +9,8 @@
   padding: 18px 18px 14px;
   border: 1px solid var(--hair);
   border-radius: var(--r-3);
-  background: color-mix(in srgb, var(--panel) 78%, transparent);
+  background: var(--panel-fill);
+  box-shadow: var(--panel-sheen);
   overflow: hidden;
   isolation: isolate;
   transition: border-color var(--t-panel) var(--ease), background-color var(--t-panel) var(--ease);
@@ -114,3 +115,6 @@
   .stats dd { font-size: 14px; }
 }
 @media (pointer: coarse) { .compare { min-height: 44px; } }
+
+/* A figure that does not exist yet reads as a state, not as a number. */
+.none { color: var(--ink-3); font-weight: 400; }

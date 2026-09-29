@@ -321,6 +321,7 @@
     .sheet-head { padding: 16px 24px; }
     .sheet-body { padding: 24px; }
     .sheet-foot { padding: 16px 24px; border-radius: 0 0 var(--r-3) var(--r-3); }
+    .sheet--wide { width: min(1040px, calc(100vw - 24px)); }
   }
 
   .modal-wrap { position: fixed; inset: 0; z-index: 81; display: grid; place-items: center; padding: 16px; }
@@ -382,7 +383,7 @@
   .tp-track { position: absolute; top: 0; left: 0; height: 100%; display: flex; align-items: center; gap: 40px; padding-right: 40px; white-space: nowrap; animation: tape-scroll-x var(--tape-s, 80s) linear infinite; }
   .tp:hover .tp-track, .tp:focus-within .tp-track { animation-play-state: paused; }
   @keyframes tape-scroll-x { to { transform: translateX(-50%); } }
-  .tp-item { display: inline-flex; align-items: center; gap: 10px; font-size: 13px; color: var(--ink-2); text-decoration: none; }
+  .tp-item { display: inline-flex; align-items: center; gap: 10px; font-size: 13px; color: var(--ink-2); text-decoration: none; min-height: 24px; }
   .tp-item:hover .tp-agent { color: var(--brass); }
   .tp-kind { width: 6px; height: 6px; border-radius: 50%; background: var(--moss); }
   .tp-item[data-kind='rating'] .tp-kind { background: var(--brass); }

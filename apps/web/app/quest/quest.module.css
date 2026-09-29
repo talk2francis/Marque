@@ -1,7 +1,47 @@
 .page { max-width: calc(1080px + 2 * var(--margin)); margin: 0 auto; padding: var(--s-6) var(--margin) 0; }
-.head { position: relative; padding: var(--s-6) 0 var(--s-6); }
+.head { position: relative; isolation: isolate; padding: var(--s-6) 0 var(--s-7); min-height: clamp(300px, 27vw, 380px); }
 .head h1 { margin: var(--s-4) 0 0; max-width: 16ch; }
-.lede { margin: var(--s-4) 0 0; max-width: 60ch; font-size: var(--fs-body-l); color: var(--ink-2); }
+.lede { margin: var(--s-4) 0 0; max-width: 38ch; font-size: var(--fs-body-l); color: var(--ink-2); }
+
+/* The Proof Causeway (29 Sep world plates): a route of five markers to a destination.
+   Wide enough to keep the whole route and the destination in view; the left edge
+   dissolves under the copy only a little, so the first marker survives, and the bottom
+   fades out before the wallet and tracker begin. No labels on the picture: the tracker
+   below is the progress. A background, so only the resolved theme's file loads. */
+.art {
+  position: absolute; z-index: -1; top: calc(-1 * var(--s-6)); right: calc(50% - 50vw);
+  width: min(62vw, 1120px); aspect-ratio: 2.3 / 1;
+  pointer-events: none;
+  -webkit-mask-image:
+    linear-gradient(to right, transparent 0, rgba(0, 0, 0, 0.35) 8%, rgba(0, 0, 0, 0.75) 15%, #000 22%),
+    linear-gradient(to top, transparent 0, rgba(0, 0, 0, 0.55) 14%, #000 32%),
+    linear-gradient(to bottom, transparent 0, rgba(0, 0, 0, 0.5) 9%, #000 22%);
+  -webkit-mask-composite: source-in, source-in;
+  mask-image:
+    linear-gradient(to right, transparent 0, rgba(0, 0, 0, 0.35) 8%, rgba(0, 0, 0, 0.75) 15%, #000 22%),
+    linear-gradient(to top, transparent 0, rgba(0, 0, 0, 0.55) 14%, #000 32%),
+    linear-gradient(to bottom, transparent 0, rgba(0, 0, 0, 0.5) 9%, #000 22%);
+  mask-composite: intersect;
+}
+.artImg { position: absolute; inset: 0; background: 50% 62% / cover no-repeat url('/brand/world/quest-night.webp'); }
+:global([data-theme='day']) .artImg { background-image: url('/brand/world/quest-day.webp'); }
+@media (max-width: 1100px) {
+  .art { width: 74vw; opacity: 0.92; }
+  .lede { max-width: 40ch; }
+}
+/* Phones: the copy, then the causeway as an edge-to-edge strip, then the tracker. */
+@media (max-width: 760px) {
+  .head { min-height: 0; padding-bottom: 0; display: flex; flex-direction: column; }
+  .art {
+    position: relative; order: 9; top: auto; right: auto; z-index: 0; opacity: 1;
+    width: 100vw; margin: var(--s-4) calc(50% - 50vw) 0; aspect-ratio: 2 / 1; max-height: 34svh;
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 16%, #000 66%, transparent 100%);
+    mask-image: linear-gradient(to bottom, transparent 0, #000 16%, #000 66%, transparent 100%);
+  }
+  .artImg { background-image: url('/brand/world/quest-night-1100.webp'); background-position: 58% 62%; }
+  :global([data-theme='day']) .artImg { background-image: url('/brand/world/quest-day-1100.webp'); }
+  .lede { max-width: none; }
+}
 .body { display: grid; gap: var(--s-5); }
 .wallet { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px 24px; padding: 18px 20px; border: 1px solid var(--hair-2); border-radius: var(--r-3); background: color-mix(in srgb, var(--panel) 65%, transparent); }
 .walletLeft { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; }

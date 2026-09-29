@@ -204,8 +204,13 @@ export const CLEARED_FILTERS: Partial<MarketState> = {
   iface: null,
 }
 
-/** The view preference is a convenience, so a failed read must never break the page. */
-const VIEW_KEY = 'marque.market.view'
+/**
+ * The view preference is a convenience, so a failed read must never break the page.
+ * Stored only when the buyer toggles it (29 Sep): the old code saved whatever view it
+ * rendered, so visitors from the list-default days kept seeing the list. New key, so
+ * those saved defaults are ignored and grid is the default again.
+ */
+const VIEW_KEY = 'marque.market.view.v2'
 export function readStoredView(): MarketView | null {
   try {
     const v = window.localStorage.getItem(VIEW_KEY)

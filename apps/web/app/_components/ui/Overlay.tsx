@@ -41,8 +41,10 @@ export function Drawer({ open, onClose, label, head, children }: { open: boolean
  * Bottom sheet on phones, a right-side panel from 1024 px. `surface="chamber"`
  * drops the sheet into the deep ground: money is moving (principle 5).
  */
-export function Sheet({ open, onClose, title, label, footer, surface, children }: {
-  open: boolean; onClose: () => void; title: ReactNode; label: string; footer?: ReactNode; surface?: 'chamber'; children: ReactNode
+export function Sheet({ open, onClose, title, label, footer, surface, size, children }: {
+  open: boolean; onClose: () => void; title: ReactNode; label: string; footer?: ReactNode; surface?: 'chamber'
+  /** 'wide' for side-by-side content (the compare sheet): up to 1040 px on desktop. */
+  size?: 'wide'; children: ReactNode
 }) {
   const ref = useRef<HTMLDivElement>(null)
   const portal = usePortal()
@@ -51,7 +53,7 @@ export function Sheet({ open, onClose, title, label, footer, surface, children }
   return createPortal(
     <>
       <div className="overlay-scrim" onClick={onClose} aria-hidden="true" />
-      <div ref={ref} className="sheet" role="dialog" aria-modal="true" aria-label={label} data-surface={surface}>
+      <div ref={ref} className={size === 'wide' ? 'sheet sheet--wide' : 'sheet'} role="dialog" aria-modal="true" aria-label={label} data-surface={surface}>
         <span className="sheet-grip" aria-hidden="true" />
         <div className="sheet-head">
           <div className="sheet-title">{title}</div>
