@@ -5,6 +5,7 @@ import { db, firstPartyAgents } from '@marque/db'
 import { NETWORKS, campaignChainId, assetAt, SUPPORTED_CHAINS, type ChainId } from './config.js'
 import { REPUTATION_REGISTRY, LOG_WINDOW, cursorOf, logsClient } from './indexer.js'
 import { DELIVERED, type JobState } from './state.js'
+import { chainClient } from './chain.js'
 import { QUEST_CATEGORIES, type QuestCategory } from './supply.js'
 
 /**
@@ -271,7 +272,11 @@ export async function questStats(chainId: ChainId = campaignChainId()) {
 export async function indexerStatus() {
   return Promise.all(SUPPORTED_CHAINS.map(async (chainId) => {
     const cursor = await cursorOf(chainId)
-    const head = await logsClient(chainId).getBlockNumber().then(Number).catch(() => null)
+    // The highest head from two independent pools: one lagging node behind a load balancer
+    // once reported a block 21 hours old, and /protocol showed a negative lag (29 Sep).
+    const heads = await Promise.all([logsClient(chainId), chainClient(chainId)].map((c) => c.getBlockNumber().then(Number).catch(() => null)))
+    const known = heads.filter((h): h is number => h !== null)
+    const head = known.length ? Math.max(...known) : null
     return { chainId, cursorBlock: cursor, headBlock: head, lagBlocks: cursor !== null && head !== null ? head - cursor : null, logWindowBlocks: Number(LOG_WINDOW[chainId]) }
   }))
 }

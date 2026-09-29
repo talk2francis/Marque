@@ -101,7 +101,7 @@ export function AgentCard({ a, compare, base = '', variant = 'default' }: {
         <div>
           <dt>Rating</dt>
           <dd>{verified.averageStars !== null && verified.count > 0 ? <>{verified.averageStars.toFixed(1)}<span className={styles.star} aria-hidden="true">★</span></> : <span className={styles.none}>Not yet</span>}</dd>
-          <dd className={styles.src}>{verified.count > 0 ? `${verified.count} verified` : 'no verified buyer yet'}</dd>
+          <dd className={styles.src}>{verified.count > 0 ? `${verified.count} verified` : 'no verified buyers'}</dd>
         </div>
       </dl>
 
