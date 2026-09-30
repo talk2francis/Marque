@@ -1,0 +1,49 @@
+/* The whitepaper's blocks inside the docs shell (30 Sep). Tokens only. */
+.ul, .ol { margin: 0 0 var(--s-4); padding-left: 1.2em; display: flex; flex-direction: column; gap: 8px; color: var(--ink-2); line-height: 1.6; }
+.ol li::marker { color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.ul li::marker { color: var(--accent); }
+
+.tableWrap { margin: var(--s-4) 0 var(--s-5); overflow-x: auto; }
+.table { width: 100%; border-collapse: collapse; font-size: 14px; line-height: 1.5; }
+.table th { text-align: left; font-size: var(--fs-label); font-weight: 500; letter-spacing: var(--tracking-eyebrow); text-transform: uppercase; color: var(--ink-3); padding: 0 14px 10px 0; border-bottom: 1px solid var(--hair-2); white-space: nowrap; }
+.table td { padding: 11px 14px 11px 0; border-bottom: 1px solid var(--hair); color: var(--ink-2); vertical-align: top; }
+.table td:first-child { color: var(--ink); font-weight: 500; }
+.table td:global(.mono) { font-size: 12.5px; overflow-wrap: anywhere; }
+.tableWrap figcaption { margin-top: 10px; font-size: 12.5px; color: var(--ink-3); }
+
+.callout { margin: var(--s-4) 0 var(--s-5); padding: 18px 20px; border: 1px solid var(--hair-2); border-left: 2px solid var(--accent); border-radius: var(--r-2); background: var(--panel-fill); box-shadow: var(--panel-sheen); }
+.callout b { display: block; margin-bottom: 6px; font-weight: 500; color: var(--ink); }
+.callout p { margin: 0; color: var(--ink-2); }
+
+.figures { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin: var(--s-5) 0; border-top: 1px solid var(--hair); }
+.figures > div { display: flex; flex-direction: column; gap: 6px; padding: 18px 16px 4px 0; }
+.figures > div + div { padding-left: 16px; border-left: 1px solid var(--hair); }
+.figures dt { font-size: var(--fs-label); font-weight: 500; letter-spacing: var(--tracking-eyebrow); text-transform: uppercase; color: var(--ink-3); }
+.figures dd { margin: 0; }
+.figNum { font-size: 34px; font-weight: 300; line-height: 1; letter-spacing: -0.02em; color: var(--ink); font-variant-numeric: tabular-nums; }
+.figNote { font-size: 12.5px; color: var(--ink-3); }
+
+.roadmap { list-style: none; margin: var(--s-5) 0 0; padding: 0; display: flex; flex-direction: column; }
+.roadmap > li { position: relative; padding: 0 0 var(--s-5) 28px; }
+.roadmap > li::before { content: ''; position: absolute; left: 5px; top: 18px; bottom: 0; width: 1px; background: var(--hair-2); }
+.roadmap > li:last-child::before { display: none; }
+.rmHead { display: flex; align-items: baseline; gap: 12px; margin-bottom: 10px; }
+.rmHead b { font-size: 18px; font-weight: 500; color: var(--ink); }
+.rmHead span:last-child { font-size: 12.5px; color: var(--ink-3); }
+.rmDot { position: absolute; left: 0; top: 7px; width: 11px; height: 11px; border-radius: 50%; border: 1px solid var(--hair-2); background: var(--canvas); }
+.roadmap > li[data-h='shipped'] .rmDot { background: var(--moss); border-color: var(--moss); }
+.roadmap > li[data-h='next'] .rmDot { background: var(--accent); border-color: var(--accent); }
+.roadmap ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 22px; }
+.roadmap ul li { font-size: 14px; line-height: 1.55; color: var(--ink-2); }
+.roadmap ul li b { color: var(--ink); font-weight: 500; }
+
+.links { list-style: none; margin: var(--s-3) 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 14px; }
+.links a { color: var(--ink); text-underline-offset: 3px; }
+.version { margin: var(--s-6) 0 0; padding-top: var(--s-4); border-top: 1px solid var(--hair); font-size: 12.5px; color: var(--ink-3); }
+
+@media (max-width: 760px) {
+  .figures { grid-template-columns: 1fr 1fr; }
+  .figures > div:nth-child(3) { padding-left: 0; border-left: 0; }
+  .figures > div:nth-child(n + 3) { border-top: 1px solid var(--hair); }
+  .roadmap ul { grid-template-columns: 1fr; }
+}

@@ -1,7 +1,7 @@
 import 'server-only'
 import { sql } from 'drizzle-orm'
 import { cachedProjection, db, firstPartyIdListSql, oneAgentIdSql } from '@marque/db'
-import { coverage, formatAmount, QUEST_CATEGORIES, teamWallets, assetAt, type ChainId } from '@marque/commerce'
+import { coverage, disputeWindowSeconds, formatAmount, QUEST_CATEGORIES, teamWallets, assetAt, type ChainId } from '@marque/commerce'
 import { funnel } from '@marque/registry'
 import { marketplaceAgents, type MarketRow } from './marketplace'
 import { readLedger } from './ledger'
@@ -183,6 +183,8 @@ export async function ledgerHeadline(): Promise<LedgerHeadline | null> {
 
 export interface LatestHire {
   jobId: string
+  /** The agent's canonical id, for its portrait. */
+  agentId: string | null
   agent: string
   category: string
   price: string | null
@@ -193,6 +195,8 @@ export interface LatestHire {
   /** The job's first chain event (JobCreated), and its settlement (JobCompleted) once the review window closed. */
   openedTx: string | null
   settledTx: string | null
+  /** When escrow releases to the agent unless the buyer reports a problem. */
+  releaseAt: string | null
 }
 
 /**
@@ -201,8 +205,8 @@ export interface LatestHire {
  */
 export async function latestHire(): Promise<LatestHire | null> {
   const [j] = rowsOf(await db().execute(sql`
-    select j.job_id, j.client, j.provider, j.funded_raw, j.token, i.category, a.name, a.token_id,
-           (select json_object_agg(e.name, json_build_object('tx', e.tx_hash, 'at', e.block_time))
+    select j.job_id, j.client, j.provider, j.funded_raw, j.token, i.category, i.agent_id, a.name, a.token_id,
+           (select json_object_agg(e.name, json_build_object('tx', e.tx_hash, 'at', e.block_time, 'block', e.block_number))
               from commerce_event e where e.chain_id = j.chain_id and e.job_id = j.job_id) as ev
     from commerce_job j
     join hire_intent i on i.id = j.intent_id
@@ -210,17 +214,19 @@ export async function latestHire(): Promise<LatestHire | null> {
     where j.chain_id = 56 and j.state in ('SUBMITTED', 'DISPUTED', 'COMPLETED', 'PAID')
     order by j.updated_block desc nulls last limit 1`).catch(() => []))
   if (!j) return null
-  const ev = (j['ev'] ?? {}) as Record<string, { tx: string; at: string | null }>
+  const ev = (j['ev'] ?? {}) as Record<string, { tx: string; at: string | null; block?: number }>
   const [r] = rowsOf(await db().execute(sql`
     select value, value_decimals, tx_hash, block_time from rating
     where chain_id = 56 and client = ${String(j['client'])} and agent_token_id = ${String(j['token_id'] ?? '')} and not revoked
-    order by block_number desc limit 1`).catch(() => []))
+      and block_number >= ${Number(ev['JobSubmitted']?.block ?? Number.MAX_SAFE_INTEGER)}
+    order by block_number asc limit 1`).catch(() => []))
   const tok = j['token'] ? assetAt(56 as ChainId, String(j['token'])) : null
   const funded = ev['JobFunded']?.at ? Date.parse(ev['JobFunded'].at) : null
   const submitted = ev['JobSubmitted']?.at ? Date.parse(ev['JobSubmitted'].at) : null
   const iso = (v: string | null | undefined) => (v ? new Date(v).toISOString() : null)
   return {
     jobId: String(j['job_id']),
+    agentId: j['agent_id'] ? String(j['agent_id']) : null,
     agent: String(j['name'] ?? 'An agent'),
     category: CAT_LABEL[String(j['category'] ?? '')] ?? 'Agent',
     price: tok && j['funded_raw'] ? `${formatAmount(String(j['funded_raw']), tok.decimals)} ${tok.symbol}` : null,
@@ -235,5 +241,6 @@ export async function latestHire(): Promise<LatestHire | null> {
     stars: r ? Math.round(Number(r['value']) / 10 ** Number(r['value_decimals'] ?? 0) / 20) : null,
     openedTx: ev['JobCreated']?.tx ?? null,
     settledTx: ev['JobCompleted']?.tx ?? null,
+    releaseAt: submitted !== null && !ev['JobCompleted'] ? await disputeWindowSeconds(56 as ChainId).then((w) => new Date(submitted + w * 1000).toISOString()).catch(() => null) : null,
   }
 }

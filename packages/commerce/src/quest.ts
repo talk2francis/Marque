@@ -222,12 +222,17 @@ export async function walletQuest(address: string, chainId: ChainId = campaignCh
 
 /** GET /api/v1/phase2/job/:chainId/:jobId */
 export async function questJob(chainId: ChainId, jobId: string) {
-  const [h] = await hiresFor(sql`j.chain_id = ${chainId} and j.job_id = ${jobId}`)
+  // Ratings are bound across all of the client's hires, then this job's is read: bound alone,
+  // an earlier job's rating fell through to this one (30 Sep, job 56843 showed 56842's).
+  const client = await clientOf(chainId, jobId)
+  const all = client ? await hiresFor(sql`j.chain_id = ${chainId} and j.client = ${client}`) : []
+  const h = all.find((x) => x.jobId === jobId) ?? (await hiresFor(sql`j.chain_id = ${chainId} and j.job_id = ${jobId}`))[0]
   const events = rowsOf(await db().execute(sql`
     select name, contract, tx_hash, log_index, block_number, block_time, args from commerce_event
     where chain_id = ${chainId} and job_id = ${jobId} order by block_number, log_index`))
   if (!h && !events.length) return null
-  if (h) await attachRatings((await clientOf(chainId, jobId)) ?? '', [h])
+  if (h) await attachRatings(client ?? '', all.length ? all : [h])
+  if (h?.reasons.includes('rating_unbound')) { h.rating = null; h.tx.rating = null }
   const [j] = rowsOf(await db().execute(sql`select * from commerce_job where chain_id = ${chainId} and job_id = ${jobId}`))
   const [intent] = h?.intentId ? rowsOf(await db().execute(sql`select id, wallet, agent_id, category, quote_id, description_hash, created_at, bound_at, bind_source from hire_intent where id = ${h.intentId}`)) : []
   // The feedbackURI of a Marque rating points here, so the comment behind each hash is served too.

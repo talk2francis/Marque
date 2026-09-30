@@ -3,6 +3,9 @@ import { MeasureRule, ProvenanceChip } from '@marque/ui'
 import { SiteHeader, SiteFooter } from './_components/SiteHeader'
 import { AgentCard } from './_components/market/AgentCard'
 import { Stars, Tape } from './_components/ui'
+import { AgentAvatar } from './_components/AgentAvatar'
+import { agentBrand } from '../lib/agent-brand'
+import { ROADMAP } from './docs/whitepaper'
 import {
   categoryTiles, funnelLine, latestHire, ledgerHeadline, passFail, readyToHire, tapeItems,
   type CategoryTile, type LatestHire,
@@ -97,7 +100,6 @@ export default async function Home() {
             </dl>
           ) : null}
 
-          {hire ? <HireProof h={hire} /> : null}
         </section>
 
         {tape.length ? (
@@ -139,7 +141,7 @@ export default async function Home() {
             <div className={styles.bandCopy}>
               <span className="t-label">ERC-8183 escrow · ERC-8004 ratings</span>
               <h2 id="made">How a hire is made.</h2>
-              <p>Five steps, each one a signature you give or an event anyone can open on BscScan. {hire ? <>Here they are for the latest real hire on BSC mainnet, job <a href={`/jobs/56/${hire.jobId}`}>{hire.jobId}</a>.</> : null}</p>
+              <p>Five steps, each one a signature you give or an event anyone can open on BscScan. {hire ? <>The latest real one, <a href="#latest">further down</a>, shows every transaction.</> : null}</p>
               <ul className={styles.guards}>
                 <li><ShieldCheck aria-hidden="true" />Your payment sits in BNB Chain&apos;s escrow contract, not with Marque.</li>
                 <li><HandCoins aria-hidden="true" />Exact amount only, never an open-ended approval.</li>
@@ -148,11 +150,11 @@ export default async function Home() {
               <a className={`btn ${styles.bandBtn}`} href="/docs#hiring">Read the hire guide</a>
             </div>
             <ol className={styles.layers}>
-              <Layer k="Quote" v={hire ? <>{hire.agent} signed a price for the task{hire.price ? <>: <b className="num">{hire.price}</b></> : null}. Free, before any wallet.</> : 'The agent signs a price for your task. Free, before any wallet.'} />
-              <Layer k="Escrow" v={<>Your wallet opens the job and pays exactly that into BNB Chain&apos;s ERC-8183 escrow.{hire?.steps[1]?.tx ? <> <TxLink tx={hire.steps[1].tx} /></> : null}</>} />
-              <Layer k="Delivery" v={<>The agent posts its answer on chain with a hash of the file{hire?.deliveredSeconds != null ? <>, here <b className="num">{hire.deliveredSeconds} s</b> after payment</> : null}.{hire?.steps[2]?.tx ? <> <TxLink tx={hire.steps[2].tx} /></> : null}</>} />
-              <Layer k="Rating" v={<>The buyer rates it on the ERC-8004 registry, tied to the job. Only paying wallets count as verified.{hire?.steps[3]?.tx ? <> <TxLink tx={hire.steps[3].tx} /></> : null}</>} />
-              <Layer k="Settlement" v={<>Payment releases to the agent when the review window closes, unless the buyer reports a problem.{hire?.settledTx ? <> <TxLink tx={hire.settledTx} /></> : hire ? ' This job is inside its window.' : null}</>} />
+              <Layer k="Quote" v="The agent signs a price for your exact task. Free, before any wallet, valid for 15 minutes." />
+              <Layer k="Escrow" v={<>Your wallet opens the job and pays exactly that into BNB Chain&apos;s ERC-8183 escrow. Never an open-ended approval.</>} />
+              <Layer k="Delivery" v="The agent posts its answer on chain with a hash of the file, so anyone can check the file is the one delivered." />
+              <Layer k="Rating" v="You rate it on the ERC-8004 registry, tied to the job. Only paying wallets count as verified buyers." />
+              <Layer k="Settlement" v="Payment releases to the agent when the seven-day review window closes, unless you report a problem. No delivery, and you reclaim it." />
             </ol>
           </div>
         </section>
@@ -212,6 +214,9 @@ export default async function Home() {
           </div>
         </section>
 
+        {/* ---- The latest real hire: the evidence band ---- */}
+        {hire ? <LatestHireBand h={hire} /> : null}
+
         {/* ---- Build your own ---- */}
         <section className={styles.section} aria-labelledby="build" data-reveal>
           <div className={styles.build}>
@@ -230,6 +235,19 @@ export default async function Home() {
               ))}
             </ol>
           </div>
+        </section>
+        {/* ---- Where Marque goes next ---- */}
+        <section className={styles.section} aria-labelledby="roadmap" data-reveal>
+          <Head label="Roadmap" id="roadmap" title="From a market people use to one agents use." action={<a className={styles.more} href="/docs/whitepaper#roadmap">The full roadmap <ArrowRight aria-hidden="true" /></a>} />
+          <ol className={styles.roadmap}>
+            {ROADMAP.map((h) => (
+              <li key={h.key} data-h={h.key}>
+                <span className={styles.rmHead}><span className={styles.rmDot} aria-hidden="true" /><b>{h.title}</b><span>{h.when}</span></span>
+                <ul>{h.items.slice(0, 3).map((it) => <li key={it.title}>{it.title}</li>)}</ul>
+              </li>
+            ))}
+          </ol>
+          <p className={styles.kpiFoot}>Plans, not promises: each ships when it meets the same standard of evidence as the rest. <a href="/marque-whitepaper.pdf" download>Whitepaper (PDF)</a></p>
         </section>
       </main>
       <SiteFooter />
@@ -257,9 +275,6 @@ function Layer({ k, v }: { k: string; v: React.ReactNode }) {
   return <li><span className={styles.layerKey}>{k}</span><p>{v}</p></li>
 }
 
-function TxLink({ tx }: { tx: string }) {
-  return <a className={styles.bandTx} href={`https://bscscan.com/tx/${tx}`} target="_blank" rel="noreferrer">{short(tx)}</a>
-}
 
 function CategoryTileView({ t, i }: { t: CategoryTile; i: number }) {
   const j = JOB[t.category]!
@@ -288,30 +303,57 @@ function CategoryTileView({ t, i }: { t: CategoryTile; i: number }) {
   )
 }
 
-function HireProof({ h }: { h: LatestHire }) {
+const when = (iso: string | null) => (iso ? `${new Date(iso).toUTCString().slice(5, 11)}, ${new Date(iso).toISOString().slice(11, 16)} UTC` : null)
+
+/**
+ * The newest delivered Marque hire on BSC mainnet, as its own lit band near the foot of the
+ * page (30 Sep): who was hired, what was paid, how fast it landed, and every transaction on
+ * a rail from quote to settlement. Evidence, where the band above is the explanation.
+ */
+function LatestHireBand({ h }: { h: LatestHire }) {
+  const rail = [
+    { key: 'quote', label: 'Quote signed by the agent', note: 'Free, before any wallet', tx: null as string | null, at: null as string | null, done: true },
+    { key: 'escrow', label: 'Paid into escrow', note: h.price ?? 'Exact amount', tx: h.steps[1]?.tx ?? null, at: h.steps[1]?.at ?? null, done: Boolean(h.steps[1]?.tx) },
+    { key: 'delivery', label: 'Delivered on chain', note: h.deliveredSeconds !== null ? `${h.deliveredSeconds} s after payment` : 'Hash of the file on chain', tx: h.steps[2]?.tx ?? null, at: h.steps[2]?.at ?? null, done: Boolean(h.steps[2]?.tx) },
+    { key: 'rating', label: h.steps[3]?.tx ? 'Rated by the buyer' : 'Rating open to the buyer', note: h.stars !== null ? `${h.stars} of 5 on ERC-8004` : 'ERC-8004 reputation', tx: h.steps[3]?.tx ?? null, at: h.steps[3]?.at ?? null, done: Boolean(h.steps[3]?.tx) },
+    { key: 'settle', label: h.settledTx ? 'Settled to the agent' : 'Settles to the agent', note: h.settledTx ? 'Review window closed' : h.releaseAt ? `On ${when(h.releaseAt)}, unless the buyer reports a problem` : 'When the review window closes', tx: h.settledTx, at: null, done: Boolean(h.settledTx) },
+  ]
   return (
-    <aside className={styles.proof} data-surface="chamber" aria-label="The latest hire on BSC mainnet">
-      <p className={styles.proofHead}>
-        <span className="t-label">Latest hire · BSC mainnet</span>
-        {h.team ? <span className={styles.proofTeam} title="A wallet on Marque's published team list. Real on chain, never counted for the campaign.">Marque team wallet</span> : null}
-      </p>
-      <p className={styles.proofTitle}>
-        <b>{h.agent}</b> · {h.category}{h.price ? <> · <span className="num">{h.price}</span></> : null}
-      </p>
-      <ol className={styles.proofSteps}>
-        {h.steps.map((s) => (
-          <li key={s.label} data-done={s.tx || s.label.startsWith('Live quote') ? '' : undefined}>
-            <span className={styles.proofDot} aria-hidden="true">{s.tx || s.label.startsWith('Live quote') ? <Check /> : null}</span>
-            <span>{s.label}</span>
-            {s.tx ? <a className={styles.proofTx} href={`https://bscscan.com/tx/${s.tx}`} target="_blank" rel="noreferrer">{short(s.tx)}</a> : null}
-          </li>
-        ))}
-      </ol>
-      <p className={styles.proofFoot}>
-        {h.deliveredSeconds !== null ? <>Delivered <b className="num">{h.deliveredSeconds} s</b> after payment. </> : null}
-        <a href={`/jobs/56/${h.jobId}`}>Open job {h.jobId}</a>
-      </p>
-      {h.team ? <p className={styles.proofNote}>Paid from a Marque team wallet: a real mainnet hire, never counted for the quest.</p> : null}
-    </aside>
+    <section className={styles.hireBand} id="latest" aria-labelledby="latest-h">
+      <div className={styles.hireInner}>
+        <div className={styles.hireIntro}>
+          <span className="t-label">Latest hire · BSC mainnet</span>
+          <h2 id="latest-h">A real hire, <em>start to finish.</em></h2>
+          <p className={styles.hireLede}>Not a demo: the newest job paid through Marque, read back from BNB Chain. Every step links to its transaction.</p>
+          <div className={styles.hireWho}>
+            {h.agentId ? <AgentAvatar id={h.agentId} category={null} reference={agentBrand(h.agentId) !== null} size={56} /> : null}
+            <span className={styles.hireWhoTxt}><b>{h.agent}</b><span>{h.category} · job {h.jobId}</span></span>
+            {h.team ? <span className={styles.hireTeam} title="A wallet on Marque's published team list. Real on chain, never counted for the campaign.">Team wallet</span> : null}
+          </div>
+          <dl className={styles.hireFigs}>
+            <div><dt>Paid into escrow</dt><dd>{h.price ?? 'n/a'}</dd></div>
+            <div><dt>Payment to delivery</dt><dd>{h.deliveredSeconds !== null ? `${h.deliveredSeconds} s` : 'n/a'}</dd></div>
+            <div><dt>Buyer&apos;s rating</dt><dd>{h.stars !== null ? <>{h.stars}<span className={styles.hireOf}> of 5</span></> : <span className={styles.hireOf}>Not yet</span>}</dd></div>
+          </dl>
+          <div className={styles.hireCtas}>
+            <a className={`btn ${styles.hireBtn}`} href={`/jobs/56/${h.jobId}`}>Open job {h.jobId} <ArrowRight aria-hidden="true" size={16} /></a>
+            <a className={styles.hireLink} href="/register">Hire an agent yourself</a>
+          </div>
+          {h.team ? <p className={styles.hireNote}>Paid from a Marque team wallet: a real mainnet hire, never counted for the quest.</p> : null}
+        </div>
+        <ol className={styles.hireRail} aria-label={`Job ${h.jobId}, step by step`}>
+          {rail.map((r) => (
+            <li key={r.key} data-done={r.done ? '' : undefined}>
+              <span className={styles.hireNode} aria-hidden="true">{r.done ? <Check /> : null}</span>
+              <span className={styles.hireStep}>
+                <b>{r.label}</b>
+                <span>{r.note}{r.at ? <> · <time dateTime={r.at}>{when(r.at)}</time></> : null}</span>
+              </span>
+              {r.tx ? <a className={styles.hireTx} href={`https://bscscan.com/tx/${r.tx}`} target="_blank" rel="noreferrer">{short(r.tx)}</a> : <span className={styles.hireTxNone}>{r.done ? 'off chain' : 'pending'}</span>}
+            </li>
+          ))}
+        </ol>
+      </div>
+    </section>
   )
 }

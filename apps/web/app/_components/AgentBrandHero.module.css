@@ -18,10 +18,13 @@
 .echo {
   position: absolute; inset: -16% -6% -26%;
   background: var(--hero) var(--hero-position) / cover no-repeat;
-  filter: blur(46px) saturate(1.05);
-  opacity: 0.22;
+  filter: blur(64px) saturate(0.9);
+  opacity: 0.2;
   pointer-events: none;
   z-index: -1;
+  /* The echo is air, not a box: it fades out from the artifact in every direction. */
+  -webkit-mask-image: radial-gradient(closest-side at 63% 48%, #000 30%, transparent 100%);
+  mask-image: radial-gradient(closest-side at 63% 48%, #000 30%, transparent 100%);
 }
 /* Layer A: the sharp artifact, faded at its edges by an alpha mask (the gradient is an
    alpha channel, never a visible colour). The night art was drawn dark, so it is shown as
@@ -30,25 +33,31 @@
   position: absolute; inset: 0; display: block;
   border-radius: inherit;
   background: var(--hero) var(--hero-position) / cover no-repeat;
+  /* Night (30 Sep): the cool night air meets a warm graphite page, so straight edge fades
+     read as a rectangle. Long linear ramps take every edge to zero, and an ellipse around
+     the artifact makes the falloff organic, so the scene dissolves into the page. */
   -webkit-mask-image:
-    linear-gradient(to right, transparent 0, #000 12%, #000 92%, transparent 100%),
-    linear-gradient(to bottom, transparent 0, #000 10%, #000 70%, transparent 100%);
-  -webkit-mask-composite: source-in;
+    linear-gradient(to right, transparent 0, rgba(0, 0, 0, 0.35) 10%, #000 30%, #000 80%, rgba(0, 0, 0, 0.4) 93%, transparent 100%),
+    linear-gradient(to bottom, transparent 0, rgba(0, 0, 0, 0.45) 14%, #000 34%, #000 60%, rgba(0, 0, 0, 0.35) 82%, transparent 100%),
+    radial-gradient(ellipse 70% 95% at 63% 48%, #000 45%, rgba(0, 0, 0, 0.55) 75%, rgba(0, 0, 0, 0.2) 100%);
+  -webkit-mask-composite: source-in, source-in;
   mask-image:
-    linear-gradient(to right, transparent 0, #000 12%, #000 92%, transparent 100%),
-    linear-gradient(to bottom, transparent 0, #000 10%, #000 70%, transparent 100%);
+    linear-gradient(to right, transparent 0, rgba(0, 0, 0, 0.35) 10%, #000 30%, #000 80%, rgba(0, 0, 0, 0.4) 93%, transparent 100%),
+    linear-gradient(to bottom, transparent 0, rgba(0, 0, 0, 0.45) 14%, #000 34%, #000 60%, rgba(0, 0, 0, 0.35) 82%, transparent 100%),
+    radial-gradient(ellipse 70% 95% at 63% 48%, #000 45%, rgba(0, 0, 0, 0.55) 75%, rgba(0, 0, 0, 0.2) 100%);
   mask-composite: intersect;
 }
 :global([data-theme='day']) .art {
   filter: saturate(0.94);
+  -webkit-mask-composite: source-in;
   -webkit-mask-image:
     linear-gradient(to right, transparent 0, #000 16%, #000 90%, transparent 100%),
-    linear-gradient(to bottom, transparent 0, #000 12%, #000 62%, transparent 100%);
+    linear-gradient(to bottom, transparent 0, rgba(0, 0, 0, 0.5) 10%, #000 22%, #000 62%, transparent 100%);
   mask-image:
     linear-gradient(to right, transparent 0, #000 16%, #000 90%, transparent 100%),
-    linear-gradient(to bottom, transparent 0, #000 12%, #000 62%, transparent 100%);
+    linear-gradient(to bottom, transparent 0, rgba(0, 0, 0, 0.5) 10%, #000 22%, #000 62%, transparent 100%);
 }
-:global([data-theme='day']) .echo { opacity: 0.16; }
+:global([data-theme='day']) .echo { opacity: 0.16; filter: blur(52px) saturate(1.05); }
 
 /* The operative, anchored to the stage's lower edge, about 40% over it. */
 .id { position: relative; display: flex; align-items: flex-end; gap: 22px; margin-top: -46px; padding-left: clamp(4px, 2vw, 20px); }
@@ -68,7 +77,7 @@
   .stage { aspect-ratio: 2.1 / 1; min-height: 0; --hero: var(--hero-night-small); }
   .echo { inset: -16% 0 -26%; }
   :global([data-theme='day']) .stage { --hero: var(--hero-day-small); }
-  .art, :global([data-theme='day']) .art {
+  :global([data-theme='day']) .art {
     -webkit-mask-image:
       linear-gradient(to right, transparent 0, #000 8%, #000 94%, transparent 100%),
       linear-gradient(to bottom, transparent 0, #000 10%, #000 60%, transparent 100%);

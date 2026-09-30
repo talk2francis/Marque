@@ -92,35 +92,6 @@
 .callouts dd { margin: 0; font-size: 13px; color: var(--ink-2); text-shadow: 0 0 14px var(--canvas), 0 0 3px var(--canvas); }
 .callouts b { color: var(--ink); font-weight: 500; }
 
-/* The latest real hire, on the plate: the product proving itself, not a picture of it. */
-.proof {
-  grid-column: 2; grid-row: 3; justify-self: end; align-self: end;
-  position: relative;
-  width: min(380px, 100%);
-  padding: 16px 18px 14px;
-  border: 1px solid var(--hair-2);
-  border-radius: var(--r-3);
-  background: color-mix(in srgb, var(--canvas) 93%, transparent);
-  color: var(--ink);
-  box-shadow: var(--elev-3);
-}
-.proofHead { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 0 0 8px; }
-.proofHead :global(.t-label) { color: var(--ink-2); }
-.proofTeam { white-space: nowrap; font-size: 11px; color: var(--ink-3); border: 1px dashed var(--hair-2); border-radius: var(--r-pill); padding: 1px 7px; }
-.proofTitle { margin: 0 0 12px; font-size: 14.5px; color: var(--ink-2); }
-.proofTitle b { color: var(--ink); font-weight: 500; }
-.proofSteps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
-.proofSteps li { display: grid; grid-template-columns: 20px 1fr auto; align-items: center; gap: 10px; font-size: 13.5px; color: var(--ink-3); }
-.proofSteps li[data-done] { color: var(--ink); }
-.proofDot { display: grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; border: 1px solid var(--hair-2); }
-.proofSteps li[data-done] .proofDot { background: var(--moss); border-color: var(--moss); color: var(--ink-inverse); }
-.proofDot svg { width: 11px; height: 11px; stroke-width: 3; }
-.proofTx { font-family: var(--font-mono); font-size: 12px; color: var(--chain); text-decoration: none; padding-block: 4px; margin-block: -4px; }
-.proofTx:hover { text-decoration: underline; }
-.proofFoot { margin: 12px 0 0; padding-top: 10px; border-top: 1px solid var(--hair); font-size: 13px; color: var(--ink-2); }
-.proofFoot a { color: var(--ink); }
-.proofNote { margin: 8px 0 0; font-size: 12px; line-height: 1.45; color: var(--ink-3); }
-
 /* ---------- The tape: a full-bleed strip with its label ---------- */
 .tapeBand {
   display: flex; align-items: stretch;
@@ -269,6 +240,87 @@
 .checks li:last-child { border-bottom: 1px solid var(--hair); }
 .checkN { flex: none; display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--hair-2); font-family: var(--font-mono); font-size: 11px; color: var(--ink-3); }
 
+/* ---------- The latest hire: the evidence band (30 Sep) ----------
+   Same family as the explanation band (the lit forest field), laid out as a record:
+   who, what, how fast on the left; the job's rail on the right, filled in champagne
+   up to the step the chain has reached. */
+.hireBand {
+  position: relative;
+  margin-top: clamp(64px, 7.5vw, 104px);
+  margin-inline: calc(50% - 50vw);
+  padding-block: clamp(56px, 7vw, 96px);
+  background:
+    var(--grain),
+    linear-gradient(90deg, transparent, color-mix(in srgb, var(--accent) 45%, transparent) 30%, color-mix(in srgb, var(--accent) 45%, transparent) 70%, transparent) top / 100% 1px no-repeat,
+    radial-gradient(56rem 32rem at 100% 0%, color-mix(in srgb, var(--accent) 9%, transparent), transparent 70%),
+    radial-gradient(60rem 34rem at 0% 110%, color-mix(in srgb, var(--on-forest) 6%, transparent), transparent 70%),
+    linear-gradient(180deg, color-mix(in srgb, var(--forest) 88%, var(--canvas)) 0%, var(--forest) 100%);
+  background-size: 160px 160px, 100% 1px, auto, auto, auto;
+  color: var(--on-forest);
+  content-visibility: auto; contain-intrinsic-size: auto 640px;
+}
+.hireInner { max-width: var(--maxw); margin: 0 auto; padding-inline: var(--margin); display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: clamp(32px, 6vw, 88px); align-items: center; }
+.hireIntro { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+.hireIntro :global(.t-label) { color: var(--on-forest-2); }
+.hireIntro h2 { margin: 0; font-family: var(--font-serif); font-weight: 400; font-size: clamp(34px, 3.6vw, 48px); line-height: 1.02; letter-spacing: -0.01em; color: var(--on-forest); }
+.hireIntro h2 em { font-style: italic; color: var(--accent); }
+.hireLede { margin: 0; max-width: 44ch; font-size: 15px; line-height: 1.6; color: var(--on-forest-2); }
+.hireWho { display: flex; align-items: center; gap: 14px; margin-top: 4px; }
+.hireWho :global(.agent-avatar) { box-shadow: 0 0 0 1px var(--on-forest-hair); }
+.hireWhoTxt { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.hireWhoTxt b { font-size: 18px; font-weight: 500; color: var(--on-forest); }
+.hireWhoTxt span { font-size: 13.5px; color: var(--on-forest-2); }
+.hireTeam { margin-left: auto; white-space: nowrap; font-size: 11.5px; color: var(--on-forest-2); border: 1px dashed var(--on-forest-hair); border-radius: var(--r-pill); padding: 2px 9px; }
+.hireFigs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 4px 0 0; border-top: 1px solid var(--on-forest-hair); }
+.hireFigs > div { display: flex; flex-direction: column; gap: 8px; padding: 16px 16px 0 0; min-width: 0; }
+.hireFigs > div + div { padding-left: 16px; border-left: 1px solid var(--on-forest-hair); }
+.hireFigs dt { font-size: var(--fs-label); font-weight: 500; letter-spacing: var(--tracking-eyebrow); text-transform: uppercase; color: var(--on-forest-2); }
+.hireFigs dd { margin: 0; font-size: clamp(22px, 2.2vw, 28px); font-weight: 300; line-height: 1.1; letter-spacing: -0.015em; color: var(--on-forest); font-variant-numeric: tabular-nums; }
+.hireOf { font-size: 0.62em; color: var(--on-forest-2); letter-spacing: 0; }
+.hireCtas { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; margin-top: 8px; }
+.hireBtn { background: var(--on-forest) !important; color: var(--forest) !important; border-color: var(--on-forest) !important; }
+.hireBtn:hover { background: color-mix(in srgb, var(--on-forest) 88%, var(--forest)) !important; }
+.hireLink { font-size: 14px; color: var(--on-forest); text-underline-offset: 3px; text-decoration-color: var(--on-forest-hair); }
+.hireNote { margin: 0; font-size: 12.5px; line-height: 1.5; color: var(--on-forest-2); max-width: 52ch; }
+
+/* The rail: one node per step, a line that runs between them. */
+.hireRail {
+  list-style: none; margin: 0; padding: 22px 24px;
+  border: 1px solid var(--on-forest-hair); border-radius: var(--r-3);
+  background: color-mix(in srgb, var(--forest) 55%, var(--canvas) 18%);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--on-forest) 8%, transparent), 0 30px 60px -40px rgba(0, 0, 0, 0.5);
+}
+.hireRail li { position: relative; display: grid; grid-template-columns: 26px minmax(0, 1fr) auto; align-items: start; gap: 14px; padding: 12px 0; }
+.hireRail li + li { border-top: 1px solid color-mix(in srgb, var(--on-forest-hair) 60%, transparent); }
+.hireRail li::before { content: ''; position: absolute; left: 12px; top: 38px; bottom: -14px; width: 2px; border-radius: 1px; background: repeating-linear-gradient(to bottom, var(--on-forest-hair) 0 4px, transparent 4px 8px); }
+.hireRail li:last-child::before { display: none; }
+.hireRail li[data-done]::before { background: color-mix(in srgb, var(--accent) 70%, transparent); }
+.hireNode { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; border: 1.5px dashed var(--on-forest-2); color: var(--forest); margin-top: 1px; }
+.hireRail li[data-done] .hireNode { border: 0; background: var(--accent); }
+.hireNode svg { width: 14px; height: 14px; stroke-width: 3; }
+.hireStep { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.hireStep b { font-size: 15px; font-weight: 500; color: var(--on-forest); }
+.hireStep > span { font-size: 13px; line-height: 1.45; color: var(--on-forest-2); }
+.hireStep time { font-variant-numeric: tabular-nums; }
+.hireTx { align-self: center; padding: 4px 10px; border: 1px solid var(--on-forest-hair); border-radius: var(--r-pill); font-family: var(--font-mono); font-size: 12px; color: var(--on-forest); text-decoration: none; white-space: nowrap; }
+.hireTx:hover { border-color: var(--on-forest-2); }
+.hireTxNone { align-self: center; font-size: 12px; color: var(--on-forest-2); white-space: nowrap; }
+
+/* The roadmap, in brief: four horizons on one line. */
+.roadmap { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.roadmap > li { position: relative; display: flex; flex-direction: column; gap: 14px; padding: 18px 18px 20px; border: 1px solid var(--hair); border-radius: var(--r-3); background: var(--panel-fill); box-shadow: var(--panel-sheen); min-width: 0; }
+.roadmap > li[data-h='shipped'] { box-shadow: var(--panel-sheen), inset 0 2px 0 var(--moss); }
+.roadmap > li[data-h='next'] { box-shadow: var(--panel-sheen), inset 0 2px 0 var(--accent); }
+.rmHead { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.rmHead b { font-size: 18px; font-weight: 500; color: var(--ink); }
+.rmHead > span:last-child { font-size: 12.5px; color: var(--ink-3); }
+.rmDot { width: 9px; height: 9px; border-radius: 50%; border: 1px solid var(--ink-3); align-self: center; }
+.roadmap > li[data-h='shipped'] .rmDot { background: var(--moss); border-color: var(--moss); }
+.roadmap > li[data-h='next'] .rmDot { background: var(--accent); border-color: var(--accent); }
+.roadmap ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 9px; }
+.roadmap ul li { position: relative; padding-left: 14px; font-size: 14px; line-height: 1.45; color: var(--ink-2); }
+.roadmap ul li::before { content: ''; position: absolute; left: 0; top: 0.62em; width: 6px; height: 1px; background: var(--ink-3); }
+
 /* ---------- Motion: quiet, informative, off under reduced motion ---------- */
 @media (prefers-reduced-motion: no-preference) {
   /* One transform animation per element: two on the same property is not
@@ -282,14 +334,6 @@
   .construct span:nth-child(8)::after { animation: travel 12s linear 4.5s infinite; }
   .construct span:nth-child(11)::after { animation: travel 10.5s linear 7.5s infinite; }
   @keyframes travel { 0% { opacity: 0; transform: translateY(-160px); } 8% { opacity: 1; } 70% { opacity: 1; } 100% { opacity: 0; transform: translateY(900px); } }
-  .proof { animation: proof-in 700ms var(--ease) 260ms both; }
-  @keyframes proof-in { from { opacity: 0; transform: translateY(12px); } }
-  .proofSteps li[data-done] .proofDot { animation: tick 420ms var(--ease-settle) both; }
-  .proofSteps li:nth-child(1) .proofDot { animation-delay: 700ms; }
-  .proofSteps li:nth-child(2) .proofDot { animation-delay: 880ms; }
-  .proofSteps li:nth-child(3) .proofDot { animation-delay: 1060ms; }
-  .proofSteps li:nth-child(4) .proofDot { animation-delay: 1240ms; }
-  @keyframes tick { from { transform: scale(0.4); opacity: 0; } }
   .layers li::before { animation: layer-pulse 9s var(--ease) infinite; }
   .layers li:nth-child(2)::before { animation-delay: 1.8s; }
   .layers li:nth-child(3)::before { animation-delay: 3.6s; }
@@ -321,13 +365,18 @@
   .heroCopy { padding-right: 0; margin-top: -72px; }
   .construct, .cross { display: none; }
   .line { white-space: normal; }
-  .proof { width: 100%; justify-self: stretch; }
-  .bandInner, .whyGrid, .build { grid-template-columns: 1fr; }
+  .bandInner, .whyGrid, .build, .hireInner { grid-template-columns: 1fr; }
+  .roadmap { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .layers li { grid-template-columns: 1fr; gap: 6px; }
   .layers li::before { left: calc(-1 * var(--margin) + 4px); }
 }
 @media (max-width: 640px) {
-  .tiles, .cards, .pf { grid-template-columns: 1fr; }
+  .tiles, .cards, .pf, .roadmap { grid-template-columns: 1fr; }
+  .hireFigs > div { padding-right: 10px; }
+  .hireFigs > div + div { padding-left: 10px; }
+  .hireRail { padding: 14px 16px; }
+  .hireRail li { grid-template-columns: 26px minmax(0, 1fr); }
+  .hireTx, .hireTxNone { grid-column: 2; justify-self: start; }
   .kpis { grid-template-columns: 1fr 1fr; }
   .kpis > div { padding: 16px 12px 4px 0; }
   .kpis > div:nth-child(even) { padding-left: 14px; border-left: 1px solid var(--hair); }
