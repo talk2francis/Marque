@@ -11,6 +11,20 @@ import { friendlyError, type FriendlyError } from '../errors.js'
 import { network, type ChainId } from '../config.js'
 
 /**
+ * Anonymous failure report (2 Oct): the step, our error code, the wallet kind and the first
+ * words of the raw message, so a failure that happens inside a buyer's wallet is visible to
+ * the team. No address, no amount, no task. Fire and forget.
+ */
+function reportFailure(code: string, err: unknown, wallet: string, step: string): void {
+  try {
+    const raw = err instanceof Error ? (err as Error & { shortMessage?: string }).shortMessage ?? err.message : String(err)
+    const msg = raw.replace(/0x[0-9a-fA-F]{6,}/g, '0x…').replace(/\s+/g, ' ').slice(0, 40)
+    const body = JSON.stringify({ name: 'hire_failed', meta: { code: String(code).slice(0, 40), step: String(step).slice(0, 40), wallet: wallet.slice(0, 40), msg } })
+    void fetch('/api/v1/events', { method: 'POST', headers: { 'content-type': 'application/json' }, body, keepalive: true }).catch(() => undefined)
+  } catch { /* telemetry never breaks the sheet */ }
+}
+
+/**
  * The hire step runner (SPEC-COMMERCE 5.1). Every signature is named before the wallet
  * opens. After createJob confirms, registerJob, setBudget, approve and fund go as one
  * EIP-5792 atomic batch when the wallet supports it on this chain; otherwise one at a
@@ -74,9 +88,10 @@ function planSteps(q: HireQuote): HireStep[] {
 
 export function useHire() {
   const config = useConfig()
-  const { address, chainId: walletChain } = useAccount()
+  const { address, chainId: walletChain, connector } = useAccount()
   const [state, setState] = useState<HireState>(initial)
   const busy = useRef(false)
+  const currentStep = useRef<string>('idle')
   const lastRequest = useRef<{ agentId: string; task: string; serviceId: number | null } | null>(null)
   const set = (patch: Partial<HireState> | ((s: HireState) => Partial<HireState>)) =>
     setState((s) => ({ ...s, ...(typeof patch === 'function' ? patch(s) : patch) }))
@@ -102,8 +117,14 @@ export function useHire() {
   }, [])
 
   const send = async (c: Call, step?: HireStep['id']): Promise<Hex> => {
-    if (step) mark(step, 'active')
-    const hash = await writeContract(config, { address: c.to, abi: c.abi, functionName: c.functionName, args: c.args as unknown[], chainId: c.chainId })
+    if (step) { mark(step, 'active'); currentStep.current = step }
+    // The network's own gas price, a little over, set on the request (2 Oct). Left to itself
+    // a wallet may price BSC gas at its default (1 gwei and up, against 0.05 live), and a
+    // wallet holding a few cents of BNB then refuses with "insufficient funds" before it
+    // ever shows the transaction, while the sheet promised a fee 20 times smaller.
+    const live = await getGasPrice(config, { chainId: c.chainId }).catch(() => 0n)
+    const gasPrice = live > 0n ? (live * 125n) / 100n : undefined
+    const hash = await writeContract(config, { address: c.to, abi: c.abi, functionName: c.functionName, args: c.args as unknown[], chainId: c.chainId, ...(gasPrice ? { gasPrice } : {}) } as Parameters<typeof writeContract>[1])
     if (step) mark(step, 'confirming', hash)
     const r = await waitForTransactionReceipt(config, { hash, chainId: c.chainId })
     if (r.status !== 'success') throw Object.assign(new Error('reverted'), { code: 'reverted' })
@@ -115,6 +136,7 @@ export function useHire() {
     const q = state.quote
     if (!q || !address || busy.current) return
     busy.current = true
+    currentStep.current = 'checking'
     set({ phase: 'checking', error: null })
     try {
       if (walletChain !== q.chainId) await switchChain(config, { chainId: q.chainId })
@@ -175,6 +197,7 @@ export function useHire() {
 
       if (batched) {
         for (const c of calls) mark(c.step, 'active')
+        currentStep.current = 'batch'
         const { id } = await sendCalls(config, {
           chainId: quote.chainId, forceAtomic: true,
           calls: calls.map((c) => ({ to: c.to, data: encodeFunctionData({ abi: c.abi as Abi, functionName: c.functionName, args: c.args as unknown[] }) })),
@@ -201,6 +224,7 @@ export function useHire() {
     } catch (err) {
       const e = err as { code?: string; detail?: string }
       const friendly = e.detail ? { code: e.code ?? 'hire', title: e.detail, action: 'Nothing more was charged. Try again.', retryable: true } : friendlyError(err)
+      reportFailure(friendly.code, err, connector?.id ?? 'unknown', currentStep.current)
       set((s) => ({ phase: 'error', error: friendly, steps: s.steps.map((st) => (st.status === 'active' ? { ...st, status: 'failed' } : st)) }))
     } finally {
       busy.current = false

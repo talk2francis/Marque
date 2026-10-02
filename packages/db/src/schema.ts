@@ -819,6 +819,7 @@ export const PRODUCT_EVENTS = [
   'marketplace_search', 'position_read', 'agent_profile_view', 'compare_add',
   'preflight_run', 'hire_started', 'hire_completed', 'charter_granted',
   'charter_revoked', 'builder_test_run', 'third_party_listing', 'judge_flow_completed',
+  'hire_failed',
 ] as const
 export type ProductEventName = (typeof PRODUCT_EVENTS)[number]
 
