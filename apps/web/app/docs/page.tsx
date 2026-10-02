@@ -107,7 +107,7 @@ export default function DocsPage() {
       <DocSection id="problems" title="Something wrong with a hire?">
         <p>Everything below happens in the job&apos;s Job Room, from the wallet that paid. Open it from <a href="/me">My Marque</a>, which lists every job your wallet paid for, or at <code>/jobs/56/&lt;job number&gt;</code>. The Job Room shows only the actions the contract allows at that moment, with the date the next one opens.</p>
         <div className={styles.tableWrap}>
-          <table className={styles.table} style={{ tableLayout: 'fixed' }}>
+          <table className={`${styles.table} ${styles.tableFixed}`}>
             <colgroup><col style={{ width: '26%' }} /><col style={{ width: '24%' }} /><col style={{ width: '50%' }} /></colgroup>
             <thead><tr><th scope="col">What happened</th><th scope="col">What to press</th><th scope="col">What follows</th></tr></thead>
             <tbody>

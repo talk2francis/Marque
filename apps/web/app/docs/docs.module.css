@@ -69,6 +69,9 @@
 .table th, .table td { padding: 12px 14px; text-align: left; vertical-align: top; border-top: 1px solid var(--hair); line-height: 1.5; }
 .table thead th { border-top: 0; font-size: var(--fs-label); font-weight: 500; letter-spacing: var(--tracking-eyebrow); text-transform: uppercase; color: var(--ink-3); background: color-mix(in srgb, var(--panel) 70%, transparent); }
 .table tbody th { font-weight: 500; color: var(--ink); white-space: nowrap; }
+/* A table with set column widths wraps its row labels instead of overflowing them. */
+.tableFixed { table-layout: fixed; }
+.tableFixed tbody th { white-space: normal; }
 .table td { color: var(--ink-2); }
 .addr { display: inline-flex; align-items: center; gap: 4px; font-family: var(--font-mono); font-size: 13px; color: var(--chain) !important; text-decoration: none !important; white-space: nowrap; }
 .addr svg { width: 13px; height: 13px; }
