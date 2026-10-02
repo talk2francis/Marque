@@ -115,6 +115,13 @@ cp -a "$WEB/.next-verify/standalone" "$REL/$SHA.tmp"
 rm -rf "$REL/$SHA" && mv "$REL/$SHA.tmp" "$REL/$SHA"
 ln -sfn "$REL/$SHA" "$REL/slot-$IDLE"
 
+# A deploy within five minutes of the last one reuses the slot that deploy scheduled to
+# retire; without this, the old timer stops the new candidate mid-check (2 Oct: two
+# deploys failed that way, 3 s and 4 min after starting the candidate).
+for t in $(systemctl list-units --all --plain --no-legend "marque-retire-$(name_of "$IDLE")-*.timer" | awk '{print $1}'); do
+  systemctl stop "$t" && say "cancelled $t (its slot is the new candidate)"
+done
+
 start_slot "$IDLE"
 if ! healthy "$IDLE"; then
   say "candidate failed its health check; live :$LIVE untouched"
