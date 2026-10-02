@@ -94,6 +94,13 @@ export function MyMarque({ addrParam, chainId }: { addrParam: string | null; cha
         {quest.isPending ? <Rows /> : hires.length ? <JobList hires={[...hires].reverse()} /> : (
           <EmptyState title="No jobs yet" action={<ButtonLink size="sm" variant="primary" href="/quest">Start the quest</ButtonLink>}>Hires this wallet pays for appear here, every step read from the chain.</EmptyState>
         )}
+        {own && hires.length ? (
+          <aside className={styles.help} aria-label="Something wrong with a hire?">
+            <b>Something wrong with a hire?</b>
+            <p>Open the job above. If the answer is wrong, <b>Report a problem</b> is there for 7 days after delivery and keeps the payment in escrow until it is decided. If the agent never delivered, <b>Reclaim your payment</b> appears once its deadline passes. Your wallet does both directly on BNB Chain&apos;s escrow.</p>
+            <a href="/docs#problems">How disputes and refunds work</a>
+          </aside>
+        ) : null}
       </section>
 
       <section className={styles.section} aria-labelledby="me-controls" id="controls">

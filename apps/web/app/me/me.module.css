@@ -52,3 +52,10 @@
   .allowHead > :last-child { display: none; }
   .allowRow > :last-child { grid-column: 1 / -1; }
 }
+
+/* Where to go when a hire went wrong (2 Oct): the Job Room's actions, named. */
+.help { display: flex; flex-direction: column; gap: 6px; margin-top: var(--s-4); padding: 14px 16px; border: 1px solid var(--hair); border-left: 2px solid var(--accent); border-radius: var(--r-2); background: var(--panel-fill); box-shadow: var(--panel-sheen); }
+.help > b { font-weight: 500; color: var(--ink); }
+.help p { margin: 0; font-size: 14px; line-height: 1.55; color: var(--ink-2); max-width: 72ch; }
+.help p b { font-weight: 500; color: var(--ink); }
+.help a { width: fit-content; font-size: 14px; color: var(--ink); text-underline-offset: 3px; }
