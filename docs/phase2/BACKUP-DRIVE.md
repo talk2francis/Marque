@@ -1,10 +1,15 @@
 # Encrypted Google Drive backups
 
 The backup pipeline uses pg_dump, gzip, age public-key encryption and rclone.
-The initial 27 September archive was uploaded privately through the Drive connector,
-downloaded, hash-checked, decrypted and restored successfully into a scratch database.
-This verifies that archive, not recurring uploads. OAuth and an independent recovery-key
-copy remain outstanding; nightly offsite automation is not yet enabled.
+Nightly offsite automation is ENABLED (2 Oct 2026). Francis authorised rclone (drive.file
+scope) to his Google Drive; MARQUE_BACKUP_REMOTE=marque-drive:Marque-backups. The first
+automated run uploaded marque-20261002T093259Z.sql.gz.age (148 MB) and rclone's checksum
+check passed; the copy was then downloaded back from Drive, decrypted with the recovery
+key and found byte-identical to the local dump (SHA-256 8c1896a3...), valid gzip, 33
+tables. The cron entry (03:17 server time) runs the same script every night.
+The initial 27 September archive was uploaded through the Drive connector and restored
+into a scratch database at the time.
+Still outstanding: an independent copy of the recovery key off this server.
 No database password is passed in pg_dump's command-line arguments.
 The normal local backup uses restrictive creation permissions and a lock.
 
@@ -22,8 +27,11 @@ the lost VPS. Do not put the unencrypted key next to the encrypted dump on Drive
 
 ## Authorization
 
-Run node ops/drive-connect.mjs. It prints only a loopback browser link, never a token.
-Forward port 53682 over SSH and approve Drive access in your browser. The requested
+Run `rclone authorize drive <base64 {"scope":"drive.file"}> --auth-no-open-browser` on the
+server; it listens on 127.0.0.1:53682. Give the operator the Google consent URL that the
+listener redirects to. After Allow, the browser lands on an unreachable 127.0.0.1 address:
+the operator pastes that address back and it is replayed against the listener with curl
+(no SSH tunnel needed). The token goes into /root/.marque/rclone.conf, mode 600. The requested
 drive.file scope accesses files created by that rclone application, not all existing
 Drive files. The connector's one-off backup folder is separate from rclone's scope.
 

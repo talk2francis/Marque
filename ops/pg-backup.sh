@@ -53,6 +53,8 @@ fi
 
 # --- rotate
 find "$PRIMARY"   -name 'marque-*.sql.gz' -mtime +${KEEP_DAYS} -delete
+# The encrypted copies made for the offsite upload rotate locally too (the Drive copies stay).
+find "$PRIMARY"   -name 'marque-*.sql.gz.age' -mtime +${KEEP_DAYS} -delete
 find "$SECONDARY" -name 'marque-*.sql.gz' -mtime +${KEEP_DAYS} -delete
 
 # --- record the latest for the health monitor / status page to read
