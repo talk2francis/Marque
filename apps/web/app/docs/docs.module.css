@@ -139,3 +139,13 @@
   .faqQ { font-size: 16px; }
   .section p { font-size: 15.5px; }
 }
+
+/* Phones: each row of a fixed table becomes a small card (situation, action, outcome). */
+@media (max-width: 640px) {
+  .tableFixed, .tableFixed tbody, .tableFixed tr, .tableFixed th, .tableFixed td { display: block; width: auto; }
+  .tableFixed colgroup, .tableFixed thead { display: none; }
+  .tableFixed tr { padding: 12px 14px; border-top: 1px solid var(--hair); }
+  .tableFixed tr:first-child { border-top: 0; }
+  .tableFixed tbody th, .tableFixed td { padding: 0; border-top: 0; }
+  .tableFixed td { margin-top: 6px; }
+}
