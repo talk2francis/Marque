@@ -99,15 +99,29 @@ for (const line of body.split('\n')) {
   // My Marque (P2-08, DESIGN-SYSTEM 8.7) for a wallet with real mainnet hires: every section
   // renders and the job history is populated from the Quest API.
   const page = await browser.newPage({ viewport: { width: 1280, height: 900 } })
+  const walletPath = '/api/v1/phase2/wallet/' + HIRER_ADDR.toLowerCase()
+  const walletReply = page.waitForResponse(
+    (response) => new URL(response.url()).pathname.toLowerCase() === walletPath,
+    { timeout: 30000 },
+  ).then(async (response) => ({
+    status: response.status(),
+    hires: (await response.json().catch(() => null))?.hires?.length ?? 0,
+  })).catch(() => ({ status: 0, hires: 0 }))
   await page.goto(`${BASE}/me?addr=${HIRER_ADDR}`, { waitUntil: 'networkidle' })
-  await page.waitForTimeout(3500)
+  const wallet = await walletReply
+  if (wallet.status === 200 && wallet.hires > 0) {
+    await page.locator('a[href^="/jobs/"]').first().waitFor({ timeout: 5000 }).catch(() => {})
+  }
   const text = await page.evaluate(() => document.body.innerText)
   const hasSections = ['Set and Earn', 'Active jobs', 'History', 'Spending controls', 'Ratings you gave', 'Your agents'].every((h) => new RegExp(h, 'i').test(text))
   const hasJobs = /job \d{3,}/i.test(text)
-  console.log(hasSections && hasJobs
+  const historyOk = wallet.status === 200 && wallet.hires > 0 && hasSections && hasJobs
+  console.log(historyOk
     ? 'ok   /me?addr= renders every My Marque section with a populated job history'
-    : `FAIL /me?addr= incomplete (sections=${hasSections} jobs=${hasJobs})`)
-  if (!(hasSections && hasJobs)) failures++
+    : `FAIL /me?addr= incomplete (wallet=${wallet.status} hires=${wallet.hires} sections=${hasSections} jobs=${hasJobs})`)
+  if (!historyOk) {
+    failures++
+  }
   await page.close()
 }
 
@@ -124,9 +138,9 @@ for (const line of body.split('\n')) {
     const t = String(e)
     if (/CSP|unsafe-eval|EvalError|call to eval/i.test(t)) violations.push(`pageerror: ${t.slice(0, 220)}`)
   })
-  await page.goto(BASE + '/app/charter', { waitUntil: 'networkidle' })
-  await page.waitForTimeout(4000)
+  await page.goto(BASE + '/app/charter', { waitUntil: 'domcontentloaded', timeout: 60000 })
   const connect = page.locator('button').filter({ hasText: /connect/i }).first()
+  await connect.waitFor({ state: 'visible', timeout: 30000 }).catch(() => {})
   if (await connect.count()) {
     await connect.click({ timeout: 10000 }).catch(() => {})
     await page.waitForTimeout(8000)

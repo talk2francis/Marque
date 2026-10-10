@@ -2,12 +2,17 @@
 
 Live record of Phase 2. Newest first inside each section. Times are UTC.
 
-## 9 October: incident response and activity (verified, deployment pending)
+## 9 October: incident response and activity (live 10 October, b6f54b7)
 
 User requested investigation of overnight alerts, prevention, public agent activity,
 non-team usage evidence, and mobile comparison improvements. No mainnet transactions
 or seller restarts are part of this work. See [incident report](INCIDENT-2026-10-09.md).
-Changes are not deployed yet. Serial workspace typecheck, eslint, copy lint and
+Changes went live at 21:36 UTC on 10 October through the blue/green slot.
+The corrected full candidate gate passed, and public smoke passed home,
+marketplace, Keel storefront, quest, health, status and comparison. All 11
+malformed-request regressions passed through the live domain. Only the health
+and quote monitors were restarted; no seller or indexer was restarted.
+Serial workspace typecheck, eslint, copy lint and
 406 unit tests passed (three existing integration tests skipped). The final
 production build passed. All 24 targeted browser cases passed at 390/768/1440
 in both themes, including the corrected long-badge wrapping. Screenshots were
