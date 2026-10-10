@@ -9,6 +9,7 @@
 # Without them it still logs failures to stdout (PM2 captures it); it just can't
 # page anyone.
 set -uo pipefail
+. "$(dirname "${BASH_SOURCE[0]}")/http-health.sh"
 set -a; . /root/.marque/secrets.env; set +a
 
 BASE="${MARQUE_PUBLIC_URL:-https://marque.trade}"
@@ -18,12 +19,14 @@ mkdir -p "$STATE_DIR"
 
 CHECKS=(
   "status|${BASE}/status"
+  "web-liveness|${BASE}/api/health"
   "api-funnel|${BASE}/api/v1/funnel"
   "agent-bound|${BASE}/agents/bound/health"
   "agent-lattice|${BASE}/agents/lattice/health"
   "agent-sluicegate|${BASE}/agents/sluicegate/health"
   "agent-keel|${BASE}/agents/keel/health"
   "agent-redcell|${BASE}/agents/redcell/health"
+  "agent-tidemark|${BASE}/agents/tidemark/health"
 )
 
 tg() {
@@ -40,8 +43,10 @@ while true; do
   for entry in "${CHECKS[@]}"; do
     name="${entry%%|*}"; url="${entry#*|}"
     f="${STATE_DIR}/${name}.fails"; a="${STATE_DIR}/${name}.alerted"
-    code="$(curl -sS -m 12 -o /dev/null -w '%{http_code}' "$url" 2>/dev/null || echo 000)"
-    if [ "$code" -ge 200 ] && [ "$code" -lt 400 ]; then
+    read -r code transport < <(http_health "$url")
+    detail="HTTP ${code}"
+    if [ "$transport" -ne 0 ]; then detail="request failed (curl ${transport}, last HTTP ${code})"; fi
+    if [ "$transport" -eq 0 ] && [ "$code" -ge 200 ] && [ "$code" -lt 400 ]; then
       if [ -f "$a" ]; then
         tg "✅ Marque recovered: ${name} is back (HTTP ${code})."
         rm -f "$a"
@@ -50,9 +55,9 @@ while true; do
     else
       n=$(( $(cat "$f" 2>/dev/null || echo 0) + 1 ))
       echo "$n" > "$f"
-      echo "$(date -u +%FT%TZ) FAIL ${name} HTTP ${code} (consecutive: ${n})"
+      echo "$(date -u +%FT%TZ) FAIL ${name} ${detail} (consecutive: ${n})"
       if [ "$n" -ge 2 ] && [ ! -f "$a" ]; then
-        tg "🔴 Marque: ${name} failing — HTTP ${code}, ${n} consecutive checks. ${url}"
+        tg "🔴 Marque: ${name} failing: ${detail}, ${n} consecutive checks. ${url}"
         touch "$a"
       fi
     fi

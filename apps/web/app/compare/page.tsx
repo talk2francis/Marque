@@ -4,6 +4,7 @@ import { SiteHeader, SiteFooter } from '../_components/SiteHeader'
 import { marketplaceAgents, type MarketRow } from '../../lib/marketplace'
 import { profileHref } from '../register/market-model'
 import { CompareTable } from './CompareTable'
+import { comparisonIds } from '../../lib/compare-selection'
 import styles from './compare.module.css'
 
 export const dynamic = 'force-dynamic'
@@ -15,9 +16,15 @@ export const metadata = {
 
 export default async function ComparePage({ searchParams }: { searchParams: Promise<{ agents?: string }> }) {
   const { agents: raw } = await searchParams
-  const ids = (raw ?? '').split(',').map((s) => decodeURIComponent(s.trim())).filter(Boolean).slice(0, 3)
+  const ids = comparisonIds(raw)
 
-  const { rows } = await marketplaceAgents({ limit: 300 }).catch(() => ({ rows: [] as MarketRow[] }))
+  let loadFailed = false
+  const { rows } = ids.length >= 2
+    ? await marketplaceAgents({ agentIds: ids, includeUnclassified: true, limit: 3 }).catch(() => {
+      loadFailed = true
+      return { rows: [] as MarketRow[] }
+    })
+    : { rows: [] as MarketRow[] }
   const chosen = ids.map((id) => rows.find((r) => r.agentId === id)).filter((r): r is MarketRow => Boolean(r))
 
   return (
@@ -34,8 +41,8 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
         </header>
 
         {chosen.length < 2 ? (
-          <EmptyState title="Pick two or three agents to compare.">
-            <p>Select agents in the <Link href="/register">marketplace</Link> and the compare tray will bring you here.</p>
+          <EmptyState title={loadFailed ? 'Comparison could not be loaded.' : ids.length >= 2 ? 'Some selected agents are unavailable.' : 'Pick two or three agents to compare.'}>
+            <p>{ids.length >= 2 ? 'Please refresh, or choose agents in the ' : 'Select agents in the '}<Link href="/register">marketplace</Link>{ids.length >= 2 ? '.' : ' and the compare tray will bring you here.'}</p>
           </EmptyState>
         ) : (
           <CompareTable

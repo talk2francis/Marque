@@ -72,6 +72,7 @@
 
 @media (max-width: 1023.98px) {
   .stage { min-height: 160px; }
+  .echo { inset: -16% 0 -26%; }
 }
 @media (max-width: 720px) {
   .stage { aspect-ratio: 2.1 / 1; min-height: 0; --hero: var(--hero-night-small); }

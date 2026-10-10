@@ -9,6 +9,8 @@ import { explorerAddress, explorerTx } from '../../../lib/network'
 import { utcDay, utcStamp } from '../../../lib/time'
 import type { Storefront as Data } from '../../../lib/storefront'
 import styles from './storefront.module.css'
+import { StorefrontTabs } from './StorefrontTabs'
+import { AgentActivity } from './AgentActivity'
 
 /**
  * A storefront (DESIGN-SYSTEM.md 8.4): the same page for a Marque reference agent
@@ -133,6 +135,7 @@ export function Storefront({ d }: { d: Data }) {
           </header>
           )}
 
+          <StorefrontTabs activity={<AgentActivity agentId={d.agentId} provider={d.wallet} />}>
           {/* 1. What it does */}
           <section className={styles.section} aria-labelledby="sf-does">
             <h2 id="sf-does">What it does</h2>
@@ -285,6 +288,7 @@ export function Storefront({ d }: { d: Data }) {
             </dl>
             {d.wallet ? <p className={styles.muted}><a className={styles.ext} href={explorerAddress(56, d.wallet)} target="_blank" rel="noreferrer">Every transaction of this agent on BscScan<ArrowUpRight aria-hidden="true" /></a></p> : null}
           </section>
+          </StorefrontTabs>
         </div>
 
         <div className={styles.side}>{panel}</div>

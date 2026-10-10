@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { Children, type CSSProperties, type ReactNode } from 'react'
 import { Chip, WarrantBadge, ProvenanceChip } from '@marque/ui'
 import { Badge, Stars } from '../_components/ui'
 import { AgentAvatar } from '../_components/AgentAvatar'
@@ -21,7 +22,7 @@ export function CompareTable({ chosen, hireLink, tryLink, onNavigate }: {
   onNavigate?: () => void
 }) {
   return (
-    <div className={styles.grid} style={{ gridTemplateColumns: `170px repeat(${chosen.length}, minmax(0, 1fr))` }}>
+    <ComparisonGrid count={chosen.length}>
       <div className={styles.rowLabel} />
       {chosen.map((a) => (
         <div key={a.agentId} className={styles.colHead}>
@@ -122,8 +123,25 @@ export function CompareTable({ chosen, hireLink, tryLink, onNavigate }: {
             : <span className={styles.muted}>{hireBlocked(a)}</span>}
         </div>
       ))}
-    </div>
+    </ComparisonGrid>
   )
+}
+
+/** Keep each characteristic on one shared row, including in the mobile sheet. */
+function ComparisonGrid({count,children}:{count:number;children:ReactNode}) {
+  const cells=Children.toArray(children)
+  const rows=Array.from({length:Math.ceil(cells.length/(count+1))},(_,i)=>cells.slice(i*(count+1),(i+1)*(count+1)))
+  return <>
+    <p className={styles.guide}>Compare one question at a time.{count>2?' Swipe sideways to see all three agents.':''} Agent names stay visible as you scroll.</p>
+    <div className={styles.scroll} role="region" aria-label="Scrollable agent comparison" tabIndex={0}>
+      <div className={styles.grid} role="table" aria-label="Agent characteristics" style={{'--compare-count':count} as CSSProperties}>
+        {rows.map((row,index)=><div role="row" className={styles.row} key={index}>
+          {row.map((cell,column)=><div key={column} role={index===0?'columnheader':column===0?'rowheader':'cell'}
+            className={index===0 ? column===0 ? styles.corner : styles.heading : column===0 ? styles.labelCell : styles.valueCell}>{cell}</div>)}
+        </div>)}
+      </div>
+    </div>
+  </>
 }
 
 const CATEGORY_LABEL: Record<string, string> = {

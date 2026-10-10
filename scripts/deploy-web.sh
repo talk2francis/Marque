@@ -32,7 +32,7 @@ other() { [ "$1" = 3200 ] && echo 3201 || echo 3200; }
 switch_to() {
   local port="$1" tmp
   tmp="$(mktemp)"
-  printf 'reverse_proxy 127.0.0.1:%s\n' "$port" > "$tmp"
+  sed "s/{args\\[0\\]}/$port/g" "$ROOT/ops/web-upstream.caddy" > "$tmp"
   cp "$UPSTREAM" "$UPSTREAM.prev" 2>/dev/null || true
   install -m 0644 "$tmp" "$UPSTREAM"; rm -f "$tmp"
   if ! caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile >>"$LOG" 2>&1; then

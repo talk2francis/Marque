@@ -24,6 +24,7 @@ export async function generateMetadata({ params }: { params: Promise<{ tokenId: 
 
 export default async function AgentStorefront({ params }: { params: Promise<{ tokenId: string }> }) {
   const { tokenId } = await params
+  if (!/^\d{1,12}$/.test(tokenId)) notFound()
   const d = await storefrontByToken(tokenId)
   if (!d) notFound()
   if (d.slug) permanentRedirect(`/agents/${d.slug}`)

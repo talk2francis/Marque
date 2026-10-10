@@ -4,6 +4,7 @@ import { db, firstPartyIds, canonicalAgentIdSql } from '@marque/db'
 import { commercialStates, formatAmount, type CommercialState } from '@marque/commerce'
 import { agentState, TASK_FOR_CATEGORY } from './agent-state'
 import { agentTracks, EMPTY_TRACK, type AgentTrack } from './agent-track'
+import { selectedAgentRows } from './compare-selection'
 
 /**
  * The Marketplace view of the Register (P10.5B).
@@ -84,6 +85,8 @@ export interface MarketRow {
 }
 
 export interface MarketQuery {
+  /** Internal selection, applied before per-agent capability resolution. */
+  agentIds?: readonly string[]
   category?: string | null
   search?: string | null
   liveNow?: boolean
@@ -438,6 +441,7 @@ function otherLast(rows: MarketRow[]): MarketRow[] {
 export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: MarketRow[]; generatedAt: string; total: number; offset: number; hasMore: boolean }> {
   // Clone: the base is memoised and the sort below is in place.
   let all = [...(await marketplaceBase())]
+  if (q.agentIds) all = selectedAgentRows(all, q.agentIds)
 
   // Filters (TS side — the qualifying set is small).
   // Ready to hire, all categories: every agent a wallet can pay into escrow right now,

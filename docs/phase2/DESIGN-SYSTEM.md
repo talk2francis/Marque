@@ -1,4 +1,22 @@
 # DESIGN-SYSTEM.md
+
+## 9 October: evidence tabs and mobile comparison
+
+Storefront Overview and Activity use keyboard-operable tabs with a quiet accent
+underline. Activity uses ruled job rows, public-address controls, UTC event times,
+explicit network/provenance, and team/source labels. Counts cover the full indexed
+population; the list explicitly limits itself to the latest 30 jobs.
+
+Comparison keeps agents side by side at every width. On phones each question
+spans the table above aligned values; two agents fit, three scroll inside the
+table, never the document. Sticky agent headings retain context. The marketplace
+sheet and standalone page use the same component and visual rules.
+Long status badges wrap within their own column, including stale-warrant dates;
+they must never extend the horizontal scroll area beyond the final agent.
+The comparison's CLAIMED chips keep their dashed border and muted tone without
+sub-threshold transparency. Activity address controls have 32 px minimum targets.
+The existing reference-hero ambient layer stays inside tablet horizontal bounds.
+
 ## Marque Phase 2: the Kerbstone transplant
 
 Marque keeps its identity: the negative-space mark, the wordmark, brass, the Field / Passage / Chamber art, the MeasureRule, provenance chips, and the idea that the interface darkens when money moves. It takes Kerb's engineering of the experience: type stack, scale, component set, status pill, three-state theme, toasts, the transaction stepper, the error map, skeletons, the footer. Claude Code built Kerb (`github.com/Franlinozz/Kerb`, V2 and V3 web app); port the patterns and code shapes from there, never Kerb's brand, mark, art or copy.

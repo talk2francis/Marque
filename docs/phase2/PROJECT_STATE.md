@@ -2,6 +2,18 @@
 
 Live record of Phase 2. Newest first inside each section. Times are UTC.
 
+## 9 October: incident response and activity (verified, deployment pending)
+
+User requested investigation of overnight alerts, prevention, public agent activity,
+non-team usage evidence, and mobile comparison improvements. No mainnet transactions
+or seller restarts are part of this work. See [incident report](INCIDENT-2026-10-09.md).
+Changes are not deployed yet. Serial workspace typecheck, eslint, copy lint and
+406 unit tests passed (three existing integration tests skipped). The final
+production build passed. All 24 targeted browser cases passed at 390/768/1440
+in both themes, including the corrected long-badge wrapping. Screenshots were
+reviewed. The status audit passed all four widths; existing small Overview
+links/controls remain documented. All 11 proxy request regressions passed.
+
 ## Pre-freeze pass (Tue 29 Sep, live 36e422a)
 
 | Item | Result |
@@ -205,6 +217,10 @@ Logged in `docs/DEVIATIONS.md` under "Phase 2". Index:
 - D2-00-06 `config/first-party.json` created in P2-00 (planned for P2-01) because the probe T0 tier needs it.
 
 ## Requests
+
+- [2026-10-09] [B: product/incident] [A: deployment] [scripts/deploy-web.sh, ops/web-upstream.caddy] Preserve a trusted routing-state mirror at the Marque-only reverse proxy because Next removes Flight headers before middleware. The upstream renderer now includes this guard on every deploy and rollback; seller routes and Kerb are unchanged. Candidate proxy validation and attack regression required before cutover.
+
+- [2026-10-09] [B: product/incident] [A: commerce] [packages/commerce/src/supply.ts] Retry failed first-party quote probes after one minute; leave healthy and third-party cadence unchanged. Implemented with tests under the user's incident-fix request. No change to signing or transaction authority.
 
 - [RESOLVED by private-chat configuration] [P2-11] The earlier group-membership request is superseded. The user supplied a private chat destination; delivery succeeded and both alert monitors reloaded their private configuration. The public group remains the support channel, not the operational-alert destination.
 

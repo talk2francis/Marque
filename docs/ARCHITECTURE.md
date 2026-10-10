@@ -1,5 +1,20 @@
 # Architecture
 
+## Web request boundary (9 October 2026)
+
+The web slots bind only to loopback. `ops/web-upstream.caddy` is the shared
+Marque-only proxy rule, rendered with the selected port by `deploy-web.sh` for
+both deploy and rollback. It deletes a client-supplied `X-Marque-Router-State`,
+copies any actual routing-state header into that mirror with a presence prefix,
+and normalizes duplicate original headers to the same value. Next strips its
+Flight headers before middleware, so middleware validates the trusted mirror
+before allowing a render. Invalid state receives 400, not a renderer exception.
+Do not expose a web slot directly or replace this rule with a bare proxy.
+Seller routes and other sites on the VPS do not use this rule. The isolated
+proxy/request regression script covers ordinary navigation, RSC, empty/malformed
+state and attempts to spoof the mirror. No user or agent secret is involved.
+
+
 One VPS. Caddy terminates TLS and routes; PM2 supervises every process; a native
 PostgreSQL 16 and Redis 7 sit underneath. No containers, no cloud control plane —
 so the whole system is legible from one `pm2 status` and one `psql`.

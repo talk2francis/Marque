@@ -1,0 +1,9 @@
+# Imported with the loopback web port as argument 0. Keep this route ordered.
+route {
+	@marqueRouterState header Next-Router-State-Tree *
+	request_header -X-Marque-Router-State
+	request_header @marqueRouterState X-Marque-Router-State "present:{http.request.header.Next-Router-State-Tree}"
+	# Normalize duplicates to the same value the middleware validates.
+	request_header @marqueRouterState Next-Router-State-Tree "{http.request.header.Next-Router-State-Tree}"
+	reverse_proxy 127.0.0.1:{args[0]}
+}

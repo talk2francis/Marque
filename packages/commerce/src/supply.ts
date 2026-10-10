@@ -153,7 +153,9 @@ export async function recordQuote(source: 'probe' | 'user', c: Pick<SellerCandid
 
 /** Minutes between probe quotes for a seller, by what we last saw. */
 export function quoteIntervalMinutes(firstParty: boolean, lastOk: boolean | null): number {
-  if (firstParty) return 10
+  // A transient timeout must not leave our own sellers unobserved for ten minutes.
+  // Every failed attempt remains stored; recovery is a new, successful observation.
+  if (firstParty) return lastOk === false ? 1 : 10
   if (lastOk) return 30
   return 6 * 60
 }

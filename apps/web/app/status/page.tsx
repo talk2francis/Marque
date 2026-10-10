@@ -8,6 +8,7 @@ import { indexerStatus, questStats, campaignChainId } from '@marque/commerce'
 import { Statement, Chip, ProvenanceChip } from '@marque/ui'
 import { SiteHeader, SiteFooter } from '../_components/SiteHeader'
 import styles from './status.module.css'
+import { withDeadline } from '../../lib/deadline'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -49,7 +50,7 @@ interface Queried { rows: Array<Record<string, unknown>>; failed: string | null 
 
 async function queried(label: string, run: Promise<unknown>): Promise<Queried> {
   try {
-    return { rows: unwrap(await run), failed: null }
+    return { rows: unwrap(await withDeadline(run, 5000)), failed: null }
   } catch (err) {
     return { rows: [], failed: `${label}: ${err instanceof Error ? err.message : String(err)}` }
   }
@@ -94,7 +95,7 @@ async function agentHealth(): Promise<Array<{ id: string; ok: boolean; ms: numbe
 
 export default async function StatusPage() {
   const [head, cursorQ, probesQ, confQ, watchQ, usageQ, agents, tiers] = await Promise.all([
-    publicClient().getBlockNumber().then((b) => b.toString()).catch(() => null),
+    withDeadline(publicClient().getBlockNumber(), 5000).then((b) => b.toString()).catch(() => null),
     queried('ingest cursor', db().execute(sql`select source, cursor, updated_at from ingest_cursor order by source`)),
     queried('probe rollup', db().execute(sql`
       with latest as (
@@ -118,12 +119,12 @@ export default async function StatusPage() {
       select name, count(*)::int as n, min(at) as since from product_event group by name
     `)),
     agentHealth(),
-    tierFreshness().catch(() => null),
+    withDeadline(tierFreshness(), 5000).catch(() => null),
   ])
 
   const [quest, questTotals] = await Promise.all([
-    indexerStatus().catch(() => null),
-    questStats(campaignChainId()).catch(() => null),
+    withDeadline(indexerStatus(), 4000).catch(() => null),
+    withDeadline(questStats(campaignChainId()), 4000).catch(() => null),
   ])
   let keeper: { at: string; keeper: string; settlesLastHour: number; capPerHour: number; chains: Record<string, { balanceBnb: string | null; floorBnb: string; submittedBound: number; due: number }> } | null = null
   try { keeper = JSON.parse(readFileSync(process.env.KEEPER_STATUS ?? '/root/.marque/keeper/status.json', 'utf8')) } catch { keeper = null }
