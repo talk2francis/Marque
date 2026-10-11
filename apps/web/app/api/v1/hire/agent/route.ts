@@ -3,6 +3,7 @@ import { sql } from 'drizzle-orm'
 import { db } from '@marque/db'
 import { agentForSheet, disputeWindowSeconds, freeTarget, HireError, isSupportedChain, campaignChainId, chainClient, network, type ChainId } from '@marque/commerce'
 import { hireError } from '../../../../../lib/hire-api'
+import { registryImageUrl } from '../../../../../lib/avatar-source'
 
 export const dynamic = 'force-dynamic'
 
@@ -37,13 +38,16 @@ export async function GET(req: NextRequest) {
     })
     const chain = agent.lastQuote?.chainId ?? null
     const chainId = chain !== null && isSupportedChain(chain) ? chain : campaignChainId()
+    const imageRows = await db().execute(sql`select image_url, raw_metadata #>> '{offchain_content,image}' as meta_image from agent where id = ${agentId} limit 1`)
+    const imageRow = (((imageRows as unknown as { rows?: unknown[] }).rows ?? (imageRows as unknown as unknown[])) as Array<Record<string, unknown>>)[0]
+    const imageUrl = registryImageUrl(imageRow?.['image_url']) ?? registryImageUrl(imageRow?.['meta_image'])
     // The review window is read from OptimisticPolicy (cached an hour), so the sheet can say
     // when an undelivered payment becomes reclaimable before the job exists.
     const [reviewWindowSeconds, platformFeeBP] = await Promise.all([
       disputeWindowSeconds(chainId).catch(() => null),
       platformFeeBp(chainId).catch(() => null),
     ])
-    return NextResponse.json({ ...agent, reviewWindowSeconds, platformFeeBP, reviewWindowChainId: chainId }, { headers: { 'Cache-Control': 'no-store' } })
+    return NextResponse.json({ ...agent, imageUrl, reviewWindowSeconds, platformFeeBP, reviewWindowChainId: chainId }, { headers: { 'Cache-Control': 'no-store' } })
   } catch (err) {
     return hireError(err, 'agent')
   }

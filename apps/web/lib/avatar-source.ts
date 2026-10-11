@@ -3,7 +3,7 @@ import { agentBrand } from './agent-brand'
 export type AvatarSource =
   | { kind: 'brand'; src: string; srcSet: string }
   | { kind: 'registry'; src: string; srcSet?: undefined }
-  | { kind: 'emblem'; src?: undefined; srcSet?: undefined }
+  | { kind: 'fallback'; src?: undefined; srcSet?: undefined }
 
 /** Only render images served by the registry indexer's image proxy. */
 export function registryImageUrl(value: unknown): string | null {
@@ -18,16 +18,6 @@ export function registryImageUrl(value: unknown): string | null {
   }
 }
 
-/** Initials are derived from the published name, never passed off as owner artwork. */
-export function identityInitials(name: string | null | undefined): string {
-  const words = (name ?? '').trim().split(/\s+/).map((word) =>
-    Array.from(word).filter((letter) => /[\p{L}\p{N}]/u.test(letter)),
-  ).filter((word) => word.length > 0)
-  if (words.length > 1) return ((words[0]?.[0] ?? '') + (words[words.length - 1]?.[0] ?? '')).toLocaleUpperCase()
-  if (words.length === 1) return (words[0] ?? []).slice(0, 2).join('').toLocaleUpperCase()
-  return 'ID'
-}
-
 /**
  * Which image an agent avatar shows (27 Sep identity pass).
  *
@@ -35,7 +25,8 @@ export function identityInitials(name: string | null | undefined): string {
  *    (160 px for anything up to 80 CSS px, 512 px above), even when the registry
  *    carries another image. The branded art is first-party only.
  * 2. Anyone else: the registry image, unchanged.
- * 3. Neither: a neutral name-derived identity tile, never Marque's logo.
+ * 3. Neither: Marque's mark as a clearly labelled platform fallback, never
+ *    misrepresented as an owner-supplied identity.
  */
 export function avatarSource({ id, reference, imageUrl, size }: { id: string; reference: boolean; imageUrl: string | null | undefined; size: number }): AvatarSource {
   const brand = reference ? agentBrand(id) : null
@@ -49,5 +40,5 @@ export function avatarSource({ id, reference, imageUrl, size }: { id: string; re
   }
   const registry = registryImageUrl(imageUrl)
   if (registry) return { kind: 'registry', src: registry }
-  return { kind: 'emblem' }
+  return { kind: 'fallback' }
 }

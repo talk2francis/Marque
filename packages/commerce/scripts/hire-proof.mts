@@ -34,7 +34,7 @@ const AGENTS = [
   { slug: 'sluicegate', agentId: '56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341555', category: 'yield', task: 'Where should 1000 USDT earn the most on Venus or Lista right now, net of switching cost?' },
   ...(MAINNET ? [{ slug: 'tidemark', agentId: '56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:358786', category: 'yield', task: 'Where should 1000 USDT earn the most on BNB Chain over the last 7 days, after switching costs?' }] : []),
   { slug: 'lattice', agentId: '56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341554', category: 'grid', task: 'Plan a 10-level arithmetic grid for BNB/USDT between 550 and 700 with 500 USDT, stop at 520.' },
-  { slug: 'bound', agentId: '56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341553', category: 'rebalancing', task: 'Re-centre PancakeSwap V3 position 7395979 symmetrically at +-6% on its fee tier.' },
+  { slug: 'bound', agentId: '56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341553', category: 'rebalancing', task: 'Re-centre PancakeSwap V3 position 7654242 symmetrically at +-6% on its fee tier.' },
   { slug: 'keel', agentId: '56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341556', category: 'health_factor', task: 'Health factor of Venus account 0x60AA3AEE06E2345A17E4d4B12c53E046F4F63CAf and the repay that restores it to 2.5.' },
 ].filter((a) => !ONLY || ONLY.includes(a.slug))
 

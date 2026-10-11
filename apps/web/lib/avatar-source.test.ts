@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { avatarSource, identityInitials, registryImageUrl } from './avatar-source'
+import { avatarSource, registryImageUrl } from './avatar-source'
 
 describe('avatarSource', () => {
   it('a reference agent shows its portrait, never its registry image', () => {
@@ -16,11 +16,11 @@ describe('avatarSource', () => {
   })
 
   it('a third party that claims a reference token still gets no Marque art', () => {
-    expect(avatarSource({ id: '56:341556', reference: false, imageUrl: null, size: 40 }).kind).toBe('emblem')
+    expect(avatarSource({ id: '56:341556', reference: false, imageUrl: null, size: 40 }).kind).toBe('fallback')
   })
 
-  it('falls back to the emblem with no image', () => {
-    expect(avatarSource({ id: '56:1', reference: false, imageUrl: null, size: 40 }).kind).toBe('emblem')
+  it('falls back to the platform mark with no image', () => {
+    expect(avatarSource({ id: '56:1', reference: false, imageUrl: null, size: 40 }).kind).toBe('fallback')
   })
 
   it('does not render arbitrary owner-controlled URLs as an image', () => {
@@ -29,9 +29,4 @@ describe('avatarSource', () => {
     expect(registryImageUrl('https://example.com/a.png')).toBeNull()
   })
 
-  it('derives a neutral identity tile from the published name', () => {
-    expect(identityInitials('Health Factor Monitor')).toBe('HM')
-    expect(identityInitials('Tidemark')).toBe('TI')
-    expect(identityInitials('')).toBe('ID')
-  })
 })

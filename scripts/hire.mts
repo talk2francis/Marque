@@ -16,7 +16,7 @@ import {
 import { publicClient } from '@marque/chain'
 
 const DEMO = process.env['DEMO_ADDRESS'] ?? '0x60AA3AEE06E2345A17E4d4B12c53E046F4F63CAf'
-const LP_OWNER = '0x2e07E0145C0CFdF6D200B0aFAeD36953ef00d0cD'
+const LP_OWNER = '0xE36dEF833322EbA312eeE52bD6CDFB228C0E9Be8'
 
 interface Supplier { agentId: string; name: string; kind: string; endpoint: string; host: string }
 
@@ -51,7 +51,7 @@ async function buildTasks(blockNumber: string): Promise<StructuredTask[]> {
     }),
     structuredTask.parse({
       kind: 'rebalance', chainId: 56, blockNumber, subject: LP_OWNER,
-      maxSpendUsd: 1, positionTokenId: '7321916',
+      maxSpendUsd: 1, positionTokenId: '7654242',
       policy: { rangePct: 6, feeTier: 2500, maxSlippageBps: 40 },
     }),
     structuredTask.parse({

@@ -369,10 +369,12 @@ operative (the "who"); the hero is the instrument (the "what").
 - First-party only. `lib/agent-brand.ts` is the one manifest (slug, avatar,
   hero, heroPosition, tone), resolved through `reference-agents.ts` by `marque:*`
   id, slug or canonical ERC-8004 id, never by display name. A third party never
-  resolves, so it keeps its registry image, then a neutral identity tile.
+  resolves, so it keeps its registry image, then the Marque platform fallback.
 - `AgentAvatar` precedence (`lib/avatar-source.ts`): reference portrait, else
-  registry image, else name-derived initials. Rounded square, 8 px at 40, 14 px at 88 and up,
-  a hairline drawn inside. Never a circle.
+  registry image, else the Marque mark in a plain platform tile. Rounded square,
+  8 px at 40, 14 px at 88 and up. Never a circle. A genuine image renders
+  immediately over the fallback; it is never held invisible waiting for a
+  client hydration event that the browser may have already fired.
 - Portraits go everywhere an agent is named (cards, panel, hire sheet, job
   room, compare). The hero is used once: the storefront masthead
   (`AgentBrandHero`), in the main column beside the sticky purchase panel. Two
@@ -395,18 +397,21 @@ operative (the "who"); the hero is the instrument (the "what").
   (7 to 62 KB each). Cards load the 160 px portrait only. A third-party agent
   never receives this artwork.
 
-**Third-party identity (11 Oct).** A third-party storefront has its own restrained
-masthead: the real ERC-8004 registry image, if available, is a blurred ambient
-backdrop behind the sharp avatar. Its source is labelled as an owner claim, not
-verification. Missing or broken images receive a neutral identity tile and an
-  explicit note. The neutral tile stays visible until a remote image has loaded,
-  so a slow or broken proxy never flashes the browser's broken-image icon.
-  Listing does not require artwork; registration's optional `image`
-field is recommended and reused as the ambient source rather than demanding a
-second banner upload. This preserves access for functional agents without art.
+**Third-party identity (11 Oct, revised).** A storefront opens with a quiet,
+contained profile panel: name and current state on one side, one sharp registry
+avatar on the other, and the on-chain token ID in a restrained evidence line.
+The old blurred, enlarged copy of small registry artwork and oversized token
+number were removed after phone and desktop inspection. The image is still an
+owner claim, not verification. Both top-level `image_url` and the off-chain
+metadata image use the same safe 8004scan proxy allowlist on cards, storefronts,
+hire sheets, job rooms and the home record. Missing or broken images show the
+Marque fallback mark, explicitly labelled as such. No second banner upload is
+required to list a functional third-party agent.
 
-**Home evidence carousel (11 Oct).** Manual previous/next and direct slide
-selection; no timer or autoplay. It selects real paid Marque-originated jobs in
+**Home evidence carousel (11 Oct, revised).** Advances every eight seconds,
+pauses while hovered or keyboard-focused and whenever the tab is hidden, and
+does not autoplay when reduced motion is requested. Arrows, direct selection
+and horizontal phone swipe remain available. It selects real paid Marque-originated jobs in
 funded, submitted and settled states if each exists. It never fills a missing
 state with a demo or shows raw buyer task text. Each completed rail step links
 to its actual transaction; pending steps are visibly pending.

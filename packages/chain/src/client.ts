@@ -34,7 +34,13 @@ let pool: RpcPool | undefined
 let client: PublicClient | undefined
 
 export function rpcPool(): RpcPool {
-  if (!pool) pool = new RpcPool(urlsFromEnv(), BSC_MAINNET_ID)
+  // Campaign traffic has exposed a slow dataseed, a rate-limited gateway and
+  // an unresolving host in the configured list. Bench each on its first fault
+  // and try all six before giving up; a 10 s per-host timeout made the agent's
+  // 8 s free-read budget expire before failover could even begin.
+  if (!pool) pool = new RpcPool(urlsFromEnv(), BSC_MAINNET_ID, {
+    timeoutMs: 4_000, failureThreshold: 1, maxAttempts: 6,
+  })
   return pool
 }
 

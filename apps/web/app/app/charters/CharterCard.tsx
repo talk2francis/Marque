@@ -82,6 +82,7 @@ export function CharterCard({ charter, subject }: { charter: CharterView; subjec
   const [error, setError] = useState<string | null>(null)
   const [pulse, setPulse] = useState(false)
   const [controlToken, setControlToken] = useState<string | null>(null)
+  const [positionTokenId, setPositionTokenId] = useState('')
 
   const active = live.status === 'active' && (seconds === null || seconds > 0)
 
@@ -145,6 +146,10 @@ export function CharterCard({ charter, subject }: { charter: CharterView; subjec
       const kind = KIND_FOR_CATEGORY[live.category]
       const policy = TASK_FOR_CATEGORY[live.category]
       if (!kind || !policy) { setError('this charter has no task shape on record'); return }
+      if (kind === 'rebalance' && !/^\d{1,20}$/.test(positionTokenId)) {
+        setError('Enter the PancakeSwap V3 position NFT ID you want this agent to inspect.')
+        return
+      }
       const res = await fetch('/api/v1/runs', {
         method: 'POST',
         headers: {
@@ -154,7 +159,7 @@ export function CharterCard({ charter, subject }: { charter: CharterView; subjec
         body: JSON.stringify({
           agentId: live.agentId, subject, kind, policy,
           maxSpendUsd: 1, charterId: live.id,
-          ...(kind === 'rebalance' ? { positionTokenId: '7395979' } : {}),
+          ...(kind === 'rebalance' ? { positionTokenId } : {}),
           ...(kind === 'grid' ? { pair: 'BNB/USDT' } : {}),
         }),
       })
@@ -166,7 +171,7 @@ export function CharterCard({ charter, subject }: { charter: CharterView; subjec
     } finally {
       setBusy(null)
     }
-  }, [controlToken, live.agentId, live.category, live.id, subject])
+  }, [controlToken, live.agentId, live.category, live.id, positionTokenId, subject])
 
   const cap = live.caps[0]
   const spentPct = cap && cap.limit > 0 ? cap.spent / cap.limit : 0
@@ -257,6 +262,12 @@ export function CharterCard({ charter, subject }: { charter: CharterView; subjec
       </div>
 
       {error && <p className={styles.error} role="alert">{error}</p>}
+
+      {active && controlToken && live.category === 'rebalancing' ? (
+        <label className={styles.positionField}>PancakeSwap V3 position NFT ID
+          <input inputMode="numeric" pattern="[0-9]{1,20}" value={positionTokenId} onChange={(event) => setPositionTokenId(event.target.value.trim())} placeholder="Your position ID" autoComplete="off" />
+        </label>
+      ) : null}
 
       {active && controlToken && (
         <div className={styles.actions}>

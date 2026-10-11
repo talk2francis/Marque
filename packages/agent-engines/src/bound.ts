@@ -96,7 +96,7 @@ export const boundEngine: Engine = {
     const maxSlippageBps = num(prompt, String.raw`%N%\s*bps`, String.raw`slippage[^0-9]{0,20}%N%`)
 
     try {
-      const head = await within(publicClient().getBlockNumber(), 3_000, 'BNB Smart Chain')
+      const head = await within(publicClient().getBlockNumber(), 8_000, 'BNB Smart Chain')
       const ctx = historicalContext(prompt, head)
       if (isRefusal(ctx)) return ctx
       // A pinned historical block reads off the archive client; owner, position

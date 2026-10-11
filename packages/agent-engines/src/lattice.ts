@@ -182,7 +182,7 @@ export const latticeEngine: Engine = {
     // worse trade than reporting the stamp as unknown.
     let block: string | null = null
     try {
-      block = (await within(publicClient().getBlockNumber(), opts.deadlineMs ?? 3_000, 'BNB Smart Chain')).toString()
+      block = (await within(publicClient().getBlockNumber(), opts.deadlineMs ?? 8_000, 'BNB Smart Chain')).toString()
     } catch {
       block = null
     }

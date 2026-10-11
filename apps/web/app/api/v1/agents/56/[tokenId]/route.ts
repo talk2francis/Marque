@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { sql } from 'drizzle-orm'
 import { db } from '@marque/db'
+import { registryImageUrl } from '../../../../../../lib/avatar-source'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -53,7 +54,7 @@ export async function GET(
       description: a['description'],
       ownerAddress: a['owner_address'],
       agentWallet: a['agent_wallet'],
-      imageUrl: a['image_url'],
+      imageUrl: registryImageUrl(a['image_url']) ?? registryImageUrl((a['raw_metadata'] as Record<string, unknown> | null)?.['offchain_content'] && ((a['raw_metadata'] as Record<string, unknown>)['offchain_content'] as Record<string, unknown>)['image']),
       tags: a['tags'],
       supportedProtocols: a['supported_protocols'],
       x402Supported: a['x402_supported'],

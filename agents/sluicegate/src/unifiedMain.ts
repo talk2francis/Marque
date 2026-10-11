@@ -568,7 +568,7 @@ async function main(): Promise<void> {
     try {
       // A hard ceiling, so a degraded upstream produces a legible failure in
       // seconds rather than a hung request.
-      const answer = await MARQUE_ENGINE.run(text, { deadlineMs: 7_000 });
+      const answer = await MARQUE_ENGINE.run(text, { deadlineMs: 15_000 });
       return res.json(a2aResult(id, answer));
     } catch (e) {
       return res.json(a2aError(id, e instanceof Error ? e.message : String(e)));

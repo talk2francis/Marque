@@ -4,19 +4,47 @@ Live record of Phase 2. Newest first inside each section. Times are UTC.
 
 ## 11 October: identity artwork, current test evidence, home job record
 
+- Follow-up (11 Oct): replaced initials with the Marque platform fallback for
+  absent/broken owner art. Registry art is now a CSS image layer over that mark:
+  it cannot show a broken-image icon or get stuck behind a hydration opacity
+  gate. The storefront, marketplace, hire sheet, Job Room,
+  home record and public token API now use the same safe registry image fields.
+  Third-party mastheads no longer enlarge and blur small owner avatars; the
+  profile panel displays a single sharp image and its provenance. The home
+  real-hire carousel advances every 8 seconds, pauses on interaction/in a
+  hidden tab, respects reduced motion and accepts horizontal touch swipes.
+- MCS repair (11 Oct): the configured archive RPC fails TLS. The reference
+  worker now captures a new immutable case directly before each agent rather
+  than letting the pinned block age through the whole sweep. The public RPC
+  pool benches failed endpoints after one fault and tries all six with a 4 s
+  per-endpoint timeout; the free agent face allows 15 s for data reads. Bound's
+  withdrawn BTCB/USDC case was replaced by a chain-verified active US/WBNB
+  position, token #7654242, with one owned position; the unchanged MCS-REB-1
+  assertions passed against it. Latest fresh reference sweep: Bound, Lattice,
+  Sluicegate and Keel pass; Tidemark cannot pass the quoted-APR yield case with
+  its realised-yield method while the archive endpoint fails; Redcell has no
+  published security MCS. No badge was forced green.
+- Public shortlist retest (11 Oct): 34 unique third-party classified agents
+  from Ready to hire and the top Try free/All tested pages were considered.
+  Six passed their own category's fresh case, 27 failed, one had no testable
+  service. Xona and Venus Health Checker were among the genuine no-answer
+  results; five Brain on BNB agents and Vitals passed. All results were stored
+  as first-party observations. The testing script is
+  `scripts/retest-shortlist.mts`; no on-chain writes were made.
 - Audited ready-to-hire third-party identity metadata: 7 of 19 published a
   registry image URL; 12 did not publish one in either top-level or off-chain
   metadata. Broken proxy images fall back to a neutral name-derived identity
   tile, not Marque's logo; the tile stays in place while the remote image loads.
-  Storefronts use real registry artwork as a soft
+  This initial design was superseded by the follow-up above. Storefronts use real registry artwork as a soft
   background where present; builders are encouraged, not required, to provide
   the optional ERC-8004 `image` field. No invented hero assets or ranking effect.
-- Home's single latest-job panel is now a manually controlled carousel of real
+- Home's single latest-job panel first became a manually controlled carousel of real
   Marque-funded jobs, selected across funded, submitted, and settled states
   where those states exist. No buyer task text or fictional pending job is shown.
   The carousel does not make an RPC call during Home render; the Job Room reads
   the exact review-window deadline. This keeps build-time and request rendering
-  bounded even when a public chain RPC is slow.
+  bounded even when a public chain RPC is slow. Autoplay and swipe were added
+  in the follow-up above.
 - Conformance listing chooses the latest own-category result, including a
   failed retest. The worker creates a fresh immutable case id each sweep and
   skips tests whose new case could not be captured, instead of silently

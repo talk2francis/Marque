@@ -16,7 +16,7 @@ import {
   CASES, type TestId, type Tolerance,
 } from '@marque/conformance'
 import { db, closeDb, conformanceCase } from '@marque/db'
-import { eq } from 'drizzle-orm'
+import { eq, asc } from 'drizzle-orm'
 
 const HERE = dirname(fileURLToPath(import.meta.url))
 const OUT = join(HERE, '..', 'docs', 'standard')
@@ -35,9 +35,10 @@ function bound(t: Tolerance): string {
 async function main(): Promise<void> {
   const generatedAt = new Date().toISOString()
 
-  // Attach the live case for each test, so the published standard names the
-  // exact subject and block every agent was graded against.
-  const cases = await db().select().from(conformanceCase).where(eq(conformanceCase.active, true))
+  // Each reference agent gets a fresh immutable snapshot, not one shared
+  // historical block. Show only the newest example here; each result carries
+  // its own exact case id and block for verification.
+  const cases = await db().select().from(conformanceCase).where(eq(conformanceCase.active, true)).orderBy(asc(conformanceCase.capturedAt))
   const caseByTest = new Map(cases.map((c) => [c.testId, c]))
 
   const L: string[] = []
@@ -87,6 +88,8 @@ async function main(): Promise<void> {
   L.push('stronger than re-reading: every agent is graded against byte-identical inputs. The')
   L.push('block number and a hash of the frozen snapshot are published with every result, so')
   L.push('anyone with archive access can verify the snapshot against the chain itself.')
+  L.push('Reference agents are tested against newly captured cases one at a time; the')
+  L.push('latest snapshot below is an example, not a shared block for every agent.')
   L.push('')
   L.push('An agent that cannot be reached **fails**. "We asked and it did not answer" is a')
   L.push('conformance outcome and belongs in the public record.')
@@ -112,7 +115,7 @@ async function main(): Promise<void> {
       L.push(`*Policy supplied to the agent:* "${(spec.policy as { statement: string }).statement}"`)
       L.push('')
       if (live) {
-        L.push(`*Captured at block* \`${live.blockNumber}\` · *ground-truth hash* \`${live.groundTruthHash}\``)
+        L.push(`*Latest captured example: block* \`${live.blockNumber}\` · *ground-truth hash* \`${live.groundTruthHash}\``)
         L.push('')
       }
     }

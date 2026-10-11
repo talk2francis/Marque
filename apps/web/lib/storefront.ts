@@ -6,6 +6,7 @@ import { agentTrack, type AgentTrack } from './agent-track'
 import { readManifest, type Manifest } from './manifest'
 import { referenceAgent } from './reference-agents'
 import { registrationTx } from './registration'
+import { registryImageUrl } from './avatar-source'
 
 /**
  * Everything one storefront shows (DESIGN-SYSTEM.md 8.4), for a reference agent or a
@@ -126,7 +127,7 @@ async function computeStorefront(agentId: string): Promise<Storefront | null> {
     tokenId,
     name: s(a['name']) ?? `Agent #${tokenId}`,
     description: s(a['description']) ?? ref?.blurb ?? null,
-    imageUrl: s(a['image_url']),
+    imageUrl: registryImageUrl(a['image_url']) ?? registryImageUrl((a['raw_metadata'] as Record<string, unknown> | null)?.['offchain_content'] && ((a['raw_metadata'] as Record<string, unknown>)['offchain_content'] as Record<string, unknown>)['image']),
     category: s(a['category']),
     isReference: fp !== null,
     slug: fp?.slug ?? null,

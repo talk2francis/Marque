@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { ArrowLeft, ArrowRight, Check } from 'lucide-react'
 import { AgentAvatar } from './AgentAvatar'
 import { agentBrand } from '../../lib/agent-brand'
@@ -16,9 +16,38 @@ function stateLabel(h: RecentHire) {
   return 'Settled'
 }
 
-/** A manually controlled record carousel; every slide is a real paid Marque job. */
+const ADVANCE_MS = 8_000
+
+/** Every slide is a real paid Marque job; motion pauses for interaction and reduced motion. */
 export function RecentHires({ hires }: { hires: RecentHire[] }) {
   const [index, setIndex] = useState(0)
+  const [paused, setPaused] = useState(false)
+  const [reducedMotion, setReducedMotion] = useState(false)
+  const [visible, setVisible] = useState(true)
+  const [announce, setAnnounce] = useState(false)
+  const touch = useRef<{ x: number; y: number } | null>(null)
+  useEffect(() => {
+    const media = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const sync = () => setReducedMotion(media.matches)
+    sync()
+    media.addEventListener('change', sync)
+    return () => media.removeEventListener('change', sync)
+  }, [])
+  useEffect(() => {
+    const sync = () => setVisible(!document.hidden)
+    document.addEventListener('visibilitychange', sync)
+    return () => document.removeEventListener('visibilitychange', sync)
+  }, [])
+  useEffect(() => {
+    if (hires.length < 2 || paused || reducedMotion || !visible) return
+    const timer = window.setTimeout(() => setIndex((current) => (current + 1) % hires.length), ADVANCE_MS)
+    return () => window.clearTimeout(timer)
+  }, [index, paused, reducedMotion, visible, hires.length])
+  const choose = (next: number) => {
+    setIndex((next + hires.length) % hires.length)
+    setAnnounce(true)
+    window.setTimeout(() => setAnnounce(false), 1_000)
+  }
   const h = hires[index]!
   const rail = [
     { key: 'quote', label: 'Quote signed by the agent', note: 'Free, before any wallet', tx: null as string | null, at: null as string | null, done: true },
@@ -28,16 +57,27 @@ export function RecentHires({ hires }: { hires: RecentHire[] }) {
     { key: 'settle', label: h.settledTx ? 'Settled to the agent' : 'Settles to the agent', note: h.settledTx ? 'Review window closed' : 'When the review window closes; the Job Room shows the exact time', tx: h.settledTx, at: null, done: Boolean(h.settledTx) },
   ]
   return (
-    <section className={styles.hireBand} id="latest" aria-labelledby="latest-h">
+    <section className={styles.hireBand} id="latest" aria-labelledby="latest-h"
+      onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)}
+      onFocusCapture={() => setPaused(true)} onBlurCapture={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) setPaused(false) }}
+      onTouchStart={(event) => { touch.current = { x: event.touches[0]!.clientX, y: event.touches[0]!.clientY } }}
+      onTouchEnd={(event) => {
+        const start = touch.current
+        touch.current = null
+        if (!start || !event.changedTouches[0]) return
+        const dx = event.changedTouches[0].clientX - start.x
+        const dy = event.changedTouches[0].clientY - start.y
+        if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy) * 1.4) choose(index + (dx < 0 ? 1 : -1))
+      }}>
       <div className={styles.hireCarouselHead}>
         <span className="t-label">Real hires · BSC mainnet</span>
         {hires.length > 1 ? <div className={styles.hireControls} aria-label="Browse real hires">
           <span className={styles.hireCount}>{index + 1} / {hires.length}</span>
-          <button type="button" aria-label="Previous hire" onClick={() => setIndex((index - 1 + hires.length) % hires.length)}><ArrowLeft size={17} /></button>
-          <button type="button" aria-label="Next hire" onClick={() => setIndex((index + 1) % hires.length)}><ArrowRight size={17} /></button>
+          <button type="button" aria-label="Previous hire" onClick={() => choose(index - 1)}><ArrowLeft size={17} /></button>
+          <button type="button" aria-label="Next hire" onClick={() => choose(index + 1)}><ArrowRight size={17} /></button>
         </div> : null}
       </div>
-      <div className={styles.hireInner} aria-live="polite" aria-atomic="true">
+      <div key={h.jobId} className={styles.hireInner} aria-live={announce ? 'polite' : 'off'} aria-atomic="true">
         <div className={styles.hireIntro}>
           <h2 id="latest-h">Real hires, <em>step by step.</em></h2>
           <p className={styles.hireLede}>Not a demo: paid Marque jobs read back from BNB Chain, including jobs still in their review window. Each completed step links to its transaction.</p>
@@ -67,7 +107,7 @@ export function RecentHires({ hires }: { hires: RecentHire[] }) {
         </ol>
       </div>
       {hires.length > 1 ? <div className={styles.hireDots} aria-label="Choose a hire">{hires.map((job, n) =>
-        <button key={job.jobId} type="button" aria-label={`Show job ${job.jobId}: ${stateLabel(job)}`} aria-current={n === index ? 'true' : undefined} onClick={() => setIndex(n)} />
+        <button key={job.jobId} type="button" aria-label={`Show job ${job.jobId}: ${stateLabel(job)}`} aria-current={n === index ? 'true' : undefined} onClick={() => choose(n)} />
       )}</div> : null}
     </section>
   )

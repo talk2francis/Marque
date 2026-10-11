@@ -90,11 +90,11 @@
 }
 .coverArt {
   position: absolute; inset: 0; width: 100%; height: 100%;
-  object-fit: cover; object-position: 50% 28%;
+  background-size: cover; background-position: 50% 28%;
   filter: brightness(0.82) saturate(0.92);
 }
 :global([data-theme='day']) .coverArt { filter: none; }
-.cover[data-kind='emblem'] {
+.cover[data-kind='fallback'] {
   background-image: linear-gradient(to right, var(--grid-line) 1px, transparent 1px);
   background-size: 28px 100%;
 }

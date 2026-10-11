@@ -22,6 +22,7 @@ import { DeliverableView } from '../jobs/[chainId]/[jobId]/Deliverable'
  */
 interface SheetAgent {
   agentId: string; tokenId: string; registryChainId: number; name: string; category: string | null
+  imageUrl: string | null
   owner: string | null; firstParty: boolean; state: string
   lastQuote: { chainId: number | null; priceLabel: string | null; signed: boolean | null; quotedAt: string | null } | null
   reviewWindowSeconds: number | null; platformFeeBP: number | null; reviewWindowChainId: number
@@ -234,7 +235,7 @@ export function HireSheet() {
       {agent ? (
         <div className="hs">
           <header className="hs-agent">
-            <AgentAvatar id={agent.agentId} name={agent.name} category={agent.category} reference={agent.firstParty} size={44} />
+            <AgentAvatar id={agent.agentId} name={agent.name} category={agent.category} reference={agent.firstParty} imageUrl={agent.imageUrl} size={44} />
             <div className="hs-agent-txt">
               <h2 className="hs-name">{agent.name}</h2>
               <p className="hs-meta">{CAT[agent.category ?? ''] ?? 'Agent'} · ERC-8004 #{agent.tokenId}</p>

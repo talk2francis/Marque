@@ -13,6 +13,7 @@ import { network as net } from '../../../../lib/network'
 import { utcStamp } from '../../../../lib/time'
 import { DeliverableView } from './Deliverable'
 import { readManifest } from '../../../../lib/manifest'
+import { registryImageUrl } from '../../../../lib/avatar-source'
 import { JobActions } from './JobActions'
 import styles from './job.module.css'
 
@@ -64,7 +65,10 @@ export default async function JobRoom({ params }: { params: Promise<{ chainId: s
   if (!job && (!onchain || onchain.id === 0n)) notFound()
 
   const [intent] = (await db().execute(sql`
-    select description, price_raw, token, category from hire_intent where chain_id = ${chainId} and job_id = ${jobId} limit 1`)) as unknown as Array<Record<string, unknown>>
+    select i.description, i.price_raw, i.token, i.category, a.image_url,
+           a.raw_metadata #>> '{offchain_content,image}' as meta_image
+    from hire_intent i left join agent a on a.id = i.agent_id
+    where i.chain_id = ${chainId} and i.job_id = ${jobId} limit 1`)) as unknown as Array<Record<string, unknown>>
 
   const state = job?.state ?? (['OPEN', 'FUNDED', 'SUBMITTED', 'COMPLETED', 'REJECTED', 'EXPIRED'] as const)[onchain!.status] ?? 'OPEN'
   const events: Ev[] = (job?.events ?? []) as Ev[]
@@ -112,7 +116,7 @@ export default async function JobRoom({ params }: { params: Promise<{ chainId: s
               <span className={styles.stateTag} data-state={state}>{state === 'SUBMITTED' ? 'Delivered' : state === 'FUNDED' ? 'Working' : state.charAt(0) + state.slice(1).toLowerCase()}</span>
             </div>
             <div className={styles.agentRow}>
-              {job?.agent ? <AgentAvatar id={job.agent.agentKey ?? jobId} name={agentName} category={category} reference={job.agent.firstParty} size={52} /> : null}
+              {job?.agent ? <AgentAvatar id={job.agent.agentKey ?? jobId} name={agentName} category={category} reference={job.agent.firstParty} imageUrl={registryImageUrl(intent?.['image_url']) ?? registryImageUrl(intent?.['meta_image'])} size={52} /> : null}
               <div className={styles.agentTxt}>
                 <h1>{head.title}</h1>
                 <p className={styles.lede}>{head.body}</p>

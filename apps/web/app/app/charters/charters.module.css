@@ -132,3 +132,6 @@ a.proof { text-decoration: underline; text-underline-offset: 3px; }
 details[open] .historySummary::before { content: '▾'; }
 .historySummary:hover { border-color: var(--fg-soft); color: var(--fg); }
 .history[open] .historySummary { margin-bottom: var(--s4); }
+.positionField { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; font-size: 13px; color: var(--ink-2); }
+.positionField input { width: 100%; min-height: 42px; padding: 9px 12px; border: 1px solid var(--hair-2); border-radius: var(--r-2); background: var(--panel); color: var(--ink); font: inherit; }
+.positionField input:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }

@@ -28,12 +28,12 @@ export interface CaseSpec {
 
 export const CASES: readonly CaseSpec[] = [
   {
-    id: 'REB-1-btcb-usdc-2500',
+    id: 'REB-1-us-wbnb-2500',
     testId: 'MCS-REB-1',
     subject: {
-      owner: '0x2E7bCA3AC237903BCE134d5bd88145F50f9ad794',
-      tokenId: '7395979',
-      pair: 'BTCB/USDC',
+      owner: '0xE36dEF833322EbA312eeE52bD6CDFB228C0E9Be8',
+      tokenId: '7654242',
+      pair: 'US/WBNB',
     },
     policy: {
       rangePct: 6,
@@ -42,7 +42,7 @@ export const CASES: readonly CaseSpec[] = [
         're-centre the position symmetrically at ±6% around the current spot price, on the 0.25% fee tier, keeping the same liquidity',
     } satisfies RebPolicy,
     why:
-      'A live BTCB/USDC position on the 0.25% tier, whose tickSpacing of 50 makes the multiple-of-spacing check bite immediately. Its bounds (109750–114450) sit asymmetrically around spot — currently nearer the upper bound — so the distance-to-bound arithmetic is real rather than a midpoint. Its owner holds exactly one position, which matters: the position reader enumerates an owner and stops at 40, so a subject held by a large LP manager is invisible to the test no matter how live it is. The previous subject (tokenId 7321916) was withdrawn by its owner and the case could no longer be captured at all; a single-position owner is the most durable form this case can take while still being a real stranger’s position.',
+      'A live third-party US/WBNB position on PancakeSwap V3’s 0.25% tier, verified at capture time from the position manager. Its owner held one enumerable position when selected on 11 October 2026, so the reader’s 40-position cap does not hide it. This checks tick spacing, range arithmetic, liquidity amounts and the supplied policy against a real pool. The former BTCB/USDC subject (tokenId 7395979) was withdrawn and could no longer be captured. If this NFT is later withdrawn too, the worker skips new tests rather than reusing an old block or fabricating a replacement.',
   },
   {
     id: 'HF-1-venus-at-risk',

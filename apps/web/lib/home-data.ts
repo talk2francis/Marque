@@ -6,6 +6,7 @@ import { funnel } from '@marque/registry'
 import { marketplaceAgents, type MarketRow } from './marketplace'
 import { readLedger } from './ledger'
 import { referenceAgent } from './reference-agents'
+import { registryImageUrl } from './avatar-source'
 import type { TapeItem } from '../app/_components/ui'
 
 /**
@@ -207,7 +208,8 @@ export interface RecentHire {
 export async function recentHires(): Promise<RecentHire[]> {
   const jobs = rowsOf(await db().execute(sql`
     select j.job_id, j.client, j.provider, j.funded_raw, j.token, j.state,
-           i.category, i.agent_id, a.name, a.token_id, a.image_url, funded.block_time as funded_at,
+           i.category, i.agent_id, a.name, a.token_id, a.image_url,
+           (a.raw_metadata #>> '{offchain_content,image}') as meta_image, funded.block_time as funded_at,
            (select json_object_agg(e.name, json_build_object('tx', e.tx_hash, 'at', e.block_time, 'block', e.block_number))
               from commerce_event e where e.chain_id = j.chain_id and e.job_id = j.job_id) as ev
     from commerce_job j
@@ -236,7 +238,7 @@ export async function recentHires(): Promise<RecentHire[]> {
     return {
       jobId: String(j['job_id']),
       agentId: j['agent_id'] ? String(j['agent_id']) : null,
-      imageUrl: j['image_url'] ? String(j['image_url']) : null,
+      imageUrl: registryImageUrl(j['image_url']) ?? registryImageUrl(j['meta_image']),
       agent: String(j['name'] ?? 'An agent'),
       category: CAT_LABEL[String(j['category'] ?? '')] ?? 'Agent',
       state: String(j['state']),

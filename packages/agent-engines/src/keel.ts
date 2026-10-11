@@ -87,7 +87,7 @@ export const keelEngine: Engine = {
     const goal = target ?? DEFAULT_TARGET_HF
 
     try {
-      const head = await within(publicClient().getBlockNumber(), 3_000, 'BNB Smart Chain')
+      const head = await within(publicClient().getBlockNumber(), 8_000, 'BNB Smart Chain')
       const ctx = historicalContext(prompt, head)
       if (isRefusal(ctx)) return ctx
       // Comptroller state, market state and the oracle price are all read at

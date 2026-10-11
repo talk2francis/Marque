@@ -47,9 +47,8 @@ export function AgentCard({ a, compare, base = '', variant = 'default' }: {
     <article className={styles.card} data-variant={variant} data-agent={a.agentId} data-hireable={hireable || undefined} data-picked={compare?.picked || undefined}>
       {feature ? (
         <div className={styles.cover} aria-hidden="true" data-kind={art.kind}>
-          {art.src
-            ? <img className={styles.coverArt} src={art.src} alt="" width={512} height={512} loading="lazy" decoding="async" />
-            : <span className={styles.coverEmblem}><AgentAvatar id={a.agentId} name={a.name} category={a.category} reference={a.isReference} size={72} /></span>}
+          <span className={styles.coverEmblem}><AgentAvatar id={a.agentId} name={a.name} category={a.category} reference={a.isReference} imageUrl={a.identity.imageUrl} size={72} /></span>
+          {art.src ? <span className={styles.coverArt} style={{ backgroundImage: `url("${art.src}")` }} /> : null}
         </div>
       ) : null}
 

@@ -31,6 +31,16 @@ for (const sig of ['SIGINT', 'SIGTERM'] as const) process.on(sig, () => { stoppi
 function log(event: string, data: Record<string, unknown>): void {
   console.log(JSON.stringify({ t: new Date().toISOString(), worker: 'conform', event, ...data }))
 }
+/** Third-party error text can contain RPC credentials or private endpoint URLs. */
+function errorKind(error: unknown): string | null {
+  if (!error) return null
+  const value = error instanceof Error ? error.message : String(error)
+  if (value.startsWith('unusable_response:')) return 'unusable_response'
+  if (value.startsWith('no_compatible_interface:')) return 'no_compatible_interface'
+  if (value.startsWith('payment required:')) return 'payment_required'
+  if (/timeout|did not answer within|timed out/i.test(value)) return 'timeout'
+  return error instanceof Error ? error.name : 'request_failed'
+}
 
 function liveAdapter(agentId: string, name: string, endpoint: string) {
   return {
@@ -95,10 +105,10 @@ async function sweep(): Promise<void> {
         else fail++
         log('result', {
           agent: a.name, test: c.testId, pass: outcome.pass,
-          failed: outcome.failedFields, latencyMs: outcome.latencyMs, error: outcome.error,
+          failed: outcome.failedFields, latencyMs: outcome.latencyMs, error: errorKind(outcome.error),
         })
       } catch (err) {
-        log('run_error', { agent: a.name, test: c.testId, error: err instanceof Error ? err.message : String(err) })
+        log('run_error', { agent: a.name, test: c.testId, error: errorKind(err) })
       }
     }
   }
@@ -117,7 +127,7 @@ async function captureAll(): Promise<Set<TestId>> {
       captured.add(c.testId as TestId)
       log('case_captured', { case: caseId, block: testCase.blockNumber.toString(), hash: groundTruthHash })
     } catch (err) {
-      log('case_capture_failed', { case: c.id, error: err instanceof Error ? err.message : String(err) })
+      log('case_capture_failed', { case: c.id, error: errorKind(err) })
     }
   }
   return captured
@@ -130,7 +140,6 @@ async function captureAll(): Promise<Set<TestId>> {
  * "retest due" applies only when the latest pass is older than 72 h.
  */
 async function referenceSweep(): Promise<void> {
-  const captured = await captureAll()
   const ids = new Map<string, string>()
   const fp = firstPartyAgents()
   for (const id of await firstPartyAgentIds()) {
@@ -140,11 +149,25 @@ async function referenceSweep(): Promise<void> {
   }
   let pass = 0
   let fail = 0
+  const runId = `${new Date().toISOString().replace(/[^0-9]/g, '')}-${randomUUID().slice(0, 8)}`
   for (const a of fp) {
     const testId = TEST_FOR_CATEGORY[a.category]
     const agentId = ids.get(a.slug)
-    if (!testId || !agentId || !captured.has(testId)) {
-      log('reference_skip', { agent: a.slug, reason: !testId ? 'no published test for this category' : !agentId ? 'registry row not ingested' : 'fresh case capture failed' })
+    if (!testId || !agentId) {
+      log('reference_skip', { agent: a.slug, reason: !testId ? 'no published test for this category' : 'registry row not ingested' })
+      continue
+    }
+    // Public BSC RPCs prune historical state after about 60 blocks. Capturing
+    // every category first made later agents read an already-pruned block,
+    // especially when the optional archive provider was down. Freeze a fresh,
+    // immutable case immediately before asking this agent; never reuse a stale
+    // case or substitute the latest head for its pinned block.
+    const spec = CASES.find((c) => c.testId === testId)!
+    try {
+      const captured = await captureCase({ id: `${spec.id}-${a.slug}-${runId}`, testId, subject: spec.subject, policy: spec.policy })
+      log('reference_case_captured', { agent: a.slug, block: captured.testCase.blockNumber.toString(), hash: captured.groundTruthHash })
+    } catch (err) {
+      log('reference_skip', { agent: a.slug, reason: 'fresh case capture failed', error: errorKind(err) })
       continue
     }
     const adapter = a2aAdapter(agentId, a.slug, `${PUBLIC_URL}/agents/${a.slug}/.well-known/agent-card.json`)
@@ -152,10 +175,10 @@ async function referenceSweep(): Promise<void> {
       const outcome = await runConformance({ adapter, testId })
       if (outcome.pass) pass++
       else fail++
-      log('reference_result', { agent: a.slug, agentId, test: testId, pass: outcome.pass, failed: outcome.failedFields, latencyMs: outcome.latencyMs, error: outcome.error })
+      log('reference_result', { agent: a.slug, agentId, test: testId, pass: outcome.pass, failed: outcome.failedFields, latencyMs: outcome.latencyMs, error: errorKind(outcome.error) })
     } catch (err) {
       fail++
-      log('reference_error', { agent: a.slug, test: testId, error: err instanceof Error ? err.message : String(err) })
+      log('reference_error', { agent: a.slug, test: testId, error: errorKind(err) })
     }
   }
   log('reference_sweep_done', { pass, fail })
@@ -176,13 +199,13 @@ async function main(): Promise<void> {
   while (!stopping) {
     if (Date.now() >= nextReference) {
       try { await referenceSweep() } catch (err) {
-        log('reference_sweep_error', { error: err instanceof Error ? err.message : String(err) })
+        log('reference_sweep_error', { error: errorKind(err) })
       }
       nextReference = Date.now() + REFERENCE_CYCLE_MS
     }
     if (Date.now() >= nextFull) {
       try { await sweep() } catch (err) {
-        log('sweep_error', { error: err instanceof Error ? err.message : String(err) })
+        log('sweep_error', { error: errorKind(err) })
       }
       nextFull = Date.now() + CYCLE_MS
     }

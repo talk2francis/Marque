@@ -163,7 +163,7 @@ export const redcellEngine: Engine = {
     const spender = found[2] ?? null
 
     try {
-      const head = await within(publicClient().getBlockNumber(), 3_000, 'BNB Smart Chain')
+      const head = await within(publicClient().getBlockNumber(), 8_000, 'BNB Smart Chain')
       const ctx = historicalContext(prompt, head)
       if (isRefusal(ctx)) return ctx
       const { client, readAt } = ctx
