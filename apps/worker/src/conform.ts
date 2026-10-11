@@ -9,7 +9,7 @@
  * retains only ~64 blocks of state and a stale case grades agents against a
  * position that may no longer resemble the chain.
  */
-import { CASES, captureCase, runConformance, formatOutcome, a2aAdapter, type TestId } from '@marque/conformance'
+import { CASES, capturePublishedCase, runConformance, formatOutcome, a2aAdapter, type TestId } from '@marque/conformance'
 import { randomUUID } from 'node:crypto'
 import { safeFetch, firstPartyAgentIds } from '@marque/probe'
 import { db, closeDb, firstPartyAgents } from '@marque/db'
@@ -96,10 +96,11 @@ async function sweep(): Promise<void> {
   let fail = 0
   for (const a of agents) {
     for (const c of CASES) {
-      if (!captured.has(c.testId as TestId)) continue
+      const caseId = captured.get(c.testId as TestId)
+      if (!caseId) continue
       try {
         const outcome = await runConformance({
-          adapter: liveAdapter(a.id, a.name, a.endpoint), testId: c.testId as TestId,
+          adapter: liveAdapter(a.id, a.name, a.endpoint), testId: c.testId as TestId, caseId,
         })
         if (outcome.pass) pass++
         else fail++
@@ -116,16 +117,16 @@ async function sweep(): Promise<void> {
   void formatOutcome
 }
 
-async function captureAll(): Promise<Set<TestId>> {
-  const captured = new Set<TestId>()
+async function captureAll(): Promise<Map<TestId, string>> {
+  const captured = new Map<TestId, string>()
   // A frozen case cannot be overwritten. Give each sweep its own immutable id.
   const runId = `${new Date().toISOString().replace(/[^0-9]/g, '')}-${randomUUID().slice(0, 8)}`
   for (const c of CASES) {
     try {
       const caseId = `${c.id}-${runId}`
-      const { testCase, groundTruthHash } = await captureCase({ id: caseId, testId: c.testId, subject: c.subject, policy: c.policy })
-      captured.add(c.testId as TestId)
-      log('case_captured', { case: caseId, block: testCase.blockNumber.toString(), hash: groundTruthHash })
+      const { testCase, groundTruthHash } = await capturePublishedCase({ id: caseId, testId: c.testId, subject: c.subject, policy: c.policy })
+      captured.set(c.testId as TestId, testCase.id)
+      log('case_captured', { case: caseId, block: testCase.blockNumber.toString(), subjectTokenId: testCase.subject['tokenId'] ?? null, hash: groundTruthHash })
     } catch (err) {
       log('case_capture_failed', { case: c.id, error: errorKind(err) })
     }
@@ -163,16 +164,18 @@ async function referenceSweep(): Promise<void> {
     // immutable case immediately before asking this agent; never reuse a stale
     // case or substitute the latest head for its pinned block.
     const spec = CASES.find((c) => c.testId === testId)!
+    let caseId: string
     try {
-      const captured = await captureCase({ id: `${spec.id}-${a.slug}-${runId}`, testId, subject: spec.subject, policy: spec.policy })
-      log('reference_case_captured', { agent: a.slug, block: captured.testCase.blockNumber.toString(), hash: captured.groundTruthHash })
+      const captured = await capturePublishedCase({ id: `${spec.id}-${a.slug}-${runId}`, testId, subject: spec.subject, policy: spec.policy })
+      caseId = captured.testCase.id
+      log('reference_case_captured', { agent: a.slug, block: captured.testCase.blockNumber.toString(), subjectTokenId: captured.testCase.subject['tokenId'] ?? null, hash: captured.groundTruthHash })
     } catch (err) {
       log('reference_skip', { agent: a.slug, reason: 'fresh case capture failed', error: errorKind(err) })
       continue
     }
     const adapter = a2aAdapter(agentId, a.slug, `${PUBLIC_URL}/agents/${a.slug}/.well-known/agent-card.json`)
     try {
-      const outcome = await runConformance({ adapter, testId })
+      const outcome = await runConformance({ adapter, testId, caseId })
       if (outcome.pass) pass++
       else fail++
       log('reference_result', { agent: a.slug, agentId, test: testId, pass: outcome.pass, failed: outcome.failedFields, latencyMs: outcome.latencyMs, error: errorKind(outcome.error) })

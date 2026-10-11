@@ -8,6 +8,7 @@ import { rebGroundTruth, rebPrompt, gradeReb, type RebPolicy, type RebGroundTrut
 import { hfGroundTruth, hfPrompt, gradeHf, type HfPolicy, type HfGroundTruth } from './tests/mcs-hf-1.js'
 import { gridGroundTruth, gridPrompt, gradeGrid, type GridPolicy, type GridGroundTruth } from './tests/mcs-grid-1.js'
 import { yieldGroundTruth, yieldPrompt, gradeYield, type YieldPolicy, type YieldGroundTruth } from './tests/mcs-yield-1.js'
+import { REB_FALLBACK_SUBJECTS } from './cases.js'
 
 /**
  * The conformance harness.
@@ -143,19 +144,37 @@ export async function captureCase(spec: {
   return { testCase, groundTruth, groundTruthHash, prompt }
 }
 
-/** Load the active case for a test, without touching the chain. */
-export async function loadCase(testId: TestId): Promise<{
+/**
+ * Capture a published case against current chain state. V3 position NFTs can be
+ * withdrawn at any time, so try the independently verified backup roster only
+ * when the primary cannot be captured. The stored subject is always the exact
+ * owner/NFT actually read; no old snapshot or substitute answer is reused.
+ */
+export async function capturePublishedCase(spec: Parameters<typeof captureCase>[0]): ReturnType<typeof captureCase> {
+  if (spec.testId !== 'MCS-REB-1') return captureCase(spec)
+  return firstCapturable([spec.subject, ...REB_FALLBACK_SUBJECTS], (subject) => captureCase({ ...spec, subject }))
+}
+
+/** Preserve candidate order and the last real failure; never return fabricated evidence. */
+export async function firstCapturable<T>(subjects: readonly Record<string, string>[], capture: (subject: Record<string, string>) => Promise<T>): Promise<T> {
+  let lastError: unknown
+  for (const subject of subjects) {
+    try {
+      return await capture(subject)
+    } catch (error) {
+      lastError = error
+    }
+  }
+  throw lastError ?? new Error('no conformance subjects supplied')
+}
+
+type LoadedCase = {
   testCase: TestCase
   groundTruth: GroundTruth
   groundTruthHash: string
-} | null> {
-  const rows = await db()
-    .select().from(conformanceCase)
-    .where(and(eq(conformanceCase.testId, testId), eq(conformanceCase.active, true)))
-    .orderBy(desc(conformanceCase.capturedAt)).limit(1)
-  const row = rows[0]
-  if (!row) return null
+}
 
+function hydrateCase(row: typeof conformanceCase.$inferSelect): LoadedCase {
   return {
     testCase: {
       id: row.id,
@@ -170,6 +189,22 @@ export async function loadCase(testId: TestId): Promise<{
     groundTruth: row.groundTruth as GroundTruth,
     groundTruthHash: row.groundTruthHash,
   }
+}
+
+/** Load the latest active case for a test, without touching the chain. */
+export async function loadCase(testId: TestId): Promise<LoadedCase | null> {
+  const rows = await db()
+    .select().from(conformanceCase)
+    .where(and(eq(conformanceCase.testId, testId), eq(conformanceCase.active, true)))
+    .orderBy(desc(conformanceCase.capturedAt)).limit(1)
+  return rows[0] ? hydrateCase(rows[0]) : null
+}
+
+/** Bind a run to its own immutable snapshot, even while another tester captures. */
+export async function loadCaseById(caseId: string): Promise<LoadedCase | null> {
+  const rows = await db().select().from(conformanceCase)
+    .where(and(eq(conformanceCase.id, caseId), eq(conformanceCase.active, true))).limit(1)
+  return rows[0] ? hydrateCase(rows[0]) : null
 }
 
 /** Grade a raw agent response against frozen ground truth. Pure, no I/O. */
@@ -192,11 +227,13 @@ export function grade(testId: TestId, groundTruth: GroundTruth, response: unknow
 export async function runConformance(opts: {
   adapter: ConformanceAdapter
   testId: TestId
+  caseId?: string
   persist?: boolean
 }): Promise<ConformanceOutcome> {
-  const loaded = await loadCase(opts.testId)
+  const loaded = opts.caseId ? await loadCaseById(opts.caseId) : await loadCase(opts.testId)
   if (!loaded) throw new Error(`no active case for ${opts.testId} — run captureCase first`)
   const { testCase, groundTruth } = loaded
+  if (testCase.testId !== opts.testId) throw new Error(`case ${testCase.id} belongs to ${testCase.testId}, not ${opts.testId}`)
 
   type Asked = { response: unknown; latencyMs: number; costUsd?: number | null; error?: string | null }
   const asked: Asked = await opts.adapter.ask(testCase, testCase.prompt).catch((err: unknown) => ({

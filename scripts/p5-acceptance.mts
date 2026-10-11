@@ -8,7 +8,7 @@
  */
 import { createServer } from 'node:http'
 import { A2AExecutor, runHire, preflight, structuredTask, type StructuredTask } from '@marque/execution'
-import { captureCase, CASES } from '@marque/conformance'
+import { capturePublishedCase, CASES } from '@marque/conformance'
 import { safeFetch } from '@marque/probe'
 import { publicClient } from '@marque/chain'
 import { closeDb } from '@marque/db'
@@ -21,7 +21,7 @@ function line(t: string) { console.log(`\n${'='.repeat(76)}\n${t}\n${'='.repeat(
 async function main(): Promise<void> {
   // Re-capture the HF case so ground truth is inside the 64-block state window.
   const spec = CASES.find((c) => c.testId === 'MCS-HF-1')!
-  const cap = await captureCase({ id: spec.id, testId: spec.testId, subject: spec.subject, policy: spec.policy })
+  const cap = await capturePublishedCase({ id: spec.id, testId: spec.testId, subject: spec.subject, policy: spec.policy })
   console.log(`case ${spec.id} captured at block ${cap.testCase.blockNumber} · ground truth ${cap.groundTruthHash.slice(0, 20)}…`)
 
   const blockNumber = (await publicClient().getBlockNumber()).toString()

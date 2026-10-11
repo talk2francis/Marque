@@ -9,7 +9,7 @@ import { randomUUID } from 'node:crypto'
 import { sql } from 'drizzle-orm'
 import { db, closeDb } from '@marque/db'
 import { safeFetch } from '@marque/probe'
-import { CASES, captureCase, runConformance, a2aAdapter, mcpAdapter, extractJsonPayload, type TestId } from '@marque/conformance'
+import { CASES, capturePublishedCase, runConformance, a2aAdapter, mcpAdapter, extractJsonPayload, type TestId } from '@marque/conformance'
 
 type PublicAgent = { agentId: string; tokenId: string; name: string; category: string | null; isReference: boolean }
 const TEST: Record<string, TestId | undefined> = {
@@ -62,8 +62,10 @@ for (const agent of selected.values()) {
     order by case kind when 'a2a' then 0 when 'termix' then 1 else 2 end limit 1`))
   if (!service) { skipped++; console.log(JSON.stringify({ token: agent.tokenId, test: testId, result: 'no_testable_service' })); continue }
   const spec = CASES.find((c) => c.testId === testId)!
+  let caseId: string
   try {
-    await captureCase({ id: `${spec.id}-shortlist-${agent.tokenId}-${Date.now()}-${randomUUID().slice(0, 6)}`, testId, subject: spec.subject, policy: spec.policy })
+    const captured = await capturePublishedCase({ id: `${spec.id}-shortlist-${agent.tokenId}-${Date.now()}-${randomUUID().slice(0, 6)}`, testId, subject: spec.subject, policy: spec.policy })
+    caseId = captured.testCase.id
   } catch (error) {
     skipped++
     console.log(JSON.stringify({ token: agent.tokenId, test: testId, result: 'case_capture_failed', errorClass: error instanceof Error ? error.name : 'Error' }))
@@ -75,7 +77,7 @@ for (const agent of selected.values()) {
     : /agent-card|\.well-known|\/card(?:\/|$)/i.test(endpoint) ? a2aAdapter(agent.agentId, agent.name, endpoint)
       : directA2a(agent, endpoint)
   try {
-    const outcome = await runConformance({ adapter, testId })
+    const outcome = await runConformance({ adapter, testId, caseId })
     if (outcome.pass) pass++; else fail++
     console.log(JSON.stringify({ token: agent.tokenId, name: agent.name, test: testId, pass: outcome.pass, failedFields: outcome.failedFields, noAnswer: Boolean(outcome.error), latencyMs: outcome.latencyMs }))
   } catch (error) {

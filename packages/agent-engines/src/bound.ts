@@ -139,7 +139,7 @@ export const boundEngine: Engine = {
       }
 
       const read = await within(
-        pancakeV3Reader(owner, { client, ...(readAt === undefined ? {} : { blockNumber: readAt }) }),
+        pancakeV3Reader(owner, { client, ...(readAt === undefined ? {} : { blockNumber: readAt }), ...(wantTokenId ? { tokenId: BigInt(wantTokenId) } : {}) }),
         deadline,
         'the PancakeSwap V3 position manager',
       )

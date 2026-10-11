@@ -26,14 +26,20 @@ export interface CaseSpec {
   why: string
 }
 
+/** Public, chain-verified backup NFTs. A withdrawn position is skipped, never fabricated. */
+export const REB_FALLBACK_SUBJECTS: readonly Record<string, string>[] = [
+  { owner: '0xa9621227DF65696fB2B45b94644b65eA452b9724', tokenId: '7654391', pair: 'BNCB/WBNB' },
+  { owner: '0xf5d23924E63718bAaBE4ea4c9f295104DcB02397', tokenId: '7654396', pair: 'BNCB/WBNB' },
+]
+
 export const CASES: readonly CaseSpec[] = [
   {
-    id: 'REB-1-us-wbnb-2500',
+    id: 'REB-1-bncb-wbnb-2500',
     testId: 'MCS-REB-1',
     subject: {
-      owner: '0xE36dEF833322EbA312eeE52bD6CDFB228C0E9Be8',
-      tokenId: '7654242',
-      pair: 'US/WBNB',
+      owner: '0x2cfD930f4Ca936CAD72a13b62df095D8BA17874f',
+      tokenId: '7650656',
+      pair: 'BNCB/WBNB',
     },
     policy: {
       rangePct: 6,
@@ -42,7 +48,7 @@ export const CASES: readonly CaseSpec[] = [
         're-centre the position symmetrically at ±6% around the current spot price, on the 0.25% fee tier, keeping the same liquidity',
     } satisfies RebPolicy,
     why:
-      'A live third-party US/WBNB position on PancakeSwap V3’s 0.25% tier, verified at capture time from the position manager. Its owner held one enumerable position when selected on 11 October 2026, so the reader’s 40-position cap does not hide it. This checks tick spacing, range arithmetic, liquidity amounts and the supplied policy against a real pool. The former BTCB/USDC subject (tokenId 7395979) was withdrawn and could no longer be captured. If this NFT is later withdrawn too, the worker skips new tests rather than reusing an old block or fabricating a replacement.',
+      'A live third-party BNCB/WBNB position on PancakeSwap V3’s 0.25% tier, minted about 240,000 blocks before its 11 October 2026 selection and still carrying liquidity. The owner held three enumerable positions, below the reader’s 40-position cap. The previous BTCB/USDC (#7395979) and US/WBNB (#7654242) subjects were withdrawn. Two separately chain-verified BNCB/WBNB positions are published as fallback subjects. Every capture still reads current ownership and liquidity at a fresh block; if none survives, the test is skipped rather than inventing a position. This fixture tests V3 arithmetic, not the investment merits of either token.',
   },
   {
     id: 'HF-1-venus-at-risk',

@@ -160,7 +160,7 @@ async function uncollectedFees(
 
 export async function pancakeV3Reader(
   owner: Address,
-  opts: { client?: PublicClient; blockNumber?: bigint; maxPositions?: number } = {},
+  opts: { client?: PublicClient; blockNumber?: bigint; maxPositions?: number; tokenId?: bigint } = {},
 ): Promise<ReaderResult<V3Portfolio>> {
   const client = opts.client ?? publicClient()
   const nfpm = BSC_ADDRESSES.pancakeV3PositionManager as Address
@@ -168,30 +168,44 @@ export async function pancakeV3Reader(
   const ctx: ReadContext = { blockNumber, readAt: new Date().toISOString(), chainId: 56 }
   const maxPositions = opts.maxPositions ?? 40
 
-  let balance: bigint
-  try {
-    balance = await client.readContract({
-      address: nfpm, abi: nonfungiblePositionManagerAbi,
-      functionName: 'balanceOf', args: [owner], blockNumber,
-    })
-  } catch (err) {
-    return fail('position_manager_unreadable', ctx, err instanceof Error ? err.message : String(err))
+  let ids: bigint[]
+  if (opts.tokenId !== undefined) {
+    // A named position needs only that NFT. Reading the entire holder portfolio
+    // makes a time-limited agent fail for unrelated positions and can miss an
+    // NFT past maxPositions. Prove ownership at the same pinned block first.
+    try {
+      const actualOwner = await client.readContract({
+        address: nfpm, abi: nonfungiblePositionManagerAbi,
+        functionName: 'ownerOf', args: [opts.tokenId], blockNumber,
+      })
+      ids = actualOwner.toLowerCase() === owner.toLowerCase() ? [opts.tokenId] : []
+    } catch {
+      ids = []
+    }
+  } else {
+    let balance: bigint
+    try {
+      balance = await client.readContract({
+        address: nfpm, abi: nonfungiblePositionManagerAbi,
+        functionName: 'balanceOf', args: [owner], blockNumber,
+      })
+    } catch (err) {
+      return fail('position_manager_unreadable', ctx, err instanceof Error ? err.message : String(err))
+    }
+    const count = Number(balance) > maxPositions ? maxPositions : Number(balance)
+    if (count === 0) return ok({ owner, positions: [], emptyPositions: 0 }, ctx)
+    const tokenIds = (await client.multicall({
+      contracts: Array.from({ length: count }, (_, i) => ({
+        address: nfpm, abi: nonfungiblePositionManagerAbi,
+        functionName: 'tokenOfOwnerByIndex', args: [owner, BigInt(i)],
+      })),
+      allowFailure: true,
+      blockNumber,
+    })) as unknown as Array<MulticallResult<bigint>>
+    ids = []
+    for (const r of tokenIds) if (r.status === 'success') ids.push(r.result)
   }
-
-  const count = Number(balance) > maxPositions ? maxPositions : Number(balance)
-  if (count === 0) return ok({ owner, positions: [], emptyPositions: 0 }, ctx)
-
-  const tokenIds = (await client.multicall({
-    contracts: Array.from({ length: count }, (_, i) => ({
-      address: nfpm, abi: nonfungiblePositionManagerAbi,
-      functionName: 'tokenOfOwnerByIndex', args: [owner, BigInt(i)],
-    })),
-    allowFailure: true,
-    blockNumber,
-  })) as unknown as Array<MulticallResult<bigint>>
-
-  const ids: bigint[] = []
-  for (const r of tokenIds) if (r.status === 'success') ids.push(r.result)
+  if (ids.length === 0) return ok({ owner, positions: [], emptyPositions: 0 }, ctx)
 
   const rawPositions = (await client.multicall({
     contracts: ids.map((id) => ({

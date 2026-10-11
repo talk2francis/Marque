@@ -1,6 +1,6 @@
 # Marque Conformance Standard — MCS v1.0.0
 
-> Generated 2026-10-11T13:41:45.341Z from `packages/conformance/src/tolerances.ts`.
+> Generated 2026-10-11T18:27:30.196Z from `packages/conformance/src/tolerances.ts`.
 > Do not edit by hand — regenerate with `pnpm standard`.
 > Tolerance revision 1.
 
@@ -54,15 +54,16 @@ conformance outcome and belongs in the public record.
 **Reader:** PancakeSwap V3 NonfungiblePositionManager + pool slot0
 **Category:** `rebalancing`
 
-**Live case:** `REB-1-us-wbnb-2500`
+**Live case:** `REB-1-bncb-wbnb-2500`
 
-*Subject:* owner `0xE36dEF833322EbA312eeE52bD6CDFB228C0E9Be8` · tokenId `7654242` · pair `US/WBNB`
+*Subject:* owner `0x2cfD930f4Ca936CAD72a13b62df095D8BA17874f` · tokenId `7650656` · pair `BNCB/WBNB`
 
-*Why this subject:* A live third-party US/WBNB position on PancakeSwap V3’s 0.25% tier, verified at capture time from the position manager. Its owner held one enumerable position when selected on 11 October 2026, so the reader’s 40-position cap does not hide it. This checks tick spacing, range arithmetic, liquidity amounts and the supplied policy against a real pool. The former BTCB/USDC subject (tokenId 7395979) was withdrawn and could no longer be captured. If this NFT is later withdrawn too, the worker skips new tests rather than reusing an old block or fabricating a replacement.
+*Why this subject:* A live third-party BNCB/WBNB position on PancakeSwap V3’s 0.25% tier, minted about 240,000 blocks before its 11 October 2026 selection and still carrying liquidity. The owner held three enumerable positions, below the reader’s 40-position cap. The previous BTCB/USDC (#7395979) and US/WBNB (#7654242) subjects were withdrawn. Two separately chain-verified BNCB/WBNB positions are published as fallback subjects. Every capture still reads current ownership and liquidity at a fresh block; if none survives, the test is skipped rather than inventing a position. This fixture tests V3 arithmetic, not the investment merits of either token.
 
 *Policy supplied to the agent:* "re-centre the position symmetrically at ±6% around the current spot price, on the 0.25% fee tier, keeping the same liquidity"
 
-*Latest captured example: block* `127029223` · *ground-truth hash* `0x516f948bbdebe642224f83c9bac4ebf96607b659f6b022ab91f69831cc6809a5`
+*Latest captured example:* case `REB-1-bncb-wbnb-2500-final-1791743231671` · block `127067260` · ground-truth hash `0xabc7fcfb58b6f69fd29023f99e145da83877f85d5bc6fc91549aa26571322b40`
+*Actual subject in that snapshot:* pair `BNCB/WBNB` · owner `0x2cfD930f4Ca936CAD72a13b62df095D8BA17874f` · tokenId `7650656`
 
 | Check | Bound | What is asserted |
 |---|---|---|
@@ -97,7 +98,8 @@ conformance outcome and belongs in the public record.
 
 *Policy supplied to the agent:* "build a 12-level grid for BNB/USDT between 600 and 850 using 2,000 USD of capital, with a stop at 580, and disclose the fee drag at 25 bps per trade"
 
-*Latest captured example: block* `127029043` · *ground-truth hash* `0xdd24d85447324f200df3cf25b098b87ca822ee665def328dcc443662be5319bb`
+*Latest captured example:* case `GRID-1-bnb-usdt-20261011181053961-5106d70c` · block `127065270` · ground-truth hash `0x358a9a8b9dac34ba596622a929b91e6ea9d70e9b2188f10ac7649332a2a79278`
+*Actual subject in that snapshot:* pair `BNB/USDT` · address `0x60AA3AEE06E2345A17E4d4B12c53E046F4F63CAf`
 
 | Check | Bound | What is asserted |
 |---|---|---|
@@ -128,7 +130,8 @@ conformance outcome and belongs in the public record.
 
 *Policy supplied to the agent:* "find the best net-of-cost route for 1,000 USD of USDT across the allowed protocols, only recommending a move that beats the current 0% by at least 50 bps, and excluding leveraged strategies"
 
-*Latest captured example: block* `127029061` · *ground-truth hash* `0xb5b2572fda37f4396a68a2372b46d3507d00dcf42200295de439ee37198f46cc`
+*Latest captured example:* case `YIELD-1-usdt-1000-20261011181053961-5106d70c` · block `127065270` · ground-truth hash `0xe2301152d25a486d63daaae28c75a6530a117c31b07560b4a42c2525c44d446d`
+*Actual subject in that snapshot:* asset `USDT`
 
 | Check | Bound | What is asserted |
 |---|---|---|
@@ -159,7 +162,8 @@ conformance outcome and belongs in the public record.
 
 *Policy supplied to the agent:* "report the account’s current health factor and the exact USD of debt that must be repaid to restore a health factor of 2.5"
 
-*Latest captured example: block* `127029057` · *ground-truth hash* `0x6bc1df5ea1285b06dabf9e8904551f155b96ea54743e5badc7f08951c312524f`
+*Latest captured example:* case `HF-1-venus-at-risk-20261011181053961-5106d70c` · block `127065270` · ground-truth hash `0x6ab25d3c56ad3b51a54b1ad70b5a7d5148a8492a7ceed520b1758ac478e1a9fb`
+*Actual subject in that snapshot:* address `0x60AA3AEE06E2345A17E4d4B12c53E046F4F63CAf`
 
 | Check | Bound | What is asserted |
 |---|---|---|

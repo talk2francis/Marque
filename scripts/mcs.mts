@@ -10,7 +10,7 @@
  * then graded against that identical snapshot.
  */
 import {
-  CASES, captureCase, loadCase, runConformance, formatOutcome,
+  CASES, capturePublishedCase, loadCase, runConformance, formatOutcome,
   CORRECT_STUB, WRONG_STUB, SILENT_STUB, adapterFor, type TestId,
 } from '@marque/conformance'
 import { db, closeDb, agent, agentService, probe } from '@marque/db'
@@ -24,7 +24,7 @@ async function capture(): Promise<void> {
   for (const c of CASES) {
     process.stdout.write(`capturing ${c.id} (${c.testId})… `)
     try {
-      const { groundTruthHash, testCase } = await captureCase({
+      const { groundTruthHash, testCase } = await capturePublishedCase({
         id: c.id, testId: c.testId, subject: c.subject, policy: c.policy,
       })
       console.log(`ok  block ${testCase.blockNumber}  hash ${groundTruthHash.slice(0, 18)}…`)

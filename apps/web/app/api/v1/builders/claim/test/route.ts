@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
+import { randomUUID } from 'node:crypto'
 import { z } from 'zod'
-import { CASES, captureCase, loadCase, runConformance, adapterFor, type TestId } from '@marque/conformance'
+import { CASES, capturePublishedCase, runConformance, adapterFor, type TestId } from '@marque/conformance'
 import { db, conformanceResult } from '@marque/db'
 import { readClaimToken } from '../../../../../../lib/claim'
 import { checkClaimBurst, clientKey } from '../../../../../../lib/limits'
@@ -44,19 +45,15 @@ export async function POST(request: Request) {
   if (!spec) return NextResponse.json({ error: 'no_such_test' }, { status: 404 })
 
 
-  // Cases are immutable once captured (D2-00-05): run against the pinned case, whose
-  // prompt names its block, and capture only when a test has no case at all. Before
-  // this, every run failed with "already exists with different immutable evidence".
-  let loaded = await loadCase(input.testId as TestId)
-  if (!loaded) {
-    try {
-      await captureCase({ id: spec.id, testId: spec.testId, subject: spec.subject, policy: spec.policy })
-    } catch {
-      return NextResponse.json({ error: 'could_not_capture_case', detail: 'The test case could not be read from BNB Chain just now. Try again in a minute.' }, { status: 503 })
-    }
-    loaded = await loadCase(input.testId as TestId)
+  // A builder listing their agent gets a fresh, immutable on-chain case, and
+  // is graded against that exact id even while other tests capture in parallel.
+  let caseId: string
+  try {
+    const captured = await capturePublishedCase({ id: `${spec.id}-claim-${Date.now()}-${randomUUID().slice(0, 6)}`, testId: spec.testId, subject: spec.subject, policy: spec.policy })
+    caseId = captured.testCase.id
+  } catch {
+    return NextResponse.json({ error: 'could_not_capture_case', detail: 'The test case could not be read from BNB Chain just now. Try again in a minute.' }, { status: 503 })
   }
-  if (!loaded) return NextResponse.json({ error: 'no_active_case' }, { status: 503 })
 
   const adapter = adapterFor(input.kind, claim.agentId, 'listed by owner', input.endpoint)
   if (!adapter) {
@@ -65,7 +62,7 @@ export async function POST(request: Request) {
 
   let outcome
   try {
-    outcome = await runConformance({ adapter, testId: input.testId as TestId, persist: false })
+    outcome = await runConformance({ adapter, testId: input.testId as TestId, caseId, persist: false })
   } catch (err) {
     return NextResponse.json({ error: 'run_failed', detail: err instanceof Error ? err.message : 'the run failed' }, { status: 502 })
   }

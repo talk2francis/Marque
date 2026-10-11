@@ -21,7 +21,7 @@
  */
 import { performance } from 'node:perf_hooks'
 import {
-  CASES, captureCase, loadCase, runConformance, formatOutcome,
+  CASES, capturePublishedCase, loadCase, runConformance, formatOutcome,
   a2aAdapter, type TestId,
 } from '@marque/conformance'
 import { closeDb } from '@marque/db'
@@ -165,7 +165,7 @@ async function conformance(): Promise<void> {
   for (const c of CASES) {
     process.stdout.write(`capturing ${c.id} (${c.testId})… `)
     try {
-      const { groundTruthHash, testCase } = await captureCase({
+      const { groundTruthHash, testCase } = await capturePublishedCase({
         id: c.id, testId: c.testId, subject: c.subject, policy: c.policy,
       })
       console.log(`block ${testCase.blockNumber}  hash ${groundTruthHash.slice(0, 18)}…`)

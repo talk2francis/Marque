@@ -115,7 +115,8 @@ async function main(): Promise<void> {
       L.push(`*Policy supplied to the agent:* "${(spec.policy as { statement: string }).statement}"`)
       L.push('')
       if (live) {
-        L.push(`*Latest captured example: block* \`${live.blockNumber}\` · *ground-truth hash* \`${live.groundTruthHash}\``)
+        L.push(`*Latest captured example:* case \`${live.id}\` · block \`${live.blockNumber}\` · ground-truth hash \`${live.groundTruthHash}\``)
+        L.push(`*Actual subject in that snapshot:* ${Object.entries(live.subject).map(([k, v]) => `${k} \`${v}\``).join(' · ')}`)
         L.push('')
       }
     }
@@ -174,6 +175,8 @@ async function main(): Promise<void> {
             subject: spec.subject,
             policy: spec.policy,
             why: spec.why,
+            capturedCaseId: live?.id ?? null,
+            capturedSubject: live?.subject ?? null,
             blockNumber: live?.blockNumber ?? null,
             groundTruthHash: live?.groundTruthHash ?? null,
           } : null,

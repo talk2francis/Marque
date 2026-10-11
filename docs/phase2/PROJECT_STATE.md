@@ -4,6 +4,20 @@ Live record of Phase 2. Newest first inside each section. Times are UTC.
 
 ## 11 October: identity artwork, current test evidence, home job record
 
+- Evening follow-up: PancakeSwap NFT #7654242 was withdrawn hours after it
+  became the Bound fixture, so the production worker correctly skipped its
+  fresh capture. A replacement BNCB/WBNB position #7650656, minted about
+  240,000 blocks earlier and still liquid, passed the full published MCS-REB-1
+  check with Bound. Two other live positions (#7654391, #7654396) are now
+  explicit fallbacks. Each capture records the actual owner/NFT and fresh
+  block; if none is available, the result is skipped, never forced green.
+  Runs are bound to their own immutable case ID, so concurrent retests cannot
+  silently substitute a different question. Builder tests now capture a fresh
+  case per attempt rather than reuse an old block that public RPCs cannot read.
+  The named-NFT reader now verifies ownership at the pinned block and reads
+  only that position, instead of spending the response deadline on every NFT
+  in its holder's wallet. Both backup positions passed the exact MCS-REB-1
+  arithmetic and policy grade in a live-chain check on 11 October.
 - Follow-up (11 Oct): replaced initials with the Marque platform fallback for
   absent/broken owner art. Registry art is now a CSS image layer over that mark:
   it cannot show a broken-image icon or get stuck behind a hydration opacity

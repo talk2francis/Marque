@@ -68,6 +68,7 @@ export async function rebGroundTruth(
   const read = await pancakeV3Reader(owner, {
     ...(opts.client ? { client: opts.client } : {}),
     blockNumber: testCase.blockNumber,
+    ...(wantTokenId ? { tokenId: BigInt(wantTokenId) } : {}),
   })
   if (!read.ok) throw new Error(`MCS-REB-1 ground truth unavailable: ${read.error}`)
 
