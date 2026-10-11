@@ -1,7 +1,7 @@
 import 'server-only'
 import { sql } from 'drizzle-orm'
 import { cachedProjection, db, firstPartyIdListSql, oneAgentIdSql } from '@marque/db'
-import { coverage, disputeWindowSeconds, formatAmount, QUEST_CATEGORIES, teamWallets, assetAt, type ChainId } from '@marque/commerce'
+import { coverage, formatAmount, QUEST_CATEGORIES, teamWallets, assetAt, type ChainId } from '@marque/commerce'
 import { funnel } from '@marque/registry'
 import { marketplaceAgents, type MarketRow } from './marketplace'
 import { readLedger } from './ledger'
@@ -198,8 +198,6 @@ export interface RecentHire {
   /** The job's first chain event (JobCreated), and its settlement (JobCompleted) once the review window closed. */
   openedTx: string | null
   settledTx: string | null
-  /** When escrow releases to the agent unless the buyer reports a problem. */
-  releaseAt: string | null
 }
 
 /**
@@ -223,9 +221,6 @@ export async function recentHires(): Promise<RecentHire[]> {
     ...jobs.filter((j) => j['state'] === 'SUBMITTED').slice(0, 2),
     ...jobs.filter((j) => j['state'] === 'COMPLETED' || j['state'] === 'PAID').slice(0, 2),
   ].sort((a, b) => Date.parse(String(b['funded_at'])) - Date.parse(String(a['funded_at']))).slice(0, 5)
-  const disputeWindow = selected.some((j) => j['state'] === 'SUBMITTED')
-    ? disputeWindowSeconds(56 as ChainId).catch(() => null)
-    : Promise.resolve(null)
   return Promise.all(selected.map(async (j): Promise<RecentHire> => {
     const ev = (j['ev'] ?? {}) as Record<string, { tx: string; at: string | null; block?: number }>
     const [r] = rowsOf(await db().execute(sql`
@@ -258,7 +253,6 @@ export async function recentHires(): Promise<RecentHire[]> {
       stars: r ? Math.round(Number(r['value']) / 10 ** Number(r['value_decimals'] ?? 0) / 20) : null,
       openedTx: ev['JobCreated']?.tx ?? null,
       settledTx: ev['JobCompleted']?.tx ?? null,
-      releaseAt: submitted !== null && !ev['JobCompleted'] ? await disputeWindow.then((w) => w === null ? null : new Date(submitted + w * 1000).toISOString()) : null,
     }
   }))
 }

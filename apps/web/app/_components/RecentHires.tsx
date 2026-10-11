@@ -25,7 +25,7 @@ export function RecentHires({ hires }: { hires: RecentHire[] }) {
     { key: 'escrow', label: 'Paid into escrow', note: h.price ?? 'Exact amount', tx: h.steps[1]?.tx ?? null, at: h.steps[1]?.at ?? null, done: Boolean(h.steps[1]?.tx) },
     { key: 'delivery', label: 'Delivered on chain', note: h.deliveredSeconds !== null ? `${h.deliveredSeconds} s after payment` : 'Awaiting the agent', tx: h.steps[2]?.tx ?? null, at: h.steps[2]?.at ?? null, done: Boolean(h.steps[2]?.tx) },
     { key: 'rating', label: h.steps[3]?.tx ? 'Rated by the buyer' : 'Rating open to the buyer', note: h.stars !== null ? `${h.stars} of 5 on ERC-8004` : 'ERC-8004 reputation', tx: h.steps[3]?.tx ?? null, at: h.steps[3]?.at ?? null, done: Boolean(h.steps[3]?.tx) },
-    { key: 'settle', label: h.settledTx ? 'Settled to the agent' : 'Settles to the agent', note: h.settledTx ? 'Review window closed' : h.releaseAt ? `On ${when(h.releaseAt)}, unless the buyer reports a problem` : 'When the review window closes', tx: h.settledTx, at: null, done: Boolean(h.settledTx) },
+    { key: 'settle', label: h.settledTx ? 'Settled to the agent' : 'Settles to the agent', note: h.settledTx ? 'Review window closed' : 'When the review window closes; the Job Room shows the exact time', tx: h.settledTx, at: null, done: Boolean(h.settledTx) },
   ]
   return (
     <section className={styles.hireBand} id="latest" aria-labelledby="latest-h">

@@ -13,6 +13,9 @@ Live record of Phase 2. Newest first inside each section. Times are UTC.
 - Home's single latest-job panel is now a manually controlled carousel of real
   Marque-funded jobs, selected across funded, submitted, and settled states
   where those states exist. No buyer task text or fictional pending job is shown.
+  The carousel does not make an RPC call during Home render; the Job Room reads
+  the exact review-window deadline. This keeps build-time and request rendering
+  bounded even when a public chain RPC is slow.
 - Conformance listing chooses the latest own-category result, including a
   failed retest. The worker creates a fresh immutable case id each sweep and
   skips tests whose new case could not be captured, instead of silently
