@@ -110,7 +110,8 @@ export function extractJsonPayload(body: unknown): unknown {
 /** Protocol errors are not candidate answers; their message is untrusted text. */
 export function isJsonRpcError(body: unknown): boolean {
   return Boolean(body && typeof body === 'object' && !Array.isArray(body)
-    && 'error' in body && !('result' in body))
+    && 'error' in body && !('result' in body)
+    && Object.keys(body).every((key) => key === 'error' || key === 'jsonrpc' || key === 'id'))
 }
 
 /**
@@ -181,6 +182,9 @@ export function a2aAdapter(agentId: string, name: string, cardUrl: string): Conf
       }
 
       const payload = extractJsonPayload(parsed)
+      if (isJsonRpcError(payload)) {
+        return { response: null, latencyMs, error: 'unusable_response: agent returned an error instead of an answer' }
+      }
       if (!payload || typeof payload !== 'object') {
         return {
           response: parsed, latencyMs,

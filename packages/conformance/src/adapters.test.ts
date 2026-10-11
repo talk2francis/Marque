@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { argumentsForCase, endpointFromCard, isJsonRpcError } from './adapters'
+import { argumentsForCase, endpointFromCard, extractJsonPayload, isJsonRpcError } from './adapters'
 import type { TestCase } from './types'
 
 const testCase: TestCase = {
@@ -34,6 +34,8 @@ describe('A2A JSON-RPC reply classification', () => {
   it('treats an error envelope as no answer, never as a gradeable object', () => {
     expect(isJsonRpcError({ jsonrpc: '2.0', id: 1, error: { code: -32000, message: 'private detail' } })).toBe(true)
     expect(isJsonRpcError({ jsonrpc: '2.0', id: 1, result: { recommend: 'stay' } })).toBe(false)
+    expect(isJsonRpcError(extractJsonPayload({ jsonrpc: '2.0', id: 1, result: { error: 'private detail' } }))).toBe(true)
+    expect(isJsonRpcError({ recommend: 'stay', error: 'nonfatal warning' })).toBe(false)
     expect(isJsonRpcError(null)).toBe(false)
   })
 })

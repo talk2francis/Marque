@@ -21,7 +21,8 @@ Live record of Phase 2. Newest first inside each section. Times are UTC.
   failed retest. The worker creates a fresh immutable case id each sweep and
   skips tests whose new case could not be captured, instead of silently
   reusing old cases. A2A JSON-RPC error envelopes are recorded as no answer
-  without storing the raw operator error text. Tidemark's storefront explains
+  including an error-only object nested inside `result`, without storing the
+  raw operator error text. Tidemark's storefront explains
   that the quoted-APR MCS test does not certify its trailing realised-yield
   method; the recorded nonpass remains public.
 - Removed first-party repository and issue links from public UI and docs.
