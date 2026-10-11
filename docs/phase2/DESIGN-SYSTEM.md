@@ -399,7 +399,9 @@ operative (the "who"); the hero is the instrument (the "what").
 masthead: the real ERC-8004 registry image, if available, is a blurred ambient
 backdrop behind the sharp avatar. Its source is labelled as an owner claim, not
 verification. Missing or broken images receive a neutral identity tile and an
-explicit note. Listing does not require artwork; registration's optional `image`
+  explicit note. The neutral tile stays visible until a remote image has loaded,
+  so a slow or broken proxy never flashes the browser's broken-image icon.
+  Listing does not require artwork; registration's optional `image`
 field is recommended and reused as the ambient source rather than demanding a
 second banner upload. This preserves access for functional agents without art.
 

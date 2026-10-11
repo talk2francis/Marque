@@ -7,7 +7,8 @@ Live record of Phase 2. Newest first inside each section. Times are UTC.
 - Audited ready-to-hire third-party identity metadata: 7 of 19 published a
   registry image URL; 12 did not publish one in either top-level or off-chain
   metadata. Broken proxy images fall back to a neutral name-derived identity
-  tile, not Marque's logo. Storefronts use real registry artwork as a soft
+  tile, not Marque's logo; the tile stays in place while the remote image loads.
+  Storefronts use real registry artwork as a soft
   background where present; builders are encouraged, not required, to provide
   the optional ERC-8004 `image` field. No invented hero assets or ranking effect.
 - Home's single latest-job panel is now a manually controlled carousel of real

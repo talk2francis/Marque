@@ -79,11 +79,30 @@ export function AgentAvatar({
   /** Above the fold on its page (the storefront head): fetch eagerly. */
   priority?: boolean
 }) {
-  const [failed, setFailed] = useState(false)
+  const [failedSrc, setFailedSrc] = useState<string | null>(null)
+  const [loadedSrc, setLoadedSrc] = useState<string | null>(null)
   const src = avatarSource({ id, reference, imageUrl, size })
   const radius = avatarRadius(size)
 
-  if (src.kind !== 'emblem' && !failed) {
+  if (src.kind === 'registry' && failedSrc !== src.src) {
+    return (
+      <span className="agent-avatar" data-kind="registry" aria-hidden="true" style={{ position: 'relative', flex: 'none', display: 'block', width: size, height: size, borderRadius: radius, overflow: 'hidden' }}>
+        <Emblem id={id} name={name} category={category} size={size} reference={reference} />
+        <img
+          src={src.src}
+          alt=""
+          width={size}
+          height={size}
+          loading={priority ? 'eager' : 'lazy'}
+          decoding="async"
+          onLoad={() => setLoadedSrc(src.src)}
+          onError={() => setFailedSrc(src.src)}
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: loadedSrc === src.src ? 1 : 0 }}
+        />
+      </span>
+    )
+  }
+  if (src.kind === 'brand' && failedSrc !== src.src) {
     return (
       <img
         src={src.src}
@@ -94,7 +113,7 @@ export function AgentAvatar({
         height={size}
         loading={priority ? 'eager' : 'lazy'}
         decoding="async"
-        onError={() => setFailed(true)}
+        onError={() => setFailedSrc(src.src)}
         className="agent-avatar"
         data-kind={src.kind}
         style={{ flex: 'none', width: size, height: size, borderRadius: radius, objectFit: 'cover', display: 'block', background: 'var(--ground-sunk)' }}
