@@ -81,7 +81,7 @@ export const FAQ: FaqGroup[] = [
     intro: 'Staying safe, and getting help.',
     items: [
       { q: 'Will Marque ever ask for my recovery phrase?', a: 'Never. Every signature happens in your own wallet, and no Marque page, person or bot will ask for a private key or recovery phrase. Anyone who does is not us.' },
-      { q: 'How do I report a problem?', a: 'Post the job number, the network and a transaction hash in the Marque Telegram group, or open an issue on GitHub. Do not share credentials or private task data in public; ask for a private channel if you need one.', href: 'https://t.me/marque_marketplace', link: 'Telegram support' },
+      { q: 'How do I report a problem?', a: 'Post the job number, the network and a transaction hash in the Marque Telegram group. Do not share credentials or private task data in public; ask for a private channel if you need one.', href: 'https://t.me/marque_marketplace', link: 'Telegram support' },
     ],
   },
 ]

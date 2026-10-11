@@ -218,7 +218,8 @@ async function queryAgents(): Promise<MarketRow[]> {
         select ${canonicalAgentIdSql(sql`agent_id`)} as cid, test_id, pass, failed_fields, ran_at
         from conformance_result where agent_id like '56:%' or agent_id like 'marque:%'
       ) cr
-      order by cid, test_id, (pass) desc, ran_at desc
+      -- The latest run wins. A failed retest cannot leave an older pass looking current.
+      order by cid, test_id, ran_at desc
     ),
     cat as (
       select distinct on (agent_id) agent_id, category, confidence
@@ -226,7 +227,7 @@ async function queryAgents(): Promise<MarketRow[]> {
       order by agent_id, (category <> 'unclassified') desc, confidence desc, assigned_at desc
     ),
     conf_pick as (
-      -- Only agents with a result (hundreds, not the whole registry): a pass first, then the newest.
+      -- Only agents with a result (hundreds, not the whole registry): own-category test, then newest.
       -- A classified agent is shown only its own category's test (security has none yet).
       select distinct on (conf.agent_id) conf.*
       from conf left join cat on cat.agent_id = conf.agent_id
@@ -236,7 +237,7 @@ async function queryAgents(): Promise<MarketRow[]> {
       order by conf.agent_id,
                (conf.test_id = case cat.category when 'yield' then 'MCS-YIELD-1' when 'grid' then 'MCS-GRID-1'
                   when 'rebalancing' then 'MCS-REB-1' when 'health_factor' then 'MCS-HF-1' end) desc nulls last,
-               conf.pass desc, conf.ran_at desc
+               conf.ran_at desc
     ),
     qualifying as (
       select a.id, a.token_id, a.name, a.owner_address, a.supported_protocols,

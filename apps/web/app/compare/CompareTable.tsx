@@ -26,7 +26,7 @@ export function CompareTable({ chosen, hireLink, tryLink, onNavigate }: {
       <div className={styles.rowLabel} />
       {chosen.map((a) => (
         <div key={a.agentId} className={styles.colHead}>
-          <AgentAvatar id={a.agentId} category={a.category} reference={a.isReference} size={44} />
+          <AgentAvatar id={a.agentId} name={a.name} category={a.category} reference={a.isReference} imageUrl={a.identity.imageUrl} size={44} />
           <Link href={profileHref(a) ?? '/register'} className={styles.colName} onClick={onNavigate}>{a.name}</Link>
           {a.isReference ? <a href="/register#reference-agents" className={styles.refLink}><Badge kind="reference" /></a> : null}
         </div>

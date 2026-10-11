@@ -10,6 +10,7 @@
  * position that may no longer resemble the chain.
  */
 import { CASES, captureCase, runConformance, formatOutcome, a2aAdapter, type TestId } from '@marque/conformance'
+import { randomUUID } from 'node:crypto'
 import { safeFetch, firstPartyAgentIds } from '@marque/probe'
 import { db, closeDb, firstPartyAgents } from '@marque/db'
 import { sql } from 'drizzle-orm'
@@ -76,7 +77,7 @@ async function liveAgents(): Promise<Array<{ id: string; name: string; endpoint:
 }
 
 async function sweep(): Promise<void> {
-  await captureAll()
+  const captured = await captureAll()
 
   const agents = await liveAgents()
   log('agents', { live: agents.length })
@@ -85,6 +86,7 @@ async function sweep(): Promise<void> {
   let fail = 0
   for (const a of agents) {
     for (const c of CASES) {
+      if (!captured.has(c.testId as TestId)) continue
       try {
         const outcome = await runConformance({
           adapter: liveAdapter(a.id, a.name, a.endpoint), testId: c.testId as TestId,
@@ -104,26 +106,31 @@ async function sweep(): Promise<void> {
   void formatOutcome
 }
 
-async function captureAll(): Promise<void> {
+async function captureAll(): Promise<Set<TestId>> {
+  const captured = new Set<TestId>()
+  // A frozen case cannot be overwritten. Give each sweep its own immutable id.
+  const runId = `${new Date().toISOString().replace(/[^0-9]/g, '')}-${randomUUID().slice(0, 8)}`
   for (const c of CASES) {
     try {
-      const { testCase, groundTruthHash } = await captureCase({ id: c.id, testId: c.testId, subject: c.subject, policy: c.policy })
-      log('case_captured', { case: c.id, block: testCase.blockNumber.toString(), hash: groundTruthHash })
+      const caseId = `${c.id}-${runId}`
+      const { testCase, groundTruthHash } = await captureCase({ id: caseId, testId: c.testId, subject: c.subject, policy: c.policy })
+      captured.add(c.testId as TestId)
+      log('case_captured', { case: caseId, block: testCase.blockNumber.toString(), hash: groundTruthHash })
     } catch (err) {
       log('case_capture_failed', { case: c.id, error: err instanceof Error ? err.message : String(err) })
     }
   }
+  return captured
 }
 
 /**
  * Re-test every first-party agent against its own category's published test, through
  * its public free A2A face, exactly as a third party is tested. Results are stored under
- * the agent's canonical ERC-8004 row id. The Warrant shows the most recent PASS, so a
- * transient failed retest is published but never flips a warranted badge by itself;
- * "retest due" appears only when the last pass is older than 72 h.
+ * the agent's canonical ERC-8004 row id. The latest result controls the badge;
+ * "retest due" applies only when the latest pass is older than 72 h.
  */
 async function referenceSweep(): Promise<void> {
-  await captureAll()
+  const captured = await captureAll()
   const ids = new Map<string, string>()
   const fp = firstPartyAgents()
   for (const id of await firstPartyAgentIds()) {
@@ -136,8 +143,8 @@ async function referenceSweep(): Promise<void> {
   for (const a of fp) {
     const testId = TEST_FOR_CATEGORY[a.category]
     const agentId = ids.get(a.slug)
-    if (!testId || !agentId) {
-      log('reference_skip', { agent: a.slug, reason: !testId ? 'no published test for this category' : 'registry row not ingested' })
+    if (!testId || !agentId || !captured.has(testId)) {
+      log('reference_skip', { agent: a.slug, reason: !testId ? 'no published test for this category' : !agentId ? 'registry row not ingested' : 'fresh case capture failed' })
       continue
     }
     const adapter = a2aAdapter(agentId, a.slug, `${PUBLIC_URL}/agents/${a.slug}/.well-known/agent-card.json`)

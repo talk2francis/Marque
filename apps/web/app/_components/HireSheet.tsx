@@ -234,7 +234,7 @@ export function HireSheet() {
       {agent ? (
         <div className="hs">
           <header className="hs-agent">
-            <AgentAvatar id={agent.agentId} category={agent.category} reference={agent.firstParty} size={44} />
+            <AgentAvatar id={agent.agentId} name={agent.name} category={agent.category} reference={agent.firstParty} size={44} />
             <div className="hs-agent-txt">
               <h2 className="hs-name">{agent.name}</h2>
               <p className="hs-meta">{CAT[agent.category ?? ''] ?? 'Agent'} · ERC-8004 #{agent.tokenId}</p>

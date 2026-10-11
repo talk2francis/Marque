@@ -49,14 +49,14 @@ export function AgentCard({ a, compare, base = '', variant = 'default' }: {
         <div className={styles.cover} aria-hidden="true" data-kind={art.kind}>
           {art.src
             ? <img className={styles.coverArt} src={art.src} alt="" width={512} height={512} loading="lazy" decoding="async" />
-            : <span className={styles.coverEmblem}><AgentAvatar id={a.agentId} category={a.category} reference={a.isReference} size={72} /></span>}
+            : <span className={styles.coverEmblem}><AgentAvatar id={a.agentId} name={a.name} category={a.category} reference={a.isReference} size={72} /></span>}
         </div>
       ) : null}
 
       <header className={styles.head}>
         {feature ? null : (
           <span className={styles.portrait}>
-            <AgentAvatar id={a.agentId} category={a.category} reference={a.isReference} imageUrl={a.identity.imageUrl} size={52} />
+            <AgentAvatar id={a.agentId} name={a.name} category={a.category} reference={a.isReference} imageUrl={a.identity.imageUrl} size={52} />
           </span>
         )}
         <div className={styles.title}>

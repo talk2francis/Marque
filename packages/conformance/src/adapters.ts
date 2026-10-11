@@ -107,6 +107,12 @@ export function extractJsonPayload(body: unknown): unknown {
   return null
 }
 
+/** Protocol errors are not candidate answers; their message is untrusted text. */
+export function isJsonRpcError(body: unknown): boolean {
+  return Boolean(body && typeof body === 'object' && !Array.isArray(body)
+    && 'error' in body && !('result' in body))
+}
+
 /**
  * An A2A agent, addressed correctly.
  *
@@ -167,6 +173,12 @@ export function a2aAdapter(agentId: string, name: string, cardUrl: string): Conf
 
       let parsed: unknown
       try { parsed = JSON.parse(res.body) } catch { parsed = res.body }
+
+      if (isJsonRpcError(parsed)) {
+        // A JSON-RPC error is not the agent's answer. Do not persist the raw
+        // message: operators sometimes embed private endpoint URLs in it.
+        return { response: null, latencyMs, error: 'unusable_response: agent returned a JSON-RPC error instead of an answer' }
+      }
 
       const payload = extractJsonPayload(parsed)
       if (!payload || typeof payload !== 'object') {

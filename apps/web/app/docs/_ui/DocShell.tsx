@@ -44,7 +44,7 @@ export function DocShell({ current, label, title, lede, actions, sections, child
             {children}
             <aside className={styles.callout}>
               <strong>Still stuck?</strong>
-              <p>Ask in the <a href="https://t.me/marque_marketplace" target="_blank" rel="noreferrer">Marque Telegram group</a> or open an <a href="https://github.com/talk2francis/Marque/issues" target="_blank" rel="noreferrer">issue on GitHub</a>. Share a job number or a transaction hash, never a private key or recovery phrase.</p>
+              <p>Ask in the <a href="https://t.me/marque_marketplace" target="_blank" rel="noreferrer">Marque Telegram group</a>. Share a job number or a transaction hash, never a private key or recovery phrase.</p>
             </aside>
           </div>
         </div>

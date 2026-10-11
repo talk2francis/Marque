@@ -3,12 +3,11 @@ import { MeasureRule, ProvenanceChip } from '@marque/ui'
 import { SiteHeader, SiteFooter } from './_components/SiteHeader'
 import { AgentCard } from './_components/market/AgentCard'
 import { Stars, Tape } from './_components/ui'
-import { AgentAvatar } from './_components/AgentAvatar'
-import { agentBrand } from '../lib/agent-brand'
+import { RecentHires } from './_components/RecentHires'
 import { ROADMAP } from './docs/whitepaper'
 import {
-  categoryTiles, funnelLine, latestHire, ledgerHeadline, passFail, readyToHire, tapeItems,
-  type CategoryTile, type LatestHire,
+  categoryTiles, funnelLine, recentHires, ledgerHeadline, passFail, readyToHire, tapeItems,
+  type CategoryTile,
 } from '../lib/home-data'
 import { CATEGORY_SLUG } from './register/market-model'
 import styles from './home.module.css'
@@ -23,10 +22,9 @@ export const metadata = {
 
 /**
  * Home (DESIGN-SYSTEM.md 8.1, 27 Sep refresh): sell the hire in five seconds and
- * route quest users. The arch plate carries the brand; the latest real mainnet
- * hire sits on it, step by step. Then the Tape, the measured record, the four
+ * route quest users. The arch plate carries the brand. The Tape, the measured record, the four
  * categories, how a hire is made (every layer read from that same real job),
- * agents ready now, why Marque, and the builder door.
+ * agents ready now, why Marque, real mainnet hire records, and the builder door.
  *
  * Every figure is live; a section with no data either says so or does not
  * render (AGENTS.md 4). No colour of its own beyond the tokens.
@@ -43,7 +41,6 @@ const JOB: Record<string, { name: string; job: string; tone: string }> = {
 const MARKET = 3
 
 const fmt = (n: number | null) => (n === null ? null : n.toLocaleString('en-US'))
-const short = (tx: string) => `${tx.slice(0, 6)}…${tx.slice(-4)}`
 function time(ms: number): string {
   if (ms < 1000) return `${Math.round(ms)} ms`
   if (ms < 90_000) return `${(ms / 1000).toFixed(ms < 10_000 ? 1 : 0)} s`
@@ -51,10 +48,10 @@ function time(ms: number): string {
 }
 
 export default async function Home() {
-  const [{ all: ready, picks }, tape, hire, pf, ledger] = await Promise.all([
+  const [{ all: ready, picks }, tape, hires, pf, ledger] = await Promise.all([
     readyToHire().catch(() => ({ all: [], picks: [] })),
     tapeItems().catch(() => []),
-    latestHire().catch(() => null),
+    recentHires().catch(() => []),
     passFail().catch(() => ({ pass: null, fail: null })),
     ledgerHeadline().catch(() => null),
   ])
@@ -64,7 +61,7 @@ export default async function Home() {
     <>
       <SiteHeader />
       <main className={styles.main}>
-        {/* ---- Hero: the arch plate, the promise, and the latest real hire on it ---- */}
+        {/* ---- Hero: the arch plate and the promise ---- */}
         <section className={styles.hero} aria-labelledby="hero-title">
           <div className={styles.plate} aria-hidden="true"><span className={styles.plateImg} /></div>
           <div className={styles.construct} aria-hidden="true">
@@ -141,7 +138,7 @@ export default async function Home() {
             <div className={styles.bandCopy}>
               <span className="t-label">ERC-8183 escrow · ERC-8004 ratings</span>
               <h2 id="made">How a hire is made.</h2>
-              <p>Five steps, each one a signature you give or an event anyone can open on BscScan. {hire ? <>The latest real one, <a href="#latest">further down</a>, shows every transaction.</> : null}</p>
+              <p>Five steps, each one a signature you give or an event anyone can open on BscScan. {hires.length ? <>See real hires, <a href="#latest">further down</a>, at different stages.</> : null}</p>
               <ul className={styles.guards}>
                 <li><ShieldCheck aria-hidden="true" />Your payment sits in BNB Chain&apos;s escrow contract, not with Marque.</li>
                 <li><HandCoins aria-hidden="true" />Exact amount only, never an open-ended approval.</li>
@@ -214,8 +211,8 @@ export default async function Home() {
           </div>
         </section>
 
-        {/* ---- The latest real hire: the evidence band ---- */}
-        {hire ? <LatestHireBand h={hire} /> : null}
+        {/* ---- Real hires at their actual chain state: the evidence carousel ---- */}
+        {hires.length ? <RecentHires hires={hires} /> : null}
 
         {/* ---- Build your own ---- */}
         <section className={styles.section} aria-labelledby="build" data-reveal>
@@ -300,60 +297,5 @@ function CategoryTileView({ t, i }: { t: CategoryTile; i: number }) {
       </span>
       <span className={styles.tileGo}>Browse {j.name.toLowerCase()} <ArrowRight aria-hidden="true" /></span>
     </a>
-  )
-}
-
-const when = (iso: string | null) => (iso ? `${new Date(iso).toUTCString().slice(5, 11)}, ${new Date(iso).toISOString().slice(11, 16)} UTC` : null)
-
-/**
- * The newest delivered Marque hire on BSC mainnet, as its own lit band near the foot of the
- * page (30 Sep): who was hired, what was paid, how fast it landed, and every transaction on
- * a rail from quote to settlement. Evidence, where the band above is the explanation.
- */
-function LatestHireBand({ h }: { h: LatestHire }) {
-  const rail = [
-    { key: 'quote', label: 'Quote signed by the agent', note: 'Free, before any wallet', tx: null as string | null, at: null as string | null, done: true },
-    { key: 'escrow', label: 'Paid into escrow', note: h.price ?? 'Exact amount', tx: h.steps[1]?.tx ?? null, at: h.steps[1]?.at ?? null, done: Boolean(h.steps[1]?.tx) },
-    { key: 'delivery', label: 'Delivered on chain', note: h.deliveredSeconds !== null ? `${h.deliveredSeconds} s after payment` : 'Hash of the file on chain', tx: h.steps[2]?.tx ?? null, at: h.steps[2]?.at ?? null, done: Boolean(h.steps[2]?.tx) },
-    { key: 'rating', label: h.steps[3]?.tx ? 'Rated by the buyer' : 'Rating open to the buyer', note: h.stars !== null ? `${h.stars} of 5 on ERC-8004` : 'ERC-8004 reputation', tx: h.steps[3]?.tx ?? null, at: h.steps[3]?.at ?? null, done: Boolean(h.steps[3]?.tx) },
-    { key: 'settle', label: h.settledTx ? 'Settled to the agent' : 'Settles to the agent', note: h.settledTx ? 'Review window closed' : h.releaseAt ? `On ${when(h.releaseAt)}, unless the buyer reports a problem` : 'When the review window closes', tx: h.settledTx, at: null, done: Boolean(h.settledTx) },
-  ]
-  return (
-    <section className={styles.hireBand} id="latest" aria-labelledby="latest-h">
-      <div className={styles.hireInner}>
-        <div className={styles.hireIntro}>
-          <span className="t-label">Latest hire · BSC mainnet</span>
-          <h2 id="latest-h">A real hire, <em>start to finish.</em></h2>
-          <p className={styles.hireLede}>Not a demo: the newest job paid through Marque, read back from BNB Chain. Every step links to its transaction.</p>
-          <div className={styles.hireWho}>
-            {h.agentId ? <AgentAvatar id={h.agentId} category={null} reference={agentBrand(h.agentId) !== null} size={56} /> : null}
-            <span className={styles.hireWhoTxt}><b>{h.agent}</b><span>{h.category} · job {h.jobId}</span></span>
-            {h.team ? <span className={styles.hireTeam} title="A wallet on Marque's published team list. Real on chain, never counted for the campaign.">Team wallet</span> : null}
-          </div>
-          <dl className={styles.hireFigs}>
-            <div><dt>Paid into escrow</dt><dd>{h.price ?? 'n/a'}</dd></div>
-            <div><dt>Payment to delivery</dt><dd>{h.deliveredSeconds !== null ? `${h.deliveredSeconds} s` : 'n/a'}</dd></div>
-            <div><dt>Buyer&apos;s rating</dt><dd>{h.stars !== null ? <>{h.stars}<span className={styles.hireOf}> of 5</span></> : <span className={styles.hireOf}>Not yet</span>}</dd></div>
-          </dl>
-          <div className={styles.hireCtas}>
-            <a className={`btn ${styles.hireBtn}`} href={`/jobs/56/${h.jobId}`}>Open job {h.jobId} <ArrowRight aria-hidden="true" size={16} /></a>
-            <a className={styles.hireLink} href="/register">Hire an agent yourself</a>
-          </div>
-          {h.team ? <p className={styles.hireNote}>Paid from a Marque team wallet: a real mainnet hire, never counted for the quest.</p> : null}
-        </div>
-        <ol className={styles.hireRail} aria-label={`Job ${h.jobId}, step by step`}>
-          {rail.map((r) => (
-            <li key={r.key} data-done={r.done ? '' : undefined}>
-              <span className={styles.hireNode} aria-hidden="true">{r.done ? <Check /> : null}</span>
-              <span className={styles.hireStep}>
-                <b>{r.label}</b>
-                <span>{r.note}{r.at ? <> · <time dateTime={r.at}>{when(r.at)}</time></> : null}</span>
-              </span>
-              {r.tx ? <a className={styles.hireTx} href={`https://bscscan.com/tx/${r.tx}`} target="_blank" rel="noreferrer">{short(r.tx)}</a> : <span className={styles.hireTxNone}>{r.done ? 'off chain' : 'pending'}</span>}
-            </li>
-          ))}
-        </ol>
-      </div>
-    </section>
   )
 }

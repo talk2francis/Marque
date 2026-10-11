@@ -102,8 +102,6 @@ const COLS: Array<{ label: string; links: Array<{ label: string; href: string; e
     links: [
       { label: '@marquetrade on X', href: 'https://x.com/marquetrade', external: true },
       { label: 'Telegram support', href: 'https://t.me/marque_marketplace', external: true },
-      { label: 'Source on GitHub', href: 'https://github.com/talk2francis/Marque', external: true },
-      { label: 'Report a problem', href: 'https://github.com/talk2francis/Marque/issues', external: true },
       { label: 'Brand kit', href: '/brand/marque-brand-kit.zip' },
     ],
   },

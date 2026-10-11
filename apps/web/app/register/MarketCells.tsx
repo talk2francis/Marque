@@ -193,7 +193,7 @@ export function RowActions({ a }: { a: MarketRow }) {
 export function AgentThumb({ a, size }: { a: MarketRow; size: number }) {
   const href = profileHref(a)
   const avatar = (
-    <AgentAvatar id={a.agentId} category={a.category} reference={a.isReference} size={size} imageUrl={a.identity.imageUrl} />
+    <AgentAvatar id={a.agentId} name={a.name} category={a.category} reference={a.isReference} size={size} imageUrl={a.identity.imageUrl} />
   )
   if (!href) return <span className={styles.thumb}>{avatar}</span>
   return (

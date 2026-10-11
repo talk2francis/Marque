@@ -112,7 +112,7 @@ export default async function JobRoom({ params }: { params: Promise<{ chainId: s
               <span className={styles.stateTag} data-state={state}>{state === 'SUBMITTED' ? 'Delivered' : state === 'FUNDED' ? 'Working' : state.charAt(0) + state.slice(1).toLowerCase()}</span>
             </div>
             <div className={styles.agentRow}>
-              {job?.agent ? <AgentAvatar id={job.agent.agentKey ?? jobId} category={category} reference={job.agent.firstParty} size={52} /> : null}
+              {job?.agent ? <AgentAvatar id={job.agent.agentKey ?? jobId} name={agentName} category={category} reference={job.agent.firstParty} size={52} /> : null}
               <div className={styles.agentTxt}>
                 <h1>{head.title}</h1>
                 <p className={styles.lede}>{head.body}</p>
@@ -183,7 +183,7 @@ export default async function JobRoom({ params }: { params: Promise<{ chainId: s
                 <div><dt>Escrow</dt><dd><AddressChip value={network(cid).commerce} chainId={chainId} /></dd></div>
                 {expiredAt ? <div><dt>Deadline</dt><dd>{utcStamp(expiredAt * 1000)}</dd></div> : null}
               </dl>
-              <p className={styles.support}>Something wrong? <a href="https://x.com/marquetrade" target="_blank" rel="noreferrer">Message @marquetrade</a> with job {jobId}, or <a href="https://github.com/talk2francis/Marque/issues" target="_blank" rel="noreferrer">open an issue</a>. This page is read from chain: <a href={`/api/v1/phase2/job/${chainId}/${jobId}`}>the same data as JSON</a>.</p>
+              <p className={styles.support}>Something wrong? <a href="https://t.me/marque_marketplace" target="_blank" rel="noreferrer">Ask in the Marque Telegram group</a> with job {jobId}. Never share a private key or recovery phrase. This page is read from chain: <a href={`/api/v1/phase2/job/${chainId}/${jobId}`}>the same data as JSON</a>.</p>
             </aside>
           </div>
         </div>

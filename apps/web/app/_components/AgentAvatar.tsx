@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { avatarSource } from '../../lib/avatar-source'
+import { avatarSource, identityInitials } from '../../lib/avatar-source'
 
 /**
  * An agent's avatar.
@@ -10,9 +10,8 @@ import { avatarSource } from '../../lib/avatar-source'
  * operative portrait, served locally at card size, never its registry image.
  * Anyone else shows the registry-supplied image when there is one (CLAIMED:
  * whatever the operator uploaded). Either falls back on error or absence to a
- * deterministic generated emblem: the winged mark on a tile whose hue and corner
- * ticks are seeded from the agent's id. The emblem needs no network and never
- * fails, so a row is never a blank square.
+ * neutral identity tile: initials derived from the published name, with a hue
+ * seeded from the agent id. It is not presented as owner-supplied artwork.
  *
  * A rounded square, never a circle: 8 to 10 px at card size, up to 16 px large.
  */
@@ -34,16 +33,16 @@ function hash(s: string): number {
   return h >>> 0
 }
 
-function Emblem({ id, category, size, reference }: { id: string; category?: string | null; size: number; reference: boolean }) {
+function Emblem({ id, name, category, size, reference }: { id: string; name?: string | null; category?: string | null; size: number; reference: boolean }) {
   const h = hash(id)
   const hue = reference && category && CATEGORY_HUE[category] !== undefined
     ? CATEGORY_HUE[category]
     : 30 + (h % 300)
-  const sat = reference ? 42 : 14
+  const sat = reference ? 42 : 28
   const bg = `hsl(${hue} ${sat}% 16%)`
   const edge = `hsl(${hue} ${sat}% 34%)`
   const mark = `hsl(${hue} ${Math.min(sat + 18, 60)}% 72%)`
-  const ticks = [h & 1, (h >> 3) & 1, (h >> 6) & 1, (h >> 9) & 1]
+  const initials = identityInitials(name)
 
   return (
     <svg
@@ -51,23 +50,19 @@ function Emblem({ id, category, size, reference }: { id: string; category?: stri
       height={size}
       viewBox="0 0 40 40"
       aria-hidden="true"
+      data-kind="identity-placeholder"
       style={{ flex: 'none', borderRadius: 8, display: 'block' }}
     >
       <rect x="0.5" y="0.5" width="39" height="39" rx="8" fill={bg} stroke={edge} strokeWidth="1" />
-      {ticks[0] ? <rect x="5" y="5" width="5" height="1.6" fill={edge} /> : null}
-      {ticks[1] ? <rect x="30" y="5" width="5" height="1.6" fill={edge} /> : null}
-      {ticks[2] ? <rect x="5" y="33.4" width="5" height="1.6" fill={edge} /> : null}
-      {ticks[3] ? <rect x="30" y="33.4" width="5" height="1.6" fill={edge} /> : null}
-      <g transform="translate(8 12) scale(0.24)" fill={mark}>
-        <path d="M50 21C43 13 27 5 17 2.5C9 1 0 3 0 8.5L0 63L1 67.5C15 54 33 32 50 21Z" />
-        <path d="M50 21C57 13 73 5 83 2.5C91 1 100 3 100 8.5L100 63L99 67.5C85 54 67 32 50 21Z" />
-      </g>
+      <path d="M6 8V6h5M29 6h5v2M6 32v2h5M29 34h5v-2" fill="none" stroke={edge} strokeWidth="1" />
+      <text x="20" y="21" textAnchor="middle" dominantBaseline="middle" fill={mark} fontFamily="var(--font-ui), sans-serif" fontSize={initials.length > 1 ? 15 : 18} fontWeight="600" letterSpacing="-0.5">{initials}</text>
     </svg>
   )
 }
 
 export function AgentAvatar({
   id,
+  name,
   category,
   size = 40,
   reference = false,
@@ -75,6 +70,7 @@ export function AgentAvatar({
   priority = false,
 }: {
   id: string
+  name?: string | null
   category?: string | null
   size?: number
   reference?: boolean
@@ -105,7 +101,7 @@ export function AgentAvatar({
       />
     )
   }
-  return <Emblem id={id} category={category} size={size} reference={reference} />
+  return <Emblem id={id} name={name} category={category} size={size} reference={reference} />
 }
 
 /** 8 px at 40, 10 px at 48 to 64, 14 px from 88: soft enough to breathe, never a circle. */

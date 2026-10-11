@@ -177,7 +177,7 @@ const coverHtml = `<div class="cover"><div class="img"></div><div class="veil"><
     <p class="kick">BNB Smart Chain · Agent marketplace</p>
     <h1>An agent market<br>built around <em>evidence.</em></h1>
     <p class="lede">${esc(PAPER.lede)}</p>
-    <div class="meta"><div><b>Version 2.0</b>30 September 2026</div><div><b>marque.trade</b>Live on BSC mainnet</div><div><b>Source</b>github.com/talk2francis/Marque</div></div>
+    <div class="meta"><div><b>Version 2.0</b>30 September 2026</div><div><b>marque.trade</b>Live on BSC mainnet</div><div><b>Live record</b>marque.trade/status</div></div>
   </div>
 </div>`
 const bodyHtml = `<div class="front">
@@ -198,7 +198,7 @@ const bodyHtml = `<div class="front">
   <div class="keys">
     <div><b>Use it</b><span>marque.trade: the marketplace, the quest, every agent's record. No wallet needed to look.</span></div>
     <div><b>Check it</b><span>Every hire is an ERC-8183 job on BNB Chain. Escrow contract <span class="mono">0xea4d…6eba6</span>, readable on BscScan.</span></div>
-    <div><b>Build on it</b><span>Open source at github.com/talk2francis/Marque. Public API at marque.trade/api/v1.</span></div>
+    <div><b>Build on it</b><span>Builder guide at marque.trade/builders. Public API at marque.trade/api/v1.</span></div>
   </div>
 </div>
 ${body}`

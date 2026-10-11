@@ -22,7 +22,17 @@ cd "$ROOT"
 # verification build leaves the repo referencing a throwaway directory — which
 # then fails lint and would break the real build's types if committed.
 if [ "$BUILD_DIR" != ".next" ]; then
-  trap 'git -C "$ROOT" checkout -- apps/web/tsconfig.json apps/web/next-env.d.ts 2>/dev/null || true' EXIT
+  # Restore the files as they were before this build, including any uncommitted
+  # user edits. Never use git checkout here: it would discard those edits.
+  CONFIG_SNAPSHOT="$(mktemp -d)"
+  cp "$WEB/tsconfig.json" "$CONFIG_SNAPSHOT/tsconfig.json"
+  if [ -f "$WEB/next-env.d.ts" ]; then cp "$WEB/next-env.d.ts" "$CONFIG_SNAPSHOT/next-env.d.ts"; fi
+  restore_config() {
+    cp "$CONFIG_SNAPSHOT/tsconfig.json" "$WEB/tsconfig.json"
+    if [ -f "$CONFIG_SNAPSHOT/next-env.d.ts" ]; then cp "$CONFIG_SNAPSHOT/next-env.d.ts" "$WEB/next-env.d.ts"; fi
+    rm -r "$CONFIG_SNAPSHOT"
+  }
+  trap restore_config EXIT
 fi
 
 pnpm --filter @marque/web build

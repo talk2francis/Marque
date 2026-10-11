@@ -242,7 +242,7 @@ export const SECTIONS: PaperSection[] = [
         'Load, measured: every target met through 100 concurrent users (page p95 462 ms, API p95 489 ms, no errors); at 250 users there were still no errors, but latency exceeded target.',
       ] },
     ],
-    links: [{ label: 'Source code', href: 'https://github.com/talk2francis/Marque' }, { label: 'Live status', href: '/status' }],
+    links: [{ label: 'Live status', href: '/status' }],
   },
   {
     id: 'limits', n: '11', title: 'Trust and limitations',

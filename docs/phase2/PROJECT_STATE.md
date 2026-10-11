@@ -2,6 +2,28 @@
 
 Live record of Phase 2. Newest first inside each section. Times are UTC.
 
+## 11 October: identity artwork, current test evidence, home job record
+
+- Audited ready-to-hire third-party identity metadata: 7 of 19 published a
+  registry image URL; 12 did not publish one in either top-level or off-chain
+  metadata. Broken proxy images fall back to a neutral name-derived identity
+  tile, not Marque's logo. Storefronts use real registry artwork as a soft
+  background where present; builders are encouraged, not required, to provide
+  the optional ERC-8004 `image` field. No invented hero assets or ranking effect.
+- Home's single latest-job panel is now a manually controlled carousel of real
+  Marque-funded jobs, selected across funded, submitted, and settled states
+  where those states exist. No buyer task text or fictional pending job is shown.
+- Conformance listing chooses the latest own-category result, including a
+  failed retest. The worker creates a fresh immutable case id each sweep and
+  skips tests whose new case could not be captured, instead of silently
+  reusing old cases. A2A JSON-RPC error envelopes are recorded as no answer
+  without storing the raw operator error text. Tidemark's storefront explains
+  that the quoted-APR MCS test does not certify its trailing realised-yield
+  method; the recorded nonpass remains public.
+- Removed first-party repository and issue links from public UI and docs.
+  The repository remains public to satisfy the campaign's repository rule.
+
+
 ## 9 October: incident response and activity (live 10 October, b6f54b7)
 
 User requested investigation of overnight alerts, prevention, public agent activity,

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { avatarSource } from './avatar-source'
+import { avatarSource, identityInitials, registryImageUrl } from './avatar-source'
 
 describe('avatarSource', () => {
   it('a reference agent shows its portrait, never its registry image', () => {
@@ -12,7 +12,7 @@ describe('avatarSource', () => {
   })
 
   it('a third party keeps its registry image', () => {
-    expect(avatarSource({ id: '56:304493', reference: false, imageUrl: 'https://x.test/a.png', size: 40 })).toEqual({ kind: 'registry', src: 'https://x.test/a.png' })
+    expect(avatarSource({ id: '56:304493', reference: false, imageUrl: 'https://api.8004scan.io/a.png', size: 40 })).toEqual({ kind: 'registry', src: 'https://api.8004scan.io/a.png' })
   })
 
   it('a third party that claims a reference token still gets no Marque art', () => {
@@ -21,5 +21,17 @@ describe('avatarSource', () => {
 
   it('falls back to the emblem with no image', () => {
     expect(avatarSource({ id: '56:1', reference: false, imageUrl: null, size: 40 }).kind).toBe('emblem')
+  })
+
+  it('does not render arbitrary owner-controlled URLs as an image', () => {
+    expect(registryImageUrl('http://api.8004scan.io/a')).toBeNull()
+    expect(registryImageUrl('https://api.8004scan.io.evil.test/a')).toBeNull()
+    expect(registryImageUrl('https://example.com/a.png')).toBeNull()
+  })
+
+  it('derives a neutral identity tile from the published name', () => {
+    expect(identityInitials('Health Factor Monitor')).toBe('HM')
+    expect(identityInitials('Tidemark')).toBe('TI')
+    expect(identityInitials('')).toBe('ID')
   })
 })

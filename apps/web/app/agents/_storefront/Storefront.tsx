@@ -2,6 +2,7 @@ import { ArrowUpRight, Check, KeyRound, ShieldCheck, X } from 'lucide-react'
 import { ProvenanceChip } from '@marque/ui'
 import { AgentAvatar } from '../../_components/AgentAvatar'
 import { AgentBrandHero } from '../../_components/AgentBrandHero'
+import { AgentIdentityHero } from '../../_components/AgentIdentityHero'
 import { agentBrand } from '../../../lib/agent-brand'
 import { AddressChip, Badge, HashChip, Stars } from '../../_components/ui'
 import { DeliverableView } from '../../jobs/[chainId]/[jobId]/Deliverable'
@@ -65,7 +66,7 @@ export function Storefront({ d }: { d: Data }) {
   const panel = (
     <aside className={styles.panel} aria-label={`Hire ${d.name}`}>
       <div className={styles.panelHead}>
-        <AgentAvatar id={d.agentId} category={d.category} reference={d.isReference} imageUrl={d.imageUrl} size={44} />
+        <AgentAvatar id={d.agentId} name={d.name} category={d.category} reference={d.isReference} imageUrl={d.imageUrl} size={44} />
         <div>
           <p className={styles.panelName}>{d.name}</p>
           <p className={styles.panelWhere}>{cat} · {net}</p>
@@ -121,9 +122,7 @@ export function Storefront({ d }: { d: Data }) {
               </div>
             </AgentBrandHero>
           ) : (
-          <header className={styles.head}>
-            <AgentAvatar id={d.agentId} category={d.category} reference={d.isReference} imageUrl={d.imageUrl} size={64} />
-            <div className={styles.headTxt}>
+          <AgentIdentityHero agentId={d.agentId} tokenId={d.tokenId} name={d.name} category={d.category} imageUrl={d.imageUrl}>
               <h1 className={styles.title}>{d.name}</h1>
               <div className={styles.badges}>
                 <Badge kind="network" label={net} />
@@ -131,8 +130,7 @@ export function Storefront({ d }: { d: Data }) {
                 {passed && passed === latest && passed.ranAt ? (Date.now() - Date.parse(passed.ranAt) > 72 * 3_600_000 ? <Badge kind="retest" /> : <Badge kind="warranted" date={passed.ranAt} />) : latest && !latest.pass ? <Badge kind="failed" test={latest.testId} field={latest.failedFields[0]} date={latest.ranAt ?? undefined} /> : <Badge kind="untested" />}
                 {d.isReference ? <a href="/register#reference-agents" className={styles.refLink}><Badge kind="reference" /></a> : null}
               </div>
-            </div>
-          </header>
+          </AgentIdentityHero>
           )}
 
           <StorefrontTabs activity={<AgentActivity agentId={d.agentId} provider={d.wallet} />}>
@@ -229,6 +227,7 @@ export function Storefront({ d }: { d: Data }) {
                     </p>
                   </div>
                 </div>
+                {d.slug === 'tidemark' && latest.testId === 'MCS-YIELD-1' ? <p className={styles.muted}>This published test asks for a quoted net APR and a switching decision. Tidemark measures trailing realised yield instead; it has not passed this test. Its result is still shown, but the test does not certify its specialised method.</p> : null}
                 {d.tests.length > 1 ? (
                   <div className={styles.tableWrap}>
                     <table className={styles.table}>

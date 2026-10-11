@@ -303,6 +303,10 @@ export function ClaimFlow() {
               placeholder="e.g. 0.15 U per call" style={{ fontFamily: 'inherit' }} />
             <span className={styles.hint}>Leave blank if you do not advertise one — the marketplace shows that as a finding, not a gap.</span>
           </div>
+          <div className={styles.field}>
+            <strong>Agent image · optional</strong>
+            <span className={styles.hint}>To show your own avatar, put an <code>image</code> URL in your ERC-8004 registration file. Marque reads it after the registry index refreshes and uses the same image softly behind your storefront identity. No separate banner or image upload is needed to list.</span>
+          </div>
 
           {testCategory?.test ? (
             <div className={styles.actions}>

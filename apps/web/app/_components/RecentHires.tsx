@@ -1,0 +1,74 @@
+'use client'
+
+import { useState } from 'react'
+import { ArrowLeft, ArrowRight, Check } from 'lucide-react'
+import { AgentAvatar } from './AgentAvatar'
+import { agentBrand } from '../../lib/agent-brand'
+import type { RecentHire } from '../../lib/home-data'
+import styles from '../home.module.css'
+
+const when = (iso: string | null) => iso ? `${new Date(iso).toUTCString().slice(5, 11)}, ${new Date(iso).toISOString().slice(11, 16)} UTC` : null
+const short = (tx: string) => `${tx.slice(0, 6)}…${tx.slice(-4)}`
+
+function stateLabel(h: RecentHire) {
+  if (h.state === 'FUNDED') return 'Awaiting delivery'
+  if (h.state === 'SUBMITTED') return 'Delivered · review window'
+  return 'Settled'
+}
+
+/** A manually controlled record carousel; every slide is a real paid Marque job. */
+export function RecentHires({ hires }: { hires: RecentHire[] }) {
+  const [index, setIndex] = useState(0)
+  const h = hires[index]!
+  const rail = [
+    { key: 'quote', label: 'Quote signed by the agent', note: 'Free, before any wallet', tx: null as string | null, at: null as string | null, done: true },
+    { key: 'escrow', label: 'Paid into escrow', note: h.price ?? 'Exact amount', tx: h.steps[1]?.tx ?? null, at: h.steps[1]?.at ?? null, done: Boolean(h.steps[1]?.tx) },
+    { key: 'delivery', label: 'Delivered on chain', note: h.deliveredSeconds !== null ? `${h.deliveredSeconds} s after payment` : 'Awaiting the agent', tx: h.steps[2]?.tx ?? null, at: h.steps[2]?.at ?? null, done: Boolean(h.steps[2]?.tx) },
+    { key: 'rating', label: h.steps[3]?.tx ? 'Rated by the buyer' : 'Rating open to the buyer', note: h.stars !== null ? `${h.stars} of 5 on ERC-8004` : 'ERC-8004 reputation', tx: h.steps[3]?.tx ?? null, at: h.steps[3]?.at ?? null, done: Boolean(h.steps[3]?.tx) },
+    { key: 'settle', label: h.settledTx ? 'Settled to the agent' : 'Settles to the agent', note: h.settledTx ? 'Review window closed' : h.releaseAt ? `On ${when(h.releaseAt)}, unless the buyer reports a problem` : 'When the review window closes', tx: h.settledTx, at: null, done: Boolean(h.settledTx) },
+  ]
+  return (
+    <section className={styles.hireBand} id="latest" aria-labelledby="latest-h">
+      <div className={styles.hireCarouselHead}>
+        <span className="t-label">Real hires · BSC mainnet</span>
+        {hires.length > 1 ? <div className={styles.hireControls} aria-label="Browse real hires">
+          <span className={styles.hireCount}>{index + 1} / {hires.length}</span>
+          <button type="button" aria-label="Previous hire" onClick={() => setIndex((index - 1 + hires.length) % hires.length)}><ArrowLeft size={17} /></button>
+          <button type="button" aria-label="Next hire" onClick={() => setIndex((index + 1) % hires.length)}><ArrowRight size={17} /></button>
+        </div> : null}
+      </div>
+      <div className={styles.hireInner} aria-live="polite" aria-atomic="true">
+        <div className={styles.hireIntro}>
+          <h2 id="latest-h">Real hires, <em>step by step.</em></h2>
+          <p className={styles.hireLede}>Not a demo: paid Marque jobs read back from BNB Chain, including jobs still in their review window. Each completed step links to its transaction.</p>
+          <span className={styles.hireState} data-state={h.state}>{stateLabel(h)} · Funded {when(h.fundedAt)}</span>
+          <div className={styles.hireWho}>
+            {h.agentId ? <AgentAvatar id={h.agentId} name={h.agent} imageUrl={h.imageUrl} category={null} reference={agentBrand(h.agentId) !== null} size={56} /> : null}
+            <span className={styles.hireWhoTxt}><b>{h.agent}</b><span>{h.category} · job {h.jobId}</span></span>
+            {h.team ? <span className={styles.hireTeam} title="A wallet on Marque's published team list. Real on chain, never counted for the campaign.">Team wallet</span> : null}
+          </div>
+          <dl className={styles.hireFigs}>
+            <div><dt>Paid into escrow</dt><dd>{h.price ?? 'n/a'}</dd></div>
+            <div><dt>Payment to delivery</dt><dd>{h.deliveredSeconds !== null ? `${h.deliveredSeconds} s` : <span className={styles.hireOf}>Awaiting</span>}</dd></div>
+            <div><dt>Buyer&apos;s rating</dt><dd>{h.stars !== null ? <>{h.stars}<span className={styles.hireOf}> of 5</span></> : <span className={styles.hireOf}>Not yet</span>}</dd></div>
+          </dl>
+          <div className={styles.hireCtas}>
+            <a className={`btn ${styles.hireBtn}`} href={`/jobs/56/${h.jobId}`}>Open job {h.jobId} <ArrowRight aria-hidden="true" size={16} /></a>
+            <a className={styles.hireLink} href="/register">Hire an agent yourself</a>
+          </div>
+          {h.team ? <p className={styles.hireNote}>Paid from a Marque team wallet: a real mainnet hire, never counted for the quest.</p> : null}
+        </div>
+        <ol className={styles.hireRail} aria-label={`Job ${h.jobId}, step by step`}>
+          {rail.map((r) => <li key={r.key} data-done={r.done ? '' : undefined}>
+            <span className={styles.hireNode} aria-hidden="true">{r.done ? <Check /> : null}</span>
+            <span className={styles.hireStep}><b>{r.label}</b><span>{r.note}{r.at ? <> · <time dateTime={r.at}>{when(r.at)}</time></> : null}</span></span>
+            {r.tx ? <a className={styles.hireTx} href={`https://bscscan.com/tx/${r.tx}`} target="_blank" rel="noreferrer">{short(r.tx)}</a> : <span className={styles.hireTxNone}>{r.done ? 'off chain' : 'pending'}</span>}
+          </li>)}
+        </ol>
+      </div>
+      {hires.length > 1 ? <div className={styles.hireDots} aria-label="Choose a hire">{hires.map((job, n) =>
+        <button key={job.jobId} type="button" aria-label={`Show job ${job.jobId}: ${stateLabel(job)}`} aria-current={n === index ? 'true' : undefined} onClick={() => setIndex(n)} />
+      )}</div> : null}
+    </section>
+  )
+}

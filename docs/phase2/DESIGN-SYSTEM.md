@@ -136,7 +136,7 @@ Port from Kerb unless noted. Each lists states.
 | **ErrorMap** (`packages/commerce/src/errors.ts`) | Maps every custom error of AgenticCommerce, EvaluatorRouter, OptimisticPolicy, ERC-20, and wallet codes (4001 rejected, 4902 unknown chain, -32002 pending) to a sentence with the next step. Examples in section 9 |
 | **Field** | Numeric right-aligned, token suffix, helper, error |
 | **Pill / Badge** | `Hireable` (moss), `Preview only` (hair outline), `Warranted 26 Sep` (brass outline), `Tested: failed repayToTarget` (oxide text, small), `Untested` (ink-3), `Retest due` (amber), `Marque reference` (brass-dim fill), network pill |
-| **AgentAvatar** | Keep the existing registry image plus generated emblem fallback |
+| **AgentAvatar** | Reference portrait, else HTTPS registry-proxy image, else neutral initials from the published name. The fallback is never Marque's logo or an invented owner portrait. |
 | **PriceTag** | `0.10 USDT` in `num-l`, below it `Live quote · 12:41 left` (MEASURED) or `Declared price` (CLAIMED) |
 | **Stars** | 1 to 5, average with count, "verified buyers" label |
 | **Kpi** | Label, value, unit, provenance chip, optional delta |
@@ -369,9 +369,9 @@ operative (the "who"); the hero is the instrument (the "what").
 - First-party only. `lib/agent-brand.ts` is the one manifest (slug, avatar,
   hero, heroPosition, tone), resolved through `reference-agents.ts` by `marque:*`
   id, slug or canonical ERC-8004 id, never by display name. A third party never
-  resolves, so it keeps its registry image, then the generated emblem.
+  resolves, so it keeps its registry image, then a neutral identity tile.
 - `AgentAvatar` precedence (`lib/avatar-source.ts`): reference portrait, else
-  registry image, else emblem. Rounded square, 8 px at 40, 14 px at 88 and up,
+  registry image, else name-derived initials. Rounded square, 8 px at 40, 14 px at 88 and up,
   a hairline drawn inside. Never a circle.
 - Portraits go everywhere an agent is named (cards, panel, hire sheet, job
   room, compare). The hero is used once: the storefront masthead
@@ -394,6 +394,20 @@ operative (the "who"); the hero is the instrument (the "what").
   `apps/web/public/brand/agents/<slug>/{avatar,avatar-160,hero-day,hero-day-900,hero-night,hero-night-900}.webp`
   (7 to 62 KB each). Cards load the 160 px portrait only. A third-party agent
   never receives this artwork.
+
+**Third-party identity (11 Oct).** A third-party storefront has its own restrained
+masthead: the real ERC-8004 registry image, if available, is a blurred ambient
+backdrop behind the sharp avatar. Its source is labelled as an owner claim, not
+verification. Missing or broken images receive a neutral identity tile and an
+explicit note. Listing does not require artwork; registration's optional `image`
+field is recommended and reused as the ambient source rather than demanding a
+second banner upload. This preserves access for functional agents without art.
+
+**Home evidence carousel (11 Oct).** Manual previous/next and direct slide
+selection; no timer or autoplay. It selects real paid Marque-originated jobs in
+funded, submitted and settled states if each exists. It never fills a missing
+state with a demo or shows raw buyer task text. Each completed rail step links
+to its actual transaction; pending steps are visibly pending.
 
 **World plates (29 Sep).** Three 16:9 photographs, each in Day and Night, one
 per principal page: Home = the Marque Monument, Marketplace = the Registry Field

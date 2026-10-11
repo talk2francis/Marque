@@ -181,12 +181,15 @@ export async function ledgerHeadline(): Promise<LedgerHeadline | null> {
   return { complete: done.length, total: benches.length, agentMs, humanMs, agentScore: pct(arm('agent')), humanScore: pct(arm('manual')) }
 }
 
-export interface LatestHire {
+export interface RecentHire {
   jobId: string
   /** The agent's canonical id, for its portrait. */
   agentId: string | null
+  imageUrl: string | null
   agent: string
   category: string
+  state: string
+  fundedAt: string
   price: string | null
   team: boolean
   steps: Array<{ label: string; tx: string | null; at: string | null }>
@@ -200,47 +203,62 @@ export interface LatestHire {
 }
 
 /**
- * The newest delivered Marque hire on BSC mainnet, step by step from chain events:
- * the hero's proof that the flow is real. Null when there is none yet.
+ * A short, state-diverse selection of real paid Marque jobs on BSC mainnet.
+ * No raw buyer task is put on Home; the Job Room carries the full evidence.
  */
-export async function latestHire(): Promise<LatestHire | null> {
-  const [j] = rowsOf(await db().execute(sql`
-    select j.job_id, j.client, j.provider, j.funded_raw, j.token, i.category, i.agent_id, a.name, a.token_id,
+export async function recentHires(): Promise<RecentHire[]> {
+  const jobs = rowsOf(await db().execute(sql`
+    select j.job_id, j.client, j.provider, j.funded_raw, j.token, j.state,
+           i.category, i.agent_id, a.name, a.token_id, a.image_url, funded.block_time as funded_at,
            (select json_object_agg(e.name, json_build_object('tx', e.tx_hash, 'at', e.block_time, 'block', e.block_number))
               from commerce_event e where e.chain_id = j.chain_id and e.job_id = j.job_id) as ev
     from commerce_job j
     join hire_intent i on i.id = j.intent_id
     left join agent a on a.id = i.agent_id
-    where j.chain_id = 56 and j.state in ('SUBMITTED', 'DISPUTED', 'COMPLETED', 'PAID')
-    order by j.updated_block desc nulls last limit 1`).catch(() => []))
-  if (!j) return null
-  const ev = (j['ev'] ?? {}) as Record<string, { tx: string; at: string | null; block?: number }>
-  const [r] = rowsOf(await db().execute(sql`
-    select value, value_decimals, tx_hash, block_time from rating
-    where chain_id = 56 and client = ${String(j['client'])} and agent_token_id = ${String(j['token_id'] ?? '')} and not revoked
-      and block_number >= ${Number(ev['JobSubmitted']?.block ?? Number.MAX_SAFE_INTEGER)}
-    order by block_number asc limit 1`).catch(() => []))
-  const tok = j['token'] ? assetAt(56 as ChainId, String(j['token'])) : null
-  const funded = ev['JobFunded']?.at ? Date.parse(ev['JobFunded'].at) : null
-  const submitted = ev['JobSubmitted']?.at ? Date.parse(ev['JobSubmitted'].at) : null
-  const iso = (v: string | null | undefined) => (v ? new Date(v).toISOString() : null)
-  return {
-    jobId: String(j['job_id']),
-    agentId: j['agent_id'] ? String(j['agent_id']) : null,
-    agent: String(j['name'] ?? 'An agent'),
-    category: CAT_LABEL[String(j['category'] ?? '')] ?? 'Agent',
-    price: tok && j['funded_raw'] ? `${formatAmount(String(j['funded_raw']), tok.decimals)} ${tok.symbol}` : null,
-    team: teamWallets().includes(String(j['client'])),
-    steps: [
-      { label: 'Live quote, signed by the agent', tx: null, at: null },
-      { label: 'Paid into escrow', tx: ev['JobFunded']?.tx ?? null, at: iso(ev['JobFunded']?.at) },
-      { label: 'Delivered on chain', tx: ev['JobSubmitted']?.tx ?? null, at: iso(ev['JobSubmitted']?.at) },
-      { label: r ? 'Rated by the buyer' : 'Rating open to the buyer', tx: r ? String(r['tx_hash']) : null, at: r ? iso(String(r['block_time'])) : null },
-    ],
-    deliveredSeconds: funded !== null && submitted !== null ? Math.max(0, Math.round((submitted - funded) / 1000)) : null,
-    stars: r ? Math.round(Number(r['value']) / 10 ** Number(r['value_decimals'] ?? 0) / 20) : null,
-    openedTx: ev['JobCreated']?.tx ?? null,
-    settledTx: ev['JobCompleted']?.tx ?? null,
-    releaseAt: submitted !== null && !ev['JobCompleted'] ? await disputeWindowSeconds(56 as ChainId).then((w) => new Date(submitted + w * 1000).toISOString()).catch(() => null) : null,
-  }
+    join commerce_event funded on funded.chain_id = j.chain_id and funded.job_id = j.job_id and funded.name = 'JobFunded'
+    where j.chain_id = 56 and j.state in ('FUNDED', 'SUBMITTED', 'COMPLETED', 'PAID')
+    order by funded.block_time desc nulls last limit 60`).catch(() => []))
+  const selected = [
+    ...jobs.filter((j) => j['state'] === 'FUNDED').slice(0, 1),
+    ...jobs.filter((j) => j['state'] === 'SUBMITTED').slice(0, 2),
+    ...jobs.filter((j) => j['state'] === 'COMPLETED' || j['state'] === 'PAID').slice(0, 2),
+  ].sort((a, b) => Date.parse(String(b['funded_at'])) - Date.parse(String(a['funded_at']))).slice(0, 5)
+  const disputeWindow = selected.some((j) => j['state'] === 'SUBMITTED')
+    ? disputeWindowSeconds(56 as ChainId).catch(() => null)
+    : Promise.resolve(null)
+  return Promise.all(selected.map(async (j): Promise<RecentHire> => {
+    const ev = (j['ev'] ?? {}) as Record<string, { tx: string; at: string | null; block?: number }>
+    const [r] = rowsOf(await db().execute(sql`
+      select r.value, r.value_decimals, r.tx_hash, r.block_time from rating_comment c
+      join rating r on r.chain_id = c.chain_id and r.feedback_hash = c.feedback_hash
+        and r.client = c.client and r.agent_token_id = c.agent_token_id
+      where c.chain_id = 56 and c.job_id = ${String(j['job_id'])} and not r.revoked
+      order by r.block_number desc limit 1`).catch(() => []))
+    const tok = j['token'] ? assetAt(56 as ChainId, String(j['token'])) : null
+    const funded = ev['JobFunded']?.at ? Date.parse(ev['JobFunded'].at) : null
+    const submitted = ev['JobSubmitted']?.at ? Date.parse(ev['JobSubmitted'].at) : null
+    const iso = (v: string | null | undefined) => (v ? new Date(v).toISOString() : null)
+    return {
+      jobId: String(j['job_id']),
+      agentId: j['agent_id'] ? String(j['agent_id']) : null,
+      imageUrl: j['image_url'] ? String(j['image_url']) : null,
+      agent: String(j['name'] ?? 'An agent'),
+      category: CAT_LABEL[String(j['category'] ?? '')] ?? 'Agent',
+      state: String(j['state']),
+      fundedAt: iso(String(j['funded_at']))!,
+      price: tok && j['funded_raw'] ? `${formatAmount(String(j['funded_raw']), tok.decimals)} ${tok.symbol}` : null,
+      team: teamWallets().includes(String(j['client'])),
+      steps: [
+        { label: 'Live quote, signed by the agent', tx: null, at: null },
+        { label: 'Paid into escrow', tx: ev['JobFunded']?.tx ?? null, at: iso(ev['JobFunded']?.at) },
+        { label: 'Delivered on chain', tx: ev['JobSubmitted']?.tx ?? null, at: iso(ev['JobSubmitted']?.at) },
+        { label: r ? 'Rated by the buyer' : 'Rating open to the buyer', tx: r ? String(r['tx_hash']) : null, at: r ? iso(String(r['block_time'])) : null },
+      ],
+      deliveredSeconds: funded !== null && submitted !== null ? Math.max(0, Math.round((submitted - funded) / 1000)) : null,
+      stars: r ? Math.round(Number(r['value']) / 10 ** Number(r['value_decimals'] ?? 0) / 20) : null,
+      openedTx: ev['JobCreated']?.tx ?? null,
+      settledTx: ev['JobCompleted']?.tx ?? null,
+      releaseAt: submitted !== null && !ev['JobCompleted'] ? await disputeWindow.then((w) => w === null ? null : new Date(submitted + w * 1000).toISOString()) : null,
+    }
+  }))
 }
