@@ -390,6 +390,11 @@ operative (the "who"); the hero is the instrument (the "what").
   and no wrong-theme flash. System needs no asset logic of its own: the
   bootstrap resolves it to day or night before paint. The Night art is shown as
   drawn; the old brightness filter that faked night from the day art is gone.
+- The six manifest tones are visible in the masthead, not just stored as names:
+  a restrained chroma layer over the instrument art and a narrow portrait frame
+  restore each agent's own steel, ice, brass, verdigris, opal or garnet identity.
+  These hues identify the first-party art; they never mean hireability or test
+  status. The original Day and Night masters remain unchanged.
 - Masters: `brand-assets/agents-brand/avatars_and_hero_banners/` (never edited;
   Night files are `<Name>-Agent-Nighttime-Hero-banner.png`). Web copies:
   `node scripts/prepare-brand-assets.mjs` writes
@@ -397,12 +402,14 @@ operative (the "who"); the hero is the instrument (the "what").
   (7 to 62 KB each). Cards load the 160 px portrait only. A third-party agent
   never receives this artwork.
 
-**Third-party identity (11 Oct, revised).** A storefront opens with a quiet,
-contained profile panel: name and current state on one side, one sharp registry
-avatar on the other, and the on-chain token ID in a restrained evidence line.
-The old blurred, enlarged copy of small registry artwork and oversized token
-number were removed after phone and desktop inspection. The image is still an
-owner claim, not verification. Both top-level `image_url` and the off-chain
+**Third-party identity (12 Oct, revised).** A storefront opens with a contained
+profile masthead: a restrained, enlarged and blurred echo of the registry image
+in the upper stage, while the actual avatar stays sharp on the left at the
+stage's lower edge, matching the reference-agent portrait placement. The name
+and status sit beside it, and the on-chain token ID stays in a small evidence
+line. The ambient echo never replaces the avatar, never enlarges it as a sharp
+hero, and is omitted when there is no registry art. The image is still an owner
+claim, not verification. Both top-level `image_url` and the off-chain
 metadata image use the same safe 8004scan proxy allowlist on cards, storefronts,
 hire sheets, job rooms and the home record. Missing or broken images show the
 Marque fallback mark, explicitly labelled as such. No second banner upload is

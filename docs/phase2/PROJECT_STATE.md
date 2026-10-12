@@ -2,6 +2,16 @@
 
 Live record of Phase 2. Newest first inside each section. Times are UTC.
 
+## 12 October: agent profile art refinement
+
+- Reference-agent mastheads now use the existing six tone identities as a
+  restrained colour treatment over their original Day/Night artwork and around
+  the portrait. The colour identifies the agent, not its test or hire status.
+- Third-party storefronts place the sharp registry avatar on the left, matching
+  reference-agent pages. A faint, enlarged blurred copy provides atmosphere in
+  the stage only when the registry supplied an image; absent art retains the
+  labelled Marque fallback and no synthetic owner banner.
+
 ## 11 October: identity artwork, current test evidence, home job record
 
 - Evening follow-up: PancakeSwap NFT #7654242 was withdrawn hours after it

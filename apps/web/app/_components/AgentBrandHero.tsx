@@ -28,6 +28,7 @@ export function AgentBrandHero({ brand, agentId, category, children }: { brand: 
       <div className={styles.stage} style={art} aria-hidden="true">
         <span className={styles.echo} />
         <span className={styles.art} />
+        <span className={styles.chromatic} />
       </div>
       <div className={styles.id}>
         <div className={styles.portrait}>
