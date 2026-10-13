@@ -15,8 +15,22 @@ import { MarqueMark } from './MarqueMark'
  * A rounded square, never a circle: 8 to 10 px at card size, up to 16 px large.
  */
 
-function Fallback({ size }: { size: number }) {
-  return <span className="agent-avatar" data-kind="platform-fallback" title="No agent image supplied; Marque platform mark" aria-label="No agent image supplied; Marque platform mark" style={{ flex: 'none', display: 'grid', placeItems: 'center', width: size, height: size, borderRadius: avatarRadius(size), border: '1px solid var(--hair-2)', background: 'var(--panel)', color: 'var(--ink-2)' }}><MarqueMark size={Math.round(size * .54)} variant="simple" /></span>
+/* The former fallback varied its colour by agent id. Keep that distinction while
+ * using the Marque mark, so the tile cannot be mistaken for owner artwork. */
+const FALLBACK_HUES = [34, 155, 198, 10, 82, 175] as const
+
+function fallbackHue(id: string): number {
+  let hash = 2166136261
+  for (let index = 0; index < id.length; index++) {
+    hash ^= id.charCodeAt(index)
+    hash = Math.imul(hash, 16777619)
+  }
+  return FALLBACK_HUES[(hash >>> 0) % FALLBACK_HUES.length] ?? 34
+}
+
+function Fallback({ id, size, reference }: { id: string; size: number; reference: boolean }) {
+  const hue = fallbackHue(id)
+  return <span className="agent-avatar" data-kind="platform-fallback" title="No agent image supplied; Marque platform mark" aria-label="No agent image supplied; Marque platform mark" style={{ flex: 'none', display: 'grid', placeItems: 'center', width: size, height: size, borderRadius: avatarRadius(size), border: reference ? '1px solid var(--hair-2)' : `1px solid hsl(${hue} 31% 40%)`, background: reference ? 'var(--panel)' : `hsl(${hue} 30% 20%)`, color: reference ? 'var(--ink-2)' : `hsl(${hue} 42% 80%)` }}><MarqueMark size={Math.round(size * .54)} variant="simple" /></span>
 }
 
 export function AgentAvatar({
@@ -43,7 +57,7 @@ export function AgentAvatar({
   if (src.kind === 'registry') {
     return (
       <span className="agent-avatar" data-kind="registry" aria-hidden="true" style={{ position: 'relative', flex: 'none', display: 'block', width: size, height: size, borderRadius: radius, overflow: 'hidden' }}>
-        <Fallback size={size} />
+        <Fallback id={id} size={size} reference={reference} />
         <span style={{ position: 'absolute', inset: 0, borderRadius: radius, backgroundImage: `url("${src.src}")`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
       </span>
     )
@@ -66,7 +80,7 @@ export function AgentAvatar({
       />
     )
   }
-  return <Fallback size={size} />
+  return <Fallback id={id} size={size} reference={reference} />
 }
 
 /** 8 px at 40, 10 px at 48 to 64, 14 px from 88: soft enough to breathe, never a circle. */

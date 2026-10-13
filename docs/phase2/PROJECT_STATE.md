@@ -2,6 +2,16 @@
 
 Live record of Phase 2. Newest first inside each section. Times are UTC.
 
+## 13 October: corrected agent identity scope
+
+- Restored the reference-agent hero and portrait styling exactly to the
+  pre-12-October version. The colour request concerned third-party agents using
+  the Marque fallback, not the six reference agents.
+- Third-party storefronts now separate their banner from the identity row,
+  with the avatar at the banner's lower-left edge like the reference layout.
+  Their missing-image fallback is the labelled Marque mark on one of six stable,
+  agent-ID-derived muted colour tiles across the product.
+
 ## 12 October: agent profile art refinement
 
 - Reference-agent mastheads now use the existing six tone identities as a

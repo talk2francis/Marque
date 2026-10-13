@@ -18,12 +18,10 @@ export function AgentIdentityHero({ agentId, tokenId, name, category, imageUrl, 
   const art = image ? { '--identity-art': `url("${image}")` } as CSSProperties : undefined
 
   return (
-    <header className={styles.masthead} data-has-art={image ? 'true' : 'false'} style={art}>
-      <div className={styles.stage} aria-hidden="true">
+    <header className={styles.masthead} data-has-art={image ? 'true' : 'false'}>
+      <div className={styles.stage} style={art} aria-hidden="true">
         {image ? <span className={styles.ambient} /> : null}
-        <span className={styles.stageRule} />
       </div>
-      <div className={styles.topline}><span>Agent profile</span><span>BSC mainnet · 56</span></div>
       <div className={styles.identity}>
         <span className={styles.portrait}><AgentAvatar id={agentId} name={name} category={category} imageUrl={image} size={104} priority /></span>
         <div className={styles.copy}>

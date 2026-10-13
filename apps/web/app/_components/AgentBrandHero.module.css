@@ -1,19 +1,12 @@
 /* The reference-agent masthead. Image-derived only: no gradient washes, no glow, no motion.
    Day and Night are two lighting states of the same artifact (29 Sep). */
-.masthead { position: relative; isolation: isolate; margin-bottom: var(--s-5); --agent-hue: #87969c; }
-.masthead[data-tone='steel'] { --agent-hue: #779ab0; }
-.masthead[data-tone='lattice'] { --agent-hue: #5b9eb6; }
-.masthead[data-tone='brass'] { --agent-hue: #b18a4e; }
-.masthead[data-tone='verdigris'] { --agent-hue: #4d9c83; }
-.masthead[data-tone='opal'] { --agent-hue: #6b9db4; }
-.masthead[data-tone='garnet'] { --agent-hue: #a65d70; }
+.masthead { position: relative; isolation: isolate; margin-bottom: var(--s-5); }
 
 .stage {
   position: relative;
   aspect-ratio: 3 / 1;
   min-height: 170px;
   border-radius: var(--r-3);
-  background: color-mix(in srgb, var(--agent-hue) 14%, var(--canvas));
 }
 /* The themed image. Night is the default (the bootstrap resolves data-theme before paint);
    Day swaps the variable, so the browser only ever fetches the image in use. */
@@ -54,18 +47,6 @@
     radial-gradient(ellipse 70% 95% at 63% 48%, #000 45%, rgba(0, 0, 0, 0.55) 75%, rgba(0, 0, 0, 0.2) 100%);
   mask-composite: intersect;
 }
-.chromatic {
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: var(--agent-hue);
-  mix-blend-mode: color;
-  opacity: .28;
-  pointer-events: none;
-  -webkit-mask-image: radial-gradient(ellipse 72% 105% at 66% 48%, #000 40%, transparent 100%);
-  mask-image: radial-gradient(ellipse 72% 105% at 66% 48%, #000 40%, transparent 100%);
-}
-:global([data-theme='day']) .chromatic { opacity: .22; }
 :global([data-theme='day']) .art {
   filter: saturate(0.94);
   -webkit-mask-composite: source-in;
@@ -86,7 +67,7 @@
   object-fit: cover; border-radius: 50%;
   filter: blur(32px); opacity: 0.12; pointer-events: none;
 }
-.frame { position: relative; display: block; border-radius: 14px; box-shadow: 0 0 0 3px var(--canvas), 0 0 0 4px var(--agent-hue); }
+.frame { position: relative; display: block; border-radius: 14px; box-shadow: 0 0 0 3px var(--canvas), 0 0 0 4px var(--hair-2); }
 .txt { display: flex; flex-direction: column; gap: 12px; min-width: 0; padding-bottom: 4px; }
 
 @media (max-width: 1023.98px) {

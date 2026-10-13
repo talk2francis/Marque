@@ -136,7 +136,7 @@ Port from Kerb unless noted. Each lists states.
 | **ErrorMap** (`packages/commerce/src/errors.ts`) | Maps every custom error of AgenticCommerce, EvaluatorRouter, OptimisticPolicy, ERC-20, and wallet codes (4001 rejected, 4902 unknown chain, -32002 pending) to a sentence with the next step. Examples in section 9 |
 | **Field** | Numeric right-aligned, token suffix, helper, error |
 | **Pill / Badge** | `Hireable` (moss), `Preview only` (hair outline), `Warranted 26 Sep` (brass outline), `Tested: failed repayToTarget` (oxide text, small), `Untested` (ink-3), `Retest due` (amber), `Marque reference` (brass-dim fill), network pill |
-| **AgentAvatar** | Reference portrait, else HTTPS registry-proxy image, else neutral initials from the published name. The fallback is never Marque's logo or an invented owner portrait. |
+| **AgentAvatar** | Reference portrait, else HTTPS registry-proxy image, else a clearly labelled Marque platform mark on an agent-id-coloured tile. The fallback is not owner-supplied artwork. |
 | **PriceTag** | `0.10 USDT` in `num-l`, below it `Live quote · 12:41 left` (MEASURED) or `Declared price` (CLAIMED) |
 | **Stars** | 1 to 5, average with count, "verified buyers" label |
 | **Kpi** | Label, value, unit, provenance chip, optional delta |
@@ -371,7 +371,9 @@ operative (the "who"); the hero is the instrument (the "what").
   id, slug or canonical ERC-8004 id, never by display name. A third party never
   resolves, so it keeps its registry image, then the Marque platform fallback.
 - `AgentAvatar` precedence (`lib/avatar-source.ts`): reference portrait, else
-  registry image, else the Marque mark in a plain platform tile. Rounded square,
+  registry image, else the Marque mark in a platform tile. Third-party fallback
+  tiles vary by a stable hash of the agent ID; this colour is identity decoration,
+  never a test or hireability signal. Rounded square,
   8 px at 40, 14 px at 88 and up. Never a circle. A genuine image renders
   immediately over the fallback; it is never held invisible waiting for a
   client hydration event that the browser may have already fired.
@@ -390,11 +392,9 @@ operative (the "who"); the hero is the instrument (the "what").
   and no wrong-theme flash. System needs no asset logic of its own: the
   bootstrap resolves it to day or night before paint. The Night art is shown as
   drawn; the old brightness filter that faked night from the day art is gone.
-- The six manifest tones are visible in the masthead, not just stored as names:
-  a restrained chroma layer over the instrument art and a narrow portrait frame
-  restore each agent's own steel, ice, brass, verdigris, opal or garnet identity.
-  These hues identify the first-party art; they never mean hireability or test
-  status. The original Day and Night masters remain unchanged.
+- The original Day and Night masters and their neutral portrait frame remain
+  unchanged. Do not tint or recolour reference-agent artwork to implement a
+  third-party fallback treatment.
 - Masters: `brand-assets/agents-brand/avatars_and_hero_banners/` (never edited;
   Night files are `<Name>-Agent-Nighttime-Hero-banner.png`). Web copies:
   `node scripts/prepare-brand-assets.mjs` writes
@@ -402,13 +402,14 @@ operative (the "who"); the hero is the instrument (the "what").
   (7 to 62 KB each). Cards load the 160 px portrait only. A third-party agent
   never receives this artwork.
 
-**Third-party identity (12 Oct, revised).** A storefront opens with a contained
-profile masthead: a restrained, enlarged and blurred echo of the registry image
-in the upper stage, while the actual avatar stays sharp on the left at the
-stage's lower edge, matching the reference-agent portrait placement. The name
-and status sit beside it, and the on-chain token ID stays in a small evidence
-line. The ambient echo never replaces the avatar, never enlarges it as a sharp
-hero, and is omitted when there is no registry art. The image is still an owner
+**Third-party identity (13 Oct, corrected).** The banner is its own rounded
+stage above the identity row, mirroring the reference-agent structure. A
+restrained, enlarged and blurred echo of the registry image lives only in that
+stage. The sharp avatar overlaps the stage's lower-left edge; the name and
+status sit beside it on wide screens and below it on phones. The on-chain token
+ID stays in a small evidence line below. The ambient echo never replaces the
+avatar, never enlarges it as a sharp hero, and is omitted when there is no
+registry art. The image is still an owner
 claim, not verification. Both top-level `image_url` and the off-chain
 metadata image use the same safe 8004scan proxy allowlist on cards, storefronts,
 hire sheets, job rooms and the home record. Missing or broken images show the
