@@ -1,38 +1,20 @@
 .masthead {
-  position: relative;
-  isolation: isolate;
   min-width: 0;
   margin-bottom: var(--s-5);
-}
-.stage {
-  position: relative;
-  height: clamp(170px, 22vw, 220px);
-  overflow: hidden;
+  padding: clamp(20px, 2.5vw, 30px);
   border: 1px solid var(--hair-2);
   border-radius: var(--r-3);
-  background: var(--ground-sunk);
+  background: var(--panel-fill);
+  box-shadow: var(--panel-sheen);
 }
-.masthead[data-has-art='false'] .stage { height: 130px; }
-/* Atmosphere, never the identity image. The owner art stays crisp below. */
-.ambient {
-  position: absolute;
-  inset: -20px 10px -20px auto;
-  width: min(55%, 340px);
-  background: var(--identity-art) center right / clamp(205px, 24vw, 270px) no-repeat;
-  filter: blur(10px) saturate(1.1) brightness(1.2);
-  opacity: .38;
-}
-:global([data-theme='day']) .ambient { filter: blur(10px) saturate(1.1); opacity: .3; }
-.identity { position: relative; display: flex; align-items: flex-end; gap: 22px; min-width: 0; margin-top: -46px; padding-left: clamp(4px, 2vw, 20px); }
-.copy { display: flex; flex-direction: column; gap: 12px; min-width: 0; padding-bottom: 4px; }
-.portrait { z-index: 1; flex: none; display: block; width: 104px; height: 104px; border-radius: 14px; box-shadow: 0 0 0 3px var(--canvas), 0 0 0 4px var(--hair-2); }
+.identity { display: flex; align-items: center; gap: 22px; min-width: 0; }
+.copy { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.portrait { flex: none; display: block; width: 104px; height: 104px; border-radius: 14px; box-shadow: 0 0 0 1px var(--hair-2); }
 .footline { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px 14px; margin-top: 18px; padding-top: 11px; border-top: 1px solid var(--hair); color: var(--ink-3); font-size: 11.5px; line-height: 1.45; }
 .footline strong { color: var(--ink-2); font-weight: 500; }
 @media (max-width: 720px) {
-  .stage { height: auto; aspect-ratio: 2.1 / 1; }
-  .masthead[data-has-art='false'] .stage { height: 96px; aspect-ratio: auto; }
-  .ambient { width: 65%; }
-  .identity { flex-direction: column; align-items: flex-start; gap: 14px; margin-top: -40px; padding-left: 4px; }
+  .masthead { padding: 18px; }
+  .identity { align-items: flex-start; gap: 14px; }
   .portrait { width: 76px; height: 76px; border-radius: 12px; }
   .portrait :global(.agent-avatar) { width: 76px !important; height: 76px !important; border-radius: 12px !important; }
   .footline { margin-top: 16px; }

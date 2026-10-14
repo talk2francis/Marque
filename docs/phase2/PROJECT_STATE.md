@@ -2,6 +2,19 @@
 
 Live record of Phase 2. Newest first inside each section. Times are UTC.
 
+## 14 October: third-party profiles, rating clarity, hire motion
+
+- Removed the third-party hero stage. Registry images now stay sharp as avatars
+  in a compact identity panel; agents without art no longer get a blank banner.
+  The six Marque reference-agent heroes and portraits were not changed.
+- Storefronts now explain that the primary paid-buyer rating is a subset of
+  broader ERC-8004 star ratings, and label the recent list as history rather
+  than another score. Registry ratings retain on-chain provenance without
+  implying that every rater completed a paid Marque hire.
+- Home's real-job carousel now has a directional handoff, short evidence-rail
+  sequence and visible autoplay progress. It still pauses for interaction,
+  respects reduced motion and contains only chain-indexed jobs.
+
 ## 13 October: corrected agent identity scope
 
 - Restored the reference-agent hero and portrait styling exactly to the

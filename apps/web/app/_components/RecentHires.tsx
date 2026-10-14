@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { ArrowLeft, ArrowRight, Check } from 'lucide-react'
 import { AgentAvatar } from './AgentAvatar'
 import { agentBrand } from '../../lib/agent-brand'
@@ -25,7 +25,11 @@ export function RecentHires({ hires }: { hires: RecentHire[] }) {
   const [reducedMotion, setReducedMotion] = useState(false)
   const [visible, setVisible] = useState(true)
   const [announce, setAnnounce] = useState(false)
+  const [phase, setPhase] = useState<'ready' | 'leave' | 'enter'>('ready')
+  const [direction, setDirection] = useState<'next' | 'previous'>('next')
   const touch = useRef<{ x: number; y: number } | null>(null)
+  const transitionTimer = useRef<number | null>(null)
+  const announceTimer = useRef<number | null>(null)
   useEffect(() => {
     const media = window.matchMedia('(prefers-reduced-motion: reduce)')
     const sync = () => setReducedMotion(media.matches)
@@ -38,16 +42,33 @@ export function RecentHires({ hires }: { hires: RecentHire[] }) {
     document.addEventListener('visibilitychange', sync)
     return () => document.removeEventListener('visibilitychange', sync)
   }, [])
+  const choose = useCallback((next: number, manual = true) => {
+    if (phase === 'leave' || hires.length < 2) return
+    const target = (next + hires.length) % hires.length
+    if (target === index) return
+    setDirection(next < index ? 'previous' : 'next')
+    if (manual) {
+      setAnnounce(true)
+      if (announceTimer.current !== null) window.clearTimeout(announceTimer.current)
+      announceTimer.current = window.setTimeout(() => setAnnounce(false), 1_000)
+    }
+    if (reducedMotion) { setIndex(target); return }
+    setPhase('leave')
+    transitionTimer.current = window.setTimeout(() => {
+      setIndex(target)
+      setPhase('enter')
+      transitionTimer.current = window.setTimeout(() => { setPhase('ready'); transitionTimer.current = null }, 620)
+    }, 220)
+  }, [hires.length, index, phase, reducedMotion])
   useEffect(() => {
-    if (hires.length < 2 || paused || reducedMotion || !visible) return
-    const timer = window.setTimeout(() => setIndex((current) => (current + 1) % hires.length), ADVANCE_MS)
+    if (hires.length < 2 || paused || reducedMotion || !visible || phase !== 'ready') return
+    const timer = window.setTimeout(() => choose(index + 1, false), ADVANCE_MS)
     return () => window.clearTimeout(timer)
-  }, [index, paused, reducedMotion, visible, hires.length])
-  const choose = (next: number) => {
-    setIndex((next + hires.length) % hires.length)
-    setAnnounce(true)
-    window.setTimeout(() => setAnnounce(false), 1_000)
-  }
+  }, [index, paused, reducedMotion, visible, hires.length, phase, choose])
+  useEffect(() => () => {
+    if (transitionTimer.current !== null) window.clearTimeout(transitionTimer.current)
+    if (announceTimer.current !== null) window.clearTimeout(announceTimer.current)
+  }, [])
   const h = hires[index]!
   const rail = [
     { key: 'quote', label: 'Quote signed by the agent', note: 'Free, before any wallet', tx: null as string | null, at: null as string | null, done: true },
@@ -57,7 +78,7 @@ export function RecentHires({ hires }: { hires: RecentHire[] }) {
     { key: 'settle', label: h.settledTx ? 'Settled to the agent' : 'Settles to the agent', note: h.settledTx ? 'Review window closed' : 'When the review window closes; the Job Room shows the exact time', tx: h.settledTx, at: null, done: Boolean(h.settledTx) },
   ]
   return (
-    <section className={styles.hireBand} id="latest" aria-labelledby="latest-h"
+    <section className={styles.hireBand} id="latest" aria-labelledby="latest-h" data-paused={paused || reducedMotion || !visible || phase !== 'ready' ? '' : undefined}
       onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)}
       onFocusCapture={() => setPaused(true)} onBlurCapture={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) setPaused(false) }}
       onTouchStart={(event) => { touch.current = { x: event.touches[0]!.clientX, y: event.touches[0]!.clientY } }}
@@ -77,7 +98,7 @@ export function RecentHires({ hires }: { hires: RecentHire[] }) {
           <button type="button" aria-label="Next hire" onClick={() => choose(index + 1)}><ArrowRight size={17} /></button>
         </div> : null}
       </div>
-      <div key={h.jobId} className={styles.hireInner} aria-live={announce ? 'polite' : 'off'} aria-atomic="true">
+      <div key={h.jobId} className={styles.hireInner} data-phase={phase} data-direction={direction} aria-live={announce ? 'polite' : 'off'} aria-atomic="true">
         <div className={styles.hireIntro}>
           <h2 id="latest-h">Real hires, <em>step by step.</em></h2>
           <p className={styles.hireLede}>Not a demo: paid Marque jobs read back from BNB Chain, including jobs still in their review window. Each completed step links to its transaction.</p>

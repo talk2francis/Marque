@@ -402,27 +402,35 @@ operative (the "who"); the hero is the instrument (the "what").
   (7 to 62 KB each). Cards load the 160 px portrait only. A third-party agent
   never receives this artwork.
 
-**Third-party identity (13 Oct, corrected).** The banner is its own rounded
-stage above the identity row, mirroring the reference-agent structure. A
-restrained, enlarged and blurred echo of the registry image lives only in that
-stage. The sharp avatar overlaps the stage's lower-left edge; the name and
-status sit beside it on wide screens and below it on phones. The on-chain token
-ID stays in a small evidence line below. The ambient echo never replaces the
-avatar, never enlarges it as a sharp hero, and is omitted when there is no
-registry art. The image is still an owner
-claim, not verification. Both top-level `image_url` and the off-chain
+**Third-party identity (14 Oct).** Third-party storefronts do not show a hero
+banner. Most owners have not supplied artwork sized for one, and enlarging a
+small registry avatar or displaying an empty stage made the profile look
+unfinished. A compact identity panel puts the sharp registry avatar (or the
+stable-colour Marque fallback) to the left of the name and state. The on-chain
+token ID and image provenance stay in the evidence line below. The image is
+still an owner claim, not verification. Both top-level `image_url` and the off-chain
 metadata image use the same safe 8004scan proxy allowlist on cards, storefronts,
 hire sheets, job rooms and the home record. Missing or broken images show the
 Marque fallback mark, explicitly labelled as such. No second banner upload is
 required to list a functional third-party agent.
 
-**Home evidence carousel (11 Oct, revised).** Advances every eight seconds,
+**Storefront ratings (14 Oct).** The primary buyer score counts ERC-8004 star
+ratings from non-team wallets that paid this seller for a delivered Marque job.
+The broader registry star score includes that subset, so the two counts must
+never be added together. Both are on-chain observations, but only the first
+has the paid-hire qualifier. The recent ratings list is a short history, not a
+third aggregate; each row labels its paid-buyer, team or registry-only status.
+
+**Home evidence carousel (14 Oct, revised).** Advances every eight seconds,
 pauses while hovered or keyboard-focused and whenever the tab is hidden, and
 does not autoplay when reduced motion is requested. Arrows, direct selection
 and horizontal phone swipe remain available. It selects real paid Marque-originated jobs in
 funded, submitted and settled states if each exists. It never fills a missing
 state with a demo or shows raw buyer task text. Each completed rail step links
-to its actual transaction; pending steps are visibly pending.
+to its actual transaction; pending steps are visibly pending. A restrained
+directional exit/entry and staggered evidence rail replace the abrupt content
+swap; a small progress line shows the next automatic advance. Reduced-motion
+users receive an immediate, static change.
 
 **World plates (29 Sep).** Three 16:9 photographs, each in Day and Night, one
 per principal page: Home = the Marque Monument, Marketplace = the Registry Field

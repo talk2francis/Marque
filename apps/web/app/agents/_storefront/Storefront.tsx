@@ -88,7 +88,7 @@ export function Storefront({ d }: { d: Data }) {
       </div>
       <dl className={styles.panelFacts}>
         <div><dt>Delivers in</dt><dd>{delivery ? <span title={`Median of ${t.delivery.samples} paid ${t.delivery.samples === 1 ? 'job' : 'jobs'}, from payment to delivery.`}>{delivery}</span> : <span className={styles.muted}>No paid jobs yet</span>}</dd></div>
-        <div><dt>Verified buyers</dt><dd><Stars value={t.verified.averageStars} count={t.verified.count} label="verified" /></dd></div>
+        <div><dt>Buyer rating</dt><dd><Stars value={t.verified.averageStars} count={t.verified.count} label="verified buyers" /></dd></div>
         <div><dt>Jobs delivered</dt><dd><span className="num">{t.jobs.delivered}</span> <ProvenanceChip provenance="ONCHAIN" /></dd></div>
       </dl>
       <div className={styles.panelActions}>
@@ -172,18 +172,24 @@ export function Storefront({ d }: { d: Data }) {
               ))}
             </dl>
             {t.jobs.fromTeam > 0 ? <p className={styles.muted}>{t.jobs.fromTeam} of the paid jobs came from wallets on Marque&apos;s published team list.</p> : null}
+            <div className={styles.ratingIntro}>
+              <h3>How to read the ratings</h3>
+              <p>The buyer score is the one to use when choosing an agent. It counts star ratings from non-team wallets that paid this seller for a delivered Marque job. The registry score includes those ratings <strong>and</strong> other ERC-8004 star ratings. Do not add the two counts together.</p>
+            </div>
             <div className={styles.ratings}>
               <div className={styles.ratingBox}>
-                <span className="t-label">Verified buyers</span>
-                <Stars value={t.verified.averageStars} count={t.verified.count} label="verified" />
-                <p>Wallets that paid this agent through a Marque hire that was delivered. Team wallets never count. <ProvenanceChip provenance="ONCHAIN" /></p>
+                <span className={styles.ratingKind}>Buyer score <span>Primary</span></span>
+                <Stars value={t.verified.averageStars} count={t.verified.count} label="verified buyers" />
+                <p>Paid, delivered Marque hires. Team wallets excluded. <ProvenanceChip provenance="ONCHAIN" /></p>
               </div>
               <div className={styles.ratingBox} data-weak>
-                <span className="t-label">All registry feedback</span>
-                <Stars value={t.allFeedback.averageStars} count={t.allFeedback.count} label="ratings" />
-                <p>Every ERC-8004 rating written for this identity. Anyone can write one, so it is never merged into the number beside it. <ProvenanceChip provenance="CLAIMED" /></p>
+                <span className={styles.ratingKind}>All registry star ratings <span>Broader context</span></span>
+                <Stars value={t.allFeedback.averageStars} count={t.allFeedback.count} label="registry ratings" />
+                <p>All starred ERC-8004 feedback for this identity, including the buyer ratings at left and ratings without a matched paid hire. <ProvenanceChip provenance="ONCHAIN" /></p>
               </div>
             </div>
+            <h3 className={styles.reviewHeading}>Recent on-chain ratings</h3>
+            <p className={styles.muted}>Up to eight recent star ratings for this ERC-8004 identity. This is a short history, not another score.</p>
             {d.reviews.length ? (
               <ul className={styles.reviews}>
                 {d.reviews.map((r) => (
@@ -191,7 +197,7 @@ export function Storefront({ d }: { d: Data }) {
                     <Stars value={r.stars} count={1} mine />
                     <span className={styles.revWho}>
                       <AddressChip value={r.client} chainId={56} />
-                      {r.verified ? <span className={styles.verified}>verified buyer</span> : r.team ? <span className={styles.teamTag}>team wallet</span> : null}
+                      {r.verified ? <span className={styles.verified}>Paid Marque buyer</span> : r.team ? <span className={styles.teamTag}>Team wallet</span> : <span className={styles.registryTag}>Registry feedback</span>}
                     </span>
                     {r.comment ? <p className={styles.revText}>{r.comment}</p> : null}
                     <span className={styles.revMeta}>

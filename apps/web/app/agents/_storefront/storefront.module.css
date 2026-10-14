@@ -34,16 +34,24 @@
 .counts div:first-child { border-left: 0; }
 .counts dt { font-size: var(--fs-label); letter-spacing: var(--tracking-eyebrow); text-transform: uppercase; color: var(--ink-3); font-weight: 500; }
 .counts dd { margin: 0; font-size: 24px; font-weight: 500; letter-spacing: -0.02em; color: var(--ink); }
-.ratings { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: var(--s-5); }
+.ratingIntro { margin-top: var(--s-5); padding: 16px 18px; border-left: 2px solid var(--moss); background: color-mix(in srgb, var(--moss) 6%, var(--panel)); }
+.ratingIntro h3 { margin: 0 0 5px; font-size: 15px; font-weight: 600; }
+.ratingIntro p { margin: 0; font-size: 13.5px; line-height: 1.55; color: var(--ink-2); }
+.ratingIntro strong { color: var(--ink); font-weight: 600; }
+.ratings { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; }
 .ratingBox { display: flex; flex-direction: column; gap: 8px; padding: 16px; border: 1px solid var(--hair); border-radius: var(--r-3); }
+.ratingKind { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; font-size: 14px; font-weight: 600; color: var(--ink); }
+.ratingKind span { font-size: 11px; font-weight: 500; white-space: nowrap; color: var(--ink-3); }
 .ratingBox p { margin: 0; font-size: 13px; line-height: 1.5; color: var(--ink-3); }
 .ratingBox[data-weak] { border-style: dashed; }
 .ratingBox[data-weak] :global(.stars) { opacity: 0.8; }
-.reviews { list-style: none; margin: var(--s-5) 0 0; padding: 0; display: flex; flex-direction: column; }
+.reviewHeading { margin: var(--s-5) 0 4px; font-size: 16px; font-weight: 600; }
+.reviews { list-style: none; margin: 12px 0 0; padding: 0; display: flex; flex-direction: column; }
 .reviews li { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; padding: 12px 0; border-top: 1px solid var(--hair); align-items: center; }
 .revWho { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .verified { font-size: 12px; color: var(--moss); }
 .teamTag { font-size: 11px; color: var(--ink-3); border: 1px dashed var(--hair-2); border-radius: var(--r-pill); padding: 1px 7px; }
+.registryTag { font-size: 11px; color: var(--ink-3); }
 .revText { grid-column: 1 / -1; margin: 0; font-size: 14px; color: var(--ink); overflow-wrap: anywhere; }
 .revMeta { grid-column: 1 / -1; font-size: 12.5px; color: var(--ink-3); }
 .revMeta a { color: var(--ink-2); }
