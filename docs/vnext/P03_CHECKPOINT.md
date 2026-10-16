@@ -4,7 +4,7 @@ Phase status: **AMBER**. Scoped source, candidate API, browser and regression ac
 
 ## Baseline, candidate and reuse
 
-Baseline P02 HEAD `4509846a2a0912c3a876b5b6176921598fe7a7e4`; branch `repair/vnext-v3-p03-20261016`; isolated worktree `/root/marque-vnext-p01`. Production source/release remains `97ef4c73ea3717d1a059b649a35e8124d93bdb7f`. Tested source SHA is bound by the documentation-only follow-up and closing report. No push.
+Baseline P02 HEAD `4509846a2a0912c3a876b5b6176921598fe7a7e4`; branch `repair/vnext-v3-p03-20261016`; isolated worktree `/root/marque-vnext-p01`. Production source/release remains `97ef4c73ea3717d1a059b649a35e8124d93bdb7f`. Tested source commit `f4d5d568e939a19b2666598c6ac58fc5c58110c3`. This documentation-only follow-up binds that identifier; final documentation HEAD is recorded in the closing report and private manifest. No push.
 
 Reused `/builders`, the owner projection, nonce/claim signatures, fresh owner publication, category declaration, discovery/conformance adapters, existing quote/intent/notify tables and indexed jobs/events. No new dashboard, claim framework, hosting product, migration, contract, dependency or SDK upgrade. Existing four categories, art, fonts, marketplace/hire flows, Caddy mirror and transport protection are preserved.
 
