@@ -1,6 +1,6 @@
 # P01 latest checkpoint, 16 October 2026
 
-Status AMBER. See [P01_CHECKPOINT](P01_CHECKPOINT.md) for the full acceptance record, metrics, source scope, failures and next approval. Local repair branch only; production application release remains 97ef4c7. Root session persistence and the reviewed shared-service restart policy are installed, without production service restarts. P01A/P02 not started; stop for owner review.
+Status AMBER. Tested application candidate `8ccdd9a2072daac0b22721c20c741c17c53cd453`. See [P01_CHECKPOINT](P01_CHECKPOINT.md) for the full acceptance record, metrics, source scope, failures and next approval. Local repair branch only; production application release remains 97ef4c7. Root session persistence and the reviewed shared-service restart policy are installed, without production service restarts. P01A/P02 not started; stop for owner review.
 
 # P00 checkpoint
 

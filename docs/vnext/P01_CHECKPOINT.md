@@ -4,7 +4,7 @@ Phase status: **AMBER, review checkpoint reached**. Source/operational work and 
 
 ## Scope and baseline
 
-Application baseline and unchanged production release: `97ef4c73ea3717d1a059b649a35e8124d93bdb7f`. Documentation baseline: `162e3185da432cb138846551325d7f94a0f88be8`. Candidate branch: `repair/vnext-v3-p01-20261016`, isolated worktree `/root/marque-vnext-p01`. Final candidate SHA is recorded in the delivery report and local git history; nothing is pushed.
+Application baseline and unchanged production release: `97ef4c73ea3717d1a059b649a35e8124d93bdb7f`. Documentation baseline: `162e3185da432cb138846551325d7f94a0f88be8`. Candidate branch: `repair/vnext-v3-p01-20261016`, isolated worktree `/root/marque-vnext-p01`. Tested application candidate: `8ccdd9a2072daac0b22721c20c741c17c53cd453`. A documentation-only follow-up binds this report to that commit; the delivery reports the final branch HEAD. Nothing is pushed.
 
 Reused: existing seller/quote tables, service identity filters, probe scheduler, first-party config, all four category readers and MCS engines, buyer-wallet calls, quest/state/ratings projections, native PostgreSQL, cache helper, themes/artwork, claim rails, Caddy router-state mirror and health transport tests. No new marketplace framework, escrow, signer, contract or authority model.
 
