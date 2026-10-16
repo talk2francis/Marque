@@ -79,7 +79,8 @@ export function Storefront({ d }: { d: Data }) {
             <span className={styles.priceSrc}>
               <span className={styles.liveDot} aria-hidden="true" data-live={hireable || undefined} />
               {hireable ? `Live quote ${quoteAge ?? ''}` : `Last quote ${quoteAge ?? ''}`}
-              <ProvenanceChip provenance="MEASURED" title="A quote this agent signed for Marque's price check. Hiring asks it for a fresh one on your task." />
+              {c.quoteExpiresAt ? `; acceptance ends ${c.quoteExpiresAt.replace('T', ' ').slice(0, 19)} UTC` : '; expiry unknown'}
+              <ProvenanceChip provenance="MEASURED" title="A stored price-check observation. Signature mode and expiry are separate evidence; hiring requests a new quote." />
             </span>
           </>
         ) : (
@@ -93,6 +94,7 @@ export function Storefront({ d }: { d: Data }) {
       </dl>
       <div className={styles.panelActions}>
         {hireable ? <a className="btn btn--primary btn--block btn--lg" href={hireHref}>{d.name.length <= 22 ? `Hire ${d.name}` : "Hire this agent"}</a> : null}
+        {!hireable && c?.serviceId && d.endpoint ? <a className="btn btn--primary btn--block btn--lg" href={hireHref}>Request a fresh quote</a> : null}
         {answersFree ? <a className={`btn btn--block ${hireable ? '' : 'btn--lg'}`} href={tryHref}>Try free</a> : null}
         {!hireable && !answersFree ? <p className={styles.muted}>This agent cannot be hired or tried right now. The record below says why.</p> : null}
       </div>
@@ -265,7 +267,7 @@ export function Storefront({ d }: { d: Data }) {
             <dl className={styles.facts}>
               <div><dt>Protocol</dt><dd>{c ? 'A2A for the task, BNB Chain ERC-8183 escrow for payment' : d.services.length ? d.services.map((x) => x.kind.toUpperCase()).join(', ') : 'No service declared'}</dd></div>
               {d.endpoint ? <div><dt>Endpoint</dt><dd className={styles.code}>{d.endpoint}</dd></div> : d.services[0] ? <div><dt>Endpoint</dt><dd className={styles.code}>{d.services[0].endpoint}</dd></div> : null}
-              <div><dt>Price</dt><dd>{c ? 'The agent signs a quote for your exact task, valid for up to 15 minutes. You pay exactly that amount, never more.' : 'It has not quoted through BNB Chain escrow.'}</dd></div>
+              <div><dt>Price</dt><dd>{c ? 'Request a quote for your task. The response shows its expiry and whether it is provider-signed or unsigned with identity checks. You approve exactly the displayed amount.' : 'It has not quoted through BNB Chain escrow.'}</dd></div>
               <div><dt>Review window</dt><dd>{d.disputeWindowSeconds ? `After delivery you have ${days(d.disputeWindowSeconds)} to report a problem before payment is released (read from BNB Chain's escrow policy).` : 'Read from BNB Chain\'s escrow policy when you hire.'}</dd></div>
               <div><dt>If it does not deliver</dt><dd>Each job carries a deadline set when you open it. If nothing is delivered by then, you reclaim the full payment from the escrow contract.</dd></div>
             </dl>

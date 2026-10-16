@@ -21,3 +21,13 @@
 - Build wrapper loads production secrets unconditionally. Candidate used sanitized snapshot-only environment and equivalent asset-copy steps; no deployment script change. Final incremental build verified final copy. Generated next-env reference restored.
 - First temporary Caddy launch created a new root autosave; it was retained privately and preview XDG state isolated before browser validation. Production runs under its separate caddy account/config/PID. No production service restart.
 - Stop: P01A quote/listing/metadata integrity work and outside-seller task-copy assumptions remain explicit next-phase prerequisites; no silent phase advancement, paid invocation or deployment.
+
+
+## P01A, 16 October 2026
+
+- Five-check automatic GET publication was removed from both callers. Existing authenticated POST now preserves chain-only testnet listing as owner data, with no invented registry/category row; public testnet storefronts remain unsupported and navigation uses builder checks.
+- Candidate-only builds were stopped/rebuilt after real expiry explanation and testnet-rail review findings. Build/type/public-source checks and final fingerprints pass. A concurrent generated-type check failure was resolved after build; no tsconfig or threshold relaxation.
+- Chromium full-page screenshots skipped offscreen content-visibility paint. Actual viewport scrolling captured all nine home sections in six contexts. Initial empty-state, free-tab and exact list-label assumptions were corrected; original failing reports remain private. Quote/expiry fixtures are visibly labelled and never counted as provider activity.
+- Stock audit retains 24/28 small-target heuristic advisory cases; no full accessibility certification. No global redesign or permissive test baseline change.
+- An existing ingestion worker exited/recovered under PM2 during observation. Other product/shared/user-manager PIDs stayed unchanged and health reads completed. Kernel OOM absent; PM2 SIGINT fallback and configured memory cap do not prove initiating cause. No speculative production fix is applied. Old 23 untracked status entries reconcile to 26 pre-existing media files.
+- P02 provider/buyer independence, consent and original artifact proof remain UNKNOWN. User has already approved P02; no extra phase permission is needed, but new paid mainnet and production release approvals remain separate.

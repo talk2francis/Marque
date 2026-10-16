@@ -22,6 +22,7 @@ interface IdentityView {
   classified: { category: string | null; confidence: number | null; rationale: string | null }
   endpoint: string | null
   listed: boolean
+  listingEvidence?: { ownerListed: boolean; qualityListed: boolean }
   availability?: {attempts:number; successes:number; scope:string}
 }
 
@@ -150,6 +151,17 @@ export function BuilderChecklist() {
     if (!r.ok) throw new Error(j.detail ?? 'The test could not run.')
     return j.error ? `${testFor.test}: no gradable answer (${String(j.error).slice(0, 140)}).` : `${testFor.test}: ${j.pass ? 'passed every field' : `answered; ${(j.diffs as Array<{ pass: boolean }>).filter((d) => !d.pass).length} fields off`}. Passing is not required.`
   })
+  const doPublish = () => act('publish', async () => {
+    if (!cur || !cur.category || !cur.endpoint) throw new Error('Choose a category and declared endpoint first.')
+    const token = await claimToken()
+    if (!token) return
+    const service = cur.identity.services.find(s => s.endpoint === cur.endpoint)
+    if (!service || !['a2a', 'mcp'].includes(service.kind)) throw new Error('Choose the declared A2A or MCP service in the claim form before publishing.')
+    const r = await fetch('/api/v1/builders/claim/publish', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ claimToken: token, category: cur.category, serviceKind: service.kind, endpoint: cur.endpoint }) })
+    const j = await r.json()
+    if (!r.ok) throw new Error(j.detail ?? 'The listing could not be published.')
+    return 'Owner-listed. Local quality checks, service Warrants and official BNB qualification remain separate.'
+  })
 
   if (!isConnected || !address) {
     return (
@@ -205,7 +217,7 @@ export function BuilderChecklist() {
               <h2 id="bc-title" className={styles.cardTitle}>{cur.identity.name ?? `Identity #${cur.identity.tokenId}`}</h2>
               <p className={styles.idMeta}>ERC-8004 #{cur.identity.tokenId} · {NET[cur.identity.chainId]} · {cur.verdict.passed} of 5 checks pass</p>
             </div>
-            {cur.listed ? <span className={styles.listed}><Check aria-hidden="true" />Listed on Marque</span> : null}
+            {cur.listed ? <span className={styles.listed}><Check aria-hidden="true" />{cur.listingEvidence?.ownerListed ? 'Owner-listed' : 'Published record; recheck proof'}</span> : null}
           </header>
 
           <p className={styles.muted}>Availability evidence, last 24 hours: {cur.availability ? `${cur.availability.successes} successful calls in ${cur.availability.attempts} builder probes at the current endpoint.` : 'No recent measurement available.'} These are irregular samples, not a continuous uptime score. Keep the service running after listing.</p>
@@ -262,9 +274,11 @@ export function BuilderChecklist() {
 
           {cur.verdict.qualityListing ? (
             <div className={styles.done}>
-              <p className={styles.doneTitle}><Check aria-hidden="true" />Listed on Marque</p>
-              <p className={styles.muted}>All five checks pass. Marque&apos;s local fifth step reads this listing from its records{cur.identity.chainId === 97 ? '; testnet agents are listed for the quest only, the marketplace shows mainnet supply' : ''}.</p>
+              <p className={styles.doneTitle}><Check aria-hidden="true" />{cur.listingEvidence?.qualityListed ? 'Quality-listed; five local checks pass' : 'Five local checks pass; publish current details'}</p>
+              <p className={styles.muted}>Reading this checklist does not publish. A Warrant requires a separate passing service test; hireability needs a current quote. BNB determines official qualification{cur.identity.chainId === 97 ? '; testnet listings appear in builder checks, and the public marketplace shows mainnet supply' : ''}.</p>
               <div className={styles.actions}>
+                {!cur.listingEvidence?.qualityListed && cur.identity.owner === address.toLowerCase() ? <Button size="sm" variant="primary" loading={busy === 'publish'} onClick={doPublish}>Publish my listing</Button> : null}
+                <ButtonLink href="/builders/claim" size="sm">Edit listing details</ButtonLink>
                 <ButtonLink href="/quest" size="sm" variant="primary">See your quest</ButtonLink>
                 {cur.identity.chainId === 56 ? <ButtonLink href={`/agents/56/${cur.identity.tokenId}`} size="sm">Open its storefront</ButtonLink> : null}
               </div>

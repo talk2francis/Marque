@@ -1,3 +1,5 @@
+'use client'
+import { useEffect, useState } from 'react'
 import { Check } from 'lucide-react'
 import { AgentAvatar } from '../AgentAvatar'
 import { Badge } from '../ui'
@@ -31,7 +33,19 @@ export function AgentCard({ a, compare, base = '', variant = 'default' }: {
 }) {
   const feature = variant === 'feature'
   const profile = profileHref(a)
-  const hireable = isHireable(a)
+  const [quoteExpired, setQuoteExpired] = useState(false)
+  const expiry = a.commerce.quoteExpiresAt
+  useEffect(() => {
+    const until = expiry ? Date.parse(expiry) : NaN
+    const remaining = until - Date.now()
+    setQuoteExpired(!Number.isFinite(remaining) || remaining <= 0)
+    if (remaining > 0) {
+      const timer = setTimeout(() => setQuoteExpired(true), Math.min(remaining, 2_147_483_647))
+      return () => clearTimeout(timer)
+    }
+  }, [expiry])
+  const hireable = isHireable(a) && !quoteExpired
+  const price = quoteExpired && a.priceProvenance === 'MEASURED' ? null : a.price
   const free = answersFree(a)
   const classified = a.category && a.category !== 'unclassified'
   const cat = classified ? CATEGORY_LABEL[a.category!] ?? a.category! : 'Other'
@@ -88,9 +102,9 @@ export function AgentCard({ a, compare, base = '', variant = 'default' }: {
       <dl className={styles.stats}>
         <div>
           <dt>Price</dt>
-          <dd className={a.priceProvenance === 'MEASURED' ? styles.live : styles.claimed}>{a.price ?? 'None'}</dd>
+          <dd className={a.priceProvenance === 'MEASURED' ? styles.live : styles.claimed}>{price ?? 'Request a quote'}</dd>
           {/* Relative time is computed at render: server and browser clocks differ by the page's age. */}
-          <dd className={styles.src} suppressHydrationWarning>{a.price ? (a.priceProvenance === 'MEASURED' ? (priced ? `live quote, ${priced}` : 'live quote') : 'declared') : 'not published'}</dd>
+          <dd className={styles.src} suppressHydrationWarning>{price ? (a.priceProvenance === 'MEASURED' ? (priced ? `live quote, ${priced}` : 'live quote') : 'declared') : quoteExpired ? 'No current price' : 'not published'}</dd>
         </div>
         <div>
           <dt>Delivers</dt>
@@ -119,7 +133,7 @@ export function AgentCard({ a, compare, base = '', variant = 'default' }: {
             : profile ? <a className="btn btn--sm" href={profile} title={hireBlocked(a)}>View record</a> : null}
         </span>
       </footer>
-      {!hireable ? <p className={styles.why}>{hireBlocked(a)}.</p> : null}
+      {!hireable ? <p className={styles.why}>{quoteExpired && isHireable(a) ? 'The stored quote expired. Open the record to request a fresh one.' : hireBlocked(a)}.</p> : null}
     </article>
   )
 }

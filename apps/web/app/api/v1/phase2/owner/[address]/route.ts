@@ -1,7 +1,7 @@
 import { sql } from 'drizzle-orm'
 import { db } from '@marque/db'
 import { served, bad, ADDRESS } from '../../../../../../lib/phase2-api'
-import { builderIdentities, builderView, listIfQualified } from '../../../../../../lib/builder'
+import { builderIdentities, builderView } from '../../../../../../lib/builder'
 
 export const dynamic = 'force-dynamic'
 
@@ -19,19 +19,21 @@ export async function GET(_req: Request, { params }: { params: Promise<{ address
     const ids = await builderIdentities(address)
     const agents = await Promise.all(ids.slice(0, 8).map(async (t) => {
       const v = await builderView(address, t.chainId, t.tokenId)
-      const listed = await listIfQualified(v)
       const [jobs] = rowsOf(await db().execute(sql`
-        select count(*)::int as n, count(*) filter (where j.funded_raw is not null)::int as paid
-        from commerce_job j join agent a on lower(a.agent_wallet) = j.provider and a.id = ${v.identity.agentKey}`).catch(() => []))
+        select count(*)::int as n, count(*) filter (where j.funded_raw is not null)::int as paid,
+          count(*) filter (where j.state = 'PAID')::int as released
+        from commerce_job j join agent a on lower(a.agent_wallet) = j.provider and a.chain_id = j.chain_id and a.id = ${v.identity.agentKey}`).catch(() => []))
       return {
         agentKey: v.identity.agentKey, chainId: v.identity.chainId, agentId: v.identity.tokenId, name: v.identity.name, category: v.category,
-        listedOnMarque: listed, qualityListing: v.verdict.qualityListing,
+        listedOnMarque: v.listed, qualityListing: v.verdict.qualityListing,
         availability: v.availability,
+        listingEvidence: v.listingEvidence,
         quality: {
           listing: v.verdict.qualityListing, passed: v.verdict.passed,
           checks: v.verdict.checks.map((c) => ({ id: c.id, label: c.label, pass: c.state === 'pass', state: c.state, reason: c.reason, fix: c.fix, note: c.note ?? null })),
         },
         jobsReceived: Number(jobs?.['n'] ?? 0), jobsPaid: Number(jobs?.['paid'] ?? 0),
+        jobEvidence: { version: 1, available: jobs !== undefined, chainId: v.identity.chainId, observedAt: new Date().toISOString(), scope: 'All indexed jobs for this registered provider wallet; not proof of marketplace origin or independent buyers.', funded: jobs ? Number(jobs['paid']) : null, paymentReleased: jobs ? Number(jobs['released']) : null, legacyJobsPaidMeans: 'funded' },
       }
     }))
     return { owner: address.toLowerCase(), qualityListing: agents.some((a) => a.qualityListing), agents }

@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { isSupportedChain, type ChainId } from '@marque/commerce'
-import { builderIdentities, builderView, listIfQualified } from '../../../../../lib/builder'
+import { builderIdentities, builderView } from '../../../../../lib/builder'
 
 export const dynamic = 'force-dynamic'
 
@@ -11,7 +11,7 @@ const ADDRESS = /^0x[0-9a-fA-F]{40}$/
  *
  * The builder checklist (DESIGN-SYSTEM.md 8.8) for one identity, or for every identity
  * the wallet owns or has proved. Each check says pass, fail with the exact fix, or not
- * yet. When all five pass the identity is listed on Marque (SPEC-TRACKING 10).
+ * yet. These checks never publish. The owner publishes through the authenticated claim rail.
  */
 export async function GET(req: NextRequest) {
   const p = req.nextUrl.searchParams
@@ -26,8 +26,7 @@ export async function GET(req: NextRequest) {
     if (!targets) return NextResponse.json({ error: 'bad_request', detail: 'Name the network (56 or 97) and a token id.' }, { status: 400 })
     const views = await Promise.all(targets.slice(0, 8).map(async (t) => {
       const v = await builderView(wallet, t.chainId, t.tokenId)
-      const listed = await listIfQualified(v)
-      return { ...v, listed }
+      return v
     }))
     return NextResponse.json({ wallet: wallet.toLowerCase(), identities: views }, { headers: { 'Cache-Control': 'no-store' } })
   } catch (err) {

@@ -24,6 +24,7 @@ import {
   type MarketState,
 } from './market-url'
 import styles from './register.module.css'
+import { expireMarketQuote } from '../../lib/quote-expiry'
 
 /**
  * The marketplace.
@@ -39,6 +40,15 @@ export function Marketplace({ category: fixedCategory, initial }: { category?: s
   // The server rendered the default view's first page: it is on screen at first paint,
   // and the first fetch is skipped when the URL asks for exactly that view.
   const [rows, setRows] = useState<MarketRow[]>(initial?.agents ?? [])
+  useEffect(() => {
+    const current = rows.map(row => expireMarketQuote(row))
+    if (current.some((row, i) => row !== rows[i])) { setRows(current); return }
+    const deadlines = rows.filter(row => ['hireable', 'settleable'].includes(row.commerce.state))
+      .map(row => Date.parse(row.commerce.quoteExpiresAt ?? '')).filter(Number.isFinite)
+    if (!deadlines.length) return
+    const timer = setTimeout(() => setRows(previous => previous.map(row => expireMarketQuote(row))), Math.min(2_147_483_647, Math.max(0, Math.min(...deadlines) - Date.now()) + 5))
+    return () => clearTimeout(timer)
+  }, [rows])
   const [loading, setLoading] = useState(!initial)
   const [error, setError] = useState<string | null>(null)
   const [generatedAt, setGeneratedAt] = useState<string | null>(initial?.generatedAt ?? null)

@@ -95,7 +95,7 @@ export function Gallery() {
         </div>
       </Story>
 
-      <Story id="price" title="PriceTag" note="A signed quote counts down (MEASURED); a declared price says so (CLAIMED)">
+      <Story id="price" title="PriceTag" note="A checked quote counts down (MEASURED); a declared price says so (CLAIMED)">
         <div className={styles.inline} style={{ gap: 48 }}>
           <PriceTag amount="0.05" token="U" source={{ kind: 'quote', expiresAt: Date.now() + 12 * 60_000 + 41_000 }} />
           <PriceTag amount="0.10" token="USDT" source={{ kind: 'declared' }} />
@@ -222,7 +222,7 @@ export function Gallery() {
               { id: 'registry', label: 'Registry', content: <p className={styles.note}>Every registered agent, with its honest reason when it cannot be hired.</p> },
             ]} />
             <p className={styles.note} style={{ marginTop: 16 }}>
-              Hover or focus: <Tooltip content="A signed quote from the agent, valid until the time shown."><button type="button" className="icon-btn icon-btn--bare" aria-label="What is a live quote?"><Info /></button></Tooltip>
+              Hover or focus: <Tooltip content="An observed quote, valid until the time shown. Signature mode is separate evidence."><button type="button" className="icon-btn icon-btn--bare" aria-label="What is a live quote?"><Info /></button></Tooltip>
             </p>
           </div>
         </div>

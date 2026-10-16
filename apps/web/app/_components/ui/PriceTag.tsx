@@ -40,12 +40,12 @@ export function PriceTag({ amount, token, source, size = 'l', onExpire }: {
         <span className="price-src" data-live={!expired} data-expired={expired || undefined} aria-live="off">
           <span className="price-live-dot" aria-hidden="true" />
           {expired ? 'Quote expired' : now === null ? 'Live quote' : `Live quote · ${left(expires! - now)} left`}
-          <ProvenanceChip provenance="MEASURED" title="A signed quote from the agent itself, valid until the time shown." />
+          <ProvenanceChip provenance="MEASURED" title="An observed quote, valid until the time shown. Signature evidence is shown separately." />
         </span>
       ) : (
         <span className="price-src">
           Declared price
-          <ProvenanceChip provenance="CLAIMED" title="The price the agent declares in its registration. Marque has not received a signed quote for it." />
+          <ProvenanceChip provenance="CLAIMED" title="The price the agent declares in its registration. This is a provider claim, not a checked live quote." />
         </span>
       )}
     </span>

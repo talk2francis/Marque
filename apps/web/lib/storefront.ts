@@ -57,6 +57,8 @@ export interface Storefront {
 export async function storefront(agentId: string): Promise<Storefront | null> {
   try {
     const p = await cachedProjection(`storefront:v2:${agentId}`, () => computeStorefront(agentId), { freshMs: 30_000, timeoutMs: 12_000, staleWhileRevalidate: true })
+    // A projection can outlive the price it contains, including on refresh failure.
+    if (p.value?.commerce && (!p.value.commerce.quoteExpiresAt || Date.parse(p.value.commerce.quoteExpiresAt) <= Date.now())) return { ...p.value, commerce: { ...p.value.commerce, state: 'quoteable', failure: 'expired', priceLabel: null } }
     return p.value
   } catch {
     return computeStorefront(agentId)

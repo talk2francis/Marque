@@ -39,3 +39,23 @@ it('keeps the global discovery path separate from exact-agent transaction budget
   expect(query.sql).not.toContain('where ps.agent_id =')
   expect(query.sql).not.toContain('from agent_category\n      where agent_id =')
 })
+
+describe('stored quote truth', () => {
+  it.each([
+    { signed: false, quote_expires_at: new Date(Date.now() - 1) },
+    { signed: false, quote_expires_at: new Date(Date.now() + 60_000), provider_expiry: Math.floor(Date.now() / 1000) - 1 },
+    { signed: null, quote_expires_at: new Date(Date.now() + 60_000) },
+  ])('does not advertise expired, renewed or unknown-signature prices as hireable', async extra => {
+    execute.mockImplementation(async q => dialect.sqlToQuery(q).sql.includes('from commerce_quote') ? [{ service_id: 43279, agent_id: agentId, created_at: new Date(), ok: true, ...extra }] : [])
+    const state = (await commercialStates(43279)).get(43279)!
+    expect(['hireable', 'settleable']).not.toContain(state.state)
+    if (extra.signed === null) expect(state.signatureEvidence).toBe('unknown')
+  })
+  it.each([true, false])('preserves actual signature mode %s for an unexpired quote', async signed => {
+    execute.mockImplementation(async q => dialect.sqlToQuery(q).sql.includes('from commerce_quote') ? [{ service_id: 43279, agent_id: agentId, created_at: new Date(), ok: true, signed, quote_expires_at: new Date(Date.now() + 60_000) }] : [])
+    const state = (await commercialStates(43279)).get(43279)!
+    expect(state.state).toBe('hireable')
+    expect(state.signed).toBe(signed)
+    expect(state.signatureEvidence).toBe(signed ? 'provider_signed' : 'identity_matched_unsigned')
+  })
+})

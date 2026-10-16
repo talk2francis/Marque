@@ -5,6 +5,8 @@ import { commercialStates, formatAmount, type CommercialState } from '@marque/co
 import { agentState, TASK_FOR_CATEGORY } from './agent-state'
 import { agentTracks, EMPTY_TRACK, type AgentTrack } from './agent-track'
 import { selectedAgentRows } from './compare-selection'
+import { expireMarketQuote } from './quote-expiry'
+export { expireMarketQuote } from './quote-expiry'
 
 /**
  * The Marketplace view of the Register (P10.5B).
@@ -68,6 +70,9 @@ export interface MarketRow {
     token: { address: string; symbol: string; decimals: number } | null
     signedQuote: boolean | null
     quotedAt: string | null
+    quoteExpiresAt?: string | null
+    sourceClaimVersion?: 1
+    signatureEvidence?: 'provider_signed' | 'identity_matched_unsigned' | 'unknown'
     deliveredJobs: number
     failure: string | null
   }
@@ -384,6 +389,8 @@ function priceAndCommerce(c: ServiceCommerceRow | undefined, live: boolean, decl
       token: hire ? c.token : null,
       signedQuote: c?.signed ?? null,
       quotedAt: c?.quotedAt ?? null,
+      quoteExpiresAt: c?.quoteExpiresAt ?? null, sourceClaimVersion: 1,
+      signatureEvidence: c?.signatureEvidence ?? 'unknown',
       deliveredJobs: c?.deliveredJobs ?? 0,
       failure: c?.failure ?? null,
     },
@@ -441,7 +448,7 @@ function otherLast(rows: MarketRow[]): MarketRow[] {
 
 export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: MarketRow[]; generatedAt: string; total: number; offset: number; hasMore: boolean }> {
   // Clone: the base is memoised and the sort below is in place.
-  let all = [...(await marketplaceBase())]
+  let all = (await marketplaceBase()).map(expireMarketQuote)
   if (q.agentIds) all = selectedAgentRows(all, q.agentIds)
 
   // Filters (TS side — the qualifying set is small).

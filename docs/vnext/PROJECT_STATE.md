@@ -1,3 +1,7 @@
+# P01A checkpoint, 16 October 2026
+
+Quote/listing/claim repair acceptance passes on the isolated feature branch. See [P01A checkpoint](P01A_CHECKPOINT.md) and the versioned integrity contract. No push, production deployment or chain write. P02 explicitly approved by the owner, begins after local commit/announcement; paid mainnet and production release gates remain. Existing recovered ingestion-worker exit has unknown initiating cause; web/Kerb/shared services remain healthy. Historical P00/P01 entries below are retained.
+
 # P01 latest checkpoint, 16 October 2026
 
 Status AMBER. Tested application candidate `8ccdd9a2072daac0b22721c20c741c17c53cd453`. See [P01_CHECKPOINT](P01_CHECKPOINT.md) for the full acceptance record, metrics, source scope, failures and next approval. Local repair branch only; production application release remains 97ef4c7. Root session persistence and the reviewed shared-service restart policy are installed, without production service restarts. P01A/P02 not started; stop for owner review.

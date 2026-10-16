@@ -35,6 +35,8 @@ export const NegotiationSchema = z.object({
   provider_sig: z.string().regex(/^0x[0-9a-fA-F]+$/).optional(),
   chain_id: z.number().int().positive().optional(),
   verifying_contract: z.string().regex(/^0x[0-9a-fA-F]{40}$/).optional(),
+  quote_expires_at: z.number().int().positive().optional(),
+  negotiated_at: z.number().int().positive().optional(),
 }).passthrough()
 export type Negotiation = z.infer<typeof NegotiationSchema>
 
@@ -74,11 +76,15 @@ export type QuoteFailure =
   | 'no_price'
   | 'expired'
   | 'provider_mismatch'
+  | 'task_mismatch'
 
 export interface VerifiedQuote {
   ok: true
   /** True for a provider-signed NegotiationResult; false for a plain quote whose provider is the registered wallet. */
   signed: boolean
+  signatureEvidence: 'provider_signed' | 'identity_matched_unsigned'
+  sourceClaimVersion: 1
+  expirySource: 'provider_signed' | 'provider_capped' | 'server_assigned'
   /** Present when signed. */
   negotiation: Negotiation | null
   /** Present when unsigned. */
@@ -154,6 +160,8 @@ export interface QuoteVerifyContext {
   agentOwner?: string | null
   /** Seconds since epoch; injectable for tests. */
   now?: number
+  /** Only signed negotiations can prove the task was accepted cryptographically. */
+  expectedTask?: string
 }
 
 /** Verify a parsed negotiation against the protocol and the agent's identity. Pure except for ECDSA recovery. */
@@ -174,8 +182,15 @@ export async function verifyNegotiation(neg: Negotiation, ctx: QuoteVerifyContex
   const price = terms?.price ? BigInt(terms.price) : 0n
   if (price <= 0n) return fail('no_price', 'quote has no positive price', { chainId })
   const now = ctx.now ?? Math.floor(Date.now() / 1000)
-  const expiresAt = neg.response.quote_expires_at ?? 0
+  // Use the same authoritative fields as the SDK's signed description. Contradictory
+  // duplicate fields are rejected rather than verifying one expiry and buying another.
+  if (neg.quote_expires_at !== undefined && neg.response.quote_expires_at !== undefined && neg.quote_expires_at !== neg.response.quote_expires_at) return fail('malformed', 'conflicting quote expiry fields', { chainId })
+  if (neg.negotiated_at !== undefined && neg.response.negotiated_at !== undefined && neg.negotiated_at !== neg.response.negotiated_at) return fail('malformed', 'conflicting negotiation timestamps', { chainId })
+  const expiresAt = neg.quote_expires_at ?? neg.response.quote_expires_at ?? 0
   if (!expiresAt || expiresAt <= now) return fail('expired', `quote expired at ${expiresAt}`, { chainId })
+  const negotiatedAt = neg.negotiated_at ?? neg.response.negotiated_at
+  if (!negotiatedAt || negotiatedAt > now + 30 || expiresAt <= negotiatedAt || expiresAt - negotiatedAt > UNSIGNED_QUOTE_TTL_S) return fail('malformed', 'signed lifetime must be explicit and at most 900 seconds', { chainId })
+  if (ctx.expectedTask !== undefined && neg.request['task_description'] !== ctx.expectedTask) return fail('task_mismatch', 'signed quote is for a different task', { chainId })
 
   // The seller recomputes this hash from the description we put on chain; if it does not
   // match the content now, the seller would refuse the funded job.
@@ -197,6 +212,7 @@ export async function verifyNegotiation(neg: Negotiation, ctx: QuoteVerifyContex
   return {
     ok: true,
     signed: true,
+    signatureEvidence: 'provider_signed', sourceClaimVersion: 1, expirySource: 'provider_signed',
     negotiation: neg,
     simple: null,
     chainId,
@@ -210,7 +226,7 @@ export async function verifyNegotiation(neg: Negotiation, ctx: QuoteVerifyContex
   }
 }
 
-/** Unsigned quotes live 15 minutes from when we received them (the SDK's cap for signed quotes). */
+/** Maximum local acceptance lifetime; never renew an explicit provider expiry. */
 export const UNSIGNED_QUOTE_TTL_S = 900
 
 /**
@@ -237,10 +253,13 @@ export function verifySimpleQuote(q: SimpleQuote, ctx: QuoteVerifyContext, laten
     return fail('provider_mismatch', `quote names provider ${provider}, which is not this agent's registered wallet`, { chainId, provider })
   }
   const now = ctx.now ?? Math.floor(Date.now() / 1000)
-  const expiresAt = q.quote_expires_at && q.quote_expires_at > now ? q.quote_expires_at : now + UNSIGNED_QUOTE_TTL_S
+  if (q.quote_expires_at !== undefined && q.quote_expires_at <= now) return fail('expired', `quote expired at ${q.quote_expires_at}`, { chainId })
+  const expiresAt = Math.min(q.quote_expires_at ?? now + UNSIGNED_QUOTE_TTL_S, now + UNSIGNED_QUOTE_TTL_S)
   return {
     ok: true,
     signed: false,
+    signatureEvidence: 'identity_matched_unsigned', sourceClaimVersion: 1,
+    expirySource: q.quote_expires_at === undefined ? 'server_assigned' : 'provider_capped',
     negotiation: null,
     simple: q,
     chainId,
@@ -314,7 +333,7 @@ export async function requestQuote(endpoint: string, task: NegotiateTask, ctx: Q
   if (refusal !== null) return { ok: false, reason: 'declined', detail: refusal.slice(0, 300), latencyMs }
   const parsed = NegotiationSchema.safeParse(neg)
   if (!parsed.success) return { ok: false, reason: 'malformed', detail: parsed.error.issues.slice(0, 3).map((i) => `${i.path.join('.')}: ${i.message}`).join('; '), latencyMs }
-  return verifyNegotiation(parsed.data, ctx, latencyMs)
+  return verifyNegotiation(parsed.data, { ...ctx, expectedTask: task.task_description }, latencyMs)
 }
 
 /** The seller's stated reason when a negotiation says accepted: false, else null. */

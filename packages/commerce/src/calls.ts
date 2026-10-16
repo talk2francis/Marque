@@ -43,7 +43,7 @@ export function createJobCall(t: HireTerms): Call {
   const n = network(t.chainId)
   const base = { step: 'createJob' as const, chainId: t.chainId, to: n.commerce, abi: agenticCommerceAbi as unknown as Abi,
     label: `Open a job for ${t.agentName}`,
-    detail: `Records the job and ${t.agentName}'s signed price on BNB Chain's ERC-8183 escrow contract. No money moves yet.` }
+    detail: `Records the job and ${t.agentName}'s quoted price on BNB Chain's ERC-8183 escrow contract. No money moves yet.` }
   // The kernel's default token needs no binding; any other catalog token is bound to the job.
   return t.token.isDefault
     ? { ...base, functionName: 'createJob', args: [t.provider, n.router, t.expiredAt, t.description, n.router] }

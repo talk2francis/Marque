@@ -14,7 +14,7 @@ const Body = z.object({
 })
 
 /**
- * POST /api/v1/hire/quote: ask this exact agent for a signed price on the buyer's task.
+ * POST /api/v1/hire/quote: ask this exact agent for a price on the buyer's task, with explicit signature evidence.
  * Verified server side (signer or provider = the agent's registered wallet, chain,
  * escrow contract, token). Free: a quote binds nobody until the buyer's wallet opens a job.
  */

@@ -55,7 +55,7 @@ export default async function Home() {
     passFail().catch(() => ({ pass: null, fail: null })),
     ledgerHeadline().catch(() => null),
   ])
-  const [tiles, line] = await Promise.all([categoryTiles(ready).catch(() => null), funnelLine(ready).catch(() => null)])
+  const [tiles, line] = await Promise.all([categoryTiles(ready).catch(() => null), funnelLine().catch(() => null)])
 
   return (
     <>
@@ -91,8 +91,8 @@ export default async function Home() {
           </div>
 
           {line ? (
-            <dl className={styles.callouts} aria-label="The market right now">
-              <div><dt>Hireable now</dt><dd><b className="num">{line.hireable}</b> with a live quote</dd></div>
+            <dl className={styles.callouts} aria-label={`Quote snapshot at ${line.measuredAt}`}>
+              <div><dt>Quote snapshot</dt><dd><b className="num">{line.hireable}</b> listings at {line.measuredAt.slice(11, 16)} UTC</dd></div>
               {line.warranted !== null ? <div><dt>Warranted</dt><dd><b className="num">{line.warranted}</b> passed the published test</dd></div> : null}
             </dl>
           ) : null}
@@ -113,7 +113,7 @@ export default async function Home() {
             <dl className={styles.kpis}>
               <div><dt>Registered on BNB Chain</dt><dd className={styles.kpiNum}>{fmt(line.registered)}</dd><dd className={styles.kpiNote}>ERC-8004 identities Marque has indexed. Registration says who, never how good.</dd></div>
               {line.answering !== null ? <div><dt>Answering a live call</dt><dd className={styles.kpiNum}>{fmt(line.answering)}</dd><dd className={styles.kpiNote}>Endpoints that answered Marque&apos;s own probe, timestamped.</dd></div> : null}
-              <div><dt>Hireable right now</dt><dd className={styles.kpiNum}>{line.hireable}</dd><dd className={styles.kpiNote}>Signed a live quote payable into BNB Chain&apos;s escrow.</dd></div>
+              <div><dt>Valid quote listings at snapshot</dt><dd className={styles.kpiNum}>{line.hireable}</dd><dd className={styles.kpiNote}>Checked at {line.measuredAt.replace('T', ' ').slice(0, 19)} UTC. Signature modes differ; hiring requests a fresh quote.</dd></div>
               {line.warranted !== null ? <div><dt>Warranted</dt><dd className={styles.kpiNum}>{line.warranted}</dd><dd className={styles.kpiNote}>Passed a published test with one right answer. <a href="/standard">The Standard</a></dd></div> : null}
             </dl>
             <p className={styles.kpiFoot}><ProvenanceChip provenance="MEASURED" /> Counted from Marque&apos;s index, not quoted from a provider. <a href="/why">How we count</a></p>
@@ -130,7 +130,7 @@ export default async function Home() {
           ) : (
             <p className={styles.empty}>Live category counts are unavailable right now. The <a href="/register">marketplace</a> lists every agent with its state.</p>
           )}
-          {tiles ? <p className={styles.kpiFoot}>Operator counts group recorded owner addresses, with each unknown owner counted per identity. Separate addresses do not prove independent people or funding.</p> : null}
+          {tiles ? <p className={styles.kpiFoot}>Quote counts and prices are dated snapshots; request a fresh quote before hiring. Operator counts group recorded owner addresses, with each unknown owner counted per identity. Separate addresses do not prove independent people or funding.</p> : null}
         </section>
 
         {/* ---- How a hire is made: the feature band, every layer from one real job ---- */}
@@ -148,7 +148,7 @@ export default async function Home() {
               <a className={`btn ${styles.bandBtn}`} href="/docs#hiring">Read the hire guide</a>
             </div>
             <ol className={styles.layers}>
-              <Layer k="Quote" v="The agent signs a price for your exact task. Free, before any wallet, valid for 15 minutes." />
+              <Layer k="Quote" v="Request a price before connecting a wallet. See its expiry and whether the provider signed it or only its identity was checked." />
               <Layer k="Escrow" v={<>Your wallet opens the job and pays exactly that into BNB Chain&apos;s ERC-8183 escrow. Never an open-ended approval.</>} />
               <Layer k="Delivery" v="The agent posts its answer on chain with a hash of the file, so anyone can check the file is the one delivered." />
               <Layer k="Rating" v="You rate it on the ERC-8004 registry, tied to the job. Only paying wallets count as verified buyers." />
@@ -160,8 +160,8 @@ export default async function Home() {
         {/* ---- Ready to hire now ---- */}
         <section className={styles.section} aria-labelledby="ready" data-reveal>
           <Head
-            label="Ready to hire now"
-            note={ready.length ? `${ready.length} hireable with a live quote` : undefined}
+            label="Request a fresh quote"
+            note={line ? `Quote snapshot ${line.measuredAt.replace('T', ' ').slice(0, 19)} UTC` : undefined}
             id="ready"
             title="Hire in under a minute."
             action={<a className={styles.more} href="/register">See all in the marketplace <ArrowRight aria-hidden="true" /></a>}
@@ -171,7 +171,7 @@ export default async function Home() {
               {picks.map((a) => <AgentCard key={a.agentId} a={a} base="/" variant="feature" />)}
             </div>
           ) : (
-            <p className={styles.empty}>No agent has a live quote in the last two hours. That is the measured state, not a loading screen; the <a href="/register?tab=free">free tab</a> lists agents you can still try.</p>
+            <p className={styles.empty}>No unexpired accepted quote was available in this snapshot. Open an agent&apos;s storefront to request a new quote, or browse the <a href="/register?tab=free">free tab</a>.</p>
           )}
         </section>
 
@@ -283,7 +283,7 @@ function CategoryTileView({ t, i }: { t: CategoryTile; i: number }) {
       <span className={styles.tileJob}>{j.job}</span>
       <span className={styles.tileMeasure}>
         <MeasureRule
-          label={`${j.name}: ${t.hireable} hireable now, ${MARKET} makes a market`}
+          label={`${j.name}: ${t.hireable} at snapshot, ${MARKET} makes a market`}
           value={t.hireable} lower={0} upper={Math.max(MARKET + 2, t.hireable)}
           threshold={MARKET} thresholdLabel={`${MARKET} makes a market`} lowerLabel="0" upperLabel=""
           valueLabel={`${t.hireable} hireable`} state={state} index={i}
@@ -291,7 +291,8 @@ function CategoryTileView({ t, i }: { t: CategoryTile; i: number }) {
       </span>
       <span className={styles.tileFacts}>
         <span><b className="num">{t.hireable}</b> hireable{t.operators ? ` from ${t.operators} ${t.operators === 1 ? 'operator' : 'operators'}` : ''}</span>
-        {t.cheapest ? <span>from <b className="num">{t.cheapest}</b></span> : <span>no live quote</span>}
+        {t.cheapest ? <span>from <b className="num">{t.cheapest}</b></span> : <span>no valid quote at snapshot</span>}
+        <span>Quote snapshot {t.measuredAt.replace('T', ' ').slice(0, 19)} UTC</span>
         <span className={styles.tileRating}>
           {t.bestRating ? <Stars value={t.bestRating.stars} count={t.bestRating.count} label="verified" /> : 'No verified ratings yet'}
         </span>

@@ -1,3 +1,7 @@
+# P01A checkpoint, 16 October 2026
+
+Quote/listing/claim repair acceptance passes on the isolated feature branch. See [P01A checkpoint](../vnext/P01A_CHECKPOINT.md) and the versioned integrity contract. No push, production deployment or chain write. P02 explicitly approved by the owner, begins after local commit/announcement; paid mainnet and production release gates remain. Existing recovered ingestion-worker exit has unknown initiating cause; web/Kerb/shared services remain healthy. Historical P00/P01 entries below are retained.
+
 ## P01 AMBER checkpoint, 16 October 2026
 
 Owner approved repair work after P00. P01 source and scoped validation complete: 426 tests, typecheck/lint/build passed; 66 candidate browser cases passed; tap-size advisories and P01A integrity defects remain. Full checkpoint: docs/vnext/P01_CHECKPOINT.md. Isolated branch `repair/vnext-v3-p01-20261016`; no production application deployment. Stop for review before P01A/P02. Combined commerce/product maintenance owns the narrow query, loading recovery, cache provenance and campaign labels in this branch.
@@ -483,3 +487,5 @@ See the checkpoint block in the P2-00 report, reproduced here as it is finalised
 - [Sat 26 Sep] **"I APPROVE MAINNET"** (G-M1) for Phase 2: reference sellers, keeper and smoke hires on BSC mainnet. Funding (G-M2) per the P2-05 table; Francis sends from his own wallet, no private key is ever shared.
 - [Sun 27 Sep] Support channels: X @marquetrade (official) and the Marque Telegram community group at https://t.me/marque_marketplace.
 - [Sat 26 Sep] Damian acknowledgement sent. Gwen's six questions pending; Francis is following up.
+
+Request: [2026-10-16] [owner-directed combined repair] [commerce/product] P01A authorized edits span quote/claim/listing APIs and their existing UI; minimal A0 integrity fixes, no production merge/deploy. Existing fonts, artwork, four categories, escrow, buyer signing and SDK pins retained.

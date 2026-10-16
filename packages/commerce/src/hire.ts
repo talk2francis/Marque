@@ -7,7 +7,7 @@ import { network, isSupportedChain, formatAmount, type ChainId } from './config.
 import { chainClient, disputeWindowSeconds, fromAny, receiptFromAny } from './chain.js'
 import { buildJobDescription, buildPlainDescription, descriptionHash } from './description.js'
 import { computeExpiredAt, createJobCall } from './calls.js'
-import { requestQuote, type NegotiateTask, type QuoteResult, NegotiationSchema, SimpleQuoteSchema } from './quote.js'
+import { requestQuote, verifySimpleQuote, verifyNegotiation, type NegotiateTask, type QuoteResult, NegotiationSchema, SimpleQuoteSchema } from './quote.js'
 import { sellerCandidates, recordQuote, type SellerCandidate } from './supply.js'
 
 /**
@@ -42,6 +42,9 @@ export interface PublicQuote {
   priceLabel: string
   token: { address: string; symbol: string; decimals: number; isDefault: boolean }
   signed: boolean
+  sourceClaimVersion: 1
+  signatureEvidence: 'provider_signed' | 'identity_matched_unsigned'
+  expirySource: 'provider_signed' | 'provider_capped' | 'server_assigned'
   expiresAt: number
   estimatedCompletionSeconds: number | null
   providerMatchesRegistry: true
@@ -59,6 +62,7 @@ export async function quoteForBuyer(agentId: string, serviceId: number | null, t
     chainId: q.chainId, provider: q.provider, price: q.price.toString(),
     priceLabel: `${formatAmount(q.price, q.token.decimals)} ${q.token.symbol}`,
     token: q.token, signed: q.signed, expiresAt: q.expiresAt, estimatedCompletionSeconds: q.estimatedCompletionSeconds,
+    sourceClaimVersion: 1, signatureEvidence: q.signatureEvidence, expirySource: q.expirySource,
     providerMatchesRegistry: true,
   }
 }
@@ -117,6 +121,18 @@ export async function createIntent(input: { wallet: string; quoteId: number; cli
   const net = network(chainId)
   const token = net.assets.find((a) => a.address.toLowerCase() === q.token!.toLowerCase())
   if (!token) throw new HireError('bad_token', 'The quoted token is not accepted by the escrow.', 422)
+  // Recheck stored envelope and the exact current service. Historical accepted rows
+  // can contain the old renewed-expiry defect; a database ok=true is insufficient.
+  if (q.serviceId === null || typeof q.signed !== 'boolean') throw new HireError('bad_quote', 'Ask for a fresh quote with complete service evidence.', 422)
+  const seller = await sellerFor(q.agentId, q.serviceId)
+  if (seller.endpoint !== q.endpoint) throw new HireError('service_changed', 'The selected service changed. Ask it for a fresh quote.', 409)
+  const context = { agentOwner: seller.owner, agentWallet: seller.agentWallet, now }
+  const verified = q.signed
+    ? await verifyNegotiation(NegotiationSchema.parse(q.raw), context)
+    : verifySimpleQuote(SimpleQuoteSchema.parse(q.raw), { ...context, now: Math.floor(q.createdAt.getTime() / 1000) })
+  if (!verified.ok) throw new HireError(`quote_${verified.reason}`, quoteFailureSentence(verified.reason), verified.reason === 'expired' ? 410 : 422)
+  if (verified.expiresAt <= now + 20) throw new HireError('quote_expired', 'The stored quote is no longer valid. Ask for a new one.', 410)
+  if (verified.chainId !== chainId || verified.provider.toLowerCase() !== q.provider.toLowerCase() || verified.price.toString() !== q.priceRaw || verified.token.address.toLowerCase() !== q.token.toLowerCase() || verified.token.decimals !== q.tokenDecimals) throw new HireError('bad_quote', 'The stored quote fields do not match its verified envelope.', 422)
   const agent = rowsOf(await db().execute(sql`select name from agent where id = ${q.agentId}`))[0]
   const agentName = String(agent?.['name'] ?? 'this agent')
   const category = await categoryOf(q.agentId)

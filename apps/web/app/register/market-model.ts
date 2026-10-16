@@ -47,6 +47,8 @@ export interface MarketRow {
     token: { address: string; symbol: string; decimals: number } | null
     signedQuote: boolean | null
     quotedAt: string | null
+    quoteExpiresAt?: string | null
+    signatureEvidence?: 'provider_signed' | 'identity_matched_unsigned' | 'unknown'
     deliveredJobs: number
     failure: string | null
   }
@@ -211,11 +213,13 @@ export function isHireable(a: MarketRow): boolean {
 /** Why Hire is not offered, in plain words. */
 export function hireBlocked(a: MarketRow): string {
   switch (a.commerce.failure) {
+    case 'expired': return 'The stored quote expired; request a fresh one from its storefront'
+    case 'expired_or_unproven': return 'The stored price expired or its evidence is incomplete; request a fresh quote'
     case 'provider_mismatch': return 'Its quotes name a wallet that is not its registered identity'
     case 'unsigned': case 'malformed': return 'Its quotes are not in a verifiable form'
     case 'unreachable': case 'no_quote': case 'not_a2a': return 'It does not answer price requests'
     default:
-      return a.commerce.state === 'preview_only' ? 'Free preview only; it does not take paid jobs' : 'No live quote in the last 2 hours'
+      return a.commerce.state === 'preview_only' ? 'Preview available; no current accepted price' : 'No current accepted quote; open its record for details'
   }
 }
 

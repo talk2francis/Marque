@@ -33,8 +33,8 @@ export async function POST(request: Request) {
     const id = await readIdentity(97, tokenId)
     if (id.readFailed) return NextResponse.json({ error: 'lookup_failed', detail: 'The BSC testnet identity registry did not answer. Try again in a minute.' }, { status: 502 })
     if (!id.owner) return NextResponse.json({ error: 'not_found', detail: `No identity #${tokenId} exists on BSC testnet.` }, { status: 404 })
-    const { nonce, token } = issueNonce(tokenId, id.registry, id.owner, 97)
-    const message = buildClaimMessage({ tokenId, contract: id.registry, owner: id.owner, nonce, issuedAt: new Date().toISOString(), chainId: 97 })
+    const { nonce, token, issuedAt } = issueNonce(tokenId, id.registry, id.owner, 97)
+    const message = buildClaimMessage({ tokenId, contract: id.registry, owner: id.owner, nonce, issuedAt, chainId: 97 })
     return NextResponse.json({
       identity: {
         agentId: id.agentKey, chainId: 97, tokenId, contract: id.registry, owner: id.owner, ownerProvenance: 'ONCHAIN',
@@ -52,8 +52,7 @@ export async function POST(request: Request) {
   if (lookup.status === 'error') return NextResponse.json({ error: 'lookup_failed', detail: lookup.detail }, { status: 502 })
 
   const id = lookup.identity
-  const { nonce, token } = issueNonce(id.tokenId, id.contract, id.owner)
-  const issuedAt = new Date().toISOString()
+  const { nonce, token, issuedAt } = issueNonce(id.tokenId, id.contract, id.owner)
   const message = buildClaimMessage({ tokenId: id.tokenId, contract: id.contract, owner: id.owner, nonce, issuedAt })
 
   return NextResponse.json({

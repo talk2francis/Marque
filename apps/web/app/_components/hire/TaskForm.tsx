@@ -166,7 +166,7 @@ function Rebalance({ onChange, disabled }: { onChange: (v: TaskValue) => void; d
           {mine && mine.length ? <>Yours: {mine.map((p, i) => <span key={p.tokenId}>{i ? ', ' : ''}<button type="button" className="taskform-link" onClick={() => setId(p.tokenId)}>#{p.tokenId} {p.pair}{p.inRange ? '' : ' (out of range)'}</button></span>)}. </> : address && mine ? 'No V3 positions in your wallet. ' : ''}
           <button type="button" className="taskform-link" onClick={() => setId(EXAMPLE_POSITION)}>Use Marque&apos;s own live position #{EXAMPLE_POSITION}</button>
         </span>} />
-      <Field label="New range" value={pct} onChange={setPct} unit="± % of price" disabled={disabled} error={pct && !pctOk ? 'Between 0 and 50.' : null} help="Bound proposes ticks on the pool's spacing; nothing moves." />
+      <Field label="New range" value={pct} onChange={setPct} unit="± % of price" disabled={disabled} error={pct && !pctOk ? 'Between 0 and 50.' : null} help="Requested range for the selected agent. A quote is not permission to move assets." />
     </div>
   )
 }

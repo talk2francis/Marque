@@ -243,6 +243,8 @@ export interface ServiceCommerce {
   deliveredJobs: number
   /** Null when no quote succeeded; false for a plain quote bound to the registered wallet. */
   signed: boolean | null
+  sourceClaimVersion: 1
+  signatureEvidence: 'provider_signed' | 'identity_matched_unsigned' | 'unknown'
 }
 
 /**
@@ -254,10 +256,11 @@ export async function commercialStates(serviceId?: number): Promise<Map<number, 
   const scoped = serviceId !== undefined
   const quotes = await supplyRows(sql`
     select distinct on (service_id) service_id, agent_id, ok, failure, detail, chain_id, provider, price_raw, token,
-           token_symbol, token_decimals, created_at, quote_expires_at, negotiation_hash, provider_sig, signed
+           token_symbol, token_decimals, created_at, quote_expires_at, negotiation_hash, provider_sig, signed,
+           raw->'quote_expires_at' as provider_expiry, raw#>'{response,quote_expires_at}' as response_expiry
     from commerce_quote where service_id is not null
     ${scoped ? sql`and service_id = ${serviceId}` : sql``}
-    order by service_id, created_at desc ${scoped ? sql`, id desc` : sql``}`, scoped)
+    order by service_id, created_at desc, id desc`, scoped)
   const delivered = new Map<string, number>()
   const provider = quotes[0]?.['provider']
   const chainId = quotes[0]?.['chain_id']
@@ -273,13 +276,21 @@ export async function commercialStates(serviceId?: number): Promise<Map<number, 
   const now = Date.now()
   for (const q of quotes) {
     const at = new Date(q['created_at'] as string).getTime()
-    const fresh = now - at <= QUOTE_FRESH_MS
+    const fresh = at <= now && now - at <= QUOTE_FRESH_MS
+    let expiry = q['quote_expires_at'] ? new Date(q['quote_expires_at'] as string).getTime() : NaN
+    if (q['signed'] === false) expiry = Math.min(expiry, at + 900_000)
+    const providerExpiry = q['provider_expiry']
+    const responseExpiry = q['response_expiry']
+    if (typeof providerExpiry === 'number') expiry = Math.min(expiry, providerExpiry * 1000)
+    if (q['signed'] === true && typeof responseExpiry === 'number') expiry = Math.min(expiry, responseExpiry * 1000)
+    const conflicting = q['signed'] === true && typeof providerExpiry === 'number' && typeof responseExpiry === 'number' && providerExpiry !== responseExpiry
+    const valid = fresh && Number.isFinite(expiry) && expiry > now && !conflicting && typeof q['signed'] === 'boolean'
     const wellFormed = typeof q['negotiation_hash'] === 'string' && typeof q['provider_sig'] === 'string' && (q['provider_sig'] as string).length > 2
     const chainId = q['chain_id'] == null ? null : Number(q['chain_id'])
     const provider = q['provider'] ? String(q['provider']) : null
     const n = provider && chainId ? delivered.get(`${chainId}:${provider.toLowerCase()}`) ?? 0 : 0
     let state: CommercialState = 'unavailable'
-    if (fresh && q['ok'] === true) state = n > 0 ? 'settleable' : 'hireable'
+    if (valid && q['ok'] === true) state = n > 0 ? 'settleable' : 'hireable'
     else if (fresh && wellFormed) state = 'quoteable'
     out.set(Number(q['service_id']), {
       serviceId: Number(q['service_id']),
@@ -290,11 +301,13 @@ export async function commercialStates(serviceId?: number): Promise<Map<number, 
       priceRaw: q['price_raw'] ? String(q['price_raw']) : null,
       token: q['ok'] === true && q['token'] ? { address: String(q['token']), symbol: String(q['token_symbol']), decimals: Number(q['token_decimals']) } : null,
       quotedAt: new Date(at).toISOString(),
-      quoteExpiresAt: q['quote_expires_at'] ? new Date(q['quote_expires_at'] as string).toISOString() : null,
-      failure: q['ok'] === true ? null : (q['failure'] ? String(q['failure']) : null),
-      failureDetail: q['ok'] === true ? null : (q['detail'] ? String(q['detail']) : null),
+      quoteExpiresAt: Number.isFinite(expiry) ? new Date(expiry).toISOString() : null,
+      failure: q['ok'] === true ? (valid ? null : 'expired_or_unproven') : (q['failure'] ? String(q['failure']) : null),
+      failureDetail: q['ok'] === true ? (valid ? null : 'Stored price is expired or its quote evidence is incomplete. Request a fresh exact-task quote.') : (q['detail'] ? String(q['detail']) : null),
       deliveredJobs: n,
-      signed: q['ok'] === true ? q['signed'] !== false : null,
+      signed: q['ok'] === true && typeof q['signed'] === 'boolean' ? q['signed'] : null,
+      sourceClaimVersion: 1,
+      signatureEvidence: q['ok'] === true && q['signed'] === true ? 'provider_signed' : q['ok'] === true && q['signed'] === false ? 'identity_matched_unsigned' : 'unknown',
     })
   }
   return out

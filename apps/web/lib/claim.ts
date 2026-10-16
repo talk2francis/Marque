@@ -1,7 +1,7 @@
 import 'server-only'
 import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto'
 import { getAddress, isAddress, recoverMessageAddress, type Address } from 'viem'
-import { chainClient, isSupportedChain, type ChainId } from '@marque/commerce'
+import { chainClient, isSupportedChain, network } from '@marque/commerce'
 
 /**
  * The claim rail's proof-of-control (P10a).
@@ -38,14 +38,16 @@ function sign(payload: Record<string, string | number>): string {
 
 function verify(token: string): Record<string, unknown> | null {
   if (!SECRET) throw new Error('MARQUE_CLAIM_SECRET is not set')
-  const [body, mac] = token.split('.')
+  const [body, mac, extra] = token.split('.')
+  if (extra !== undefined) return null
   if (!body || !mac) return null
   const expected = hmac([body])
   const a = Buffer.from(mac)
   const b = Buffer.from(expected)
   if (a.length !== b.length || !timingSafeEqual(a, b)) return null
   try {
-    return JSON.parse(Buffer.from(body, 'base64url').toString('utf8')) as Record<string, unknown>
+    const parsed: unknown = JSON.parse(Buffer.from(body, 'base64url').toString('utf8'))
+    return parsed !== null && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed as Record<string, unknown> : null
   } catch {
     return null
   }
@@ -53,10 +55,22 @@ function verify(token: string): Record<string, unknown> | null {
 
 // ── nonce ──────────────────────────────────────────────────────────────────
 
-export function issueNonce(tokenId: string, contract: string, owner: string, chainId: number = 56): { nonce: string; token: string } {
+export function canonicalClaimKey(chainId: number, contract: string, tokenId: string): string | null {
+  if (!isSupportedChain(chainId) || !isAddress(contract) || contract.toLowerCase() !== network(chainId).identityRegistry.toLowerCase() || !/^(0|[1-9]\d{0,77})$/.test(tokenId) || BigInt(tokenId) >= 2n ** 256n) return null
+  return `${chainId}:${contract.toLowerCase()}:${tokenId}`
+}
+
+function fresh(iat: unknown, ttl: number): boolean {
+  return typeof iat === 'number' && Number.isSafeInteger(iat) && iat <= Date.now() && Date.now() - iat <= ttl
+}
+
+export function issueNonce(tokenId: string, contract: string, owner: string, chainId: number = 56): { nonce: string; token: string; issuedAt: string } {
+  if (!canonicalClaimKey(chainId, contract, tokenId) || !isAddress(owner)) throw new Error('Invalid identity for proof request')
   const nonce = randomBytes(12).toString('hex')
-  const token = sign({ k: 'nonce', nonce, tokenId, contract: contract.toLowerCase(), owner: owner.toLowerCase(), chainId, iat: Date.now() })
-  return { nonce, token }
+  const iat = Date.now()
+  const issuedAt = new Date(iat).toISOString()
+  const token = sign({ k: 'nonce', nonce, tokenId, contract: contract.toLowerCase(), owner: owner.toLowerCase(), chainId, iat })
+  return { nonce, token, issuedAt }
 }
 
 // ── the message that gets signed ───────────────────────────────────────────
@@ -106,7 +120,7 @@ export async function verifyClaim(args: {
 }): Promise<VerifyResult> {
   const claim = verify(args.nonceToken)
   if (!claim || claim['k'] !== 'nonce') return { ok: false, detail: 'The proof request is malformed. Start again.' }
-  if (Date.now() - Number(claim['iat'] ?? 0) > NONCE_TTL_MS) {
+  if (!fresh(claim['iat'], NONCE_TTL_MS)) {
     return { ok: false, detail: 'The proof request expired. Fetch the identity again and re-sign.' }
   }
 
@@ -116,16 +130,11 @@ export async function verifyClaim(args: {
   const declaredOwner = String(claim['owner'])
   const chainId = Number(claim['chainId'] ?? 56)
   if (!isSupportedChain(chainId)) return { ok: false, detail: 'The proof request names an unsupported network.' }
-  if (!args.message.includes(`Chain ID: ${chainId}`)) {
-    return { ok: false, detail: 'The signed message is for a different network than the one being claimed.' }
-  }
-
-  if (!args.message.includes(`Nonce: ${nonce}`)) {
-    return { ok: false, detail: 'The signed message does not carry the nonce we issued.' }
-  }
-  if (!args.message.includes(`Identity: #${tokenId}`)) {
-    return { ok: false, detail: 'The signed message is for a different identity than the one being claimed.' }
-  }
+  if (canonicalClaimKey(chainId, contract, tokenId) !== args.agentId || !isAddress(declaredOwner)) return { ok: false, detail: 'The proof request and selected identity do not match.' }
+  // Older in-flight requests issued the message a few milliseconds after the nonce.
+  // Accept that bounded difference, while comparing the entire signed message.
+  const issuedAt = /^Issued At: (.+)$/m.exec(args.message)?.[1] ?? ''
+  if (!Number.isFinite(Date.parse(issuedAt)) || Math.abs(Date.parse(issuedAt) - Number(claim['iat'])) > 5000 || args.message !== buildClaimMessage({ tokenId, contract, owner: declaredOwner, chainId, nonce, issuedAt })) return { ok: false, detail: 'Sign the exact proof message issued for this identity.' }
 
   let signer: Address
   try {
@@ -139,7 +148,7 @@ export async function verifyClaim(args: {
   // the value we cached.
   let onchainOwner: Address
   try {
-    const res = await chainClient(chainId as ChainId).readContract({
+    const res = await chainClient(chainId).readContract({
       address: getAddress(contract),
       abi: [{ type: 'function', name: 'ownerOf', stateMutability: 'view', inputs: [{ name: 'tokenId', type: 'uint256' }], outputs: [{ type: 'address' }] }],
       functionName: 'ownerOf',
@@ -150,7 +159,7 @@ export async function verifyClaim(args: {
     return { ok: false, detail: `Could not re-check ownership on chain: ${err instanceof Error ? err.message : String(err)}` }
   }
 
-  if (signer.toLowerCase() !== onchainOwner.toLowerCase()) {
+  if (signer.toLowerCase() !== onchainOwner.toLowerCase() || signer.toLowerCase() !== declaredOwner.toLowerCase()) {
     const drifted = declaredOwner.toLowerCase() !== onchainOwner.toLowerCase()
     return {
       ok: false,
@@ -194,18 +203,33 @@ export const __testonly = { sign, verify }
 export function readClaimToken(token: string): AuthorisedClaim | null {
   const claim = verify(token)
   if (!claim || claim['k'] !== 'claim') return null
-  if (Date.now() - Number(claim['iat'] ?? 0) > CLAIM_TTL_MS) return null
+  if (!fresh(claim['iat'], CLAIM_TTL_MS)) return null
   const owner = String(claim['owner'] ?? '')
   const contract = String(claim['contract'] ?? '')
   if (!isAddress(owner) || !isAddress(contract)) return null
+  const chainId = Number(claim['chainId'] ?? 56)
+  const tokenId = String(claim['tokenId'] ?? '')
+  const agentId = String(claim['agentId'] ?? '')
+  if (canonicalClaimKey(chainId, contract, tokenId) !== agentId || !claim['message'] || !claim['nonce'] || !/^0x[0-9a-fA-F]{130}$/.test(String(claim['signature'] ?? ''))) return null
   return {
-    agentId: String(claim['agentId'] ?? ''),
+    agentId,
     owner: getAddress(owner),
-    tokenId: String(claim['tokenId'] ?? ''),
+    tokenId,
     contract: getAddress(contract),
-    chainId: Number(claim['chainId'] ?? 56),
+    chainId,
     proofMessage: String(claim['message'] ?? ''),
     proofSignature: String(claim['signature'] ?? ''),
     proofNonce: String(claim['nonce'] ?? ''),
   }
+}
+
+/** Fresh read immediately before an authorized publication; a cached proof is insufficient. */
+export async function claimOwnerIsCurrent(claim: AuthorisedClaim): Promise<boolean> {
+  if (!isSupportedChain(claim.chainId) || canonicalClaimKey(claim.chainId, claim.contract, claim.tokenId) !== claim.agentId) return false
+  const owner = await chainClient(claim.chainId).readContract({
+    address: claim.contract,
+    abi: [{ type: 'function', name: 'ownerOf', stateMutability: 'view', inputs: [{ name: 'tokenId', type: 'uint256' }], outputs: [{ type: 'address' }] }],
+    functionName: 'ownerOf', args: [BigInt(claim.tokenId)],
+  })
+  return String(owner).toLowerCase() === claim.owner.toLowerCase()
 }

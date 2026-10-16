@@ -120,7 +120,7 @@ export function qualityVerdict(f: QualityFacts): QualityVerdict {
   const t = f.test
   checks.push(
     t && t.wellFormed
-      ? { id: 'tested', label: 'It answered a live Marque test', state: 'pass', reason: `${t.testId} on ${t.at.slice(0, 10)}: ${t.pass ? 'passed, which also earns a Warrant' : 'a well-formed answer that did not pass every field (passing is not required)'}.`, fix: null }
+      ? { id: 'tested', label: 'It answered a live Marque test', state: 'pass', reason: `${t.testId} on ${t.at.slice(0, 10)}: ${t.pass ? 'passed; current Warrant evidence also depends on the exact service and test date' : 'a well-formed answer that did not pass every field (passing is not required)'}.`, fix: null }
       : { id: 'tested', label: 'It answered a live Marque test', state: eff.category && fresh ? 'fail' : 'pending', reason: t ? `${t.testId} on ${t.at.slice(0, 10)}: no gradable answer${t.error ? ` (${t.error.slice(0, 160)})` : ''}.` : 'Not tested yet.', fix: eff.category && fresh ? 'Run the live test for its category. Your endpoint gets a real task on real chain state.' : 'Needs a live endpoint and a category first.' },
   )
 

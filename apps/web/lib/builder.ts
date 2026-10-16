@@ -1,6 +1,6 @@
 import 'server-only'
 import { sql } from 'drizzle-orm'
-import { db, builderCheck, builderListing, builderProof } from '@marque/db'
+import { db, builderCheck } from '@marque/db'
 import { chainClient, isSupportedChain, network, type ChainId } from '@marque/commerce'
 import { safeFetch, probeService } from '@marque/probe'
 import { classifyByKeyword, qualityVerdict, effectiveCategory, type QualityFacts, type QualityVerdict } from '@marque/registry'
@@ -40,17 +40,33 @@ export interface IdentityRead {
 }
 
 /** Registration metadata: data: URIs decoded in place, https fetched through safeFetch. */
-async function readMetadata(uri: string): Promise<Record<string, unknown> | null> {
+export async function readMetadata(uri: string): Promise<Record<string, unknown> | null> {
   try {
+    let text: string
     if (uri.startsWith('data:')) {
-      const [head, body = ''] = uri.split(',', 2)
-      const text = head!.includes(';base64') ? Buffer.from(body, 'base64').toString('utf8') : decodeURIComponent(body)
-      return JSON.parse(text) as Record<string, unknown>
-    }
-    if (/^https:\/\//i.test(uri)) {
+      if (uri.length > 768 * 1024) return null
+      const comma = uri.indexOf(',')
+      if (comma < 0) return null
+      const head = uri.slice(0, comma)
+      if (!/^data:application\/json(?:;charset=utf-8)?(?:;base64)?$/i.test(head)) return null
+      const body = uri.slice(comma + 1)
+      text = head.includes(';base64') ? Buffer.from(body, 'base64').toString('utf8') : decodeURIComponent(body)
+    } else if (/^https:\/\//i.test(uri)) {
       const r = await safeFetch(uri, { timeoutMs: 6_000, maxBytes: 256 * 1024 })
-      return r.ok ? (JSON.parse(r.body) as Record<string, unknown>) : null
+      if (!r.ok || r.status >= 400) return null
+      text = r.body
+    } else return null
+    if (Buffer.byteLength(text, 'utf8') > 256 * 1024) return null
+    const parsed: unknown = JSON.parse(text)
+    if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) return null
+    const meta = parsed as Record<string, unknown>
+    // Refuse malformed or excessive declarations as a whole, not a silently selected
+    // prefix that could present a different service from the identity's actual record.
+    for (const key of ['services', 'endpoints']) {
+      const value = meta[key]
+      if (value != null && (!Array.isArray(value) || value.length > 64)) return null
     }
+    return meta
   } catch { /* unreadable metadata is reported as such */ }
   return null
 }
@@ -68,10 +84,11 @@ export async function readIdentity(chainId: ChainId, tokenId: string): Promise<I
   }
   const uri = await chainClient(chainId).readContract({ address: registry, abi: ERC721, functionName: 'tokenURI', args: [BigInt(tokenId)] }).catch(() => null)
   const meta = uri ? await readMetadata(String(uri)) : null
-  const list = [...((meta?.['services'] as unknown[]) ?? []), ...((meta?.['endpoints'] as unknown[]) ?? [])]
+  const list: unknown[] = [...(Array.isArray(meta?.['services']) ? meta['services'] : []), ...(Array.isArray(meta?.['endpoints']) ? meta['endpoints'] : [])]
   const services = list
+    .filter((x) => x !== null && typeof x === 'object' && !Array.isArray(x))
     .map((x) => x as { name?: unknown; endpoint?: unknown; type?: unknown })
-    .filter((x) => typeof x.endpoint === 'string' && /^https:\/\//i.test(x.endpoint as string))
+    .filter((x) => typeof x.endpoint === 'string' && x.endpoint.length <= 2048 && /^https:\/\//i.test(x.endpoint) && !Array.from(x.endpoint).some(c => c.charCodeAt(0) <= 32 || c.charCodeAt(0) === 127))
     .map((x) => {
       const n = String(x.name ?? x.type ?? '').toLowerCase()
       return { kind: (n.includes('a2a') ? 'a2a' : n.includes('mcp') ? 'mcp' : 'other') as 'a2a' | 'mcp' | 'other', endpoint: String(x.endpoint) }
@@ -93,6 +110,7 @@ export interface BuilderView {
   classified: QualityFacts['classified']
   endpoint: string | null
   listed: boolean
+  listingEvidence: { version: 1; ownerListed: boolean; qualityListed: boolean; localChecksPassed: boolean; warrant: 'separate_service_test'; hireability: 'requires_current_quote'; officialCampaign: 'not_determined' }
   availability: { windowHours: number; attempts: number; successes: number; firstAt: string | null; lastAt: string | null; scope: string }
 }
 
@@ -112,7 +130,7 @@ export async function builderView(wallet: string, chainId: ChainId, tokenId: str
       where q.agent_id = ${key} order by p.checked_at desc`).then(rowsOf).catch(() => []),
     db().execute(sql`select category, confidence, rationale from agent_category where agent_id = ${key} and method <> 'owner_declared' order by (category <> 'unclassified') desc, confidence desc limit 1`).then(rowsOf).catch(() => []),
     db().execute(sql`select test_id, pass, error, ran_at from conformance_result where agent_id = ${key} order by ran_at desc limit 1`).then(rowsOf),
-    db().execute(sql`select status from builder_listing where agent_id = ${key} and withdrawn_at is null limit 1`).then(rowsOf),
+    db().execute(sql`select status, category, service_kind, endpoint, owner_address, chain_id, token_id, contract_address from builder_listing where agent_id = ${key} and withdrawn_at is null limit 1`).then(rowsOf),
   ])
 
   // Proof: the newest signature by whoever owns it now (a previous owner's never counts).
@@ -153,43 +171,23 @@ export async function builderView(wallet: string, chainId: ChainId, tokenId: str
   }
   const verdict = qualityVerdict(facts)
   const endpoint = lastOk ? String(lastOk['endpoint']) : id.services[0]?.endpoint ?? null
+  const published = listing[0]?.['status'] === 'published'
+  const ownerListed = published && listing[0]?.['owner_address'] != null && String(listing[0]['owner_address']).toLowerCase() === id.owner
+    && Number(listing[0]['chain_id']) === chainId && String(listing[0]['token_id']) === tokenId && String(listing[0]['contract_address']).toLowerCase() === id.registry.toLowerCase()
+  const category = effectiveCategory(facts).category
+  const listingMatches = listing[0]?.['category'] === category && listing[0]?.['endpoint'] === endpoint && id.services.some(s => s.endpoint === endpoint && s.kind === listing[0]?.['service_kind'])
   const [availability] = rowsOf(await db().execute(sql`
     select count(*)::int as attempts, count(*) filter (where ok)::int as successes,
       min(checked_at) as first_at, max(checked_at) as last_at
     from builder_check where agent_key = ${key} and kind = 'probe'
       and endpoint = ${endpoint} and checked_at > now() - interval '24 hours'`))
   return {
-    identity: id, verdict, category: effectiveCategory(facts).category, declared, classified,
+    identity: id, verdict, category, declared, classified,
     endpoint,
     availability: {windowHours:24, attempts:Number(availability?.['attempts'] ?? 0), successes:Number(availability?.['successes'] ?? 0), firstAt:iso(availability?.['first_at']), lastAt:iso(availability?.['last_at']), scope:'Builder-initiated task probes at the current declared endpoint. Irregular samples, not a continuous uptime measurement.'},
     listed: listing[0]?.['status'] === 'published',
+    listingEvidence: { version: 1, ownerListed, qualityListed: ownerListed && listingMatches && verdict.qualityListing, localChecksPassed: verdict.qualityListing, warrant: 'separate_service_test', hireability: 'requires_current_quote', officialCampaign: 'not_determined' },
   }
-}
-
-/**
- * When all five checks pass, the identity is listed on Marque: a published
- * builder_listing row carrying the owner's stored proof, the category that
- * counted and the test that answered. The quest's fifth row reads it.
- */
-export async function listIfQualified(v: BuilderView): Promise<boolean> {
-  if (!v.verdict.qualityListing) return false
-  if (v.listed) return true
-  const key = v.identity.agentKey
-  const [p] = rowsOf(await db().execute(sql`
-    select message, signature, nonce from builder_proof where agent_key = ${key} and owner_address = ${v.identity.owner} order by verified_at desc limit 1`))
-  const [t] = rowsOf(await db().execute(sql`select id from conformance_result where agent_id = ${key} and error is null order by ran_at desc limit 1`))
-  if (!p || !v.category) return false
-  const now = new Date()
-  await db().insert(builderListing).values({
-    agentId: key, chainId: v.identity.chainId, tokenId: v.identity.tokenId, contractAddress: v.identity.registry.toLowerCase(),
-    ownerAddress: v.identity.owner!, proofMessage: String(p['message']), proofSignature: String(p['signature']), proofNonce: String(p['nonce']),
-    verifiedAt: now, category: v.category as never, serviceKind: 'a2a', endpoint: v.endpoint ?? '', conformanceResultId: t ? Number(t['id']) : null,
-    status: 'published', publishedAt: now, withdrawnAt: null,
-  }).onConflictDoUpdate({
-    target: builderListing.agentId,
-    set: { ownerAddress: v.identity.owner!, category: v.category as never, endpoint: v.endpoint ?? '', conformanceResultId: t ? Number(t['id']) : null, status: 'published', publishedAt: now, withdrawnAt: null },
-  })
-  return true
 }
 
 /** Identities a wallet can work on: indexed mainnet agents it owns, plus any it has proved. */
@@ -246,8 +244,13 @@ export async function declareCategory(chainId: ChainId, tokenId: string, categor
 }
 
 export async function recordProof(p: { chainId: ChainId; tokenId: string; owner: string; message: string; signature: string; nonce: string }): Promise<void> {
-  await db().insert(builderProof).values({
-    agentKey: agentKeyOf(p.chainId, p.tokenId), chainId: p.chainId, tokenId: p.tokenId, registry: identityRegistry(p.chainId).toLowerCase(),
-    ownerAddress: p.owner.toLowerCase(), message: p.message, signature: p.signature, nonce: p.nonce,
+  const key = agentKeyOf(p.chainId, p.tokenId)
+  await db().transaction(async tx => {
+    await tx.execute(sql`set local statement_timeout = '5000ms'`)
+    await tx.execute(sql`set local lock_timeout = '1000ms'`)
+    await tx.execute(sql`select pg_advisory_xact_lock(hashtextextended(${key}, 0))`)
+    await tx.execute(sql`insert into builder_proof (agent_key, chain_id, token_id, registry, owner_address, message, signature, nonce)
+      select ${key}, ${p.chainId}, ${p.tokenId}, ${identityRegistry(p.chainId).toLowerCase()}, ${p.owner.toLowerCase()}, ${p.message}, ${p.signature}, ${p.nonce}
+      where not exists (select 1 from builder_proof where agent_key = ${key} and signature = ${p.signature} and message = ${p.message})`)
   })
 }

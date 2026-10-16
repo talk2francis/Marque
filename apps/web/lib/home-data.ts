@@ -75,6 +75,7 @@ export async function tapeItems(limit = 14): Promise<TapeItem[]> {
 }
 
 export interface CategoryTile {
+  measuredAt: string
   category: string
   hireable: number
   operators: number
@@ -95,7 +96,7 @@ export async function categoryTiles(ready: MarketRow[]): Promise<CategoryTile[] 
       .filter((r) => r.category === category && r.track.verified.averageStars !== null)
       .sort((a, b) => (b.track.verified.averageStars ?? 0) - (a.track.verified.averageStars ?? 0))[0]
     return {
-      category, hireable: c?.hireable ?? 0, operators: c?.operators ?? 0, thirdPartyOperators: c?.thirdPartyOperators ?? 0, cheapest,
+      measuredAt: cov.measuredAt, category, hireable: c?.hireable ?? 0, operators: c?.operators ?? 0, thirdPartyOperators: c?.thirdPartyOperators ?? 0, cheapest,
       bestRating: rated ? { stars: rated.track.verified.averageStars!, count: rated.track.verified.count, agent: rated.name } : null,
     }
   })
@@ -119,16 +120,17 @@ export async function readyToHire(): Promise<{ all: MarketRow[]; picks: MarketRo
   return { all: rows, picks }
 }
 
-export interface FunnelLine { registered: number | null; answering: number | null; hireable: number; warranted: number | null }
+export interface FunnelLine { registered: number | null; answering: number | null; hireable: number; warranted: number | null; measuredAt: string }
 
 /** The Phase 1 funnel reduced to one line (the full one lives on /why). */
-export async function funnelLine(ready: MarketRow[]): Promise<FunnelLine> {
+export async function funnelLine(): Promise<FunnelLine> {
   const stages = await funnel(56).catch(() => null)
   const stage = (k: string) => stages?.find((s) => s.stage === k)?.count ?? null
   const warranted = await db().execute(sql`
     select count(distinct ${oneAgentIdSql(sql`agent_id`)})::int as n from conformance_result where pass = true and agent_id not like 'stub:%'`)
     .then((r) => Number(rowsOf(r)[0]?.['n'] ?? 0)).catch(() => null)
-  return { registered: stage('registered_bsc'), answering: stage('reachable'), hireable: ready.filter((r) => r.commerce.chainId === 56).length, warranted }
+  const ready = await marketplaceAgents({ tab: 'ready', network: 56, limit: 1 })
+  return { registered: stage('registered_bsc'), answering: stage('reachable'), hireable: ready.total, warranted, measuredAt: new Date().toISOString() }
 }
 
 export interface PassFail {
@@ -246,7 +248,7 @@ export async function recentHires(): Promise<RecentHire[]> {
       price: tok && j['funded_raw'] ? `${formatAmount(String(j['funded_raw']), tok.decimals)} ${tok.symbol}` : null,
       team: teamWallets().includes(String(j['client'])),
       steps: [
-        { label: 'Live quote, signed by the agent', tx: null, at: null },
+        { label: 'Quote evidence, with signature mode shown', tx: null, at: null },
         { label: 'Paid into escrow', tx: ev['JobFunded']?.tx ?? null, at: iso(ev['JobFunded']?.at) },
         { label: 'Delivered on chain', tx: ev['JobSubmitted']?.tx ?? null, at: iso(ev['JobSubmitted']?.at) },
         { label: r ? 'Rated by the buyer' : 'Rating open to the buyer', tx: r ? String(r['tx_hash']) : null, at: r ? iso(String(r['block_time'])) : null },

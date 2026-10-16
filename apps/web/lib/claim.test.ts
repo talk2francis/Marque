@@ -1,4 +1,12 @@
-import { describe, it, expect, beforeAll } from 'vitest'
+import { describe, it, expect, beforeAll, vi, beforeEach } from 'vitest'
+import { privateKeyToAccount } from 'viem/accounts'
+import { network } from '@marque/commerce'
+const { readContract } = vi.hoisted(() => ({ readContract: vi.fn() }))
+vi.mock('@marque/commerce', async original => ({ ...await original<object>(), chainClient: () => ({ readContract }) }))
+const owner = privateKeyToAccount(`0x${'1'.repeat(64)}`)
+const registry = network(56).identityRegistry
+const key = `56:${registry.toLowerCase()}:1`
+beforeEach(() => readContract.mockReset().mockResolvedValue(owner.address))
 
 /**
  * The claim rail's proof primitives (P10a).
@@ -41,11 +49,39 @@ describe('claim tokens', () => {
 
     // A fresh, well-formed one.
     const good = __testonly.sign({
-      k: 'claim', agentId: '56:0xabc:1', owner: '0x1111111111111111111111111111111111111111',
-      tokenId: '1', contract: '0x2222222222222222222222222222222222222222',
-      nonce: 'n', message: 'm', signature: '0xsig', iat: Date.now(),
+      k: 'claim', agentId: key, owner: owner.address,
+      tokenId: '1', contract: registry,
+      nonce: 'n', message: 'm', signature: `0x${'1'.repeat(130)}`, iat: Date.now(),
     })
-    expect(readClaimToken(good)).toMatchObject({ agentId: '56:0xabc:1', tokenId: '1' })
+    expect(readClaimToken(good)).toMatchObject({ agentId: key, tokenId: '1' })
+  })
+})
+
+describe('canonical claim authority', () => {
+  async function proof() {
+    const c = await import('./claim')
+    const nonce = c.issueNonce('1', registry, owner.address, 56)
+    const message = c.buildClaimMessage({ tokenId: '1', contract: registry, owner: owner.address, chainId: 56, nonce: nonce.nonce, issuedAt: nonce.issuedAt })
+    const signature = await owner.signMessage({ message })
+    return { c, args: { nonceToken: nonce.token, message, signature, agentId: key } }
+  }
+  it('verifies only the canonical identity, exact message and current owner', async () => {
+    const { c, args } = await proof()
+    const good = await c.verifyClaim(args)
+    expect(good).toMatchObject({ ok: true, agentId: key })
+    if (!good.ok) throw new Error('verification failed')
+    expect(c.readClaimToken(good.claimToken)).toMatchObject({ agentId: key, chainId: 56, tokenId: '1' })
+    expect(await c.verifyClaim({ ...args, agentId: key.slice(0, -1) + '999' })).toMatchObject({ ok: false })
+    expect(await c.verifyClaim({ ...args, message: args.message + '\nChain ID: 97' })).toMatchObject({ ok: false })
+    readContract.mockResolvedValue('0x2222222222222222222222222222222222222222')
+    expect(await c.verifyClaim(args)).toMatchObject({ ok: false })
+    expect(await c.claimOwnerIsCurrent(c.readClaimToken(good.claimToken)!)).toBe(false)
+  })
+  it('rejects future/malformed claim tokens and mismatched registry/network/token tuples', async () => {
+    const { c } = await proof()
+    const data = { k: 'claim', agentId: key, owner: owner.address, tokenId: '1', contract: registry, chainId: 56, nonce: 'n', message: 'm', signature: `0x${'1'.repeat(130)}`, iat: Date.now() }
+    for (const changes of [{ agentId: key + '0' }, { chainId: 97 }, { contract: owner.address }, { tokenId: '-1' }, { iat: Date.now() + 60_000 }, { iat: 'NaN' }]) expect(c.readClaimToken(c.__testonly.sign({ ...data, ...changes }))).toBeNull()
+    expect(c.__testonly.verify(c.__testonly.sign(data) + '.extra')).toBeNull()
   })
 })
 

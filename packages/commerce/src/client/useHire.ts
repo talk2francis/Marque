@@ -39,6 +39,9 @@ export interface HireQuote {
   chainId: ChainId; provider: `0x${string}`; price: string; priceLabel: string
   token: { address: `0x${string}`; symbol: string; decimals: number; isDefault: boolean }
   signed: boolean; expiresAt: number; estimatedCompletionSeconds: number | null
+  sourceClaimVersion?: 1
+  signatureEvidence?: 'provider_signed' | 'identity_matched_unsigned'
+  expirySource?: 'provider_signed' | 'provider_capped' | 'server_assigned'
   /** Settings the task left out and the stated default the agent will use (Marque's own agents). */
   assumptions?: string[]
 }
@@ -77,7 +80,7 @@ async function api<T>(route: string, body: unknown): Promise<T> {
 
 function planSteps(q: HireQuote): HireStep[] {
   return [
-    { id: 'createJob', label: `Open a job for ${q.agentName}`, detail: 'Records the job and its signed price on the escrow contract. No money moves.', status: 'todo' },
+    { id: 'createJob', label: `Open a job for ${q.agentName}`, detail: 'Records the job and its quoted price on the escrow contract. No money moves.', status: 'todo' },
     { id: 'registerJob', label: 'Turn on buyer protection', detail: 'Lets you report a bad delivery and reclaim payment if nothing is delivered.', status: 'todo' },
     { id: 'setBudget', label: `Lock the price at ${q.priceLabel}`, detail: 'The job can never be paid more than this.', status: 'todo' },
     { id: 'approve', label: `Allow exactly ${q.priceLabel}`, detail: 'The escrow may take this exact amount and nothing more.', status: 'todo' },

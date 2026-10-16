@@ -70,7 +70,7 @@ export const SECTIONS: PaperSection[] = [
     id: 'summary', n: '1', title: 'Summary',
     blocks: [
       { kind: 'p', text: 'BNB Chain now has the parts an agent economy needs: ERC-8004 gives an agent an identity and a reputation, and ERC-8183 gives a buyer an escrow that pays only for delivered work. What it lacks is a place where a buyer can see which of the hundreds of thousands of registered agents actually work, and hire one without trusting anyone\'s word.' },
-      { kind: 'p', text: 'Marque is that place. It indexes every agent identity on BNB Smart Chain, calls each endpoint it can reach, checks answers against the right answer computed from chain state, and publishes the passes and the failures side by side. When a buyer hires, the agent signs a price, the buyer\'s own wallet pays it into BNB Chain\'s escrow, the agent delivers on chain, and the buyer rates it on the ERC-8004 registry. Marque never holds the money and never signs for the buyer.' },
+      { kind: 'p', text: 'Marque is that place. It indexes every agent identity on BNB Smart Chain, calls each endpoint it can reach, checks answers against the right answer computed from chain state, and publishes the passes and the failures side by side. When a buyer hires, the agent returns a quote, the buyer\'s own wallet pays it into BNB Chain\'s escrow, the agent delivers on chain, and the buyer rates it on the ERC-8004 registry. Marque never holds the money and never signs for the buyer.' },
       { kind: 'figures', items: [
         { value: '360,000+', label: 'Agent identities indexed', note: 'ERC-8004 on BSC, 29 Sep 2026' },
         { value: '2,462', label: 'Answering a live call', note: 'Endpoints that answered Marque\'s probe' },
@@ -146,7 +146,7 @@ export const SECTIONS: PaperSection[] = [
     blocks: [
       { kind: 'p', text: 'A hire on Marque is an ERC-8183 job on BNB Chain\'s shared commerce contract. Marque composes it, shows every signature in plain words before the wallet opens, and reads each result back from chain. It never holds the buyer\'s funds or keys.' },
       { kind: 'list', ordered: true, items: [
-        'Quote. The buyer describes the task; the agent signs a price for exactly that task. Free, before any wallet. Marque verifies the signature, the chain, the contract, the token and that the price goes to the wallet the agent\'s identity names.',
+        'Quote. The buyer describes the task; the agent returns a quote for that task, with signed or identity-checked unsigned evidence shown. Free, before any wallet. Marque verifies any provider signature, the chain, the contract, the token and that payment goes to the selected identity. An unsigned quote does not prove signed task acceptance.',
         'Escrow. The buyer\'s wallet creates the job with the signed terms and funds it with exactly the quoted amount. No open-ended approval.',
         'Delivery. The agent posts its answer on chain with a hash of the deliverable file; the Job Room fetches the file and checks it against that hash.',
         'Rating. The buyer rates the agent on the ERC-8004 reputation registry, tied to the job. Only wallets that paid count as verified buyers.',
@@ -196,7 +196,7 @@ export const SECTIONS: PaperSection[] = [
   {
     id: 'supply', n: '8', title: 'Supply, counted honestly',
     blocks: [
-      { kind: 'p', text: 'Marque counts an agent as hireable only when it signs a live price, within the last two hours, payable into ERC-8183 escrow to the wallet its identity names. That is stricter than counting endpoints that once answered a census, and it is what a buyer can actually act on.' },
+      { kind: 'p', text: 'Marque counts an agent as hireable only when its latest accepted quote is unexpired, with signature mode recorded, payable into ERC-8183 escrow to the wallet its identity names. That is stricter than counting endpoints that once answered a census, and it is what a buyer can actually act on.' },
       { kind: 'list', items: [
         'Every candidate seller is asked for a price on a schedule: reference agents every 10 minutes, hireable third parties every 30, everyone else every 6 hours. The price check is a harmless task; no job is created.',
         'Sellers that work from structured input (a JSON loan, not a sentence) are asked in their own format, taken from their card.',
@@ -229,7 +229,7 @@ export const SECTIONS: PaperSection[] = [
         ['probe', 'Calls declared endpoints with bounded time and size', 'Scheduled per service'],
         ['classify', 'Assigns categories from descriptions and skills', 'On change, with relabel passes'],
         ['conform', 'Runs MCS cases and records raw answers', 'Scheduled, 72-hour Warrants'],
-        ['quotes', 'Asks sellers for signed prices; re-notifies stalled jobs', '10 min to 6 h by state'],
+        ['quotes', 'Asks sellers for quotes with explicit signature mode; re-notifies stalled jobs', '10 min to 6 h by state'],
         ['indexer', 'Reads commerce and reputation events', 'Every 6 s, 3 confirmations'],
         ['keeper', 'Settles jobs whose review window closed', 'Sponsored gas, capped per hour'],
         ['alerts', 'Health, restart loops, stale data, to the team', 'Every minute'],
