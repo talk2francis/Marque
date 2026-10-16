@@ -95,7 +95,7 @@ export interface VerifiedQuote {
   token: { address: `0x${string}`; symbol: string; decimals: number; isDefault: boolean }
   expiresAt: number
   estimatedCompletionSeconds: number | null
-  /** keccak256 of the canonical envelope bytes we stored, for binding intents to quotes. */
+  /** V1 keccak256(JSON.stringify(parsed provider envelope)); serialization-sensitive, distinct from receipt/negotiation hashes. */
   quoteHash: `0x${string}`
   latencyMs: number
 }

@@ -99,9 +99,16 @@ export function Marketplace({ category: fixedCategory, initial }: { category?: s
   useEffect(() => {
     if (!ready) return
     // The hire sheet lives in the URL (?hire=) over any page; filter sync must never drop it.
-    const hire = new URLSearchParams(window.location.search).get('hire')
+    const current = new URLSearchParams(window.location.search)
+    const hire = current.get('hire')
     const params = new URLSearchParams(stateToParams(state, { fixedCategory: !!fixedCategory }))
-    if (hire) params.set('hire', hire)
+    if (hire) {
+      params.set('hire', hire)
+      for (const key of ['serviceId', 'try']) {
+        const value = current.get(key)
+        if (value !== null) params.set(key, value)
+      }
+    }
     const qs = params.toString()
     const next = qs ? `${window.location.pathname}?${qs}` : window.location.pathname
     if (next === window.location.pathname + window.location.search) return

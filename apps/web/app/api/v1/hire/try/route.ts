@@ -9,6 +9,7 @@ export const dynamic = 'force-dynamic'
 
 const Body = z.object({
   agentId: z.string().min(3).max(200),
+  serviceId: z.number().int().positive().nullable().optional(),
   task: z.string().trim().min(3).max(1200),
 })
 
@@ -23,8 +24,8 @@ export async function POST(req: NextRequest) {
   const parsed = Body.safeParse(await req.json().catch(() => null))
   if (!parsed.success) return NextResponse.json({ error: 'bad_request', detail: 'Send the agent and a short task description.' }, { status: 400 })
   try {
-    const { agentId, task } = parsed.data
-    const seller = await freeTarget(agentId)
+    const { agentId, task, serviceId } = parsed.data
+    const seller = await freeTarget(agentId, serviceId)
     const engine = seller.firstPartySlug ? engineFor(seller.firstPartySlug) : null
     const check = engine?.inspect(task) ?? { missing: [], assumptions: [] }
     if (check.missing.length) {
@@ -33,7 +34,7 @@ export async function POST(req: NextRequest) {
         { status: 422, headers: { 'Cache-Control': 'no-store' } },
       )
     }
-    const answer = await tryFree(agentId, task)
+    const answer = await tryFree(agentId, task, serviceId)
     return NextResponse.json({ ...answer, assumptions: check.assumptions }, { headers: { 'Cache-Control': 'no-store' } })
   } catch (err) {
     if (err instanceof FreeTryError) return NextResponse.json({ error: err.code, detail: err.message }, { status: 502, headers: { 'Cache-Control': 'no-store' } })

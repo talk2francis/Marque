@@ -1,4 +1,4 @@
-import { erc20Abi, type Abi } from 'viem'
+import { erc20Abi, zeroAddress, type Abi } from 'viem'
 import { agenticCommerceAbi, evaluatorRouterAbi, optimisticPolicyAbi } from './generated.js'
 import { network, type ChainId } from './config.js'
 
@@ -135,4 +135,21 @@ export function paymentCalls(t: HireTerms, jobId: bigint, allowance: bigint): Ca
   if (approve !== null) calls.push(approveCall(t.chainId, t.token, approve, t.priceLabel))
   calls.push(fundCall(t.chainId, jobId, t.price, t.priceLabel))
   return calls
+}
+
+/** Resume only the buyer's exact onchain job; never repeat registration or funding. */
+export function remainingPaymentCalls(t: HireTerms, jobId: bigint, allowance: bigint, buyer: string, job: { client: string; provider: string; evaluator: string; hook: string; description: string; expiredAt: bigint; budget: bigint; status: number }, policy: string, token: string): Call[] {
+  const n = network(t.chainId)
+  const same = (a: string, b: string) => a.toLowerCase() === b.toLowerCase()
+  if (!same(job.client, buyer) || !same(job.provider, t.provider) || !same(job.evaluator, n.router) || !same(job.hook, n.router) || !same(token, t.token.address) || job.description !== t.description || job.expiredAt !== t.expiredAt) throw new Error('The onchain job differs from the selected hire. Open its job room before continuing.')
+  if (job.status === 2 || job.status === 3) return [] // delivered or completed, never repay
+  if (job.status !== 0 && job.status !== 1) throw new Error('This job is closed. No payment was prepared.')
+  if (!same(policy, zeroAddress) && !same(policy, n.policy)) throw new Error('This job uses a different policy. No payment was prepared.')
+  if (job.budget !== 0n && job.budget !== t.price) throw new Error('The onchain budget differs from the quote. No payment was prepared.')
+  if (job.status === 1) {
+    if (!same(policy, n.policy) || job.budget !== t.price) throw new Error('The funded job does not match the protected hire.')
+    return []
+  }
+  if (job.expiredAt <= BigInt(Math.floor(Date.now() / 1000))) throw new Error('This open job expired. Open its job room.')
+  return paymentCalls(t, jobId, allowance).filter(c => c.step !== 'registerJob' || same(policy, zeroAddress)).filter(c => c.step !== 'setBudget' || job.budget !== t.price)
 }

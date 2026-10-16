@@ -151,11 +151,11 @@ export function deliveryWords(seconds: number | null): string | null {
 
 /** Try free opens the same sheet in its free mode. */
 export function tryHref(a: MarketRow): string {
-  return `?hire=${encodeURIComponent(a.agentId)}&try=1`
+  return `${hireHref(a)}&try=1`
 }
 
 export function answersFree(a: MarketRow): boolean {
-  return a.isReference || (a.liveness === 'live' && a.interfaces.includes('a2a'))
+  return a.isReference
 }
 
 /** Unchanged `iface` query values; only the labels are cased for reading. */
@@ -202,7 +202,7 @@ export function charterHref(a: MarketRow): string {
 
 /** Hire opens the ERC-8183 hire sheet over the current page (deep link: ?hire=<agentId>). */
 export function hireHref(a: MarketRow): string {
-  return `?hire=${encodeURIComponent(a.agentId)}`
+  return `?hire=${encodeURIComponent(a.agentId)}${a.commerce.serviceId == null ? '' : `&serviceId=${a.commerce.serviceId}`}`
 }
 
 /** Can a buyer's wallet hire this exact agent through ERC-8183 escrow right now? */

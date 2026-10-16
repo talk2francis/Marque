@@ -6,7 +6,8 @@ import {
   getCapabilities, sendCalls, waitForCallsStatus, getGasPrice,
 } from '@wagmi/core'
 import { erc20Abi, encodeFunctionData, type Abi, type Hex } from 'viem'
-import { createJobCall, paymentCalls, cancelCall, type Call, type HireTerms, type StepId } from '../calls.js'
+import { createJobCall, remainingPaymentCalls, cancelCall, type Call, type HireTerms, type StepId } from '../calls.js'
+import { agenticCommerceAbi, evaluatorRouterAbi } from '../generated.js'
 import { friendlyError, type FriendlyError } from '../errors.js'
 import { network, type ChainId } from '../config.js'
 
@@ -42,10 +43,14 @@ export interface HireQuote {
   sourceClaimVersion?: 1
   signatureEvidence?: 'provider_signed' | 'identity_matched_unsigned'
   expirySource?: 'provider_signed' | 'provider_capped' | 'server_assigned'
+  quoteAccessVersion?: 2
+  quoteAccessToken?: string
+  quoteHash?: string
+  quoteHashVersion?: 1
   /** Settings the task left out and the stated default the agent will use (Marque's own agents). */
   assumptions?: string[]
 }
-interface IntentResponse { intentId: string; expiredAt: string; refundAfter: string; description: string; disputeWindowSeconds: number }
+interface IntentResponse { intentId: string; wallet?: string; quoteId?: number; agentId?: string; serviceId?: number; quoteHash?: string | null; chainId: ChainId; provider: string; price: string; token: { address: string }; expiredAt: string; refundAfter: string; description: string; disputeWindowSeconds: number }
 
 export interface HireState {
   phase: 'idle' | 'quoting' | 'quoted' | 'checking' | 'signing' | 'done' | 'error'
@@ -61,9 +66,10 @@ export interface HireState {
   balances: { token: string; gas: string; gasNeeded: string } | null
   /** Whether this wallet can sign the payment steps as one EIP-5792 batch here (null = not checked yet). */
   batchCapable: boolean | null
+  notification: 'accepted' | 'pending' | 'rejected' | null
 }
 
-const initial: HireState = { phase: 'idle', quote: null, intent: null, jobId: null, steps: [], batched: false, error: null, shortfall: null, balances: null, batchCapable: null }
+const initial: HireState = { phase: 'idle', quote: null, intent: null, jobId: null, steps: [], batched: false, error: null, shortfall: null, balances: null, batchCapable: null, notification: null }
 
 /**
  * Gas for createJob, registerJob, setBudget, approve and fund together. Measured on mainnet
@@ -95,23 +101,28 @@ export function useHire() {
   const [state, setState] = useState<HireState>(initial)
   const busy = useRef(false)
   const currentStep = useRef<string>('idle')
+  const requestGeneration = useRef(0)
   const lastRequest = useRef<{ agentId: string; task: string; serviceId: number | null } | null>(null)
   const set = (patch: Partial<HireState> | ((s: HireState) => Partial<HireState>)) =>
     setState((s) => ({ ...s, ...(typeof patch === 'function' ? patch(s) : patch) }))
   const mark = (id: HireStep['id'], status: StepStatus, tx?: Hex) =>
     set((s) => ({ steps: s.steps.map((st) => (st.id === id ? { ...st, status, ...(tx ? { tx } : {}) } : st)) }))
 
-  const reset = useCallback(() => { busy.current = false; setState(initial) }, [])
+  const reset = useCallback(() => { requestGeneration.current++; busy.current = false; setState(initial) }, [])
 
   /** Ask the agent for a price on this task. Free, no wallet needed. */
   const getQuote = useCallback(async (agentId: string, task: string, serviceId?: number | null) => {
-    set({ phase: 'quoting', error: null })
+    const generation = ++requestGeneration.current
+    set({ phase: 'quoting', error: null, quote: null, intent: null, jobId: null, steps: [] })
     lastRequest.current = { agentId, task, serviceId: serviceId ?? null }
     try {
-      const quote = await api<HireQuote>('hire/quote', { agentId, task, serviceId: serviceId ?? null })
+      const quote = await api<HireQuote>('hire/quote', { agentId, task, serviceId: serviceId ?? null, quoteAccessVersion: 2 })
+      if (generation !== requestGeneration.current) return null
+      if (quote.agentId !== agentId || (serviceId != null && quote.serviceId !== serviceId)) throw new Error('The response names a different service. No hire was prepared.')
       set({ phase: 'quoted', quote, intent: null, jobId: null, steps: planSteps(quote) })
       return quote
     } catch (err) {
+      if (generation !== requestGeneration.current) return null
       const e = err as { code?: string; detail?: string }
       const action = e.code === 'task_incomplete' ? 'Add it to the task above, then ask for a price again.' : 'Try again, or pick another agent.'
       set({ phase: 'error', error: { code: e.code ?? 'quote', title: e.detail ?? 'The agent could not be quoted.', action, retryable: true } })
@@ -127,7 +138,7 @@ export function useHire() {
     // ever shows the transaction, while the sheet promised a fee 20 times smaller.
     const live = await getGasPrice(config, { chainId: c.chainId }).catch(() => 0n)
     const gasPrice = live > 0n ? (live * 125n) / 100n : undefined
-    const hash = await writeContract(config, { address: c.to, abi: c.abi, functionName: c.functionName, args: c.args as unknown[], chainId: c.chainId, ...(gasPrice ? { gasPrice } : {}) } as Parameters<typeof writeContract>[1])
+    const hash = await writeContract(config, { account: address, address: c.to, abi: c.abi, functionName: c.functionName, args: c.args as unknown[], chainId: c.chainId, ...(gasPrice ? { gasPrice } : {}) } as Parameters<typeof writeContract>[1])
     if (step) mark(step, 'confirming', hash)
     const r = await waitForTransactionReceipt(config, { hash, chainId: c.chainId })
     if (r.status !== 'success') throw Object.assign(new Error('reverted'), { code: 'reverted' })
@@ -140,8 +151,10 @@ export function useHire() {
     if (!q || !address || busy.current) return
     busy.current = true
     currentStep.current = 'checking'
+    const generation = requestGeneration.current
     set({ phase: 'checking', error: null })
     try {
+      const pendingCreateTx = state.steps.find(st => st.id === 'createJob')?.tx
       if (walletChain !== q.chainId) await switchChain(config, { chainId: q.chainId })
       const [tokenBal, gasBal] = await Promise.all([
         readContract(config, { address: q.token.address, abi: erc20Abi, functionName: 'balanceOf', args: [address], chainId: q.chainId }),
@@ -149,29 +162,34 @@ export function useHire() {
       ])
       const gasPrice = await getGasPrice(config, { chainId: q.chainId }).catch(() => 0n)
       const gasNeeded = state.jobId ? 0n : gasPrice * HIRE_GAS
-      const shortfall = { token: tokenBal < BigInt(q.price), gas: gasBal.value === 0n || gasBal.value < gasNeeded }
+      const shortfall = { token: !state.jobId && !pendingCreateTx && tokenBal < BigInt(q.price), gas: !state.jobId && !pendingCreateTx && (gasBal.value === 0n || gasBal.value < gasNeeded) }
       set({ balances: { token: tokenBal.toString(), gas: gasBal.value.toString(), gasNeeded: gasNeeded.toString() } })
       if (shortfall.token || shortfall.gas) { set({ phase: 'quoted', shortfall }); busy.current = false; return }
       set({ phase: 'signing', shortfall: null })
 
       // Quotes last at most 15 minutes; re-quote if this one is about to lapse.
       let quote = q
-      let requoted = false
-      if (!state.jobId && quote.expiresAt - Date.now() / 1000 < 60 && lastRequest.current) {
-        quote = await api<HireQuote>('hire/quote', lastRequest.current)
-        requoted = true
-        set({ quote })
+      if (!state.jobId && !pendingCreateTx && quote.expiresAt - Date.now() / 1000 < 60 && lastRequest.current) {
+        quote = await api<HireQuote>('hire/quote', { ...lastRequest.current, quoteAccessVersion: 2 })
+        if (generation !== requestGeneration.current) return
+        if (quote.agentId !== q.agentId || quote.serviceId !== q.serviceId) throw new Error('The refreshed quote names a different service.')
+        // A changed price/asset/provider needs another explicit buyer decision. Never
+        // silently spend a refreshed quote after checking balances for the old one.
+        set({ phase: 'quoted', quote, intent: null, jobId: null, steps: planSteps(quote), balances: null, shortfall: null })
+        return
       }
       // An intent is bound to the quote it was made for: a fresh quote always gets a fresh
       // intent, even when an earlier attempt (declined in the wallet) already made one.
-      const intent = (state.jobId || !requoted ? state.intent : null) ?? await api<IntentResponse>('hire/intent', { wallet: address, quoteId: quote.quoteId })
+      const intent = ((state.jobId || pendingCreateTx) ? state.intent : null) ?? await api<IntentResponse>('hire/intent', { wallet: address, quoteId: quote.quoteId, quoteAccessToken: quote.quoteAccessToken })
+      if (intent.wallet && intent.wallet.toLowerCase() !== address.toLowerCase()) throw new Error('Reconnect the wallet that started this hire before continuing.')
+      if (intent.chainId !== quote.chainId || intent.provider.toLowerCase() !== quote.provider.toLowerCase() || intent.price !== quote.price || intent.token.address.toLowerCase() !== quote.token.address.toLowerCase() || (intent.quoteId !== undefined && intent.quoteId !== quote.quoteId) || (intent.agentId !== undefined && intent.agentId !== quote.agentId) || (intent.serviceId !== undefined && intent.serviceId !== quote.serviceId) || (quote.quoteHash !== undefined && intent.quoteHash !== quote.quoteHash)) throw new Error('The prepared hire differs from the selected quote. Request a fresh quote before continuing.')
+      if (generation !== requestGeneration.current) throw new Error('The selected hire changed. Review the current service before continuing.')
       set({ intent })
       const terms: HireTerms = { chainId: quote.chainId, provider: quote.provider, token: quote.token, price: BigInt(quote.price), priceLabel: quote.priceLabel, agentName: quote.agentName, expiredAt: BigInt(intent.expiredAt), description: intent.description }
 
       let jobId = state.jobId
       if (!jobId) {
-        const createTx = await send(createJobCall(terms), 'createJob')
-        mark('createJob', 'done', createTx)
+        const createTx = pendingCreateTx ?? await send(createJobCall(terms), 'createJob')
         let bound: { jobId: string } | null = null
         for (let i = 0; i < 6 && !bound; i++) {
           bound = await api<{ jobId: string }>('hire/bind', { intentId: intent.intentId, txHash: createTx }).catch((e: { status?: number }) => {
@@ -181,13 +199,25 @@ export function useHire() {
           if (!bound) await new Promise((r) => setTimeout(r, 3000))
         }
         if (!bound) throw Object.assign(new Error('bind'), { code: 'bind_pending' })
+        mark('createJob', 'done', createTx)
         jobId = bound.jobId
         set({ jobId })
       }
 
       const allowance = await readContract(config, { address: quote.token.address, abi: erc20Abi, functionName: 'allowance', args: [address, network(quote.chainId).commerce], chainId: quote.chainId })
-      const calls = paymentCalls(terms, BigInt(jobId), allowance)
-      if (!calls.some((c) => c.step === 'approve')) mark('approve', 'skipped')
+      const n = network(quote.chainId)
+      const [job, policy, token] = await Promise.all([
+        readContract(config, { address: n.commerce, abi: agenticCommerceAbi, functionName: 'getJob', args: [BigInt(jobId)], chainId: quote.chainId }),
+        readContract(config, { address: n.router, abi: evaluatorRouterAbi, functionName: 'jobPolicy', args: [BigInt(jobId)], chainId: quote.chainId }),
+        readContract(config, { address: n.commerce, abi: agenticCommerceAbi, functionName: 'jobPaymentToken', args: [BigInt(jobId)], chainId: quote.chainId }),
+      ])
+      const calls = remainingPaymentCalls(terms, BigInt(jobId), allowance, address, job, policy, token)
+      if (generation !== requestGeneration.current) throw new Error('The selected hire changed. Open the existing job room to continue.')
+      if (calls.length && ((calls.some(c => c.step === 'fund') && tokenBal < BigInt(quote.price)) || gasBal.value === 0n)) {
+        set({ phase: 'quoted', shortfall: { token: tokenBal < BigInt(quote.price), gas: gasBal.value === 0n } })
+        return
+      }
+      for (const id of ['registerJob', 'setBudget', 'approve', 'fund'] as const) if (!calls.some(c => c.step === id)) mark(id, id === 'approve' ? 'skipped' : 'done')
 
       // EIP-5792: one atomic batch for the payment steps, when this wallet supports it here.
       let batched = false
@@ -198,11 +228,11 @@ export function useHire() {
         batched = atomic?.status === 'supported' || atomic?.status === 'ready' || atomic?.supported === true
       } catch { batched = false }
 
-      if (batched) {
+      if (batched && calls.length) {
         for (const c of calls) mark(c.step, 'active')
         currentStep.current = 'batch'
         const { id } = await sendCalls(config, {
-          chainId: quote.chainId, forceAtomic: true,
+          account: address, chainId: quote.chainId, forceAtomic: true,
           calls: calls.map((c) => ({ to: c.to, data: encodeFunctionData({ abi: c.abi as Abi, functionName: c.functionName, args: c.args as unknown[] }) })),
         })
         for (const c of calls) mark(c.step, 'confirming')
@@ -219,18 +249,19 @@ export function useHire() {
       }
 
       mark('notify', 'active')
-      await api('hire/notify', { chainId: quote.chainId, jobId, params: opts.notifyParams })
-        .then(() => mark('notify', 'done'))
-        // The worker retries a lost notify; the job is paid and safe either way.
-        .catch(() => mark('notify', 'done'))
+      const notified = await api<{ accepted: boolean; status: string | null }>('hire/notify', { chainId: quote.chainId, jobId, params: opts.notifyParams }).catch(() => null)
+      const notification = notified?.accepted ? 'accepted' : notified?.status === 'rejected' ? 'rejected' : 'pending'
+      mark('notify', notification === 'accepted' ? 'done' : 'failed')
+      set({ notification })
       set({ phase: 'done' })
     } catch (err) {
+      if (generation !== requestGeneration.current) return
       const e = err as { code?: string; detail?: string }
       const friendly = e.detail ? { code: e.code ?? 'hire', title: e.detail, action: 'Nothing more was charged. Try again.', retryable: true } : friendlyError(err)
       reportFailure(friendly.code, err, connector?.id ?? 'unknown', currentStep.current)
       set((s) => ({ phase: 'error', error: friendly, steps: s.steps.map((st) => (st.status === 'active' ? { ...st, status: 'failed' } : st)) }))
     } finally {
-      busy.current = false
+      if (generation === requestGeneration.current) busy.current = false
     }
   }, [state.quote, state.intent, state.jobId, address, walletChain, config])
 
@@ -265,15 +296,17 @@ export function useHire() {
 
   /** Cancel an opened job before paying (registerJob or payment failed). */
   const cancel = useCallback(async () => {
-    if (!state.jobId || !state.quote) return
+    if (!state.jobId || !state.quote || !address) return
     try {
+      const job = await readContract(config, { address: network(state.quote.chainId).commerce, abi: agenticCommerceAbi, functionName: 'getJob', args: [BigInt(state.jobId)], chainId: state.quote.chainId })
+      if (job.status !== 0 || job.client.toLowerCase() !== address.toLowerCase()) throw new Error('Only your unfunded open job can be cancelled here. Open its job room for current state and refund options.')
       set({ phase: 'signing', error: null })
       await send(cancelCall(state.quote.chainId, BigInt(state.jobId)))
       set({ phase: 'idle', jobId: null, intent: null, error: null })
     } catch (err) {
       set({ phase: 'error', error: friendlyError(err) })
     }
-  }, [state.jobId, state.quote])
+  }, [state.jobId, state.quote, address, config])
 
   return { state, getQuote, start, cancel, reset, precheck }
 }

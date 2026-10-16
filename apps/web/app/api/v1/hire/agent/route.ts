@@ -22,12 +22,15 @@ async function platformFeeBp(chainId: ChainId): Promise<number | null> {
 /** GET /api/v1/hire/agent?agentId=: the agent the hire sheet is about, with its last live quote. */
 export async function GET(req: NextRequest) {
   const agentId = req.nextUrl.searchParams.get('agentId') ?? ''
+  const selected = req.nextUrl.searchParams.get('serviceId')
+  if (selected !== null && (!/^[1-9]\d*$/.test(selected) || !Number.isSafeInteger(Number(selected)))) return NextResponse.json({ error: 'bad_service', detail: 'Select an exact service.' }, { status: 400 })
+  const serviceId = selected === null ? null : Number(selected)
   if (agentId.length < 3 || agentId.length > 200) return NextResponse.json({ error: 'bad_request', detail: 'Name an agent.' }, { status: 400 })
   try {
-    const agent = await withDeadline(agentForSheet(agentId).catch(async (err) => {
+    const agent = await withDeadline(agentForSheet(agentId, serviceId).catch(async (err) => {
       // Try free also opens over agents that answer at their own endpoint but take no paid
       // jobs: the sheet then offers the free run only, and says why there is no Hire.
-      if (!(err instanceof HireError) || req.nextUrl.searchParams.get('try') !== '1') throw err
+      if (!(err instanceof HireError) || serviceId !== null || req.nextUrl.searchParams.get('try') !== '1') throw err
       const free = await freeTarget(agentId)
       const res = await db().execute(sql`select token_id, owner_address from agent where id = ${agentId} limit 1`)
       const row = (((res as unknown as { rows?: unknown[] }).rows ?? (res as unknown as unknown[])) as Array<Record<string, unknown>>)[0]

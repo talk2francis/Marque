@@ -11,6 +11,7 @@ const Body = z.object({
   agentId: z.string().min(3).max(200),
   serviceId: z.number().int().positive().nullable().optional(),
   task: z.string().trim().min(3).max(1200),
+  quoteAccessVersion: z.literal(2).optional(),
 })
 
 /**
@@ -24,7 +25,7 @@ export async function POST(req: NextRequest) {
   const parsed = Body.safeParse(await req.json().catch(() => null))
   if (!parsed.success) return NextResponse.json({ error: 'bad_request', detail: 'Send the agent and a short task description.' }, { status: 400 })
   try {
-    const { agentId, serviceId, task } = parsed.data
+    const { agentId, serviceId, task, quoteAccessVersion } = parsed.data
     // Marque's own agents can say, before any money moves, whether the task names
     // what they need. Missing facts stop the quote; left-out settings come back as
     // the stated defaults the answer will use.
@@ -40,7 +41,7 @@ export async function POST(req: NextRequest) {
     const q = await quoteForBuyer(agentId, serviceId ?? null, {
       task_description: task,
       terms: { deliverables: 'Complete the task as described, with the result delivered on chain.', quality_standards: 'Figures read from BNB Chain at delivery time, with sources.' },
-    })
+    }, quoteAccessVersion)
     return NextResponse.json({ ...q, assumptions: check.assumptions }, { headers: { 'Cache-Control': 'no-store' } })
   } catch (err) {
     return hireError(err, 'quote')

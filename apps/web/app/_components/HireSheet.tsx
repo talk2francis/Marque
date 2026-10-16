@@ -22,6 +22,8 @@ import { DeliverableView } from '../jobs/[chainId]/[jobId]/Deliverable'
  */
 interface SheetAgent {
   agentId: string; tokenId: string; registryChainId: number; name: string; category: string | null
+  serviceId?: number
+  preflight?: { version: 1; freePreview: 'reference_engine' | 'unsupported'; lastFailure: string | null; quotedAt: string | null }
   imageUrl: string | null
   owner: string | null; firstParty: boolean; state: string
   lastQuote: { chainId: number | null; priceLabel: string | null; signed: boolean | null; quotedAt: string | null } | null
@@ -73,6 +75,7 @@ function stepperSteps(steps: HireStep[], chainId: number, batch: boolean): TxSte
 export function HireSheet() {
   const params = useSearchParams()
   const agentId = params.get('hire')
+  const selectedService = params.get('serviceId')
   const tryFirst = params.get('try') === '1'
   const router = useRouter()
   const pathname = usePathname()
@@ -97,7 +100,7 @@ export function HireSheet() {
     setTryError(null)
     setFree(null)
     try {
-      const r = await fetch('/api/v1/hire/try', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ agentId, task: task.task }) })
+      const r = await fetch('/api/v1/hire/try', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ agentId, task: task.task, serviceId: agent?.serviceId }) })
       const j = await r.json().catch(() => ({}))
       if (!r.ok) throw new Error(typeof j.detail === 'string' ? j.detail : 'The free run did not complete. Try again in a minute.')
       setFree(j as FreeRun)
@@ -106,7 +109,7 @@ export function HireSheet() {
     } finally {
       setTrying(false)
     }
-  }, [agentId, task])
+  }, [agentId, agent?.serviceId, task])
 
   useEffect(() => {
     if (!agentId) return
@@ -121,7 +124,7 @@ export function HireSheet() {
     let active = true
     const timer = setTimeout(() => controller.abort(), 15_000)
     const signal = controller.signal
-    fetch(`/api/v1/hire/agent?agentId=${encodeURIComponent(agentId)}${tryFirst ? '&try=1' : ''}`, { signal })
+    fetch(`/api/v1/hire/agent?agentId=${encodeURIComponent(agentId)}${selectedService !== null ? `&serviceId=${encodeURIComponent(selectedService)}` : ''}${tryFirst ? '&try=1' : ''}`, { signal })
       .then(async (r) => {
         const j = await r.json()
         if (!r.ok) throw new Error(j.detail ?? 'This agent cannot be hired right now.')
@@ -134,12 +137,13 @@ export function HireSheet() {
     setSpotBnb(null)
     fetch('/api/v1/spot?symbol=BNB', { signal }).then((r) => (r.ok ? r.json() : null)).then((j) => { if (active) setSpotBnb(typeof j?.price === 'number' ? j.price : null) }).catch(() => undefined)
     return () => { active = false; clearTimeout(timer); controller.abort() }
-  }, [agentId, tryFirst, loadAttempt]) // reset is stable
+  }, [agentId, selectedService, tryFirst, loadAttempt]) // reset is stable
 
   const close = useCallback(() => {
     const next = new URLSearchParams(params.toString())
     next.delete('hire')
     next.delete('try')
+    next.delete('serviceId')
     router.replace(next.size ? `${pathname}?${next}` : pathname, { scroll: false })
   }, [params, pathname, router])
 
@@ -194,7 +198,7 @@ export function HireSheet() {
     if (!q) {
       const sells = agent.sellsJobs !== false
       // Try-first mode leads with the free run until there is an answer; after it, the price.
-      if ((tryFirst && !free) || !sells) {
+      if (((tryFirst && !free) || !sells) && agent.firstParty) {
         return (
           <Button variant="primary" block disabled={!task.ready || trying} loading={trying} onClick={runFree}>
             {free ? 'Run it free again' : 'Run it free'}
@@ -202,7 +206,7 @@ export function HireSheet() {
         )
       }
       return (
-        <Button variant="primary" block disabled={!task.ready || state.phase === 'quoting'} loading={state.phase === 'quoting'} onClick={() => getQuote(agent.agentId, task.task)}>
+        <Button variant="primary" block disabled={!sells || !task.ready || state.phase === 'quoting'} loading={state.phase === 'quoting'} onClick={() => getQuote(agent.agentId, task.task, agent.serviceId)}>
           Get a live price
         </Button>
       )
@@ -222,20 +226,20 @@ export function HireSheet() {
     <Sheet
       open
       onClose={() => { if (!signing) close() }}
-      label={`${tryFirst && !q ? 'Try' : 'Hire'} ${agent?.name ?? 'an agent'}`}
+      label={`${tryFirst && agent?.firstParty && !q ? 'Try' : 'Hire'} ${agent?.name ?? 'an agent'}`}
       surface="chamber"
-      title={<span className="t-label">{tryFirst && !q ? 'Try free' : 'Hire'} · {NET[chainId] ?? 'BNB Chain'}</span>}
+      title={<span className="t-label">{tryFirst && agent?.firstParty && !q ? 'Try free' : 'Hire'} · {NET[chainId] ?? 'BNB Chain'}</span>}
       footer={agent ? (
         <div className="hs-foot">
           {primary}
           {!q && task.missing && !task.ready ? <p className="hs-fine">{task.missing}</p> : null}
-          {!q && agent.sellsJobs !== false && task.ready && !trying && state.phase !== 'quoting' ? (
+          {!q && agent.firstParty && agent.sellsJobs !== false && task.ready && !trying && state.phase !== 'quoting' ? (
             tryFirst && !free
-              ? <button type="button" className="hs-quiet" onClick={() => getQuote(agent.agentId, task.task)}>Skip the free run and get a live price</button>
+              ? <button type="button" className="hs-quiet" onClick={() => getQuote(agent.agentId, task.task, agent.serviceId)}>Skip the free run and get a live price</button>
               : !free ? <button type="button" className="hs-quiet" onClick={runFree}>Try it free first (no wallet)</button> : null
           ) : null}
           {q && !signing && state.phase !== 'done' && !state.jobId ? <button type="button" className="hs-quiet" onClick={reset}>Change the task</button> : null}
-          {state.jobId && state.phase === 'error' ? <button type="button" className="hs-quiet" onClick={cancel}>Cancel job {state.jobId} (nothing is charged)</button> : null}
+          {state.jobId && state.phase === 'error' ? <button type="button" className="hs-quiet" onClick={cancel}>Cancel open job {state.jobId}</button> : null}
         </div>
       ) : null}
     >
@@ -253,15 +257,20 @@ export function HireSheet() {
             {agent.firstParty ? <Badge kind="reference" /> : null}
           </header>
 
+          {!agent.firstParty ? <p className="hs-fine">Service {agent.serviceId ?? 'unknown'}. Free execution has not been verified for this outside service. Requesting a price does not commission work or authorize payment.</p> : null}
+          {!q && agent.preflight?.lastFailure ? <p className="hs-fine">{agent.preflight.lastFailure === 'expired_or_unproven' ? 'The stored price expired or lacks current validity evidence.' : 'The last stored price did not pass its checks.'} A fresh quote is required.</p> : null}
+          {!q && state.error ? <ErrorNote error={state.error} /> : null}
+
           {state.phase === 'done' && q ? (
             <section className="hs-done" aria-live="polite">
               <div className="hs-done-head">
                 <span className="hs-done-ico" data-state={delivered ? 'done' : 'working'}>{delivered ? <Check /> : <Clock />}</span>
                 <div>
-                  <h3>{delivered ? `${q.agentName} delivered` : `${q.agentName} is working`}</h3>
+                  <h3>{delivered ? `${q.agentName} delivered` : state.notification === 'accepted' ? `${q.agentName} accepted the work request` : 'Job funded; provider response pending'}</h3>
                   <p>{delivered
                     ? `Job ${state.jobId} is delivered. Read the answer and rate it in the job room.`
-                    : `Job ${state.jobId} is paid. Your ${q.priceLabel} is held in BNB Chain's escrow until ${q.agentName} delivers.`}</p>
+                    : `Job ${state.jobId} is funded. Your ${q.priceLabel} is held in BNB Chain's escrow. Funding is separate from delivery and payment release.`}</p>
+                  {!delivered && state.notification !== 'accepted' ? <p>{state.notification === 'rejected' ? 'The provider rejected the work request. Open the job room for its current state and refund date.' : 'Provider acceptance has not been confirmed. Open the job room to follow delivery, retry status and the refund date.'}</p> : null}
                 </div>
               </div>
               {refundDate && !delivered ? <p className="hs-note">If it does not deliver, you can reclaim the payment from {refundDate}.</p> : null}

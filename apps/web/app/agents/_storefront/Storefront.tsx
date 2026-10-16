@@ -54,11 +54,11 @@ export function Storefront({ d }: { d: Data }) {
   const own = d.category && d.category !== 'unclassified' ? d.tests.filter((t) => t.testId === ownTest) : d.tests
   const latest = own[0] ?? null
   const passed = own.find((t) => t.pass) ?? null
-  const answersFree = d.endpoint !== null || d.isReference || (d.lastProbe?.liveness === 'live' && d.services.some((x) => x.kind === 'a2a'))
+  const answersFree = d.isReference
   const t = d.track
   const delivery = secs(t.delivery.medianSeconds)
-  const hireHref = `?hire=${encodeURIComponent(d.agentId)}`
-  const tryHref = `?hire=${encodeURIComponent(d.agentId)}&try=1`
+  const hireHref = `?hire=${encodeURIComponent(d.agentId)}${c?.serviceId == null ? '' : `&serviceId=${c.serviceId}`}`
+  const tryHref = `${hireHref}&try=1`
   const quoteAge = ago(c?.quotedAt ?? null)
   // First-party identity art only when this row is a Marque reference agent with a local brand.
   const brand = d.isReference ? agentBrand(d.agentId) : null
@@ -84,7 +84,7 @@ export function Storefront({ d }: { d: Data }) {
             </span>
           </>
         ) : (
-          <span className={styles.priceNone}>No live price. {c?.failure ? 'Its last price request failed.' : 'It has not quoted through BNB Chain escrow.'}</span>
+          <span className={styles.priceNone}>No live price. {c?.failure === 'expired_or_unproven' ? 'The stored price expired or lacks current validity evidence.' : c?.failure ? 'Its last price check did not pass.' : 'It has not quoted through BNB Chain escrow.'}</span>
         )}
       </div>
       <dl className={styles.panelFacts}>
@@ -158,7 +158,7 @@ export function Storefront({ d }: { d: Data }) {
               </>
             ) : (
               <div className={styles.emptyBox}>
-                <p>No public deliverable from this agent yet.{answersFree ? ' Run your own task free and see its real answer before you pay.' : ''}</p>
+                <p>No deliverable preview is available in this record yet.{answersFree ? ' Run your own task free and see its real answer before you pay.' : ''}</p>
                 {answersFree ? <a className="btn btn--sm" href={tryHref}>Try free</a> : null}
               </div>
             )}
@@ -291,7 +291,7 @@ export function Storefront({ d }: { d: Data }) {
               <div><dt>Metadata last read</dt><dd>{d.metadataReadAt ? `${utcStamp(d.metadataReadAt)} UTC` : 'not read yet'} <ProvenanceChip provenance="CLAIMED" /></dd></div>
               <div><dt>Last discovery check</dt><dd>{d.lastProbe ? <>{d.lastProbe.detail?.startsWith('card readable') ? 'Agent card readable; task call not tested by this check' : d.lastProbe.detail ?? d.lastProbe.liveness}{d.lastProbe.latencyMs !== null ? ` in ${d.lastProbe.latencyMs} ms` : ''}, {ago(d.lastProbe.at)}</> : 'not probed yet'} <ProvenanceChip provenance="MEASURED" /></dd></div>
               <div><dt>Endpoint observations, 24 h</dt><dd>{d.probes24h.total ? `${d.probes24h.reachable} of ${d.probes24h.total} discovery requests returned HTTP success. This is sampled reachability across services, not task success or guaranteed uptime.` : 'No observations in the last 24 hours.'} <ProvenanceChip provenance="MEASURED" /></dd></div>
-              <div><dt>Last quote</dt><dd>{c?.quotedAt ? <>{c.priceLabel ?? 'failed'}, {ago(c.quotedAt)}{c.signed ? ', signed by the agent wallet' : c.signed === false ? ', plain quote naming the agent wallet' : ''}</> : 'never quoted'} <ProvenanceChip provenance="MEASURED" /></dd></div>
+              <div><dt>Last quote</dt><dd>{c?.quotedAt ? <>{c.priceLabel ?? (c.failure === 'expired_or_unproven' ? 'expired or unproven' : 'not accepted')}, {ago(c.quotedAt)}{c.signed ? ', signed by the agent wallet' : c.signed === false ? ', plain quote naming the agent wallet' : ''}</> : 'never quoted'} <ProvenanceChip provenance="MEASURED" /></dd></div>
             </dl>
             {d.wallet ? <p className={styles.muted}><a className={styles.ext} href={explorerAddress(56, d.wallet)} target="_blank" rel="noreferrer">Every transaction of this agent on BscScan<ArrowUpRight aria-hidden="true" /></a></p> : null}
           </section>

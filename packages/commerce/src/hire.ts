@@ -1,14 +1,16 @@
 import { sql, eq, and, desc } from 'drizzle-orm'
+import { createHash, randomBytes, timingSafeEqual } from 'node:crypto'
 import { decodeEventLog, getAddress, isAddress, type Hex } from 'viem'
 import { db, hireIntent, commerceQuote, notifyAttempt, firstPartyAgents, canonicalAgentId } from '@marque/db'
 import { safeFetch } from '@marque/probe'
 import { agenticCommerceAbi } from './generated.js'
 import { network, isSupportedChain, formatAmount, type ChainId } from './config.js'
-import { chainClient, disputeWindowSeconds, fromAny, receiptFromAny } from './chain.js'
+import { chainClient, disputeWindowSeconds, fromAny, receiptFromAny, sellerIdentity } from './chain.js'
 import { buildJobDescription, buildPlainDescription, descriptionHash } from './description.js'
 import { computeExpiredAt, createJobCall } from './calls.js'
 import { requestQuote, verifySimpleQuote, verifyNegotiation, type NegotiateTask, type QuoteResult, NegotiationSchema, SimpleQuoteSchema } from './quote.js'
 import { sellerCandidates, recordQuote, type SellerCandidate } from './supply.js'
+import { notificationAcceptance } from './notification.js'
 
 /**
  * The server half of the hire rail (SPEC-COMMERCE 7.1). Nothing here signs or holds
@@ -30,8 +32,16 @@ export async function sellerFor(agentId: string, serviceId?: number | null): Pro
   return list[0]!
 }
 
+async function currentIdentity(seller: SellerCandidate) {
+  try { return await sellerIdentity(seller) }
+  catch { throw new HireError('identity_unavailable', 'The selected registry identity could not be checked on chain. No hire was prepared. Try again.', 503) }
+}
+
 export interface PublicQuote {
   quoteId: number
+  /** Existing v1 provider-envelope JSON digest; not the receipt or EIP-712 hash. */
+  quoteHash: string
+  quoteHashVersion: 1
   agentId: string
   serviceId: number
   agentName: string
@@ -48,22 +58,32 @@ export interface PublicQuote {
   expiresAt: number
   estimatedCompletionSeconds: number | null
   providerMatchesRegistry: true
+  registryEvidence: { version: 1; chainId: number; blockNumber: string; observedAt: string }
+  quoteAccessVersion?: 2
+  quoteAccessToken?: string
 }
 
 /** Ask the exact service for a price on the buyer's task, verify it, store it. */
-export async function quoteForBuyer(agentId: string, serviceId: number | null, task: NegotiateTask): Promise<PublicQuote> {
+export async function quoteForBuyer(agentId: string, serviceId: number | null, task: NegotiateTask, quoteAccessVersion?: 2): Promise<PublicQuote> {
   const seller = await sellerFor(agentId, serviceId)
-  const q: QuoteResult = await requestQuote(seller.endpoint, task, { agentWallet: seller.agentWallet, agentOwner: seller.owner, timeoutMs: 10_000 })
+  const identity = await currentIdentity(seller)
+  const q: QuoteResult = await requestQuote(seller.endpoint, task, { ...identity, timeoutMs: 10_000 })
   // A plain quote does not echo the task, so the task we asked is kept with it for the job description.
-  const quoteId = await recordQuote('user', seller, q, q.ok && !q.signed ? { _marque_task: task.task_description } : undefined)
+  const quoteAccessToken = quoteAccessVersion === 2 ? randomBytes(32).toString('hex') : undefined
+  const quoteId = await recordQuote('user', seller, q, {
+    ...(q.ok && !q.signed ? { _marque_task: task.task_description } : {}),
+    ...(quoteAccessToken ? { _marque_access: { version: 2, tokenHash: createHash('sha256').update(quoteAccessToken).digest('hex') } } : {}),
+  })
   if (!q.ok) throw new HireError(`quote_${q.reason}`, quoteFailureSentence(q.reason), 422)
   return {
-    quoteId, agentId, serviceId: seller.serviceId, agentName: seller.name, category: seller.category,
+    quoteId, quoteHash: q.quoteHash, quoteHashVersion: 1, agentId, serviceId: seller.serviceId, agentName: seller.name, category: seller.category,
     chainId: q.chainId, provider: q.provider, price: q.price.toString(),
     priceLabel: `${formatAmount(q.price, q.token.decimals)} ${q.token.symbol}`,
     token: q.token, signed: q.signed, expiresAt: q.expiresAt, estimatedCompletionSeconds: q.estimatedCompletionSeconds,
     sourceClaimVersion: 1, signatureEvidence: q.signatureEvidence, expirySource: q.expirySource,
     providerMatchesRegistry: true,
+    registryEvidence: { version: 1, chainId: seller.chainId, blockNumber: identity.blockNumber, observedAt: new Date().toISOString() },
+    ...(quoteAccessToken ? { quoteAccessVersion: 2 as const, quoteAccessToken } : {}),
   }
 }
 
@@ -89,6 +109,12 @@ async function categoryOf(agentId: string): Promise<string> {
 
 export interface IntentResponse {
   intentId: string
+  quoteId: number
+  agentId: string
+  serviceId: number
+  quoteHash: string | null
+  quoteHashVersion: 1
+  wallet: string
   chainId: ChainId
   agentName: string
   category: string
@@ -107,11 +133,17 @@ export interface IntentResponse {
 }
 
 /** Record a buyer's intent for one stored quote (no signature needed; SPEC-TRACKING 5). */
-export async function createIntent(input: { wallet: string; quoteId: number; clientIp?: string | null }): Promise<IntentResponse> {
+export async function createIntent(input: { wallet: string; quoteId: number; quoteAccessToken?: string; clientIp?: string | null }): Promise<IntentResponse> {
   if (!isAddress(input.wallet)) throw new HireError('bad_wallet', 'That is not a wallet address.')
   const wallet = getAddress(input.wallet)
   const [q] = await db().select().from(commerceQuote).where(and(eq(commerceQuote.id, input.quoteId), eq(commerceQuote.source, 'user'), eq(commerceQuote.ok, true))).limit(1)
   if (!q) throw new HireError('no_quote', 'That quote does not exist or did not pass checks. Ask for a new quote.', 404)
+  const access = q.raw?.['_marque_access'] as { version?: unknown; tokenHash?: unknown } | undefined
+  if (access !== undefined) {
+    const supplied = input.quoteAccessToken
+    const valid = access?.version === 2 && typeof access.tokenHash === 'string' && /^[a-f0-9]{64}$/.test(access.tokenHash) && typeof supplied === 'string' && /^[a-f0-9]{64}$/.test(supplied) && timingSafeEqual(Buffer.from(access.tokenHash, 'hex'), createHash('sha256').update(supplied).digest())
+    if (!valid) throw new HireError('quote_access', 'Use the quote returned to this browser or request a fresh one.', 403)
+  }
   const now = Math.floor(Date.now() / 1000)
   if (!q.quoteExpiresAt || q.quoteExpiresAt.getTime() / 1000 <= now + 20) throw new HireError('quote_expired', 'The quote has expired. Ask for a new one.', 410)
   if (!isSupportedChain(q.chainId) || !q.provider || !q.priceRaw || !q.token || q.tokenDecimals === null || !q.tokenSymbol) {
@@ -126,7 +158,7 @@ export async function createIntent(input: { wallet: string; quoteId: number; cli
   if (q.serviceId === null || typeof q.signed !== 'boolean') throw new HireError('bad_quote', 'Ask for a fresh quote with complete service evidence.', 422)
   const seller = await sellerFor(q.agentId, q.serviceId)
   if (seller.endpoint !== q.endpoint) throw new HireError('service_changed', 'The selected service changed. Ask it for a fresh quote.', 409)
-  const context = { agentOwner: seller.owner, agentWallet: seller.agentWallet, now }
+  const context = { ...await currentIdentity(seller), now }
   const verified = q.signed
     ? await verifyNegotiation(NegotiationSchema.parse(q.raw), context)
     : verifySimpleQuote(SimpleQuoteSchema.parse(q.raw), { ...context, now: Math.floor(q.createdAt.getTime() / 1000) })
@@ -137,31 +169,37 @@ export async function createIntent(input: { wallet: string; quoteId: number; cli
   const agentName = String(agent?.['name'] ?? 'this agent')
   const category = await categoryOf(q.agentId)
   const window = await disputeWindowSeconds(chainId)
-  const expiredAt = computeExpiredAt(now, window, q.estimatedCompletionSeconds)
-
-  const intentId = crypto.randomUUID()
   const raw = q.raw as Record<string, unknown>
-  let description: string
-  if (q.signed === false) {
-    const simple = SimpleQuoteSchema.parse(raw)
-    const task = String(raw['_marque_task'] ?? raw['service'] ?? '')
-    description = buildPlainDescription(simple, task, intentId)
-  } else {
-    description = buildJobDescription(NegotiationSchema.parse(raw))
-  }
-  const hash = descriptionHash(description)
   const price = BigInt(q.priceRaw)
   const priceLabel = `${formatAmount(price, token.decimals)} ${token.symbol}`
-
-  await db().insert(hireIntent).values({
-    id: intentId, wallet: wallet.toLowerCase(), agentId: q.agentId, serviceId: q.serviceId, category, chainId,
-    quoteId: q.id, provider: q.provider.toLowerCase(), token: token.address.toLowerCase(), priceRaw: q.priceRaw,
-    description, descriptionHash: hash, expiredAt: Number(expiredAt), clientIp: input.clientIp ?? null,
+  const intent = await db().transaction(async tx => {
+    await tx.execute(sql`set local statement_timeout = '5000ms'`)
+    await tx.execute(sql`set local lock_timeout = '500ms'`)
+    // One durable intent per buyer/quote. No migration or historical observation rewrite.
+    await tx.execute(sql`select pg_advisory_xact_lock(hashtextextended(${`hire:${wallet.toLowerCase()}:${q.id}`}, 0))`)
+    const [existing] = await tx.select().from(hireIntent).where(and(eq(hireIntent.wallet, wallet.toLowerCase()), eq(hireIntent.quoteId, q.id))).orderBy(desc(hireIntent.createdAt)).limit(1)
+    if (existing?.jobId) throw new HireError('intent_already_bound', `This quote already opened job ${existing.jobId}. Continue in its job room.`, 409)
+    if (existing) return existing
+    if (verified.expiresAt <= Date.now() / 1000 + 20) throw new HireError('quote_expired', 'The quote expired while preparing the hire. Ask again.', 410)
+    const intentId = crypto.randomUUID()
+    const description = q.signed === false
+      ? buildPlainDescription(SimpleQuoteSchema.parse(raw), String(raw['_marque_task'] ?? raw['service'] ?? ''), intentId)
+      : buildJobDescription(NegotiationSchema.parse(raw))
+    const [created] = await tx.insert(hireIntent).values({
+      id: intentId, wallet: wallet.toLowerCase(), agentId: q.agentId, serviceId: q.serviceId, category, chainId,
+      quoteId: q.id, provider: q.provider!.toLowerCase(), token: token.address.toLowerCase(), priceRaw: q.priceRaw!,
+      description, descriptionHash: descriptionHash(description), expiredAt: Number(computeExpiredAt(Math.floor(Date.now() / 1000), window, q.estimatedCompletionSeconds)), clientIp: input.clientIp ?? null,
+    }).returning()
+    if (!created) throw new HireError('intent_failed', 'The hire could not be recorded. Try again.', 503)
+    return created
   })
+  const { id: intentId, description } = intent
+  const hash = intent.descriptionHash
+  const expiredAt = BigInt(intent.expiredAt)
 
   const call = createJobCall({ chainId, provider: getAddress(q.provider), token, price, priceLabel, agentName, expiredAt, description })
   return {
-    intentId, chainId, agentName, category, provider: getAddress(q.provider), price: q.priceRaw, priceLabel,
+    intentId, wallet: wallet.toLowerCase(), quoteId: q.id, agentId: q.agentId, serviceId: q.serviceId, quoteHash: q.quoteHash, quoteHashVersion: 1, chainId, agentName, category, provider: getAddress(q.provider), price: q.priceRaw, priceLabel,
     token: { address: token.address, symbol: token.symbol, decimals: token.decimals, isDefault: token.isDefault },
     expiredAt: expiredAt.toString(), refundAfter: new Date(Number(expiredAt) * 1000).toISOString(),
     disputeWindowSeconds: window, description, descriptionHash: hash,
@@ -219,14 +257,15 @@ export async function notifySeller(chainId: number, jobId: string, opts: { param
   const done = await db().select().from(notifyAttempt).where(and(eq(notifyAttempt.chainId, chainId), eq(notifyAttempt.jobId, jobId), eq(notifyAttempt.ok, true))).orderBy(desc(notifyAttempt.createdAt)).limit(1)
   if (done[0] && !opts.force) return { accepted: true, status: done[0].status, attempts: 0 }
   const job = await chainClient(chainId as ChainId).readContract({ address: network(chainId).commerce, abi: agenticCommerceAbi, functionName: 'getJob', args: [BigInt(jobId)] }) as { status: number }
-  if (job.status < 1) throw new HireError('not_funded', 'The job is not paid yet, so the agent has not been asked to start.', 409)
+  if (job.status === 2 || job.status === 3) return { accepted: true, status: 'already_delivered', attempts: 0 }
+  if (job.status !== 1) throw new HireError('not_funded', 'The job is not currently funded. No work request was sent.', 409)
   const [q] = await db().select().from(commerceQuote).where(eq(commerceQuote.id, intent.quoteId)).limit(1)
   if (!q) throw new HireError('no_quote', 'The quote for this job is missing.', 500)
   const prior = await db().select({ n: sql<number>`count(*)::int` }).from(notifyAttempt).where(and(eq(notifyAttempt.chainId, chainId), eq(notifyAttempt.jobId, jobId)))
   let attempt = prior[0]?.n ?? 0
   const body = (id: string) => JSON.stringify({
     jsonrpc: '2.0', id, method: 'message/send',
-    params: { message: { kind: 'message', role: 'user', messageId: id, parts: [{ kind: 'data', data: { skill: 'notify_funded', job_id: Number(jobId), ...(opts.params ?? {}) } }] } },
+    params: { message: { kind: 'message', role: 'user', messageId: id, parts: [{ kind: 'data', data: { ...(opts.params ?? {}), skill: 'notify_funded', job_id: Number(jobId) } }] } },
   })
   for (let i = 0; i < 3; i++) {
     attempt++
@@ -235,9 +274,8 @@ export async function notifySeller(chainId: number, jobId: string, opts: { param
     let status: string | null = null
     let ok = false
     if (res.ok && res.status < 400) {
-      const m = res.body.match(/"status"\s*:\s*"(accepted|rejected)"/)
-      status = m?.[1] ?? (/"accepted"\s*:\s*true/.test(res.body) ? 'accepted' : null)
-      ok = status === 'accepted' || /job_id|jobId/.test(res.body)
+      status = notificationAcceptance(res.body, jobId)
+      ok = status === 'accepted'
     }
     await db().insert(notifyAttempt).values({
       chainId, jobId, intentId: intent.id, endpoint: q.endpoint, attempt, ok, status,
@@ -297,6 +335,7 @@ export async function retryPendingNotifies(limit = 20): Promise<{ checked: numbe
 
 export interface SheetAgent {
   agentId: string
+  serviceId: number
   tokenId: string
   registryChainId: number
   name: string
@@ -307,17 +346,19 @@ export interface SheetAgent {
   lastQuote: { chainId: number | null; priceLabel: string | null; signed: boolean | null; quotedAt: string | null } | null
   /** The seller's own example task when it works from a JSON object (see SellerCandidate). */
   taskExample: string | null
+  preflight: { version: 1; observationalOnly: true; sellerRequests: 0; freePreview: 'reference_engine' | 'unsupported'; quoteMode: string; lastFailure: string | null; quotedAt: string | null; nextStep: string }
 }
 
 /** What the hire sheet shows before the buyer asks for a price. */
-export async function agentForSheet(agentId: string): Promise<SheetAgent> {
-  const seller = await sellerFor(agentId)
+export async function agentForSheet(agentId: string, serviceId?: number | null): Promise<SheetAgent> {
+  const seller = await sellerFor(agentId, serviceId)
   const { commercialStates } = await import('./supply.js')
   const s = (await commercialStates(seller.serviceId)).get(seller.serviceId)
   return {
-    agentId: seller.agentId, tokenId: seller.tokenId, registryChainId: seller.chainId, name: seller.name,
+    agentId: seller.agentId, serviceId: seller.serviceId, tokenId: seller.tokenId, registryChainId: seller.chainId, name: seller.name,
     category: seller.category, owner: seller.owner, firstParty: seller.firstParty !== null, state: s?.state ?? 'unavailable',
     taskExample: seller.taskExample,
+    preflight: { version: 1, observationalOnly: true, sellerRequests: 0, freePreview: seller.firstParty ? 'reference_engine' : 'unsupported', quoteMode: s?.signed === true ? 'provider_signed' : s?.signed === false ? 'identity_matched_unsigned' : 'unknown', lastFailure: s?.failure ?? null, quotedAt: s?.quotedAt ?? null, nextStep: 'Request a fresh price for this exact service and task. Inspect the returned signature mode before hiring.' },
     lastQuote: s ? {
       chainId: s.chainId,
       priceLabel: s.priceRaw && s.token ? `${formatAmount(BigInt(s.priceRaw), s.token.decimals)} ${s.token.symbol}` : null,

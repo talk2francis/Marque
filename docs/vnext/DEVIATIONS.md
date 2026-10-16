@@ -31,3 +31,18 @@
 - Stock audit retains 24/28 small-target heuristic advisory cases; no full accessibility certification. No global redesign or permissive test baseline change.
 - An existing ingestion worker exited/recovered under PM2 during observation. Other product/shared/user-manager PIDs stayed unchanged and health reads completed. Kernel OOM absent; PM2 SIGINT fallback and configured memory cap do not prove initiating cause. No speculative production fix is applied. Old 23 untracked status entries reconcile to 26 pre-existing media files.
 - P02 provider/buyer independence, consent and original artifact proof remain UNKNOWN. User has already approved P02; no extra phase permission is needed, but new paid mainnet and production release approvals remain separate.
+
+
+## P02, 16 October 2026
+
+- Allowed AMBER fallback: current chain confirms historical payment and artifact integrity; human independence and consent remain unknown. Vitals56924 was newly found PAID, with a configured team buyer, and is excluded. No new paid job was created for a metric. Operator contact draft remains private and unsent; testnet plan is not execution approval.
+- Source-only exact-service/fresh-owner/recovery repairs extend existing rails. Quote access v2 is opt-in and legacy numeric-ID access remains weaker; no destructive API migration or asset authority. Outside free-task execution is intentionally blocked pending a reviewed operation contract; reference previews and four categories remain.
+- Historical registry ownership at creation could not be read from the public RPC. Two IPFS gateways returned429; a third returned a manifest whose canonical SDK hash matches chain. Keep failure observations. Full deployed-build verified-source provenance remains unknown.
+- No production deployment, Git push, paid external task, wallet session or chain write. Candidate evidence is distinct from production behavior; no new independent-human success count or exactly-once chain guarantee is claimed.
+
+- Actual storefront browser review found two scope errors: absence of an indexed preview was worded as no public artifact, and an expired stored quote as a failed request. A copy-only correction is rebuilt and receives focused browser verification; the functional build evidence is retained separately.
+
+- Browser mismatched-service negatives correctly prevented hire but exposed an initially invisible error (the old error display required a non-null quote). The same assertion is retained for the repaired pre-quote error view; original failures remain private. This justified a further candidate-only build, with no production restart.
+- Final copy checker hit a sandbox nested `git spawnSync` EPERM; automatic review of the direct host retry timed out. A private copy of the unchanged checker used the exact shell-captured Git file list and original baseline instead:843 <=859, exit0. No baseline relaxation or source-checker mutation.
+
+- The final terminal-bound build printed the completed route table but its wrapper ended143 before writing a clean exit marker. Scope journal/no kernel OOM/shared PID checks did not establish an initiating cause. A detached, identically capped build of the same frozen source completed exit0 (service success/exited; peak2530983936bytes). No speculative production fix or memory-cap increase was applied.

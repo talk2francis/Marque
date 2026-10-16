@@ -405,11 +405,11 @@ export function quotedPrice(r: Pick<MarketRow, 'commerce'>): number | null {
 }
 
 /**
- * Answers a free task at its own endpoint: Marque's reference agents (their free face
- * runs the paid engine), and any agent with a live A2A service measured in the last 24 h.
+ * Audited reference preview. A readable outside A2A card does not establish
+ * free execution or the absence of side effects.
  */
 export function answersFree(r: Pick<MarketRow, 'isReference' | 'liveness' | 'interfaces'>): boolean {
-  return r.isReference || (r.liveness === 'live' && r.interfaces.includes('a2a'))
+  return r.isReference
 }
 
 const isOther = (r: Pick<MarketRow, 'category'>) => r.category === null || r.category === 'unclassified'

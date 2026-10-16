@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm'
-import { db } from '@marque/db'
+import { db, firstPartyAgents, canonicalAgentId } from '@marque/db'
 import { safeFetch } from '@marque/probe'
 import { HireError, sellerFor } from './hire.js'
 
@@ -9,8 +9,8 @@ import { HireError, sellerFor } from './hire.js'
  * The buyer's own task goes to the exact service Hire would pay, as a plain A2A
  * `message/send` with no payment and no signature: an agent's free face. Marque's
  * reference agents answer it with the same engine their paid jobs run, so the free
- * answer is the answer a buyer would pay for. Third parties answer however they
- * answer; the reply is shown as theirs, never graded here.
+ * answer is the answer a buyer would pay for. Outside message/send operations
+ * are blocked until their free operation contract is independently reviewed.
  *
  * Nothing is stored and nothing moves on chain. The call goes through safeFetch
  * (SSRF guard, timeout, size cap) like every other call to an agent.
@@ -74,12 +74,16 @@ export function answerFromA2A(body: unknown): { content: Record<string, unknown>
  * Where to send a free task: the seller's own service when it sells through ERC-8183,
  * else the agent's A2A service our probe found live in the last 24 hours.
  */
-export async function freeTarget(agentId: string): Promise<{ name: string; category: string | null; endpoint: string; firstPartySlug: string | null }> {
+export async function freeTarget(agentId: string, serviceId?: number | null): Promise<{ name: string; category: string | null; endpoint: string; firstPartySlug: string | null }> {
+  // A2A liveness and a card are not evidence that message/send is free or read-only.
+  // Keep the audited reference preview; outside providers require a separate reviewed
+  // operation contract before their tasks may be invoked through this free rail.
+  if (!firstPartyAgents().some(a => canonicalAgentId(a) === agentId)) throw new HireError('free_preview_unsupported', 'A free, read-only task has not been verified for this outside service. Request a quote or inspect its record.', 422)
   try {
-    const seller = await sellerFor(agentId, null)
+    const seller = await sellerFor(agentId, serviceId)
     return { name: seller.name, category: seller.category, endpoint: seller.endpoint, firstPartySlug: seller.firstParty?.slug ?? null }
   } catch (err) {
-    if (!(err instanceof HireError)) throw err
+    if (!(err instanceof HireError) || serviceId != null) throw err
   }
   const r = await db().execute(sql`
     select coalesce(a.name, 'This agent') as name,
@@ -96,8 +100,8 @@ export async function freeTarget(agentId: string): Promise<{ name: string; categ
   return { name: String(row['name']), category: row['category'] ? String(row['category']) : null, endpoint: String(row['endpoint']), firstPartySlug: null }
 }
 
-export async function tryFree(agentId: string, task: string): Promise<FreeAnswer> {
-  const seller = await freeTarget(agentId)
+export async function tryFree(agentId: string, task: string, serviceId?: number | null): Promise<FreeAnswer> {
+  const seller = await freeTarget(agentId, serviceId)
   const messageId = `try-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
   const started = Date.now()
   const res = await safeFetch(seller.endpoint, {

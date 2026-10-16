@@ -6,7 +6,7 @@ import { hireError, limited } from '../../../../../lib/hire-api'
 
 export const dynamic = 'force-dynamic'
 
-const Body = z.object({ wallet: z.string().regex(/^0x[0-9a-fA-F]{40}$/), quoteId: z.number().int().positive() })
+const Body = z.object({ wallet: z.string().regex(/^0x[0-9a-fA-F]{40}$/), quoteId: z.number().int().positive(), quoteAccessToken: z.string().regex(/^[a-f0-9]{64}$/).optional() })
 
 /**
  * POST /api/v1/hire/intent: record that this wallet intends to hire at this quote, and

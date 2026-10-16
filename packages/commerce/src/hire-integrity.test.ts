@@ -3,6 +3,7 @@ import { network } from './config'
 const { quote, insert, candidates } = vi.hoisted(() => ({ quote: { current: {} as Record<string, unknown> }, insert: vi.fn(), candidates: vi.fn() }))
 vi.mock('@marque/db', async original => ({ ...await original<object>(), db: () => ({ select: () => ({ from: () => ({ where: () => ({ limit: async () => [quote.current] }) }) }), insert }) }))
 vi.mock('./supply', async original => ({ ...await original<object>(), sellerCandidates: candidates }))
+vi.mock('./chain', async original => ({ ...await original<object>(), sellerIdentity: async () => ({ agentOwner: '0x1111111111111111111111111111111111111111', agentWallet: null, blockNumber: '123' }) }))
 import { createIntent } from './hire'
 const net = network(56)
 const provider = '0x1111111111111111111111111111111111111111'

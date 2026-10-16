@@ -1,4 +1,4 @@
-import { createPublicClient, http, fallback, type Hex, type PublicClient, type TransactionReceipt } from 'viem'
+import { createPublicClient, http, fallback, getAddress, parseAbi, zeroAddress, type Hex, type PublicClient, type TransactionReceipt } from 'viem'
 import { bsc, bscTestnet } from 'viem/chains'
 import { network, type ChainId } from './config.js'
 import { optimisticPolicyAbi } from './generated.js'
@@ -30,6 +30,27 @@ export function chainClient(chainId: ChainId): PublicClient {
 }
 
 const single = new Map<string, PublicClient>()
+
+const identityAbi = parseAbi(['function ownerOf(uint256) view returns (address)', 'function getAgentWallet(uint256) view returns (address)'])
+
+/** Fresh, same-block registry proof for one selected seller. No index fallback. */
+export async function sellerIdentity(seller: { agentId: string; chainId: number; tokenId: string }): Promise<{ agentOwner: string; agentWallet: string | null; blockNumber: string }> {
+  const n = network(seller.chainId)
+  if (!/^(0|[1-9]\d{0,77})$/.test(seller.tokenId) || BigInt(seller.tokenId) >= 2n ** 256n || seller.agentId.toLowerCase() !== `${seller.chainId}:${n.identityRegistry.toLowerCase()}:${seller.tokenId}`) throw new Error('noncanonical seller identity')
+  // A single bounded RPC pins both reads to the same observed block. Unavailable or
+  // transferred identities fail closed before contacting a seller or creating an intent.
+  const c = createPublicClient({ transport: http(rpcUrls(seller.chainId as ChainId)[0]!, { timeout: 4000, retryCount: 0 }) })
+  const [header, actualChain] = await Promise.all([c.getBlock({ blockTag: 'latest' }), c.getChainId()])
+  const age = Date.now() / 1000 - Number(header.timestamp)
+  if (actualChain !== seller.chainId || age > 120 || age < -30) throw new Error('wrong chain or stale RPC head')
+  const blockNumber = header.number
+  const [owner, wallet] = await Promise.all([
+    c.readContract({ address: n.identityRegistry, abi: identityAbi, functionName: 'ownerOf', args: [BigInt(seller.tokenId)], blockNumber }),
+    c.readContract({ address: n.identityRegistry, abi: identityAbi, functionName: 'getAgentWallet', args: [BigInt(seller.tokenId)], blockNumber }),
+  ])
+  if (owner === zeroAddress) throw new Error('identity has no owner')
+  return { agentOwner: getAddress(owner), agentWallet: wallet === zeroAddress ? null : getAddress(wallet), blockNumber: blockNumber.toString() }
+}
 
 /**
  * A receipt from whichever RPC in the pool has it first (28 Sep, P2-12). A fallback

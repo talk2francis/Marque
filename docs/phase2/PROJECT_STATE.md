@@ -1,3 +1,7 @@
+# P02 checkpoint, 16 October 2026
+
+Approved P02 scoped candidate repairs pass after P01A; the phase closes AMBER through its allowed historical-evidence/diagnostic fallback. Historical Plinth56916 signed quote, chain description, artifact and payment are verified; Vitals56924 is also PAID but its team buyer is excluded. Historical signed quotes/explicit notifications prove protocol acceptance; human independence and authenticated operator/new-pilot consent remain UNKNOWN. Exact-service, fresh-registry, intent/recovery and external-preview repairs are tracked in [P02 checkpoint](../vnext/P02_CHECKPOINT.md) and its evidence contract. Full suite487passed; final targeted74/metadata5/real-Postgres8 passed; final build/types/lint/browser checks passed. No deployment, push, real wallet, mainnet/testnet write or paid external call. P03 will not start without approval. Prior history below is retained.
+
 # P01A checkpoint, 16 October 2026
 
 Quote/listing/claim repair acceptance passes at tested source `32fd5cfeb5109984e060ef573988be8677cdb3ac` on the isolated feature branch. See [P01A checkpoint](../vnext/P01A_CHECKPOINT.md) and the versioned integrity contract. No push, production deployment or chain write. P02 explicitly approved by the owner, begins after local commit/announcement; paid mainnet and production release gates remain. Existing recovered ingestion-worker exit has unknown initiating cause; web/Kerb/shared services remain healthy. Historical P00/P01 entries below are retained.
