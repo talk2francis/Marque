@@ -252,7 +252,7 @@ export const conformanceCase = pgTable('conformance_case', {
   policy: jsonb('policy').notNull(),
   /** Frozen ground truth, computed by us from chain state at capture. */
   groundTruth: jsonb('ground_truth').notNull(),
-  /** keccak-style hash of the frozen ground truth, published with results. */
+  /** SHA-256 of recursively sorted-key JSON ground truth, no prefix. */
   groundTruthHash: text('ground_truth_hash').notNull(),
   /** The exact question put to every agent. */
   prompt: text('prompt').notNull(),

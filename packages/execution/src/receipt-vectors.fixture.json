@@ -1,0 +1,137 @@
+[
+  {
+    "receipt": {
+      "version": "1",
+      "runId": "synthetic-regression-only",
+      "issuedAt": "2026-01-01T00:00:00.000Z",
+      "task": {
+        "kind": "health_factor",
+        "chainId": 56,
+        "blockNumber": "100",
+        "subject": "0x0000000000000000000000000000000000000001",
+        "maxSpendUsd": 1,
+        "policy": {
+          "targetHealthFactor": 2
+        }
+      },
+      "commercial": {
+        "agentId": "synthetic:1",
+        "executorKind": "a2a",
+        "declaredPrice": null,
+        "paidAmount": null,
+        "paidAsset": null,
+        "maxSpendUsd": 1,
+        "settled": false,
+        "settlementNote": "synthetic only"
+      },
+      "execution": {
+        "chainId": 56,
+        "blockNumber": "100",
+        "txHashes": [],
+        "startedAt": "2026-01-01T00:00:00.000Z",
+        "finishedAt": "2026-01-01T00:00:01.000Z",
+        "latencyMs": 1000,
+        "ok": false,
+        "failureReason": "synthetic failure"
+      },
+      "authority": {
+        "charterId": null,
+        "allowlist": [],
+        "spendCapUsd": 1,
+        "expiresAt": null,
+        "withinAuthority": true
+      },
+      "quality": {
+        "testId": null,
+        "pass": null,
+        "failedFields": [],
+        "caseId": null,
+        "groundTruthHash": null
+      },
+      "agentResponse": {
+        "message": "é vs é; < > &; 😀",
+        "values": [
+          2,
+          1
+        ],
+        "rawAmount": "9007199254740993123456789"
+      }
+    },
+    "canonical": "{\"agentResponse\":{\"message\":\"é vs é; < > &; 😀\",\"rawAmount\":\"9007199254740993123456789\",\"values\":[2,1]},\"authority\":{\"allowlist\":[],\"charterId\":null,\"expiresAt\":null,\"spendCapUsd\":1,\"withinAuthority\":true},\"commercial\":{\"agentId\":\"synthetic:1\",\"declaredPrice\":null,\"executorKind\":\"a2a\",\"maxSpendUsd\":1,\"paidAmount\":null,\"paidAsset\":null,\"settled\":false,\"settlementNote\":\"synthetic only\"},\"execution\":{\"blockNumber\":\"100\",\"chainId\":56,\"failureReason\":\"synthetic failure\",\"finishedAt\":\"2026-01-01T00:00:01.000Z\",\"latencyMs\":1000,\"ok\":false,\"startedAt\":\"2026-01-01T00:00:00.000Z\",\"txHashes\":[]},\"issuedAt\":\"2026-01-01T00:00:00.000Z\",\"quality\":{\"caseId\":null,\"failedFields\":[],\"groundTruthHash\":null,\"pass\":null,\"testId\":null},\"runId\":\"synthetic-regression-only\",\"task\":{\"blockNumber\":\"100\",\"chainId\":56,\"kind\":\"health_factor\",\"maxSpendUsd\":1,\"policy\":{\"targetHealthFactor\":2},\"subject\":\"0x0000000000000000000000000000000000000001\"},\"version\":\"1\"}",
+    "hash": "0x3b73f45695dd60f5ef16d4770d90a400bb6708f0bc44ed60662a6567362505cd"
+  },
+  {
+    "receipt": {
+      "version": "2",
+      "runId": "synthetic-regression-only",
+      "issuedAt": "2026-01-01T00:00:00.000Z",
+      "task": {
+        "kind": "health_factor",
+        "chainId": 56,
+        "blockNumber": "100",
+        "subject": "0x0000000000000000000000000000000000000001",
+        "maxSpendUsd": 1,
+        "policy": {
+          "targetHealthFactor": 2
+        }
+      },
+      "commercial": {
+        "agentId": "synthetic:1",
+        "executorKind": "a2a",
+        "declaredPrice": null,
+        "paidAmount": null,
+        "paidAsset": null,
+        "maxSpendUsd": 1,
+        "settled": false,
+        "settlementNote": "synthetic only"
+      },
+      "execution": {
+        "chainId": 56,
+        "blockNumber": "100",
+        "txHashes": [],
+        "startedAt": "2026-01-01T00:00:00.000Z",
+        "finishedAt": "2026-01-01T00:00:01.000Z",
+        "latencyMs": 1000,
+        "ok": false,
+        "failureReason": "synthetic failure"
+      },
+      "authority": {
+        "charterId": null,
+        "allowlist": [],
+        "spendCapUsd": 1,
+        "expiresAt": null,
+        "withinAuthority": true
+      },
+      "quality": {
+        "testId": null,
+        "pass": null,
+        "failedFields": [],
+        "caseId": null,
+        "groundTruthHash": null
+      },
+      "agentResponse": {
+        "message": "é vs é; < > &; 😀",
+        "values": [
+          2,
+          1
+        ],
+        "rawAmount": "9007199254740993123456789"
+      },
+      "artifactType": "failure",
+      "failure": {
+        "stage": "execute",
+        "class": "SYNTHETIC",
+        "detail": "synthetic only"
+      },
+      "service": {
+        "serviceId": 42,
+        "protocol": "a2a",
+        "discoveryEndpoint": "https://synthetic.invalid/card",
+        "executableEndpoint": "https://synthetic.invalid/a2a",
+        "probeId": 9
+      }
+    },
+    "canonical": "{\"agentResponse\":{\"message\":\"é vs é; < > &; 😀\",\"rawAmount\":\"9007199254740993123456789\",\"values\":[2,1]},\"artifactType\":\"failure\",\"authority\":{\"allowlist\":[],\"charterId\":null,\"expiresAt\":null,\"spendCapUsd\":1,\"withinAuthority\":true},\"commercial\":{\"agentId\":\"synthetic:1\",\"declaredPrice\":null,\"executorKind\":\"a2a\",\"maxSpendUsd\":1,\"paidAmount\":null,\"paidAsset\":null,\"settled\":false,\"settlementNote\":\"synthetic only\"},\"execution\":{\"blockNumber\":\"100\",\"chainId\":56,\"failureReason\":\"synthetic failure\",\"finishedAt\":\"2026-01-01T00:00:01.000Z\",\"latencyMs\":1000,\"ok\":false,\"startedAt\":\"2026-01-01T00:00:00.000Z\",\"txHashes\":[]},\"failure\":{\"class\":\"SYNTHETIC\",\"detail\":\"synthetic only\",\"stage\":\"execute\"},\"issuedAt\":\"2026-01-01T00:00:00.000Z\",\"quality\":{\"caseId\":null,\"failedFields\":[],\"groundTruthHash\":null,\"pass\":null,\"testId\":null},\"runId\":\"synthetic-regression-only\",\"service\":{\"discoveryEndpoint\":\"https://synthetic.invalid/card\",\"executableEndpoint\":\"https://synthetic.invalid/a2a\",\"probeId\":9,\"protocol\":\"a2a\",\"serviceId\":42},\"task\":{\"blockNumber\":\"100\",\"chainId\":56,\"kind\":\"health_factor\",\"maxSpendUsd\":1,\"policy\":{\"targetHealthFactor\":2},\"subject\":\"0x0000000000000000000000000000000000000001\"},\"version\":\"2\"}",
+    "hash": "0xfd44d6674e0df6c7f93991d325d1f5dde9de36dfe5fc5d7f76a381fc3ed4ccff"
+  }
+]

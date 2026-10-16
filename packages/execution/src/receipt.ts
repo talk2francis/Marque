@@ -59,6 +59,9 @@ export interface AuthorityProof {
 
 export interface QualityProof {
   testId: string | null
+  /** Present only when recorded at grading time; never inferred for old receipts. */
+  testVersion?: string
+  toleranceRevision?: number
   pass: boolean | null
   failedFields: string[]
   /** The case the answer was graded against, so the grade is reproducible. */
@@ -110,10 +113,10 @@ export function canonicalise(receipt: Receipt): string {
 }
 
 /**
- * keccak-style content hash of a receipt.
+ * SHA-256 of UTF-8 canonicalise(receipt), with no domain prefix.
  *
  * This is the value anchored on MarqueRegistry. Anchoring proves the receipt
- * existed at a block and has not been edited since; it does not prove the
+ * hash was published at a block, if independently confirmed; it does not prove the
  * receipt is true, and we never claim otherwise.
  */
 export function receiptHash(receipt: Receipt): string {
@@ -164,7 +167,9 @@ export function buildReceipt(input: {
 /**
  * The hash sealed BEFORE an outcome is known.
  *
- * keccak(recommendation ‖ block ‖ agentId ‖ timestamp). Publishing this at a
+ * SHA-256 of the same sorted-key JSON encoding, including version '1' and
+ * recommendation, blockNumber, agentId and timestamp. No domain prefix.
+ * Publishing this at a
  * block that precedes the outcome is what makes a track record falsifiable —
  * without it, any win rate is assembled after the fact and unverifiable.
  */

@@ -24,3 +24,12 @@
 | OOM protection prevents this recurrence | Existing script changes oom_score_adj only | Does not prevent systemd session/scope termination; prepare targeted lifetime protection, no global restart. |
 
 Sources: exact HEAD handlers, private source probes/API/chain snapshots, `docs/phase2/PROJECT_STATE.md`, `INCIDENT-2026-10-09.md`, and the current [official campaign page](https://www.bnbchain.org/en/hackathons/smart-money-era-set-and-earn) and [announcement](https://www.bnbchain.org/en/blog/set-and-earn-hire-and-build-ai-agents-on-bnb-chain-win). Official page was captured 16 October; local observations are not an organizer eligibility decision.
+
+
+## P04 dated follow-up, 16 October 21:27 UTC
+
+The table above preserves P00 observations. Candidate P04 corrects SHA-256 comments in receipt/sealed-call code, DB ground-truth NatSpec and contract NatSpec; receipt hashing and executable contract statements are unchanged. Frozen versions 1/2 vectors and a JSON-safe offline checker now exist. No historical row is rewritten.
+
+The public receipt 944bea48-7c7e-4afc-aa93-fbe126772362 was fetched again at 21:22:30UTC: identical receipt body and published SHA-256, still settled=false/quality.pass=false. Its existing testnet anchor was independently rechecked at 21:27:08UTC: successful tx0x9d7f7069f6d2fd21aa5b7239009a113b01c10f2d021959d2eba2ee2a6d4e829b, chain 97, registry0x01D584f3a07Ba07D114386A78CA7fa3103db7AE7, block135788370, matching Anchored leaf and block hash0x11cd0ee1b5b17f8f74b2f357d966e3a7b9ef45d8368663baa68c4c26c74d181d. PublicNode returned no receipt; the public BNB dataseed returned it. Neither that failure nor the successful fallback proves configured archive health. This resolves the earlier untested-anchor statement for this sample only; the generic receipt GET remains NOT_CHECKED because it performs no chain read and historical rows omit anchor chain/contract.
+
+Source inspection and baseline replay also proved that the local run pipeline could grade case A then cite a later case, and could grade against a different block. P04 binds future quality evidence to the single case actually graded and leaves different-block tasks ungraded. Existing historical claims remain unchanged. See [P04 contract](P04_RECEIPT_CONTRACT.md).

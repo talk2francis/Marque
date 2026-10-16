@@ -1472,3 +1472,8 @@ Format: planned, shipped, why, cost, restore.
 ## vNext P03, 16 October 2026
 
 Compact seller visibility reuses the existing builder/owner/claim surfaces. Exact-service historical Warrant binding, token decimals/valuation and human independence remain explicitly unknown where not proved. Task tests now require explicit consent and owner-recorded tests recheck current control; discovery sends no A2A task. Details and evidence: `docs/vnext/P03_SELLER_CONTRACT.md`, `docs/vnext/P03_CHECKPOINT.md` and `docs/vnext/DEVIATIONS.md`. Candidate only, no deployment or new chain writes.
+
+
+### vNext P04 receipt integrity
+
+See [P04 receipt contract](vnext/P04_RECEIPT_CONTRACT.md) and [vNext deviations](vnext/DEVIATIONS.md). Reuse immutable receipt versions1/2 and existing evidence rows; no new generic manifest table, history rewrite or inferred anchor/actor truth. Preserve historical SHA-256 bytes and unknowns. Future grades retain the exact case and version; different-block tasks are ungraded. No UI, migration, deployment or new transaction.

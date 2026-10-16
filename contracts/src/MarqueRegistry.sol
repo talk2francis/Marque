@@ -34,14 +34,14 @@ pragma solidity ^0.8.24;
 contract MarqueRegistry {
     /// @notice A receipt hash was anchored.
     /// @param anchorer  Who published it.
-    /// @param leaf      keccak256 of the canonically serialised receipt.
+    /// @param leaf      Caller-supplied digest; Marque receipts use sorted-JSON SHA-256.
     /// @param blockTime Block timestamp, denormalised so an indexer reading only
     ///                  logs never has to fetch the block to order events.
     event Anchored(address indexed anchorer, bytes32 indexed leaf, uint64 blockTime);
 
     /// @notice A recommendation was sealed before its outcome was known.
     /// @param sealer    Who published it.
-    /// @param callHash  keccak256(recommendation ‖ block ‖ agentId ‖ timestamp).
+    /// @param callHash  Caller-supplied digest; Marque sealed calls use sorted-JSON SHA-256.
     /// @param agentId   ERC-8004 identity the call belongs to, for cheap filtering.
     /// @param blockTime Block timestamp at the moment of sealing.
     event CallSealed(address indexed sealer, bytes32 indexed callHash, bytes32 indexed agentId, uint64 blockTime);

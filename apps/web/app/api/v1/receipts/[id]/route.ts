@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { readReceipt } from '../../../../../lib/runs'
+import { receiptEvidence } from '../../../../../lib/receipt-evidence'
 
 export const dynamic = 'force-dynamic'
 
@@ -15,5 +16,6 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
     anchorTxHash: row.anchorTxHash,
     anchorBlock: row.anchorBlock,
     issuedAt: row.issuedAt,
+    evidence: receiptEvidence(row),
   })
 }

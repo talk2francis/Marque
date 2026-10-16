@@ -40,3 +40,8 @@ The newly reproduced operating blocker raises operations from 92 to 97 in this p
 NO CHANGE: registry/indexer replacement, deterministic MCS rewrite, receipt primitive replacement, ERC-8183 state-machine replacement, second marketplace API, global reputation score, hero/theme regeneration, new escrow/token, multichain. Existing primitives are reused.
 
 DEFER: broad seller dashboard, autonomous procurement, action authority expansion, x402 buyer, fair Trials/Router and new framework infrastructure until their actual prerequisites are demonstrated. Existing owner/job data is a projection foundation, not proof these products are done. Freeze optional features by 3 November 12:00 UTC; campaign cutoff remains 5 November 12:00 UTC, subject to the current official source.
+
+
+## P04 authorization and dependency update, 16 October 2026
+
+Owner explicitly approved P03 then P04. P03 is committed at f4d5d56 with checkpoint 3c4f298. P04 reuses the receipt primitive: offline content checks, additive GET evidence and exact-case grade binding. No new generic proof table or router. P04 ends at its local checkpoint; no P05/P06 implementation, paid pilot or production deployment follows automatically. Broader verification can reuse this frozen digest contract after separate phase authorization.

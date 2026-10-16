@@ -1,11 +1,17 @@
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { checkCharterBinding, runHire } from './pipeline'
 import type { AgentExecutor } from './types'
 import type { StructuredTask } from './tasks'
+import { loadCase, grade } from '@marque/conformance'
 
 vi.mock('@marque/conformance', () => ({
-  loadCase: vi.fn(), grade: vi.fn(),
+  loadCase: vi.fn(), grade: vi.fn(), MCS_VERSION: '1.0.0', MCS_TOLERANCE_REVISION: 1,
 }))
+
+afterEach(() => {
+  vi.mocked(loadCase).mockReset()
+  vi.mocked(grade).mockReset()
+})
 
 const task: StructuredTask = {
   kind: 'health_factor', chainId: 56, blockNumber: '100',
@@ -31,6 +37,48 @@ function executor(overrides: Partial<AgentExecutor> = {}): AgentExecutor {
 }
 
 describe('terminal evidence', () => {
+  it('pins receipt quality to the case actually graded when the latest case changes', async () => {
+    vi.mocked(loadCase).mockReset()
+    const loaded = {
+      testCase: {
+        id: 'frozen-case-a', testId: 'MCS-HF-1' as const, category: 'health_factor' as const,
+        chainId: 56 as const, blockNumber: 100n, subject: { account: task.subject },
+        policy: task.policy, prompt: 'frozen question',
+      },
+      groundTruth: {
+        address: task.subject, healthFactor: 2, weightedCollateralUsd: 2,
+        totalBorrowedUsd: 1, repayUsd: 0, targetHealthFactor: 2,
+        markets: [], primaryCollateral: null,
+      },
+      groundTruthHash: '0x' + 'a'.repeat(64),
+    }
+    // A second load would see a different case. It must never occur.
+    vi.mocked(loadCase).mockResolvedValueOnce(loaded)
+      .mockRejectedValue(new Error('latest case changed'))
+    vi.mocked(grade).mockReturnValue([{
+      field: 'healthFactor', expected: '2', actual: '2', pass: true,
+      tolerance: '0.001', detail: '', missing: false,
+    }])
+    const out = await runHire({
+      runId: 'case-race', task, executor: executor(),
+      ctx: { buyer: task.subject, maxSpendUsd: 1, allowlist: [] },
+    })
+    expect(loadCase).toHaveBeenCalledTimes(1)
+    expect(out.receipt?.quality).toMatchObject({
+      testId: 'MCS-HF-1', pass: true, caseId: 'frozen-case-a',
+      groundTruthHash: loaded.groundTruthHash, testVersion: '1.0.0', toleranceRevision: 1,
+    })
+  })
+  it('does not grade a task at another block against a stale case', async () => {
+    vi.mocked(loadCase).mockResolvedValue({
+      testCase: { id: 'other-block', testId: 'MCS-HF-1', category: 'health_factor', chainId: 56, blockNumber: 99n, subject: { account: task.subject }, policy: task.policy, prompt: 'synthetic' },
+      groundTruth: { address: task.subject, healthFactor: 2, weightedCollateralUsd: 2, totalBorrowedUsd: 1, repayUsd: 0, targetHealthFactor: 2, markets: [], primaryCollateral: null },
+      groundTruthHash: '0x' + 'b'.repeat(64),
+    })
+    const out = await runHire({ runId: 'other-block', task, executor: executor(), ctx: { buyer: task.subject, maxSpendUsd: 1, allowlist: [] } })
+    expect(grade).not.toHaveBeenCalled()
+    expect(out.receipt?.quality).toEqual({ testId: null, pass: null, failedFields: [], caseId: null, groundTruthHash: null })
+  })
   it('issues a failure receipt when quote discovery fails', async () => {
     const out = await runHire({
       runId: 'quote-failure', task,

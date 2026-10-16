@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto'
-import { loadCase, grade, type TestId } from '@marque/conformance'
+import { loadCase, grade, MCS_VERSION, MCS_TOLERANCE_REVISION, type TestId } from '@marque/conformance'
 import { TASK_TEST, type StructuredTask } from './tasks.js'
 import { buildReceipt, type Receipt } from './receipt.js'
 import type { AgentExecutor, ExecutionContext, PreflightResult, Quote, RunResult } from './types.js'
@@ -186,15 +186,20 @@ function comparableToCase(task: StructuredTask, caseSubject: Record<string, stri
 async function gradeAgainstCase(
   task: StructuredTask,
   answer: unknown,
-): Promise<{ testId: string; pass: boolean; failedFields: string[] } | null> {
+): Promise<(Receipt['quality'] & { testId: string; pass: boolean }) | null> {
   const testId = TASK_TEST[task.kind] as TestId
   try {
     const loaded = await loadCase(testId)
     if (!loaded) return null
+    if (task.blockNumber !== loaded.testCase.blockNumber.toString()) return null
     if (!comparableToCase(task, loaded.testCase.subject, loaded.testCase.policy)) return null
     const diffs = grade(testId, loaded.groundTruth, answer)
     const failedFields = diffs.filter((dd) => !dd.pass).map((dd) => dd.field)
-    return { testId, pass: diffs.length > 0 && failedFields.length === 0, failedFields }
+    return {
+      testId, pass: diffs.length > 0 && failedFields.length === 0, failedFields,
+      caseId: loaded.testCase.id, groundTruthHash: loaded.groundTruthHash,
+      testVersion: MCS_VERSION, toleranceRevision: MCS_TOLERANCE_REVISION,
+    }
   } catch {
     return null
   }
@@ -355,8 +360,6 @@ export async function runHire(opts: RunOptions): Promise<PipelineOutcome> {
   // ---- 5. Receipt. Issued for failures too. --------------------------------
   // A failed run with a legible reason is evidence the system is real, and
   // publishing failures is the most credible thing this marketplace does.
-  const loaded = graded ? await loadCase(graded.testId as TestId).catch(() => null) : null
-
   const { receipt, hash } = buildReceipt({
     runId,
     task: opts.task,
@@ -378,13 +381,7 @@ export async function runHire(opts: RunOptions): Promise<PipelineOutcome> {
       expiresAt: null,
       withinAuthority: true,
     },
-    quality: {
-      testId: graded?.testId ?? null,
-      pass: graded?.pass ?? null,
-      failedFields: graded?.failedFields ?? [],
-      caseId: loaded?.testCase.id ?? null,
-      groundTruthHash: loaded?.groundTruthHash ?? null,
-    },
+    quality: graded ?? { testId: null, pass: null, failedFields: [], caseId: null, groundTruthHash: null },
     artifactType: run.ok ? 'execution' : 'failure',
     failure: run.ok ? null : {
       stage: 'execute',

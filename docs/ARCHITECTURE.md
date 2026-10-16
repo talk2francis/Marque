@@ -154,8 +154,9 @@ Charter   browser signs ONE transaction — MarqueRegistry / the agent's
 Execute   the agent acts strictly inside that scope. A call to a contract not
           on the allowlist, a spend over the cap, an action after expiry —
           refused before it is signed.
-Receipt   four proof blocks + canonical hash + the anchor tx on chain. The
-          recommendation was sealed BEFORE its outcome was known.
+Receipt   four distinct claims plus a sorted-JSON SHA-256 digest. Stored
+          anchor references require independent chain verification. Sealed
+          calls are separate records, not implied by every receipt.
 ```
 
 ### The index (background)
@@ -187,3 +188,8 @@ an 8004scan outage degrades *freshness*, not availability.
 Load: 50 concurrent position reads for arbitrary addresses — 50/50 return 200,
 site healthy immediately after; latency degrades gracefully (p50 ~17 s at 50×
 vs ~2 s single) because the pool spreads load rather than failing.
+
+
+### vNext P04 receipt integrity contract
+
+The existing immutable receipt versions1/2 remain. Public receipt GET appends a version1 read-only evidence projection: content digest comparison and explicitly unchecked claim/anchor references, with no writes or remote fetch. Future local run grades retain the exact case used and the MCS version/revision; different-block tasks are ungraded. No schema migration or historical backfill. See [P04 receipt contract](vnext/P04_RECEIPT_CONTRACT.md) for canonical bytes, trust limits and rollback.

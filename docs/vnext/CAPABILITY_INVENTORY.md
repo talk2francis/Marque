@@ -32,3 +32,8 @@ Baseline `97ef4c7`. EXISTS means an implementation is present; it does not certi
 | New escrow/token, multichain, global AI score | UNSUPPORTED / deliberately skipped | Contrary to current invariants or no evidenced user need. |
 
 Source tree manifest and API method inventory are retained privately. Planning graphs, competitor details and screenshots were not added to the public repository.
+
+
+## P04 candidate delta, 16 October 2026
+
+The baseline inventory above remains dated. A bounded offline receipt content checker and frozen versions 1/2 SHA-256 vectors now EXIST in the execution package; public receipt GET adds version 1 evidence pointers without writes, remote calls or a new receipt table. Chain/issuer/authority/MCS replay and human independence are separate, not implied by MATCH. One historical anchor has a separately captured chain 97 log/block consistency proof. Future local run grades retain their exact case/block/version. A universal portable chain verifier remains PARTIAL, not a shipped generalized product.

@@ -29,3 +29,8 @@ Anchor: `97ef4c73ea3717d1a059b649a35e8124d93bdb7f`. PRESENT means source behavio
 ## Evidence limits and negative tests
 
 The existing suite passed 412 tests with 3 skipped. Twelve additional private probes passed by reproducing current behavior, including defects; they are NOT repair acceptance tests. Hard provider, chain, token and escrow mismatches still fail in the isolated verifier tests. No authenticated production publish, ownership transfer, simultaneous publish, paid quote request, wallet signature or malformed production metadata was attempted. Integration tests for safe GET and authorized publication belong to P01A against an isolated database.
+
+
+## P04 CR-05 follow-up, 16 October 2026
+
+Candidate repair: receipt/sealed-call/db/contract comments now name SHA-256 correctly; the serializer/hash functions and executable contract statements are preserved. `receipt-integrity.ts` adds a versioned digest descriptor and bounded JSON-safe offline comparison, covering unknown fields without coercion. Frozen versions 1/2 and sealed-call vectors, mutation/key-order/Unicode/large-string-amount tests and API compatibility tests pass in targeted validation. Unknown/v0 bodies fail safely. Receipt GET adds explicit NOT_CHECKED anchor/claim pointers; an unrelated chain/block is never inferred as verified from a matching digest. Actual chain inclusion is separately read for one historical testnet sample, not universally certified or backfilled. See P04 checkpoint and contract for final validation scope.
