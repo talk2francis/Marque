@@ -4,7 +4,7 @@ Phase status: **GREEN for the scoped quote/listing/claim repairs and candidate a
 
 ## Baseline, candidate and reuse
 
-Baseline P01 HEAD: `b679adaa2a8bbabe0eee6009d2c8ef65174f6fee`. Unchanged production application/source: `97ef4c73ea3717d1a059b649a35e8124d93bdb7f`. Branch `repair/vnext-v3-p01a-20261016`, isolated worktree `/root/marque-vnext-p01`. Candidate SHA is bound in the documentation-only follow-up after the code commit. Nothing is pushed.
+Baseline P01 HEAD: `b679adaa2a8bbabe0eee6009d2c8ef65174f6fee`. Unchanged production application/source: `97ef4c73ea3717d1a059b649a35e8124d93bdb7f`. Branch `repair/vnext-v3-p01a-20261016`, isolated worktree `/root/marque-vnext-p01`. Tested source candidate: `32fd5cfeb5109984e060ef573988be8677cdb3ac`. A documentation-only follow-up binds this checkpoint to that commit; final branch HEAD is reported separately. Nothing is pushed.
 
 Reused: existing SDK-compatible signed descriptions, simple quote support, quote/intent storage, exact-service seller lookup, safeFetch, owner nonce/claim tokens and authenticated publish POST, PostgreSQL uniqueness, MCS verdict, all four categories, wallet connector, themes/artwork, Caddy trusted-header mirror and transport monitor. No replacement marketplace/authentication framework, contract, signer, SDK upgrade or migration.
 

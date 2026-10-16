@@ -1,6 +1,6 @@
 # P01A checkpoint, 16 October 2026
 
-Quote/listing/claim repair acceptance passes on the isolated feature branch. See [P01A checkpoint](../vnext/P01A_CHECKPOINT.md) and the versioned integrity contract. No push, production deployment or chain write. P02 explicitly approved by the owner, begins after local commit/announcement; paid mainnet and production release gates remain. Existing recovered ingestion-worker exit has unknown initiating cause; web/Kerb/shared services remain healthy. Historical P00/P01 entries below are retained.
+Quote/listing/claim repair acceptance passes at tested source `32fd5cfeb5109984e060ef573988be8677cdb3ac` on the isolated feature branch. See [P01A checkpoint](../vnext/P01A_CHECKPOINT.md) and the versioned integrity contract. No push, production deployment or chain write. P02 explicitly approved by the owner, begins after local commit/announcement; paid mainnet and production release gates remain. Existing recovered ingestion-worker exit has unknown initiating cause; web/Kerb/shared services remain healthy. Historical P00/P01 entries below are retained.
 
 ## P01 AMBER checkpoint, 16 October 2026
 
