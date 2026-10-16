@@ -4,7 +4,7 @@ Phase status: **AMBER, allowed diagnostic/historical-evidence fallback**. Scoped
 
 ## Baseline and candidate
 
-Baseline P01A HEAD: `05aad6088f943d060597b62fe46bffbc8bb2cab3`. Branch `repair/vnext-v3-p02-20261016`, isolated tree `/root/marque-vnext-p01`. Production checkout/deployed application remains `97ef4c73ea3717d1a059b649a35e8124d93bdb7f`. Tested-source SHA and final documentation HEAD are bound after validation; no Git push.
+Baseline P01A HEAD: `05aad6088f943d060597b62fe46bffbc8bb2cab3`. Branch `repair/vnext-v3-p02-20261016`, isolated tree `/root/marque-vnext-p01`. Production checkout/deployed application remains `97ef4c73ea3717d1a059b649a35e8124d93bdb7f`. Tested candidate/source commit: `e4f5030896a7f62b5d618d4d0f1105a8c7b0ce6f`. The immediate documentation-only follow-up binds this identifier; its HEAD is recorded in the closing report and private evidence manifest. No Git push.
 
 Reuse: existing seller lookup, user/probe quote records, signed/unsigned verifier, SDK-compatible description/hash, hire intents/indexer binding, browser wallet connector, exact approvals, existing metadata/quote/intent/notify routes, provider retry observations, job room, safeFetch, all four categories, reference previews, artwork/themes, Caddy mirror and transport protections. No new contract, signer, payment protocol, dashboard, dependency or schema migration.
 
@@ -22,7 +22,7 @@ The [commerce evidence and adapter contract](P02_COMMERCE_EVIDENCE.md) contains 
 
 ## Validation and observed facts
 
-Validation completed on the frozen candidate; a documentation-only follow-up binds the tested source SHA. `pnpm exec vitest run --maxWorkers=1 --minWorkers=1`: 487 passed / 23 gated skipped, 58 files passed / 3 skipped, 329.41 seconds. This full run preceded the strict notification parser and expanded metadata tests. Final targeted integrity/notification/metadata selection: 74 passed / 10 files, 38.71 seconds. Metadata constructor/type correction plus actual HTTP404 assertion: 5 passed, 5.39 seconds. Final real PostgreSQL intent fixture: 8 passed, 5.49 seconds. No live wallet signing or mainnet execution is claimed.
+Validation completed on the frozen candidate source committed as `e4f5030896a7f62b5d618d4d0f1105a8c7b0ce6f`; this follow-up changes documentation only. `pnpm exec vitest run --maxWorkers=1 --minWorkers=1`: 487 passed / 23 gated skipped, 58 files passed / 3 skipped, 329.41 seconds. This full run preceded the strict notification parser and expanded metadata tests. Final targeted integrity/notification/metadata selection: 74 passed / 10 files, 38.71 seconds. Metadata constructor/type correction plus actual HTTP404 assertion: 5 passed, 5.39 seconds. Final real PostgreSQL intent fixture: 8 passed, 5.49 seconds. No live wallet signing or mainnet execution is claimed.
 
 Real observations: Plinth56916 current chain status3, four successful lifecycle receipts, explicit payment-release event and 0.01U escrow-to-provider Transfer; original signed quote/description and canonical artifact hash match. Keel56903 control artifact/payment also match, first-party excluded. Vitals56924 newly discovered current paid case has four confirmed lifecycle receipts and a configured team buyer, so it is excluded from independent demand. Two non-reference-identity PAID intent jobs were returned by a cap20 query at13:23:10UTC; this is not an all-chain total. Independent-human paid cases verified here: **UNKNOWN**, not a fabricated positive count.
 
