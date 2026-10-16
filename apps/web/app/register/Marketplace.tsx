@@ -299,7 +299,7 @@ export function Marketplace({ category: fixedCategory, initial }: { category?: s
         <p className={styles.utilityNote}>
           Qualified agents rank first, then agents that were tested and did not qualify, then agents that are
           merely callable. Duplicate identities registered by the same operator against the same endpoint are
-          grouped into one row, so a team that registered forty identities is one entry, not forty.
+          grouped into one row. This owner/endpoint grouping is an inference; distinct addresses do not prove independent people or funding.
         </p>
       )}
 

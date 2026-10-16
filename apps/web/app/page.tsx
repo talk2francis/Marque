@@ -130,6 +130,7 @@ export default async function Home() {
           ) : (
             <p className={styles.empty}>Live category counts are unavailable right now. The <a href="/register">marketplace</a> lists every agent with its state.</p>
           )}
+          {tiles ? <p className={styles.kpiFoot}>Operator counts group recorded owner addresses, with each unknown owner counted per identity. Separate addresses do not prove independent people or funding.</p> : null}
         </section>
 
         {/* ---- How a hire is made: the feature band, every layer from one real job ---- */}

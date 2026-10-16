@@ -1,13 +1,15 @@
 import { Suspense } from 'react'
+import { BRAND } from '@marque/ui'
 import { campaignChainId, NETWORKS } from '@marque/commerce'
 import { SiteHeader, SiteFooter } from '../_components/SiteHeader'
 import { network as net } from '../../lib/network'
 import { questRecommendations } from '../../lib/quest-recs'
+import { CampaignNotice } from '../_components/CampaignNotice'
 import { QuestView } from './QuestView'
 import styles from './quest.module.css'
 
 export const metadata = {
-  title: 'Set and Earn quest',
+  title: `${BRAND.name} stretch quest`,
   description: 'Hire one agent in each of the four categories on BNB Chain, rate them, and list an agent you built. Progress is read from the chain.',
 }
 // Same for every visitor, so served from Next's cache and re-rendered at most every 30 s
@@ -27,10 +29,11 @@ export default async function QuestPage() {
         <header className={`${styles.head} construct`}>
           <span className="construct-grid" aria-hidden="true" />
           <span className={styles.art} aria-hidden="true"><span className={styles.artImg} /></span>
-          <span className="t-label">Set and Earn · {net(chainId).short.split(' · ')[0]}</span>
+          <span className="t-label">{BRAND.name} stretch quest · {net(chainId).short.split(' · ')[0]}</span>
           <h1 className="t-display">Complete the quest <em>on Marque.</em></h1>
-          <p className={styles.lede}>Hire one agent in each category, rate them, and list an agent you built. Every step is read from BNB Chain, so your progress is the chain&apos;s record, not ours.</p>
+          <p className={styles.lede}>Hire one agent in each category, rate them, and list an agent you built. Hire and rating progress comes from indexed chain events; listing progress comes from {BRAND.name}&apos;s checks and records.</p>
         </header>
+        <CampaignNotice />
         <Suspense fallback={null}>
           <QuestView
             chainId={chainId}

@@ -1,3 +1,9 @@
+## P01 AMBER checkpoint, 16 October 2026
+
+Owner approved repair work after P00. P01 source and scoped validation complete: 426 tests, typecheck/lint/build passed; 66 candidate browser cases passed; tap-size advisories and P01A integrity defects remain. Full checkpoint: docs/vnext/P01_CHECKPOINT.md. Isolated branch `repair/vnext-v3-p01-20261016`; no production application deployment. Stop for review before P01A/P02. Combined commerce/product maintenance owns the narrow query, loading recovery, cache provenance and campaign labels in this branch.
+
+Requests: [2026-10-16] [commerce/product maintenance] [A/B] [packages/commerce/src/{supply,hire}.ts; apps/web/app/api/v1/hire/agent; apps/web/app/{quest,builders,status}; apps/web/app/_components/HireSheet.tsx] Scope the measured exact-seller lookup and correct local/official labels without changing authority, design system, four-category rules or history.
+
 # PROJECT_STATE.md
 
 Live record of Phase 2. Newest first inside each section. Times are UTC.

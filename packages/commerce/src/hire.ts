@@ -25,7 +25,7 @@ const rowsOf = (r: unknown) => ((r as { rows?: unknown[] }).rows ?? (r as unknow
 
 /** The exact seller service to hire. Never substitutes another agent (invariant 24). */
 export async function sellerFor(agentId: string, serviceId?: number | null): Promise<SellerCandidate> {
-  const list = (await sellerCandidates()).filter((c) => c.agentId === agentId && (serviceId == null || c.serviceId === serviceId))
+  const list = (await sellerCandidates({ agentId, serviceId })).filter((c) => c.agentId === agentId && (serviceId == null || c.serviceId === serviceId))
   if (!list.length) throw new HireError('not_a_seller', 'This agent does not offer paid jobs through ERC-8183.', 404)
   return list[0]!
 }
@@ -297,7 +297,7 @@ export interface SheetAgent {
 export async function agentForSheet(agentId: string): Promise<SheetAgent> {
   const seller = await sellerFor(agentId)
   const { commercialStates } = await import('./supply.js')
-  const s = (await commercialStates()).get(seller.serviceId)
+  const s = (await commercialStates(seller.serviceId)).get(seller.serviceId)
   return {
     agentId: seller.agentId, tokenId: seller.tokenId, registryChainId: seller.chainId, name: seller.name,
     category: seller.category, owner: seller.owner, firstParty: seller.firstParty !== null, state: s?.state ?? 'unavailable',

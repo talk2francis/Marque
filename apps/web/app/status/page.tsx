@@ -305,7 +305,7 @@ export default async function StatusPage() {
           ))}
           {questTotals && (
             <p className={styles.note}>
-              Set and Earn on chain {questTotals.chainId}, eligible activity only: {questTotals.walletsWithHire} wallets hired,{' '}
+              Marque stretch quest on chain {questTotals.chainId}, locally eligible activity only: {questTotals.walletsWithHire} wallets hired,{' '}
               {Object.entries(questTotals.hiresPerCategory).map(([c, n]) => `${n} ${c.replace('_', ' ')}`).join(', ')};{' '}
               {questTotals.delivered} delivered, {questTotals.ratings} rated. Excluded (team, self, duplicate or not on Marque):{' '}
               {questTotals.excluded.hires} hires. Per wallet: <span className="mono">/api/v1/phase2/wallet/&lt;address&gt;</span>.
@@ -395,7 +395,7 @@ export default async function StatusPage() {
         <section className={styles.section}>
           <h2 className={styles.h2}>Conformance</h2>
           {conf.length === 0 ? (
-            <p className={styles.muted}>No conformance run has been recorded.</p>
+            <p className={styles.muted}>{confQ.failed ? 'Conformance observations are unavailable right now.' : 'No conformance run has been recorded.'}</p>
           ) : (
             <>
               <table className={styles.table}>
@@ -412,9 +412,8 @@ export default async function StatusPage() {
                 </tbody>
               </table>
               <p className={styles.note}>
-                Test stubs are excluded. Every pass recorded so far belongs to a first-party
-                reference agent — no third-party agent on BNB Chain has passed an MCS test yet,
-                and that is the measured state of the supply rather than a filter.{' '}
+                Test stubs are excluded. Counts include stored first-party and third-party runs.
+                A pass applies to the recorded test, service and date; it does not prove paid settlement or campaign qualification.{' '}
                 <Link href="/standard">The Standard</Link> lists the failures with their reasons.
                 Last run {confFresh.text}.
               </p>

@@ -1,11 +1,13 @@
+import { BRAND } from '@marque/ui'
 import { ArrowUpRight, Terminal } from 'lucide-react'
 import { SiteHeader, SiteFooter } from '../_components/SiteHeader'
+import { CampaignNotice } from '../_components/CampaignNotice'
 import { BuilderChecklist } from './BuilderChecklist'
 import styles from './checklist.module.css'
 
 export const metadata = {
   title: 'List an agent you built',
-  description: 'Five checks read from your wallet, the chain and your endpoint. When all five pass, your agent is listed on Marque and the Set and Earn quest\'s fifth step ticks. Build one with BNB Agent Studio.',
+  description: `Check local listing readiness, prove ownership and publish your agent on ${BRAND.name}. BNB campaign qualification is reviewed separately.`,
 }
 
 /**
@@ -21,10 +23,11 @@ export default function BuildersPage() {
           <p className="t-label">Builders · BNB Smart Chain</p>
           <h1 className={styles.title}>List an agent you built.</h1>
           <p className={styles.lede}>
-            Five checks, read from your wallet, the chain and your agent&apos;s endpoint. When all five pass, your agent is
-            listed on Marque and the Set and Earn quest&apos;s fifth step ticks. No email, no approval queue.
+            Check local listing readiness using your wallet, the chain and your agent&apos;s endpoint.
+            Prove ownership and publish through the existing listing flow.
           </p>
         </header>
+        <CampaignNotice builders />
         <div className={styles.grid}>
           <BuilderChecklist />
           <aside className={styles.side} aria-labelledby="build-one">
@@ -37,7 +40,7 @@ export default function BuildersPage() {
             <p className={styles.muted}>Your ERC-8004 registration file can include an optional <code>image</code> URL. Marque uses that owner-supplied image for the avatar and storefront atmosphere; an agent with no image gets a neutral identity tile. Artwork is not a listing check.</p>
             <a className={styles.ext} href="https://eips.ethereum.org/EIPS/eip-8004" target="_blank" rel="noreferrer">ERC-8004 registration format<ArrowUpRight aria-hidden="true" /></a>
             <hr className={styles.rule} />
-            <p className={styles.note}>The quest&apos;s fifth step needs an agent you built and own. Marque&apos;s own reference agents never count, and neither does an agent owned by a wallet on Marque&apos;s published team list.</p>
+            <p className={styles.note}>Marque&apos;s local fifth step needs an agent you built and own. Marque&apos;s own reference agents never count, and neither does an agent owned by a wallet on Marque&apos;s published team list.</p>
             <p className={styles.muted}><a href="/builders/test">Test any endpoint free</a>, with no wallet and nothing stored.</p>
           </aside>
         </div>

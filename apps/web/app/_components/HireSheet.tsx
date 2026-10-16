@@ -81,6 +81,7 @@ export function HireSheet() {
   const { state, getQuote, start, cancel, reset, precheck } = useHire()
   const [agent, setAgent] = useState<SheetAgent | null>(null)
   const [loadError, setLoadError] = useState<string | null>(null)
+  const [loadAttempt, setLoadAttempt] = useState(0)
   const [task, setTask] = useState<TaskValue>({ task: '', ready: false, missing: null })
   const [spotBnb, setSpotBnb] = useState<number | null>(null)
   const [job, setJob] = useState<{ state: string | null; submittedAt: string | null } | null>(null)
@@ -116,15 +117,24 @@ export function HireSheet() {
     setFree(null)
     setTryError(null)
     announced.current = null
-    fetch(`/api/v1/hire/agent?agentId=${encodeURIComponent(agentId)}${tryFirst ? '&try=1' : ''}`)
+    const controller = new AbortController()
+    let active = true
+    const timer = setTimeout(() => controller.abort(), 15_000)
+    const signal = controller.signal
+    fetch(`/api/v1/hire/agent?agentId=${encodeURIComponent(agentId)}${tryFirst ? '&try=1' : ''}`, { signal })
       .then(async (r) => {
         const j = await r.json()
         if (!r.ok) throw new Error(j.detail ?? 'This agent cannot be hired right now.')
-        setAgent(j)
+        if (active) setAgent(j)
       })
-      .catch((e: Error) => setLoadError(e.message))
-    fetch('/api/v1/spot?symbol=BNB').then((r) => (r.ok ? r.json() : null)).then((j) => setSpotBnb(typeof j?.price === 'number' ? j.price : null)).catch(() => undefined)
-  }, [agentId, tryFirst]) // reset is stable
+      .catch((e: Error) => {
+        if (active) setLoadError(signal.aborted ? 'The agent details took too long to load. Try again.' : e.message)
+      })
+      .finally(() => clearTimeout(timer))
+    setSpotBnb(null)
+    fetch('/api/v1/spot?symbol=BNB', { signal }).then((r) => (r.ok ? r.json() : null)).then((j) => { if (active) setSpotBnb(typeof j?.price === 'number' ? j.price : null) }).catch(() => undefined)
+    return () => { active = false; clearTimeout(timer); controller.abort() }
+  }, [agentId, tryFirst, loadAttempt]) // reset is stable
 
   const close = useCallback(() => {
     const next = new URLSearchParams(params.toString())
@@ -229,7 +239,7 @@ export function HireSheet() {
         </div>
       ) : null}
     >
-      {loadError ? <ErrorNote error={{ title: loadError, action: 'Choose another agent from the marketplace.' }} action={<ButtonLink href="/register" size="sm">Open the marketplace</ButtonLink>} /> : null}
+      {loadError ? <ErrorNote error={{ title: loadError, action: 'Retry loading, or choose another agent from the marketplace.' }} action={<><Button size="sm" onClick={() => setLoadAttempt((n) => n + 1)}>Retry loading</Button><ButtonLink href="/register" size="sm">Open the marketplace</ButtonLink></>} /> : null}
       {!agent && !loadError ? <div className="hs-loading" aria-busy="true"><span className="skel" style={{ height: 44, width: 44, borderRadius: 10 }} /><span className="skel" style={{ height: 18, width: '50%' }} /></div> : null}
 
       {agent ? (

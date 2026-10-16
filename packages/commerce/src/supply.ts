@@ -1,4 +1,4 @@
-import { sql } from 'drizzle-orm'
+import { sql, type SQL } from 'drizzle-orm'
 import { db, commerceQuote, firstPartyAgents, canonicalAgentId, type FirstPartyAgent } from '@marque/db'
 import { requestQuote, probeTask, type QuoteResult } from './quote.js'
 
@@ -22,6 +22,17 @@ export type QuestCategory = (typeof QUEST_CATEGORIES)[number]
 export const HIREABLE_CATEGORIES = [...QUEST_CATEGORIES, 'security'] as const
 
 const rowsOf = (r: unknown) => ((r as { rows?: unknown[] }).rows ?? (r as unknown[])) as Array<Record<string, unknown>>
+
+/** Exact-agent reads must not scan the marketplace or leave SQL running after a UI timeout. */
+async function supplyRows(query: SQL, scoped: boolean): Promise<Array<Record<string, unknown>>> {
+  if (!scoped) return rowsOf(await db().execute(query))
+  return db().transaction(async (tx) => {
+    await tx.execute(sql`set transaction read only`)
+    await tx.execute(sql`set local statement_timeout = '4000ms'`)
+    await tx.execute(sql`set local lock_timeout = '500ms'`)
+    return rowsOf(await tx.execute(query))
+  })
+}
 
 export interface SellerCandidate {
   serviceId: number
@@ -49,17 +60,19 @@ export interface SellerCandidate {
  * `negotiate` or `notify_funded` skill or names ERC-8183, plus every first-party agent.
  * The negotiate endpoint is the card's own `url`, the address the agent publishes.
  */
-export async function sellerCandidates(): Promise<SellerCandidate[]> {
+export async function sellerCandidates(scope?: { agentId: string; serviceId?: number | null }): Promise<SellerCandidate[]> {
   const fp = firstPartyAgents()
   const fpIds = fp.map((a) => canonicalAgentId(a))
-  const rows = rowsOf(await db().execute(sql`
+  const rows = await supplyRows(sql`
     with lp as (
       select ps.service_id, ps.agent_id, p.manifest, p.executable_endpoint
       from probe_schedule ps join probe p on p.id = ps.last_probe_id
+      ${scope ? sql`where ps.agent_id = ${scope.agentId} ${scope.serviceId == null ? sql`` : sql`and ps.service_id = ${scope.serviceId}`}` : sql``}
     ),
     cat as (
       select distinct on (agent_id) agent_id, category
       from agent_category
+      ${scope ? sql`where agent_id = ${scope.agentId}` : sql``}
       order by agent_id, (category <> 'unclassified') desc, confidence desc, assigned_at desc
     )
     select lp.service_id, a.id as agent_id, a.chain_id, a.token_id, a.name, a.agent_wallet, a.owner_address,
@@ -79,7 +92,7 @@ export async function sellerCandidates(): Promise<SellerCandidate[]> {
     left join cat on cat.agent_id = a.id
     where s.kind = 'a2a' and (
       a.id in (${sql.join(fpIds.map((id) => sql`${id}`), sql`, `)})
-      -- Any answering A2A agent classified into a hireable category gets a harmless price
+      -- Any answering A2A agent classified into a hireable category gets a price
       -- check: some production sellers (plain quotes) do not list a negotiate skill.
       or (cat.category in ('yield', 'grid', 'rebalancing', 'health_factor', 'security')
           and exists (select 1 from probe_schedule ps2 join probe p2 on p2.id = ps2.last_probe_id
@@ -88,7 +101,7 @@ export async function sellerCandidates(): Promise<SellerCandidate[]> {
         select 1 from jsonb_array_elements(case when jsonb_typeof(lp.manifest->'skills') = 'array' then lp.manifest->'skills' else '[]'::jsonb end) x
         where x->>'id' in ('negotiate', 'notify_funded') or (x->>'id') ilike '%8183%' or (x->>'name') ilike '%erc-8183%'
       )
-    )`))
+    ) ${scope ? sql`order by lp.service_id` : sql``}`, scope !== undefined)
   return rows.map((r) => {
     const tokenId = String(r['token_id'])
     const chainId = Number(r['chain_id'])
@@ -237,16 +250,23 @@ export interface ServiceCommerce {
  * and indexed job history. `callableServiceIds` marks services with a fresh live probe,
  * for the preview_only state.
  */
-export async function commercialStates(): Promise<Map<number, ServiceCommerce>> {
-  const quotes = rowsOf(await db().execute(sql`
+export async function commercialStates(serviceId?: number): Promise<Map<number, ServiceCommerce>> {
+  const scoped = serviceId !== undefined
+  const quotes = await supplyRows(sql`
     select distinct on (service_id) service_id, agent_id, ok, failure, detail, chain_id, provider, price_raw, token,
            token_symbol, token_decimals, created_at, quote_expires_at, negotiation_hash, provider_sig, signed
     from commerce_quote where service_id is not null
-    order by service_id, created_at desc`))
+    ${scoped ? sql`and service_id = ${serviceId}` : sql``}
+    order by service_id, created_at desc ${scoped ? sql`, id desc` : sql``}`, scoped)
   const delivered = new Map<string, number>()
-  for (const r of rowsOf(await db().execute(sql`
+  const provider = quotes[0]?.['provider']
+  const chainId = quotes[0]?.['chain_id']
+  const jobs = scoped && (provider == null || chainId == null) ? [] : await supplyRows(sql`
     select chain_id, lower(provider) as provider, count(*)::int as n
-    from commerce_job where state in ('COMPLETED', 'PAID') group by 1, 2`).catch(() => []))) {
+    from commerce_job where state in ('COMPLETED', 'PAID')
+    ${scoped ? sql`and chain_id = ${Number(chainId)} and provider = ${String(provider).toLowerCase()}` : sql``}
+    group by 1, 2`, scoped).catch(() => [])
+  for (const r of jobs) {
     delivered.set(`${r['chain_id']}:${r['provider']}`, Number(r['n']))
   }
   const out = new Map<number, ServiceCommerce>()

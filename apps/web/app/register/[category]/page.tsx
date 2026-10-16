@@ -87,7 +87,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
                     <Chip tone="watch">
                       {row.thirdPartyExecutable === 0 ? 'No fresh compatible supplier' : '1 fresh compatible supplier'}
                     </Chip>
-                    <span className={styles.introSupplyNote}>A category needs 2 independent suppliers to be a market.</span>
+                    <span className={styles.introSupplyNote}>Supplier groups use recorded owners/endpoints; independence is not verified.</span>
                   </>
                 ) : (
                   <Chip tone="holds">{row.thirdPartyExecutable} compatible suppliers</Chip>

@@ -1,0 +1,11 @@
+.notice {
+  max-width: 68ch;
+  margin: 0 0 var(--s-5);
+  padding: 0 0 0 var(--s-4);
+  border-left: 2px solid var(--hair-2);
+  color: var(--ink-2);
+  font-size: var(--fs-body);
+  line-height: 1.55;
+}
+.notice p { margin: 0 0 var(--s-3); }
+.notice strong { color: var(--ink); font-weight: 600; }

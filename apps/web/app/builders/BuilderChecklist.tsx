@@ -263,7 +263,7 @@ export function BuilderChecklist() {
           {cur.verdict.qualityListing ? (
             <div className={styles.done}>
               <p className={styles.doneTitle}><Check aria-hidden="true" />Listed on Marque</p>
-              <p className={styles.muted}>All five checks pass. The quest&apos;s fifth step reads this listing from Marque&apos;s records{cur.identity.chainId === 97 ? '; testnet agents are listed for the quest only, the marketplace shows mainnet supply' : ''}.</p>
+              <p className={styles.muted}>All five checks pass. Marque&apos;s local fifth step reads this listing from its records{cur.identity.chainId === 97 ? '; testnet agents are listed for the quest only, the marketplace shows mainnet supply' : ''}.</p>
               <div className={styles.actions}>
                 <ButtonLink href="/quest" size="sm" variant="primary">See your quest</ButtonLink>
                 {cur.identity.chainId === 56 ? <ButtonLink href={`/agents/56/${cur.identity.tokenId}`} size="sm">Open its storefront</ButtonLink> : null}

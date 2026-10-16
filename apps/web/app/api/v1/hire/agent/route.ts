@@ -3,6 +3,7 @@ import { sql } from 'drizzle-orm'
 import { db } from '@marque/db'
 import { agentForSheet, disputeWindowSeconds, freeTarget, HireError, isSupportedChain, campaignChainId, chainClient, network, type ChainId } from '@marque/commerce'
 import { hireError } from '../../../../../lib/hire-api'
+import { withDeadline } from '../../../../../lib/deadline'
 import { registryImageUrl } from '../../../../../lib/avatar-source'
 
 export const dynamic = 'force-dynamic'
@@ -23,7 +24,7 @@ export async function GET(req: NextRequest) {
   const agentId = req.nextUrl.searchParams.get('agentId') ?? ''
   if (agentId.length < 3 || agentId.length > 200) return NextResponse.json({ error: 'bad_request', detail: 'Name an agent.' }, { status: 400 })
   try {
-    const agent = await agentForSheet(agentId).catch(async (err) => {
+    const agent = await withDeadline(agentForSheet(agentId).catch(async (err) => {
       // Try free also opens over agents that answer at their own endpoint but take no paid
       // jobs: the sheet then offers the free run only, and says why there is no Hire.
       if (!(err instanceof HireError) || req.nextUrl.searchParams.get('try') !== '1') throw err
@@ -35,17 +36,17 @@ export async function GET(req: NextRequest) {
         owner: row?.['owner_address'] ? String(row['owner_address']) : null, firstParty: false, state: 'preview_only', lastQuote: null, taskExample: null,
         sellsJobs: false,
       }
-    })
+    }), 10_000)
     const chain = agent.lastQuote?.chainId ?? null
     const chainId = chain !== null && isSupportedChain(chain) ? chain : campaignChainId()
-    const imageRows = await db().execute(sql`select image_url, raw_metadata #>> '{offchain_content,image}' as meta_image from agent where id = ${agentId} limit 1`)
+    const imageRows = await withDeadline(db().execute(sql`select image_url, raw_metadata #>> '{offchain_content,image}' as meta_image from agent where id = ${agentId} limit 1`), 1000).catch(() => [])
     const imageRow = (((imageRows as unknown as { rows?: unknown[] }).rows ?? (imageRows as unknown as unknown[])) as Array<Record<string, unknown>>)[0]
     const imageUrl = registryImageUrl(imageRow?.['image_url']) ?? registryImageUrl(imageRow?.['meta_image'])
     // The review window is read from OptimisticPolicy (cached an hour), so the sheet can say
     // when an undelivered payment becomes reclaimable before the job exists.
     const [reviewWindowSeconds, platformFeeBP] = await Promise.all([
-      disputeWindowSeconds(chainId).catch(() => null),
-      platformFeeBp(chainId).catch(() => null),
+      withDeadline(disputeWindowSeconds(chainId), 2500).catch(() => null),
+      withDeadline(platformFeeBp(chainId), 2500).catch(() => null),
     ])
     return NextResponse.json({ ...agent, imageUrl, reviewWindowSeconds, platformFeeBP, reviewWindowChainId: chainId }, { headers: { 'Cache-Control': 'no-store' } })
   } catch (err) {

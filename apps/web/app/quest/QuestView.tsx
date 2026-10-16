@@ -1,5 +1,6 @@
 'use client'
 import Link from 'next/link'
+import { BRAND } from '@marque/ui'
 import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { useAccount, useBalance, useReadContracts } from 'wagmi'
@@ -16,11 +17,11 @@ type Tok = { address: string; symbol: string; decimals: number }
 const ADDR = /^0x[0-9a-fA-F]{40}$/
 const USDT_SWAP = (u: string) => `https://pancakeswap.finance/swap?chain=bsc&inputCurrency=0x55d398326f99059fF775485246999027B3197955&outputCurrency=${u}`
 const REASON: Record<string, string> = {
-  team_wallet: 'This wallet is on Marque\'s published team list, so its hires are shown but never count for the campaign.',
+  team_wallet: `This wallet is on ${BRAND.name}'s published team list, so its hires are shown but excluded from this quest and the campaign.`,
   self_hire: 'A hire of an agent this wallet owns does not count.',
   zero_deposit: 'A hire must pay a real amount into escrow to count.',
   not_marque: 'Only hires started on Marque count.',
-  not_delivered: 'A hire counts once the agent delivers.',
+  not_delivered: 'This local quest marks delivery when the agent submits its work.',
   rating_unbound: 'A rating counts only for a job this wallet paid for.',
   duplicate_category: 'Only one hire per category counts.',
 }
@@ -68,13 +69,14 @@ export function QuestView({ chainId, recs, recsAt, u, usdt }: { chainId: number;
     const rec = recFor(key)
     if ((st === 'done' || st === 'waiting') && h) {
       const price = amt(h.amount, h.token)
+      const stage = ({ OPEN: 'opened', FUNDED: 'funded in escrow', SUBMITTED: 'work submitted', DISPUTED: 'disputed', COMPLETED: 'completed', PAID: 'payment released', REFUNDED: 'refunded', REJECTED: 'rejected', CANCELLED: 'cancelled', EXPIRED: 'expired' } as Record<string, string>)[h.state] ?? 'state unknown'
       const rated = h.rating ? `rated ${h.rating.stars ?? Math.round(h.rating.value / 20)} of 5` : null
       const pending = h.tx['funded'] ?? h.tx['created']
       return {
         key, name, state: st,
-        detail: <>{h.agent.name}{price ? ` · ${price}` : ''}{rated ? ` · ${rated}` : ''}{st === 'waiting' && pending ? <> · <a href={explorerTx(h.chainId, pending)} target="_blank" rel="noreferrer">{h.state === 'FUNDED' ? 'working' : 'confirming'}</a></> : null}</>,
+        detail: <>{h.agent.name} · {stage}{price ? ` · ${price}` : ''}{rated ? ` · ${rated}` : ''}{st === 'waiting' && pending ? <> · <a href={explorerTx(h.chainId, pending)} target="_blank" rel="noreferrer">{h.state === 'FUNDED' ? 'working' : 'confirming'}</a></> : null}</>,
         actions: <>
-          {st === 'done' && !h.rating && own ? <ButtonLink size="sm" variant="primary" href={`/jobs/${h.chainId}/${h.jobId}`}>Rate it</ButtonLink> : null}
+          {st === 'done' && h.tx['submitted'] && !h.rating && own ? <ButtonLink size="sm" variant="primary" href={`/jobs/${h.chainId}/${h.jobId}`}>Rate it</ButtonLink> : null}
           <ButtonLink size="sm" href={`/jobs/${h.chainId}/${h.jobId}`}>View job</ButtonLink>
         </>,
       }
@@ -149,18 +151,21 @@ export function QuestView({ chainId, recs, recsAt, u, usdt }: { chainId: number;
       )}
 
       <div className={styles.foot}>
-        <p>{remaining.length ? <>To finish: {totalLabel ? <strong>{totalLabel}</strong> : 'the prices above'} plus network fees, across {remaining.length} {remaining.length === 1 ? 'hire' : 'hires'}.</> : doneCount >= 4 ? 'All four hires are done.' : null} Prices are live quotes{recsAt ? `, read ${new Date(recsAt).toISOString().slice(11, 16)} UTC` : ''}.</p>
+        {data?.projection?.computedAt ? <p role={data.projection.stale ? 'status' : undefined}>
+          Snapshot computed {data.projection.computedAt}.{data.projection.stale ? ' Refresh delayed: this is the last available progress, not a current chain confirmation.' : ''}
+        </p> : null}
+        <p>{remaining.length ? <>To finish: {totalLabel ? <strong>{totalLabel}</strong> : 'the prices above'} plus network fees, across {remaining.length} {remaining.length === 1 ? 'hire' : 'hires'}.</> : doneCount >= 4 ? 'All four hires are funded.' : null} Prices are live quotes{recsAt ? `, read ${new Date(recsAt).toISOString().slice(11, 16)} UTC` : ''}.</p>
         <p className={styles.muted}>Progress is read from the chain. Check it yourself: {target ? <a href={`/api/v1/phase2/wallet/${target}`}>/api/v1/phase2/wallet/{target.slice(0, 6)}…{target.slice(-4)}</a> : <a href="/api/v1/phase2/config">/api/v1/phase2/config</a>}</p>
       </div>
 
       {complete && data ? <Complete hires={QUEST_CATEGORIES.map(({ key }) => hireFor(key)).filter((h): h is WalletHire => Boolean(h))} address={target!} /> : null}
 
-      <Disclosure summary="What counts, exactly" boxed>
+      <Disclosure summary={`What counts toward the ${BRAND.name} stretch quest`} boxed>
         <ul className={styles.rules}>
-          <li>A hire counts when it was started on Marque, paid into BNB Chain&apos;s ERC-8183 escrow with a real amount, and the agent delivered.</li>
+          <li>A local hire step records a Marque-started, funded escrow job. Submitted work and ratings are checked separately before the stretch quest is complete. Submission, completion and payment release are separate events.</li>
           <li>One hire per category: Yield, Grid, Rebalancing and Health factor.</li>
           <li>A rating counts when the wallet that paid rates that agent on the ERC-8004 reputation registry.</li>
-          <li>Listing counts when an ERC-8004 agent you own passes Marque&apos;s five listing checks.</li>
+          <li>Listing progress uses a published listing owned by this wallet. The five readiness checks and a passing MCS Warrant are separate facts.</li>
           <li>Team wallets are shown but excluded. Nothing here is set by hand: <a href="/protocol">see the contracts and events</a>.</li>
         </ul>
       </Disclosure>
@@ -198,14 +203,14 @@ function Complete({ hires, address }: { hires: WalletHire[]; address: string }) 
   }, [address])
   return (
     <section className={styles.complete} data-surface="chamber" aria-labelledby="quest-complete">
-      <span className="t-label">Set and Earn</span>
-      <h2 id="quest-complete" className="t-serif">Quest complete.</h2>
-      <p>Every hire below was paid into escrow, delivered and rated, all from this wallet and all on chain.</p>
+      <span className="t-label">{BRAND.name} stretch quest</span>
+      <h2 id="quest-complete" className="t-serif">{BRAND.name} stretch quest complete.</h2>
+      <p>Every hire below was funded, submitted and rated from this wallet. BNB campaign qualification is reviewed separately.</p>
       <ul className={styles.completeList}>
         {hires.map((h) => (
           <li key={h.jobKey}>
             <span>{h.agent.name}</span>
-            {h.tx['funded'] ? <HashChip value={h.tx['funded']} chainId={h.chainId} label="Paid" /> : null}
+            {h.tx['funded'] ? <HashChip value={h.tx['funded']} chainId={h.chainId} label="Funded" /> : null}
             {h.rating?.tx ? <HashChip value={h.rating.tx} chainId={h.chainId} label="Rated" /> : null}
           </li>
         ))}

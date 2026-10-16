@@ -1,3 +1,7 @@
+# P01 latest checkpoint, 16 October 2026
+
+Status AMBER. See [P01_CHECKPOINT](P01_CHECKPOINT.md) for the full acceptance record, metrics, source scope, failures and next approval. Local repair branch only; production application release remains 97ef4c7. Root session persistence and the reviewed shared-service restart policy are installed, without production service restarts. P01A/P02 not started; stop for owner review.
+
 # P00 checkpoint
 
 Status: **AMBER, audit complete enough for review; implementation and release blocked on A0 findings. STOP.**

@@ -60,8 +60,8 @@ export default async function RegisterPage() {
             </p>
             <p>
               Ranking is qualification-first: agents that passed the published test, then agents that ran it
-              and did not pass, then agents that are merely callable. Rows are deduplicated by operator, so one
-              team registering forty identities against one endpoint is one row.
+              and did not pass, then agents that are merely callable. Rows group recorded owners and endpoints.
+              This grouping does not prove independent people or funding.
             </p>
             <p>
               The tests themselves are published in full, per category, with their tolerances and the exact
