@@ -1,6 +1,7 @@
 import { sql } from 'drizzle-orm'
 import { db } from '@marque/db'
 import { served, bad, ADDRESS } from '../../../../../../lib/phase2-api'
+import { sellerProjection } from '../../../../../../lib/seller'
 import { builderIdentities, builderView } from '../../../../../../lib/builder'
 
 export const dynamic = 'force-dynamic'
@@ -15,7 +16,7 @@ const rowsOf = (r: unknown) => ((r as { rows?: unknown[] }).rows ?? (r as unknow
 export async function GET(_req: Request, { params }: { params: Promise<{ address: string }> }) {
   const { address } = await params
   if (!ADDRESS.test(address)) return bad('Send a 0x address of 40 hex characters.')
-  return served(`phase2:owner:v2:${address.toLowerCase()}`, 'owner', async () => {
+  return served(`phase2:owner:v3:${address.toLowerCase()}`, 'owner', async () => {
     const ids = await builderIdentities(address)
     const agents = await Promise.all(ids.slice(0, 8).map(async (t) => {
       const v = await builderView(address, t.chainId, t.tokenId)
@@ -27,6 +28,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ address
         agentKey: v.identity.agentKey, chainId: v.identity.chainId, agentId: v.identity.tokenId, name: v.identity.name, category: v.category,
         listedOnMarque: v.listed, qualityListing: v.verdict.qualityListing,
         availability: v.availability,
+        seller: await sellerProjection(v),
         listingEvidence: v.listingEvidence,
         quality: {
           listing: v.verdict.qualityListing, passed: v.verdict.passed,

@@ -27,6 +27,7 @@ export const revalidate = 0
 
 const body = z.object({
   endpoint: z.string().url().max(500),
+  taskConsent: z.boolean().optional(),
   testId: z.enum(['MCS-REB-1', 'MCS-GRID-1', 'MCS-YIELD-1', 'MCS-HF-1']),
   kind: z.enum(['a2a', 'mcp']).default('a2a'),
 })
@@ -44,6 +45,8 @@ export async function POST(request: Request) {
       detail: 'Provide an endpoint URL, a testId and optionally kind (a2a or mcp).',
     }, { status: 400 })
   }
+
+  if (input.taskConsent !== true) return NextResponse.json({ error: 'task_consent_required', detail: 'This invokes a real task. Confirm that you control or have permission for this endpoint and that the test needs no payment or other side effects.' }, { status: 428 })
 
   const spec = CASES.find((c) => c.testId === input.testId)
   if (!spec) return NextResponse.json({ error: 'no_such_test' }, { status: 404 })

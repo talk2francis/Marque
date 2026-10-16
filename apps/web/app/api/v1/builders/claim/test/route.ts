@@ -3,6 +3,9 @@ import { randomUUID } from 'node:crypto'
 import { z } from 'zod'
 import { CASES, capturePublishedCase, runConformance, adapterFor, type TestId } from '@marque/conformance'
 import { db, conformanceResult } from '@marque/db'
+import { isSupportedChain } from '@marque/commerce'
+import { readIdentity } from '../../../../../../lib/builder'
+import { withDeadline } from '../../../../../../lib/deadline'
 import { readClaimToken } from '../../../../../../lib/claim'
 import { checkClaimBurst, clientKey } from '../../../../../../lib/limits'
 
@@ -23,6 +26,7 @@ export const revalidate = 0
 const body = z.object({
   claimToken: z.string().min(1).max(4000),
   endpoint: z.string().url().max(500),
+  taskConsent: z.boolean().optional(),
   testId: z.enum(['MCS-REB-1', 'MCS-GRID-1', 'MCS-YIELD-1', 'MCS-HF-1']),
   kind: z.enum(['a2a', 'mcp']).default('a2a'),
 })
@@ -40,6 +44,16 @@ export async function POST(request: Request) {
 
   const claim = readClaimToken(input.claimToken)
   if (!claim) return NextResponse.json({ error: 'claim_expired', detail: 'Prove control again — the claim window closed.' }, { status: 401 })
+
+  if (input.taskConsent !== true) return NextResponse.json({ error: 'task_consent_required', detail: 'This invokes a real task. Confirm that you control or have permission for this endpoint and that the test needs no payment or other side effects.' }, { status: 428 })
+
+  try {
+    if (!isSupportedChain(claim.chainId)) return NextResponse.json({ error: 'unsupported_chain' }, { status: 400 })
+    const identity = await withDeadline(readIdentity(claim.chainId, claim.tokenId), 8000)
+    if (identity.readFailed) throw new Error('registry unavailable')
+    if (identity.owner !== claim.owner.toLowerCase()) return NextResponse.json({ error: 'owner_changed', detail: 'Prove current ownership again before running a public test.' }, { status: 403 })
+    if (!identity.services.some(s => s.endpoint === input.endpoint && s.kind === input.kind)) return NextResponse.json({ error: 'endpoint_mismatch', detail: 'Choose the exact A2A or MCP endpoint currently declared by this identity.' }, { status: 422 })
+  } catch { return NextResponse.json({ error: 'identity_unavailable', detail: 'Current identity proof is unavailable. No task was sent.' }, { status: 503 }) }
 
   const spec = CASES.find((c) => c.testId === input.testId)
   if (!spec) return NextResponse.json({ error: 'no_such_test' }, { status: 404 })

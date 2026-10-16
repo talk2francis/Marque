@@ -25,6 +25,7 @@ export async function POST(req: NextRequest) {
     const out = await probeNow(parsed.data.chainId, parsed.data.tokenId, parsed.data.endpoint)
     return NextResponse.json(out, { headers: { 'Cache-Control': 'no-store' } })
   } catch (err) {
+    if (err instanceof Error && err.message === 'Choose a current declared A2A or MCP endpoint.') return NextResponse.json({ error: 'endpoint_mismatch', detail: 'This endpoint could not be matched to the current ERC-8004 metadata. Recheck the declared service and metadata availability before probing.' }, { status: 422 })
     console.error('[api/v1/builders/probe]', err instanceof Error ? err.message : String(err))
     return NextResponse.json({ error: 'probe_failed', detail: 'The probe could not run just now. Try again in a minute.' }, { status: 503 })
   }

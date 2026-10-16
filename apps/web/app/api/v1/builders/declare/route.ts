@@ -1,7 +1,8 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { z } from 'zod'
 import type { ChainId } from '@marque/commerce'
-import { readClaimToken } from '../../../../../lib/claim'
+import { withDeadline } from '../../../../../lib/deadline'
+import { readClaimToken, claimOwnerIsCurrent } from '../../../../../lib/claim'
 import { declareCategory } from '../../../../../lib/builder'
 import { checkWindow, clientKey } from '../../../../../lib/limits'
 
@@ -24,6 +25,9 @@ export async function POST(req: NextRequest) {
   if (!parsed.success) return NextResponse.json({ error: 'bad_request', detail: 'Send the claim token and a category.' }, { status: 400 })
   const claim = readClaimToken(parsed.data.claimToken)
   if (!claim) return NextResponse.json({ error: 'claim_expired', detail: 'Sign the proof again: the 20 minute window closed.' }, { status: 401 })
+  try {
+    if (!await withDeadline(claimOwnerIsCurrent(claim), 8000)) return NextResponse.json({ error: 'owner_changed', detail: 'Prove current ownership again before changing the category.' }, { status: 403 })
+  } catch { return NextResponse.json({ error: 'identity_unavailable', detail: 'Current ownership could not be checked. Nothing was changed.' }, { status: 503 }) }
   await declareCategory(claim.chainId as ChainId, claim.tokenId, parsed.data.category, claim.owner)
   return NextResponse.json({ declared: parsed.data.category }, { headers: { 'Cache-Control': 'no-store' } })
 }

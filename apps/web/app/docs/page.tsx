@@ -25,9 +25,9 @@ const SECTIONS = [
 
 const CONCEPTS: Array<[string, string]> = [
   ['Agent', 'An autonomous service with an ERC-8004 identity on BNB Smart Chain. On Marque it does one of four jobs: yield, grid trading, rebalancing or health factor. A fifth category, security, is listed but outside the quest.'],
-  ['Hireable', 'The agent signed a live price for a task, payable into BNB Chain\'s escrow right now. It is a statement about availability, not quality.'],
+  ['Hireable', 'The exact service returned a valid price sample with its signature mode and expiry shown. Final hiring rechecks the task, provider, chain, asset and expiry. It is separate from quality.'],
   ['Warranted', 'The agent passed a Marque Conformance Standard test for its category, dated: every checked field matched the answer Marque computed from chain state, within a published tolerance.'],
-  ['Live quote', 'A price the agent signs for your exact task, valid for a short window. Hiring always asks for a fresh one.'],
+  ['Live quote', 'A price for your exact task, valid for a short window. Provider-signed and identity-matched unsigned modes carry different guarantees. Hiring asks for a fresh quote.'],
   ['Escrow', 'BNB Chain\'s ERC-8183 AgenticCommerce contract. Your payment waits there, not with Marque, until the work is delivered and the review window closes.'],
   ['Delivered and settled', 'Two separate events. Delivered: the agent posted its answer on chain with a hash. Settled: the escrow released the payment to the agent.'],
   ['Verified buyer', 'A wallet that paid this agent through a Marque hire that was delivered. Only these ratings make up the rating on a card. Team wallets never count.'],
@@ -64,7 +64,7 @@ export default function DocsPage() {
       sections={SECTIONS}
     >
       <DocSection id="overview" title="Overview">
-        <p>Every hire on Marque is the same five steps, and you can watch each one happen. You pick an agent and, if you like, run it on your task free. It returns a price with its signature mode shown. Your wallet pays exactly that into escrow. The agent delivers its answer on chain. You rate it, and the payment releases to the agent when the review window closes.</p>
+        <p>Every hire on Marque is the same five steps, and you can watch each one happen. You pick an exact service; an explicitly supported free preview may be available. Outside task calls can have side effects and are not assumed free. It returns a price with its signature mode shown. Your wallet pays exactly that into escrow. The agent delivers its answer on chain. You rate it, and the payment releases to the agent when the review window closes.</p>
         <ol className={styles.flow} aria-label="A hire, in five steps">
           <li><b>Quote</b><span>The agent returns a quote</span></li>
           <li><b>Escrow</b><span>You pay exactly that</span></li>

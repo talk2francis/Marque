@@ -46,3 +46,15 @@
 - Final copy checker hit a sandbox nested `git spawnSync` EPERM; automatic review of the direct host retry timed out. A private copy of the unchanged checker used the exact shell-captured Git file list and original baseline instead:843 <=859, exit0. No baseline relaxation or source-checker mutation.
 
 - The final terminal-bound build printed the completed route table but its wrapper ended143 before writing a clean exit marker. Scope journal/no kernel OOM/shared PID checks did not establish an initiating cause. A detached, identically capped build of the same frozen source completed exit0 (service success/exited; peak2530983936bytes). No speculative production fix or memory-cap increase was applied.
+
+## P03 seller visibility
+
+- Reuse builder/owner routes, claim proof and existing tables instead of a new dashboard/auth system; additive seller v1 projections and disconnected public lookup; no migration or new hosting product.
+- Historical conformance lacks a verifiable immutable exact-service binding for this projection; expose Warrant UNKNOWN, preserve records, defer portable binding work rather than infer a pass.
+- Token metadata is not independently re-read for every historical release; publish raw-unit strings by token/chain, decimals and valuation UNKNOWN; later verified metadata can improve display without altering amounts.
+- Unsafe A2A task fallback removed from discovery; explicit taskConsent now required by existing conformance POSTs and fresh owner/endpoint proof required for owner-recorded tests. Old callers without consent get428; update callers rather than silently execute an outside task.
+- New independent human operator/paid pilot consent remains UNKNOWN; verify historical public state and reliable setup/failure paths, use synthetic isolated owner fixtures, do not manufacture a transaction or claim organic acceptance.
+- One public Kerb API health sample timed out after20seconds; the read-only retry returned200/308bytes in0.201089seconds, shared PIDs unchanged. Both observations retained; no service restart or attribution invented.
+- Real candidate browser found mobile builder overflow from the longer current install command and guide code overflowing without the existing code style. Preserve failed screenshots; fix scoped grid minimum and reuse scrollable code styles, with neutral seller-status outline. Rerun same viewport assertions without weakening them.
+- Deliberately unconfigured candidate claim verification exposed an unhandled500 before the GET error boundary. Return explicit no-store503 while public status remains readable; invalid configured tokens still401. Add configuration-failure fixture and distinguish actual HTTP samples. No production signing/auth secret was loaded to hide the failure.
+- Generated custom-build next-env reference caused one lint failure after a successful build. Restore only asserted generated include/reference/format differences before lint; keep source/config baselines unchanged and preserve original failure.

@@ -1,10 +1,12 @@
 'use client'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useAccount, useSignMessage } from 'wagmi'
 import { useConnectModal } from '@rainbow-me/rainbowkit'
 import { Check, Circle, X, Radar, PenLine, Tag, FlaskConical, BadgeCheck } from 'lucide-react'
 import { AddressChip, Button, ButtonLink, ErrorNote, Skeleton } from '../_components/ui'
 import styles from './checklist.module.css'
+import { SellerSummary } from './SellerSummary'
+import type { SellerProjection } from '../../lib/seller'
 
 /**
  * The builder checklist (DESIGN-SYSTEM.md 8.8): five checks read from the connected
@@ -15,6 +17,7 @@ import styles from './checklist.module.css'
 type State = 'pass' | 'fail' | 'pending'
 interface CheckView { id: 'identity' | 'proved' | 'callable' | 'classified' | 'tested'; label: string; state: State; reason: string; fix: string | null; note?: string | null }
 interface IdentityView {
+  seller?: SellerProjection
   identity: { chainId: 56 | 97; tokenId: string; agentKey: string; registry: string; owner: string | null; name: string | null; description: string | null; services: Array<{ kind: string; endpoint: string }> }
   verdict: { qualityListing: boolean; passed: number; checks: CheckView[] }
   category: string | null
@@ -49,8 +52,22 @@ function saveClaim(key: string, token: string) {
   try { sessionStorage.setItem(tokenKey(key), JSON.stringify({ token, at: Date.now() })) } catch { /* the claim still works for this page view */ }
 }
 
+function readClaimFor(chainId: number, tokenId: string): string | null {
+  try {
+    for (let i = 0; i < sessionStorage.length; i++) {
+      const k = sessionStorage.key(i)
+      if (k?.startsWith(`marque.claim.${chainId}:`) && k.endsWith(`:${tokenId}`)) return readClaim(k.slice('marque.claim.'.length))
+    }
+  } catch { /* private diagnostics can be reauthorized */ }
+  return null
+}
+
 export function BuilderChecklist() {
   const { address, isConnected } = useAccount()
+  const [watchWallet, setWatchWallet] = useState('')
+  const [walletInput, setWalletInput] = useState('')
+  const wallet = watchWallet || address
+  const loadSequence = useRef(0)
   const { openConnectModal } = useConnectModal()
   const { signMessageAsync } = useSignMessage()
   const [list, setList] = useState<IdentityView[] | null>(null)
@@ -66,13 +83,16 @@ export function BuilderChecklist() {
   const [lookToken, setLookToken] = useState('')
 
   const load = useCallback(async (extra?: { chainId: number; tokenId: string }) => {
-    if (!address) return
+    if (!wallet) return
+    const seq = ++loadSequence.current
     setLoading(true); setError(null)
     try {
       const q = extra ? `&chainId=${extra.chainId}&tokenId=${extra.tokenId}` : ''
-      const r = await fetch(`/api/v1/builders/checks?wallet=${address}${q}`, { cache: 'no-store' })
+      const proofToken = extra && address?.toLowerCase() === wallet.toLowerCase() ? readClaimFor(extra.chainId, extra.tokenId) : null
+      const r = await fetch(`/api/v1/builders/checks?wallet=${wallet}${q}`, { headers: proofToken ? { Authorization: `Bearer ${proofToken}` } : {}, cache: 'no-store' })
       const j = await r.json()
       if (!r.ok) throw new Error(j.detail ?? 'The checks could not be read.')
+      if (seq !== loadSequence.current) return
       const got = j.identities as IdentityView[]
       setList((prev) => {
         if (!extra) return got
@@ -82,11 +102,11 @@ export function BuilderChecklist() {
       if (extra && got[0]) setSelected(got[0].identity.agentKey)
       else if (!extra) setSelected((s) => s ?? got[0]?.identity.agentKey ?? null)
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'The checks could not be read.')
-    } finally { setLoading(false) }
-  }, [address])
+      if (seq === loadSequence.current) setError(e instanceof Error ? e.message : 'The checks could not be read.')
+    } finally { if (seq === loadSequence.current) setLoading(false) }
+  }, [wallet, address])
 
-  useEffect(() => { setList(null); setSelected(null); if (address) void load() }, [address, load])
+  useEffect(() => { ++loadSequence.current; setList(null); setSelected(null); if (wallet) void load() }, [wallet, load])
 
   const cur = useMemo(() => list?.find((x) => x.identity.agentKey === selected) ?? null, [list, selected])
   useEffect(() => {
@@ -131,7 +151,7 @@ export function BuilderChecklist() {
     const r = await fetch('/api/v1/builders/probe', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ chainId: cur.identity.chainId, tokenId: cur.identity.tokenId, endpoint: endpoint.trim() }) })
     const j = await r.json()
     if (!r.ok) throw new Error(j.detail ?? 'The probe could not run.')
-    return j.ok ? `Answered as callable in ${j.latencyMs} ms.` : `Did not reach a callable service (${j.liveness}): ${j.detail}`
+    return `Discovery only (${j.liveness}), ${j.latencyMs} ms: ${j.detail}. No task was sent.`
   })
   const doDeclare = () => act('classified', async () => {
     const token = await claimToken()
@@ -143,10 +163,11 @@ export function BuilderChecklist() {
   })
   const testFor = CATS.find((c) => c.v === (cur?.category ?? declare))
   const doTest = () => act('tested', async () => {
+    if (!window.confirm('This sends a real task to your declared service and records the result publicly. Continue only if you control it and it accepts this test without payment or other side effects.')) return
     if (!testFor?.test) throw new Error('Security has no assertion-based Marque test yet, so it cannot complete the live test check.')
     const token = await claimToken()
     if (!token) return
-    const r = await fetch('/api/v1/builders/claim/test', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ claimToken: token, endpoint: endpoint.trim(), testId: testFor.test, kind: /\/mcp\b/i.test(endpoint) ? 'mcp' : 'a2a' }) })
+    const r = await fetch('/api/v1/builders/claim/test', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ claimToken: token, endpoint: endpoint.trim(), testId: testFor.test, taskConsent: true, kind: /\/mcp\b/i.test(endpoint) ? 'mcp' : 'a2a' }) })
     const j = await r.json()
     if (!r.ok) throw new Error(j.detail ?? 'The test could not run.')
     return j.error ? `${testFor.test}: no gradable answer (${String(j.error).slice(0, 140)}).` : `${testFor.test}: ${j.pass ? 'passed every field' : `answered; ${(j.diffs as Array<{ pass: boolean }>).filter((d) => !d.pass).length} fields off`}. Passing is not required.`
@@ -163,10 +184,13 @@ export function BuilderChecklist() {
     return 'Owner-listed. Local quality checks, service Warrants and official BNB qualification remain separate.'
   })
 
-  if (!isConnected || !address) {
+  const readLookup = <form className={styles.lookup} onSubmit={e => { e.preventDefault(); if (/^0x[0-9a-fA-F]{40}$/.test(walletInput.trim())) setWatchWallet(walletInput.trim()) }}><label htmlFor="seller-wallet">Read seller status without a wallet</label><input id="seller-wallet" aria-label="Seller owner address" placeholder="0x owner address" value={walletInput} onChange={e => setWalletInput(e.target.value)} /><Button type="submit" size="sm" disabled={!/^0x[0-9a-fA-F]{40}$/.test(walletInput.trim())}>Read status</Button>{watchWallet ? <Button size="sm" onClick={() => setWatchWallet('')}>Use connected wallet</Button> : null}</form>
+
+  if (!wallet) {
     return (
       <div className={styles.connect}>
-        <p className={styles.connectTitle}>Connect the wallet that owns your agent.</p>
+        <p className={styles.connectTitle}>Read seller status or connect to manage.</p>
+        {readLookup}
         <p className={styles.muted}>The checks read its ERC-8004 identity on BSC mainnet and testnet. Connecting signs nothing.</p>
         <Button variant="primary" onClick={openConnectModal}>Connect wallet</Button>
         <ol className={styles.preview} aria-label="The five checks">
@@ -180,10 +204,12 @@ export function BuilderChecklist() {
 
   return (
     <div className={styles.wrap}>
+      {readLookup}
+      {!isConnected ? <Button onClick={openConnectModal}>Connect wallet to manage</Button> : null}
       <div className={styles.picker}>
         <div className={styles.pickerHead}>
-          <span className="t-label">Your agents</span>
-          <AddressChip value={address} label="Wallet" />
+          <span className="t-label">Seller identities</span>
+          <AddressChip value={wallet} label="Owner" />
         </div>
         {list === null && loading ? <Skeleton h={44} /> : null}
         {list && list.length === 0 ? <p className={styles.muted}>No ERC-8004 identity owned by this wallet is indexed yet. Check one by its token id below.</p> : null}
@@ -220,7 +246,7 @@ export function BuilderChecklist() {
             {cur.listed ? <span className={styles.listed}><Check aria-hidden="true" />{cur.listingEvidence?.ownerListed ? 'Owner-listed' : 'Published record; recheck proof'}</span> : null}
           </header>
 
-          <p className={styles.muted}>Availability evidence, last 24 hours: {cur.availability ? `${cur.availability.successes} successful calls in ${cur.availability.attempts} builder probes at the current endpoint.` : 'No recent measurement available.'} These are irregular samples, not a continuous uptime score. Keep the service running after listing.</p>
+          <p className={styles.muted}>Availability evidence, last 24 hours: {cur.availability ? `${cur.availability.successes} successful observations in ${cur.availability.attempts} builder checks at the current endpoint.` : 'No recent measurement available.'} These are irregular samples, not a continuous uptime score. Keep the service running after listing.</p>
           <ol className={styles.checks}>
             {cur.verdict.checks.map((c) => {
               const Icon = ICON[c.id]
@@ -233,18 +259,18 @@ export function BuilderChecklist() {
                     {c.note ? <p className={styles.noteLine}>{c.note}</p> : null}
                     {c.state !== 'pass' && c.fix ? <p className={styles.fix}>{c.fix}</p> : null}
 
-                    {c.id === 'proved' && c.state !== 'pass' && cur.identity.owner === address.toLowerCase() ? (
+                    {c.id === 'proved' && c.state !== 'pass' && !!address && cur.identity.owner === address.toLowerCase() ? (
                       <div className={styles.actions}><Button size="sm" variant="primary" loading={busy === 'proved'} onClick={doProve}>Sign the proof</Button><span className={styles.muted}>No transaction, no gas.</span></div>
                     ) : null}
 
-                    {c.id === 'callable' ? (
+                    {c.id === 'callable' && !!address && cur.identity.owner === address.toLowerCase() ? (
                       <div className={styles.actions}>
                         <input className={styles.input} aria-label="Endpoint to probe" value={endpoint} onChange={(e) => setEndpoint(e.target.value)} placeholder="https://your-agent.example/.well-known/agent-card.json" spellCheck={false} />
-                        <Button size="sm" variant={c.state === 'pass' ? 'secondary' : 'primary'} loading={busy === 'callable'} disabled={!/^https:\/\//.test(endpoint.trim())} onClick={doProbe}>Probe now</Button>
+                        <Button size="sm" variant={c.state === 'pass' ? 'secondary' : 'primary'} loading={busy === 'callable'} disabled={!/^https:\/\//.test(endpoint.trim())} onClick={doProbe}>Read capabilities</Button>
                       </div>
                     ) : null}
 
-                    {c.id === 'classified' && cur.identity.owner === address.toLowerCase() ? (
+                    {c.id === 'classified' && !!address && cur.identity.owner === address.toLowerCase() ? (
                       <div className={styles.actions}>
                         <select className={styles.input} aria-label="Declared category" value={declare} onChange={(e) => setDeclare(e.target.value)}>
                           <option value="">Choose a category</option>
@@ -255,7 +281,7 @@ export function BuilderChecklist() {
                       </div>
                     ) : null}
 
-                    {c.id === 'tested' && c.state !== 'pass' && cur.identity.owner === address.toLowerCase() ? (
+                    {c.id === 'tested' && c.state !== 'pass' && !!address && cur.identity.owner === address.toLowerCase() ? (
                       <div className={styles.actions}>
                         <Button size="sm" variant="primary" loading={busy === 'tested'} disabled={!testFor?.test || !/^https:\/\//.test(endpoint.trim())} onClick={doTest}>
                           {testFor?.test ? `Run ${testFor.test} now` : 'Choose a category first'}
@@ -269,6 +295,9 @@ export function BuilderChecklist() {
             })}
           </ol>
 
+          {cur.seller ? <SellerSummary seller={cur.seller} /> : null}
+          {!!address && cur.identity.owner === address.toLowerCase() ? <div className={styles.actions}><Button size="sm" loading={busy === 'diagnostics'} onClick={() => act('diagnostics', async () => { await claimToken(); return 'Owner proof checked; private diagnostics refreshed.' })}>Read owner diagnostics</Button></div> : null}
+
           {actionNote ? <p className={styles.actionNote} role="status">{actionNote}</p> : null}
           {actionError ? <ErrorNote error={{ title: actionError, action: 'Fix it and try again. Nothing on chain changed.' }} /> : null}
 
@@ -277,7 +306,7 @@ export function BuilderChecklist() {
               <p className={styles.doneTitle}><Check aria-hidden="true" />{cur.listingEvidence?.qualityListed ? 'Quality-listed; five local checks pass' : 'Five local checks pass; publish current details'}</p>
               <p className={styles.muted}>Reading this checklist does not publish. A Warrant requires a separate passing service test; hireability needs a current quote. BNB determines official qualification{cur.identity.chainId === 97 ? '; testnet listings appear in builder checks, and the public marketplace shows mainnet supply' : ''}.</p>
               <div className={styles.actions}>
-                {!cur.listingEvidence?.qualityListed && cur.identity.owner === address.toLowerCase() ? <Button size="sm" variant="primary" loading={busy === 'publish'} onClick={doPublish}>Publish my listing</Button> : null}
+                {!cur.listingEvidence?.qualityListed && !!address && cur.identity.owner === address.toLowerCase() ? <Button size="sm" variant="primary" loading={busy === 'publish'} onClick={doPublish}>Publish my listing</Button> : null}
                 <ButtonLink href="/builders/claim" size="sm">Edit listing details</ButtonLink>
                 <ButtonLink href="/quest" size="sm" variant="primary">See your quest</ButtonLink>
                 {cur.identity.chainId === 56 ? <ButtonLink href={`/agents/56/${cur.identity.tokenId}`} size="sm">Open its storefront</ButtonLink> : null}

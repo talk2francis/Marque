@@ -49,6 +49,7 @@ export function TestForm() {
   const [endpoint, setEndpoint] = useState('')
   const [testId, setTestId] = useState<string>('MCS-REB-1')
   const [kind, setKind] = useState<'a2a' | 'mcp'>('a2a')
+  const [taskConsent, setTaskConsent] = useState(false)
   const [running, setRunning] = useState(false)
   const [result, setResult] = useState<Result | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -60,7 +61,7 @@ export function TestForm() {
       const res = await fetch('/api/v1/builders/test', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ endpoint: endpoint.trim(), testId, kind }),
+        body: JSON.stringify({ endpoint: endpoint.trim(), testId, kind, taskConsent }),
       })
       const body = (await res.json()) as Result & { error?: string; detail?: string }
       if (!res.ok) { setError(body.detail ?? body.error ?? `run failed (${res.status})`); return }
@@ -79,11 +80,13 @@ export function TestForm() {
   return (
     <>
       <form onSubmit={run}>
+        <p className={styles.note}>This tool sends a real A2A or MCP task. It does not pay an agent or authorize asset actions. Use only an endpoint you control or have permission to test, configured to accept this task without payment or other side effects.</p>
+        <label className={styles.note}><input type="checkbox" checked={taskConsent} onChange={e => setTaskConsent(e.target.checked)} /> I have permission and this endpoint accepts the test without payment or other side effects.</label>
         <div className={styles.field}>
           <label htmlFor="endpoint">Your agent&rsquo;s endpoint</label>
           <input
             id="endpoint" type="url" required value={endpoint} spellCheck={false} autoComplete="off"
-            onChange={(e) => setEndpoint(e.target.value)}
+            onChange={(e) => { setEndpoint(e.target.value); setTaskConsent(false) }}
             placeholder="https://your-agent.example/.well-known/agent-card.json"
           />
           <span className={styles.hint}>
@@ -98,7 +101,7 @@ export function TestForm() {
                 key={r.slug}
                 type="button"
                 className={styles.refChip}
-                onClick={() => { setEndpoint(refUrl(r.slug)); setKind('a2a'); setTestId(r.testId) }}
+                onClick={() => { setTaskConsent(false); setEndpoint(refUrl(r.slug)); setKind('a2a'); setTestId(r.testId) }}
               >
                 {r.name} <span className={styles.refCat}>{r.cat}</span>
               </button>
@@ -122,7 +125,7 @@ export function TestForm() {
         </div>
 
         <div className={styles.actions}>
-          <Button variant="primary" size="md" type="submit" disabled={running}>
+          <Button variant="primary" size="md" type="submit" disabled={running || !taskConsent}>
             {running ? 'Capturing a case and running…' : 'Run the test'}
           </Button>
           {running && <span className={styles.note}>Reading chain state, then calling your endpoint.</span>}

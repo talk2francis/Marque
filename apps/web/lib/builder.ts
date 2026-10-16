@@ -184,7 +184,7 @@ export async function builderView(wallet: string, chainId: ChainId, tokenId: str
   return {
     identity: id, verdict, category, declared, classified,
     endpoint,
-    availability: {windowHours:24, attempts:Number(availability?.['attempts'] ?? 0), successes:Number(availability?.['successes'] ?? 0), firstAt:iso(availability?.['first_at']), lastAt:iso(availability?.['last_at']), scope:'Builder-initiated task probes at the current declared endpoint. Irregular samples, not a continuous uptime measurement.'},
+    availability: {windowHours:24, attempts:Number(availability?.['attempts'] ?? 0), successes:Number(availability?.['successes'] ?? 0), firstAt:iso(availability?.['first_at']), lastAt:iso(availability?.['last_at']), scope:'Builder-initiated discovery or task-probe observations at the current declared endpoint. Irregular samples, not a continuous uptime measurement.'},
     listed: listing[0]?.['status'] === 'published',
     listingEvidence: { version: 1, ownerListed, qualityListed: ownerListed && listingMatches && verdict.qualityListing, localChecksPassed: verdict.qualityListing, warrant: 'separate_service_test', hireability: 'requires_current_quote', officialCampaign: 'not_determined' },
   }
@@ -204,38 +204,21 @@ export async function builderIdentities(wallet: string): Promise<Array<{ chainId
 
 /** "Probe now": one safeFetch probe of the declared endpoint, stored as a first-party observation. */
 export async function probeNow(chainId: ChainId, tokenId: string, endpoint: string): Promise<{ ok: boolean; liveness: string; latencyMs: number; detail: string; executableEndpoint: string | null }> {
-  const kind = /\/mcp\b/i.test(endpoint) ? 'mcp' : 'a2a'
+  const identity = await readIdentity(chainId, tokenId)
+  if (identity.readFailed) throw new Error('Current identity could not be read.')
+  const service = identity.services.find(s => s.endpoint === endpoint && (s.kind === 'a2a' || s.kind === 'mcp'))
+  if (!service || service.kind === 'other') throw new Error('Choose a current declared A2A or MCP endpoint.')
+  const kind = service.kind
+  // Discovery may initialize/list MCP capabilities or GET an A2A card. It never
+  // invokes message/send or tools/call. A readable card is not task acceptance.
   const out = await probeService(kind, endpoint)
-  let callable = out.liveness === 'live'
-  let detail = out.detail
-  // A2A discovery only reads the card (it cannot prove message/send takes work), so for
-  // this owner-requested probe Marque makes one real, read-only call: a message/send
-  // asking the agent to describe itself. Any JSON-RPC result counts as callable.
-  let sendMs: number | null = null
-  if (!callable && kind === 'a2a' && out.executableEndpoint && /^card readable/.test(out.detail)) {
-    const id = `marque-callable-${Date.now().toString(36)}`
-    const t0 = Date.now()
-    const r = await safeFetch(out.executableEndpoint, {
-      method: 'POST', timeoutMs: 12_000, maxBytes: 256 * 1024,
-      headers: { 'content-type': 'application/json', accept: 'application/json' },
-      body: JSON.stringify({ jsonrpc: '2.0', id, method: 'message/send', params: { message: { kind: 'message', role: 'user', messageId: id, parts: [{ kind: 'text', text: 'Marque callable check: in one sentence, what task do you take?' }] } } }),
-    })
-    sendMs = Date.now() - t0
-    // A result, or a processed JSON-RPC error (the agent read the task and declined it),
-    // proves message/send takes work; "method not found" or "invalid request" does not.
-    let result = false
-    try {
-      const j = (r.ok ? JSON.parse(r.body) : {}) as { id?: unknown; result?: unknown; error?: { code?: unknown } }
-      result = r.ok && r.status === 200 && j.id === id && (j.result !== undefined || (j.error !== undefined && ![-32601, -32600, -32700].includes(Number(j.error.code))))
-    } catch { result = false }
-    callable = result
-    detail = result ? `card readable; message/send answered in ${sendMs} ms` : `card readable, but message/send did not return a result (${r.ok ? `http ${r.status}` : r.detail})`
-  }
+  const callable = out.liveness === 'live'
+  const detail = out.detail
   await db().insert(builderCheck).values({
     agentKey: agentKeyOf(chainId, tokenId), kind: 'probe', chainId, tokenId, endpoint, ok: callable,
-    result: { liveness: callable ? 'callable' : out.liveness, latencyMs: out.latencyMs, messageSendMs: sendMs, statusCode: out.statusCode, failureClass: callable ? null : out.failureClass, detail: detail.slice(0, 300), executableEndpoint: out.executableEndpoint, skills: out.skills.slice(0, 20), kind },
+    result: { liveness: callable ? 'callable' : out.liveness, latencyMs: out.latencyMs, discoveryOnly: true, statusCode: out.statusCode, failureClass: callable ? null : out.failureClass, detail: detail.slice(0, 300), executableEndpoint: out.executableEndpoint, skills: out.skills.slice(0, 20), kind },
   })
-  return { ok: callable, liveness: callable ? 'callable' : out.liveness, latencyMs: sendMs ?? out.latencyMs, detail: detail.slice(0, 300), executableEndpoint: out.executableEndpoint }
+  return { ok: callable, liveness: callable ? 'callable' : out.liveness, latencyMs: out.latencyMs, detail: detail.slice(0, 300), executableEndpoint: out.executableEndpoint }
 }
 
 /** The owner's declared category, stored with who declared it. */

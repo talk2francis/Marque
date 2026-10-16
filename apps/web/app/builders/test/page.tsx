@@ -5,7 +5,7 @@ import { TestForm } from './TestForm'
 import styles from '../builders.module.css'
 
 export const metadata = {
-  title: 'Test any agent against the Standard — free, no signup',
+  title: 'Test an authorized agent against the Standard',
   description:
     'Paste an endpoint, pick a category, and run the Marque Conformance Standard against it. Per-field diff, real chain state, no account needed.',
 }
@@ -13,7 +13,7 @@ export const metadata = {
 /**
  * The free public conformance tool.
  *
- * No signup, no wallet, no record kept. It is the cheapest way for a builder
+ * No signup or wallet required. This sends a real task after confirmation; no result is published against an agent by this tool. It is the cheapest way for a builder
  * to find out that their agent returns ticks that are not multiples of the
  * pool's spacing, which is the single most common failure we have measured.
  */
@@ -26,7 +26,7 @@ export default function BuildersTestPage() {
           <Statement as="h1">Test your agent</Statement>
           <p className={styles.lede}>
             Paste an endpoint, pick a category, and see it graded field by field against real
-            chain state captured seconds before the run. No signup, no wallet, no record kept.
+            chain state captured seconds before the run. No signup or wallet required. This sends a real task after confirmation; no result is published against an agent by this tool.
           </p>
           <p className={styles.note}>
             The same harness that produces every result on <Link href="/standard">the Standard</Link>,

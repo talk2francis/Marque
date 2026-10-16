@@ -9,7 +9,7 @@ const { owners, metadata } = vi.hoisted(() => ({ owners: new Map<string, string>
 // Exercise owner GET's computation on every call, rather than letting a cached
 // response hide its former mutation branch. SQL still uses real fixture Postgres.
 vi.mock('@marque/db', async original => ({ ...await original<object>(), cachedProjection: async (_key: string, build: () => Promise<unknown>) => ({ value: await build(), computedAt: new Date().toISOString(), ageMs: 0, stale: false }) }))
-vi.mock('@marque/commerce', async original => ({ ...await original<object>(), chainClient: () => ({ readContract: async ({ functionName, args }: { functionName: string; args: bigint[] }) => functionName === 'ownerOf' ? owners.get(String(args[0])) : metadata.get(String(args[0])) }) }))
+vi.mock('@marque/commerce', async original => ({ ...await original<object>(), sellerIdentity: async ({ tokenId }: { tokenId: string }) => { const owner = owners.get(tokenId); if (!owner) throw new Error('fixture identity absent'); return { agentOwner: owner, agentWallet: owner, blockNumber: '123' } }, chainClient: () => ({ readContract: async ({ functionName, args }: { functionName: string; args: bigint[] }) => functionName === 'ownerOf' ? owners.get(String(args[0])) : metadata.get(String(args[0])) }) }))
 vi.mock('./limits', () => ({ checkClaimBurst: () => ({ ok: true }), clientKey: () => 'fixture' }))
 // Run only with a new, explicitly named fixture DB; never point this at an app DB.
 const url = process.env['MARQUE_INTEGRATION_DB']

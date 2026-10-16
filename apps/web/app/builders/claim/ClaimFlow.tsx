@@ -131,13 +131,14 @@ export function ClaimFlow() {
 
   async function runTest() {
     if (!claimToken || !endpoint) return
+    if (!window.confirm('Send a real task to your declared service and publish the result? Continue only if it accepts this test without payment or other side effects.')) return
     setTesting(true); setError(null); setTestResult(null)
     try {
       const testId = CATEGORIES.find((c) => c.v === category)?.test
       if (!testId) { setError('No conformance test exists for this category yet.'); return }
       const res = await fetch('/api/v1/builders/claim/test', {
         method: 'POST', headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ claimToken, endpoint: endpoint.trim(), testId, kind: kind === 'mcp' ? 'mcp' : 'a2a' }),
+        body: JSON.stringify({ claimToken, endpoint: endpoint.trim(), testId, taskConsent: true, kind: kind === 'mcp' ? 'mcp' : 'a2a' }),
       })
       const body = await res.json()
       if (!res.ok) { setError(body.detail ?? body.error ?? `run failed (${res.status})`); return }
