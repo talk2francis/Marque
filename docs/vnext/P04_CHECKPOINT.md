@@ -4,7 +4,7 @@ Phase status: **GREEN for scoped candidate-source acceptance**. Receipt versions
 
 ## Baseline, candidate and reuse
 
-Baseline `3c4f298302615fe3acd2ec700aff5298a484a6d9`, following P03 source `f4d5d568e939a19b2666598c6ac58fc5c58110c3`. Branch `repair/vnext-v3-p04-20261016`, isolated worktree `/root/marque-vnext-p01`. Production source/release remains `97ef4c73ea3717d1a059b649a35e8124d93bdb7f`. Tested source SHA: SOURCE_SHA_BINDING_PENDING; closing documentation binds it in a documentation-only follow-up. No push.
+Baseline `3c4f298302615fe3acd2ec700aff5298a484a6d9`, following P03 source `f4d5d568e939a19b2666598c6ac58fc5c58110c3`. Branch `repair/vnext-v3-p04-20261016`, isolated worktree `/root/marque-vnext-p01`. Production source/release remains `97ef4c73ea3717d1a059b649a35e8124d93bdb7f`. Tested source SHA: `64104c6052145275b06414784d43c260c0a5b4d6`; closing documentation binds it in a documentation-only follow-up. No push.
 
 Reused immutable receipt versions 1/2, four-proof fields and their sorted-JSON SHA-256 hashes; MCS cases/results and deterministic rules; run/run_event/run_rejection; receipt GET and phase2 job timeline. Proposed new receipt envelope/table and replacement execution/proof frameworks are SKIPPED-existing. The [receipt contract](P04_RECEIPT_CONTRACT.md) maps actual sources, canonical bytes, source kinds, trust limits and rollout.
 
