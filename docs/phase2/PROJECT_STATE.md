@@ -2,6 +2,16 @@
 
 Live record of Phase 2. Newest first inside each section. Times are UTC.
 
+## 16 October: read-only vNext P00 checkpoint
+
+The isolated audit branch records current source, live read-only API/chain/browser
+evidence and unresolved A0 findings in [docs/vnext](../vnext/BASELINE_TRUTH.md).
+Application source and production release remain `97ef4c7`. No deployment,
+service restart, transaction or migration was initiated. Status AMBER; stop for
+review before implementation. Current Plinth job 56916 payment was verified from
+existing chain receipts; the exact-seller metadata path also reproduced a 60-second
+no-response failure. Historical observations and the existing working tree remain intact.
+
 ## 14 October: third-party profiles, rating clarity, hire motion
 
 - Removed the third-party hero stage. Registry images now stay sharp as avatars

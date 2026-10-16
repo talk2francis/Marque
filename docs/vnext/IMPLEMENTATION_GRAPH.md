@@ -1,0 +1,42 @@
+# Review-gated implementation selection
+
+P00 stops here. Scores are planning judgments under the pack's 100-point reuse/value/proof/risk framework, not measured impact or a competitive ranking.
+
+| Selected gap | Score / priority | Why now | Acceptance before moving on |
+|---|---|---|---|
+| Listing and exact identity authorization | 99 / A0 | Two GET writers; reproduced cross-identity claim; publish chain/owner drift | Isolated DB tests for both observational GETs, wrong identity/owner/chain, transfer, concurrent/idempotent POST; old legitimate listings preserved |
+| Quote time, signature and state truth | 98 / A0 | Unsigned renewal, signed expiry conflict, cached expired-ready state and mixed-mode claims | Boundary/clock/stored-expiry/replay/signature/task/provider tests; old boolean retained; all surfaced guarantees match actual mode |
+| Campaign and economic/provenance labels | 93 / A0 | Official vs local requirements, jobsPaid/funded mismatch, stale MCS/cached status copy | Official crosswalk, compatible added fields/headers, scoped counts, four-category journey preserved |
+| Operating continuity and measured latency | 97 / A0 | Tmux scope destruction, 60 s hire-metadata timeout, seller queries >80 s, resource 502, charter timeout | Targeted session change separately approved; retain 11 proxy/4 monitor tests; bounded exact-service query plan and pending-request recovery; no speculative SQL changes |
+| Existing outside-job proof and seller recovery | 90 / A1 | A paid Plinth example exists, but artifact/independence and compact operating view remain partial | Reconcile original quote/intent/delivery bytes and buyer provenance; expose failure actions and confirmed token/state counts with auth |
+
+```mermaid
+flowchart TD
+  P00[Completed P00 evidence checkpoint] --> Review[Owner review]
+  Review --> P01[P01 campaign and operational regressions]
+  P01 --> P01A[P01A minimal integrity repairs]
+  P01A --> Gate[Tests, two-theme browser, source diff review]
+  Gate --> P02[P02 existing outside-job dossier first]
+  Gate --> Ops[Measured A0 operating blocker if still present]
+  P02 --> P03[P03 compact seller projection]
+  P02 --> P06[P06 incremental offline receipt verifier]
+  P01A --> P07[P07 existing HTTP contract and unsigned client]
+  P03 --> Conditional[Trials and Router only with two comparable independent providers]
+```
+
+P01/P01A implementation, production deployment and mainnet operations are separate checkpoints. New mainnet writes require the root agreement's explicit `approved, mainnet`. Do not automatically begin P02 after P01A.
+
+The newly reproduced operating blocker raises operations from 92 to 97 in this planning score. Diagnose the exact-service global query in P01 before expansion. Do not repeatedly probe the slow production path: failed browser waits do not necessarily cancel server SQL. Any new performance experiment needs a request budget, isolated/restored data where feasible and an explicit abort rule.
+
+## Minimal repair slices
+
+1. Existing claim/publish rail: canonical `(chain, registry, token)` key derived from proof; validate row tuple and chain; fresh owner read immediately before write; one transaction for listing/category; retry idempotency and proof consistency. Both GETs read persisted listing state without publishing. No redundant claim framework, no reset/backfill of observations.
+2. Existing quote verifier/store/projection: one signed expiry interpretation consistent with signed bytes, reject conflicting/past values; cap unsigned lifetime, label locally assigned expiry; keep historical quote snapshots. Distinguish current price validity from recent ability to quote. Preserve provider/token/network/escrow checks and the intent expiry guard.
+3. Existing UI/API: additive verification/expiry provenance and cache-age fields or headers; label existing signed/unsigned modes; separate funded from PaymentReleased. Correct local stretch vs official wording, status MCS claim and quote tooltips. No art, typography, navigation or generic dashboard rewrite.
+4. Operations: inspect actual cold query fingerprint/plan under bounded read-only diagnostics, correlate Caddy static 502/transport with app and DB logs. No speculative SQL rewrite, worker restart, proxy replacement or production load test.
+
+## Skip and defer
+
+NO CHANGE: registry/indexer replacement, deterministic MCS rewrite, receipt primitive replacement, ERC-8183 state-machine replacement, second marketplace API, global reputation score, hero/theme regeneration, new escrow/token, multichain. Existing primitives are reused.
+
+DEFER: broad seller dashboard, autonomous procurement, action authority expansion, x402 buyer, fair Trials/Router and new framework infrastructure until their actual prerequisites are demonstrated. Existing owner/job data is a projection foundation, not proof these products are done. Freeze optional features by 3 November 12:00 UTC; campaign cutoff remains 5 November 12:00 UTC, subject to the current official source.

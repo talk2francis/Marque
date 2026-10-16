@@ -1,0 +1,808 @@
+{
+  "scope": "Observed response shapes, not a normative JSON Schema; null alone does not establish an optional field type",
+  "capturedOn": "2026-10-16",
+  "shapes": {
+    "health": {
+      "ok": "boolean",
+      "service": "string",
+      "at": "string"
+    },
+    "config": {
+      "product": "string",
+      "url": "string",
+      "campaignNetwork": "number",
+      "networks": {
+        "type": "array",
+        "observedItemShapes": [
+          {
+            "chainId": "number",
+            "name": "string",
+            "identityRegistry": "string",
+            "reputationRegistry": "string",
+            "agenticCommerce": "string",
+            "evaluatorRouter": "string",
+            "optimisticPolicy": "string",
+            "paymentTokens": {
+              "type": "array",
+              "observedItemShapes": [
+                {
+                  "symbol": "string",
+                  "address": "string",
+                  "decimals": "number",
+                  "default": "boolean"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "events": {
+        "hire": {
+          "name": "string",
+          "topic0": "string",
+          "verifiedOnChain": {
+            "topic0": "string",
+            "abiTopic0": "string",
+            "abiMatchesSpec": "boolean",
+            "contract": "string",
+            "verified": "boolean",
+            "chainId": "number",
+            "tx": "string",
+            "block": "number",
+            "note": "string"
+          }
+        },
+        "priceLocked": {
+          "name": "string",
+          "topic0": "string",
+          "verifiedOnChain": {
+            "topic0": "string",
+            "abiTopic0": "string",
+            "abiMatchesSpec": "boolean",
+            "contract": "string",
+            "verified": "boolean",
+            "chainId": "number",
+            "tx": "string",
+            "block": "number",
+            "note": "string"
+          }
+        },
+        "deposit": {
+          "name": "string",
+          "topic0": "string",
+          "verifiedOnChain": {
+            "topic0": "string",
+            "abiTopic0": "string",
+            "abiMatchesSpec": "boolean",
+            "contract": "string",
+            "verified": "boolean",
+            "chainId": "number",
+            "tx": "string",
+            "block": "number",
+            "note": "string"
+          }
+        },
+        "delivered": {
+          "name": "string",
+          "topic0": "string",
+          "verifiedOnChain": {
+            "topic0": "string",
+            "abiTopic0": "string",
+            "abiMatchesSpec": "boolean",
+            "contract": "string",
+            "verified": "boolean",
+            "chainId": "number",
+            "tx": "string",
+            "block": "number",
+            "note": "string"
+          }
+        },
+        "settled": {
+          "name": "string",
+          "topic0": "string",
+          "verifiedOnChain": {
+            "topic0": "string",
+            "abiTopic0": "string",
+            "abiMatchesSpec": "boolean",
+            "contract": "string",
+            "verified": "boolean",
+            "chainId": "number",
+            "tx": "string",
+            "block": "number",
+            "note": "string"
+          }
+        },
+        "paid": {
+          "name": "string",
+          "topic0": "string",
+          "verifiedOnChain": {
+            "topic0": "string",
+            "abiTopic0": "string",
+            "abiMatchesSpec": "boolean",
+            "contract": "string",
+            "verified": "boolean",
+            "chainId": "number",
+            "tx": "string",
+            "block": "number",
+            "note": "string"
+          }
+        },
+        "rating": {
+          "name": "string",
+          "topic0": "string",
+          "verifiedOnChain": {
+            "topic0": "string",
+            "abiTopic0": "string",
+            "abiMatchesSpec": "boolean",
+            "contract": "string",
+            "verified": "boolean",
+            "chainId": "number",
+            "tx": "string",
+            "block": "number",
+            "note": "string"
+          }
+        }
+      },
+      "questRules": {
+        "hire": "string",
+        "deposit": "string",
+        "completion": "string",
+        "rating": "string",
+        "oneHirePerCategory": "boolean",
+        "antiWash": {
+          "type": "array",
+          "observedItemShapes": [
+            "string"
+          ]
+        }
+      },
+      "teamWallets": {
+        "type": "array",
+        "observedItemShapes": [
+          "string"
+        ]
+      },
+      "indexer": {
+        "type": "array",
+        "observedItemShapes": [
+          {
+            "chainId": "number",
+            "cursorBlock": "number",
+            "headBlock": "number",
+            "lagBlocks": "number",
+            "logWindowBlocks": "number"
+          }
+        ]
+      }
+    },
+    "stats56": {
+      "chainId": "number",
+      "walletsWithHire": "number",
+      "hiresPerCategory": {
+        "yield": "number",
+        "grid": "number",
+        "rebalancing": "number",
+        "health_factor": "number"
+      },
+      "deposits": "number",
+      "delivered": "number",
+      "settled": "number",
+      "ratings": "number",
+      "agentsListed": "number",
+      "excluded": {
+        "wallets": "number",
+        "hires": "number"
+      }
+    },
+    "market-ready": {
+      "chainId": "number",
+      "generatedAt": "string",
+      "provenance": "string",
+      "count": "number",
+      "total": "number",
+      "offset": "number",
+      "hasMore": "boolean",
+      "agents": {
+        "type": "array",
+        "observedItemShapes": [
+          {
+            "agentId": "string",
+            "tokenId": "string",
+            "name": "string",
+            "category": "string",
+            "isReference": "boolean",
+            "identityCount": "number",
+            "owner": "string",
+            "ownerLabel": "string",
+            "host": "string",
+            "identity": {
+              "imageUrl": "null",
+              "description": "string",
+              "contractAddress": "string",
+              "website": "null",
+              "x402": "boolean",
+              "registeredAt": "string"
+            },
+            "liveness": "null",
+            "latencyMs": "null",
+            "interfaces": {
+              "type": "array",
+              "observedItemShapes": [
+                "string"
+              ]
+            },
+            "protocols": {
+              "type": "array",
+              "observedItemShapes": [
+                "string"
+              ]
+            },
+            "price": "string",
+            "priceProvenance": "string",
+            "commerce": {
+              "state": "string",
+              "serviceId": "number",
+              "chainId": "number",
+              "provider": "string",
+              "priceRaw": "string",
+              "token": {
+                "address": "string",
+                "symbol": "string",
+                "decimals": "number"
+              },
+              "signedQuote": "boolean",
+              "quotedAt": "string",
+              "deliveredJobs": "number",
+              "failure": "null"
+            },
+            "warrant": {
+              "status": "string",
+              "testId": "string",
+              "date": "string",
+              "failedField": "null"
+            },
+            "qual": "string",
+            "previewable": "boolean",
+            "hireBlockedReason": "null",
+            "track": {
+              "chainId": "number",
+              "verified": {
+                "count": "number",
+                "averageStars": "number"
+              },
+              "allFeedback": {
+                "count": "number",
+                "averageStars": "number",
+                "total": "number"
+              },
+              "jobs": {
+                "funded": "number",
+                "delivered": "number",
+                "settled": "number",
+                "refunded": "number",
+                "disputed": "number",
+                "fromTeam": "number"
+              },
+              "delivery": {
+                "medianSeconds": "number",
+                "samples": "number"
+              }
+            }
+          },
+          {
+            "agentId": "string",
+            "tokenId": "string",
+            "name": "string",
+            "category": "string",
+            "isReference": "boolean",
+            "identityCount": "number",
+            "owner": "string",
+            "ownerLabel": "string",
+            "host": "string",
+            "identity": {
+              "imageUrl": "string",
+              "description": "string",
+              "contractAddress": "string",
+              "website": "null",
+              "x402": "boolean",
+              "registeredAt": "null"
+            },
+            "liveness": "string",
+            "latencyMs": "number",
+            "interfaces": {
+              "type": "array",
+              "observedItemShapes": [
+                "string"
+              ]
+            },
+            "protocols": {
+              "type": "array",
+              "observedItemShapes": [
+                "string"
+              ]
+            },
+            "price": "string",
+            "priceProvenance": "string",
+            "commerce": {
+              "state": "string",
+              "serviceId": "number",
+              "chainId": "number",
+              "provider": "string",
+              "priceRaw": "string",
+              "token": {
+                "address": "string",
+                "symbol": "string",
+                "decimals": "number"
+              },
+              "signedQuote": "boolean",
+              "quotedAt": "string",
+              "deliveredJobs": "number",
+              "failure": "null"
+            },
+            "warrant": {
+              "status": "string",
+              "testId": "string",
+              "date": "string",
+              "failedField": "string"
+            },
+            "qual": "string",
+            "previewable": "boolean",
+            "hireBlockedReason": "null",
+            "track": {
+              "chainId": "number",
+              "verified": {
+                "count": "number",
+                "averageStars": "null"
+              },
+              "allFeedback": {
+                "count": "number",
+                "averageStars": "number",
+                "total": "number"
+              },
+              "jobs": {
+                "funded": "number",
+                "delivered": "number",
+                "settled": "number",
+                "refunded": "number",
+                "disputed": "number",
+                "fromTeam": "number"
+              },
+              "delivery": {
+                "medianSeconds": "number",
+                "samples": "number"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "job56916": {
+      "chainId": "number",
+      "jobId": "string",
+      "state": "string",
+      "client": "string",
+      "provider": "string",
+      "evaluator": "string",
+      "agent": {
+        "agentKey": "string",
+        "agentId": "string",
+        "name": "string",
+        "owner": "string",
+        "provider": "string",
+        "category": "string",
+        "firstParty": "boolean"
+      },
+      "amount": "string",
+      "token": {
+        "address": "string",
+        "symbol": "string",
+        "decimals": "number"
+      },
+      "deliverable": {
+        "hash": "string",
+        "url": "null"
+      },
+      "expiresAt": "string",
+      "intent": {
+        "id": "string",
+        "wallet": "string",
+        "agent_id": "string",
+        "category": "string",
+        "quote_id": "number",
+        "description_hash": "string",
+        "created_at": "string",
+        "bound_at": "string",
+        "bind_source": "string"
+      },
+      "rating": "null",
+      "feedback": {
+        "type": "array",
+        "observedItemShapes": []
+      },
+      "tx": {
+        "created": "string",
+        "registered": "string",
+        "budgetSet": "string",
+        "funded": "string",
+        "submitted": "string",
+        "completed": "string",
+        "paymentReleased": "string",
+        "rejected": "null",
+        "refunded": "null",
+        "rating": "null"
+      },
+      "eligible": "boolean",
+      "reasons": {
+        "type": "array",
+        "observedItemShapes": []
+      },
+      "events": {
+        "type": "array",
+        "observedItemShapes": [
+          {
+            "name": "string",
+            "contract": "string",
+            "tx": "string",
+            "logIndex": "number",
+            "block": "number",
+            "at": "string",
+            "args": {
+              "hook": "string",
+              "jobId": "string",
+              "client": "string",
+              "provider": "string",
+              "evaluator": "string",
+              "expiredAt": "string"
+            }
+          },
+          {
+            "name": "string",
+            "contract": "string",
+            "tx": "string",
+            "logIndex": "number",
+            "block": "number",
+            "at": "string",
+            "args": {
+              "jobId": "string",
+              "token": "string"
+            }
+          },
+          {
+            "name": "string",
+            "contract": "string",
+            "tx": "string",
+            "logIndex": "number",
+            "block": "number",
+            "at": "string",
+            "args": {
+              "jobId": "string",
+              "client": "string",
+              "policy": "string"
+            }
+          },
+          {
+            "name": "string",
+            "contract": "string",
+            "tx": "string",
+            "logIndex": "number",
+            "block": "number",
+            "at": "string",
+            "args": {
+              "jobId": "string",
+              "amount": "string"
+            }
+          },
+          {
+            "name": "string",
+            "contract": "string",
+            "tx": "string",
+            "logIndex": "number",
+            "block": "number",
+            "at": "string",
+            "args": {
+              "jobId": "string",
+              "amount": "string",
+              "client": "string",
+              "provider": "string"
+            }
+          }
+        ]
+      }
+    },
+    "receipt": {
+      "id": "string",
+      "hash": "string",
+      "receipt": {
+        "task": {
+          "kind": "string",
+          "policy": {
+            "targetHealthFactor": "number"
+          },
+          "chainId": "number",
+          "subject": "string",
+          "blockNumber": "string",
+          "maxSpendUsd": "number"
+        },
+        "runId": "string",
+        "failure": "null",
+        "quality": {
+          "pass": "boolean",
+          "caseId": "string",
+          "testId": "string",
+          "failedFields": {
+            "type": "array",
+            "observedItemShapes": [
+              "string"
+            ]
+          },
+          "groundTruthHash": "string"
+        },
+        "service": {
+          "probeId": "null",
+          "protocol": "string",
+          "serviceId": "null",
+          "discoveryEndpoint": "string",
+          "executableEndpoint": "null"
+        },
+        "version": "string",
+        "issuedAt": "string",
+        "authority": {
+          "allowlist": {
+            "type": "array",
+            "observedItemShapes": [
+              "string"
+            ]
+          },
+          "charterId": "string",
+          "expiresAt": "null",
+          "spendCapUsd": "number",
+          "withinAuthority": "boolean"
+        },
+        "execution": {
+          "ok": "boolean",
+          "chainId": "number",
+          "txHashes": {
+            "type": "array",
+            "observedItemShapes": []
+          },
+          "latencyMs": "number",
+          "startedAt": "string",
+          "finishedAt": "string",
+          "blockNumber": "string",
+          "failureReason": "null"
+        },
+        "commercial": {
+          "agentId": "string",
+          "settled": "boolean",
+          "paidAsset": "null",
+          "paidAmount": "null",
+          "maxSpendUsd": "number",
+          "quoteStatus": "string",
+          "executorKind": "string",
+          "declaredPrice": "null",
+          "settlementNote": "string",
+          "quoteProvenance": "string"
+        },
+        "artifactType": "string",
+        "agentResponse": {
+          "parts": {
+            "type": "array",
+            "observedItemShapes": [
+              {
+                "kind": "string",
+                "text": "string"
+              }
+            ]
+          }
+        }
+      },
+      "anchorTxHash": "string",
+      "anchorBlock": "string",
+      "issuedAt": "string"
+    },
+    "wallet": {
+      "wallet": "string",
+      "chainId": "number",
+      "asOfBlock": {
+        "56": "number"
+      },
+      "quest": {
+        "categories": {
+          "yield": {
+            "done": "boolean",
+            "delivered": "boolean",
+            "jobKey": "null"
+          },
+          "grid": {
+            "done": "boolean",
+            "delivered": "boolean",
+            "jobKey": "null"
+          },
+          "rebalancing": {
+            "done": "boolean",
+            "delivered": "boolean",
+            "jobKey": "string"
+          },
+          "health_factor": {
+            "done": "boolean",
+            "delivered": "boolean",
+            "jobKey": "null"
+          }
+        },
+        "ratedAll": "boolean",
+        "ownAgentListed": {
+          "done": "boolean",
+          "agentKey": "string"
+        },
+        "eligible": "boolean",
+        "reasons": {
+          "type": "array",
+          "observedItemShapes": []
+        }
+      },
+      "hires": {
+        "type": "array",
+        "observedItemShapes": [
+          {
+            "jobKey": "string",
+            "chainId": "number",
+            "jobId": "string",
+            "agent": {
+              "agentKey": "string",
+              "agentId": "string",
+              "name": "string",
+              "owner": "string",
+              "provider": "string",
+              "category": "null",
+              "firstParty": "boolean"
+            },
+            "amount": "string",
+            "token": {
+              "address": "string",
+              "symbol": "string",
+              "decimals": "number"
+            },
+            "state": "string",
+            "marque": "boolean",
+            "intentId": "null",
+            "tx": {
+              "created": "string",
+              "registered": "string",
+              "budgetSet": "string",
+              "funded": "string",
+              "submitted": "string",
+              "completed": "string",
+              "paymentReleased": "string",
+              "rejected": "null",
+              "refunded": "null",
+              "rating": "null"
+            },
+            "timestamps": {
+              "created": "string",
+              "funded": "string",
+              "submitted": "string",
+              "completed": "string"
+            },
+            "rating": "null",
+            "eligible": "boolean",
+            "reasons": {
+              "type": "array",
+              "observedItemShapes": [
+                "string"
+              ]
+            }
+          },
+          {
+            "jobKey": "string",
+            "chainId": "number",
+            "jobId": "string",
+            "agent": {
+              "agentKey": "string",
+              "agentId": "string",
+              "name": "string",
+              "owner": "string",
+              "provider": "string",
+              "category": "string",
+              "firstParty": "boolean"
+            },
+            "amount": "string",
+            "token": {
+              "address": "string",
+              "symbol": "string",
+              "decimals": "number"
+            },
+            "state": "string",
+            "marque": "boolean",
+            "intentId": "string",
+            "tx": {
+              "created": "string",
+              "registered": "string",
+              "budgetSet": "string",
+              "funded": "string",
+              "submitted": "string",
+              "completed": "string",
+              "paymentReleased": "string",
+              "rejected": "null",
+              "refunded": "null",
+              "rating": "null"
+            },
+            "timestamps": {
+              "created": "string",
+              "funded": "string",
+              "submitted": "string",
+              "completed": "string"
+            },
+            "rating": "null",
+            "eligible": "boolean",
+            "reasons": {
+              "type": "array",
+              "observedItemShapes": []
+            }
+          }
+        ]
+      },
+      "totals": {
+        "hires": "number",
+        "deposits": "number",
+        "delivered": "number",
+        "settled": "number",
+        "ratings": "number"
+      }
+    },
+    "owner": {
+      "owner": "string",
+      "qualityListing": "boolean",
+      "agents": {
+        "type": "array",
+        "observedItemShapes": [
+          {
+            "agentKey": "string",
+            "chainId": "number",
+            "agentId": "string",
+            "name": "string",
+            "category": "string",
+            "listedOnMarque": "boolean",
+            "qualityListing": "boolean",
+            "availability": {
+              "windowHours": "number",
+              "attempts": "number",
+              "successes": "number",
+              "firstAt": "null",
+              "lastAt": "null",
+              "scope": "string"
+            },
+            "quality": {
+              "listing": "boolean",
+              "passed": "number",
+              "checks": {
+                "type": "array",
+                "observedItemShapes": [
+                  {
+                    "id": "string",
+                    "label": "string",
+                    "pass": "boolean",
+                    "state": "string",
+                    "reason": "string",
+                    "fix": "null",
+                    "note": "null"
+                  },
+                  {
+                    "id": "string",
+                    "label": "string",
+                    "pass": "boolean",
+                    "state": "string",
+                    "reason": "string",
+                    "fix": "string",
+                    "note": "null"
+                  }
+                ]
+              }
+            },
+            "jobsReceived": "number",
+            "jobsPaid": "number"
+          }
+        ]
+      }
+    }
+  }
+}

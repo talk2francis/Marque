@@ -1,0 +1,212 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-10-16T04:51:55.253Z",
+  "baselineSha": "97ef4c73ea3717d1a059b649a35e8124d93bdb7f",
+  "sdk": {
+    "buyer": "@bnbagent/sdk@0.6.0",
+    "referenceSellers": "@bnbagent/sdk@0.5.5",
+    "lockfileSha256": "292ce855b1a9215315bac3afa5cdb8f27416f5f97a0439261a7fb227785a218b"
+  },
+  "networks": [
+    {
+      "chainId": 97,
+      "rpc": "https://bsc-testnet-rpc.publicnode.com",
+      "contracts": {
+        "commerce": {
+          "address": "0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de",
+          "codeBytes": 130,
+          "codeHash": "0x1f1858db4825be798342d4c094630bf5ddc685bd802a083d8d88f15a6cdb2a89",
+          "implementation": "0x55c3826b39a0f671b2c3e5d0f1372cad0b911421",
+          "implementationCodeHash": "0xb42935ea4e89b470ea5049cf66d7f1003a5c8d452aef72d78c666577e828380b"
+        },
+        "router": {
+          "address": "0xd7d36d66d2f1b608a0f943f722d27e3744f66f25",
+          "codeBytes": 130,
+          "codeHash": "0x1f1858db4825be798342d4c094630bf5ddc685bd802a083d8d88f15a6cdb2a89",
+          "implementation": "0x40c0254610d92f1eb9c2d7d5d2114bc4c99d935e",
+          "implementationCodeHash": "0xb523939a51d980e6bb482b6362806d06b2d75cee4e230d4ccb25f9acf0e44d18"
+        },
+        "policy": {
+          "address": "0xd6a4217588f6b1f5657a92a3e94e6422ad771cea",
+          "codeBytes": 4413,
+          "codeHash": "0xe06798700c986d4387898a1dfde009d52c75f77c7d8dd1a3e179c02d5138cb9b",
+          "implementation": null
+        },
+        "identityRegistry": {
+          "address": "0x8004A818BFB912233c491871b3d84c89A494BD9e",
+          "codeBytes": 130,
+          "codeHash": "0xd0e45b1d89fa9b6cc7e97c1f155d64180e5c232aaccf9900ef9d4fd738c02b41",
+          "implementation": "0x7274e874ca62410a93bd8bf61c69d8045e399c02",
+          "implementationCodeHash": "0xa5f9624ea85e45b3f4b8558581f03bfb3e6cefab278d7bf0500ec9bd065dc16f"
+        }
+      },
+      "assets": [
+        {
+          "symbol": "U",
+          "address": "0xc70B8741B8B07A6d61E54fd4B20f22Fa648E5565",
+          "decimals": 18,
+          "isDefault": true,
+          "supported": true,
+          "liveDecimals": 18
+        },
+        {
+          "symbol": "USDC",
+          "address": "0x64544969ed7EBf5f083679233325356EbE738930",
+          "decimals": 18,
+          "isDefault": false,
+          "supported": true,
+          "liveDecimals": 18
+        },
+        {
+          "symbol": "USDT",
+          "address": "0x337610d27c682E347C9cD60BD4b3b107C9d34dDd",
+          "decimals": 18,
+          "isDefault": false,
+          "supported": true,
+          "liveDecimals": 18
+        }
+      ],
+      "rpcChainId": 97,
+      "block": "137065135",
+      "disputeWindow": "900",
+      "paymentToken": "0xc70B8741B8B07A6d61E54fd4B20f22Fa648E5565",
+      "jobCounter": "1484"
+    },
+    {
+      "chainId": 56,
+      "rpc": "https://bsc-rpc.publicnode.com",
+      "contracts": {
+        "commerce": {
+          "address": "0xea4daa3100a767e86fded867729ae7446476eba6",
+          "codeBytes": 130,
+          "codeHash": "0x1f1858db4825be798342d4c094630bf5ddc685bd802a083d8d88f15a6cdb2a89",
+          "implementation": "0xe8d47866e2cc3dcaa50f0ad980355695b2f1d533",
+          "implementationCodeHash": "0xf435a0575d5da24554761d0ec355cd897fde5ac302a7ad9eeab69eb296bd9a07"
+        },
+        "router": {
+          "address": "0x51895229e12f9876011789b04f8698af06ccd6da",
+          "codeBytes": 130,
+          "codeHash": "0x1f1858db4825be798342d4c094630bf5ddc685bd802a083d8d88f15a6cdb2a89",
+          "implementation": "0xf0cf8f47e5c035f16247ff16e9f367e477ee5007",
+          "implementationCodeHash": "0x5f95706fdeae0bf3ac092ee86998dde7b9ce3fdcb2c8082d40f0c7847122df6a"
+        },
+        "policy": {
+          "address": "0x9c01845705b3078aa2e8cff7520a6376fd766de5",
+          "codeBytes": 4413,
+          "codeHash": "0x79a469cc624bdb3a85350a6bd220c8368ebdc8c5a8e9cf9a431422db68419b1c",
+          "implementation": null
+        },
+        "identityRegistry": {
+          "address": "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432",
+          "codeBytes": 130,
+          "codeHash": "0xd0e45b1d89fa9b6cc7e97c1f155d64180e5c232aaccf9900ef9d4fd738c02b41",
+          "implementation": "0x7274e874ca62410a93bd8bf61c69d8045e399c02",
+          "implementationCodeHash": "0xa5f9624ea85e45b3f4b8558581f03bfb3e6cefab278d7bf0500ec9bd065dc16f"
+        }
+      },
+      "assets": [
+        {
+          "symbol": "U",
+          "address": "0xcE24439F2D9C6a2289F741120FE202248B666666",
+          "decimals": 18,
+          "isDefault": true,
+          "supported": true,
+          "liveDecimals": 18
+        },
+        {
+          "symbol": "USD1",
+          "address": "0x8d0D000Ee44948FC98c9B98A4FA4921476f08B0d",
+          "decimals": 18,
+          "isDefault": false,
+          "supported": true,
+          "liveDecimals": 18
+        },
+        {
+          "symbol": "USDC",
+          "address": "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d",
+          "decimals": 18,
+          "isDefault": false,
+          "supported": true,
+          "liveDecimals": 18
+        },
+        {
+          "symbol": "USDT",
+          "address": "0x55d398326f99059fF775485246999027B3197955",
+          "decimals": 18,
+          "isDefault": false,
+          "supported": true,
+          "liveDecimals": 18
+        }
+      ],
+      "rpcChainId": 56,
+      "block": "127917640",
+      "disputeWindow": "604800",
+      "paymentToken": "0xcE24439F2D9C6a2289F741120FE202248B666666",
+      "jobCounter": "57010"
+    }
+  ],
+  "abiComparison": [
+    {
+      "name": "commerce",
+      "entries": 52,
+      "upstreamEntries": 87,
+      "mismatches": [],
+      "sha256": "f9cdf63cf39b99c9fc15a2d320b22abc267960964b58d1f5535853dabffb30e3"
+    },
+    {
+      "name": "router",
+      "entries": 34,
+      "upstreamEntries": 64,
+      "mismatches": [],
+      "sha256": "527432b25b3e585003ebbfa27a67f45cbcff8fe62fdd3ec1c5787b7d35dbf6d8"
+    },
+    {
+      "name": "policy",
+      "entries": 26,
+      "upstreamEntries": 53,
+      "mismatches": [],
+      "sha256": "15a2abea5ec24cef947c42970d17658bd1cea86d241a9f095d639d19c44d93e3"
+    }
+  ],
+  "officialContractSource": {
+    "repo": "https://github.com/bnb-chain/apex-contracts",
+    "sha": "f6a3c4ff337158a8a66281c565f3f1562e1287b7",
+    "abiSubsetComparison": "all 112 generated entries match official ABI after excluding internalType; official ABI contains additional entries",
+    "explorerVerifiedBuildLinkage": "UNKNOWN",
+    "attempts": [
+      "BscScan implementation page HTTP 403",
+      "Sourcify full/partial metadata HTTP 404"
+    ]
+  },
+  "serialization": {
+    "receiptVersions": [
+      "1",
+      "2"
+    ],
+    "receiptAlgorithm": "SHA-256",
+    "receiptCanonicalization": "recursive object-key sort; preserve arrays; JSON.stringify; UTF-8; no added domain prefix",
+    "quoteHash": "Keccak-256 of JSON.stringify stored envelope",
+    "signedDescription": "SDK-compatible canonicalJson, non-ASCII escaped, signed content Keccak-256, EIP-191 recoverMessageAddress",
+    "historicalCompatibility": "preserve existing receipt and quote bytes/hashes"
+  },
+  "stateSemantics": {
+    "contractStatuses": [
+      "Open",
+      "Funded",
+      "Submitted",
+      "Completed",
+      "Rejected",
+      "Expired"
+    ],
+    "applicationState": "PAID requires PaymentReleased, separately from JobSubmitted and JobCompleted",
+    "expiry": "claimRefund after expiredAt per deployed-compatible ABI/source; no transaction or simulation executed in P00",
+    "reorg": "3 confirmations and 50-block rescan exist; full orphan reconciliation unproven"
+  },
+  "unknown": [
+    "Configured archive current health",
+    "Verified deployed-source compilation linkage",
+    "Independent operator/person/funding provenance",
+    "All buyer-wallet signing paths"
+  ],
+  "mainnetWritesInitiated": []
+}
