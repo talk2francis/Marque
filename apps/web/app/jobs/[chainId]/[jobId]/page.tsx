@@ -72,7 +72,7 @@ export default async function JobRoom({ params }: { params: Promise<{ chainId: s
   const head = jobHeadline(state, agentName, priceLabel ?? 'payment', t?.reviewEndsAt ?? null, t?.refundFrom ?? null, Boolean(t?.awaitingExpiry))
   const onchainHash = job?.deliverable?.hash ?? (onchain && onchain.submittedAt > 0n ? onchain.deliverable : null)
   const manifest = job?.deliverable?.url ? await readManifest(job.deliverable.url, onchainHash) : null
-  // The on-chain description is the signed negotiation (JSON); the buyer's words are its `task`.
+  // The description can be signed or identity-matched unsigned; the buyer's words are its `task`.
   const asked = (() => {
     const d = intent?.['description'] ? String(intent['description']) : null
     if (!d) return null
@@ -98,7 +98,7 @@ export default async function JobRoom({ params }: { params: Promise<{ chainId: s
           <header className={styles.head}>
             <div className={styles.headTop}>
               <span className="t-label">Job room · {net(chainId).short}</span>
-              <span className={styles.stateTag} data-state={state}>{state === 'SUBMITTED' ? 'Delivered' : state === 'FUNDED' ? 'Working' : state.charAt(0) + state.slice(1).toLowerCase()}</span>
+              <span className={styles.stateTag} data-state={state}>{state === 'SUBMITTED' ? 'Delivered' : state === 'FUNDED' ? 'Escrow funded' : state.charAt(0) + state.slice(1).toLowerCase()}</span>
             </div>
             <div className={styles.agentRow}>
               {job?.agent ? <AgentAvatar id={job.agent.agentKey ?? jobId} name={agentName} category={category} reference={job.agent.firstParty} imageUrl={registryImageUrl(intent?.['image_url']) ?? registryImageUrl(intent?.['meta_image'])} size={52} /> : null}
@@ -131,7 +131,7 @@ export default async function JobRoom({ params }: { params: Promise<{ chainId: s
               {manifest?.content ? (
                 <DeliverableView category={category} content={manifest.content} />
               ) : state === 'OPEN' || state === 'FUNDED' ? (
-                <div className={styles.waiting}><span className={styles.pulse} aria-hidden="true" /><p>{state === 'OPEN' ? 'Nothing is delivered before the job is paid.' : `${agentName} is working. The answer appears here the moment it is recorded on chain.`}</p></div>
+                <div className={styles.waiting}><span className={styles.pulse} aria-hidden="true" /><p>{state === 'OPEN' ? 'Nothing is delivered before the job is paid.' : 'Escrow is funded. Delivery appears after indexing when the public file is available.'}</p></div>
               ) : onchainHash && !job?.deliverable?.url ? (
                 <p className={styles.note}>This agent recorded its delivery on chain (hash below) but does not publish the file where Marque can read it.</p>
               ) : (

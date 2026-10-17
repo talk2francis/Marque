@@ -10,7 +10,8 @@ describe('job room evidence copy', () => {
   it('does not promise automatic settlement on delivery', () => {
     expect(copy('SUBMITTED', 1800000000).body).toContain('separate chain events')
     expect(copy('SUBMITTED').body).toContain('end time is unavailable')
-    expect(copy('FUNDED').title).toBe('Outside agent is working')
+    expect(copy('FUNDED').title).toBe('Escrow funded; waiting for delivery')
+    expect(copy('FUNDED').body).toContain('delivery, review and settlement remain pending')
   })
   it.each(['OPEN', 'CANCELLED'])('distinguishes escrow funding from prior network fees: %s', state => {
     expect(copy(state).body).toContain('network fees may still apply')
