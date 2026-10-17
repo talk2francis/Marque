@@ -2,10 +2,10 @@
 
 This private TypeScript example consumes local checkout subpath exports. These packages are not published to npm. Type checking uses the checkout’s strict bundler resolution; the server runs through its TypeScript loader, not an unbuilt native Node package. Use the repository's existing Node22, pnpm9 and installed workspace dependencies; no wallet, key, database URL or Redis configuration is required. Do not run package installation in production. For an external copied project, resolve the same reviewed checkout packages and existing dependencies first. The checkpoint records the exact temporary consumer setup used for validation.
 
-From this directory, using the repository tools:
+From this directory, using the repository tools and an already-running reviewed candidate on the explicit base URL below. New source contracts are not assumed deployed on the public site; a legacy response fails validation. No default network base is chosen:
 
 ```
-node --import tsx server.ts catalog https://marque.trade
+node --import tsx server.ts catalog http://127.0.0.1:3292
 node --import tsx server.ts receipt /absolute/path/to/captured-receipt-bundle.json
 node --import tsx server.ts job /absolute/path/to/captured-job-bundle.json
 node --import tsx server.ts plan /absolute/path/to/reviewed-plan-input.json
