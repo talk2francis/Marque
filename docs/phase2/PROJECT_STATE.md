@@ -1,8 +1,8 @@
-# P07 in progress, 17 October 2026
+# P07 checkpoint, 17 October 2026
 
-Owner-approved P07 begins from P06 committed source with608regressions passed and actual read-only anchor/payment proof. P06 remaining validation stays frozen in its own worktree. No production deployment, paid task, wallet/chain write or P08 follows automatically. P06 final checkpoint evidence will be included before P07 closes.
+Source `0de30852a3d4717c4beb4f688ab229fa812f0550`:683tests passed/37gatedskipped;34fixture integration tests separately pass, full serial types/build/lint pass. Existing marketplace opt-in machine1 and pure UNSIGNED exact-term plan verified by actual HTTP schemas and a standalone Node client using a real first-party quote and fixture-only intent.18page smoke and6populated-market readiness cases pass, both themes/390/768/1440; original transient empty frames retained. See [checkpoint](../vnext/P07_CHECKPOINT.md). AMBER for unknown external-human adoption, missing evidence dimensions and unmeasured production cold capacity. No deployment/push/migration/paid job/chain write/buyer wallet. Closing10:23:15UTC product/shared PIDs, tmux and proxy unchanged, complete Marque/Kerb health bodies pass; owned previews stopped. P05-P07 authorized batch complete. STOP after P07.
 
-Requests: [2026-10-17] [combined commerce/product maintenance] [A/B] [packages/commerce pure plan/catalog/read bounds; existing marketplace and public evidence GETs; public schema and TS example; docs] Stabilize the existing API with an opt-in machine projection, controlled filters and a pure unsigned create-job plan. Preserve default successful bodies, quote/intent flow, exact seller/asset binding, private data, MCS and UI. Bound cold reads without changing query plans; no generic execution route or signer.
+Requests: [2026-10-17] [combined commerce/product maintenance] [A/B] [existing catalog and evidence APIs, commerce client/plan, bounded reads and public schemas] Stabilize the existing API, preserve exact selection and unknown provenance, produce only unsigned calls, retain all SDK/config/DB/UI/ops boundaries. No new authority, service or production action.
 
 # P06 checkpoint, 17 October 2026
 
