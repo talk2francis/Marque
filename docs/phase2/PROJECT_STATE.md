@@ -556,3 +556,8 @@ Request: [2026-10-17] [owner-approved P10/P11] [commerce/product] P11 exact feed
 ### P10 local closure, 17 October 2026
 
 AMBER: read-only policy fallback complete on source585a71f; full build/lint/copy and42Chromium states pass,54screens inspected. Native asset authority remains unproven; two existing19px inline protocol-reference links remain audit advisories. Full results and dated production continuity are in docs/vnext/P10_CHECKPOINT.md. Production unchanged, no chain/paid writes. User already authorizes P11 next; full validation remains serial.
+
+
+### P11 validation transition
+
+P10 final checkpoint4b40705 incorporated, including585a71f history-scope correction. P11 source preparation is preserved detached; the isolated p07 workspace switches to the P11 feature branch for normal local cache reuse. Full tests, isolated fixture regressions, serial types, standalone build, lint/copy and read-only browser proof run under25%CPU. Production is untouched. Validation pending; no P11 completion claim.
