@@ -34,15 +34,14 @@ export default function JudgePage() {
         <header className={styles.head}>
           <Statement as="h1">Judge mode</Statement>
           <p className={styles.lede}>
-            The whole product, one click per step: an intent, three ranked agents with the reason
-            for each, a capped and revocable charter written on chain, a real run against a live
-            agent, its public receipt, and the revocation. Pre-filled, so the ninety seconds go on
-            watching rather than typing.
+            Inspect a position and recorded agent evidence without a wallet. The legacy grant/run
+            sequence now stops at a read-only policy preview while buyer-owned onchain authority
+            remains unverified.
           </p>
           <p className={styles.note}>
-            This interactive walkthrough runs live. The charter and the revocation are
-            transactions on BNB Smart Chain testnet, and each one links to BscScan.{' '}
-            <Link href="/status">Check what is live first</Link> if anything here stalls.
+            No charter transaction is sent by this walkthrough. Use the <Link href="/register">marketplace</Link> for
+            existing wallet-owned hires and <Link href="/app/charters">historical policy records</Link> for their controls.{' '}
+            <Link href="/status">Check current service status</Link>.
           </p>
           <p className={styles.note}>
             The <Link href="/standard">live Standard</Link> records conformance runs as they happen.

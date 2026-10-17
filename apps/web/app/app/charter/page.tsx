@@ -1,163 +1,40 @@
 import { Statement, EmptyState } from '@marque/ui'
 import { SiteHeader, SiteFooter } from '../../_components/SiteHeader'
 import { NetworkBadge } from '../../_components/NetworkBadge'
-import { CharterDesk } from './CharterDesk'
-import { TEMPLATES, CATEGORY_ORDER, isCharterCategory, UNIVERSAL_MAY_NOT } from '../../../lib/charter-templates'
-import { callableAgents, callableAgentById } from '../../../lib/agents'
-import { charterServiceAvailable, CHARTER_CHAIN_NAME, CHARTER_CHAIN_ID } from '../../../lib/charters'
+import { PolicyPreview } from './PolicyPreview'
+import { TEMPLATES, CATEGORY_ORDER, isCharterCategory } from '../../../lib/charter-templates'
 import styles from './charter.module.css'
 
 export const dynamic = 'force-dynamic'
+const LABEL = { rebalancing: 'Rebalancing', grid: 'Grid trading', yield: 'Yield optimisation', health_factor: 'Health factor' }
 
-/**
- * The Charter Desk.
- *
- * The screen where a person decides how much of their money an agent may touch.
- * It is written for someone who has never heard of a session key, because
- * AGENTS.md invariant 14 says a screen that needs a glossary is wrong, and
- * because the words that make this decision safe are "may" and "may not" — not
- * "scoped delegation".
- *
- * Nothing here is a preview. Granting writes a transaction on
- * BNB Smart Chain testnet and the charter that comes back is revocable from
- * the strip at the top of every page.
- */
-
-const CATEGORY_LABEL: Record<string, string> = {
-  rebalancing: 'Rebalancing',
-  grid: 'Grid trading',
-  yield: 'Yield optimisation',
-  health_factor: 'Health factor',
-}
-
-export default async function CharterDeskPage({
-  searchParams,
-}: {
+export default async function CharterDeskPage({ searchParams }: {
   searchParams: Promise<{ category?: string; agent?: string }>
 }) {
   const params = await searchParams
-
-  /*
-   * A buyer who clicked Hire in the marketplace has already chosen someone.
-   * Honour that choice: look the agent up directly rather than hoping it falls
-   * inside `callableAgents`, which is capped at twelve, deduplicated by host
-   * and filtered to one category. Most third-party agents are `unclassified`,
-   * so their Hire link carried no usable category, the desk defaulted to
-   * rebalancing, and the requested agent was silently replaced by whoever was
-   * first in that list — always a Marque reference agent. Choosing a different
-   * counterparty than the one asked for is the one thing this desk must never do.
-   */
-  const unsupportedCategory = params.category !== undefined && !isCharterCategory(params.category)
+  const invalid = params.category !== undefined && !isCharterCategory(params.category)
   const category = params.category && isCharterCategory(params.category) ? params.category : 'rebalancing'
-  const template = TEMPLATES[category]
-  const requestedId = params.agent ?? null
-  const requested = requestedId && !unsupportedCategory
-    ? await callableAgentById(requestedId, category).catch(() => null)
-    : null
-
-  const listed = unsupportedCategory ? [] : await callableAgents(category).catch(() => [])
-  // Put the requested agent in the list if the category query missed it.
-  const agents = requested && !listed.some((a) => a.agentId === requested.agentId)
-    ? [requested, ...listed]
-    : listed
-
-  const preselected = requestedId !== null ? requested?.agentId ?? null : agents[0]?.agentId ?? null
-  // Asked for someone we cannot reach: say so rather than quietly swapping them.
-  const requestedUnavailable = requestedId !== null && requested === null
-
-  return (
-    <>
-      <SiteHeader active="charters" />
-      <main className={styles.page}>
-        <header className={styles.head}>
-          <p className={styles.note}><strong>Charter sandbox (testnet).</strong> A demonstration of bounded action authority, signed by Marque&apos;s testnet operator. It is not a hire: to hire an agent with your own wallet through BNB Chain&apos;s ERC-8183 escrow, use Hire on the <a href="/register">marketplace</a>.</p>
-          <Statement as="h1">{template.name}</Statement>
-          <p className={styles.lede}>{template.purpose}</p>
-          <p className={styles.note}>
-            <NetworkBadge chainId={CHARTER_CHAIN_ID} />{' '}
-            A charter is authority with an edge on it. You set what the agent may touch, how much
-            it may spend and how long it has. Outside those three bounds it cannot act at all, and
-            you can end it in one transaction at any moment. Every transaction on this page is
-            built for {CHARTER_CHAIN_NAME}.
-          </p>
-        </header>
-
-        <nav className={styles.tabs} aria-label="Charter category">
-          {CATEGORY_ORDER.map((key) => (
-            <a
-              key={key}
-              className={styles.tab}
-              href={`/app/charter?category=${key}${requestedId !== null ? `&agent=${encodeURIComponent(requestedId)}` : ''}`}
-              aria-current={key === category ? 'page' : undefined}
-            >
-              {CATEGORY_LABEL[key]}
-            </a>
-          ))}
-        </nav>
-
-        {requested && !isCharterCategory(params.category ?? '') && (
-          <p className={styles.note}>
-            Sandbox charter for {requested.name}. Choose the scope above and review its limits before granting.
-            These permissions do not verify that the agent can perform the task.
-          </p>
-        )}
-
-        {requestedUnavailable && (
-          <p className={styles.note} role="status">
-            The selected agent has no supported live interface on record, or its availability could not be checked. Nothing
-            has been selected on your behalf — pick another agent below, or{' '}
-            <a href="/register">go back to the marketplace</a>.
-          </p>
-        )}
-
-        {unsupportedCategory ? (
-          <EmptyState title="This Charter category is not supported.">
-            <p>No agent was selected. Choose one of the four published Charter categories above.</p>
-          </EmptyState>
-        ) : !charterServiceAvailable() ? (
-          <EmptyState title="Charters are not configured on this deployment.">
-            <p>
-              The charter service needs a testnet signer and the MarqueRegistry address. Without
-              them a grant would be a picture of a grant, so the desk refuses to draw one.
-            </p>
-          </EmptyState>
-        ) : agents.length === 0 ? (
-          <EmptyState title={`No agent in ${CATEGORY_LABEL[category]} is callable right now.`}>
-            <p>
-              Every agent we have indexed in this category either does not answer or answers
-              without being bound to a runtime. A charter granted to an endpoint that cannot be
-              called would be theatre, so the desk will not issue one.
-            </p>
-            <p>
-              <a href={`/register/${category === 'health_factor' ? 'health-factor' : category}`}>
-                See the whole category, including the agents that failed
-              </a>
-            </p>
-          </EmptyState>
-        ) : (
-          <CharterDesk
-            key={`${category}:${requestedId ?? 'browse'}`}
-            category={category}
-            template={template}
-            universalMayNot={UNIVERSAL_MAY_NOT}
-            agents={agents}
-            preselectedAgentId={preselected}
-            chainName={CHARTER_CHAIN_NAME}
-          />
-        )}
-
-        <section className={styles.footnote}>
-          <NetworkBadge chainId={CHARTER_CHAIN_ID} />
-          <p>
-            Charters are granted on {CHARTER_CHAIN_NAME}. Mainnet authority is a separate decision
-            with a separate approval, and nothing on this page can reach it. The wallet that signs
-            is Marque&rsquo;s own testnet wallet, not yours — so a judge with no wallet can grant,
-            watch and revoke a real charter, and every transaction below is a real one you can open
-            on BscScan.
-          </p>
-        </section>
-      </main>
-      <SiteFooter />
-    </>
-  )
+  const selected = params.agent?.slice(0, 200) ?? null
+  return <>
+    <SiteHeader active="charters" />
+    <main className={styles.page}>
+      <header className={styles.head}>
+        <Statement as="h1">Policy preview</Statement>
+        <p className={styles.lede}>Review proposed limits without connecting a wallet. New grants and execution are unavailable while buyer-owned onchain enforcement remains unverified.</p>
+      </header>
+      <nav className={styles.tabs} aria-label="Charter category">{CATEGORY_ORDER.map(key =>
+        <a key={key} className={styles.tab} href={`/app/charter?category=${key}${selected ? `&agent=${encodeURIComponent(selected)}` : ''}`} aria-current={key === category ? 'page' : undefined}>{LABEL[key]}</a>
+      )}</nav>
+      {selected && <p className={styles.note} style={{ overflowWrap: 'anywhere' }}>Selected agent: {selected}. Ownership, service and task support have not been checked here. No other agent has been substituted.</p>}
+      {invalid ? <EmptyState title="This policy category is not supported."><p>Choose one of the four published categories above.</p></EmptyState>
+        : <PolicyPreview key={category} template={TEMPLATES[category]} />}
+      <section className={styles.footnote}>
+        <NetworkBadge chainId={97} />
+        <p>These historical operation templates refer to BNB Smart Chain testnet. A recorded policy hash does not enforce asset permissions. Service-fee escrow does not authorize an agent to move your assets.</p>
+        <p><a href="/register">Browse agents and existing wallet-owned hires</a></p>
+        <p><a href="/app/charters">Inspect historical policy records</a></p>
+      </section>
+    </main>
+    <SiteFooter />
+  </>
 }

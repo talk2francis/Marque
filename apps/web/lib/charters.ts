@@ -174,12 +174,8 @@ export async function readCharter(id: string): Promise<CharterView | null> {
     live = undefined
   }
 
-  // Expiry that the clock has passed is a state change with no transaction
-  // behind it, so it is written back rather than recomputed on every read.
+  // Observational GET: retain the original record; expiry is a derived view.
   const view = viewFromRow(row, live)
-  if (row.status === 'active' && view.status !== 'active') {
-    await db().update(charterTable).set({ status: view.status as 'expired' }).where(eq(charterTable.id, id))
-  }
   return view
 }
 

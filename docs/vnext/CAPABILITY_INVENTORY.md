@@ -58,3 +58,6 @@ P08: offline same-context replay EXISTS locally; genuine neutral two-independent
 
 
 P09: strict structured-intent suitability diagnostics EXISTS locally; deterministic scoped inspection ordering, rejection/unknown reasons and insufficient_comparable_supply/manual browse. Qualified-provider recommendation/routing DEFERRED because catalog-v1 lacks authenticated task-bound evidence and an established comparable pair. No automatic hire or house preference.
+
+
+P10 candidate: native buyer-owned session enforcement UNPROVEN; registry new grant/execute and Altana construction DISABLED intentionally. Pure strict denial preview and four-category no-wallet policy review EXIST. Historical registry records/revocation retained; observational GET has no writes. Existing mainnet buyer-owned fee-escrow hire unchanged. No KeyStore version or onchain policy safety claim.

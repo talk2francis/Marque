@@ -1,12 +1,14 @@
 'use client'
 
+import { readMachineCatalog } from '@marque/commerce/catalog'
+
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { track } from '../../lib/track'
 import Link from 'next/link'
 import { Button, Chip, ProvenanceChip } from '@marque/ui'
 import { announceChartersChanged } from '../_components/CharterStrip'
 import { explorerTx } from '../../lib/network'
-import { displayName, isReferenceAgent } from '../../lib/reference-agents'
+import { isReferenceAgent } from '../../lib/reference-agents'
 import styles from './judge.module.css'
 
 type StepId = 'intent' | 'rank' | 'charter' | 'run' | 'receipt' | 'revoke'
@@ -90,50 +92,17 @@ export function JudgeFlow({ demoAddress }: { demoAddress: string }) {
   const doRank = useCallback(async () => {
     setS((p) => ({ ...p, busy: 'rank', error: null }))
     try {
-      const res = await fetch('/api/v1/agents?category=health_factor&status=all&limit=12', { cache: 'no-store' })
-      const b = await res.json() as { agents?: Array<{ id: string; name: string | null; liveness: string | null }> }
-      const third = (b.agents ?? []).slice(0, 2).map((a) => ({
-        id: a.id,
-        name: a.name ?? 'unnamed',
-        why: a.liveness === 'working'
-          ? 'Answers when called, but has never passed MCS-HF-1, so it carries no warrant.'
-          : a.liveness === 'unbound'
-            ? 'Registered on ERC-8004 but not bound — its card declares no endpoint, so there is nothing to call.'
-            : 'Indexed, not yet probed.',
-        warranted: false,
-      }))
-      finish('rank', {
-        agents: [
-          {
-            id: 'marque:keel',
-            name: displayName('marque:keel'),
-            why: 'Passes MCS-HF-1 against a case captured at the current block: health factor to three decimals, the correct per-market liquidation threshold, and the exact repayment to reach the target.',
-            warranted: true,
-          },
-          ...third,
-        ],
-      })
+      const catalog = await readMachineCatalog(window.location.origin, { category: 'health_factor', tab: 'all', limit: 3 })
+      finish('rank', { agents: catalog.agents.map(a => ({
+        id: a.agentId, name: a.name, warranted: false,
+        why: `${a.conformance.state === 'UNTESTED' ? 'No test recorded' : `Identity test history: ${a.conformance.state.toLowerCase().replaceAll('_', ' ')}${a.conformance.observedAt ? ` at ${a.conformance.observedAt}` : ''}`}. Current exact-service quality, task suitability and independent control are not established by this catalog.`,
+      })) })
     } catch (e) { fail(e instanceof Error ? e.message : 'the ranking failed') }
   }, [])
 
-  // ---- 3. Charter: a real transaction --------------------------------------
+  // Policy preview never grants authority or completes the legacy grant step.
   const doCharter = useCallback(async () => {
-    setS((p) => ({ ...p, busy: 'charter', error: null }))
-    try {
-      const res = await fetch('/api/v1/charters', {
-        method: 'POST', headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({
-          category: 'health_factor', agentId: 'marque:keel', agentName: displayName('marque:keel'),
-          capBnb: 0.002, minutes: 15, label: 'Judge mode',
-        }),
-      })
-      const b = await res.json() as { charter?: { id: string; grantTxHash?: string | null }; controlToken?: string; error?: string; detail?: string }
-      if (!res.ok || !b.charter || !b.controlToken) { fail(b.detail ?? b.error ?? 'the grant was refused'); return }
-      announceChartersChanged()
-      finish('charter', {
-        charter: { id: b.charter.id, txHash: b.charter.grantTxHash ?? null, capBnb: 0.002, minutes: 15, controlToken: b.controlToken },
-      })
-    } catch (e) { fail(e instanceof Error ? e.message : 'the grant failed') }
+    window.location.assign('/app/charter?category=health_factor')
   }, [])
 
   // ---- 4. Run: a live agent, under that charter ----------------------------
@@ -213,14 +182,14 @@ export function JudgeFlow({ demoAddress }: { demoAddress: string }) {
       why: 'No wallet, no connection. The hero of the product is a position, and every number below is read from Venus on BNB Smart Chain at this block.',
     },
     rank: {
-      title: 'Rank the agents that can act on it',
-      cta: 'Rank the agents',
-      why: 'Ranked on what we measured — a published conformance test and a real probe — never on a self-declared capability. Registration answers who; it never answers how good.',
+      title: 'Inspect recorded agents',
+      cta: 'Read agent evidence',
+      why: 'Read the existing catalog with its dated test history and unknowns. This does not establish a task-qualified winner.',
     },
     charter: {
-      title: 'Grant bounded authority',
-      cta: 'Grant a charter',
-      why: 'A spend cap, an expiry and an explicit allowlist, written on chain. This is a real transaction on BNB Smart Chain testnet, and it is revocable from the moment it exists.',
+      title: 'Review proposed authority',
+      cta: 'Preview policy',
+      why: 'New grants are disabled while buyer-owned onchain enforcement is unverified. Review proposed limits without a wallet; this legacy grant/run sequence stops here.',
     },
     run: {
       title: 'Put it to work under that charter',
@@ -285,7 +254,7 @@ export function JudgeFlow({ demoAddress }: { demoAddress: string }) {
                           {a.name}
                           {isReferenceAgent(a.id) && <Chip tone="watch">Marque reference agent</Chip>}
                           <Chip tone={a.warranted ? 'holds' : 'watch'}>
-                            {a.warranted ? 'MCS-HF-1 pass' : 'no warrant'}
+                            {a.warranted ? 'Service proof' : 'No current service proof'}
                           </Chip>
                         </span>
                         <span className={styles.agentWhy}>{a.why}</span>

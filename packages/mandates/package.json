@@ -11,7 +11,9 @@
     "./store": "./src/store.ts",
     "./stores/db": "./src/stores/db.ts",
     "./registry": "./src/providers/registry.ts",
-    "./altana": "./src/providers/altana.ts"
+    "./altana": "./src/providers/altana.ts",
+    "./preview": "./src/policy-preview.ts",
+    "./availability": "./src/availability.ts"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",

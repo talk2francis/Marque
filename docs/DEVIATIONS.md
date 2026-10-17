@@ -1496,3 +1496,6 @@ P08: genuine outside comparison reduced to explicit synthetic offline replay, re
 
 
 P09: recommendations reduced to explicit insufficient-supply diagnostics with exact selection, stale/unknown reasons and compatible-token budgets. Current catalog cannot authenticate task fit or independence; no winner/auto-hire. Restore real evidence adapters after comparable supply is established. Existing marketplace/API/authority unchanged.
+
+
+P10: native sessions reduced to read-only preview; unsafe operator grant/execute disabled in candidate and Altana quarantined. Local denial tests do not prove onchain enforcement. Existing history/revocation and mainnet hire preserved. Restore only with verified native ownership/enforcement/revoke proof and approval; see docs/vnext/P10_AUTHORITY_CONTRACT.md.

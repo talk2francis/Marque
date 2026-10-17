@@ -65,3 +65,6 @@ P09: fresh catalog export is not fresh source evidence; recompute age at explici
 
 
 P09 closing, 17 October14:19UTC: successful health/PID continuity is not proof of zero performance impact. A7.78sKerb API mid-sample preceded a0.79sclosing sample; both complete/status=ok, cause UNKNOWN. Reduced only owned validation CPU50%, without modifying Kerb/Marque. Do not erase the slower result or infer production p95/capacity. P09's3supplied entries/7snapshot total remain dated10:17UTC source data; a fresh CLI execution does not renew source freshness, task acceptance, quote expiry or operator independence.
+
+
+P10 source: anchoring a policy does not enforce its selectors/token/recipient limits. The old web grant used Marque operator testnet wallet, not buyer ownership. Altana wrapper widened native cap, changed total period and falsely marked cached state fromChain; it is quarantined, not declared fixed native authority. SDK0.9.0 installed is not deployed KeyStore version evidence. Public14:46UTC charter list is capped history, not user/independent-person count.

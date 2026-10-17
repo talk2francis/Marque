@@ -6,9 +6,12 @@ import type {
   ExecuteUnderCharter, ExecutionOutcome,
 } from '../types.js'
 import { InMemoryCharterStore, type CharterRecord, type CharterStore } from '../store.js'
+import { refuseUnverifiedAuthority } from '../availability.js'
 
 /**
- * P6-LITE — CharterService against our own primitives.
+ * Historical P6-lite policy records. P10 blocks all new grants/execution.
+ * Only historical read/revocation remains. Legacy checks below do not prove
+ * recipient, token or selector enforcement and are not an execution fallback.
  *
  * The fallback AGENTS.md names: an allowlist, a spend cap and an expiry
  * recorded on MarqueRegistry, with the same UI, the same revoke and the same
@@ -99,9 +102,7 @@ export class RegistryCharterService implements CharterService {
   private readonly store: CharterStore
 
   constructor(private readonly config: RegistryConfig) {
-    if (config.chainId === 56) {
-      throw new Error('refusing to construct a mainnet charter service: escalation gate 1 requires written approval')
-    }
+    if (config.chainId !== 97) throw new Error('registry policy records support testnet97 only')
     this.account = privateKeyToAccount(config.privateKey)
     const transport = http(config.rpcUrl, { timeout: 30_000 })
     this.wallet = createWalletClient({ account: this.account, chain: bscTestnet, transport })
@@ -122,6 +123,7 @@ export class RegistryCharterService implements CharterService {
   }
 
   async grant(grant: CharterGrant, meta: GrantMeta = {}): Promise<Charter> {
+    refuseUnverifiedAuthority()
     const policy = policyHash(grant)
     const grantedAt = new Date().toISOString()
 
@@ -260,6 +262,7 @@ export class RegistryCharterService implements CharterService {
    * revert at the contract; these do not, and the UI must say so.
    */
   async execute(req: ExecuteUnderCharter): Promise<ExecutionOutcome> {
+    refuseUnverifiedAuthority()
     const started = Date.now()
     const stored = await this.store.get(req.charterId)
     if (!stored) {

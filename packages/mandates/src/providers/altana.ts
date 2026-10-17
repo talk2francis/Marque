@@ -6,9 +6,13 @@ import type {
   Charter, CharterGrant, CharterService, CharterState,
   ExecuteUnderCharter, ExecutionOutcome,
 } from '../types.js'
+import { refuseUnverifiedAuthority } from '../availability.js'
 
 /**
- * Altana implementation of CharterService.
+ * Historical Altana implementation of CharterService.
+ * P10 QUARANTINE: construction refuses before SDK/key initialization. The old
+ * adapter below is not verified native authority; its cap widening, missing
+ * selectors and cached state must not be enabled by removing the guard alone.
  *
  * Read from the live docs at build time (docs.altana.network, 4 Sep 2026), not
  * from memory. Two warnings in those docs are load-bearing and are handled
@@ -79,6 +83,7 @@ export class AltanaCharterService implements CharterService {
   private readonly sessions = new Map<string, StoredSession>()
 
   constructor(private readonly config: AltanaConfig) {
+    refuseUnverifiedAuthority()
     if (config.chainId === 56) {
       // Escalation gate 1. A mainnet charter grant is an on-chain state change
       // and needs explicit written approval, which a config flag is not.

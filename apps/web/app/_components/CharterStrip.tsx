@@ -115,7 +115,7 @@ export function CharterStrip() {
     <div className={styles.strip} role="status" aria-live="polite">
       <span className={styles.mark} aria-hidden="true" />
       <span className={styles.what}>
-        {live.length > 1 ? `${live.length} sandbox charters active` : 'Sandbox charter active'}
+        {live.length > 1 ? `${live.length} testnet policy records` : 'Testnet policy record'}
         <span className={styles.who}> · {first.agentName ?? first.agentId}</span>
       </span>
 

@@ -93,3 +93,6 @@ P08: planned independent equal-task trials; shipped offline replay with explicit
 
 
 P09: planned evidence-based candidate recommendation; shipped deterministic structured-intent/catalog diagnostics, disclosed inspection ordering and explicit insufficient_comparable_supply/manual browse because no authenticated adequate pair or task/settlement/authority fields exist in catalog-v1; cost is no proven winner; restore through real exact-task evidence adapters and independently consented comparable providers, preserving unsigned buyer review.
+
+
+P10: planned proven native sessions; shipped the permitted read-only decoded policy/UI preview and hard barriers against unsafe legacy grant/execute because no exact enforcement/signer/deployed-version proof exists; cost is unavailable new sandbox grants and a stopped legacy judge grant/run flow; restore only with independently proven buyer-owned native permissions and explicit wallet/release approval. Historical revocation retained; no real chain write or simulation asserted.

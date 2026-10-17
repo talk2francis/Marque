@@ -31,11 +31,11 @@ export default async function ChartersPage() {
         <header className={styles.head}>
           <Statement as="h1">Charters</Statement>
           <p className={styles.lede}>
-            Every charter Marque has granted, on {CHARTER_CHAIN_NAME}. What each agent may touch,
-            what is left of its cap, how long it has, and a button that ends it now.
+            Historical policy records on {CHARTER_CHAIN_NAME}. Limits and usage are server records;
+            policy hashes do not enforce permissions over your wallet. Existing revocation controls remain available.
           </p>
           <p className={styles.headAct}>
-            <LinkButton variant="primary" href="/app/charter">Grant a charter</LinkButton>
+            <LinkButton variant="primary" href="/app/charter">Preview a policy</LinkButton>
           </p>
         </header>
 
@@ -46,10 +46,9 @@ export default async function ChartersPage() {
           {live.length === 0 ? (
             <EmptyState title="No charter is active.">
               <p>
-                Nothing currently holds authority over anything. That is the resting state, and it
-                is the one the product should spend most of its time in.
+                No active policy record was returned. This does not inspect wallet approvals or other onchain permissions.
               </p>
-              <p><LinkButton variant="primary" href="/app/charter">Grant a charter</LinkButton></p>
+              <p><LinkButton variant="primary" href="/app/charter">Preview a policy</LinkButton></p>
             </EmptyState>
           ) : (
             <div className={styles.cards}>

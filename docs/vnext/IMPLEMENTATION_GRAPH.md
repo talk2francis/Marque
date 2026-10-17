@@ -66,3 +66,8 @@ P09 authorized scope: add a pure catalog diagnostic adapter and local CLI, not s
 
 
 P08-P09 checkpoints complete locally: P08d848288, P09tested sourcee5bd3f4. Both AMBER with explicit offline/insufficient-supply fallbacks; no genuine independent equal-task comparison or qualified-provider recommendation is asserted. Prerequisites to restore remain authenticated independent-operator consent and current exact-task/service/endpoint/quote/quality/settlement/authority evidence. Production cold capacity and slower Kerb API sample causality remain UNKNOWN. No automatic P10/release/paid action/chain write follows this approved batch.
+
+
+## P10-P11 owner approval, 17 October 2026
+
+Owner explicitly approves P10 then P11, superseding the P09 stop for these phases only. P10 inventories the unsafe/unproven session rails and uses the specified read-only policy fallback; no native grant is enabled. Commit its scoped evidence, then proceed to P11 provenance/outcome learning without another approval. No P12, production release, paid action, key use, new authority or chain write follows automatically.

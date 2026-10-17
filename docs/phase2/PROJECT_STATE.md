@@ -1,3 +1,9 @@
+# P10 in validation, 17 October 2026
+
+Owner authorizes P10 then P11. P10 source audit finds operator-key testnet policy anchoring, incomplete legacy execution checks and an unproven Altana adapter; candidate blocks new grant/execute, keeps history/revocation and adds read-only policy preview. Existing buyer-owned mainnet hires unchanged. [Contract](../vnext/P10_AUTHORITY_CONTRACT.md). No deployment, wallet/key operation, paid task or chain write. P11 follows P10 checkpoint under existing approval; stop after P11.
+
+Requests: [2026-10-17] [combined commerce/product maintenance] [A/B] [mandates providers/pure preview, existing charter GET/POST, policy/history/judge UI and docs] Narrow unproven authority, preserve actual evidence and historical revocation, remove GET mutation, use the permitted no-wallet preview. No new native signer or data migration.
+
 # P09 checkpoint complete, 17 October 2026
 
 Final sourcee5bd3f4:723tests passed/37gated skips; full workspace/CLI types, lint/copy and MCS anchor pass. Pure structured-intent diagnostics preserve exact service, quoted assets, original negative observations, stale/unknown scopes and disclosed inspection ordering. Current catalog cannot qualify a comparable exact-task pair: insufficient_comparable_supply, recommended=null, manual browse. [Checkpoint](../vnext/P09_CHECKPOINT.md). AMBER for unproven genuine recommendation/independence. Closing2026-10-17T14:19:45.406521+00:00 product/shared PIDs, original tmux/linger/proxy/production source unchanged; complete Marque/Kerb200health bodies pass. Slower7.78sKerb API mid-sample retained; cause unknown, only own validation CPU reduced50%. No deploy/push/migration/DB write/paid task/chain write/key/authority change. P08 checkpointd848288 and P09 are locally complete under explicit approval. STOP after P09; no automatic P10 or release.

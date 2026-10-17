@@ -361,7 +361,7 @@ export default async function WhyMarque() {
               screen to a cockpit and composes the charter line by line before it is sealed on chain.
             </p>
             <div className={styles.chamberActs}>
-              <LinkButton href="/app/charter" variant="primary">Grant a charter</LinkButton>
+              <LinkButton href="/app/charter" variant="primary">Preview a policy</LinkButton>
               <LinkButton href="/app/charters" variant="secondary">See every charter granted</LinkButton>
             </div>
           </div>
