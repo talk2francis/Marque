@@ -88,7 +88,7 @@ export function buildHirePlan(input: unknown, nowMs = Date.now()) {
         generatedAt: new Date(nowMs).toISOString(), intentId: i.intentId,
         idempotencyKey: `intent:${i.intentId}:${i.wallet.toLowerCase()}:${q.quoteHash.toLowerCase()}`,
         selection: { agentId: q.agentId, identityChainId: q.registryEvidence.chainId, serviceId: q.serviceId, quoteId: q.quoteId, quoteHash: q.quoteHash, quoteHashVersion: 1 as const, quoteMode: q.signatureEvidence, provider: getAddress(q.provider) },
-        chainId: q.chainId, buyer: getAddress(i.wallet), token: asset, amountRaw: q.price, amountLabel: priceLabel,
+        chainId: q.chainId, buyer: getAddress(i.wallet), token: { ...asset }, amountRaw: q.price, amountLabel: priceLabel,
         quoteExpiresAt: new Date(q.expiresAt * 1000).toISOString(), quoteExpiresAtSeconds: String(q.expiresAt),
         jobExpiresAt: i.refundAfter, jobExpiresAtSeconds: i.expiredAt, disputeWindowSeconds: i.disputeWindowSeconds,
         descriptionHash: i.descriptionHash,

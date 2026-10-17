@@ -45,6 +45,17 @@ describe('pure unsigned hire plan', () => {
       expect(fetchSpy).not.toHaveBeenCalled()
     } finally { fetchSpy.mockRestore() }
   })
+  it('keeps mutations of a returned plan out of the pinned asset catalog and later plans', () => {
+    const input = fixture(), result = buildHirePlan(input, now)
+    if (!result.ok) throw Error(result.reason)
+    const pinned = network(56).assets.find(a => a.address.toLowerCase() === result.plan.token.address.toLowerCase())!
+    const before = structuredClone(pinned)
+    expect(result.plan.token).not.toBe(pinned)
+    result.plan.token.decimals = 0
+    result.plan.token.address = buyer
+    expect(pinned).toEqual(before)
+    expect(buildHirePlan(input, now)).toMatchObject({ ok: true, plan: { token: before } })
+  })
   it('keeps the published output contract aligned with every emitted top-level field', () => {
     const result = buildHirePlan(fixture(), now)
     if (!result.ok) throw Error(result.reason)
