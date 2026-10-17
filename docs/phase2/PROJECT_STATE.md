@@ -549,3 +549,8 @@ See the checkpoint block in the P2-00 report, reproduced here as it is finalised
 - [Sat 26 Sep] Damian acknowledgement sent. Gwen's six questions pending; Francis is following up.
 
 Request: [2026-10-16] [owner-directed combined repair] [commerce/product] P01A authorized edits span quote/claim/listing APIs and their existing UI; minimal A0 integrity fixes, no production merge/deploy. Existing fonts, artwork, four categories, escrow, buyer signing and SDK pins retained.
+
+
+### P10 local closure, 17 October 2026
+
+AMBER: read-only policy fallback complete on source585a71f; full build/lint/copy and42Chromium states pass,54screens inspected. Native asset authority remains unproven; two existing19px inline protocol-reference links remain audit advisories. Full results and dated production continuity are in docs/vnext/P10_CHECKPOINT.md. Production unchanged, no chain/paid writes. User already authorizes P11 next; full validation remains serial.
