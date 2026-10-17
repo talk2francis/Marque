@@ -120,7 +120,7 @@ export async function agentTrack(tokenId: string | null, chainId = 56): Promise<
 
 /** Empty indexed subset and unavailable read are different states. */
 export function trackFromSource(tokenId: string, chainId: number, source: Awaited<ReturnType<typeof agentTracks>>): AgentTrack {
-  if (!source) return { ...EMPTY_TRACK(chainId), available: false }
+  if (!tokenId || !source) return { ...EMPTY_TRACK(chainId), available: false }
   return { ...(source.tracks[tokenId] ?? EMPTY_TRACK(chainId)), available: true, computedAt: source.computedAt, sourceStale: source.stale }
 }
 

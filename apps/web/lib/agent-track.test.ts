@@ -18,4 +18,5 @@ it('market cards and storefronts use the same state distinction without mutating
   expect(trackFromSource('1',56,source)).toMatchObject({available:true,computedAt:source.computedAt})
   expect(original.computedAt).toBeNull()
   expect(trackFromSource('1',56,null).available).toBe(false)
+  expect(trackFromSource('',56,source).available).toBe(false)
 })
