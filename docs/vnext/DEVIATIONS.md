@@ -67,3 +67,12 @@
 - Existing receipt and sealed-call digests are sorted-JSON SHA-256 without a prefix, not JCS or Keccak. Preserve bytes and old numeric fields; new raw monetary fields must be strings. A new prefixed/JCS format is deferred until a distinct version is justified.
 - Source inspection found a second MCS case lookup and missing block comparison. Future receipt grades now cite the exact loaded case/version and different-block tasks remain ungraded. Legacy run quality availability may decrease truthfully; Phase2 settlement and old MCS/receipt/ledger rows are untouched.
 - No UI source changes: P03 browser evidence is retained as prior evidence, not claimed as a P04 clickthrough. P04 validates Next route responses, offline replay, full regressions/types/lint and read-only public receipt compatibility. No production release, paid task or chain write.
+
+
+## P05, 17 October 2026
+
+- Reuse existing immutable cases/results and request JSON instead of a new Warrant table/migration. New exact-service/code evidence exists only on future actually observed runs; legacy records stay unknown. Source commitment is a content hash, not an onchain anchor or issuer signature.
+- Replayed actual historical passes, failed answers and transport failures, plus fresh public-chain inputs for all four categories, without new agent tasks or paid calls. Cost: no newly consented independent external exact-service Warrant. Restore by an owner-authorized test and voluntary bundle sharing, not fabricated backfill.
+- Legacy API field names remain compatible historical test-pass semantics; visible labels become Test passed to avoid asserting unknown exact-service qualification. Portable validity is separate, versioned and bounded. Listing/hire is not gated on MCS.
+- Current harness stores sorted-JSON SHA-256 request/response commitments. P04's documentation table described the unsorted helper too broadly; preserve known historical variants and report their actual matching mode. No stored hash is rewritten.
+- Shared bounded-JSON guard extracted from the P04 checker, with unchanged receipt vectors/semantics. No serializer, receipt hash or sealed-call algorithm change.

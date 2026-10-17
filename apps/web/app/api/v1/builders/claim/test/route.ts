@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { randomUUID } from 'node:crypto'
 import { z } from 'zod'
-import { CASES, capturePublishedCase, runConformance, adapterFor, type TestId } from '@marque/conformance'
+import { CASES, capturePublishedCase, runConformance, adapterFor, buildWarrantBundle, type TestId } from '@marque/conformance'
 import { db, conformanceResult } from '@marque/db'
 import { isSupportedChain } from '@marque/commerce'
 import { readIdentity } from '../../../../../../lib/builder'
@@ -62,9 +62,11 @@ export async function POST(request: Request) {
   // A builder listing their agent gets a fresh, immutable on-chain case, and
   // is graded against that exact id even while other tests capture in parallel.
   let caseId: string
+  let observation: Awaited<ReturnType<typeof capturePublishedCase>>
   try {
     const captured = await capturePublishedCase({ id: `${spec.id}-claim-${Date.now()}-${randomUUID().slice(0, 6)}`, testId: spec.testId, subject: spec.subject, policy: spec.policy })
     caseId = captured.testCase.id
+    observation = captured
   } catch {
     return NextResponse.json({ error: 'could_not_capture_case', detail: 'The test case could not be read from BNB Chain just now. Try again in a minute.' }, { status: 503 })
   }
@@ -76,7 +78,7 @@ export async function POST(request: Request) {
 
   let outcome
   try {
-    outcome = await runConformance({ adapter, testId: input.testId as TestId, caseId, persist: false })
+    outcome = await runConformance({ adapter, testId: input.testId as TestId, caseId, persist: false, selectionSource: 'current_owner_claim' })
   } catch (err) {
     return NextResponse.json({ error: 'run_failed', detail: err instanceof Error ? err.message : 'the run failed' }, { status: 502 })
   }
@@ -114,5 +116,6 @@ export async function POST(request: Request) {
     blockNumber: outcome.blockNumber,
     diffs: outcome.diffs,
     note: 'This result is now on the public record for this identity, whichever way it went.',
+    warrant: buildWarrantBundle(observation, outcome),
   })
 }

@@ -18,7 +18,7 @@ import styles from './register.module.css'
  */
 
 const TOGGLES: Array<{ key: keyof MarketState; group: string; label: string; hint: string; off?: keyof MarketState }> = [
-  { key: 'warranted', group: 'Marque test', label: 'Warranted only', hint: 'Passed the published conformance test for its category.' },
+  { key: 'warranted', group: 'Marque test', label: 'Test passes only', hint: 'A recorded category test pass. Exact-service binding and current code provenance may be unavailable.' },
   { key: 'liveNow', group: 'Availability', label: 'Live now', hint: 'Answered Marque’s most recent probe.' },
   { key: 'thirdParty', group: 'Provider', label: 'Third-party only', hint: 'Hide the reference agents Marque operates.', off: 'firstParty' },
   { key: 'firstParty', group: 'Provider', label: 'Marque reference only', hint: 'Only the agents Marque runs, one or two per category.', off: 'thirdParty' },

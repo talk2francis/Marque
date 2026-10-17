@@ -83,12 +83,15 @@ export interface ConformanceAdapter {
   /** Stable id, used in results. */
   agentId: string
   name: string
+  /** Exact selected discovery surface, recorded before any task is sent. */
+  service?: { kind: 'a2a' | 'mcp'; discoveryEndpoint: string; serviceId?: number | null }
   /** Answer one case. Implementations must not throw; return an error string. */
   ask(testCase: TestCase, prompt: string): Promise<{
     response: unknown
     latencyMs: number
     costUsd?: number | null
     error?: string | null
+    invocation?: { endpoint: string; operation: string; responseTextSha256: string; tool?: string }
   }>
 }
 

@@ -1,4 +1,5 @@
 import { safeFetch } from '@marque/probe'
+import { createHash } from 'node:crypto'
 import type { ConformanceAdapter, TestCase } from './types.js'
 
 interface McpTool { name?: string; description?: string; inputSchema?: unknown }
@@ -125,6 +126,7 @@ export function a2aAdapter(agentId: string, name: string, cardUrl: string): Conf
   return {
     agentId,
     name,
+    service: { kind: 'a2a', discoveryEndpoint: cardUrl },
     async ask(_testCase: TestCase, prompt: string) {
       const started = Date.now()
 
@@ -191,7 +193,7 @@ export function a2aAdapter(agentId: string, name: string, cardUrl: string): Conf
           error: 'unusable_response: the reply contained no structured JSON answer',
         }
       }
-      return { response: payload, latencyMs, costUsd: null }
+      return { response: payload, latencyMs, costUsd: null, invocation: { endpoint, operation: 'message/send', responseTextSha256: `0x${createHash('sha256').update(res.body, 'utf8').digest('hex')}` } }
     },
   }
 }
@@ -208,6 +210,7 @@ export function mcpAdapter(agentId: string, name: string, endpoint: string): Con
   return {
     agentId,
     name,
+    service: { kind: 'mcp', discoveryEndpoint: endpoint },
     async ask(testCase: TestCase, prompt: string) {
       const started = Date.now()
       const rpc = (id: number, method: string, params: unknown) =>
@@ -297,7 +300,7 @@ export function mcpAdapter(agentId: string, name: string, endpoint: string): Con
       if (!payload || typeof payload !== 'object') {
         return { response: parsed, latencyMs, error: 'unusable_response: tool returned no structured JSON answer' }
       }
-      return { response: payload, latencyMs, costUsd: null }
+      return { response: payload, latencyMs, costUsd: null, invocation: { endpoint, operation: 'tools/call', tool: compatible.tool.name, responseTextSha256: `0x${createHash('sha256').update(call.body, 'utf8').digest('hex')}` } }
     },
   }
 }

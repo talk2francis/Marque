@@ -138,7 +138,7 @@ export default async function WhyMarque() {
           {([
             ['Registered on BNB Chain', registered, 'from the ERC-8004 registry'],
             ['Charter-ready', hireableCount, 'a callable service matches its charter task (testnet sandbox)'],
-            ['Warranted', homeCounts['warranted'] == null ? null : Number(homeCounts['warranted']), 'passed a published MCS case'],
+            ['Test passes', homeCounts['warranted'] == null ? null : Number(homeCounts['warranted']), 'passed a published MCS case'],
             ['Public receipts', homeCounts['receipts'] == null ? null : Number(homeCounts['receipts']), 'execution and quality recorded separately'],
           ] as Array<[string, number | null, string]>).map(([label, n, sub]) => (
             <div className={styles.stat} key={label}>

@@ -124,7 +124,7 @@ export function WarrantBadge({
   const stale = date ? (Date.now() - Date.parse(date)) > 72 * 3_600_000 : false
   return (
     <span className={`warrant warrant--ok${stale ? ' warrant--stale' : ''}`}>
-      Warranted{date ? <span className="warrant__date"> {date}</span> : null}
+      Test passed{date ? <span className="warrant__date"> {date}</span> : null}
       {stale ? <span className="warrant__date"> · retest due</span> : null}
     </span>
   )

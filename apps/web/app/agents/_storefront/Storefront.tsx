@@ -222,7 +222,7 @@ export function Storefront({ d }: { d: Data }) {
                   <span className={styles.verdictIco} aria-hidden="true">{latest.pass ? <Check /> : <X />}</span>
                   <div>
                     <p className={styles.verdictTitle}>
-                      {latest.error ? 'Did not answer the test' : latest.pass ? 'Warranted' : 'Tested: failed'} · <a href={`/standard/${latest.testId}`} className="mono">{latest.testId}</a>
+                      {latest.error ? 'Did not answer the test' : latest.pass ? 'Tested: passed' : 'Tested: failed'} · <a href={`/standard/${latest.testId}`} className="mono">{latest.testId}</a><span> · Historical identity test; exact-service Warrant binding may be unavailable.</span>
                       {latest.ranAt ? ` · ${utcDay(latest.ranAt)}` : ''}
                     </p>
                     <p className={styles.muted}>

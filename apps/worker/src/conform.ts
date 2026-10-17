@@ -38,6 +38,7 @@ function errorKind(error: unknown): string | null {
   if (value.startsWith('unusable_response:')) return 'unusable_response'
   if (value.startsWith('no_compatible_interface:')) return 'no_compatible_interface'
   if (value.startsWith('payment required:')) return 'payment_required'
+  if (value.startsWith('case_stale:')) return 'case_stale'
   if (/timeout|did not answer within|timed out/i.test(value)) return 'timeout'
   return error instanceof Error ? error.name : 'request_failed'
 }
@@ -175,7 +176,7 @@ async function referenceSweep(): Promise<void> {
     }
     const adapter = a2aAdapter(agentId, a.slug, `${PUBLIC_URL}/agents/${a.slug}/.well-known/agent-card.json`)
     try {
-      const outcome = await runConformance({ adapter, testId, caseId })
+      const outcome = await runConformance({ adapter, testId, caseId, selectionSource: 'first_party_config' })
       if (outcome.pass) pass++
       else fail++
       log('reference_result', { agent: a.slug, agentId, test: testId, pass: outcome.pass, failed: outcome.failedFields, latencyMs: outcome.latencyMs, error: errorKind(outcome.error) })

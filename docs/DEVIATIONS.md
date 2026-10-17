@@ -1477,3 +1477,8 @@ Compact seller visibility reuses the existing builder/owner/claim surfaces. Exac
 ### vNext P04 receipt integrity
 
 See [P04 receipt contract](vnext/P04_RECEIPT_CONTRACT.md) and [vNext deviations](vnext/DEVIATIONS.md). Reuse immutable receipt versions1/2 and existing evidence rows; no new generic manifest table, history rewrite or inferred anchor/actor truth. Preserve historical SHA-256 bytes and unknowns. Future grades retain the exact case and version; different-block tasks are ungraded. No UI, migration, deployment or new transaction.
+
+
+### vNext P05 portable conformance
+
+See [P05 contract](vnext/P05_WARRANT_CONTRACT.md) and vNext deviations. Reuse immutable result/request records; no migration or backfill. Legacy identity test passes are labelled as such; exact-service/source-code evidence is separately inspectable. Real historical replay and fresh input reads do not imply an independent paid pilot.

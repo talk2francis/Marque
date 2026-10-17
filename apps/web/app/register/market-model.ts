@@ -278,7 +278,7 @@ export function qualView(a: MarketRow): QualView {
     return {
       tone: stale ? 'stale' : 'qualified',
       label: 'Qualified',
-      evidence: ['Warranted', a.warrant.testId].filter(Boolean).join(' · '),
+      evidence: ['Test passed', a.warrant.testId].filter(Boolean).join(' · '),
       date: day,
       // Kept on its own line rather than appended: a lapsed retest window is a
       // caveat on the pass, not more of the citation, and appending it made the

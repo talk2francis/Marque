@@ -93,7 +93,7 @@ export default async function Home() {
           {line ? (
             <dl className={styles.callouts} aria-label={`Quote snapshot at ${line.measuredAt}`}>
               <div><dt>Quote snapshot</dt><dd><b className="num">{line.hireable}</b> listings at {line.measuredAt.slice(11, 16)} UTC</dd></div>
-              {line.warranted !== null ? <div><dt>Warranted</dt><dd><b className="num">{line.warranted}</b> passed the published test</dd></div> : null}
+              {line.warranted !== null ? <div><dt>Test passes</dt><dd><b className="num">{line.warranted}</b> passed the published test</dd></div> : null}
             </dl>
           ) : null}
 
@@ -114,7 +114,7 @@ export default async function Home() {
               <div><dt>Registered on BNB Chain</dt><dd className={styles.kpiNum}>{fmt(line.registered)}</dd><dd className={styles.kpiNote}>ERC-8004 identities Marque has indexed. Registration says who, never how good.</dd></div>
               {line.answering !== null ? <div><dt>Answering a live call</dt><dd className={styles.kpiNum}>{fmt(line.answering)}</dd><dd className={styles.kpiNote}>Endpoints that answered Marque&apos;s own probe, timestamped.</dd></div> : null}
               <div><dt>Valid quote listings at snapshot</dt><dd className={styles.kpiNum}>{line.hireable}</dd><dd className={styles.kpiNote}>Checked at {line.measuredAt.replace('T', ' ').slice(0, 19)} UTC. Signature modes differ; hiring requests a fresh quote.</dd></div>
-              {line.warranted !== null ? <div><dt>Warranted</dt><dd className={styles.kpiNum}>{line.warranted}</dd><dd className={styles.kpiNote}>Passed a published test with one right answer. <a href="/standard">The Standard</a></dd></div> : null}
+              {line.warranted !== null ? <div><dt>Test passes</dt><dd className={styles.kpiNum}>{line.warranted}</dd><dd className={styles.kpiNote}>Passed a published test with one right answer. <a href="/standard">The Standard</a></dd></div> : null}
             </dl>
             <p className={styles.kpiFoot}><ProvenanceChip provenance="MEASURED" /> Counted from Marque&apos;s index, not quoted from a provider. <a href="/why">How we count</a></p>
           </section>

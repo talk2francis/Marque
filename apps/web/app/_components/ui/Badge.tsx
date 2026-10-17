@@ -9,7 +9,7 @@ import { cx } from './cx'
 export type BadgeKind =
   | { kind: 'hireable' }
   | { kind: 'preview' }
-  | { kind: 'warranted'; date: string }
+  | { kind: 'warranted'; date: string; serviceBound?: boolean }
   | { kind: 'failed'; test: string; field?: string; date?: string }
   | { kind: 'untested' }
   | { kind: 'retest' }
@@ -26,7 +26,7 @@ export function Badge(props: BadgeKind & { className?: string }) {
     case 'preview':
       return <span className={cx('pill pill--preview', c)}>Preview only</span>
     case 'warranted':
-      return <span className={cx('pill pill--warranted', c)}>Warranted {day(props.date)}</span>
+      return <span className={cx('pill pill--warranted', c)}>{props.serviceBound ? 'Warranted' : 'Test passed'} {day(props.date)}</span>
     case 'failed':
       return (
         <span className={cx('pill pill--failed', c)}>

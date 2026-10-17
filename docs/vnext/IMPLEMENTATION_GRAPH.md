@@ -45,3 +45,8 @@ DEFER: broad seller dashboard, autonomous procurement, action authority expansio
 ## P04 authorization and dependency update, 16 October 2026
 
 Owner explicitly approved P03 then P04. P03 is committed at f4d5d56 with checkpoint 3c4f298. P04 reuses the receipt primitive: offline content checks, additive GET evidence and exact-case grade binding. No new generic proof table or router. P04 ends at its local checkpoint; no P05/P06 implementation, paid pilot or production deployment follows automatically. Broader verification can reuse this frozen digest contract after separate phase authorization.
+
+
+## P05-P07 explicit batch authorization, 17 October 2026
+
+Owner approved P05, P06 and P07 without a new approval between checkpoints. P05 reuses MCS and immutable observations for portable replay and honest historical labels. P06 follows its committed checkpoint and reuses frozen receipt hashes plus historical public chain evidence. P07 follows P06 and stabilizes the existing marketplace/quote/intent contract with a pure unsigned plan. Announce each transition and commit its evidence. P08, production release, paid tasks, wallet authority and chain writes are not authorized by this batch.

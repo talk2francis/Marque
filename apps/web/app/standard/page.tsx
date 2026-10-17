@@ -143,6 +143,13 @@ export default async function StandardPage() {
           standard cannot drift from what is actually checked.{' '}
           <ProvenanceChip provenance="TESTED" />
         </p>
+        <p className={styles.lede}>
+          A recorded test pass is one dated observation. Older records may lack exact-service
+          binding and test-code provenance; they are not automatically portable Warrants.
+          Payment, provider independence and current chain state require separate evidence.
+          {' '}<a href="/api/v1/conformance/code">Inspect the current test-code commitments</a>.
+          A Warrant is not a safety or return guarantee.
+        </p>
       </header>
 
       <section className={styles.section}>

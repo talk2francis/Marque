@@ -1,3 +1,4 @@
+import { boundedJson } from '@marque/probe'
 import { createHash } from 'node:crypto'
 import { z } from 'zod'
 import { canonicalise, type Receipt } from './receipt.js'
@@ -57,30 +58,6 @@ const receiptSchema = z.object({
   }).passthrough().nullable().optional(),
 }).passthrough()
 
-/** JSON-only boundary: no lossy BigInt/NaN/date/accessor/toJSON conversion. */
-function isBoundedJson(value: unknown, depth: number, budget: { left: number; bytesLeft: number; bytesExceeded: boolean }): boolean {
-  if (depth > 64 || --budget.left < 0) return false
-  if (typeof value === 'string') {
-    budget.bytesLeft -= Buffer.byteLength(value, 'utf8')
-    if (budget.bytesLeft < 0) budget.bytesExceeded = true
-    return !budget.bytesExceeded
-  }
-  if (value === null || typeof value === 'boolean') return true
-  if (typeof value === 'number') return Number.isFinite(value)
-  if (typeof value !== 'object') return false
-  if (!Array.isArray(value) && Object.getPrototypeOf(value) !== Object.prototype && Object.getPrototypeOf(value) !== null) return false
-  if (Object.getOwnPropertySymbols(value).length) return false
-  const descriptors = Object.getOwnPropertyDescriptors(value)
-  if (Array.isArray(value) && Object.keys(value).length !== value.length) return false
-  return Object.entries(descriptors).every(([key, descriptor]) => {
-    if (Array.isArray(value) && key === 'length') return true
-    budget.bytesLeft -= Buffer.byteLength(key, 'utf8')
-    if (budget.bytesLeft < 0) budget.bytesExceeded = true
-    if (budget.bytesExceeded) return false
-    return descriptor.enumerable && 'value' in descriptor && isBoundedJson(descriptor.value, depth + 1, budget)
-  })
-}
-
 export type ReceiptIntegrityStatus = 'MATCH' | 'MISMATCH' | 'UNSUPPORTED_VERSION' | 'INVALID_RECEIPT' | 'INVALID_HASH' | 'LIMIT_EXCEEDED'
 
 /** Offline content check ONLY: no chain, issuer, payment, MCS or authority verification. */
@@ -98,8 +75,8 @@ export function verifyReceiptIntegrity(body: unknown, expectedHash: unknown): {
 function checkIntegrity(body: unknown, expectedHash: unknown): ReturnType<typeof verifyReceiptIntegrity> {
   // Count keys/strings before canonicalization: repeated references to a large
   // string must not expand into an unbounded serialized allocation.
-  const budget = { left: 100_000, bytesLeft: MAX_RECEIPT_BYTES, bytesExceeded: false }
-  if (!isBoundedJson(body, 0, budget)) return { status: budget.bytesExceeded ? 'LIMIT_EXCEEDED' : 'INVALID_RECEIPT', computedHash: null }
+  const json = boundedJson(body)
+  if (json !== 'OK') return { status: json === 'LIMIT' ? 'LIMIT_EXCEEDED' : 'INVALID_RECEIPT', computedHash: null }
   if (!body || typeof body !== 'object' || Array.isArray(body)) return { status: 'INVALID_RECEIPT', computedHash: null }
   const version = (body as Record<string, unknown>)['version']
   if (version !== '1' && version !== '2') return { status: 'UNSUPPORTED_VERSION', computedHash: null }

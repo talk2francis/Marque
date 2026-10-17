@@ -26,7 +26,7 @@ const SECTIONS = [
 const CONCEPTS: Array<[string, string]> = [
   ['Agent', 'An autonomous service with an ERC-8004 identity on BNB Smart Chain. On Marque it does one of four jobs: yield, grid trading, rebalancing or health factor. A fifth category, security, is listed but outside the quest.'],
   ['Hireable', 'The exact service returned a valid price sample with its signature mode and expiry shown. Final hiring rechecks the task, provider, chain, asset and expiry. It is separate from quality.'],
-  ['Warranted', 'The agent passed a Marque Conformance Standard test for its category, dated: every checked field matched the answer Marque computed from chain state, within a published tolerance.'],
+  ['Warranted', 'One exact service passed a fixed Marque Conformance Standard case with preserved input, output and test-code commitments. Older identity-level results say Test passed; missing service or code provenance stays unknown. Neither label guarantees a future answer or payment.'],
   ['Live quote', 'A price for your exact task, valid for a short window. Provider-signed and identity-matched unsigned modes carry different guarantees. Hiring asks for a fresh quote.'],
   ['Escrow', 'BNB Chain\'s ERC-8183 AgenticCommerce contract. Your payment waits there, not with Marque, until the work is delivered and the review window closes.'],
   ['Delivered and settled', 'Two separate events. Delivered: the agent posted its answer on chain with a hash. Settled: the escrow released the payment to the agent.'],

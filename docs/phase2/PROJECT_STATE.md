@@ -1,3 +1,9 @@
+# P05-P07 approved batch, 17 October 2026
+
+Owner explicitly approved P05, P06 and P07 without new approval between phase checkpoints. Candidate-only development; production deployment, payments, mainnet writes and authority changes remain separately gated. Each phase records a local checkpoint and commit before proceeding. Preserve all current products and observations.
+
+Requests: [2026-10-17] [combined commerce/product maintenance] [A/B] [packages/conformance; existing builder test responses; test/warrant copy; docs; verification scripts] Add portable falsifiable MCS evidence with exact observed service and test-code digest, preserve historical results and thresholds, distinguish legacy identity test passes from exact-service Warrants. No migration or live task required for historical replay. P06 receipt inspection and P07 unsigned machine contracts follow their actual prerequisites.
+
 # P04 checkpoint, 16 October 2026
 
 P04 scoped candidate-source acceptance passes. Tested source SHA `64104c6052145275b06414784d43c260c0a5b4d6`. Reused immutable receipt versions 1/2 and existing evidence rows; added JSON-safe offline SHA-256 checks and read-only evidence 1; fixed exact-case/block grade binding and stamped future MCS versions. Full suite 546passed/37gatedskipped before final byte-budget hardening; final 48passed, serial workspace types and lint passed. Public historical body/hash unchanged; one existing chain 97 anchor log/block was independently read. See [checkpoint](../vnext/P04_CHECKPOINT.md) and [receipt contract](../vnext/P04_RECEIPT_CONTRACT.md). No migration, executable contract change, production deployment, push, paid call, wallet or chain write. Closing 21:38:45UTC product/shared PIDs unchanged; health bodies pass. No UI change; no P04 browser/build claim. STOP after P04; P05 and production release are not authorized.

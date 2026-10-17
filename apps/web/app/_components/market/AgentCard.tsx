@@ -93,7 +93,7 @@ export function AgentCard({ a, compare, base = '', variant = 'default' }: {
           : <span className={styles.off}>{a.commerce.state === 'preview_only' || free ? 'Preview only' : 'Not hireable'}</span>}
         <span className={styles.sep} aria-hidden="true" />
         {w.status === 'warranted' && w.date
-          ? stale ? <span className={styles.retest}>Retest due</span> : <span className={styles.warrant}><Check aria-hidden="true" />Warranted {utcDay(w.date)}</span>
+          ? stale ? <span className={styles.retest}>Retest due</span> : <span className={styles.warrant}><Check aria-hidden="true" />Test passed {utcDay(w.date)}</span>
           : w.status === 'failed'
             ? <span className={styles.failed} title={`Failed ${w.testId ?? 'MCS'}${w.failedField ? ` on ${w.failedField}` : ''}${w.date ? `, ${utcDay(w.date)}` : ''}. The record is on its page.`}>Failed {w.testId ?? 'the test'}</span>
             : <span className={styles.untested}>Untested</span>}

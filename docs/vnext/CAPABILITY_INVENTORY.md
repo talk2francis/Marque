@@ -37,3 +37,8 @@ Source tree manifest and API method inventory are retained privately. Planning g
 ## P04 candidate delta, 16 October 2026
 
 The baseline inventory above remains dated. A bounded offline receipt content checker and frozen versions 1/2 SHA-256 vectors now EXIST in the execution package; public receipt GET adds version 1 evidence pointers without writes, remote calls or a new receipt table. Chain/issuer/authority/MCS replay and human independence are separate, not implied by MATCH. One historical anchor has a separately captured chain 97 log/block consistency proof. Future local run grades retain their exact case/block/version. A universal portable chain verifier remains PARTIAL, not a shipped generalized product.
+
+
+## P05 candidate delta, 17 October 2026
+
+Portable frozen-case MCS replay, explicit service/invocation commitments for future adapter tests and a deterministic source manifest now EXIST. Historical test-pass rendering no longer implies exact-service Warrant binding. New public conformance reads expose only commitments and source hashes; owners can choose to share their returned raw test bundle. Existing deterministic engines/tolerances and paid hire remain unchanged. An independent new operator's exact-service Warrant is NOT DEMONSTRATED; historical binding, issuer authentication and person/funding independence remain UNKNOWN.

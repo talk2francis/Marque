@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { randomUUID } from 'node:crypto'
 import { z } from 'zod'
 import {
-  CASES, capturePublishedCase, runConformance, adapterFor, type TestId,
+  CASES, capturePublishedCase, runConformance, adapterFor, buildWarrantBundle, type TestId,
 } from '@marque/conformance'
 import { checkTestBurst, clientKey } from '../../../../../lib/limits'
 
@@ -55,9 +55,11 @@ export async function POST(request: Request) {
   // longer be read by an agent through public BSC RPCs; the exact id below also
   // prevents another simultaneous test from replacing this attempt's question.
   let caseId: string
+  let observation: Awaited<ReturnType<typeof capturePublishedCase>>
   try {
     const captured = await capturePublishedCase({ id: `${spec.id}-builder-${Date.now()}-${randomUUID().slice(0, 6)}`, testId: spec.testId, subject: spec.subject, policy: spec.policy })
     caseId = captured.testCase.id
+    observation = captured
   } catch {
     return NextResponse.json({ error: 'could_not_capture_case', detail: 'The test case could not be read from BNB Chain just now. Try again in a minute.' }, { status: 503 })
   }
@@ -81,6 +83,7 @@ export async function POST(request: Request) {
       blockNumber: outcome.blockNumber,
       diffs: outcome.diffs,
       note: 'This result is not recorded against any public agent record. Testing your own work should not be publishing it.',
+      warrant: buildWarrantBundle(observation, outcome),
     })
   } catch (err) {
     return NextResponse.json({

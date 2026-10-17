@@ -1,4 +1,6 @@
-import { createHash } from 'node:crypto'
+import { stableHash } from './hash.js'
+export { hash, stableHash } from './hash.js'
+import { caseCommitment } from './warrant-contract.js'
 import { eq, and, desc } from 'drizzle-orm'
 import { db, conformanceCase, conformanceResult, type NewConformanceCase } from '@marque/db'
 import { publicClient } from '@marque/chain'
@@ -9,6 +11,7 @@ import { hfGroundTruth, hfPrompt, gradeHf, type HfPolicy, type HfGroundTruth } f
 import { gridGroundTruth, gridPrompt, gradeGrid, type GridPolicy, type GridGroundTruth } from './tests/mcs-grid-1.js'
 import { yieldGroundTruth, yieldPrompt, gradeYield, type YieldPolicy, type YieldGroundTruth } from './tests/mcs-yield-1.js'
 import { REB_FALLBACK_SUBJECTS } from './cases.js'
+import { MCS_CODE_ANCHOR } from './code-anchor.js'
 
 /**
  * The conformance harness.
@@ -21,24 +24,6 @@ import { REB_FALLBACK_SUBJECTS } from './cases.js'
  * No LLM grades anything here. Every check is arithmetic or compliance with a
  * constraint the case itself supplied (AGENTS.md invariant 8).
  */
-
-export function hash(value: unknown): string {
-  return `0x${createHash('sha256').update(JSON.stringify(value ?? null)).digest('hex')}`
-}
-
-/** Deterministic ordering so the same content always hashes the same way. */
-function stable(value: unknown): unknown {
-  if (Array.isArray(value)) return value.map(stable)
-  if (value && typeof value === 'object') {
-    const rec = value as Record<string, unknown>
-    return Object.fromEntries(Object.keys(rec).sort().map((k) => [k, stable(rec[k])]))
-  }
-  return value
-}
-
-export function stableHash(value: unknown): string {
-  return hash(stable(value))
-}
 
 /** Every test's ground-truth shape, keyed by test id. */
 export type GroundTruth = RebGroundTruth | HfGroundTruth | GridGroundTruth | YieldGroundTruth
@@ -57,7 +42,7 @@ const TEST_CATEGORY: Record<TestId, Category> = {
  * mutating the old one, because changing a frozen snapshot would silently
  * invalidate every result already graded against it.
  */
-export async function captureCase(spec: {
+export async function observeCase(spec: {
   id: string
   testId: TestId
   subject: Record<string, string>
@@ -110,6 +95,15 @@ export async function captureCase(spec: {
 
   testCase.prompt = prompt
   const groundTruthHash = stableHash(groundTruth)
+
+  return { testCase, groundTruth, groundTruthHash, prompt }
+}
+
+/** Persist a fresh observation without overwriting any existing frozen bytes. */
+export async function captureCase(spec: Parameters<typeof observeCase>[0]): ReturnType<typeof observeCase> {
+  const observed = await observeCase(spec)
+  const { testCase, groundTruth, groundTruthHash, prompt } = observed
+  const blockNumber = testCase.blockNumber
 
   const row: NewConformanceCase = {
     id: spec.id,
@@ -172,6 +166,7 @@ type LoadedCase = {
   testCase: TestCase
   groundTruth: GroundTruth
   groundTruthHash: string
+  capturedAt?: string
 }
 
 function hydrateCase(row: typeof conformanceCase.$inferSelect): LoadedCase {
@@ -188,6 +183,7 @@ function hydrateCase(row: typeof conformanceCase.$inferSelect): LoadedCase {
     },
     groundTruth: row.groundTruth as GroundTruth,
     groundTruthHash: row.groundTruthHash,
+    capturedAt: row.capturedAt.toISOString(),
   }
 }
 
@@ -229,14 +225,18 @@ export async function runConformance(opts: {
   testId: TestId
   caseId?: string
   persist?: boolean
+  serviceId?: number | null
+  selectionSource?: 'current_owner_claim' | 'first_party_config' | 'indexed_service' | 'user_declared_endpoint'
 }): Promise<ConformanceOutcome> {
   const loaded = opts.caseId ? await loadCaseById(opts.caseId) : await loadCase(opts.testId)
   if (!loaded) throw new Error(`no active case for ${opts.testId} — run captureCase first`)
   const { testCase, groundTruth } = loaded
   if (testCase.testId !== opts.testId) throw new Error(`case ${testCase.id} belongs to ${testCase.testId}, not ${opts.testId}`)
 
-  type Asked = { response: unknown; latencyMs: number; costUsd?: number | null; error?: string | null }
-  const asked: Asked = await opts.adapter.ask(testCase, testCase.prompt).catch((err: unknown) => ({
+  type Asked = Awaited<ReturnType<ConformanceAdapter['ask']>>
+  const capturedAt = loaded.capturedAt ? Date.parse(loaded.capturedAt) : NaN
+  const stale = Number.isFinite(capturedAt) && (Date.now() < capturedAt || Date.now() - capturedAt > 5 * 60_000)
+  const asked: Asked = stale ? { response: null, latencyMs: 0, costUsd: null, error: 'case_stale: capture a fresh frozen input before asking this agent' } : await opts.adapter.ask(testCase, testCase.prompt).catch((err: unknown) => ({
     response: null,
     latencyMs: 0,
     costUsd: null,
@@ -263,13 +263,24 @@ export async function runConformance(opts: {
     failedFields,
     latencyMs: asked.latencyMs,
     costUsd: asked.costUsd ?? null,
-    request: { prompt: testCase.prompt, caseId: testCase.id },
+    request: {
+      prompt: testCase.prompt, caseId: testCase.id,
+      evidence: {
+        version: 1, testCodeHash: MCS_CODE_ANCHOR.sha256,
+        groundTruthHash: loaded.groundTruthHash, caseHash: caseCommitment(testCase, loaded.groundTruthHash), caseCapturedAt: loaded.capturedAt ?? null,
+        service: opts.adapter.service ? { ...opts.adapter.service, agentId: opts.adapter.agentId, serviceId: opts.serviceId ?? opts.adapter.service.serviceId ?? null } : null,
+        invocation: asked.invocation ?? null,
+        independence: 'UNKNOWN', payment: 'NOT_CLAIMED',
+        selectionSource: opts.selectionSource ?? 'user_declared_endpoint',
+      },
+    },
     response: asked.response ?? null,
-    requestHash: stableHash({ prompt: testCase.prompt, caseId: testCase.id }),
+    requestHash: '',
     responseHash: stableHash(asked.response ?? null),
     ranAt: new Date().toISOString(),
     error,
   }
+  outcome.requestHash = stableHash(outcome.request)
 
   if (opts.persist !== false) {
     await db().insert(conformanceResult).values({
