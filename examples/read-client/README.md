@@ -1,6 +1,6 @@
 # Read client example
 
-This private TypeScript example consumes local checkout subpath exports. These packages are not published to npm. Use the repository's existing Node22, pnpm9 and installed workspace dependencies; no wallet, key, database URL or Redis configuration is required. Do not run package installation in production. For an external copied project, resolve the same reviewed checkout packages and existing dependencies first. The checkpoint records the exact temporary consumer setup used for validation.
+This private TypeScript example consumes local checkout subpath exports. These packages are not published to npm. Type checking uses the checkout’s strict bundler resolution; the server runs through its TypeScript loader, not an unbuilt native Node package. Use the repository's existing Node22, pnpm9 and installed workspace dependencies; no wallet, key, database URL or Redis configuration is required. Do not run package installation in production. For an external copied project, resolve the same reviewed checkout packages and existing dependencies first. The checkpoint records the exact temporary consumer setup used for validation.
 
 From this directory, using the repository tools:
 
