@@ -149,7 +149,7 @@ export function CharterCard({ charter }: { charter: CharterView }) {
       <dl className={styles.facts}>
         <div className={styles.fact}>
           <dt>Time left</dt>
-          <dd><DataCell align="left">{live.status === 'active' ? countdown(seconds) : '—'}</DataCell></dd>
+          <dd><DataCell align="left">{live.status === 'active' ? countdown(seconds) : 'Unavailable'}</DataCell></dd>
         </div>
         <div className={styles.fact}>
           <dt>Recorded calls</dt>
@@ -157,7 +157,7 @@ export function CharterCard({ charter }: { charter: CharterView }) {
         </div>
         <div className={styles.fact}>
           <dt>Recorded spend</dt>
-          <dd><DataCell align="left">{cap ? `${cap.spent.toFixed(5)} ${cap.symbol}` : '—'}</DataCell></dd>
+          <dd><DataCell align="left">{cap ? `${cap.spent.toFixed(5)} ${cap.symbol}` : 'Unavailable'}</DataCell></dd>
         </div>
         <div className={styles.fact}>
           <dt>Expires</dt>

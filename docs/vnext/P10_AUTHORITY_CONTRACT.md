@@ -15,3 +15,5 @@ UI /app/charter is a local no-wallet policy review across all four existing cate
 Existing user-controlled mainnet hire flow is unchanged. Any future native adapter must establish deployed contract/version/code, ownership/signature/call/token/recipient enforcement, lifetime caps without fee widening, fresh state and TOCTOU/simulation, durable recovery and actual revoke effectiveness. Buyer approves with their wallet; no model or server custodies their key. New authority, paid/testnet uncertainty, mainnet writes and production release retain separate gates.
 
 Rollback candidate source to P09 only after review of the intentionally disabled unsafe demo writer; no data rollback. Existing history remains append-preserved. This phase does not certify native sessions as safe or claim real-wallet/chain execution proof.
+
+Touched-copy cleanup replaces legacy dash placeholders with explicit unavailable text; judge metadata no longer promises a ninety-second complete execution path. No runtime authority is restored.

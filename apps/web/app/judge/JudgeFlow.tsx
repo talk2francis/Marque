@@ -81,7 +81,7 @@ export function JudgeFlow({ demoAddress }: { demoAddress: string }) {
       finish('intent', {
         hf: {
           value: b.venus.healthFactor,
-          symbol: primary?.symbol ?? '—',
+          symbol: primary?.symbol ?? 'Unknown',
           liqPrice: primary?.liquidationPriceUsd ?? null,
         },
       })
@@ -152,7 +152,7 @@ export function JudgeFlow({ demoAddress }: { demoAddress: string }) {
         }
         await new Promise((r) => setTimeout(r, 1200))
       }
-      fail('The run has not settled yet. Nothing is fabricated in its place — reload to keep waiting.')
+      fail('The run has not settled yet. Nothing is fabricated in its place. Reload to keep waiting.')
     } catch (e) { fail(e instanceof Error ? e.message : 'the receipt lookup failed') }
   }, [s.run])
 
@@ -199,7 +199,7 @@ export function JudgeFlow({ demoAddress }: { demoAddress: string }) {
     receipt: {
       title: 'Take the receipt',
       cta: 'Get the receipt',
-      why: 'Four proof blocks — commercial, execution, authority and quality — a canonical hash anyone can recompute, and the transaction that anchored it.',
+      why: 'Four proof blocks (commercial, execution, authority and quality), a canonical hash anyone can recompute, and the transaction that anchored it.',
     },
     revoke: {
       title: 'Take the authority back',

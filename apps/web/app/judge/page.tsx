@@ -7,7 +7,7 @@ import styles from './judge.module.css'
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 export const metadata = {
-  title: 'Judge mode — the whole product in ninety seconds',
+  title: 'Judge mode: review the product evidence',
   description:
     'Intent to ranked agents to a capped charter to a real run to a public receipt to revocation, pre-filled, one click per step, on BNB Smart Chain testnet.',
 }
