@@ -32,12 +32,17 @@ describe('exact-seller read budget', () => {
   })
 })
 
-it('keeps the global discovery path separate from exact-agent transaction budgets', async () => {
+it('bounds global discovery separately while preserving its unscoped query', async () => {
   await sellerCandidates()
-  expect(transaction).not.toHaveBeenCalled()
-  const query = dialect.sqlToQuery(execute.mock.calls[0]![0])
+  expect(transaction).toHaveBeenCalledTimes(1)
+  const queries = execute.mock.calls.map(([q]) => dialect.sqlToQuery(q))
+  const query = queries.find(q => q.sql.includes('with lp'))!
   expect(query.sql).not.toContain('where ps.agent_id =')
   expect(query.sql).not.toContain('from agent_category\n      where agent_id =')
+  expect(queries.some(q => q.sql.includes('read only'))).toBe(true)
+  expect(queries.some(q => q.sql.includes("statement_timeout = '8000ms'"))).toBe(true)
+  expect(queries.some(q => q.sql.includes("statement_timeout = '4000ms'"))).toBe(false)
+  expect(queries.some(q => q.sql.includes("lock_timeout = '500ms'"))).toBe(true)
 })
 
 describe('stored quote truth', () => {
