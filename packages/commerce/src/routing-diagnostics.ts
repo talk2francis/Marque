@@ -46,7 +46,7 @@ export function explainCandidates(value: unknown) {
     if (a.category !== intent.category) rejected.push(a.category === null ? 'category_unknown' : 'category_mismatch')
     const identity = /^(56|97):(0x[\da-fA-F]{40}):(0|[1-9]\d{0,77})$/.exec(a.agentId)
     if (!identity || Number(identity[1]) !== a.identity.chainId || identity[3] !== a.identity.tokenId || BigInt(identity[3]!) >= 2n ** 256n) rejected.push('identity_fields_inconsistent')
-    if (a.selectedService.serviceId === null || a.selectedService.provider === null || /^0x0{40}$/i.test(a.selectedService.provider)) rejected.push('exact_service_unavailable')
+    if (a.selectedService.serviceId === null || !Number.isSafeInteger(a.selectedService.serviceId) || a.selectedService.serviceId > 2_147_483_647 || a.selectedService.provider === null || /^0x0{40}$/i.test(a.selectedService.provider)) rejected.push('exact_service_unavailable')
     if (a.selectedService.chainId !== intent.chainId) rejected.push('action_chain_mismatch')
     if (a.payableRails.erc8183.state !== 'CANDIDATE_REQUIRES_FRESH_QUOTE') rejected.push('escrow_quote_unavailable')
     if (sourceStale) unknown.push('catalog_source_stale_or_unknown')
@@ -73,7 +73,7 @@ export function explainCandidates(value: unknown) {
       firstParty: a.ownership.firstParty, ownershipProvenance: a.ownership.source,
       state: rejected.length ? 'REJECTED' as const : 'UNKNOWN' as const, rejected, unknown,
       categoryMatch: a.category === intent.category, eligible: false as const,
-      price: { storedQuoteState: p.state, budgetState, amountRaw, provenance: p.provenance, observedAt: p.observedAt, expiresAt: p.expiresAt, observedQuoteMode: p.quoteMode, taskBinding: p.taskBinding },
+      price: { storedQuoteState: p.state, budgetState, amountRaw, token: p.token, chainId: p.chainId, provenance: p.provenance, observedAt: p.observedAt, expiresAt: p.expiresAt, observedQuoteMode: p.quoteMode, taskBinding: p.taskBinding },
       conformanceObservation: a.conformance, probeObservation: a.observation,
       commerceObservation: a.payableRails.erc8183,
       // No global trust score, imputed settlement, latency or judgement quality.
@@ -93,6 +93,7 @@ export function explainCandidates(value: unknown) {
   })
   return {
     schema: 'marque.routing-diagnostics.v1' as const,
+    provenance: 'DERIVED_FROM_SUPPLIED_CATALOG_NOT_AUTHENTICATED' as const,
     state: 'insufficient_comparable_supply' as const, recommended: null, autoHire: false as const,
     intent, taskTextHash: keccak256(toBytes(sanitizeForClaim(intent.task))), taskTextHashVersion: 'SDK_SANITIZED_TEXT_KECCAK256_V1' as const,
     snapshot: { asOf, exportedAt: catalog.generatedAt, sourceComputedAt: catalog.sourceComputedAt, sourceAgeMs, sourceStale,

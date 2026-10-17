@@ -67,6 +67,8 @@ describe('deterministic catalog suitability diagnostics, without a manufactured 
     if (key === 'chain') a.price.chainId = 97
     const r = explainCandidates(f).candidates.find(c => c.serviceId === 2)!
     expect(r.price).toMatchObject({ budgetState: 'NOT_COMPARABLE', amountRaw: null })
+    expect(r.price.token).toEqual(a.price.token)
+    expect(r.price.chainId).toBe(a.price.chainId)
     expect(r.rejected).toContain('payment_asset_not_comparable')
   })
   it.each(['expiry', 'cached_expiry', 'future', 'lifetime', 'zero'] as const)('rejects %s price evidence', kind => {
@@ -104,6 +106,15 @@ describe('deterministic catalog suitability diagnostics, without a manufactured 
     const f = fixture(); f.catalog.agents[1] = structuredClone(f.catalog.agents[0]!)
     expect(explainCandidates(f).candidates.every(c => c.rejected.includes('duplicate_selection'))).toBe(true)
     expect(explainCandidates(f).recommended).toBeNull()
+  })
+  it('rejects unsafe and non-database service IDs without dropping their observations', () => {
+    for (const id of [2_147_483_648, Number.MAX_SAFE_INTEGER + 1]) {
+      const f = fixture(); f.catalog.agents[0]!.selectedService.serviceId = id
+      const c = explainCandidates(f).candidates.find(c => c.serviceId === id)!
+      expect(c.rejected).toContain('exact_service_unavailable')
+      expect(c.price.observedQuoteMode).toBe('identity_matched_unsigned')
+      expect(c.eligible).toBe(false)
+    }
   })
   it('preserves existing negative test, probe and seller observations without promoting them', () => {
     const f = fixture(); const a = f.catalog.agents[0]!
