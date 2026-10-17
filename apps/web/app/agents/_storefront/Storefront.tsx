@@ -1,5 +1,5 @@
 import { ArrowUpRight, Check, KeyRound, ShieldCheck, X } from 'lucide-react'
-import { ProvenanceChip } from '@marque/ui'
+import { BRAND, ProvenanceChip } from '@marque/ui'
 import { AgentAvatar } from '../../_components/AgentAvatar'
 import { AgentBrandHero } from '../../_components/AgentBrandHero'
 import { AgentIdentityHero } from '../../_components/AgentIdentityHero'
@@ -140,9 +140,9 @@ export function Storefront({ d }: { d: Data }) {
           <section className={styles.section} aria-labelledby="sf-does">
             <h2 id="sf-does">What it does</h2>
             {d.description ? (
-              <p className={styles.claimed}>{d.description} <ProvenanceChip provenance="CLAIMED" title="Written by the operator in the ERC-8004 registry. Marque does not verify it." /></p>
+              <p className={styles.claimed}>{d.description} <ProvenanceChip provenance="CLAIMED" title={`Written by the operator in the ERC-8004 registry. ${BRAND.name} does not verify it.`} /></p>
             ) : <p className={styles.muted}>This agent published no description. <ProvenanceChip provenance="CLAIMED" /></p>}
-            {d.isReference ? <p className={styles.note}>Marque runs this agent so {cat.toLowerCase()} always has a working seller. It is held to the same published test and ranked by the same rules as every third party. <a href="/register#reference-agents">Why Marque runs its own agents</a></p> : null}
+            {d.isReference ? <p className={styles.note}>{BRAND.name} runs this agent so {cat.toLowerCase()} always has a working seller. It is held to the same published test and ranked by the same rules as every third party. <a href="/register#reference-agents">Why {BRAND.name} runs its own agents</a></p> : null}
           </section>
 
           {/* 2. What you get */}
@@ -168,16 +168,16 @@ export function Storefront({ d }: { d: Data }) {
           <section className={styles.section} aria-labelledby="sf-track">
             <h2 id="sf-track">Track record</h2>
             {t.available === false ? <p className={styles.note}>Indexed job and rating totals are unavailable. This is not evidence of zero activity.</p> : <>
-            <p className={styles.note}>Indexed jobs associated with {d.name} on {net}. Escrow funding, delivery and completion are distinct; completion alone does not prove payment release. Provider-wallet matches outside Marque do not identify an exact service. <ProvenanceChip provenance="ONCHAIN" /></p>
+            <p className={styles.note}>Indexed jobs associated with {d.name} on {net}. Escrow funding, delivery and completion are distinct; completion alone does not prove payment release. Provider-wallet matches outside {BRAND.name} do not identify an exact service. <ProvenanceChip provenance="ONCHAIN" /></p>
             <dl className={styles.counts}>
               {([['Escrow funded', t.jobs.funded], ['Delivered', t.jobs.delivered], ['Completed', t.jobs.settled], ['Refunded', t.jobs.refunded], ['Disputed', t.jobs.disputed]] as const).map(([k, v]) => (
                 <div key={k}><dt>{k}</dt><dd className="num">{v}</dd></div>
               ))}
             </dl>
-            {t.jobs.fromTeam > 0 ? <p className={styles.muted}>{t.jobs.fromTeam} of the funded jobs came from wallets on Marque&apos;s published team list.</p> : null}
+            {t.jobs.fromTeam > 0 ? <p className={styles.muted}>{t.jobs.fromTeam} of the funded jobs came from wallets on {BRAND.name}&apos;s published team list.</p> : null}
             <div className={styles.ratingIntro}>
               <h3>How to read the ratings</h3>
-              <p>Buyer-linked reviews match the exact feedback commitment, agent identity and funded delivered Marque job. They exclude published team wallets. The broader registry score includes these and other ERC-8004 star ratings; do not add their counts. Reviews and distinct wallets do not establish independent people or current quality.</p>
+              <p>Buyer-linked reviews match the exact feedback commitment, agent identity and funded delivered {BRAND.name} job. They exclude published team wallets. The broader registry score includes these and other ERC-8004 star ratings; do not add their counts. Reviews and distinct wallets do not establish independent people or current quality.</p>
             </div>
             <div className={styles.ratings}>
               <div className={styles.ratingBox}>
@@ -203,7 +203,7 @@ export function Storefront({ d }: { d: Data }) {
                     <Stars value={r.stars} count={1} mine />
                     <span className={styles.revWho}>
                       <AddressChip value={r.client} chainId={56} />
-                      {r.verified ? <span className={styles.verified}>Exact Marque job link</span> : r.team ? <span className={styles.teamTag}>Team wallet</span> : <span className={styles.registryTag}>Registry feedback</span>}
+                      {r.verified ? <span className={styles.verified}>Exact {BRAND.name} job link</span> : r.team ? <span className={styles.teamTag}>Team wallet</span> : <span className={styles.registryTag}>Registry feedback</span>}
                     </span>
                     {r.comment ? <p className={styles.revText}>{r.comment}</p> : null}
                     <span className={styles.revMeta}>
@@ -219,7 +219,7 @@ export function Storefront({ d }: { d: Data }) {
 
           {/* 4. Marque verification */}
           <section className={styles.section} aria-labelledby="sf-verify">
-            <h2 id="sf-verify">Marque verification</h2>
+            <h2 id="sf-verify">{BRAND.name} verification</h2>
             {latest ? (
               <>
                 <div className={styles.verdict} data-pass={latest.pass || undefined}>
@@ -231,9 +231,9 @@ export function Storefront({ d }: { d: Data }) {
                     </p>
                     <p className={styles.muted}>
                       {latest.pass
-                        ? 'Every checked field matched the answer Marque computed itself from chain state at a pinned block, within the published tolerance.'
+                        ? `Every checked field matched the answer ${BRAND.name} computed itself from chain state at a pinned block, within the published tolerance.`
                         : latest.error
-                          ? 'The endpoint did not return an answer Marque could grade. The result is kept, not hidden.'
+                          ? `The endpoint did not return an answer ${BRAND.name} could grade. The result is kept, not hidden.`
                           : `Failed ${latest.failedFields.length} checked ${latest.failedFields.length === 1 ? 'field' : 'fields'}: ${latest.failedFields.join(', ') || 'see the case'}. Hire is not gated on the test; the result is shown so you can decide.`}
                       {' '}<ProvenanceChip provenance="TESTED" />
                     </p>
@@ -260,7 +260,7 @@ export function Storefront({ d }: { d: Data }) {
               </>
             ) : (
               <p className={styles.muted}>
-                Not run against {d.category && TEST[d.category] ? <a href={`/standard/${TEST[d.category]}`}>{TEST[d.category]}</a> : 'a Marque test'} yet. A warrant is dated and earned, never assumed. <Badge kind="untested" />
+                Not run against {d.category && TEST[d.category] ? <a href={`/standard/${TEST[d.category]}`}>{TEST[d.category]}</a> : `a ${BRAND.name} test`} yet. A warrant is dated and earned, never assumed. <Badge kind="untested" />
               </p>
             )}
           </section>
