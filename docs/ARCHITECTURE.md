@@ -232,3 +232,5 @@ Whitepaper HTML uses current source; its original30SepPDF remains an explicitly 
 
 
 P12: existing storefront/builder evidence remains contextual; pure job-copy helper separates completion from PaymentReleased, charter glossary matches preview-only authority, and read-only audit modes preserve explicit environment and screenshot scope.
+
+P12 receipt UI reuses the existing integrity projection and per-object explorer resolver. Unknown anchor metadata stays unknown; archived flags never become payment/authority/fresh-quality proof. No receipt mutation or API schema change.
