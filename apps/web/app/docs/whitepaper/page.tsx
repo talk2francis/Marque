@@ -8,7 +8,7 @@ export const metadata = {
   description: 'How Marque indexes BNB Chain agents, tests them against answers computed from chain state, and lets anyone hire them through ERC-8183 escrow. With the roadmap.',
 }
 
-/** The whitepaper (v2.0, 30 Sep): the same text as the PDF, from docs/whitepaper.ts. */
+/** The whitepaper (v2.0, 30 Sep): current text from whitepaper.ts; the original dated PDF remains an archive. */
 export default function WhitepaperPage() {
   return (
     <DocShell
@@ -18,7 +18,7 @@ export default function WhitepaperPage() {
       lede={PAPER.lede}
       actions={
         <>
-          <a className="btn btn--primary" href="/marque-whitepaper.pdf" download><Download aria-hidden="true" size={16} /> Download the PDF</a>
+          <a className="btn btn--primary" href="/marque-whitepaper.pdf" download><Download aria-hidden="true" size={16} /> Download original 30 Sep PDF</a>
           <a className="btn" href="#roadmap">Jump to the roadmap</a>
         </>
       }
