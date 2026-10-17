@@ -8,20 +8,12 @@ import type {
 } from '../types.js'
 
 /**
- * x402 / B402 executor.
- *
- * The flow is: call → 402 with a payment challenge → pay → retry with proof.
- * This executor observes an unsigned GET response only. Task preflight and
- * execution are blocked until an explicit consented adapter exists.
- *
- * Paying requires signing with a funded key, which is a mainnet state change
- * and one of the four hard escalation gates in AGENTS.md. So a run that reaches
- * a real 402 returns `payment_required` with the parsed challenge attached: the
- * buyer sees exactly what is being asked for, in which asset, on which chain,
- * before anyone signs anything.
- *
- * The settlement asset is READ from the challenge, never assumed. Guessing USDT
- * and being wrong wastes a swap and half a morning (AGENTS.md gotcha 13).
+ * Legacy x402 / B402 adapter, observation only.
+ * inspect/quote make an unsigned guarded GET without payment credentials.
+ * A discovery response or HTTP error is never a free task quote. Task preflight
+ * and execution fail before any provider request until a consented exact-service
+ * adapter and payment path are independently established. Use the versioned
+ * captured-response inspector for atomic terms; this adapter never pays.
  */
 
 export interface PaymentChallenge {
@@ -146,18 +138,19 @@ export class X402Executor implements AgentExecutor {
   }
 
   async preflight(_task: StructuredTask): Promise<PreflightResult> {
+    const started = Date.now()
     return {
       ok: false, agentId: this.agentId, plan: null, calls: [], estimatedGasNative: null,
-      feeUsd: null, maxSlippageBps: null, conformance: null, latencyMs: 0, nothingSubmitted: true,
+      feeUsd: null, maxSlippageBps: null, conformance: null, latencyMs: Date.now() - started, nothingSubmitted: true,
       reason: 'blocked', detail: 'x402 preflight is unavailable without a consented task adapter. No provider request was sent.',
     }
   }
 
   async execute(_task: StructuredTask, _ctx: ExecutionContext): Promise<RunResult> {
-    const at = new Date().toISOString()
+    const started = Date.now(), at = new Date(started).toISOString()
     return {
       ok: false, agentId: this.agentId, kind: this.kind, result: null, txHashes: [], feeUsd: null,
-      latencyMs: 0, startedAt: at, finishedAt: at, reason: 'blocked',
+      latencyMs: Date.now() - started, startedAt: at, finishedAt: new Date().toISOString(), reason: 'blocked',
       detail: 'Paid x402 execution is unavailable. No provider request or payment was sent.',
     }
   }
