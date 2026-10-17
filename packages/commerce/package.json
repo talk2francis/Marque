@@ -10,7 +10,9 @@
     "./client": "./src/client/index.ts",
     "./state": "./src/state.ts",
     "./errors": "./src/errors.ts",
-    "./generated": "./src/generated.ts"
+    "./generated": "./src/generated.ts",
+    "./evidence": "./src/portable-job.ts",
+    "./inspection": "./src/inspection.ts"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",

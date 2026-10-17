@@ -42,3 +42,8 @@ The baseline inventory above remains dated. A bounded offline receipt content ch
 ## P05 candidate delta, 17 October 2026
 
 Portable frozen-case MCS replay, explicit service/invocation commitments for future adapter tests and a deterministic source manifest now EXIST. Historical test-pass rendering no longer implies exact-service Warrant binding. New public conformance reads expose only commitments and source hashes; owners can choose to share their returned raw test bundle. Existing deterministic engines/tolerances and paid hire remain unchanged. An independent new operator's exact-service Warrant is NOT DEMONSTRATED; historical binding, issuer authentication and person/funding independence remain UNKNOWN.
+
+
+## P06 candidate delta, 17 October 2026
+
+Opt-in version2 receipt/job wrappers, direct legacy-response digest inspection, standalone bounded read-only RPC inspection, exact emitter/event/canonical-block checks, separate payment/refund transfers and local SDK deliverable verification now EXIST. Actual original anchor and already-paid Plinth case pass the CLI; corrupt bytes and missing metadata fail safely. Existing APIs, body versions/hashes and data remain. Owner/person/funding independence, missing original bytes, absent historical allowance/action charter, source-build attestation and unexported private quote signature replay remain separate UNKNOWN states, not universal verification.

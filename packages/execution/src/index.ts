@@ -7,6 +7,8 @@ export { X402Executor, parseChallenge, type PaymentChallenge } from './executors
 export { Erc8183Executor, resolveSettlementAsset, erc8183KernelAbi, type Erc8183Config, type SettlementAsset } from './executors/erc8183.js'
 export { buildReceipt, receiptHash, canonicalise, sealedCallHash, type Receipt, type CommercialProof, type ExecutionProof, type AuthorityProof, type QualityProof } from './receipt.js'
 export { RECEIPT_DIGEST_CONTRACT, verifyReceiptIntegrity, type ReceiptIntegrityStatus } from './receipt-integrity.js'
+export { buildReceiptBundle, receiptBindings, inspectReceiptBundle, inspectReceiptAnchor } from './portable-receipt.js'
+export { inspectTransaction, type InspectionRpc, type Inspection, type InspectionState, type TransactionReference } from './chain-inspection.js'
 export {
   CAPABILITY_REASONS, evaluateAgentState,
   type CapabilityReason, type CanonicalAgentState, type ServiceCapabilityEvidence,

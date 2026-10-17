@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 const { readReceipt } = vi.hoisted(() => ({ readReceipt: vi.fn() }))
 vi.mock('../../../../../lib/runs', () => ({ readReceipt }))
 import { GET } from './route'
-import { receiptHash, type Receipt } from '@marque/execution'
+import { receiptHash, inspectReceiptBundle, type Receipt } from '@marque/execution'
 import vectors from '../../../../../../../packages/execution/src/receipt-vectors.fixture.json'
 
 const invoke = () => GET(new Request('https://candidate.invalid/api/v1/receipts/synthetic'), { params: Promise.resolve({ id: 'synthetic' }) })
@@ -56,5 +56,24 @@ describe('receipt GET additive integrity projection', () => {
     const response = await invoke()
     expect(response.status).toBe(404)
     expect(await response.json()).toEqual({ error: 'no such receipt' })
+  })
+  it('exports an opt-in V2 container without relabelling the original receipt or filling missing metadata', async () => {
+    const body = structuredClone(vectors[0]!.receipt)
+    const row = { hash: vectors[0]!.hash, body, anchorTxHash: null, anchorBlock: null }
+    readReceipt.mockResolvedValue(row)
+    const before = JSON.stringify(row)
+    const res = await GET(new Request('https://candidate.invalid/api/v1/receipts/synthetic?format=bundle'), { params: Promise.resolve({ id: 'synthetic' }) })
+    const data = await res.json()
+    expect(res.headers.get('Cache-Control')).toBe('no-store')
+    expect(data.payload.receipt).toEqual(body)
+    expect(data.payload.receipt.version).toBe('1')
+    expect(data.payload.anchor.chainId).toBeNull()
+    expect(inspectReceiptBundle(data)).toMatchObject({ integrity: 'MATCH', receiptVersion: '1', bundleVersion: 2 })
+    expect(JSON.stringify(row)).toBe(before)
+  })
+  it('does not export a damaged historical body as a verified container', async () => {
+    readReceipt.mockResolvedValue({ hash: vectors[0]!.hash, body: { version: '1' }, anchorTxHash: null, anchorBlock: null })
+    const res = await GET(new Request('https://candidate.invalid/api/v1/receipts/synthetic?format=bundle'), { params: Promise.resolve({ id: 'synthetic' }) })
+    expect(res.status).toBe(422)
   })
 })

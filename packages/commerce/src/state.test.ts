@@ -46,6 +46,19 @@ describe('job state machine: every legal path', () => {
   it('settle without a dispute keeps the job submitted until JobCompleted', () => {
     expect(projectJob([created(), ev('JobFunded'), ev('JobSubmitted'), ev('JobSettled')]).state).toBe('SUBMITTED')
   })
+  it('preserves paid state when the router verdict follows kernel completion and release', () => {
+    const p = projectJob([created(), ev('JobFunded'), ev('JobSubmitted'), ev('JobCompleted'), ev('PaymentReleased', { amount: 3n }), ev('JobSettled')])
+    expect(p.state).toBe('PAID')
+    expect(p.paidRaw).toBe('3')
+    expect(p.anomalies).toEqual([])
+    expect(p.tx.settled).toBeDefined()
+  })
+  it('preserves refund state when the router verdict follows rejection and refund', () => {
+    const p = projectJob([created(), ev('JobFunded'), ev('JobSubmitted'), ev('JobRejected'), ev('Refunded', { amount: 3n }), ev('JobSettled')])
+    expect(p.state).toBe('REFUNDED')
+    expect(p.refundedRaw).toBe('3')
+    expect(p.anomalies).toEqual([])
+  })
 })
 
 describe('job state machine: illegal transitions are recorded, not applied', () => {

@@ -65,7 +65,9 @@ const TRANSITIONS: Record<JobEventName, Partial<Record<JobState | 'NONE', JobSta
   JobFunded: { OPEN: 'FUNDED' },
   JobSubmitted: { FUNDED: 'SUBMITTED' },
   Disputed: { SUBMITTED: 'DISPUTED' },
-  JobSettled: { SUBMITTED: 'SUBMITTED', DISPUTED: 'DISPUTED' },
+  // The router emits its verdict after the kernel completion/payment/refund logs.
+  // It records a decision; it does not undo the terminal transfer state.
+  JobSettled: { SUBMITTED: 'SUBMITTED', DISPUTED: 'DISPUTED', COMPLETED: 'COMPLETED', PAID: 'PAID', REJECTED: 'REJECTED', REFUNDED: 'REFUNDED' },
   JobCompleted: { SUBMITTED: 'COMPLETED', DISPUTED: 'COMPLETED' },
   PaymentReleased: { COMPLETED: 'PAID' },
   JobRejected: { OPEN: 'CANCELLED', FUNDED: 'REJECTED', SUBMITTED: 'REJECTED', DISPUTED: 'REJECTED' },

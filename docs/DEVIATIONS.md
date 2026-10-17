@@ -1482,3 +1482,6 @@ See [P04 receipt contract](vnext/P04_RECEIPT_CONTRACT.md) and [vNext deviations]
 ### vNext P05 portable conformance
 
 See [P05 contract](vnext/P05_WARRANT_CONTRACT.md) and vNext deviations. Reuse immutable result/request records; no migration or backfill. Legacy identity test passes are labelled as such; exact-service/source-code evidence is separately inspectable. Real historical replay and fresh input reads do not imply an independent paid pilot.
+
+
+P06 candidate: preserve old receipt hashes/default APIs; opt-in evidence containers and independent read-only inspection. Missing original evidence stays partial/unknown, and historical fee approval never becomes action authority. Actual post-payment router event ordering is corrected only in the existing source projector. No data migration, signer, deployment or chain write. See docs/vnext/P06_INSPECTION_CONTRACT.md and vNext deviations.

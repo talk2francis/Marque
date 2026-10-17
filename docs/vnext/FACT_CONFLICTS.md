@@ -40,3 +40,14 @@ Source inspection and baseline replay also proved that the local run pipeline co
 Historical identity-level test passes do not prove an exact selected service, code build or operator independence. Candidate badges/counts say Test passed / Test passes while legacy API names remain compatible. New explicitly consented tests can return frozen portable evidence; no historical row is relabelled or overwritten. Twelve actual historical rows replay identically with the current deterministic checker: four passes, four failed answers and four protocol failures. Code/service provenance for these legacy rows remains unavailable.
 
 Correction to the P04 digest table: current runConformance already uses sorted stableHash for request and response. The old unsorted hash helper is a known legacy variant, not a description of every current record. Portable verification reports the matching variant explicitly. Receipt versions 1/2 and sealed-call canonicalization are unchanged. Fresh read-only input collection covered all four categories on chain 56; it was not an agent invocation or a new hire. See P05_WARRANT_CONTRACT.md and the dated checkpoint.
+
+
+## P06 dated follow-up, 17 October 2026
+
+Receipt SHA-256, provider-envelope quote Keccak, signed negotiation hash, description Keccak, SDK manifest Keccak and raw artifact SHA-256 are separate domains. The new containers declare their own SHA-256 encoding and preserve every old digest. Actual default public job events contain role labels (commerce/router/policy), not historical emitter addresses; a pinned-SDK mapping becomes verified only after exact receipt-log checks.
+
+The finalized independent inspector rechecked the original testnet receipt anchor and existing mainnet Plinth56916. At 05:06:11 UTC, pinned mainnet head128111421, Plinth remained Completed/onchain status3 with confirmed PaymentReleased plus the exact token transfer and matching original SDK artifact. The historical policy-registration event is proven while the current router policy link is empty; do not label that absence a revoked charter or erase history. No new transaction was sent.
+
+A bounded production metadata SELECT retains agent363619/service43279/quote56305, original envelope hash0x4441d5d5d59cb812c7decf29164f6dfee494662fc42da291dc4917f4a5c0ed4c and stored signed mode. The separate SELECT-only snapshot lacks that quote row; this is not evidence production lost it. The new projection retains the original intent selection even in that reduced environment. Current inspector does not replay a private quote signature or establish historical registry owner/human independence from those commitments.
+
+Real router JobSettled follows PaymentReleased. The existing projector previously retained PAID but recorded an unnecessary anomaly and omitted that settlement reference. The candidate accepts that terminal summary ordering, with regression tests, without rewriting historical rows.

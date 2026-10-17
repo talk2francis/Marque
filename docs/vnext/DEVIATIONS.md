@@ -79,3 +79,11 @@
 
 
 P05 browser evidence follow-up: keep all original results. Four selectors hit a mobile-hidden duplicate home callout; two long full-page exports timed out. All six replayed against the same build using actual visible sections and viewport screenshots, with the same console/API/overflow assertions; combined72cases pass. Stock audit preserves all algorithms/thresholds and reports inline tap-size advisories. Its one initial /why first-tab result did not reproduce in explicit two-theme keyboard replay with visible outlines. No product CSS, navigation or evidence threshold was changed to clear the harness.
+
+
+## P06, 17 October 2026
+
+- Planned fully bound portable history; exported original public bodies plus available intent/quote commitments. Missing legacy anchor network, missing quote rows in the isolated snapshot, original transport bytes, historical owner and human independence remain explicit UNKNOWN/PARTIAL. Production metadata and the snapshot are separate observations, not a claim that production lost its quote. Recover only from original preserved evidence; never invent or backfill an old digest.
+- Planned generalized allowance/policy proof; shipped exact historical fee Approval inspection when present and separate historical/current policy checks. Asset action charter and present allowance remain unavailable without their own evidence. Fee escrow is not an asset cap.
+- Reused existing ABI/state code. Actual Plinth event order places router verdict after payment; the narrow existing-projector correction accepts that terminal ordering. No replacement state machine, historical rewrite or production worker restart.
+- P06 source preparation overlapped frozen P05 build/browser validation in a second isolated worktree under explicit batch approval. Each keeps its own source/evidence/commit and production remains unchanged.

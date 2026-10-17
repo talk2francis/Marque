@@ -1,4 +1,5 @@
 import { readFileSync, existsSync } from 'node:fs'
+import { createHash } from 'node:crypto'
 import path from 'node:path'
 import { sql } from 'drizzle-orm'
 import { db, firstPartyAgents } from '@marque/db'
@@ -221,7 +222,7 @@ export async function walletQuest(address: string, chainId: ChainId = campaignCh
 }
 
 /** GET /api/v1/phase2/job/:chainId/:jobId */
-export async function questJob(chainId: ChainId, jobId: string) {
+export async function questJob(chainId: ChainId, jobId: string, options: { portable?: boolean } = {}) {
   // Ratings are bound across all of the client's hires, then this job's is read: bound alone,
   // an earlier job's rating fell through to this one (30 Sep, job 56843 showed 56842's).
   const client = await clientOf(chainId, jobId)
@@ -240,6 +241,8 @@ export async function questJob(chainId: ChainId, jobId: string) {
     select feedback_hash, stars, comment, canonical, client, agent_token_id, created_at from rating_comment
     where chain_id = ${chainId} and job_id = ${jobId} order by created_at`))
   const slug = h?.agent.agentId ? firstPartyAgents().find((f) => String(f.tokenId) === h.agent.agentId)?.slug : undefined
+  // Opt-in public commitments only. Never export raw quote/task/IP/access-token fields.
+  const selectionCommitments = options.portable ? await publicJobSelection(chainId, jobId, h?.intentId ?? null) : undefined
   return {
     chainId, jobId, state: h?.state ?? null, client: s(j?.['client']), provider: s(j?.['provider']), evaluator: s(j?.['evaluator']),
     agent: h?.agent ?? null, amount: h?.amount ?? null, token: h?.token ?? null,
@@ -248,6 +251,39 @@ export async function questJob(chainId: ChainId, jobId: string) {
     intent: intent ?? null, rating: h?.rating ?? null,
     feedback: feedback.map((f) => ({ feedbackHash: f['feedback_hash'], stars: Number(f['stars']), comment: f['comment'] ?? null, canonical: f['canonical'], client: f['client'], agentId: f['agent_token_id'], preparedAt: iso(f['created_at']) })), tx: h?.tx ?? null, eligible: h?.eligible ?? false, reasons: h?.reasons ?? ['unknown_job'],
     events: events.map((e) => ({ name: e['name'], contract: e['contract'], tx: e['tx_hash'], logIndex: e['log_index'], block: Number(e['block_number']), at: iso(e['block_time']), args: e['args'] })),
+    ...(selectionCommitments ? { selectionCommitments } : {}),
+  }
+}
+
+async function publicJobSelection(chainId: ChainId, jobId: string, intentId: string | null) {
+  const absent = { version: 1, status: 'UNAVAILABLE', reason: 'original_selection_commitments_not_preserved', agentId: null, serviceId: null, quoteId: null, quoteHash: null, quoteHashVersion: 1, quoteHashAlgorithm: 'Keccak-256/JSON.stringify(provider-envelope)', signatureEvidence: 'unknown', endpointSha256: null, provider: null, token: null, chainId: null, amountRaw: null }
+  if (!intentId) return absent
+  const rows = await db().transaction(async tx => {
+    await tx.execute(sql`set transaction read only`)
+    await tx.execute(sql`set local statement_timeout = '4000ms'`)
+    await tx.execute(sql`set local lock_timeout = '500ms'`)
+    return rowsOf(await tx.execute(sql`
+      select i.agent_id, i.service_id, i.quote_id, i.provider as intent_provider,
+             i.token as intent_token, i.chain_id as intent_chain_id, i.price_raw as intent_price_raw,
+             q.agent_id as quoted_agent_id, q.service_id as quoted_service_id,
+             q.quote_hash, q.signed, q.endpoint, q.provider, q.token, q.chain_id, q.price_raw
+      from hire_intent i left join commerce_quote q on q.id = i.quote_id
+      where i.id = ${intentId} and i.chain_id = ${chainId} and i.job_id = ${jobId}
+      limit 1`))
+  })
+  const r = rows[0]
+  if (!r) return absent
+  const quoteMatches = r['agent_id'] === r['quoted_agent_id'] && r['service_id'] === r['quoted_service_id'] && r['service_id'] != null && Boolean(r['quote_hash'])
+    && typeof r['provider'] === 'string' && r['provider'].toLowerCase() === String(r['intent_provider']).toLowerCase()
+    && typeof r['token'] === 'string' && r['token'].toLowerCase() === String(r['intent_token']).toLowerCase()
+    && r['chain_id'] === r['intent_chain_id'] && r['price_raw'] === r['intent_price_raw']
+  return {
+    version: 1, status: quoteMatches ? 'PRESERVED' : 'PARTIAL', reason: quoteMatches ? null : 'original_quote_snapshot_unavailable_or_mismatched_intent_selection_retained',
+    agentId: s(r['agent_id']), serviceId: r['service_id'] == null ? null : Number(r['service_id']), quoteId: r['quote_id'] == null ? null : Number(r['quote_id']),
+    quoteHash: quoteMatches ? s(r['quote_hash']) : null, quoteHashVersion: 1, quoteHashAlgorithm: 'Keccak-256/JSON.stringify(provider-envelope)',
+    signatureEvidence: quoteMatches && r['signed'] === true ? 'provider_signed' : quoteMatches && r['signed'] === false ? 'identity_matched_unsigned' : 'unknown',
+    endpointSha256: quoteMatches && typeof r['endpoint'] === 'string' ? `0x${createHash('sha256').update(r['endpoint']).digest('hex')}` : null,
+    provider: s(r['intent_provider']), token: s(r['intent_token']), chainId: r['intent_chain_id'] == null ? null : Number(r['intent_chain_id']), amountRaw: s(r['intent_price_raw']),
   }
 }
 
