@@ -3,11 +3,11 @@ import { network } from '@marque/commerce'
 import { machineCatalog } from './machine-catalog'
 import type { MarketRow } from './marketplace'
 
-// Only fields read by this pure projection; deliberately synthetic, never served.
+// Complete synthetic marketplace row for projection contracts; never served or measured.
 const now = Date.parse('2026-10-17T00:00:00Z')
-function fixture() {
+function fixture(): MarketRow {
   const asset = network(56).assets[0]!
-  return { agentId: `56:${network(56).identityRegistry}:123`, name: 'Synthetic projection test', category: 'grid', isReference: false, identityCount: 2, owner: '0x1111111111111111111111111111111111111111', interfaces: ['a2a'], protocols: ['x402'], liveness: 'alive', latencyMs: 100, warrant: { status: 'warranted', testId: 'MCS-GRID-1', date: new Date(now - 1000).toISOString() }, commerce: { state: 'hireable', serviceId: 42, chainId: 56, provider: '0x1111111111111111111111111111111111111111', priceRaw: '100', token: asset, signedQuote: false, sourceClaimVersion: 1, signatureEvidence: 'identity_matched_unsigned', quotedAt: new Date(now).toISOString(), quoteExpiresAt: new Date(now + 10_000).toISOString(), failure: null } } as MarketRow
+  return { agentId: `56:${network(56).identityRegistry}:123`, name: 'Synthetic projection test', category: 'grid', isReference: false, identityCount: 2, owner: '0x1111111111111111111111111111111111111111', interfaces: ['a2a'], protocols: ['x402'], liveness: 'alive', latencyMs: 100, warrant: { status: 'warranted', testId: 'MCS-GRID-1', date: new Date(now - 1000).toISOString(), failedField: null }, commerce: { state: 'hireable', serviceId: 42, chainId: 56, provider: '0x1111111111111111111111111111111111111111', priceRaw: '100', token: asset, signedQuote: false, sourceClaimVersion: 1, signatureEvidence: 'identity_matched_unsigned', quotedAt: new Date(now).toISOString(), quoteExpiresAt: new Date(now + 10_000).toISOString(), failure: null, deliveredJobs: 0 }, tokenId: '123', ownerLabel: null, host: null, identity: { imageUrl: null, description: null, contractAddress: null, website: null, x402: true, registeredAt: null }, price: null, priceProvenance: null, qual: 'warranted', previewable: false, hireBlockedReason: null, track: { chainId: 56, verified: { count: 0, averageStars: null }, allFeedback: { count: 0, averageStars: null, total: 0 }, jobs: { funded: 0, delivered: 0, settled: 0, refunded: 0, disputed: 0, fromTeam: 0 }, delivery: { medianSeconds: null, samples: 0 } } }
 }
 const project = (row = fixture(), generatedAt = new Date(now).toISOString()) => machineCatalog({ rows: [row], generatedAt, total: 2, offset: 0, hasMore: true }, 1, now)
 describe('machine projection preserves observation limits', () => {
