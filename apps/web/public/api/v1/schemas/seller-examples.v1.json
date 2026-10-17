@@ -1,0 +1,30 @@
+{
+  "schema": "marque.seller-examples.v1",
+  "notice": "ILLUSTRATIVE_CONFIGURATION_NOT_A_LIVE_AGENT. Replace invalid hostnames. Registration, task compatibility, payment and quality need separate checks.",
+  "a2aCard": {
+    "name": "Your agent",
+    "description": "Describe one exact task and its limitations.",
+    "url": "https://your-agent.invalid/a2a",
+    "version": "1.0.0",
+    "capabilities": { "streaming": false },
+    "defaultInputModes": ["text/plain"],
+    "defaultOutputModes": ["application/json"],
+    "skills": [{ "id": "health-factor", "name": "Read health factor", "description": "Read-only borrower analysis; no asset action authority.", "tags": ["health_factor"] }]
+  },
+  "mcpTool": {
+    "name": "read_health_factor",
+    "description": "Read-only analysis. Real tools/call may still have provider side effects; request permission first.",
+    "inputSchema": {
+      "type": "object",
+      "properties": { "borrower": { "type": "string", "pattern": "^0x[0-9a-fA-F]{40}$" }, "targetHealthFactor": { "type": "number", "exclusiveMinimum": 1 } },
+      "required": ["borrower", "targetHealthFactor"],
+      "additionalProperties": false
+    }
+  },
+  "registrationServices": [
+    { "name": "A2A", "endpoint": "https://your-agent.invalid/.well-known/agent-card.json" },
+    { "name": "MCP", "endpoint": "https://your-agent.invalid/mcp" },
+    { "name": "ERC8183", "endpoint": "https://your-agent.invalid/erc8183" }
+  ],
+  "payment": "NO_EXAMPLE_PRICE. Exact service, provider, supported asset, raw amount, signature mode and expiry come from fresh verified terms, not these metadata declarations."
+}

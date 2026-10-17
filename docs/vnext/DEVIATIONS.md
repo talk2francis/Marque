@@ -104,3 +104,5 @@ P11 final AMBER: browser/API proof uses the preexisting16October read-only snaps
 
 
 P12 validation pending: no real funded wallet or consenting outside seller is invoked. Browser covers current no-wallet/read paths and sandbox wallet-modal UI only. Native action authority remains disabled under P10; no backend or availability claim is advanced by presentation changes.
+
+P13: optional paid HTTP-payment buyer reduced to beta captured-response inspection and local source exports/examples. Selected endpoint reads yielded200discovery/404/503, no402. Other declarations remain untested. No fabricated payment or universal token compatibility. Legacy x402 automatic task POSTs are disabled because no safe consented adapter is established; existing ERC-8183 hires remain. Recovery needs provider/task/asset/identity/consent and explicit payment gates. No npm publication or new hosting. See P13_READ_CLIENT_CONTRACT.md.

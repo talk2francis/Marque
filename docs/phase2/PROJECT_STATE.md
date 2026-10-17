@@ -569,3 +569,7 @@ AMBER: source63386e0 exact feedback/job/identity/amount binding, separate review
 
 
 Request: [2026-10-17] [owner-approved P12/P13] [commerce/product] P12 contextual evidence/accessibility and accurate job-state copy; P13 existing typed catalog/unsigned plan/portable verifier examples and read-only payment challenge diagnostics. Local feature branches only. Existing APIs, design, four categories and wallet-owned signing retained; no paid request, new authority, production deployment or chain write. User authorizes transition P12 to P13 after documented checkpoints.
+
+### P13 independent source preparation
+
+Owner approves P12 then P13. P12 frozen source is untouched while this separate branch prepares read-only client/evidence exports, a small existing-shell guide, versioned illustrative seller examples and beta payment capture inspection. Current x402 source misclassified error/discovery responses as free and POSTed from preflight; the proposed repair blocks those unproven tasks. Request scope includes packages/probe/src/liveness.ts and packages/execution/src/executors/x402.ts alongside commerce read exports and product docs. No worker runtime, source dependency pin, migrations, signing authority, paid task or production deployment. Final validation waits for the P12 checkpoint.

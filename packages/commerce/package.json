@@ -17,7 +17,8 @@
     "./plan": "./src/hire-plan.ts",
     "./catalog": "./src/catalog-client.ts",
     "./routing": "./src/routing-diagnostics.ts",
-    "./feedback": "./src/feedback-proof.ts"
+    "./feedback": "./src/feedback-proof.ts",
+    "./read-only": "./src/read-client.ts"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",

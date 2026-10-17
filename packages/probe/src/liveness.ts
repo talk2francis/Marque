@@ -1,3 +1,4 @@
+import { inspectPaymentChallenge } from './payment-challenge.js'
 import { z } from 'zod'
 import type { FailureClass, ServiceKind } from '@marque/db'
 import { safeFetch, type SafeFetchFailure } from './safe-fetch.js'
@@ -340,15 +341,15 @@ export async function probeMCP(url: string): Promise<ProbeOutcome> {
 
 /**
  * x402: a paid endpoint should answer an unpaid request with 402 and a
- * parseable payment challenge. A 200 means it is not actually charging.
+ * structured payment requirements. A 200 proves reachability only.
  */
 export async function probeX402(url: string): Promise<ProbeOutcome> {
   const res = await safeFetch(url, { timeoutMs: 8_000 })
   if (!res.ok) return dead(res.detail, failureFromFetch(res.failure), res.latencyMs, res.status ?? null)
 
   if (res.status === 402) {
-    const header = res.headers['www-authenticate'] ?? res.headers['x-payment'] ?? ''
-    let hasChallenge = /payment/i.test(header)
+    const inspected = inspectPaymentChallenge({ status: res.status, headers: res.headers, body: res.body })
+    const hasChallenge = inspected.state === 'OBSERVED'
     if (!hasChallenge) {
       try {
         const d = JSON.parse(res.body) as Record<string, unknown>
@@ -358,13 +359,13 @@ export async function probeX402(url: string): Promise<ProbeOutcome> {
     if (!hasChallenge) {
       return {
         ok: false, liveness: 'bad_schema', latencyMs: res.latencyMs, statusCode: 402,
-        failureClass: 'bad_schema', detail: '402 returned with no parseable payment challenge',
+        failureClass: 'bad_schema', detail: `402 requirements unavailable or unsupported: ${inspected.reason}`,
         skills: [], executableEndpoint: url, reportedName: null,
       }
     }
     return {
       ok: true, liveness: 'live', latencyMs: res.latencyMs, statusCode: 402,
-      failureClass: null, detail: '402 with a parseable payment challenge',
+      failureClass: null, detail: '402 with structured untrusted payment requirements; payment compatibility unverified',
       skills: [], executableEndpoint: url, reportedName: null,
     }
   }

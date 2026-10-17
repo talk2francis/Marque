@@ -1,6 +1,7 @@
 import { safeFetch } from '@marque/probe'
-import { renderTaskPrompt, type StructuredTask } from '../tasks.js'
-import { extractJson, parseFeeUsd, parsePriceWithAsset } from '../parse.js'
+import type { StructuredTask } from '../tasks.js'
+import { inspectPaymentChallenge } from '@marque/probe/payment-challenge'
+import { extractJson, parsePriceWithAsset } from '../parse.js'
 import type {
   AgentExecutor, CapabilityManifest, ExecutionContext, FailureReason,
   PreflightResult, Quote, RunResult,
@@ -10,8 +11,8 @@ import type {
  * x402 / B402 executor.
  *
  * The flow is: call → 402 with a payment challenge → pay → retry with proof.
- * This executor implements everything up to and including reading the
- * challenge, and deliberately STOPS before paying.
+ * This executor observes an unsigned GET response only. Task preflight and
+ * execution are blocked until an explicit consented adapter exists.
  *
  * Paying requires signing with a funded key, which is a mainnet state change
  * and one of the four hard escalation gates in AGENTS.md. So a run that reaches
@@ -38,8 +39,9 @@ export interface PaymentChallenge {
   raw: unknown
 }
 
-/** Parse a 402 challenge from headers and body, tolerating both dialects. */
+/** Legacy display parser retained for compatibility. Never a verifier, atomic amount parser or payment authorization. */
 export function parseChallenge(headers: Record<string, string>, body: string): PaymentChallenge | null {
+  if (body.length > 65_536) return null
   const header = headers['www-authenticate'] ?? headers['x-payment'] ?? headers['payment-required'] ?? ''
   const parsed = extractJson(body) as Record<string, unknown> | null
 
@@ -50,7 +52,8 @@ export function parseChallenge(headers: Record<string, string>, body: string): P
   const num = (v: unknown): number | null => {
     if (typeof v === 'number' && Number.isFinite(v)) return v
     if (typeof v === 'string') {
-      const n = Number(v.replace(/[^\d.]/g, ''))
+      if (!/^(?:0|[1-9]\d*)(?:\.\d+)?$/.test(v)) return null
+      const n = Number(v)
       return Number.isFinite(n) ? n : null
     }
     return null
@@ -103,23 +106,17 @@ export class X402Executor implements AgentExecutor {
       return { ok: false, reason: res.failure === 'timeout' ? 'timeout' : 'unreachable', detail: `${res.failure}: ${res.detail}` }
     }
 
-    let declaredPrice: string | null = null
-    if (res.status === 402) {
-      const challenge = parseChallenge(res.headers, res.body)
-      declaredPrice = challenge?.amount !== null && challenge?.amount !== undefined
-        ? `${challenge.amount}${challenge.asset ? ` ${challenge.asset}` : ''}`
-        : null
-    }
 
+    if (res.status >= 400 && res.status !== 402) return { ok: false, reason: 'unreachable', detail: `http ${res.status}` }
     return {
       kind: this.kind,
       agentId: this.agentId,
       name: this.name,
       endpoint: this.endpoint,
       skills: [],
-      // A 200 on an unpaid request means the endpoint is not actually charging.
-      supportsFreePreflight: res.status === 200,
-      declaredPrice,
+      // A 200 discovery response does not prove a free task-compatible operation.
+      supportsFreePreflight: false,
+      declaredPrice: null,
       reachedAt: new Date().toISOString(),
       latencyMs: Date.now() - started,
     }
@@ -136,109 +133,32 @@ export class X402Executor implements AgentExecutor {
       }
     }
 
-    if (res.status === 402) {
-      const c = parseChallenge(res.headers, res.body)
-      if (!c) {
-        return {
-          ok: false, status: 'failed', provenance: 'none', agentId: this.agentId, kind: this.kind, feeUsd: null,
-          declaredPrice: null, settlementAsset: null, latencyMs: Date.now() - started,
-          reason: 'unusable_response',
-          detail: '402 returned with no parseable payment challenge',
-        }
-      }
-      return {
-        ok: true, status: 'quoted', provenance: 'protocol', agentId: this.agentId, kind: this.kind,
-        // Only call it USD when the asset actually is a dollar stablecoin.
-        feeUsd: c.asset && /^(USD|USDC|USDT|BUSD|DAI)/i.test(c.asset) ? c.amount : null,
-        declaredPrice: c.amount !== null ? `${c.amount}${c.asset ? ` ${c.asset}` : ''}` : null,
-        settlementAsset: c.asset,
-        latencyMs: Date.now() - started,
-      }
-    }
-
+    const inspection = inspectPaymentChallenge({ status: res.status, headers: res.headers, body: res.body })
     return {
-      ok: true, status: 'free', provenance: 'protocol', agentId: this.agentId, kind: this.kind, feeUsd: 0,
-      declaredPrice: 'free', settlementAsset: null,
+      ok: false, status: 'price_unknown', provenance: inspection.state === 'OBSERVED' ? 'protocol' : 'none',
+      agentId: this.agentId, kind: this.kind, feeUsd: null, declaredPrice: null, settlementAsset: null,
       latencyMs: Date.now() - started,
-      detail: 'endpoint answered without requiring payment',
+      reason: res.status === 402 ? 'payment_required' : res.status >= 400 ? 'unreachable' : 'no_compatible_interface',
+      detail: res.status === 402
+        ? 'Payment requirements are untrusted observations. Paid execution is unavailable; no payment option has been selected.'
+        : 'HTTP reachability does not establish a free task-compatible operation.',
     }
   }
 
-  private async call(task: StructuredTask, timeoutMs: number) {
-    const started = Date.now()
-    const res = await safeFetch(this.endpoint, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ task: renderTaskPrompt(task), address: task.subject, blockNumber: task.blockNumber }),
-      timeoutMs,
-    })
-    const latencyMs = Date.now() - started
-
-    if (!res.ok) {
-      return { ok: false as const, reason: (res.failure === 'timeout' ? 'timeout' : 'unreachable') as FailureReason, detail: `${res.failure}: ${res.detail}`, latencyMs, challenge: null }
-    }
-    if (res.status === 402) {
-      const c = parseChallenge(res.headers, res.body)
-      /*
-       * We stop here, deliberately.
-       *
-       * Paying means signing with a funded key on mainnet, which is one of the
-       * four hard escalation gates. The buyer is shown exactly what is being
-       * asked for, in which asset, on which chain, and decides.
-       */
-      return {
-        ok: false as const,
-        reason: 'payment_required' as FailureReason,
-        detail: c
-          ? `agent requires ${c.amount ?? '?'} ${c.asset ?? 'unknown asset'}${c.chainId ? ` on chain ${c.chainId}` : ''}${c.payTo ? ` to ${c.payTo}` : ''}`
-          : 'agent returned 402 with an unparseable challenge',
-        latencyMs,
-        challenge: c,
-      }
-    }
-    if (res.status >= 400) {
-      return { ok: false as const, reason: 'unreachable' as FailureReason, detail: `http ${res.status}`, latencyMs, challenge: null }
-    }
-
-    const payload = extractJson(res.body)
-    if (payload === null) {
-      return { ok: false as const, reason: 'unusable_response' as FailureReason, detail: 'no structured JSON answer', latencyMs, challenge: null }
-    }
-    return { ok: true as const, payload, latencyMs, challenge: null }
-  }
-
-  async preflight(task: StructuredTask): Promise<PreflightResult> {
-    const r = await this.call(task, 45_000)
-    if (!r.ok) {
-      return {
-        ok: false, agentId: this.agentId, plan: null, calls: [],
-        estimatedGasNative: null, feeUsd: null, maxSlippageBps: null,
-        conformance: null, latencyMs: r.latencyMs, nothingSubmitted: true,
-        reason: r.reason, detail: r.detail,
-      }
-    }
+  async preflight(_task: StructuredTask): Promise<PreflightResult> {
     return {
-      ok: true, agentId: this.agentId, plan: r.payload, calls: [],
-      estimatedGasNative: null, feeUsd: parseFeeUsd(r.payload), maxSlippageBps: null,
-      conformance: null, latencyMs: r.latencyMs, nothingSubmitted: true,
+      ok: false, agentId: this.agentId, plan: null, calls: [], estimatedGasNative: null,
+      feeUsd: null, maxSlippageBps: null, conformance: null, latencyMs: 0, nothingSubmitted: true,
+      reason: 'blocked', detail: 'x402 preflight is unavailable without a consented task adapter. No provider request was sent.',
     }
   }
 
-  async execute(task: StructuredTask, ctx: ExecutionContext): Promise<RunResult> {
-    const startedAt = new Date().toISOString()
-    const r = await this.call(task, ctx.deadlineMs ?? 60_000)
-    const finishedAt = new Date().toISOString()
-    if (!r.ok) {
-      return {
-        ok: false, agentId: this.agentId, kind: this.kind, result: null, txHashes: [],
-        feeUsd: null, latencyMs: r.latencyMs, startedAt, finishedAt,
-        reason: r.reason, detail: r.detail,
-      }
-    }
+  async execute(_task: StructuredTask, _ctx: ExecutionContext): Promise<RunResult> {
+    const at = new Date().toISOString()
     return {
-      ok: true, agentId: this.agentId, kind: this.kind, result: r.payload,
-      txHashes: [], feeUsd: parseFeeUsd(r.payload),
-      latencyMs: r.latencyMs, startedAt, finishedAt,
+      ok: false, agentId: this.agentId, kind: this.kind, result: null, txHashes: [], feeUsd: null,
+      latencyMs: 0, startedAt: at, finishedAt: at, reason: 'blocked',
+      detail: 'Paid x402 execution is unavailable. No provider request or payment was sent.',
     }
   }
 }

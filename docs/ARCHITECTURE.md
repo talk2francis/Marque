@@ -232,3 +232,5 @@ Whitepaper HTML uses current source; its original30SepPDF remains an explicitly 
 
 
 P12: existing storefront/builder evidence remains contextual; pure job-copy helper separates completion from PaymentReleased, charter glossary matches preview-only authority, and read-only audit modes preserve explicit environment and screenshot scope.
+
+P13: explicit browser read-only commerce subpath reuses catalog and unsigned plan; Node-only execution/evidence reuses portable receipt content checks. Shared probe/payment-challenge is a bounded pure captured-response inspector, never a wallet or HTTP requester. The legacy x402 task rail fails closed before POST; reachability/error responses do not imply a free task. Existing ERC-8183 commerce remains unchanged. See docs/vnext/P13_READ_CLIENT_CONTRACT.md.

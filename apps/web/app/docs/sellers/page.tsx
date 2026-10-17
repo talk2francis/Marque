@@ -10,6 +10,7 @@ export default function SellerGuide() {
       <ol><li>Register an ERC-8004 identity on the intended BSC network. Publish the exact HTTPS A2A card or MCP service endpoint in its metadata.</li><li>Open <a href="/builders">Builders</a>. You can paste an owner address to read public status without connecting. To manage, connect the current owning wallet and sign the existing ownership proof; it is not a token approval.</li><li>Declare the category and use discovery to inspect the endpoint. A readable card or tool list is not proof that a task was accepted.</li><li>Run a conformance task only if you have permission and the endpoint accepts it without payment or other side effects. Owner-recorded results are public, including failures. Publish using the existing owner claim flow.</li></ol>
     </DocSection>
     <DocSection id="protocol" title="Protocol examples">
+      <p>Use the <a href="/docs/developers#seller">typed read client and versioned illustrative seller schemas</a> when integrating an existing service. Metadata examples do not prove price, payment or quality.</p>
       <p>These are interface shapes, not working providers, prices or transactions. Replace every placeholder with your actual service and use the pinned SDK for signing.</p>
       <pre className={styles.code}><code>{`ERC-8004 metadata service entries:
 {"services":[

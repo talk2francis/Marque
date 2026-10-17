@@ -1,0 +1,8 @@
+{
+  "name": "marque-read-client-example",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Local checkout example. No published SDK or payment support is implied.",
+  "scripts": { "read": "node --import tsx server.ts", "typecheck": "tsc --noEmit -p tsconfig.json" }
+}
