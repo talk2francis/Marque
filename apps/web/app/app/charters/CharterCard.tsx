@@ -7,18 +7,8 @@ import { scanAddress, scanTx } from '../../../lib/charter-templates'
 import { forgetCharterControl, readCharterControl } from '../../../lib/charter-control-client'
 import styles from './charters.module.css'
 
-/**
- * One charter, live.
- *
- * The three numbers that decide whether this is safe are the ones that move:
- * what is left of the cap, how long is left, and how many calls have been made.
- * They are refreshed against the server rather than extrapolated, and the
- * countdown is arithmetic on the expiry the chain holds — not a timer we
- * started when the page loaded and hope is still right.
- *
- * REVOKE NOW is a single click with no confirmation dialogue. A revoke that
- * first asks whether you are sure arrives after the money has moved.
- */
+/** Historical registry policy records. Stored limits and usage do not prove
+ * native wallet enforcement. Capability holders can still anchor revocation. */
 
 interface Cap {
   symbol: string; decimals: number; limit: number; spent: number; remaining: number; period: string
@@ -47,21 +37,6 @@ export interface CharterView {
   blockNumber: string | null
 }
 
-const KIND_FOR_CATEGORY: Record<string, string> = {
-  rebalancing: 'rebalance', grid: 'grid', yield: 'yield', health_factor: 'health_factor',
-}
-
-/** The default hire for each category, matching the published MCS case. */
-const TASK_FOR_CATEGORY: Record<string, Record<string, unknown>> = {
-  rebalancing: { rangePct: 6, feeTier: 2500, maxSlippageBps: 40 },
-  grid: { lowerBound: 500, upperBound: 800, capitalUsd: 1000, levels: 10, stopPrice: 450, feeBps: 25 },
-  yield: {
-    asset: 'USDT', sizeUsd: 1000, allowedProtocols: ['venus'],
-    minImprovementBps: 50, leverageAllowed: false, currentAprPct: 0,
-  },
-  health_factor: { targetHealthFactor: 2.5 },
-}
-
 function countdown(seconds: number | null): string {
   if (seconds === null) return '…'
   if (seconds <= 0) return 'expired'
@@ -72,17 +47,16 @@ function countdown(seconds: number | null): string {
   return `${m}m ${String(s).padStart(2, '0')}s`
 }
 
-export function CharterCard({ charter, subject }: { charter: CharterView; subject: string }) {
+export function CharterCard({ charter }: { charter: CharterView }) {
   const [live, setLive] = useState<CharterView>(charter)
   // `null` until mounted: the seconds-remaining depends on Date.now(), which is
   // not the same on the server and in the browser, so computing it during
   // render is a guaranteed hydration mismatch. The clock starts in useEffect.
   const [seconds, setSeconds] = useState<number | null>(null)
-  const [busy, setBusy] = useState<null | 'revoking' | 'hiring'>(null)
+  const [busy, setBusy] = useState<null | 'revoking'>(null)
   const [error, setError] = useState<string | null>(null)
   const [pulse, setPulse] = useState(false)
   const [controlToken, setControlToken] = useState<string | null>(null)
-  const [positionTokenId, setPositionTokenId] = useState('')
 
   const active = live.status === 'active' && (seconds === null || seconds > 0)
 
@@ -139,40 +113,6 @@ export function CharterCard({ charter, subject }: { charter: CharterView; subjec
     }
   }, [controlToken, live.id])
 
-  const hire = useCallback(async () => {
-    setBusy('hiring')
-    setError(null)
-    try {
-      const kind = KIND_FOR_CATEGORY[live.category]
-      const policy = TASK_FOR_CATEGORY[live.category]
-      if (!kind || !policy) { setError('this charter has no task shape on record'); return }
-      if (kind === 'rebalance' && !/^\d{1,20}$/.test(positionTokenId)) {
-        setError('Enter the PancakeSwap V3 position NFT ID you want this agent to inspect.')
-        return
-      }
-      const res = await fetch('/api/v1/runs', {
-        method: 'POST',
-        headers: {
-          'content-type': 'application/json',
-          ...(controlToken ? { authorization: `Bearer ${controlToken}` } : {}),
-        },
-        body: JSON.stringify({
-          agentId: live.agentId, subject, kind, policy,
-          maxSpendUsd: 1, charterId: live.id,
-          ...(kind === 'rebalance' ? { positionTokenId } : {}),
-          ...(kind === 'grid' ? { pair: 'BNB/USDT' } : {}),
-        }),
-      })
-      const data = (await res.json()) as { url?: string; error?: string; rejectionId?: string }
-      if (!res.ok || !data.url) { setError(data.error ?? 'the run could not be started'); return }
-      window.location.href = data.url
-    } catch {
-      setError('the network request failed before the run could be started')
-    } finally {
-      setBusy(null)
-    }
-  }, [controlToken, live.agentId, live.category, live.id, positionTokenId, subject])
-
   const cap = live.caps[0]
   const spentPct = cap && cap.limit > 0 ? cap.spent / cap.limit : 0
 
@@ -184,7 +124,7 @@ export function CharterCard({ charter, subject }: { charter: CharterView; subjec
           <p className={styles.cardSub}>{live.label ?? live.category}</p>
         </div>
         {active
-          ? <Chip tone="holds">Active</Chip>
+          ? <Chip tone="watch">Unexpired record</Chip>
           : live.status === 'revoked'
             ? <Chip tone="breach">Revoked</Chip>
             : <Chip tone="watch">{live.status === 'active' ? 'Expired' : live.status}</Chip>}
@@ -193,12 +133,12 @@ export function CharterCard({ charter, subject }: { charter: CharterView; subjec
       {cap && (
         <div className={styles.meterBlock}>
           <MeasureRule
-            label={`${cap.remaining.toFixed(5)} of ${cap.limit.toFixed(5)} ${cap.symbol} left`}
+            label={`Recorded remainder: ${cap.remaining.toFixed(5)} of ${cap.limit.toFixed(5)} ${cap.symbol}`}
             value={cap.spent}
             lower={0}
             upper={cap.limit}
             threshold={cap.limit}
-            thresholdLabel="cap"
+            thresholdLabel="recorded limit"
             lowerLabel="0"
             upperLabel={`${cap.limit} ${cap.symbol}`}
             state={spentPct >= 1 ? 'breach' : spentPct > 0.8 ? 'watch' : 'holds'}
@@ -212,11 +152,11 @@ export function CharterCard({ charter, subject }: { charter: CharterView; subjec
           <dd><DataCell align="left">{live.status === 'active' ? countdown(seconds) : '—'}</DataCell></dd>
         </div>
         <div className={styles.fact}>
-          <dt>Calls used</dt>
+          <dt>Recorded calls</dt>
           <dd><DataCell align="left">{live.callsUsed}</DataCell></dd>
         </div>
         <div className={styles.fact}>
-          <dt>Spent</dt>
+          <dt>Recorded spend</dt>
           <dd><DataCell align="left">{cap ? `${cap.spent.toFixed(5)} ${cap.symbol}` : '—'}</DataCell></dd>
         </div>
         <div className={styles.fact}>
@@ -227,7 +167,7 @@ export function CharterCard({ charter, subject }: { charter: CharterView; subjec
 
       <div className={styles.permits}>
         <span className={styles.permitsLabel}>
-          May call {live.contracts.length} contract{live.contracts.length === 1 ? '' : 's'}, and nothing else
+          Policy names {live.contracts.length} contract{live.contracts.length === 1 ? '' : 's'}. Enforcement is not proven.
         </span>
         <ul className={styles.permitList}>
           {live.contracts.map((c) => (
@@ -248,12 +188,12 @@ export function CharterCard({ charter, subject }: { charter: CharterView; subjec
       <div className={styles.proofs}>
         {live.grantTxHash && (
           <a className={`mono ${styles.proof}`} href={scanTx(live.grantTxHash)} target="_blank" rel="noreferrer">
-            Granted {live.grantTxHash.slice(0, 10)}…
+            Policy anchor {live.grantTxHash.slice(0, 10)}…
           </a>
         )}
         {live.revokeTxHash && (
           <a className={`mono ${styles.proof}`} href={scanTx(live.revokeTxHash)} target="_blank" rel="noreferrer">
-            Revoked {live.revokeTxHash.slice(0, 10)}…
+            Revocation anchor {live.revokeTxHash.slice(0, 10)}…
           </a>
         )}
         <span className={`mono ${styles.proof}`} title="keccak of the policy that was anchored on chain">
@@ -263,24 +203,16 @@ export function CharterCard({ charter, subject }: { charter: CharterView; subjec
 
       {error && <p className={styles.error} role="alert">{error}</p>}
 
-      {active && controlToken && live.category === 'rebalancing' ? (
-        <label className={styles.positionField}>PancakeSwap V3 position NFT ID
-          <input inputMode="numeric" pattern="[0-9]{1,20}" value={positionTokenId} onChange={(event) => setPositionTokenId(event.target.value.trim())} placeholder="Your position ID" autoComplete="off" />
-        </label>
-      ) : null}
-
       {active && controlToken && (
         <div className={styles.actions}>
           <button type="button" className={styles.revoke} onClick={() => void revoke()} disabled={busy !== null}>
-            {busy === 'revoking' ? 'Revoking…' : 'Revoke now'}
+            {busy === 'revoking' ? 'Revoking…' : 'Revoke policy record'}
           </button>
-          <button type="button" className={styles.hire} onClick={() => void hire()} disabled={busy !== null}>
-            {busy === 'hiring' ? 'Starting…' : 'Put it to work'}
-          </button>
+
         </div>
       )}
       {active && !controlToken && (
-        <p className={styles.error}>Public evidence only. This browser does not hold the capability required to use or revoke this charter.</p>
+        <p className={styles.error}>Public policy record only. This browser does not hold its revocation capability. Wallet permissions have not been inspected.</p>
       )}
     </article>
   )

@@ -16,9 +16,6 @@ export const revalidate = 0
  * cheapest credibility available (AGENTS.md invariant 7).
  */
 
-const DEMO = process.env['DEMO_ADDRESS'] ?? '0x60AA3AEE06E2345A17E4d4B12c53E046F4F63CAf'
-const DEMO_LP = process.env['NEXT_PUBLIC_DEMO_LP_ADDRESS'] ?? DEMO
-
 export default async function ChartersPage() {
   const charters = await listCharters().catch(() => [])
   const live = charters.filter((c) => c.status === 'active')
@@ -32,7 +29,7 @@ export default async function ChartersPage() {
           <Statement as="h1">Charters</Statement>
           <p className={styles.lede}>
             Historical policy records on {CHARTER_CHAIN_NAME}. Limits and usage are server records;
-            policy hashes do not enforce permissions over your wallet. Existing revocation controls remain available.
+            policy hashes do not enforce permissions over your wallet. Existing revocation controls remain available. This page shows up to 40 returned records, not the total population.
           </p>
           <p className={styles.headAct}>
             <LinkButton variant="primary" href="/app/charter">Preview a policy</LinkButton>
@@ -41,7 +38,7 @@ export default async function ChartersPage() {
 
         <section aria-labelledby="live-heading">
           <h2 className={styles.sectionHead} id="live-heading">
-            Active {live.length > 0 && <span className={`mono ${styles.count}`}>{live.length}</span>}
+            Unexpired records {live.length > 0 && <span className={`mono ${styles.count}`}>{live.length}</span>}
           </h2>
           {live.length === 0 ? (
             <EmptyState title="No charter is active.">
@@ -53,7 +50,7 @@ export default async function ChartersPage() {
           ) : (
             <div className={styles.cards}>
               {live.map((c) => (
-                <CharterCard key={c.id} charter={c} subject={c.category === 'rebalancing' || c.category === 'grid' ? DEMO_LP : DEMO} />
+                <CharterCard key={c.id} charter={c} />
               ))}
             </div>
           )}
@@ -62,15 +59,15 @@ export default async function ChartersPage() {
         {past.length > 0 && (
           <section aria-labelledby="past-heading" className={styles.past}>
             <h2 className={styles.sectionHead} id="past-heading">
-              Ended <span className={`mono ${styles.count}`}>{past.length}</span>
+              Ended records <span className={`mono ${styles.count}`}>{past.length}</span>
             </h2>
             <p className={styles.lede}>
-              Kept, because a revocation nobody can check is not a revocation. Each of these has the
-              transaction that ended it. The three most recent are shown; the rest are one click away.
+              Expiry is derived from the stored lifetime. A revocation anchor is shown when recorded;
+              expiry does not require a transaction. Three returned records are shown first; expand for the rest.
             </p>
             <div className={styles.cards}>
               {past.slice(0, 3).map((c) => (
-                <CharterCard key={c.id} charter={c} subject={DEMO} />
+                <CharterCard key={c.id} charter={c} />
               ))}
             </div>
             {past.length > 3 && (
@@ -80,7 +77,7 @@ export default async function ChartersPage() {
                 </summary>
                 <div className={styles.cards}>
                   {past.slice(3).map((c) => (
-                    <CharterCard key={c.id} charter={c} subject={DEMO} />
+                    <CharterCard key={c.id} charter={c} />
                   ))}
                 </div>
               </details>

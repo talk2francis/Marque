@@ -6,25 +6,10 @@ import { RegistryCharterService } from '@marque/mandates/registry'
 import { deserialiseGrant } from '@marque/mandates/store'
 import type { CharterGrant, CharterState } from '@marque/mandates/types'
 
-/**
- * The charter service, as the web process sees it.
- *
- * Every surface speaks `CharterService` and never a vendor SDK — that is the
- * whole point of building the interface first (AGENTS.md P6-lite). The web
- * process uses the REGISTRY implementation, and says so on screen, because it
- * is the one that survives a restart: its authority is the operator key plus a
- * durable Postgres record, so a charter granted before a deploy still has a
- * working revoke button afterwards. Altana's implementation holds its session
- * signer in process memory by design, which is correct for a key and wrong for
- * a marketplace's only revoke path.
- *
- * The difference between the two is real and the UI states it rather than
- * letting a reader assume equivalence:
- *
- *   registry  policy anchored on chain and publicly readable; enforced by this
- *             service before it signs.
- *   altana    policy enforced by the relay, which reverts at the contract.
- */
+/** Historical testnet registry records. Anchors commit to policy/revocation
+ * documents; they do not establish native wallet permission enforcement.
+ * New grants and execution are disabled. Existing capability-authorized
+ * revocation remains a server-signed record anchor, not a native session revoke. */
 
 export const CHARTER_CHAIN_ID = 97
 export const CHARTER_CHAIN_NAME = 'BNB Smart Chain testnet'
