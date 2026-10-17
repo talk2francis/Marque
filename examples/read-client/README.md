@@ -15,6 +15,8 @@ pnpm exec tsc --noEmit -p tsconfig.json
 
 A parsed invalid/failed/unsupported/unavailable proof or rejected plan exits 2 and retains its explicit reason; this is never a verification success. A decoded payment observation remains a claim even when the command exits 0.
 
+The server catalog example requests the tested tab, which can include expired or unavailable services; tested is not hireable.
+
 Only `catalog` makes a network request: one GET, no credentials, no redirects, at most 2 MiB, 15s timeout, no retry or automatic pagination. Limit 10 is a request cap, not a population count. A cold 503 means unavailable, never zero supply. On 429 inspect bounded Retry-After and request budget before a later explicit retry. Never replay a write or provider task automatically.
 
 `browser.ts` exports the same one-request catalog read, pure plan and captured-payment inspection for an application's own bundler. It must not import the Node-only receipt verifier. Browser requests require a same-origin API or an expressly configured CORS origin. Server-supplied URLs are not safe outbound targets; server-side agent reads must use the shared SSRF guard.

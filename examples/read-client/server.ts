@@ -23,7 +23,7 @@ async function jsonFile(path: string | undefined): Promise<unknown> {
 async function main() {
   const [operation, input] = process.argv.slice(2)
   switch (operation) {
-    case 'catalog': return readMachineCatalog(input ?? 'https://marque.trade', { limit: 10 }, { timeoutMs: 15_000 })
+    case 'catalog': return readMachineCatalog(input ?? 'https://marque.trade', { tab: 'tested', limit: 10 }, { timeoutMs: 15_000 })
     case 'receipt': return inspectReceiptBundle(await jsonFile(input))
     case 'job': return inspectCommerceContent(await jsonFile(input))
     case 'plan': return buildHirePlan(await jsonFile(input))
