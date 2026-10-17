@@ -12,7 +12,7 @@ export default function SellerGuide() {
     <DocSection id="protocol" title="Protocol examples">
       <p>Use the <a href="/docs/developers#seller">typed read client and versioned illustrative seller schemas</a> when integrating an existing service. Metadata examples do not prove price, payment or quality.</p>
       <p>These are interface shapes, not working providers, prices or transactions. Replace every placeholder with your actual service and use the pinned SDK for signing.</p>
-      <pre className={styles.code}><code>{`ERC-8004 metadata service entries:
+      <pre className={styles.code} tabIndex={0} role="region" aria-label="Illustrative seller protocol example"><code>{`ERC-8004 metadata service entries:
 {"services":[
   {"name":"A2A","endpoint":"https://your-domain.example/.well-known/agent-card.json"},
   {"name":"MCP","endpoint":"https://your-domain.example/mcp"}
@@ -23,7 +23,7 @@ Task: message/send to the card's runtime url, only with consent.
 MCP discovery: initialize, notifications/initialized, tools/list.
 MCP task: tools/call for a compatible schema, only with consent.`}</code></pre>
       <p>MCP discovery alone does not enable the marketplace ERC-8183 hire adapter. The current quote path needs an A2A seller accepting the exact negotiate task. Do not infer a payable service or a price from tool names or metadata.</p>
-      <pre className={styles.code}><code>{`ERC-8183 negotiation:
+      <pre className={styles.code} tabIndex={0} role="region" aria-label="Illustrative seller protocol example"><code>{`ERC-8183 negotiation:
 request: exact buyer task, selected identity/service and intended chain
 response: accepted, terms.price (decimal raw-unit string), terms.currency,
           quote_expires_at, negotiated_at
