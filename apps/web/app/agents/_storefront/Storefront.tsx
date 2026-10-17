@@ -183,7 +183,7 @@ export function Storefront({ d }: { d: Data }) {
               <div className={styles.ratingBox}>
                 <span className={styles.ratingKind}>Buyer-linked reviews <span>Exact job link</span></span>
                 <Stars value={t.verified.averageStars} count={t.verified.count} label="buyer-linked reviews" />
-                <p>Exact funded and delivered job links. Repeat reviews may come from the same wallet. Common funding and operator overlap are unknown. <ProvenanceChip provenance="ONCHAIN" /></p>
+                <p>Indexed feedback and job events matched to stored preparation records. Repeat reviews may come from the same wallet. Common funding and operator overlap are unknown. <ProvenanceChip provenance="ONCHAIN" /> <ProvenanceChip provenance="MEASURED" /></p>
               </div>
               <div className={styles.ratingBox} data-weak>
                 <span className={styles.ratingKind}>All registry star ratings <span>Broader context</span></span>
