@@ -1,3 +1,7 @@
+# P08 checkpoint complete, 17 October 2026
+
+Source d7ce335:698tests passed/37gated skips; full serial workspace types, CLI types, lint/copy and MCS anchor pass. Allowed offline synthetic replay preserves failures and always says comparison UNPROVEN; fresh descriptor GETs prove reachability only. No independent consenting same-task pair established. [Checkpoint](../vnext/P08_CHECKPOINT.md). Closing13:42:41UTC service/product PIDs, original tmux/linger/proxy/production source unchanged; complete Marque/Kerb health bodies pass. No deployment, chain write, paid task, key, push, migration or DB write. AMBER. P09 already approved, follows this local checkpoint; stop after P09.
+
 # P08 in validation, 17 October 2026
 
 Owner authorizes P08 then P09. P08 uses the allowed offline fixture replay fallback; no proven independent consenting same-task pair. Fresh public descriptor GETs at13:26UTC succeed without invoking tasks. Existing Ledger/MCS/APIs/UI/DB/ops unchanged; no winner or production action. See [trial contract](../vnext/P08_TRIAL_CONTRACT.md). P09 begins after the local P08 checkpoint, without another permission request; stop after P09.
