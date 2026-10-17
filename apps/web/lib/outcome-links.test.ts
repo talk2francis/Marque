@@ -17,6 +17,7 @@ it('a real-looking reference stays unverified, and missing chain cannot create a
 it('rejects malformed or oversized reference metadata without rendering hostile links',()=>{
   const r=ledgerOutcomeReferences([{...row(),jobId:'https://evil.invalid'}, {...row(),receiptId:'javascript:alert(1)'}, {...row(),chainId:1}, {...row(),at:'invalid'}],at)
   expect(r.scope).toMatchObject({returnedRecords:0,invalidRecords:4});expect(r.records).toEqual([])
+  expect(r.rejectedRecords.map(r=>r.position)).toEqual([0,1,2,3])
 })
 it('a query cap is disclosed as returned metadata, never a population',()=>{
   const r=ledgerOutcomeReferences(Array.from({length:201},(_,i)=>({...row(),id:i+1})),at)

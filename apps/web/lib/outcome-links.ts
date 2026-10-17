@@ -23,6 +23,7 @@ export function ledgerOutcomeReferences(rows: readonly unknown[], computedAt: st
     scope: { returnedRecords: records.length, invalidRecords: parsed.length - records.length, moreAvailable: rows.length > 200, limit: 200 },
     state: records.some(r => r.state === 'EXPLICIT_REFERENCE_UNVERIFIED') ? 'REFERENCES_REQUIRE_VERIFICATION' as const : 'UNAVAILABLE' as const,
     verifiedReceiptLinkedOutcome: null, records,
+    rejectedRecords: parsed.flatMap((p,position) => p.success ? [] : [{position, reason:'UNSUPPORTED_REFERENCE_METADATA_PENDING_REVIEW' as const}]),
     independentHumans: null, roi: null, drawdown: null,
     limits: ['No receipt/job linkage is inferred from a matching agent, date, task or anchor.',
       'Explicit references are unverified pointers, not proof of the same task, service or commercial outcome.',

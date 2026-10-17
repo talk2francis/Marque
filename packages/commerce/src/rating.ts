@@ -98,7 +98,7 @@ export async function prepareRating(input: { chainId: ChainId; jobId: string; wa
 export async function agentRatings(chainId: ChainId, agentTokenId: string, providerWallet: string, options: { evidence?: boolean } = {}) {
   const identity = feedbackIdentity(chainId, agentTokenId)
   const rows = rowsOf(await boundedCommerceRead(sql`
-    select r.client, r.value, r.value_decimals, r.tag1, r.block_number::text, r.block_time, r.tx_hash, c.job_id,
+    select r.client, r.value, r.value_decimals, r.tag1, r.feedback_index, r.block_number::text, r.block_time, r.tx_hash, c.job_id,
       ${buyerFeedbackBinding(sql`${providerWallet.toLowerCase()}`, sql`${identity}`)} as verified
     from rating r left join rating_comment c on lower(c.feedback_hash) = lower(r.feedback_hash)
       and c.chain_id = r.chain_id and c.agent_token_id = r.agent_token_id and lower(c.client) = lower(r.client)
@@ -116,7 +116,7 @@ export async function agentRatings(chainId: ChainId, agentTokenId: string, provi
     allFeedback: { count: rows.length, starredCount: rows.filter((r) => String(r['tag1']) === 'starred').length, averageStars: avg(rows.filter((r) => String(r['tag1']) === 'starred')) },
     ...(options.evidence ? { evidence: feedbackEvidence(chainId, agentTokenId, rows.map(r => ({
       client: String(r['client']), verified: r['verified'] === true, jobId: r['job_id'] == null ? null : String(r['job_id']),
-      blockNumber: String(r['block_number']), at: r['block_time'] == null ? null : new Date(String(r['block_time'])).toISOString(), tx: String(r['tx_hash']),
+      feedbackIndex: String(r['feedback_index']), blockNumber: String(r['block_number']), at: r['block_time'] == null ? null : new Date(String(r['block_time'])).toISOString(), tx: String(r['tx_hash']),
     })), teamWallets()) } : {}),
   }
 }

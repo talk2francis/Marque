@@ -38,7 +38,7 @@ export function feedbackIdentity(chainId: ChainId, tokenId: string): string | nu
 
 export interface FeedbackObservation {
   client: string; verified: boolean; jobId: string | null
-  blockNumber: string; at: string | null; tx: string
+  feedbackIndex: string; blockNumber: string; at: string | null; tx: string
 }
 
 /** Counts records, distinct addresses and exact job keys separately. The input
@@ -61,6 +61,10 @@ export function feedbackEvidence(chainId: ChainId, agentId: string, observations
   }))
   const blocks = observations.map(r => r.blockNumber).filter(b => /^\d+$/.test(b)).map(BigInt)
   const times = observations.map(r => r.at).filter((s): s is string => s !== null && Number.isFinite(Date.parse(s))).sort()
+  const refs = observations.map(r => ({ client: r.client.toLowerCase(), feedbackIndex: r.feedbackIndex,
+    tx: r.tx.toLowerCase(), block: r.blockNumber, at: r.at,
+    buyerLinkedJob: r.verified && r.jobId !== null && !team.has(r.client.toLowerCase()) ? `${chainId}:${r.jobId}` : null,
+  })).sort((a,b) => { const x=JSON.stringify(a), y=JSON.stringify(b); return x < y ? -1 : x > y ? 1 : 0 })
   return {
     schema: 'marque.rating-evidence.v1' as const, chainId, agentId,
     provenance: 'INDEXED_EVENTS_AND_PREPARED_FEEDBACK_COMMITMENT' as const,
@@ -70,7 +74,9 @@ export function feedbackEvidence(chainId: ChainId, agentId: string, observations
     buyerLinked: { feedbackRecords: linked.length, distinctWallets: wallets.size,
       distinctJobs: new Set(linked.map(r => `${chainId}:${r.jobId}`)).size,
       repeatedWallets: graph.filter(r => r.repeatedWallet).length,
-      repeatedJobFeedbackRecords: graph.reduce((n,r) => n + r.feedbackRecords - r.distinctJobs, 0), graph },
+      repeatedJobFeedbackRecords: graph.reduce((n,r) => n + r.feedbackRecords - r.distinctJobs, 0),
+      graph: graph.slice(0,200), graphMoreAvailable: graph.length > 200 },
+    feedbackReferences: refs.slice(0,100), feedbackReferencesMoreAvailable: refs.length > 100,
     teamFeedbackRecords: observations.filter(r => team.has(r.client.toLowerCase())).length,
     independentHumans: null, commonFunding: 'NOT_CHECKED' as const, counterfeitEndorsements: 'NOT_CHECKED' as const,
     limits: ['Review records, wallets and jobs are different units. Addresses do not establish independent people.',
