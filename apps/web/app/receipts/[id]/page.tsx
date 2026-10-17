@@ -64,9 +64,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   if (receiptEvidence(row).digest.status !== 'MATCH') return { title: `Receipt integrity unavailable · ${BRAND.name}`, robots: { index: false } }
   const body = row.body as unknown as ReceiptBody
   const title = `Receipt ${row.hash.slice(0, 10)} · ${BRAND.name}`
-  const description = body.execution.ok
-    ? `A ${body.task.kind.replace('_', ' ')} run on BNB Smart Chain, graded against the published standard and hashed.`
-    : `A ${body.task.kind.replace('_', ' ')} run that failed, published with the reason it failed.`
+  const description = `A preserved ${body.task.kind.replaceAll('_', ' ')} receipt with matching content digest. Payment, authority and current quality require separate verification.`
   return {
     title,
     description,
