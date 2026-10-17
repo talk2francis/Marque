@@ -92,10 +92,11 @@
 }
 
 .footnote {
-  display: flex; gap: var(--s3); align-items: flex-start;
+  display: flex; flex-direction: column; gap: var(--s3); align-items: flex-start;
   margin-top: var(--s6); max-width: var(--measure);
 }
 .footnote p { margin: 0; font-size: var(--size-caption); color: var(--fg-soft); }
+.footnote a { display: inline-flex; align-items: center; min-height: 40px; }
 
 /* =======================================================================
  * THE SEAL
