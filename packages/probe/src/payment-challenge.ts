@@ -70,13 +70,12 @@ export function inspectPaymentChallenge(input: unknown, expected?: ExpectedPayme
       try { url = new URL(c.resource.url) } catch { return fail('invalid_v2_resource') }
       if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password) return fail('invalid_v2_resource')
       // A second challenge in the optional body must not contradict the canonical header.
-      try {
-        const other: unknown = JSON.parse(body)
-        if (other && typeof other === 'object' && Object.hasOwn(other, 'x402Version')) {
-          const q = challengeSchema.safeParse(other)
-          if (!q.success || JSON.stringify(q.data) !== JSON.stringify(c)) return fail('conflicting_body_challenge')
-        }
-      } catch { /* The v2 body need not be JSON or repeat the header. */ }
+      let other: unknown
+      try { other = JSON.parse(body) } catch { /* Optional v2 body need not be JSON. */ }
+      if (other && typeof other === 'object' && Object.hasOwn(other, 'x402Version')) {
+        const q = challengeSchema.safeParse(other)
+        if (!q.success || JSON.stringify(q.data) !== JSON.stringify(c)) return fail('conflicting_body_challenge')
+      }
     }
     if (c.accepts.some(o => (c.x402Version === 2 ? o.amount : o.maxAmountRequired) === undefined || (o.amount !== undefined && o.maxAmountRequired !== undefined && o.amount !== o.maxAmountRequired))) return fail('missing_or_conflicting_atomic_amount')
     const offers = c.accepts.map((o, index) => {
