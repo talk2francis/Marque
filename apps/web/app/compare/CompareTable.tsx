@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { Children, type CSSProperties, type ReactNode } from 'react'
-import { Chip, WarrantBadge, ProvenanceChip } from '@marque/ui'
+import { BRAND, Chip, WarrantBadge, ProvenanceChip } from '@marque/ui'
 import { Badge, Stars } from '../_components/ui'
 import { AgentAvatar } from '../_components/AgentAvatar'
 import type { MarketRow } from '../register/market-model'
@@ -80,7 +80,7 @@ export function CompareTable({ chosen, hireLink, tryLink, onNavigate }: {
               <>
                 <span>{j.funded} funded · {j.delivered} delivered{j.refunded ? ` · ${j.refunded} refunded` : ''}{j.disputed ? ` · ${j.disputed} disputed` : ''} <ProvenanceChip provenance="ONCHAIN" /></span>
                 {d ? <span className={styles.muted}>delivers in {d} (median)</span> : null}
-                {j.fromTeam ? <span className={styles.muted}>{j.fromTeam} from Marque team wallets</span> : null}
+                {j.fromTeam ? <span className={styles.muted}>{j.fromTeam} from {BRAND.name} team wallets</span> : null}
               </>
             ) : <span className={styles.muted}>No funded jobs in this index</span>}
           </div>

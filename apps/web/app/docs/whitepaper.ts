@@ -31,7 +31,7 @@ export const ROADMAP: Horizon[] = [
     items: [
       { title: 'The index and the Standard', text: 'Every ERC-8004 identity on BSC, probed for a live endpoint, classified, and tested against MCS v1.0 in four categories.' },
       { title: 'Hire through escrow', text: 'Signed quotes, ERC-8183 jobs paid from the buyer\'s wallet, delivery on chain, the Job Room with recovery.' },
-      { title: 'Ratings and the quest', text: 'ERC-8004 ratings split by verified buyers; the Set and Earn tracking API and the five-step quest.' },
+      { title: 'Ratings and the quest', text: 'ERC-8004 feedback split into buyer-linked reviews and broader registry context; the Set and Earn tracking API and the five-step quest.' },
       { title: 'Builders and reference agents', text: 'Five listing checks read from chain and endpoint; six reference agents that anyone can hire.' },
     ],
   },
@@ -107,7 +107,7 @@ export const SECTIONS: PaperSection[] = [
         ['6 Payment', 'How does money move safely?', 'BNB Chain escrow, exact amounts, no Marque custody'],
         ['7 Execution', 'Did it perform?', 'Delivery on chain with a hash of the deliverable'],
         ['8 Evidence', 'Can I prove what happened?', 'The Job Room: every event, every transaction'],
-        ['9 Reputation', 'What does its record show?', 'ERC-8004 ratings, verified buyers counted apart'],
+        ['9 Reputation', 'What does its record show?', 'ERC-8004 feedback, exact buyer-linked review records counted apart'],
         ['10 Agent to agent', 'Can software hire software?', 'Next, see the roadmap'],
       ] },
       { kind: 'p', text: 'Marque also runs six reference agents so that every category always has at least one working, tested seller. They are labelled, held to the same test and ranked by the same rules as every third party.' },
@@ -147,9 +147,9 @@ export const SECTIONS: PaperSection[] = [
       { kind: 'p', text: 'A hire on Marque is an ERC-8183 job on BNB Chain\'s shared commerce contract. Marque composes it, shows every signature in plain words before the wallet opens, and reads each result back from chain. It never holds the buyer\'s funds or keys.' },
       { kind: 'list', ordered: true, items: [
         'Quote. The buyer describes the task; the agent returns a quote for that task, with signed or identity-checked unsigned evidence shown. Free, before any wallet. Marque verifies any provider signature, the chain, the contract, the token and that payment goes to the selected identity. An unsigned quote does not prove signed task acceptance.',
-        'Escrow. The buyer\'s wallet creates the job with the signed terms and funds it with exactly the quoted amount. No open-ended approval.',
+        'Escrow. The buyer\'s wallet creates the job with the selected quote terms and funds it with exactly the quoted amount. No open-ended approval.',
         'Delivery. The agent posts its answer on chain with a hash of the deliverable file; the Job Room fetches the file and checks it against that hash.',
-        'Rating. The buyer rates the agent on the ERC-8004 reputation registry, tied to the job. Only wallets that paid count as verified buyers.',
+        'Rating. The buyer rates the agent on the ERC-8004 reputation registry, tied to the job. Buyer-linked reviews match the exact feedback commitment, identity and funded delivered job; review counts do not establish independent people.',
         'Settlement. Payment releases to the agent when the review window closes, unless the buyer reports a problem. If the agent never delivers, the buyer reclaims the deposit.',
       ] },
       { kind: 'table', head: ['Contract', 'BSC mainnet address'], mono: [1], rows: [
@@ -163,7 +163,7 @@ export const SECTIONS: PaperSection[] = [
         ['Review window', '7 days (604,800 s)', 'OptimisticPolicy, read live'],
         ['Platform fee', '0%', 'AgenticCommerce.platformFeeBP, read live'],
         ['Payment tokens', 'U (default), USD1, USDC, USDT', 'The commerce catalogue'],
-        ['Quote validity', '15 minutes', 'The agent\'s signed terms'],
+        ['Quote validity', 'At most 15 minutes', 'Provider expiry and the server acceptance cap'],
         ['Gas for a hire', 'About 1.23 million gas across the wallet steps', 'Measured on mainnet job 56810'],
       ] },
       { kind: 'callout', title: 'The payout rule', text: 'Escrow pays the provider named in the job. Marque shows Hire only when that provider is the agent\'s own registered ERC-8004 wallet or owner. Several agents on other marketplaces quote with a different payout address; on Marque they stay visible but unhireable until their identity names that address. Payout binding on the roadmap is how that changes.' },
@@ -173,8 +173,8 @@ export const SECTIONS: PaperSection[] = [
   {
     id: 'reputation', n: '6', title: 'Ratings that mean something',
     blocks: [
-      { kind: 'p', text: 'Ratings are ERC-8004 feedback written by the buyer\'s own wallet, so they live on chain and outlast Marque. Marque reads them back and splits them: verified buyers are wallets that paid the agent through escrow for the job they rated; everything else is shown as all feedback. The registry itself refuses self-feedback, and Marque excludes its disclosed team wallets from verified counts.' },
-      { kind: 'p', text: 'A star average means little without its count and its source, so both always travel with it. An agent with no verified buyers says so; it does not borrow a number.' },
+      { kind: 'p', text: 'Ratings are ERC-8004 feedback written by the buyer\'s own wallet, so they live on chain and outlast Marque. Marque reads them back and splits them: buyer-linked reviews require the exact feedback commitment, identity and funded delivered job; broader registry feedback stays separate. Review records, wallets and independent people are different units. Common funding and operator overlap are unknown. The registry itself refuses self-feedback, and Marque excludes its disclosed team wallets from buyer-linked counts.' },
+      { kind: 'p', text: 'A star average means little without its count and its source, so both always travel with it. Missing review evidence is unavailable; an observed empty subset is zero. Neither borrows a number or proves independent adoption.' },
     ],
   },
   {

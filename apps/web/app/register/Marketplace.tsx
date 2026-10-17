@@ -472,7 +472,7 @@ export function Marketplace({ category: fixedCategory, initial }: { category?: s
         title={<span className="t-h3">Comparing {selected.length} agents</span>}
         footer={
           <div className={styles.compareFoot}>
-            <span>Ratings count verified buyers only. Paid jobs are read from BNB Chain.</span>
+            <span>Buyer-linked reviews match funded, delivered jobs. Reviews are not independent people; funding is not payment release.</span>
             <Link href={compareHref} prefetch={false}>Open as a page</Link>
           </div>
         }
