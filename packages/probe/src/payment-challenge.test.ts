@@ -64,7 +64,8 @@ describe('captured payment inspection never signs or buys', () => {
     const spy = vi.spyOn(globalThis, 'fetch').mockRejectedValue(new Error('must not fetch'))
     try {
       expect(inspectPaymentChallenge(capture(), { ...expected, maxAmountRaw: '-1' }).state).toBe('INVALID')
-      inspectPaymentChallenge(capture(), expected)
+      const saved = capture()
+      expect(inspectPaymentChallenge(saved, expected)).toEqual(inspectPaymentChallenge(saved, expected))
       expect(spy).not.toHaveBeenCalled()
     } finally { spy.mockRestore() }
   })

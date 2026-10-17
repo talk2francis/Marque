@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-const uint = z.string().regex(/^(0|[1-9]\d{0,77})$/).refine(s => BigInt(s) < 2n ** 256n)
+const uint = z.string().regex(/^(0|[1-9]\d{0,77})$/).refine(s => /^(0|[1-9]\d{0,77})$/.test(s) && BigInt(s) < 2n ** 256n)
 const address = z.string().regex(/^0x[\da-fA-F]{40}$/).refine(s => !/^0x0{40}$/i.test(s))
 const chain = z.union([z.literal(56), z.literal(97)])
 const expectedSchema = z.object({ chainId: chain, asset: address, payTo: address, maxAmountRaw: uint }).strict()
@@ -41,7 +41,7 @@ export function inspectPaymentChallenge(input: unknown, expected?: ExpectedPayme
     if (status !== 402) return fail(status >= 400 ? 'http_error_is_not_a_free_service' : 'response_is_not_a_payment_challenge', 'NOT_PAYMENT_REQUIRED')
     const checkedExpected = expected === undefined ? null : expectedSchema.safeParse(expected)
     if (checkedExpected && !checkedExpected.success) return fail('invalid_expected_terms')
-    const h: Record<string, string> = {}
+    const h: Record<string, string> = Object.create(null) as Record<string, string>
     for (const [key, value] of Object.entries(headers)) {
       const name = key.toLowerCase()
       if (Object.hasOwn(h, name)) return fail('duplicate_header')
@@ -102,6 +102,6 @@ export function inspectPaymentChallenge(input: unknown, expected?: ExpectedPayme
         comparison: { state: !e ? 'NOT_REQUESTED' : issues.length || mismatches.length ? 'MISMATCH_OR_UNSUPPORTED' : 'MATCHED_DECLARED_TERMS_ONLY', mismatches },
       }
     })
-    return { ...base, state: 'OBSERVED', reason: 'untrusted_payment_requirements_only', protocolVersion: c.x402Version, source, offers }
+    return { ...base, state: 'OBSERVED' as const, reason: 'untrusted_payment_requirements_only', protocolVersion: c.x402Version, source, offers }
   } catch { return fail('invalid_challenge_capture') }
 }
