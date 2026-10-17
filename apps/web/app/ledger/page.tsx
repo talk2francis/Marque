@@ -9,7 +9,7 @@ import styles from './ledger.module.css'
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 export const metadata = {
-  title: 'The Ledger — measured advantage, or none',
+  title: 'The Ledger: measured advantage, or none',
   description:
     'Agent and human analyst results, assessed against a rubric registered before scoring. Completion requires matching task and block evidence. Sealed calls are anchored on chain before their outcome is known.',
 }
@@ -81,7 +81,7 @@ function Benchmark({ b }: { b: LedgerBenchmark }) {
 
       <p className={styles.note}>
         {b.agentName ?? b.agentId} and a human analyst, assessed against rubric {b.rubricVersion}, registered{' '}
-        {new Date(b.rubricRegisteredAt).toISOString().slice(0, 16).replace('T', ' ')}Z — before
+        {new Date(b.rubricRegisteredAt).toISOString().slice(0, 16).replace('T', ' ')}Z, before
         either arm ran.
       </p>
 
@@ -136,7 +136,7 @@ function Benchmark({ b }: { b: LedgerBenchmark }) {
                   {h.rate !== null && <span className={styles.muted}> · {ms(Math.round(h.time ?? 0))} @ ${h.rate.toFixed(0)}/h</span>}
                 </>
               )}
-              agentVal={a.cost === null ? <span className={styles.muted}>—</span> : <b>${a.cost.toFixed(2)}</b>}
+              agentVal={a.cost === null ? <span className={styles.muted}>Unavailable</span> : <b>${a.cost.toFixed(2)}</b>}
             />
             <Cell
               label="QUALITY (blind)"
@@ -152,12 +152,11 @@ function Benchmark({ b }: { b: LedgerBenchmark }) {
               }
             />
             <p className={styles.expFoot}>
-              {a.reps} agent repetition{a.reps === 1 ? '' : 's'}, {h.reps} manual — the manual arm
-              by hand with a stopwatch. Time and cost are measured. Quality is graded blind by a
+              {a.reps} agent repetition{a.reps === 1 ? '' : 's'}, {h.reps} manual. Manual repetitions use a stopwatch. Time and cost are measured. Quality is graded blind by a
               language model (<code className="mono">scripts/ledger-grade.mjs</code>, DeepSeek, each
               anonymised answer scored three times against the rubric hashed before either arm ran,
               per-criterion median taken). Scores can differ between terse and detailed answers, so the two manual
-              repetitions can score far apart — a full write-up against a one-line summary of the
+              repetitions can score far apart: a full write-up against a one-line summary of the
               same finding.
             </p>
             {h.reps > 0 && (
@@ -165,7 +164,7 @@ function Benchmark({ b }: { b: LedgerBenchmark }) {
                 <HumanArmEvidence id={b.id} compact />
                 <span className={styles.expEvidenceNote}>
                   The manual arm was recorded on camera. This is the analyst running {b.id} by
-                  hand at the pinned block — <Link href={`/ledger/${b.id}`}>see it in context</Link>.
+                  hand at the pinned block. <Link href={`/ledger/${b.id}`}>see it in context</Link>.
                 </span>
               </div>
             )}
@@ -218,7 +217,7 @@ export default async function LedgerPage() {
           <Statement as="h1">The Ledger</Statement>
           <p className={styles.lede}>
             The Standard asks whether an agent is correct. The Ledger asks whether it is better
-            than doing the work yourself — the same task, graded blind against a rubric that was
+            than doing the work yourself: the same task, graded blind against a rubric that was
             written and hashed before either arm ran. Each card states what its own evidence
             still lacks before the comparison counts.
           </p>
