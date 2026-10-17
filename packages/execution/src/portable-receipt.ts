@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto'
 import { decodeEventLog, parseAbi, type Hex } from 'viem'
 import { z } from 'zod'
-import { boundedJson } from '@marque/probe'
+import { boundedJson } from '@marque/probe/bounded-json'
 import { canonicalise, type Receipt } from './receipt.js'
 import { verifyReceiptIntegrity, RECEIPT_DIGEST_CONTRACT } from './receipt-integrity.js'
 import { inspectTransaction, type Inspection, type InspectionRpc } from './chain-inspection.js'

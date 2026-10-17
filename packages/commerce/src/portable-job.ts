@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto'
 import { z } from 'zod'
-import { boundedJson } from '@marque/probe'
+import { boundedJson } from '@marque/probe/bounded-json'
 import { canonicalJson } from './description.js'
 import { network } from './config.js'
 import { SDK_VERSION } from './generated.js'

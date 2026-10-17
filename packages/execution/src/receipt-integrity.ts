@@ -1,4 +1,4 @@
-import { boundedJson } from '@marque/probe'
+import { boundedJson } from '@marque/probe/bounded-json'
 import { createHash } from 'node:crypto'
 import { z } from 'zod'
 import { canonicalise, type Receipt } from './receipt.js'
