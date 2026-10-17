@@ -63,3 +63,6 @@ Owner explicitly approves P08 then P09. The P07 STOP boundary is superseded for 
 
 
 P09 authorized scope: add a pure catalog diagnostic adapter and local CLI, not speculative autonomous procurement. P08 establishes no independently consented same-task pair; P07 exposes missing exact-task/endpoint/settlement/authority scope explicitly. Recommendations stay deferred; preserve manual browse. After its local checkpoint STOP; no automatic P10 or production rollout.
+
+
+P08-P09 checkpoints complete locally: P08d848288, P09tested sourcee5bd3f4. Both AMBER with explicit offline/insufficient-supply fallbacks; no genuine independent equal-task comparison or qualified-provider recommendation is asserted. Prerequisites to restore remain authenticated independent-operator consent and current exact-task/service/endpoint/quote/quality/settlement/authority evidence. Production cold capacity and slower Kerb API sample causality remain UNKNOWN. No automatic P10/release/paid action/chain write follows this approved batch.

@@ -62,3 +62,6 @@ P08, 17 October 13:26UTC: both public descriptors still GET200, byte hashes unch
 
 
 P09: fresh catalog export is not fresh source evidence; recompute age at explicit asOf. Catalog-v1 identity-level MCS pass, quoted price and category do not prove exact-task fit, confirmed payment or least authority. Two IDs do not establish two operators; new diagnostics keep these UNKNOWN and return no recommended winner.
+
+
+P09 closing, 17 October14:19UTC: successful health/PID continuity is not proof of zero performance impact. A7.78sKerb API mid-sample preceded a0.79sclosing sample; both complete/status=ok, cause UNKNOWN. Reduced only owned validation CPU50%, without modifying Kerb/Marque. Do not erase the slower result or infer production p95/capacity. P09's3supplied entries/7snapshot total remain dated10:17UTC source data; a fresh CLI execution does not renew source freshness, task acceptance, quote expiry or operator independence.

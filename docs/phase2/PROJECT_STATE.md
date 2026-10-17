@@ -1,8 +1,8 @@
-# P09 in validation, 17 October 2026
+# P09 checkpoint complete, 17 October 2026
 
-Owner explicitly approved P08 then P09. P08 checkpoint d848288 is complete (AMBER). P09 adds pure catalog suitability diagnostics and bounded local CLI; current catalog-v1 has insufficient task-bound evidence, so all selections stay rejected/unknown with recommended=null and manual browse. Exact service tuple, first-party disclosure, explicit clock, integer-only matching-token budget and reason traces preserved. [Contract](../vnext/P09_ROUTING_CONTRACT.md). No production, API/UI, DB/worker, authority, paid or chain changes. Stop after P09 checkpoint.
+Final sourcee5bd3f4:723tests passed/37gated skips; full workspace/CLI types, lint/copy and MCS anchor pass. Pure structured-intent diagnostics preserve exact service, quoted assets, original negative observations, stale/unknown scopes and disclosed inspection ordering. Current catalog cannot qualify a comparable exact-task pair: insufficient_comparable_supply, recommended=null, manual browse. [Checkpoint](../vnext/P09_CHECKPOINT.md). AMBER for unproven genuine recommendation/independence. Closing2026-10-17T14:19:45.406521+00:00 product/shared PIDs, original tmux/linger/proxy/production source unchanged; complete Marque/Kerb200health bodies pass. Slower7.78sKerb API mid-sample retained; cause unknown, only own validation CPU reduced50%. No deploy/push/migration/DB write/paid task/chain write/key/authority change. P08 checkpointd848288 and P09 are locally complete under explicit approval. STOP after P09; no automatic P10 or release.
 
-Requests: [2026-10-17] [combined commerce/product maintenance] [A/B] [commerce pure routing subpath, local diagnostics CLI/shared file reader and docs] Build inspectable deterministic insufficient-supply path; no duplicate marketplace, signer, task executor or invented trust/independence score.
+Requests: [2026-10-17] [combined commerce/product maintenance] [A/B] [commerce pure routing subpath, local diagnostics CLI/shared file reader and docs] Complete inspectable deterministic insufficient-supply fallback; preserve existing APIs, observations and buyer-owned signing. No task executor or invented trust score.
 
 # P08 checkpoint complete, 17 October 2026
 
