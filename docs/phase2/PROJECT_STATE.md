@@ -552,3 +552,7 @@ Request: [2026-10-16] [owner-directed combined repair] [commerce/product] P01A a
 
 
 Request: [2026-10-17] [owner-approved P10/P11] [commerce/product] P11 exact feedback/job/identity binding, typed review/address dedup evidence and honest Ledger linkage labels span commerce and existing public UI/APIs. P11 source is prepared in its own worktree while P10 frozen-source validation completes; P10 is not declared complete early. Expensive validation remains serial. Existing seller projection, raw-token payment/refund semantics, buyer signing, observations and all four categories are reused. No production, authority or chain write.
+
+### P10 local closure, 17 October 2026
+
+AMBER: read-only policy fallback complete on source585a71f; full build/lint/copy and42Chromium states pass,54screens inspected. Native asset authority remains unproven; two existing19px inline protocol-reference links remain audit advisories. Full results and dated production continuity are in docs/vnext/P10_CHECKPOINT.md. Production unchanged, no chain/paid writes. User already authorizes P11 next; full validation remains serial.

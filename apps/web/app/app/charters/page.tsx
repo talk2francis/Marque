@@ -41,7 +41,7 @@ export default async function ChartersPage() {
             Unexpired records {live.length > 0 && <span className={`mono ${styles.count}`}>{live.length}</span>}
           </h2>
           {live.length === 0 ? (
-            <EmptyState title="No charter is active.">
+            <EmptyState title="No unexpired policy records returned.">
               <p>
                 No active policy record was returned. This does not inspect wallet approvals or other onchain permissions.
               </p>

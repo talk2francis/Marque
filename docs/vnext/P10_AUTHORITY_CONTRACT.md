@@ -19,3 +19,5 @@ Rollback candidate source to P09 only after review of the intentionally disabled
 Touched-copy cleanup replaces legacy dash placeholders with explicit unavailable text; judge metadata no longer promises a ninety-second complete execution path. No runtime authority is restored.
 
 Manual mobile screenshot review corrected the policy footer from four cramped flex columns to stacked prose/navigation within the existing measure and a40px link target. Initial partial captures remain private; final proof is rerun on the rebuilt source.
+
+History empty-state title reports only the returned subset. A capped or failed read cannot establish that no active permission exists anywhere. No fresh grant or wallet-permission claim follows an empty list.
