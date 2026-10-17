@@ -1,3 +1,9 @@
+# P09 in validation, 17 October 2026
+
+Owner explicitly approved P08 then P09. P08 checkpoint d848288 is complete (AMBER). P09 adds pure catalog suitability diagnostics and bounded local CLI; current catalog-v1 has insufficient task-bound evidence, so all selections stay rejected/unknown with recommended=null and manual browse. Exact service tuple, first-party disclosure, explicit clock, integer-only matching-token budget and reason traces preserved. [Contract](../vnext/P09_ROUTING_CONTRACT.md). No production, API/UI, DB/worker, authority, paid or chain changes. Stop after P09 checkpoint.
+
+Requests: [2026-10-17] [combined commerce/product maintenance] [A/B] [commerce pure routing subpath, local diagnostics CLI/shared file reader and docs] Build inspectable deterministic insufficient-supply path; no duplicate marketplace, signer, task executor or invented trust/independence score.
+
 # P08 checkpoint complete, 17 October 2026
 
 Source d7ce335:698tests passed/37gated skips; full serial workspace types, CLI types, lint/copy and MCS anchor pass. Allowed offline synthetic replay preserves failures and always says comparison UNPROVEN; fresh descriptor GETs prove reachability only. No independent consenting same-task pair established. [Checkpoint](../vnext/P08_CHECKPOINT.md). Closing13:42:41UTC service/product PIDs, original tmux/linger/proxy/production source unchanged; complete Marque/Kerb health bodies pass. No deployment, chain write, paid task, key, push, migration or DB write. AMBER. P09 already approved, follows this local checkpoint; stop after P09.

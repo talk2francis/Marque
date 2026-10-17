@@ -55,3 +55,6 @@ EXISTS (candidate validated at source0de3085; see P07_CHECKPOINT.md): opt-in ver
 
 
 P08: offline same-context replay EXISTS locally; genuine neutral two-independent-provider comparison UNSUPPORTED by current evidence. Fixture-only primitive equality checks are not financial judgement or a quality ranking. Existing Ledger and MCS unchanged.
+
+
+P09: strict structured-intent suitability diagnostics EXISTS locally; deterministic scoped inspection ordering, rejection/unknown reasons and insufficient_comparable_supply/manual browse. Qualified-provider recommendation/routing DEFERRED because catalog-v1 lacks authenticated task-bound evidence and an established comparable pair. No automatic hire or house preference.

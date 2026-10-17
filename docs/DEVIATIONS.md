@@ -1493,3 +1493,6 @@ Planned machine service inventory and independent client acceptance; shipped the
 
 
 P08: genuine outside comparison reduced to explicit synthetic offline replay, retaining failures and no winner; consent and operator independence unknown. Recovery requires two safe consenting same-task operators. Existing Ledger unchanged; see docs/vnext/P08_TRIAL_CONTRACT.md.
+
+
+P09: recommendations reduced to explicit insufficient-supply diagnostics with exact selection, stale/unknown reasons and compatible-token budgets. Current catalog cannot authenticate task fit or independence; no winner/auto-hire. Restore real evidence adapters after comparable supply is established. Existing marketplace/API/authority unchanged.

@@ -59,3 +59,6 @@ Existing catalog generation time is the base projection computation time, not ea
 
 
 P08, 17 October 13:26UTC: both public descriptors still GET200, byte hashes unchanged from P02; declared operations are not consent, read-only task acceptance or operator independence. Historical paid Plinth and Brain declarations do not demonstrate equal frozen input. Replay pass is not fair comparison; report always UNPROVEN.
+
+
+P09: fresh catalog export is not fresh source evidence; recompute age at explicit asOf. Catalog-v1 identity-level MCS pass, quoted price and category do not prove exact-task fit, confirmed payment or least authority. Two IDs do not establish two operators; new diagnostics keep these UNKNOWN and return no recommended winner.

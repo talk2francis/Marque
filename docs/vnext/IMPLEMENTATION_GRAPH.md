@@ -60,3 +60,6 @@ P05 checkpoint5a5c9c9 and P06 checkpoint9366e43 are incorporated. P07 completes 
 ## P08-P09 owner authorization, 17 October 2026
 
 Owner explicitly approves P08 then P09. The P07 STOP boundary is superseded for these two phases only. Production release, payments, signing and chain writes remain separate gates. P08 selects its allowed offline fixture replay because fresh descriptor reads do not establish two independent consenting same-task providers. P09 may expose deterministic insufficient_comparable_supply diagnostics; no manufactured winner or automatic hire. No automatic P10.
+
+
+P09 authorized scope: add a pure catalog diagnostic adapter and local CLI, not speculative autonomous procurement. P08 establishes no independently consented same-task pair; P07 exposes missing exact-task/endpoint/settlement/authority scope explicitly. Recommendations stay deferred; preserve manual browse. After its local checkpoint STOP; no automatic P10 or production rollout.
