@@ -561,3 +561,8 @@ AMBER: read-only policy fallback complete on source585a71f; full build/lint/copy
 ### P11 validation transition
 
 P10 final checkpoint4b40705 incorporated, including585a71f history-scope correction. P11 source preparation is preserved detached; the isolated p07 workspace switches to the P11 feature branch for normal local cache reuse. Full tests, isolated fixture regressions, serial types, standalone build, lint/copy and read-only browser proof run under25%CPU. Production is untouched. Validation pending; no P11 completion claim.
+
+
+### P11 local closure, 17 October 2026 UTC
+
+AMBER: source63386e0 exact feedback/job/identity/amount binding, separate review/wallet/job evidence and explicit unavailable Ledger links validated.774general tests pass(51gated skips in that run); separate48isolated PostgreSQL regressions pass. Workspace types, standalone build, lint/copy pass.48distinct snapshot browser states validated across preserved/focused runs;78custom+20audit images inspected. Audit inline-target advisories and cold local catalog limits remain explicit. Production metadata21:43UTC confirms41runs with0explicit links; no fabricated quality/independence metric. Production97ef4c7/processes/proxy unchanged; no chain/paid writes or deploy/push. See docs/vnext/P11_CHECKPOINT.md for exact attempts, scopes, commands and rollback. STOP after P11; P12/release/new authority not approved.

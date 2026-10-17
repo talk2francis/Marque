@@ -64,3 +64,5 @@ P10 candidate: native buyer-owned session enforcement UNPROVEN; registry new gra
 
 
 P11 candidate: exact prepared-feedback/job/identity matching and versioned record/wallet/job dedup evidence EXIST locally; query failure has explicit unavailable state. Existing payment/refund raw-token seller projection and portable paid-job inspection REUSED. Verified Ledger-to-receipt commercial outcome UNAVAILABLE in current inspected records; operator/funding/human independence UNKNOWN. No new global reputation score or mutable historical backfill.
+
+P11 closing17October: exact review binding/opt-in evidence and unavailable Ledger references VALIDATED LOCALLY on63386e0;774general+48isolatedDBtests, workspace types/build/lint/copy pass.48snapshot browser states covered;20DOMaudit cases retain inline-target advisories. Production metadata21:43UTC confirms no explicit Ledger links; production remains97ef4c7. Native authority/independence/real linked outcomes remain unproven. PhaseAMBER, not deployed.

@@ -99,3 +99,5 @@ P10: planned proven native sessions; shipped the permitted read-only decoded pol
 
 
 P11: outcome learning reduced to exact feedback binding, review/address/job dedup, unknown independence and explicit unavailable Ledger linkage. No global score, inferred ROI, counterfeit/funding accusation or synthetic customer claim. Existing seller cohort amounts and job/receipt verifiers reused; no duplicate earnings dashboard. P11 code prepared independently while P10 frozen validation finishes; final P10 checkpoint retained and expensive validation serialized.
+
+P11 final AMBER: browser/API proof uses the preexisting16October read-only snapshot, separately from production SQL/public health and historical chain verification. Preserve cold local503/13.81s/23.01s observations under25%CPU; production cold capacity remains a release measurement gate. Full-page capture timed out; completed unchanged DOM checks with viewport artifacts and48distinct cases across focused reruns. Inline tap-target/mobile-caption polish deferred; no clean accessibility or current-production-availability claim. No product source or assertion weakened to correct readiness/capture harness failures.
