@@ -31,7 +31,10 @@ async function main() {
     default: throw new Error('Choose catalog, receipt, job, plan or payment-capture. Only catalog makes one GET.')
   }
 }
-main().then(result => { console.log(JSON.stringify(result, null, 2)) }).catch(error => {
+main().then(result => {
+  console.log(JSON.stringify(result, null, 2))
+  if (result && typeof result === 'object' && (('ok' in result && result.ok === false) || ('state' in result && ['INVALID', 'FAILED', 'UNSUPPORTED', 'UNAVAILABLE'].includes(String(result.state))))) process.exitCode = 2
+}).catch(error => {
   console.error(JSON.stringify(error instanceof CatalogReadError ? { error: error.code, retryAfterSeconds: error.retryAfterSeconds, automaticRetry: false } : { error: 'invalid_input_or_read_failure' }))
   process.exitCode = 1
 })

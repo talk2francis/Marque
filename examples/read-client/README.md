@@ -5,13 +5,15 @@ This private TypeScript example consumes local checkout subpath exports. These p
 From this directory, using the repository tools:
 
 ```
-pnpm exec tsx server.ts catalog https://marque.trade
-pnpm exec tsx server.ts receipt /absolute/path/to/captured-receipt-bundle.json
-pnpm exec tsx server.ts job /absolute/path/to/captured-job-bundle.json
-pnpm exec tsx server.ts plan /absolute/path/to/reviewed-plan-input.json
-pnpm exec tsx server.ts payment-capture /absolute/path/to/captured-response.json
+node --import tsx server.ts catalog https://marque.trade
+node --import tsx server.ts receipt /absolute/path/to/captured-receipt-bundle.json
+node --import tsx server.ts job /absolute/path/to/captured-job-bundle.json
+node --import tsx server.ts plan /absolute/path/to/reviewed-plan-input.json
+node --import tsx server.ts payment-capture /absolute/path/to/captured-response.json
 pnpm exec tsc --noEmit -p tsconfig.json
 ```
+
+A parsed invalid/failed/unsupported/unavailable proof or rejected plan exits 2 and retains its explicit reason; this is never a verification success. A decoded payment observation remains a claim even when the command exits 0.
 
 Only `catalog` makes a network request: one GET, no credentials, no redirects, at most 2 MiB, 15s timeout, no retry or automatic pagination. Limit 10 is a request cap, not a population count. A cold 503 means unavailable, never zero supply. On 429 inspect bounded Retry-After and request budget before a later explicit retry. Never replay a write or provider task automatically.
 
