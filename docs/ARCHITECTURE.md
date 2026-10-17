@@ -221,3 +221,6 @@ Pure commerce ./routing reuses catalog-v1 and SDK text sanitization. Strict stru
 ## P10 authority boundary
 
 The existing registry writer is historical testnet policy storage, not native asset authority. Candidate blocks new grant/execute and quarantines the unused Altana adapter before signer/SDK initialization. Existing historical reads/revocation remain; reads no longer update rows. Pure decoded-action policy preview and no-wallet four-category UI expose unresolved account/token/recipient/enforcement bounds. The legacy judge flow stops at preview and uses catalog evidence. See [contract](vnext/P10_AUTHORITY_CONTRACT.md). No new signer, session, escrow, schema or production deployment.
+
+
+P11: existing ERC-8004 ratings/track/storefront share exact prepared-feedback/job/identity binding; legacy API shape preserved, opt-in rating-evidence v1 separates review/address/job units and unknown independence. Track query failure is unavailable, not zero. Existing Ledger GET adds opt-in bounded read-only outcome-reference metadata with explicit unverified/unavailable links. P03 raw-token seller outcomes and P06 chain inspector are reused. No new score/protocol, schema or history mutation. See vnext/P11_REPUTATION_CONTRACT.md.

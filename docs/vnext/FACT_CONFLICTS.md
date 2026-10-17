@@ -68,3 +68,6 @@ P09 closing, 17 October14:19UTC: successful health/PID continuity is not proof o
 
 
 P10 source: anchoring a policy does not enforce its selectors/token/recipient limits. The old web grant used Marque operator testnet wallet, not buyer ownership. Altana wrapper widened native cap, changed total period and falsely marked cached state fromChain; it is quarantined, not declared fixed native authority. SDK0.9.0 installed is not deployed KeyStore version evidence. Public14:46UTC charter list is capped history, not user/independent-person count.
+
+
+P11 source finding: storefront/track/agentRatings previously matched any delivered buyer/provider job; same-provider identity or unmatched feedback could qualify. New predicate requires exact original feedback/job/intent/asset binding. Dated actual mainnet snapshot shows30old/30exact matched before team exclusions,0old-only, not observed existing inflation. Reviews are records, distinct addresses are not humans. Legacy funded label Paid and settled label COMPLETED-or-PAID are clarified as escrow funded/completed, not PaymentReleased. Failed track reads are unavailable, not measured zero.41Ledger rows have no explicit links in inspected fields; existing Plinth PAID is independently rechecked but not a linked Ledger outcome.

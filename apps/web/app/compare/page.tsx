@@ -11,7 +11,7 @@ export const dynamic = 'force-dynamic'
 export const metadata = {
   title: 'Compare agents',
   description:
-    'Agents side by side on the things that decide a hire: what it does, whether you can hire it now, whether it passed the standard, its paid jobs on chain, verified ratings, whether you can try it free, its identity, and what it costs.',
+    'Agents side by side on the things that decide a hire: what it does, whether you can hire it now, whether it passed the standard, its funded jobs on chain, buyer-linked reviews, whether you can try it free, its identity, and what it costs.',
 }
 
 export default async function ComparePage({ searchParams }: { searchParams: Promise<{ agents?: string }> }) {
@@ -36,7 +36,7 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
           <p className={styles.lede}>
             The same questions for each, in the order they decide a hire: what it does, whether you
             can hire it now, whether it passed the standard, what it has done on chain, whether you
-            can try it free, who it is, and what it costs. Ratings count only verified buyers.
+            can try it free, who it is, and what it costs. Buyer-linked ratings count review records with an exact funded delivered job link; reviews do not establish independent people.
           </p>
         </header>
 
@@ -53,9 +53,8 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
         )}
 
         <p className={styles.note}>
-          <ProvenanceChip provenance="ONCHAIN" /> Paid jobs and ratings are read from BNB Chain&apos;s
-          escrow and reputation contracts. <ProvenanceChip provenance="MEASURED" /> A live quote is one
-          the agent signed for Marque. A warrant is a pass on the published MCS case; a failure names the
+          <ProvenanceChip provenance="ONCHAIN" /> Funding, job outcomes and ratings are read from BNB Chain&apos;s
+          escrow and reputation contracts. <ProvenanceChip provenance="MEASURED" /> A quote states whether it is provider signed or identity checked without a signature; its expiry still applies. A warrant is a pass on the published MCS case; a failure names the
           field. A <ProvenanceChip provenance="CLAIMED" /> price is the one the agent declares.
         </p>
       </main>

@@ -70,27 +70,27 @@ export function CompareTable({ chosen, hireLink, tryLink, onNavigate }: {
         </div>
       ))}
 
-      <div className={styles.rowLabel}>Paid jobs (on chain)</div>
+      <div className={styles.rowLabel}>Escrow-funded jobs (on chain)</div>
       {chosen.map((a) => {
         const j = a.track.jobs
         const d = deliveryWords(a.track.delivery.medianSeconds)
         return (
           <div key={a.agentId} className={styles.cell}>
-            {j.funded > 0 ? (
+            {a.track.available === false ? <span>Indexed job evidence unavailable</span> : j.funded > 0 ? (
               <>
-                <span>{j.funded} paid · {j.delivered} delivered{j.refunded ? ` · ${j.refunded} refunded` : ''}{j.disputed ? ` · ${j.disputed} disputed` : ''} <ProvenanceChip provenance="ONCHAIN" /></span>
+                <span>{j.funded} funded · {j.delivered} delivered{j.refunded ? ` · ${j.refunded} refunded` : ''}{j.disputed ? ` · ${j.disputed} disputed` : ''} <ProvenanceChip provenance="ONCHAIN" /></span>
                 {d ? <span className={styles.muted}>delivers in {d} (median)</span> : null}
                 {j.fromTeam ? <span className={styles.muted}>{j.fromTeam} from Marque team wallets</span> : null}
               </>
-            ) : <span className={styles.muted}>No paid jobs yet</span>}
+            ) : <span className={styles.muted}>No funded jobs in this index</span>}
           </div>
         )
       })}
 
-      <div className={styles.rowLabel}>Verified buyers</div>
+      <div className={styles.rowLabel}>Buyer-linked reviews</div>
       {chosen.map((a) => (
         <div key={a.agentId} className={styles.cell}>
-          <Stars value={a.track.verified.averageStars} count={a.track.verified.count} label="verified" />
+          {a.track.available === false ? 'Rating evidence unavailable' : <Stars value={a.track.verified.averageStars} count={a.track.verified.count} label="buyer-linked reviews" />}
         </div>
       ))}
 

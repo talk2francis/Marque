@@ -86,7 +86,7 @@ export interface CategoryTile {
 
 /** Per quest category: live hireable count, operators, cheapest live quote, best verified rating. */
 export async function categoryTiles(ready: MarketRow[]): Promise<CategoryTile[] | null> {
-  const cov = await cachedProjection('home:coverage:v1', () => coverage(), { freshMs: 60_000, timeoutMs: 8_000, staleWhileRevalidate: true })
+  const cov = await cachedProjection('home:coverage:v2', () => coverage(), { freshMs: 60_000, timeoutMs: 8_000, staleWhileRevalidate: true })
     .then((p) => p.value).catch(() => null)
   if (!cov) return null
   return QUEST_CATEGORIES.map((category) => {

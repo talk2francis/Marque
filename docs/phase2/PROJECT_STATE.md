@@ -549,3 +549,6 @@ See the checkpoint block in the P2-00 report, reproduced here as it is finalised
 - [Sat 26 Sep] Damian acknowledgement sent. Gwen's six questions pending; Francis is following up.
 
 Request: [2026-10-16] [owner-directed combined repair] [commerce/product] P01A authorized edits span quote/claim/listing APIs and their existing UI; minimal A0 integrity fixes, no production merge/deploy. Existing fonts, artwork, four categories, escrow, buyer signing and SDK pins retained.
+
+
+Request: [2026-10-17] [owner-approved P10/P11] [commerce/product] P11 exact feedback/job/identity binding, typed review/address dedup evidence and honest Ledger linkage labels span commerce and existing public UI/APIs. P11 source is prepared in its own worktree while P10 frozen-source validation completes; P10 is not declared complete early. Expensive validation remains serial. Existing seller projection, raw-token payment/refund semantics, buyer signing, observations and all four categories are reused. No production, authority or chain write.

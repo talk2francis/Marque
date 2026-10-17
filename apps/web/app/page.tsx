@@ -294,7 +294,7 @@ function CategoryTileView({ t, i }: { t: CategoryTile; i: number }) {
         {t.cheapest ? <span>from <b className="num">{t.cheapest}</b></span> : <span>no valid quote at snapshot</span>}
         <span>Quote snapshot {t.measuredAt.replace('T', ' ').slice(0, 19)} UTC</span>
         <span className={styles.tileRating}>
-          {t.bestRating ? <Stars value={t.bestRating.stars} count={t.bestRating.count} label="verified" /> : 'No verified ratings yet'}
+          {t.bestRating ? <Stars value={t.bestRating.stars} count={t.bestRating.count} label="buyer-linked reviews" /> : 'No buyer-linked reviews available'}
         </span>
       </span>
       <span className={styles.tileGo}>Browse {j.name.toLowerCase()} <ArrowRight aria-hidden="true" /></span>

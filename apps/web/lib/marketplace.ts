@@ -4,7 +4,7 @@ import { firstPartyIds, canonicalAgentIdSql } from '@marque/db'
 import { boundedCommerceRead } from '@marque/commerce/reads'
 import { commercialStates, formatAmount, type CommercialState } from '@marque/commerce'
 import { agentState, TASK_FOR_CATEGORY } from './agent-state'
-import { agentTracks, EMPTY_TRACK, type AgentTrack } from './agent-track'
+import { agentTracks, trackFromSource, type AgentTrack } from './agent-track'
 import { selectedAgentRows } from './compare-selection'
 import { expireMarketQuote } from './quote-expiry'
 export { expireMarketQuote } from './quote-expiry'
@@ -369,7 +369,7 @@ async function queryAgents(): Promise<MarketRow[]> {
   })
 
   const tracks = await agentTracks(56)
-  return thirdParty.map((r) => ({ ...r, track: (r.tokenId && tracks[r.tokenId]) || EMPTY_TRACK(56) }))
+  return thirdParty.map((r) => ({ ...r, track: trackFromSource(r.tokenId ?? '', 56, tracks) }))
 }
 
 type ServiceCommerceRow = Awaited<ReturnType<typeof commercialStates>> extends Map<number, infer V> ? V : never

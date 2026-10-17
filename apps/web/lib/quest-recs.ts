@@ -71,7 +71,7 @@ function toRec(r: MarketRow, rating: { count: number; averageStars: number | nul
 /** Cached for a minute: quotes refresh on the probe's schedule, not per page view. */
 export async function questRecommendations(): Promise<{ at: string; categories: QuestCategoryRecs[] } | null> {
   try {
-    const p = await cachedProjection('quest:recs:v1', async () => ({ at: new Date().toISOString(), categories: await recs() }), { freshMs: 60_000, timeoutMs: 20_000, staleWhileRevalidate: true })
+    const p = await cachedProjection('quest:recs:v2', async () => ({ at: new Date().toISOString(), categories: await recs() }), { freshMs: 60_000, timeoutMs: 20_000, staleWhileRevalidate: true })
     return p.value
   } catch {
     return null

@@ -2,6 +2,7 @@ import 'server-only'
 import { sql } from 'drizzle-orm'
 import { cachedProjection, canonicalAgentIdSql, db, firstPartyAgents } from '@marque/db'
 import { commercialStates, disputeWindowSeconds, formatAmount, sellerFor, teamWallets, type ServiceCommerce } from '@marque/commerce'
+import { buyerFeedbackBinding } from '@marque/commerce/feedback'
 import { agentTrack, type AgentTrack } from './agent-track'
 import { readManifest, type Manifest } from './manifest'
 import { referenceAgent } from './reference-agents'
@@ -56,7 +57,7 @@ export interface Storefront {
  */
 export async function storefront(agentId: string): Promise<Storefront | null> {
   try {
-    const p = await cachedProjection(`storefront:v2:${agentId}`, () => computeStorefront(agentId), { freshMs: 30_000, timeoutMs: 12_000, staleWhileRevalidate: true })
+    const p = await cachedProjection(`storefront:v3:${agentId}`, () => computeStorefront(agentId), { freshMs: 30_000, timeoutMs: 12_000, staleWhileRevalidate: true })
     // A projection can outlive the price it contains, including on refresh failure.
     if (p.value?.commerce && (!p.value.commerce.quoteExpiresAt || Date.parse(p.value.commerce.quoteExpiresAt) <= Date.now())) return { ...p.value, commerce: { ...p.value.commerce, state: 'quoteable', failure: 'expired', priceLabel: null } }
     return p.value
@@ -89,10 +90,8 @@ async function computeStorefront(agentId: string): Promise<Storefront | null> {
       where agent_id = ${agentId} and checked_at > now() - interval '24 hours'`).then(rowsOf).catch(() => []),
     db().execute(sql`
       select r.client, r.value, r.value_decimals, r.tx_hash, r.block_time, r.feedback_hash, c.comment, c.job_id,
-             exists (select 1 from commerce_job j join hire_intent i on i.id = j.intent_id
-                     where j.chain_id = r.chain_id and j.client = r.client and j.provider = lower(${s(a['agent_wallet']) ?? ''})
-                       and j.state in ('SUBMITTED', 'DISPUTED', 'COMPLETED', 'PAID')) as verified
-      from rating r left join rating_comment c on c.feedback_hash = r.feedback_hash and c.chain_id = r.chain_id
+             ${buyerFeedbackBinding(sql`${s(a['agent_wallet']) ?? ''}`, sql`${agentId}`)} as verified
+      from rating r left join rating_comment c on lower(c.feedback_hash) = lower(r.feedback_hash) and c.chain_id = r.chain_id and c.agent_token_id = r.agent_token_id and lower(c.client) = lower(r.client)
       where r.chain_id = 56 and r.agent_token_id = ${tokenId} and not r.revoked and r.tag1 = 'starred'
       order by r.block_number desc limit 8`).then(rowsOf).catch(() => []),
     commercialStates().catch(() => new Map<number, ServiceCommerce>()),
@@ -154,7 +153,7 @@ async function computeStorefront(agentId: string): Promise<Storefront | null> {
       stars: Math.round(Number(r['value']) / 10 ** Number(r['value_decimals'] ?? 0) / 20),
       client: String(r['client']), at: iso(r['block_time']), tx: String(r['tx_hash']),
       verified: r['verified'] === true && !team.has(String(r['client'])), team: team.has(String(r['client'])),
-      comment: s(r['comment']), jobId: s(r['job_id']),
+      comment: s(r['comment']), jobId: r['verified'] === true ? s(r['job_id']) : null,
     })),
     sample,
     disputeWindowSeconds: windowS,

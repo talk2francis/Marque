@@ -8,6 +8,8 @@ import { DELIVERED, type JobState } from './state.js'
 import { HireError } from './hire.js'
 import type { Call } from './calls.js'
 import { teamWallets } from './quest.js'
+import { boundedCommerceRead } from './read-budget.js'
+import { buyerFeedbackBinding, feedbackIdentity, feedbackEvidence } from './feedback-proof.js'
 
 /**
  * Ratings (SPEC-TRACKING 8, P2-04). The server never signs: it checks the guards, stores
@@ -93,13 +95,14 @@ export async function prepareRating(input: { chainId: ChainId; jobId: string; wa
  * Storefront averages (SPEC-TRACKING 8): verified buyers (raters with a Marque-bound,
  * delivered job for this agent) and every ERC-8004 rating, kept apart, never mixed.
  */
-export async function agentRatings(chainId: ChainId, agentTokenId: string, providerWallet: string) {
-  const rows = rowsOf(await db().execute(sql`
-    select r.client, r.value, r.value_decimals, r.tag1,
-      exists (select 1 from commerce_job j join hire_intent i on i.id = j.intent_id
-              where j.chain_id = r.chain_id and j.client = r.client and j.provider = ${providerWallet.toLowerCase()}
-                and j.state in ('SUBMITTED','DISPUTED','COMPLETED','PAID')) as verified
-    from rating r where r.chain_id = ${chainId} and r.agent_token_id = ${agentTokenId} and not r.revoked`))
+export async function agentRatings(chainId: ChainId, agentTokenId: string, providerWallet: string, options: { evidence?: boolean } = {}) {
+  const identity = feedbackIdentity(chainId, agentTokenId)
+  const rows = rowsOf(await boundedCommerceRead(sql`
+    select r.client, r.value, r.value_decimals, r.tag1, r.block_number::text, r.block_time, r.tx_hash, c.job_id,
+      ${buyerFeedbackBinding(sql`${providerWallet.toLowerCase()}`, sql`${identity}`)} as verified
+    from rating r left join rating_comment c on lower(c.feedback_hash) = lower(r.feedback_hash)
+      and c.chain_id = r.chain_id and c.agent_token_id = r.agent_token_id and lower(c.client) = lower(r.client)
+    where r.chain_id = ${chainId} and r.agent_token_id = ${agentTokenId} and not r.revoked`, 'exact'))
   const score = (r: Record<string, unknown>) => Number(r['value']) / 10 ** Number(r['value_decimals'] ?? 0)
   const avg = (xs: Array<Record<string, unknown>>) => (xs.length ? Number((xs.reduce((a, r) => a + score(r), 0) / xs.length / 20).toFixed(2)) : null)
   // Team wallets (config/team-wallets.json) test the product; their ratings are real but never
@@ -111,5 +114,9 @@ export async function agentRatings(chainId: ChainId, agentTokenId: string, provi
     verifiedBuyers: { count: verified.length, averageStars: avg(verified) },
     // Registry-wide includes feedback not on the 0-100 "starred" scale; its average is shown only over starred entries.
     allFeedback: { count: rows.length, starredCount: rows.filter((r) => String(r['tag1']) === 'starred').length, averageStars: avg(rows.filter((r) => String(r['tag1']) === 'starred')) },
+    ...(options.evidence ? { evidence: feedbackEvidence(chainId, agentTokenId, rows.map(r => ({
+      client: String(r['client']), verified: r['verified'] === true, jobId: r['job_id'] == null ? null : String(r['job_id']),
+      blockNumber: String(r['block_number']), at: r['block_time'] == null ? null : new Date(String(r['block_time'])).toISOString(), tx: String(r['tx_hash']),
+    })), teamWallets()) } : {}),
   }
 }

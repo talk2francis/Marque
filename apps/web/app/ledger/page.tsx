@@ -213,6 +213,7 @@ export default async function LedgerPage() {
     <>
       <SiteHeader active="ledger" />
       <main className={styles.page}>
+        <p className={styles.note}>Ledger measurements do not establish a paid hire or financial return. <a href="/api/v1/ledger?format=outcomes">Receipt and job reference evidence</a> reports missing links explicitly; original observations remain unchanged.</p>
         <header className={styles.head}>
           <Statement as="h1">The Ledger</Statement>
           <p className={styles.lede}>

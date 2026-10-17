@@ -3,6 +3,7 @@ import { sql } from 'drizzle-orm'
 import { cachedProjection } from '@marque/db'
 import { boundedCommerceRead } from '@marque/commerce/reads'
 import { teamWallets } from '@marque/commerce'
+import { buyerFeedbackBinding } from '@marque/commerce/feedback'
 
 /**
  * An agent's record as a seller, read from the chain index (DESIGN-SYSTEM.md 8.3 and
@@ -10,12 +11,16 @@ import { teamWallets } from '@marque/commerce'
  * and how long it takes to deliver once paid. Every figure is a COUNT or a median over
  * indexed ERC-8183 and ERC-8004 events on one network; nothing is declared or estimated.
  *
- * A verified buyer is a wallet that paid this agent through a Marque hire that was
- * delivered, and is not on the team list (SPEC-TRACKING anti-wash, invariant 27).
+ * Buyer-linked review records match the exact feedback commitment, funded job
+ * and identity. Counts are reviews, not unique people, and exclude the team list (SPEC-TRACKING anti-wash, invariant 27).
  */
 export interface Rating { count: number; averageStars: number | null }
 export interface AgentTrack {
   chainId: number
+  evidenceVersion?: 1
+  available?: boolean
+  computedAt?: string | null
+  sourceStale?: boolean
   verified: Rating
   allFeedback: Rating & { total: number }
   jobs: { funded: number; delivered: number; settled: number; refunded: number; disputed: number; fromTeam: number }
@@ -28,7 +33,7 @@ const num = (v: unknown): number | null => (v === null || v === undefined ? null
 const stars = (v: unknown): number | null => { const x = num(v); return x === null ? null : Number((x / 20).toFixed(2)) }
 
 export const EMPTY_TRACK = (chainId: number): AgentTrack => ({
-  chainId,
+  chainId, evidenceVersion: 1, available: true, computedAt: null, sourceStale: false,
   verified: { count: 0, averageStars: null },
   allFeedback: { count: 0, averageStars: null, total: 0 },
   jobs: { funded: 0, delivered: 0, settled: 0, refunded: 0, disputed: 0, fromTeam: 0 },
@@ -44,11 +49,7 @@ async function computeTracks(chainId: number): Promise<Record<string, AgentTrack
       with r as (
         select r.agent_token_id as tid, r.client, r.tag1,
                r.value::numeric / power(10, coalesce(r.value_decimals, 0)) as score,
-               exists (
-                 select 1 from commerce_job j join hire_intent i on i.id = j.intent_id
-                 where j.chain_id = r.chain_id and j.client = r.client and j.provider = lower(a.agent_wallet)
-                   and j.state in ('SUBMITTED', 'DISPUTED', 'COMPLETED', 'PAID')
-               ) as paid
+               ${buyerFeedbackBinding(sql`lower(a.agent_wallet)`, sql`a.id`)} as paid
         from rating r
         left join agent a on a.chain_id = r.chain_id and a.token_id = r.agent_token_id
         where r.chain_id = ${chainId} and not r.revoked
@@ -101,18 +102,26 @@ async function computeTracks(chainId: number): Promise<Record<string, AgentTrack
 }
 
 /** Cached for a minute: ratings and jobs change on the indexer's pace, not per page view. */
-export async function agentTracks(chainId = 56): Promise<Record<string, AgentTrack>> {
+export async function agentTracks(chainId = 56): Promise<{ tracks: Record<string, AgentTrack>; computedAt: string; stale: boolean } | null> {
   try {
-    const p = await cachedProjection(`agent:tracks:v1:${chainId}`, () => computeTracks(chainId), { freshMs: 60_000, timeoutMs: 8_000, staleWhileRevalidate: true })
-    return p.value
+    const p = await cachedProjection(`agent:tracks:v2:${chainId}`, () => computeTracks(chainId), { freshMs: 60_000, timeoutMs: 8_000, staleWhileRevalidate: true })
+    return { tracks: p.value, computedAt: p.computedAt, stale: p.stale }
   } catch {
-    return {}
+    return null
   }
 }
 
 export async function agentTrack(tokenId: string | null, chainId = 56): Promise<AgentTrack> {
-  if (!tokenId) return EMPTY_TRACK(chainId)
-  return (await agentTracks(chainId))[tokenId] ?? EMPTY_TRACK(chainId)
+  if (!tokenId) return { ...EMPTY_TRACK(chainId), available: false }
+  const source = await agentTracks(chainId)
+  return trackFromSource(tokenId, chainId, source)
+}
+
+
+/** Empty indexed subset and unavailable read are different states. */
+export function trackFromSource(tokenId: string, chainId: number, source: Awaited<ReturnType<typeof agentTracks>>): AgentTrack {
+  if (!source) return { ...EMPTY_TRACK(chainId), available: false }
+  return { ...(source.tracks[tokenId] ?? EMPTY_TRACK(chainId)), available: true, computedAt: source.computedAt, sourceStale: source.stale }
 }
 
 /** "about 20 s", "about 3 min": a measured median, worded. */

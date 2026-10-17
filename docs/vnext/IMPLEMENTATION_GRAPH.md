@@ -71,3 +71,6 @@ P08-P09 checkpoints complete locally: P08d848288, P09tested sourcee5bd3f4. Both 
 ## P10-P11 owner approval, 17 October 2026
 
 Owner explicitly approves P10 then P11, superseding the P09 stop for these phases only. P10 inventories the unsafe/unproven session rails and uses the specified read-only policy fallback; no native grant is enabled. Commit its scoped evidence, then proceed to P11 provenance/outcome learning without another approval. No P12, production release, paid action, key use, new authority or chain write follows automatically.
+
+
+P11 owner-authorized implementation: reuse P03 seller cohort/raw-token outcomes, P06 confirmed job/receipt inspection and existing ERC-8004/Ledger reads. Exact feedback binding, opt-in typed dedup/provenance and unavailable link report precede any future learning/ranking. P10 native authority remains deliberately unavailable. P11 is prepared in a separate worktree during P10 frozen checks; incorporate its completed checkpoint without runtime changes. No automatic P12, deployment, paid job or authority.

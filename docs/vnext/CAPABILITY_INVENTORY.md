@@ -61,3 +61,6 @@ P09: strict structured-intent suitability diagnostics EXISTS locally; determinis
 
 
 P10 candidate: native buyer-owned session enforcement UNPROVEN; registry new grant/execute and Altana construction DISABLED intentionally. Pure strict denial preview and four-category no-wallet policy review EXIST. Historical registry records/revocation retained; observational GET has no writes. Existing mainnet buyer-owned fee-escrow hire unchanged. No KeyStore version or onchain policy safety claim.
+
+
+P11 candidate: exact prepared-feedback/job/identity matching and versioned record/wallet/job dedup evidence EXIST locally; query failure has explicit unavailable state. Existing payment/refund raw-token seller projection and portable paid-job inspection REUSED. Verified Ledger-to-receipt commercial outcome UNAVAILABLE in current inspected records; operator/funding/human independence UNKNOWN. No new global reputation score or mutable historical backfill.

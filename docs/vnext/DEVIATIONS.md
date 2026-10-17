@@ -96,3 +96,6 @@ P09: planned evidence-based candidate recommendation; shipped deterministic stru
 
 
 P10: planned proven native sessions; shipped the permitted read-only decoded policy/UI preview and hard barriers against unsafe legacy grant/execute because no exact enforcement/signer/deployed-version proof exists; cost is unavailable new sandbox grants and a stopped legacy judge grant/run flow; restore only with independently proven buyer-owned native permissions and explicit wallet/release approval. Historical revocation retained; no real chain write or simulation asserted.
+
+
+P11: outcome learning reduced to exact feedback binding, review/address/job dedup, unknown independence and explicit unavailable Ledger linkage. No global score, inferred ROI, counterfeit/funding accusation or synthetic customer claim. Existing seller cohort amounts and job/receipt verifiers reused; no duplicate earnings dashboard. P11 code prepared independently while P10 frozen validation finishes; final P10 checkpoint retained and expensive validation serialized.

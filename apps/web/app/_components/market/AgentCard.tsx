@@ -99,7 +99,7 @@ export function AgentCard({ a, compare, base = '', variant = 'default' }: {
             : <span className={styles.untested}>Untested</span>}
       </p>
 
-      <dl className={styles.stats}>
+      <dl className={styles.stats} title={a.track.computedAt ? `Job and review index observed ${a.track.computedAt}${a.track.sourceStale ? ' (cached, refresh pending)' : ''}` : 'Index observation time unavailable'}>
         <div>
           <dt>Price</dt>
           <dd className={a.priceProvenance === 'MEASURED' ? styles.live : styles.claimed}>{price ?? 'Request a quote'}</dd>
@@ -108,13 +108,13 @@ export function AgentCard({ a, compare, base = '', variant = 'default' }: {
         </div>
         <div>
           <dt>Delivers</dt>
-          <dd>{delivery ?? (a.latencyMs !== null ? `${a.latencyMs} ms` : 'No jobs')}</dd>
-          <dd className={styles.src}>{delivery ? `median, ${a.track.delivery.samples} paid` : a.latencyMs !== null ? 'probe reply' : 'none paid yet'}</dd>
+          <dd>{delivery ?? (a.latencyMs !== null ? `${a.latencyMs} ms` : a.track.available === false ? 'Unavailable' : 'No delivery samples')}</dd>
+          <dd className={styles.src}>{delivery ? `median, ${a.track.delivery.samples} escrow-funded` : a.latencyMs !== null ? 'probe reply' : a.track.available === false ? 'job evidence unavailable' : 'no delivery samples'}</dd>
         </div>
         <div>
           <dt>Rating</dt>
-          <dd>{verified.averageStars !== null && verified.count > 0 ? <>{verified.averageStars.toFixed(1)}<span className={styles.star} aria-hidden="true">★</span></> : <span className={styles.none}>Not yet</span>}</dd>
-          <dd className={styles.src}>{verified.count > 0 ? `${verified.count} verified` : 'no verified buyers'}</dd>
+          <dd>{verified.averageStars !== null && verified.count > 0 ? <>{verified.averageStars.toFixed(1)}<span className={styles.star} aria-hidden="true">★</span></> : <span className={styles.none}>{a.track.available === false ? 'Unavailable' : 'Not yet'}</span>}</dd>
+          <dd className={styles.src}>{verified.count > 0 ? `${verified.count} linked reviews` : a.track.available === false ? 'rating evidence unavailable' : 'no linked reviews'}</dd>
         </div>
       </dl>
 

@@ -1499,3 +1499,6 @@ P09: recommendations reduced to explicit insufficient-supply diagnostics with ex
 
 
 P10: native sessions reduced to read-only preview; unsafe operator grant/execute disabled in candidate and Altana quarantined. Local denial tests do not prove onchain enforcement. Existing history/revocation and mainnet hire preserved. Restore only with verified native ownership/enforcement/revoke proof and approval; see docs/vnext/P10_AUTHORITY_CONTRACT.md.
+
+
+P11: real Ledger-receipt commercial outcome cannot be established from inspected records (41Ledger runs with no explicit job/receipt references). Publish explicit UNAVAILABLE/unverified pointers; preserve all observations. Reuse confirmed paid Plinth separately and existing seller raw-token payment/refund projection; neither implies human independence or financial advantage. Restore only with exact preserved task/service/chain/job/receipt links and real measurement evidence. Native authority remains P10 AMBER. Independent P11 preparation overlaps P10 frozen validation in a separate worktree; expensive validation stays serial.
