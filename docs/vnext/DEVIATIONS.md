@@ -76,3 +76,6 @@
 - Legacy API field names remain compatible historical test-pass semantics; visible labels become Test passed to avoid asserting unknown exact-service qualification. Portable validity is separate, versioned and bounded. Listing/hire is not gated on MCS.
 - Current harness stores sorted-JSON SHA-256 request/response commitments. P04's documentation table described the unsorted helper too broadly; preserve known historical variants and report their actual matching mode. No stored hash is rewritten.
 - Shared bounded-JSON guard extracted from the P04 checker, with unchanged receipt vectors/semantics. No serializer, receipt hash or sealed-call algorithm change.
+
+
+P05 browser evidence follow-up: keep all original results. Four selectors hit a mobile-hidden duplicate home callout; two long full-page exports timed out. All six replayed against the same build using actual visible sections and viewport screenshots, with the same console/API/overflow assertions; combined72cases pass. Stock audit preserves all algorithms/thresholds and reports inline tap-size advisories. Its one initial /why first-tab result did not reproduce in explicit two-theme keyboard replay with visible outlines. No product CSS, navigation or evidence threshold was changed to clear the harness.

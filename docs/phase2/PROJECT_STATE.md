@@ -1,3 +1,7 @@
+# P05 checkpoint, 17 October 2026
+
+Candidate source `403d218924f784610ae02b07d08667ce5af498f2` is frozen and validated. Full suite568passed/37gatedskipped, serial workspace types/build/lint pass; combined72browser cases pass with six retained-and-replayed harness/capture failures. Legacy test passes are not retroactive exact-service Warrants. Twelve real historical outcomes replay identically; current four-category inputs read without a task or write. Status AMBER for legacy provenance, independent-operator acceptance and inline tap-size advisories. See [checkpoint](../vnext/P05_CHECKPOINT.md). No deployment, push, migration, wallet, paid task or chain write. Closing05:18:51UTC shared/product PIDs, tmux and proxy unchanged; complete Marque/Kerb health bodies pass. P06/P07 already approved; no further phase approval requested.
+
 # P05-P07 approved batch, 17 October 2026
 
 Owner explicitly approved P05, P06 and P07 without new approval between phase checkpoints. Candidate-only development; production deployment, payments, mainnet writes and authority changes remain separately gated. Each phase records a local checkpoint and commit before proceeding. Preserve all current products and observations.
