@@ -1,0 +1,59 @@
+{
+  "schema": "marque.trial-replay.v1",
+  "provenance": "SYNTHETIC_FIXTURE",
+  "context": {
+    "schema": "marque.trial-context.v1",
+    "task": "Synthetic arithmetic only: return the sum of 2 and 3.",
+    "input": "{\"a\":2,\"b\":3}",
+    "policy": "No network, payment, signer or external action.",
+    "chainId": 97,
+    "block": "1",
+    "blockHash": "0x1111111111111111111111111111111111111111111111111111111111111111",
+    "registeredAt": "2026-10-17T00:00:00.000Z",
+    "rubric": {
+      "version": 1,
+      "assertions": [
+        {
+          "path": [
+            "sum"
+          ],
+          "equals": 5
+        }
+      ]
+    }
+  },
+  "runs": [
+    {
+      "agentId": "synthetic-a",
+      "serviceId": 1,
+      "provider": "0x1111111111111111111111111111111111111111",
+      "independence": "UNKNOWN",
+      "consent": "UNKNOWN",
+      "sideEffects": "UNKNOWN",
+      "rep": 1,
+      "contextHash": "0xfd46fa14f445e0d58248740c4545eca2a2045fbcd7b45f3d8b8c50c250510679",
+      "observedBlockHash": "0x1111111111111111111111111111111111111111111111111111111111111111",
+      "startedAt": "2026-10-17T00:00:01.000Z",
+      "elapsedMs": null,
+      "cost": null,
+      "outcome": "OUTPUT",
+      "outputText": "{\"sum\":5}"
+    },
+    {
+      "agentId": "synthetic-b",
+      "serviceId": 2,
+      "provider": "0x2222222222222222222222222222222222222222",
+      "independence": "UNKNOWN",
+      "consent": "UNKNOWN",
+      "sideEffects": "UNKNOWN",
+      "rep": 1,
+      "contextHash": "0xfd46fa14f445e0d58248740c4545eca2a2045fbcd7b45f3d8b8c50c250510679",
+      "observedBlockHash": "0x1111111111111111111111111111111111111111111111111111111111111111",
+      "startedAt": "2026-10-17T00:00:01.000Z",
+      "elapsedMs": null,
+      "cost": null,
+      "outcome": "OUTPUT",
+      "outputText": "{\"sum\":6}"
+    }
+  ]
+}

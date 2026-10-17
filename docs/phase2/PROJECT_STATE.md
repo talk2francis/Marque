@@ -1,3 +1,9 @@
+# P08 in validation, 17 October 2026
+
+Owner authorizes P08 then P09. P08 uses the allowed offline fixture replay fallback; no proven independent consenting same-task pair. Fresh public descriptor GETs at13:26UTC succeed without invoking tasks. Existing Ledger/MCS/APIs/UI/DB/ops unchanged; no winner or production action. See [trial contract](../vnext/P08_TRIAL_CONTRACT.md). P09 begins after the local P08 checkpoint, without another permission request; stop after P09.
+
+Requests: [2026-10-17] [combined commerce/product maintenance] [A/B] [packages/ledger pure trials subpath, replay CLI and docs] Add offline reproduction and failure transparency only. No Ledger replacement, public benchmark rewrite, provider execution or migration.
+
 # P07 checkpoint, 17 October 2026
 
 Source `0de30852a3d4717c4beb4f688ab229fa812f0550`:683tests passed/37gatedskipped;34fixture integration tests separately pass, full serial types/build/lint pass. Existing marketplace opt-in machine1 and pure UNSIGNED exact-term plan verified by actual HTTP schemas and a standalone Node client using a real first-party quote and fixture-only intent.18page smoke and6populated-market readiness cases pass, both themes/390/768/1440; original transient empty frames retained. See [checkpoint](../vnext/P07_CHECKPOINT.md). AMBER for unknown external-human adoption, missing evidence dimensions and unmeasured production cold capacity. No deployment/push/migration/paid job/chain write/buyer wallet. Closing10:23:15UTC product/shared PIDs, tmux and proxy unchanged, complete Marque/Kerb health bodies pass; owned previews stopped. P05-P07 authorized batch complete. STOP after P07.

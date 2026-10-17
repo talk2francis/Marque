@@ -55,3 +55,8 @@ Owner approved P05, P06 and P07 without a new approval between checkpoints. P05 
 ## P07 batch boundary, 17 October 2026
 
 P05 checkpoint5a5c9c9 and P06 checkpoint9366e43 are incorporated. P07 completes existing API/schema/unsigned-plan stabilization and bounded reads, without a replacement registry/marketplace/escrow. Stop after its local evidence commit. Next potential work is owner-reviewed release validation and independent provider/client adoption; P08, production deploy, signing, paid call or mainnet activity are not authorized here.
+
+
+## P08-P09 owner authorization, 17 October 2026
+
+Owner explicitly approves P08 then P09. The P07 STOP boundary is superseded for these two phases only. Production release, payments, signing and chain writes remain separate gates. P08 selects its allowed offline fixture replay because fresh descriptor reads do not establish two independent consenting same-task providers. P09 may expose deterministic insufficient_comparable_supply diagnostics; no manufactured winner or automatic hire. No automatic P10.

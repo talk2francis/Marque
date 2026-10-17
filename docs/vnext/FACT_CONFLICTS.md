@@ -56,3 +56,6 @@ Real router JobSettled follows PaymentReleased. The existing projector previousl
 ## P07 fact boundaries, 17 October 2026
 
 Existing catalog generation time is the base projection computation time, not each observation. Machine output retains it separately from export time; null probe timestamp stays null. Deduplicated entries/identities are not independent persons. Existing selected service is not complete inventory, category is not exact-task acceptance, A2A/MCP discovery is not payable rail, and stored signed quote mode is not independent signature replay. Chain of identity may differ from quoted action chain. The pure plan can compare all supplied terms but cannot establish an unspent intent/current owner without external read. Real first-party quote plus fixture intent is a technical integration check, not organic demand, outside-provider consent or settlement.
+
+
+P08, 17 October 13:26UTC: both public descriptors still GET200, byte hashes unchanged from P02; declared operations are not consent, read-only task acceptance or operator independence. Historical paid Plinth and Brain declarations do not demonstrate equal frozen input. Replay pass is not fair comparison; report always UNPROVEN.

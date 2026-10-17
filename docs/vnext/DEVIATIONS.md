@@ -87,3 +87,6 @@ P05 browser evidence follow-up: keep all original results. Four selectors hit a 
 - Planned generalized allowance/policy proof; shipped exact historical fee Approval inspection when present and separate historical/current policy checks. Asset action charter and present allowance remain unavailable without their own evidence. Fee escrow is not an asset cap.
 - Reused existing ABI/state code. Actual Plinth event order places router verdict after payment; the narrow existing-projector correction accepts that terminal ordering. No replacement state machine, historical rewrite or production worker restart.
 - P06 source preparation overlapped frozen P05 build/browser validation in a second isolated worktree under explicit batch approval. Each keeps its own source/evidence/commit and production remains unchanged.
+
+
+P08: planned independent equal-task trials; shipped offline replay with explicit synthetic fixture and comparison UNPROVEN because fresh guarded GET descriptors establish neither same-task acceptance nor independent-operator consent; cost is no live winner/latency/quality claim; restore only with consented comparable providers and separately approved paid/chain actions.

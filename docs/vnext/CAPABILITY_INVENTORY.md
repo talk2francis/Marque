@@ -52,3 +52,6 @@ Opt-in version2 receipt/job wrappers, direct legacy-response digest inspection, 
 ## P07 candidate delta, 17 October 2026
 
 EXISTS (candidate validated at source0de3085; see P07_CHECKPOINT.md): opt-in versioned existing catalog, runtime/generated structural schemas, GET-only typed client/example, deterministic unsigned exact-term plan, separate deferred funding, read courtesy/SQL/HTTP bounds. REUSED: existing dedup/filter/pagination, quote/intent and ABI. PARTIAL: one commercial service per existing entry; provider current control and task compatibility require fresh checks. UNSUPPORTED: x402 buyer, generic execute, automatic signing/spending; UNKNOWN: exact probe timestamp, extra services, independent human adoption, current source-bytecode verification. See P07_MACHINE_CONTRACT.md; no live deployment claim.
+
+
+P08: offline same-context replay EXISTS locally; genuine neutral two-independent-provider comparison UNSUPPORTED by current evidence. Fixture-only primitive equality checks are not financial judgement or a quality ranking. Existing Ledger and MCS unchanged.
