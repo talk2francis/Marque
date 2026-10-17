@@ -51,3 +51,8 @@ The finalized independent inspector rechecked the original testnet receipt ancho
 A bounded production metadata SELECT retains agent363619/service43279/quote56305, original envelope hash0x4441d5d5d59cb812c7decf29164f6dfee494662fc42da291dc4917f4a5c0ed4c and stored signed mode. The separate SELECT-only snapshot lacks that quote row; this is not evidence production lost it. The new projection retains the original intent selection even in that reduced environment. Current inspector does not replay a private quote signature or establish historical registry owner/human independence from those commitments.
 
 Real router JobSettled follows PaymentReleased. The existing projector previously retained PAID but recorded an unnecessary anomaly and omitted that settlement reference. The candidate accepts that terminal summary ordering, with regression tests, without rewriting historical rows.
+
+
+## P07 fact boundaries, 17 October 2026
+
+Existing catalog generation time is the base projection computation time, not each observation. Machine output retains it separately from export time; null probe timestamp stays null. Deduplicated entries/identities are not independent persons. Existing selected service is not complete inventory, category is not exact-task acceptance, A2A/MCP discovery is not payable rail, and stored signed quote mode is not independent signature replay. Chain of identity may differ from quoted action chain. The pure plan can compare all supplied terms but cannot establish an unspent intent/current owner without external read. Real first-party quote plus fixture intent is a technical integration check, not organic demand, outside-provider consent or settlement.

@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://marque.trade/api/v1/schemas/catalog-query.v1.json",
+  "description": "Structural contract. Runtime cross-field, freshness, commitment and exact-selection checks remain required; schema validation is not signing permission.",
+  "type": "object",
+  "properties": {
+    "category": {
+      "type": "string",
+      "enum": [
+        "rebalancing",
+        "grid",
+        "yield",
+        "health_factor",
+        "security"
+      ]
+    },
+    "q": {
+      "type": "string",
+      "maxLength": 120
+    },
+    "live": {
+      "type": "boolean"
+    },
+    "warranted": {
+      "type": "boolean"
+    },
+    "thirdParty": {
+      "type": "boolean"
+    },
+    "hireable": {
+      "type": "boolean"
+    },
+    "includeUnclassified": {
+      "type": "boolean"
+    },
+    "hasPrice": {
+      "type": "boolean"
+    },
+    "firstParty": {
+      "type": "boolean"
+    },
+    "network": {
+      "anyOf": [
+        {
+          "const": 56
+        },
+        {
+          "const": 97
+        }
+      ]
+    },
+    "token": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9]{1,12}$"
+    },
+    "iface": {
+      "type": "string",
+      "enum": [
+        "a2a",
+        "mcp",
+        "x402",
+        "erc8183"
+      ]
+    },
+    "tab": {
+      "type": "string",
+      "enum": [
+        "ready",
+        "free",
+        "tested",
+        "all"
+      ]
+    },
+    "sort": {
+      "type": "string",
+      "enum": [
+        "best",
+        "proven",
+        "price",
+        "fast",
+        "recent",
+        "rated"
+      ]
+    },
+    "maxPrice": {
+      "type": "number",
+      "minimum": 0
+    },
+    "minRating": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 5
+    },
+    "limit": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 300
+    },
+    "offset": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 1000000
+    }
+  },
+  "required": [],
+  "additionalProperties": false
+}

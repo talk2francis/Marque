@@ -50,3 +50,8 @@ Owner explicitly approved P03 then P04. P03 is committed at f4d5d56 with checkpo
 ## P05-P07 explicit batch authorization, 17 October 2026
 
 Owner approved P05, P06 and P07 without a new approval between checkpoints. P05 reuses MCS and immutable observations for portable replay and honest historical labels. P06 follows its committed checkpoint and reuses frozen receipt hashes plus historical public chain evidence. P07 follows P06 and stabilizes the existing marketplace/quote/intent contract with a pure unsigned plan. Announce each transition and commit its evidence. P08, production release, paid tasks, wallet authority and chain writes are not authorized by this batch.
+
+
+## P07 batch boundary, 17 October 2026
+
+P05 checkpoint5a5c9c9 and P06 checkpoint9366e43 are incorporated. P07 completes existing API/schema/unsigned-plan stabilization and bounded reads, without a replacement registry/marketplace/escrow. Stop after its local evidence commit. Next potential work is owner-reviewed release validation and independent provider/client adoption; P08, production deploy, signing, paid call or mainnet activity are not authorized here.

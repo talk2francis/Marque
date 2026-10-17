@@ -5,13 +5,13 @@ import { GET } from './route'
 import { receiptHash, inspectReceiptBundle, type Receipt } from '@marque/execution'
 import vectors from '../../../../../../../packages/execution/src/receipt-vectors.fixture.json'
 
-const invoke = () => GET(new Request('https://candidate.invalid/api/v1/receipts/synthetic'), { params: Promise.resolve({ id: 'synthetic' }) })
-beforeEach(() => readReceipt.mockReset())
+const invoke = () => GET(new Request('https://candidate.invalid/api/v1/receipts/00000000-0000-4000-8000-000000000001'), { params: Promise.resolve({ id: '00000000-0000-4000-8000-000000000001' }) })
+beforeEach(() => { readReceipt.mockReset() })
 
 describe('receipt GET additive integrity projection', () => {
   it('preserves every legacy field, body and hash without any writes or fetch', async () => {
     const receipt = structuredClone(vectors[1]!.receipt) as Receipt
-    const row = { id: 'synthetic', hash: receiptHash(receipt), body: receipt, anchorTxHash: '0x' + 'a'.repeat(64), anchorBlock: '200', issuedAt: '2026-01-01T00:00:01.000Z' }
+    const row = { id: '00000000-0000-4000-8000-000000000001', hash: receiptHash(receipt), body: receipt, anchorTxHash: '0x' + 'a'.repeat(64), anchorBlock: '200', issuedAt: '2026-01-01T00:00:01.000Z' }
     readReceipt.mockResolvedValue(row)
     const before = JSON.stringify(row)
     const fetchSpy = vi.spyOn(globalThis, 'fetch')
@@ -29,7 +29,7 @@ describe('receipt GET additive integrity projection', () => {
   })
   it('does not validate unrelated anchor references by copying execution chain/block', async () => {
     const body = structuredClone(vectors[1]!.receipt)
-    readReceipt.mockResolvedValue({ id: 'synthetic', hash: vectors[1]!.hash, body, anchorTxHash: 'unrelated', anchorBlock: '999999999', issuedAt: body.issuedAt })
+    readReceipt.mockResolvedValue({ id: '00000000-0000-4000-8000-000000000001', hash: vectors[1]!.hash, body, anchorTxHash: 'unrelated', anchorBlock: '999999999', issuedAt: body.issuedAt })
     const { evidence } = await (await invoke()).json()
     expect(evidence.digest.status).toBe('MATCH')
     expect(evidence.anchor).toMatchObject({ chainId: null, blockNumber: '999999999', blockHash: null, verification: 'NOT_CHECKED' })
@@ -37,7 +37,7 @@ describe('receipt GET additive integrity projection', () => {
   it('reports tampering without rewriting the historical payload or promoting truth', async () => {
     const body = structuredClone(vectors[1]!.receipt)
     body.commercial.settled = true
-    readReceipt.mockResolvedValue({ id: 'synthetic', hash: vectors[1]!.hash, body, anchorTxHash: null, anchorBlock: null, issuedAt: body.issuedAt })
+    readReceipt.mockResolvedValue({ id: '00000000-0000-4000-8000-000000000001', hash: vectors[1]!.hash, body, anchorTxHash: null, anchorBlock: null, issuedAt: body.issuedAt })
     const data = await (await invoke()).json()
     expect(data.evidence.digest.status).toBe('MISMATCH')
     expect(data.receipt.commercial.settled).toBe(true)
@@ -45,7 +45,7 @@ describe('receipt GET additive integrity projection', () => {
   })
   it('returns invalid and unknown versions safely, retaining original data', async () => {
     for (const body of [{ version: '0' }, { version: '2', execution: null }]) {
-      readReceipt.mockResolvedValue({ id: 'synthetic', hash: vectors[1]!.hash, body, anchorTxHash: null, anchorBlock: null })
+      readReceipt.mockResolvedValue({ id: '00000000-0000-4000-8000-000000000001', hash: vectors[1]!.hash, body, anchorTxHash: null, anchorBlock: null })
       const data = await (await invoke()).json()
       expect(data.receipt).toEqual(body)
       expect(data.evidence.digest.status).toBe(body.version === '0' ? 'UNSUPPORTED_VERSION' : 'INVALID_RECEIPT')
@@ -62,7 +62,7 @@ describe('receipt GET additive integrity projection', () => {
     const row = { hash: vectors[0]!.hash, body, anchorTxHash: null, anchorBlock: null }
     readReceipt.mockResolvedValue(row)
     const before = JSON.stringify(row)
-    const res = await GET(new Request('https://candidate.invalid/api/v1/receipts/synthetic?format=bundle'), { params: Promise.resolve({ id: 'synthetic' }) })
+    const res = await GET(new Request('https://candidate.invalid/api/v1/receipts/00000000-0000-4000-8000-000000000001?format=bundle'), { params: Promise.resolve({ id: '00000000-0000-4000-8000-000000000001' }) })
     const data = await res.json()
     expect(res.headers.get('Cache-Control')).toBe('no-store')
     expect(data.payload.receipt).toEqual(body)
@@ -73,7 +73,18 @@ describe('receipt GET additive integrity projection', () => {
   })
   it('does not export a damaged historical body as a verified container', async () => {
     readReceipt.mockResolvedValue({ hash: vectors[0]!.hash, body: { version: '1' }, anchorTxHash: null, anchorBlock: null })
-    const res = await GET(new Request('https://candidate.invalid/api/v1/receipts/synthetic?format=bundle'), { params: Promise.resolve({ id: 'synthetic' }) })
+    const res = await GET(new Request('https://candidate.invalid/api/v1/receipts/00000000-0000-4000-8000-000000000001?format=bundle'), { params: Promise.resolve({ id: '00000000-0000-4000-8000-000000000001' }) })
     expect(res.status).toBe(422)
   })
+  it('rejects malformed IDs before a read and redacts read failures', async () => {
+    const bad = await GET(new Request('https://candidate.invalid/api/v1/receipts/bad'), { params: Promise.resolve({ id: 'bad' }) })
+    expect(bad.status).toBe(400)
+    expect(readReceipt).not.toHaveBeenCalled()
+    readReceipt.mockRejectedValue(new Error('PRIVATE_CONNECTION_STRING'))
+    const failed = await invoke()
+    expect(failed.status).toBe(503)
+    expect(await failed.text()).not.toContain('PRIVATE_CONNECTION_STRING')
+    expect(failed.headers.get('Cache-Control')).toBe('no-store')
+  })
+
 })

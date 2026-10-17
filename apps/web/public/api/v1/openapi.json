@@ -1,0 +1,389 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Marque existing marketplace and unsigned procurement contract",
+    "version": "1.0.0",
+    "description": "Candidate contract; availability is deployment-dependent. Catalog GET and local pure plan builder do not authorize signing. Quote and intent are explicit offchain side effects; bind and notify require an already-created job. Never preflight arbitrary A2A message/send, invoke a task, accept metadata prices, upload keys, or auto-sign/spend. Runtime checks exceed structural JSON Schema."
+  },
+  "servers": [
+    {
+      "url": "https://marque.trade"
+    }
+  ],
+  "paths": {
+    "/api/v1/marketplace": {
+      "get": {
+        "operationId": "readMachineCatalogV1",
+        "parameters": [
+          {
+            "name": "format",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "const": "machine"
+            }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "rebalancing",
+                "grid",
+                "yield",
+                "health_factor",
+                "security"
+              ]
+            },
+            "description": "Controlled existing marketplace filter; see contract for evidence scope."
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 120
+            },
+            "description": "Controlled existing marketplace filter; see contract for evidence scope."
+          },
+          {
+            "name": "live",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Controlled existing marketplace filter; see contract for evidence scope."
+          },
+          {
+            "name": "warranted",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Controlled existing marketplace filter; see contract for evidence scope."
+          },
+          {
+            "name": "thirdParty",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Controlled existing marketplace filter; see contract for evidence scope."
+          },
+          {
+            "name": "hireable",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Controlled existing marketplace filter; see contract for evidence scope."
+          },
+          {
+            "name": "includeUnclassified",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Controlled existing marketplace filter; see contract for evidence scope."
+          },
+          {
+            "name": "hasPrice",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Controlled existing marketplace filter; see contract for evidence scope."
+          },
+          {
+            "name": "firstParty",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Controlled existing marketplace filter; see contract for evidence scope."
+          },
+          {
+            "name": "network",
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": 56
+                },
+                {
+                  "const": 97
+                }
+              ]
+            },
+            "description": "Controlled existing marketplace filter; see contract for evidence scope."
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9]{1,12}$"
+            },
+            "description": "Controlled existing marketplace filter; see contract for evidence scope."
+          },
+          {
+            "name": "iface",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "a2a",
+                "mcp",
+                "x402",
+                "erc8183"
+              ]
+            },
+            "description": "Controlled existing marketplace filter; see contract for evidence scope."
+          },
+          {
+            "name": "tab",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ready",
+                "free",
+                "tested",
+                "all"
+              ]
+            },
+            "description": "Controlled existing marketplace filter; see contract for evidence scope."
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "best",
+                "proven",
+                "price",
+                "fast",
+                "recent",
+                "rated"
+              ]
+            },
+            "description": "Controlled existing marketplace filter; see contract for evidence scope."
+          },
+          {
+            "name": "maxPrice",
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "minimum": 0
+            },
+            "description": "Controlled existing marketplace filter; see contract for evidence scope."
+          },
+          {
+            "name": "minRating",
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 5
+            },
+            "description": "Controlled existing marketplace filter; see contract for evidence scope."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 300
+            },
+            "description": "Controlled existing marketplace filter; see contract for evidence scope."
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            },
+            "description": "Controlled existing marketplace filter; see contract for evidence scope."
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Invalid controlled query; no catalog read"
+          },
+          "429": {
+            "description": "120 reads/minute per connection, courtesy in-process limit; no automatic retry",
+            "headers": {
+              "Retry-After": {
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Read unavailable or HTTP deadline; no SQL details"
+          },
+          "200": {
+            "description": "Versioned filtered/deduplicated entries, one selected commercial service per entry, UTC provenance and UNKNOWN limits. Cache at most 15 seconds and never past observed quote expiry; stale projection no-store.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "./schemas/catalog.v1.json"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/hire/agent": {
+      "get": {
+        "operationId": "readExactHireMetadata",
+        "parameters": [
+          {
+            "name": "agentId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "serviceId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Existing exact-service metadata, never a quote or task acceptance"
+          },
+          "404": {
+            "description": "Not an available seller"
+          }
+        }
+      }
+    },
+    "/api/v1/hire/quote": {
+      "post": {
+        "operationId": "explicitExactTaskQuote",
+        "description": "EXPLICIT OFFCHAIN SIDE EFFECT. Sends negotiate to selected provider and stores observation. 20/min/IP. General outside message/send may cause work: require known provider protocol/consent before invocation. Request quoteAccessVersion:2 to bind later intent access. No automatic client retry; quote expiry is immutable, <=900s. Never call this as catalog preflight.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "agentId",
+                  "serviceId",
+                  "task"
+                ],
+                "properties": {
+                  "agentId": {
+                    "type": "string"
+                  },
+                  "serviceId": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "task": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 1200
+                  },
+                  "quoteAccessVersion": {
+                    "const": 2
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Existing PublicQuote: explicit sourceClaimVersion/mode, original quote digest and one-use client access capability. Keep task/capability private."
+          },
+          "422": {
+            "description": "Declined, invalid, unsupported or expired; no substitution"
+          }
+        }
+      }
+    },
+    "/api/v1/hire/intent": {
+      "post": {
+        "operationId": "explicitIdempotentIntent",
+        "description": "EXPLICIT OFFCHAIN DATABASE WRITE. Existing idempotency key is buyer wallet + original quote ID, serialized under DB advisory lock. Same unbound intent returns same call; expired quote fails, bound intent fails 409. 10/min/wallet and 30/min/IP. No wallet ownership inference from an unsigned address. No onchain write.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "wallet",
+                  "quoteId"
+                ],
+                "properties": {
+                  "wallet": {
+                    "type": "string",
+                    "pattern": "^0x[0-9a-fA-F]{40}$"
+                  },
+                  "quoteId": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "quoteAccessToken": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Existing IntentResponse with unsigned createJob arguments; use local HirePlan with independently selected expected terms"
+          },
+          "403": {
+            "description": "Missing/incorrect capability or identity evidence"
+          },
+          "409": {
+            "description": "Already bound; recover existing transaction instead of creating again"
+          }
+        }
+      }
+    }
+  },
+  "x-local-hire-plan": {
+    "inputSchema": "./schemas/hire-plan-input.v1.json",
+    "implementation": "@marque/commerce/plan buildHirePlan(input, nowMs?)",
+    "outputSchema": "./schemas/hire-plan.v1.json",
+    "authority": "UNSIGNED; user-wallet required; simulation NOT_RUN",
+    "recovery": "Check existing intent binding and transaction receipt before any retry; confirm new job ID before separate register/budget/exact-approval/fund steps. Pure plan cannot prove an intent unspent.",
+    "quoteSignature": "Server-reported mode; no client ECDSA replay from PublicQuote projection. Recheck fresh identity/asset support before signing."
+  },
+  "x-read-bounds": {
+    "httpDeadlineMs": 12000,
+    "perStatementCatalogMs": 8000,
+    "perStatementExactMs": 4000,
+    "lockTimeoutMs": 500,
+    "cancellation": "HTTP timeout does not cancel SQL; statement bounds do not include pool wait. Existing singleflight/SWR retained.",
+    "clientTimeoutMs": 15000,
+    "clientBodyMaxBytes": 2097152,
+    "rateScope": "Courtesy process-local/IP; not distributed or authentication."
+  },
+  "x-existing-writers-not-in-client": [
+    "POST /api/v1/hire/bind records and verifies original user transaction; never creates one",
+    "POST /api/v1/hire/notify can trigger paid seller delivery and chain submission; never call as preflight"
+  ]
+}

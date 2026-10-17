@@ -1,6 +1,7 @@
 import 'server-only'
 import { sql } from 'drizzle-orm'
-import { db, firstPartyIds, canonicalAgentIdSql } from '@marque/db'
+import { firstPartyIds, canonicalAgentIdSql } from '@marque/db'
+import { boundedCommerceRead } from '@marque/commerce/reads'
 import { commercialStates, formatAmount, type CommercialState } from '@marque/commerce'
 import { agentState, TASK_FOR_CATEGORY } from './agent-state'
 import { agentTracks, EMPTY_TRACK, type AgentTrack } from './agent-track'
@@ -183,7 +184,7 @@ async function marketplaceBase(): Promise<MarketRow[]> {
 async function queryAgents(): Promise<MarketRow[]> {
   const fp = new Set(firstPartyIds())
   const commerce = await commercialStates().catch(() => new Map())
-  const rows = await db().execute(sql`
+  const rows = await boundedCommerceRead(sql`
     with latest as (
       -- Newest probe per service by primary key (probe_schedule), not a scan of history.
       select ps.service_id, ps.agent_id, p.liveness, p.latency_ms,

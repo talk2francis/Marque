@@ -1,0 +1,419 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://marque.trade/api/v1/schemas/hire-plan-input.v1.json",
+  "description": "Structural contract. Runtime cross-field, freshness, commitment and exact-selection checks remain required; schema validation is not signing permission.",
+  "type": "object",
+  "properties": {
+    "quote": {
+      "type": "object",
+      "properties": {
+        "quoteId": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 2147483647
+        },
+        "quoteHash": {
+          "type": "string",
+          "pattern": "^0x[\\da-fA-F]{64}$"
+        },
+        "quoteHashVersion": {
+          "const": 1
+        },
+        "agentId": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "serviceId": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 2147483647
+        },
+        "chainId": {
+          "anyOf": [
+            {
+              "const": 56
+            },
+            {
+              "const": 97
+            }
+          ]
+        },
+        "provider": {
+          "type": "string",
+          "pattern": "^0x[\\da-fA-F]{40}$"
+        },
+        "price": {
+          "type": "string",
+          "pattern": "^(0|[1-9]\\d{0,77})$"
+        },
+        "token": {
+          "type": "object",
+          "properties": {
+            "address": {
+              "type": "string",
+              "pattern": "^0x[\\da-fA-F]{40}$"
+            },
+            "symbol": {
+              "type": "string",
+              "maxLength": 20
+            },
+            "decimals": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 255
+            },
+            "isDefault": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "address",
+            "symbol",
+            "decimals",
+            "isDefault"
+          ],
+          "additionalProperties": true
+        },
+        "signed": {
+          "type": "boolean"
+        },
+        "sourceClaimVersion": {
+          "const": 1
+        },
+        "signatureEvidence": {
+          "type": "string",
+          "enum": [
+            "provider_signed",
+            "identity_matched_unsigned"
+          ]
+        },
+        "expiresAt": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "minimum": -9007199254740991,
+          "maximum": 9007199254740991
+        },
+        "providerMatchesRegistry": {
+          "const": true
+        },
+        "registryEvidence": {
+          "type": "object",
+          "properties": {
+            "version": {
+              "const": 1
+            },
+            "chainId": {
+              "anyOf": [
+                {
+                  "const": 56
+                },
+                {
+                  "const": 97
+                }
+              ]
+            },
+            "blockNumber": {
+              "type": "string",
+              "pattern": "^(0|[1-9]\\d{0,77})$"
+            },
+            "observedAt": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          "required": [
+            "version",
+            "chainId",
+            "blockNumber",
+            "observedAt"
+          ],
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "quoteId",
+        "quoteHash",
+        "quoteHashVersion",
+        "agentId",
+        "serviceId",
+        "chainId",
+        "provider",
+        "price",
+        "token",
+        "signed",
+        "sourceClaimVersion",
+        "signatureEvidence",
+        "expiresAt",
+        "providerMatchesRegistry",
+        "registryEvidence"
+      ],
+      "additionalProperties": true
+    },
+    "intent": {
+      "type": "object",
+      "properties": {
+        "intentId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "quoteId": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 2147483647
+        },
+        "quoteHash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^0x[\\da-fA-F]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "quoteHashVersion": {
+          "const": 1
+        },
+        "wallet": {
+          "type": "string",
+          "pattern": "^0x[\\da-fA-F]{40}$"
+        },
+        "agentId": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "serviceId": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 2147483647
+        },
+        "chainId": {
+          "anyOf": [
+            {
+              "const": 56
+            },
+            {
+              "const": 97
+            }
+          ]
+        },
+        "agentName": {
+          "type": "string",
+          "maxLength": 300
+        },
+        "provider": {
+          "type": "string",
+          "pattern": "^0x[\\da-fA-F]{40}$"
+        },
+        "price": {
+          "type": "string",
+          "pattern": "^(0|[1-9]\\d{0,77})$"
+        },
+        "token": {
+          "type": "object",
+          "properties": {
+            "address": {
+              "type": "string",
+              "pattern": "^0x[\\da-fA-F]{40}$"
+            },
+            "symbol": {
+              "type": "string",
+              "maxLength": 20
+            },
+            "decimals": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 255
+            },
+            "isDefault": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "address",
+            "symbol",
+            "decimals",
+            "isDefault"
+          ],
+          "additionalProperties": true
+        },
+        "expiredAt": {
+          "type": "string",
+          "pattern": "^(0|[1-9]\\d{0,77})$"
+        },
+        "refundAfter": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "disputeWindowSeconds": {
+          "type": "integer",
+          "minimum": -9007199254740991,
+          "maximum": 9007199254740991
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 4096
+        },
+        "descriptionHash": {
+          "type": "string",
+          "pattern": "^0x[\\da-fA-F]{64}$"
+        },
+        "contracts": {
+          "type": "object",
+          "properties": {
+            "commerce": {
+              "type": "string",
+              "pattern": "^0x[\\da-fA-F]{40}$"
+            },
+            "router": {
+              "type": "string",
+              "pattern": "^0x[\\da-fA-F]{40}$"
+            },
+            "policy": {
+              "type": "string",
+              "pattern": "^0x[\\da-fA-F]{40}$"
+            }
+          },
+          "required": [
+            "commerce",
+            "router",
+            "policy"
+          ],
+          "additionalProperties": true
+        },
+        "createJob": {
+          "type": "object",
+          "properties": {
+            "to": {
+              "type": "string",
+              "pattern": "^0x[\\da-fA-F]{40}$"
+            },
+            "functionName": {
+              "type": "string",
+              "enum": [
+                "createJob",
+                "createJobWithToken"
+              ]
+            },
+            "args": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "maxLength": 4096
+              },
+              "maxItems": 6,
+              "minItems": 5
+            }
+          },
+          "required": [
+            "to",
+            "functionName",
+            "args"
+          ],
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "intentId",
+        "quoteId",
+        "quoteHash",
+        "quoteHashVersion",
+        "wallet",
+        "agentId",
+        "serviceId",
+        "chainId",
+        "agentName",
+        "provider",
+        "price",
+        "token",
+        "expiredAt",
+        "refundAfter",
+        "disputeWindowSeconds",
+        "description",
+        "descriptionHash",
+        "contracts",
+        "createJob"
+      ],
+      "additionalProperties": true
+    },
+    "expected": {
+      "type": "object",
+      "properties": {
+        "wallet": {
+          "type": "string",
+          "pattern": "^0x[\\da-fA-F]{40}$"
+        },
+        "chainId": {
+          "anyOf": [
+            {
+              "const": 56
+            },
+            {
+              "const": 97
+            }
+          ]
+        },
+        "agentId": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "serviceId": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 2147483647
+        },
+        "provider": {
+          "type": "string",
+          "pattern": "^0x[\\da-fA-F]{40}$"
+        },
+        "quoteHash": {
+          "type": "string",
+          "pattern": "^0x[\\da-fA-F]{64}$"
+        },
+        "amountRaw": {
+          "type": "string",
+          "pattern": "^(0|[1-9]\\d{0,77})$"
+        },
+        "tokenAddress": {
+          "type": "string",
+          "pattern": "^0x[\\da-fA-F]{40}$"
+        },
+        "tokenDecimals": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 255
+        },
+        "descriptionHash": {
+          "type": "string",
+          "pattern": "^0x[\\da-fA-F]{64}$"
+        },
+        "task": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 1200
+        }
+      },
+      "required": [
+        "wallet",
+        "chainId",
+        "agentId",
+        "serviceId",
+        "provider",
+        "quoteHash",
+        "amountRaw",
+        "tokenAddress",
+        "tokenDecimals",
+        "descriptionHash",
+        "task"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "quote",
+    "intent",
+    "expected"
+  ],
+  "additionalProperties": false
+}

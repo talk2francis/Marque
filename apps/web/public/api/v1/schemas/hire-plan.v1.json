@@ -1,0 +1,304 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://marque.trade/api/v1/schemas/hire-plan.v1.json",
+  "description": "Structural UNSIGNED output only. Runtime exact terms/ABI, fresh chain checks and caller consent remain required.",
+  "type": "object",
+  "properties": {
+    "schema": {
+      "const": "marque.hire-plan.v1"
+    },
+    "version": {
+      "const": 1
+    },
+    "state": {
+      "const": "UNSIGNED"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "intentId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "idempotencyKey": {
+      "type": "string"
+    },
+    "selection": {
+      "type": "object",
+      "required": [
+        "agentId",
+        "identityChainId",
+        "serviceId",
+        "quoteId",
+        "quoteHash",
+        "quoteHashVersion",
+        "quoteMode",
+        "provider"
+      ],
+      "properties": {
+        "agentId": {
+          "type": "string"
+        },
+        "identityChainId": {
+          "enum": [
+            56,
+            97
+          ]
+        },
+        "serviceId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "quoteId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "quoteHash": {
+          "type": "string",
+          "pattern": "^0x[0-9a-fA-F]{64}$"
+        },
+        "quoteHashVersion": {
+          "const": 1
+        },
+        "quoteMode": {
+          "enum": [
+            "provider_signed",
+            "identity_matched_unsigned"
+          ]
+        },
+        "provider": {
+          "type": "string",
+          "pattern": "^0x[0-9a-fA-F]{40}$"
+        }
+      }
+    },
+    "chainId": {
+      "enum": [
+        56,
+        97
+      ]
+    },
+    "buyer": {
+      "type": "string",
+      "pattern": "^0x[0-9a-fA-F]{40}$"
+    },
+    "token": {
+      "type": "object",
+      "required": [
+        "address",
+        "symbol",
+        "decimals",
+        "isDefault"
+      ],
+      "properties": {
+        "address": {
+          "type": "string",
+          "pattern": "^0x[0-9a-fA-F]{40}$"
+        },
+        "symbol": {
+          "type": "string"
+        },
+        "decimals": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 255
+        },
+        "isDefault": {
+          "type": "boolean"
+        }
+      }
+    },
+    "amountRaw": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]{0,77})$"
+    },
+    "amountLabel": {
+      "type": "string"
+    },
+    "quoteExpiresAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "quoteExpiresAtSeconds": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]{0,77})$"
+    },
+    "jobExpiresAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "jobExpiresAtSeconds": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]{0,77})$"
+    },
+    "disputeWindowSeconds": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "descriptionHash": {
+      "type": "string",
+      "pattern": "^0x[0-9a-fA-F]{64}$"
+    },
+    "call": {
+      "type": "object",
+      "required": [
+        "chainId",
+        "from",
+        "to",
+        "functionName",
+        "args",
+        "data",
+        "valueRaw"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "chainId": {
+          "enum": [
+            56,
+            97
+          ]
+        },
+        "from": {
+          "type": "string",
+          "pattern": "^0x[0-9a-fA-F]{40}$"
+        },
+        "to": {
+          "type": "string",
+          "pattern": "^0x[0-9a-fA-F]{40}$"
+        },
+        "functionName": {
+          "enum": [
+            "createJob",
+            "createJobWithToken"
+          ]
+        },
+        "args": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 5,
+          "maxItems": 6
+        },
+        "data": {
+          "type": "string",
+          "pattern": "^0x[0-9a-fA-F]+$"
+        },
+        "valueRaw": {
+          "const": "0"
+        }
+      }
+    },
+    "deferred": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": {
+        "type": "object",
+        "required": [
+          "step",
+          "to",
+          "functionName",
+          "requires"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "step": {
+            "enum": [
+              "registerJob",
+              "setBudget",
+              "approve",
+              "fund"
+            ]
+          },
+          "to": {
+            "type": "string",
+            "pattern": "^0x[0-9a-fA-F]{40}$"
+          },
+          "functionName": {
+            "enum": [
+              "registerJob",
+              "setBudget",
+              "approve",
+              "fund"
+            ]
+          },
+          "requires": {
+            "type": "string"
+          },
+          "spender": {
+            "type": "string",
+            "pattern": "^0x[0-9a-fA-F]{40}$"
+          },
+          "exactAmountRaw": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]{0,77})$"
+          }
+        }
+      }
+    },
+    "simulation": {
+      "type": "object",
+      "required": [
+        "state",
+        "reason"
+      ],
+      "properties": {
+        "state": {
+          "const": "NOT_RUN"
+        },
+        "reason": {
+          "type": "string"
+        }
+      }
+    },
+    "signing": {
+      "const": "USER_WALLET_REQUIRED"
+    },
+    "quoteSignatureReplay": {
+      "const": "NOT_PERFORMED_SERVER_REPORTED_MODE"
+    },
+    "currentRegistryAndAssetSupport": {
+      "const": "NOT_REPLAYED_RECHECK_BEFORE_SIGNING"
+    },
+    "replayProtection": {
+      "const": "CHECK_EXISTING_INTENT_BINDING_BEFORE_SUBMISSION"
+    },
+    "limits": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "schema",
+    "version",
+    "state",
+    "generatedAt",
+    "intentId",
+    "idempotencyKey",
+    "selection",
+    "chainId",
+    "buyer",
+    "token",
+    "amountRaw",
+    "amountLabel",
+    "quoteExpiresAt",
+    "quoteExpiresAtSeconds",
+    "jobExpiresAt",
+    "jobExpiresAtSeconds",
+    "disputeWindowSeconds",
+    "descriptionHash",
+    "call",
+    "deferred",
+    "simulation",
+    "signing",
+    "quoteSignatureReplay",
+    "currentRegistryAndAssetSupport",
+    "replayProtection",
+    "limits"
+  ],
+  "additionalProperties": false
+}

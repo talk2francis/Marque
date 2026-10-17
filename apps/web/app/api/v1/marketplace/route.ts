@@ -1,5 +1,9 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { marketplaceAgents, type MarketQuery } from '../../../../lib/marketplace'
+import { parseCatalogQuery } from '@marque/commerce/catalog'
+import { machineCatalog } from '../../../../lib/machine-catalog'
+import { checkWindow, clientKey } from '../../../../lib/limits'
+import { withDeadline } from '../../../../lib/deadline'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -11,8 +15,20 @@ export const revalidate = 0
  */
 export async function GET(req: NextRequest) {
   const p = req.nextUrl.searchParams
+  const machine = p.get('format') === 'machine'
+  const baseHeaders = { 'Cache-Control': 'no-store', ...(machine ? { 'Access-Control-Allow-Origin': '*', 'Access-Control-Expose-Headers': 'Retry-After, X-Marque-Projection-Computed-At, X-Marque-Projection-Age-Ms, X-Marque-Projection-Stale' } : {}) }
+  const rate = checkWindow('marketplace-read', clientKey(req.headers), 120, 60_000, 'Catalog reads are limited to 120 a minute per connection.')
+  if (!rate.ok) return NextResponse.json({ error: 'rate_limited', detail: rate.detail }, { status: 429, headers: { ...baseHeaders, 'Retry-After': String(rate.retryAfterSeconds ?? 60) } })
+  const f = machine ? parseCatalogQuery(p) : null
+  if (machine && (!f || p.getAll('format').length !== 1)) return NextResponse.json({ error: 'invalid_catalog_query', detail: 'Use documented categories, networks, filters and pagination.' }, { status: 400, headers: baseHeaders })
   const bool = (k: string) => p.get(k) === '1' || p.get(k) === 'true'
-  const q: MarketQuery = {
+  const q: MarketQuery = f ? {
+    category: f.category ?? null, search: f.q ?? null, liveNow: f.live, warranted: f.warranted,
+    thirdPartyOnly: f.thirdParty, hireableOnly: f.hireable, includeUnclassified: f.includeUnclassified,
+    hasPrice: f.hasPrice, iface: f.iface ?? null, tab: f.tab ?? null, firstPartyOnly: f.firstParty,
+    network: f.network ?? null, token: f.token ?? null, maxPrice: f.maxPrice ?? null, minRating: f.minRating ?? null,
+    sort: f.sort ?? 'best', limit: f.limit ?? 120, offset: f.offset ?? 0,
+  } : {
     category: p.get('category'),
     search: p.get('q'),
     liveNow: bool('live'),
@@ -37,12 +53,19 @@ export async function GET(req: NextRequest) {
     offset: Number(p.get('offset') ?? 0),
   }
   try {
-    const { rows, generatedAt, total, offset, hasMore } = await marketplaceAgents(q)
-    return NextResponse.json({ chainId: 56, generatedAt, provenance: 'MEASURED', count: rows.length, total, offset, hasMore, agents: rows })
-  } catch (err) {
+    const result = await withDeadline(marketplaceAgents(q), 12_000)
+    const { rows, generatedAt, total, offset, hasMore } = result
+    const age = Date.now() - Date.parse(generatedAt)
+    const headers = { ...baseHeaders, 'X-Marque-Projection-Computed-At': generatedAt, 'X-Marque-Projection-Age-Ms': Number.isFinite(age) && age >= 0 ? String(age) : 'UNKNOWN', 'X-Marque-Projection-Stale': String(!Number.isFinite(age) || age < 0 || age > 180_000) }
+    if (machine) {
+      const body = machineCatalog(result, q.limit ?? 120)
+      return NextResponse.json(body, { headers: { ...headers, 'Cache-Control': body.cacheMaxAgeSeconds ? `public, max-age=${body.cacheMaxAgeSeconds}` : 'no-store', Link: '</api/v1/openapi.json>; rel="describedby"' } })
+    }
+    return NextResponse.json({ chainId: 56, generatedAt, provenance: 'MEASURED', count: rows.length, total, offset, hasMore, agents: rows }, { headers })
+  } catch {
     return NextResponse.json(
-      { error: 'marketplace_unavailable', detail: err instanceof Error ? err.message : String(err) },
-      { status: 503 },
+      { error: 'marketplace_unavailable', detail: 'The catalog could not be read just now. Retry after a short pause.' },
+      { status: 503, headers: baseHeaders },
     )
   }
 }

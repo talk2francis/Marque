@@ -1,6 +1,7 @@
 import 'server-only'
 import { sql } from 'drizzle-orm'
-import { cachedProjection, db } from '@marque/db'
+import { cachedProjection } from '@marque/db'
+import { boundedCommerceRead } from '@marque/commerce/reads'
 import { teamWallets } from '@marque/commerce'
 
 /**
@@ -39,7 +40,7 @@ async function computeTracks(chainId: number): Promise<Record<string, AgentTrack
   const team = teamWallets()
   const teamList = team.length ? sql.join(team.map((w) => sql`${w}`), sql`, `) : sql`''`
   const [ratings, jobs] = await Promise.all([
-    db().execute(sql`
+    boundedCommerceRead(sql`
       with r as (
         select r.agent_token_id as tid, r.client, r.tag1,
                r.value::numeric / power(10, coalesce(r.value_decimals, 0)) as score,
@@ -59,7 +60,7 @@ async function computeTracks(chainId: number): Promise<Record<string, AgentTrack
              count(*) filter (where tag1 = 'starred' and paid and client not in (${teamList}))::int as verified,
              avg(score) filter (where tag1 = 'starred' and paid and client not in (${teamList})) as verified_avg
       from r group by tid`),
-    db().execute(sql`
+    boundedCommerceRead(sql`
       -- A Marque hire names the exact identity it hired; a job opened elsewhere counts for
       -- every identity that registered the provider wallet (the chain cannot say which).
       select coalesce(nullif(split_part(i.agent_id, ':', 3), ''), a.token_id) as tid,

@@ -12,7 +12,10 @@
     "./errors": "./src/errors.ts",
     "./generated": "./src/generated.ts",
     "./evidence": "./src/portable-job.ts",
-    "./inspection": "./src/inspection.ts"
+    "./inspection": "./src/inspection.ts",
+    "./reads": "./src/read-budget.ts",
+    "./plan": "./src/hire-plan.ts",
+    "./catalog": "./src/catalog-client.ts"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",

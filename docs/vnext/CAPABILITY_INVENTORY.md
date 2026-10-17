@@ -47,3 +47,8 @@ Portable frozen-case MCS replay, explicit service/invocation commitments for fut
 ## P06 candidate delta, 17 October 2026
 
 Opt-in version2 receipt/job wrappers, direct legacy-response digest inspection, standalone bounded read-only RPC inspection, exact emitter/event/canonical-block checks, separate payment/refund transfers and local SDK deliverable verification now EXIST. Actual original anchor and already-paid Plinth case pass the CLI; corrupt bytes and missing metadata fail safely. Existing APIs, body versions/hashes and data remain. Owner/person/funding independence, missing original bytes, absent historical allowance/action charter, source-build attestation and unexported private quote signature replay remain separate UNKNOWN states, not universal verification.
+
+
+## P07 candidate delta, 17 October 2026
+
+EXISTS (candidate, pending final checkpoint): opt-in versioned existing catalog, runtime/generated structural schemas, GET-only typed client/example, deterministic unsigned exact-term plan, separate deferred funding, read courtesy/SQL/HTTP bounds. REUSED: existing dedup/filter/pagination, quote/intent and ABI. PARTIAL: one commercial service per existing entry; provider current control and task compatibility require fresh checks. UNSUPPORTED: x402 buyer, generic execute, automatic signing/spending; UNKNOWN: exact probe timestamp, extra services, independent human adoption, current source-bytecode verification. See P07_MACHINE_CONTRACT.md; no live deployment claim.

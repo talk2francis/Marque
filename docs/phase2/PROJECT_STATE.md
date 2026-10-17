@@ -1,3 +1,9 @@
+# P07 in progress, 17 October 2026
+
+Owner-approved P07 begins from P06 committed source with608regressions passed and actual read-only anchor/payment proof. P06 remaining validation stays frozen in its own worktree. No production deployment, paid task, wallet/chain write or P08 follows automatically. P06 final checkpoint evidence will be included before P07 closes.
+
+Requests: [2026-10-17] [combined commerce/product maintenance] [A/B] [packages/commerce pure plan/catalog/read bounds; existing marketplace and public evidence GETs; public schema and TS example; docs] Stabilize the existing API with an opt-in machine projection, controlled filters and a pure unsigned create-job plan. Preserve default successful bodies, quote/intent flow, exact seller/asset binding, private data, MCS and UI. Bound cold reads without changing query plans; no generic execution route or signer.
+
 # P06 checkpoint, 17 October 2026
 
 Source `6dde8648ecb11f119adcc95458ab2928088a39e3`: full suite608passed/37gatedskipped, serial types/build/lint/copylint pass. Historical receipt SHA-256 and chain97 anchor match; current chain56 Plinth56916 is PAID with exact transfer and SDK manifest proof, while current policy/actor independence remain unknown. Optional bundles preserve default APIs and missing snapshot metadata. See [checkpoint](../vnext/P06_CHECKPOINT.md). AMBER for historical provenance and independent-user acceptance. No deployment, migration, push, paid action or chain write. Closing08:53:57UTC shared/product PIDs, tmux and proxy unchanged; Marque/Kerb complete health bodies pass. P07 already approved and active; stop after P07.

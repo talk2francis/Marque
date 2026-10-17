@@ -1,6 +1,6 @@
 import 'server-only'
 import { createHash, randomUUID } from 'node:crypto'
-import { asc, desc, eq } from 'drizzle-orm'
+import { asc, desc, eq, sql } from 'drizzle-orm'
 import { db, run as runTable, runEvent as runEventTable, runRejection as runRejectionTable, receipt as receiptTable } from '@marque/db'
 import { verifyCharterCapability } from './charter-capability'
 import {
@@ -379,8 +379,13 @@ export async function readRun(id: string): Promise<RunView | null> {
 }
 
 export async function readReceipt(id: string) {
-  const [row] = await db().select().from(receiptTable).where(eq(receiptTable.id, id)).limit(1)
-  return row ?? null
+  return db().transaction(async tx => {
+    await tx.execute(sql`set transaction read only`)
+    await tx.execute(sql`set local statement_timeout = '4000ms'`)
+    await tx.execute(sql`set local lock_timeout = '500ms'`)
+    const [row] = await tx.select().from(receiptTable).where(eq(receiptTable.id, id)).limit(1)
+    return row ?? null
+  })
 }
 
 export async function recentRuns(limit = 20) {

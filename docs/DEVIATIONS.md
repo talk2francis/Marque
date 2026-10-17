@@ -1485,3 +1485,8 @@ See [P05 contract](vnext/P05_WARRANT_CONTRACT.md) and vNext deviations. Reuse im
 
 
 P06 candidate: preserve old receipt hashes/default APIs; opt-in evidence containers and independent read-only inspection. Missing original evidence stays partial/unknown, and historical fee approval never becomes action authority. Actual post-payment router event ordering is corrected only in the existing source projector. No data migration, signer, deployment or chain write. See docs/vnext/P06_INSPECTION_CONTRACT.md and vNext deviations.
+
+
+## vNext P07, 17 October 2026
+
+Planned machine service inventory and independent client acceptance; shipped the existing deduplicated catalog's one selected commercial service, explicitly UNKNOWN additional services/task support, a GET-only TS example and a pure unsigned plan. Existing projection lacks exact probe time/transport and PublicQuote lacks raw signature envelope; no invented inventory/recency/client ECDSA proof. Cost: users need fresh exact-task quote/current chain checks. Restore fuller inventory only from measured source and versioned contract. Acceptance uses a real first-party quote with synthetic unsigned buyer and fixture-only intent, not outside-user adoption or a paid hire. No need for another marketplace/execute endpoint. Existing cold-query risk receives statement bounds without a speculative SQL rewrite; no production speed claim.

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 const mocks = vi.hoisted(() => ({ select: vi.fn(), limit: vi.fn() }))
-vi.mock('@marque/db', async original => ({ ...await original<object>(), db: () => ({ select: mocks.select }) }))
+vi.mock('@marque/db', async original => ({ ...await original<object>(), db: () => ({ transaction: async (run: (tx: object) => unknown) => run({ select: mocks.select, execute: async () => [] }) }) }))
 import { GET } from './route'
 
 const invoke = (id = '1') => GET(new Request('https://candidate.invalid/api/v1/conformance/' + id), { params: Promise.resolve({ id }) })

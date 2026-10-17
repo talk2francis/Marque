@@ -1,6 +1,7 @@
 import { sql, type SQL } from 'drizzle-orm'
 import { db, commerceQuote, firstPartyAgents, canonicalAgentId, type FirstPartyAgent } from '@marque/db'
 import { requestQuote, probeTask, type QuoteResult } from './quote.js'
+import { boundedCommerceRead } from './read-budget.js'
 
 /**
  * The commercial axis (SPEC-COMMERCE 4.1), separate from MCS quality.
@@ -25,13 +26,7 @@ const rowsOf = (r: unknown) => ((r as { rows?: unknown[] }).rows ?? (r as unknow
 
 /** Exact-agent reads must not scan the marketplace or leave SQL running after a UI timeout. */
 async function supplyRows(query: SQL, scoped: boolean): Promise<Array<Record<string, unknown>>> {
-  if (!scoped) return rowsOf(await db().execute(query))
-  return db().transaction(async (tx) => {
-    await tx.execute(sql`set transaction read only`)
-    await tx.execute(sql`set local statement_timeout = '4000ms'`)
-    await tx.execute(sql`set local lock_timeout = '500ms'`)
-    return rowsOf(await tx.execute(query))
-  })
+  return rowsOf(await boundedCommerceRead(query, scoped ? 'exact' : 'catalog'))
 }
 
 export interface SellerCandidate {
