@@ -77,3 +77,9 @@
 
 /* Seller observations can be failed or unknown; use a neutral rule. */
 .seller { border-color: var(--hair-2); }
+
+.qualifications { margin: 0; display: grid; gap: 10px; }
+.qualifications > div { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: 12px; }
+.qualifications dt { font-size: 14px; font-weight: 500; }
+.qualifications dd { margin: 0; font-size: 14px; color: var(--ink-2); overflow-wrap: anywhere; }
+@media (max-width: 520px) { .qualifications > div { grid-template-columns: 1fr; gap: 2px; } }

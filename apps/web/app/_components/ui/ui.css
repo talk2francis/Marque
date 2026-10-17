@@ -210,7 +210,7 @@
   /* ================= Address / hash chip ================= */
   .addr {
     display: inline-flex; align-items: center; gap: 2px;
-    height: 28px; padding: 0 3px 0 9px;
+    min-height: 32px; padding: 0 3px 0 9px;
     border: 1px solid var(--hair); border-radius: var(--r-pill);
     background: color-mix(in srgb, var(--panel) 60%, transparent);
     font-family: var(--font-mono); font-size: 12.5px; color: var(--ink);
@@ -219,7 +219,7 @@
   }
   .addr-text { padding-right: 4px; white-space: nowrap; }
   .addr-label { font-family: var(--font-sans); color: var(--ink-3); margin-right: 5px; font-size: 12px; }
-  .addr button, .addr a { display: inline-grid; place-items: center; width: 22px; height: 22px; border: 0; border-radius: 50%; background: transparent; color: var(--ink-3); }
+  .addr button, .addr a { display: inline-grid; place-items: center; width: 28px; height: 28px; flex-shrink: 0; border: 0; border-radius: 50%; background: transparent; color: var(--ink-3); }
   .addr button:hover, .addr a:hover { color: var(--ink); background: color-mix(in srgb, var(--ink) 7%, transparent); }
   .addr a { color: var(--chain); }
   .addr svg { width: 12px; height: 12px; }

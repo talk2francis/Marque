@@ -128,3 +128,6 @@
   .head { gap: 14px; }
   .title { font-size: 30px; }
 }
+
+/* Evidence links remain readable and operable without precise tapping. */
+.crumbs a, .note a, .muted a, .ratingBox a, .revMeta a, .verdictTitle a, .table a, .facts a { display: inline-block; min-height: 28px; padding-block: 3px; }

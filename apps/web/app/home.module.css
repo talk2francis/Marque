@@ -280,8 +280,8 @@
 .hireControls button { display: grid; place-items: center; width: 40px; height: 40px; border: 1px solid var(--on-forest-hair); border-radius: 50%; background: transparent; color: var(--on-forest); cursor: pointer; }
 .hireControls button:hover, .hireControls button:focus-visible { border-color: var(--accent); color: var(--accent); }
 .hireDots { max-width: var(--maxw); margin: 28px auto 0; padding-inline: var(--margin); display: flex; gap: 8px; justify-content: center; }
-.hireDots button { position: relative; width: 36px; height: 18px; padding: 0; border: 0; background: transparent; cursor: pointer; }
-.hireDots button::before, .hireDots button::after { content: ''; position: absolute; left: 0; top: 8px; display: block; height: 3px; border-radius: 3px; }
+.hireDots button { position: relative; width: 36px; height: 28px; padding: 0; border: 0; background: transparent; cursor: pointer; }
+.hireDots button::before, .hireDots button::after { content: ''; position: absolute; left: 0; top: 13px; display: block; height: 3px; border-radius: 3px; }
 .hireDots button::before { width: 100%; background: var(--on-forest-hair); }
 .hireDots button::after { width: 0; background: var(--accent); }
 @media (prefers-reduced-motion: no-preference) {
@@ -426,3 +426,6 @@
 @media (prefers-reduced-motion: reduce) {
   .more svg, .tileGo svg { transition: none; }
 }
+
+/* Evidence links remain readable and operable without precise tapping. */
+.inline, .kpiNote a, .kpiFoot a, .bandCopy a:not(:global(.btn)), .pfHead a { display: inline-block; min-height: 28px; padding-block: 3px; }

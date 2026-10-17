@@ -198,3 +198,5 @@
 .expEvidenceNote { font-size: var(--size-caption); line-height: 1.6; color: var(--fg-soft); }
 .expEvidenceNote a { color: var(--chain); text-decoration: none; }
 @media (max-width: 560px) { .expEvidence { flex-direction: column; gap: var(--s2); } }
+
+.expEvidenceNote a { display: inline-block; min-height: 28px; padding-block: 4px; }

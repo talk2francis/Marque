@@ -11,6 +11,7 @@ import { AgentAvatar } from '../../../_components/AgentAvatar'
 import { AddressChip, Badge, Disclosure, HashChip } from '../../../_components/ui'
 import { network as net } from '../../../../lib/network'
 import { utcStamp } from '../../../../lib/time'
+import { jobHeadline } from '../../../../lib/job-copy'
 import { DeliverableView } from './Deliverable'
 import { readManifest } from '../../../../lib/manifest'
 import { registryImageUrl } from '../../../../lib/avatar-source'
@@ -35,22 +36,6 @@ const EVENT_LABEL: Record<string, string> = {
   PaymentReleased: 'Paid to the agent', JobRejected: 'Cancelled', JobExpired: 'Deadline passed', Refunded: 'Refunded to you',
 }
 
-function headline(state: string, agent: string, price: string, reviewEnds: number | null, refundFrom: number | null, late: boolean) {
-  switch (state) {
-    case 'OPEN': return { title: 'Finish paying to start the job', body: `The job is open on BNB Chain's escrow but not paid. Nothing has been charged. Finish paying, or cancel it.` }
-    case 'FUNDED': return late && refundFrom
-      ? { title: `${agent} has not delivered`, body: `The delivery deadline has passed. You can reclaim your ${price} from ${utcStamp(refundFrom * 1000)}.` }
-      : { title: `${agent} is working`, body: `Your ${price} is held in BNB Chain's ERC-8183 escrow until ${agent} delivers.` }
-    case 'SUBMITTED': return { title: 'Delivered', body: reviewEnds ? `Payment releases to ${agent} on ${utcStamp(reviewEnds * 1000)} unless you report a problem before then.` : `Payment releases to ${agent} after the review window.` }
-    case 'DISPUTED': return { title: 'You reported a problem', body: 'Independent voters decide. If they reject the delivery you are refunded; the payment stays in escrow until then.' }
-    case 'COMPLETED': case 'PAID': return { title: `Done. ${agent} was paid.`, body: 'The review window closed with no dispute and the escrow released the payment.' }
-    case 'EXPIRED': return { title: `Reclaim your ${price}`, body: `${agent} did not deliver in time. The payment is yours to take back.` }
-    case 'REFUNDED': return { title: 'Refunded to your wallet', body: `The ${price} went back to the wallet that paid.` }
-    case 'REJECTED': return { title: 'Rejected', body: 'The delivery was rejected and the payment is refundable to you.' }
-    case 'CANCELLED': return { title: 'Cancelled', body: 'The job was closed before payment. Nothing was charged.' }
-    default: return { title: 'Job', body: '' }
-  }
-}
 
 export default async function JobRoom({ params }: { params: Promise<{ chainId: string; jobId: string }> }) {
   const { chainId: c, jobId } = await params
@@ -84,7 +69,7 @@ export default async function JobRoom({ params }: { params: Promise<{ chainId: s
   const submittedAt = submittedEv?.at ? Math.floor(Date.parse(submittedEv.at) / 1000) : onchain && onchain.submittedAt > 0n ? Number(onchain.submittedAt) : null
   const now = Math.floor(Date.now() / 1000)
   const t = windowS === null ? null : timeline({ state: state as never, expiredAt }, submittedAt, windowS, now)
-  const head = headline(state, agentName, priceLabel ?? 'payment', t?.reviewEndsAt ?? null, t?.refundFrom ?? null, Boolean(t?.awaitingExpiry))
+  const head = jobHeadline(state, agentName, priceLabel ?? 'payment', t?.reviewEndsAt ?? null, t?.refundFrom ?? null, Boolean(t?.awaitingExpiry))
   const onchainHash = job?.deliverable?.hash ?? (onchain && onchain.submittedAt > 0n ? onchain.deliverable : null)
   const manifest = job?.deliverable?.url ? await readManifest(job.deliverable.url, onchainHash) : null
   // The on-chain description is the signed negotiation (JSON); the buyer's words are its `task`.

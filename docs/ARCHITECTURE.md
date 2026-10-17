@@ -229,3 +229,6 @@ P11: existing ERC-8004 ratings/track/storefront share exact prepared-feedback/jo
 P11 final copy alignment: homepage, register compare sheet, FAQ and whitepaper use buyer-linked review records, distinct wallet/person units and escrow funding versus payment release. Legacy verifiedBuyers API field remains compatible; no separate review framework. Existing quote explanation says selected terms and a maximum expiry, without universal signatures.
 
 Whitepaper HTML uses current source; its original30SepPDF remains an explicitly dated archive, not silently regenerated or represented as the current text.
+
+
+P12: existing storefront/builder evidence remains contextual; pure job-copy helper separates completion from PaymentReleased, charter glossary matches preview-only authority, and read-only audit modes preserve explicit environment and screenshot scope.

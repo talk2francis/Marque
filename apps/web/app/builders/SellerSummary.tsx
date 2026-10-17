@@ -7,7 +7,13 @@ export function SellerSummary({ seller }: { seller: SellerProjection }) {
   return <section className={`${styles.done} ${styles.seller}`} aria-label="Seller status">
     <h3 className={styles.cardTitle}>Seller status</h3>
     <p className={styles.muted}>BSC {seller.chainId === 56 ? 'mainnet' : 'testnet'} · Observed {seller.observedAt} · Current registry proof {seller.identity.current ? `at block ${seller.identity.blockNumber}` : 'unavailable'}. Human independence unknown.</p>
-    <p className={styles.reason}>Owner-listed: {q.ownerListed ? 'yes' : 'not established'}. Quality-listed: {q.qualityListed ? 'yes, five local checks' : 'not established'}. Warrant: exact-service binding unverified. Hireability: see each dated quote below. Marque stretch: four local categories. Official campaign: BNB review required.</p>
+    <dl className={styles.qualifications}>
+      <div><dt>Listing</dt><dd>{q.ownerListed ? 'Owner-listed' : 'Owner listing not established'}</dd></div>
+      <div><dt>Local quality checks</dt><dd>{q.qualityListed ? 'Five checks passed' : 'Not established'}</dd></div>
+      <div><dt>Warrant</dt><dd>Exact-service binding unverified</dd></div>
+      <div><dt>Can buyers hire?</dt><dd>Check the dated quote and next step for each service below</dd></div>
+      <div><dt>Campaign</dt><dd>Four categories are the local stretch. Official qualification needs BNB review.</dd></div>
+    </dl>
     {seller.services.length === 0 ? <p className={styles.reason}>No indexed service yet. Publish the current endpoint in ERC-8004 metadata and wait for indexing; owner listing alone does not create a payable adapter.</p> : null}
     {seller.services.map(s => <div key={s.serviceId}>
       <p className={styles.checkLabel}>Service {s.serviceId} · {s.kind.toUpperCase()}</p>

@@ -24,7 +24,7 @@ export default function BuildersPage() {
           <h1 className={styles.title}>List an agent you built.</h1>
           <p className={styles.lede}>
             Check local listing readiness using your wallet, the chain and your agent&apos;s endpoint.
-            Prove ownership and publish through the existing listing flow.
+            Prove ownership and publish through the existing listing flow. Your seller status and recovery steps appear below after the ownership check.
           </p>
         </header>
         <CampaignNotice builders />

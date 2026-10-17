@@ -19,7 +19,11 @@ import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const HERE = dirname(fileURLToPath(import.meta.url))
-const OUT = join(HERE, '..', 'playwright-report')
+const OUT = process.env.AUDIT_OUT ?? join(HERE, '..', 'playwright-report')
+const THEMES = (process.env.AUDIT_THEMES ?? 'night').split(',')
+if (THEMES.some(t => !['day', 'night'].includes(t))) throw new Error('Invalid audit theme')
+const READ_ONLY = process.env.AUDIT_READ_ONLY === '1'
+const VIEWPORT_ONLY = process.env.AUDIT_VIEWPORT_ONLY === '1'
 const BASE = process.env.BASE_URL ?? 'https://marque.trade'
 
 const WIDTHS = [
@@ -54,13 +58,23 @@ function routes() {
   return value.split(',').map((r) => r.trim()).filter(Boolean)
 }
 
-async function auditRoute(browser, route, viewport) {
+async function auditRoute(browser, route, viewport, theme) {
   const context = await browser.newContext({
     viewport: { width: viewport.width, height: viewport.height },
     deviceScaleFactor: 1,
+    reducedMotion: process.env.AUDIT_MOTION === 'reduce' ? 'reduce' : 'no-preference',
     // A judge with no wallet must be able to use every one of these surfaces,
     // so the audit browser deliberately has no extension and no storage.
     storageState: undefined,
+  })
+  await context.addInitScript(t => localStorage.setItem('marque-theme', t), theme)
+  const blockedWrites = []
+  if (READ_ONLY) await context.route('**/*', async r => {
+    const request = r.request()
+    if (['GET', 'HEAD', 'OPTIONS'].includes(request.method())) return r.continue()
+    if (new URL(request.url()).pathname === '/api/v1/events') return r.fulfill({ status: 204, body: '' })
+    blockedWrites.push(request.url())
+    return r.abort('blockedbyclient')
   })
   const page = await context.newPage()
 
@@ -239,9 +253,10 @@ async function auditRoute(browser, route, viewport) {
 
   const shotDir = join(OUT, 'screens', route === '/' ? 'root' : route.replace(/^\//, '').replace(/\//g, '_'))
   mkdirSync(shotDir, { recursive: true })
-  await page.screenshot({ path: join(shotDir, `${viewport.name}.png`), fullPage: true })
+  await page.screenshot({ path: join(shotDir, `${theme}-${viewport.name}.png`), fullPage: !VIEWPORT_ONLY, animations: 'disabled' })
 
   const issues = []
+  if (blockedWrites.length) issues.push(`${blockedWrites.length} non-telemetry write attempt(s) blocked`)
   if (status >= 400) issues.push(`http ${status}`)
   if (findings.overflow) {
     issues.push(`horizontal overflow: ${findings.overflow.scrollWidth}px in ${findings.overflow.clientWidth}px${findings.overflow.worst ? ` (widest: ${findings.overflow.worst})` : ''}`)
@@ -256,23 +271,23 @@ async function auditRoute(browser, route, viewport) {
 
   await context.close()
   return {
-    route, viewport: viewport.name, status, issues,
+    route, viewport: viewport.name, theme, status, issues,
     consoleErrors, pageErrors, failedRequests, focusVisible, ...findings,
   }
 }
 
 async function main() {
-  rmSync(OUT, { recursive: true, force: true })
+  if (!process.env.AUDIT_OUT) rmSync(OUT, { recursive: true, force: true })
   mkdirSync(OUT, { recursive: true })
 
   const browser = await chromium.launch()
   const results = []
   for (const route of routes()) {
-    for (const viewport of WIDTHS) {
-      const r = await auditRoute(browser, route, viewport)
+    for (const viewport of WIDTHS) for (const theme of THEMES) {
+      const r = await auditRoute(browser, route, viewport, theme)
       results.push(r)
       const mark = r.issues.length === 0 ? 'ok  ' : 'ISSUE'
-      console.log(`${mark} ${route.padEnd(28)} ${viewport.name.padEnd(5)} ${r.issues.join(' · ') || 'clean'}`)
+      console.log(`${mark} ${route.padEnd(28)} ${viewport.name.padEnd(5)} ${theme} ${r.issues.join(' · ') || 'clean'}`)
     }
   }
   await browser.close()
@@ -283,7 +298,7 @@ async function main() {
   const lines = ['# Audit report', '', `Base: ${BASE}`, `Ran: ${new Date().toISOString()}`, '',
     `${results.length} route/width combinations · ${withIssues.length} with issues`, '']
   for (const r of withIssues) {
-    lines.push(`## ${r.route} @ ${r.viewport}`)
+    lines.push(`## ${r.route} @ ${r.viewport} ${r.theme}`)
     for (const i of r.issues) lines.push(`- ${i}`)
     if (r.consoleErrors?.length) {
       lines.push('', '```')
