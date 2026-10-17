@@ -105,6 +105,16 @@ describe('deterministic catalog suitability diagnostics, without a manufactured 
     expect(explainCandidates(f).candidates.every(c => c.rejected.includes('duplicate_selection'))).toBe(true)
     expect(explainCandidates(f).recommended).toBeNull()
   })
+  it('preserves existing negative test, probe and seller observations without promoting them', () => {
+    const f = fixture(); const a = f.catalog.agents[0]!
+    a.conformance.state = 'IDENTITY_TEST_FAILED'; a.observation.liveness = 'dead'
+    a.payableRails.erc8183 = { state: 'UNAVAILABLE', failure: 'Synthetic seller timeout' }
+    a.price.state = 'UNKNOWN'
+    const c = explainCandidates(f).candidates.find(c => c.serviceId === 2)!
+    expect(c).toMatchObject({ conformanceObservation: { state: 'IDENTITY_TEST_FAILED', exactServiceBinding: 'UNKNOWN', paymentProof: 'NOT_IMPLIED' }, probeObservation: { liveness: 'dead', sampleTime: null }, commerceObservation: { state: 'UNAVAILABLE', failure: 'Synthetic seller timeout' }, price: { storedQuoteState: 'UNKNOWN' } })
+    expect(c.unknown).toContain('exact_service_quality_unknown')
+    expect(c.rejected).toContain('escrow_quote_unavailable')
+  })
   it.each([0, 1])('handles %s entries and page incompleteness without inferred population', count => {
     const f = fixture(); f.catalog.agents = f.catalog.agents.slice(0, count); f.catalog.page.count = count
     const r = explainCandidates(f)

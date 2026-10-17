@@ -73,7 +73,9 @@ export function explainCandidates(value: unknown) {
       firstParty: a.ownership.firstParty, ownershipProvenance: a.ownership.source,
       state: rejected.length ? 'REJECTED' as const : 'UNKNOWN' as const, rejected, unknown,
       categoryMatch: a.category === intent.category, eligible: false as const,
-      price: { budgetState, amountRaw, provenance: p.provenance, observedAt: p.observedAt, expiresAt: p.expiresAt, observedQuoteMode: p.quoteMode, taskBinding: p.taskBinding },
+      price: { storedQuoteState: p.state, budgetState, amountRaw, provenance: p.provenance, observedAt: p.observedAt, expiresAt: p.expiresAt, observedQuoteMode: p.quoteMode, taskBinding: p.taskBinding },
+      conformanceObservation: a.conformance, probeObservation: a.observation,
+      commerceObservation: a.payableRails.erc8183,
       // No global trust score, imputed settlement, latency or judgement quality.
       objectives: { freshUsableEvidence: null, confirmedSettlement: null, leastAuthority: null },
     }
