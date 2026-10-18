@@ -235,7 +235,7 @@ module.exports = {
       // spawns a child and PM2 saw only the 19 MB wrapper; P2-11 memory budget).
       interpreter: 'node',
       node_args: '--import tsx',
-      env: { ...env, NODE_ENV: 'production' },
+      env: { ...env, NODE_ENV: 'production', CONFORM_DEFER_ON_START: '1' },
       autorestart: true,
       max_restarts: 50,
       restart_delay: 30000,

@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { Download } from 'lucide-react'
 import { DocSection, DocShell } from '../_ui/DocShell'
 import { PAPER, SECTIONS, type Block } from '../whitepaper'
@@ -24,6 +25,7 @@ export default function WhitepaperPage() {
       }
       sections={SECTIONS.map(({ id, n, title }) => ({ id, label: `${n}. ${title}` }))}
     >
+      <p>Operating note, 18 October 2026: this paper includes dated September figures. Read the <Link href="/docs">current usage guide</Link> and <Link href="/docs/sellers">seller guide</Link> for quote modes, disabled action grants, qualification limits and campaign distinctions. The original PDF remains an archive.</p>
       {SECTIONS.map((s) => (
         <DocSection key={s.id} id={s.id} title={`${s.n}. ${s.title}`}>
           {s.blocks.map((b, i) => <BlockView key={i} b={b} />)}

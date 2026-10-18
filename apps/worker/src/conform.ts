@@ -198,8 +198,11 @@ async function main(): Promise<void> {
     log('stop', {})
     return
   }
-  let nextFull = Date.now()
-  let nextReference = Date.now()
+  // A rolling release must not duplicate a whole task sweep immediately on boot.
+  const defer = process.env.CONFORM_DEFER_ON_START === '1'
+  let nextFull = Date.now() + (defer ? CYCLE_MS : 0)
+  let nextReference = Date.now() + (defer ? REFERENCE_CYCLE_MS : 0)
+  log('next_sweeps', { nextFull: new Date(nextFull).toISOString(), nextReference: new Date(nextReference).toISOString(), deferred: defer })
   while (!stopping) {
     if (Date.now() >= nextReference) {
       try { await referenceSweep() } catch (err) {

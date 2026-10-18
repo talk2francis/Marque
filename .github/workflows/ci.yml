@@ -42,6 +42,27 @@ jobs:
       - run: pnpm lint
       - run: pnpm lint:copy
       - run: pnpm test
+      - name: Create the guarded integration fixture database
+        env:
+          PGHOST: localhost
+          PGPORT: '5432'
+          PGUSER: postgres
+          PGPASSWORD: marque
+        run: createdb marque_vnext_fixture_ci
+      - name: Migrate the isolated integration fixture
+        env:
+          DATABASE_URL: postgres://postgres:marque@localhost:5432/marque_vnext_fixture_ci
+        run: pnpm db:migrate
+      - name: Listing, seller, hire and feedback database regressions
+        env:
+          MARQUE_INTEGRATION_DB: postgres://postgres:marque@localhost:5432/marque_vnext_fixture_ci
+        run: >-
+          pnpm exec vitest run
+          apps/web/lib/listing.integration.test.ts
+          apps/web/lib/seller.integration.test.ts
+          packages/commerce/src/hire-p02.integration.test.ts
+          packages/commerce/src/feedback-proof.integration.test.ts
+          --maxWorkers=1 --minWorkers=1
       - name: Build the web app
         run: pnpm --filter @marque/web build
 

@@ -323,7 +323,7 @@ export function Marketplace({ category: fixedCategory, initial }: { category?: s
       <p className={styles.trust}>
         <span className={styles.trustDot} aria-hidden="true" />
         <span>
-          <b>Try free</b> runs your task on the agent&apos;s own endpoint before you pay. No wallet, nothing signed.
+          <b>Try free</b> is available for supported Marque reference services. Outside-agent task calls are not assumed free. No wallet or signature is needed for a supported preview.
         </span>
         <Link className={styles.trustLink} href="/standard">
           How Marque tests agents

@@ -111,14 +111,35 @@ SHA="$(git rev-parse --short HEAD)"
 LIVE="$(live_port)"; IDLE="$(other "$LIVE")"
 say "commit $SHA; live :$LIVE, deploying to :$IDLE; log $LOG"
 
-say "building (memory capped)"
-systemd-run --user --scope -q -p MemoryMax=3G -p MemorySwapMax=1G -p CPUQuota=50% -p CPUWeight=1 \
-  --setenv=MARQUE_BUILD_DIR=.next-verify nice -n 5 bash scripts/build-web.sh >>"$LOG" 2>&1
+# Reject source/build mismatches before a candidate process or upstream is touched.
+git diff --quiet HEAD -- || { say "tracked source is dirty; commit and verify it first"; exit 1; }
+STANDALONE_SOURCE="$WEB/.next-verify/standalone"
+if [ "${1:-}" = "--prepared" ]; then
+  [ "$#" = 2 ] || { say "usage: --prepared DIRECTORY"; exit 64; }
+  PREPARED="$(realpath -- "$2")"
+  [ -d "$PREPARED/standalone" ] && [ -s "$PREPARED/SHA256SUMS" ] || { say "prepared artifact is incomplete"; exit 1; }
+  [ "$(cat "$PREPARED/RELEASE_SHA")" = "$(git rev-parse HEAD)" ] || { say "prepared release SHA does not match HEAD"; exit 1; }
+  BUILD_SOURCE="$(cat "$PREPARED/BUILD_SOURCE_SHA")"
+  [[ "$BUILD_SOURCE" =~ ^[a-f0-9]{40}$ ]] || { say "invalid build-source SHA"; exit 1; }
+  # Worker, CI, deployment tooling and evidence-doc changes do not invalidate an
+  # unchanged web component. Every web/package/config/dependency input must match.
+  git diff --quiet "$BUILD_SOURCE" HEAD -- apps/web packages config pnpm-lock.yaml pnpm-workspace.yaml package.json tsconfig.base.json || { say "web inputs differ from the tested build"; exit 1; }
+  (cd "$PREPARED" && sha256sum --strict --quiet -c SHA256SUMS) >>"$LOG" 2>&1 || { say "prepared artifact checksum failed"; exit 1; }
+  STANDALONE_SOURCE="$PREPARED/standalone"
+  say "using verified prepared web artifact from $BUILD_SOURCE"
+else
+  [ "$#" = 0 ] || { say "unknown deploy arguments"; exit 64; }
+  BUILD_SOURCE="$(git rev-parse HEAD)"
+  say "building (memory capped)"
+  systemd-run --user --scope -q -p MemoryMax=3G -p MemorySwapMax=1G -p CPUQuota=50% -p CPUWeight=1 \
+    --setenv=MARQUE_BUILD_DIR=.next-verify nice -n 5 bash scripts/build-web.sh >>"$LOG" 2>&1
+fi
 
 say "staging release $SHA"
 [ ! -e "$REL/$SHA" ] && [ ! -e "$REL/$SHA.tmp" ] || { say "release already exists; preserve it and use --rollback if appropriate"; exit 1; }
-cp -a "$WEB/.next-verify/standalone" "$REL/$SHA.tmp"
+cp -a "$STANDALONE_SOURCE" "$REL/$SHA.tmp"
 git rev-parse HEAD > "$REL/$SHA.tmp/RELEASE_SHA"
+printf '%s\n' "$BUILD_SOURCE" > "$REL/$SHA.tmp/BUILD_SOURCE_SHA"
 mv "$REL/$SHA.tmp" "$REL/$SHA"
 ln -sfn "$REL/$SHA" "$REL/slot-$IDLE"
 

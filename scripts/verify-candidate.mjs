@@ -29,11 +29,27 @@ const ROUTES = [
   '/me', `/me?addr=${ACTIVE_ADDR}`, `/me?addr=${DEAD_ADDR}`,
 ]
 const browser = await chromium.launch()
+const blockedWrites = []
+let telemetryIntercepted = 0
+async function newReadOnlyPage(options) {
+  const page = await browser.newPage(options)
+  await page.route('**/*', (route) => {
+    const request = route.request()
+    if (['GET', 'HEAD', 'OPTIONS'].includes(request.method())) return route.continue()
+    if (new URL(request.url()).pathname === '/api/v1/events') {
+      telemetryIntercepted++
+      return route.fulfill({ status: 204, body: '' })
+    }
+    blockedWrites.push(`${request.method()} ${new URL(request.url()).pathname}`)
+    return route.abort()
+  })
+  return page
+}
 let failures = 0
 
 for (const route of ROUTES) {
   for (const width of [1440, 1024, 390]) {
-    const page = await browser.newPage({ viewport: { width, height: 900 } })
+    const page = await newReadOnlyPage({ viewport: { width, height: 900 } })
     const problems = []
     page.on('console', (m) => {
       const t = m.text()
@@ -72,7 +88,7 @@ for (const route of ROUTES) {
 
 // The Ledger must no longer say a grade is pending for runs that answered a
 // different task — that was the misleading "grading…" a judge would read.
-const page = await browser.newPage({ viewport: { width: 1440, height: 900 } })
+const page = await newReadOnlyPage({ viewport: { width: 1440, height: 900 } })
 await page.goto(BASE + '/ledger', { waitUntil: 'networkidle' })
 const body = await page.evaluate(() => document.body.innerText)
 console.log('\n--- Ledger completion language ---')
@@ -98,7 +114,7 @@ for (const line of body.split('\n')) {
 
   // My Marque (P2-08, DESIGN-SYSTEM 8.7) for a wallet with real mainnet hires: every section
   // renders and the job history is populated from the Quest API.
-  const page = await browser.newPage({ viewport: { width: 1280, height: 900 } })
+  const page = await newReadOnlyPage({ viewport: { width: 1280, height: 900 } })
   const walletPath = '/api/v1/phase2/wallet/' + HIRER_ADDR.toLowerCase()
   const walletReply = page.waitForResponse(
     (response) => new URL(response.url()).pathname.toLowerCase() === walletPath,
@@ -128,7 +144,7 @@ for (const line of body.split('\n')) {
 // The wallet path: its bundle loads on click, so a page load alone proves
 // nothing about whether the tightened script-src breaks connecting.
 {
-  const page = await browser.newPage({ viewport: { width: 1440, height: 900 } })
+  const page = await newReadOnlyPage({ viewport: { width: 1440, height: 900 } })
   const violations = []
   page.on('console', (m) => {
     const t = m.text()
@@ -144,7 +160,7 @@ for (const line of body.split('\n')) {
   if (await connect.count()) {
     await connect.click({ timeout: 10000 }).catch(() => {})
     await page.waitForTimeout(8000)
-    const dialog = await page.locator('[data-rk], [role="dialog"]').count()
+    const dialog = await page.locator('[role="dialog"]').count()
     console.log(dialog ? `\nok   wallet modal opens (${dialog} dialog elements), no CSP refusal` : '\nFAIL wallet modal did not open')
     if (!dialog) failures++
   } else {
@@ -156,5 +172,7 @@ for (const line of body.split('\n')) {
 }
 
 await browser.close()
+failures += blockedWrites.length
+console.log(`Read-only verification: ${telemetryIntercepted} telemetry attempts intercepted locally; ${blockedWrites.length} unexpected writes blocked.`)
 console.log(`\n${failures} route/width combinations with problems`)
 process.exit(failures ? 1 : 0)

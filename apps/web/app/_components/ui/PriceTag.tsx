@@ -4,7 +4,7 @@ import { ProvenanceChip } from '@marque/ui'
 import { cx } from './cx'
 
 /**
- * A price and its source (invariant 28). A live signed quote counts down to its
+ * A price and its source (invariant 28). An observed quote counts down to its
  * expiry (MEASURED); a declared price says so (CLAIMED). No other kind exists.
  */
 export type PriceSource = { kind: 'quote'; expiresAt: string | number } | { kind: 'declared' }

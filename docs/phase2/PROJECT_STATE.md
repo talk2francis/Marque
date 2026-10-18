@@ -1,3 +1,5 @@
+Requests: [2026-10-18] [combined release/commerce/product maintenance] [A/B] [apps/worker/src/conform.ts; ecosystem.config.cjs; scripts/deploy-web.sh; scripts/verify-candidate.mjs; .github/workflows/ci.yml; usage/FAQ/whitepaper copy] Defer startup task sweeps on rolling activation, make smoke reads non-mutating, verify prepared artifact/source agreement, execute existing DB regressions in CI, and finish current claim alignment. No new signer, paid operation, migration or recurring service.
+
 # P14/P15 and production release authorized, 18 October 2026
 
 Owner explicitly requests P14, P15, remaining justified repairs, commit, push and live production deployment. This supersedes previous phase-stop and no-release notes; those historical records remain. Baseline candidate16445fa; production97ef4c7. Release remains conditional on actual security, backup/restore, browser and rollback evidence. No new mainnet transaction, paid provider task, recurring cost, destructive data operation or expanded wallet authority is inferred.

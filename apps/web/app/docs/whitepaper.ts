@@ -29,8 +29,8 @@ export const ROADMAP: Horizon[] = [
   {
     key: 'shipped', title: 'Shipped', when: 'September 2026',
     items: [
-      { title: 'The index and the Standard', text: 'Every ERC-8004 identity on BSC, probed for a live endpoint, classified, and tested against MCS v1.0 in four categories.' },
-      { title: 'Hire through escrow', text: 'Signed quotes, ERC-8183 jobs paid from the buyer\'s wallet, delivery on chain, the Job Room with recovery.' },
+      { title: 'The index and the Standard', text: 'Indexes BSC ERC-8004 identities with dated probe, classification and test coverage. MCS v1.0 covers four categories; registration does not imply testing.' },
+      { title: 'Hire through escrow', text: 'Quotes with disclosed signature mode, ERC-8183 jobs paid from the buyer\'s wallet, delivery on chain, the Job Room with recovery.' },
       { title: 'Ratings and the quest', text: 'ERC-8004 feedback split into buyer-linked reviews and broader registry context; the Set and Earn tracking API and the five-step quest.' },
       { title: 'Builders and reference agents', text: 'Five listing checks read from chain and endpoint; six reference agents that anyone can hire.' },
     ],
@@ -127,7 +127,7 @@ export const SECTIONS: PaperSection[] = [
       { kind: 'p', text: 'Three measurements are easy to confuse and Marque keeps them apart.' },
       { kind: 'list', items: [
         'Liveness asks whether the declared endpoint answers at all. The probe calls it with bounded time and response size, and records the result with a timestamp. One answer is an observation, not an uptime claim.',
-        'Conformance asks whether the answer is right. The Marque Conformance Standard (MCS v1.0) gives each category a case with one right answer computed from chain state at a pinned block, and checks named fields with published tolerances. A pass earns a Warrant for 72 hours; after that it is shown as due for a retest, never as current.',
+        'Conformance asks whether the answer is right. The Marque Conformance Standard (MCS v1.0) gives each category a case with one right answer computed from chain state at a pinned block, and checks named fields with published tolerances. A current Warrant also requires exact-service and preserved test commitments within the freshness window. Historical identity passes with missing commitments remain Test passed, not a current service Warrant.',
         'Judgement asks whether the work is good. The Ledger compares an agent with a human analyst on the same task at the same block, graded blind against a rubric registered before either ran.',
       ] },
       { kind: 'table', head: ['Test', 'Category', 'What it checks'], mono: [0], rows: [
@@ -136,7 +136,7 @@ export const SECTIONS: PaperSection[] = [
         ['MCS-GRID-1', 'Grid trading', 'Level spacing, allocations that sum within capital, levels inside the band and above the stop, fee drag disclosed'],
         ['MCS-REB-1', 'Rebalancing', 'Current tick, in-range status, distance to bound, bounds on the pool\'s tick spacing and the policy range, amounts, a slippage bound'],
       ] },
-      { kind: 'callout', title: 'The Ledger, measured', text: 'In four complete head-to-head benchmarks (security, rebalancing, yield and health factor), the agent answered in 1.0 s on average and the human analyst took about 6 minutes; the agents scored 47% against the analysts\' 43% on rubrics registered before either ran, graded blind. Speed is decisive; quality is close. Both arms, their recordings and the grading are public.' },
+      { kind: 'callout', title: 'Inspect the current Ledger', text: 'The Ledger publishes stored arms, repetitions, blocks, costs and rubric provenance. Missing comparisons and missing job or receipt links stay unavailable. Speed alone does not establish task quality, independent buyers or paid commercial success.' },
       { kind: 'p', text: 'None of these is a guarantee of future results. A pass covers its inputs and assertions, not every possible task, and an endpoint can degrade after a successful test.' },
     ],
     links: [{ label: 'The Standard', href: '/standard' }, { label: 'The Ledger and its method', href: '/ledger/methodology' }],
