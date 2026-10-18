@@ -293,6 +293,21 @@ export function marketplaceSourceQuery(owners?: readonly string[]) {
   `
 }
 
+/** Match the source query's current category before selecting complete owners. */
+export function marketplaceCategoryQuery(category?: string | null) {
+  return sql`
+    with cat as (
+      select distinct on (agent_id) agent_id, category
+      from agent_category
+      order by agent_id, (category <> 'unclassified') desc, confidence desc, assigned_at desc
+    )
+    select cat.agent_id
+    from cat join agent a on a.id = cat.agent_id
+    where a.chain_id = 56
+      ${category ? sql`and cat.category = ${category}` : sql`and cat.category is not null and cat.category <> 'unclassified'`}
+  `
+}
+
 // One bounded memo for requested owner groups. The full catalog memo remains
 // separate. Fresh quote selection happens before this cache, and expiry is still
 // checked on every response. Never turn a failed commerce read into zero supply.
@@ -487,7 +502,11 @@ export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: Ma
   const hireable = q.tab === 'ready' || q.hireableOnly === true
   const states = hireable ? await commercialStates() : undefined
   const readyIds = states ? [...new Set([...states.values()].filter(c => c.state === 'hireable' || c.state === 'settleable').map(c => c.agentId))] : null
-  const ids = q.agentIds ? (readyIds ? q.agentIds.filter(id => readyIds.includes(id)) : q.agentIds) : readyIds
+  let ids = q.agentIds ? (readyIds ? q.agentIds.filter(id => readyIds.includes(id)) : q.agentIds) : readyIds
+  if (ids === null && (q.category || !q.includeUnclassified)) {
+    const matches = await boundedCommerceRead(marketplaceCategoryQuery(q.category), 'exact')
+    ids = Array.from(matches as unknown as Array<{ agent_id: string }>).map(row => row.agent_id)
+  }
   const base = ids ? await scopedBase(ids, states) : { rows: await marketplaceBase(), at: baseMemo?.at ?? Date.now() }
   // Clone: the base is memoised and the sort below is in place.
   let all = base.rows.map(expireMarketQuote)

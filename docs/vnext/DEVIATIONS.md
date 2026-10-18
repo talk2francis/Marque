@@ -122,3 +122,17 @@ P14/P15 extra review: coverage compared raw amounts across assets/networks. Thre
 
 
 P14 additional boundary: nightly arbitrary-host A2A message/send testing had no provider-specific consent gate. Quarantine that automatic outside sweep rather than inventing consent or a free operation contract; --once refuses unless the explicit reference-only mode is selected. Existing reference schedule and consented builder tests stay, all historical observations retained. Outside MCS freshness may lapse until controlled tests occur; that is reported as stale, not hidden.
+# P15 observed Judge catalog repair, 18 October 2026
+
+The restored-candidate browser found a real HTTP 503 on Judge's health-factor
+catalog. The ready/exact owner scope did not cover category or default classified
+queries. These now resolve the original winning category before reading complete
+owner partitions, preserving other-category sibling counts and null-owner
+fallback. Read-only restored measurements completed in 6.775 seconds for
+health-factor and 7.115 seconds for the classified set, with the existing eight
+second statement limit. Unit tests reproduced the missed early filter and
+unnecessary empty-category reads before repair. Real fixture tests compare
+results and clone counts, category precedence and chain exclusion. No index,
+migration, deadline increase or classification change is introduced. Fully
+unclassified browsing remains on the original broad path and is not covered by
+these latency observations. Final build and browser acceptance are separate.

@@ -36,4 +36,21 @@ describe('ready selection before the broad catalog read', () => {
     expect(query.params).not.toContain('synthetic-owned')
   })
 
+  it('resolves the requested category before reading unrelated catalog rows', async () => {
+    mocks.states.mockResolvedValue(new Map()); mocks.read.mockReset()
+    mocks.read.mockRejectedValueOnce(Error('category lookup unavailable'))
+    await expect(marketplaceAgents({ category: 'health_factor', tab: 'all' })).rejects.toThrow('category lookup unavailable')
+    const query = new PgDialect().sqlToQuery(mocks.read.mock.calls[0]![0])
+    expect(query.params).toContain('health_factor')
+    expect(mocks.read).toHaveBeenCalledTimes(1)
+  })
+
+  it('returns an empty missing category without reading the broad registry', async () => {
+    mocks.states.mockResolvedValue(new Map()).mockClear(); mocks.read.mockReset()
+    mocks.read.mockResolvedValueOnce([])
+    expect(await marketplaceAgents({ category: 'missing-category', tab: 'all' })).toMatchObject({ rows: [], total: 0 })
+    expect(mocks.read).toHaveBeenCalledTimes(1)
+    expect(mocks.states).not.toHaveBeenCalled()
+  })
+
 })

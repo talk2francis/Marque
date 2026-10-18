@@ -276,3 +276,9 @@ Blue/green deployment and rollback save PM2 state before switching the Marque
 upstream. A failed save prevents cutover. Delayed retirement saves again after
 stopping the old slot. This preserves the live slot across host reboots; see
 `docs/vnext/P15_RECOVERY.md` for the observed stale-snapshot outage and recovery.
+
+Category catalog requests and the default classified catalog first resolve the
+same winning category used by the source projection, then read whole owner
+partitions. Other-category siblings still contribute to clone counts. Explicit
+unclassified browsing and null ownership retain the original complete path.
+Category lookup failures remain unavailable; they do not become zero supply.
