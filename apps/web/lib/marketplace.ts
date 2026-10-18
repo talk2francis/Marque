@@ -208,6 +208,10 @@ export function marketplaceSourceQuery(owners?: readonly string[]) {
              min(s.declared_price) filter (where s.declared_price is not null) as price,
              (array_agg(coalesce(s.resolved_endpoint, s.endpoint) order by (p.liveness='live') desc, s.id))[1] as endpoint
       from agent_service s left join latest p on p.service_id = s.id
+      ${owners ? sql`where s.agent_id in (
+        select scoped.id from agent scoped where scoped.chain_id = 56
+          and scoped.owner_address in (${sql.join(owners.map(owner => sql`${owner}`), sql`, `)})
+      )` : sql``}
       group by s.agent_id
     ),
     conf as (

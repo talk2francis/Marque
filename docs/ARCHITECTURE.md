@@ -283,6 +283,10 @@ original projection alone chooses the winning category, including historical
 ties. Other-category siblings still contribute to clone counts. Explicit
 unclassified browsing and null ownership retain the original complete path.
 Category lookup failures remain unavailable; they do not become zero supply.
+The owner constraint also applies before service aggregation and latest-probe
+joins. Filtering only the final registry rows still scans unrelated services
+and caused the first real production candidate to time out. The original
+unscoped query remains available for unknown-owner and unclassified requests.
 
 Release staging retains previous public `/_next/static` files without replacing
 the new build's files. The candidate verifier loads the prior live page's script,

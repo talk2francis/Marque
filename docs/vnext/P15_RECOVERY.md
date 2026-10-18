@@ -57,3 +57,12 @@ page and consumes its script, style and font files from the candidate, rejecting
 missing files, wrong content types and incomplete bodies. Five local HTTP-fixture
 checks cover success, missing chunks, truncated 200, HTML fallback and an error
 page without asset evidence. Server code and observation data are not copied.
+
+The first production stage of release d7ee954 returned HTTP 503 for the default
+catalog. The release script stopped the candidate and preserved the old live
+slot. Its restored-snapshot acceptance remains dated evidence, not production
+success. Production had 1,212 classified identities and 892 owners, close to the
+snapshot scope. Applying the complete-owner constraint before service
+aggregation returned 1,733 qualifying rows in a read-only execution plan taking
+2.003 seconds, within the unchanged eight-second bound. The same owner/host
+partition and result-parity regressions gate this additional repair.
