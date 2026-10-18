@@ -66,3 +66,16 @@ snapshot scope. Applying the complete-owner constraint before service
 aggregation returned 1,733 qualifying rows in a read-only execution plan taking
 2.003 seconds, within the unchanged eight-second bound. The same owner/host
 partition and result-parity regressions gate this additional repair.
+
+The follow-up restored-snapshot browser check still caught a Judge catalog
+503. Tracing identified capability enrichment issuing four reads for each
+displayed identity and scanning probe history. Catalog pages now batch exact
+identities by their category task. Canonical evaluation reads the latest probe
+through the existing service/time index, including newer manual observations
+outside the scheduler, with the existing four-second read-only statement bound.
+No timeout, freshness rule or hireability criterion was relaxed. Five additional
+isolated PostgreSQL tests cover newer manual failure, foreign-identity evidence,
+single/batch parity, unprobed services and exact identity scope; all 24 focused
+checks passed. A traced restored-snapshot health-category read took 3.971 seconds
+and its warm repeat 0.080 seconds. These observations do not establish a public
+latency percentile; final candidate and production acceptance remain required.

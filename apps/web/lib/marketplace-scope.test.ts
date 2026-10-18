@@ -1,9 +1,10 @@
 import { describe, expect, it, vi } from 'vitest'
 import { PgDialect } from 'drizzle-orm/pg-core'
-const mocks = vi.hoisted(() => ({ states: vi.fn(), read: vi.fn() }))
+const mocks = vi.hoisted(() => ({ states: vi.fn(), read: vi.fn(), capabilities: vi.fn() }))
 vi.mock('@marque/commerce', async original => ({ ...await original<object>(), commercialStates: mocks.states }))
 vi.mock('@marque/commerce/reads', () => ({ boundedCommerceRead: mocks.read }))
-import { marketplaceAgents } from './marketplace'
+vi.mock('./agent-state', async original => ({ ...await original<object>(), agentStates: mocks.capabilities }))
+import { marketplaceAgents, marketPageAgentStates } from './marketplace'
 describe('ready selection before the broad catalog read', () => {
   it('returns measured empty supply for no stored quotes without scanning the registry', async () => {
     mocks.read.mockClear(); mocks.states.mockResolvedValueOnce(new Map())
@@ -53,4 +54,35 @@ describe('ready selection before the broad catalog read', () => {
     expect(mocks.states).not.toHaveBeenCalled()
   })
 
+})
+
+describe('paged capability evaluation', () => {
+  it('batches exact identities by their own task and excludes reference agents', async () => {
+    mocks.capabilities.mockReset().mockImplementation(async (ids: string[]) => new Map(ids.map(id => [id, { agentId: id }])))
+    const result = await marketPageAgentStates([
+      { agentId: 'A', category: 'yield', isReference: false },
+      { agentId: 'B', category: 'grid', isReference: false },
+      { agentId: 'C', category: 'yield', isReference: false },
+      { agentId: 'reference', category: 'grid', isReference: true },
+    ])
+    expect(mocks.capabilities.mock.calls).toEqual([[['A', 'C'], 'yield'], [['B'], 'grid']])
+    expect([...result.keys()].sort()).toEqual(['A', 'B', 'C'])
+  })
+  it('performs no capability read for an empty or reference-only page', async () => {
+    mocks.capabilities.mockReset()
+    expect((await marketPageAgentStates([])).size).toBe(0)
+    expect((await marketPageAgentStates([{ agentId: 'reference', category: 'yield', isReference: true }])).size).toBe(0)
+    expect(mocks.capabilities).not.toHaveBeenCalled()
+  })
+  it('keeps a failed task group unavailable without substituting another identity', async () => {
+    mocks.capabilities.mockReset().mockImplementation(async (ids: string[], task: string) => {
+      if (task === 'grid') throw Error('read unavailable')
+      return new Map(ids.map(id => [id, { agentId: id }]))
+    })
+    const result = await marketPageAgentStates([
+      { agentId: 'A', category: 'yield', isReference: false },
+      { agentId: 'B', category: 'grid', isReference: false },
+    ])
+    expect([...result.keys()]).toEqual(['A'])
+  })
 })

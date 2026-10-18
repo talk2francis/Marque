@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const { execute } = vi.hoisted(() => ({ execute: vi.fn() }))
-vi.mock('@marque/db', () => ({ db: () => ({ execute }) }))
+vi.mock('@marque/commerce/reads', () => ({ boundedCommerceRead: execute }))
 import { agentState } from './agent-state'
 
 describe('canonical database-backed agent state', () => {

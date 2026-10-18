@@ -1,6 +1,6 @@
 import 'server-only'
 import { sql } from 'drizzle-orm'
-import { db } from '@marque/db'
+import { boundedCommerceRead } from '@marque/commerce/reads'
 import {
   evaluateAgentState,
   type CanonicalAgentState,
@@ -36,7 +36,7 @@ export async function agentState(
 }
 
 /**
- * Canonically evaluate several identities from three bounded queries.
+ * Canonically evaluate several identities from four bounded read queries.
  *
  * This is deliberately the implementation behind `agentState`, rather than a
  * second SQL approximation of hireability.  Inventory and exact deep links
@@ -51,7 +51,7 @@ export async function agentStates(
   if (ids.length === 0) return new Map()
   const idList = sql.join(ids.map((id) => sql`${id}`), sql`, `)
   const [identityResult, serviceResult, qualificationResult, settledResult] = await Promise.all([
-    db().execute(sql`
+    boundedCommerceRead(sql`
       select a.id, a.token_id, coalesce(a.name, 'Unnamed agent') as name,
              a.owner_address, a.detail_fetched, c.category
       from agent a
@@ -62,42 +62,23 @@ export async function agentStates(
         limit 1
       ) c on true
       where a.id in (${idList}) and a.chain_id = 56 and a.id <> 'canary:ssrf'
-    `),
-    db().execute(sql`
-      with latest as (
-        select distinct on (service_id)
-          id as probe_id, service_id, checked_at, liveness, failure_class,
-          executable_endpoint, task_kinds, manifest
-        from probe
-        where agent_id in (${idList}) and service_id is not null
-        order by service_id, checked_at desc
-      )
-      select s.id as service_id, s.agent_id, s.kind,
-             coalesce(s.resolved_endpoint, s.endpoint) as discovery_endpoint,
-             case when s.kind in ('a2a', 'termix') then l.executable_endpoint
-                  else coalesce(l.executable_endpoint, s.resolved_endpoint, s.endpoint) end as executable_endpoint,
-             l.probe_id, l.checked_at, l.liveness, l.failure_class,
-             coalesce(l.task_kinds, '[]'::jsonb) as task_kinds, l.manifest
-      from agent_service s
-      left join latest l on l.service_id = s.id
-      where s.agent_id in (${idList})
-      order by s.id
-    `),
-    db().execute(sql`
+    `, 'exact'),
+    boundedCommerceRead(agentServiceEvidenceQuery(ids), 'exact'),
+    boundedCommerceRead(sql`
       select distinct on (agent_id) agent_id, test_id, pass, ran_at
       from conformance_result
       where agent_id in (${idList})
       order by agent_id, ran_at desc
-    `),
+    `, 'exact'),
     // Settleable evidence (P2-03): an indexed ERC-8183 job paid to this agent's wallet
     // that was delivered and then settled (JobCompleted or PaymentReleased).
-    db().execute(sql`
+    boundedCommerceRead(sql`
       select distinct s.id as service_id
       from agent_service s
       join agent a on a.id = s.agent_id
       join commerce_job j on j.provider = a.agent_wallet and j.state in ('COMPLETED', 'PAID')
       where s.agent_id in (${idList}) and s.kind = 'a2a'
-    `).catch(() => []),
+    `, 'exact').catch(() => []),
   ])
   const settleableServiceIds = rowsOf(settledResult).map((r) => Number(r['service_id']))
 
@@ -157,4 +138,28 @@ export async function agentStates(
     })
   }
   return result
+}
+
+/** Newest exact-service observation, including manual probes outside scheduling. */
+export function agentServiceEvidenceQuery(agentIds: readonly string[]) {
+  const idList = sql.join(agentIds.map(id => sql`${id}`), sql`, `)
+  return sql`
+      select s.id as service_id, s.agent_id, s.kind,
+             coalesce(s.resolved_endpoint, s.endpoint) as discovery_endpoint,
+             case when s.kind in ('a2a', 'termix') then l.executable_endpoint
+                  else coalesce(l.executable_endpoint, s.resolved_endpoint, s.endpoint) end as executable_endpoint,
+             l.probe_id, l.checked_at, l.liveness, l.failure_class,
+             coalesce(l.task_kinds, '[]'::jsonb) as task_kinds, l.manifest
+      from agent_service s
+      left join lateral (
+        select p.id as probe_id, p.checked_at, p.liveness, p.failure_class,
+               p.executable_endpoint, p.task_kinds, p.manifest
+        from probe p
+        where p.service_id = s.id and p.agent_id = s.agent_id
+        order by p.checked_at desc nulls last
+        limit 1
+      ) l on true
+      where s.agent_id in (${idList})
+      order by s.id
+  `
 }

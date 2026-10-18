@@ -3,7 +3,7 @@ import { sql } from 'drizzle-orm'
 import { firstPartyIds, canonicalAgentIdSql } from '@marque/db'
 import { boundedCommerceRead } from '@marque/commerce/reads'
 import { commercialStates, formatAmount, type CommercialState } from '@marque/commerce'
-import { agentState, TASK_FOR_CATEGORY } from './agent-state'
+import { agentStates, TASK_FOR_CATEGORY, type AgentStateView } from './agent-state'
 import { agentTracks, trackFromSource, type AgentTrack } from './agent-track'
 import { selectedAgentRows } from './compare-selection'
 import { expireMarketQuote } from './quote-expiry'
@@ -307,6 +307,20 @@ export function marketplaceCategoryQuery(category?: string | null) {
   `
 }
 
+/** Keep each category's task and exact identities while avoiding per-row queries. */
+export async function marketPageAgentStates(page: readonly Pick<MarketRow, 'agentId' | 'category' | 'isReference'>[]) {
+  const groups = new Map<Parameters<typeof agentStates>[1], string[]>()
+  for (const row of page) {
+    if (row.isReference) continue
+    const task = TASK_FOR_CATEGORY[row.category ?? ''] ?? null
+    groups.set(task, [...(groups.get(task) ?? []), row.agentId])
+  }
+  const results = await Promise.all([...groups].map(([task, ids]) =>
+    agentStates(ids, task).catch(() => new Map<string, AgentStateView>()),
+  ))
+  return new Map(results.flatMap(result => [...result]))
+}
+
 // One bounded memo for requested owner groups. The full catalog memo remains
 // separate. Fresh quote selection happens before this cache, and expiry is still
 // checked on every response. Never turn a failed commerce read into zero supply.
@@ -584,11 +598,12 @@ export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: Ma
   const requestedOffset = Number.isFinite(q.offset) ? Math.max(0, Math.floor(q.offset!)) : 0
   const offset = all.length ? Math.min(requestedOffset, Math.floor((all.length - 1) / limit) * limit) : 0
   const page = all.slice(offset, offset + limit)
-  const rows = await Promise.all(page.map(async (row) => {
+  const pageStates = await marketPageAgentStates(page)
+  const rows = page.map((row) => {
     // Reference agents answer their free face directly; their Hire is the ERC-8183 rail.
     if (row.isReference) return { ...row, previewable: true, hireBlockedReason: null } satisfies MarketRow
     const task = TASK_FOR_CATEGORY[row.category ?? '']
-    const state = await agentState(row.agentId, task ?? null).catch(() => null)
+    const state = pageStates.get(row.agentId) ?? null
     const hireBlockedReason = state?.hireable
       ? null
       : !task
@@ -605,7 +620,7 @@ export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: Ma
       previewable: state?.previewable === true,
       hireBlockedReason,
     } satisfies MarketRow
-  }))
+  })
   return { rows, total: all.length, offset,
     hasMore: offset + limit < all.length, generatedAt: new Date(base.at).toISOString() }
 }

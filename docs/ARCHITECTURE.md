@@ -287,6 +287,12 @@ The owner constraint also applies before service aggregation and latest-probe
 joins. Filtering only the final registry rows still scans unrelated services
 and caused the first real production candidate to time out. The original
 unscoped query remains available for unknown-owner and unclassified requests.
+Capability enrichment batches only the displayed identities by their existing
+task. Each group uses the canonical evaluator and four bounded read-only queries.
+Latest service evidence uses the existing service/timestamp index via a lateral
+lookup, matching both service and identity. Manual observations remain eligible
+even when a scheduling pointer is stale. No authority or freshness threshold is
+relaxed; failed groups remain unavailable.
 
 Release staging retains previous public `/_next/static` files without replacing
 the new build's files. The candidate verifier loads the prior live page's script,
