@@ -123,7 +123,7 @@ if [ "${1:-}" = "--prepared" ]; then
   [[ "$BUILD_SOURCE" =~ ^[a-f0-9]{40}$ ]] || { say "invalid build-source SHA"; exit 1; }
   # Worker, CI, deployment tooling and evidence-doc changes do not invalidate an
   # unchanged web component. Every web/package/config/dependency input must match.
-  git diff --quiet "$BUILD_SOURCE" HEAD -- apps/web packages config pnpm-lock.yaml pnpm-workspace.yaml package.json tsconfig.base.json || { say "web inputs differ from the tested build"; exit 1; }
+  git diff --quiet "$BUILD_SOURCE" HEAD -- apps/web packages config docs/standard docs/pancakeswap-proof.json .npmrc pnpm-lock.yaml pnpm-workspace.yaml package.json tsconfig.base.json || { say "web inputs differ from the tested build"; exit 1; }
   (cd "$PREPARED" && sha256sum --strict --quiet -c SHA256SUMS) >>"$LOG" 2>&1 || { say "prepared artifact checksum failed"; exit 1; }
   STANDALONE_SOURCE="$PREPARED/standalone"
   say "using verified prepared web artifact from $BUILD_SOURCE"
