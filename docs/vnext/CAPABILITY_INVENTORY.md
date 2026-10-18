@@ -69,3 +69,6 @@ P11 closing17October: exact review binding/opt-in evidence and unavailable Ledge
 
 
 P12 local checkpoint AMBER: contextual seller definitions, job-state truth, receipt content-vs-chain/authority/payment claims, wrapped captions, larger evidence controls and observed avatar/builder/wallet accessibility repairs validated.72snapshot+16motion+8walletnegative+8isolatedreceipt cases pass; paid/independent/fullconnected journeys remain unproven. See P12_CHECKPOINT.md.
+
+
+P13 local AMBER: explicit typed browser read/unsigned-plan/captured-payment entry and Node receipt verifier, separate browser/server example project, existing-shell developer guide and versioned illustrative seller schema EXIST and validated. Beta payment inspector never fetches/signs/authorizes; unsafe legacy x402 task POST rail blocked. Paid HTTP compatibility/independent human adoption unproven. Receipt crypto remains Node-only. No npm publication or production release. See P13_CHECKPOINT.md.

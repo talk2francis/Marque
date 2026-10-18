@@ -76,3 +76,6 @@ P10/P11 environment clarification: candidate browser/API counts come from the pr
 
 
 P12 receipt correction: UUID944bea48-7c7e-4afc-aa93-fbe126772362 is both valid production receipt ID and run ID by schema design. Snapshot has0receipts; HTTP200streamed404 is a failed content visit. No production SELECT grant added. Positive UI proof copies unchanged already-public content idempotently into isolated fixture DB and previews it READONLY. It is neither a new paid case nor linked to Plinth56916. Old receipt claims and missing anchor chain remain explicit; SHA-256 original digest unchanged.
+
+
+P13: non402 HTTP is not proof of free task execution. Actual selected x402 metadata URLs returned discovery200/404/503; no402or paid compatibility established. Legacy free/POST inference is blocked. MCS source hash includes probe source, so its42-file manifest changes although arithmetic/version/tolerance do not. Historical old-code hashes remain original, current-code agreementUNSUPPORTED/UNAVAILABLE separately from valid content/arithmetic replay. No history rewrite or onchain anchoring action.

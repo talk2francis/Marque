@@ -1509,3 +1509,6 @@ P11 final AMBER: browser/API proof uses the preexisting16October read-only snaps
 P12: contextual UX and observed accessibility/claim repairs shipped locally; funded/independent journey not exercised,20audit combinations retain advisories, positive receipt proof uses unchanged public-data isolated replay because snapshot is empty. No deployment or authority/chain write. See docs/vnext/P12_CHECKPOINT.md.
 
 P13 planned optional paid HTTP-payment buyer; ships beta offline challenge inspection, local typed examples and a fail-closed legacy task rail because the three selected indexed endpoints supplied no usable payment challenge. Cost: no x402 paid execution proof. Restore only with exact task/service, consenting independent provider, supported deployed currency, payer/payee binding, cap/nonce/idempotency and explicit payment approval. Existing ERC-8183 buyer flow retained. Preparation/validation status is recorded in the P13 checkpoint, not inferred here.
+
+
+P13 closes AMBER: beta HTTP-payment diagnostics instead of unproven paid buyer; local checkout examples rather than public npm release; Node-only receipt crypto retained. Existing ERC8183 buyer flow unchanged. Canonical source manifest regenerated for probe changes, historical results untouched. Actual attempts/outputs/browser/advisories and restoration conditions in docs/vnext/P13_CHECKPOINT.md.

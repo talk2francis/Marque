@@ -79,3 +79,6 @@ P10 checkpoint4b40705 completed AMBER; P11 source63386e0 now validated and close
 
 
 P12-P13 owner approval18October: P12 checkpoint complete locally AMBER with finalruntimec476d56. Continue already-authorized P13 typed read/verifier example and beta captured-payment diagnostics; incorporate P12 closure before expensive serial validation. No payment/chain write/release or automaticP14.
+
+
+P12 andP13 approved batch complete locally AMBER: P12checkpoint78043b0; P13frozen sourceef7f4925f9e5c597af7a5f6582a84f4851b32f1f. Full819tests/20types on0850b72 plus final2docs-only-file webtypes/rebuild/lint/browser and unchanged separate-client evidence complete. No automaticP14, deployment, payment or new authority. Release requires review of cold capacity/audit advisories, disabled native grants, unproven paid HTTP and exact current provider conditions. No further phase selected.
