@@ -104,3 +104,6 @@ P11 final AMBER: browser/API proof uses the preexisting16October read-only snaps
 
 
 P12 validation pending: no real funded wallet or consenting outside seller is invoked. Browser covers current no-wallet/read paths and sandbox wallet-modal UI only. Native action authority remains disabled under P10; no backend or availability claim is advanced by presentation changes.
+
+
+P12 closes AMBER: no funded wallet/independent seller task, normal-motion captures can retain reveal transitions, remaining Ledger sampled contrast and builder/job inline targets are documented. Wallet library unnamed decorative icons repaired without replacing connector/dependency. Receipt positive UI uses isolated unchanged public-data replay because snapshot has0rows and reader lacks productionSELECT; no grants/production mutations. Exact attempts, scopes and restoration in P12_CHECKPOINT.md.

@@ -569,3 +569,8 @@ AMBER: source63386e0 exact feedback/job/identity/amount binding, separate review
 
 
 Request: [2026-10-17] [owner-approved P12/P13] [commerce/product] P12 contextual evidence/accessibility and accurate job-state copy; P13 existing typed catalog/unsigned plan/portable verifier examples and read-only payment challenge diagnostics. Local feature branches only. Existing APIs, design, four categories and wallet-owned signing retained; no paid request, new authority, production deployment or chain write. User authorizes transition P12 to P13 after documented checkpoints.
+
+
+### P12 local closure,18October2026UTC
+
+AMBER: contextual seller/job/receipt evidence and observed avatar/builder/wallet accessibility repairs validated.72snapshot+16motion+8walletnegative+8isolatedreceipt cases pass,168custom+56audit screens reviewed.42affectedtests and finalwebtypes/build/lint/copy pass; full782test scope documented. Existing audit/cold-capacity/paid-independent limits explicit. Production97ef4c7/PIDs/proxy unchanged at06:10UTC, no deploy/push/chain/paid write. P13 already approved next; STOP afterP13. See docs/vnext/P12_CHECKPOINT.md.
