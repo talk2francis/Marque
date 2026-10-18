@@ -293,16 +293,11 @@ export function marketplaceSourceQuery(owners?: readonly string[]) {
   `
 }
 
-/** Match the source query's current category before selecting complete owners. */
+/** Select a category superset; the original projection still chooses its winner. */
 export function marketplaceCategoryQuery(category?: string | null) {
   return sql`
-    with cat as (
-      select distinct on (agent_id) agent_id, category
-      from agent_category
-      order by agent_id, (category <> 'unclassified') desc, confidence desc, assigned_at desc
-    )
-    select cat.agent_id
-    from cat join agent a on a.id = cat.agent_id
+    select distinct cat.agent_id
+    from agent_category cat join agent a on a.id = cat.agent_id
     where a.chain_id = 56
       ${category ? sql`and cat.category = ${category}` : sql`and cat.category is not null and cat.category <> 'unclassified'`}
   `

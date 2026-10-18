@@ -126,8 +126,10 @@ P14 additional boundary: nightly arbitrary-host A2A message/send testing had no 
 
 The restored-candidate browser found a real HTTP 503 on Judge's health-factor
 catalog. The ready/exact owner scope did not cover category or default classified
-queries. These now resolve the original winning category before reading complete
-owner partitions, preserving other-category sibling counts and null-owner
+queries. These now preselect recorded category candidates before reading complete
+owner partitions. The unchanged projection selects the winning category, so
+historical classification ties cannot be resolved differently by a prefilter.
+This preserves other-category sibling counts and null-owner
 fallback. Read-only restored measurements completed in 6.775 seconds for
 health-factor and 7.115 seconds for the classified set, with the existing eight
 second statement limit. Unit tests reproduced the missed early filter and

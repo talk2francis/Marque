@@ -51,11 +51,13 @@ describe.skipIf(!enabled)('catalog owner partition, real isolated PostgreSQL', (
     const row = asRows(await db().execute(marketplaceSourceQuery([owner]))).find(r => r.agent_id === ids[5])!
     expect(row.conf_test).toBe('MCS-YIELD-1'); expect(row.any_pass).toBe(false)
   })
-  it('selects current classifications with the original precedence and chain scope', async () => {
+  it('retains candidate classifications and chain scope without choosing a second winner', async () => {
     const selected = asRows(await db().execute(marketplaceCategoryQuery('health_factor'))).map(row => row.agent_id)
     expect(selected).toContain(ids[0]); expect(selected).toContain(ids[4]); expect(selected).not.toContain(ids[6])
     const grid = asRows(await db().execute(marketplaceCategoryQuery('grid'))).map(row => row.agent_id)
-    expect(grid).toContain(ids[1]); expect(grid).not.toContain(ids[5])
+    expect(grid).toContain(ids[1]); expect(grid).toContain(ids[5])
+    const winning = asRows(await db().execute(marketplaceSourceQuery([owner]))).find(row => row.agent_id === ids[5])!
+    expect(winning.category).toBe('yield')
   })
   it('preserves category results and clone counts across differently classified siblings', async () => {
     const selected = asRows(await db().execute(marketplaceCategoryQuery('health_factor'))).map(row => String(row.agent_id)).filter(id => ids.includes(id))
