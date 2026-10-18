@@ -2,7 +2,7 @@
 export const MCS_CODE_ANCHOR = {
   "version": 1,
   "algorithm": "SHA-256",
-  "sha256": "0x6df690511e19aeedfe0fabc36a4c153ff8dde69b0c87ccfc94ccd39352b8f3ee",
+  "sha256": "0x3c871134132086241c3e9cf1ddfab7303709de6c28b395a59f442b817adcda3e",
   "scope": "local MCS implementation and imported workspace source; lockfile pins external dependencies; not deployed-bytecode or issuer attestation",
   "files": [
     {
@@ -151,7 +151,7 @@ export const MCS_CODE_ANCHOR = {
     },
     {
       "path": "packages/probe/src/liveness.ts",
-      "sha256": "0x36d50ad645cd565c3ce6beecf717081b99ace1b2b80d39061254fa45f57d3724"
+      "sha256": "0x06d8eda54ec7c708b9ebbba76581893fd174cdad11d079bfd954f7c0d8401008"
     },
     {
       "path": "packages/probe/src/payment-challenge.ts",

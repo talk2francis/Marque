@@ -351,12 +351,6 @@ export async function probeX402(url: string): Promise<ProbeOutcome> {
     const inspected = inspectPaymentChallenge({ status: res.status, headers: res.headers, body: res.body })
     const hasChallenge = inspected.state === 'OBSERVED'
     if (!hasChallenge) {
-      try {
-        const d = JSON.parse(res.body) as Record<string, unknown>
-        hasChallenge = 'accepts' in d || 'x402Version' in d || 'paymentRequirements' in d
-      } catch { /* body is not JSON; header check already failed */ }
-    }
-    if (!hasChallenge) {
       return {
         ok: false, liveness: 'bad_schema', latencyMs: res.latencyMs, statusCode: 402,
         failureClass: 'bad_schema', detail: `402 requirements unavailable or unsupported: ${inspected.reason}`,
@@ -373,7 +367,7 @@ export async function probeX402(url: string): Promise<ProbeOutcome> {
   if (res.status === 200) {
     return {
       ok: true, liveness: 'live', latencyMs: res.latencyMs, statusCode: 200,
-      failureClass: null, detail: 'answers 200 without requiring payment',
+      failureClass: null, detail: 'HTTP 200 reachable; task price and payment compatibility unverified',
       skills: [], executableEndpoint: url, reportedName: null,
     }
   }

@@ -11,5 +11,7 @@ describe('x402 probe labels structure without proving payment', () => {
     const c = { x402Version: 2, resource: { url: 'https://provider.invalid/task' }, accepts: [{ scheme: 'exact', network: 'eip155:56', amount: '1', asset: '0x1111111111111111111111111111111111111111', payTo: '0x2222222222222222222222222222222222222222', maxTimeoutSeconds: 60 }] }
     vi.mocked(safeFetch).mockResolvedValue({ ok: true, status: 402, headers: { 'payment-required': btoa(JSON.stringify(c)) }, body: '', bytes: 0, latencyMs: 1, finalUrl: 'https://provider.invalid', redirects: 0 })
     expect(await probeX402('https://provider.invalid')).toMatchObject({ ok: true, liveness: 'live', detail: '402 with structured untrusted payment requirements; payment compatibility unverified' })
+    vi.mocked(safeFetch).mockResolvedValue({ ok: true, status: 200, headers: {}, body: '{}', bytes: 2, latencyMs: 1, finalUrl: 'https://provider.invalid', redirects: 0 })
+    expect(await probeX402('https://provider.invalid')).toMatchObject({ ok: true, detail: 'HTTP 200 reachable; task price and payment compatibility unverified' })
   })
 })
