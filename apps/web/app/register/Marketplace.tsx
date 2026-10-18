@@ -340,6 +340,7 @@ export function Marketplace({ category: fixedCategory, initial }: { category?: s
       )}
 
       <div id={resultsId} ref={listRef} className={styles.results}>
+        <h2 className="sr-only">Agent results</h2>
         {loading && (
           <div className={state.view === 'grid' ? styles.grid : styles.list} aria-hidden="true">
             {Array.from({ length: skeletonCount }).map((_, i) => (

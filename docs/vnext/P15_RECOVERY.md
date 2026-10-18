@@ -91,3 +91,9 @@ result-parity comparison nor a latency guarantee. SQL eligibility, ranking,
 clone counts, quote expiry and unknown-track behavior are unchanged; existing
 database parity checks and a stalled-read scheduling regression gate the repair.
 Both rejected candidate releases are preserved, and the stable slot kept traffic.
+
+Current-data AXE checks also found a moderate heading-order defect in populated
+catalogs: the page title was followed directly by card-level headings. A visually
+hidden results heading restores that hierarchy using the existing accessibility
+utility. Shared card headings and visible layout stay intact. The earlier empty
+snapshot did not expose this case; final populated-catalog browser checks cover it.
