@@ -34,3 +34,23 @@ The existing suite passed 412 tests with 3 skipped. Twelve additional private pr
 ## P04 CR-05 follow-up, 16 October 2026
 
 Candidate repair: receipt/sealed-call/db/contract comments now name SHA-256 correctly; the serializer/hash functions and executable contract statements are preserved. `receipt-integrity.ts` adds a versioned digest descriptor and bounded JSON-safe offline comparison, covering unknown fields without coercion. Frozen versions 1/2 and sealed-call vectors, mutation/key-order/Unicode/large-string-amount tests and API compatibility tests pass in targeted validation. Unknown/v0 bodies fail safely. Receipt GET adds explicit NOT_CHECKED anchor/claim pointers; an unrelated chain/block is never inferred as verified from a matching digest. Actual chain inclusion is separately read for one historical testnet sample, not universally certified or backfilled. See P04 checkpoint and contract for final validation scope.
+
+## P14 incremental source recheck, 18 October 2026
+
+The preceding table is the preserved P00 baseline, not today's defect list.
+
+| Finding | Current source disposition |
+|---|---|
+| CR-01 | Repaired: builders/checks GET and phase2/owner GET only read. Authenticated mutation remains builders/claim/publish POST; listing PostgreSQL tests cover repeated GET, authorization, transfer and idempotency. |
+| CR-02 | Basic owner listing, local quality and fresh exact-service Warrant are distinct in registry/quality, builder projection and seller UI; no automatic organizer approval. |
+| CR-03 | quote::verifySimpleQuote rejects explicit expiry and caps unsigned lifetime; verifyNegotiation rejects conflicting signed expiry. supply::commercialStates and response-time expireMarketQuote prevent stale ready promotion; createIntent rechecks stored terms. |
+| CR-04 | API signatureEvidence/sourceClaimVersion and quote sheet distinguish provider_signed from identity_matched_unsigned. Current guide/FAQ/whitepaper universal claims corrected inP14. |
+| CR-05 | receipt hash remains original canonical SHA256. Versioned offline verifier and exported descriptor reused; historical bytes and anchors not rewritten. |
+| CR-06 | Existing bounded metadata shape/parser regressions retained. P14 additionally blocks HTTPS-to-HTTP redirects before DNS/socket/body forwarding in shared safeFetch. |
+| CR-07 | Sanitized trusted router-state mirror and loopback web slots retained. Eleven request negatives and complete-body monitoring regressions remain release gates. |
+| CR-08 | Historical Plinth56/56916 chain refresh18October confirms PAID and matching artifact. Distinct delivery/payment fields preserved. Buyer/provider control and funding independence remain UNKNOWN; no new transaction. |
+| CR-09 | Status TCP, HTTP and complete response are measured separately. Cold full-catalog restore timeouts are retained as negative evidence. Ready/exact owner scoping is the measured minimal correction; full unfiltered cold capacity remainsP2. |
+
+No mainnet write, paid provider invocation, historical observation deletion or
+claim of independent user adoption follows from this source recheck. Acceptance
+and production activation are recorded separately inP14/P15 checkpoints.

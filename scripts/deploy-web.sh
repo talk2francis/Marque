@@ -156,7 +156,7 @@ if ! healthy "$IDLE"; then
   pm2 stop "$(name_of "$IDLE")" >/dev/null 2>&1 || true
   exit 1
 fi
-if ! node scripts/verify-candidate.mjs "http://127.0.0.1:$IDLE" >>"$LOG" 2>&1; then
+if ! EXPECTED_RELEASE_SHA="$(git rev-parse HEAD)" node scripts/verify-candidate.mjs "http://127.0.0.1:$IDLE" >>"$LOG" 2>&1; then
   say "candidate failed verify-candidate (see $LOG); live :$LIVE untouched"
   pm2 stop "$(name_of "$IDLE")" >/dev/null 2>&1 || true
   exit 1

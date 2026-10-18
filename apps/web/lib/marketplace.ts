@@ -14,7 +14,7 @@ export { expireMarketQuote } from './quote-expiry'
  *
  * The default view is the agents a buyer could actually act on: live and
  * callable, plus anything that has a conformance result (pass OR a named
- * failure), plus Marque's reference agents. That set is ~2k rows, so it can be
+ * failure), plus Marque's reference agents. That qualifying set can be
  * deduplicated by operator and sorted by qualification on every request. The
  * graveyard (unbound, dead) is a separate paged view with its real counts.
  *
@@ -181,10 +181,9 @@ async function marketplaceBase(): Promise<MarketRow[]> {
   return baseMemo ? baseMemo.rows : baseInflight
 }
 
-async function queryAgents(): Promise<MarketRow[]> {
-  const fp = new Set(firstPartyIds())
-  const commerce = await commercialStates().catch(() => new Map())
-  const rows = await boundedCommerceRead(sql`
+/** Same eligibility and owner/host counts; scope only whole owner partitions. */
+export function marketplaceSourceQuery(owners?: readonly string[]) {
+  return sql`
     with latest as (
       -- Newest probe per service by primary key (probe_schedule), not a scan of history.
       select ps.service_id, ps.agent_id, p.liveness, p.latency_ms,
@@ -262,6 +261,7 @@ async function queryAgents(): Promise<MarketRow[]> {
       where a.chain_id = 56
         and (s.any_reachable or c.agent_id is not null)
         and a.id <> 'canary:ssrf'
+        ${owners ? sql`and a.owner_address in (${sql.join(owners.map(owner => sql`${owner}`), sql`, `)})` : sql``}
     )
     select
       id as agent_id,
@@ -290,7 +290,43 @@ async function queryAgents(): Promise<MarketRow[]> {
       category
     from qualifying
     order by identities desc, agent_id
-  `)
+  `
+}
+
+// One bounded memo for requested owner groups. The full catalog memo remains
+// separate. Fresh quote selection happens before this cache, and expiry is still
+// checked on every response. Never turn a failed commerce read into zero supply.
+let scopeMemo: { key: string; at: number; rows: MarketRow[] } | null = null
+let scopeInflight: { key: string; promise: Promise<{ rows: MarketRow[]; at: number }> } | null = null
+async function scopedBase(ids: readonly string[], states?: Awaited<ReturnType<typeof commercialStates>>) {
+  if (!ids.length) return { rows: [] as MarketRow[], at: Date.now() }
+  const key = [...new Set(ids)].sort().join(',')
+  if (scopeMemo?.key === key && Date.now() - scopeMemo.at < BASE_TTL_MS) return scopeMemo
+  if (scopeInflight?.key === key) return scopeInflight.promise
+  const promise = (async () => {
+    const result = await boundedCommerceRead(sql`select id, owner_address from agent where id in (${sql.join([...new Set(ids)].map(id => sql`${id}`), sql`, `)})`, 'exact')
+    const owners = Array.from(result as unknown as Array<{ owner_address: string | null }>)
+    // SQL groups null owners together. Preserve that entire partition using the
+    // original path rather than dropping unknown-owner clones from its counts.
+    if (owners.some(row => row.owner_address === null)) {
+      const rows = await marketplaceBase()
+      return { rows, at: baseMemo?.at ?? Date.now() }
+    }
+    const addresses = [...new Set(owners.map(row => row.owner_address!))]
+    const rows = addresses.length ? await queryAgents(addresses, states) : []
+    const value = { key, rows, at: Date.now() }
+    scopeMemo = value
+    return value
+  })()
+  const current = { key, promise }
+  scopeInflight = current
+  try { return await promise } finally { if (scopeInflight === current) scopeInflight = null }
+}
+
+async function queryAgents(owners?: readonly string[], states?: Awaited<ReturnType<typeof commercialStates>>): Promise<MarketRow[]> {
+  const fp = new Set(firstPartyIds())
+  const commerce = states ?? await commercialStates()
+  const rows = await boundedCommerceRead(marketplaceSourceQuery(owners))
 
   const list = (((rows as unknown as { rows?: unknown[] }).rows ?? (rows as unknown as unknown[])) as Array<Record<string, unknown>>)
 
@@ -448,11 +484,16 @@ function otherLast(rows: MarketRow[]): MarketRow[] {
 }
 
 export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: MarketRow[]; generatedAt: string; total: number; offset: number; hasMore: boolean }> {
+  const hireable = q.tab === 'ready' || q.hireableOnly === true
+  const states = hireable ? await commercialStates() : undefined
+  const readyIds = states ? [...new Set([...states.values()].filter(c => c.state === 'hireable' || c.state === 'settleable').map(c => c.agentId))] : null
+  const ids = q.agentIds ? (readyIds ? q.agentIds.filter(id => readyIds.includes(id)) : q.agentIds) : readyIds
+  const base = ids ? await scopedBase(ids, states) : { rows: await marketplaceBase(), at: baseMemo?.at ?? Date.now() }
   // Clone: the base is memoised and the sort below is in place.
-  let all = (await marketplaceBase()).map(expireMarketQuote)
+  let all = base.rows.map(expireMarketQuote)
   if (q.agentIds) all = selectedAgentRows(all, q.agentIds)
 
-  // Filters (TS side — the qualifying set is small).
+  // Filters over the memoised qualifying set.
   // Ready to hire, all categories: every agent a wallet can pay into escrow right now,
   // including ones outside the four quest jobs (listed after them as "Other", 28 Sep).
   const readyAll = q.tab === 'ready' && !q.category
@@ -548,5 +589,5 @@ export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: Ma
     } satisfies MarketRow
   }))
   return { rows, total: all.length, offset,
-    hasMore: offset + limit < all.length, generatedAt: new Date(baseMemo?.at ?? Date.now()).toISOString() }
+    hasMore: offset + limit < all.length, generatedAt: new Date(base.at).toISOString() }
 }

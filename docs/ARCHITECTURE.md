@@ -257,3 +257,16 @@ Coverage minimum prices now require one chain/token-address/decimal scope; symbo
 
 
 The legacy all-host nightly conformance sweep is quarantined: A2A/MCP reachability is not task consent or free execution. Scheduled outside sweeps log SKIPPED without fetches, cases or results; explicit default --once refuses with an error. First-party reference tests remain scheduled and the existing builder test/claim consent flow remains available. No historical result is rewritten and no new consent framework is introduced.
+
+### Ready and exact catalog reads (18 October 2026)
+
+Cold restored-database catalog reads exceeded the existing eight-second SQL
+budget. Plans showed a broad registry join before quote filtering. Ready and
+exact selections now resolve their requested identities to whole owner groups
+before invoking the same catalog SQL. Owner/endpoint clone partitions, eligibility,
+category-specific latest conformance, pagination and response fields remain intact.
+Unknown-owner identities retain the full path because SQL groups null owners
+alongside one another. The ready selection uses current stored-quote validity
+before its bounded memo; response-time expiry remains enforced. Failed commerce
+reads propagate as unavailable rather than appearing as zero supply. No SQL
+budget, migration, global planner setting or production cache is changed.

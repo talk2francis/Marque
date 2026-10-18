@@ -62,6 +62,7 @@ jobs:
           apps/web/lib/seller.integration.test.ts
           packages/commerce/src/hire-p02.integration.test.ts
           packages/commerce/src/feedback-proof.integration.test.ts
+          apps/web/lib/marketplace-scope.integration.test.ts
           --maxWorkers=1 --minWorkers=1
       - name: Build the web app
         run: pnpm --filter @marque/web build

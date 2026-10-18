@@ -17,6 +17,15 @@
 import { chromium } from 'playwright'
 
 const BASE = process.argv[2] ?? 'http://127.0.0.1:3299'
+// Deployment metadata from the slot, checked before Chromium or a traffic switch.
+const expectedRelease = process.env.EXPECTED_RELEASE_SHA
+if (expectedRelease) {
+  if (!/^[a-f0-9]{40}$/.test(expectedRelease)) throw new Error('invalid expected release SHA')
+  const health = await fetch(`${BASE}/api/health`, { signal: AbortSignal.timeout(8000), cache: 'no-store' })
+  const body = await health.json()
+  if (!health.ok || body.ok !== true || body.release !== expectedRelease) throw new Error('candidate release metadata mismatch')
+  console.log(`ok   candidate release metadata ${expectedRelease}`)
+}
 // An address with real first-party history — charters, hires, receipts, seals —
 // so the profile renders populated sections rather than only empty states.
 const ACTIVE_ADDR = '0x60AA3AEE06E2345A17E4d4B12c53E046F4F63CAf'
