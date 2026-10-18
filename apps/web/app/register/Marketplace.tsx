@@ -25,6 +25,7 @@ import {
 } from './market-url'
 import styles from './register.module.css'
 import { expireMarketQuote } from '../../lib/quote-expiry'
+import { canReuseInitialMarket } from './initial-freshness'
 
 /**
  * The marketplace.
@@ -38,7 +39,7 @@ import { expireMarketQuote } from '../../lib/quote-expiry'
  */
 export function Marketplace({ category: fixedCategory, initial }: { category?: string; initial?: InitialMarket | null }) {
   // The server rendered the default view's first page: it is on screen at first paint,
-  // and the first fetch is skipped when the URL asks for exactly that view.
+  // and the first fetch is skipped only while that matching view is still fresh.
   const [rows, setRows] = useState<MarketRow[]>(initial?.agents ?? [])
   useEffect(() => {
     const current = rows.map(row => expireMarketQuote(row))
@@ -64,7 +65,14 @@ export function Marketplace({ category: fixedCategory, initial }: { category?: s
   }))
   /** Nothing fetches or writes the URL until the URL has been read once. */
   const [ready, setReady] = useState(false)
+  const [, refreshMeasurementAge] = useState(0)
   const replaceNext = useRef(false)
+
+  useEffect(() => {
+    if (!ready) return
+    const timer = setInterval(() => refreshMeasurementAge(age => age + 1), 30_000)
+    return () => clearInterval(timer)
+  }, [ready])
 
   const resultsId = useId()
   const listRef = useRef<HTMLDivElement>(null)
@@ -148,12 +156,15 @@ export function Marketplace({ category: fixedCategory, initial }: { category?: s
     if (seeded.current !== null) {
       const same = seeded.current === key
       seeded.current = null
-      if (same && retry === 0) return
+      if (same && retry === 0 && canReuseInitialMarket(initial?.generatedAt)) return
     }
     let cancelled = false
     const controller = new AbortController()
     setLoading(true)
     setError(null)
+    setTotal(null)
+    setGeneratedAt(null)
+    setHasMore(false)
     const t = setTimeout(() => {
       void (async () => {
         try {
@@ -191,7 +202,7 @@ export function Marketplace({ category: fixedCategory, initial }: { category?: s
       controller.abort()
       clearTimeout(t)
     }
-  }, [qs, page, pageSize, ready, retry, state.tab])
+  }, [qs, page, pageSize, ready, retry, state.tab, initial?.generatedAt])
 
   /* --- FLIP: remember row positions, animate the delta ---------------- */
 
@@ -291,14 +302,14 @@ export function Marketplace({ category: fixedCategory, initial }: { category?: s
       {/* Result utility bar: what this set is, and how it was ranked. */}
       <div className={styles.utility}>
         <p className={styles.utilityCount} role="status" aria-live="polite">
-          {total === null ? (
-            loading ? 'Counting agents…' : 'Result count unavailable'
+          {!ready || total === null ? (
+            loading || !ready ? 'Counting agents…' : 'Result count unavailable'
           ) : (
             <>
               <strong>{total.toLocaleString()}</strong> {total === 1 ? 'agent' : 'agents'}
             </>
           )}
-          {ago && <span className={styles.utilityDot} suppressHydrationWarning> · Measured {ago}</span>}
+          {ready && ago && <span className={styles.utilityDot}> · Measured {ago}</span>}
           <span className={styles.utilityDot}> · Operator-deduplicated</span>
         </p>
         <button

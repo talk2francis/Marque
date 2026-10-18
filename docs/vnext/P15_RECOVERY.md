@@ -97,3 +97,13 @@ catalogs: the page title was followed directly by card-level headings. A visuall
 hidden results heading restores that hierarchy using the existing accessibility
 utility. Shared card headings and visible layout stay intact. The earlier empty
 snapshot did not expose this case; final populated-catalog browser checks cover it.
+
+Visual review found a separate first-load defect: the cached Register could show
+zero agents and skip its API read while the current ready-catalog sample had
+14. A real browser with a controlled five-minute client-clock offset reproduced
+the unconditional stale-seed reuse before repair. The client now reuses a seed
+only inside the existing 30-second page window, refreshes unknown/stale/future
+times, clears numeric counts while reading, and updates measurement age locally.
+Hydration no longer preserves a server-rendered "just now" label indefinitely.
+No quote is renewed and no query, authority or statement bound is widened.
+Controlled stale/error checks and the current-data browser matrix gate release.
