@@ -58,7 +58,9 @@ describe('captured payment inspection never signs or buys', () => {
     expect(inspectPaymentChallenge({ ...capture(), body: 'x'.repeat(65_537) }).state).toBe('INVALID')
   })
   it('keeps MPP and mixed offers unsupported without selecting or replaying', () => {
-    expect(inspectPaymentChallenge({ ...capture(), headers: { ...capture().headers, 'WWW-Authenticate': 'Payment intent="charge"' } }).state).toBe('UNSUPPORTED')
+    for (const auth of ['Payment intent="charge"', '  Payment intent="charge"', 'Bearer realm="api", Payment intent="charge"']) {
+      expect(inspectPaymentChallenge({ ...capture(), headers: { ...capture().headers, 'WWW-Authenticate': auth } }).state).toBe('UNSUPPORTED')
+    }
   })
   it('is offline and rejects invalid caller expectations', () => {
     const spy = vi.spyOn(globalThis, 'fetch').mockRejectedValue(new Error('must not fetch'))

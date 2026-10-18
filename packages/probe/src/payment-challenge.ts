@@ -47,7 +47,7 @@ export function inspectPaymentChallenge(input: unknown, expected?: ExpectedPayme
       if (Object.hasOwn(h, name)) return fail('duplicate_header')
       h[name] = value
     }
-    if (h['www-authenticate']?.match(/^Payment\b/i)) return fail('mpp_or_mixed_payment_protocol_requires_separate_inspection', 'UNSUPPORTED')
+    if (h['www-authenticate']?.match(/(?:^|,)\s*Payment\b/i)) return fail('mpp_or_mixed_payment_protocol_requires_separate_inspection', 'UNSUPPORTED')
     let payload: unknown, source: 'PAYMENT_REQUIRED_HEADER' | 'V1_RESPONSE_BODY'
     const header = h['payment-required']
     if (header !== undefined) {
