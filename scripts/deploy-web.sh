@@ -156,7 +156,11 @@ candidate_static=("$REL/$SHA.tmp/apps/web"/.next*/static)
 shopt -u nullglob
 [ "${#previous_static[@]}" = 1 ] && [ "${#candidate_static[@]}" = 1 ] || { say "cannot identify previous/candidate static assets; not activating"; exit 1; }
 cp -a --no-clobber "${previous_static[0]}/." "${candidate_static[0]}/"
-cp "$REL/slot-$LIVE/RELEASE_SHA" "$REL/$SHA.tmp/PREVIOUS_STATIC_RELEASE_SHA"
+if [ -s "$REL/slot-$LIVE/RELEASE_SHA" ]; then
+  cat "$REL/slot-$LIVE/RELEASE_SHA" > "$REL/$SHA.tmp/PREVIOUS_STATIC_RELEASE_REF"
+else
+  basename -- "$(readlink -f "$REL/slot-$LIVE")" > "$REL/$SHA.tmp/PREVIOUS_STATIC_RELEASE_REF"
+fi
 say "retained previous public static assets for cached clients"
 git rev-parse HEAD > "$REL/$SHA.tmp/RELEASE_SHA"
 printf '%s\n' "$BUILD_SOURCE" > "$REL/$SHA.tmp/BUILD_SOURCE_SHA"
