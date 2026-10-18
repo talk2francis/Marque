@@ -596,3 +596,9 @@ Completed P12 checkpoint78043b0 incorporated, includingc476d56 wallet and8d9db96
 ### P13 local closure,18October2026UTC
 
 AMBER: local typed read/unsigned client, Node evidence facade, separate examples, current-shell developer guide/static schema and beta captured-payment diagnostics validated onef7f4925f9e5c597af7a5f6582a84f4851b32f1f.819general tests pass(51gatedskip),47focused,20workspace types/build/lint/copy on0850b72; final2docs-only-file repair passes webtypes/rebuild/lint/browser.14external consumer steps,compiled browser consumer,16docs states+16audit and11proxy cases pass;40screens reviewed. Legacy unqualified x402 POST task rail blocked; no free task from200/404/503. Source manifest regenerated42files with old-code mismatch retained, math/tolerances unchanged. Production97ef4c7/PIDs/proxy/tmux intact, complete Marque/Kerb checks pass. No deploy/push/paid/chain/authority write. STOP afterP13, no automaticP14. See docs/vnext/P13_CHECKPOINT.md.
+
+
+Requests: [2026-10-18] [combined commerce/product maintenance] [A/B] [packages/commerce/src/supply.ts; coverage-price.test.ts; home price caption] Guard the observed raw-unit minimum against mixed chain/asset/decimal scopes. Current read sample18valid storedquotes allchain56/U18; no live mixed-asset misprice demonstrated. Three negative synthetic cases reproduce the latent defect. No query rewrite, schema or transaction change.
+
+
+Requests: [2026-10-18] [combined release/commerce maintenance] [A/B] [apps/worker/src/conform.ts] Remove the legacy automatic arbitrary-host message/send sweep, discovered during final side-effect review. Preserve first-party schedules and owner-consented builder testing; do not infer task consent from endpoint liveness. No paid/new mainnet operation.

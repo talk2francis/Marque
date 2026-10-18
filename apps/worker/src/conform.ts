@@ -9,11 +9,10 @@
  * retains only ~64 blocks of state and a stale case grades agents against a
  * position that may no longer resemble the chain.
  */
-import { CASES, capturePublishedCase, runConformance, formatOutcome, a2aAdapter, type TestId } from '@marque/conformance'
+import { CASES, capturePublishedCase, runConformance, a2aAdapter, type TestId } from '@marque/conformance'
 import { randomUUID } from 'node:crypto'
-import { safeFetch, firstPartyAgentIds } from '@marque/probe'
-import { db, closeDb, firstPartyAgents } from '@marque/db'
-import { sql } from 'drizzle-orm'
+import { firstPartyAgentIds } from '@marque/probe'
+import { closeDb, firstPartyAgents } from '@marque/db'
 
 const ONCE = process.argv.includes('--once')
 const CYCLE_MS = Number(process.env.CONFORM_CYCLE_MS ?? 24 * 60 * 60_000)
@@ -43,96 +42,10 @@ function errorKind(error: unknown): string | null {
   return error instanceof Error ? error.name : 'request_failed'
 }
 
-function liveAdapter(agentId: string, name: string, endpoint: string) {
-  return {
-    agentId,
-    name,
-    async ask(_tc: unknown, prompt: string) {
-      const started = Date.now()
-      const res = await safeFetch(endpoint, {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({
-          jsonrpc: '2.0', id: 1, method: 'message/send',
-          params: { message: { role: 'user', parts: [{ kind: 'text', text: prompt }] } },
-        }),
-        timeoutMs: 30_000,
-      })
-      const latencyMs = Date.now() - started
-      if (!res.ok) return { response: null, latencyMs, error: `${res.failure}: ${res.detail}` }
-      if (res.status >= 400) return { response: null, latencyMs, error: `http ${res.status}` }
-      try { return { response: JSON.parse(res.body), latencyMs, costUsd: null } }
-      catch { return { response: res.body, latencyMs, error: 'response was not JSON' } }
-    },
-  }
-}
-
-/** One live, callable agent per distinct host — the only agents worth testing. */
-async function liveAgents(): Promise<Array<{ id: string; name: string; endpoint: string }>> {
-  const rows = await db().execute(sql`
-    with latest as (
-      select ps.service_id, ps.agent_id, p.liveness
-      from probe_schedule ps join probe p on p.id = ps.last_probe_id
-    )
-    select distinct on (host) a.id, a.name,
-           coalesce(s.resolved_endpoint, s.endpoint) as endpoint,
-           regexp_replace(coalesce(s.resolved_endpoint, s.endpoint), '^(https?://[^/]+).*', '\\1') as host
-    from latest l
-    join agent_service s on s.id = l.service_id
-    join agent a on a.id = l.agent_id
-    where l.liveness = 'live' and a.id <> 'canary:ssrf'
-    order by host, a.id
-  `)
-  const list = ((rows as unknown as { rows?: unknown[] }).rows ?? (rows as unknown as unknown[])) as Array<Record<string, unknown>>
-  return list.map((r) => ({ id: String(r['id']), name: String(r['name'] ?? 'unnamed'), endpoint: String(r['endpoint']) }))
-}
-
+/** Endpoint liveness does not establish consent for a task or its side effects. */
 async function sweep(): Promise<void> {
-  const captured = await captureAll()
-
-  const agents = await liveAgents()
-  log('agents', { live: agents.length })
-
-  let pass = 0
-  let fail = 0
-  for (const a of agents) {
-    for (const c of CASES) {
-      const caseId = captured.get(c.testId as TestId)
-      if (!caseId) continue
-      try {
-        const outcome = await runConformance({
-          adapter: liveAdapter(a.id, a.name, a.endpoint), testId: c.testId as TestId, caseId,
-        })
-        if (outcome.pass) pass++
-        else fail++
-        log('result', {
-          agent: a.name, test: c.testId, pass: outcome.pass,
-          failed: outcome.failedFields, latencyMs: outcome.latencyMs, error: errorKind(outcome.error),
-        })
-      } catch (err) {
-        log('run_error', { agent: a.name, test: c.testId, error: errorKind(err) })
-      }
-    }
-  }
-  log('sweep_done', { pass, fail })
-  void formatOutcome
-}
-
-async function captureAll(): Promise<Map<TestId, string>> {
-  const captured = new Map<TestId, string>()
-  // A frozen case cannot be overwritten. Give each sweep its own immutable id.
-  const runId = `${new Date().toISOString().replace(/[^0-9]/g, '')}-${randomUUID().slice(0, 8)}`
-  for (const c of CASES) {
-    try {
-      const caseId = `${c.id}-${runId}`
-      const { testCase, groundTruthHash } = await capturePublishedCase({ id: caseId, testId: c.testId, subject: c.subject, policy: c.policy })
-      captured.set(c.testId as TestId, testCase.id)
-      log('case_captured', { case: caseId, block: testCase.blockNumber.toString(), subjectTokenId: testCase.subject['tokenId'] ?? null, hash: groundTruthHash })
-    } catch (err) {
-      log('case_capture_failed', { case: c.id, error: errorKind(err) })
-    }
-  }
-  return captured
+  log('outside_sweep_skipped', { reason: 'Outside task tests require explicit provider control/permission and side-effect consent through the existing builder test flow.' })
+  if (ONCE) throw new Error('outside_conformance_requires_provider_consent')
 }
 
 /**

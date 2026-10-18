@@ -291,7 +291,7 @@ function CategoryTileView({ t, i }: { t: CategoryTile; i: number }) {
       </span>
       <span className={styles.tileFacts}>
         <span><b className="num">{t.hireable}</b> hireable{t.operators ? ` from ${t.operators} ${t.operators === 1 ? 'operator' : 'operators'}` : ''}</span>
-        {t.cheapest ? <span>from <b className="num">{t.cheapest}</b></span> : <span>no valid quote at snapshot</span>}
+        {t.cheapest ? <span>from <b className="num">{t.cheapest}</b></span> : <span>{t.hireable > 0 ? 'Compare individual quote terms' : 'no valid quote at snapshot'}</span>}
         <span>Quote snapshot {t.measuredAt.replace('T', ' ').slice(0, 19)} UTC</span>
         <span className={styles.tileRating}>
           {t.bestRating ? <Stars value={t.bestRating.stars} count={t.bestRating.count} label="buyer-linked reviews" /> : 'No buyer-linked reviews available'}

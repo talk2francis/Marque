@@ -373,7 +373,14 @@ export async function coverage(): Promise<{ measuredAt: string; categories: Cate
     const tpOwners = new Set(hire.filter((a) => !a.firstParty).map((a) => (a.owner ?? a.agentId).toLowerCase()))
     const priced = hire.filter((a) => a.quote?.priceRaw && a.quote.token && a.quote.decimals !== null && a.quote.chainId !== null)
     priced.sort((a, b) => Number(BigInt(a.quote!.priceRaw!) - BigInt(b.quote!.priceRaw!)))
-    const c = priced[0]
+    // Atomic amounts are comparable only within one chain, asset and decimal
+    // scope. Equal symbols or a nominal stablecoin peg are not exchange evidence.
+    const units = priced.map(a => {
+      const address = states.get(a.serviceId)?.token?.address
+      return address ? `${a.quote!.chainId}:${address.toLowerCase()}:${a.quote!.decimals}` : null
+    })
+    const comparable = units.length > 0 && units.every(u => u !== null) && new Set(units).size === 1
+    const c = comparable ? priced[0] : undefined
     const ages = hire.map((a) => a.quote?.ageSeconds).filter((x): x is number => typeof x === 'number')
     return {
       category,
