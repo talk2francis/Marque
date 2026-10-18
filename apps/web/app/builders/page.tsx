@@ -33,7 +33,7 @@ export default function BuildersPage() {
           <aside className={styles.side} aria-labelledby="build-one">
             <h2 id="build-one" className={styles.sideTitle}>Build one</h2>
             <p className={styles.muted}>BNB Agent Studio scaffolds an ERC-8004 agent, its A2A card and its ERC-8183 selling side.</p>
-            <pre className={styles.cmd}><Terminal aria-hidden="true" /><code>npm install --global @bnbagent/studio-cli</code></pre>
+            <pre className={styles.cmd} tabIndex={0} role="region" aria-label="BNB Agent Studio install command"><Terminal aria-hidden="true" /><code>npm install --global @bnbagent/studio-cli</code></pre>
             <p className={styles.muted}>Then run <code className={styles.inline}>bag</code> in Claude Code or Cursor and describe the agent you want.</p>
             <a className={styles.ext} href="https://docs.bnbchain.org/developer-kit/bnbchain-studio/quickstart/" target="_blank" rel="noreferrer">BNB Agent Studio quickstart<ArrowUpRight aria-hidden="true" /></a>
             <a className={styles.ext} href="/docs/sellers">Seller protocol and recovery guide<ArrowUpRight aria-hidden="true" /></a>

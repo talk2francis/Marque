@@ -1,7 +1,8 @@
 'use client'
 
 import '@rainbow-me/rainbowkit/styles.css'
-import { RainbowKitProvider } from '@rainbow-me/rainbowkit'
+import { RainbowKitProvider, useConnectModal } from '@rainbow-me/rainbowkit'
+import { useEffect } from 'react'
 import { WagmiProvider } from 'wagmi'
 import { marqueTheme, wagmiConfig } from './config'
 import { WalletReady } from './ready'
@@ -20,8 +21,32 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   return (
     <WagmiProvider config={wagmiConfig} reconnectOnMount>
       <RainbowKitProvider modalSize="compact" theme={marqueTheme}>
+        <WalletIconAccessibility />
         <WalletReady.Provider value={true}>{children}</WalletReady.Provider>
       </RainbowKitProvider>
     </WagmiProvider>
   )
+}
+
+/** RainbowKit 2.2.11 renders unnamed role=img icons beside wallet button text.
+ * Treat only those redundant icons as decorative while its portal is open.
+ * Keep the visible button names and all connection behavior in RainbowKit.
+ */
+function WalletIconAccessibility() {
+  const { connectModalOpen } = useConnectModal()
+  useEffect(() => {
+    if (!connectModalOpen) return
+    const repair = () => {
+      for (const icon of document.querySelectorAll('[data-rk] [role="dialog"] button[data-testid^="rk-wallet-option-"] [role="img"]')) {
+        if (icon.closest('button')?.textContent?.trim() && !icon.hasAttribute('aria-label') && !icon.hasAttribute('aria-labelledby') && !icon.hasAttribute('title')) {
+          icon.setAttribute('aria-hidden', 'true')
+        }
+      }
+    }
+    repair()
+    const observer = new MutationObserver(repair)
+    observer.observe(document.body, { childList: true, subtree: true })
+    return () => observer.disconnect()
+  }, [connectModalOpen])
+  return null
 }

@@ -428,4 +428,4 @@
 }
 
 /* Evidence links remain readable and operable without precise tapping. */
-.inline, .kpiNote a, .kpiFoot a, .bandCopy a:not(:global(.btn)), .pfHead a { display: inline-block; min-height: 28px; padding-block: 3px; }
+.inline, .hireLink, .empty a, .kpiNote a, .kpiFoot a, .bandCopy a:not(:global(.btn)), .pfHead a { display: inline-block; min-height: 28px; padding-block: 3px; }

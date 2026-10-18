@@ -1,6 +1,6 @@
 # Read client and payment inspection contract
 
-Source preparation is isolated while P12 validates; P12 is not declared complete early. P13 final validation follows its completed checkpoint. Existing P07 catalog/unsigned plan, P06 receipt/content/chain replay, P03 seller guide and current docs shell are reused. No replacement SDK, registry, hosting product, payment primitive or API tier.
+P12 checkpoint78043b0 is incorporated before P13 final validation. Source preparation was isolated while P12 validated; no prerequisite was declared complete early. Existing P07 catalog/unsigned plan, P06 receipt/content/chain replay, P03 seller guide and current docs shell are reused. No replacement SDK, registry, hosting product, payment primitive or API tier.
 
 Browser-safe `@marque/commerce/read-only` exposes existing typed catalog GET and pure unsigned plan plus `inspectPaymentChallenge`. Node-only `@marque/execution/evidence` exposes existing sorted-JSON SHA-256 receipt checks. Pure content verifiers import the explicit probe/bounded-json helper instead of loading the worker/database barrel; digest logic is unchanged. Separate `examples/read-client` imports package subpaths without database, wallet or signing configuration. These are local checkout packages, not a publicly published npm release; Node uses the existing TypeScript loader. Caller must review expected selections independently. No source signature replay, current ownership, simulated success, independence or paid work is inferred from a syntactic plan or content hash.
 

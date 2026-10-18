@@ -30,7 +30,7 @@ function fallbackHue(id: string): number {
 
 function Fallback({ id, size, reference }: { id: string; size: number; reference: boolean }) {
   const hue = fallbackHue(id)
-  return <span className="agent-avatar" data-kind="platform-fallback" title="No agent image supplied; Marque platform mark" aria-label="No agent image supplied; Marque platform mark" style={{ flex: 'none', display: 'grid', placeItems: 'center', width: size, height: size, borderRadius: avatarRadius(size), border: reference ? '1px solid var(--hair-2)' : `1px solid hsl(${hue} 31% 40%)`, background: reference ? 'var(--panel)' : `hsl(${hue} 30% 20%)`, color: reference ? 'var(--ink-2)' : `hsl(${hue} 42% 80%)` }}><MarqueMark size={Math.round(size * .54)} variant="simple" /></span>
+  return <span className="agent-avatar" data-kind="platform-fallback" role="img" title="No agent image supplied; Marque platform mark" aria-label="No agent image supplied; Marque platform mark" style={{ flex: 'none', display: 'grid', placeItems: 'center', width: size, height: size, borderRadius: avatarRadius(size), border: reference ? '1px solid var(--hair-2)' : `1px solid hsl(${hue} 31% 40%)`, background: reference ? 'var(--panel)' : `hsl(${hue} 30% 20%)`, color: reference ? 'var(--ink-2)' : `hsl(${hue} 42% 80%)` }}><MarqueMark size={Math.round(size * .54)} variant="simple" /></span>
 }
 
 export function AgentAvatar({

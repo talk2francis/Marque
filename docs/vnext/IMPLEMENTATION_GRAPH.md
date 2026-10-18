@@ -76,3 +76,6 @@ Owner explicitly approves P10 then P11, superseding the P09 stop for these phase
 P11 owner-authorized implementation: reuse P03 seller cohort/raw-token outcomes, P06 confirmed job/receipt inspection and existing ERC-8004/Ledger reads. Exact feedback binding, opt-in typed dedup/provenance and unavailable link report precede any future learning/ranking. P10 native authority remains deliberately unavailable. P11 is prepared in a separate worktree during P10 frozen checks; incorporate its completed checkpoint without runtime changes. No automatic P12, deployment, paid job or authority.
 
 P10 checkpoint4b40705 completed AMBER; P11 source63386e0 now validated and closed AMBER with the evidence in P11_CHECKPOINT.md. Completed authorization ends here. No automaticP12, release, native authority, paid task or chain write. Future release must account for snapshot-vs-production evidence, cold capacity and recorded accessibility advisories; no invented supply or linkage.
+
+
+P12-P13 owner approval18October: P12 checkpoint complete locally AMBER with finalruntimec476d56. Continue already-authorized P13 typed read/verifier example and beta captured-payment diagnostics; incorporate P12 closure before expensive serial validation. No payment/chain write/release or automaticP14.

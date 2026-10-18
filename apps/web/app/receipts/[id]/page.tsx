@@ -4,7 +4,8 @@ import { Statement, Chip, DataCell } from '@marque/ui'
 import { BRAND } from '@marque/ui/brand'
 import { SiteHeader, SiteFooter } from '../../_components/SiteHeader'
 import { readReceipt } from '../../../lib/runs'
-import { scanAddress, scanTx } from '../../../lib/charter-templates'
+import { explorerAddress, explorerTx, network } from '../../../lib/network'
+import { receiptEvidence } from '../../../lib/receipt-evidence'
 import styles from './receipt.module.css'
 
 export const dynamic = 'force-dynamic'
@@ -60,11 +61,10 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const { id } = await params
   const row = await readReceipt(id).catch(() => null)
   if (!row) return { title: `Receipt not found · ${BRAND.name}` }
+  if (receiptEvidence(row).digest.status !== 'MATCH') return { title: `Receipt integrity unavailable · ${BRAND.name}`, robots: { index: false } }
   const body = row.body as unknown as ReceiptBody
   const title = `Receipt ${row.hash.slice(0, 10)} · ${BRAND.name}`
-  const description = body.execution.ok
-    ? `A ${body.task.kind.replace('_', ' ')} run on BNB Smart Chain, graded against the published standard and hashed.`
-    : `A ${body.task.kind.replace('_', ' ')} run that failed, published with the reason it failed.`
+  const description = `A preserved ${body.task.kind.replaceAll('_', ' ')} receipt with matching content digest. Payment, authority and current quality require separate verification.`
   return {
     title,
     description,
@@ -105,7 +105,12 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
   const { id } = await params
   const row = await readReceipt(id)
   if (!row) notFound()
+  const evidence = receiptEvidence(row)
+  if (evidence.digest.status !== 'MATCH') return <><SiteHeader /><main className={styles.page}><h1>Receipt integrity unavailable</h1><p>The stored receipt failed its content check. Its claims are not displayed as evidence.</p><p>Content status: {evidence.digest.status}.</p><a href={`/api/v1/receipts/${row.id}`}>Inspect the preserved JSON and evidence</a></main><SiteFooter /></>
   const body = row.body as unknown as ReceiptBody
+  const executionNet = network(body.execution.chainId)
+  const issued = new Date(body.issuedAt)
+  const issuedAt = Number.isFinite(issued.getTime()) ? issued.toISOString().replace('T', ' ').slice(0, 19) + 'Z' : 'Unavailable'
 
   const settled = body.commercial.settled
   const graded = body.quality.pass
@@ -123,34 +128,35 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
             <p className={styles.sub}>
               {body.task.kind.replace('_', ' ')} · agent{' '}
               <span className="mono">{body.commercial.agentId}</span> · issued{' '}
-              <span className="mono">{new Date(body.issuedAt).toISOString().replace('T', ' ').slice(0, 19)}Z</span>
+              <span className="mono">{issuedAt}</span>
             </p>
           </div>
           {body.execution.ok
-            ? <Chip tone="holds">Ran to completion</Chip>
+            ? <Chip tone="watch">Recorded run succeeded</Chip>
             : <Chip tone="breach">Failed</Chip>}
         </header>
 
+        <p className={styles.leafNote}>Content digest matches the preserved receipt. The blocks below are recorded claims, not independent chain verification. Payment release, execution, asset authority, test freshness and operator independence have not been checked here.</p>
         <div className={styles.blocks}>
           <Block
             title="Commercial"
-            verdict={settled ? 'Settled' : 'Not settled'}
-            tone={settled ? 'holds' : 'neutral'}
+            verdict={settled ? 'Recorded as settled' : 'No settlement recorded'}
+            tone="neutral"
           >
             <RowItem label="Quote">
               {body.commercial.quoteStatus === 'price_unknown'
-                ? <span className={styles.absent}>unsupported by protocol — price unknown</span>
+                ? <span className={styles.absent}>Price unknown in this record</span>
                 : body.commercial.quoteStatus ?? 'legacy receipt'}
             </RowItem>
             <RowItem label="Agent asked">
               {body.commercial.declaredPrice ?? <span className={styles.absent}>no machine-readable price</span>}
             </RowItem>
-            <RowItem label="Paid">
+            <RowItem label="Recorded paid amount">
               {body.commercial.paidAmount === null
-                ? <span className={styles.absent}>nothing was paid</span>
+                ? <span className={styles.absent}>Payment amount not recorded; release unverified</span>
                 : <DataCell align="left">{body.commercial.paidAmount} {body.commercial.paidAsset ?? ''}</DataCell>}
             </RowItem>
-            <RowItem label="Buyer’s ceiling">
+            <RowItem label="Recorded buyer ceiling">
               <DataCell align="left">{body.commercial.maxSpendUsd} USD</DataCell>
             </RowItem>
             {body.commercial.settlementNote && (
@@ -160,67 +166,64 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
 
           <Block
             title="Execution"
-            verdict={body.execution.ok ? 'Completed' : `Stopped: ${body.execution.failureReason ?? 'unknown'}`}
-            tone={body.execution.ok ? 'holds' : 'breach'}
+            verdict={body.execution.ok ? 'Recorded success' : `Stopped: ${body.execution.failureReason ?? 'unknown'}`}
+            tone={body.execution.ok ? 'neutral' : 'breach'}
           >
             <RowItem label="Chain">
-              <DataCell align="left">BNB Smart Chain · {body.execution.chainId}</DataCell>
+              <DataCell align="left">{executionNet.short}</DataCell>
             </RowItem>
             <RowItem label="Block">
               <DataCell align="left">{body.execution.blockNumber}</DataCell>
             </RowItem>
             <RowItem label="Subject">
-              <a className="mono" href={scanAddress(body.task.subject)} target="_blank" rel="noreferrer">
-                {body.task.subject}
-              </a>
+              {explorerAddress(body.task.chainId, body.task.subject) ? <a className="mono" href={explorerAddress(body.task.chainId, body.task.subject)} target="_blank" rel="noreferrer">{body.task.subject}</a> : <span className="mono">{body.task.subject}</span>}
+              <span>Recorded task chain: {network(body.task.chainId).short}</span>
             </RowItem>
             <RowItem label="Took">
               <DataCell align="left">{body.execution.latencyMs} ms</DataCell>
             </RowItem>
             <RowItem label="Transactions">
               {body.execution.txHashes.length === 0
-                ? <span className={styles.absent}>none — nothing moved on chain</span>
+                ? <span className={styles.absent}>No transaction hashes recorded; chain state not checked</span>
                 : body.execution.txHashes.map((h) => (
-                    <a key={h} className={`mono ${styles.txLink}`} href={scanTx(h)} target="_blank" rel="noreferrer">{h}</a>
+                    explorerTx(body.execution.chainId, h) ? <a key={h} className={`mono ${styles.txLink}`} href={explorerTx(body.execution.chainId, h)} target="_blank" rel="noreferrer">{h}</a> : <span key={h} className="mono">{h}</span>
                   ))}
             </RowItem>
           </Block>
 
           <Block
             title="Authority"
-            verdict={body.authority.charterId ? 'Bounded by a charter' : 'Read-only'}
-            tone={body.authority.withinAuthority ? 'holds' : 'breach'}
+            verdict="Recorded policy only"
+            tone="neutral"
           >
             <RowItem label="Charter">
               {body.authority.charterId
                 ? <DataCell align="left">{body.authority.charterId}</DataCell>
-                : <span className={styles.absent}>none — no contract call was permitted</span>}
+                : <span className={styles.absent}>No charter recorded; asset permissions unverified</span>}
             </RowItem>
-            <RowItem label="May have called">
+            <RowItem label="Recorded allowlist">
               {body.authority.allowlist.length === 0
                 ? <span className={styles.absent}>nothing</span>
                 : body.authority.allowlist.map((a) => (
-                    <a key={a} className={`mono ${styles.txLink}`} href={scanAddress(a)} target="_blank" rel="noreferrer">{a}</a>
+                    <span key={a} className={`mono ${styles.txLink}`}>{a}</span>
                   ))}
             </RowItem>
-            <RowItem label="Spend cap">
+            <RowItem label="Recorded spend cap">
               <DataCell align="left">{body.authority.spendCapUsd} USD</DataCell>
             </RowItem>
-            <RowItem label="Stayed inside it">
-              {body.authority.withinAuthority ? 'Yes' : 'No'}
+            <RowItem label="Recorded policy check">
+              {body.authority.withinAuthority ? 'Reported within bounds; native enforcement unverified' : 'Reported outside bounds'}
             </RowItem>
           </Block>
 
           <Block
             title="Quality"
-            verdict={graded === null ? 'Not graded' : graded ? `Passed ${body.quality.testId}` : `Failed ${body.quality.testId}`}
-            tone={graded === null ? 'neutral' : graded ? 'holds' : 'watch'}
+            verdict={graded === null ? 'Not graded' : graded ? `Recorded pass: ${body.quality.testId}` : `Recorded failure: ${body.quality.testId}`}
+            tone={graded === null ? 'neutral' : 'watch'}
           >
             {graded === null ? (
               <RowItem label="Why not">
-                This hire asked a different question from the published case for its category, so
-                grading it against that case would be meaningless in both directions — a correct
-                answer would fail, and an agent that ignored the buyer would pass.
+No test verdict was preserved in this receipt. A different task, missing case or unavailable grader must not be inferred as a pass or failure.
               </RowItem>
             ) : (
               <>
@@ -242,18 +245,12 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
           <h2 className={styles.leafTitle}>The leaf</h2>
           <p className={`mono ${styles.leafHash}`}>{row.hash}</p>
           <p className={styles.leafNote}>
-            SHA-256 over the canonical form of everything above — sorted keys, no incidental
-            whitespace — so anyone holding the same content computes the same 32 bytes.
-            {anchored
-              ? ' It is written on MarqueRegistry, which proves this receipt existed at that block and has not been edited since. It does not prove the receipt is true, and we do not claim it does.'
-              : ' It has not been anchored on chain, so its timestamp rests on our word alone. That is worth less, and saying so costs nothing.'}
+            The stored JSON passes the existing sorted-JSON SHA-256 content check. The digest covers the receipt JSON, not this page or the separate evidence projection. It does not authenticate the issuer or prove payment, quality, authority or current chain state.
+            {anchored ? ' An anchor transaction reference is recorded, but its chain and contract were not preserved. Independent replay requires explicit references; do not infer the anchor chain from the execution chain.' : 'No anchor transaction reference was preserved. Chain anchoring is unverified.'}
           </p>
           <div className={styles.leafActions}>
-            {row.anchorTxHash && (
-              <a className={styles.verify} href={scanTx(row.anchorTxHash)} target="_blank" rel="noreferrer">
-                Verify on BscScan
-              </a>
-            )}
+            {row.anchorTxHash ? <span className={`mono ${styles.hashInline}`}>Recorded anchor hash: {row.anchorTxHash}. Anchor chain unknown.</span> : null}
+            <a className={styles.raw} href={`/api/v1/receipts/${row.id}?format=bundle`}>Export content evidence</a>
             <a className={styles.raw} href={`/api/v1/receipts/${row.id}`}>The receipt as JSON</a>
             <a className={styles.raw} href={`/runs/${body.runId}`}>The run it came from</a>
           </div>
