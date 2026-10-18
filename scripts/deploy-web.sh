@@ -148,6 +148,16 @@ fi
 say "staging release $SHA"
 [ ! -e "$REL/$SHA" ] && [ ! -e "$REL/$SHA.tmp" ] || { say "release already exists; preserve it and use --rollback if appropriate"; exit 1; }
 cp -a "$STANDALONE_SOURCE" "$REL/$SHA.tmp"
+# Cached HTML and already-open tabs still request the previous content-hashed
+# files after a switch. Retain only public static files; new bytes always win.
+shopt -s nullglob
+previous_static=("$REL/slot-$LIVE/apps/web"/.next*/static)
+candidate_static=("$REL/$SHA.tmp/apps/web"/.next*/static)
+shopt -u nullglob
+[ "${#previous_static[@]}" = 1 ] && [ "${#candidate_static[@]}" = 1 ] || { say "cannot identify previous/candidate static assets; not activating"; exit 1; }
+cp -a --no-clobber "${previous_static[0]}/." "${candidate_static[0]}/"
+cp "$REL/slot-$LIVE/RELEASE_SHA" "$REL/$SHA.tmp/PREVIOUS_STATIC_RELEASE_SHA"
+say "retained previous public static assets for cached clients"
 git rev-parse HEAD > "$REL/$SHA.tmp/RELEASE_SHA"
 printf '%s\n' "$BUILD_SOURCE" > "$REL/$SHA.tmp/BUILD_SOURCE_SHA"
 mv "$REL/$SHA.tmp" "$REL/$SHA"
@@ -166,7 +176,7 @@ if ! healthy "$IDLE"; then
   pm2 stop "$(name_of "$IDLE")" >/dev/null 2>&1 || true
   exit 1
 fi
-if ! EXPECTED_RELEASE_SHA="$(git rev-parse HEAD)" node scripts/verify-candidate.mjs "http://127.0.0.1:$IDLE" >>"$LOG" 2>&1; then
+if ! EXPECTED_RELEASE_SHA="$(git rev-parse HEAD)" PREVIOUS_BASE_URL="http://127.0.0.1:$LIVE" node scripts/verify-candidate.mjs "http://127.0.0.1:$IDLE" >>"$LOG" 2>&1; then
   say "candidate failed verify-candidate (see $LOG); live :$LIVE untouched"
   pm2 stop "$(name_of "$IDLE")" >/dev/null 2>&1 || true
   exit 1

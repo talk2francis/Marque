@@ -41,6 +41,11 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm lint
       - run: pnpm lint:copy
+      - name: Deployment transport and cached-client assets
+        run: |
+          bash -n scripts/deploy-web.sh
+          bash ops/http-health.test.sh
+          node --test scripts/lib/previous-assets.check.mjs
       - run: pnpm test
       - name: Create the guarded integration fixture database
         env:

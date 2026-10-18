@@ -15,6 +15,7 @@
  * Usage: node scripts/verify-candidate.mjs http://127.0.0.1:3299
  */
 import { chromium } from 'playwright'
+import { verifyPreviousAssets } from './lib/previous-assets.mjs'
 
 const BASE = process.argv[2] ?? 'http://127.0.0.1:3299'
 // Deployment metadata from the slot, checked before Chromium or a traffic switch.
@@ -25,6 +26,10 @@ if (expectedRelease) {
   const body = await health.json()
   if (!health.ok || body.ok !== true || body.release !== expectedRelease) throw new Error('candidate release metadata mismatch')
   console.log(`ok   candidate release metadata ${expectedRelease}`)
+}
+if (process.env.PREVIOUS_BASE_URL) {
+  const count = await verifyPreviousAssets(BASE, process.env.PREVIOUS_BASE_URL)
+  console.log(`ok   ${count} previous-release static assets remain available`)
 }
 // An address with real first-party history — charters, hires, receipts, seals —
 // so the profile renders populated sections rather than only empty states.

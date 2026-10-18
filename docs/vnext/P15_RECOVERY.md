@@ -49,3 +49,11 @@ acceptance are recorded in the final P14/P15 checkpoints. No phase is declared
 complete solely from this recovery note. Keeper, seller and other-product
 processes are outside the release activation scope. No database migration,
 observation deletion, new paid resource or mainnet transaction is required.
+
+A cached-client check found four live JavaScript paths returned HTTP 404 from
+the new candidate. Staging now retains the previous slot's public static files
+without replacing new files. Before cutover, the verifier reads the old live
+page and consumes its script, style and font files from the candidate, rejecting
+missing files, wrong content types and incomplete bodies. Five local HTTP-fixture
+checks cover success, missing chunks, truncated 200, HTML fallback and an error
+page without asset evidence. Server code and observation data are not copied.
