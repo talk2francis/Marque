@@ -1,3 +1,9 @@
+# P14/P15 and production release authorized, 18 October 2026
+
+Owner explicitly requests P14, P15, remaining justified repairs, commit, push and live production deployment. This supersedes previous phase-stop and no-release notes; those historical records remain. Baseline candidate16445fa; production97ef4c7. Release remains conditional on actual security, backup/restore, browser and rollback evidence. No new mainnet transaction, paid provider task, recurring cost, destructive data operation or expanded wallet authority is inferred.
+
+Requests: [2026-10-18] [combined release/commerce/product maintenance] [A/B] [existing release scripts, security/runbooks, judge/docs and minimal evidence-backed regressions] Finish P14/P15, repair measured release blockers, preserve four categories, exact buyer-signed commerce, immutable observations, Caddy incident protections and unrelated services; publish only reviewed source, never private build pack, operational secrets or QA captures.
+
 # P10 in validation, 17 October 2026
 
 Owner authorizes P10 then P11. P10 source audit finds operator-key testnet policy anchoring, incomplete legacy execution checks and an unproven Altana adapter; candidate blocks new grant/execute, keeps history/revocation and adds read-only policy preview. Existing buyer-owned mainnet hires unchanged. [Contract](../vnext/P10_AUTHORITY_CONTRACT.md). No deployment, wallet/key operation, paid task or chain write. P11 follows P10 checkpoint under existing approval; stop after P11.

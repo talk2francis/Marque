@@ -7,6 +7,7 @@ export function GET() {
   return NextResponse.json({
     ok: true,
     service: 'marque-web',
+    release: /^[a-f0-9]{40}$/.test(process.env['MARQUE_RELEASE_SHA'] ?? '') ? process.env['MARQUE_RELEASE_SHA'] : null,
     at: new Date().toISOString(),
   })
 }

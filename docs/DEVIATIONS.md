@@ -1512,3 +1512,5 @@ P13 planned optional paid HTTP-payment buyer; ships beta offline challenge inspe
 
 
 P13 closes AMBER: beta HTTP-payment diagnostics instead of unproven paid buyer; local checkout examples rather than public npm release; Node-only receipt crypto retained. Existing ERC8183 buyer flow unchanged. Canonical source manifest regenerated for probe changes, historical results untouched. Actual attempts/outputs/browser/advisories and restoration conditions in docs/vnext/P13_CHECKPOINT.md.
+
+P14/P15: owner authorizes source push and production release18October, subject to actual preflight evidence. Deploy transport completion and preservation hardened; judge shows read-only fallback and preserved evidence, no dead grant/run promise. Existing native-authority/HTTP-payment/independent-people limitations remain explicit. Detailed release checkpoint and final claims in docs/vnext.

@@ -1,7 +1,7 @@
 /** Dated organizer guidance. Local quest progress never certifies organizer eligibility. */
 export const CAMPAIGN_RULES = {
-  version: 'bnb-2026-10-16',
-  checkedAt: '2026-10-16',
+  version: 'bnb-2026-10-18',
+  checkedAt: '2026-10-18',
   url: 'https://www.bnbchain.org/en/hackathons/smart-money-era-set-and-earn',
   announcementUrl: 'https://www.bnbchain.org/en/blog/set-and-earn-hire-and-build-ai-agents-on-bnb-chain-win',
   startDate: '2026-10-01',

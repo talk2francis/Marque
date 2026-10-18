@@ -15,6 +15,8 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 WEB="$ROOT/apps/web"
+# A response is healthy only when curl consumed the complete body successfully.
+. "$ROOT/ops/http-health.sh"
 REL="$ROOT/releases"
 UPSTREAM=/etc/caddy/marque-upstream.caddy
 PUBLIC_URL="${PUBLIC_URL:-https://marque.trade}"
@@ -39,23 +41,27 @@ switch_to() {
     say "caddy config did not validate; restoring the previous upstream"
     cp "$UPSTREAM.prev" "$UPSTREAM"; return 1
   fi
-  # `caddy validate` runs as root and opens the access log; keep the file Caddy's own.
-  chown -R caddy:caddy /var/log/caddy 2>/dev/null || true
-  systemctl reload caddy
+  # Existing logs retain their ownership; do not recursively modify shared product logs.
+  if ! systemctl reload caddy; then
+    say "caddy reload failed; restoring the previous upstream"
+    cp "$UPSTREAM.prev" "$UPSTREAM"
+    systemctl reload caddy >>"$LOG" 2>&1 || true
+    return 1
+  fi
   say "caddy now routes marque.trade to :$port"
 }
 
 healthy() {
   local port="$1" code
   for _ in $(seq 1 60); do
-    code="$(curl -s -o /dev/null -w '%{http_code}' -m 5 "http://127.0.0.1:$port/api/health" || true)"
-    [ "$code" = 200 ] && break; sleep 2
+    code="$(http_health "http://127.0.0.1:$port/api/health" 5)"
+    [ "$code" = "200 0" ] && break; sleep 2
   done
-  [ "$code" = 200 ] || { say "  :$port /api/health never answered 200"; return 1; }
+  [ "$code" = "200 0" ] || { say "  :$port /api/health never answered 200"; return 1; }
   for u in / /register /quest /builders "/api/v1/marketplace?limit=3&offset=0" /api/v1/phase2/config; do
-    code="$(curl -s -o /dev/null -w '%{http_code}' -m 90 "http://127.0.0.1:$port$u" || echo 000)"
+    code="$(http_health "http://127.0.0.1:$port$u" 90)"
     echo "  $code :$port$u" | tee -a "$LOG"
-    [ "$code" = 200 ] || return 1
+    [ "$code" = "200 0" ] || return 1
   done
 }
 
@@ -63,7 +69,7 @@ start_slot() {
   local port="$1" name
   name="$(name_of "$port")"
   pm2 delete "$name" >/dev/null 2>&1 || true
-  pm2 start "$ROOT/ecosystem.config.cjs" --only "$name" >/dev/null
+  MARQUE_RELEASE_SHA="$(cat "$REL/slot-$port/RELEASE_SHA" 2>/dev/null || true)" pm2 start "$ROOT/ecosystem.config.cjs" --only "$name" >/dev/null
   say "started $name on :$port -> $(readlink "$REL/slot-$port")"
 }
 
@@ -92,7 +98,7 @@ if [ "${1:-}" = "--rollback" ]; then
   for t in $(systemctl list-units --all --plain --no-legend "marque-retire-$(name_of "$PREV")-*.timer" | awk '{print $1}'); do
     systemctl stop "$t" && say "cancelled $t"
   done
-  if ! curl -s -o /dev/null -m 3 "http://127.0.0.1:$PREV/api/health"; then start_slot "$PREV"; fi
+  if [ "$(http_health "http://127.0.0.1:$PREV/api/health" 3)" != "200 0" ]; then start_slot "$PREV"; fi
   healthy "$PREV" || { say "previous slot is not healthy; not switching"; exit 1; }
   switch_to "$PREV"
   retire_later "$(name_of "$LIVE")"
@@ -106,13 +112,14 @@ LIVE="$(live_port)"; IDLE="$(other "$LIVE")"
 say "commit $SHA; live :$LIVE, deploying to :$IDLE; log $LOG"
 
 say "building (memory capped)"
-systemd-run --user --scope -q -p MemoryMax=5G -p MemorySwapMax=3G \
+systemd-run --user --scope -q -p MemoryMax=3G -p MemorySwapMax=1G -p CPUQuota=50% -p CPUWeight=1 \
   --setenv=MARQUE_BUILD_DIR=.next-verify nice -n 5 bash scripts/build-web.sh >>"$LOG" 2>&1
 
 say "staging release $SHA"
-rm -rf "$REL/$SHA.tmp"
+[ ! -e "$REL/$SHA" ] && [ ! -e "$REL/$SHA.tmp" ] || { say "release already exists; preserve it and use --rollback if appropriate"; exit 1; }
 cp -a "$WEB/.next-verify/standalone" "$REL/$SHA.tmp"
-rm -rf "$REL/$SHA" && mv "$REL/$SHA.tmp" "$REL/$SHA"
+git rev-parse HEAD > "$REL/$SHA.tmp/RELEASE_SHA"
+mv "$REL/$SHA.tmp" "$REL/$SHA"
 ln -sfn "$REL/$SHA" "$REL/slot-$IDLE"
 
 # A deploy within five minutes of the last one reuses the slot that deploy scheduled to
@@ -145,8 +152,8 @@ switch_to "$IDLE"
 # Public smoke through Caddy. On failure, switch straight back: the old slot is still up.
 fails=0
 for u in / /register /quest /api/health "/api/v1/marketplace?limit=3&offset=0" /api/v1/phase2/config /api/v1/phase2/stats; do
-  code="$(curl -s -o /dev/null -w '%{http_code}' -m 90 "$PUBLIC_URL$u" || echo 000)"
-  echo "  $code $u" | tee -a "$LOG"; [ "$code" = 200 ] || fails=$((fails + 1))
+  code="$(http_health "$PUBLIC_URL$u" 90)"
+  echo "  $code $u" | tee -a "$LOG"; [ "$code" = "200 0" ] || fails=$((fails + 1))
 done
 if [ "$fails" -gt 0 ]; then
   say "public smoke failed ($fails); switching back to :$LIVE"
@@ -156,11 +163,6 @@ fi
 retire_later "$(name_of "$LIVE")"
 pm2 save >/dev/null 2>&1 || true
 
-# Keep the two slot targets and the three newest other releases.
-keep="$(readlink "$REL/slot-3200" 2>/dev/null || true) $(readlink "$REL/slot-3201" 2>/dev/null || true)"
-ls -1dt "$REL"/*/ 2>/dev/null | sed 's:/$::' | grep -v '\.tmp$' | while read -r d; do
-  case " $keep " in *" $d "*) continue ;; esac
-  echo "$d"
-done | tail -n +4 | xargs -r rm -rf
+# Release pruning is a separate operator retention task; deployment never deletes releases.
 
 say "deployed $SHA on :$IDLE (rollback: bash scripts/deploy-web.sh --rollback)"

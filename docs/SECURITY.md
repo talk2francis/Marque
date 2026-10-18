@@ -1,3 +1,15 @@
+# Current release security boundaries, 18 October 2026
+
+The dated Phase1 account below is historical. Current buyer signatures include ERC8183 create/register/budget/exact token approval/fund and job recovery/rating actions, signed by the connected buyer. No server buyer key is accepted. Fee escrow bounds the service payment, not strategy capital. New native action grants/execution and the unproven Altana provider are disabled; historical reads/revocation remain. The judge walkthrough performs reads only. See `vnext/P10_AUTHORITY_CONTRACT.md`.
+
+Current exact quotes distinguish cryptographically signed negotiation from identity-checked unsigned terms. Explicit expiry is never renewed; unsigned server lifetime is capped. Owner listing GETs have no writes, publication reuses owner authorization and fresh registry proof. Current receipt content digests use versioned SHA256; digest match, chain anchoring, quality and paid state are separate facts. HTTP-payment discovery is beta inspection only and cannot execute tasks. See `vnext/P01A_INTEGRITY_CONTRACT.md`, `P04_RECEIPT_CONTRACT.md` and `P13_READ_CLIENT_CONTRACT.md`.
+
+The current release mechanism is two loopback standalone slots with a sanitized Caddy router-state mirror and graceful upstream reload, not the older directory-swap account below. Health requires complete transport as well as HTTP200. Existing observations and releases are preserved. A current-code manifest is reproducible but does not authenticate the whole deployed source or make the issuer independent. First-party append-only policy is not a database access-control or anti-tamper guarantee against a compromised writer; independent verification needs original bytes and external chain evidence.
+
+Dependency advisories below are dated, not a current clean-audit claim. The release checkpoint records current checks and unresolved limits. No security certification, guaranteed outcome or official campaign eligibility is claimed.
+
+---
+
 # Security model
 
 Written for someone who will try to break it. It covers the four boundaries that

@@ -258,7 +258,7 @@ module.exports = {
       instances: 2,
       exec_mode: 'cluster',
       // Set and Earn runs on BSC mainnet (P2-05 step 8); testnet 97 stays as staging.
-      env: { ...env, NODE_ENV: 'production', PORT: port, HOSTNAME: '127.0.0.1', MARQUE_ROOT: ROOT, MARQUE_CAMPAIGN_CHAIN: '56', NEXT_PUBLIC_MARQUE_CAMPAIGN_CHAIN: '56' },
+      env: { ...env, NODE_ENV: 'production', PORT: port, HOSTNAME: '127.0.0.1', MARQUE_RELEASE_SHA: process.env.MARQUE_RELEASE_SHA || '', MARQUE_ROOT: ROOT, MARQUE_CAMPAIGN_CHAIN: '56', NEXT_PUBLIC_MARQUE_CAMPAIGN_CHAIN: '56' },
       autorestart: true,
       max_restarts: 50,
       restart_delay: 3000,
