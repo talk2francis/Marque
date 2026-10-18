@@ -35,6 +35,13 @@ describe('portable MCS replay, not global certification', () => {
     const b = bundle(); b.payload.result.agentId += '1'
     expect(verifyWarrantBundle(b, options)).toMatchObject({ state: 'FAILED', reason: 'bundle_digest_mismatch' })
   })
+  it('retains historical code provenance without calling it current-source proof', () => {
+    const b = bundle()
+    const request = b.payload.result.request
+    ;(request['evidence'] as Record<string, unknown>)['testCodeHash'] = '0x6b3312b87d03dc3fca1fae0ae67903bdc6bd63ec74f7cb3452be1a58cedf6433'
+    b.payload.result.requestHash = stableHash(request)
+    expect(verifyWarrantBundle(resign(b), options)).toMatchObject({ state: 'UNAVAILABLE', integrity: 'MATCH', testCode: 'UNSUPPORTED', replay: { pass: true, agreesWithRecord: true } })
+  })
   it('rejects substituted ground truth even after outer digest is recomputed', () => {
     const b = bundle(); (b.payload.testCase.groundTruth as HfGroundTruth).healthFactor = 2
     expect(verifyWarrantBundle(resign(b), options).state).toBe('FAILED')
