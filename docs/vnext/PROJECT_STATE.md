@@ -1,3 +1,21 @@
+# P14/P15 recovery and release validation, 18 October 2026
+
+The owner authorizes completing P14/P15, justified repairs, push and production
+deployment. The host powered off during the final build after an ACPI power-key
+event. A stale PM2 snapshot then left the live web slot stopped after boot.
+The existing release was restored and saved; see [recovery](P15_RECOVERY.md).
+
+Validated web source: `2eaac0775823bd94414db99434d6fbe3ae0371b0`. All 891 tests
+in 96 files, web types, production build, lint, copy and packaging pass. Remote
+code validation passed; its old-live smoke failed separately. Private proxy,
+complete-body API and corrected four-state hire-dialog checks pass. Full browser
+acceptance and production cutover remain pending. Deployment tooling now saves
+available slots before switching and saves retired state afterwards. No web
+build input changed in that operational repair. Earlier records below are
+historical and do not supersede this release scope. No new chain or paid task.
+
+---
+
 # P01A checkpoint, 16 October 2026
 
 Quote/listing/claim repair acceptance passes at tested source `32fd5cfeb5109984e060ef573988be8677cdb3ac` on the isolated feature branch. See [P01A checkpoint](P01A_CHECKPOINT.md) and the versioned integrity contract. No push, production deployment or chain write. P02 explicitly approved by the owner, begins after local commit/announcement; paid mainnet and production release gates remain. Existing recovered ingestion-worker exit has unknown initiating cause; web/Kerb/shared services remain healthy. Historical P00/P01 entries below are retained.
