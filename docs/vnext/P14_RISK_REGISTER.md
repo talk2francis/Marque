@@ -1,0 +1,20 @@
+# P14 risk review, 18 October 2026
+
+| Priority | Finding and disposition | Required evidence / limit |
+|---|---|---|
+| P1 repaired | HTTPS task redirect could downgrade transport; shared safeFetch now rejects before second DNS/socket/body hop | Seven added pinned-request tests; current code manifest updated, historical hashes preserved |
+| P1 repaired | Deploy and rollback readiness accepted HTTP200 without complete-body transport | Six helper regressions plus three actual loopback complete/truncated/stalled responses |
+| P1 repaired | Owner listing mutation, expiry renewal and identity-only signature claims fromP00 | Reused P01A/P02 implementation; repeated-GET/unauthorized/transfer/idempotency isolated PostgreSQL regressions; full quote/binding suite |
+| P1 repaired | Reboot restored a stopped web slot while Caddy still depended on it | Existing slot recovered; PM2 saves before deploy/rollback cutover and after retirement, with failed saves refusing cutover |
+| P1 repaired | Judge and default category reads enriched the broad registry before filtering | Category-candidate superset plus complete owner groups; 14 regressions, including real SQL result/count parity; final browser acceptance recorded separately |
+| P1 repaired | Cached old JavaScript returned 404 on a new standalone artifact | Retain prior public static files without clobbering new files; five real HTTP fixture cases and an actual staged old-page asset gate before cutover |
+| P1 contained | Unproven native authority and unsafe HTTP-payment task rail | No new grants/execute; pure preview and beta challenge inspection only, tests fail closed before network/signers |
+| P2 | Dependency audit38 advisory classifications:1critical/13high/24moderate | Not a clean audit. proxy-addr2.0.7 exploit requires mapped-v6 trust subnet; actual six Express apps use default trustProxy=false, no override. Next15.5.25 advisories target PagesRouterSSG/ISR; actual app uses AppRouter, no pages source. Sharp0.35.4 SVG condition: no directsharp imports, no remote image patterns/uploads, default dangerouslyAllowSVG=false. PostCSS/source-map processing takes repository build inputs. Drizzle identifier issue: no request-controlled identifiers. Transitive axios/ws issues need separate narrow dependency-maintenance work; wallet/SDK pins retained and no blanket unreachability claim for entire dependency tree. Sources: actual registry audit, installed config and upstream advisories. These are conditional/configuration exposure findings, not a security certification. |
+| P2 | Cold full status/metadata and shared-host latency | Preserve separate TCP/TLS/HTTP/body outcomes and exact samples; no p95 or causal claim from small sample, no query rewrite without plan |
+| P2 | Independent provider/person/funding and linked commercial quality not proven | One preserved paid Plinth case and excluded team-buyer Vitals case remain historical; no new organic pilot, wallet counts are not people |
+| P2 | Original full connected/paid wallet journey not repeated | Modal and sandbox are separate from actual user signatures; no new transaction just for evidence |
+| P2 | Offsite recovery-key custody not independently demonstrated | Fresh two-location local backup/isolated restore;18October nightly encrypted offsite log verification. New fullDB remote upload rejected by automatic review, not retried. No decryption-key request. |
+| P2 | Small inline prose link target advisories | 40-state final audit: no contrast failures; 32 states flagged 17-20px prose links. Findings retained, no full WCAG certification |
+| P2 | Worker code still cached in old long-running processes until scoped activation | Only affected read/projection/probe/conformance workers considered; keeper and seller signer processes protected, no globalPM2restart |
+
+Go/no-go and actual acceptance are in P14_CHECKPOINT.md and P15_HANDOFF.md. No source-only check is described as production acceptance. Conditional dependency advisories and explicit product limits remain; no security certification or universal performance guarantee is made.

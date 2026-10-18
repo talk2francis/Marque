@@ -1,3 +1,19 @@
+# P14/P15 candidate accepted, 18 October 2026
+
+Owner-authorized rollout is ready to stage. Web source07307a5 passes896tests
+(96files,55isolatedDBcases,3publicread-onlyRPCcases,0skips), types/build/lint/copy,
+102browserstates,4syntheticwalletstates,11proxycases,11completeHTTPsamples and
+private rollback. Forty DOM-audit states have only inline prose-link target
+advisories. All132custom+40audit captures reviewed through contact sheets.
+PM2 reboot persistence and cached-client asset continuity are repaired in
+deployment tooling; positive staged asset verification remains a cutover gate.
+See P14_CHECKPOINT.md, P14_RISK_REGISTER.md and P15_HANDOFF.md. Production is
+still97ef4c7 at this dated candidate entry; actual activation follows below.
+No new paid task, wallet authority, chain transaction, migration or data deletion.
+Historical entries remain below; the newest dated release entry takes precedence.
+
+---
+
 # P14/P15 recovery and release validation, 18 October 2026
 
 The owner authorizes completing P14/P15, justified repairs, push and production

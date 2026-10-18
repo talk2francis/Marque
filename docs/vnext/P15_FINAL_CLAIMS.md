@@ -46,3 +46,16 @@ This is a recording script only; no screencast or new paid pilot is claimed.
 | MCP server, autonomous composition, multichain | Evidence existing HTTP/client contract cannot serve an actual user need and current BSC loop is healthy |
 
 No hidden background implementation or new paid infrastructure is scheduled. Existing documented worker duties continue.
+
+## Final dated sample scope
+
+One preserved outside-provider job, Plinth on chain 56, is PAID with matching
+deliverable evidence. PaymentReleased is in block 127719379 at
+2026-10-15T04:03:54Z; a public RPC header read on 18 October independently matched
+the indexed timestamp. This establishes one historical payment case, not one
+independent person or operator. Human/control/funding independence remains
+UNKNOWN. Vitals 56924 is excluded because its buyer is team-controlled. New paid
+pilots initiated: 0. No new paid-success or paid-failure rate is inferred.
+Missing refund, private historical quote and current native-policy authority
+evidence remain explicit. Browser catalog failures and synthetic negative cases
+are separate from paid-provider outcomes. See P15_HANDOFF.md for exact scope.

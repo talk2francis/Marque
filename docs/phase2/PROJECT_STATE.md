@@ -602,3 +602,15 @@ Requests: [2026-10-18] [combined commerce/product maintenance] [A/B] [packages/c
 
 
 Requests: [2026-10-18] [combined release/commerce maintenance] [A/B] [apps/worker/src/conform.ts] Remove the legacy automatic arbitrary-host message/send sweep, discovered during final side-effect review. Preserve first-party schedules and owner-consented builder testing; do not infer task consent from endpoint liveness. No paid/new mainnet operation.
+
+
+### P14/P15 candidate acceptance, 18 October 2026 UTC
+
+Owner authorizes final repairs, push and production rollout. Source07307a5
+passes896applicationtests/55isolatedDBcases, types/build/lint/copy,102browser
+states,4syntheticwalletstates,11proxy/11completeHTTPcases and private rollback.
+Forty common audit states retain only inline-link target advisories. Recovery
+corrected a stopped live PM2 slot after an ACPI host shutdown. Deployment now
+persists state and retains/verifies cached-client static assets. See final
+vnext checkpoints. Production activation and public proof are pending at this
+dated entry. No new chain/paid write, migration, authority or observation deletion.
