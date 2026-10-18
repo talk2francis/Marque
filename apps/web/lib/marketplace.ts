@@ -353,8 +353,13 @@ async function scopedBase(ids: readonly string[], states?: Awaited<ReturnType<ty
 
 async function queryAgents(owners?: readonly string[], states?: Awaited<ReturnType<typeof commercialStates>>): Promise<MarketRow[]> {
   const fp = new Set(firstPartyIds())
-  const commerce = states ?? await commercialStates()
-  const rows = await boundedCommerceRead(marketplaceSourceQuery(owners))
+  // Independent observations share the request deadline; do not add their
+  // cold read times serially before filtering and pagination can begin.
+  const [commerce, rows, tracks] = await Promise.all([
+    states ?? commercialStates(),
+    boundedCommerceRead(marketplaceSourceQuery(owners)),
+    agentTracks(56),
+  ])
 
   const list = (((rows as unknown as { rows?: unknown[] }).rows ?? (rows as unknown as unknown[])) as Array<Record<string, unknown>>)
 
@@ -432,7 +437,6 @@ async function queryAgents(owners?: readonly string[], states?: Awaited<ReturnTy
     }
   })
 
-  const tracks = await agentTracks(56)
   return thirdParty.map((r) => ({ ...r, track: trackFromSource(r.tokenId ?? '', 56, tracks) }))
 }
 

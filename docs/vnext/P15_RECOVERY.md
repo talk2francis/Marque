@@ -79,3 +79,15 @@ single/batch parity, unprobed services and exact identity scope; all 24 focused
 checks passed. A traced restored-snapshot health-category read took 3.971 seconds
 and its warm repeat 0.080 seconds. These observations do not establish a public
 latency percentile; final candidate and production acceptance remain required.
+
+The next staged release, 1c36141, also failed the default catalog check on the
+current production data, before any traffic switch. A verified read-only trace
+showed a process-cold default request taking 10.684 seconds: catalog rows,
+commerce observations and seller tracks ran serially. These independent reads
+now start together under their original bounds. A second process-cold read-only
+production observation took 4.233 seconds, with a warm repeat of 0.168 seconds.
+The live index changed between observations, so the samples are neither a frozen
+result-parity comparison nor a latency guarantee. SQL eligibility, ranking,
+clone counts, quote expiry and unknown-track behavior are unchanged; existing
+database parity checks and a stalled-read scheduling regression gate the repair.
+Both rejected candidate releases are preserved, and the stable slot kept traffic.

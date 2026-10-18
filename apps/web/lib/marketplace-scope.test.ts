@@ -1,9 +1,10 @@
 import { describe, expect, it, vi } from 'vitest'
 import { PgDialect } from 'drizzle-orm/pg-core'
-const mocks = vi.hoisted(() => ({ states: vi.fn(), read: vi.fn(), capabilities: vi.fn() }))
+const mocks = vi.hoisted(() => ({ states: vi.fn(), read: vi.fn(), capabilities: vi.fn(), tracks: vi.fn().mockResolvedValue(null) }))
 vi.mock('@marque/commerce', async original => ({ ...await original<object>(), commercialStates: mocks.states }))
 vi.mock('@marque/commerce/reads', () => ({ boundedCommerceRead: mocks.read }))
 vi.mock('./agent-state', async original => ({ ...await original<object>(), agentStates: mocks.capabilities }))
+vi.mock('./agent-track', async original => ({ ...await original<object>(), agentTracks: mocks.tracks }))
 import { marketplaceAgents, marketPageAgentStates } from './marketplace'
 describe('ready selection before the broad catalog read', () => {
   it('returns measured empty supply for no stored quotes without scanning the registry', async () => {
@@ -52,6 +53,31 @@ describe('ready selection before the broad catalog read', () => {
     expect(await marketplaceAgents({ category: 'missing-category', tab: 'all' })).toMatchObject({ rows: [], total: 0 })
     expect(mocks.read).toHaveBeenCalledTimes(1)
     expect(mocks.states).not.toHaveBeenCalled()
+  })
+
+  it('starts independent catalog observations without waiting for a slow quote or track read', async () => {
+    let quotesDone!: (value: Map<never, never>) => void
+    let rowsDone!: (value: []) => void
+    let tracksDone!: (value: null) => void
+    const quotes = new Promise<Map<never, never>>(resolve => { quotesDone = resolve })
+    const source = new Promise<[]>(resolve => { rowsDone = resolve })
+    const tracks = new Promise<null>(resolve => { tracksDone = resolve })
+    mocks.states.mockReset().mockReturnValueOnce(quotes)
+    mocks.tracks.mockClear().mockReturnValueOnce(tracks)
+    mocks.read.mockReset().mockResolvedValueOnce([{ id: 'concurrent-observations', owner_address: 'concurrent-owner' }])
+      .mockReturnValueOnce(source)
+    const pending = marketplaceAgents({ agentIds: ['concurrent-observations'] })
+    try {
+      await vi.waitFor(() => {
+        expect(mocks.states).toHaveBeenCalledTimes(1)
+        expect(mocks.read).toHaveBeenCalledTimes(2)
+        expect(mocks.tracks).toHaveBeenCalledTimes(1)
+      })
+    } finally {
+      quotesDone(new Map()); rowsDone([]); tracksDone(null)
+      await pending
+    }
+    expect(await pending).toMatchObject({ rows: [], total: 0 })
   })
 
 })

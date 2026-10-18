@@ -293,6 +293,10 @@ Latest service evidence uses the existing service/timestamp index via a lateral
 lookup, matching both service and identity. Manual observations remain eligible
 even when a scheduling pointer is stale. No authority or freshness threshold is
 relaxed; failed groups remain unavailable.
+Catalog source rows, commerce observations and indexed tracks are independent
+bounded reads and start together. Their cold durations must not accumulate
+serially inside the unchanged HTTP deadline. Each projection retains its own
+freshness and unavailable-state semantics; quote expiry is checked on response.
 
 Release staging retains previous public `/_next/static` files without replacing
 the new build's files. The candidate verifier loads the prior live page's script,
