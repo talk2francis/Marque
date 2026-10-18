@@ -55,7 +55,7 @@ What it does, in order:
    the connection cannot land anywhere the check did not clear. TLS still
    verifies against the hostname, so pinning the address does not weaken the
    certificate check.
-5. **Re-validate after every redirect.** `redirect: 'manual'`; each hop runs the
+5. **Reject HTTPS-to-HTTP downgrade before the next socket; re-validate every other redirect.** `redirect: 'manual'`; each hop runs the
    full check again. A public host that 302s to `169.254.169.254` gets nothing.
    Max 3 redirects. Request headers are **dropped on a cross-origin hop** so a
    redirect cannot forward an `authorization` header to a third party, and a

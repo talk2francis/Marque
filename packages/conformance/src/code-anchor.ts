@@ -2,7 +2,7 @@
 export const MCS_CODE_ANCHOR = {
   "version": 1,
   "algorithm": "SHA-256",
-  "sha256": "0x3c871134132086241c3e9cf1ddfab7303709de6c28b395a59f442b817adcda3e",
+  "sha256": "0xbd9cc6322863f39347715b0cceb78aafd11157d6feebecb9ff144b7c92a87acf",
   "scope": "local MCS implementation and imported workspace source; lockfile pins external dependencies; not deployed-bytecode or issuer attestation",
   "files": [
     {
@@ -159,7 +159,7 @@ export const MCS_CODE_ANCHOR = {
     },
     {
       "path": "packages/probe/src/safe-fetch.ts",
-      "sha256": "0x1dbc7b0d30c04d44600df557d0bd17e3778f17119d268f365851e763053049b6"
+      "sha256": "0xb6275c1c418a4a4cfa296c8c915ed0bcf23b70e1b148bb0e7438659c730d94b4"
     },
     {
       "path": "packages/probe/src/schedule.ts",

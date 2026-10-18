@@ -367,6 +367,12 @@ export async function safeFetch(rawUrl: string, opts: SafeFetchOptions = {}): Pr
           }
         }
         const next = new URL(location, currentUrl)
+        if (new URL(currentUrl).protocol === 'https:' && next.protocol === 'http:') {
+          return {
+            ok: false, failure: 'blocked_ssrf', status: res.status,
+            detail: 'HTTPS redirect downgrade to HTTP is blocked', latencyMs: Date.now() - started,
+          }
+        }
         if (next.origin !== new URL(currentUrl).origin) {
           requestOptions = { ...requestOptions, headers: {} }
         }

@@ -43,6 +43,25 @@ describe('pinned agent requests', () => {
     expect(mocks.request).toHaveBeenCalledTimes(1)
   })
 
+  it.each([301, 302, 303, 307, 308])('blocks HTTPS downgrade status %s before sending a task to an insecure hop', async status => {
+    mocks.lookup.mockResolvedValue([{ address: '8.8.8.8', family: 4 }])
+    mocks.request.mockImplementationOnce(reply(status, { location: 'http://other.example/task' }))
+      .mockImplementationOnce(reply())
+    const result = await safeFetch('https://agent.example/task', { method: 'POST', body: 'private-task-bytes', headers: { authorization: 'Bearer test-only' } })
+    expect(result).toMatchObject({ ok: false, failure: 'blocked_ssrf', detail: 'HTTPS redirect downgrade to HTTP is blocked' })
+    expect(mocks.request).toHaveBeenCalledTimes(1)
+    expect(mocks.lookup).toHaveBeenCalledTimes(1)
+  })
+
+  it.each(['http:', 'https:'])('preserves same-protocol %s redirects and DNS checks', async protocol => {
+    mocks.lookup.mockResolvedValue([{ address: '8.8.8.8', family: 4 }])
+    mocks.request.mockImplementationOnce(reply(302, { location: `${protocol}//other.example/card` }))
+      .mockImplementationOnce(reply())
+    expect(await safeFetch(`${protocol}//agent.example/card`)).toMatchObject({ ok: true, redirects: 1 })
+    expect(mocks.request).toHaveBeenCalledTimes(2)
+    expect(mocks.lookup).toHaveBeenCalledTimes(2)
+  })
+
   it('caps a public redirect loop deterministically', async () => {
     mocks.lookup.mockResolvedValue([{ address: '8.8.8.8', family: 4 }])
     mocks.request.mockImplementation(reply(302, { location: 'https://agent.example/loop' }))
