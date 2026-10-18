@@ -74,7 +74,7 @@ describe('ready selection before the broad catalog read', () => {
         expect(mocks.tracks).toHaveBeenCalledTimes(1)
       })
     } finally {
-      quotesDone(new Map()); rowsDone([]); tracksDone(null)
+      quotesDone(new Map<never, never>()); rowsDone([]); tracksDone(null)
       await pending
     }
     expect(await pending).toMatchObject({ rows: [], total: 0 })
