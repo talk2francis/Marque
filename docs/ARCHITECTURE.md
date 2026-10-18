@@ -270,3 +270,10 @@ alongside one another. The ready selection uses current stored-quote validity
 before its bounded memo; response-time expiry remains enforced. Failed commerce
 reads propagate as unavailable rather than appearing as zero supply. No SQL
 budget, migration, global planner setting or production cache is changed.
+# Web slot persistence, 18 October 2026
+
+Blue/green deployment and rollback save PM2 state before switching the Marque
+upstream. A failed save prevents cutover. Delayed retirement saves again after
+stopping the old slot. This preserves the live slot across host reboots; see
+`docs/vnext/P15_RECOVERY.md` for the observed stale-snapshot outage and recovery.
+

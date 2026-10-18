@@ -73,13 +73,22 @@ start_slot() {
   say "started $name on :$port -> $(readlink "$REL/slot-$port")"
 }
 
+# Save while both slots are available, before the proxy can depend on the new one.
+# A reboot must never restore a stopped live slot from an older PM2 snapshot.
+persist_processes() {
+  if ! pm2 save >>"$LOG" 2>&1; then
+    say "could not persist PM2 state; refusing to switch traffic"
+    return 1
+  fi
+}
+
 retire_later() {
   # systemd runs the stop with a bare PATH, so pm2 is called by its absolute path
   # (the first retire, 27 Sep, failed with "pm2: command not found").
   local name="$1" unit="marque-retire-$1-$STAMP" pm2bin
   pm2bin="$(command -v pm2)"
   systemd-run --unit "$unit" --on-active="$RETIRE_AFTER" --setenv=HOME=/root --setenv=PM2_HOME=/root/.pm2 \
-    --setenv=PATH="$(dirname "$pm2bin"):$(dirname "$(command -v node)"):/usr/bin:/bin" "$pm2bin" stop "$name" >/dev/null 2>&1 \
+    --setenv=PATH="$(dirname "$pm2bin"):$(dirname "$(command -v node)"):/usr/bin:/bin" /bin/bash -c '"$1" stop "$2" && "$1" save' _ "$pm2bin" "$name" >/dev/null 2>&1 \
     && say "$name stops in ${RETIRE_AFTER}s (systemd unit $unit)" \
     || say "could not schedule the stop of $name; stop it by hand: pm2 stop $name"
 }
@@ -100,6 +109,7 @@ if [ "${1:-}" = "--rollback" ]; then
   done
   if [ "$(http_health "http://127.0.0.1:$PREV/api/health" 3)" != "200 0" ]; then start_slot "$PREV"; fi
   healthy "$PREV" || { say "previous slot is not healthy; not switching"; exit 1; }
+  persist_processes
   switch_to "$PREV"
   retire_later "$(name_of "$LIVE")"
   say "rolled back to $(readlink "$REL/slot-$PREV")"
@@ -168,6 +178,7 @@ for u in / /register /register/yield /agents/keel /quest /builders /api/v1/phase
   curl -s -o /dev/null -m 60 "http://127.0.0.1:$IDLE$u" || true
 done
 
+persist_processes
 switch_to "$IDLE"
 
 # Public smoke through Caddy. On failure, switch straight back: the old slot is still up.
@@ -182,7 +193,6 @@ if [ "$fails" -gt 0 ]; then
 fi
 
 retire_later "$(name_of "$LIVE")"
-pm2 save >/dev/null 2>&1 || true
 
 # Release pruning is a separate operator retention task; deployment never deletes releases.
 
