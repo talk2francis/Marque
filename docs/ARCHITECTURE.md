@@ -234,3 +234,5 @@ Whitepaper HTML uses current source; its original30SepPDF remains an explicitly 
 P12: existing storefront/builder evidence remains contextual; pure job-copy helper separates completion from PaymentReleased, charter glossary matches preview-only authority, and read-only audit modes preserve explicit environment and screenshot scope.
 
 P12 receipt UI reuses the existing integrity projection and per-object explorer resolver. Unknown anchor metadata stays unknown; archived flags never become payment/authority/fresh-quality proof. No receipt mutation or API schema change.
+
+P12 wallet accessibility: retain RainbowKit2.2.11 and its connection behavior. WalletProvider adds a connect-modal-only portal observer for unnamed decorative option icons inside visibly named wallet buttons. No new provider, signer or authority, no vendor/dependency edits. Actual Chromium/axe modal proof is required after rebuilding.
