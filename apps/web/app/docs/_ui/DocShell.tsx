@@ -29,7 +29,7 @@ export function DocShell({ current, label, title, lede, actions, sections, child
           {actions ? <div className={styles.actions}>{actions}</div> : null}
         </header>
         <div className={styles.grid}>
-          <aside className={styles.rail}>
+          <aside className={styles.rail} aria-label="Documentation navigation">
             <ScrollSpy items={sections} />
             <nav className={styles.library} aria-label="Documentation library">
               <span className="t-label">Library</span>
@@ -42,7 +42,7 @@ export function DocShell({ current, label, title, lede, actions, sections, child
           </aside>
           <div className={styles.body}>
             {children}
-            <aside className={styles.callout}>
+            <aside className={styles.callout} aria-label="Documentation support">
               <strong>Still stuck?</strong>
               <p>Ask in the <a href="https://t.me/marque_marketplace" target="_blank" rel="noreferrer">Marque Telegram group</a>. Share a job number or a transaction hash, never a private key or recovery phrase.</p>
             </aside>
