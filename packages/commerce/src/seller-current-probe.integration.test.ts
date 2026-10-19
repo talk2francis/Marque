@@ -15,6 +15,8 @@ const cases = [
   { name: 'advertised-commerce', liveness: 'dead', category: 'unclassified', advertises: true, expected: true },
   { name: 'unclassified', liveness: 'live', category: 'unclassified', advertises: false, expected: false },
   { name: 'missing-current', liveness: 'live', category: 'yield', advertises: false, expected: false },
+  { name: 'mixed-labels', liveness: 'live', category: 'yield', advertises: false, expected: true },
+  { name: 'future-advertised-category', liveness: 'dead', category: 'zz_custom', advertises: true, expected: true },
 ] as const
 const services = new Map<string, { agentId: string; serviceId: number }>()
 const rows = (value: unknown) => Array.from(value as Array<Record<string, unknown>>)
@@ -26,6 +28,9 @@ describe.skipIf(!enabled)('seller discovery uses each service current probe in i
       const agentId = `56:seller-current-probe:${stamp}:${i}`
       await db().execute(sql`insert into agent(id,chain_id,contract_address,token_id,name) values(${agentId},56,'0x0000000000000000000000000000000000000001',${`${stamp}${i}`},${fixture.name})`)
       await db().execute(sql`insert into agent_category(agent_id,category,confidence,method) values(${agentId},${fixture.category},1,'owner_declared')`)
+      if (fixture.name === 'mixed-labels') {
+        await db().execute(sql`insert into agent_category(agent_id,category,confidence,method) values(${agentId},'unclassified',100,'owner_declared')`)
+      }
       const endpoint = `https://fixture.invalid/current-probe/${stamp}/${i}`
       const [service] = rows(await db().execute(sql`insert into agent_service(agent_id,kind,endpoint,source) values(${agentId},'a2a',${endpoint},'onchain') returning id`))
       const serviceId = Number(service!.id)
@@ -43,6 +48,7 @@ describe.skipIf(!enabled)('seller discovery uses each service current probe in i
     const selected = services.get(fixture.name)!
     const scoped = await sellerCandidates(selected)
     expect(scoped.map(row => row.serviceId)).toEqual(fixture.expected ? [selected.serviceId] : [])
+    if (fixture.expected) expect(scoped[0]?.category).toBe(fixture.category === 'unclassified' ? null : fixture.category)
   })
 
   it('returns the same fixture services globally and with exact-service scopes', async () => {

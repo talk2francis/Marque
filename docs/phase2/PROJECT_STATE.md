@@ -417,7 +417,7 @@ Logged in `docs/DEVIATIONS.md` under "Phase 2". Index:
 
 ## Requests
 
-- [2026-10-19T23:21:07.117634+00:00] [A: commerce] [B: product/docs] `packages/commerce/src/supply.ts`, `docs/ARCHITECTURE.md`, `docs/DEVIATIONS.md`: record the measured current-probe discovery optimization and separate worker source from the unchanged deployed web artifact. No layout or design-token change.
+- [2026-10-19T23:21:07.117634+00:00] [A: commerce] [B: product/docs] `packages/commerce/src/supply.ts`, `docs/ARCHITECTURE.md`, `docs/DEVIATIONS.md`: record the measured current-probe, null-equivalent classification and eligibility-order discovery optimization and separate worker source from the unchanged deployed web artifact. No layout or design-token change.
 
 
 - [2026-10-19] [B: V3 audit] [A: reference seller maintenance] [agents/tidemark/src/sellerCore.ts, unifiedMain.ts; packages/agent-engines/src/serve.ts, seller-readiness.ts] Confirmed Tidemark data failure despite quote availability and terminal engine errors serialized as paid work. Check historical dependency before new Tidemark quotes; fail paid work before submission on terminal errors. Keep existing funded-job checks, signatures, expiry and financial rules. Targeted graceful seller activation under the user's bug-repair/deployment instruction; no new paid task or chain write during verification.

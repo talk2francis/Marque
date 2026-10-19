@@ -68,10 +68,10 @@ export async function sellerCandidates(scope?: { agentId: string; serviceId?: nu
     cat as (
       select distinct on (agent_id) agent_id, category
       from agent_category
-      ${scope ? sql`where agent_id = ${scope.agentId}` : sql`where agent_id in (
-        select ps.agent_id from probe_schedule ps
-        join agent_service ss on ss.id = ps.service_id
-        where ss.kind = 'a2a' and ps.last_probe_id is not null
+      ${scope ? sql`where agent_id = ${scope.agentId}` : sql`where (
+        -- An unclassified-only row already projects to null below. These index
+        -- ranges retain every other label without sorting the unknown population.
+        category < 'unclassified' or category > 'unclassified'
       )`}
       order by agent_id, (category <> 'unclassified') desc, confidence desc, assigned_at desc
     )
@@ -89,9 +89,9 @@ export async function sellerCandidates(scope?: { agentId: string; serviceId?: nu
     from lp
     join agent a on a.id = lp.agent_id
     join agent_service s on s.id = lp.service_id
-    left join cat on cat.agent_id = a.id
+    left join cat on cat.agent_id = lp.agent_id
     where s.kind = 'a2a' and (
-      a.id in (${sql.join(fpIds.map((id) => sql`${id}`), sql`, `)})
+      lp.agent_id in (${sql.join(fpIds.map((id) => sql`${id}`), sql`, `)})
       -- Any answering A2A agent classified into a hireable category gets a price
       -- check: some production sellers (plain quotes) do not list a negotiate skill.
       or (cat.category in ('yield', 'grid', 'rebalancing', 'health_factor', 'security')
