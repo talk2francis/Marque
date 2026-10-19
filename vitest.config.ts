@@ -7,7 +7,7 @@ export default defineConfig({
     alias: { 'server-only': new URL('./test/server-only-stub.ts', import.meta.url).pathname },
   },
   test: {
-    include: ['packages/**/*.test.ts', 'apps/**/*.test.ts'],
+    include: ['packages/**/*.test.ts', 'apps/**/*.test.ts', 'agents/**/*.test.ts'],
     // Network-dependent tests (the RPC pool) need room; unit tests finish fast.
     testTimeout: 60_000,
     hookTimeout: 30_000,

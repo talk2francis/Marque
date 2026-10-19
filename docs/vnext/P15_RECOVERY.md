@@ -1,5 +1,31 @@
 # Release recovery, 18 October 2026
 
+## Reference-agent failures investigated on 19 October 2026
+
+The owner requested investigation of recurring reference MCS failures. A bounded
+read of the eight latest retained results per registered reference identity
+found fresh passes for Bound, Lattice, Sluicegate and Keel at 01:47 UTC on
+19 October. Their 18 October reboot-period failures were agent-card HTTP 502s,
+not arithmetic mismatches. Their failed observations remain retained.
+
+Tidemark repeatedly received MCS-YIELD-1 because the scheduler selected by
+category alone. Its public engine declaration has `standard: null`: it measures
+trailing realised exchange-rate growth, while that test asks for a quoted net
+rate and switching decision. The scheduler now checks the explicit first-party
+card declaration and matching category before capturing a grading case. A
+missing or incompatible declaration is logged as skipped, never passed. This
+does not grant Tidemark a Warrant or erase its historical failures. Redcell
+likewise has no matching published category test.
+
+A real free, read-only Tidemark request also failed at its configured archive
+provider. TLS 1.2 and IPv4 checks did not restore it; the configured public
+endpoints did not serve the exact older contract state. Public alternatives
+were checked without signup or spending; no unverified replacement is being
+installed. Availability of realised-yield history is a separate limitation from
+MCS compatibility. Endpoint-bearing error text is now redacted in the same
+Tidemark engine wrapper used by free and paid rails. No wallet, settlement,
+pricing, MCS formula, tolerance or historical record is changed.
+
 At 13:22:58 UTC the host recorded an ACPI power-key event and began an orderly
 power-off. It booted again at 13:45:59 UTC. The event initiator is unknown.
 This ended tmux and the running local build. Persistent Codex transcripts,

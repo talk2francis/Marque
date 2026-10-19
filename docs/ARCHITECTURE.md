@@ -1,5 +1,15 @@
 # Architecture
 
+Reference conformance scheduling reads each first-party card's explicit
+`x-marque.standard` and verifies its category before capturing a case. A Yield
+category label does not make Tidemark's trailing realised-yield task compatible
+with MCS-YIELD-1's quoted-rate routing task. Missing, null or incompatible
+declarations are logged as skipped, never passed. Historical failures stay in
+the observation store and storefront; availability probes remain separate.
+Tidemark's public engine wrapper also redacts endpoint-bearing read failures
+across its free and paid answer paths, including nested excluded-venue reasons.
+Successful measurements and ordinary task refusals are preserved.
+
 ## Web request boundary (9 October 2026)
 
 The web slots bind only to loopback. `ops/web-upstream.caddy` is the shared

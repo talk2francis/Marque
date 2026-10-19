@@ -11,8 +11,9 @@
  */
 import { CASES, capturePublishedCase, runConformance, a2aAdapter, type TestId } from '@marque/conformance'
 import { randomUUID } from 'node:crypto'
-import { firstPartyAgentIds } from '@marque/probe'
+import { firstPartyAgentIds, safeFetch } from '@marque/probe'
 import { closeDb, firstPartyAgents } from '@marque/db'
+import { declaredReferenceTest } from './reference-standard.js'
 
 const ONCE = process.argv.includes('--once')
 const CYCLE_MS = Number(process.env.CONFORM_CYCLE_MS ?? 24 * 60 * 60_000)
@@ -49,8 +50,8 @@ async function sweep(): Promise<void> {
 }
 
 /**
- * Re-test every first-party agent against its own category's published test, through
- * its public free A2A face, exactly as a third party is tested. Results are stored under
+ * Re-test first-party engines that declare a compatible published standard through
+ * their public free A2A face, exactly as a third party is tested. Results are stored under
  * the agent's canonical ERC-8004 row id. The latest result controls the badge;
  * "retest due" applies only when the latest pass is older than 72 h.
  */
@@ -66,10 +67,23 @@ async function referenceSweep(): Promise<void> {
   let fail = 0
   const runId = `${new Date().toISOString().replace(/[^0-9]/g, '')}-${randomUUID().slice(0, 8)}`
   for (const a of fp) {
-    const testId = TEST_FOR_CATEGORY[a.category]
+    const expectedTest = TEST_FOR_CATEGORY[a.category]
     const agentId = ids.get(a.slug)
-    if (!testId || !agentId) {
-      log('reference_skip', { agent: a.slug, reason: !testId ? 'no published test for this category' : 'registry row not ingested' })
+    if (!expectedTest || !agentId) {
+      log('reference_skip', { agent: a.slug, reason: !expectedTest ? 'no published test for this category' : 'registry row not ingested' })
+      continue
+    }
+    // Realised yield and quoted-rate routing share a category, not a task.
+    // Check the engine's public declaration before capturing a grading case.
+    const cardUrl = `${PUBLIC_URL}/agents/${a.slug}/.well-known/agent-card.json`
+    const card = await safeFetch(cardUrl, { timeoutMs: 15_000 })
+    let declaration: unknown = null
+    if (card.ok && card.status < 400) {
+      try { declaration = JSON.parse(card.body) } catch { /* unavailable declaration stays untestable */ }
+    }
+    const testId = declaredReferenceTest(declaration, a.category, expectedTest)
+    if (!testId) {
+      log('reference_skip', { agent: a.slug, reason: card.ok && card.status < 400 ? 'no compatible declared published standard' : 'agent card unavailable', attempted: false })
       continue
     }
     // Public BSC RPCs prune historical state after about 60 blocks. Capturing
@@ -87,7 +101,7 @@ async function referenceSweep(): Promise<void> {
       log('reference_skip', { agent: a.slug, reason: 'fresh case capture failed', error: errorKind(err) })
       continue
     }
-    const adapter = a2aAdapter(agentId, a.slug, `${PUBLIC_URL}/agents/${a.slug}/.well-known/agent-card.json`)
+    const adapter = a2aAdapter(agentId, a.slug, cardUrl)
     try {
       const outcome = await runConformance({ adapter, testId, caseId, selectionSource: 'first_party_config' })
       if (outcome.pass) pass++

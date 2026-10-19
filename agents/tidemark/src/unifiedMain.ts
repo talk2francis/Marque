@@ -91,6 +91,7 @@ import { buildAgentCard } from "./agentCard.js";
 import { SellerAgentExecutor } from "./executor.js";
 import { requestLimitContext } from "./requestLimits.js";
 import type { RunWork } from "./sellerCore.js";
+import { publicReadEngine } from "./publicReadEngine.js";
 import {
   a2aDataResult,
   a2aError,
@@ -117,7 +118,7 @@ function resolveEngine() {
   }
   return engine;
 }
-const MARQUE_ENGINE = resolveEngine();
+const MARQUE_ENGINE = publicReadEngine(resolveEngine());
 const MARQUE_PUBLIC_URL =
   process.env.MARQUE_AGENT_PUBLIC_URL ??
   `http://127.0.0.1:${process.env.AGENT_PORT || "8615"}`;
