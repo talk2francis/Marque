@@ -237,6 +237,10 @@ export function marketplaceSourceQuery(owners?: readonly string[]) {
     cat as (
       select distinct on (agent_id) agent_id, category, confidence
       from agent_category
+      ${owners ? sql`where agent_id in (
+        select scoped.id from agent scoped where scoped.chain_id = 56
+          and scoped.owner_address in (${sql.join(owners.map(owner => sql`${owner}`), sql`, `)})
+      )` : sql``}
       order by agent_id, (category <> 'unclassified') desc, confidence desc, assigned_at desc
     ),
     conf_pick as (

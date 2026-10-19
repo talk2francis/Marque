@@ -181,3 +181,27 @@ The schema-index source change regenerates the 42-file MCS source manifest to
 MCS arithmetic, version 1.0.0 and tolerance revision 1 are unchanged; historical
 result hashes remain historical. Fresh build, current-data acceptance and
 actual production activation are still required after this candidate entry.
+
+### Cold-cluster rejection and early category scoping
+
+Candidate `9fb7775` passed 929 tests in 102 files with zero skips, both source
+CIs and 42 current-data browser states (30 accessibility checks), but its cold
+two-worker preflight received a catalog 503. It was not deployed. Retained
+negative evidence takes precedence over those earlier positive gates.
+
+The catalog plan materialized and sorted 344,294 category records before
+owner scoping. The category CTE now narrows to all identities belonging to the
+complete selected owner groups before choosing the existing category winner.
+Unscoped seller projections narrow categories to the scheduled A2A identity
+superset that the final query can return. Exact-service identity, full owner
+groups, category ordering, null-owner fallback and quote rules are unchanged.
+No cache policy, JIT setting or production read timeout is changed.
+
+A read-only single-statement snapshot comparison returned 1,732 catalog rows
+and 774 seller rows before and after, with zero differing rows in both
+directions. These are dated observations, not a frozen supply claim. All 57
+focused tests in 10 files passed, including seven catalog SQL parity cases. A
+private compiled SQL-only prototype returned HTTP 200 for all 14 requests
+across two fresh two-worker clusters; it is not a deployable release artifact.
+The source change still requires fresh full validation, an immutable prepared
+artifact, cold checks on separate runtime copies and actual live acceptance.

@@ -67,7 +67,11 @@ export async function sellerCandidates(scope?: { agentId: string; serviceId?: nu
     cat as (
       select distinct on (agent_id) agent_id, category
       from agent_category
-      ${scope ? sql`where agent_id = ${scope.agentId}` : sql``}
+      ${scope ? sql`where agent_id = ${scope.agentId}` : sql`where agent_id in (
+        select ps.agent_id from probe_schedule ps
+        join agent_service ss on ss.id = ps.service_id
+        where ss.kind = 'a2a' and ps.last_probe_id is not null
+      )`}
       order by agent_id, (category <> 'unclassified') desc, confidence desc, assigned_at desc
     )
     select lp.service_id, a.id as agent_id, a.chain_id, a.token_id, a.name, a.agent_wallet, a.owner_address,

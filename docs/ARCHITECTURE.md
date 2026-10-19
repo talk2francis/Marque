@@ -21,6 +21,11 @@ also share one pending read per process. The entry is removed on either success
 or failure; completed results are never cached by this mechanism. Exact-service
 reads remain independent, and each caller evaluates quote expiry and capability
 state separately. The original read-only, statement and lock bounds remain.
+Category deduplication is also constrained before its sort: marketplace reads
+retain every category row belonging to the complete selected owner groups;
+unscoped seller discovery retains every category row for identities attached to
+scheduled A2A services, the superset its final join can return. Null-owner/full
+registry fallback and exact-seller reads retain their existing behavior.
 
 ## Web request boundary (9 October 2026)
 
