@@ -376,3 +376,7 @@ The unchanged seller-history join matches `agent.chain_id` and `lower(agent.agen
 ### Header freshness scope
 
 The pulse response consumes only T0 freshness. It now requests an explicit first-party-only scope from `tierFreshness`; default callers still compute every tier. The SQL keeps the same template eligibility, identity selection, freshness windows and counts, filtering unrelated agent IDs before aggregation. This avoids making the header wait for a whole-market T1 scan. Pulse response fields, cache keys and its eight-second bound are unchanged. Regenerate the existing source commitment because probe scheduler source is in its declared scope; no MCS arithmetic or tolerance changes.
+
+### Runtime projection readiness before cutover
+
+The four pre-rendered data routes (home, protocol, Register and quest) use a 30-second ISR interval. An isolated build can contain fixture HTML even when the running candidate connects to production. `warmCandidateProjections` consumes complete responses, waits the natural interval and polls for completed regeneration. The home quote snapshot must be generated after runtime warm-up began, or explicitly report unavailable data. The existing candidate verifier runs this guard before browser checks and traffic switching. CI covers stale fixture HITs, regeneration, unavailable data, deadline exhaustion and transport failure. No cache timestamp, observation, query timeout, quote term or runtime rendering interval is altered.

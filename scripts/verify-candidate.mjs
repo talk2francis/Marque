@@ -15,6 +15,7 @@
  * Usage: node scripts/verify-candidate.mjs http://127.0.0.1:3299
  */
 import { chromium } from 'playwright'
+import { warmCandidateProjections } from './lib/warm-projections.mjs'
 import { verifyPreviousAssets } from './lib/previous-assets.mjs'
 import { isVerificationRpcRead } from './lib/verification-rpc.mjs'
 
@@ -32,6 +33,8 @@ if (process.env.PREVIOUS_BASE_URL) {
   const count = await verifyPreviousAssets(BASE, process.env.PREVIOUS_BASE_URL)
   console.log(`ok   ${count} previous-release static assets remain available`)
 }
+const projections = await warmCandidateProjections(BASE)
+console.log('ok   runtime projections refreshed before browser acceptance: ' + JSON.stringify(projections))
 // An address with real first-party history — charters, hires, receipts, seals —
 // so the profile renders populated sections rather than only empty states.
 const ACTIVE_ADDR = '0x60AA3AEE06E2345A17E4d4B12c53E046F4F63CAf'
