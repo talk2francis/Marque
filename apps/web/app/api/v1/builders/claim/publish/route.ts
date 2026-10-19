@@ -84,8 +84,11 @@ export async function POST(request: Request) {
       // Serialize concurrent publication for this identity. The existing unique key
       // makes retries a single listing; category and listing commit together.
       await tx.execute(sql`set local statement_timeout = '5000ms'`)
-      await tx.execute(sql`set local lock_timeout = '1000ms'`)
+      // A preceding publication can spend a bounded ownership read in this lock.
+      // Give retries room to serialize, then restore the short write-lock budget.
+      await tx.execute(sql`set local lock_timeout = '5000ms'`)
       await tx.execute(sql`select pg_advisory_xact_lock(hashtextextended(${claim.agentId}, 0))`)
+      await tx.execute(sql`set local lock_timeout = '1000ms'`)
       // Check after acquiring the serialization lock, never using claim-time ownership.
       if (!await withDeadline(claimOwnerIsCurrent(claim), 8000)) {
         ownerChanged = true

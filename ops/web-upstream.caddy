@@ -5,5 +5,11 @@ route {
 	request_header @marqueRouterState X-Marque-Router-State "present:{http.request.header.Next-Router-State-Tree}"
 	# Normalize duplicates to the same value the middleware validates.
 	request_header @marqueRouterState Next-Router-State-Tree "{http.request.header.Next-Router-State-Tree}"
-	reverse_proxy 127.0.0.1:{args[0]}
+	reverse_proxy 127.0.0.1:{args[0]} {
+		# Next.js advertises a five-second HTTP/1.1 idle timeout. Retire pooled
+		# connections first so later asset requests do not reuse closed sockets.
+		transport http {
+			keepalive 2s
+		}
+	}
 }

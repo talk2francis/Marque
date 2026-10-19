@@ -623,3 +623,5 @@ corrected a stopped live PM2 slot after an ACPI host shutdown. Deployment now
 persists state and retains/verifies cached-client static assets. See final
 vnext checkpoints. Production activation and public proof are pending at this
 dated entry. No new chain/paid write, migration, authority or observation deletion.
+
+Requests: [2026-10-19] [combined user-directed V3 repair] [A/B] [builder publish route and database regression; ops/web-upstream.caddy] Fix reproduced retry 503s with a bounded five-second advisory-lock wait while preserving one-second write locks and ownership checks. Correct the measured five-second Next.js versus default Caddy idle-connection mismatch in the Marque-only import; no global routing edit or new financial action. Candidate validation and actual production acceptance remain required.

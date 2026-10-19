@@ -69,6 +69,26 @@ describe.skipIf(!enabled)('listing boundary with real PostgreSQL', () => {
     expect(await response.json()).toMatchObject({ profileUrl: '/builders', chainId: 97, listingLevel: 'owner_listed' })
     expect(rows(await db().execute(sql`select chain_id from builder_listing where agent_id = ${f.agentId}`))[0]).toMatchObject({ chain_id: 97 })
   })
+  it('waits for a short in-flight publication without relaxing category-write rollback', async () => {
+    const f = await fixture()
+    await import('../app/api/v1/builders/claim/publish/route')
+    let unlock: () => void = () => {}
+    let signalLocked: () => void = () => {}
+    const locked = new Promise<void>(resolve => { signalLocked = resolve })
+    const held = raw().begin(async tx => {
+      await tx`select pg_advisory_xact_lock(hashtextextended(${f.agentId}, 0))`
+      signalLocked()
+      await new Promise<void>(resolve => { unlock = resolve })
+    })
+    await locked
+    const response = publish(f)
+    // Exceed the old one-second publication wait, without slowing any query.
+    const release = setTimeout(unlock, 1500)
+    try {
+      expect((await response).status).toBe(200)
+      expect(rows(await db().execute(sql`select id from builder_listing where agent_id = ${f.agentId}`))).toHaveLength(1)
+    } finally { clearTimeout(release); unlock(); await held }
+  })
   it('preserves authenticated chain-only testnet listing without inventing an indexed registry row', async () => {
     const f = await fixture(97, false)
     const response = await publish(f)
