@@ -23,7 +23,7 @@ export interface Manifest {
 export async function readManifest(url: string, onchainHash: string | null): Promise<Manifest | null> {
   try {
     const r = await safeFetch(url, { timeoutMs: 8_000, maxBytes: 512 * 1024 })
-    if (r.status === 409) {
+    if (r.ok && r.status === 409) {
       const disclosure = JSON.parse(r.body) as Record<string, unknown>
       if (disclosure['schema'] !== 'marque.withheld-error-deliverable.v1' || disclosure['originalPreserved'] !== true
         || typeof disclosure['originalContentHash'] !== 'string' || !/^0x[0-9a-fA-F]{64}$/.test(disclosure['originalContentHash'])) return null

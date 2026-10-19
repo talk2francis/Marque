@@ -5,8 +5,8 @@
  * profile, the Ledger, the Charter Desk, the Judge flow and every receipt. Three
  * names for one agent is a bug, not a cosmetic issue (AGENTS.md invariant 18).
  *
- * These agents exist only to guarantee every category has a working
- * counterparty. They are held to the same standard as everyone else and are
+ * These agents support category supply without guaranteeing continuous
+ * availability. They are held to the same standard as everyone else and are
  * ranked by the same rules, including when a third party beats them (invariant 1
  * / 17). `isReferenceAgent` and `referenceMarkHref` are how a surface labels
  * them so one is never mistaken for third-party supply.

@@ -103,7 +103,7 @@ function Yield({ c }: { c: Json }) {
     <div className={styles.dBody}>
       <div className={styles.dHero}>
         <div><span className="t-label">{recommend ? 'Recommended' : 'Recommendation'}</span><span className={styles.dBig}>{recommend === null ? 'Not given' : recommend ? s(c['venue']) ?? 'Venue not given' : 'Stay put'}</span>{recommend === false && s(c['declineReason']) ? <span className={styles.dSub}>{s(c['declineReason'])}</span> : null}</div>
-        <div><span className="t-label">{ranking ? 'Net realised APR' : 'Net APR at your size'}</span><span className={styles.dBig} data-state="holds">{pct(net)}</span><span className={styles.dSub}>on {usd(n(c['sizeUsd']), 0)}</span></div>
+        <div><span className="t-label">{ranking ? 'Net realised APR' : 'Net APR at your size'}</span><span className={styles.dBig} data-state={net === null ? undefined : 'holds'}>{pct(net)}</span><span className={styles.dSub}>on {usd(n(c['sizeUsd']), 0)}</span></div>
       </div>
       {ranking ? (
         <div className={styles.dTableWrap}><table className={styles.dTable}>

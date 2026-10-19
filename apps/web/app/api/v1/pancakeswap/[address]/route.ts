@@ -83,7 +83,7 @@ async function rankAgentsForPool(): Promise<RankedAgent[]> {
         ? `Passed MCS-REB-1, the published rebalancing test${reb?.ranAt ? `, on ${reb.ranAt.slice(0, 10)}` : ''}.`
         : mcs === 'fail' ? `Its latest MCS-REB-1 run failed${reb?.failedFields[0] ? ` on ${reb.failedFields[0]}` : ''}; the record is on its storefront.` : 'Not yet tested against MCS-REB-1.',
       'Reads the pool\u2019s own tickSpacing, so it supports every fee tier rather than a fixed list.',
-      'First-party reference agent: it exists so this category always has a seller, and is labelled as ours.',
+      'First-party reference agent: it supports category supply and is labelled as ours. Current availability is reported separately.',
     ],
   }
 

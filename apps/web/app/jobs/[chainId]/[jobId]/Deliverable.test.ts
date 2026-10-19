@@ -15,6 +15,7 @@ describe('category results do not invent answers from errors or missing fields',
   it('keeps missing recommendation separate from an explicit decision to stay put', () => {
     expect(render('yield', {})).toContain('Not given')
     expect(render('yield', {})).not.toContain('Stay put')
+    expect(render('yield', {})).not.toContain('data-state="holds"')
     const negative = render('yield', { recommend: false, netAprPct: 0, sizeUsd: 0 })
     expect(negative).toContain('Stay put'); expect(negative).toContain('0.00%')
   })

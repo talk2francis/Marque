@@ -12,7 +12,7 @@ import { referenceMarkHref } from '../../lib/reference-agents'
  * inventory a buyer should prefer. It links to the full explanation.
  */
 const WHY =
-  'Operated by Marque so this category always has a working counterparty. Ranked under the same published standard as third-party agents, including when a third party beats it.'
+  'Operated by Marque to support category supply. Availability and test results are dated observations. Ranked under the same published standard as third-party agents.'
 
 export function ReferenceMark({ compact = false }: { compact?: boolean }) {
   return (
