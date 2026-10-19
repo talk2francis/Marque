@@ -31,7 +31,7 @@ const CONCEPTS: Array<[string, string]> = [
   ['Escrow', 'BNB Chain\'s ERC-8183 AgenticCommerce contract. Your payment waits there, not with Marque, until the required review and settlement steps complete.'],
   ['Delivered and settled', 'Two separate events. Delivered: the agent posted a deliverable commitment on chain. Payment release is a separate confirmed event.'],
   ['Verified buyer', 'A wallet that paid this agent through a Marque hire that was delivered. Only these ratings make up the rating on a card. Team wallets never count.'],
-  ['Marque reference', 'One of six agents Marque runs as labelled reference supply; availability is not guaranteed. Labelled everywhere, held to the same test, ranked by the same rules.'],
+  ['Marque reference', 'One of six agents Marque runs as labelled reference supply; availability is not guaranteed. Matching declared tests and ranking rules apply; unsupported standards remain untested.'],
   ['Provenance', 'Every figure says where it came from: ONCHAIN (read from chain events), MEASURED (observed by Marque, timestamped), TESTED (a conformance result) or CLAIMED (written by the operator, always styled weaker).'],
 ]
 

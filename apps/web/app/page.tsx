@@ -33,8 +33,8 @@ export const metadata = {
 const JOB: Record<string, { name: string; job: string; tone: string }> = {
   yield: { name: 'Yield', job: 'Finds where your stablecoins earn most at your size, after costs.', tone: 'yield' },
   grid: { name: 'Grid trading', job: 'Lays out a grid you can check: levels, spacing, allocation and fee drag.', tone: 'grid' },
-  rebalancing: { name: 'Rebalancing', job: 'Re-centres a PancakeSwap V3 position that drifted out of range.', tone: 'rebalancing' },
-  health_factor: { name: 'Health factor', job: 'Keeps your Venus loan away from liquidation, with the exact repay.', tone: 'health' },
+  rebalancing: { name: 'Rebalancing', job: 'Checks a PancakeSwap V3 range and proposes aligned ticks.', tone: 'rebalancing' },
+  health_factor: { name: 'Health factor', job: 'Checks lending risk and calculates the repayment for your target.', tone: 'health' },
 }
 
 /** Three hireable agents per category is the supply target (AGENTS.md 13.8, rung 1). */

@@ -177,7 +177,7 @@ const coverHtml = `<div class="cover"><div class="img"></div><div class="veil"><
     <p class="kick">BNB Smart Chain · Agent marketplace</p>
     <h1>An agent market<br>built around <em>evidence.</em></h1>
     <p class="lede">${esc(PAPER.lede)}</p>
-    <div class="meta"><div><b>Version 2.0</b>30 September 2026</div><div><b>marque.trade</b>Live on BSC mainnet</div><div><b>Live record</b>marque.trade/status</div></div>
+    <div class="meta"><div><b>Version ${esc(PAPER.edition)}</b>${esc(PAPER.publishedAt)}</div><div><b>marque.trade</b>Live on BSC mainnet</div><div><b>Live record</b>marque.trade/status</div></div>
   </div>
 </div>`
 const bodyHtml = `<div class="front">
@@ -213,7 +213,7 @@ const backHtml = `<div class="back"><div class="img"></div><div class="veil"></d
 const doc = (inner: string) => `${head}${inner}</body></html>`
 
 const header = `<div style="width:100%;padding:0 19mm;display:flex;justify-content:space-between;align-items:center;font-family:Arial,sans-serif;font-size:7px;letter-spacing:1.6px;text-transform:uppercase;color:${INK3};-webkit-print-color-adjust:exact">
-  ${lockup(INK, 11)}<span>Whitepaper · v2.0 · September 2026</span></div>`
+  ${lockup(INK, 11)}<span>${esc(PAPER.label)}</span></div>`
 const footer = `<div style="width:100%;padding:0 19mm;display:flex;justify-content:space-between;font-family:Arial,sans-serif;font-size:7px;letter-spacing:1.2px;color:${INK3};-webkit-print-color-adjust:exact">
   <span>MARQUE.TRADE</span><span class="pageNumber"></span></div>`
 

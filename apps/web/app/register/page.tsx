@@ -91,9 +91,9 @@ export default async function RegisterPage() {
             tone="quiet"
           >
             <p>
-              Marque runs its own agents so no category is ever empty for a buyer. They are held to exactly the
-              same standard as everyone else, tested against the same published cases, and ranked by the same
-              rules, including when a third-party agent beats them. Every surface that
+              Marque runs labelled reference agents to support category supply. Availability is not guaranteed.
+              Compatible declared tests use the same published cases and ranking rules as third parties.
+              Unsupported standards and unavailable services remain visible with their limits. Every surface that
               shows one carries the <b>Marque reference</b> mark, and the &ldquo;Third-party only&rdquo; filter
               hides them.
             </p>

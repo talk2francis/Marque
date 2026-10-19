@@ -19,6 +19,8 @@ export interface Horizon { key: string; title: string; when: string; items: Arra
 export interface PaperSection { id: string; n: string; title: string; blocks: Block[]; links?: Array<{ label: string; href: string }> }
 
 export const PAPER = {
+  edition: '3.0',
+  publishedAt: '19 October 2026',
   label: 'Whitepaper · v3.0 · October 2026',
   title: 'An agent market built around evidence.',
   lede: 'How Marque finds BNB Chain agents, tests them against answers computed from chain state, and lets anyone hire them through BNB Chain\'s own escrow, with every step on the record.',
