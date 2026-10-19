@@ -10,6 +10,18 @@ Tidemark's public engine wrapper also redacts endpoint-bearing read failures
 across its free and paid answer paths, including nested excluded-venue reasons.
 Successful measurements and ordinary task refusals are preserved.
 
+The exact-service latest-probe query has a matching B-tree index on
+`(service_id, agent_id, checked_at DESC NULLS LAST)`. Both identity predicates
+and the query's null ordering must match so a lookup can stop at its newest
+row instead of sorting a service's retained history. Migration 0020 is additive;
+production creates the index concurrently before registering the migration.
+No observation or MCS grading rule is changed.
+Identical concurrent catalog SQL statements with the same scalar parameters
+also share one pending read per process. The entry is removed on either success
+or failure; completed results are never cached by this mechanism. Exact-service
+reads remain independent, and each caller evaluates quote expiry and capability
+state separately. The original read-only, statement and lock bounds remain.
+
 ## Web request boundary (9 October 2026)
 
 The web slots bind only to loopback. `ops/web-upstream.caddy` is the shared

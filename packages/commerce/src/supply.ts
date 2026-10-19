@@ -1,7 +1,7 @@
 import { sql, type SQL } from 'drizzle-orm'
 import { db, commerceQuote, firstPartyAgents, canonicalAgentId, type FirstPartyAgent } from '@marque/db'
 import { requestQuote, probeTask, type QuoteResult } from './quote.js'
-import { boundedCommerceRead } from './read-budget.js'
+import { boundedCommerceRead, coalescedCatalogRead } from './read-budget.js'
 
 /**
  * The commercial axis (SPEC-COMMERCE 4.1), separate from MCS quality.
@@ -26,7 +26,7 @@ const rowsOf = (r: unknown) => ((r as { rows?: unknown[] }).rows ?? (r as unknow
 
 /** Exact-agent reads must not scan the marketplace or leave SQL running after a UI timeout. */
 async function supplyRows(query: SQL, scoped: boolean): Promise<Array<Record<string, unknown>>> {
-  return rowsOf(await boundedCommerceRead(query, scoped ? 'exact' : 'catalog'))
+  return rowsOf(await (scoped ? boundedCommerceRead(query, 'exact') : coalescedCatalogRead(query)))
 }
 
 export interface SellerCandidate {

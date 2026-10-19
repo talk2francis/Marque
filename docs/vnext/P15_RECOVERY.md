@@ -148,3 +148,36 @@ A private instrumented two-worker prototype returned the two catalog requests
 in 7.792 and 6.415 seconds. These are separate dated samples, not frozen-dataset
 or percentile claims. Existing catalog result parity and new real PostgreSQL
 quote projection/tie/failure/scope cases gate the actual source repair.
+
+## Catalog fan-out and exact-probe index, 19 October 2026
+
+Web source `9ff6ce0` passed its full 914-case suite and the later reference fixes
+passed 923 cases, with both release CIs green. The current-data browser gate
+then rejected state 14 of 42: Health Factor at 390px/night received a catalog
+503. No fourth production stage or public cutover occurred. The failing
+observation and all earlier stage failures remain retained.
+
+PostgreSQL recorded bounded statement timeouts in exact-service probe reads,
+and subsequently in overlapping catalog/quote reads. A read-only plan for
+20 Health Factor identities sorted 908 historical observations per service
+on average across 11 services. Existing separate service/time and agent/time
+indexes did not cover both predicates and the exact ordering together. The
+additive migration 0020 supplies `(service_id, agent_id, checked_at DESC NULLS
+LAST)`; production activation uses concurrent index creation and the normal
+migration ledger. Fixture checks require the index and an ordered probe lookup
+without a history sort. No retained observation is rewritten or deleted.
+
+Catalog source and unscoped supply projections also coalesce identical pending
+SQL reads, including scalar parameters. Every completed or failed promise is
+removed, so the next request performs a new observation. Exact-service reads
+are independent, quote expiry and capability decisions are evaluated per
+caller, and original read-only/4s/8s/lock bounds remain. Five concurrency
+regressions cover identical/different queries, exact reads, failure recovery
+and non-scalar driver parameters. This is in-flight work sharing, not a
+last-good result cache.
+
+The schema-index source change regenerates the 42-file MCS source manifest to
+`0xcfa7180a55f8e19407ead79e90e34f57ef25614863f0db14b47d634bbf6a9e39`.
+MCS arithmetic, version 1.0.0 and tolerance revision 1 are unchanged; historical
+result hashes remain historical. Fresh build, current-data acceptance and
+actual production activation are still required after this candidate entry.

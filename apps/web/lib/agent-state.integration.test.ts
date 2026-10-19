@@ -59,4 +59,24 @@ describe.skipIf(!enabled)('exact latest-probe reads in isolated PostgreSQL', () 
     expect(selected).toHaveLength(2)
     expect(selected.every(row => row.agent_id === ids[0])).toBe(true)
   })
+  it('can read the latest exact observation through the matching index without sorting probe history', async () => {
+    const result = await db().transaction(async tx => {
+      // A tiny fixture otherwise prefers a sequential/bitmap scan. This checks that
+      // the real query can use the declared ordering, not production timing.
+      await tx.execute(sql`set local enable_seqscan = off`)
+      await tx.execute(sql`set local enable_bitmapscan = off`)
+      return tx.execute(sql`explain (format json) ${agentServiceEvidenceQuery([ids[0]!])}`)
+    })
+    const root = (rows(result)[0]!['QUERY PLAN'] as Array<{ Plan: Record<string, unknown> }>)[0]!.Plan
+    const nodes: Array<Record<string, unknown>> = []
+    const walk = (node: Record<string, unknown>) => {
+      nodes.push(node)
+      for (const child of (node['Plans'] ?? []) as Array<Record<string, unknown>>) walk(child)
+    }
+    walk(root)
+    expect(nodes.some(node => node['Relation Name'] === 'probe' && node['Node Type'] === 'Index Scan')).toBe(true)
+    expect(nodes.filter(node => node['Node Type'] === 'Sort').some(node => JSON.stringify(node['Sort Key']).includes('checked_at'))).toBe(false)
+    const definition = rows(await db().execute(sql`select indexdef from pg_indexes where schemaname='public' and indexname='probe_service_agent_checked_idx'`))[0]?.indexdef
+    expect(definition).toContain('(service_id, agent_id, checked_at DESC NULLS LAST)')
+  })
 })

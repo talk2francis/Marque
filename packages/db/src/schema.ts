@@ -13,6 +13,7 @@
  *
  * Tables in the first-party tier are marked FIRST-PARTY below.
  */
+import { sql } from 'drizzle-orm'
 import {
   pgTable, text, integer, bigint, boolean, timestamp, jsonb, doublePrecision, uuid,
   uniqueIndex, index, primaryKey, serial,
@@ -180,6 +181,7 @@ export const probe = pgTable('probe', {
 }, (t) => ({
   agentCheckedIdx: index('probe_agent_checked_idx').on(t.agentId, t.checkedAt.desc()),
   serviceCheckedIdx: index('probe_service_checked_idx').on(t.serviceId, t.checkedAt.desc()),
+  serviceAgentCheckedIdx: index('probe_service_agent_checked_idx').on(t.serviceId, t.agentId, sql`${t.checkedAt} desc nulls last`),
   checkedIdx: index('probe_checked_idx').on(t.checkedAt.desc()),
 }))
 

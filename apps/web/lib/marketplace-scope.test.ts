@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { PgDialect } from 'drizzle-orm/pg-core'
 const mocks = vi.hoisted(() => ({ states: vi.fn(), read: vi.fn(), capabilities: vi.fn(), tracks: vi.fn().mockResolvedValue(null) }))
 vi.mock('@marque/commerce', async original => ({ ...await original<object>(), commercialStates: mocks.states }))
-vi.mock('@marque/commerce/reads', () => ({ boundedCommerceRead: mocks.read }))
+vi.mock('@marque/commerce/reads', () => ({ boundedCommerceRead: mocks.read, coalescedCatalogRead: mocks.read }))
 vi.mock('./agent-state', async original => ({ ...await original<object>(), agentStates: mocks.capabilities }))
 vi.mock('./agent-track', async original => ({ ...await original<object>(), agentTracks: mocks.tracks }))
 import { marketplaceAgents, marketPageAgentStates } from './marketplace'

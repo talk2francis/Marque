@@ -1,7 +1,7 @@
 import 'server-only'
 import { sql } from 'drizzle-orm'
 import { firstPartyIds, canonicalAgentIdSql } from '@marque/db'
-import { boundedCommerceRead } from '@marque/commerce/reads'
+import { boundedCommerceRead, coalescedCatalogRead } from '@marque/commerce/reads'
 import { commercialStates, formatAmount, type CommercialState } from '@marque/commerce'
 import { agentStates, TASK_FOR_CATEGORY, type AgentStateView } from './agent-state'
 import { agentTracks, trackFromSource, type AgentTrack } from './agent-track'
@@ -361,7 +361,7 @@ async function queryAgents(owners?: readonly string[], states?: Awaited<ReturnTy
   // cold read times serially before filtering and pagination can begin.
   const [commerce, rows, tracks] = await Promise.all([
     states ?? commercialStates(),
-    boundedCommerceRead(marketplaceSourceQuery(owners)),
+    coalescedCatalogRead(marketplaceSourceQuery(owners)),
     agentTracks(56),
   ])
 
