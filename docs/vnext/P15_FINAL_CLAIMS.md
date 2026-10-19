@@ -8,6 +8,8 @@ Rechecked the [official campaign](https://www.bnbchain.org/en/hackathons/smart-m
 
 | Product claim | Proof or boundary |
 |---|---|
+| Reference-agent MCS repair | Four fresh first-party passes after activation; incompatible standards skipped, historical failures retained; no organic-provider claim |
+| Live recovery release | Release `267b46d`; unchanged web build `78d9b64` passed 929/102 with zero skips, cold14 and private42/30AXE; verifier9 and source CI passed on the release, then public36 passed. Full SHAs and evidence in P15 handoff |
 | Wallet-free discovery across four categories | Real browser release matrix and current catalog; no availability guarantee |
 | Exact selected provider and asset on buyer-owned ERC8183 hire | Existing quote/intent/call tests plus source; new wallet-funded mainnet walkthrough NOT performed |
 | Quote integrity | Signed negotiation or identity-checked unsigned quote, always identified separately; expired terms rejected |
@@ -41,7 +43,8 @@ This is a recording script only; no screencast or new paid pilot is claimed.
 | Native action sessions | Verified deployed enforcement of target+selector+recipient+token+cumulative caps+expiry+revocation, buyer ownership and simulation; separate approval |
 | Genuine fair trials / recommendations | Two consenting independent exact-task-compatible providers, equal frozen inputs and complete failures/cost/evidence |
 | Commercial outcome learning | Explicit immutable job/run/receipt linkage and independently reproducible task-quality observations; no hash joins by guess |
-| Cold performance work | Bounded actual production samples and query plans isolating app/DB/host causes before query or cache changes |
+| Further cold performance work | Bounded actual production samples and query plans isolating app/DB/host causes before query or cache changes |
+| Tidemark realised-yield reader | Existing configured archive source must answer the required historical state; new paid provider requires separate approval. No synthetic pass or yield metric |
 | Remaining inline accessibility polish | Actual failing target/contrast cases, scoped layout repair and browser regression; no broad token redesign |
 | MCP server, autonomous composition, multichain | Evidence existing HTTP/client contract cannot serve an actual user need and current BSC loop is healthy |
 

@@ -1,3 +1,7 @@
+# P14/P15 production handoff, 2026-10-19T09:45:18.102462+00:00
+
+Release `267b46d26582ce32a67787f66d71364a7db8dadd` is live at https://marque.trade; the unchanged web build `78d9b64` passed 929 tests/102 files with zero skips, nine verifier regressions and CI passed on the release, and actual public acceptance passed. Read the exact source, browser/API scopes, rejected candidates, worker activation, rollback, preserved observations and limits in [P15 handoff](../vnext/P15_HANDOFF.md). The owner authorized this release. Only additive index migration 0020 was applied; no new chain transaction, paid task, wallet authority or destructive operation. Historical entries below are retained.
+
 Requests: [2026-10-18] [combined release/commerce/product maintenance] [A/B] [apps/worker/src/conform.ts; ecosystem.config.cjs; scripts/deploy-web.sh; scripts/verify-candidate.mjs; .github/workflows/ci.yml; usage/FAQ/whitepaper copy] Defer startup task sweeps on rolling activation, make smoke reads non-mutating, verify prepared artifact/source agreement, execute existing DB regressions in CI, and finish current claim alignment. No new signer, paid operation, migration or recurring service.
 
 # P14/P15 and production release authorized, 18 October 2026

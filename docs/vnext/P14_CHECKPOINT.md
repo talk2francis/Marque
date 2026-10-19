@@ -1,3 +1,95 @@
+# P14/P15 production release completed, 2026-10-19T09:45:18.102462+00:00
+
+Live at https://marque.trade. Web release is `267b46d26582ce32a67787f66d71364a7db8dadd`; the tested web build source is
+`78d9b64b8b32bbf9f7784fe60d3575a3c561dbd4` on slot 3200. The owner explicitly authorized repairs, push and
+production deployment. Main and phase2 contain the release; later documentation
+commits do not change this tested web artifact. Previous release `97ef4c7` is
+retained for rollback. Feature scope remains AMBER for the documented limits;
+production activation and acceptance have passed.
+
+Final local validation: 929 tests in 102 files, zero skips, including 65 isolated
+PostgreSQL cases and three public read-only RPC cases. Fifty-seven focused checks cover
+catalog/capability state, quotes, freshness, concurrency and reference errors.
+Web types, build, lint, copy and packaging passed on `78d9b64b8b32bbf9f7784fe60d3575a3c561dbd4`;
+The release uses this exact tested web build source.
+All tracked hashes matched their respective frozen source manifests. Exact-source [CI](https://github.com/talk2francis/Marque/actions/runs/39211372994) passed.
+Five freshness regressions and controlled stale/error browser cases verify that
+old server-rendered counts are refreshed rather than presented as a new zero.
+The final candidate ran against current production data through verified
+read-only database sessions: 42 page/theme/width states (390, 768, 1440),
+30 catalog AXE states, 13 complete-body HTTP samples, 11 proxy protection cases,
+MCS code provenance and private reversal passed. Contact sheets were inspected.
+Nine additional Node regressions verify that the deploy browser allows only valid eth_call reads at the existing exact public BSC RPC; transaction/signature methods, mixed batches and other endpoints stay blocked. The fourth stage passed every page check but its old guard misclassified RPC POST reads as writes; this tooling-only repair changes no web build input.
+Earlier source `07307a5` separately passed the 102-state broader UI matrix,
+four synthetic wallet cases and 40 custom DOM-audit states; these are dated
+separate scopes, not 102 new-source or 40 AXE cases.
+
+Actual production acceptance passed 36 read-only browser states at 390/1440
+in day/night, including profile, historical job, receipt, builder wallet modal,
+quest, Judge and status. Thirteen complete-body HTTP samples, eight catalog
+queries (including the default full page and all four categories), 11 proxy
+cases and the 42-file MCS source manifest regenerated for the additive database index passed. No wallet signature or
+paid task was performed. Public screenshots and interactions were inspected.
+
+Prepared checksums cover 1022 files. All 986 immutable
+release files matched; only generated HTML/RSC/metadata for positive-revalidation
+manifest routes, including on-demand dynamic routes whose positive literal
+revalidate value is verified against the frozen tested source, may change. Actual ISR hash
+changes are retained in private evidence. The private checker originally
+missed on-demand categories absent from the static route list; that negative
+verification and the corrected source-backed exception list are retained. Prior public static files are an
+explicit compatibility layer, not source-code replacements. The real staged
+cached-client asset verifier passed before Caddy switched traffic.
+
+The four authorized readers (conformance, probe, quotes, indexer) were activated
+and PM2 state saved. Conformance startup defers its existing schedules and keeps
+unconsented outside tasks quarantined. Graceful stop was observed for
+3 of four prior processes; individual timing and stop outcomes are recorded
+in the handoff. Keeper, the other five sellers, other products, shared service PIDs and global
+Caddy configuration match the post-reboot baseline. The trusted Marque upstream
+mirror is preserved. Both slot cluster instances match saved PM2 state; the
+recovered Marquecodex session and linger remain present. Owned preview ports
+are released. All 26 pre-existing untracked media/evidence paths are preserved;
+no new untracked release asset is being published.
+
+The first four production candidates were rejected before cutover, with live
+traffic kept on the recovered baseline. Repairs scope service aggregation to
+complete owner groups, batch exact-service canonical capability reads and run
+independent catalog/quote/track observations together. Latest quote IDs are selected before loading historical raw payloads; scheduled probe reads are narrowed to complete selected owner groups. Category selection is scoped before sorting; a single read-only statement snapshot returned identical complete rows before and after for both catalog and seller projections. Two fresh two-worker clusters passed current-data, read-only preflight on separate runtime copies of the tested web build; the original canonical prepared checksums remain unchanged. Release/build input equivalence is checked for the tooling-only source commit. Existing SQL, HTTP,
+freshness, signing and provenance boundaries were not widened. Read-only
+production observations of 10.684 seconds before read overlap and 4.233 seconds
+after it are separate dated samples, not a percentile or frozen-dataset proof.
+
+The original interruption was an orderly host power-off after an ACPI power-key
+event; its initiator is UNKNOWN. A stale PM2 dump then restored the live slot
+stopped, producing HTTP 502. Recovery restored it; deployment now saves both
+available slots before cutover and saves retirement state afterwards.
+
+A subsequent owner-requested first-party check recorded four fresh MCS passes
+(Bound, Lattice, Sluicegate and Keel) after activation. Tidemark and Redcell
+were skipped because they declare no compatible published standard; neither
+has been certified or given a synthetic pass. Historical 502 and failed-task
+observations remain retained. Only the first-party free interfaces were asked;
+no outside provider task or paid job was created. Tidemark alone was restarted
+with SIGTERM after its executor was idle to activate endpoint-error redaction
+across its free and paid answer paths. Its configured archive provider remains
+unavailable; the tested public alternatives did not serve the required state.
+Its realised-yield reader is still unavailable pending a working archive source.
+
+Only additive migration 0020 was required. The matching latest-probe index was
+created concurrently and registered through the existing migrator; all twenty
+prior migration rows and hashes were retained unchanged. No column or observation
+was altered or deleted. MCS version 1.0.0, tolerance revision 1 and all grading
+arithmetic are unchanged; the source manifest reflects the schema index.
+No dependency or SDK update, new paid provider, new wallet authority,
+mainnet/testnet transaction or observation deletion was required. No new organic
+pilot, independent people/funding, payable HTTP seller, native action session or
+receipt-linked commercial-quality outcome is claimed. Residual P2 conditions,
+backup evidence, claim boundaries and revival triggers remain in the linked
+risk register and handoff. P15 is handed over; no hidden follow-on work is queued.
+
+---
+
 # P14 security and release checkpoint, 18 October 2026
 
 Status: AMBER. Release acceptance and exact activation are recorded below and in
@@ -5,7 +97,7 @@ Status: AMBER. Release acceptance and exact activation are recorded below and in
 independent security certification.
 
 Production baseline: `97ef4c73ea3717d1a059b649a35e8124d93bdb7f`.
-Final tested web source: `07307a5cb962622cc8b3aef98347451bbc15bd7d`.
+Initial broadly audited web source: `07307a5cb962622cc8b3aef98347451bbc15bd7d`.
 P14/P15 extend the existing marketplace, buyer/seller APIs, four categories,
 ERC-8183 projections, canonical SHA-256 receipts, deterministic MCS, SDK pins,
 Caddy router-state protection, loopback slots, PM2 and observation backups.
@@ -49,7 +141,7 @@ states with no task, signature or wallet write. Original failures are retained.
 
 ## Validation
 
-Final source: 896 tests in 96 files passed, zero skips, including 55 isolated
+Initial source: 896 tests in 96 files passed, zero skips, including 55 isolated
 PostgreSQL regressions and three public read-only RPC cases. Fourteen focused
 catalog checks passed. Final web types passed. Actual build, lint, copy,
 packaging, browser, audit, rollback and production results follow in the release
