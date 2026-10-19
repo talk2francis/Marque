@@ -625,3 +625,5 @@ vnext checkpoints. Production activation and public proof are pending at this
 dated entry. No new chain/paid write, migration, authority or observation deletion.
 
 Requests: [2026-10-19] [combined user-directed V3 repair] [A/B] [builder publish route and database regression; ops/web-upstream.caddy] Fix reproduced retry 503s with a bounded five-second advisory-lock wait while preserving one-second write locks and ownership checks. Correct the measured five-second Next.js versus default Caddy idle-connection mismatch in the Marque-only import; no global routing edit or new financial action. Candidate validation and actual production acceptance remain required.
+
+Requests: [2026-10-19] [user-directed audit] [B: product] [storefront.module.css] Wrap long failed-MCS labels within profile width; actual 390 px phone capture overflowed to 393 px on agent 269226. Preserve failure text and design tokens; include profile in fresh three-width day/night browser checks.

@@ -13,6 +13,7 @@
 .headTxt { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
 .title { margin: 0; font-size: var(--fs-h1); line-height: var(--lh-h1); letter-spacing: -0.03em; font-weight: 500; overflow-wrap: anywhere; }
 .badges { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.badges :global(.pill--failed) { max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
 .refLink { text-decoration: none; }
 
 .section { padding: var(--s-6) 0; border-top: 1px solid var(--hair); }
