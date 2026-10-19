@@ -81,10 +81,10 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
             <Statement as="h1" className={styles.introTitle}>{meta.label}</Statement>
             <p className={styles.introLede}>{meta.what}</p>
             <p className={styles.introSupply}>
-              <Chip tone={initial?.total == null || initial.total < 3 ? 'watch' : 'holds'}>
+              <Chip tone={initial?.total == null || (!untested && initial.total < 3) ? 'watch' : 'holds'}>
                 {initial?.total == null ? 'Escrow listing count unavailable' : `${initial.total} hireable escrow listings`}
               </Chip>
-              <span className={styles.introSupplyNote}>BSC 56 and 97. Local supply target: at least 3. Quotes expire; the list below refreshes as availability changes.</span>
+              <span className={styles.introSupplyNote}>BSC 56 and 97. {untested ? 'Additional category, outside the core supply target.' : 'Local supply target: at least 3.'} Quotes expire; the list below refreshes as availability changes.</span>
               {initial?.generatedAt ? <span className={styles.introSupplyNote}><ProvenanceChip provenance="MEASURED" /> Listing snapshot <time dateTime={initial.generatedAt}>{initial.generatedAt.replace('T', ' ').slice(0, 19)} UTC</time>.</span> : null}
             </p>
             {row && (

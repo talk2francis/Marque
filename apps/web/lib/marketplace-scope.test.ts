@@ -37,6 +37,21 @@ describe('ready selection before the broad catalog read', () => {
     expect(result.supply.every(category => category.hireable === 0)).toBe(true)
   })
 
+  it('uses renewed exact-agent terms even when the listing metadata is memoized', async () => {
+    const id = 'synthetic-renewal-boundary', expires = new Date(Date.now() + 600_000).toISOString()
+    const first = { agentId: id, serviceId: 988, state: 'hireable', priceRaw: '1',
+      token: { address: '0x0000000000000000000000000000000000000001', symbol: 'U', decimals: 18 },
+      chainId: 56, quoteExpiresAt: expires }
+    mocks.states.mockReset().mockResolvedValueOnce(new Map([[988, first]]))
+      .mockResolvedValueOnce(new Map([[988, { ...first, priceRaw: '2' }]]))
+    mocks.read.mockReset().mockResolvedValueOnce([{ id, owner_address: id }])
+      .mockResolvedValueOnce([{ agent_id: id, owner_address: id, category: 'yield', name: 'Synthetic renewal fixture' }])
+    mocks.tracks.mockResolvedValue(null); mocks.capabilities.mockResolvedValue(new Map())
+    expect((await marketplaceAgents({ tab: 'ready' })).rows[0]?.commerce.priceRaw).toBe('1')
+    expect((await marketplaceAgents({ tab: 'ready' })).rows[0]?.commerce.priceRaw).toBe('2')
+    expect(mocks.read).toHaveBeenCalledTimes(2) // metadata is still reused; no new catalog scan
+  })
+
   it('retains the full null-owner partition instead of narrowing unknown ownership', async () => {
     mocks.states.mockResolvedValue(new Map()); mocks.read.mockReset()
     mocks.read.mockResolvedValueOnce([{ id: 'synthetic-null', owner_address: null }]).mockRejectedValueOnce(Error('captured source query'))

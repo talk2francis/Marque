@@ -29,6 +29,7 @@
 - `/api/v1/phase2/coverage` was publicly linked but returned 404.
 - Third-party quotes observed with 15-minute validity were refreshed on a 30-minute success cadence, creating availability gaps. The scheduler now brings refresh forward using original expiry while retaining failure backoff, poll floors, limits and safe endpoint handling. It never extends provider terms.
 - Homepage coverage came from an independent stale projection rather than the same complete matching listing population as the marketplace. Counts are now aggregated before pagination from the same observation as its headline. Expiry filtering uses a fixed observation time, avoiding Array.map passing its row index as a timestamp.
+- Ready listing metadata could retain an old quote after provider renewal. Ready reads now overlay their already-read current exact-agent commercial terms without another catalog scan, with a separate internal quote observation timestamp. Metadata freshness retains its original timestamp.
 - Category headers displayed task-compatible third-party supplier groups, which were easy to mistake for escrow listing counts. Both scopes are now named separately, with the local three-listing target retained.
 - Identity mismatch and missing-service hypotheses were tested against the captured ready set and were not found. No speculative identity relaxation was added.
 

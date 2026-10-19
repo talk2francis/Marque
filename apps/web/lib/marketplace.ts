@@ -360,6 +360,20 @@ async function scopedBase(ids: readonly string[], states?: Awaited<ReturnType<ty
   try { return await promise } finally { if (scopeInflight === current) scopeInflight = null }
 }
 
+/** The same exact-agent service selection is used for materialization and quote renewal. */
+function bestCommerceByAgent(commerce: Awaited<ReturnType<typeof commercialStates>>) {
+  // Best commercial state per agent across its services.
+  const RANK: Record<CommercialState, number> = { settleable: 0, hireable: 1, quoteable: 2, preview_only: 3, unavailable: 4 }
+  const bestByAgent = new Map<string, ReturnType<typeof commerce.get>>()
+  for (const c of commerce.values()) {
+    const prev = bestByAgent.get(c.agentId)
+    if (!prev || RANK[c.state as CommercialState] < RANK[prev.state as CommercialState]
+      || (c.state === prev.state && c.signed === true && prev.signed !== true)) bestByAgent.set(c.agentId, c)
+  }
+
+  return bestByAgent
+}
+
 async function queryAgents(owners?: readonly string[], states?: Awaited<ReturnType<typeof commercialStates>>): Promise<MarketRow[]> {
   const fp = new Set(firstPartyIds())
   // Independent observations share the request deadline; do not add their
@@ -372,14 +386,7 @@ async function queryAgents(owners?: readonly string[], states?: Awaited<ReturnTy
 
   const list = (((rows as unknown as { rows?: unknown[] }).rows ?? (rows as unknown as unknown[])) as Array<Record<string, unknown>>)
 
-  // Best commercial state per agent across its services.
-  const RANK: Record<CommercialState, number> = { settleable: 0, hireable: 1, quoteable: 2, preview_only: 3, unavailable: 4 }
-  const bestByAgent = new Map<string, ReturnType<typeof commerce.get>>()
-  for (const c of commerce.values()) {
-    const prev = bestByAgent.get(c.agentId)
-    if (!prev || RANK[c.state as CommercialState] < RANK[prev.state as CommercialState]
-      || (c.state === prev.state && c.signed === true && prev.signed !== true)) bestByAgent.set(c.agentId, c)
-  }
+  const bestByAgent = bestCommerceByAgent(commerce)
 
   const thirdParty: Array<Omit<MarketRow, 'track'>> = list.map((r) => {
     const live = r['any_live'] === true
@@ -524,7 +531,7 @@ function otherLast(rows: MarketRow[]): MarketRow[] {
   return [...rows.filter((r) => !isOther(r)), ...rows.filter(isOther)]
 }
 
-export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: MarketRow[]; generatedAt: string; total: number; offset: number; hasMore: boolean; supply: MarketSupplyCategory[] }> {
+export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: MarketRow[]; generatedAt: string; total: number; offset: number; hasMore: boolean; supply: MarketSupplyCategory[]; quoteObservedAt: string | null }> {
   const hireable = q.tab === 'ready' || q.hireableOnly === true
   const states = hireable ? await commercialStates() : undefined
   const readyIds = states ? [...new Set([...states.values()].filter(c => c.state === 'hireable' || c.state === 'settleable').map(c => c.agentId))] : null
@@ -536,7 +543,14 @@ export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: Ma
   const base = ids ? await scopedBase(ids, states) : { rows: await marketplaceBase(), at: baseMemo?.at ?? Date.now() }
   // Clone: the base is memoised and the sort below is in place.
   const observedAt = Date.now()
-  let all = base.rows.map(row => expireMarketQuote(row, observedAt))
+  const freshCommerce = states ? bestCommerceByAgent(states) : null
+  let all = base.rows.map(row => {
+    // Ready reads already loaded current exact-agent terms. Reuse metadata,
+    // but do not hide a renewed quote behind the three-minute catalog memo.
+    const current = freshCommerce ? { ...row, ...priceAndCommerce(freshCommerce.get(row.agentId),
+      row.liveness === 'live', row.priceProvenance === 'CLAIMED' ? row.price : null) } : row
+    return expireMarketQuote(current, observedAt)
+  })
   if (q.agentIds) all = selectedAgentRows(all, q.agentIds)
 
   // Filters over the memoised qualifying set.
@@ -636,6 +650,6 @@ export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: Ma
       hireBlockedReason,
     } satisfies MarketRow
   })
-  return { rows, total: all.length, offset, supply,
+  return { rows, total: all.length, offset, supply, quoteObservedAt: states ? new Date(observedAt).toISOString() : null,
     hasMore: offset + limit < all.length, generatedAt: new Date(base.at).toISOString() }
 }

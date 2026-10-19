@@ -10,7 +10,7 @@ export async function GET(req: Request) {
   return served(`phase2:marketplace-coverage:v1:${chainId}`, 'coverage', async () => {
     const result = await marketplaceAgents({ tab: 'ready', network: chainId, limit: 1 })
     return {
-      chainId, measuredAt: result.generatedAt, provenance: 'MEASURED',
+      chainId, measuredAt: result.quoteObservedAt ?? result.generatedAt, provenance: 'MEASURED',
       countingUnit: 'deduplicated_marketplace_listing',
       operatorCounting: 'Recorded owner addresses; unknown owners count per identity. Independence is not verified.',
       totalHireable: result.total, categories: result.supply,

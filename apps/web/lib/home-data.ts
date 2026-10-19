@@ -101,7 +101,7 @@ export async function categoryTiles(ready: MarketRow[], supply: Awaited<ReturnTy
 
 /** Six hireable agents, mixing categories: best of each category first, then the next best. */
 export async function readyToHire(): Promise<{ all: MarketRow[]; picks: MarketRow[]; supply: Awaited<ReturnType<typeof marketplaceAgents>>['supply']; generatedAt: string; total: number }> {
-  const { rows, supply, generatedAt, total } = await marketplaceAgents({ tab: 'ready', network: 56, sort: 'best', limit: 60 })
+  const { rows, supply, generatedAt, quoteObservedAt, total } = await marketplaceAgents({ tab: 'ready', network: 56, sort: 'best', limit: 60 })
   const byCat = new Map<string, MarketRow[]>()
   for (const r of rows) {
     const k = r.category ?? 'other'
@@ -114,7 +114,7 @@ export async function readyToHire(): Promise<{ all: MarketRow[]; picks: MarketRo
       if (r && picks.length < 6) picks.push(r)
     }
   }
-  return { all: rows, picks, supply, generatedAt, total }
+  return { all: rows, picks, supply, generatedAt: quoteObservedAt ?? generatedAt, total }
 }
 
 export interface FunnelLine { registered: number | null; answering: number | null; hireable: number; warranted: number | null; measuredAt: string }
