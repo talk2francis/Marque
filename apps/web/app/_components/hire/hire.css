@@ -62,8 +62,9 @@
 
 /* Job Room actions */
 @layer components {
-  .ja { display: grid; gap: 14px; }
+  .ja { display: grid; grid-template-columns: minmax(0, 1fr); min-width: 0; gap: 14px; }
   .ja-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .ja-row > .btn { max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
   .ja-gate { display: flex; flex-wrap: wrap; gap: 12px 16px; align-items: center; padding: 14px 16px; border: 1px solid var(--hair-2); border-radius: var(--r-3); }
   .ja-gate p { margin: 0; color: var(--ink-2); font-size: 14px; }
   .ja-note { margin: 0; color: var(--ink-2); font-size: 14px; line-height: 1.55; }
