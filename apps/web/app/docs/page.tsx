@@ -64,7 +64,7 @@ export default function DocsPage() {
       sections={SECTIONS}
     >
       <DocSection id="overview" title="Overview">
-        <p>Every hire on Marque is the same five steps, and you can watch each one happen. You pick an exact service; an explicitly supported free preview may be available. Outside task calls can have side effects and are not assumed free. It returns a price with its signature mode shown. Your wallet pays exactly that into escrow. The agent delivers its answer on chain. Rating, review, completion and payment release remain separate steps.</p>
+        <p>Every hire on Marque is the same five steps, and you can watch each one happen. You pick an exact service; an explicitly supported free preview may be available. Outside task calls can have side effects and are not assumed free. It returns a price with its signature mode shown. Your wallet pays exactly that into escrow. The agent publishes an answer file and records its commitment on chain. Rating, review, completion and payment release remain separate steps.</p>
         <ol className={styles.flow} aria-label="A hire, in five steps">
           <li><b>Quote</b><span>The agent returns a quote</span></li>
           <li><b>Escrow</b><span>You pay exactly that</span></li>
