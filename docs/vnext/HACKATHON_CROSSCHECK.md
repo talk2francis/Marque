@@ -22,6 +22,7 @@ The current campaign ends 5 November 2026 at 12:00 UTC. Its advertised pool is m
 | Original entry rules | UNKNOWN, scoped | Original rules allow individuals or teams, one entry per team. Shortlisting is visible, but submission contents and one-entry compliance were not re-verified from organizer records. |
 | Live BSC deployment | PASS, scoped | `marque.trade` serves the marketplace and reports its release at `/api/health`. This establishes deployment, not every user journey or eligibility. |
 | TermiX marketplace-hired tasks, manual comparison and outputs | NOT ESTABLISHED | `/api/v1/ledger` on 19 October reports ADV-02 and ADV-04 complete, ADV-01 and ADV-03 incomplete. Three qualifying marketplace-hired benchmark tasks and their actual payment/output links have not been established. Historic direct engine replay is insufficient. The older Agent Advantage Report is a September record. |
+| TermiX scoring and trading record | NOT SELF-CERTIFIED | Service value and the comparison report each carry 30%; category/track record and marketplace quality each 20%. Any trading-performance claim still needs its measured window, outcomes and risk. No current win-rate or organizer score is established here. |
 | TermiX high-stakes category | PARTIAL | ADV-01 concerns security, but its current comparison is incomplete. A category label alone does not satisfy the task requirement. |
 | PancakeSwap benefit and execution evidence | PARTIAL | `/pancakeswap/proof` retains a dated mainnet LP rebalance and transaction links. Historical transactions do not establish the current native charter execution path or organizer acceptance. |
 | Altana integration, session limits, explorer execution and revocation | NOT ENTERED | No proven end-to-end Keystore/session integration or Altana-explorer execution evidence. Native action authority is disabled; a policy preview does not satisfy this track. |
@@ -46,10 +47,10 @@ Read the linked official rules for the exact six build criteria and all conditio
 | Build: declared-category execution | NOT ESTABLISHED | Current reference purchases deliver analysis. Native portfolio execution is disabled. An analysis-only agent cannot be represented as meeting an actual-execution criterion. |
 | Public repository; identity and chain visible | PASS for disclosed references, scoped | Public repo and `config/first-party.json` identify references. Participant builds still need their own visible identity/chain and correct ownership. |
 | Post-announcement listing and originality | UNKNOWN / conflict for older references | Several references were listed before October. Exact qualifying X-announcement time is not established. Re-registration, renaming or cosmetic clones cannot repair this eligibility problem. |
-| Age, jurisdiction and legal eligibility | UNKNOWN | No personal/legal eligibility facts were verified. |
+| Age, one-wallet limit, jurisdiction and legal eligibility | UNKNOWN | No personal/legal eligibility facts were verified. The organizer requires adulthood and one wallet per person; multiple wallets are not merely deduplicated. |
 | Team and contractor exclusions | APPLIES | Marketplace team members are excluded by the official rules. Team test activity remains visible and excluded locally; do not present it as eligible organic adoption. |
 | Common funding, controlled buyers, circular activity and multi-wallet participation | UNKNOWN beyond disclosed tests | Local team exclusions do not prove the absence of other common control or funding. No manufactured hires or wallet activity is authorized as a repair. |
-| Prize confirmation, delivery and claim conditions | ORGANIZER ONLY | Completion is not a guaranteed place. Organizer review, contact/claim timing and shipping restrictions apply. |
+| Prize confirmation, delivery and claim conditions | ORGANIZER ONLY | The first 100 places use the final qualifying on-chain timestamp and require review. Confirmed winners have 14 days to claim. Merchandise is nontransferable with no cash alternative; delivery details, shipping restrictions and winner-paid duties/taxes apply. No place is guaranteed. |
 
 ## What needs to happen
 

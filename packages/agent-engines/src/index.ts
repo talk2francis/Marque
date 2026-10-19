@@ -29,3 +29,5 @@ export const ENGINES: Record<string, Engine> = {
 export function engineFor(id: string): Engine | null {
   return ENGINES[id] ?? null
 }
+
+export { tidemarkHistoryReadiness, readinessGuard } from './seller-readiness.js'

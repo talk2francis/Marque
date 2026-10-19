@@ -193,6 +193,8 @@ const defaultPendingJobs: PendingJobsFetcher = async (network) => {
 export interface SellerCoreOpts {
   runWork: RunWork;
   generator: string;
+  /** Dependency check before issuing new terms; never gates existing funded jobs. */
+  beforeQuote?: () => Promise<void>;
   network?: string | null;
   /** Whether the project configured the ERC-8183 commerce rail. */
   commerceSkills?: boolean;
@@ -220,6 +222,7 @@ export class SellerCore {
   protected readonly network: string;
   protected readonly signing: SigningApi;
   private readonly commerceSkills: boolean;
+  private readonly beforeQuote: (() => Promise<void>) | undefined;
   private readonly pendingJobs: PendingJobsFetcher;
   // Background delivery bookkeeping (see notifyFunded / isBusy):
   //  tasks    — live background promises (busy-status source).
@@ -231,6 +234,7 @@ export class SellerCore {
 
   constructor(opts: SellerCoreOpts) {
     this.runWork = opts.runWork;
+    this.beforeQuote = opts.beforeQuote;
     this.generator = opts.generator;
     this.network = opts.network ?? "bsc-testnet";
     this.signing = opts.signing ?? defaultSigning;
@@ -278,6 +282,7 @@ export class SellerCore {
       }
       request = picked;
     }
+    await this.beforeQuote?.();
     const clamped = this.signing.clampPrice(this.signing.listPrice());
     return this.signing.signQuote(request as Record<string, unknown>, clamped);
   }

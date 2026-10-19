@@ -98,6 +98,7 @@ import {
   a2aResult,
   engineFor,
   engineRunWork,
+  tidemarkHistoryReadiness,
   marqueCard,
   skillEnvelopeFromA2ABody,
   textFromA2ABody,
@@ -451,6 +452,7 @@ async function main(): Promise<void> {
     generator: generatorTag(),
     network: defaultNetwork(),
     commerceSkills: rails.erc8183,
+    beforeQuote: tidemarkHistoryReadiness,
   });
   const agentCard = buildAgentCard({ commerceSkills: rails.erc8183 });
   const seller = await B402Seller.create({
@@ -533,6 +535,7 @@ async function main(): Promise<void> {
       category: MARQUE_ENGINE.meta.category,
       standard: MARQUE_ENGINE.meta.testId,
       busy: executor.isBusy(),
+      quoteReadiness: tidemarkHistoryReadiness.status(),
       at: new Date().toISOString(),
     });
   });

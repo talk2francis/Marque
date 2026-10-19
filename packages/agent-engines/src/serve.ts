@@ -185,11 +185,18 @@ const UPSTREAM_FAILURE = /did not answer within|could not read|fetch failed|HTTP
 export function engineRunWork(engine: Engine, opts: { attempts?: number; deadlineMs?: number; backoffMs?: number } = {}) {
   const attempts = opts.attempts ?? 3
   return async (prompt: string): Promise<string> => {
-    let answer = await engine.run(prompt, { deadlineMs: opts.deadlineMs ?? 20_000 })
-    for (let i = 1; i < attempts && typeof answer.error === 'string' && UPSTREAM_FAILURE.test(answer.error); i++) {
-      await new Promise((r) => setTimeout(r, (opts.backoffMs ?? 2_000) * i))
-      answer = await engine.run(prompt, { deadlineMs: opts.deadlineMs ?? 20_000 })
+    try {
+      let answer = await engine.run(prompt, { deadlineMs: opts.deadlineMs ?? 20_000 })
+      for (let i = 1; i < attempts && typeof answer.error === 'string' && UPSTREAM_FAILURE.test(answer.error); i++) {
+        await new Promise((r) => setTimeout(r, (opts.backoffMs ?? 2_000) * i))
+        answer = await engine.run(prompt, { deadlineMs: opts.deadlineMs ?? 20_000 })
+      }
+      if (answer.error !== undefined && answer.error !== null) throw Error('engine returned an error')
+      return JSON.stringify(answer)
+    } catch {
+      // The caller must not submit an error object as a successful deliverable.
+      // Keep upstream credentials out of the error exposed by every paid rail.
+      throw Error('The agent could not produce a deliverable. No result was submitted.')
     }
-    return JSON.stringify(answer)
   }
 }

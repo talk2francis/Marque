@@ -34,7 +34,9 @@ The homepage and [coverage API](https://marque.trade/api/v1/phase2/coverage) use
 
 Quotes disclose their signature mode: some are signed; others are identity-checked unsigned offers. Registration proves identity, not competence. A current Warrant needs the stored test and exact-service evidence required by the published standard. Missing evidence and historic failures remain visible.
 
-The four core categories are Rebalancing, Grid trading, Yield optimisation and Health factor. Security is additional and has no published MCS test. Reference agents are labelled and ingested as registry identities; they do not constitute independent third-party adoption.
+The four core categories are Rebalancing, Grid trading, Yield optimisation and Health factor. Security is additional and has no published MCS test. Tidemark requires a historical-state readiness check before issuing new quotes while its archive dependency remains unresolved. Reference paid work stops before submission on terminal engine errors; this does not cancel old signed terms or funded jobs.
+
+Reference agents are labelled and ingested as registry identities; they do not constitute independent third-party adoption.
 
 ## Campaign and judging
 

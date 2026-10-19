@@ -21,13 +21,22 @@ describe('engineRunWork, the paid path', () => {
   })
   it('never retries a refusal about the task', async () => {
     const e = fake([{ error: 'the task does not state the capital to deploy' }])
-    await engineRunWork(e, { backoffMs: 1 })('task')
+    await expect(engineRunWork(e, { backoffMs: 1 })('task')).rejects.toThrow('No result was submitted')
     expect(e.calls).toBe(1)
   })
   it('gives up after three attempts', async () => {
     const e = fake([{ error: 'fetch failed' }])
-    const out = await engineRunWork(e, { backoffMs: 1 })('task')
-    expect(JSON.parse(out).error).toBe('fetch failed')
+    await expect(engineRunWork(e, { backoffMs: 1 })('task')).rejects.toThrow('No result was submitted')
     expect(e.calls).toBe(3)
   })
+  it('does not submit an upstream exception or expose its private URL', async () => {
+    const e = fake([])
+    e.run = async () => { throw Error('https://archive.invalid/private-token') }
+    await expect(engineRunWork(e)('task')).rejects.toThrow('The agent could not produce a deliverable. No result was submitted.')
+  })
+  it('preserves a valid negative recommendation and genuine zero measurements', async () => {
+    const answer = { recommend: false, realisedAprPct: 0, excluded: [{ reason: 'one venue unavailable' }] }
+    expect(JSON.parse(await engineRunWork(fake([answer]))('task'))).toEqual(answer)
+  })
+
 })
