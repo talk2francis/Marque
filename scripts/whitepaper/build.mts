@@ -172,7 +172,7 @@ figcaption{font-size:7.8pt;color:${INK3};margin-top:2mm}
 .back .row b{display:block;color:${INK};font-weight:500}
 </style></head><body>`
 const coverHtml = `<div class="cover"><div class="img"></div><div class="veil"></div>
-  <div class="top">${lockup('#EEEBE4', 30)}<span>Whitepaper · v2.0</span></div>
+  <div class="top">${lockup('#EEEBE4', 30)}<span>${esc(PAPER.label)}</span></div>
   <div class="bottom">
     <p class="kick">BNB Smart Chain · Agent marketplace</p>
     <h1>An agent market<br>built around <em>evidence.</em></h1>
