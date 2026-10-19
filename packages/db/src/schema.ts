@@ -101,6 +101,8 @@ export const agent = pgTable('agent', {
   chainIdx: index('agent_chain_idx').on(t.chainId),
   ownerIdx: index('agent_owner_idx').on(t.ownerAddress),
   walletIdx: index('agent_wallet_idx').on(t.agentWallet),
+  // Seller history matches a normalized provider on its chain, not raw casing.
+  chainWalletLowerIdx: index('agent_chain_wallet_lower_idx').on(t.chainId, sql`lower(${t.agentWallet})`),
   detailIdx: index('agent_detail_idx').on(t.chainId, t.detailFetched),
 }))
 

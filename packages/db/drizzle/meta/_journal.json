@@ -148,6 +148,13 @@
       "when": 1792385673939,
       "tag": "0020_probe_service_agent_checked",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1792431069813,
+      "tag": "0021_agent_chain_wallet_lower",
+      "breakpoints": true
     }
   ]
 }
