@@ -417,6 +417,9 @@ Logged in `docs/DEVIATIONS.md` under "Phase 2". Index:
 
 ## Requests
 
+- [2026-10-19T23:21:07.117634+00:00] [A: commerce] [B: product/docs] `packages/commerce/src/supply.ts`, `docs/ARCHITECTURE.md`, `docs/DEVIATIONS.md`: record the measured current-probe discovery optimization and separate worker source from the unchanged deployed web artifact. No layout or design-token change.
+
+
 - [2026-10-19] [B: V3 audit] [A: reference seller maintenance] [agents/tidemark/src/sellerCore.ts, unifiedMain.ts; packages/agent-engines/src/serve.ts, seller-readiness.ts] Confirmed Tidemark data failure despite quote availability and terminal engine errors serialized as paid work. Check historical dependency before new Tidemark quotes; fail paid work before submission on terminal errors. Keep existing funded-job checks, signatures, expiry and financial rules. Targeted graceful seller activation under the user's bug-repair/deployment instruction; no new paid task or chain write during verification.
 
 - [2026-10-19] [B: user-requested V3 audit] [A: commerce and worker] [packages/commerce/src/supply.ts, quote-schedule.ts, apps/worker/src/quotes.ts, apps/web/app/api/v1/phase2/coverage] Repair quote refresh later than observed expiry; preserve terms, failure backoff, concurrency and read-only probe behavior. Restore the linked coverage endpoint using full marketplace listing counts. User authorized bug repair, push and deployment; no new financial actions or provider costs.

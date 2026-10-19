@@ -61,7 +61,7 @@ export async function sellerCandidates(scope?: { agentId: string; serviceId?: nu
   const fpIds = fp.map((a) => canonicalAgentId(a))
   const rows = await supplyRows(sql`
     with lp as (
-      select ps.service_id, ps.agent_id, p.manifest, p.executable_endpoint
+      select ps.service_id, ps.agent_id, p.manifest, p.executable_endpoint, p.liveness
       from probe_schedule ps join probe p on p.id = ps.last_probe_id
       ${scope ? sql`where ps.agent_id = ${scope.agentId} ${scope.serviceId == null ? sql`` : sql`and ps.service_id = ${scope.serviceId}`}` : sql``}
     ),
@@ -95,8 +95,9 @@ export async function sellerCandidates(scope?: { agentId: string; serviceId?: nu
       -- Any answering A2A agent classified into a hireable category gets a price
       -- check: some production sellers (plain quotes) do not list a negotiate skill.
       or (cat.category in ('yield', 'grid', 'rebalancing', 'health_factor', 'security')
-          and exists (select 1 from probe_schedule ps2 join probe p2 on p2.id = ps2.last_probe_id
-                      where ps2.service_id = lp.service_id and p2.liveness in ('live', 'unbound', 'bad_schema')))
+          -- probe_schedule has one row per service. lp already selected that
+          -- row's current probe; repeating that schedule/probe lookup can time out.
+          and lp.liveness in ('live', 'unbound', 'bad_schema'))
       or exists (
         select 1 from jsonb_array_elements(case when jsonb_typeof(lp.manifest->'skills') = 'array' then lp.manifest->'skills' else '[]'::jsonb end) x
         where x->>'id' in ('negotiate', 'notify_funded') or (x->>'id') ilike '%8183%' or (x->>'name') ilike '%erc-8183%'
