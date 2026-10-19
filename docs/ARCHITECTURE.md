@@ -309,3 +309,10 @@ Catalog clients reuse a matching server-rendered first page only inside its
 times require an observational API read. Pending or failed reads do not retain
 a stale numeric count. Relative measurement age starts after hydration and
 updates locally every 30 seconds; this clock adds no network polling.
+
+Owner-scoped catalog reads also restrict scheduled-probe lookup to services of
+the same complete owner groups before loading probe rows. Unknown ownership
+retains the original complete path. Commerce reads select latest quote IDs in
+a materialized CTE before loading payload fields; service, creation time and ID
+ordering stay identical, including latest failures and raw expiry observations.
+Neither query drops history, changes freshness, nor adds an index or migration.

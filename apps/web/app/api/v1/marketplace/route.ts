@@ -62,7 +62,10 @@ export async function GET(req: NextRequest) {
       return NextResponse.json(body, { headers: { ...headers, 'Cache-Control': body.cacheMaxAgeSeconds ? `public, max-age=${body.cacheMaxAgeSeconds}` : 'no-store', Link: '</api/v1/openapi.json>; rel="describedby"' } })
     }
     return NextResponse.json({ chainId: 56, generatedAt, provenance: 'MEASURED', count: rows.length, total, offset, hasMore, agents: rows }, { headers })
-  } catch {
+  } catch (error) {
+    // Classify failures for operators without logging query values or credentials.
+    console.warn('[marketplace]', error instanceof Error && error.message === 'Check timed out'
+      ? 'request_deadline' : error instanceof TypeError ? 'type_error' : 'read_failure')
     return NextResponse.json(
       { error: 'marketplace_unavailable', detail: 'The catalog could not be read just now. Retry after a short pause.' },
       { status: 503, headers: baseHeaders },

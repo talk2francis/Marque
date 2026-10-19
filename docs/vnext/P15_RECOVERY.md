@@ -107,3 +107,18 @@ times, clears numeric counts while reading, and updates measurement age locally.
 Hydration no longer preserves a server-rendered "just now" label indefinitely.
 No quote is renewed and no query, authority or statement bound is widened.
 Controlled stale/error checks and the current-data browser matrix gate release.
+
+The third staged release, 63122ee, was also rejected before cutover on the
+default catalog. A private two-worker reproduction isolated catalog reads near
+eight seconds, historical quote payload reads near three seconds and concurrent
+track refresh work. Null ownership was ruled out for the classified sample
+(1,212 identities, zero null owners); Redis connectivity and stored projection
+metadata were healthy. No cache was flushed and no statement limit was raised.
+
+Two narrower read-only plans took 1.643 seconds for the same complete-owner
+service scope and 0.512 seconds for latest quote payload selection. The latter
+selects IDs before reading large raw fields; newest failed quotes still win.
+A private instrumented two-worker prototype returned the two catalog requests
+in 7.792 and 6.415 seconds. These are separate dated samples, not frozen-dataset
+or percentile claims. Existing catalog result parity and new real PostgreSQL
+quote projection/tie/failure/scope cases gate the actual source repair.

@@ -242,20 +242,28 @@ export interface ServiceCommerce {
   signatureEvidence: 'provider_signed' | 'identity_matched_unsigned' | 'unknown'
 }
 
-/**
- * The commercial state of every seller service, from the newest quote (probe or user)
- * and indexed job history. `callableServiceIds` marks services with a fresh live probe,
- * for the preview_only state.
- */
+/** Select the newest observation before reading large historical quote payloads. */
+export function latestCommerceQuoteQuery(serviceId?: number) {
+  const scoped = serviceId !== undefined
+  return sql`
+    with latest_ids as materialized (
+      select distinct on (service_id) id
+      from commerce_quote where service_id is not null
+      ${scoped ? sql`and service_id = ${serviceId}` : sql``}
+      order by service_id, created_at desc, id desc
+    )
+    select q.service_id, q.agent_id, q.ok, q.failure, q.detail, q.chain_id, q.provider, q.price_raw, q.token,
+           q.token_symbol, q.token_decimals, q.created_at, q.quote_expires_at, q.negotiation_hash, q.provider_sig, q.signed,
+           q.raw->'quote_expires_at' as provider_expiry, q.raw#>'{response,quote_expires_at}' as response_expiry
+    from latest_ids l join commerce_quote q on q.id = l.id
+    order by q.service_id
+  `
+}
+
+/** Commercial state from each service's newest quote and indexed job history. */
 export async function commercialStates(serviceId?: number): Promise<Map<number, ServiceCommerce>> {
   const scoped = serviceId !== undefined
-  const quotes = await supplyRows(sql`
-    select distinct on (service_id) service_id, agent_id, ok, failure, detail, chain_id, provider, price_raw, token,
-           token_symbol, token_decimals, created_at, quote_expires_at, negotiation_hash, provider_sig, signed,
-           raw->'quote_expires_at' as provider_expiry, raw#>'{response,quote_expires_at}' as response_expiry
-    from commerce_quote where service_id is not null
-    ${scoped ? sql`and service_id = ${serviceId}` : sql``}
-    order by service_id, created_at desc, id desc`, scoped)
+  const quotes = await supplyRows(latestCommerceQuoteQuery(serviceId), scoped)
   const delivered = new Map<string, number>()
   const provider = quotes[0]?.['provider']
   const chainId = quotes[0]?.['chain_id']

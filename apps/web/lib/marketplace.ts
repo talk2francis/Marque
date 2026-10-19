@@ -189,6 +189,10 @@ export function marketplaceSourceQuery(owners?: readonly string[]) {
       select ps.service_id, ps.agent_id, p.liveness, p.latency_ms,
              p.failure_class, p.skills, p.checked_at, p.task_kinds, p.manifest, p.executable_endpoint
       from probe_schedule ps join probe p on p.id = ps.last_probe_id
+      ${owners ? sql`where ps.service_id in (
+        select ss.id from agent_service ss join agent scoped on scoped.id = ss.agent_id
+        where scoped.chain_id = 56 and scoped.owner_address in (${sql.join(owners.map(owner => sql`${owner}`), sql`, `)})
+      )` : sql``}
     ),
     svc as (
       select s.agent_id,
