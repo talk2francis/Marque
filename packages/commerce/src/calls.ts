@@ -77,7 +77,7 @@ export function fundCall(chainId: ChainId, jobId: bigint, price: bigint, priceLa
   const n = network(chainId)
   return { step: 'fund', chainId, to: n.commerce, abi: agenticCommerceAbi as unknown as Abi, functionName: 'fund', args: [jobId, price, '0x'],
     label: `Pay ${priceLabel} into escrow`,
-    detail: 'Your payment is held by BNB Chain\'s ERC-8183 escrow contract, not by Marque and not by the agent, until the work is delivered.' }
+    detail: 'Your payment is held by BNB Chain\'s ERC-8183 escrow contract under the job\'s delivery, review and settlement rules.' }
 }
 
 /** Cancel before paying: the SDK's cancelOpen is AgenticCommerce.reject while the job is Open. */

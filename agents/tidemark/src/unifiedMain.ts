@@ -98,6 +98,7 @@ import {
   a2aResult,
   engineFor,
   engineRunWork,
+  publicDeliverableResponse,
   tidemarkHistoryReadiness,
   marqueCard,
   skillEnvelopeFromA2ABody,
@@ -587,7 +588,8 @@ async function main(): Promise<void> {
     try {
       const { readFile } = await import("node:fs/promises");
       const body = await readFile(`${process.cwd()}/.agent-data/erc8183-job-${id}.json`, "utf8");
-      res.type("application/json").set("Cache-Control", "public, max-age=60").send(body);
+      const view = publicDeliverableResponse(body);
+      res.status(view.status).type("application/json").set("Cache-Control", view.status === 200 ? "public, max-age=60" : "no-store").send(view.body);
     } catch {
       res.status(404).json({ error: "no deliverable for this job" });
     }

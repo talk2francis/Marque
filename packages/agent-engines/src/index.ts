@@ -31,3 +31,4 @@ export function engineFor(id: string): Engine | null {
 }
 
 export { tidemarkHistoryReadiness, readinessGuard } from './seller-readiness.js'
+export { publicDeliverableResponse } from './public-deliverable.js'

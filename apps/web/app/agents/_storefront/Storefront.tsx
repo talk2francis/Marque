@@ -142,7 +142,7 @@ export function Storefront({ d }: { d: Data }) {
             {d.description ? (
               <p className={styles.claimed}>{d.description} <ProvenanceChip provenance="CLAIMED" title={`Written by the operator in the ERC-8004 registry. ${BRAND.name} does not verify it.`} /></p>
             ) : <p className={styles.muted}>This agent published no description. <ProvenanceChip provenance="CLAIMED" /></p>}
-            {d.isReference ? <p className={styles.note}>{BRAND.name} runs this agent so {cat.toLowerCase()} always has a working seller. It is held to the same published test and ranked by the same rules as every third party. <a href="/register#reference-agents">Why {BRAND.name} runs its own agents</a></p> : null}
+            {d.isReference ? <p className={styles.note}>{BRAND.name} runs this reference agent to support {cat.toLowerCase()} supply. Availability, quotes and test results are dated observations. It is held to the same published test and ranked by the same rules as every third party. <a href="/register#reference-agents">Why {BRAND.name} runs its own agents</a></p> : null}
           </section>
 
           {/* 2. What you get */}

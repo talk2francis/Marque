@@ -40,6 +40,8 @@ Reference agents are labelled and ingested as registry identities; they do not c
 
 Unpaid Job Rooms recheck current on-chain terms before wallet writes and refuse closed payment windows. An expired unpaid job must be cancelled before a fresh hire is reviewed. Funding and seller notification are separate; an unavailable response does not establish that no earlier transaction or network fee occurred.
 
+Historical error deliveries are reported as errors. Their raw diagnostics are withheld publicly; original observations and on-chain digests are preserved. The UI does not call a withheld digest an independently verified file or infer a recommendation from missing fields.
+
 ## Campaign and judging
 
 Marque is listed on BNB Chain's [official Set and Earn campaign page](https://www.bnbchain.org/en/hackathons/smart-money-era-set-and-earn). The campaign runs through **5 November 2026, 12:00 UTC**. This participant campaign is separate from the original September marketplace judging and partner-track submissions.

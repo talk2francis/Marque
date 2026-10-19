@@ -138,7 +138,7 @@ export default async function JobRoom({ params }: { params: Promise<{ chainId: s
               ) : (
                 <p className={styles.note}>No delivery was recorded for this job.</p>
               )}
-              {manifest ? (
+              {manifest?.withheld ? <p className={styles.note}>The original error response is preserved privately. Raw diagnostics are withheld to avoid exposing private provider details. The provider reports its original content hash as <code>{manifest.withheld.originalContentHash}</code>. The original bytes are unavailable here, so this page cannot independently verify that hash against the chain. Payment state above is separate from a usable result.</p> : manifest ? (
                 <Disclosure summary={<span className={styles.rawSum}>View the raw file {manifest.matches === true ? <span className={styles.ok}><Check aria-hidden="true" />hash matches the chain</span> : manifest.matches === false ? <span className={styles.bad}><X aria-hidden="true" />hash does not match</span> : null}</span>}>
                   <p className={styles.note}>keccak256 of this file is <code>{manifest.hash}</code>{onchainHash ? <>. The hash {agentName} recorded on chain in its delivery is <code>{onchainHash}</code>{manifest.matches ? ', the same.' : ', which differs.'}</> : '.'}</p>
                   <pre className={styles.raw}>{manifest.pretty}</pre>

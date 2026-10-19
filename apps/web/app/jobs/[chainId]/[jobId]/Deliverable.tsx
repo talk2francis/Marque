@@ -8,6 +8,7 @@ import styles from './job.module.css'
  * shown as it gave them; the raw file and its hash check sit below.
  */
 type Json = Record<string, unknown>
+const objects = (value: unknown): Json[] => Array.isArray(value) ? value.filter((x): x is Json => x !== null && typeof x === 'object' && !Array.isArray(x)) : []
 const n = (v: unknown): number | null => (typeof v === 'number' && Number.isFinite(v) ? v : typeof v === 'string' && v.trim() !== '' && Number.isFinite(Number(v)) ? Number(v) : null)
 const s = (v: unknown): string | null => (typeof v === 'string' && v ? v : null)
 const usd = (v: number | null, dp = 2) => (v === null ? 'not given' : `$${v.toLocaleString('en-US', { minimumFractionDigits: dp, maximumFractionDigits: dp })}`)
@@ -70,12 +71,12 @@ function HealthFactor({ c }: { c: Json }) {
 
 function Rebalance({ c }: { c: Json }) {
   const cur = n(c['currentTick']), lo = n(c['proposedTickLower']), hi = n(c['proposedTickUpper'])
-  const inRange = c['inRange'] === true
+  const inRange = typeof c['inRange'] === 'boolean' ? c['inRange'] : null
   return (
     <div className={styles.dBody}>
       <div className={styles.dHero}>
         <div><span className="t-label">Position</span><span className={styles.dBig}>#{s(c['tokenId']) ?? '?'}</span><span className={styles.dSub}>{s(c['pair']) ?? ''}{n(c['feeTier']) !== null ? ` · ${(n(c['feeTier'])! / 10000).toFixed(2)}% tier` : ''}</span></div>
-        <div><span className="t-label">Now</span><span className={styles.dBig} data-state={inRange ? 'holds' : 'breach'}>{inRange ? 'In range' : 'Out of range'}</span><span className={styles.dSub}>{pct(n(c['pctToNearestBound']))} to the nearest bound</span></div>
+        <div><span className="t-label">Now</span><span className={styles.dBig} data-state={inRange === null ? undefined : inRange ? 'holds' : 'breach'}>{inRange === null ? 'not given' : inRange ? 'In range' : 'Out of range'}</span><span className={styles.dSub}>{pct(n(c['pctToNearestBound']))} to the nearest bound</span></div>
       </div>
       {cur !== null && lo !== null && hi !== null ? (
         <MeasureRule label={`Current tick ${cur} against the proposed range ${lo} to ${hi}`} value={Math.max(lo, Math.min(hi, cur))} lower={lo} upper={hi}
@@ -93,15 +94,15 @@ function Rebalance({ c }: { c: Json }) {
 }
 
 function Yield({ c }: { c: Json }) {
-  const recommend = c['recommend'] === true
+  const recommend = typeof c['recommend'] === 'boolean' ? c['recommend'] : null
   const net = n(c['netAprPct']) ?? n(c['netRealisedAprPct'])
-  const ranking = Array.isArray(c['ranking']) ? (c['ranking'] as Json[]) : null
-  const sources = Array.isArray(c['aprSources']) ? (c['aprSources'] as Json[]) : null
+  const ranking = Array.isArray(c['ranking']) ? objects(c['ranking']) : null
+  const sources = Array.isArray(c['aprSources']) ? objects(c['aprSources']) : null
   const cost = (c['switchingCost'] ?? null) as Json | null
   return (
     <div className={styles.dBody}>
       <div className={styles.dHero}>
-        <div><span className="t-label">{recommend ? 'Recommended' : 'Recommendation'}</span><span className={styles.dBig}>{recommend ? s(c['venue']) ?? 'a venue' : 'Stay put'}</span>{!recommend && s(c['declineReason']) ? <span className={styles.dSub}>{s(c['declineReason'])}</span> : null}</div>
+        <div><span className="t-label">{recommend ? 'Recommended' : 'Recommendation'}</span><span className={styles.dBig}>{recommend === null ? 'Not given' : recommend ? s(c['venue']) ?? 'Venue not given' : 'Stay put'}</span>{recommend === false && s(c['declineReason']) ? <span className={styles.dSub}>{s(c['declineReason'])}</span> : null}</div>
         <div><span className="t-label">{ranking ? 'Net realised APR' : 'Net APR at your size'}</span><span className={styles.dBig} data-state="holds">{pct(net)}</span><span className={styles.dSub}>on {usd(n(c['sizeUsd']), 0)}</span></div>
       </div>
       {ranking ? (
@@ -123,13 +124,14 @@ function Yield({ c }: { c: Json }) {
 }
 
 function Grid({ c }: { c: Json }) {
-  const levels = Array.isArray(c['levels']) ? (c['levels'] as Json[]).map((l) => ({ p: n(l['price']), a: n(l['allocationUsd']) })).filter((l): l is { p: number; a: number } => l.p !== null && l.a !== null) : []
+  const levels = objects(c['levels']).map((l) => ({ p: n(l['price']), a: n(l['allocationUsd']) })).filter((l): l is { p: number; a: number } => l.p !== null && l.a !== null)
+  const count = Array.isArray(c['levels']) && levels.length === c['levels'].length ? levels.length : null
   const lo = n(c['bandLow']) ?? levels[0]?.p ?? null
   const hi = n(c['bandHigh']) ?? levels[levels.length - 1]?.p ?? null
   return (
     <div className={styles.dBody}>
       <div className={styles.dHero}>
-        <div><span className="t-label">Grid</span><span className={styles.dBig}>{levels.length} levels</span><span className={styles.dSub}>{s(c['spacingType']) ?? ''} spacing, {big(lo)} to {big(hi)}</span></div>
+        <div><span className="t-label">Grid</span><span className={styles.dBig}>{count === null ? 'Levels not given' : `${count} levels`}</span><span className={styles.dSub}>{s(c['spacingType']) ?? ''} spacing, {big(lo)} to {big(hi)}</span></div>
         <div><span className="t-label">Fee drag</span><span className={styles.dBig} data-state="watch">{pct(n(c['feeDragPct']))}</span><span className={styles.dSub}>{s(c['feeDragBasis']) ?? ''}</span></div>
       </div>
       {lo !== null && hi !== null && hi > lo ? (
@@ -150,6 +152,7 @@ function Grid({ c }: { c: Json }) {
 }
 
 export function DeliverableView({ category, content }: { category: string | null; content: Json }) {
+  if (content['error'] != null) return <div className={styles.dBody}><p className={styles.note}><strong>Agent reported an error</strong></p><p className={styles.note}>This response does not establish a usable category result. Payment and completion above are separate evidence. Provider diagnostics are omitted here.</p></div>
   if (category === 'health_factor' || 'healthFactor' in content) return <HealthFactor c={content} />
   if (category === 'rebalancing' || 'proposedTickLower' in content) return <Rebalance c={content} />
   if (category === 'grid' || 'levels' in content) return <Grid c={content} />
