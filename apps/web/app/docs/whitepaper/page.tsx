@@ -49,7 +49,7 @@ function BlockView({ b }: { b: Block }) {
       return <L className={b.ordered ? styles.ol : styles.ul}>{b.items.map((t, i) => <li key={i}>{t}</li>)}</L>
     }
     case 'table': return (
-      <figure className={styles.tableWrap}>
+      <figure className={styles.tableWrap} tabIndex={0} role="region" aria-label={b.caption ?? `${b.head.join(", ")} table`}>
         <table className={styles.table}>
           <thead><tr>{b.head.map((h) => <th key={h} scope="col">{h}</th>)}</tr></thead>
           <tbody>{b.rows.map((r, i) => <tr key={i}>{r.map((c, j) => <td key={j} className={b.mono?.includes(j) ? 'mono' : undefined}>{c}</td>)}</tr>)}</tbody>
