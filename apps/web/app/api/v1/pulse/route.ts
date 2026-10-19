@@ -32,7 +32,7 @@ async function compute(): Promise<Pulse> {
   const chainId = campaignChainId()
   const [idx, tiers] = await Promise.all([
     indexerStatus().catch(() => null),
-    tierFreshness().catch(() => null),
+    tierFreshness({ firstPartyOnly: true }).catch(() => null),
   ])
   const mine = idx?.find((c) => c.chainId === chainId) ?? null
   const lag = mine?.lagBlocks ?? null

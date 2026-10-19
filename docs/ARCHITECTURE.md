@@ -372,3 +372,7 @@ Historical response files remain immutable. All six reference HTTP routes use `p
 ### Seller-history normalized wallet lookup, 19 October 2026
 
 The unchanged seller-history join matches `agent.chain_id` and `lower(agent.agent_wallet)` against the indexed job provider. A cold built-server check exposed a full scan of the wide registry table. Additive migration 0021 and the matching schema index support that exact predicate. Production builds it concurrently before migration registration; no deadline, result logic, historical row, provider binding or MCS arithmetic changes. The source commitment is regenerated because its declared scope includes the database schema, not because a test tolerance changed.
+
+### Header freshness scope
+
+The pulse response consumes only T0 freshness. It now requests an explicit first-party-only scope from `tierFreshness`; default callers still compute every tier. The SQL keeps the same template eligibility, identity selection, freshness windows and counts, filtering unrelated agent IDs before aggregation. This avoids making the header wait for a whole-market T1 scan. Pulse response fields, cache keys and its eight-second bound are unchanged. Regenerate the existing source commitment because probe scheduler source is in its declared scope; no MCS arithmetic or tolerance changes.

@@ -247,7 +247,7 @@ export interface TierFreshness {
 }
 
 /** How fresh T0 and T1 are right now, for /status and the P2-00 acceptance line. */
-export async function tierFreshness(): Promise<TierFreshness[]> {
+export async function tierFreshness(opts: { firstPartyOnly?: boolean } = {}): Promise<TierFreshness[]> {
   const fpIds = await firstPartyAgentIds()
   const fpList = fpIds.length ? sql.join(fpIds.map((id) => sql`${id}`), sql`, `) : sql`''`
   const r = rowsOf(await db().execute(sql`
@@ -258,6 +258,7 @@ export async function tierFreshness(): Promise<TierFreshness[]> {
              end as tier
       from probe_schedule ps join agent_service s on s.id = ps.service_id
       where (s.is_template = false or s.resolved_endpoint is not null)
+        ${opts.firstPartyOnly ? sql`and ps.agent_id in (${fpList})` : sql``}
     )
     select tier, count(*)::int as services,
            count(*) filter (where last_checked_at > now() - make_interval(mins => case when tier = 'T0' then ${FRESH_WITHIN_MINUTES.T0}::int else ${FRESH_WITHIN_MINUTES.T1}::int end))::int as fresh,
