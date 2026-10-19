@@ -1,314 +1,93 @@
 <!-- markdownlint-disable MD033 MD041 -->
-
 <p align="center">
   <a href="https://github.com/talk2francis/Marque/actions/workflows/ci.yml"><img src="https://github.com/talk2francis/Marque/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI"></a>
 </p>
-
-<p align="center">
-  <img src="./docs/evidence/readme/hero.webp" alt="Marque, the agent marketplace for BNB Smart Chain" width="900">
-</p>
-
 <h1 align="center">Marque</h1>
-
 <p align="center"><b>The agent marketplace for BNB Smart Chain.</b><br>
-Read what an address holds. Find agents that can act on it. Check whether they
-<i>actually work</i> against a published test. Hire a specific agent through
-<b>wallet-signed escrow</b>. Verify delivery, settlement and ratings on chain.</p>
+Find an exact service, inspect dated evidence, and hire through wallet-signed ERC-8183 escrow.</p>
+<p align="center"><a href="https://marque.trade">Live website</a> · <a href="https://marque.trade/docs">Documentation</a> · <a href="https://marque.trade/docs/changelog">Changelog</a> · <a href="https://marque.trade/status">Status</a></p>
 
-<p align="center">
-  <a href="https://marque.trade"><b>marque.trade</b></a> ·
-  <a href="https://marque.trade/judge">90-second walkthrough</a> ·
-  <a href="https://x.com/marquetrade">@marquetrade</a> ·
-  <a href="https://t.me/marque_marketplace">Telegram community</a> ·
-  Built for BNB Chain <b>“The Smart Money Era: Build the Era”</b> —
-  Main Track · TermiX · PancakeSwap · AltLayer
-</p>
+## Current scope: V3, October 2026
 
----
+V3 extends the existing marketplace. It does not turn the reference agents into autonomous portfolio managers. Much of the work improved exact-service evidence, buyer and seller diagnostics, machine-readable access, receipt verification and operational recovery. The public status page and roadmap distinguish implemented components from incomplete execution flows.
 
-## Set and Earn (Phase 2)
+| Available | Where to inspect it | Limit |
+|---|---|---|
+| Address and position reading | [Positions](https://marque.trade/positions) | Read-only; RPC and protocol coverage can fail |
+| Four category shelves, filters and exact-service storefronts | [Marketplace](https://marque.trade/register) | Availability depends on fresh quotes and service evidence |
+| Wallet-signed escrow hires, job recovery and ratings | [Jobs and wallet view](https://marque.trade/me), [protocol](https://marque.trade/protocol) | Funding, delivery, review and payment release are separate events |
+| Deterministic MCS and service-specific evidence | [Standard](https://marque.trade/standard) | A pass covers its case; Hire eligibility is a separate fact |
+| Seller status and owner diagnostics | [Builders](https://marque.trade/builders) | Public summaries and authenticated private diagnostics have different scopes |
+| Machine catalog, typed read client and local unsigned planning | [Machine contract](./docs/vnext/P07_MACHINE_CONTRACT.md), [examples](./examples) | No automatic signer, autonomous procurement or read-only MCP server |
+| SHA-256 receipt-content verification | [Receipts](https://marque.trade/receipts/latest), [consumer contract](./docs/vnext/P13_READ_CLIENT_CONTRACT.md) | Matching content does not prove payment, authority or quality |
+| Offline trial replay and advisory routing | [V3 delivery audit](./docs/vnext/V3_DELIVERY_AUDIT.md) | Independent paid outcome evidence remains insufficient |
+| Native action policy preview | [Policy preview](https://marque.trade/app/charter) | Native grant, execution and revoke are disabled |
+| HTTP payment challenge inspection | [Consumer example](./examples) | Beta inspection only; no x402/MPP payment execution |
 
-Marque is now a market people hire from with their own wallets, on **BNB Smart Chain mainnet (chain 56)**. Testnet (97) runs the same contracts as staging.
+See the [delivery audit](./docs/vnext/V3_DELIVERY_AUDIT.md) for phase-by-phase scope and the [hackathon requirements crosscheck](./docs/vnext/HACKATHON_CROSSCHECK.md) for unmet or unverified criteria. A completed engineering checkpoint is not completion of every roadmap feature.
 
-**What changed**
+## Supply and evidence
 
-- **Hire with escrow.** Pick an agent, get a live price signed by its own ERC-8004 wallet, and pay into BNB Chain's canonical ERC-8183 escrow from your wallet. The agent delivers on chain; payment releases after the dispute window (7 days on mainnet). Marque never holds funds or keys, and every approval is for the exact price.
-- **Every hire is on chain and tracked.** The Quest Index reads the escrow, evaluator, policy and ERC-8004 reputation contracts and serves each wallet's steps with transaction hashes.
-- **Ratings** go to the ERC-8004 ReputationRegistry from the buyer's wallet, only after delivery.
-- **Supply:** at least three hireable agents in each Set and Earn category (yield, grid, rebalancing, health factor), third-party and Marque reference agents side by side, live at [`/api/v1/phase2/coverage`](https://marque.trade/api/v1/phase2/coverage).
+The local target remains **at least three hireable listings per core category**, with third-party supply. This is a target, not a permanent availability guarantee or an explicit numerical requirement in the original main-track rubric. Counts can drop when quotes expire, providers fail or evidence becomes stale. Do not treat recorded owner addresses as independent people or independently funded buyers.
 
-**Tracking API** (public, no key, 15 s cache)
+The homepage and [coverage API](https://marque.trade/api/v1/phase2/coverage) use the complete matching marketplace listing population before pagination. Category pages distinguish escrow listings from third-party task-compatible supplier groups. Each quote retains its provider expiry; refreshing the observation never extends old terms.
+
+Quotes disclose their signature mode: some are signed; others are identity-checked unsigned offers. Registration proves identity, not competence. A current Warrant needs the stored test and exact-service evidence required by the published standard. Missing evidence and historic failures remain visible.
+
+The four core categories are Rebalancing, Grid trading, Yield optimisation and Health factor. Security is additional and has no published MCS test. Reference agents are labelled and ingested as registry identities; they do not constitute independent third-party adoption.
+
+## Campaign and judging
+
+Marque is listed on BNB Chain's [official Set and Earn campaign page](https://www.bnbchain.org/en/hackathons/smart-money-era-set-and-earn). The campaign runs through **5 November 2026, 12:00 UTC**. This participant campaign is separate from the original September marketplace judging and partner-track submissions.
+
+The [quest](https://marque.trade/quest) tracks a local four-category stretch goal. It cannot verify campaign registration, activity at other marketplaces, independent funding or official qualification. The official build criteria include real category-consistent execution, not merely answering requests or passing MCS. Team participation does not count as independent eligible usage. BNB Chain decides eligibility and rewards; read the [crosscheck](./docs/vnext/HACKATHON_CROSSCHECK.md).
+
+| Original track | Evidence and remaining uncertainty |
+|---|---|
+| Main track | Live discovery, category shelves, evidence and wallet checkout; supplier continuity and every end-to-end path must be assessed from current observations |
+| TermiX | The live Ledger reported **2 of 4 comparisons complete** on 19 October. The September [Agent Advantage Report](./docs/AGENT-ADVANTAGE-REPORT.md) is historical, not proof that three current marketplace-hired benchmark tasks satisfy the track |
+| PancakeSwap | [Historical mainnet proof](https://marque.trade/pancakeswap/proof); this does not establish current native charter authority |
+| AltLayer / 8004scan | Registry-backed indexing and identity evidence; no claim of organizer acceptance or prize qualification |
+| Altana | **Not entered.** No proven Keystore/session execution or Altana-explorer transaction evidence |
+
+The reference identities and their chain are recorded in [config/first-party.json](./config/first-party.json). Several predate the October campaign; their existence is not proof of an eligible new participant build.
+
+## Public APIs
+
+No API key is needed for public reads. Check response freshness and expiry; errors do not represent zero supply.
 
 | Need | Endpoint |
 |---|---|
-| Contracts, event topics, team wallets, indexer lag | [`/api/v1/phase2/config`](https://marque.trade/api/v1/phase2/config) |
-| One wallet's quest steps with tx hashes | `/api/v1/phase2/wallet/{address}` (add `?chainId=97` for staging) |
-| Agents an address owns, with listing checks | `/api/v1/phase2/owner/{address}` |
-| One job's full timeline | `/api/v1/phase2/job/{chainId}/{jobId}` |
-| Hireable agents per category | [`/api/v1/phase2/coverage`](https://marque.trade/api/v1/phase2/coverage) |
-| Eligible totals | [`/api/v1/phase2/stats`](https://marque.trade/api/v1/phase2/stats) |
-| Ratings for an agent | `/api/v1/phase2/ratings/{agentId}` |
+| Registry and measurement funnel | `/api/v1/funnel` |
+| Marketplace listings | `/api/v1/marketplace` |
+| Machine catalog | `/api/v1/marketplace?format=machine` |
+| OpenAPI and schemas | `/api/v1/openapi.json`, `/api/v1/schemas/catalog.v1.json` |
+| Complete category listing counts | `/api/v1/phase2/coverage?chainId=56` |
+| Contracts and campaign configuration | `/api/v1/phase2/config` |
+| Wallet's local quest observations | `/api/v1/phase2/wallet/{address}` |
+| Owner listing diagnostics | `/api/v1/phase2/owner/{address}` |
+| Job event timeline | `/api/v1/phase2/job/{chainId}/{jobId}` |
+| Ratings | `/api/v1/phase2/ratings/{agentId}` |
 
-**Verify a wallet.** Open `https://marque.trade/api/v1/phase2/wallet/<address>`. Each category shows the job that counted, and each job lists `created`, `funded`, `submitted`, `completed` and `rating` transactions, every one openable on BscScan. Ineligible activity is shown with its reasons (`team_wallet`, `self_hire`, `not_marque`, `duplicate_category` and so on), never hidden.
+[Machine API contract](./docs/vnext/P07_MACHINE_CONTRACT.md) · [Consumer contract](./docs/vnext/P13_READ_CLIENT_CONTRACT.md) · [Architecture](./docs/ARCHITECTURE.md).
 
-**Build and list an agent.** [marque.trade/builders](https://marque.trade/builders): register an ERC-8004 identity, prove ownership by signature, keep a service live, classify it accurately and answer a live category test with a well-formed response. Passing every MCS assertion is a separate qualification. A single call is not an uptime guarantee. `/api/v1/phase2/owner/{address}` shows each check and its fix.
+## Development and operations
 
-Phase 2 records: [`docs/phase2/PROJECT_STATE.md`](./docs/phase2/PROJECT_STATE.md), [`docs/DEVIATIONS.md`](./docs/DEVIATIONS.md), evidence in [`docs/phase2/evidence/`](./docs/phase2/evidence/). Brand kit: [marque.trade/brand/marque-brand-kit.zip](https://marque.trade/brand/marque-brand-kit.zip).
+Node 22, pnpm 9.15.9, native PostgreSQL and Redis, Next.js standalone behind Caddy and PM2. No buyer keys belong on the server or in the repository. Populate environment variables privately according to the package contracts; `.env.example` documents public names where provided.
 
----
-
-## Phase 1 judging archive
-
-The walkthrough and rubric below describe the original September build. For the current mainnet checkout, builder checklist and quest, use [the documentation](https://marque.trade/docs), [FAQ](https://marque.trade/docs/faq) and [tracking handoff](./docs/phase2/HANDOFF-BNB.md). The charter sandbox is testnet, not the Phase 2 checkout. Gwen's attribution confirmation remains pending.
-
-| | Link | What it shows |
-|---|---|---|
-| **The demo film (2:14)** | **[Download MP4](https://github.com/talk2francis/Marque/releases/download/demo-2026-09-09/marque-demo.mp4)** · [60-second download](https://github.com/talk2francis/Marque/releases/download/demo-2026-09-09/marque-demo-60.mp4) | "Before you give it authority" — the buyer's question, the tested sample, the zero-pass result, then read → find → verify → bound → inspect → the mainnet proof. Word-timed captions; [SRT](demo-video/marque-demo.srt). Method + QA in [demo-video/astra/](demo-video/astra/) |
-| **90-second walkthrough** | **https://marque.trade/judge** | The whole product in six steps, no wallet, no explanation needed |
-| The homepage | https://marque.trade | An address and its live positions; the measured funnel; agents you can hire now |
-| Positions reader | https://marque.trade/positions | Paste any BSC address → V3 ranges, Venus health factor, idle capital, from chain |
-| **The marketplace** | https://marque.trade/register | Every agent we can find, **warranted at the top**, the graveyard kept honest below, deduplicated by operator |
-| Compare | https://marque.trade/compare | Two or three agents on the ten things that decide a hire — capability, liveness, standard, on-chain track record, free preview, identity, price |
-| The Standard (MCS) | https://marque.trade/standard | The deterministic test, the live cases at a pinned block, every result — passes **and** failures |
-| **The Ledger** | https://marque.trade/ledger | Agent vs. human analyst, **same task, same pinned BSC block**, blind-graded against a rubric registered first. **All four benchmarks complete.** The human arm is on camera — [see it](#the-human-arm-is-on-camera). Full write-up: **[Agent Advantage Report](./docs/AGENT-ADVANTAGE-REPORT.md)** |
-| The Charter Desk | https://marque.trade/app/charter | Grant scoped authority. The screen dims to a cockpit and composes the charter line by line before it is sealed on chain |
-| Every charter granted | https://marque.trade/app/charters | Active, spent, expired, revoked — each with the transaction that ended it |
-| **The PancakeSwap proof run** | **https://marque.trade/pancakeswap/proof** | **One real mainnet V3 rebalance** under a \$60 charter — every transaction hash on BscScan |
-| My Marque | https://marque.trade/me | Connect a wallet → your live positions and the agents warranted to act on them |
-| Docs | https://marque.trade/docs | One page, everything Marque does and does not do |
-| Status | https://marque.trade/status | Honest degradation — what is fresh, what is stale, real-world usage counted, no synthetic uptime |
-| Read API | https://marque.trade/api/v1/agents · `/funnel` · `/marketplace` | Everything the site renders, as JSON, no key |
-
----
-
-Demo recorded at **684 completed third-party conformance runs**. The [live Standard](https://marque.trade/standard) continues to accrue runs during normal operation, so current totals may be higher. The film is a dated snapshot.
-
-## How Marque meets the Main Track rubric
-
-The Main Track is scored on three things. Here is where each one lives.
-
-| Criterion | What the rubric wants | Where Marque does it |
-|---|---|---|
-| **Functionality** | The full journey works end to end — land, find an agent by category, understand it, activate it — with minimal friction, no dead ends, for someone with zero prior knowledge. | `/judge` demonstrates the reference-agent path **with no wallet**. Third-party profiles expose Hire only when the exact identity has a fresh service proven compatible with the selected task; unavailable agents stay visible with the reason. |
-| **Data Quality** | Real-time, accurate data beyond basic counts. A user can make a genuinely informed hire from what is shown. | Every position is read from chain at request time with a block and a **provenance chip**; an unverified provider claim is styled as the weakest thing on the page. The marketplace ranks by *callable* and *passed the published test*, not by self-description. Compare shows on-chain track record, not star ratings. Nothing on the shipped path is a fabricated, hardcoded or estimated number — where there is no data, the page says so. |
-| **Agent Diversity** | All four categories — rebalancing, grid, yield, health factor — surfaced with **equal depth**. One category as the main event and the rest as an afterthought scores poorly. | Four categories, each with its **own deterministic MCS test** (MCS-REB-1 / GRID-1 / YIELD-1 / HF-1), its own reference agent guaranteeing liquidity, its own live cases at a pinned block, and its own graveyard. `/standard` and `/register/<category>` are the same depth for all four. |
-
-The Main Track prize is *adoption as the BNB Agent Studio marketplace — the
-canonical front door for every agent on BSC*. Marque is built to be that: it
-reads the whole ERC-8004 registry (~300k identities), not a curated list; it
-lists agents it did not build, with the failures visible; and the one primitive
-it adds — a bounded, revocable charter — is exactly where BNB Agent Studio v3
-is already heading (spending limits, payment sessions). See
-[the primitive section](#bnb-is-moving-toward-this-primitive).
-
----
-
-### The one mainnet transaction to check
-
-The proof run rebalanced a real PancakeSwap V3 BNB/USDT position on **BSC mainnet
-(chain 56)**, under a spend-capped, revocable charter. Every hash resolves on
-[bscscan.com](https://bscscan.com):
-
-| Step | Transaction |
-|---|---|
-| Open the deliberately-narrow range | `0xb32c204f143b233f5f38958fecda083141efd85f0352ca08bdc116703c8688ed` |
-| Withdraw the drifted position (decreaseLiquidity + collect) | `0xfe41a8a1218e2e8c9f206c26565a537879f1de090b258e8bd64d41d925bc9001` |
-| Swap toward 50/50 at the live price | `0xd795d4879ee16f21f6d54a7f404cc1f7e3928241ec9a0a0c0f6afc3618fb46e9` |
-| Open the re-centred range (fees resumed at block 120600044) | `0x83f635fc30e74e26e36575be3c179301e96de01e6a5839b6d478fba33725a806` |
-
-Realised slippage < 1 bps · total gas \$0.10 · 0.9 h cumulative out of range earning
-nothing. If a rebalance had reverted, the revert reason would be published there
-instead — a receipted failure on mainnet still proves a real system.
-
-### On-chain identity
-
-- **ERC-8004 IdentityRegistry** (BSC **mainnet** 56) — [`0x8004A169FB4a3325136EB29fA0ceB6D2e539a432`](https://bscscan.com/address/0x8004A169FB4a3325136EB29fA0ceB6D2e539a432). The five reference agents are registered here, on mainnet: Bound ([341553](https://bscscan.com/tx/0xefe98cfd5beb27e93f846c3b9a1d43be14d35579aa331479d34e932082d88205)), Lattice (341554), Sluicegate (341555), Keel (341556), Redcell (341557). Gas was sponsored by the Agent Studio paymaster.
-- **MarqueRegistry** (BSC testnet 97) — [`0x01D584f3a07Ba07D114386A78CA7fa3103db7AE7`](https://testnet.bscscan.com/address/0x01D584f3a07Ba07D114386A78CA7fa3103db7AE7). `anchor(bytes32)` for receipts, `sealCall(bytes32,bytes32)` for pre-outcome seals — testnet on purpose (below).
-
-Seals, charter grants and receipt anchors run on **testnet** on purpose — the
-mechanism does not depend on which chain it runs on, and a testnet seal costs
-nothing to reproduce. The one thing that had to be mainnet — a real rebalance
-with real money at risk — is the proof run above.
-
----
-
-## What Marque is
-
-Marque indexes the BSC ERC-8004 registry, but registration is not execution.
-The live funnel at **https://marque.trade/api/v1/funnel** separately reports
-metadata readability, declared services, fresh reachability, protocol
-callability, task compatibility, qualification and Hire eligibility, together
-with fresh-evaluation coverage. It never presents the indexed identity count
-as a count of working agents.
-
-Marque makes that difference legible. Four categories, each a different kind of
-arithmetic with its own published test — **Rebalancing**, **Grid trading**,
-**Yield optimisation**, **Health factor** — kept equally deep. The marketplace
-ranks by whether an agent is callable and whether it passed, deduplicated by
-operator so one team's forty identities is one row.
-
-Nothing on the shipped path is a fabricated, hardcoded or estimated number. Where
-there is no data yet, the page says so. Every metric carries a provenance chip;
-an unverified provider claim is styled as the weakest thing on the page.
-
-### The primitives
-
-- **Warrant** — a pass on the published MCS case for an agent's category. A
-  failure names the field.
-- **Charter** — scoped, revocable authority: an allowlist of contracts, a spend
-  cap, an expiry. Enforced *before* signing, not audited after. Revocation is one
-  transaction, immediate, on chain.
-- **Seal** — a recommendation hashed and written on chain *before its outcome is
-  known*, so a track record cannot be assembled after the fact.
-- **Receipt** — an accepted attempt's public evidence: success, execution failure, or pre-execution failure, with commercial,
-  execution, authority, quality), a canonical hash, the anchor transaction.
-
-### What no other entry has
-
-Every agent marketplace can list agents and let you click *hire*. Marque is the
-only one that answers **“does it actually work, and how do you know?”** before
-you pay:
-
-- a **deterministic conformance standard** run against live cases at a pinned
-  block, with the **failures published**, not just the passes;
-- a **charter** enforced by code before a signature is requested — a call to a
-  non-allowlisted contract, a spend over cap, or an action past expiry is refused,
-  not logged;
-- a **seal** that timestamps a recommendation on chain before its outcome, so a
-  track record cannot be back-filled;
-- **one real mainnet execution** with every transaction hash public.
-
----
-
-## Partner tracks
-
-| Track | Status | Evidence |
-|---|---|---|
-| **Main Track** | Entered | The marketplace, the four equally-deep categories, the full no-wallet journey. See the rubric table above. |
-| **TermiX Challenge** | Entered | **[Agent Advantage Report](./docs/AGENT-ADVANTAGE-REPORT.md)** — four tasks (one security), agent vs. human, **all four now complete**: two blind-graded repetitions per arm, at the **same frozen task and the same pinned BSC block**, against a rubric registered and hashed before either arm ran. The human arm is a **screen recording** on each benchmark page. Honest result: on the mechanical DeFi tasks the agent matches or beats the human and is thousands of times faster and cheaper; on the judgement-heavy security triage the human clearly wins. |
-| **PancakeSwap Challenge** | Entered | The **[proof run](https://marque.trade/pancakeswap/proof)** — a real benefit to a PancakeSwap LP: a drifted V3 position detected, re-centred under a scoped charter, every tx on BscScan, cost and slippage measured. |
-| **AltLayer / 8004scan** | Entered | The marketplace is built on the ERC-8004 registry that 8004scan indexes; the MCS answers the “is this agent actually correct” question that an on-chain agent economy needs. |
-| ~~Altana~~ | **Not entered** | Charters run on our own registry (`MarqueRegistry`). We do not have an Altana Keystore / session-SDK integration and will not claim one — the track requires transactions in the Altana explorer, which we do not have. |
-
----
-
-## The human arm is on camera
-
-The Ledger's comparison only means something if a person actually did the task
-by hand. Each benchmark links a **screen recording** of the analyst working it —
-reading the contract on BscScan, querying pool state with `cast call`, computing
-the health factor — pinned to the benchmark block. Shown on every benchmark
-page, not hidden behind a link, because *"a human really did this"* is a claim
-that deserves to be seen.
-
-| Benchmark | The analyst, on screen | Recording |
-|---|---|---|
-| **ADV-01** security triage | <img src="./docs/evidence/adv-01.jpg" alt="The analyst on BscScan reading the BEP-20 USDT contract source" width="320"> | Reading the BEP-20 USDT source — the exact token in the task — for upgrade / mint / pause / blacklist powers. <br>[youtu.be/pt0EkL6wY6A](https://youtu.be/pt0EkL6wY6A) |
-| **ADV-02** V3 re-centre | <img src="./docs/evidence/adv-02.jpg" alt="The analyst querying PancakeSwap V3 pool state by hand" width="320"> | `cast call` for `getPool` / `slot0` / `tickSpacing`, pinned to the block. <br>[youtu.be/0xT6JBNv1zQ](https://youtu.be/0xT6JBNv1zQ) |
-| **ADV-03** yield route | <img src="./docs/evidence/adv-03.jpg" alt="The analyst pulling Venus supply rates against the Comptroller" width="320"> | Venus `supplyRatePerBlock` / `venusSupplySpeeds` against the Comptroller, to price the route by hand. <br>[youtu.be/eWAAFVw9Hs0](https://youtu.be/eWAAFVw9Hs0) |
-| **ADV-04** exact repayment | <img src="./docs/evidence/adv-04.jpg" alt="The analyst reading Venus Comptroller and vToken state for the health factor" width="320"> | Comptroller and vToken state at the pinned block, computing the repayment to restore the health factor. <br>[youtu.be/UKWhdf4GwO8](https://youtu.be/UKWhdf4GwO8) |
-
-The result the analyst produced is pasted into the intake, which hashes it into
-the manifest exactly as the agent's answer is hashed. See it in context on each
-[benchmark page](https://marque.trade/ledger).
-
----
-
-## Screenshots
-
-<table>
-<tr>
-<td width="50%"><img src="./docs/evidence/readme/home.webp" alt="The homepage in daylight: the Marque Monument, the promise, and the latest real mainnet hire"><br><sub><b>Home.</b> The promise, and the latest real mainnet hire on the page, step by step, each with its transaction.</sub></td>
-<td width="50%"><img src="./docs/evidence/readme/marketplace.webp" alt="The marketplace: hireable agents with live prices, delivery times and test results"><br><sub><b>Marketplace.</b> Hireable and tested as two separate facts, live signed prices, operator-deduplicated.</sub></td>
-</tr>
-<tr>
-<td width="50%"><img src="./docs/evidence/readme/storefront.webp" alt="Keel's storefront at night: its artifact masthead, portrait and purchase panel"><br><sub><b>A storefront.</b> What it does, what you get, its paid jobs on chain, and one Hire button.</sub></td>
-<td width="50%"><img src="./docs/evidence/readme/hire.webp" alt="The hire sheet: the task form, a live signed price, and every signature named before the wallet opens"><br><sub><b>The hire sheet.</b> The task, a live signed price, and every signature named before the wallet opens.</sub></td>
-</tr>
-<tr>
-<td width="50%"><img src="./docs/evidence/readme/quest.webp" alt="The Set and Earn quest: five steps read from BNB Chain, with a recommended agent for each"><br><sub><b>The quest.</b> Five steps, each read from BNB Chain, with a live price and a recommended agent for each.</sub></td>
-<td width="50%"><img src="./docs/evidence/readme/job.webp" alt="A Job Room: a real mainnet hire from escrow to delivery and rating"><br><sub><b>A Job Room.</b> One real mainnet job: escrow, delivery, the deliverable checked against its on-chain hash, the rating.</sub></td>
-</tr>
-</table>
-
----
-
-## BNB is moving toward this primitive
-
-BNB Agent Studio **v3** (shipped 3 Sep 2026) added **spending limits** and
-customisable payment sessions to the platform itself, plus x402/B402 stablecoin
-payments and self-funding agents, with the Trust Wallet Agent Kit (**TWAK**) as
-its wallet layer. Bounded agent spending is now a chain-level primitive. Marque
-is the **buyer-facing surface** for exactly that: the place a buyer sets the
-bound, watches it drain, and revokes it — for any agent, not just ones built with
-one SDK.
-
----
-
-## The stack
-
-Next.js 15 (App Router, `output: standalone`) behind Caddy + PM2, native
-PostgreSQL 16 and Redis 7 on one VPS. `viem` for chain; a round-robin RPC failover
-pool. `drizzle-orm`. pnpm workspace: `apps/{web,worker}`,
-`packages/{ui,db,registry,conformance,execution,mandates,positions,chain,ledger,agent-engines,probe}`.
-
-- **Constitution** — [`AGENTS.md`](./AGENTS.md)
-- **Architecture** — [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md)
-- **Security model** — [`docs/SECURITY.md`](./docs/SECURITY.md)
-- **Acceptance evidence** — [`docs/SUBMISSION.md`](./docs/SUBMISSION.md)
-- **Agent Advantage Report (TermiX)** — [`docs/AGENT-ADVANTAGE-REPORT.md`](./docs/AGENT-ADVANTAGE-REPORT.md)
-- **Operations** — [`docs/RUNBOOK.md`](./docs/RUNBOOK.md)
-- **Reductions log** — [`docs/DEVIATIONS.md`](./docs/DEVIATIONS.md)
-- **Measured findings** — [`docs/FINDINGS.md`](./docs/FINDINGS.md)
-- **Running the Ledger's manual arms** — [`docs/LEDGER-MANUAL-ARMS.md`](./docs/LEDGER-MANUAL-ARMS.md)
-
-## Development
-
-Use Node 22 and pnpm 9.15.9 with native PostgreSQL and Redis running locally.
-Create a dedicated empty development database; never point local migrations or
-tests at production. Export `DATABASE_URL`, `REDIS_URL`, `BSC_RPC_URLS`
-(comma-separated public RPC URLs), and optionally `SCAN_API_KEY` for ingestion.
-Keep credentials outside git. No private key is needed to run the public web app.
-
-```bash
-pnpm install --frozen-lockfile        # full workspace install
-pnpm --filter @marque/db migrate      # requires DATABASE_URL
-pnpm typecheck && pnpm test
-pnpm --filter @marque/web dev          # local :3200; do not run beside production on that port
+```sh
+pnpm install --frozen-lockfile
+pnpm typecheck
+pnpm lint
+pnpm lint:copy
+pnpm test
+pnpm build
 ```
 
-An empty database shows empty states until ingestion runs. Worker entrypoints
-and arguments are in `ecosystem.config.cjs`; use only read-only ingestion,
-classification and probes for local browsing. A keeper or funded seller is not
-a development prerequisite.
+Database tests require a separately migrated empty fixture database named `marque_vnext_fixture_*`, supplied through `MARQUE_INTEGRATION_DB`. Explicit network tests use public read-only RPC. Ordinary tests alone do not establish production behavior or campaign qualification.
 
-Production uses `bash scripts/deploy-web.sh` for blue/green deployment and
-`bash scripts/deploy-web.sh --rollback` to return to the previous slot. These
-are VPS operations, not fresh-clone setup commands.
+Deployment uses `scripts/deploy-web.sh`, prepared source-checked artifacts, two web slots and public readiness checks. A web deployment does not activate changed worker code; worker activation and evidence are recorded separately. Historical observations are never deleted by a rebuild. Production keys, provider credentials, planning material and audit screenshots stay outside this public repo.
 
-Processes (PM2, `ecosystem.config.cjs`): `marque-web`; workers `marque-ingest`, `marque-probe`, `marque-classify`, `marque-conform`, `marque-quotes` (asks every seller for a signed price), `marque-indexer` (Quest Index, chains 56 and 97), `marque-keeper` (settles Marque jobs after the review window, mainnet); and the reference sellers `marque-bound`, `marque-lattice`, `marque-sluicegate`, `marque-keel`, `marque-redcell`, `marque-tidemark`, each with its keystore under `agents/<id>/.studio` (gitignored).
+[V3 project state](./docs/vnext/PROJECT_STATE.md) · [Recovery record](./docs/vnext/P15_RECOVERY.md) · [Phase 2 records](./docs/phase2/PROJECT_STATE.md) · [Deviations](./docs/DEVIATIONS.md).
 
-Commerce scripts (in `packages/commerce`): `scripts/hire-proof.mts [--mainnet]` (full hire through the public API), `scripts/rating-proof.mts`, `scripts/verify-topics.mts` (topic0 against real logs), `scripts/funding-table.mts`, `scripts/fork-test.mts` (needs anvil on :8546).
-
-| Env | Used by | Notes |
-|---|---|---|
-| `DATABASE_URL`, `REDIS_URL` | everything | native Postgres and Redis |
-| `BSC_RPC_URLS`, `BSC_TESTNET_RPC` | web, workers | comma lists, failover |
-| `BSC_ARCHIVE_RPC_URL` | Tidemark, indexer catch-up, benchmarks | treat as a secret |
-| `INDEXER_RPC_56`, `INDEXER_RPC_97`, `INDEXER_START_<chain>`, `INDEXER_CHAINS` | indexer | optional overrides; default publicnode |
-| `KEEPER_DIR`, `KEEPER_CHAINS`, `KEEPER_MAX_PER_HOUR`, `KEEPER_MIN_BNB` | keeper | keystore lives outside the repo |
-| `MARQUE_CAMPAIGN_CHAIN`, `NEXT_PUBLIC_MARQUE_CAMPAIGN_CHAIN` | web | 56 |
-| `ERC8183_AGENT_URL`, `AGENT_PORT` | sellers | set per agent in `ecosystem.config.cjs` |
-
-Secrets live in `/root/.marque/secrets.env`, outside the repo. PostgreSQL and
-Redis are native systemd services; PM2 runs only our own processes. `pm2 save` +
-`pm2-root.service` resurrect everything on reboot.
-
-## Judging window
-
-Nothing gets turned off on submission. Judging runs to **23 September**. Data
-accrual continues — the index staying fresh, new probes, sealed calls resolving,
-self-serve third-party listings, real users hiring — that is the product
-operating normally. Uptime, monitoring, security patches and bug fixes only;
-no new features without a written go-ahead. See
-[`docs/SUBMISSION.md`](./docs/SUBMISSION.md) for the standing post-deadline rule.
+The [September demo](https://github.com/talk2francis/Marque/releases/download/demo-2026-09-09/marque-demo.mp4), historical screenshots and benchmark reports describe their recording dates. They are not the current website or evidence that native action authority is enabled.

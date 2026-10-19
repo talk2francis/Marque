@@ -343,3 +343,12 @@ retains the original complete path. Commerce reads select latest quote IDs in
 a materialized CTE before loading payload fields; service, creation time and ID
 ordering stay identical, including latest failures and raw expiry observations.
 Neither query drops history, changes freshness, nor adds an index or migration.
+
+
+### 19 October V3 audit: supply timing and public scope
+
+`quote-schedule.ts` computes the next probe from unchanged healthy maximum intervals and failure backoff, shortened to observed provider expiry minus a bounded lead. A one-minute per-service floor prevents hot loops. First-party candidates remain first, then successful third-party sellers before untested background candidates, with the existing batch limit/concurrency. Original stored and provider expiry remain immutable. Failed observations remain stored.
+
+`marketplaceAgents` applies expiry at one explicit timestamp (not Array.map's index), aggregates the complete filtered listing population before paging, and returns internal category supply metadata. Home tiles and headline consume one marketplace observation instead of an independent stale coverage cache. The restored public `phase2/coverage` route exposes this listing scope, its timestamp, owner-count limitations and unclassified remainder through existing projection/CORS/unavailable handling. The default marketplace success body is unchanged. Category headers name escrow listings and separate 24-hour third-party task-compatible groups; neither proves independent people.
+
+V3 public delivery status, changelog, README and shared homepage/whitepaper roadmap expose implemented components and disabled or unproven execution separately. No schema, MCS assertion, signer, payment authority, dependency or design token changes are introduced. See the dated V3 delivery audit and official-requirements crosscheck.

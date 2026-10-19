@@ -14,7 +14,7 @@ export function CampaignNotice({ builders = false }: { builders?: boolean }) {
       {builders ? <Disclosure summary="The six official build requirements"><p>The six build requirements cover ownership and listing, a discoverable card, responsiveness, three completed hires by independently funded buyers, five onchain actions over three days, and category-consistent actions. A public repository is also required.</p></Disclosure> : null}
       <p>Team members and controlled or commonly funded wallets are excluded. BNB makes the final determination.{' '}
         <a href={CAMPAIGN_RULES.url} target="_blank" rel="noreferrer">Official rules and registration</a>{' '}
-        (checked {CAMPAIGN_RULES.checkedAt}).
+        (checked {CAMPAIGN_RULES.checkedAt}). <a href="/docs/delivery-status#campaign">Current scope and requirements crosscheck</a>.
       </p>
     </aside>
   )

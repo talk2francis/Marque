@@ -4,8 +4,9 @@
  * signs anything and never moves funds: a quote is free and binds nobody until a
  * buyer's own wallet anchors it on chain.
  *
- * Cadence: first-party sellers every 10 min, hireable third parties every 30 min,
- * everyone else every 6 h. Every outbound call goes through safeFetch.
+ * Healthy cadence is capped at 10 min for reference sellers and 30 min for
+ * third parties, brought forward before observed quote expiry. Failed attempts
+ * retry after 1 min for reference sellers and 6 h for third parties. Every outbound call goes through safeFetch.
  */
 import { runQuoteProbe, syncFirstPartyCategories, retryPendingNotifies } from '@marque/commerce'
 import { closeDb } from '@marque/db'

@@ -21,6 +21,22 @@ describe('ready selection before the broad catalog read', () => {
     mocks.states.mockRejectedValueOnce(Error('database unavailable'))
     await expect(marketplaceAgents({ tab: 'ready' })).rejects.toThrow('database unavailable')
   })
+  it('filters an expired memoized quote at wall-clock time rather than its array index', async () => {
+    const id = 'synthetic-expired-boundary'
+    mocks.states.mockReset().mockResolvedValue(new Map([[987, {
+      agentId: id, serviceId: 987, state: 'hireable', priceRaw: '1',
+      token: { address: '0x0000000000000000000000000000000000000001', symbol: 'U', decimals: 18 },
+      chainId: 56, quoteExpiresAt: '2000-01-01T00:00:00Z',
+    }]]))
+    mocks.read.mockReset().mockResolvedValueOnce([{ id, owner_address: id }])
+      .mockResolvedValueOnce([{ agent_id: id, owner_address: id, category: 'yield', name: 'Synthetic expired fixture' }])
+    mocks.tracks.mockResolvedValue(null)
+    const result = await marketplaceAgents({ tab: 'ready' })
+    expect(result.total).toBe(0)
+    expect(result.rows).toEqual([])
+    expect(result.supply.every(category => category.hireable === 0)).toBe(true)
+  })
+
   it('retains the full null-owner partition instead of narrowing unknown ownership', async () => {
     mocks.states.mockResolvedValue(new Map()); mocks.read.mockReset()
     mocks.read.mockResolvedValueOnce([{ id: 'synthetic-null', owner_address: null }]).mockRejectedValueOnce(Error('captured source query'))

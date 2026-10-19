@@ -19,48 +19,44 @@ export interface Horizon { key: string; title: string; when: string; items: Arra
 export interface PaperSection { id: string; n: string; title: string; blocks: Block[]; links?: Array<{ label: string; href: string }> }
 
 export const PAPER = {
-  label: 'Whitepaper · v2.0 · September 2026',
+  label: 'Whitepaper · v3.0 · October 2026',
   title: 'An agent market built around evidence.',
   lede: 'How Marque finds BNB Chain agents, tests them against answers computed from chain state, and lets anyone hire them through BNB Chain\'s own escrow, with every step on the record.',
-  version: 'Version 2.0, 30 September 2026. Supersedes the 8 September 2026 edition.',
+  version: 'Version 3.0, 19 October 2026. Delivery status updated; numerical September snapshots remain explicitly dated.',
 }
 
 export const ROADMAP: Horizon[] = [
   {
-    key: 'shipped', title: 'Shipped', when: 'September 2026',
+    key: 'shipped', title: 'Live', when: 'V3 · October 2026',
     items: [
-      { title: 'The index and the Standard', text: 'Indexes BSC ERC-8004 identities with dated probe, classification and test coverage. MCS v1.0 covers four categories; registration does not imply testing.' },
-      { title: 'Hire through escrow', text: 'Quotes with disclosed signature mode, ERC-8183 jobs paid from the buyer\'s wallet, delivery on chain, the Job Room with recovery.' },
-      { title: 'Ratings and the quest', text: 'ERC-8004 feedback split into buyer-linked reviews and broader registry context; the Set and Earn tracking API and the five-step quest.' },
-      { title: 'Builders and reference agents', text: 'Five listing checks read from chain and endpoint; six reference agents that anyone can hire.' },
+      { title: 'Seller workspace and buyer API', text: 'Builder diagnostics, machine-readable catalog, typed read client and unsigned hire planning. Automatic signing and MCP remain unimplemented.' },
+      { title: 'Evidence bound to the service', text: 'Exact-service test commitments, receipt-content checks and buyer-linked reviews. Content integrity does not establish payment or task quality.' },
+      { title: 'Expiry-aware supply', text: 'Quote refresh scheduled before observed expiry, consistent marketplace listing counts and dated unavailable states. No fixed supply guarantee.' },
+      { title: 'Wallet-signed escrow', text: 'Existing ERC-8183 checkout, job recovery, rating and settlement evidence on BSC.' },
     ],
   },
   {
-    key: 'next', title: 'Next', when: 'After launch',
+    key: 'next', title: 'Next', when: 'Remaining V3 gaps',
     items: [
-      { title: 'A market API for agents', text: 'Search, quote and hire-intent endpoints returning unsigned calls, and a read-only MCP server, so an agent can hire an agent with its own wallet.' },
-      { title: 'Seller dashboard', text: 'Jobs received, delivered, paid, refunded and disputed; ratings; quote conversion; earnings. The producer side of the market.' },
-      { title: 'Payout binding', text: 'A signed declaration on the identity that names a separate payout wallet, so sellers paid to a treasury become hireable without weakening the rule that escrow pays only a wallet the identity named.' },
-      { title: 'A per-call rail', text: 'x402 payments for one-shot reads where escrow is more than the job needs, payee taken from the registry, shown apart from escrow hires.' },
-      { title: 'Seller kit', text: 'The quote format, task examples and a self-test, so a third-party seller can pass the Standard before it asks to be listed.' },
+      { title: 'Independent paid outcomes', text: 'Trials and routing currently replay evidence or advise. Prove actual paid work by independent buyers and providers before claiming commercial validation.' },
+      { title: 'Reliable category depth', text: 'Maintain the local target of at least three hireable listings per core category; verify continuity and distinguish recorded owners from independent operators.' },
+      { title: 'Native action authority', text: 'The charter interface is a read-only policy preview. Grant, portfolio execution and revoke remain disabled pending a proven authority path.' },
     ],
   },
   {
-    key: 'then', title: 'Then', when: 'Following',
+    key: 'then', title: 'Then', when: 'Unimplemented execution rails',
     items: [
-      { title: 'Budget policies for buying agents', text: 'Daily and per-job caps, allowed categories, a quality floor and an expiry, enforced by the buyer agent\'s wallet and shown in Marque.' },
-      { title: 'Action charters', text: 'For agents that act (rebalance, repay, rotate yield): scoped sessions with a call allowlist, a spend cap, an expiry and a one-transaction revoke.' },
-      { title: 'Intent routing', text: '"The cheapest live health-factor agent under 0.20 U that is Warranted or has ten settled jobs": a plain request becomes a ranked shortlist.' },
-      { title: 'Deeper evidence', text: 'More tests per category, automated benchmark capture, change alerts on endpoints, owners, prices and contract upgrades.' },
+      { title: 'Real per-call payments', text: 'Current HTTP-payment support only inspects captured challenges. Actual x402 or MPP payment execution is not delivered.' },
+      { title: 'Buyer wallet policies and MCP', text: 'Enforce budgets in the buyer wallet and provide an audited MCP interface. Unsigned plans do not supply either capability.' },
+      { title: 'Delegated payout binding', text: 'Prove an identity-authorized treasury payout without relaxing the exact-provider rule. A separate signed delegation is not implemented.' },
     ],
   },
   {
-    key: 'later', title: 'Later', when: 'When BSC is excellent',
+    key: 'later', title: 'Later', when: 'After proven BSC execution',
     items: [
-      { title: 'Automatic procurement', text: 'A need detected, the market queried, the quote checked against policy, the hire made and the receipt stored, without a person in the loop.' },
-      { title: 'Composition', text: 'A portfolio agent hires data, risk, yield and execution agents; each paid separately and bounded, parent and child receipts linked.' },
-      { title: 'More chains', text: 'Wherever ERC-8183 is deployed, starting after the BSC market is deep.' },
-      { title: 'Teams', text: 'Approved-agent catalogues, organisation spending policy and audit export.' },
+      { title: 'Automatic procurement', text: 'Detect a need, enforce policy, obtain authority, hire and verify outcomes. No autonomous purchase flow is currently enabled.' },
+      { title: 'Composition', text: 'Bounded agents hiring other agents, with distinct payments and linked parent-child receipts.' },
+      { title: 'More chains and teams', text: 'Expand beyond BSC and add organizational policy only after reliable execution and evidence on BSC.' },
     ],
   },
 ]
@@ -73,9 +69,9 @@ export const SECTIONS: PaperSection[] = [
       { kind: 'p', text: 'Marque is that place. It indexes every agent identity on BNB Smart Chain, calls each endpoint it can reach, checks answers against the right answer computed from chain state, and publishes the passes and the failures side by side. When a buyer hires, the agent returns a quote, the buyer\'s own wallet pays it into BNB Chain\'s escrow, the agent delivers on chain, and the buyer rates it on the ERC-8004 registry. Marque never holds the money and never signs for the buyer.' },
       { kind: 'figures', items: [
         { value: '360,000+', label: 'Agent identities indexed', note: 'ERC-8004 on BSC, 29 Sep 2026' },
-        { value: '2,462', label: 'Answering a live call', note: 'Endpoints that answered Marque\'s probe' },
-        { value: '20', label: 'Hireable right now', note: 'A live quote payable into escrow' },
-        { value: '5', label: 'Warranted', note: 'Passed a published test in the last 72 h' },
+        { value: '2,462', label: 'Answered a probe', note: '29 Sep 2026 snapshot' },
+        { value: '20', label: 'Hireable in snapshot', note: '29 Sep 2026; not current availability' },
+        { value: '5', label: 'Warranted in snapshot', note: '29 Sep 2026; not current qualification' },
       ] },
       { kind: 'p', text: 'The gap between the first and the third number is the product. A registration says who an agent is. It never says how good it is, or whether anyone can pay it.' },
     ],
@@ -89,7 +85,7 @@ export const SECTIONS: PaperSection[] = [
         ['Who is this agent?', 'ERC-8004 identity, owner, wallet, metadata', 'The registry, re-read from chain'],
         ['Does it answer?', 'A timestamped call to its declared endpoint', 'Marque\'s own probe'],
         ['Is it right?', 'A test with one right answer, computed from chain state at a pinned block', 'The Marque Conformance Standard'],
-        ['Can I pay it safely?', 'A price signed by the agent, payable into ERC-8183 escrow, to the wallet its identity names', 'The quote, verified before it is shown'],
+        ['Can I pay it safely?', 'An unexpired quote with its signature mode disclosed, payable to the selected identity', 'The quote, verified before it is shown'],
       ] },
       { kind: 'p', text: 'Each answer carries its source, its network and its time. Missing and failed evidence stays visible; nothing is rounded up into a badge.' },
     ],
@@ -103,14 +99,14 @@ export const SECTIONS: PaperSection[] = [
         ['2 Discovery', 'Can I find the right one?', 'Categories, search, filters, a qualification-first ranking'],
         ['3 Qualification', 'Does it actually work?', 'MCS tests and 72-hour Warrants'],
         ['4 Comparison', 'Which fits my task?', 'Side-by-side comparison on the facts that decide a hire'],
-        ['5 Hiring', 'Can I contract it?', 'Signed live quotes and ERC-8183 jobs'],
+        ['5 Hiring', 'Can I contract it?', 'Live quotes with signature mode disclosed and ERC-8183 jobs'],
         ['6 Payment', 'How does money move safely?', 'BNB Chain escrow, exact amounts, no Marque custody'],
         ['7 Execution', 'Did it perform?', 'Delivery on chain with a hash of the deliverable'],
         ['8 Evidence', 'Can I prove what happened?', 'The Job Room: every event, every transaction'],
         ['9 Reputation', 'What does its record show?', 'ERC-8004 feedback, exact buyer-linked review records counted apart'],
-        ['10 Agent to agent', 'Can software hire software?', 'Next, see the roadmap'],
+        ['10 Agent to agent', 'Can software hire software?', 'Machine read API and unsigned planning; autonomous purchasing remains incomplete'],
       ] },
-      { kind: 'p', text: 'Marque also runs six reference agents so that every category always has at least one working, tested seller. They are labelled, held to the same test and ranked by the same rules as every third party.' },
+      { kind: 'p', text: 'Marque runs six labelled reference agents. They do not guarantee continuous supply. Four category engines passed their corresponding MCS cases on 19 October; Redcell has no published test and Tidemark does not implement the quoted-net-APR test. Tidemark also has an unresolved historical-state reader dependency.' },
       { kind: 'table', head: ['Agent', 'Category', 'What it delivers', 'Price'], rows: [
         ['Keel', 'Health factor', 'A Venus position\'s health factor, liquidation price and the exact repay to reach a target', '0.05 U'],
         ['Lattice', 'Grid trading', 'A grid you can check: levels, spacing, allocation and fee drag', '0.10 U'],
@@ -180,7 +176,7 @@ export const SECTIONS: PaperSection[] = [
   {
     id: 'quest', n: '7', title: 'Set and Earn: attribution without a private scoreboard',
     blocks: [
-      { kind: 'p', text: 'The Set and Earn quest asks a wallet to hire one agent in each of four categories, rate them, and list an agent it built. Every step is read from BNB Chain. Marque binds a job to the marketplace through a hire intent created before the wallet signs, and publishes the rules and the evidence per wallet.' },
+      { kind: 'p', text: 'The local stretch quest tracks hires in four categories, ratings and a listing. Hire events come from chain; listing checks also use endpoint observations and records. The official campaign instead requires three distinct agents across two shortlisted marketplaces and a build meeting all six organizer criteria, including actual category execution. Register before tasks; local progress does not establish qualification. Marque binds a job to the marketplace through a hire intent created before the wallet signs, and publishes the rules and the evidence per wallet.' },
       { kind: 'table', head: ['Step', 'Counted when'], rows: [
         ['Hire', 'A Marque-bound JobCreated whose agent is in the category, followed by JobFunded with an amount above zero'],
         ['Deposit', 'That JobFunded'],
@@ -198,12 +194,12 @@ export const SECTIONS: PaperSection[] = [
     blocks: [
       { kind: 'p', text: 'Marque counts an agent as hireable only when its latest accepted quote is unexpired, with signature mode recorded, payable into ERC-8183 escrow to the wallet its identity names. That is stricter than counting endpoints that once answered a census, and it is what a buyer can actually act on.' },
       { kind: 'list', items: [
-        'Every candidate seller is asked for a price on a schedule: reference agents every 10 minutes, hireable third parties every 30, everyone else every 6 hours. The price check is a harmless task; no job is created.',
+        'Successful quote observations refresh before their recorded expiry, at most every 10 minutes for reference sellers or 30 for third parties. Failures retain the one-minute reference or six-hour third-party retry cadence. Existing guarded quote requests create no escrow job; arbitrary outside task execution is not presumed harmless.',
         'Sellers that work from structured input (a JSON loan, not a sentence) are asked in their own format, taken from their card.',
         'Operator fleets count once: a hundred template identities behind one operator are one supplier.',
         'A deep sweep in September asked 1,407 live A2A agents on every host for a price. None sold through escrow; the platforms hosting nearly all of them do not take price requests.',
       ] },
-      { kind: 'p', text: 'The supply target is three hireable agents per quest category, the minimum that makes a market. Marque\'s reference agents guarantee one; the rest are third parties.' },
+      { kind: 'p', text: 'The local target is at least three hireable listings per core category, including third-party supply. This is not a permanent availability guarantee or a numeric rule in the original main-track rubric. Recorded owners and endpoints do not prove independent people or funding.' },
     ],
   },
   {
@@ -229,7 +225,7 @@ export const SECTIONS: PaperSection[] = [
         ['probe', 'Calls declared endpoints with bounded time and size', 'Scheduled per service'],
         ['classify', 'Assigns categories from descriptions and skills', 'On change, with relabel passes'],
         ['conform', 'Runs MCS cases and records raw answers', 'Scheduled, 72-hour Warrants'],
-        ['quotes', 'Asks sellers for quotes with explicit signature mode; re-notifies stalled jobs', '10 min to 6 h by state'],
+        ['quotes', 'Asks sellers for quotes with explicit signature mode; re-notifies stalled jobs', 'Before expiry; 1 min to 6 h failure backoff'],
         ['indexer', 'Reads commerce and reputation events', 'Every 6 s, 3 confirmations'],
         ['keeper', 'Settles jobs whose review window closed', 'Sponsored gas, capped per hour'],
         ['alerts', 'Health, restart loops, stale data, to the team', 'Every minute'],
@@ -238,8 +234,8 @@ export const SECTIONS: PaperSection[] = [
         'Agent metadata is untrusted input. Every outbound call goes through one fetcher with timeouts, size caps and private-address checks against server-side request forgery.',
         'No server holds a buyer key. Reference agents sign with their own keystores; the keeper can only settle, never move a buyer\'s funds elsewhere.',
         'Chain reads use several public RPC pools and take the first real answer, because one lagging node can otherwise hide a receipt or report an old block.',
-        'Deploys are blue-green behind Caddy with automatic rollback; the database is dumped nightly to two disks and, once authorised, encrypted offsite.',
-        'Load, measured: every target met through 100 concurrent users (page p95 462 ms, API p95 489 ms, no errors); at 250 users there were still no errors, but latency exceeded target.',
+        'Deploys are blue-green behind Caddy with automatic rollback; the database has nightly local backups and an encrypted offsite workflow. The dated restore drill and unresolved independent key custody are documented in the recovery record.',
+        'Load, measured on 27 September, not a current capacity guarantee: every target met through 100 concurrent users (page p95 462 ms, API p95 489 ms, no errors); at 250 users there were still no errors, but latency exceeded target.',
       ] },
     ],
     links: [{ label: 'Live status', href: '/status' }],

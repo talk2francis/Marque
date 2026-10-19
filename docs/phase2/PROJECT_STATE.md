@@ -417,6 +417,9 @@ Logged in `docs/DEVIATIONS.md` under "Phase 2". Index:
 
 ## Requests
 
+- [2026-10-19] [B: user-requested V3 audit] [A: commerce and worker] [packages/commerce/src/supply.ts, quote-schedule.ts, apps/worker/src/quotes.ts, apps/web/app/api/v1/phase2/coverage] Repair quote refresh later than observed expiry; preserve terms, failure backoff, concurrency and read-only probe behavior. Restore the linked coverage endpoint using full marketplace listing counts. User authorized bug repair, push and deployment; no new financial actions or provider costs.
+- [2026-10-19] [A: user-requested V3 audit] [B: product] [apps/web/lib/marketplace.ts, home-data.ts, category pages, README, public docs/roadmap] Unify supply observation scopes, label task-compatible groups separately and reconcile shipped components with incomplete execution. Preserve design tokens, branding, MCS and exact-service financial checks. Requirement crosscheck in docs/vnext/HACKATHON_CROSSCHECK.md; release evidence pending.
+
 - [2026-10-09] [B: product/incident] [A: deployment] [scripts/deploy-web.sh, ops/web-upstream.caddy] Preserve a trusted routing-state mirror at the Marque-only reverse proxy because Next removes Flight headers before middleware. The upstream renderer now includes this guard on every deploy and rollback; seller routes and Kerb are unchanged. Candidate proxy validation and attack regression required before cutover.
 
 - [2026-10-09] [B: product/incident] [A: commerce] [packages/commerce/src/supply.ts] Retry failed first-party quote probes after one minute; leave healthy and third-party cadence unchanged. Implemented with tests under the user's incident-fix request. No change to signing or transaction authority.

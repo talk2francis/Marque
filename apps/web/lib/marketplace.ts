@@ -7,6 +7,7 @@ import { agentStates, TASK_FOR_CATEGORY, type AgentStateView } from './agent-sta
 import { agentTracks, trackFromSource, type AgentTrack } from './agent-track'
 import { selectedAgentRows } from './compare-selection'
 import { expireMarketQuote } from './quote-expiry'
+import { marketSupply, type MarketSupplyCategory } from './market-supply'
 export { expireMarketQuote } from './quote-expiry'
 
 /**
@@ -523,7 +524,7 @@ function otherLast(rows: MarketRow[]): MarketRow[] {
   return [...rows.filter((r) => !isOther(r)), ...rows.filter(isOther)]
 }
 
-export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: MarketRow[]; generatedAt: string; total: number; offset: number; hasMore: boolean }> {
+export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: MarketRow[]; generatedAt: string; total: number; offset: number; hasMore: boolean; supply: MarketSupplyCategory[] }> {
   const hireable = q.tab === 'ready' || q.hireableOnly === true
   const states = hireable ? await commercialStates() : undefined
   const readyIds = states ? [...new Set([...states.values()].filter(c => c.state === 'hireable' || c.state === 'settleable').map(c => c.agentId))] : null
@@ -534,7 +535,8 @@ export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: Ma
   }
   const base = ids ? await scopedBase(ids, states) : { rows: await marketplaceBase(), at: baseMemo?.at ?? Date.now() }
   // Clone: the base is memoised and the sort below is in place.
-  let all = base.rows.map(expireMarketQuote)
+  const observedAt = Date.now()
+  let all = base.rows.map(row => expireMarketQuote(row, observedAt))
   if (q.agentIds) all = selectedAgentRows(all, q.agentIds)
 
   // Filters over the memoised qualifying set.
@@ -610,6 +612,7 @@ export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: Ma
   const requestedOffset = Number.isFinite(q.offset) ? Math.max(0, Math.floor(q.offset!)) : 0
   const offset = all.length ? Math.min(requestedOffset, Math.floor((all.length - 1) / limit) * limit) : 0
   const page = all.slice(offset, offset + limit)
+  const supply = marketSupply(all, observedAt)
   const pageStates = await marketPageAgentStates(page)
   const rows = page.map((row) => {
     // Reference agents answer their free face directly; their Hire is the ERC-8183 rail.
@@ -633,6 +636,6 @@ export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: Ma
       hireBlockedReason,
     } satisfies MarketRow
   })
-  return { rows, total: all.length, offset,
+  return { rows, total: all.length, offset, supply,
     hasMore: offset + limit < all.length, generatedAt: new Date(base.at).toISOString() }
 }

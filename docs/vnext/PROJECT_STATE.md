@@ -181,3 +181,10 @@ Deviations: see [DEVIATIONS.md](DEVIATIONS.md), including discovered owner-GET m
 Owner decisions: review the findings; authorize the next bounded P01/P01A branch work. Tmux lifetime protection and shared-service maintenance policy have a concrete private proposal and are not applied under P00. Production release and any mainnet write remain separate approvals. The root agreement requires explicit `approved, mainnet` for the latter.
 
 Next: resolve the measured A0 operating blocker and exact quote/listing authorization defects before any new commercial feature. P02 should reconcile existing Plinth proof before proposing another hire. Do not automatically continue to P01/P01A/P02/P03.
+
+
+## 19 October: user-directed V3 product and hackathon audit (active)
+
+The previous P15 phase-execution handoff did not establish full product completion. A new audit found stale/overstated README, public roadmap and changelog scope; a missing coverage API; quote refresh later than actual expiry; independent stale homepage counts; and ambiguous category supply labels. Source repairs and regression checks are in progress on `fix/v3-live-audit-20261019`. Public deployment and worker activation are not yet claimed. Requirements and per-phase scope are in `HACKATHON_CROSSCHECK.md` and `V3_DELIVERY_AUDIT.md`.
+
+Official campaign criteria have been re-read on 19 October. Shortlisting is verified; independent completed buyers, category execution across days, registration/personal eligibility and qualifying new-build timing remain unestablished. The local three-listing category target is retained. No new paid task, wallet authority, recurring provider cost, transaction or evidence deletion is authorized by this audit.

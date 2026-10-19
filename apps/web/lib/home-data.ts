@@ -1,7 +1,7 @@
 import 'server-only'
 import { sql } from 'drizzle-orm'
-import { cachedProjection, db, firstPartyIdListSql, oneAgentIdSql } from '@marque/db'
-import { coverage, formatAmount, QUEST_CATEGORIES, teamWallets, assetAt, type ChainId } from '@marque/commerce'
+import { db, firstPartyIdListSql, oneAgentIdSql } from '@marque/db'
+import { formatAmount, QUEST_CATEGORIES, teamWallets, assetAt, type ChainId } from '@marque/commerce'
 import { funnel } from '@marque/registry'
 import { marketplaceAgents, type MarketRow } from './marketplace'
 import { readLedger } from './ledger'
@@ -85,26 +85,23 @@ export interface CategoryTile {
 }
 
 /** Per quest category: live hireable count, operators, cheapest live quote, best verified rating. */
-export async function categoryTiles(ready: MarketRow[]): Promise<CategoryTile[] | null> {
-  const cov = await cachedProjection('home:coverage:v2', () => coverage(), { freshMs: 60_000, timeoutMs: 8_000, staleWhileRevalidate: true })
-    .then((p) => p.value).catch(() => null)
-  if (!cov) return null
+export async function categoryTiles(ready: MarketRow[], supply: Awaited<ReturnType<typeof marketplaceAgents>>['supply'], measuredAt: string): Promise<CategoryTile[]> {
   return QUEST_CATEGORIES.map((category) => {
-    const c = cov.categories.find((x) => x.category === category)
+    const c = supply.find((x) => x.category === category)
     const cheapest = c?.cheapest ? `${formatAmount(c.cheapest.priceRaw, c.cheapest.decimals)} ${c.cheapest.token}` : null
     const rated = ready
       .filter((r) => r.category === category && r.track.verified.averageStars !== null)
       .sort((a, b) => (b.track.verified.averageStars ?? 0) - (a.track.verified.averageStars ?? 0))[0]
     return {
-      measuredAt: cov.measuredAt, category, hireable: c?.hireable ?? 0, operators: c?.operators ?? 0, thirdPartyOperators: c?.thirdPartyOperators ?? 0, cheapest,
+      measuredAt, category, hireable: c?.hireable ?? 0, operators: c?.operators ?? 0, thirdPartyOperators: c?.thirdPartyOperators ?? 0, cheapest,
       bestRating: rated ? { stars: rated.track.verified.averageStars!, count: rated.track.verified.count, agent: rated.name } : null,
     }
   })
 }
 
 /** Six hireable agents, mixing categories: best of each category first, then the next best. */
-export async function readyToHire(): Promise<{ all: MarketRow[]; picks: MarketRow[] }> {
-  const { rows } = await marketplaceAgents({ tab: 'ready', sort: 'best', limit: 60 })
+export async function readyToHire(): Promise<{ all: MarketRow[]; picks: MarketRow[]; supply: Awaited<ReturnType<typeof marketplaceAgents>>['supply']; generatedAt: string; total: number }> {
+  const { rows, supply, generatedAt, total } = await marketplaceAgents({ tab: 'ready', network: 56, sort: 'best', limit: 60 })
   const byCat = new Map<string, MarketRow[]>()
   for (const r of rows) {
     const k = r.category ?? 'other'
@@ -117,20 +114,19 @@ export async function readyToHire(): Promise<{ all: MarketRow[]; picks: MarketRo
       if (r && picks.length < 6) picks.push(r)
     }
   }
-  return { all: rows, picks }
+  return { all: rows, picks, supply, generatedAt, total }
 }
 
 export interface FunnelLine { registered: number | null; answering: number | null; hireable: number; warranted: number | null; measuredAt: string }
 
 /** The Phase 1 funnel reduced to one line (the full one lives on /why). */
-export async function funnelLine(): Promise<FunnelLine> {
+export async function funnelLine(ready: { total: number; generatedAt: string }): Promise<FunnelLine> {
   const stages = await funnel(56).catch(() => null)
   const stage = (k: string) => stages?.find((s) => s.stage === k)?.count ?? null
   const warranted = await db().execute(sql`
     select count(distinct ${oneAgentIdSql(sql`agent_id`)})::int as n from conformance_result where pass = true and agent_id not like 'stub:%'`)
     .then((r) => Number(rowsOf(r)[0]?.['n'] ?? 0)).catch(() => null)
-  const ready = await marketplaceAgents({ tab: 'ready', network: 56, limit: 1 })
-  return { registered: stage('registered_bsc'), answering: stage('reachable'), hireable: ready.total, warranted, measuredAt: new Date().toISOString() }
+  return { registered: stage('registered_bsc'), answering: stage('reachable'), hireable: ready.total, warranted, measuredAt: ready.generatedAt }
 }
 
 export interface PassFail {

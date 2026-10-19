@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { Statement, Chip } from '@marque/ui'
+import { Statement, Chip, ProvenanceChip } from '@marque/ui'
 import { categoryFunnel, MIN_THIRD_PARTY_PER_CATEGORY } from '@marque/registry'
 import { Marketplace } from '../Marketplace'
 import { initialMarket } from '../initial'
@@ -80,22 +80,29 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
             </Link>
             <Statement as="h1" className={styles.introTitle}>{meta.label}</Statement>
             <p className={styles.introLede}>{meta.what}</p>
+            <p className={styles.introSupply}>
+              <Chip tone={initial?.total == null || initial.total < 3 ? 'watch' : 'holds'}>
+                {initial?.total == null ? 'Escrow listing count unavailable' : `${initial.total} hireable escrow listings`}
+              </Chip>
+              <span className={styles.introSupplyNote}>BSC 56 and 97. Local supply target: at least 3. Quotes expire; the list below refreshes as availability changes.</span>
+              {initial?.generatedAt ? <span className={styles.introSupplyNote}><ProvenanceChip provenance="MEASURED" /> Listing snapshot <time dateTime={initial.generatedAt}>{initial.generatedAt.replace('T', ' ').slice(0, 19)} UTC</time>.</span> : null}
+            </p>
             {row && (
               <p className={styles.introSupply}>
                 {row.thirdPartyExecutable < MIN_THIRD_PARTY_PER_CATEGORY ? (
                   <>
                     <Chip tone="watch">
-                      {row.thirdPartyExecutable === 0 ? 'No fresh compatible supplier' : '1 fresh compatible supplier'}
+                      {row.thirdPartyExecutable === 0 ? 'No compatible third-party task supplier' : '1 compatible third-party task supplier'}
                     </Chip>
-                    <span className={styles.introSupplyNote}>Supplier groups use recorded owners/endpoints; independence is not verified.</span>
+                    <span className={styles.introSupplyNote}>Separate task-call checks over the last 24 hours, not the escrow listing count. Groups use recorded owners/endpoints; independence is not verified.</span>
                   </>
                 ) : (
-                  <Chip tone="holds">{row.thirdPartyExecutable} compatible suppliers</Chip>
+                  <Chip tone="holds">{row.thirdPartyExecutable} compatible third-party task suppliers</Chip>
                 )}
                 {row.thirdPartyRegistrations > row.thirdPartyExecutable && (
                   <span className={styles.introSupplyNote}>
                     across {row.thirdPartyRegistrations.toLocaleString()} registrations; several identities
-                    point at the same endpoint, so suppliers is the number that means anything.
+                    point at the same endpoint. These checks do not establish fresh payment terms.
                   </span>
                 )}
               </p>

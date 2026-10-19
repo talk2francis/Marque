@@ -6,6 +6,7 @@ dist/
 .env.local
 .env.*.local
 coverage/
+!apps/web/app/api/v1/phase2/coverage/
 .turbo/
 out/
 *.log

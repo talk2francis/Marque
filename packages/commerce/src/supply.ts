@@ -2,6 +2,7 @@ import { sql, type SQL } from 'drizzle-orm'
 import { db, commerceQuote, firstPartyAgents, canonicalAgentId, type FirstPartyAgent } from '@marque/db'
 import { requestQuote, probeTask, type QuoteResult } from './quote.js'
 import { boundedCommerceRead, coalescedCatalogRead } from './read-budget.js'
+import { dueQuoteProbes, type QuoteProbeObservation } from './quote-schedule.js'
 
 /**
  * The commercial axis (SPEC-COMMERCE 4.1), separate from MCS quality.
@@ -163,33 +164,27 @@ export async function recordQuote(source: 'probe' | 'user', c: Pick<SellerCandid
   return row?.id ?? 0
 }
 
-/** Minutes between probe quotes for a seller, by what we last saw. */
-export function quoteIntervalMinutes(firstParty: boolean, lastOk: boolean | null): number {
-  // A transient timeout must not leave our own sellers unobserved for ten minutes.
-  // Every failed attempt remains stored; recovery is a new, successful observation.
-  if (firstParty) return lastOk === false ? 1 : 10
-  if (lastOk) return 30
-  return 6 * 60
-}
+export { quoteIntervalMinutes } from './quote-schedule.js'
 
 /** One pass of the quote probe: every seller whose next quote is due. Never creates a job. */
 export async function runQuoteProbe(opts: { concurrency?: number; limit?: number } = {}): Promise<{ attempted: number; ok: number; failures: Record<string, number> }> {
   const candidates = await sellerCandidates()
-  const last = new Map<number, { at: number; ok: boolean }>()
+  const last = new Map<number, QuoteProbeObservation>()
   for (const r of rowsOf(await db().execute(sql`
-    select distinct on (service_id) service_id, created_at, ok
+    select distinct on (service_id) service_id, created_at, ok, signed, quote_expires_at,
+      raw->'quote_expires_at' as provider_expiry, raw#>'{response,quote_expires_at}' as response_expiry
     from commerce_quote where source = 'probe' and service_id is not null
-    order by service_id, created_at desc`))) {
-    last.set(Number(r['service_id']), { at: new Date(r['created_at'] as string).getTime(), ok: r['ok'] === true })
+    order by service_id, created_at desc, id desc`))) {
+    const at = new Date(r['created_at'] as string).getTime()
+    let expiresAt = r['quote_expires_at'] ? new Date(r['quote_expires_at'] as string).getTime() : Number.NaN
+    if (r['signed'] === false) expiresAt = Math.min(expiresAt, at + 900_000)
+    for (const expiry of [r['provider_expiry'], r['response_expiry']]) {
+      if (typeof expiry === 'number') expiresAt = Math.min(expiresAt, expiry * 1000)
+    }
+    last.set(Number(r['service_id']), { at, ok: r['ok'] === true, expiresAt })
   }
   const now = Date.now()
-  const due = candidates
-    .filter((c) => {
-      const l = last.get(c.serviceId)
-      return !l || now - l.at >= quoteIntervalMinutes(c.firstParty !== null, l.ok) * 60_000
-    })
-    .sort((a, b) => Number(b.firstParty !== null) - Number(a.firstParty !== null))
-    .slice(0, opts.limit ?? 60)
+  const due = dueQuoteProbes(candidates, last, now, opts.limit ?? 60)
   const failures: Record<string, number> = {}
   let ok = 0
   let cursor = 0

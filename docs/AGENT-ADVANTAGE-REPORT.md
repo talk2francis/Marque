@@ -1,5 +1,7 @@
 # Agent Advantage Report
 
+> Historical September report. The live Ledger audit on 19 October 2026 reports only ADV-02 and ADV-04 complete under current evidence rules. This document does not establish three current marketplace-hired qualifying benchmark tasks. See [the requirements crosscheck](./vnext/HACKATHON_CROSSCHECK.md).
+
 For the TermiX Challenge. Repaired and completed on **9 September 2026** — see the P8b repair
 section for exactly how, and what was and was not touched.
 

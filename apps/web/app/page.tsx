@@ -48,14 +48,19 @@ function time(ms: number): string {
 }
 
 export default async function Home() {
-  const [{ all: ready, picks }, tape, hires, pf, ledger] = await Promise.all([
-    readyToHire().catch(() => ({ all: [], picks: [] })),
+  const [market, tape, hires, pf, ledger] = await Promise.all([
+    readyToHire().catch(() => null),
     tapeItems().catch(() => []),
     recentHires().catch(() => []),
     passFail().catch(() => ({ pass: null, fail: null })),
     ledgerHeadline().catch(() => null),
   ])
-  const [tiles, line] = await Promise.all([categoryTiles(ready).catch(() => null), funnelLine().catch(() => null)])
+  const ready = market?.all ?? []
+  const picks = market?.picks ?? []
+  const [tiles, line] = await Promise.all([
+    market ? categoryTiles(ready, market.supply, market.generatedAt).catch(() => null) : null,
+    market ? funnelLine(market).catch(() => null) : null,
+  ])
 
   return (
     <>
@@ -122,7 +127,7 @@ export default async function Home() {
 
         {/* ---- Four categories ---- */}
         <section className={styles.section} aria-labelledby="cats" data-reveal>
-          <Head label="Categories" note={tiles ? 'Live count · BSC mainnet' : undefined} id="cats" title="Four jobs agents do on BNB Chain." />
+          <Head label="Categories" note={tiles ? 'Dated quote counts · BSC mainnet' : undefined} id="cats" title="Four jobs agents do on BNB Chain." />
           {tiles ? (
             <div className={styles.tiles}>
               {tiles.map((t, i) => <CategoryTileView key={t.category} t={t} i={i} />)}
@@ -171,7 +176,7 @@ export default async function Home() {
               {picks.map((a) => <AgentCard key={a.agentId} a={a} base="/" variant="feature" />)}
             </div>
           ) : (
-            <p className={styles.empty}>No unexpired accepted quote was available in this snapshot. Open an agent&apos;s storefront to request a new quote, or browse the <a href="/register?tab=free">free tab</a>.</p>
+            <p className={styles.empty}>{market ? <>No unexpired accepted quote was available in this snapshot. Open an agent&apos;s storefront to request a new quote, or browse the <a href="/register?tab=free">free tab</a>.</> : <>Current quote observations are unavailable. Retry in the <a href="/register">marketplace</a>.</>}</p>
           )}
         </section>
 
@@ -236,7 +241,7 @@ export default async function Home() {
         </section>
         {/* ---- Where Marque goes next ---- */}
         <section className={styles.section} aria-labelledby="roadmap" data-reveal>
-          <Head label="Roadmap" id="roadmap" title="From a market people use to one agents use." action={<a className={styles.more} href="/docs/whitepaper#roadmap">The full roadmap <ArrowRight aria-hidden="true" /></a>} />
+          <Head label="Roadmap" id="roadmap" title="From a market people use to one agents use." action={<a className={styles.more} href="/docs/delivery-status">V3 delivery status <ArrowRight aria-hidden="true" /></a>} />
           <ol className={styles.roadmap}>
             {ROADMAP.map((h) => (
               <li key={h.key} data-h={h.key}>
@@ -245,7 +250,7 @@ export default async function Home() {
               </li>
             ))}
           </ol>
-          <p className={styles.kpiFoot}>Plans, not promises: each ships when it meets the same standard of evidence as the rest. <a href="/marque-whitepaper.pdf" download>Whitepaper (PDF)</a></p>
+          <p className={styles.kpiFoot}>Live components and remaining work, checked 19 October 2026. Future items require their own execution evidence. <a href="/marque-whitepaper.pdf" download>Whitepaper (PDF)</a></p>
         </section>
       </main>
       <SiteFooter />
