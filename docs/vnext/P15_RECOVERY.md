@@ -205,3 +205,22 @@ private compiled SQL-only prototype returned HTTP 200 for all 14 requests
 across two fresh two-worker clusters; it is not a deployable release artifact.
 The source change still requires fresh full validation, an immutable prepared
 artifact, cold checks on separate runtime copies and actual live acceptance.
+
+### Fourth stage: verification classified contract reads as writes
+
+Source `78d9b64` passed its fresh full 929-case suite, 42-view current-data
+browser matrix, 30 accessibility checks and both two-worker preflights (14
+requests). Its actual production stage passed readiness, all route/width
+checks, populated profiles, the wallet modal and all 20 checked cached assets.
+The verifier nevertheless rejected 14 POST requests before switching traffic.
+A read-only diagnostic captured `eth_call` requests to the existing public BSC
+RPC; HTTP POST alone does not establish a chain write.
+
+The verifier now allows only valid `eth_call` envelopes, including batches
+containing only those reads, at that exact HTTPS endpoint. Transaction,
+signing, mixed-batch, malformed and other-endpoint requests stay blocked.
+Nine Node regressions cover these boundaries and run in CI. All application,
+package, configuration and dependency inputs remain identical to the tested
+`78d9b64` web build. A later release may reuse that build with explicit separate
+release/build metadata and fresh staged verification; this entry claims no
+public cutover.

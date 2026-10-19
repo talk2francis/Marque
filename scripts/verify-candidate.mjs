@@ -16,6 +16,7 @@
  */
 import { chromium } from 'playwright'
 import { verifyPreviousAssets } from './lib/previous-assets.mjs'
+import { isVerificationRpcRead } from './lib/verification-rpc.mjs'
 
 const BASE = process.argv[2] ?? 'http://127.0.0.1:3299'
 // Deployment metadata from the slot, checked before Chromium or a traffic switch.
@@ -45,6 +46,7 @@ const ROUTES = [
 const browser = await chromium.launch()
 const blockedWrites = []
 let telemetryIntercepted = 0
+let rpcReads = 0
 async function newReadOnlyPage(options) {
   const page = await browser.newPage(options)
   await page.route('**/*', (route) => {
@@ -54,7 +56,11 @@ async function newReadOnlyPage(options) {
       telemetryIntercepted++
       return route.fulfill({ status: 204, body: '' })
     }
-    blockedWrites.push(`${request.method()} ${new URL(request.url()).pathname}`)
+    if (request.method() === 'POST' && isVerificationRpcRead(request.url(), request.postData())) {
+      rpcReads++
+      return route.continue()
+    }
+    blockedWrites.push({ method: request.method(), origin: new URL(request.url()).origin })
     return route.abort()
   })
   return page
@@ -188,5 +194,7 @@ for (const line of body.split('\n')) {
 await browser.close()
 failures += blockedWrites.length
 console.log(`Read-only verification: ${telemetryIntercepted} telemetry attempts intercepted locally; ${blockedWrites.length} unexpected writes blocked.`)
+console.log(`Read-only BSC contract RPC requests allowed: ${rpcReads}`)
+if (blockedWrites.length) console.log(JSON.stringify(blockedWrites))
 console.log(`\n${failures} route/width combinations with problems`)
 process.exit(failures ? 1 : 0)

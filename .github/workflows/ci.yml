@@ -46,6 +46,7 @@ jobs:
           bash -n scripts/deploy-web.sh
           bash ops/http-health.test.sh
           node --test scripts/lib/previous-assets.check.mjs
+          node --test scripts/lib/verification-rpc.check.mjs
       - run: pnpm test
       - name: Create the guarded integration fixture database
         env:
