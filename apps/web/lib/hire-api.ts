@@ -6,7 +6,7 @@ import { HireError } from '@marque/commerce'
 export function hireError(err: unknown, route: string) {
   if (err instanceof HireError) return NextResponse.json({ error: err.code, detail: err.message }, { status: err.status })
   console.error(`[api/v1/hire/${route}]`, err instanceof Error ? err.message : String(err))
-  return NextResponse.json({ error: 'hire_unavailable', detail: 'Marque could not complete this step just now. Nothing was charged. Try again in a minute.' }, { status: 503 })
+  return NextResponse.json({ error: 'hire_unavailable', detail: 'Marque could not confirm this step just now. Check the job and your wallet transaction history before retrying. Earlier approvals or network fees may apply.' }, { status: 503 })
 }
 
 export function limited(detail: string | undefined, retry: number | undefined) {

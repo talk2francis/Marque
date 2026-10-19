@@ -84,7 +84,7 @@ export function fundCall(chainId: ChainId, jobId: bigint, price: bigint, priceLa
 export function cancelCall(chainId: ChainId, jobId: bigint): Call {
   const n = network(chainId)
   return { step: 'cancel', chainId, to: n.commerce, abi: agenticCommerceAbi as unknown as Abi, functionName: 'reject', args: [jobId, ZERO_REASON, '0x'],
-    label: 'Cancel this job', detail: 'Closes the job before any payment. Nothing is charged.' }
+    label: 'Cancel this job', detail: 'Closes this unpaid job. Earlier approvals or network fees may still apply.' }
 }
 
 export function claimRefundCall(chainId: ChainId, jobId: bigint): Call {

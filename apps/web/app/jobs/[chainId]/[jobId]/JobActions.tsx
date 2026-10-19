@@ -6,8 +6,8 @@ import { useConnectModal } from '@rainbow-me/rainbowkit'
 import { readContract, switchChain, waitForTransactionReceipt, writeContract } from '@wagmi/core'
 import { erc20Abi, type Hex } from 'viem'
 import {
-  approvalNeeded, approveCall, cancelCall, claimRefundCall, disputeCall, friendlyError, fundCall, NETWORKS,
-  registerJobCall, setBudgetCall, useRate, type Call, type ChainId, type FriendlyError,
+  cancelCall, claimRefundCall, disputeCall, friendlyError, formatAmount, NETWORKS, agenticCommerceAbi, evaluatorRouterAbi,
+  remainingPaymentCalls, useRate, type Call, type ChainId, type FriendlyError, type HireTerms,
 } from '@marque/commerce/client'
 import { Button, ButtonLink, ErrorNote, Modal, StarInput, TxStepper, type TxStep } from '../../../_components/ui'
 import { toast } from '../../../../lib/toast'
@@ -27,7 +27,8 @@ export interface JobActionProps {
   agentName: string
   agentKey: string | null
   priceLabel: string | null
-  resume: { priceRaw: string; token: { address: `0x${string}`; symbol: string; decimals: number; isDefault: boolean }; registered: boolean; budgetSet: boolean } | null
+  resume: { priceRaw: string; provider: `0x${string}`; description: string; expiredAt: string; token: { address: `0x${string}`; symbol: string; decimals: number; isDefault: boolean } } | null
+  fundingDeadline: number | null
   refundFrom: number | null
   reviewEndsAt: number | null
   submitDeadline: number | null
@@ -63,9 +64,11 @@ export function JobActions(p: JobActionProps) {
   const disputable = now !== null && p.reviewEndsAt !== null && now < p.reviewEndsAt && p.state === 'SUBMITTED'
   const late = now !== null && p.submitDeadline !== null && now > p.submitDeadline && p.state === 'FUNDED'
   const canRate = ['SUBMITTED', 'COMPLETED', 'PAID', 'DISPUTED'].includes(p.state) && !p.rated && rateState.phase !== 'done'
+  const resumePriceLabel = p.resume ? `${formatAmount(p.resume.priceRaw, p.resume.token.decimals)} ${p.resume.token.symbol}` : null
 
-  const send = async (c: Call, id: string) => {
+  const send = async (c: Call, id: string, beforeWrite?: () => void) => {
     if (walletChain !== c.chainId) await switchChain(config, { chainId: c.chainId })
+    beforeWrite?.()
     setSteps((s) => s?.map((x) => (x.id === id ? { ...x, state: 'wallet' } : x)) ?? null)
     const hash = await writeContract(config, { address: c.to, abi: c.abi, functionName: c.functionName, args: c.args as unknown[], chainId: c.chainId })
     setSteps((s) => s?.map((x) => (x.id === id ? { ...x, state: 'confirming', txHash: hash, chainId: c.chainId } : x)) ?? null)
@@ -75,11 +78,11 @@ export function JobActions(p: JobActionProps) {
     return hash as Hex
   }
 
-  const run = async (what: string, fn: () => Promise<Hex | void>, success: { title: string; body: string }) => {
+  const run = async (what: string, fn: () => Promise<Hex | void>, success: { title: string; body: string } | (() => { title: string; body: string })) => {
     setBusy(what); setError(null)
     try {
       const tx = await fn()
-      toast({ tone: 'success', ...success, ...(tx ? { href: explorerTx(p.chainId, tx) } : {}) })
+      toast({ tone: 'success', ...(typeof success === 'function' ? success() : success), ...(tx ? { href: explorerTx(p.chainId, tx) } : {}) })
       router.refresh()
     } catch (err) {
       const f = friendlyError(err)
@@ -89,27 +92,33 @@ export function JobActions(p: JobActionProps) {
   }
 
   /** Finish an opened, unpaid job: protection, price, exact allowance, payment, then tell the agent. */
+  const assertFundingWindow = () => {
+    if (p.fundingDeadline === null || Math.floor(Date.now() / 1000) >= p.fundingDeadline) throw Object.assign(new Error('The unpaid job has no current payment window.'), { code: 'job_payment_window_closed' })
+  }
+  let notificationAccepted = false
   const resume = () => run('resume', async () => {
+    assertFundingWindow()
     const r = p.resume!
     const price = BigInt(r.priceRaw)
-    const label = p.priceLabel ?? `${r.token.symbol}`
-    const allowance = await readContract(config, { address: r.token.address, abi: erc20Abi, functionName: 'allowance', args: [address!, NETWORKS[p.chainId].commerce], chainId: p.chainId })
-    const need = approvalNeeded(allowance, price)
-    const plan: Array<{ id: string; call: Call } | null> = [
-      r.registered ? null : { id: 'registerJob', call: registerJobCall(p.chainId, BigInt(p.jobId)) },
-      r.budgetSet ? null : { id: 'setBudget', call: setBudgetCall(p.chainId, BigInt(p.jobId), price, label) },
-      need === null ? null : { id: 'approve', call: approveCall(p.chainId, r.token, need, label) },
-      { id: 'fund', call: fundCall(p.chainId, BigInt(p.jobId), price, label) },
-    ]
-    const todo = plan.filter((x): x is { id: string; call: Call } => x !== null)
-    setSteps([...todo.map((x) => ({ id: x.id, label: x.call.label, state: 'waiting' as const })), { id: 'notify', label: `Ask ${p.agentName} to start`, state: 'waiting', offchain: true }])
+    const label = resumePriceLabel!
+    const n = NETWORKS[p.chainId], jobId = BigInt(p.jobId)
+    const [allowance, job, policy, token] = await Promise.all([
+      readContract(config, { address: r.token.address, abi: erc20Abi, functionName: 'allowance', args: [address!, n.commerce], chainId: p.chainId }),
+      readContract(config, { address: n.commerce, abi: agenticCommerceAbi, functionName: 'getJob', args: [jobId], chainId: p.chainId }),
+      readContract(config, { address: n.router, abi: evaluatorRouterAbi, functionName: 'jobPolicy', args: [jobId], chainId: p.chainId }),
+      readContract(config, { address: n.commerce, abi: agenticCommerceAbi, functionName: 'jobPaymentToken', args: [jobId], chainId: p.chainId }),
+    ])
+    const terms: HireTerms = { chainId: p.chainId, provider: r.provider, token: r.token, price, priceLabel: label, agentName: p.agentName, expiredAt: BigInt(r.expiredAt), description: r.description }
+    const todo = remainingPaymentCalls(terms, jobId, allowance, address!, job, policy, token)
+    setSteps([...todo.map((x) => ({ id: x.step, label: x.label, state: 'waiting' as const })), { id: 'notify', label: `Ask ${p.agentName} to start`, state: 'waiting', offchain: true }])
     let last: Hex | undefined
-    for (const x of todo) last = await send(x.call, x.id)
+    for (const x of todo) last = await send(x, x.step, assertFundingWindow)
     setSteps((s) => s?.map((x) => (x.id === 'notify' ? { ...x, state: 'wallet' } : x)) ?? null)
-    await fetch('/api/v1/hire/notify', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ chainId: p.chainId, jobId: p.jobId }) }).catch(() => undefined)
-    setSteps((s) => s?.map((x) => (x.id === 'notify' ? { ...x, state: 'done' } : x)) ?? null)
+    const notified = await fetch('/api/v1/hire/notify', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ chainId: p.chainId, jobId: p.jobId }) }).then(async response => response.ok ? response.json() as Promise<{ accepted?: boolean }> : null).catch(() => null)
+    notificationAccepted = notified?.accepted === true
+    setSteps((s) => s?.map((x) => (x.id === 'notify' ? { ...x, state: notificationAccepted ? 'done' : 'failed', ...(!notificationAccepted ? { error: { title: 'Seller notification pending', action: 'Escrow funding and seller acceptance are separate. Delivery has not been confirmed.' } } : {}) } : x)) ?? null)
     return last
-  }, { title: 'Paid into escrow', body: `${p.agentName} has been asked to start.` })
+  }, () => ({ title: 'Escrow funded', body: notificationAccepted ? `${p.agentName} accepted the notification. Delivery is still pending.` : 'Seller notification is pending. Funding does not confirm delivery; keep this job page for recovery.' }))
 
   const one = (id: string, call: Call, success: { title: string; body: string }) => run(id, async () => {
     setSteps([{ id, label: call.label, state: 'waiting' }])
@@ -135,11 +144,12 @@ export function JobActions(p: JobActionProps) {
   return (
     <div className="ja">
       {needsWallet && gate ? gate : null}
+      {p.state === 'OPEN' && (!p.resume || p.fundingDeadline === null || (now !== null && now >= p.fundingDeadline)) ? <p className="ja-note">Payment recovery is unavailable for these original terms. Use the wallet that opened this unpaid job to cancel it, then request a fresh quote to start again. Earlier approvals or network fees may still apply.</p> : null}
 
       {isClient && p.state === 'OPEN' ? (
         <div className="ja-row">
-          {p.resume ? <Button variant="primary" loading={busy === 'resume'} disabled={busy !== null} onClick={resume}>Finish paying {p.priceLabel ?? ''}</Button> : null}
-          <Button variant="danger" loading={busy === 'cancel'} disabled={busy !== null} onClick={() => one('cancel', cancelCall(p.chainId, BigInt(p.jobId)), { title: 'Job cancelled', body: 'Nothing was charged.' })}>Cancel job</Button>
+          {p.resume && now !== null && p.fundingDeadline !== null && now < p.fundingDeadline ? <Button variant="primary" loading={busy === 'resume'} disabled={busy !== null} onClick={resume}>Finish paying {resumePriceLabel}</Button> : null}
+          <Button variant="danger" loading={busy === 'cancel'} disabled={busy !== null} onClick={() => one('cancel', cancelCall(p.chainId, BigInt(p.jobId)), { title: 'Job cancelled', body: 'The unpaid job was closed. Earlier approvals or network fees may still apply.' })}>Cancel job</Button>
         </div>
       ) : null}
 

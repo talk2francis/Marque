@@ -38,6 +38,8 @@ The four core categories are Rebalancing, Grid trading, Yield optimisation and H
 
 Reference agents are labelled and ingested as registry identities; they do not constitute independent third-party adoption.
 
+Unpaid Job Rooms recheck current on-chain terms before wallet writes and refuse closed payment windows. An expired unpaid job must be cancelled before a fresh hire is reviewed. Funding and seller notification are separate; an unavailable response does not establish that no earlier transaction or network fee occurred.
+
 ## Campaign and judging
 
 Marque is listed on BNB Chain's [official Set and Earn campaign page](https://www.bnbchain.org/en/hackathons/smart-money-era-set-and-earn). The campaign runs through **5 November 2026, 12:00 UTC**. This participant campaign is separate from the original September marketplace judging and partner-track submissions.

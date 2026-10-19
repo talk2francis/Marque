@@ -52,7 +52,10 @@ describe('read-only hire metadata failure recovery', () => {
     await vi.advanceTimersByTimeAsync(10001)
     const response = await pending
     expect(response.status).toBe(503)
-    expect(await response.json()).toMatchObject({ error: 'hire_unavailable' })
+    const error = await response.json()
+    expect(error).toMatchObject({ error: 'hire_unavailable' })
+    expect(error.detail).toContain('transaction history')
+    expect(error.detail).not.toContain('Nothing was charged')
     expect(readContract).not.toHaveBeenCalled()
   })
 })

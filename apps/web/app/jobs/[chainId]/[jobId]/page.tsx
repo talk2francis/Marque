@@ -50,7 +50,7 @@ export default async function JobRoom({ params }: { params: Promise<{ chainId: s
   if (!job && (!onchain || onchain.id === 0n)) notFound()
 
   const [intent] = (await db().execute(sql`
-    select i.description, i.price_raw, i.token, i.category, a.image_url,
+    select i.description, i.price_raw, i.token, i.category, i.provider, i.expired_at, a.image_url,
            a.raw_metadata #>> '{offchain_content,image}' as meta_image
     from hire_intent i left join agent a on a.id = i.agent_id
     where i.chain_id = ${chainId} and i.job_id = ${jobId} limit 1`)) as unknown as Array<Record<string, unknown>>
@@ -63,13 +63,16 @@ export default async function JobRoom({ params }: { params: Promise<{ chainId: s
   const token = rawToken && rawToken.address && rawToken.symbol && rawToken.decimals !== null && rawToken.decimals !== undefined
     ? { address: rawToken.address, symbol: rawToken.symbol, decimals: rawToken.decimals } : null
   const amountRaw = job?.amount ?? (onchain ? onchain.budget.toString() : null) ?? (intent?.['price_raw'] ? String(intent['price_raw']) : null)
-  const priceLabel = amountRaw && token ? `${formatAmount(BigInt(amountRaw), token.decimals)} ${token.symbol}` : intent?.['price_raw'] && token ? `${formatAmount(BigInt(String(intent['price_raw'])), token.decimals)} ${token.symbol}` : null
+  const tokenMeta = intent?.['token'] ? assetAt(cid, String(intent['token'])) : null
+  const originalQuote = state === 'OPEN' && typeof intent?.['price_raw'] === 'string' && tokenMeta ? { raw: intent['price_raw'], token: tokenMeta } : null
+  const priceLabel = originalQuote ? `${formatAmount(originalQuote.raw, originalQuote.token.decimals)} ${originalQuote.token.symbol}` : amountRaw && token ? `${formatAmount(BigInt(amountRaw), token.decimals)} ${token.symbol}` : null
   const expiredAt = job?.expiresAt ? Math.floor(Date.parse(job.expiresAt) / 1000) : onchain ? Number(onchain.expiredAt) : null
   const submittedEv = events.find((e) => e.name === 'JobSubmitted')
   const submittedAt = submittedEv?.at ? Math.floor(Date.parse(submittedEv.at) / 1000) : onchain && onchain.submittedAt > 0n ? Number(onchain.submittedAt) : null
   const now = Math.floor(Date.now() / 1000)
   const t = windowS === null ? null : timeline({ state: state as never, expiredAt }, submittedAt, windowS, now)
-  const head = jobHeadline(state, agentName, priceLabel ?? 'payment', t?.reviewEndsAt ?? null, t?.refundFrom ?? null, Boolean(t?.awaitingExpiry))
+  const fundingDeadline = t?.submitDeadline ?? expiredAt
+  const head = jobHeadline(state, agentName, priceLabel ?? 'payment', t?.reviewEndsAt ?? null, t?.refundFrom ?? null, Boolean(t?.awaitingExpiry), fundingDeadline !== null && now >= fundingDeadline)
   const onchainHash = job?.deliverable?.hash ?? (onchain && onchain.submittedAt > 0n ? onchain.deliverable : null)
   const manifest = job?.deliverable?.url ? await readManifest(job.deliverable.url, onchainHash) : null
   // The description can be signed or identity-matched unsigned; the buyer's words are its `task`.
@@ -78,9 +81,6 @@ export default async function JobRoom({ params }: { params: Promise<{ chainId: s
     if (!d) return null
     try { const j = JSON.parse(d) as { task?: unknown }; return typeof j.task === 'string' ? j.task : null } catch { return d.split('\n')[0] ?? null }
   })()
-  const registered = events.some((e) => e.name === 'JobRegistered')
-  const budgetSet = events.some((e) => e.name === 'BudgetSet')
-  const tokenMeta = token ? assetAt(cid, token.address) : null
 
   // Timeline: what happened (from chain events), then what is still to come.
   const done = events.filter((e) => EVENT_LABEL[e.name] && e.name !== 'JobSettled')
@@ -110,13 +110,14 @@ export default async function JobRoom({ params }: { params: Promise<{ chainId: s
             <dl className={styles.facts}>
               <div><dt>Agent</dt><dd>{agentName}{job?.agent?.firstParty ? <Badge kind="reference" /> : null}</dd></div>
               <div><dt>Category</dt><dd>{CAT[category ?? ''] ?? 'Unclassified'}</dd></div>
-              <div><dt>Amount</dt><dd className={styles.num}>{priceLabel ?? 'unknown'} <ProvenanceChip provenance="ONCHAIN" /></dd></div>
+              <div><dt>{originalQuote ? 'Original quote' : 'Amount'}</dt><dd className={styles.num}>{priceLabel ?? 'unknown'} <ProvenanceChip provenance={originalQuote ? 'MEASURED' : 'ONCHAIN'} /></dd></div>
               <div><dt>Job</dt><dd className={styles.num}>#{jobId}</dd></div>
             </dl>
             <JobActions
               chainId={cid} jobId={jobId} state={state} client={job?.client ?? onchain?.client ?? null} agentName={agentName}
               agentKey={job?.agent?.agentKey ?? null} priceLabel={priceLabel}
-              resume={state === 'OPEN' && intent?.['price_raw'] && tokenMeta ? { priceRaw: String(intent['price_raw']), token: { address: tokenMeta.address, symbol: tokenMeta.symbol, decimals: tokenMeta.decimals, isDefault: tokenMeta.isDefault }, registered, budgetSet } : null}
+              resume={state === 'OPEN' && intent?.['price_raw'] && intent['provider'] && intent['description'] && intent['expired_at'] && tokenMeta && windowS !== null ? { priceRaw: String(intent['price_raw']), provider: String(intent['provider']) as `0x${string}`, description: String(intent['description']), expiredAt: String(intent['expired_at']), token: { address: tokenMeta.address, symbol: tokenMeta.symbol, decimals: tokenMeta.decimals, isDefault: tokenMeta.isDefault } } : null}
+              fundingDeadline={fundingDeadline}
               refundFrom={t?.refundFrom ?? null} reviewEndsAt={t?.reviewEndsAt ?? null} submitDeadline={t?.submitDeadline ?? null}
               rated={job?.rating ? { stars: Number(job.rating.stars ?? Math.round(Number(job.rating.value) / 20)), tx: job.rating.tx ?? null } : null}
             />

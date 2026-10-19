@@ -1,9 +1,11 @@
 import { utcStamp } from './time'
 
 /** Indexed delivery, completion and payment release are distinct facts. */
-export function jobHeadline(state: string, agent: string, price: string, reviewEnds: number | null, refundFrom: number | null, late: boolean) {
+export function jobHeadline(state: string, agent: string, price: string, reviewEnds: number | null, refundFrom: number | null, late: boolean, openExpired = false) {
   switch (state) {
-    case 'OPEN': return { title: 'Finish paying to start the job', body: `The job is open on BNB Chain's escrow but not paid. The service fee has not been funded into escrow. Earlier approvals or network fees may still apply. Finish paying, or cancel it.` }
+    case 'OPEN': return openExpired
+      ? { title: 'This unpaid job has expired', body: 'The payment window has closed. The service fee was not funded into escrow. Cancel this job and request a fresh quote to start again. Earlier approvals or network fees may still apply.' }
+      : { title: 'Finish paying to start the job', body: `The job is open on BNB Chain's escrow but not paid. The service fee has not been funded into escrow. Earlier approvals or network fees may still apply. Finish paying, or cancel it.` }
     case 'FUNDED': return late && refundFrom
       ? { title: `${agent} has not delivered`, body: `The delivery deadline has passed. You can reclaim your ${price} from ${utcStamp(refundFrom * 1000)}.` }
       : { title: 'Escrow funded; waiting for delivery', body: `The ${price} service fee is held in BNB Chain's ERC-8183 escrow while delivery, review and settlement remain pending.` }

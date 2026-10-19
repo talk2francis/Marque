@@ -16,12 +16,12 @@ export interface FriendlyError {
 
 const E = (code: string, title: string, action: string, retryable = false): FriendlyError => ({ code, title, action, retryable })
 
-const INTERNAL = 'This is a problem on the contract side, not with your wallet. Nothing was charged. Contact support with the job number.'
+const INTERNAL = 'This is a problem on the contract side. Check the job and your wallet transaction history before retrying. Network fees may apply; contact support with the job number.'
 
 export const CONTRACT_ERRORS: Readonly<Record<string, FriendlyError>> = {
   // AgenticCommerce
   BudgetMismatch: E('BudgetMismatch', 'The payment does not match the locked price.', 'Lock the price again, then pay the same amount.', true),
-  EnforcedPause: E('EnforcedPause', 'The escrow contract is paused by BNB Chain.', 'No payment is possible right now. Try again later; your wallet was not charged.', true),
+  EnforcedPause: E('EnforcedPause', 'The escrow contract is paused by BNB Chain.', 'Wait until the pause ends. Check existing wallet activity before retrying; network fees may apply.', true),
   ExpectedPause: E('ExpectedPause', 'The escrow contract is not in the expected state.', INTERNAL),
   ExpiryTooLong: E('ExpiryTooLong', 'The job would run longer than the escrow allows.', 'Start the hire again for a fresh job window.', true),
   ExpiryTooShort: E('ExpiryTooShort', 'The job window is too short to cover the review period.', 'Start the hire again; Marque will set a longer window.', true),
@@ -98,7 +98,7 @@ export const WALLET_ERRORS: Readonly<Record<string, FriendlyError>> = {
   '-32603': E('-32603', 'Your wallet could not send the transaction.', 'Check you have a little BNB for gas, then try again.', true),
 }
 
-const GENERIC = E('unknown', 'Something went wrong before the transaction was sent.', 'Nothing was charged. Try again, and contact support if it keeps happening.', true)
+const GENERIC = E('unknown', 'The action could not be confirmed.', 'Check the job and your wallet transaction history before retrying. Earlier approvals or network fees may apply.', true)
 
 /** Map any thrown value on the money path to plain words. Never returns raw error text. */
 export function friendlyError(err: unknown): FriendlyError {
@@ -119,6 +119,7 @@ export function friendlyError(err: unknown): FriendlyError {
   }
   const e = err as { code?: number | string; cause?: { code?: number | string }; message?: string; shortMessage?: string; name?: string } | null
   const code = String(e?.code ?? e?.cause?.code ?? '')
+  if (code === 'job_payment_window_closed') return E(code, 'This unpaid job has no current payment window.', 'Cancel the unpaid job and request a fresh quote to start again.')
   if (WALLET_ERRORS[code]) return WALLET_ERRORS[code]
   const text = `${e?.shortMessage ?? ''} ${e?.message ?? ''}`
   if (/user (rejected|denied)|rejected the request/i.test(text)) return WALLET_ERRORS['4001']!

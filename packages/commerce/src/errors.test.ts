@@ -36,6 +36,11 @@ describe('friendlyError', () => {
     const g = friendlyError(new Error('Internal JSON-RPC error: 0xdeadbeef stack trace at foo.js:1'))
     expect(g.code).toBe('unknown')
     expect(`${g.title}${g.action}`).not.toMatch(/deadbeef|JSON-RPC|foo\.js/)
+    expect(`${g.title}${g.action}`).not.toMatch(/Nothing was charged|before the transaction was sent/)
+    expect(g.action).toContain('transaction history')
+  })
+  it('offers safe recovery for a closed unpaid-job window', () => {
+    expect(friendlyError({ code: 'job_payment_window_closed' }).action).toContain('Cancel the unpaid job')
   })
 })
 
