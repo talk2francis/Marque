@@ -60,12 +60,7 @@ export async function sellerCandidates(scope?: { agentId: string; serviceId?: nu
   const fp = firstPartyAgents()
   const fpIds = fp.map((a) => canonicalAgentId(a))
   const rows = await supplyRows(sql`
-    with lp as (
-      select ps.service_id, ps.agent_id, p.manifest, p.executable_endpoint, p.liveness
-      from probe_schedule ps join probe p on p.id = ps.last_probe_id
-      ${scope ? sql`where ps.agent_id = ${scope.agentId} ${scope.serviceId == null ? sql`` : sql`and ps.service_id = ${scope.serviceId}`}` : sql``}
-    ),
-    cat as (
+    with cat as (
       select distinct on (agent_id) agent_id, category
       from agent_category
       ${scope ? sql`where agent_id = ${scope.agentId}` : sql`where (
@@ -74,6 +69,27 @@ export async function sellerCandidates(scope?: { agentId: string; serviceId?: nu
         category < 'unclassified' or category > 'unclassified'
       )`}
       order by agent_id, (category <> 'unclassified') desc, confidence desc, assigned_at desc
+    )
+    ${scope ? sql`` : sql`, candidate_ids as materialized (
+      -- Classified and first-party IDs are small. Inspect manifest-bearing current
+      -- probes separately through the sparse index, retaining the original OR rules.
+      select ps.service_id
+      from probe_schedule ps left join cat on cat.agent_id = ps.agent_id
+      where ps.agent_id in (${sql.join(fpIds.map((id) => sql`${id}`), sql`, `)})
+         or cat.category in ('yield', 'grid', 'rebalancing', 'health_factor', 'security')
+      union
+      select ps.service_id
+      from probe_schedule ps join probe p on p.id = ps.last_probe_id
+      where p.manifest is not null and exists (
+        select 1 from jsonb_array_elements(case when jsonb_typeof(p.manifest->'skills') = 'array' then p.manifest->'skills' else '[]'::jsonb end) x
+        where x->>'id' in ('negotiate', 'notify_funded') or (x->>'id') ilike '%8183%' or (x->>'name') ilike '%erc-8183%'
+      )
+    )`},
+    lp as (
+      select ps.service_id, ps.agent_id, p.manifest, p.executable_endpoint, p.liveness
+      from probe_schedule ps join probe p on p.id = ps.last_probe_id
+      ${scope ? sql`` : sql`join candidate_ids ci on ci.service_id = ps.service_id`}
+      ${scope ? sql`where ps.agent_id = ${scope.agentId} ${scope.serviceId == null ? sql`` : sql`and ps.service_id = ${scope.serviceId}`}` : sql``}
     )
     select lp.service_id, a.id as agent_id, a.chain_id, a.token_id, a.name, a.agent_wallet, a.owner_address,
            coalesce(lp.manifest->>'url', lp.executable_endpoint, s.resolved_endpoint, s.endpoint) as endpoint,

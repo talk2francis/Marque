@@ -13,7 +13,7 @@ describe('exact-seller read budget', () => {
   it('restricts candidate probe and category work to the selected identity and service', async () => {
     await sellerCandidates({ agentId, serviceId: 43279 })
     const queries = execute.mock.calls.map(([q]) => dialect.sqlToQuery(q))
-    const query = queries.find(q => q.sql.includes('with lp'))!
+    const query = queries.find(q => q.sql.includes('as advertises'))!
     expect(query.params.filter(p => p === agentId)).toHaveLength(2)
     expect(query.params).toContain(43279)
     expect(query.sql).toMatch(/where ps.agent_id =/)
@@ -36,7 +36,7 @@ it('bounds global discovery separately while preserving its unscoped query', asy
   await sellerCandidates()
   expect(transaction).toHaveBeenCalledTimes(1)
   const queries = execute.mock.calls.map(([q]) => dialect.sqlToQuery(q))
-  const query = queries.find(q => q.sql.includes('with lp'))!
+  const query = queries.find(q => q.sql.includes('as advertises'))!
   expect(query.sql).not.toContain('where ps.agent_id =')
   expect(query.sql).not.toContain('from agent_category\n      where agent_id =')
   expect(queries.some(q => q.sql.includes('read only'))).toBe(true)

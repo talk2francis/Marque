@@ -2,7 +2,7 @@
 export const MCS_CODE_ANCHOR = {
   "version": 1,
   "algorithm": "SHA-256",
-  "sha256": "0x54983eb93838803cf79ae15ffc1d93315647c7171f7d077ba81e98cf3e1f402f",
+  "sha256": "0x45c30997ace21fc3e9be0635d11fd9aa29659cb74c841a32431cf660ca27fd6e",
   "scope": "local MCS implementation and imported workspace source; lockfile pins external dependencies; not deployed-bytecode or issuer attestation",
   "files": [
     {
@@ -99,7 +99,7 @@ export const MCS_CODE_ANCHOR = {
     },
     {
       "path": "packages/db/src/schema.ts",
-      "sha256": "0x778d23d56b7274f731aba93da93ca550cd30ab586d57ac8d71da167c2e1824b9"
+      "sha256": "0xad6356bf0b5663e1297e53d0d5d898943f4576949fb40c1015f2c7de726b6013"
     },
     {
       "path": "packages/positions/src/abis.ts",

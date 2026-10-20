@@ -185,6 +185,7 @@ export const probe = pgTable('probe', {
   serviceCheckedIdx: index('probe_service_checked_idx').on(t.serviceId, t.checkedAt.desc()),
   serviceAgentCheckedIdx: index('probe_service_agent_checked_idx').on(t.serviceId, t.agentId, sql`${t.checkedAt} desc nulls last`),
   checkedIdx: index('probe_checked_idx').on(t.checkedAt.desc()),
+  manifestLookupIdx: index('probe_manifest_lookup_idx').on(t.id).where(sql`${t.manifest} is not null`),
 }))
 
 /**

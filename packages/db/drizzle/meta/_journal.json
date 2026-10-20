@@ -155,6 +155,13 @@
       "when": 1792431069813,
       "tag": "0021_agent_chain_wallet_lower",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1792457811107,
+      "tag": "0022_probe_manifest_lookup",
+      "breakpoints": true
     }
   ]
 }
