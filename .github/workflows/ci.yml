@@ -68,6 +68,7 @@ jobs:
           apps/web/lib/listing.integration.test.ts
           apps/web/lib/seller.integration.test.ts
           packages/registry/src/service-refresh.integration.test.ts
+          apps/worker/src/registry-services.integration.test.ts
           packages/commerce/src/hire-p02.integration.test.ts
           packages/commerce/src/feedback-proof.integration.test.ts
           apps/web/lib/marketplace-scope.integration.test.ts

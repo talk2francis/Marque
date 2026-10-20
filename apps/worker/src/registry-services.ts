@@ -50,24 +50,28 @@ async function queueUriUpdates(): Promise<number> {
   return batch.logs.length
 }
 
-/** Bounded current-registry reconciliation; no runtime POST, payment or chain write. */
-export async function refreshRegistryServices(): Promise<{ attempted: number; refreshed: number; failed: number; queuedChanges: number | null }> {
-  // Future URI updates have a durable change cursor; priority/rolling reads repair older snapshots
-  // and mutable HTTPS documents whose URI never changes. Log failure without starving those reads.
-  const queuedChanges = await queueUriUpdates().catch(() => null)
-  const fp = firstPartyAgents().map(canonicalAgentId)
-  const active = rows(await db().execute(sql`
+export function registryRefreshCandidatesQuery(fp: readonly string[]) {
+  return sql`
     select a.id, a.chain_id, a.token_id, a.contract_address, 0 as service_id
     from agent a join (
       select agent_id from builder_listing where withdrawn_at is null
-      union select unnest(${fp}::text[])
+      union select unnest(array[${sql.join(fp.map(id => sql`${id}`), sql`, `)}]::text[])
       union select substring(source from length('registry:services-pending:') + 1) from ingest_cursor
         where source like 'registry:services-pending:%' and cursor > 0
     ) listed on listed.agent_id = a.id
     left join ingest_cursor c on c.source = 'registry:services-attempt:' || a.id
     left join ingest_cursor pending on pending.source = 'registry:services-pending:' || a.id
     where c.updated_at is null or c.updated_at < now() - interval '15 minutes' or pending.cursor > 0
-    order by c.updated_at nulls first, a.id limit 16`))
+    order by c.updated_at nulls first, a.id limit 16`
+}
+
+/** Bounded current-registry reconciliation; no runtime POST, payment or chain write. */
+export async function refreshRegistryServices(): Promise<{ attempted: number; refreshed: number; failed: number; queuedChanges: number | null }> {
+  // Future URI updates have a durable change cursor; priority/rolling reads repair older snapshots
+  // and mutable HTTPS documents whose URI never changes. Log failure without starving those reads.
+  const queuedChanges = await queueUriUpdates().catch(() => null)
+  const fp = firstPartyAgents().map(canonicalAgentId)
+  const active = rows(await db().execute(registryRefreshCandidatesQuery(fp)))
   // A second small rotating batch keeps non-listed indexed services refreshable too.
   const [cursor] = rows(await db().execute(sql`select cursor from ingest_cursor where source = 'registry:services-walk'`))
   const rolling = rows(await db().execute(sql`
