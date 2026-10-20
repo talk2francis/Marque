@@ -31,7 +31,7 @@ export async function sellerProjection(view: BuilderView, diagnosticOwner: strin
       left join lateral (select ok, failure, signed, provider, chain_id, quote_expires_at, created_at, endpoint
         from commerce_quote where agent_id = ${agentKey} and service_id = s.id and source = 'probe'
         order by created_at desc, id desc limit 1) q on true
-      where s.agent_id = ${agentKey} order by (s.currently_declared is true) desc, s.id limit 81`))
+      where s.agent_id = ${agentKey} order by (s.currently_declared is true) desc, s.id limit 17`))
     // Exact Marque intent binding, not every job sharing a mutable provider wallet.
     const cohort = sql`select j.*, i.service_id, i.price_raw as quoted_raw, i.token as quoted_token,
         i.provider as quoted_provider from commerce_job j join hire_intent i on i.id = j.intent_id
@@ -94,7 +94,7 @@ export async function sellerProjection(view: BuilderView, diagnosticOwner: strin
       identity: { current: current !== null, blockNumber: current?.blockNumber ?? null, owner: current?.agentOwner ?? null, provider, independence: 'UNKNOWN' as const },
       qualification: { ownerListed: view.listingEvidence.ownerListed && current !== null && current.agentOwner.toLowerCase() === view.identity.owner, qualityListed: view.listingEvidence.qualityListed && current !== null && current.agentOwner.toLowerCase() === view.identity.owner,
         warrant: 'UNKNOWN_EXACT_SERVICE_BINDING' as const, marqueStretch: 'LOCAL_FOUR_CATEGORY_GOAL' as const, officialCampaign: 'BNB_REVIEW_REQUIRED' as const },
-      services: projectedServices.slice(0,64).map(s => {
+      services: projectedServices.slice(0,16).map(s => {
         const declared = view.identity.services.some(x => x.kind === s.kind && (x.endpoint === s.endpoint || x.endpoint === s.resolved_endpoint))
         const expiry = iso(s.quote_expires_at)
         // A historical accepted probe is only a sample. Final hire repeats all exact-task checks.
@@ -107,7 +107,7 @@ export async function sellerProjection(view: BuilderView, diagnosticOwner: strin
             mode: s.ok !== true ? 'UNKNOWN' : s.signed === true ? 'PROVIDER_SIGNED' : s.signed === false ? 'IDENTITY_MATCHED_UNSIGNED' : 'UNKNOWN',
             nextStep: s.kind !== 'a2a' ? 'The current paid hire adapter requires an A2A ERC-8183 service. MCP discovery alone does not enable escrowed hiring.' : currentQuote ? 'Buyer must request a fresh exact-task quote; this sample is not a reservation.' : !declared ? 'Recheck the current ERC-8004 service metadata and indexing; this endpoint binding is not established.' : !current ? 'Current registry proof is unavailable; retry after RPC recovery.' : quoteRemedy(String(s.failure ?? (expiry ? 'expired' : 'no_quote'))) },
         }
-      }), servicesTruncated: projectedServices.length > 64,
+      }), servicesTruncated: projectedServices.length > 16,
       jobs: { scope: 'Exact Marque-intent jobs created in this 30-day cohort; lifecycle outcomes as indexed at observation. Counts can overlap. No claim of independent buyers.', received: n(counts?.received), funded: n(counts?.funded), submitted: n(counts?.submitted), completed: n(counts?.completed), paid: n(counts?.paid), refunded: n(counts?.refunded), fundingMismatch: n(counts?.mismatch), lastIndexedJobBlock: counts?.last_block == null ? null : String(counts.last_block), headLagBlocks: null },
       earnings: money.map(m => ({ chainId, token: String(m.token), amountRaw: String(m.amount_raw), kind: m.name === 'PaymentReleased' ? 'PAYMENT_RELEASED' : 'REFUNDED_TO_BUYER', jobs: n(m.jobs), lastBlock: String(m.last_block), decimals: null, scope: 'Indexed event amount, raw token units; no token metadata or USD valuation inferred.' })),
       diagnostics,

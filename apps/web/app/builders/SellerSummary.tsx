@@ -15,13 +15,13 @@ export function SellerSummary({ seller }: { seller: SellerProjection }) {
       <div><dt>Campaign</dt><dd>Four categories are the local stretch. Official qualification needs BNB review.</dd></div>
     </dl>
     {seller.services.length === 0 ? <p className={styles.reason}>No indexed service yet. Publish the current endpoint in ERC-8004 metadata and wait for indexing; owner listing alone does not create a payable adapter.</p> : null}
-    {seller.services.map(s => <div key={s.serviceId}>
-      <p className={styles.checkLabel}>Service {s.serviceId} · {s.kind.toUpperCase()}</p>
+    {seller.services.map(s => <div key={`${s.kind}:${s.endpoint}`}>
+      <p className={styles.checkLabel}>{s.serviceId === null ? 'Service awaiting index' : `Service ${s.serviceId}`} · {s.kind.toUpperCase()}</p>
       <p className={styles.reason}>{s.endpoint}</p>
       <p className={styles.muted}>Discovery: {s.probe.liveness} at {s.probe.observedAt ?? 'unknown time'}. Last good {s.probe.lastGoodAt ?? 'unknown'}, last bad {s.probe.lastBadAt ?? 'unknown'} within the last 100 scheduled samples. Latest price sample: {s.quote.state.replaceAll('_',' ').toLowerCase()} · {s.quote.mode.replaceAll('_',' ').toLowerCase()} at {s.quote.observedAt ?? 'unknown time'}; expiry {s.quote.expiresAt ?? 'unknown'}.</p>
       <p className={styles.reason}>{s.quote.nextStep}</p>
     </div>)}
-    {seller.servicesTruncated ? <p className={styles.note}>Only the first 16 indexed services are shown.</p> : null}
+    {seller.servicesTruncated ? <p className={styles.note}>Only the first 16 services are shown, with current declarations first.</p> : null}
     <p className={styles.muted}>Job cohort: {seller.window.since} to {seller.window.until}. {seller.jobs.scope}</p>
     <p className={styles.reason}>Received {seller.jobs.received} · Funded {seller.jobs.funded} · Submitted {seller.jobs.submitted} · Completed {seller.jobs.completed} · Payment released {seller.jobs.paid} · Refunded {seller.jobs.refunded}.</p>
     <p className={styles.muted}>Latest indexed job block: {seller.jobs.lastIndexedJobBlock ?? 'unknown'}. Current head lag: unknown. Discovery samples do not establish continuous uptime.</p>
