@@ -85,7 +85,7 @@ export async function sellerProjection(view: BuilderView, diagnosticOwner: strin
     }
     // Include fresh declarations immediately, even before the background index catches up.
     // Retained indexed rows remain visible after current declarations, without borrowing their observations.
-    const currentServices: Array<Record<string, unknown>> = view.identity.services.map(d => services.find(s => s.kind === d.kind && (s.endpoint === d.endpoint || s.resolved_endpoint === d.endpoint))
+    const currentServices: Array<Record<string, unknown>> = view.identity.services.filter(d => d.kind !== 'other').map(d => services.find(s => s.kind === d.kind && (s.endpoint === d.endpoint || s.resolved_endpoint === d.endpoint))
       ?? { id: null, kind: d.kind, endpoint: d.endpoint })
     const projectedServices = [...currentServices, ...services.filter(s => !currentServices.includes(s))]
     return {

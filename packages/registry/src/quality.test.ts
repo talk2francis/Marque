@@ -44,7 +44,7 @@ describe('qualityVerdict', () => {
   it('needs a callable answer inside 24 hours', () => {
     const v = qualityVerdict({ ...base, callable: { ...base.callable!, at: '2026-09-25T00:00:00Z' } })
     expect(v.checks[2]!.state).toBe('fail')
-    expect(v.checks[2]!.fix).toMatch(/Probe now/)
+    expect(v.checks[2]!.fix).toMatch(/Check a live call with permission/)
   })
   it('flags a declared category the classifier disagrees with', () => {
     const v = qualityVerdict({ ...base, declared: 'grid' })

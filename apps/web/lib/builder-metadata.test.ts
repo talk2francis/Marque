@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 const { readContract, safeFetch } = vi.hoisted(() => ({ readContract: vi.fn(), safeFetch: vi.fn() }))
 vi.mock('@marque/commerce', async original => ({ ...await original<object>(), chainClient: () => ({ readContract }) }))
-vi.mock('@marque/probe', async original => ({ ...await original<object>(), safeFetch }))
+vi.mock('../../../packages/probe/src/safe-fetch.js', () => ({ safeFetch }))
 import { readIdentity, readMetadata } from './builder'
 const uri = (v: unknown) => 'data:application/json;base64,' + Buffer.from(JSON.stringify(v)).toString('base64')
 beforeEach(() => { readContract.mockReset(); safeFetch.mockReset() })

@@ -40,11 +40,12 @@ describe.skipIf(!enabled)('seller projection with isolated real PostgreSQL', () 
   function request(auth?: string, tokenId=view.identity.tokenId) { return new NextRequest(`https://candidate.invalid/api/v1/builders/checks?wallet=${owner}&chainId=56&tokenId=${tokenId}`,{headers:auth?{authorization:auth}:{}}) }
   it('shows current unindexed declarations first without borrowing old service observations, including web', async () => {
     const original = view.identity.services
-    view.identity.services = [{kind:'a2a',endpoint:'https://example.org//.well-known/agent-card.json'}, {kind:'web',endpoint:'https://example.org/current-web'}]
+    view.identity.services = [{kind:'a2a',endpoint:'https://example.org//.well-known/agent-card.json'}, {kind:'web',endpoint:'https://example.org/current-web'}, {kind:'other',endpoint:'https://example.org/custom-extension'}]
     try {
       const p = await sellerProjection(view)
       expect(p.services.slice(0,2)).toMatchObject([{serviceId:null,kind:'a2a',declaredNow:true,probe:{liveness:'UNKNOWN'},quote:{state:'NO_SAMPLE'}},{serviceId:null,kind:'web',declaredNow:true}])
       expect(p.services.find(s => s.serviceId === service)?.declaredNow).toBe(false)
+      expect(p.services.some(s => s.kind === 'other')).toBe(false)
     } finally { view.identity.services = original }
   })
   it('public read uses exact cohort, keeps payment strings and omits private diagnostics', async () => {
