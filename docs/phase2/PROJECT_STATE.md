@@ -419,6 +419,8 @@ Logged in `docs/DEVIATIONS.md` under "Phase 2". Index:
 
 ## Requests
 
+- [2026-10-20] [user-approved Brain/Lattice verification] [A/B: reference runtime and documentation] `packages/agent-engines/src/serve.ts`, protocol regression tests, README and architecture: six Brain Message replies passed actual consented calls; Lattice completed Task omitted required identifiers. Repair the reference envelope, preserve response content and validator strictness, activate Lattice only when idle, and retest the same capability question. Restore useful README imagery, architecture, product tour, evidence and setup removed by the earlier V3 rewrite, preserving dated limitations. No paid task, wallet signature, chain write, MCS arithmetic change or historical observation rewrite.
+
 - [2026-10-19T23:21:07.117634+00:00] [A: commerce] [B: product/docs] `packages/commerce/src/supply.ts`, `docs/ARCHITECTURE.md`, `docs/DEVIATIONS.md`: record the measured current-probe, null-equivalent classification and eligibility-order discovery optimization and separate worker source from the unchanged deployed web artifact. No layout or design-token change.
 
 

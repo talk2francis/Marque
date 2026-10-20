@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto'
 import type { Engine } from './types.js'
 
 /**
@@ -56,8 +57,10 @@ export function a2aResult(id: unknown, answer: unknown): Record<string, unknown>
     id: id ?? 1,
     result: {
       kind: 'task',
+      id: randomUUID(),
+      contextId: randomUUID(),
       status: { state: 'completed' },
-      artifacts: [{ parts: [{ kind: 'text', text: JSON.stringify(answer) }] }],
+      artifacts: [{ artifactId: randomUUID(), parts: [{ kind: 'text', text: JSON.stringify(answer) }] }],
     },
   }
 }

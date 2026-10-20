@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 const mocks = vi.hoisted(() => ({ fetch: vi.fn() }))
 vi.mock('./safe-fetch.js', () => ({ safeFetch: mocks.fetch }))
 import { probeA2ACall } from './a2a-call'
+import { a2aResult } from '../../agent-engines/src/serve.js'
 const endpoint = 'https://agent.example/runtime'
 const validMessage = { kind: 'message', role: 'agent', messageId: 'response-1', parts: [{ kind: 'text', text: 'I monitor health factors.' }] }
 const validTask = { kind: 'task', id: 'task-1', contextId: 'context-1', status: { state: 'completed' } }
@@ -16,6 +17,13 @@ beforeEach(() => {
   }))
 })
 describe('explicitly consented A2A call validation', () => {
+  it('accepts the actual reference free-face envelope without changing its answer', async () => {
+    const answer = { error: 'This question does not contain a grid task.' }
+    const reference = a2aResult('reference-request', answer)
+    runtimeReply = reference.result
+    expect(await probeA2ACall('https://agent.example/card')).toMatchObject({ ok: true, liveness: 'live', taskKinds: [] })
+    expect(reference.result).toMatchObject({ artifacts: [{ artifactId: expect.any(String), parts: [{ kind: 'text', text: JSON.stringify(answer) }] }] })
+  })
   it.each([validMessage, validTask, { ...validTask, status: { state: 'working' } }])('accepts a protocol Message or accepted Task', async result => {
     runtimeReply = result
     const out = await probeA2ACall('https://agent.example/card')

@@ -1,6 +1,6 @@
 # Builder and registry service incident, 20 October 2026
 
-Status: repair deployed on 20 October 2026. Web release/build source and probe/quote worker implementation are `af39ea3660c373f3efa5abbecc16d05cda64315d`. The seven fixed-question live A2A checks remain unverified pending task permission.
+Status: repair deployed on 20 October 2026. Web release/build source and probe/quote worker implementation are `af39ea3660c373f3efa5abbecc16d05cda64315d`. The owner subsequently approved the seven live A2A capability questions; their actual results and the Lattice follow-up are recorded below.
 
 Read-only production checks reproduced two defects for BSC identities 302257, 302258, 304493, 304494, 310460 and 363709, and card-only callability behavior for reference Lattice 341554. Current registry metadata and every card were readable. The owner projection still contained old indexed endpoints.
 
@@ -27,7 +27,7 @@ At **11:53 UTC**, the public owner endpoint returned all six identities with all
 
 Four agents (302257, 302258, 304493, 304494) had current A2A quote samples. LP Placement 310460 and DeFi 363709 still had `NOT_HIREABLE`: no recognized quote for Marque's sample task. Retained failed samples have no raw response, so provider omission versus parser incompatibility is unproven. All six x402 discovery responses were HTTP 402 rejected by the current inspector as `invalid_challenge_shape_or_version`; this does not establish which side is incompatible. No payment was sent or paid adapter enabled.
 
-Existing API clients must opt into `taskConsent:true`, or use the new **Check live call** confirmation, to request the fixed free capability question. Omitting it performs discovery only. The validator accepts standard JSON-RPC Message and Task results in regression tests; live fixed-question checks for the six Brain identities and Lattice are still pending permission. No successful live result is claimed for them.
+Existing API clients must opt into `taskConsent:true`, or use the new **Check live call** confirmation, to request the fixed free capability question. Omitting it performs discovery only. The validator accepts standard JSON-RPC Message and Task results in regression tests; the initial seven approved live fixed-question checks produced six valid Brain Messages and one invalid Lattice Task, as recorded below.
 
 ## Validation and preservation
 
@@ -41,3 +41,20 @@ Existing API clients must opt into `taskConsent:true`, or use the new **Check li
 - The 26 protected neighboring PM2 processes, shared services, global Caddy configuration, tmux sessions and 26 existing untracked evidence files were preserved. Marque and both checked Kerb public health surfaces returned HTTP 200. No mainnet/testnet write, paid task, new signature or outside-provider message was initiated by this incident work.
 
 Screenshots, bounded raw diagnostics, failed attempts and runtime proofs remain private off-repository. The README, architecture, deviation and migration records link this incident. MCS arithmetic, tolerances, freshness limits, category thresholds and prices are unchanged.
+
+
+## Approved live A2A verification, 20 October 2026
+
+After explicit user approval, seven checks ran through the deployed public builder API from **13:21:26 to 13:22:38 UTC**, with `taskConsent:true` and the unchanged question **What can you do?** The requests respected the existing six-per-minute limit. No payment, wallet signature, funded job or follow-up task was sent.
+
+| Identity | Initial live result | Recorded builder check |
+|---|---|---|
+| Brain 302257 | PASS, matching JSON-RPC Message | 352 |
+| Brain 302258 | PASS, matching JSON-RPC Message | 353 |
+| Brain 304493 | PASS, matching JSON-RPC Message | 354 |
+| Brain 304494 | PASS, matching JSON-RPC Message | 355 |
+| Brain 310460 | PASS, matching JSON-RPC Message | 356 |
+| Brain 363709 | PASS, matching JSON-RPC Message | 357 |
+| Lattice 341554 | FAIL, completed Task omitted `id` and `contextId` | 358 |
+
+All six Brain responses were HTTP 200, matched the request ID and contained an agent Message with parts. Lattice also answered HTTP 200, but its shared free-face Task wrapper omitted required task/context identifiers; its artifact lacked `artifactId` too. The validator correctly rejected it. The reference adapter repair adds those identifiers and preserves the request ID and answer bytes. Two new regressions failed before the repair; all **105 focused tests in eight files** passed afterward. The MCS source anchor is unchanged. Runtime activation and post-repair verification are separate from this initial failure; original evidence is retained.

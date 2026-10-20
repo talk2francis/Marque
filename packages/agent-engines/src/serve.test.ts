@@ -1,6 +1,20 @@
 import { describe, expect, it } from 'vitest'
-import { engineRunWork } from './serve.js'
+import { a2aResult, engineRunWork } from './serve.js'
 import type { Engine } from './types.js'
+
+describe('reference free-face A2A Task', () => {
+  it('returns identified tasks and artifacts while preserving correlation and answer bytes', () => {
+    const answer = { recommend: false, amount: 0, error: 'Missing task facts' }
+    const first = a2aResult(0, answer) as { id: unknown; result: { id: string; contextId: string; artifacts: Array<{ artifactId: string; parts: Array<{ text: string }> }> } }
+    const second = a2aResult('other', answer) as typeof first
+    expect(first.id).toBe(0)
+    for (const id of [first.result.id, first.result.contextId, first.result.artifacts[0]!.artifactId]) expect(id).toMatch(/^[0-9a-f]{8}-[0-9a-f-]{27}$/)
+    expect(first.result.id).not.toBe(second.result.id)
+    expect(first.result.contextId).not.toBe(second.result.contextId)
+    expect(first.result.artifacts[0]!.artifactId).not.toBe(second.result.artifacts[0]!.artifactId)
+    expect(first.result.artifacts[0]!.parts[0]!.text).toBe(JSON.stringify(answer))
+  })
+})
 
 function fake(answers: Array<Record<string, unknown>>): Engine & { calls: number } {
   const e = {

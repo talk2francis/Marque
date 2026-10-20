@@ -47,104 +47,56 @@ PostgreSQL 16 and Redis 7 sit underneath. No containers, no cloud control plane 
 so the whole system is legible from one `pm2 status` and one `psql`.
 
 <p align="center">
-  <img src="./architecture.svg" alt="Marque architecture — one host: browser → Caddy → Next.js + workers + reference agents, over Postgres/Redis, with a two-tier data model and RPC failover to BSC" width="900">
+  <img src="./architecture.svg" alt="Marque architecture: buyer wallet, web, supervised workers, six reference runtimes, PostgreSQL, Redis and BSC" width="900">
 </p>
 
 <details>
 <summary>The same diagram as inline SVG (for renderers that allow it)</summary>
 
 <p align="center">
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 700" width="100%" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif" font-size="13">
-  <rect x="0" y="0" width="980" height="700" fill="#15160f"/>
-  <text x="24" y="34" fill="#ece9e1" font-size="17" font-weight="700">Marque — one host</text>
-  <text x="24" y="54" fill="#9b9e8d" font-size="12">browser never signs except a charter grant · reads are unprivileged · the LLM never signs and never prices</text>
-
-  <!-- client -->
-  <rect x="24" y="80" width="200" height="56" rx="10" fill="#191a10" stroke="#3c3f2e"/>
-  <text x="124" y="104" fill="#ece9e1" text-anchor="middle" font-weight="600">Browser</text>
-  <text x="124" y="122" fill="#9b9e8d" text-anchor="middle" font-size="11">RainbowKit · injected wallet only</text>
-  <line x1="224" y1="108" x2="300" y2="108" stroke="#8a6a22" stroke-width="2"/>
-  <text x="262" y="100" fill="#d9ae45" text-anchor="middle" font-size="10">HTTPS</text>
-
-  <!-- caddy -->
-  <rect x="300" y="80" width="150" height="56" rx="10" fill="#191a10" stroke="#3c3f2e"/>
-  <text x="375" y="104" fill="#ece9e1" text-anchor="middle" font-weight="600">Caddy</text>
-  <text x="375" y="122" fill="#9b9e8d" text-anchor="middle" font-size="11">TLS · reverse proxy</text>
-
-  <!-- next -->
-  <rect x="300" y="176" width="230" height="92" rx="10" fill="#1b1e15" stroke="#b0892c"/>
-  <text x="415" y="200" fill="#ece9e1" text-anchor="middle" font-weight="700">Next.js (web) :3200</text>
-  <text x="415" y="220" fill="#9b9e8d" text-anchor="middle" font-size="11">standalone · SSR pages + /api/v1</text>
-  <text x="415" y="238" fill="#9b9e8d" text-anchor="middle" font-size="11">CSP · HSTS · rate limits · SSRF guard</text>
-  <text x="415" y="256" fill="#9b9e8d" text-anchor="middle" font-size="11">signs a charter grant with the operator key</text>
-  <line x1="375" y1="136" x2="375" y2="176" stroke="#3c3f2e" stroke-width="2"/>
-
-  <!-- agents -->
-  <rect x="560" y="176" width="200" height="92" rx="10" fill="#191a10" stroke="#3c3f2e"/>
-  <text x="660" y="200" fill="#ece9e1" text-anchor="middle" font-weight="600">5 reference agents</text>
-  <text x="660" y="219" fill="#9b9e8d" text-anchor="middle" font-size="11">Bound · Lattice · Sluicegate</text>
-  <text x="660" y="235" fill="#9b9e8d" text-anchor="middle" font-size="11">Keel · Redcell   :8610–8614</text>
-  <text x="660" y="253" fill="#9b9e8d" text-anchor="middle" font-size="11">deterministic · no LLM in the path</text>
-  <line x1="450" y1="118" x2="560" y2="196" stroke="#3c3f2e" stroke-width="2"/>
-  <text x="512" y="150" fill="#9b9e8d" text-anchor="middle" font-size="10">/agents/&lt;slug&gt;/*</text>
-
-  <!-- workers -->
-  <rect x="24" y="176" width="240" height="122" rx="10" fill="#191a10" stroke="#3c3f2e"/>
-  <text x="144" y="199" fill="#ece9e1" text-anchor="middle" font-weight="600">Workers (PM2)</text>
-  <text x="144" y="219" fill="#9b9e8d" text-anchor="middle" font-size="11">ingest — sweep + enrich 8004scan</text>
-  <text x="144" y="235" fill="#9b9e8d" text-anchor="middle" font-size="11">probe — liveness + schema</text>
-  <text x="144" y="251" fill="#9b9e8d" text-anchor="middle" font-size="11">classify — DeepSeek, usd-capped</text>
-  <text x="144" y="267" fill="#9b9e8d" text-anchor="middle" font-size="11">conform — nightly MCS</text>
-  <text x="144" y="283" fill="#9b9e8d" text-anchor="middle" font-size="11">pancake-watch — pool ticks / 2 min</text>
-
-  <!-- health -->
-  <rect x="790" y="176" width="166" height="92" rx="10" fill="#191a10" stroke="#3c3f2e"/>
-  <text x="873" y="200" fill="#ece9e1" text-anchor="middle" font-weight="600">marque-health</text>
-  <text x="873" y="219" fill="#9b9e8d" text-anchor="middle" font-size="11">/status + agent /health</text>
-  <text x="873" y="235" fill="#9b9e8d" text-anchor="middle" font-size="11">every 60s</text>
-  <text x="873" y="253" fill="#d9ae45" text-anchor="middle" font-size="11">Telegram on 2× fail</text>
-
-  <!-- data layer -->
-  <rect x="24" y="340" width="932" height="150" rx="12" fill="#12140e" stroke="#2c3023"/>
-  <text x="44" y="365" fill="#ece9e1" font-weight="700">Data — two tiers, handled differently (AGENTS.md invariant 12)</text>
-
-  <rect x="44" y="380" width="440" height="94" rx="8" fill="#191a10" stroke="#3c3f2e"/>
-  <text x="64" y="402" fill="#57957a" font-weight="600">DERIVED — rebuildable from ingest</text>
-  <text x="64" y="422" fill="#9b9e8d" font-size="11">agent · agent_service · agent_category · ingest_cursor</text>
-  <text x="64" y="440" fill="#9b9e8d" font-size="11">rebuild drill: truncate → ingest from cursor 0 → diff</text>
-  <text x="64" y="458" fill="#9b9e8d" font-size="11">funnel_snapshot — append-only measurement, never dropped</text>
-
-  <rect x="500" y="380" width="440" height="94" rx="8" fill="#191a10" stroke="#3c3f2e"/>
-  <text x="520" y="402" fill="#cd6f63" font-weight="600">FIRST-PARTY — cannot be reconstructed</text>
-  <text x="520" y="422" fill="#9b9e8d" font-size="11">probe · conformance_result · receipt · run · run_event</text>
-  <text x="520" y="440" fill="#9b9e8d" font-size="11">benchmark_run · sealed_call · pool_tick_observation</text>
-  <text x="520" y="458" fill="#9b9e8d" font-size="11">builder_listing · product_event · nightly dump + restore test only</text>
-
-  <line x1="200" y1="298" x2="360" y2="340" stroke="#3c3f2e" stroke-width="2"/>
-  <line x1="415" y1="268" x2="440" y2="340" stroke="#3c3f2e" stroke-width="2"/>
-
-  <!-- chain / external -->
-  <rect x="24" y="520" width="300" height="76" rx="10" fill="#191a10" stroke="#3c3f2e"/>
-  <text x="174" y="544" fill="#ece9e1" text-anchor="middle" font-weight="600">BSC mainnet (56)</text>
-  <text x="174" y="563" fill="#9b9e8d" text-anchor="middle" font-size="11">RPC failover pool — 6 endpoints,</text>
-  <text x="174" y="579" fill="#9b9e8d" text-anchor="middle" font-size="11">bench a bad one 30s, spread the rest</text>
-
-  <rect x="344" y="520" width="300" height="76" rx="10" fill="#191a10" stroke="#3c3f2e"/>
-  <text x="494" y="544" fill="#ece9e1" text-anchor="middle" font-weight="600">BSC testnet (97)</text>
-  <text x="494" y="563" fill="#9b9e8d" text-anchor="middle" font-size="11">MarqueRegistry — anchor + sealCall</text>
-  <text x="494" y="579" fill="#9b9e8d" text-anchor="middle" font-size="11">ERC-8004 IdentityRegistry</text>
-
-  <rect x="664" y="520" width="292" height="76" rx="10" fill="#191a10" stroke="#3c3f2e"/>
-  <text x="810" y="544" fill="#ece9e1" text-anchor="middle" font-weight="600">External</text>
-  <text x="810" y="563" fill="#9b9e8d" text-anchor="middle" font-size="11">8004scan (index source) · DeepSeek (classify)</text>
-  <text x="810" y="579" fill="#9b9e8d" text-anchor="middle" font-size="11">agent endpoints — via safeFetch() SSRF guard</text>
-
-  <line x1="174" y1="490" x2="174" y2="520" stroke="#3c3f2e" stroke-width="2"/>
-  <line x1="415" y1="268" x2="494" y2="520" stroke="#3c3f2e" stroke-width="1.5" stroke-dasharray="4 4"/>
-
-  <text x="24" y="636" fill="#9b9e8d" font-size="11">Legend:  brass outline = signs / writes on chain    dashed = testnet    solid box = a supervised process</text>
-  <text x="24" y="658" fill="#9b9e8d" font-size="11">Backups:  pg_dump nightly → two on-disk paths (+ rclone offsite hook) · restore test weekly · pm2 save + pm2-root.service on reboot</text>
-  <text x="24" y="680" fill="#6b6f5d" font-size="10">Palette: ink #15160f · paper tones on dark · brass #b0892c / #d9ae45 · signals holds #57957a watch #d9ae45 breach #cd6f63</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 1020" role="img" aria-labelledby="title desc" font-family="system-ui, sans-serif">
+  <title id="title">Marque architecture, October 2026</title>
+  <desc id="desc">The buyer wallet connects to the web through Caddy. Web and supervised workers read BSC, inspect external services through safeFetch, and preserve observations in PostgreSQL. Redis stores transient projections. Six reference agents use their existing seller rails. Native action authority is disabled.</desc>
+  <defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#b0892c"/></marker></defs>
+  <rect width="1120" height="1020" rx="16" fill="#12140e"/>
+  <g fill="#e8e9e0"><text x="40" y="50" font-size="28" font-weight="700">Marque</text><text x="40" y="79" font-size="15" fill="#bdc1b2">Identity, measured service evidence and buyer-signed escrow on BNB Smart Chain</text></g>
+  <g fill="#1b1e15" stroke="#454c3c" stroke-width="1.5">
+    <rect x="40" y="120" width="300" height="140" rx="10"/>
+    <rect x="400" y="120" width="260" height="140" rx="10"/>
+    <rect x="720" y="120" width="360" height="140" rx="10" stroke="#b0892c"/>
+    <rect x="40" y="340" width="510" height="165" rx="10"/>
+    <rect x="590" y="340" width="490" height="165" rx="10"/>
+    <rect x="40" y="580" width="660" height="220" rx="10"/>
+    <rect x="740" y="580" width="340" height="220" rx="10"/>
+    <rect x="40" y="865" width="510" height="105" rx="10"/>
+    <rect x="590" y="865" width="490" height="105" rx="10"/>
+  </g>
+  <g fill="none" stroke="#b0892c" stroke-width="2" marker-end="url(#arrow)">
+    <path d="M340 190H390"/><path d="M660 190H710"/>
+    <path d="M900 260V300H835V330"/><path d="M810 260V290H295V330"/>
+    <path d="M295 505V570"/><path d="M900 260H1100V690H1090"/>
+    <path d="M835 505V540H620V570"/>
+    <path d="M295 800V855"/><path d="M835 800V855"/>
+  </g>
+  <g fill="#e8e9e0" font-size="19" font-weight="650">
+    <text x="60" y="153">Buyer browser</text><text x="420" y="153">Caddy</text><text x="740" y="153">Next.js web and API</text>
+    <text x="60" y="375">Supervised workers</text><text x="610" y="375">Agent services</text>
+    <text x="60" y="616">PostgreSQL: two data tiers</text><text x="760" y="616">Redis</text>
+    <text x="60" y="899">BSC mainnet 56 / testnet 97</text><text x="610" y="899">Host operations</text>
+  </g>
+  <g fill="#bdc1b2" font-size="15">
+    <text x="60" y="184">Browse and inspect without a wallet</text><text x="60" y="211">Wallet holds buyer signing authority</text><text x="60" y="238">Named actions and exact approvals</text>
+    <text x="420" y="184">TLS and request boundary</text><text x="420" y="211">Two loopback web slots</text><text x="420" y="238">Blue/green traffic switch</text>
+    <text x="740" y="184">Positions, shelves, storefronts, jobs</text><text x="740" y="211">Terms, evidence and receipt inspection</text><text x="740" y="238">Buyer wallet prepares escrow actions</text>
+    <text x="60" y="407">Registry ingestion and current service reconciliation</text><text x="60" y="435">Discovery, consented tests, MCS and quote observations</text><text x="60" y="463">Commerce indexing and existing keeper schedule</text><text x="60" y="490">PM2 supervision; each process has its own role</text>
+    <text x="610" y="407">Six labelled Marque reference runtimes</text><text x="610" y="435">Third-party services from current registry declarations</text><text x="610" y="463">Bounded safeFetch: SSRF, time and response-size limits</text><text x="610" y="490">Existing seller rails retain their own signing boundary</text>
+    <text x="60" y="649" fill="#80b89b">Derived index state</text><text x="60" y="674">Identity, service membership, category and cursors</text><text x="60" y="699">Rebuildable projections retain original observation bindings</text>
+    <text x="60" y="731" fill="#d9ae45">Durable first-party observations</text><text x="60" y="756">Probes, quotes, MCS, receipts, runs, listings and benchmarks</text><text x="60" y="781">Preserved across index repair and release changes</text>
+    <text x="760" y="650">Transient projections and coordination</text><text x="760" y="679">Freshness and failure remain explicit</text><text x="760" y="708">No buyer keys or signing authority</text><text x="760" y="752">Native action authority: disabled</text><text x="760" y="780">Policy preview only</text>
+    <text x="60" y="929">ERC-8004 identity and reputation; ERC-8183 commerce</text><text x="60" y="952">Chain context belongs to every action and record</text>
+    <text x="610" y="929">Caddy, PM2, health checks and existing backups</text><text x="610" y="952">Restore evidence and limits are dated in the runbook</text>
+  </g>
+  <text x="40" y="1001" font-size="13" fill="#bdc1b2">Runtime map, October 2026. Protocol acceptance, MCS qualification, hireability and paid outcomes remain separate facts.</text>
 </svg>
 </p>
 
@@ -401,3 +353,8 @@ The sparse-index source passed its frozen suite and both CI runs, but actual quo
 A2A card discovery records `discovered`, with null failure class and untested message acceptance. It never sends a runtime task. `POST /api/v1/builders/probe` accepts optional `taskConsent: true` for one fixed `message/send` capability question at the runtime published by the current declared card. Both a matching JSON-RPC Message and an accepted Task are valid protocol answers; failed/rejected/auth-required tasks, JSON-RPC errors, mismatched IDs, malformed bodies and payment challenges fail. SSRF guards, body/time limits, no POST redirects, no payment headers and no automatic follow-up remain enforced. Raw call evidence is retained internally in the append-only builder check, outside the public response. Acceptance establishes neither category compatibility, MCS nor a quote. Neutral discovery does not update the last-bad timestamp. Legacy card-only unbound samples with a discovered runtime are projected as untested, while their stored bytes remain intact. Discovery does not invalidate a previous measured call; a newer failure affects only its exact declared service. Only the declared A2A or MCP protocol can establish task callability; a web page or payment challenge answering at the same URL cannot substitute.
 
 The probe worker reconciles current tokenURI metadata at a pinned block after its normal discovery cycle. A durable URIUpdated cursor queues future changes with a 12-block confirmation margin and contiguous 1,000-block ranges; its first bootstrap covers the recent 1,000 confirmed blocks, with priority/rolling reconciliation repairing older changes. The queue is persisted before its cursor advances and acknowledged only after a successful fresh metadata sync. Failures preserve both pending work and prior service membership. A bounded priority batch revisits owner-listed/reference identities; a persistent small rolling service batch covers other indexed identities. Successful snapshots transactionally upsert current service bindings and mark old derived bindings `currently_declared=false`, preserving their IDs and every observation/listing. Nullable membership means not yet checked, not removed. Failed metadata reads preserve prior membership; older blocks cannot overwrite a newer successful snapshot. Confirmed retired bindings leave future probe/quote and current capability populations. The existing 4/8-second commerce budgets and all freshness, MCS and payment checks remain unchanged. Current owner projections merge fresh declarations immediately, without borrowing a retired service's probes or quotes. Shared exact-kind parsing includes web, MCP and x402.
+
+
+### Reference free-face protocol repair, 20 October 2026
+
+Approved live capability questions returned valid A2A Messages from all six Brain on BNB identities. Lattice returned a completed Task without `id` or `contextId`; its artifact also lacked `artifactId`. The shared reference response adapter now generates those identifiers while preserving the JSON-RPC request ID and answer bytes. The strict builder validator is unchanged. This is a protocol-envelope repair, not a new MCS pass or a change to task computation, quotes, wallet authority or paid execution. Runtime activation and post-repair live results are recorded in the incident report.
