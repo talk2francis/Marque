@@ -14,7 +14,7 @@ async function priceScope(offers: Array<{ chain: 56 | 97; token: string; decimal
   const quotes = offers.map((o, i) => ({ service_id: 900001+i, agent_id: candidates[i]!.agent_id, chain_id: o.chain, token: o.token, token_decimals: o.decimals, token_symbol: o.symbol ?? 'U', price_raw: o.price, provider: '0x1111111111111111111111111111111111111111', created_at: new Date(), quote_expires_at: new Date(Date.now()+120000), ok: true, signed: false }))
   execute.mockImplementation(async q => {
     const text = dialect.sqlToQuery(q).sql
-    if (text.includes('with lp as')) return candidates
+    if (text.includes('as advertises')) return candidates
     if (text.includes('from commerce_quote')) return quotes
     return []
   })
