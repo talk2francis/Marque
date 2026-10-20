@@ -31,7 +31,7 @@ Migration 0012 adds capability/service binding and backfills an artifact_type co
 
 ## Additive production update, 20 October 2026
 
-The dated 16 October inventory above remains historical. Production now has 23 migration rows. The three additional source migrations are:
+The dated 16 October inventory above remains historical. At the earlier V3 release checkpoint production had 23 migration rows. The three additional source migrations are:
 
 | Source migration | SHA-256 | Scope |
 |---|---|---|
@@ -42,6 +42,6 @@ The dated 16 October inventory above remains historical. Production now has 23 m
 The 0021 concurrent normalized-wallet index is valid and ready; the failed initial lock-wait attempt and subsequent concurrent repair remain in private operational evidence. The 18 October backup/restore proof predates these additions and is not a new 23-migration restore drill. See the [release audit](./V3_RELEASE_AUDIT.md).
 
 
-### Builder service incident candidate, 20 October 2026
+### Deployed builder service incident, 20 October 2026
 
-Additive migration `0023_service_declarations.sql` adds nullable `currently_declared` and `declaration_checked_at` fields to the derived `agent_service` table. It alters no first-party table, existing row ID or historical observation. Candidate fixture verification and production application are reported separately in the incident checkpoint; the 23-row production and older restore statements above are dated evidence, not a claim that this candidate has already deployed.
+Additive migration `0023_service_declarations.sql` adds nullable `currently_declared` and `declaration_checked_at` fields to the derived `agent_service` table. It alters no first-party table, existing row ID or historical observation. Production application succeeded at 10:23 UTC and now has 24 matching migration rows. SHA-256: `7fbd7065b5b64efd0d52184a01fa14e7797cc5482a665b9422d7695966d0606e`. The prior 23 ledger entries and scoped original observations are unchanged; see the [incident verification](../operations/BUILDER_SERVICE_INCIDENT_2026-10-20.md). The 18 October 20-migration restore drill remains historical, not a new 24-migration restore proof.

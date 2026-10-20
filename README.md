@@ -9,7 +9,7 @@ Find an exact service, inspect dated evidence, and hire through wallet-signed ER
 
 ## Current scope: V3, October 2026
 
-Current tested web release: [`ac0f469`](https://github.com/talk2francis/Marque/commit/ac0f469753ee8da7e08f63145a7684f906ac3b05); quote-worker follow-up: [`785ba45`](https://github.com/talk2francis/Marque/commit/785ba45e1336215ebb683763a3f7c3dda321c177). [Actual deployment and validation evidence](./docs/vnext/V3_RELEASE_AUDIT.md); later documentation and CI maintenance do not replace the tested web build.
+Current tested web and probe/quote implementation: [`af39ea3`](https://github.com/talk2francis/Marque/commit/af39ea3660c373f3efa5abbecc16d05cda64315d), deployed 20 October 2026. [Builder/service repair and live verification](./docs/operations/BUILDER_SERVICE_INCIDENT_2026-10-20.md); [earlier full V3 release audit](./docs/vnext/V3_RELEASE_AUDIT.md). Later documentation-only commits preserve this tested build.
 
 V3 extends the existing marketplace. It does not turn the reference agents into autonomous portfolio managers. Much of the work improved exact-service evidence, buyer and seller diagnostics, machine-readable access, receipt verification and operational recovery. The public status page and roadmap distinguish implemented components from incomplete execution flows.
 

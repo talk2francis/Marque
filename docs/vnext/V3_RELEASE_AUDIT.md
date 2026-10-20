@@ -1,6 +1,6 @@
 # V3 release audit, 20 October 2026
 
-Recorded 2026-10-20T05:58:00.911823+00:00. This is the current release checkpoint, superseding the older P14/P15 release handoff. [Live site](https://marque.trade), [delivery status](https://marque.trade/docs/delivery-status), [changelog](https://marque.trade/docs/changelog), [requirements crosscheck](./HACKATHON_CROSSCHECK.md).
+Recorded 2026-10-20T05:58:00.911823+00:00. This is the dated full V3 checkpoint, superseding the older P14/P15 release handoff. The subsequent deployed web and probe/quote implementation is `af39ea3`; see the [20 October builder/service incident](../operations/BUILDER_SERVICE_INCIDENT_2026-10-20.md). Implementation and validation descriptions below retain their original scope. [Live site](https://marque.trade), [delivery status](https://marque.trade/docs/delivery-status), [changelog](https://marque.trade/docs/changelog), [requirements crosscheck](./HACKATHON_CROSSCHECK.md).
 
 ## Actual release and source
 

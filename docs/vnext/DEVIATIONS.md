@@ -1,3 +1,5 @@
+> Current builder/service maintenance: see the [deployed 20 October incident](../operations/BUILDER_SERVICE_INCIDENT_2026-10-20.md). Earlier phase deviations below retain their dated scope.
+
 # P00 deviations and limits
 
 - Pack was read from its actual uploaded private directory, not copied into `build-pack/`. Reason: retain private planning/competitive material outside the public repository. No pack instructions replaced root AGENTS or Phase 2 docs.
