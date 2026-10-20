@@ -18,6 +18,7 @@ const cases = [
   { name: 'commerce-name', liveness: 'dead', category: 'unclassified', advertises: true, expected: true },
   { name: 'description-only', liveness: 'dead', category: 'unclassified', advertises: false, expected: false },
   { name: 'malformed-skills', liveness: 'dead', category: 'unclassified', advertises: false, expected: false },
+  { name: 'older-advertisement', liveness: 'dead', category: 'unclassified', advertises: false, expected: false },
   { name: 'unclassified', liveness: 'live', category: 'unclassified', advertises: false, expected: false },
   { name: 'missing-current', liveness: 'live', category: 'yield', advertises: false, expected: false },
   { name: 'mixed-labels', liveness: 'live', category: 'yield', advertises: false, expected: true },
@@ -40,7 +41,8 @@ describe.skipIf(!enabled)('seller discovery uses each service current probe in i
       const [service] = rows(await db().execute(sql`insert into agent_service(agent_id,kind,endpoint,source) values(${agentId},'a2a',${endpoint},'onchain') returning id`))
       const serviceId = Number(service!.id)
       // Older live observations must never make a dead/missing current probe eligible.
-      await db().execute(sql`insert into probe(agent_id,service_id,ok,liveness,manifest) values(${agentId},${serviceId},true,'live','{}'::jsonb)`)
+      const olderManifest = fixture.name === 'older-advertisement' ? { skills: [{ id: 'negotiate' }] } : {}
+      await db().execute(sql`insert into probe(agent_id,service_id,ok,liveness,manifest) values(${agentId},${serviceId},true,'live',${JSON.stringify(olderManifest)}::jsonb)`)
       const skills = fixture.name === 'notify-funded' ? [{ id: 'notify_funded' }]
         : fixture.name === 'commerce-id' ? [{ id: 'custom-8183-call' }]
         : fixture.name === 'commerce-name' ? [{ name: 'ERC-8183 commerce' }]

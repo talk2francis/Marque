@@ -1,14 +1,15 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { sql } from 'drizzle-orm'
+import { PgDialect } from 'drizzle-orm/pg-core'
 import { boundedCommerceRead, coalescedCatalogRead } from './read-budget'
 
 const mocks = vi.hoisted(() => ({ transaction: vi.fn() }))
 vi.mock('@marque/db', () => ({ db: () => mocks }))
+const dialect = new PgDialect()
 
 function reads(finalRead: () => Promise<unknown>) {
   mocks.transaction.mockImplementation(async (callback: (tx: { execute: ReturnType<typeof vi.fn> }) => Promise<unknown>) => {
-    let step = 0
-    return callback({ execute: vi.fn(async () => ++step <= 3 ? [] : finalRead()) })
+    return callback({ execute: vi.fn(async query => dialect.sqlToQuery(query).sql.trimStart().startsWith('set ') ? [] : finalRead()) })
   })
 }
 
@@ -51,6 +52,35 @@ describe('pending catalog read coalescing', () => {
     reads(async () => [])
     const bytes = new Uint8Array([1, 2])
     await Promise.all([coalescedCatalogRead(sql`select ${bytes}`), coalescedCatalogRead(sql`select ${bytes}`)])
+    expect(mocks.transaction).toHaveBeenCalledTimes(2)
+  })
+
+  it('keeps compilation policy local while retaining exact-service and catalog budgets', async () => {
+    const statements: string[] = []
+    mocks.transaction.mockImplementation(async callback => callback({ execute: vi.fn(async query => {
+      statements.push(dialect.sqlToQuery(query).sql)
+      return []
+    }) }))
+    await coalescedCatalogRead(sql`select ${'discovery'}`, { jit: false })
+    expect(statements).toContain("set local jit = 'off'")
+    expect(statements).toContain('set transaction read only')
+    expect(statements).toContain("set local statement_timeout = '8000ms'")
+    expect(statements).toContain("set local lock_timeout = '500ms'")
+    statements.length = 0
+    await boundedCommerceRead(sql`select ${'exact'}`, 'exact')
+    expect(statements).toContain("set local statement_timeout = '4000ms'")
+    expect(statements.some(query => query.includes('jit'))).toBe(false)
+    statements.length = 0
+    await coalescedCatalogRead(sql`select ${'ordinary catalog'}`)
+    expect(statements.some(query => query.includes('jit'))).toBe(false)
+  })
+
+  it('does not coalesce identical SQL across different compilation policies', async () => {
+    reads(async () => [{ observed: true }])
+    await Promise.all([
+      coalescedCatalogRead(sql`select ${'same policy boundary'}`),
+      coalescedCatalogRead(sql`select ${'same policy boundary'}`, { jit: false }),
+    ])
     expect(mocks.transaction).toHaveBeenCalledTimes(2)
   })
 })

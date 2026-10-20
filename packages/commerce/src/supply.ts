@@ -26,8 +26,8 @@ export const HIREABLE_CATEGORIES = [...QUEST_CATEGORIES, 'security'] as const
 const rowsOf = (r: unknown) => ((r as { rows?: unknown[] }).rows ?? (r as unknown[])) as Array<Record<string, unknown>>
 
 /** Exact-agent reads must not scan the marketplace or leave SQL running after a UI timeout. */
-async function supplyRows(query: SQL, scoped: boolean): Promise<Array<Record<string, unknown>>> {
-  return rowsOf(await (scoped ? boundedCommerceRead(query, 'exact') : coalescedCatalogRead(query)))
+async function supplyRows(query: SQL, scoped: boolean, catalogOptions: { jit?: false } = {}): Promise<Array<Record<string, unknown>>> {
+  return rowsOf(await (scoped ? boundedCommerceRead(query, 'exact') : coalescedCatalogRead(query, catalogOptions)))
 }
 
 export interface SellerCandidate {
@@ -79,31 +79,35 @@ export async function sellerCandidates(scope?: { agentId: string; serviceId?: nu
          or cat.category in ('yield', 'grid', 'rebalancing', 'health_factor', 'security')
       union
       select ps.service_id
-      from probe_schedule ps join probe p on p.id = ps.last_probe_id
-      where p.manifest is not null and exists (
+      from probe_schedule ps cross join lateral (
+        -- Select the current ID before inspecting JSON. OFFSET 0 prevents the
+        -- planner from expanding this into a scan of historical manifests.
+        select manifest from probe
+        where id = ps.last_probe_id and manifest is not null
+        offset 0
+      ) p
+      where exists (
         select 1 from jsonb_array_elements(case when jsonb_typeof(p.manifest->'skills') = 'array' then p.manifest->'skills' else '[]'::jsonb end) x
         where x->>'id' in ('negotiate', 'notify_funded') or (x->>'id') ilike '%8183%' or (x->>'name') ilike '%erc-8183%'
       )
     )`},
     lp as (
-      select ps.service_id, ps.agent_id, p.manifest, p.executable_endpoint, p.liveness
-      from probe_schedule ps join probe p on p.id = ps.last_probe_id
-      ${scope ? sql`` : sql`join candidate_ids ci on ci.service_id = ps.service_id`}
-      ${scope ? sql`where ps.agent_id = ${scope.agentId} ${scope.serviceId == null ? sql`` : sql`and ps.service_id = ${scope.serviceId}`}` : sql``}
-    )
-    select lp.service_id, a.id as agent_id, a.chain_id, a.token_id, a.name, a.agent_wallet, a.owner_address,
-           coalesce(lp.manifest->>'url', lp.executable_endpoint, s.resolved_endpoint, s.endpoint) as endpoint,
-           case when cat.category = 'unclassified' then null else cat.category end as category,
-           exists (
-             select 1 from jsonb_array_elements(case when jsonb_typeof(lp.manifest->'skills') = 'array' then lp.manifest->'skills' else '[]'::jsonb end) x
-             where x->>'id' in ('negotiate', 'notify_funded') or (x->>'id') ilike '%8183%' or (x->>'name') ilike '%erc-8183%'
-           ) or coalesce(lp.manifest->>'description', '') ilike '%8183%' as advertises,
-           (select x->'examples'->>0
-              from jsonb_array_elements(case when jsonb_typeof(lp.manifest->'skills') = 'array' then lp.manifest->'skills' else '[]'::jsonb end) x
-             where coalesce(x->>'id', '') not in ('negotiate', 'notify_funded') and jsonb_typeof(x->'examples') = 'array'
-             limit 1) as task_example
+      ${scope ? sql`
+        select ps.service_id, ps.agent_id, p.manifest, p.executable_endpoint, p.liveness
+        from probe_schedule ps join probe p on p.id = ps.last_probe_id
+        where ps.agent_id = ${scope.agentId} ${scope.serviceId == null ? sql`` : sql`and ps.service_id = ${scope.serviceId}`}
+      ` : sql`
+        select current_probe.*
+        from candidate_ids ci cross join lateral (
+          select ps.service_id, ps.agent_id, p.manifest, p.executable_endpoint, p.liveness
+          from probe_schedule ps join probe p on p.id = ps.last_probe_id
+          where ps.service_id = ci.service_id
+          offset 0
+        ) current_probe
+      `}
+    ), eligible as materialized (
+    select lp.*, cat.category, s.resolved_endpoint, s.endpoint
     from lp
-    join agent a on a.id = lp.agent_id
     join agent_service s on s.id = lp.service_id
     left join cat on cat.agent_id = lp.agent_id
     where s.kind = 'a2a' and (
@@ -118,7 +122,26 @@ export async function sellerCandidates(scope?: { agentId: string; serviceId?: nu
         select 1 from jsonb_array_elements(case when jsonb_typeof(lp.manifest->'skills') = 'array' then lp.manifest->'skills' else '[]'::jsonb end) x
         where x->>'id' in ('negotiate', 'notify_funded') or (x->>'id') ilike '%8183%' or (x->>'name') ilike '%erc-8183%'
       )
-    ) ${scope ? sql`order by lp.service_id` : sql``}`, scope !== undefined)
+    )
+    )
+    select lp.service_id, a.id as agent_id, a.chain_id, a.token_id, a.name, a.agent_wallet, a.owner_address,
+           coalesce(lp.manifest->>'url', lp.executable_endpoint, lp.resolved_endpoint, lp.endpoint) as endpoint,
+           case when lp.category = 'unclassified' then null else lp.category end as category,
+           exists (
+             select 1 from jsonb_array_elements(case when jsonb_typeof(lp.manifest->'skills') = 'array' then lp.manifest->'skills' else '[]'::jsonb end) x
+             where x->>'id' in ('negotiate', 'notify_funded') or (x->>'id') ilike '%8183%' or (x->>'name') ilike '%erc-8183%'
+           ) or coalesce(lp.manifest->>'description', '') ilike '%8183%' as advertises,
+           (select x->'examples'->>0
+              from jsonb_array_elements(case when jsonb_typeof(lp.manifest->'skills') = 'array' then lp.manifest->'skills' else '[]'::jsonb end) x
+             where coalesce(x->>'id', '') not in ('negotiate', 'notify_funded') and jsonb_typeof(x->'examples') = 'array'
+             limit 1) as task_example
+    from eligible lp
+    ${scope ? sql`join agent a on a.id = lp.agent_id` : sql`cross join lateral (
+      select id, chain_id, token_id, name, agent_wallet, owner_address
+      from agent where id = lp.agent_id
+      offset 0
+    ) a`}
+    ${scope ? sql`order by lp.service_id` : sql``}`, scope !== undefined, { jit: false })
   return rows.map((r) => {
     const tokenId = String(r['token_id'])
     const chainId = Number(r['chain_id'])
