@@ -38,6 +38,18 @@ describe.skipIf(!enabled)('seller projection with isolated real PostgreSQL', () 
   })
   afterAll(async () => { await closeDb() })
   function request(auth?: string, tokenId=view.identity.tokenId) { return new NextRequest(`https://candidate.invalid/api/v1/builders/checks?wallet=${owner}&chainId=56&tokenId=${tokenId}`,{headers:auth?{authorization:auth}:{}}) }
+  it('does not label neutral card discovery as a failed probe, and still retains a real failure', async () => {
+    const endpoint='https://example.org/neutral-history'
+    const [s]=rows(await db().execute(sql`insert into agent_service(agent_id,kind,endpoint,source) values (${view.identity.agentKey},'a2a',${endpoint},'offchain_array') returning id`))
+    await db().execute(sql`insert into probe(agent_id,service_id,ok,liveness,detail,executable_endpoint) values
+      (${view.identity.agentKey},${Number(s!.id)},false,'discovered','message/send not validated','https://example.org/runtime'),
+      (${view.identity.agentKey},${Number(s!.id)},false,'unbound','card readable; message/send not validated','https://example.org/runtime')`)
+    expect((await sellerProjection(view)).services.find(x=>x.endpoint===endpoint)?.probe.lastBadAt).toBeNull()
+    await db().execute(sql`insert into probe(agent_id,service_id,ok,liveness,executable_endpoint) values (${view.identity.agentKey},${Number(s!.id)},false,'unbound','https://example.org/runtime')`)
+    expect((await sellerProjection(view)).services.find(x=>x.endpoint===endpoint)?.probe.lastBadAt).not.toBeNull()
+    await db().execute(sql`insert into probe(agent_id,service_id,ok,liveness,detail) values (${view.identity.agentKey},${Number(s!.id)},false,'dead','http 503')`)
+    expect((await sellerProjection(view)).services.find(x=>x.endpoint===endpoint)?.probe.lastBadAt).not.toBeNull()
+  })
   it('shows current unindexed declarations first without borrowing old service observations, including web', async () => {
     const original = view.identity.services
     view.identity.services = [{kind:'a2a',endpoint:'https://example.org//.well-known/agent-card.json'}, {kind:'web',endpoint:'https://example.org/current-web'}, {kind:'other',endpoint:'https://example.org/custom-extension'}]

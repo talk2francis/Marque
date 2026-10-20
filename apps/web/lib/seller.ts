@@ -27,7 +27,10 @@ export async function sellerProjection(view: BuilderView, diagnosticOwner: strin
       from agent_service s
       left join probe_schedule ps on ps.service_id = s.id and ps.agent_id = s.agent_id
       left join probe p on p.id = ps.last_probe_id
-      left join lateral (select max(checked_at) filter (where ok) as last_good_at, max(checked_at) filter (where not ok) as last_bad_at from (select ok, checked_at from probe where service_id = s.id and agent_id = s.agent_id order by checked_at desc limit 100) recent) history on true
+      left join lateral (select max(checked_at) filter (where ok) as last_good_at,
+        max(checked_at) filter (where not ok and liveness is distinct from 'discovered'
+          and not coalesce(liveness = 'unbound' and executable_endpoint is not null and detail like '%message/send not validated%', false)) as last_bad_at
+        from (select ok, checked_at, liveness, executable_endpoint, detail from probe where service_id = s.id and agent_id = s.agent_id order by checked_at desc limit 100) recent) history on true
       left join lateral (select ok, failure, signed, provider, chain_id, quote_expires_at, created_at, endpoint
         from commerce_quote where agent_id = ${agentKey} and service_id = s.id and source = 'probe'
         order by created_at desc, id desc limit 1) q on true
