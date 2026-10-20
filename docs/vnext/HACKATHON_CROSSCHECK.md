@@ -1,6 +1,6 @@
 # Hackathon and campaign crosscheck
 
-Checked 19 October 2026 against organizer pages and the live site. This is a verification record, not a claim of qualification or legal eligibility. PASS means the named evidence exists within its stated scope. PARTIAL, FAIL and UNKNOWN must not be converted into a completed checkpoint.
+Organizer rules rechecked 20 October 2026; live product acceptance is separately dated in the release audit. This is a verification record, not a claim of qualification or legal eligibility. PASS means the named evidence exists within its stated scope. PARTIAL, FAIL and UNKNOWN must not be converted into a completed checkpoint.
 
 ## Sources and separate scopes
 
@@ -17,7 +17,7 @@ The current campaign ends 5 November 2026 at 12:00 UTC. Its advertised pool is m
 | Requirement | Assessment | Evidence and gap |
 |---|---|---|
 | Discover, understand and activate agents with little prior knowledge | PARTIAL | `/register`, category shelves, profiles, `/compare`, buyer-owned ERC-8183 checkout and `/jobs`. Current screenshot and interaction review is separate from historical funded checkout evidence; no new payment was made in this audit. |
-| Informative, accurate data beyond raw registrations | PARTIAL | `/standard`, `/why`, exact-service evidence, quote mode/expiry and Job Rooms exist. This audit found stale homepage counts and contradictory public copy; repair and fresh live verification are required. |
+| Informative, accurate data beyond raw registrations | PARTIAL | `/standard`, `/why`, exact-service evidence, quote mode/expiry and Job Rooms exist. This audit repaired stale homepage counts and contradictory public copy, with separate current-data public acceptance on web release `ac0f469`; see the release audit for scope and retained failures. |
 | Equal depth in the four core categories | PARTIAL | Distinct readers, task schemas and MCS arithmetic exist for all four. Reliable third-party availability and category-consistent financial execution are different, incomplete claims. |
 | Original entry rules | UNKNOWN, scoped | Original rules allow individuals or teams, one entry per team. Shortlisting is visible, but submission contents and one-entry compliance were not re-verified from organizer records. |
 | Live BSC deployment | PASS, scoped | `marque.trade` serves the marketplace and reports its release at `/api/health`. This establishes deployment, not every user journey or eligibility. |
@@ -54,9 +54,21 @@ Read the linked official rules for the exact six build criteria and all conditio
 
 ## What needs to happen
 
-1. Correct measurable product defects and inconsistent documentation, then verify the deployed behavior from the public domain.
+1. Product defects and inconsistent documentation were repaired and publicly checked within the recorded release scope; preserve remaining availability and unfinished-feature limits in the current release audit.
 2. Keep the local stretch quest and builder diagnostics explicitly separate from official qualification. Do not award a campaign pass from the five local checks.
 3. Establish independent paid outcome evidence and eligible build execution with traceable identities, transactions, days and funding provenance before making qualification claims.
 4. Keep native execution, paid HTTP execution, autonomous procurement and outcome learning incomplete until their actual end-to-end evidence exists.
 
 This audit performs read-only verification and software repair. It does not register a participant, fund a wallet, manufacture qualifying activity or override organizer decisions. Engineering test counts do not settle any row above.
+
+Rechecked against the official campaign rules, organizer announcement and original marketplace/partner tracks on 20 October 2026. Original-track judging and the current individual campaign remain separate scopes.
+
+## Exact participant thresholds and conditions
+
+The current participant task requires three different-agent hires from the registered wallet across at least two shortlisted marketplaces, plus one qualifying owned build. Each build must have at least three completed hires from three distinct wallets neither owned nor funded by the builder, and at least five category-consistent on-chain actions on at least three separate days. Chains 56 and 97 are both accepted. Every action must fall within the campaign window; token approval alone is insufficient. These are organizer conditions, separate from the local three-listings-per-category product target.
+
+The organizer may reference the public wallet and activity in campaign updates. Its page says only a wallet is collected at registration, while the linked form inspected in this audit also asks for name and email; do not promise wallet-only collection. Confirmed winners supply name, delivery address, contact number and any sizing needed. Supplying delivery details is voluntary, but delivery cannot occur without them. The organizer says fulfilment providers receive those details for shipping, with deletion after delivery or the claim window. These are the organizer's stated practices, not a verified audit of its processing.
+
+Shortlisting does not mean BNB Chain operates or has audited a marketplace or guarantees outcomes. Participants must inspect permissions and caps; available testnet participation does not prove mainnet performance. The organizer's risk notice, legal restrictions, fair-play exclusions, prize review and final decision remain applicable. Workshop dates marked TBC and linked SDK/resources are supporting material, not completed Marque features or additional proven qualification.
+
+Product repairs and actual release verification are now recorded in the [current release audit](./V3_RELEASE_AUDIT.md). They do not complete or certify the unproven campaign conditions above.

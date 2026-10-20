@@ -1,3 +1,5 @@
+> Current release, 20 October 2026: see the [V3 release audit](../vnext/V3_RELEASE_AUDIT.md) for web source `ac0f469`, quote reader `785ba45`, current validation and remaining limits. Earlier release descriptions below are dated historical evidence.
+
 # P14/P15 production handoff, 2026-10-19T09:45:18.102462+00:00
 
 Release `267b46d26582ce32a67787f66d71364a7db8dadd` is live at https://marque.trade; the unchanged web build `78d9b64` passed 929 tests/102 files with zero skips, nine verifier regressions and CI passed on the release, and actual public acceptance passed. Read the exact source, browser/API scopes, rejected candidates, worker activation, rollback, preserved observations and limits in [P15 handoff](../vnext/P15_HANDOFF.md). The owner authorized this release. Only additive index migration 0020 was applied; no new chain transaction, paid task, wallet authority or destructive operation. Historical entries below are retained.

@@ -1,3 +1,5 @@
+> Current release, 20 October 2026: see the [V3 release audit](./V3_RELEASE_AUDIT.md) for web source `ac0f469`, quote reader `785ba45`, current validation and remaining limits. Earlier release descriptions below are dated historical evidence.
+
 # Final claim boundaries and handoff, 18 October 2026
 
 ## Current organizer guidance

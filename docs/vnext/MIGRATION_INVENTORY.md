@@ -28,3 +28,15 @@ Read-only check on 16 October 2026: all 20 live Drizzle hashes match source. No 
 Canonical tables include derived identity/service/category/cursors and durable observations: probes, conformance cases/results, runs/events/rejections, receipts, builder proofs/checks/listings, benchmark arms/provenance, seals, quotes, intents/notify attempts, commerce events/jobs, ratings/comments and measured pool observations.
 
 Migration 0012 adds capability/service binding and backfills an artifact_type column. That historical script is not authorization to alter historical receipt bodies/hashes. Migration 0016 creates commerce/index/intent/rating tables; 0017 adds nullable quote signed mode; 0018 indexes agent wallet; 0019 creates builder proof/check observations. No reset or new schema is needed for P00.
+
+## Additive production update, 20 October 2026
+
+The dated 16 October inventory above remains historical. Production now has 23 migration rows. The three additional source migrations are:
+
+| Source migration | SHA-256 | Scope |
+|---|---|---|
+| `0020_probe_service_agent_checked.sql` | `fa6f807d2f229c959d025b5f471c5eb85e568ddabc58da0caedcb1e64da59a45` | Additive index; original observations and prior ledger rows preserved |
+| `0021_agent_chain_wallet_lower.sql` | `2980c0e013992a7dc05357ce0240ea8e32c5a48769d66ae5a70dd7ccbda38ea5` | Additive index; original observations and prior ledger rows preserved |
+| `0022_probe_manifest_lookup.sql` | `aba1ed611a7a59c49b466b53fe04e7907e1dea66d0c8df4d72a42a199e432fc8` | Additive index; original observations and prior ledger rows preserved |
+
+The 0021 concurrent normalized-wallet index is valid and ready; the failed initial lock-wait attempt and subsequent concurrent repair remain in private operational evidence. The 18 October backup/restore proof predates these additions and is not a new 23-migration restore drill. See the [release audit](./V3_RELEASE_AUDIT.md).

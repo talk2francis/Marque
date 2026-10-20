@@ -1,3 +1,5 @@
+> Current release, 20 October 2026: see the [V3 release audit](./V3_RELEASE_AUDIT.md) for web source `ac0f469`, quote reader `785ba45`, current validation and remaining limits. Earlier release descriptions below are dated historical evidence.
+
 # P14/P15 production release completed, 2026-10-19T09:45:18.102462+00:00
 
 Live at https://marque.trade. Web release is `267b46d26582ce32a67787f66d71364a7db8dadd`; the tested web build source is
