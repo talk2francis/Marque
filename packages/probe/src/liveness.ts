@@ -101,7 +101,7 @@ export function compatibleMcpTaskKinds(tool: McpToolDescriptor): TaskKind[] {
 }
 
 /** Map a transport failure onto our stored taxonomy. */
-function failureFromFetch(f: SafeFetchFailure): FailureClass {
+export function failureFromFetch(f: SafeFetchFailure): FailureClass {
   switch (f) {
     case 'dns': return 'dns'
     case 'tls': return 'tls'
@@ -116,7 +116,7 @@ function failureFromFetch(f: SafeFetchFailure): FailureClass {
   }
 }
 
-function httpFailure(status: number): FailureClass {
+export function httpFailure(status: number): FailureClass {
   if (status === 429) return 'rate_limited'
   if (status >= 500) return 'http_5xx'
   if (status >= 400) return 'http_4xx'

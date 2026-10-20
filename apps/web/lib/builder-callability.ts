@@ -3,14 +3,17 @@ const iso = (v: unknown) => new Date(String(v)).toISOString()
 type Evidence = { at: string; endpoint: string | null; via: 'builder' | 'probe' }
 
 /** A failed different service or an untested card cannot revoke a measured live call. */
-export function builderCallability(services: ReadonlyArray<{ endpoint: string }>, checks: Row[], probes: Row[]) {
-  const declared = new Set(services.map(s => s.endpoint))
+export function builderCallability(services: ReadonlyArray<{ kind: string; endpoint: string }>, checks: Row[], probes: Row[]) {
+  const taskServices = services.filter(s => s.kind === 'a2a' || s.kind === 'mcp')
+  const declared = new Set(taskServices.map(s => s.endpoint))
+  const bindings = new Set(taskServices.map(s => `${s.kind}:${s.endpoint}`))
   const successes: Evidence[] = []
   const failures: Array<{ at: string; endpoint: string; reason: string }> = []
   let callabilityUnknown = false
   for (const c of checks) {
     if (c.kind !== 'probe' || !declared.has(String(c.endpoint))) continue
     const r = (c.result ?? {}) as Row
+    if (typeof r.kind === 'string' && !bindings.has(`${r.kind}:${c.endpoint}`)) continue
     if (r.callability === 'NOT_TESTED') callabilityUnknown = true
     if (c.ok === true) successes.push({ at: iso(c.checked_at), endpoint: String(c.endpoint), via: 'builder' })
     else if (!(r.callability === 'NOT_TESTED' || (r.discoveryOnly === true && typeof r.executableEndpoint === 'string' && /message\/send not validated|task acceptance unverified/.test(String(r.detail))))) {
@@ -19,7 +22,7 @@ export function builderCallability(services: ReadonlyArray<{ endpoint: string }>
   }
   for (const p of probes) {
     const endpoint = declared.has(String(p.declared_endpoint)) ? String(p.declared_endpoint) : String(p.resolved_endpoint)
-    if (!declared.has(endpoint)) continue
+    if (!bindings.has(`${p.kind}:${endpoint}`)) continue
     if (p.liveness === 'discovered') callabilityUnknown = true
     if (p.liveness === 'live') successes.push({ at: iso(p.checked_at), endpoint, via: 'probe' })
     else if (p.liveness === 'dead' || p.liveness === 'bad_schema' || (p.liveness === 'unbound' && !(typeof p.executable_endpoint === 'string' && /message\/send not validated/.test(String(p.detail))))) {

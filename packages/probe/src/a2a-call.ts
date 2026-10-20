@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto'
 import { z } from 'zod'
 import { safeFetch } from './safe-fetch.js'
-import { probeA2A, type ProbeOutcome } from './liveness.js'
+import { probeA2A, failureFromFetch, httpFailure, type ProbeOutcome } from './liveness.js'
 
 const part = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('text'), text: z.string().min(1) }),
@@ -37,8 +37,8 @@ export async function probeA2ACall(url: string): Promise<ProbeOutcome> {
       : response.status !== 200 ? `message/send returned HTTP ${response.status}; no payment or follow-up sent`
         : 'message/send did not return a matching successful JSON-RPC Message or accepted Task'
   return {
-    ...card, ok: accepted, liveness: accepted ? 'live' : response.ok ? 'bad_schema' : 'dead',
-    failureClass: accepted ? null : !response.ok && response.failure === 'blocked_ssrf' ? 'blocked_ssrf' : response.ok ? 'bad_schema' : 'unknown',
+    ...card, ok: accepted, liveness: accepted ? 'live' : response.ok && response.status === 200 ? 'bad_schema' : 'dead',
+    failureClass: accepted ? null : !response.ok ? failureFromFetch(response.failure) : response.status !== 200 ? httpFailure(response.status) : 'bad_schema',
     statusCode: response.ok ? response.status : response.status ?? null,
     latencyMs: card.latencyMs + response.latencyMs, detail, taskKinds: [],
     callEvidence: { request, response: response.ok ? response.body : null },

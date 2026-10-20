@@ -42,4 +42,10 @@ describe('explicitly consented A2A call validation', () => {
     mocks.fetch.mockResolvedValueOnce({ ok: true, status: 200, latencyMs: 1, body: JSON.stringify({ status: 'UNBOUND', url: endpoint, skills: [{ id: 'health' }] }) })
     expect((await probeA2ACall('https://agent.example/card')).ok).toBe(false); expect(mocks.fetch).toHaveBeenCalledTimes(1)
   })
+  it.each([[402, 'http_4xx'], [429, 'rate_limited'], [503, 'http_5xx']])('keeps HTTP %s failures distinct from malformed protocol replies', async (status, failureClass) => {
+    mocks.fetch.mockImplementationOnce(async () => ({ ok: true, status: 200, latencyMs: 1, body: JSON.stringify({ url: endpoint, skills: [{ id: 'health' }] }) }))
+      .mockImplementationOnce(async () => ({ ok: true, status, latencyMs: 1, body: '{}' }))
+    expect(await probeA2ACall('https://agent.example/card')).toMatchObject({ ok: false, liveness: 'dead', failureClass })
+    expect(mocks.fetch).toHaveBeenCalledTimes(2)
+  })
 })

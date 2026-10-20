@@ -86,7 +86,7 @@ export async function builderView(wallet: string, chainId: ChainId, tokenId: str
     db().execute(sql`select owner_address, verified_at from builder_listing where agent_id = ${key} and withdrawn_at is null order by id desc limit 1`).then(rowsOf),
     db().execute(sql`select kind, ok, endpoint, result, checked_at from builder_check where agent_key = ${key} order by checked_at desc limit 40`).then(rowsOf),
     db().execute(sql`select p.liveness, p.checked_at, p.executable_endpoint, p.detail,
-      s.endpoint as declared_endpoint, s.resolved_endpoint
+      s.kind, s.endpoint as declared_endpoint, s.resolved_endpoint
       from probe_schedule q join probe p on p.id = q.last_probe_id
       join agent_service s on s.id = q.service_id
       where q.agent_id = ${key} order by p.checked_at desc`).then(rowsOf).catch(() => []),
@@ -100,7 +100,7 @@ export async function builderView(wallet: string, chainId: ChainId, tokenId: str
   const proof = allProofs.find((p) => p.owner === id.owner) ?? allProofs[0] ?? null
 
   const { callable: okAt, lastFailure: lastFail, callabilityUnknown } = builderCallability(id.services, checks, probes)
-  const currentEndpoints = new Set(id.services.map(s => s.endpoint))
+  const currentEndpoints = new Set(id.services.filter(s => s.kind === 'a2a' || s.kind === 'mcp').map(s => s.endpoint))
   const lastOk = checks.find(c => c.kind === 'probe' && c.ok === true && currentEndpoints.has(String(c.endpoint))) ?? null
 
   // Classified: Marque's classifier (ingest) if it ran, else the keyword pass over the record now.
