@@ -3,3 +3,5 @@ export { probeService, probeA2A, probeMCP, probeX402, probeRest, taskKindsFromTe
 export { runProbeCycle, latestProbeByAgent, seedSsrfCanary, type ProbeCycleResult } from './worker.js'
 export { tierOf, intervalMinutes, jitteredMinutes, nextStreak, tierFreshness, syncSchedule, firstPartyAgentIds, INTERVAL_MINUTES, FRESH_WITHIN_MINUTES, TIER_RANK, type Tier, type TierFreshness, type ScheduleInput } from './schedule.js'
 export { boundedJson } from './bounded-json.js'
+export { probeA2ACall } from './a2a-call.js'
+export { readRegistrationMetadata } from './registration.js'

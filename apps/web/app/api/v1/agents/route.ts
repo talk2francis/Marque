@@ -66,13 +66,14 @@ async function page(opts: { status: Status; category: string | null; protocol: s
     with st as (
       select s.agent_id,
              bool_or(p.liveness = 'live' and p.executable_endpoint is not null) as callable,
-             bool_or(p.liveness in ('live', 'unbound', 'bad_schema')) as reachable,
+             bool_or(p.liveness in ('live', 'discovered', 'unbound', 'bad_schema')) as reachable,
              bool_or(p.id is not null) as probed,
              min(p.latency_ms) filter (where p.liveness = 'live') as latency_ms,
              max(p.checked_at) as checked_at
       from agent_service s
       left join probe_schedule ps on ps.service_id = s.id
       left join probe p on p.id = ps.last_probe_id
+      where s.currently_declared is distinct from false
       group by s.agent_id
     )
     select a.id, a.chain_id, a.token_id, a.name, a.description, a.owner_address,

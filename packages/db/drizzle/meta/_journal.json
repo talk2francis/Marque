@@ -162,6 +162,13 @@
       "when": 1792457811107,
       "tag": "0022_probe_manifest_lookup",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1792489400497,
+      "tag": "0023_service_declarations",
+      "breakpoints": true
     }
   ]
 }

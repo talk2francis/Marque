@@ -2,7 +2,7 @@
 export const MCS_CODE_ANCHOR = {
   "version": 1,
   "algorithm": "SHA-256",
-  "sha256": "0x45c30997ace21fc3e9be0635d11fd9aa29659cb74c841a32431cf660ca27fd6e",
+  "sha256": "0xedad25228982a3c281cb0cdf88e3ddcb5c5d8858a760b8314edb930ea8c08c94",
   "scope": "local MCS implementation and imported workspace source; lockfile pins external dependencies; not deployed-bytecode or issuer attestation",
   "files": [
     {
@@ -99,7 +99,7 @@ export const MCS_CODE_ANCHOR = {
     },
     {
       "path": "packages/db/src/schema.ts",
-      "sha256": "0xad6356bf0b5663e1297e53d0d5d898943f4576949fb40c1015f2c7de726b6013"
+      "sha256": "0xc6964d71cb27f1e0883b35352889df0f524e3936a9b6d77d380d8f50a9ea765f"
     },
     {
       "path": "packages/positions/src/abis.ts",
@@ -142,20 +142,28 @@ export const MCS_CODE_ANCHOR = {
       "sha256": "0x244b99a7726a61f6502b82df22be9561132fa08b498bb2036b95d7a5a8ddd07d"
     },
     {
+      "path": "packages/probe/src/a2a-call.ts",
+      "sha256": "0xa3867c93fb4953d7b91a71e9cb159f6fa0e84bbcbe05fa53531e8a105c1a1014"
+    },
+    {
       "path": "packages/probe/src/bounded-json.ts",
       "sha256": "0xff498b80d814069fcad647a0c631ee4da99d8f97dec23dbf19d14a95d9ef897e"
     },
     {
       "path": "packages/probe/src/index.ts",
-      "sha256": "0xf2ea53b06aa8d77b672aaa8a2483e468b84edb6d1d9cdc6db06755f9fb2b37e3"
+      "sha256": "0xbc9ef9331c28a0cbd1eeaa7ca27184c185fd75123caee17ee9688edb8117f214"
     },
     {
       "path": "packages/probe/src/liveness.ts",
-      "sha256": "0x06d8eda54ec7c708b9ebbba76581893fd174cdad11d079bfd954f7c0d8401008"
+      "sha256": "0xcd944d4dfcc55362925603f3404e3a922983dda8f53d1c6f7ef2144087f3ef37"
     },
     {
       "path": "packages/probe/src/payment-challenge.ts",
       "sha256": "0x68aa9bccbe6c394575f5b96e4efa20b2eaccaf7446dad4b68f38822e20f296ce"
+    },
+    {
+      "path": "packages/probe/src/registration.ts",
+      "sha256": "0xabd7808434617c51d5fddea69ae4f7842fcb26531e3bf84fe10b39b3aacd7652"
     },
     {
       "path": "packages/probe/src/safe-fetch.ts",
@@ -163,11 +171,11 @@ export const MCS_CODE_ANCHOR = {
     },
     {
       "path": "packages/probe/src/schedule.ts",
-      "sha256": "0xf1b80f2a47fc22546b4933dc443a753dc28ff124ad26e9b020d0fff9ca0c2bf5"
+      "sha256": "0x524d68bfa6de82211e19a17c02438e515e0196985766c5a2c94a3d8f0b9b14fc"
     },
     {
       "path": "packages/probe/src/worker.ts",
-      "sha256": "0x71a72c21a6aaa1d3c4aa1e511cfccd391e5acbe28d3a2e09637d57133fc04bf7"
+      "sha256": "0x685e6d243018e82e0df6d46c8a23a7c105844a677709647d800ad4072deb6fb2"
     },
     {
       "path": "pnpm-lock.yaml",

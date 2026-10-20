@@ -57,7 +57,7 @@ describe('A2A discovery evidence', () => {
   it('does not call a readable card callable or task-compatible', async () => {
     const outcome = await probeA2A('https://agent.example/.well-known/agent-card.json')
     expect(outcome).toMatchObject({
-      ok: false, liveness: 'unbound', executableEndpoint: 'https://agent.example/a2a', taskKinds: [],
+      ok: false, liveness: 'discovered', executableEndpoint: 'https://agent.example/a2a', taskKinds: [],
       manifest: { advertisedTaskKinds: ['yield'], capabilityEvidence: {
         cardReadable: true, endpointDiscovered: true, endpointReachable: null,
         messageSendCallable: null, taskCompatible: [],

@@ -6,6 +6,7 @@
  */
 import { runProbeCycle } from '@marque/probe'
 import { closeDb } from '@marque/db'
+import { refreshRegistryServices } from './registry-services.js'
 
 const ONCE = process.argv.includes('--once')
 const CYCLE_MS = Number(process.env.PROBE_CYCLE_MS ?? 5 * 60_000)
@@ -31,6 +32,8 @@ async function main(): Promise<void> {
     try {
       const r = await runProbeCycle({ limit: LIMIT, concurrency: CONCURRENCY })
       log('cycle', { ...r, ms: Date.now() - started })
+      try { log('registry_services', await refreshRegistryServices()) }
+      catch { log('registry_services_error', { detail: 'Current service metadata could not be reconciled; prior records retained.' }) }
     } catch (err) {
       log('cycle_error', { error: err instanceof Error ? err.message : String(err), stack: err instanceof Error ? err.stack?.split('\n').slice(0, 4).join(' | ') : undefined })
       if (ONCE) throw err

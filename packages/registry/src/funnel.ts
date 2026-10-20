@@ -90,13 +90,14 @@ async function funnelUncached(chainId = 56): Promise<FunnelRow[]> {
     ),
     service_state as (
       select s.agent_id,
-        bool_or(p.liveness in ('live','unbound','bad_schema') and p.checked_at > now() - interval '24 hours') as reachable,
+        bool_or(p.liveness in ('live','discovered','unbound','bad_schema') and p.checked_at > now() - interval '24 hours') as reachable,
         bool_or(p.liveness = 'live' and p.executable_endpoint is not null
           and p.checked_at > now() - interval '24 hours' and s.kind in ('a2a','mcp')) as callable,
         bool_or(p.liveness = 'live' and p.executable_endpoint is not null
           and p.checked_at > now() - interval '24 hours' and s.kind in ('a2a','mcp')
           and jsonb_array_length(coalesce(p.task_kinds, '[]'::jsonb)) > 0) as compatible
       from agent_service s left join latest_service_probe p on p.service_id = s.id
+      where s.currently_declared is distinct from false
       group by s.agent_id
     ),
     latest_category as (
@@ -181,7 +182,7 @@ async function categoryFunnelUncached(chainId = 56): Promise<CategoryFunnelRow[]
     select category,
            count(distinct id) as registered,
            count(distinct id) filter (where service_id is not null) as has_service_metadata,
-           count(distinct host) filter (where liveness in ('live','unbound','bad_schema')
+           count(distinct host) filter (where liveness in ('live','discovered','unbound','bad_schema')
              and checked_at > now() - interval '24 hours') as reachable_now,
            count(distinct id) as classified,
            count(distinct host) filter (where liveness = 'live' and executable_endpoint is not null

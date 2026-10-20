@@ -179,13 +179,14 @@ export async function dueByTier(limit: number, deadCap: number, fpIds: readonly 
     from probe_schedule ps
     join agent_service s on s.id = ps.service_id
     where ps.next_due_at <= now() + make_interval(secs => ${DUE_GRACE_SECONDS}::int)
+      and s.currently_declared is distinct from false
       and (s.is_template = false or s.resolved_endpoint is not null)
     order by
       case
         when ps.agent_id in (${fpList}) then 0
         when exists (select 1 from agent_category c where c.agent_id = ps.agent_id and c.category <> 'unclassified') then 1
         when ps.last_checked_at is null then 3
-        when ps.last_liveness in ('live', 'unbound', 'bad_schema') then 2
+        when ps.last_liveness in ('live', 'discovered', 'unbound', 'bad_schema') then 2
         else 4
       end,
       ps.next_due_at asc
@@ -258,6 +259,7 @@ export async function tierFreshness(opts: { firstPartyOnly?: boolean } = {}): Pr
              end as tier
       from probe_schedule ps join agent_service s on s.id = ps.service_id
       where (s.is_template = false or s.resolved_endpoint is not null)
+        and s.currently_declared is distinct from false
         ${opts.firstPartyOnly ? sql`and ps.agent_id in (${fpList})` : sql``}
     )
     select tier, count(*)::int as services,

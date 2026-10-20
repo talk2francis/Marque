@@ -9,12 +9,14 @@ const Body = z.object({
   chainId: z.union([z.literal(56), z.literal(97)]),
   tokenId: z.string().regex(/^\d{1,12}$/),
   endpoint: z.string().url().max(500).refine((u) => u.startsWith('https://'), 'The endpoint must be https.'),
+  taskConsent: z.boolean().optional(),
 })
 
 /**
  * POST /api/v1/builders/probe: "Probe now". One probe of the endpoint through safeFetch
  * (SSRF guard, timeout, size cap), recorded against the identity. Anyone may run it;
- * it is rate limited, and a probe proves only that the endpoint answers.
+ * it is rate limited. Default discovery sends no task. taskConsent:true additionally
+ * sends one fixed A2A capability question; acceptance is not MCS or hireability.
  */
 export async function POST(req: NextRequest) {
   const v = checkWindow('builder-probe', clientKey(req.headers), 6, 60_000, 'Probes are limited to 6 a minute.')
@@ -22,7 +24,7 @@ export async function POST(req: NextRequest) {
   const parsed = Body.safeParse(await req.json().catch(() => null))
   if (!parsed.success) return NextResponse.json({ error: 'bad_request', detail: parsed.error.issues[0]?.message ?? 'Send the network, the token id and an https endpoint.' }, { status: 400 })
   try {
-    const out = await probeNow(parsed.data.chainId, parsed.data.tokenId, parsed.data.endpoint)
+    const out = await probeNow(parsed.data.chainId, parsed.data.tokenId, parsed.data.endpoint, parsed.data.taskConsent === true)
     return NextResponse.json(out, { headers: { 'Cache-Control': 'no-store' } })
   } catch (err) {
     if (err instanceof Error && err.message === 'Choose a current declared A2A or MCP endpoint.') return NextResponse.json({ error: 'endpoint_mismatch', detail: 'This endpoint could not be matched to the current ERC-8004 metadata. Recheck the declared service and metadata availability before probing.' }, { status: 422 })

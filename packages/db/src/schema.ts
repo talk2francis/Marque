@@ -119,6 +119,9 @@ export const agentService = pgTable('agent_service', {
   isTemplate: boolean('is_template').notNull().default(false),
   /** Template resolved against the agent's own metadata, when we could. */
   resolvedEndpoint: text('resolved_endpoint'),
+  /** null = registry metadata not yet reconciled; false retains a historical binding. */
+  currentlyDeclared: boolean('currently_declared'),
+  declarationCheckedAt: timestamp('declaration_checked_at', { withTimezone: true }),
   raw: jsonb('raw').$type<Record<string, unknown>>(),
   firstSeen: timestamp('first_seen', { withTimezone: true }).notNull().defaultNow(),
   lastSeen: timestamp('last_seen', { withTimezone: true }).notNull().defaultNow(),
@@ -154,7 +157,7 @@ export const ingestCursor = pgTable('ingest_cursor', {
 // ---------------------------------------------------------------------------
 
 /** How alive an endpoint is. `ok` alone cannot express `unbound`. */
-export const LIVENESS = ['live', 'unbound', 'bad_schema', 'dead'] as const
+export const LIVENESS = ['live', 'discovered', 'unbound', 'bad_schema', 'dead'] as const
 export type Liveness = (typeof LIVENESS)[number]
 
 /** FIRST-PARTY. Every liveness measurement we have ever taken. */

@@ -99,3 +99,6 @@ Deployment uses `scripts/deploy-web.sh`, prepared source-checked artifacts, two 
 [V3 project state](./docs/vnext/PROJECT_STATE.md) · [Recovery record](./docs/vnext/P15_RECOVERY.md) · [Phase 2 records](./docs/phase2/PROJECT_STATE.md) · [Deviations](./docs/DEVIATIONS.md).
 
 The [September demo](https://github.com/talk2francis/Marque/releases/download/demo-2026-09-09/marque-demo.mp4), historical screenshots and benchmark reports describe their recording dates. They are not the current website or evidence that native action authority is enabled.
+
+
+Builder/service maintenance is tracked in the [20 October incident checkpoint](docs/operations/BUILDER_SERVICE_INCIDENT_2026-10-20.md), including the distinction between card discovery, a consented live call, MCS and current indexed service declarations.

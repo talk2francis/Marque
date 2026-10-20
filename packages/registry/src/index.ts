@@ -8,3 +8,5 @@ export { funnel, categoryFunnel, failureHistogram, MARQUE_REFERENCE_OWNERS, MIN_
 export { buildProspects, rollupByOwner, extractContacts, assessReadiness, type Prospect, type OwnerRollup, type Priority } from './outreach.js'
 export { sweepChainIdentities, highestTokenId, BSC_IDENTITY_REGISTRY, type ChainSweepResult } from './chain-identity.js'
 export * from './quality.js'
+export { declaredServices, type DeclaredService } from './declarations.js'
+export { syncDeclaredServices } from './service-refresh.js'

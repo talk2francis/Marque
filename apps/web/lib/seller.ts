@@ -31,7 +31,7 @@ export async function sellerProjection(view: BuilderView, diagnosticOwner: strin
       left join lateral (select ok, failure, signed, provider, chain_id, quote_expires_at, created_at, endpoint
         from commerce_quote where agent_id = ${agentKey} and service_id = s.id and source = 'probe'
         order by created_at desc, id desc limit 1) q on true
-      where s.agent_id = ${agentKey} order by s.id limit 17`))
+      where s.agent_id = ${agentKey} order by (s.currently_declared is true) desc, s.id limit 81`))
     // Exact Marque intent binding, not every job sharing a mutable provider wallet.
     const cohort = sql`select j.*, i.service_id, i.price_raw as quoted_raw, i.token as quoted_token,
         i.provider as quoted_provider from commerce_job j join hire_intent i on i.id = j.intent_id
@@ -83,26 +83,31 @@ export async function sellerProjection(view: BuilderView, diagnosticOwner: strin
         notification: { scope: 'Latest recorded notification per job observed in this window; historical parsing rules may differ.', accepted: notify.filter(x => x.ok === true && x.status === 'accepted').length, rejected: notify.filter(x => x.status === 'rejected').length, pendingOrUnknown: notify.filter(x => x.status !== 'accepted' && x.status !== 'rejected').length },
       }
     }
+    // Include fresh declarations immediately, even before the background index catches up.
+    // Retained indexed rows remain visible after current declarations, without borrowing their observations.
+    const currentServices: Array<Record<string, unknown>> = view.identity.services.map(d => services.find(s => s.kind === d.kind && (s.endpoint === d.endpoint || s.resolved_endpoint === d.endpoint))
+      ?? { id: null, kind: d.kind, endpoint: d.endpoint })
+    const projectedServices = [...currentServices, ...services.filter(s => !currentServices.includes(s))]
     return {
       version: 1 as const, agentKey, chainId, observedAt, window: { since, until: observedAt, days: 30 },
       provenance: 'INDEXED_ONCHAIN_AND_MEASURED' as const,
       identity: { current: current !== null, blockNumber: current?.blockNumber ?? null, owner: current?.agentOwner ?? null, provider, independence: 'UNKNOWN' as const },
       qualification: { ownerListed: view.listingEvidence.ownerListed && current !== null && current.agentOwner.toLowerCase() === view.identity.owner, qualityListed: view.listingEvidence.qualityListed && current !== null && current.agentOwner.toLowerCase() === view.identity.owner,
         warrant: 'UNKNOWN_EXACT_SERVICE_BINDING' as const, marqueStretch: 'LOCAL_FOUR_CATEGORY_GOAL' as const, officialCampaign: 'BNB_REVIEW_REQUIRED' as const },
-      services: services.slice(0,16).map(s => {
+      services: projectedServices.slice(0,64).map(s => {
         const declared = view.identity.services.some(x => x.kind === s.kind && (x.endpoint === s.endpoint || x.endpoint === s.resolved_endpoint))
         const expiry = iso(s.quote_expires_at)
         // A historical accepted probe is only a sample. Final hire repeats all exact-task checks.
         const endpointMatches = s.quote_endpoint === s.runtime_endpoint || s.quote_endpoint === s.executable_endpoint || s.quote_endpoint === s.endpoint || s.quote_endpoint === s.resolved_endpoint
         const currentQuote = s.kind === 'a2a' && declared && endpointMatches && current !== null && s.ok === true && Number(s.chain_id) === chainId && [current.agentWallet, current.agentOwner].some(a => a?.toLowerCase() === String(s.provider).toLowerCase())
           && expiry !== null && Date.parse(expiry) > Date.parse(observedAt)
-        return { serviceId: n(s.id), kind: String(s.kind), endpoint: String(s.endpoint), declaredNow: declared,
+        return { serviceId: s.id == null ? null : n(s.id), kind: String(s.kind), endpoint: String(s.endpoint), declaredNow: declared,
           probe: { liveness: s.liveness == null ? 'UNKNOWN' : String(s.liveness), observedAt: iso(s.checked_at), lastGoodAt: iso(s.last_good_at), lastBadAt: iso(s.last_bad_at), historyLimit: 100, scope: 'Latest discovery sample, not continuous uptime or task acceptance.' },
           quote: { state: s.kind !== 'a2a' ? 'UNSUPPORTED_HIRE_ADAPTER' : currentQuote ? 'CURRENT_PROBE_SAMPLE' : s.quote_at == null ? 'NO_SAMPLE' : expiry !== null && Date.parse(expiry) <= Date.parse(observedAt) ? 'EXPIRED' : 'NOT_HIREABLE', observedAt: iso(s.quote_at), expiresAt: expiry,
             mode: s.ok !== true ? 'UNKNOWN' : s.signed === true ? 'PROVIDER_SIGNED' : s.signed === false ? 'IDENTITY_MATCHED_UNSIGNED' : 'UNKNOWN',
             nextStep: s.kind !== 'a2a' ? 'The current paid hire adapter requires an A2A ERC-8183 service. MCP discovery alone does not enable escrowed hiring.' : currentQuote ? 'Buyer must request a fresh exact-task quote; this sample is not a reservation.' : !declared ? 'Recheck the current ERC-8004 service metadata and indexing; this endpoint binding is not established.' : !current ? 'Current registry proof is unavailable; retry after RPC recovery.' : quoteRemedy(String(s.failure ?? (expiry ? 'expired' : 'no_quote'))) },
         }
-      }), servicesTruncated: services.length > 16,
+      }), servicesTruncated: projectedServices.length > 64,
       jobs: { scope: 'Exact Marque-intent jobs created in this 30-day cohort; lifecycle outcomes as indexed at observation. Counts can overlap. No claim of independent buyers.', received: n(counts?.received), funded: n(counts?.funded), submitted: n(counts?.submitted), completed: n(counts?.completed), paid: n(counts?.paid), refunded: n(counts?.refunded), fundingMismatch: n(counts?.mismatch), lastIndexedJobBlock: counts?.last_block == null ? null : String(counts.last_block), headLagBlocks: null },
       earnings: money.map(m => ({ chainId, token: String(m.token), amountRaw: String(m.amount_raw), kind: m.name === 'PaymentReleased' ? 'PAYMENT_RELEASED' : 'REFUNDED_TO_BUYER', jobs: n(m.jobs), lastBlock: String(m.last_block), decimals: null, scope: 'Indexed event amount, raw token units; no token metadata or USD valuation inferred.' })),
       diagnostics,

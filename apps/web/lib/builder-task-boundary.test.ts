@@ -1,9 +1,9 @@
 import { NextRequest } from 'next/server'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-const mocks=vi.hoisted(()=>({ readContract:vi.fn(), probeService:vi.fn(), safeFetch:vi.fn(), insert:vi.fn(), values:vi.fn(), claim:vi.fn(), current:vi.fn(), capture:vi.fn(), run:vi.fn(), bundle:vi.fn() }))
+const mocks=vi.hoisted(()=>({ readContract:vi.fn(), probeService:vi.fn(), probeA2ACall:vi.fn(), safeFetch:vi.fn(), insert:vi.fn(), values:vi.fn(), claim:vi.fn(), current:vi.fn(), capture:vi.fn(), run:vi.fn(), bundle:vi.fn() }))
 vi.mock('@marque/db',async original=>({...await original<object>(),db:()=>({insert:mocks.insert})}))
 vi.mock('@marque/commerce',async original=>({...await original<object>(),chainClient:()=>({readContract:mocks.readContract})}))
-vi.mock('@marque/probe',async original=>({...await original<object>(),probeService:mocks.probeService,safeFetch:mocks.safeFetch}))
+vi.mock('@marque/probe',async original=>({...await original<object>(),probeService:mocks.probeService,probeA2ACall:mocks.probeA2ACall,safeFetch:mocks.safeFetch}))
 vi.mock('./claim',()=>({readClaimToken:mocks.claim,claimOwnerIsCurrent:mocks.current}))
 vi.mock('./limits',()=>({checkTestBurst:()=>({ok:true}),checkClaimBurst:()=>({ok:true}),checkWindow:()=>({ok:true}),clientKey:()=> 'fixture'}))
 vi.mock('@marque/conformance',()=>({CASES:[{testId:'MCS-YIELD-1',id:'fixture'}],capturePublishedCase:mocks.capture,runConformance:mocks.run,buildWarrantBundle:mocks.bundle,adapterFor:()=>({})}))
@@ -20,12 +20,16 @@ beforeEach(()=>{
  mocks.bundle.mockReturnValue({schema:'marque.warrant.v1',synthetic:true})
  mocks.claim.mockReturnValue({chainId:56,tokenId:'123',owner});mocks.current.mockResolvedValue(true)
  mocks.readContract.mockImplementation(async({functionName})=>functionName==='ownerOf'?owner:'data:application/json,'+encodeURIComponent(JSON.stringify({services:[{name:'a2a',endpoint}]})))
- mocks.probeService.mockResolvedValue({liveness:'unbound',latencyMs:1,statusCode:200,detail:'card readable; task acceptance unverified',executableEndpoint:'https://example.org/runtime',skills:['negotiate']})
+ mocks.probeService.mockResolvedValue({liveness:'unbound',latencyMs:1,statusCode:200,detail:'card readable; task acceptance unverified',executableEndpoint:'https://example.org/runtime',skills:['negotiate'],manifest:{capabilityEvidence:{cardReadable:true,endpointDiscovered:true,messageSendCallable:null}}})
 })
 describe('builder discovery and task mutation boundary',()=>{
  it('readable A2A discovery never sends message/send',async()=>{
-  const p=await probeNow(56,'123',endpoint);expect(p.ok).toBe(false);expect(mocks.safeFetch).not.toHaveBeenCalled();expect(mocks.probeService).toHaveBeenCalledWith('a2a',endpoint)
+  const p=await probeNow(56,'123',endpoint);expect(p.ok).toBe(false);expect(p.liveness).toBe('discovered');expect(mocks.probeA2ACall).not.toHaveBeenCalled();expect(mocks.safeFetch).not.toHaveBeenCalled();expect(mocks.probeService).toHaveBeenCalledWith('a2a',endpoint)
   expect(mocks.values.mock.calls[0]?.[0].result.discoveryOnly).toBe(true)
+ })
+ it('only explicit consent invokes the A2A call validator and records its actual result',async()=>{
+  mocks.probeA2ACall.mockResolvedValue({ok:true,liveness:'live',latencyMs:2,statusCode:200,detail:'message/send validated (message)',executableEndpoint:'https://example.org/runtime',skills:['health']})
+  const r=await probeRoute(body({chainId:56,tokenId:'123',endpoint,taskConsent:true}));expect(r.status).toBe(200);expect(await r.json()).toMatchObject({ok:true,liveness:'callable',discoveryOnly:false});expect(mocks.probeA2ACall).toHaveBeenCalledWith(endpoint);expect(mocks.probeService).not.toHaveBeenCalled();expect(mocks.values.mock.calls[0]?.[0].result).toMatchObject({callability:'ACCEPTED',discoveryOnly:false})
  })
  it('undeclared endpoint is refused before discovery or observation write',async()=>{
   await expect(probeNow(56,'123','https://other.example/card')).rejects.toThrow('declared');expect(mocks.probeService).not.toHaveBeenCalled();expect(mocks.insert).not.toHaveBeenCalled()

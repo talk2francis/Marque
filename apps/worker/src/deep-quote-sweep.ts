@@ -30,7 +30,7 @@ const rows = rowsOf(await db().execute(sql`
   join agent a on a.id = s.agent_id
   join probe_schedule q on q.service_id = s.id
   join probe p on p.id = q.last_probe_id
-  where a.chain_id = 56 and s.kind = 'a2a' and p.liveness in ('live', 'unbound', 'bad_schema')
+  where a.chain_id = 56 and s.kind = 'a2a' and s.currently_declared is distinct from false and p.liveness in ('live', 'discovered', 'unbound', 'bad_schema')
     and not exists (select 1 from commerce_quote c where c.service_id = s.id)
   limit ${LIMIT}`))
 

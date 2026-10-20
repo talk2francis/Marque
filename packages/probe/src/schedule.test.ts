@@ -16,7 +16,7 @@ describe('tierOf', () => {
     expect(tierOf({ ...base, liveness: null })).toBe('T2')
   })
   it('separates answering services (T1b) from dead ones (T3)', () => {
-    for (const l of ['live', 'unbound', 'bad_schema'] as const) expect(tierOf({ ...base, liveness: l })).toBe('T1b')
+    for (const l of ['live', 'discovered', 'unbound', 'bad_schema'] as const) expect(tierOf({ ...base, liveness: l })).toBe('T1b')
     expect(tierOf({ ...base, liveness: 'dead', consecutiveDead: 1 })).toBe('T3')
   })
 })

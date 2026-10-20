@@ -110,14 +110,14 @@ export async function sellerCandidates(scope?: { agentId: string; serviceId?: nu
     from lp
     join agent_service s on s.id = lp.service_id
     left join cat on cat.agent_id = lp.agent_id
-    where s.kind = 'a2a' and (
+    where s.kind = 'a2a' and s.currently_declared is distinct from false and (
       lp.agent_id in (${sql.join(fpIds.map((id) => sql`${id}`), sql`, `)})
       -- Any answering A2A agent classified into a hireable category gets a price
       -- check: some production sellers (plain quotes) do not list a negotiate skill.
       or (cat.category in ('yield', 'grid', 'rebalancing', 'health_factor', 'security')
           -- probe_schedule has one row per service. lp already selected that
           -- row's current probe; repeating that schedule/probe lookup can time out.
-          and lp.liveness in ('live', 'unbound', 'bad_schema'))
+          and lp.liveness in ('live', 'discovered', 'unbound', 'bad_schema'))
       or exists (
         select 1 from jsonb_array_elements(case when jsonb_typeof(lp.manifest->'skills') = 'array' then lp.manifest->'skills' else '[]'::jsonb end) x
         where x->>'id' in ('negotiate', 'notify_funded') or (x->>'id') ilike '%8183%' or (x->>'name') ilike '%erc-8183%'

@@ -22,6 +22,8 @@ export type Liveness =
   | 'live'
   /** Answers with a well-formed descriptor, but nothing is callable yet. */
   | 'unbound'
+  /** Card is readable and names a runtime; no task was sent. */
+  | 'discovered'
   /** Answered, but the payload is not what the protocol requires. */
   | 'bad_schema'
   /** Did not answer. */
@@ -44,6 +46,8 @@ export interface ProbeOutcome {
   protocolVersion?: string | null
   taskKinds?: string[]
   manifest?: Record<string, unknown> | null
+  /** Internal durable diagnostic, stored in builder_check only, never a public response. */
+  callEvidence?: { request: string; response: string | null }
 }
 
 export function taskKindsFromText(values: readonly string[]): string[] {
@@ -227,8 +231,8 @@ export async function probeA2A(url: string): Promise<ProbeOutcome> {
 
   const advertisedTaskKinds = taskKindsFromText(skillDescriptions)
   return {
-    ok: false, liveness: 'unbound', latencyMs: res.latencyMs, statusCode: res.status,
-    failureClass: 'unbound',
+    ok: false, liveness: executable ? 'discovered' : 'unbound', latencyMs: res.latencyMs, statusCode: res.status,
+    failureClass: executable ? null : 'unbound',
     detail: `card readable; task endpoint discovered; message/send not validated (${skills.length} advertised skill(s))`,
     skills, executableEndpoint: executable, reportedName: name,
     protocolVersion: d.version ?? null,

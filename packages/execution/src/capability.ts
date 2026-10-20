@@ -122,7 +122,7 @@ export function evaluateAgentState(input: EvaluateAgentInput): CanonicalAgentSta
   if (input.services.length > 0 && input.services.every((s) => !s.probedAt)) reasons.push('PROBE_MISSING')
   if (input.services.some((s) => s.probedAt) && fresh.length === 0) reasons.push('PROBE_STALE')
 
-  const reachableServices = fresh.filter((s) => ['live', 'unbound', 'bad_schema'].includes(s.liveness ?? ''))
+  const reachableServices = fresh.filter((s) => ['live', 'discovered', 'unbound', 'bad_schema'].includes(s.liveness ?? ''))
   if (fresh.length > 0 && reachableServices.length === 0) reasons.push('ENDPOINT_UNREACHABLE')
 
   const callableServices = fresh.filter((s) => {

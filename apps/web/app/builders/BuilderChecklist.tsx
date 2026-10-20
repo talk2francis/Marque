@@ -148,10 +148,11 @@ export function BuilderChecklist() {
   const doProve = () => act('proved', async () => { await prove(); return 'Ownership proved. The signature is stored with the identity.' })
   const doProbe = () => act('callable', async () => {
     if (!cur) return
-    const r = await fetch('/api/v1/builders/probe', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ chainId: cur.identity.chainId, tokenId: cur.identity.tokenId, endpoint: endpoint.trim() }) })
+    if (!window.confirm('This checks your declared service. For A2A it sends "What can you do?" and records the result publicly. Continue only if you control it or have permission and it needs no payment or other side effects.')) return
+    const r = await fetch('/api/v1/builders/probe', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ chainId: cur.identity.chainId, tokenId: cur.identity.tokenId, endpoint: endpoint.trim(), taskConsent: true }) })
     const j = await r.json()
     if (!r.ok) throw new Error(j.detail ?? 'The probe could not run.')
-    return `Discovery only (${j.liveness}), ${j.latencyMs} ms: ${j.detail}. No task was sent.`
+    return `${j.discoveryOnly ? 'Discovery' : 'Call check'} (${j.liveness}), ${j.latencyMs} ms: ${j.detail}.`
   })
   const doDeclare = () => act('classified', async () => {
     const token = await claimToken()
@@ -266,7 +267,7 @@ export function BuilderChecklist() {
                     {c.id === 'callable' && !!address && cur.identity.owner === address.toLowerCase() ? (
                       <div className={styles.actions}>
                         <input className={styles.input} aria-label="Endpoint to probe" value={endpoint} onChange={(e) => setEndpoint(e.target.value)} placeholder="https://your-agent.example/.well-known/agent-card.json" spellCheck={false} />
-                        <Button size="sm" variant={c.state === 'pass' ? 'secondary' : 'primary'} loading={busy === 'callable'} disabled={!/^https:\/\//.test(endpoint.trim())} onClick={doProbe}>Read capabilities</Button>
+                        <Button size="sm" variant={c.state === 'pass' ? 'secondary' : 'primary'} loading={busy === 'callable'} disabled={!/^https:\/\//.test(endpoint.trim())} onClick={doProbe}>Check live call</Button>
                       </div>
                     ) : null}
 

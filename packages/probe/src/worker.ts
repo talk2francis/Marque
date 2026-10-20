@@ -19,6 +19,7 @@ import { syncSchedule, dueByTier, recordVerdicts, deferServices, firstPartyAgent
 export interface ProbeCycleResult {
   attempted: number
   live: number
+  discovered: number
   unbound: number
   badSchema: number
   dead: number
@@ -103,7 +104,7 @@ export async function runProbeCycle(opts: { limit?: number; concurrency?: number
   const byTier: Record<Tier, number> = { T0: 0, T1: 0, T1b: 0, T2: 0, T3: 0 }
   for (const c of candidates) byTier[c.tier]++
   const result: ProbeCycleResult = {
-    attempted: candidates.length, live: 0, unbound: 0, badSchema: 0, dead: 0, skippedBackoff: 0,
+    attempted: candidates.length, live: 0, discovered: 0, unbound: 0, badSchema: 0, dead: 0, skippedBackoff: 0,
     byTier, scheduleInserted: sync.inserted, scheduleBackfilled: sync.backfilled,
   }
   if (candidates.length === 0) return result
@@ -136,6 +137,7 @@ export async function runProbeCycle(opts: { limit?: number; concurrency?: number
     else hostFails.set(host, 0)
     switch (outcome.liveness) {
       case 'live': result.live++; break
+      case 'discovered': result.discovered++; break
       case 'unbound': result.unbound++; break
       case 'bad_schema': result.badSchema++; break
       default: result.dead++; break

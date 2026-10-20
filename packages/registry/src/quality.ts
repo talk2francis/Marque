@@ -52,6 +52,7 @@ export interface QualityFacts {
   callable: { at: string; endpoint: string | null; via: 'probe' | 'builder' } | null
   /** The newest probe attempt that did not answer callable, for the reason. */
   lastProbeFailure?: { at: string; reason: string } | null
+  callabilityUnknown?: boolean
   /** The classifier's reading of the agent's own metadata. */
   classified: { category: string | null; confidence: number | null; rationale: string | null }
   /** What the owner declared on Marque, if anything. */
@@ -104,9 +105,9 @@ export function qualityVerdict(f: QualityFacts): QualityVerdict {
     fresh
       ? { id: 'callable', label: 'Its endpoint answers a live call', state: 'pass', reason: `Answered as callable ${f.callable!.via === 'builder' ? 'to a probe run from this page' : "to Marque's scheduled probe"} at ${f.callable!.at.slice(0, 16).replace('T', ' ')} UTC.`, fix: null, note: f.callable!.endpoint }
       : {
-          id: 'callable', label: 'Its endpoint answers a live call', state: 'fail',
-          reason: f.lastProbeFailure ? `The last probe did not reach a callable service: ${f.lastProbeFailure.reason}.` : f.callable ? 'The last callable answer is more than 24 hours old.' : 'No probe has reached a callable service yet.',
-          fix: 'Probe now. The endpoint must answer an A2A agent card or an MCP handshake with a task interface.',
+          id: 'callable', label: 'Its endpoint answers a live call', state: !f.lastProbeFailure && f.callabilityUnknown ? 'pending' : 'fail',
+          reason: f.lastProbeFailure ? `The last probe did not reach a callable service: ${f.lastProbeFailure.reason}.` : f.callable ? 'The last callable answer is more than 24 hours old.' : f.callabilityUnknown ? 'The card names a runtime, but a consented live call has not been validated.' : 'No probe has reached a callable service yet.',
+          fix: 'Check a live call with permission. A2A must answer message/send with a valid Message or accepted Task; an MCP handshake must expose a task interface.',
         },
   )
 

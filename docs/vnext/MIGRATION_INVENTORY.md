@@ -40,3 +40,8 @@ The dated 16 October inventory above remains historical. Production now has 23 m
 | `0022_probe_manifest_lookup.sql` | `aba1ed611a7a59c49b466b53fe04e7907e1dea66d0c8df4d72a42a199e432fc8` | Additive index; original observations and prior ledger rows preserved |
 
 The 0021 concurrent normalized-wallet index is valid and ready; the failed initial lock-wait attempt and subsequent concurrent repair remain in private operational evidence. The 18 October backup/restore proof predates these additions and is not a new 23-migration restore drill. See the [release audit](./V3_RELEASE_AUDIT.md).
+
+
+### Builder service incident candidate, 20 October 2026
+
+Additive migration `0023_service_declarations.sql` adds nullable `currently_declared` and `declaration_checked_at` fields to the derived `agent_service` table. It alters no first-party table, existing row ID or historical observation. Candidate fixture verification and production application are reported separately in the incident checkpoint; the 23-row production and older restore statements above are dated evidence, not a claim that this candidate has already deployed.

@@ -8,6 +8,7 @@ const enabled = !!url && /^marque_vnext_fixture_/.test(new URL(url).pathname.sli
 const stamp = Date.now()
 const cases = [
   { name: 'live', liveness: 'live', category: 'yield', advertises: false, expected: true },
+  { name: 'discovered', liveness: 'discovered', category: 'yield', advertises: false, expected: true },
   { name: 'unbound', liveness: 'unbound', category: 'yield', advertises: false, expected: true },
   { name: 'bad-schema', liveness: 'bad_schema', category: 'yield', advertises: false, expected: true },
   { name: 'dead-after-live', liveness: 'dead', category: 'yield', advertises: false, expected: false },

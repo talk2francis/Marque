@@ -159,7 +159,7 @@ export function agentServiceEvidenceQuery(agentIds: readonly string[]) {
         order by p.checked_at desc nulls last
         limit 1
       ) l on true
-      where s.agent_id in (${idList})
+      where s.agent_id in (${idList}) and s.currently_declared is distinct from false
       order by s.id
   `
 }

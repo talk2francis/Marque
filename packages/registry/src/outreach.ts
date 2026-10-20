@@ -114,6 +114,8 @@ export function assessReadiness(p: {
     }
   }
 
+  if (p.liveness === 'discovered') return { readiness: 'The agent card names a runtime. A consented message/send check is still needed; discovery did not send a task.', priority: inRequiredCategory ? 'HIGH' : 'MEDIUM' }
+
   if (p.liveness === 'unbound' || p.failureClass === 'unbound' || p.failureClass === 'empty_tools') {
     const base = 'Registered and discoverable, but never bound to a runtime: the card serves, yet exposes no executable endpoint and no skills. One deploy away from being hireable.'
     return {
@@ -181,7 +183,7 @@ export async function buildProspects(opts: { limit?: number } = {}): Promise<Pro
       and a.id <> 'canary:ssrf'
       ${excludeRefs}
       and (
-        p.liveness in ('live','unbound','bad_schema')
+        p.liveness in ('live','discovered','unbound','bad_schema')
         or exists (select 1 from agent_service s2 where s2.agent_id = a.id)
       )
     order by

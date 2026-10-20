@@ -306,6 +306,11 @@ export function qualView(a: MarketRow): QualView {
     }
   }
 
+  if (a.liveness === 'discovered' || a.liveness === 'reachable') return {
+    tone: 'unavailable', label: 'Call not validated', evidence: 'Discovery answered', date: null, flag: null, detail: null,
+    title: 'Discovery answered, but a task call has not been validated. The owner can run a consented live call check.',
+  }
+
   if (a.liveness === 'live') {
     return {
       tone: 'callable',

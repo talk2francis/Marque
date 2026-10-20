@@ -1,9 +1,10 @@
 import 'server-only'
+import { builderCallability } from './builder-callability'
 import { sql } from 'drizzle-orm'
 import { db, builderCheck } from '@marque/db'
 import { chainClient, isSupportedChain, network, type ChainId } from '@marque/commerce'
-import { safeFetch, probeService } from '@marque/probe'
-import { classifyByKeyword, qualityVerdict, effectiveCategory, type QualityFacts, type QualityVerdict } from '@marque/registry'
+import { probeService, probeA2ACall, readRegistrationMetadata } from '@marque/probe'
+import { classifyByKeyword, qualityVerdict, effectiveCategory, declaredServices, type DeclaredService, type QualityFacts, type QualityVerdict } from '@marque/registry'
 
 /**
  * The builder checklist's facts (DESIGN-SYSTEM.md 8.8, SPEC-TRACKING 10), for an
@@ -36,40 +37,10 @@ export interface IdentityRead {
   name: string | null
   description: string | null
   /** Service endpoints the identity's own record declares, A2A and MCP first. */
-  services: Array<{ kind: 'a2a' | 'mcp' | 'other'; endpoint: string }>
+  services: DeclaredService[]
 }
 
-/** Registration metadata: data: URIs decoded in place, https fetched through safeFetch. */
-export async function readMetadata(uri: string): Promise<Record<string, unknown> | null> {
-  try {
-    let text: string
-    if (uri.startsWith('data:')) {
-      if (uri.length > 768 * 1024) return null
-      const comma = uri.indexOf(',')
-      if (comma < 0) return null
-      const head = uri.slice(0, comma)
-      if (!/^data:application\/json(?:;charset=utf-8)?(?:;base64)?$/i.test(head)) return null
-      const body = uri.slice(comma + 1)
-      text = head.includes(';base64') ? Buffer.from(body, 'base64').toString('utf8') : decodeURIComponent(body)
-    } else if (/^https:\/\//i.test(uri)) {
-      const r = await safeFetch(uri, { timeoutMs: 6_000, maxBytes: 256 * 1024 })
-      if (!r.ok || r.status >= 400) return null
-      text = r.body
-    } else return null
-    if (Buffer.byteLength(text, 'utf8') > 256 * 1024) return null
-    const parsed: unknown = JSON.parse(text)
-    if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) return null
-    const meta = parsed as Record<string, unknown>
-    // Refuse malformed or excessive declarations as a whole, not a silently selected
-    // prefix that could present a different service from the identity's actual record.
-    for (const key of ['services', 'endpoints']) {
-      const value = meta[key]
-      if (value != null && (!Array.isArray(value) || value.length > 64)) return null
-    }
-    return meta
-  } catch { /* unreadable metadata is reported as such */ }
-  return null
-}
+export const readMetadata = readRegistrationMetadata
 
 export async function readIdentity(chainId: ChainId, tokenId: string): Promise<IdentityRead> {
   const registry = identityRegistry(chainId)
@@ -84,16 +55,7 @@ export async function readIdentity(chainId: ChainId, tokenId: string): Promise<I
   }
   const uri = await chainClient(chainId).readContract({ address: registry, abi: ERC721, functionName: 'tokenURI', args: [BigInt(tokenId)] }).catch(() => null)
   const meta = uri ? await readMetadata(String(uri)) : null
-  const list: unknown[] = [...(Array.isArray(meta?.['services']) ? meta['services'] : []), ...(Array.isArray(meta?.['endpoints']) ? meta['endpoints'] : [])]
-  const services = list
-    .filter((x) => x !== null && typeof x === 'object' && !Array.isArray(x))
-    .map((x) => x as { name?: unknown; endpoint?: unknown; type?: unknown })
-    .filter((x) => typeof x.endpoint === 'string' && x.endpoint.length <= 2048 && /^https:\/\//i.test(x.endpoint) && !Array.from(x.endpoint).some(c => c.charCodeAt(0) <= 32 || c.charCodeAt(0) === 127))
-    .map((x) => {
-      const n = String(x.name ?? x.type ?? '').toLowerCase()
-      return { kind: (n.includes('a2a') ? 'a2a' : n.includes('mcp') ? 'mcp' : 'other') as 'a2a' | 'mcp' | 'other', endpoint: String(x.endpoint) }
-    })
-    .sort((a, b) => (a.kind === 'other' ? 1 : 0) - (b.kind === 'other' ? 1 : 0))
+  const services = declaredServices(meta)
   return {
     ...base, owner, readFailed: false,
     name: typeof meta?.['name'] === 'string' ? (meta['name'] as string).slice(0, 200) : null,
@@ -137,21 +99,9 @@ export async function builderView(wallet: string, chainId: ChainId, tokenId: str
   const allProofs = [...proofs, ...legacyProof].map((p) => ({ owner: String(p['owner_address']).toLowerCase(), at: iso(p['verified_at'])! }))
   const proof = allProofs.find((p) => p.owner === id.owner) ?? allProofs[0] ?? null
 
-  const declaredEndpoints = new Set(id.services.map(s => s.endpoint))
-  const probeRows = checks.filter((c) => c['kind'] === 'probe' && declaredEndpoints.has(String(c['endpoint'])))
-  const lastOk = probeRows.find((c) => c['ok'] === true) ?? null
-  // A templated endpoint ({agentId}) is declared raw and probed resolved: either form is the current service.
-  const currentProbes = probes.filter(p => declaredEndpoints.has(String(p['declared_endpoint'])) || declaredEndpoints.has(String(p['resolved_endpoint'])))
-  const scheduled = currentProbes.find(p => p['liveness'] === 'live') ?? null
-  const okAt = [lastOk ? { at: iso(lastOk['checked_at'])!, endpoint: String(lastOk['endpoint'] ?? ''), via: 'builder' as const } : null,
-    scheduled ? { at: iso(scheduled['checked_at'])!, endpoint: scheduled['executable_endpoint'] ? String(scheduled['executable_endpoint']) : null, via: 'probe' as const } : null]
-    .filter((x): x is NonNullable<typeof x> => x !== null)
-    .sort((a, b) => Date.parse(b.at) - Date.parse(a.at))[0] ?? null
-  const manualFailure = probeRows[0] && probeRows[0]['ok'] !== true
-    ? { at: iso(probeRows[0]['checked_at'])!, reason: String((probeRows[0]['result'] as Record<string, unknown>)?.['detail'] ?? 'no callable service') } : null
-  const scheduledFailure = currentProbes.find(p => p['liveness'] === 'dead' || p['liveness'] === 'bad_schema')
-  const lastFail = [manualFailure, scheduledFailure ? {at:iso(scheduledFailure['checked_at'])!,reason:String(scheduledFailure['detail'] ?? 'scheduled check failed')} : null]
-    .filter((x): x is NonNullable<typeof x> => x !== null).sort((a,b) => Date.parse(b.at)-Date.parse(a.at))[0] ?? null
+  const { callable: okAt, lastFailure: lastFail, callabilityUnknown } = builderCallability(id.services, checks, probes)
+  const currentEndpoints = new Set(id.services.map(s => s.endpoint))
+  const lastOk = checks.find(c => c.kind === 'probe' && c.ok === true && currentEndpoints.has(String(c.endpoint))) ?? null
 
   // Classified: Marque's classifier (ingest) if it ran, else the keyword pass over the record now.
   const kw = classifyByKeyword({ name: id.name, description: id.description })
@@ -165,7 +115,7 @@ export async function builderView(wallet: string, chainId: ChainId, tokenId: str
   const t = tests[0]
   const facts: QualityFacts = {
     chainId, tokenId, wallet: w, owner: id.owner, ownerReadFailed: id.readFailed,
-    proof, callable: okAt, lastProbeFailure: lastFail && (!okAt || Date.parse(lastFail.at) >= Date.parse(okAt.at)) ? lastFail : null,
+    proof, callable: okAt, callabilityUnknown, lastProbeFailure: lastFail && (!okAt || Date.parse(lastFail.at) >= Date.parse(okAt.at)) ? lastFail : null,
     classified, declared,
     test: t ? { at: iso(t['ran_at'])!, testId: String(t['test_id']), wellFormed: t['error'] == null, pass: t['pass'] === true, error: t['error'] ? String(t['error']) : null } : null,
   }
@@ -203,22 +153,24 @@ export async function builderIdentities(wallet: string): Promise<Array<{ chainId
 }
 
 /** "Probe now": one safeFetch probe of the declared endpoint, stored as a first-party observation. */
-export async function probeNow(chainId: ChainId, tokenId: string, endpoint: string): Promise<{ ok: boolean; liveness: string; latencyMs: number; detail: string; executableEndpoint: string | null }> {
+export async function probeNow(chainId: ChainId, tokenId: string, endpoint: string, taskConsent = false): Promise<{ discoveryOnly: boolean; ok: boolean; liveness: string; latencyMs: number; detail: string; executableEndpoint: string | null }> {
   const identity = await readIdentity(chainId, tokenId)
   if (identity.readFailed) throw new Error('Current identity could not be read.')
   const service = identity.services.find(s => s.endpoint === endpoint && (s.kind === 'a2a' || s.kind === 'mcp'))
   if (!service || service.kind === 'other') throw new Error('Choose a current declared A2A or MCP endpoint.')
   const kind = service.kind
-  // Discovery may initialize/list MCP capabilities or GET an A2A card. It never
-  // invokes message/send or tools/call. A readable card is not task acceptance.
-  const out = await probeService(kind, endpoint)
+  // Background/default discovery sends no task. An explicit consent flag permits
+  // only the fixed A2A capability question, without payment or follow-up calls.
+  const out = kind === 'a2a' && taskConsent ? await probeA2ACall(endpoint) : await probeService(kind, endpoint)
+  const discoveryOnly = !(kind === 'a2a' && taskConsent)
+  const notTested = kind === 'a2a' && discoveryOnly && out.executableEndpoint !== null && out.manifest?.capabilityEvidence != null
   const callable = out.liveness === 'live'
   const detail = out.detail
   await db().insert(builderCheck).values({
     agentKey: agentKeyOf(chainId, tokenId), kind: 'probe', chainId, tokenId, endpoint, ok: callable,
-    result: { liveness: callable ? 'callable' : out.liveness, latencyMs: out.latencyMs, discoveryOnly: true, statusCode: out.statusCode, failureClass: callable ? null : out.failureClass, detail: detail.slice(0, 300), executableEndpoint: out.executableEndpoint, skills: out.skills.slice(0, 20), kind },
+    result: { liveness: callable ? 'callable' : notTested ? 'discovered' : out.liveness, latencyMs: out.latencyMs, discoveryOnly, callability: notTested ? 'NOT_TESTED' : callable ? 'ACCEPTED' : 'FAILED', statusCode: out.statusCode, failureClass: callable ? null : out.failureClass, detail: detail.slice(0, 300), executableEndpoint: out.executableEndpoint, skills: out.skills.slice(0, 20), kind, callEvidence: out.callEvidence ?? null },
   })
-  return { ok: callable, liveness: callable ? 'callable' : out.liveness, latencyMs: out.latencyMs, detail: detail.slice(0, 300), executableEndpoint: out.executableEndpoint }
+  return { discoveryOnly, ok: callable, liveness: callable ? 'callable' : notTested ? 'discovered' : out.liveness, latencyMs: out.latencyMs, detail: detail.slice(0, 300), executableEndpoint: out.executableEndpoint }
 }
 
 /** The owner's declared category, stored with who declared it. */
