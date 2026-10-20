@@ -1,4 +1,4 @@
-> Current maintenance, 20 October 2026: web and probe/quote implementation `af39ea3` is deployed. See the [builder/service incident](../operations/BUILDER_SERVICE_INCIDENT_2026-10-20.md) for six restored current-service projections, exact CI/browser evidence, preserved history and pending live A2A capability checks. The older [V3 release audit](./V3_RELEASE_AUDIT.md) and entries below are dated evidence.
+> Current maintenance, 20 October 2026: web and probe/quote implementation `af39ea3` is deployed. See the [builder/service incident](../operations/BUILDER_SERVICE_INCIDENT_2026-10-20.md) for six restored current-service projections, exact CI/browser evidence, preserved history and the subsequently approved seven passing live A2A capability checks and separately activated Lattice repair `f4f65d3`. The older [V3 release audit](./V3_RELEASE_AUDIT.md) and entries below are dated evidence.
 
 # P14/P15 production release completed, 2026-10-19T09:45:18.102462+00:00
 

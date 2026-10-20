@@ -1,6 +1,6 @@
 # Builder and registry service incident, 20 October 2026
 
-Status: repair deployed on 20 October 2026. Web release/build source and probe/quote worker implementation are `af39ea3660c373f3efa5abbecc16d05cda64315d`. The owner subsequently approved the seven live A2A capability questions; their actual results and the Lattice follow-up are recorded below.
+Status: repair deployed on 20 October 2026. Web release/build source and probe/quote worker implementation are `af39ea3660c373f3efa5abbecc16d05cda64315d`. The owner subsequently approved the seven live A2A capability questions. All seven now pass the fixed-question protocol check; Lattice required the separately deployed reference response repair `f4f65d3`. Actual results and scope are recorded below.
 
 Read-only production checks reproduced two defects for BSC identities 302257, 302258, 304493, 304494, 310460 and 363709, and card-only callability behavior for reference Lattice 341554. Current registry metadata and every card were readable. The owner projection still contained old indexed endpoints.
 
@@ -58,3 +58,21 @@ After explicit user approval, seven checks ran through the deployed public build
 | Lattice 341554 | FAIL, completed Task omitted `id` and `contextId` | 358 |
 
 All six Brain responses were HTTP 200, matched the request ID and contained an agent Message with parts. Lattice also answered HTTP 200, but its shared free-face Task wrapper omitted required task/context identifiers; its artifact lacked `artifactId` too. The validator correctly rejected it. The reference adapter repair adds those identifiers and preserves the request ID and answer bytes. Two new regressions failed before the repair; all **105 focused tests in eight files** passed afterward. The MCS source anchor is unchanged. Runtime activation and post-repair verification are separate from this initial failure; original evidence is retained.
+
+
+### Lattice repair activated and verified
+
+The reference response fix is `f4f65d300e7a7ce791dc3d5547afe29ccf63d5f1`. Exact-source [main CI](https://github.com/talk2francis/Marque/actions/runs/39431288936) and [phase2 CI](https://github.com/talk2francis/Marque/actions/runs/39431288856) passed workspace types, lint, tests, migrations, build and live smoke. Local engine/probe/Lattice type checks, lint, copy and the 105 focused tests passed. No validator, MCS arithmetic, tolerance, SDK pin or paid-work behavior changed.
+
+At **13:39:13 UTC**, Lattice alone was activated after two idle-health reads and a check that no VPS build was running. SIGTERM allowed the existing runtime to close gracefully; PM2 recovered it and its saved state was updated. The other **31 PM2 process entries** retained their PIDs and statuses. The other five reference runtimes were not restarted; the shared source repair is available to their next rollout. The web and probe/quote workers remain the tested `af39ea3` implementation.
+
+The same approved Lattice question was repeated at **13:39:30 UTC**. Builder observation **359** records **HTTP 200, `ok:true`, `liveness:callable`, `discoveryOnly:false`**, with a matching JSON-RPC ID and a completed Task containing task/context/artifact identifiers. Original failed observation 358 remains intact. Final result: **six Brain Messages plus one Lattice Task accepted**. These checks establish protocol acceptance of this question, not seven MCS passes, paid execution or resolution of the two separate unrecognized sample quotes. No listing assertion was rewritten.
+
+### README and architecture restoration
+
+The earlier V3 README rewrite removed 284 lines and added 63. Correcting unsupported claims did not require removing useful product imagery, setup and evidence navigation. The restored README includes a current hero, product tour, architecture diagram, category standards, reference identity links, historical mainnet proof, benchmark thumbnails/recordings, developer setup and a documentation map. Six selected public website captures were reviewed from **20 October, 13:33 to 13:34 UTC**, against unchanged web release `af39ea3`; their route/theme/viewport/source provenance is tracked with the images. No wallet or task write was performed for those captures. The September hire-sheet example and original image files remain separately dated and preserved.
+
+The new architecture image corrects the old five-reference and browser/server-signing descriptions. Canonical SVG and embedded copy are synchronized. Local phone/desktop README renders verify all 12 images load without document overflow; this is a local GitHub-style render, not a claim about GitHub's hosted renderer. All local README/documentation-map links were checked. Private diagnostics and audit screenshots remain off-repository; only the reviewed public product images requested for the README are published.
+
+
+Final reads at **13:43 UTC** returned HTTP 200 for owner diagnostics, web health and Lattice health; all six Brain owner checklists still showed 5/5. A separate post-test preservation check at **13:44 UTC** again matched all 23,575 original records, eight original service identities and the prior 23 migration entries. Its first 500-row verification attempt timed out; 100-row batches with a bounded explicit sort passed under the unchanged eight-second limit. This changed only the private verification query, not a production query or timeout setting. Shared services, global Caddy configuration, tmux and existing private/untracked evidence remain preserved.

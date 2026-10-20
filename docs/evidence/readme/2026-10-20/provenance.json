@@ -1,0 +1,67 @@
+{
+  "capturedOn": "2026-10-20",
+  "webRelease": "af39ea3660c373f3efa5abbecc16d05cda64315d",
+  "scope": "Public pages, no wallet; task and transaction writes blocked. Screens show observations at capture time, not continuing availability. Job 56843 is historical.",
+  "images": [
+    {
+      "file": "hero.webp",
+      "path": "/",
+      "theme": "night",
+      "viewport": {
+        "width": 1440,
+        "height": 1100
+      },
+      "capturedAt": "2026-10-20T13:33:28.331Z"
+    },
+    {
+      "file": "home.webp",
+      "path": "/",
+      "theme": "day",
+      "viewport": {
+        "width": 1440,
+        "height": 1100
+      },
+      "capturedAt": "2026-10-20T13:33:35.418Z"
+    },
+    {
+      "file": "marketplace.webp",
+      "path": "/register",
+      "theme": "day",
+      "viewport": {
+        "width": 1440,
+        "height": 1100
+      },
+      "capturedAt": "2026-10-20T13:33:46.815Z"
+    },
+    {
+      "file": "storefront.webp",
+      "path": "/agents/56/341556",
+      "theme": "night",
+      "viewport": {
+        "width": 1440,
+        "height": 1100
+      },
+      "capturedAt": "2026-10-20T13:33:58.804Z"
+    },
+    {
+      "file": "quest.webp",
+      "path": "/quest",
+      "theme": "day",
+      "viewport": {
+        "width": 1440,
+        "height": 1100
+      },
+      "capturedAt": "2026-10-20T13:34:11.415Z"
+    },
+    {
+      "file": "job.webp",
+      "path": "/jobs/56/56843",
+      "theme": "night",
+      "viewport": {
+        "width": 1440,
+        "height": 1100
+      },
+      "capturedAt": "2026-10-20T13:34:20.806Z"
+    }
+  ]
+}

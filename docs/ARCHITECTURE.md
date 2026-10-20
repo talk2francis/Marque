@@ -60,6 +60,7 @@ so the whole system is legible from one `pm2 status` and one `psql`.
   <defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#b0892c"/></marker></defs>
   <rect width="1120" height="1020" rx="16" fill="#12140e"/>
   <g fill="#e8e9e0"><text x="40" y="50" font-size="28" font-weight="700">Marque</text><text x="40" y="79" font-size="15" fill="#bdc1b2">Identity, measured service evidence and buyer-signed escrow on BNB Smart Chain</text></g>
+  <text x="40" y="103" font-size="13" fill="#bdc1b2">Native action authority is disabled. The charter screen is a policy preview.</text>
   <g fill="#1b1e15" stroke="#454c3c" stroke-width="1.5">
     <rect x="40" y="120" width="300" height="140" rx="10"/>
     <rect x="400" y="120" width="260" height="140" rx="10"/>
@@ -73,10 +74,10 @@ so the whole system is legible from one `pm2 status` and one `psql`.
   </g>
   <g fill="none" stroke="#b0892c" stroke-width="2" marker-end="url(#arrow)">
     <path d="M340 190H390"/><path d="M660 190H710"/>
-    <path d="M900 260V300H835V330"/><path d="M810 260V290H295V330"/>
+    <path d="M900 260V300H835V330"/><path d="M550 422H580"/>
     <path d="M295 505V570"/><path d="M900 260H1100V690H1090"/>
-    <path d="M835 505V540H620V570"/>
-    <path d="M295 800V855"/><path d="M835 800V855"/>
+    <path d="M740 260V285H570V555H620V570"/>
+    <path d="M40 420H20V918H30"/>
   </g>
   <g fill="#e8e9e0" font-size="19" font-weight="650">
     <text x="60" y="153">Buyer browser</text><text x="420" y="153">Caddy</text><text x="740" y="153">Next.js web and API</text>
@@ -92,7 +93,7 @@ so the whole system is legible from one `pm2 status` and one `psql`.
     <text x="610" y="407">Six labelled Marque reference runtimes</text><text x="610" y="435">Third-party services from current registry declarations</text><text x="610" y="463">Bounded safeFetch: SSRF, time and response-size limits</text><text x="610" y="490">Existing seller rails retain their own signing boundary</text>
     <text x="60" y="649" fill="#80b89b">Derived index state</text><text x="60" y="674">Identity, service membership, category and cursors</text><text x="60" y="699">Rebuildable projections retain original observation bindings</text>
     <text x="60" y="731" fill="#d9ae45">Durable first-party observations</text><text x="60" y="756">Probes, quotes, MCS, receipts, runs, listings and benchmarks</text><text x="60" y="781">Preserved across index repair and release changes</text>
-    <text x="760" y="650">Transient projections and coordination</text><text x="760" y="679">Freshness and failure remain explicit</text><text x="760" y="708">No buyer keys or signing authority</text><text x="760" y="752">Native action authority: disabled</text><text x="760" y="780">Policy preview only</text>
+    <text x="760" y="650">Transient projections and coordination</text><text x="760" y="679">Freshness and failure remain explicit</text><text x="760" y="708">No buyer keys or signing authority</text>
     <text x="60" y="929">ERC-8004 identity and reputation; ERC-8183 commerce</text><text x="60" y="952">Chain context belongs to every action and record</text>
     <text x="610" y="929">Caddy, PM2, health checks and existing backups</text><text x="610" y="952">Restore evidence and limits are dated in the runbook</text>
   </g>
