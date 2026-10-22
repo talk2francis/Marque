@@ -15,6 +15,7 @@
 import { readFileSync, writeFileSync, existsSync, statfsSync } from 'node:fs'
 import { execFileSync } from 'node:child_process'
 import postgres from 'postgres'
+import { categorySupplyReading } from './alert-readings.mjs'
 
 const SECRETS = '/root/.marque/secrets.env'
 const env = Object.fromEntries(readFileSync(SECRETS, 'utf8').split('\n').filter((l) => /^[A-Z0-9_]+=/.test(l)).map((l) => [l.slice(0, l.indexOf('=')), l.slice(l.indexOf('=') + 1)]))
@@ -81,8 +82,7 @@ const SIGNALS = [
     id: 'hireable_per_category', title: 'A quest category has fewer than 3 hireable agents', holdMs: 5 * 60_000,
     read: async () => {
       const c = await getJson('/api/v1/phase2/coverage')
-      const low = (c.categories ?? []).filter((x) => x.inQuest && x.hireable < 3)
-      return { bad: low.length > 0, detail: low.length ? low.map((x) => `${x.category} ${x.hireable}`).join(', ') : (c.categories ?? []).filter((x) => x.inQuest).map((x) => `${x.category} ${x.hireable}`).join(', ') }
+      return categorySupplyReading(c)
     },
   },
   {

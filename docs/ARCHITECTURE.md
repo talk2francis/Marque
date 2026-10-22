@@ -359,3 +359,10 @@ The probe worker reconciles current tokenURI metadata at a pinned block after it
 ### Reference free-face protocol repair, 20 October 2026
 
 Approved live capability questions returned valid A2A Messages from all six Brain on BNB identities. Lattice returned a completed Task without `id` or `contextId`; its artifact also lacked `artifactId`. The shared reference response adapter now generates those identifiers while preserving the JSON-RPC request ID and answer bytes. The strict builder validator is unchanged. This is a protocol-envelope repair, not a new MCS pass or a change to task computation, quotes, wallet authority or paid execution. Runtime activation and post-repair live results are recorded in the incident report.
+
+
+### Bounded operational status and coverage alarms, 22 October 2026
+
+Service reconciliation uses durable per-identity cursor rows. `/status` must not enumerate those rows: a public page otherwise grows with the registry and can exceed the complete-body health deadline even while web liveness remains healthy. The explicit operational projection covers mainnet listing/deep/identity progress, confirmed URI-event progress and the service walk. Separate full aggregate counts retain visibility of snapshots, attempted identities and unacknowledged updates. The reader is observational; no cursor or first-party record is rewritten. Each displayed checkpoint uses its own timestamp and cadence. Independent status reads start together; unknown quest reads remain explicit.
+
+The launch category alarm consumes current `categories[].category` and `hireable` fields, validates all four core categories and preserves the existing three-agent minimum/five-minute hold. It does not depend on the removed `inQuest` field or infer a healthy reading from an empty/malformed response. See [incident evidence](operations/TELEGRAM_STATUS_INCIDENT_2026-10-22.md).

@@ -45,6 +45,7 @@ jobs:
         run: |
           bash -n scripts/deploy-web.sh
           bash ops/http-health.test.sh
+          node --test ops/alert-readings.check.mjs
           node --test scripts/lib/previous-assets.check.mjs
           node --test scripts/lib/verification-rpc.check.mjs
           node scripts/lib/warm-projections.check.mjs
@@ -67,6 +68,7 @@ jobs:
           pnpm exec vitest run
           apps/web/lib/listing.integration.test.ts
           apps/web/lib/seller.integration.test.ts
+          apps/web/lib/status-cursors.integration.test.ts
           packages/registry/src/service-refresh.integration.test.ts
           apps/worker/src/registry-services.integration.test.ts
           packages/commerce/src/hire-p02.integration.test.ts

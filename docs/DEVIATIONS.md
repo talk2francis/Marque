@@ -1559,3 +1559,6 @@ P15 release repair: production staging and a subsequent snapshot Judge check exp
 
 
 - 20 October 2026, README restoration: the V3 rewrite corrected overclaims but also removed useful images, architecture, walkthrough and development/evidence links. Restore those sections with current reviewed public screenshots and separately dated archives; retain original image bytes and historical records. The diagram now reflects six references and browser-held buyer authority. Public documentation preservation guidance and a checked documentation index make future claim corrections explicit without erasing useful evidence. No product layout or capability change is implied.
+
+
+- 22 October 2026, status/Telegram incident: reconciliation checkpoints grew the unbounded status table to a 6.6 MB response and caused repeated complete-body health timeouts. Replace row enumeration with five explicit operational checkpoints and complete aggregate service progress; preserve all stored rows, per-row freshness, monitoring deadlines and failures. Repair the old `inQuest` alarm contract without reducing supply requirements. Tidemark archive connectivity and funded job 57037's provider rejection remain separate observed conditions, not silent recoveries. [Validation and rollout](operations/TELEGRAM_STATUS_INCIDENT_2026-10-22.md).

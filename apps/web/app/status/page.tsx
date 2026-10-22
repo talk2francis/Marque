@@ -9,6 +9,7 @@ import { Statement, Chip, ProvenanceChip } from '@marque/ui'
 import { SiteHeader, SiteFooter } from '../_components/SiteHeader'
 import styles from './status.module.css'
 import { withDeadline } from '../../lib/deadline'
+import { cursorReading, serviceReconciliationQuery, statusCursorsQuery } from '../../lib/status-cursors'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -94,9 +95,9 @@ async function agentHealth(): Promise<Array<{ id: string; ok: boolean; ms: numbe
 }
 
 export default async function StatusPage() {
-  const [head, cursorQ, probesQ, confQ, watchQ, usageQ, agents, tiers] = await Promise.all([
+  const [head, cursorQ, probesQ, confQ, watchQ, usageQ, agents, tiers, quest, questTotals, reconciliationQ] = await Promise.all([
     withDeadline(publicClient().getBlockNumber(), 5000).then((b) => b.toString()).catch(() => null),
-    queried('ingest cursor', db().execute(sql`select source, cursor, updated_at from ingest_cursor order by source`)),
+    queried('operational cursors', db().execute(statusCursorsQuery())),
     queried('probe rollup', db().execute(sql`
       with latest as (
         select distinct on (agent_id) agent_id, last_liveness as liveness
@@ -120,11 +121,9 @@ export default async function StatusPage() {
     `)),
     agentHealth(),
     withDeadline(tierFreshness(), 5000).catch(() => null),
-  ])
-
-  const [quest, questTotals] = await Promise.all([
     withDeadline(indexerStatus(), 4000).catch(() => null),
     withDeadline(questStats(campaignChainId()), 4000).catch(() => null),
+    queried('service reconciliation', db().execute(serviceReconciliationQuery())),
   ])
   let keeper: { at: string; keeper: string; settlesLastHour: number; capPerHour: number; chains: Record<string, { balanceBnb: string | null; floorBnb: string; submittedBound: number; due: number }> } | null = null
   try { keeper = JSON.parse(readFileSync(process.env.KEEPER_STATUS ?? '/root/.marque/keeper/status.json', 'utf8')) } catch { keeper = null }
@@ -132,14 +131,13 @@ export default async function StatusPage() {
   const probes = probesQ.rows
   const conf = confQ.rows
   const watch = watchQ.rows
-  const brokenQueries = [cursorQ, probesQ, confQ, watchQ].map((q) => q.failed).filter((f): f is string => f !== null)
+  const brokenQueries = [cursorQ, probesQ, confQ, watchQ, reconciliationQ].map((q) => q.failed).filter((f): f is string => f !== null)
 
   const probeTotal = probes.reduce((n, r) => n + Number(r['n'] ?? 0), 0)
 
   const watchRow = watch[0]
   const watchFresh = freshness('Pool tick watcher', watchRow?.['last_observed'] ? String(watchRow['last_observed']) : null)
-  const ingestRow = cursor[0]
-  const ingestFresh = freshness('Registry ingest', ingestRow?.['updated_at'] ? String(ingestRow['updated_at']) : null)
+  const reconciliation = reconciliationQ.rows[0]
   const lastConf = conf.reduce<string | null>((acc, r) => {
     const t = r['last_run'] ? String(r['last_run']) : null
     return t !== null && (acc === null || t > acc) ? t : acc
@@ -254,14 +252,17 @@ export default async function StatusPage() {
                 <td className="mono">read just now</td>
                 <td>{head === null ? <Chip tone="breach">unreadable</Chip> : <Chip tone="holds">live</Chip>}</td>
               </tr>
-              {cursor.map((c) => (
-                <tr key={String(c['source'])}>
-                  <td className="mono">{String(c['source'])}</td>
-                  <td className="mono">{String(c['cursor'])}</td>
-                  <td className="mono">{ingestFresh.text}</td>
-                  <td>{ingestFresh.stale ? <Chip tone="watch">stale</Chip> : <Chip tone="holds">fresh</Chip>}</td>
-                </tr>
-              ))}
+              {cursor.map((c) => {
+                const reading = cursorReading(String(c['source']), c['updated_at'])
+                return (
+                  <tr key={String(c['source'])}>
+                    <td>{reading.label}</td>
+                    <td className="mono">{String(c['cursor'])}</td>
+                    <td className="mono">{reading.text}</td>
+                    <td>{reading.stale ? <Chip tone="watch">stale</Chip> : <Chip tone="holds">fresh</Chip>}</td>
+                  </tr>
+                )
+              })}
               <tr>
                 <td>Pool tick watcher</td>
                 <td className="mono">
@@ -272,6 +273,15 @@ export default async function StatusPage() {
               </tr>
             </tbody>
           </table>
+          {reconciliation && !reconciliationQ.failed && (
+            <p className={styles.note}>
+              Service reconciliation: {String(reconciliation['snapshots'])} stored identity snapshots,{' '}
+              {String(reconciliation['attempts'])} identities with a recorded refresh attempt,{' '}
+              {String(reconciliation['pending'])} URI updates pending. Last successful snapshot:{' '}
+              {reconciliation['last_snapshot'] ? new Date(String(reconciliation['last_snapshot'])).toISOString().replace('T', ' ').slice(0, 19) + ' UTC' : 'never'}.
+              {' '}These are reconciliation checkpoints, separate from agent liveness. Per-identity checkpoints remain stored.
+            </p>
+          )}
           <p className={styles.note}>
             The registry index is an offset into 8004scan&rsquo;s listing, not a block height, so
             &ldquo;blocks behind&rdquo; does not describe it. What matters is when it last
@@ -283,6 +293,7 @@ export default async function StatusPage() {
 
         <section className={styles.section}>
           <h2 className={styles.h2}>Quest index</h2>
+          {quest === null && <p className={`${styles.warn} ${styles.stale}`}>The quest index could not be read just now.</p>}
           <table className={styles.table}>
             <thead><tr><th>Chain</th><th>Indexed to</th><th>Head</th><th>Behind</th><th /></tr></thead>
             <tbody>
@@ -303,14 +314,14 @@ export default async function StatusPage() {
               {keeper.settlesLastHour} settled in the last hour (cap {keeper.capPerHour}); balance {k.balanceBnb ?? 'unreadable'} BNB, alarm below {k.floorBnb}. Last run {keeper.at}.
             </p>
           ))}
-          {questTotals && (
+          {questTotals ? (
             <p className={styles.note}>
               Marque stretch quest on chain {questTotals.chainId}, locally eligible activity only: {questTotals.walletsWithHire} wallets hired,{' '}
               {Object.entries(questTotals.hiresPerCategory).map(([c, n]) => `${n} ${c.replace('_', ' ')}`).join(', ')};{' '}
               {questTotals.delivered} delivered, {questTotals.ratings} rated. Excluded (team, self, duplicate or not on Marque):{' '}
               {questTotals.excluded.hires} hires. Per wallet: <span className="mono">/api/v1/phase2/wallet/&lt;address&gt;</span>.
             </p>
-          )}
+          ) : <p className={styles.note}>Quest activity totals could not be read just now.</p>}
         </section>
 
         <section className={styles.section}>
