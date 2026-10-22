@@ -243,8 +243,8 @@ export default async function StatusPage() {
 
         <section className={styles.section}>
           <h2 className={styles.h2}>Chain and index</h2>
-          <table className={styles.table}>
-            <thead><tr><th>What</th><th>Value</th><th>Last moved</th><th /></tr></thead>
+          <table className={styles.table} tabIndex={0} aria-label="Chain and index checkpoints">
+            <thead><tr><th>What</th><th>Value</th><th>Last moved</th><th>Status</th></tr></thead>
             <tbody>
               <tr>
                 <td>BSC head</td>
@@ -294,8 +294,8 @@ export default async function StatusPage() {
         <section className={styles.section}>
           <h2 className={styles.h2}>Quest index</h2>
           {quest === null && <p className={`${styles.warn} ${styles.stale}`}>The quest index could not be read just now.</p>}
-          <table className={styles.table}>
-            <thead><tr><th>Chain</th><th>Indexed to</th><th>Head</th><th>Behind</th><th /></tr></thead>
+          <table className={styles.table} tabIndex={0} aria-label="Quest index progress">
+            <thead><tr><th>Chain</th><th>Indexed to</th><th>Head</th><th>Behind</th><th>Status</th></tr></thead>
             <tbody>
               {(quest ?? []).map((q) => (
                 <tr key={q.chainId}>

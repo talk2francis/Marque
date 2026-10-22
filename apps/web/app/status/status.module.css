@@ -9,6 +9,7 @@
 .note a { display: inline-block; padding-block: 4px; color: var(--chain); }
 
 .table { width: 100%; border-collapse: collapse; font-size: var(--size-data); display: block; overflow-x: auto; }
+.table:focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
 .table th, .table td { text-align: left; padding: 8px var(--s4) 8px 0; border-bottom: 1px solid var(--line); white-space: nowrap; }
 .table th { color: var(--fg-soft); font-weight: 500; font-size: var(--size-caption); }
 .table td.wrap { white-space: normal; }
