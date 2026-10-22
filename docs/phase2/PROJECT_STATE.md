@@ -1,4 +1,5 @@
-> Current release, 20 October 2026: see the [V3 release audit](../vnext/V3_RELEASE_AUDIT.md) for web source `ac0f469`, quote reader `785ba45`, current validation and remaining limits. Earlier release descriptions below are dated historical evidence.
+> Current maintenance, 22 October 2026: web/status and the launch-monitor parser use `ebeab12`; probe/quote workers remain `af39ea3` and Lattice remains `f4f65d3`. See the [Telegram/status incident](../operations/TELEGRAM_STATUS_INCIDENT_2026-10-22.md) for deployment, exact-source CI, browser and natural-monitor evidence, plus the still-active archive/provider-job limits. Earlier entries retain their dated scope.
+
 
 # P14/P15 production handoff, 2026-10-19T09:45:18.102462+00:00
 
@@ -666,3 +667,7 @@ Requests: [2026-10-20] [user-directed Brain on BNB incident repair] [A/B: regist
 
 
 [2026-10-20, approved Brain/Lattice follow-up] The six Brain fixed-question calls passed as Messages. Lattice failed on missing Task IDs, then passed as a completed Task after repair `f4f65d3`, exact-source main/phase2 CI, and isolated idle SIGTERM activation at 13:39 UTC. Stored checks 352 to 359 preserve the original failure. Web/probe/quote implementation remains `af39ea3`; no other PM2 process changed. README visuals, current architecture, historical evidence and setup/navigation restored; details and image provenance are in the incident report. No payment, wallet signature, chain write or MCS criterion change.
+
+### 22 October Telegram/status maintenance accepted
+
+Source `ebeab12` is live for web and the launch-monitor parser. The status page now projects explicit operational cursors and complete reconciliation counts while retaining every per-identity checkpoint. Existing deadlines, supply minimums and alarm holds are unchanged. Both rejected accessibility candidates remain recorded; the accepted artifact supports keyboard scrolling in all status tables. Exact-source CI, candidate/core/public browser checks and 9 natural status checks passed. See the incident report for individual measurements and remaining Tidemark archive, funded-job input and measured supply alerts. No wallet operation or provider message was sent.

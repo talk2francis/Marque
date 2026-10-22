@@ -29,6 +29,7 @@ Start with the [repository overview](../README.md) for the product tour, archite
 |---|---|
 | [Runbook](RUNBOOK.md) | Operational procedures; confirm the current release before applying older examples |
 | [V3 release audit](vnext/V3_RELEASE_AUDIT.md) | Dated validation and deployment provenance, with the later maintenance pointer |
+| [Telegram/status incident](operations/TELEGRAM_STATUS_INCIDENT_2026-10-22.md) | Bounded status projection, current category alarms, deployment proof and genuine remaining alerts |
 | [Builder/service incident](operations/BUILDER_SERVICE_INCIDENT_2026-10-20.md) | Current declaration repair, live protocol checks and remaining provider/listing limits |
 | [Migration inventory](vnext/MIGRATION_INVENTORY.md) | Source hashes, additive changes and the scope of historical restore proofs |
 | [Recovery record](vnext/P15_RECOVERY.md) | Interruption recovery and release continuity |

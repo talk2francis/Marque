@@ -28,7 +28,8 @@ Browsing and inspection need no wallet. Sending a task requires consent; funding
 
 | Live component | Tested source | Verification |
 |---|---|---|
-| Web, probe and quote workers | [`af39ea3`](https://github.com/talk2francis/Marque/commit/af39ea3660c373f3efa5abbecc16d05cda64315d) | [20 October deployment and service repair](./docs/operations/BUILDER_SERVICE_INCIDENT_2026-10-20.md) |
+| Web/status and launch-monitor parser | [`ebeab12`](https://github.com/talk2francis/Marque/commit/ebeab129af4491f5803068f0823a980b795d6d57) | [22 October Telegram/status repair](./docs/operations/TELEGRAM_STATUS_INCIDENT_2026-10-22.md) |
+| Probe and quote workers | [`af39ea3`](https://github.com/talk2francis/Marque/commit/af39ea3660c373f3efa5abbecc16d05cda64315d) | [20 October deployment and service repair](./docs/operations/BUILDER_SERVICE_INCIDENT_2026-10-20.md) |
 | Lattice A2A runtime | [`f4f65d3`](https://github.com/talk2francis/Marque/commit/f4f65d300e7a7ce791dc3d5547afe29ccf63d5f1) | Approved live completed-Task retest, 20 October at 13:39 UTC |
 
 The [earlier full V3 audit](./docs/vnext/V3_RELEASE_AUDIT.md) retains its dated scope. Documentation-only commits preserve these tested implementations.
@@ -148,7 +149,7 @@ The reference identities and their chain are recorded in [config/first-party.jso
 
 | Start here | Evidence |
 |---|---|
-| Current release and repairs | [V3 release audit](./docs/vnext/V3_RELEASE_AUDIT.md), [20 October builder/service incident](./docs/operations/BUILDER_SERVICE_INCIDENT_2026-10-20.md) |
+| Current release and repairs | [22 October status/alert incident](./docs/operations/TELEGRAM_STATUS_INCIDENT_2026-10-22.md), [V3 release audit](./docs/vnext/V3_RELEASE_AUDIT.md), [20 October builder/service incident](./docs/operations/BUILDER_SERVICE_INCIDENT_2026-10-20.md) |
 | Feature delivery and open work | [Delivery audit](./docs/vnext/V3_DELIVERY_AUDIT.md), [requirements crosscheck](./docs/vnext/HACKATHON_CROSSCHECK.md), [deviations](./docs/DEVIATIONS.md) |
 | Live deterministic test results | [Standard](https://marque.trade/standard) |
 | Historical mainnet LP execution | [PancakeSwap proof](https://marque.trade/pancakeswap/proof), with transaction links below |
