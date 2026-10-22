@@ -226,7 +226,7 @@ export default async function StatusPage() {
                 {usageSince ? `, since ${new Date(usageSince).toISOString().slice(0, 10)}` : ''}. No
                 PII: an event name and, at most, a category or a count. Counted, never extrapolated.
               </p>
-              <table className={styles.table}>
+              <table className={styles.table} tabIndex={0} aria-label="Anonymous product usage">
                 <thead><tr><th>What</th><th>Count</th></tr></thead>
                 <tbody>
                   {usageRows.map((r) => (
@@ -330,7 +330,7 @@ export default async function StatusPage() {
             <p className={styles.muted}>The probe schedule could not be read just now.</p>
           ) : (
             <>
-              <table className={styles.table}>
+              <table className={styles.table} tabIndex={0} aria-label="Probe freshness by tier">
                 <thead><tr><th>Tier</th><th>Services</th><th>Fresh</th><th>Window</th><th>Oldest check</th></tr></thead>
                 <tbody>
                   {tiers.map((t) => (
@@ -360,7 +360,7 @@ export default async function StatusPage() {
             <p className={styles.muted}>No agent has been probed yet.</p>
           ) : (
             <>
-              <table className={styles.table}>
+              <table className={styles.table} tabIndex={0} aria-label="Latest probe coverage">
                 <thead><tr><th>Latest verdict</th><th>Agents</th><th>Share</th></tr></thead>
                 <tbody>
                   {probes.map((p) => (
@@ -384,7 +384,7 @@ export default async function StatusPage() {
 
         <section className={styles.section}>
           <h2 className={styles.h2}>Reference agents</h2>
-          <table className={styles.table}>
+          <table className={styles.table} tabIndex={0} aria-label="Reference agent health">
             <thead><tr><th>Agent</th><th>Health</th><th>Round trip</th><th>Detail</th></tr></thead>
             <tbody>
               {agents.map((a) => (
@@ -409,7 +409,7 @@ export default async function StatusPage() {
             <p className={styles.muted}>{confQ.failed ? 'Conformance observations are unavailable right now.' : 'No conformance run has been recorded.'}</p>
           ) : (
             <>
-              <table className={styles.table}>
+              <table className={styles.table} tabIndex={0} aria-label="Conformance history">
                 <thead><tr><th>Test</th><th>Runs</th><th>Passes</th><th>Last run</th></tr></thead>
                 <tbody>
                   {conf.map((c) => (

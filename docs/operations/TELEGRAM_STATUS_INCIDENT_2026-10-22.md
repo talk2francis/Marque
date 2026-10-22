@@ -27,3 +27,5 @@ Build, browser, exact-source CI, publication, activation and a fresh natural mon
 
 
 Candidate browser checks on `3852ebb` passed response completeness and bounded projection but failed the serious AXE keyboard-scroll rule for the Chain/index and Quest/index tables at 390 px. This candidate was not deployed. The scoped presentation follow-up adds keyboard focus and accessible names to those scrollable tables, plus explicit Status column headings. Backend query and monitor logic are unchanged. The initial screenshots/failure report remain private; final artifact/browser acceptance uses the follow-up source.
+
+The `757c8f9` candidate exposed the same keyboard rule in a third table as live data changed. It also remained undeployed. The final presentation repair applies named keyboard access to all seven status tables, covering variable live-data widths rather than only the first two observed overflows. Both original failed candidate reports are retained.

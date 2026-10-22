@@ -369,3 +369,5 @@ The launch category alarm consumes current `categories[].category` and `hireable
 
 
 Status progress tables retain native table semantics and expose named keyboard focus so horizontal scrolling remains usable at mobile widths. Status columns have explicit headings. This accessibility follow-up changes no query, cadence, threshold or evidence.
+
+Status tables use named keyboard-focusable scroll regions for all live-data widths; focus visibility is shared across the status tables.
