@@ -13,7 +13,7 @@ describe('existing marketplace API compatibility and read boundary', () => {
   it('keeps the original successful JSON contract and has no writer', async () => {
     const r = result(); mocks.marketplaceAgents.mockResolvedValue(r)
     const response = await invoke()
-    expect(await response.json()).toEqual({ chainId: 56, generatedAt: r.generatedAt, provenance: 'MEASURED', count: 0, total: 0, offset: 0, hasMore: false, agents: [] })
+    expect(await response.json()).toEqual({ chainId: 56, lane: 'mainnet', generatedAt: r.generatedAt, provenance: 'MEASURED', count: 0, total: 0, offset: 0, hasMore: false, agents: [] })
     expect(response.headers.get('Cache-Control')).toBe('no-store')
     expect(mocks.deadline).toHaveBeenCalledWith(expect.any(Promise), 12000)
   })

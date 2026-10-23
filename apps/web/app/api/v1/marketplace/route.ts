@@ -63,7 +63,7 @@ export async function GET(req: NextRequest) {
       const body = machineCatalog(result, q.limit ?? 120)
       return NextResponse.json(body, { headers: { ...headers, 'Cache-Control': body.cacheMaxAgeSeconds ? `public, max-age=${body.cacheMaxAgeSeconds}` : 'no-store', Link: '</api/v1/openapi.json>; rel="describedby"' } })
     }
-    return NextResponse.json({ chainId: chainOf(lane), lane, generatedAt, provenance: 'MEASURED', count: rows.length, total, offset, hasMore, facets, agents: rows }, { headers })
+    return NextResponse.json({ chainId: chainOf(lane ?? 'mainnet'), lane: lane ?? 'mainnet', generatedAt, provenance: 'MEASURED', count: rows.length, total, offset, hasMore, facets, agents: rows }, { headers })
   } catch (error) {
     // Classify failures for operators without logging query values or credentials.
     console.warn('[marketplace]', error instanceof Error && error.message === 'Check timed out'

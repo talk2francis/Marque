@@ -22,7 +22,7 @@ describe('ready selection before the broad catalog read', () => {
     await expect(marketplaceAgents({ tab: 'ready' })).rejects.toThrow('database unavailable')
   })
   it('filters an expired memoized quote at wall-clock time rather than its array index', async () => {
-    const id = 'synthetic-expired-boundary'
+    const id = '56:synthetic-expired-boundary'
     mocks.states.mockReset().mockResolvedValue(new Map([[987, {
       agentId: id, serviceId: 987, state: 'hireable', priceRaw: '1',
       token: { address: '0x0000000000000000000000000000000000000001', symbol: 'U', decimals: 18 },
@@ -38,7 +38,7 @@ describe('ready selection before the broad catalog read', () => {
   })
 
   it('uses renewed exact-agent terms even when the listing metadata is memoized', async () => {
-    const id = 'synthetic-renewal-boundary', expires = new Date(Date.now() + 600_000).toISOString()
+    const id = '56:synthetic-renewal-boundary', expires = new Date(Date.now() + 600_000).toISOString()
     const first = { agentId: id, serviceId: 988, state: 'hireable', priceRaw: '1',
       token: { address: '0x0000000000000000000000000000000000000001', symbol: 'U', decimals: 18 },
       chainId: 56, quoteExpiresAt: expires }
@@ -54,19 +54,19 @@ describe('ready selection before the broad catalog read', () => {
 
   it('retains the full null-owner partition instead of narrowing unknown ownership', async () => {
     mocks.states.mockResolvedValue(new Map()); mocks.read.mockReset()
-    mocks.read.mockResolvedValueOnce([{ id: 'synthetic-null', owner_address: null }]).mockRejectedValueOnce(Error('captured source query'))
-    await expect(marketplaceAgents({ agentIds: ['synthetic-null'] })).rejects.toThrow('captured source query')
+    mocks.read.mockResolvedValueOnce([{ id: '56:synthetic-null', owner_address: null }]).mockRejectedValueOnce(Error('captured source query'))
+    await expect(marketplaceAgents({ agentIds: ['56:synthetic-null'] })).rejects.toThrow('captured source query')
     const query = new PgDialect().sqlToQuery(mocks.read.mock.calls[1]![0])
     expect(query.sql).not.toContain('and a.owner_address in')
   })
   it('scopes complete owner groups rather than only selected identities', async () => {
     mocks.states.mockResolvedValue(new Map()); mocks.read.mockReset()
-    mocks.read.mockResolvedValueOnce([{ id: 'synthetic-owned', owner_address: 'synthetic-owner' }]).mockRejectedValueOnce(Error('captured source query'))
-    await expect(marketplaceAgents({ agentIds: ['synthetic-owned'] })).rejects.toThrow('captured source query')
+    mocks.read.mockResolvedValueOnce([{ id: '56:synthetic-owned', owner_address: 'synthetic-owner' }]).mockRejectedValueOnce(Error('captured source query'))
+    await expect(marketplaceAgents({ agentIds: ['56:synthetic-owned'] })).rejects.toThrow('captured source query')
     const query = new PgDialect().sqlToQuery(mocks.read.mock.calls[1]![0])
     expect(query.sql).toContain('and a.owner_address in')
     expect(query.params).toContain('synthetic-owner')
-    expect(query.params).not.toContain('synthetic-owned')
+    expect(query.params).not.toContain('56:synthetic-owned')
   })
 
   it('resolves the requested category before reading unrelated catalog rows', async () => {
@@ -95,9 +95,9 @@ describe('ready selection before the broad catalog read', () => {
     const tracks = new Promise<null>(resolve => { tracksDone = resolve })
     mocks.states.mockReset().mockReturnValueOnce(quotes)
     mocks.tracks.mockClear().mockReturnValueOnce(tracks)
-    mocks.read.mockReset().mockResolvedValueOnce([{ id: 'concurrent-observations', owner_address: 'concurrent-owner' }])
+    mocks.read.mockReset().mockResolvedValueOnce([{ id: '56:concurrent-observations', owner_address: 'concurrent-owner' }])
       .mockReturnValueOnce(source)
-    const pending = marketplaceAgents({ agentIds: ['concurrent-observations'] })
+    const pending = marketplaceAgents({ agentIds: ['56:concurrent-observations'] })
     try {
       await vi.waitFor(() => {
         expect(mocks.states).toHaveBeenCalledTimes(1)
