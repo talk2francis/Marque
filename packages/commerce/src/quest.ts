@@ -240,19 +240,33 @@ export async function questJob(chainId: ChainId, jobId: string, options: { porta
   const feedback = rowsOf(await db().execute(sql`
     select feedback_hash, stars, comment, canonical, client, agent_token_id, created_at from rating_comment
     where chain_id = ${chainId} and job_id = ${jobId} order by created_at`))
-  const slug = h?.agent.agentId ? firstPartyAgents().find((f) => String(f.tokenId) === h.agent.agentId)?.slug : undefined
+  const slug = h?.agent.agentId ? firstPartyAgents().find((f) => chainId === 97 ? f.testnet?.chainId === 97 && String(f.testnet.tokenId) === h.agent.agentId : String(f.tokenId) === h.agent.agentId)?.slug : undefined
+  // Where the delivery can be read: Marque's own sellers publish at a fixed path; any other agent says where in its
+  // answer to notify_funded (deliverable_url), which is kept as a first-party observation.
+  const announcedUrl = slug ? null : await deliverableUrlFromNotify(chainId, jobId)
+  const deliverableUrl = slug ? `https://marque.trade/agents/${slug}${chainId === 97 ? '/testnet' : ''}/erc8183/job/${jobId}/response` : announcedUrl
   // Opt-in public commitments only. Never export raw quote/task/IP/access-token fields.
   const selectionCommitments = options.portable ? await publicJobSelection(chainId, jobId, h?.intentId ?? null) : undefined
   return {
     chainId, jobId, state: h?.state ?? null, client: s(j?.['client']), provider: s(j?.['provider']), evaluator: s(j?.['evaluator']),
     agent: h?.agent ?? null, amount: h?.amount ?? null, token: h?.token ?? null,
-    deliverable: { hash: s(j?.['deliverable']), url: slug ? `https://marque.trade/agents/${slug}/erc8183/job/${jobId}/response` : null },
+    deliverable: { hash: s(j?.['deliverable']), url: deliverableUrl, source: slug ? 'marque_reference' : announcedUrl ? 'agent_announced' : null },
     expiresAt: j?.['expired_at'] ? new Date(Number(j['expired_at']) * 1000).toISOString() : null,
     intent: intent ?? null, rating: h?.rating ?? null,
     feedback: feedback.map((f) => ({ feedbackHash: f['feedback_hash'], stars: Number(f['stars']), comment: f['comment'] ?? null, canonical: f['canonical'], client: f['client'], agentId: f['agent_token_id'], preparedAt: iso(f['created_at']) })), tx: h?.tx ?? null, eligible: h?.eligible ?? false, reasons: h?.reasons ?? ['unknown_job'],
     events: events.map((e) => ({ name: e['name'], contract: e['contract'], tx: e['tx_hash'], logIndex: e['log_index'], block: Number(e['block_number']), at: iso(e['block_time']), args: e['args'] })),
     ...(selectionCommitments ? { selectionCommitments } : {}),
   }
+}
+
+/** The newest https deliverable_url an agent gave in its answer to notify_funded for this job, if any. */
+export async function deliverableUrlFromNotify(chainId: number, jobId: string): Promise<string | null> {
+  const rows = rowsOf(await db().execute(sql`select detail from notify_attempt where chain_id = ${chainId} and job_id = ${jobId} and detail like '%deliverable%' order by created_at desc limit 5`))
+  for (const r of rows) {
+    const m = String(r['detail'] ?? '').match(/"(?:deliverable_url|deliverableUrl)"\s*:\s*"(https:\/\/[^"\s]{8,500})"/)
+    if (m) return m[1]!
+  }
+  return null
 }
 
 async function publicJobSelection(chainId: ChainId, jobId: string, intentId: string | null) {

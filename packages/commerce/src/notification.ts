@@ -16,7 +16,9 @@ export function notificationAcceptance(body: string, jobId: string): 'accepted' 
     const id = o['job_id'] ?? o['jobId']
     if (id !== undefined && String(id) !== jobId) return
     if (o['status'] === 'rejected' || o['accepted'] === false) rejected = true
-    if (o['status'] === 'accepted' || o['accepted'] === true) accepted = true
+    // An explicit receipt counts: {status: "accepted"}, {accepted: true}, {received: true} (one marketplace's sellers),
+    // or {ok: true} with this job id (the BNB Agent Studio seller).
+    if (o['status'] === 'accepted' || o['status'] === 'received' || o['accepted'] === true || o['received'] === true || (o['ok'] === true && id !== undefined)) accepted = true
     for (const key of ['result', 'parts', 'data', 'text', 'message', 'artifacts']) if (o[key] !== undefined) visit(o[key], depth + 1)
   }
   visit(rpc['result'] ?? rpc, 0)

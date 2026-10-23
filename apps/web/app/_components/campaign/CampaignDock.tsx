@@ -4,7 +4,7 @@ import { usePathname } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { ChevronDown, X } from 'lucide-react'
 import { CAMPAIGN, clockShort, clockWords } from '@marque/commerce/client'
-import { Prism } from './Prism'
+import { Dial } from './Dial'
 import { useCampaignClock } from './Countdown'
 import { RemindMenu, useInPageReminders } from './Reminders'
 import { ADDRESS_EVENT, dockPrefs, questAddress, saveDockPrefs, type DockPrefs } from './store'
@@ -115,7 +115,6 @@ export function CampaignDock() {
   const best = quest?.build.agents[0] ?? null
   const buildObserved = best?.observed ?? 0
   const hireMet = quest?.hire.status === 'met'
-  const progress = quest ? (agents / CAMPAIGN.required.agents + buildObserved / 6) / 2 : 0
   const warn = clock.under24h
   const pill = clock.closed ? 'Closed. Winners after 13 Nov.' : `Set and Earn · ${clockShort(clock)}${quest && !team ? ` · ${agents}/${CAMPAIGN.required.agents}` : ''}`
   const next = team ? null : quest?.next[0] ?? null
@@ -126,13 +125,13 @@ export function CampaignDock() {
     <div className={styles.dock} data-open={open || undefined} data-warn={warn || undefined} data-tray={tray || undefined} role="complementary" aria-label="Set and Earn companion">
       {!open ? (
         <button type="button" className={styles.pill} onClick={() => setOpen(true)} aria-expanded="false" aria-label={`${pill}. Open the Set and Earn companion`}>
-          <Prism progress={progress} warn={warn} lit={hireMet && buildObserved === 6} />
+          <Dial hire={agents} build={buildObserved} warn={warn} team={team} size={28} />
           <span className={styles.pillText}>{pill}</span>
         </button>
       ) : (
         <div className={styles.panel} ref={panelRef}>
           <div className={styles.panelHead}>
-            <Prism progress={progress} warn={warn} lit={hireMet && buildObserved === 6} />
+            <Dial hire={agents} build={buildObserved} days={clock.closed ? null : clock.days} warn={warn} team={team} size={52} />
             <div className={styles.panelTitle}>
               <strong>Set and Earn</strong>
               <span>Closes Thu 5 Nov, 12:00 UTC</span>

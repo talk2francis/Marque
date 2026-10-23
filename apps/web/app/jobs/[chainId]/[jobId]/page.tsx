@@ -88,7 +88,7 @@ export default async function JobRoom({ params }: { params: Promise<{ chainId: s
     const [n] = (await db().execute(sql`select ok, detail from notify_attempt where chain_id = ${cid} and job_id = ${jobId} order by created_at desc limit 1`).catch(() => [])) as unknown as Array<{ ok: boolean; detail: string | null }>
     if (!n || n.ok || !n.detail) return null
     let msg = n.detail
-    try { const j = JSON.parse(n.detail) as { error?: { message?: string } }; msg = j.error?.message ?? msg } catch { /* plain text */ }
+    try { const j = JSON.parse(n.detail) as { error?: { message?: string } }; if (!j.error) return null; msg = j.error.message ?? msg } catch { /* plain text */ }
     const reason = msg.replace(/^could not complete job \d+:\s*/i, '').split(/\.\s/)[0]!.replace(/\.+$/, '').trim()
     return reason ? reason.slice(0, 200) : null
   })() : null

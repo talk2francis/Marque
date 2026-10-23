@@ -97,7 +97,7 @@ export function PassHost() {
             <ul className={styles.facts}>
               <li>A wallet made from your passkey: Face ID, fingerprint or your device PIN.</li>
               <li>Your key is made on this device from your passkey. Marque never sees it.</li>
-              <li>BSC testnet for now: practice hires with free test tokens, no real value.</li>
+              <li>Works on BSC mainnet and on the free practice network. Best for small amounts: for larger balances, use a hardware or app wallet.</li>
               <li>You can export the key any time, behind a fresh passkey prompt.</li>
             </ul>
             {error ? <p className={styles.error} role="alert">{error}</p> : null}
@@ -116,7 +116,7 @@ export function PassHost() {
                   <li>An ordinary BNB Chain wallet whose key your passkey makes, on your device, each time you confirm.</li>
                   <li>Marque never sees or keeps the key; it keeps only your public address in this browser.</li>
                   <li>The same synced passkey opens the same address on your other devices.</li>
-                  <li>It works on BSC testnet for now. For larger amounts, use a hardware or app wallet.</li>
+                  <li>It works on BSC mainnet and testnet. For larger amounts, use a hardware or app wallet.</li>
                 </ul>
                 <div className={styles.actions}><button type="button" className="btn" onClick={close}>Close</button></div>
               </>

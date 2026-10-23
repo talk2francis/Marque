@@ -235,7 +235,7 @@ export function HireSheet() {
     if (!isConnected) return (
       <>
         <Button variant="primary" block onClick={openConnectModal}>Connect a wallet to hire</Button>
-        {state.quote?.chainId === 97 ? <NoWalletLine className="hs-nowallet" /> : null}
+        <NoWalletLine className="hs-nowallet" chainId={state.quote?.chainId === 56 ? 56 : 97} />
       </>
     )
     if (signing) return <Button variant="primary" block loading>Continue in wallet</Button>

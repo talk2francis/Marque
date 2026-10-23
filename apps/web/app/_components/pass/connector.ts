@@ -6,12 +6,13 @@ import { createPassProvider, loadRecord, type PassProvider } from '@marque/pass'
 import { passBridge, lock } from './bridge'
 
 /**
- * The wagmi connector "Marque Pass" (SPEC-ACCESS 2.3) and its RainbowKit entry. BSC testnet only
- * until G-P1. Connecting with no Pass on this device opens Marque's own create-or-restore dialog;
+ * The wagmi connector "Marque Pass" (SPEC-ACCESS 2.3) and its RainbowKit entry, on BSC testnet and, since
+ * G-P1 (23 Oct), BSC mainnet. Connecting with no Pass on this device opens Marque's own create-or-restore dialog;
  * signing always goes through Marque's confirmation and a passkey prompt.
  */
 export const MARQUE_PASS_ID = 'marque-pass'
-export const PASS_MAINNET = process.env['NEXT_PUBLIC_PASS_MAINNET'] === '1'
+/** G-P1 given 23 Oct ("you are also approved for bsc mainnet passkey"). NEXT_PUBLIC_PASS_MAINNET=0 turns it off again. */
+export const PASS_MAINNET = process.env['NEXT_PUBLIC_PASS_MAINNET'] !== '0'
 
 const ICON = `data:image/svg+xml;utf8,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 28"><rect width="28" height="28" rx="7" fill="#141412"/><path d="M14 6.5a5 5 0 0 0-5 5v2.2h1.8v-2.2a3.2 3.2 0 1 1 6.4 0v2.2H19v-2.2a5 5 0 0 0-5-5Z" fill="#C79A4B"/><rect x="8" y="13" width="12" height="9" rx="2.2" fill="#EEEBE4"/><circle cx="14" cy="17.5" r="1.4" fill="#141412"/></svg>')}`
 
