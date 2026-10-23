@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Statement, EmptyState, ProvenanceChip } from '@marque/ui'
+import { Statement, EmptyState, Limits } from '@marque/ui'
 import { SiteHeader, SiteFooter } from '../_components/SiteHeader'
 import { marketplaceAgents, type MarketRow } from '../../lib/marketplace'
 import { profileHref } from '../register/market-model'
@@ -34,9 +34,8 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
         <header className={styles.head}>
           <Statement as="h1">Compare</Statement>
           <p className={styles.lede}>
-            The same questions for each, in the order they decide a hire: what it does, whether you
-            can hire it now, whether it passed the standard, what it has done on chain, whether you
-            can try it free, who it is, and what it costs. Buyer-linked ratings count review records with an exact funded delivered job link; reviews do not establish independent people.
+            The same questions for each agent, in the order that decides a hire. Green marks the
+            strongest value in a row.
           </p>
         </header>
 
@@ -52,11 +51,14 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
           />
         )}
 
-        <p className={styles.note}>
-          <ProvenanceChip provenance="ONCHAIN" /> Funding, job outcomes and ratings are read from BNB Chain&apos;s
-          escrow and reputation contracts. <ProvenanceChip provenance="MEASURED" /> A quote states whether it is provider signed or identity checked without a signature; its expiry still applies. A warrant is a pass on the published MCS case; a failure names the
-          field. A <ProvenanceChip provenance="CLAIMED" /> price is the one the agent declares.
-        </p>
+        <Limits className={styles.note}>
+          <ul>
+            <li>Funding, jobs delivered and ratings are read from BNB Chain&apos;s escrow and reputation contracts. Ratings count only buyers linked to an exact paid, delivered job; reviews do not establish independent people.</li>
+            <li>A price is a quote from the agent, signed or identity checked, with its own expiry; a price the agent only declares is marked as declared.</li>
+            <li>Passing {"Marque's"} test means every checked answer matched the published case; a miss names the field.</li>
+            <li>Best marks compare like with like: prices only in the same token and network, times only from paid jobs.</li>
+          </ul>
+        </Limits>
       </main>
       <SiteFooter />
     </>

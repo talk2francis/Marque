@@ -756,37 +756,54 @@ a.introBack:hover { color: var(--fg); }
 @media (max-width: 560px) { .pagination { flex-direction: column; align-items: flex-start; } }
 
 .tray {
-  position: fixed; left: 50%; bottom: var(--s5); transform: translateX(-50%);
-  z-index: 30;
-  width: min(680px, calc(100vw - var(--s6)));
-  display: flex; align-items: center; justify-content: space-between; gap: var(--s4);
-  padding: var(--s3) var(--s3) var(--s3) var(--s5);
-  background: color-mix(in srgb, var(--ground-raised) 94%, transparent);
-  -webkit-backdrop-filter: saturate(1.6) blur(16px);
-  backdrop-filter: saturate(1.6) blur(16px);
-  border: 1px solid color-mix(in srgb, var(--brass-mark) 45%, transparent);
-  border-radius: var(--r-pill);
-  box-shadow: var(--elev-3);
+  position: fixed; left: 50%; bottom: calc(var(--s5) + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%);
+  z-index: 30; width: min(720px, calc(100vw - 32px));
+  display: flex; align-items: center; gap: 14px;
+  padding: 10px 10px 10px 12px;
+  color: var(--ink);
+  background: color-mix(in srgb, var(--panel) 88%, transparent);
+  -webkit-backdrop-filter: saturate(1.5) blur(18px); backdrop-filter: saturate(1.5) blur(18px);
+  border: 1px solid var(--hair-2);
+  border-radius: 18px;
+  box-shadow: 0 18px 50px -18px rgba(0, 0, 0, 0.55), 0 0 0 1px color-mix(in srgb, var(--brass-mark) 22%, transparent) inset;
   animation: trayIn 260ms var(--ease-settle) both;
 }
-@media (max-width: 900px) {
-  /* Phones: solid, so scrolling the list under the tray costs no blur per frame. */
-  .tray { -webkit-backdrop-filter: none; backdrop-filter: none; background: var(--ground-raised); }
+@keyframes trayIn { from { opacity: 0; transform: translate(-50%, 14px); } to { opacity: 1; transform: translate(-50%, 0); } }
+.traySlots { display: flex; align-items: center; flex: none; }
+.traySlot, .trayEmpty { width: 40px; height: 40px; border-radius: 12px; margin-left: -8px; flex: none; }
+.traySlots > :first-child { margin-left: 0; }
+.traySlot {
+  position: relative; padding: 2px; border: 0; cursor: pointer; background: var(--panel);
+  box-shadow: 0 0 0 2px var(--panel); display: grid; place-items: center;
 }
-@keyframes trayIn { from { opacity: 0; transform: translate(-50%, 12px); } to { opacity: 1; transform: translate(-50%, 0); } }
-.trayLabel { font-size: var(--size-caption); color: var(--fg-soft); white-space: nowrap; }
-.trayList { display: flex; gap: var(--s2); flex-wrap: wrap; min-width: 0; overflow: hidden; }
-.trayChip {
-  display: inline-flex; align-items: center; gap: 6px;
-  font-size: var(--size-caption); background: var(--ground); border: 1px solid var(--line);
-  border-radius: var(--r-pill); padding: 4px 6px 4px 12px; white-space: nowrap;
+.traySlot :global(img), .traySlot > :first-child { border-radius: 10px; }
+.trayX {
+  position: absolute; inset: 0; display: grid; place-items: center; border-radius: 12px; font-size: 18px; color: #fff;
+  background: rgba(10, 10, 9, 0.55); opacity: 0; transition: opacity 140ms ease;
 }
-.trayChip button { border: none; background: transparent; cursor: pointer; font-size: 15px; line-height: 1; color: var(--fg-soft); min-width: 28px; min-height: 28px; }
-.trayChip button:hover { color: var(--fg); }
+.traySlot:hover .trayX, .traySlot:focus-visible .trayX { opacity: 1; }
+.traySlot:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.trayEmpty { border: 1.5px dashed var(--hair-2); background: transparent; }
+.trayText { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.trayTitle { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.trayNames { font-size: 12.5px; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.trayActions { display: flex; align-items: center; gap: 6px; flex: none; }
+.trayClear {
+  appearance: none; border: 0; background: transparent; color: var(--ink-2); font: inherit; font-size: 13.5px;
+  padding: 8px 10px; border-radius: 10px; cursor: pointer;
+}
+.trayClear:hover { color: var(--ink); background: color-mix(in srgb, var(--ink) 7%, transparent); }
+.trayClear:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+@media (max-width: 900px) { .tray { -webkit-backdrop-filter: none; backdrop-filter: none; background: var(--panel); } }
 @media (max-width: 560px) {
-  .tray { flex-direction: column; align-items: stretch; border-radius: var(--r-lg); padding: var(--s3); gap: var(--s2); bottom: var(--s3); }
-  .trayList { justify-content: center; }
+  .tray { bottom: calc(10px + env(safe-area-inset-bottom, 0px)); gap: 10px; padding: 8px; border-radius: 16px; }
+  .traySlot, .trayEmpty { width: 34px; height: 34px; border-radius: 10px; }
+  .trayNames { display: none; }
+  .trayTitle { font-size: 13px; }
+  .trayWide { display: none; }
+  .trayClear { padding: 8px 6px; }
 }
+@media (prefers-reduced-motion: reduce) { .tray { animation: none; } .trayX { transition: none; } }
 
 .appendix { margin-top: var(--s7); display: flex; flex-direction: column; gap: var(--s2); }
 

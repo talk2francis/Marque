@@ -211,6 +211,18 @@ export function hireHref(a: MarketRow): string {
   return `?hire=${encodeURIComponent(a.agentId)}${a.commerce.serviceId == null ? '' : `&serviceId=${a.commerce.serviceId}`}`
 }
 
+/**
+ * The agent's quoted price as a number in token units, with the unit it is in (token and
+ * network), from the current quote or else its last successful one. Null when it never priced.
+ */
+export function quotedPriceOf(a: MarketRow): { value: number; unit: string } | null {
+  const c = a.commerce
+  const q = c.priceRaw && c.token ? { raw: c.priceRaw, token: c.token, chain: c.chainId } : c.lastQuote ? { raw: c.lastQuote.priceRaw, token: c.lastQuote.token, chain: c.lastQuote.chainId } : null
+  if (!q) return null
+  const value = Number(q.raw) / 10 ** q.token.decimals
+  return Number.isFinite(value) ? { value, unit: `${q.chain}:${q.token.address.toLowerCase()}` } : null
+}
+
 /** Can a buyer's wallet hire this exact agent through ERC-8183 escrow right now? */
 export function isHireable(a: MarketRow): boolean {
   return a.commerce.state === 'hireable' || a.commerce.state === 'settleable'

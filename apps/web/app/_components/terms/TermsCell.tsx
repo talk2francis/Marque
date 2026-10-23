@@ -11,7 +11,7 @@ export function TermsPriceCell({ agentId, facts, declared }: { agentId: string; 
   if (terms.priceLabel) {
     return (
       <span style={{ display: 'inline-flex', flexDirection: 'column', gap: 2 }}>
-        <span>{terms.priceLabel}{terms.state === 'fresh' ? <> <ProvenanceChip provenance="MEASURED" /></> : null}</span>
+        <span className="terms-price">{terms.priceLabel}{terms.state === 'fresh' ? <> <ProvenanceChip provenance="MEASURED" /></> : null}</span>
         <TermsLine terms={terms} now={now} refresh={refresh} refreshing={refreshing} />
       </span>
     )

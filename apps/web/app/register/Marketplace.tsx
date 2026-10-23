@@ -10,6 +10,7 @@ import { LaneSwitch } from './LaneSwitch'
 import { MarketList } from './MarketList'
 import { RegisterTable } from './RegisterTable'
 import { AgentCard } from '../_components/market/AgentCard'
+import { AgentAvatar } from '../_components/AgentAvatar'
 import { Sheet } from '../_components/ui'
 import { CompareTable } from '../compare/CompareTable'
 import { TABS, hireHref, ifaceLabel, measuredAgo, type MarketRow, type MarketTab } from './market-model'
@@ -463,27 +464,25 @@ export function Marketplace({ category: fixedCategory, initial }: { category?: s
 
       {selected.length >= 1 && (
         <div className={styles.tray} role="region" aria-label="Compare tray">
-          <span className={styles.trayLabel}>
-            {selected.length === 1 ? 'Pick one more to compare' : `Comparing ${selected.length}`}
-          </span>
-          <span className={styles.trayList}>
+          <span className={styles.traySlots}>
             {selected.map((s) => (
-              <span key={s.agentId} className={styles.trayChip}>
-                {s.name}
-                <button type="button" aria-label={`Remove ${s.name} from comparison`} onClick={() => toggleSelect(s)}>
-                  ×
-                </button>
-              </span>
+              <button key={s.agentId} type="button" className={styles.traySlot} onClick={() => toggleSelect(s)} aria-label={`Remove ${s.name} from comparison`} title={`Remove ${s.name}`}>
+                <AgentAvatar id={s.agentId} name={s.name} category={s.category} reference={s.isReference} imageUrl={s.identity.imageUrl} size={34} />
+                <span className={styles.trayX} aria-hidden="true">×</span>
+              </button>
             ))}
+            {Array.from({ length: Math.max(0, 3 - selected.length) }).map((_, i) => <span key={`e${i}`} className={styles.trayEmpty} aria-hidden="true" />)}
           </span>
-          <button
-            type="button"
-            className="btn btn--sm btn--primary"
-            disabled={selected.length < 2}
-            onClick={() => setComparing(true)}
-          >
-            Compare{selected.length >= 2 ? ` ${selected.length}` : ''}
-          </button>
+          <span className={styles.trayText}>
+            <span className={styles.trayTitle}>{selected.length === 1 ? <>Pick 1 more<span className={styles.trayWide}> to compare</span></> : <>{selected.length}<span className={styles.trayWide}> agents</span> selected</>}</span>
+            <span className={styles.trayNames}>{selected.map((s) => s.name).join(', ')}</span>
+          </span>
+          <span className={styles.trayActions}>
+            <button type="button" className={styles.trayClear} onClick={() => setSelected([])}>Clear</button>
+            <button type="button" className="btn btn--sm btn--primary" disabled={selected.length < 2} onClick={() => setComparing(true)}>
+              Compare{selected.length >= 2 ? ` ${selected.length}` : ''}
+            </button>
+          </span>
         </div>
       )}
 
@@ -495,7 +494,7 @@ export function Marketplace({ category: fixedCategory, initial }: { category?: s
         title={<span className="t-h3">Comparing {selected.length} agents</span>}
         footer={
           <div className={styles.compareFoot}>
-            <span>Buyer-linked reviews match funded, delivered jobs. Reviews are not independent people; funding is not payment release.</span>
+            <span>Green marks the strongest value in a row. Ratings come only from buyers who paid for a delivered job.</span>
             <Link href={compareHref} prefetch={false}>Open as a page</Link>
           </div>
         }
