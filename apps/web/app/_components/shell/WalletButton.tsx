@@ -5,8 +5,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useDisconnect } from 'wagmi'
 import { explorerAddress } from '../../../lib/network'
 import { copyText } from '../../../lib/clipboard'
-import { QuestProgress } from '../ui/QuestTracker'
-import { questStates, useWalletQuest } from './useQuest'
+import { useOfficialQuest } from '../campaign/useOfficialQuest'
 
 const CHAIN_SHORT: Record<number, string> = { 56: 'BSC', 97: 'BSC testnet' }
 
@@ -59,9 +58,9 @@ function AccountMenu({ address, display, chainId, compact, openChainModal }: { a
   const [copied, setCopied] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
   const { disconnect } = useDisconnect()
-  const quest = useWalletQuest(address)
-  const states = questStates(quest.data)
-  const done = states.filter((s) => s === 'done').length
+  const official = useOfficialQuest(address)
+  const hired = Math.min(official?.hire.distinctAgents ?? 0, 3)
+  const built = official?.build.agents[0]?.observed ?? 0
 
   useEffect(() => {
     if (!open) return
@@ -80,11 +79,11 @@ function AccountMenu({ address, display, chainId, compact, openChainModal }: { a
   return (
     <div className="acct" ref={ref}>
       <button type="button" className="acct-btn" aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen((o) => !o)} data-compact={compact ? '' : undefined}
-        aria-label={`Wallet ${display} on ${CHAIN_SHORT[chainId] ?? 'chain ' + chainId}, quest ${done} of 5. Open account menu`}>
+        aria-label={`Wallet ${display} on ${CHAIN_SHORT[chainId] ?? 'chain ' + chainId}, Set and Earn: ${hired} of 3 agents hired. Open account menu`}>
         <span className="acct-dot" aria-hidden="true" />
         <span className="acct-addr">{display}</span>
         {compact ? null : <span className="acct-net">{CHAIN_SHORT[chainId] ?? chainId}</span>}
-        {compact || !quest.data ? null : <span className="acct-quest">Quest {done}/5</span>}
+        {compact || !official ? null : <span className="acct-quest">Hire {hired}/3</span>}
         <ChevronDown className="acct-chev" aria-hidden="true" />
       </button>
       {open ? (
@@ -93,7 +92,8 @@ function AccountMenu({ address, display, chainId, compact, openChainModal }: { a
             <div className="acct-menu-addr">{address.slice(0, 8)}…{address.slice(-6)}</div>
             <div className="acct-menu-net">{CHAIN_SHORT[chainId] ?? `Chain ${chainId}`} · {chainId}</div>
             <div className="acct-menu-quest">
-              <QuestProgress states={states} label="Set and Earn" />
+              <span className="acct-menu-quest-line">Set and Earn{official?.excluded.team ? ' · team wallet, excluded' : ''}</span>
+              <span className="acct-menu-quest-line">Hire {hired} of 3 agents · Build {built} of 6 criteria</span>
             </div>
           </div>
           <div className="menu-sep" />

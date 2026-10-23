@@ -35,6 +35,9 @@ function reportFailure(code: string, err: unknown, wallet: string, step: string)
 export type StepStatus = 'todo' | 'active' | 'confirming' | 'done' | 'skipped' | 'failed'
 export interface HireStep { id: StepId | 'quote' | 'notify'; label: string; detail: string; status: StepStatus; tx?: Hex }
 
+/** A category task as fields (packages/commerce/src/tasks.ts), plus an optional note appended to it. */
+export interface StructuredTask { category: string; fields: Record<string, unknown>; note?: string | null }
+
 export interface HireQuote {
   quoteId: number; agentId: string; serviceId: number; agentName: string; category: string | null
   chainId: ChainId; provider: `0x${string}`; price: string; priceLabel: string
@@ -102,7 +105,7 @@ export function useHire() {
   const busy = useRef(false)
   const currentStep = useRef<string>('idle')
   const requestGeneration = useRef(0)
-  const lastRequest = useRef<{ agentId: string; task: string; serviceId: number | null } | null>(null)
+  const lastRequest = useRef<{ agentId: string; task: string; serviceId: number | null; structured?: StructuredTask | null } | null>(null)
   const set = (patch: Partial<HireState> | ((s: HireState) => Partial<HireState>)) =>
     setState((s) => ({ ...s, ...(typeof patch === 'function' ? patch(s) : patch) }))
   const mark = (id: HireStep['id'], status: StepStatus, tx?: Hex) =>
@@ -111,12 +114,13 @@ export function useHire() {
   const reset = useCallback(() => { requestGeneration.current++; busy.current = false; setState(initial) }, [])
 
   /** Ask the agent for a price on this task. Free, no wallet needed. */
-  const getQuote = useCallback(async (agentId: string, task: string, serviceId?: number | null) => {
+  const getQuote = useCallback(async (agentId: string, task: string, serviceId?: number | null, structured?: StructuredTask | null) => {
     const generation = ++requestGeneration.current
     set({ phase: 'quoting', error: null, quote: null, intent: null, jobId: null, steps: [] })
-    lastRequest.current = { agentId, task, serviceId: serviceId ?? null }
+    lastRequest.current = { agentId, task, serviceId: serviceId ?? null, structured: structured ?? null }
     try {
-      const quote = await api<HireQuote>('hire/quote', { agentId, task, serviceId: serviceId ?? null, quoteAccessVersion: 2 })
+      // With structured fields the server validates them (invariant 42) and composes the task itself.
+      const quote = await api<HireQuote>('hire/quote', { agentId, task, serviceId: serviceId ?? null, quoteAccessVersion: 2, ...(structured ? { category: structured.category, fields: structured.fields, note: structured.note ?? undefined } : {}) })
       if (generation !== requestGeneration.current) return null
       if (quote.agentId !== agentId || (serviceId != null && quote.serviceId !== serviceId)) throw new Error('The response names a different service. No hire was prepared.')
       set({ phase: 'quoted', quote, intent: null, jobId: null, steps: planSteps(quote) })
@@ -170,7 +174,8 @@ export function useHire() {
       // Quotes last at most 15 minutes; re-quote if this one is about to lapse.
       let quote = q
       if (!state.jobId && !pendingCreateTx && quote.expiresAt - Date.now() / 1000 < 60 && lastRequest.current) {
-        quote = await api<HireQuote>('hire/quote', { ...lastRequest.current, quoteAccessVersion: 2 })
+        const { structured: st, ...rest } = lastRequest.current
+        quote = await api<HireQuote>('hire/quote', { ...rest, quoteAccessVersion: 2, ...(st ? { category: st.category, fields: st.fields, note: st.note ?? undefined } : {}) })
         if (generation !== requestGeneration.current) return
         if (quote.agentId !== q.agentId || quote.serviceId !== q.serviceId) throw new Error('The refreshed quote names a different service.')
         // A changed price/asset/provider needs another explicit buyer decision. Never
@@ -308,5 +313,12 @@ export function useHire() {
     }
   }, [state.jobId, state.quote, address, config])
 
-  return { state, getQuote, start, cancel, reset, precheck }
+  /** Hire with a quote already in hand (a Tender row): no second quote round trip while it is valid. */
+  const adoptQuote = useCallback((quote: HireQuote, request: { task: string; structured?: StructuredTask | null }) => {
+    requestGeneration.current++
+    lastRequest.current = { agentId: quote.agentId, task: request.task, serviceId: quote.serviceId ?? null, structured: request.structured ?? null }
+    set({ phase: 'quoted', error: null, quote, intent: null, jobId: null, steps: planSteps(quote) })
+  }, [])
+
+  return { state, getQuote, adoptQuote, start, cancel, reset, precheck }
 }

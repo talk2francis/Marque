@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { z } from 'zod'
-import { quoteForBuyer, sellerFor } from '@marque/commerce'
+import { quoteForBuyer, sellerFor, validateTask } from '@marque/commerce'
 import { engineFor } from '@marque/agent-engines'
 import { checkWindow, clientKey } from '../../../../../lib/limits'
 import { hireError, limited } from '../../../../../lib/hire-api'
@@ -12,6 +12,10 @@ const Body = z.object({
   serviceId: z.number().int().positive().nullable().optional(),
   task: z.string().trim().min(3).max(1200),
   quoteAccessVersion: z.literal(2).optional(),
+  /** Structured fields for a category task (invariant 42): validated here, and the task is composed from them. */
+  category: z.string().min(3).max(40).optional(),
+  fields: z.record(z.unknown()).optional(),
+  note: z.string().trim().max(400).optional(),
 })
 
 /**
@@ -25,7 +29,18 @@ export async function POST(req: NextRequest) {
   const parsed = Body.safeParse(await req.json().catch(() => null))
   if (!parsed.success) return NextResponse.json({ error: 'bad_request', detail: 'Send the agent and a short task description.' }, { status: 400 })
   try {
-    const { agentId, serviceId, task, quoteAccessVersion } = parsed.data
+    const { agentId, serviceId, quoteAccessVersion, category, fields, note } = parsed.data
+    let task = parsed.data.task
+    if (fields) {
+      const check = validateTask(category ?? '', fields)
+      if (!check.ok) {
+        return NextResponse.json(
+          { error: 'task_incomplete', detail: `This task needs ${check.missing.join(' and ')} before it can be priced.`, missing: check.missing },
+          { status: 422, headers: { 'Cache-Control': 'no-store' } },
+        )
+      }
+      task = note ? `${check.sentence} ${note}` : check.sentence
+    }
     // Marque's own agents can say, before any money moves, whether the task names
     // what they need. Missing facts stop the quote; left-out settings come back as
     // the stated defaults the answer will use.

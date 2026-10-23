@@ -12,6 +12,7 @@ export { agenticCommerceAbi, evaluatorRouterAbi, optimisticPolicyAbi, SDK_VERSIO
 export * from './indexer.js'
 export * from './quest.js'
 export * from './campaign.js'
+export * from './tasks.js'
 export { questFor, hireTrack, buildTrack, cardVerdict, categoryContracts, type CheckState, type Check, type QuestHireRow } from './campaign-quest.js'
 export { hasNodeReal, addressTransactions, type AddressTx } from './nodereal.js'
 export * from './rating.js'

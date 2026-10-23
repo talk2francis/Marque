@@ -5,7 +5,7 @@ import { useAccount } from 'wagmi'
 import { useConnectModal } from '@rainbow-me/rainbowkit'
 import { formatUnits } from 'viem'
 import { ArrowUpRight, Check, Clock, ShieldCheck } from 'lucide-react'
-import { useHire, NETWORKS, type HireStep } from '@marque/commerce/client'
+import { useHire, NETWORKS, type HireStep, type HireQuote, type StructuredTask } from '@marque/commerce/client'
 import { AgentAvatar } from './AgentAvatar'
 import { TaskForm, type TaskValue } from './hire/TaskForm'
 import { AddressChip, Badge, Button, ButtonLink, Disclosure, ErrorNote, PriceTag, Sheet, TxStepper, type TxStep } from './ui'
@@ -73,6 +73,18 @@ function stepperSteps(steps: HireStep[], chainId: number, batch: boolean): TxSte
   return [map(steps[0]!), batchStep, ...steps.filter((s) => s.id === 'notify').map(map)]
 }
 
+/** A quote the Tender screen kept for this tab (sessionStorage), if it has more than a minute left. */
+function readTenderQuote(tenderId: string, agentId: string): { quote: HireQuote; task: string; structured: StructuredTask | null } | null {
+  try {
+    const raw = sessionStorage.getItem(`marque:tender:${tenderId}`)
+    if (!raw) return null
+    const t = JSON.parse(raw) as { task: string; structured: StructuredTask | null; quotes: Record<string, HireQuote> }
+    const q = t.quotes?.[agentId]
+    if (!q || q.agentId !== agentId || q.expiresAt - Date.now() / 1000 < 60) return null
+    return { quote: q, task: t.task, structured: t.structured ?? null }
+  } catch { return null }
+}
+
 export function HireSheet() {
   const params = useSearchParams()
   const agentId = params.get('hire')
@@ -82,7 +94,8 @@ export function HireSheet() {
   const pathname = usePathname()
   const { address, isConnected, chainId: walletChain } = useAccount()
   const { openConnectModal } = useConnectModal()
-  const { state, getQuote, start, cancel, reset, precheck } = useHire()
+  const { state, getQuote, adoptQuote, start, cancel, reset, precheck } = useHire()
+  const tenderId = params.get('tender')
   const [agent, setAgent] = useState<SheetAgent | null>(null)
   const [loadError, setLoadError] = useState<string | null>(null)
   const [loadAttempt, setLoadAttempt] = useState(0)
@@ -130,6 +143,12 @@ export function HireSheet() {
         const j = await r.json()
         if (!r.ok) throw new Error(j.detail ?? 'This agent cannot be hired right now.')
         if (active) setAgent(j)
+        // Hire from a Tender row: reuse that exact quote while it is still valid (SPEC-SUPPLY 5).
+        const held = tenderId ? readTenderQuote(tenderId, agentId) : null
+        if (active && held) {
+          setTask({ task: held.task, ready: true, missing: null, structured: held.structured })
+          adoptQuote(held.quote, { task: held.task, structured: held.structured })
+        }
       })
       .catch((e: Error) => {
         if (active) setLoadError(signal.aborted ? 'The agent details took too long to load. Try again.' : e.message)
@@ -207,7 +226,7 @@ export function HireSheet() {
         )
       }
       return (
-        <Button variant="primary" block disabled={!sells || !task.ready || state.phase === 'quoting'} loading={state.phase === 'quoting'} onClick={() => getQuote(agent.agentId, task.task, agent.serviceId)}>
+        <Button variant="primary" block disabled={!sells || !task.ready || state.phase === 'quoting'} loading={state.phase === 'quoting'} onClick={() => getQuote(agent.agentId, task.task, agent.serviceId, task.structured)}>
           Get a live price
         </Button>
       )
@@ -236,7 +255,7 @@ export function HireSheet() {
           {!q && task.missing && !task.ready ? <p className="hs-fine">{task.missing}</p> : null}
           {!q && agent.firstParty && agent.sellsJobs !== false && task.ready && !trying && state.phase !== 'quoting' ? (
             tryFirst && !free
-              ? <button type="button" className="hs-quiet" onClick={() => getQuote(agent.agentId, task.task, agent.serviceId)}>Skip the free run and get a live price</button>
+              ? <button type="button" className="hs-quiet" onClick={() => getQuote(agent.agentId, task.task, agent.serviceId, task.structured)}>Skip the free run and get a live price</button>
               : !free ? <button type="button" className="hs-quiet" onClick={runFree}>Try it free first (no wallet)</button> : null
           ) : null}
           {q && !signing && state.phase !== 'done' && !state.jobId ? <button type="button" className="hs-quiet" onClick={reset}>Change the task</button> : null}

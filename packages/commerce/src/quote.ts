@@ -18,7 +18,9 @@ import { negotiationHashOf } from './description.js'
 /** The seller's NegotiationResult envelope, as the Agent Studio runtime returns it. */
 export const NegotiationSchema = z.object({
   request: z.record(z.unknown()),
-  request_hash: z.string().regex(/^0x[0-9a-fA-F]{64}$/),
+  // Optional: the SDK signs the description content, not these, and some sellers omit them
+  // or send "" (V4-04 diagnosis: house agents on one marketplace, Vitals).
+  request_hash: z.union([z.string().regex(/^0x[0-9a-fA-F]{64}$/), z.literal('')]).optional(),
   response: z.object({
     accepted: z.boolean(),
     terms: z.object({
@@ -30,7 +32,7 @@ export const NegotiationSchema = z.object({
     negotiated_at: z.number().int().positive().optional(),
     reason: z.string().optional(),
   }).passthrough(),
-  response_hash: z.string().regex(/^0x[0-9a-fA-F]{64}$/),
+  response_hash: z.union([z.string().regex(/^0x[0-9a-fA-F]{64}$/), z.literal('')]).optional(),
   negotiation_hash: z.string().regex(/^0x[0-9a-fA-F]{64}$/),
   provider_sig: z.string().regex(/^0x[0-9a-fA-F]+$/).optional(),
   chain_id: z.number().int().positive().optional(),
@@ -80,6 +82,8 @@ export type QuoteFailure =
 
 export interface VerifiedQuote {
   ok: true
+  /** The quote adapter that read it (SPEC-SUPPLY 3). */
+  protocol?: 'bnb-sdk-negotiate' | 'simple-quote'
   /** True for a provider-signed NegotiationResult; false for a plain quote whose provider is the registered wallet. */
   signed: boolean
   signatureEvidence: 'provider_signed' | 'identity_matched_unsigned'
@@ -102,6 +106,7 @@ export interface VerifiedQuote {
 
 export interface FailedQuote {
   ok: false
+  protocol?: 'bnb-sdk-negotiate' | 'simple-quote'
   reason: QuoteFailure
   detail: string
   latencyMs: number
@@ -306,34 +311,85 @@ export async function requestQuote(endpoint: string, task: NegotiateTask, ctx: Q
   }
   let res = await attempt(false)
   let found: unknown = res.ok ? parseJson(res.body) : null
-  let neg = found ? extractNegotiation(found) : null
   // Text-only A2A adapters (Foundry) take the skill envelope as a JSON string. Retry that
-  // way only when the first answer held no quote of either shape.
-  if (!neg && !(found && extractSimpleQuote(found)) && res.ok && res.status < 500) {
+  // way only when the first answer held no quote and no refusal of any shape.
+  if (!(found && QUOTE_ADAPTERS.some((a) => a.detect(found) !== null)) && !(found && plainDeclineOf(found) !== null) && res.ok && res.status < 500) {
     res = await attempt(true)
     found = res.ok ? parseJson(res.body) : null
-    neg = found ? extractNegotiation(found) : null
   }
   const latencyMs = Date.now() - started
   if (!res.ok) return { ok: false, reason: 'unreachable', detail: `${res.failure}: ${res.detail}`.slice(0, 200), latencyMs }
   if (res.status >= 400) return { ok: false, reason: 'unreachable', detail: `http ${res.status}`, latencyMs }
   if (found === null) return { ok: false, reason: 'not_a2a', detail: 'response was not JSON', latencyMs }
-  if (!neg) {
-    const simple = extractSimpleQuote(found)
-    if (simple) {
-      const parsedSimple = SimpleQuoteSchema.safeParse(simple)
-      if (parsedSimple.success) return verifySimpleQuote(parsedSimple.data, ctx, latencyMs)
-      return { ok: false, reason: 'malformed', detail: parsedSimple.error.issues.slice(0, 3).map((i) => `${i.path.join('.')}: ${i.message}`).join('; '), latencyMs }
-    }
-    return { ok: false, reason: 'no_quote', detail: 'no quote in the A2A response', latencyMs }
+  for (const adapter of QUOTE_ADAPTERS) {
+    const hit = adapter.detect(found)
+    if (hit !== null) return withProtocol(await adapter.verify(hit, { ...ctx, expectedTask: task.task_description }, latencyMs), adapter.id)
   }
-  // An explicit refusal is a decline with the seller's own reason, not a malformed quote
-  // (29 Sep: chainhelix began refusing plain-English tasks; we logged it as malformed).
-  const refusal = declineOf(neg)
-  if (refusal !== null) return { ok: false, reason: 'declined', detail: refusal.slice(0, 300), latencyMs }
-  const parsed = NegotiationSchema.safeParse(neg)
-  if (!parsed.success) return { ok: false, reason: 'malformed', detail: parsed.error.issues.slice(0, 3).map((i) => `${i.path.join('.')}: ${i.message}`).join('; '), latencyMs }
-  return verifyNegotiation(parsed.data, { ...ctx, expectedTask: task.task_description }, latencyMs)
+  // A plain refusal ({accepted: false, reason, need}) is a decline with the agent's own words.
+  const plain = plainDeclineOf(found)
+  if (plain !== null) return { ok: false, reason: 'declined', detail: plain.slice(0, 300), latencyMs }
+  return { ok: false, reason: 'no_quote', detail: 'no quote in the A2A response', latencyMs }
+}
+
+/**
+ * Quote adapters (SPEC-SUPPLY 3): one per quote protocol actually seen on agents with a working
+ * endpoint, named by protocol. Each reads only what the agent returned, and every one ends in the
+ * same identity rule (invariant 24): the provider paid is the agent's own registered wallet.
+ */
+export interface QuoteAdapter {
+  id: 'bnb-sdk-negotiate' | 'simple-quote'
+  /** The quote object inside an A2A response, or null when this protocol is not present. */
+  detect(body: unknown): unknown | null
+  verify(found: unknown, ctx: QuoteVerifyContext, latencyMs: number): Promise<QuoteResult>
+}
+
+export const sdkNegotiateAdapter: QuoteAdapter = {
+  id: 'bnb-sdk-negotiate',
+  detect: (body) => extractNegotiation(body),
+  async verify(neg, ctx, latencyMs) {
+    // An explicit refusal is a decline with the seller's own reason, not a malformed quote
+    // (29 Sep: chainhelix began refusing plain-English tasks; we logged it as malformed).
+    const refusal = declineOf(neg)
+    if (refusal !== null) return { ok: false, reason: 'declined', detail: refusal.slice(0, 300), latencyMs }
+    const parsed = NegotiationSchema.safeParse(neg)
+    if (!parsed.success) return { ok: false, reason: 'malformed', detail: parsed.error.issues.slice(0, 3).map((i) => `${i.path.join('.')}: ${i.message}`).join('; '), latencyMs }
+    return verifyNegotiation(parsed.data, ctx, latencyMs)
+  },
+}
+
+export const simpleQuoteAdapter: QuoteAdapter = {
+  id: 'simple-quote',
+  detect: (body) => extractSimpleQuote(body),
+  async verify(simple, ctx, latencyMs) {
+    const parsed = SimpleQuoteSchema.safeParse(simple)
+    if (!parsed.success) return { ok: false, reason: 'malformed', detail: parsed.error.issues.slice(0, 3).map((i) => `${i.path.join('.')}: ${i.message}`).join('; '), latencyMs }
+    return verifySimpleQuote(parsed.data, ctx, latencyMs)
+  },
+}
+
+/** Signed first: a signature that recovers to the registered wallet beats an identity check. */
+export const QUOTE_ADAPTERS: readonly QuoteAdapter[] = [sdkNegotiateAdapter, simpleQuoteAdapter]
+
+function withProtocol(q: QuoteResult, protocol: QuoteAdapter['id']): QuoteResult {
+  return { ...q, protocol }
+}
+
+/** A refusal outside any quote envelope: {accepted: false, reason?, need?}, anywhere in the response. */
+export function plainDeclineOf(body: unknown): string | null {
+  const seen = new Set<unknown>()
+  let out: string | null = null
+  const visit = (v: unknown, depth: number): void => {
+    if (out !== null || depth > 8 || v === null || typeof v !== 'object' || seen.has(v)) return
+    seen.add(v)
+    const o = v as Record<string, unknown>
+    if (o['accepted'] === false && (typeof o['reason'] === 'string' || typeof o['need'] === 'string')) {
+      out = [o['reason'], o['need']].filter((x): x is string => typeof x === 'string' && x.trim() !== '').map((x) => x.trim().replace(/[.]?$/, '.')).join(' ')
+      return
+    }
+    for (const k of Object.keys(o)) visit(o[k], depth + 1)
+  }
+  visit(body, 0)
+  return out
 }
 
 /** The seller's stated reason when a negotiation says accepted: false, else null. */

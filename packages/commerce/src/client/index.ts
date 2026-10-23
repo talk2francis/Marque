@@ -1,6 +1,6 @@
 'use client'
 // Browser entry: hooks plus the pure modules. Never imports server code.
-export { useHire, type HireState, type HireStep, type HireQuote, type StepStatus } from './useHire.js'
+export { useHire, type HireState, type HireStep, type HireQuote, type StepStatus, type StructuredTask } from './useHire.js'
 export { friendlyError, type FriendlyError } from '../errors.js'
 export { NETWORKS, network, explorerTx, explorerAddress, formatAmount, campaignChainId, type ChainId } from '../config.js'
 export { projectJob, timeline, DELIVERED, TERMINAL, type JobState, type JobProjection } from '../state.js'
@@ -8,5 +8,6 @@ export { claimRefundCall, disputeCall, revokeAllowanceCall, cancelCall, settleCa
 export { agenticCommerceAbi, evaluatorRouterAbi } from '../generated.js'
 export { useRate, type RateState } from './useRate.js'
 export { termsOf, ageWords, validForWords, msUntilLapse, priceLabel, reasonWords, type Terms, type TermsState, type CommerceFacts, type LastQuote } from '../terms.js'
+export { validateTask, taskSentence, exampleSentence, TASK_CATEGORIES, YIELD_ASSETS, GRID_PAIRS, EXAMPLE_ACCOUNT, type TaskCategory, type TaskCheck } from '../tasks.js'
 export { CAMPAIGN, SHORTLIST, campaignClock, clockShort, clockWords, campaignEndMs, campaignStartMs, shortlistDomain, marketplaceName, type CampaignClock } from '../campaign-rules.js'
 export { LANES, LANE_CHAIN, LANE_LABEL, laneOf, chainOf, parseLane, quoteInLane, type Lane } from '../lane.js'

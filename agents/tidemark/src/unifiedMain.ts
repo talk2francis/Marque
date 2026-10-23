@@ -450,6 +450,7 @@ async function main(): Promise<void> {
   // Foundry invocations (SkillRouter), and Foundry Responses.
   const executor = new SellerAgentExecutor({
     runWork,
+    inspectTask: (task: string) => MARQUE_ENGINE.inspect(task),
     generator: generatorTag(),
     network: defaultNetwork(),
     commerceSkills: rails.erc8183,

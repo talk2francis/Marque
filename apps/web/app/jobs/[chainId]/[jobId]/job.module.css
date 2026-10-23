@@ -92,3 +92,6 @@
   .dBig { font-size: 28px; }
 }
 @media (prefers-reduced-motion: reduce) { .pulse { animation: none; } }
+.refused { margin-top: 14px; padding: 14px 16px; border-radius: 12px; border: 1px solid color-mix(in srgb, var(--amber) 45%, transparent); background: color-mix(in srgb, var(--amber) 7%, transparent); display: grid; gap: 6px; font-size: 14px; line-height: 1.5; color: var(--ink); }
+.refused p { margin: 0; }
+.refused a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }

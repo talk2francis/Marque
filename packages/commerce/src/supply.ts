@@ -1,6 +1,11 @@
 import { sql, type SQL } from 'drizzle-orm'
 import { db, commerceQuote, firstPartyAgentsAllLanes, canonicalAgentId, type FirstPartyAgent } from '@marque/db'
-import { requestQuote, probeTask, type QuoteResult } from './quote.js'
+import { requestQuote, probeTask, type QuoteResult, type NegotiateTask } from './quote.js'
+import { exampleSentence } from './tasks.js'
+import { withAttribution } from './description.js'
+import { parseAbi } from 'viem'
+import { chainClient } from './chain.js'
+import { network, isSupportedChain } from './config.js'
 import { chainOf, type Lane } from './lane.js'
 import { boundedCommerceRead, coalescedCatalogRead } from './read-budget.js'
 import { dueQuoteProbes, type QuoteProbeObservation } from './quote-schedule.js'
@@ -224,6 +229,16 @@ export async function runQuoteProbe(opts: { concurrency?: number; limit?: number
     }
     last.set(Number(r['service_id']), { at, ok: r['ok'] === true, expiresAt })
   }
+  // Recovery evidence for the cadence ladder: the last success and the failures since it (2 days).
+  for (const r of rowsOf(await db().execute(sql`
+    with recent as (select service_id, ok, created_at from commerce_quote where source = 'probe' and service_id is not null and created_at > now() - interval '2 days'),
+    oks as (select service_id, max(created_at) as last_ok from recent where ok group by service_id)
+    select o.service_id, o.last_ok, (select count(*) from recent r where r.service_id = o.service_id and not r.ok and r.created_at > o.last_ok)::int as fails
+    from oks o`))) {
+    const id = Number(r['service_id'])
+    const obs = last.get(id)
+    if (obs) last.set(id, { ...obs, lastOkAt: new Date(r['last_ok'] as string).getTime(), failStreak: obs.ok ? 0 : Number(r['fails'] ?? 1) })
+  }
   const now = Date.now()
   const due = dueQuoteProbes(candidates, last, now, opts.limit ?? 60)
   const failures: Record<string, number> = {}
@@ -233,12 +248,7 @@ export async function runQuoteProbe(opts: { concurrency?: number; limit?: number
     for (;;) {
       const c = due[cursor++]
       if (!c) return
-      const task = probeTask(c.category ?? 'general')
-      let q = await requestQuote(c.endpoint, task, { agentWallet: c.agentWallet, agentOwner: c.owner })
-      // Declined in plain English: ask once more with the seller's own example task.
-      if (!q.ok && q.reason === 'declined' && c.taskExample) {
-        q = await requestQuote(c.endpoint, { ...task, task_description: c.taskExample }, { agentWallet: c.agentWallet, agentOwner: c.owner })
-      }
+      const q = await probeSeller(c)
       await recordQuote('probe', c, q)
       if (q.ok) ok++
       else failures[q.reason] = (failures[q.reason] ?? 0) + 1
@@ -258,15 +268,80 @@ export async function refreshQuoteFor(agentId: string): Promise<{ attempted: num
   let attempted = 0
   for (const c of candidates.slice(0, 2)) {
     attempted++
-    const task = probeTask(c.category ?? 'general')
-    let q = await requestQuote(c.endpoint, task, { agentWallet: c.agentWallet, agentOwner: c.owner })
-    if (!q.ok && q.reason === 'declined' && c.taskExample) {
-      q = await requestQuote(c.endpoint, { ...task, task_description: c.taskExample }, { agentWallet: c.agentWallet, agentOwner: c.owner })
-    }
+    const q = await probeSeller(c)
     await recordQuote('probe', c, q)
     if (q.ok) { ok++; break }
   }
   return { attempted, ok }
+}
+
+/**
+ * Sellers that were hireable (a successful quote) in the last day and have had none for 2 hours
+ * (SPEC-SUPPLY 3, cadence alarm). The quotes worker reports them; nothing is changed here.
+ */
+export async function unpricedAlarms(): Promise<Array<{ agentId: string; name: string | null; lastOkAt: string }>> {
+  return rowsOf(await db().execute(sql`
+    select q.agent_id, a.name, max(q.created_at) as last_ok
+    from commerce_quote q join agent a on a.id = q.agent_id
+    where q.source = 'probe' and q.ok and q.created_at > now() - interval '26 hours'
+    group by q.agent_id, a.name
+    having max(q.created_at) < now() - interval '2 hours'`)).map((r) => ({ agentId: String(r['agent_id']), name: r['name'] == null ? null : String(r['name']), lastOkAt: new Date(r['last_ok'] as string).toISOString() }))
+}
+
+/** The task a probe sends after a refusal: the category's public example, worded like a real hire. */
+function briefTask(category: string | null): NegotiateTask | null {
+  const sentence = category ? exampleSentence(category) : null
+  return sentence ? {
+    task_description: withAttribution(sentence),
+    terms: { deliverables: 'Complete the task as described, with the result delivered on chain.', quality_standards: 'Figures read from BNB Chain at delivery time, with sources.', client_ref: 'marque.trade', category },
+  } : null
+}
+
+const identityAbi = parseAbi(['function ownerOf(uint256) view returns (address)', 'function getAgentWallet(uint256) view returns (address)'])
+
+/**
+ * The agent's wallet and owner as the registry says now. The ingest copy can lag (V4-00 N5: two
+ * agents rotated wallets and every correct quote was refused), so a mismatch is re-checked on
+ * chain before it is recorded, and the stored row follows the chain.
+ */
+export async function refreshAgentWallet(agentId: string): Promise<{ wallet: string | null; owner: string | null } | null> {
+  const [chainPart, , token] = agentId.split(':')
+  const chainId = Number(chainPart)
+  if (!isSupportedChain(chainId) || !token || !/^\d+$/.test(token)) return null
+  try {
+    const c = chainClient(chainId)
+    const reg = network(chainId).identityRegistry as `0x${string}`
+    const [owner, wallet] = await Promise.all([
+      c.readContract({ address: reg, abi: identityAbi, functionName: 'ownerOf', args: [BigInt(token)] }),
+      c.readContract({ address: reg, abi: identityAbi, functionName: 'getAgentWallet', args: [BigInt(token)] }).catch(() => null),
+    ])
+    const w = wallet && !/^0x0{40}$/i.test(String(wallet)) ? String(wallet).toLowerCase() : null
+    const o = String(owner).toLowerCase()
+    await db().execute(sql`update agent set agent_wallet = ${w}, owner_address = ${o} where id = ${agentId} and (agent_wallet is distinct from ${w} or owner_address is distinct from ${o})`)
+    return { wallet: w, owner: o }
+  } catch { return null }
+}
+
+/**
+ * One free price check (SPEC-SUPPLY 2 and 3): the harmless probe task, then, if the agent refuses
+ * it, the category's public example worded as a real brief, then the agent's own card example.
+ * A provider mismatch is re-checked against the registry before it is believed.
+ */
+export async function probeSeller(c: Pick<SellerCandidate, 'agentId' | 'endpoint' | 'category' | 'agentWallet' | 'owner' | 'taskExample'>): Promise<QuoteResult> {
+  let ctx = { agentWallet: c.agentWallet, agentOwner: c.owner }
+  const ask = (task: NegotiateTask) => requestQuote(c.endpoint, task, ctx)
+  let q = await ask(probeTask(c.category ?? 'general'))
+  const brief = briefTask(c.category)
+  if (!q.ok && q.reason === 'declined' && brief) q = await ask(brief)
+  if (!q.ok && q.reason === 'declined' && c.taskExample) q = await ask({ ...probeTask(c.category ?? 'general'), task_description: c.taskExample })
+  if (!q.ok && q.reason === 'provider_mismatch') {
+    const fresh = await refreshAgentWallet(c.agentId)
+    if (fresh && (fresh.wallet !== (c.agentWallet ?? null)?.toLowerCase() || fresh.owner !== (c.owner ?? null)?.toLowerCase())) {
+      ctx = { agentWallet: fresh.wallet, agentOwner: fresh.owner }
+      q = await ask(brief ?? probeTask(c.category ?? 'general'))
+    }
+  }
+  return q
 }
 
 /** First-party agents carry their category from config, as an owner-declared label. */

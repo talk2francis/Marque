@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useAccount } from 'wagmi'
 import { Field, SelectField } from '../ui/Field'
-import { gridTask, hfTask, rebalanceTask, securityTask, yieldTask } from '../../../lib/hire-tasks'
+import { taskSentence, type StructuredTask } from '@marque/commerce/client'
 import { readBrief } from '../../../lib/brief'
 
 /**
@@ -11,13 +11,18 @@ import { readBrief } from '../../../lib/brief'
  * (packages/agent-engines, plain-tasks.test.ts), so a buyer never pays for a
  * refusal and never types a placeholder. "Write it yourself" is always there.
  */
-export interface TaskValue { task: string; ready: boolean; missing: string | null }
+export interface TaskValue {
+  task: string; ready: boolean; missing: string | null
+  /** The category fields behind the sentence; the quote route re-validates them (invariant 42). */
+  structured?: StructuredTask | null
+}
 
 const ADDR = /^0x[0-9a-fA-F]{40}$/
 // A real Venus account with a live loan, the MCS-HF-1 subject (docs/standard). Shown as an example only.
 const EXAMPLE_LOAN = '0x60AA3AEE06E2345A17E4d4B12c53E046F4F63CAf'
 // Marque's own PancakeSwap V3 position (the proof-run LP, docs/pancakeswap-proof.json).
 const EXAMPLE_POSITION = '7367728'
+const EXAMPLE_POSITION_OWNER = '0x2e010AaDFdFEbC2AdFCAFA5F83e9687ffA47C573'
 
 const num = (v: string) => (v.trim() === '' ? null : Number(v))
 const fmt = (n: number) => (Number.isInteger(n) ? String(n) : String(Number(n.toFixed(4))))
@@ -27,32 +32,34 @@ export function TaskForm({ category, agentName, onChange, disabled, taskExample 
   /** The seller's own example task when it works from a JSON object instead of a sentence. */
   taskExample?: string | null
 }) {
-  const [own, setOwn] = useState(false)
-  const [free, setFree] = useState('')
+  const [note, setNote] = useState('')
+  const [inner, setInner] = useState<TaskValue>({ task: '', ready: false, missing: null })
   const shape = jsonShape(taskExample)
-  const inner = shape
-    ? <Structured shape={shape} category={category} agentName={agentName} onChange={own ? () => undefined : onChange} disabled={disabled} />
-    : <Inner category={category} agentName={agentName} onChange={own ? () => undefined : onChange} disabled={disabled} />
+  const hasForm = !shape && category !== null && FORM_CATEGORIES.has(category)
+  // Free text is added on top of the structured task, never instead of it (SPEC-SUPPLY 4).
   useEffect(() => {
-    if (own) onChange({ task: free.trim(), ready: free.trim().length >= 12, missing: free.trim().length >= 12 ? null : 'Describe the task in a sentence.' })
-  }, [own, free])
+    const extra = note.trim()
+    if (!hasForm || !inner.structured) { onChange(inner); return }
+    onChange({ ...inner, task: extra ? `${inner.task} ${extra}` : inner.task, structured: { ...inner.structured, note: extra || null } })
+  }, [inner, note, hasForm])
   return (
     <div className="taskform">
-      {own ? (
+      {shape
+        ? <Structured shape={shape} category={category} agentName={agentName} onChange={setInner} disabled={disabled} />
+        : <Inner category={category} agentName={agentName} onChange={setInner} disabled={disabled} />}
+      {hasForm ? (
         <div className="fld">
-          <label className="fld-label" htmlFor="own-task"><span>Your task for {agentName}</span></label>
-          <textarea id="own-task" className="taskform-text" rows={4} maxLength={1200} value={free} disabled={disabled} onChange={(e) => setFree(e.target.value)} placeholder={`Say what ${agentName} should work on, with the numbers it needs.`} />
+          <label className="fld-label" htmlFor="task-note"><span>Anything else {agentName} should know</span><span className="fld-opt">optional</span></label>
+          <textarea id="task-note" className="taskform-text" rows={2} maxLength={400} value={note} disabled={disabled} onChange={(e) => setNote(e.target.value)} placeholder="For example: keep it to Venus, or explain each step." />
         </div>
-      ) : inner}
-      {category !== null ? (
-        <button type="button" className="taskform-toggle" onClick={() => setOwn((o) => !o)} disabled={disabled}>
-          {own ? 'Use the form instead' : 'Write the task yourself'}
-        </button>
       ) : null}
       <p className="fld-help">Marque adds &ldquo;(via marque.trade)&rdquo; to the end of a written task, so the job record names the marketplace. <a href="/docs/attribution">Why</a></p>
     </div>
   )
 }
+
+const FORM_CATEGORIES = new Set(['health_factor', 'grid', 'rebalancing', 'yield', 'security'])
+const structured = (category: string, fields: Record<string, unknown>): StructuredTask => ({ category, fields })
 
 function Inner({ category, agentName, onChange, disabled }: { category: string | null; agentName: string; onChange: (v: TaskValue) => void; disabled?: boolean }) {
   switch (category) {
@@ -80,8 +87,9 @@ function HealthFactor({ agentName, onChange, disabled }: { agentName: string; on
   const addrOk = ADDR.test(addr)
   const targetOk = t !== null && t > 1 && t <= 10
   const v = useMemo<TaskValue>(() => ({
-    task: hfTask(addr, t ?? 2.5),
+    task: taskSentence('health_factor', { address: addr, targetHf: t ?? 2.5 }),
     ready: addrOk && targetOk,
+    structured: addrOk && targetOk ? structured('health_factor', { address: addr, targetHf: t }) : null,
     missing: !addrOk ? 'Enter the Venus account to check.' : !targetOk ? 'Pick a target health factor above 1.' : null,
   }), [addr, t, addrOk, targetOk])
   useEmit(onChange, v)
@@ -121,8 +129,9 @@ function Grid({ onChange, disabled }: { onChange: (v: TaskValue) => void; disabl
   const stopOk = S === null || (L !== null && S < L)
   const lvOk = N === null || (Number.isInteger(N) && N >= 2 && N <= 50)
   const v = useMemo<TaskValue>(() => ({
-    task: gridTask({ pair, lower: lo, upper: hi, capital: cap, stop: S !== null ? stop : null, levels: N }),
+    task: taskSentence('grid', { pair, lower: L ?? lo, upper: H ?? hi, capitalUsd: C ?? cap, ...(S !== null ? { stop: S } : {}), ...(N !== null ? { levels: N } : {}) }),
     ready: bandOk && capOk && stopOk && lvOk,
+    structured: bandOk && capOk && stopOk && lvOk ? structured('grid', { pair, lower: L, upper: H, capitalUsd: C, ...(S !== null ? { stop: S } : {}), ...(N !== null ? { levels: N } : {}) }) : null,
     missing: !bandOk ? 'Set a lower and an upper price, lower first.' : !capOk ? 'Set the capital in USDT.' : !stopOk ? 'The stop must sit below the lower price.' : !lvOk ? 'Levels: a whole number from 2 to 50.' : null,
   }), [pair, lo, hi, cap, stop, N, S, bandOk, capOk, stopOk, lvOk])
   useEmit(onChange, v)
@@ -142,8 +151,10 @@ function Grid({ onChange, disabled }: { onChange: (v: TaskValue) => void; disabl
 function Rebalance({ onChange, disabled }: { onChange: (v: TaskValue) => void; disabled?: boolean }) {
   const { address } = useAccount()
   const [id, setId] = useState('')
+  const [owner, setOwner] = useState('')
   const [pct, setPct] = useState('5')
-  useEffect(() => { const b = readBrief('rebalancing'); if (b?.category === 'rebalancing') setId(b.positionId) }, [])
+  useEffect(() => { const b = readBrief('rebalancing'); if (b?.category === 'rebalancing') { setId(b.positionId); if (b.address) setOwner(b.address) } }, [])
+  useEffect(() => { if (!owner && address) setOwner(address) }, [address])
   const [mine, setMine] = useState<Array<{ tokenId: string; pair: string; inRange: boolean }> | null>(null)
   useEffect(() => {
     if (!address) { setMine(null); return }
@@ -158,41 +169,58 @@ function Rebalance({ onChange, disabled }: { onChange: (v: TaskValue) => void; d
   }, [address])
   const P = num(pct)
   const idOk = /^\d{1,12}$/.test(id)
+  const ownerOk = ADDR.test(owner)
   const pctOk = P !== null && P > 0 && P <= 50
+  const ok = idOk && ownerOk && pctOk
   const v = useMemo<TaskValue>(() => ({
-    task: rebalanceTask(id, P ?? 5),
-    ready: idOk && pctOk,
-    missing: !idOk ? 'Enter the position number.' : !pctOk ? 'Pick a range width between 0 and 50%.' : null,
-  }), [id, P, idOk, pctOk])
+    task: taskSentence('rebalancing', { positionId: id, address: owner, targetRangePct: P ?? 5 }),
+    ready: ok,
+    missing: !idOk ? 'Enter the position number.' : !ownerOk ? 'Enter the wallet that owns the position.' : !pctOk ? 'Pick a range width between 0 and 50%.' : null,
+    structured: ok ? structured('rebalancing', { positionId: id, address: owner, targetRangePct: P }) : null,
+  }), [id, owner, P, ok, idOk, ownerOk, pctOk])
   useEmit(onChange, v)
   return (
     <div className="taskform-grid">
       <Field label="PancakeSwap V3 position" value={id} onChange={(x) => setId(x.replace(/[^0-9]/g, ''))} kind="mono" placeholder="Position number" disabled={disabled}
         help={<span className="taskform-help">
           {mine && mine.length ? <>Yours: {mine.map((p, i) => <span key={p.tokenId}>{i ? ', ' : ''}<button type="button" className="taskform-link" onClick={() => setId(p.tokenId)}>#{p.tokenId} {p.pair}{p.inRange ? '' : ' (out of range)'}</button></span>)}. </> : address && mine ? 'No V3 positions in your wallet. ' : ''}
-          <button type="button" className="taskform-link" onClick={() => setId(EXAMPLE_POSITION)}>Use Marque&apos;s own live position #{EXAMPLE_POSITION}</button>
+          <button type="button" className="taskform-link" onClick={() => { setId(EXAMPLE_POSITION); setOwner(EXAMPLE_POSITION_OWNER) }}>Use Marque&apos;s own live position #{EXAMPLE_POSITION}</button>
         </span>} />
+      <Field label="Owner wallet" kind="mono" value={owner} onChange={setOwner} placeholder="0x…" disabled={disabled}
+        error={owner && !ownerOk ? 'A BNB Smart Chain address starts 0x and has 40 more characters.' : null}
+        help={address && owner.toLowerCase() === address.toLowerCase() ? 'Your connected wallet.' : 'The wallet that holds the position.'} />
       <Field label="New range" value={pct} onChange={setPct} unit="± % of price" disabled={disabled} error={pct && !pctOk ? 'Between 0 and 50.' : null} help="Requested range for the selected agent. A quote is not permission to move assets." />
     </div>
   )
 }
 
+const YIELD_ASSET_OPTIONS = [{ value: 'USDT', label: 'USDT' }, { value: 'USDC', label: 'USDC' }, { value: 'FDUSD', label: 'FDUSD' }, { value: 'U', label: 'U' }]
+
 function Yield({ onChange, disabled }: { onChange: (v: TaskValue) => void; disabled?: boolean }) {
   const [asset, setAsset] = useState('USDT')
   const [amount, setAmount] = useState('1000')
-  useEffect(() => { const b = readBrief('yield'); if (b?.category === 'yield') { if (b.asset === 'USDT' || b.asset === 'USDC') setAsset(b.asset); setAmount(String(Number(b.amount.toFixed(2)))) } }, [])
-  const A = num(amount)
-  const ok = A !== null && A > 0
+  const [days, setDays] = useState('30')
+  const [current, setCurrent] = useState('')
+  useEffect(() => { const b = readBrief('yield'); if (b?.category === 'yield') { if (YIELD_ASSET_OPTIONS.some((o) => o.value === b.asset)) setAsset(b.asset); setAmount(String(Number(b.amount.toFixed(2)))) } }, [])
+  const A = num(amount), D = num(days), R = num(current)
+  const amountOk = A !== null && A > 0
+  const daysOk = D !== null && Number.isInteger(D) && D > 0 && D <= 3650
+  const currentOk = R === null || (R >= 0 && R <= 1000)
+  const ok = amountOk && daysOk && currentOk
+  const fields = { amount: A ?? 0, asset, holdingDays: D ?? 0, ...(R !== null ? { currentAprPct: R } : {}) }
   const v = useMemo<TaskValue>(() => ({
-    task: yieldTask(amount, asset),
+    task: taskSentence('yield', fields),
     ready: ok,
-    missing: ok ? null : 'Enter the amount to place.',
-  }), [asset, amount, ok])
+    missing: !amountOk ? 'Enter the amount to place.' : !daysOk ? 'Say how many days you will hold it.' : !currentOk ? 'Your current yield, as a percentage.' : null,
+    structured: ok ? structured('yield', fields) : null,
+  }), [asset, A, D, R, ok, amountOk, daysOk, currentOk])
   useEmit(onChange, v)
   return (
     <div className="taskform-grid">
-      <SelectField label="Asset" value={asset} onChange={setAsset} options={[{ value: 'USDT', label: 'USDT' }, { value: 'USDC', label: 'USDC' }]} />
-      <Field label="Amount" value={amount} onChange={setAmount} unit={asset} disabled={disabled} error={amount && !ok ? 'Enter an amount above 0.' : null} help="Routes are ranked net of switching costs at this size." />
+      <SelectField label="Asset" value={asset} onChange={setAsset} options={YIELD_ASSET_OPTIONS} />
+      <Field label="Amount" value={amount} onChange={setAmount} unit={asset} disabled={disabled} error={amount && !amountOk ? 'Enter an amount above 0.' : null} help="Routes are ranked net of switching costs at this size." />
+      <Field label="Holding period" value={days} onChange={setDays} unit="days" disabled={disabled} error={days && !daysOk ? 'Whole days, 1 or more.' : null} />
+      <Field label="Earning now (optional)" value={current} onChange={setCurrent} unit="% a year" disabled={disabled} error={!currentOk ? 'A percentage from 0.' : null} help="Leave empty if it sits idle." />
     </div>
   )
 }
@@ -201,9 +229,10 @@ function Security({ onChange, disabled }: { onChange: (v: TaskValue) => void; di
   const [token, setToken] = useState('')
   const ok = ADDR.test(token)
   const v = useMemo<TaskValue>(() => ({
-    task: securityTask(token),
+    task: taskSentence('security', { token }),
     ready: ok,
     missing: ok ? null : 'Enter the token contract address.',
+    structured: ok ? structured('security', { token }) : null,
   }), [token, ok])
   useEmit(onChange, v)
   return <Field label="Token contract" kind="mono" value={token} onChange={setToken} placeholder="0x…" disabled={disabled} error={token && !ok ? 'A contract address starts 0x and has 40 more characters.' : null} />

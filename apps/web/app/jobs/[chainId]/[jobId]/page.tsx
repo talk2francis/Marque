@@ -82,6 +82,18 @@ export default async function JobRoom({ params }: { params: Promise<{ chainId: s
     try { const j = JSON.parse(d) as { task?: unknown }; return typeof j.task === 'string' ? j.task : null } catch { return d.split('\n')[0] ?? null }
   })()
 
+  // A seller that refused the funded job (it answered notify_funded with an error and never
+  // delivered): say so in its words, with the date the buyer can reclaim the full amount.
+  const refusal = state === 'FUNDED' ? await (async () => {
+    const [n] = (await db().execute(sql`select ok, detail from notify_attempt where chain_id = ${cid} and job_id = ${jobId} order by created_at desc limit 1`).catch(() => [])) as unknown as Array<{ ok: boolean; detail: string | null }>
+    if (!n || n.ok || !n.detail) return null
+    let msg = n.detail
+    try { const j = JSON.parse(n.detail) as { error?: { message?: string } }; msg = j.error?.message ?? msg } catch { /* plain text */ }
+    const reason = msg.replace(/^could not complete job \d+:\s*/i, '').split(/\.\s/)[0]!.replace(/\.+$/, '').trim()
+    return reason ? reason.slice(0, 200) : null
+  })() : null
+  const reclaimAt = t?.refundFrom ?? expiredAt
+
   // Timeline: what happened (from chain events), then what is still to come.
   const done = events.filter((e) => EVENT_LABEL[e.name] && e.name !== 'JobSettled')
   const upcoming: Array<{ label: string; when: string | null }> = []
@@ -121,6 +133,12 @@ export default async function JobRoom({ params }: { params: Promise<{ chainId: s
               refundFrom={t?.refundFrom ?? null} reviewEndsAt={t?.reviewEndsAt ?? null} submitDeadline={t?.submitDeadline ?? null}
               rated={job?.rating ? { stars: Number(job.rating.stars ?? Math.round(Number(job.rating.value) / 20)), tx: job.rating.tx ?? null } : null}
             />
+            {refusal ? (
+              <div className={styles.refused} role="note">
+                <p><strong>The agent refused this task after funding.</strong> It said: &ldquo;{refusal}.&rdquo; Nothing was delivered, so the escrow still holds the full {priceLabel ?? 'amount'}.</p>
+                {reclaimAt ? <p>You can reclaim it from {utcStamp(reclaimAt * 1000)}, with the wallet that paid. <a href={`/jobs/${cid}/${jobId}/reclaim.ics`} download>Add a reminder to your calendar</a></p> : null}
+              </div>
+            ) : null}
           </header>
 
           <div className={styles.cols}>

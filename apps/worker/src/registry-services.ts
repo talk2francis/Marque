@@ -80,10 +80,25 @@ export async function refreshRegistryServices(): Promise<{ attempted: number; re
     where s.id > ${Number(cursor?.cursor ?? 0)} order by s.id limit 8`))
   if (!rolling.length) await db().execute(sql`insert into ingest_cursor (source, cursor) values ('registry:services-walk', 0)
     on conflict (source) do update set cursor = 0, updated_at = now()`)
+  // A third rotating batch: agents that advertise A2A, MCP or x402 but have no service rows at all
+  // (8004scan's copy of their registration carried none, V4-00 N5). Newest identities first; the
+  // registration on chain is the source, so this only ever adds what the agent itself declares.
+  const [emptyCursor] = rows(await db().execute(sql`select cursor from ingest_cursor where source = 'registry:services-empty-walk'`))
+  const emptyBelow = Number(emptyCursor?.cursor ?? 0) || 2_147_483_647
+  const empty = rows(await db().execute(sql`
+    select 0 as service_id, a.id, a.chain_id, a.token_id, a.contract_address, a.token_id::int as tok
+    from agent a
+    where a.chain_id in (56, 97) and a.token_id ~ '^[0-9]{1,9}$' and a.token_id::int < ${emptyBelow}
+      and (a.supported_protocols ?| array['A2A', 'MCP', 'x402', 'a2a', 'mcp'])
+      and not exists (select 1 from agent_service s where s.agent_id = a.id)
+    order by a.token_id::int desc limit ${Number(process.env.REGISTRY_EMPTY_WALK ?? 12)}`))
+  const nextEmpty = empty.length ? Math.min(...empty.map((e) => Number(e.tok))) : 0
+  await db().execute(sql`insert into ingest_cursor (source, cursor) values ('registry:services-empty-walk', ${nextEmpty})
+    on conflict (source) do update set cursor = excluded.cursor, updated_at = now()`)
   const deadline = Date.now() + 30_000
   const result = { attempted: 0, refreshed: 0, failed: 0, queuedChanges }
   const seen = new Set<string>()
-  for (const a of [...active, ...rolling]) {
+  for (const a of [...active, ...rolling, ...empty]) {
     if (Date.now() >= deadline) break
     const agentId = String(a.id)
     if (!seen.has(agentId) && isSupportedChain(Number(a.chain_id))) {

@@ -384,6 +384,7 @@ export function Marketplace({ category: fixedCategory, initial }: { category?: s
               This is the real count, not a loading state: Marque does not pad a category with agents that do
               not exist.
             </p>
+            {state.category ? <p><a className="btn btn--sm" href={`/tender?category=${state.category}`}>Ask every {state.category.replace('_', ' ')} agent for a price instead</a></p> : null}
             {(chips.length > 0 || state.search.trim() || state.category) && (
               <p>
                 <button

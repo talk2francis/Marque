@@ -80,6 +80,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
             </Link>
             <Statement as="h1" className={styles.introTitle}>{meta.label}</Statement>
             <p className={styles.introLede}>{meta.what}</p>
+            <p className={styles.introSupply}><a className="btn btn--sm btn--primary" href={`/tender?category=${meta.key}`}>Get quotes from every agent</a></p>
             <p className={styles.introSupply}>
               <Chip tone={initial?.total == null || (!untested && initial.total < 3) ? 'watch' : 'holds'}>
                 {initial?.total == null ? 'Escrow listing count unavailable' : `${initial.total} hireable escrow listings`}

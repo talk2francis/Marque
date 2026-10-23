@@ -1128,3 +1128,44 @@ export const questWatch = pgTable('quest_watch', {
 }, (t) => ({
   pk: primaryKey({ columns: [t.chatId, t.address] }),
 }))
+
+/**
+ * FIRST-PARTY. One Tender (SPEC-SUPPLY 5): a buyer's task sent to every compatible agent at once.
+ * `shape` keeps the task's field names and non-identifying values (no address, ever), so unmet
+ * demand can be counted by category and task shape (SPEC-SUPPLY 7).
+ */
+export const tender = pgTable('tender', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  category: text('category').notNull(),
+  chainId: integer('chain_id').notNull(),
+  taskHash: text('task_hash').notNull(),
+  shape: jsonb('shape').$type<Record<string, unknown>>().notNull(),
+  asked: integer('asked').notNull(),
+  priced: integer('priced').notNull().default(0),
+  declined: integer('declined').notNull().default(0),
+  failed: integer('failed').notNull().default(0),
+  durationMs: integer('duration_ms'),
+  source: text('source').$type<'web' | 'api' | 'mcp'>().notNull().default('web'),
+}, (t) => ({
+  categoryCreatedIdx: index('tender_category_created_idx').on(t.category, t.createdAt.desc()),
+}))
+
+/** FIRST-PARTY. Each agent's answer to a Tender, priced or not, with the reason. */
+export const tenderQuote = pgTable('tender_quote', {
+  id: serial('id').primaryKey(),
+  tenderId: uuid('tender_id').notNull(),
+  agentId: text('agent_id').notNull(),
+  serviceId: integer('service_id'),
+  ok: boolean('ok').notNull(),
+  outcome: text('outcome').$type<'priced' | 'declined' | 'failed' | 'timeout'>().notNull(),
+  detail: text('detail'),
+  quoteId: integer('quote_id'),
+  priceRaw: text('price_raw'),
+  tokenSymbol: text('token_symbol'),
+  signed: boolean('signed'),
+  latencyMs: integer('latency_ms'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({
+  tenderIdx: index('tender_quote_tender_idx').on(t.tenderId),
+}))

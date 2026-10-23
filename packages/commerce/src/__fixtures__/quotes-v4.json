@@ -1,0 +1,191 @@
+{
+ "note": "Recorded 23 Oct 2026 from public ERC-8004 agents on BSC mainnet via negotiate (free; no job created). Message ids removed.",
+ "task": {
+  "task_description": "Where should 1000 USDT earn the most on BNB Chain right now, after switching costs? Holding period: 30 days. Currently earning 0%. (via marque.trade)",
+  "terms": {
+   "deliverables": "Complete the task as described, with the result delivered on chain.",
+   "quality_standards": "Figures read from BNB Chain at delivery time, with sources."
+  }
+ },
+ "sdkNegotiate": {
+  "agent": "Keel #341556 (Marque reference)",
+  "task": {
+   "task_description": "What is the health factor of Venus account 0x60AA3AEE06E2345A17E4d4B12c53E046F4F63CAf and what repay restores it to 1.5? (via marque.trade)",
+   "terms": {
+    "deliverables": "Complete the task as described, with the result delivered on chain.",
+    "quality_standards": "Figures read from BNB Chain at delivery time, with sources."
+   }
+  },
+  "agentWallet": "0xdf1074a272c53a1a10b96fa0201eb58bbbaafe00",
+  "response": {
+   "jsonrpc": "2.0",
+   "result": {
+    "kind": "message",
+    "role": "agent",
+    "parts": [
+     {
+      "kind": "data",
+      "data": {
+       "request": {
+        "task_description": "What is the health factor of Venus account 0x60AA3AEE06E2345A17E4d4B12c53E046F4F63CAf and what repay restores it to 1.5? (via marque.trade)",
+        "terms": {
+         "deliverables": "Complete the task as described, with the result delivered on chain.",
+         "quality_standards": "Figures read from BNB Chain at delivery time, with sources.",
+         "evaluation_required": true,
+         "evaluator_type": "uma_oov3"
+        }
+       },
+       "request_hash": "0x154a30b4db989ff31bcaff077a21934442a1971786b0cc109b3118261f631eb6",
+       "response": {
+        "accepted": true,
+        "terms": {
+         "deliverables": "Complete the task as described, with the result delivered on chain.",
+         "quality_standards": "Figures read from BNB Chain at delivery time, with sources.",
+         "evaluation_required": true,
+         "evaluator_type": "uma_oov3",
+         "price": "50000000000000000",
+         "currency": "0xcE24439F2D9C6a2289F741120FE202248B666666"
+        },
+        "estimated_completion_seconds": 600,
+        "quote_expires_at": 1792761717,
+        "negotiated_at": 1792760817
+       },
+       "response_hash": "0x9de3d3fc57a2cd349899a02da24f4dfd73091b4eff02d0ab81d0457d8ab7d3d7",
+       "negotiation_hash": "0x348786309c8de80555e34f782eff7e70ccd7fe7dd7668fdedf4e85348afbe4d7",
+       "provider_sig": "0x3aa0c027ec029e3800f71c3124eb2d7bded35e465241833c9d5e81a813134c6e563053adcaebd85cfe7f0a58e6f425493fa5da177948533c7a433414b8c76aa01b",
+       "chain_id": 56,
+       "verifying_contract": "0xea4daa3100a767e86fded867729ae7446476eba6"
+      }
+     }
+    ]
+   }
+  }
+ },
+ "sdkWrongSigner": {
+  "agent": "Cresthold #374112",
+  "agentWallet": "0xf22217aaac007bf8d076cd3f0819e53e2baf8bff",
+  "response": {
+   "jsonrpc": "2.0",
+   "result": {
+    "kind": "message",
+    "role": "agent",
+    "parts": [
+     {
+      "kind": "data",
+      "data": {
+       "request": {
+        "task_description": "Where should 1000 USDT earn the most on BNB Chain right now, after switching costs? Holding period: 30 days. Currently earning 0%. (via marque.trade)"
+       },
+       "response": {
+        "accepted": true,
+        "terms": {
+         "price": "100000000000000000",
+         "currency": "0xcE24439F2D9C6a2289F741120FE202248B666666",
+         "deliverables": "Complete the task as described, with the result delivered on chain.",
+         "quality_standards": "Figures read from BNB Chain at delivery time, with sources."
+        }
+       },
+       "negotiated_at": 1792760817,
+       "quote_expires_at": 1792761717,
+       "chain_id": 56,
+       "verifying_contract": "0xEa4DAa3100A767e86FDed867729ae7446476EBA6",
+       "negotiation_hash": "0x1700016839fef63f109e57a51afecbe51c3d527a5c29da603df081de76bcd2d1",
+       "provider_sig": "0x2838583b35582684e21bba9a8d066bec9454566fb3ba71d541d3a9ed5e83b7570c5b240454425e370eaf8e8aecf8b009dcf604e3dedbe542650636def28409e91b"
+      }
+     }
+    ]
+   }
+  }
+ },
+ "plainDecline": {
+  "agent": "Cresthold #374112",
+  "response": {
+   "jsonrpc": "2.0",
+   "result": {
+    "kind": "message",
+    "role": "agent",
+    "parts": [
+     {
+      "kind": "data",
+      "data": {
+       "accepted": false,
+       "reason": "The brief names no amount and stablecoin",
+       "need": "Say how much and which stablecoin, e.g. \"1000 USDT\"",
+       "examples": [
+        "Where should 1000 USDT earn the most on BNB Chain right now?",
+        "5000 USDC currently earning 2%, holding 30 days: is there a better Venus market by at least 0.5 points?",
+        "Best net yield for 250 FDUSD over 90 days"
+       ]
+      }
+     }
+    ]
+   }
+  }
+ },
+ "simpleQuote": {
+  "agent": "Brain on BNB Venus Yield Ranking #304493",
+  "agentWallet": "0x497dAc54FD7238027Ecbbd194b353379a1D605F0",
+  "response": {
+   "jsonrpc": "2.0",
+   "result": {
+    "accepted": true,
+    "provider": "0x497dAc54FD7238027Ecbbd194b353379a1D605F0",
+    "price": "100000000000000000",
+    "price_display": "0.10 $U",
+    "currency": "U",
+    "service": "yield_plan",
+    "category": "yield-optimization",
+    "deliverables": "Every Venus core-pool market ranked by supply APY, computed from the rate per block and a block time measured against the chain rather than the 10,512,000-blocks-a-year constant most published BSC yield figures still use — which understates these rates by about 6.7x. Cross-checked on the chain: each market's supply rate is re-derived from its borrow rate, utilisation and reserve factor (the rule Venus's rate model pays by), and Venus's published APY is compared on top when their API answers — every row and the summary say what agreed, and a divergence is named. Given an amount and what you earn today it returns the days until a move pays for its own gas, which below a certain position size is never.",
+    "needs": {
+     "amountUsd": "position size in USD, optional",
+     "from": "the Venus market held today, optional",
+     "currentApyPct": "what you earn today, optional"
+    },
+    "estimated_completion_seconds": 120,
+    "instructions": "Create a job in 0xEa4DAa3100A767e86FDed867729ae7446476EBA6 naming 0x497dAc54FD7238027Ecbbd194b353379a1D605F0 as provider, set the budget to 100000000000000000 (0.10 $U), fund it, then send skill:\"notify_funded\" with job_id and the parameters listed under \"needs\". Evaluator: 0x51895229E12F9876011789B04f8698af06cCD6DA; expiry at least 8 days after funding (see job_requirements).",
+    "chain_id": 56,
+    "verifying_contract": "0xEa4DAa3100A767e86FDed867729ae7446476EBA6",
+    "payment_token": "0xcE24439F2D9C6a2289F741120FE202248B666666",
+    "job_requirements": {
+     "evaluator": "0x51895229E12F9876011789B04f8698af06cCD6DA",
+     "hook": "0x51895229E12F9876011789B04f8698af06cCD6DA",
+     "min_expiry_seconds_after_funding": 691200,
+     "why": "The job must be evaluated by the escrow's router 0x51895229E12F9876011789B04f8698af06cCD6DA (hook the router or none), and must expire at least 8 days after it is funded: the kernel refuses any delivery to a job that expires inside its 7-day dispute window, and a job evaluated by anyone else never reaches the policy. Such a job is refused before any work, and its budget returns to you at expiry."
+    },
+    "kind": "message",
+    "role": "agent",
+    "parts": [
+     {
+      "kind": "data",
+      "data": {
+       "accepted": true,
+       "provider": "0x497dAc54FD7238027Ecbbd194b353379a1D605F0",
+       "price": "100000000000000000",
+       "price_display": "0.10 $U",
+       "currency": "U",
+       "service": "yield_plan",
+       "category": "yield-optimization",
+       "deliverables": "Every Venus core-pool market ranked by supply APY, computed from the rate per block and a block time measured against the chain rather than the 10,512,000-blocks-a-year constant most published BSC yield figures still use — which understates these rates by about 6.7x. Cross-checked on the chain: each market's supply rate is re-derived from its borrow rate, utilisation and reserve factor (the rule Venus's rate model pays by), and Venus's published APY is compared on top when their API answers — every row and the summary say what agreed, and a divergence is named. Given an amount and what you earn today it returns the days until a move pays for its own gas, which below a certain position size is never.",
+       "needs": {
+        "amountUsd": "position size in USD, optional",
+        "from": "the Venus market held today, optional",
+        "currentApyPct": "what you earn today, optional"
+       },
+       "estimated_completion_seconds": 120,
+       "instructions": "Create a job in 0xEa4DAa3100A767e86FDed867729ae7446476EBA6 naming 0x497dAc54FD7238027Ecbbd194b353379a1D605F0 as provider, set the budget to 100000000000000000 (0.10 $U), fund it, then send skill:\"notify_funded\" with job_id and the parameters listed under \"needs\". Evaluator: 0x51895229E12F9876011789B04f8698af06cCD6DA; expiry at least 8 days after funding (see job_requirements).",
+       "chain_id": 56,
+       "verifying_contract": "0xEa4DAa3100A767e86FDed867729ae7446476EBA6",
+       "payment_token": "0xcE24439F2D9C6a2289F741120FE202248B666666",
+       "job_requirements": {
+        "evaluator": "0x51895229E12F9876011789B04f8698af06cCD6DA",
+        "hook": "0x51895229E12F9876011789B04f8698af06cCD6DA",
+        "min_expiry_seconds_after_funding": 691200,
+        "why": "The job must be evaluated by the escrow's router 0x51895229E12F9876011789B04f8698af06cCD6DA (hook the router or none), and must expire at least 8 days after it is funded: the kernel refuses any delivery to a job that expires inside its 7-day dispute window, and a job evaluated by anyone else never reaches the policy. Such a job is refused before any work, and its budget returns to you at expiry."
+       }
+      }
+     }
+    ]
+   }
+  }
+ }
+}

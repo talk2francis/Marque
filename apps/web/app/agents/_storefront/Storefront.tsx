@@ -14,6 +14,8 @@ import { StorefrontTabs } from './StorefrontTabs'
 import { AgentActivity } from './AgentActivity'
 import { RailTerms } from './RailTerms'
 
+const TENDER_CATEGORIES = new Set(['health_factor', 'yield', 'grid', 'rebalancing', 'security'])
+
 /**
  * A storefront (DESIGN-SYSTEM.md 8.4): the same page for a Marque reference agent
  * and a third party. Right, a sticky purchase panel with one primary action. Left,
@@ -81,6 +83,7 @@ export function Storefront({ d }: { d: Data }) {
         </dl>
       </RailTerms>
       {d.terms.state !== 'none' ? <p className={styles.authorise}><ShieldCheck aria-hidden="true" />What you authorise: exactly this price, into escrow. Nothing else.</p> : null}
+      {d.category && TENDER_CATEGORIES.has(d.category) ? <p className={styles.authorise}><a href={`/tender?category=${d.category}${d.chainId === 97 ? '&lane=practice' : ''}`}>Compare with others: the same task, priced by every agent</a></p> : null}
     </aside>
   )
 

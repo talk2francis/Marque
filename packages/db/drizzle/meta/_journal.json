@@ -176,6 +176,13 @@
       "when": 1792748000000,
       "tag": "0024_campaign_job",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1792760000000,
+      "tag": "0025_tender",
+      "breakpoints": true
     }
   ]
 }

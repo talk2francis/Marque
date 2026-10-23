@@ -200,6 +200,12 @@ export interface SellerCoreOpts {
   commerceSkills?: boolean;
   /** Test seam: replace the signing module (default: `./signing.js`). */
   signing?: SigningApi;
+  /**
+   * V4 invariant 42: the engine's own check of a task, run before any quote is signed. A task
+   * missing what the engine needs is refused at quote time with the reason, so it can never be
+   * funded and then refused.
+   */
+  inspectTask?: (task: string) => { missing: string[] };
   /** Test seam: replace the sweep's pending-job scan. */
   pendingJobs?: PendingJobsFetcher;
 }
@@ -224,6 +230,7 @@ export class SellerCore {
   private readonly commerceSkills: boolean;
   private readonly beforeQuote: (() => Promise<void>) | undefined;
   private readonly pendingJobs: PendingJobsFetcher;
+  private readonly inspectTask: ((task: string) => { missing: string[] }) | undefined;
   // Background delivery bookkeeping (see notifyFunded / isBusy):
   //  tasks    — live background promises (busy-status source).
   //  inflight — job ids in flight OR already terminally handled this
@@ -240,6 +247,7 @@ export class SellerCore {
     this.signing = opts.signing ?? defaultSigning;
     this.commerceSkills = opts.commerceSkills ?? true;
     this.pendingJobs = opts.pendingJobs ?? defaultPendingJobs;
+    this.inspectTask = opts.inspectTask;
   }
 
   /**
@@ -283,6 +291,19 @@ export class SellerCore {
       request = picked;
     }
     await this.beforeQuote?.();
+    const task = (request as Record<string, unknown>)["task_description"];
+    const missing = typeof task === "string" && this.inspectTask ? this.inspectTask(task).missing : [];
+    if (missing.length) {
+      return {
+        request,
+        response: {
+          accepted: false,
+          reason_code: "INCOMPLETE_TASK",
+          reason: `This task needs ${missing.join(" and ")} before it can be priced. Nothing was signed or charged.`,
+          missing,
+        },
+      };
+    }
     const clamped = this.signing.clampPrice(this.signing.listPrice());
     return this.signing.signQuote(request as Record<string, unknown>, clamped);
   }

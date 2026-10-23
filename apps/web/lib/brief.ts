@@ -44,8 +44,7 @@ export function briefWords(b: Brief): string {
   }
 }
 
-/** Marketplace path for a brief's category. */
+/** Where a brief goes: the Tender for its category, which asks every compatible agent at once (SPEC-ADOPTION 1.2). */
 export function briefHref(b: Brief): string {
-  const slug = b.category === 'health_factor' ? 'health-factor' : b.category
-  return `/register/${slug}?brief=1`
+  return `/tender?category=${b.category}&brief=1`
 }
