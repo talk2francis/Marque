@@ -18,14 +18,6 @@ import styles from './register.module.css'
  * the site header instead of over the page.
  */
 
-const TOGGLES: Array<{ key: keyof MarketState; group: string; label: string; hint: string; off?: keyof MarketState }> = [
-  { key: 'warranted', group: 'Marque test', label: 'Test passes only', hint: 'A recorded category test pass. Exact-service binding and current code provenance may be unavailable.' },
-  { key: 'liveNow', group: 'Availability', label: 'Live now', hint: 'Answered Marque’s most recent probe.' },
-  { key: 'thirdParty', group: 'Provider', label: 'Third-party only', hint: 'Hide the reference agents Marque operates.', off: 'firstParty' },
-  { key: 'firstParty', group: 'Provider', label: 'Marque reference only', hint: 'Only the agents Marque runs, one or two per category.', off: 'thirdParty' },
-  { key: 'hasPrice', group: 'Commerce', label: 'Price listed', hint: 'A live quote or a declared price.' },
-]
-
 /** One row of mutually exclusive options, the same control the interface facet uses. */
 function Choice<T extends string | number | null>({ id, group, value, options, onPick }: {
   id: string; group: string; value: T; options: Array<{ value: T; label: string; count?: number | null; disabledReason?: string | null }>; onPick: (v: T) => void
@@ -78,77 +70,58 @@ function Facets({
   activeCount: number
   facets: MarketFacetCounts | null
 }) {
-  const zero = (n: number | undefined, why: string) => (facets && n === 0 ? why : null)
+  const f = facets
+  const zero = (n: number | undefined, why: string) => (f && n === 0 ? why : null)
+  const proof = state.warranted ? 'warranted' : state.tested ? 'tested' : 'any'
+  const provider = state.firstParty ? 'reference' : state.thirdParty ? 'third' : 'any'
   return (
     <>
-      {TOGGLES.map((t) => (
-        <div key={String(t.key)} className={styles.facet}>
-          <span className={styles.facetGroup}>{t.group}</span>
-          <button
-            type="button"
-            className={styles.facetToggle}
-            aria-pressed={state[t.key] as boolean}
-            onClick={() => patch({ [t.key]: !state[t.key], ...(t.off && !state[t.key] ? { [t.off]: false } : {}) } as Partial<MarketState>)}
-          >
-            <span className={styles.facetBox} aria-hidden="true">
-              <svg viewBox="0 0 12 12" width="10" height="10" focusable="false">
-                <path d="M1.5 6.2 4.4 9 10.5 2.6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </span>
-            <span className={styles.facetLabel}>
-              {t.label}
-              <span className={styles.facetHint}>{t.hint}</span>
-            </span>
-          </button>
-        </div>
-      ))}
+      <Choice id="proof-group" group="Proof" value={proof}
+        options={[
+          { value: 'any', label: 'Any', count: f?.proof.any ?? null },
+          { value: 'tested', label: 'Tested', count: f?.proof.tested ?? null, disabledReason: zero(f?.proof.tested, 'No agent in this view has a Marque test result.') },
+          { value: 'warranted', label: 'Warranted', count: f?.proof.warranted ?? null, disabledReason: zero(f?.proof.warranted, 'No agent in this view holds a current warrant.') },
+        ]}
+        onPick={(v) => patch({ warranted: v === 'warranted', tested: v === 'tested' })} />
+
+      <PriceSlider state={state} patch={patch} facets={f} />
+
+      <Choice id="live-group" group="Availability" value={state.liveNow ? 'live' : 'any'}
+        options={[
+          { value: 'any', label: 'Any', count: f?.live.any ?? null },
+          { value: 'live', label: 'Live now', count: f?.live.live ?? null, disabledReason: zero(f?.live.live, 'No agent in this view answered the latest probe.') },
+        ]}
+        onPick={(v) => patch({ liveNow: v === 'live' })} />
+
+      <Choice id="provider-group" group="Provider" value={provider}
+        options={[
+          { value: 'any', label: 'Any', count: f?.provider.any ?? null },
+          { value: 'third', label: 'Third-party', count: f?.provider.thirdParty ?? null, disabledReason: zero(f?.provider.thirdParty, 'Only Marque reference agents match the other filters.') },
+          { value: 'reference', label: 'Marque reference', count: f?.provider.reference ?? null, disabledReason: zero(f?.provider.reference, 'No Marque reference agent matches the other filters.') },
+        ]}
+        onPick={(v) => patch({ thirdParty: v === 'third', firstParty: v === 'reference' })} />
 
       {/* Network is not a filter: the lane switch above the tabs chooses mainnet or practice (invariant 32). */}
       <Choice id="token-group" group="Paid in" value={state.token}
         options={[{ value: null, label: 'Any' }, ...(['U', 'USDT', 'USDC'] as const).map((t) => ({
-          value: t, label: t, count: facets?.token[t.toLowerCase()] ?? null,
-          disabledReason: zero(facets?.token[t.toLowerCase()], `No agent in this view quotes in ${t} right now.`),
+          value: t, label: t, count: f?.token[t.toLowerCase()] ?? null,
+          disabledReason: zero(f?.token[t.toLowerCase()], `No agent in this view quotes in ${t} right now.`),
         }))]}
         onPick={(v) => patch({ token: v })} />
-      <Choice id="rating-group" group="Verified rating" value={state.minRating}
-        options={[{ value: null, label: 'Any' }, { value: 3, label: '3+' }, { value: 4, label: '4+' }, { value: 4.5, label: '4.5+' }]}
-        onPick={(v) => patch({ minRating: v })} />
-      <div className={styles.facet}>
-        <label className={styles.facetGroup} htmlFor="max-price">Max price per job</label>
-        <input
-          id="max-price"
-          className={styles.priceInput}
-          type="number"
-          inputMode="decimal"
-          min={0}
-          step="0.01"
-          placeholder="Any"
-          value={state.maxPrice ?? ''}
-          onChange={(e) => {
-            const v = e.target.value.trim()
-            patch({ maxPrice: v === '' || !Number.isFinite(Number(v)) || Number(v) < 0 ? null : Number(v) })
-          }}
-        />
-        <span className={styles.facetHint}>Live quotes only, in the quote&apos;s own token.</span>
-      </div>
 
-      <div className={styles.facet}>
-        <span className={styles.facetGroup} id="iface-group">Interface</span>
-        <div className={styles.ifaceRow} role="radiogroup" aria-labelledby="iface-group">
-          {IFACES.map((i) => (
-            <button
-              key={i.label}
-              type="button"
-              role="radio"
-              aria-checked={state.iface === i.value}
-              className={`${styles.ifaceOpt} ${state.iface === i.value ? styles.ifaceOptOn : ''}`}
-              onClick={() => patch({ iface: i.value })}
-            >
-              {i.label}
-            </button>
-          ))}
-        </div>
-      </div>
+      <Choice id="iface-group" group="Interface" value={state.iface}
+        options={IFACES.map((i) => ({
+          value: i.value, label: i.label, count: f ? (i.value ? f.iface[i.value] ?? 0 : f.iface['any'] ?? null) : null,
+          disabledReason: i.value ? zero(f?.iface[i.value], `No agent in this view declares ${i.label}.`) : null,
+        }))}
+        onPick={(v) => patch({ iface: v })} />
+
+      <Choice id="rating-group" group="Verified rating" value={state.minRating}
+        options={[{ value: null, label: 'Any', count: f?.rating['any'] ?? null }, ...[3, 4, 4.5].map((n) => ({
+          value: n, label: `${n}+`, count: f?.rating[String(n)] ?? null,
+          disabledReason: zero(f?.rating[String(n)], `No agent in this view has a verified-buyer average of ${n} or more.`),
+        }))]}
+        onPick={(v) => patch({ minRating: v })} />
 
       <div className={styles.facetFoot}>
         <button
@@ -164,16 +137,63 @@ function Facets({
   )
 }
 
+/**
+ * Price, in the lane's token, over live quotes only. The range is the cheapest and dearest live
+ * quote under the other filters; the thumb commits on release so the list does not refetch per pixel.
+ */
+function PriceSlider({ state, patch, facets }: { state: MarketState; patch: (p: Partial<MarketState>) => void; facets: MarketFacetCounts | null }) {
+  const p = facets?.price
+  const min = p?.min ?? 0
+  const max = p?.max ?? 0
+  const step = max > 10 ? 0.5 : max > 1 ? 0.05 : 0.01
+  const top = Math.ceil(max / step) * step
+  const [draft, setDraft] = useState<number | null>(state.maxPrice)
+  useEffect(() => setDraft(state.maxPrice), [state.maxPrice])
+  const shown = draft ?? top
+  const unit = state.token ?? p?.unit ?? ''
+  const commit = () => patch({ maxPrice: draft === null || draft >= top ? null : Number(draft.toFixed(2)) })
+  const fmt = (n: number) => (n >= 1 ? n.toFixed(2) : n.toFixed(n >= 0.1 ? 2 : 3))
+  return (
+    <div className={styles.facet}>
+      <span className={styles.facetGroup} id="price-group">Price per job</span>
+      {p && p.quoted > 0 && max > 0 ? (
+        <div className={styles.priceSlide}>
+          <input
+            type="range"
+            aria-labelledby="price-group"
+            aria-valuetext={draft === null || draft >= top ? 'Any price' : `At most ${fmt(shown)} ${unit}`}
+            min={Math.floor(min / step) * step}
+            max={top}
+            step={step}
+            value={Math.min(shown, top)}
+            onChange={(e) => setDraft(Number(e.target.value))}
+            onPointerUp={commit}
+            onKeyUp={commit}
+            onBlur={commit}
+          />
+          <span className={styles.priceRead}>
+            {draft === null || draft >= top ? <>Any price <span className={styles.facetHint}>{p.quoted} live {p.quoted === 1 ? 'quote' : 'quotes'}, {fmt(min)} to {fmt(max)} {unit}</span></> : <>At most <b className="mono">{fmt(shown)} {unit}</b></>}
+          </span>
+        </div>
+      ) : (
+        <span className={styles.facetHint}>No live quotes under these filters, so there is no price to filter by.</span>
+      )}
+    </div>
+  )
+}
+
 export function MarketFilters({
   state,
   patch,
   activeCount,
   facets,
+  total,
 }: {
   state: MarketState
   patch: (p: Partial<MarketState>) => void
   activeCount: number
   facets: MarketFacetCounts | null
+  total: number | null
 }) {
   const [open, setOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
@@ -310,8 +330,8 @@ export function MarketFilters({
               </div>
               <div className={styles.sheetBody}>{facetsEl}</div>
               <div className={styles.sheetFoot}>
-                <button type="button" className={styles.sheetApply} onClick={close}>
-                  Show results
+                <button type="button" className={styles.sheetApply} onClick={close} disabled={total === 0}>
+                  {total === null ? 'Show results' : total === 0 ? 'No agents match' : `Show ${total.toLocaleString()} ${total === 1 ? 'agent' : 'agents'}`}
                 </button>
               </div>
             </div>

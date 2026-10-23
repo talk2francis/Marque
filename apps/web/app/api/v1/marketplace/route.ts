@@ -34,6 +34,7 @@ export async function GET(req: NextRequest) {
     search: p.get('q'),
     liveNow: bool('live'),
     warranted: bool('warranted'),
+    tested: bool('tested'),
     thirdPartyOnly: bool('thirdParty'),
     hireableOnly: bool('hireable'),
     includeUnclassified: bool('includeUnclassified'),

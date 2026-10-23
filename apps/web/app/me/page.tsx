@@ -1,13 +1,12 @@
 import { Suspense } from 'react'
-import { campaignChainId } from '@marque/commerce'
 import { SiteHeader, SiteFooter } from '../_components/SiteHeader'
-import { MyMarque } from './MyMarque'
+import { Workspace } from './Workspace'
 import styles from './me.module.css'
 
 export const dynamic = 'force-dynamic'
 export const metadata = {
   title: 'My Marque',
-  description: 'Your hires, quest progress, spending controls, ratings and agents, read from BNB Chain. Connect a wallet, or pass ?addr= for any address. Nothing is stored.',
+  description: 'Your logbook, jobs, money, agents and watched positions, read from BNB Chain. Connect a wallet, or pass ?addr= for any address. Nothing is stored.',
 }
 
 /**
@@ -22,7 +21,7 @@ export default async function MePage({ searchParams }: { searchParams: Promise<{
     <>
       <SiteHeader active="me" />
       <main className={styles.page}>
-        <Suspense fallback={null}><MyMarque addrParam={addrParam} chainId={campaignChainId()} /></Suspense>
+        <Suspense fallback={null}><Workspace addrParam={addrParam} /></Suspense>
       </main>
       <SiteFooter />
     </>

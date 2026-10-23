@@ -1,6 +1,5 @@
 import { notFound } from 'next/navigation'
 import { sql } from 'drizzle-orm'
-import { Check, X } from 'lucide-react'
 import { db } from '@marque/db'
 import {
   agenticCommerceAbi, assetAt, chainClient, disputeWindowSeconds, formatAmount, isSupportedChain, network, questJob, timeline, type ChainId,
@@ -8,11 +7,12 @@ import {
 import { ProvenanceChip } from '@marque/ui'
 import { SiteHeader, SiteFooter } from '../../../_components/SiteHeader'
 import { AgentAvatar } from '../../../_components/AgentAvatar'
-import { AddressChip, Badge, Disclosure, HashChip } from '../../../_components/ui'
+import { AddressChip, Badge, HashChip } from '../../../_components/ui'
 import { network as net } from '../../../../lib/network'
 import { utcStamp } from '../../../../lib/time'
 import { jobHeadline } from '../../../../lib/job-copy'
-import { DeliverableView } from './Deliverable'
+import { ResultLens } from './ResultLens'
+import { jobLens } from '../../../../lib/lens'
 import { readManifest } from '../../../../lib/manifest'
 import { registryImageUrl } from '../../../../lib/avatar-source'
 import { JobActions } from './JobActions'
@@ -75,6 +75,9 @@ export default async function JobRoom({ params }: { params: Promise<{ chainId: s
   const head = jobHeadline(state, agentName, priceLabel ?? 'payment', t?.reviewEndsAt ?? null, t?.refundFrom ?? null, Boolean(t?.awaitingExpiry), fundingDeadline !== null && now >= fundingDeadline)
   const onchainHash = job?.deliverable?.hash ?? (onchain && onchain.submittedAt > 0n ? onchain.deliverable : null)
   const manifest = job?.deliverable?.url ? await readManifest(job.deliverable.url, onchainHash) : null
+  // The Result Lens reads the same file and checks it against the chain (cached per job).
+  const lensData = manifest && !manifest.withheld ? await jobLens(cid, jobId).then((p) => p.value).catch(() => null) : null
+  const lensContent: unknown = manifest?.content ?? (() => { try { return manifest?.raw ? JSON.parse(manifest.raw) : null } catch { return null } })()
   // The description can be signed or identity-matched unsigned; the buyer's words are its `task`.
   const asked = (() => {
     const d = intent?.['description'] ? String(intent['description']) : null
@@ -143,25 +146,23 @@ export default async function JobRoom({ params }: { params: Promise<{ chainId: s
 
           <div className={styles.cols}>
             <section className={styles.main} aria-labelledby="deliverable">
-              <h2 id="deliverable" className={styles.h2}>{manifest?.content ? `What ${agentName} delivered` : 'The delivery'}</h2>
+              {lensData && lensData.manifest?.raw ? null : <h2 id="deliverable" className={styles.h2}>The delivery</h2>}
               {asked ? (
                 <div className={styles.asked}><span className="t-label">{job?.client ? 'The buyer asked' : 'Asked'}</span><p>{asked}</p></div>
               ) : null}
-              {manifest?.content ? (
-                <DeliverableView category={category} content={manifest.content} />
+              {lensData && lensData.manifest?.raw ? (
+                <ResultLens data={lensData} agentName={agentName} content={lensContent} />
+              ) : manifest?.withheld ? (
+                <p className={styles.note}>The original error response is preserved privately. Raw diagnostics are withheld to avoid exposing private provider details. The provider reports its original content hash as <code>{manifest.withheld.originalContentHash}</code>. The original bytes are unavailable here, so this page cannot independently verify that hash against the chain. Payment state above is separate from a usable result.</p>
               ) : state === 'OPEN' || state === 'FUNDED' ? (
-                <div className={styles.waiting}><span className={styles.pulse} aria-hidden="true" /><p>{state === 'OPEN' ? 'Nothing is delivered before the job is paid.' : 'Escrow is funded. Delivery appears after indexing when the public file is available.'}</p></div>
+                <div className={styles.waiting}><span className={styles.pulse} aria-hidden="true" /><p>{state === 'OPEN' ? 'Nothing is delivered before the job is paid.' : 'Escrow is funded. The answer appears here as soon as the agent delivers.'}</p></div>
               ) : onchainHash && !job?.deliverable?.url ? (
-                <p className={styles.note}>This agent recorded its delivery on chain (hash below) but does not publish the file where Marque can read it.</p>
+                <p className={styles.note}>This agent recorded its delivery on chain (hash below) but has not said where its file can be read. Marque shows it here as soon as the agent publishes it.</p>
+              ) : job?.deliverable?.url && !manifest ? (
+                <p className={styles.note}>The agent&apos;s delivery file could not be read just now. Its hash is recorded on chain; this page tries again on the next visit.</p>
               ) : (
                 <p className={styles.note}>No delivery was recorded for this job.</p>
               )}
-              {manifest?.withheld ? <p className={styles.note}>The original error response is preserved privately. Raw diagnostics are withheld to avoid exposing private provider details. The provider reports its original content hash as <code>{manifest.withheld.originalContentHash}</code>. The original bytes are unavailable here, so this page cannot independently verify that hash against the chain. Payment state above is separate from a usable result.</p> : manifest ? (
-                <Disclosure summary={<span className={styles.rawSum}>View the raw file {manifest.matches === true ? <span className={styles.ok}><Check aria-hidden="true" />hash matches the chain</span> : manifest.matches === false ? <span className={styles.bad}><X aria-hidden="true" />hash does not match</span> : null}</span>}>
-                  <p className={styles.note}>keccak256 of this file is <code>{manifest.hash}</code>{onchainHash ? <>. The hash {agentName} recorded on chain in its delivery is <code>{onchainHash}</code>{manifest.matches ? ', the same.' : ', which differs.'}</> : '.'}</p>
-                  <pre className={styles.raw}>{manifest.pretty}</pre>
-                </Disclosure>
-              ) : null}
             </section>
 
             <aside className={styles.side} aria-labelledby="timeline">

@@ -30,6 +30,7 @@ export function MarketToolbar({
   fixedCategory,
   resultsId,
   facets,
+  total = null,
 }: {
   state: MarketState
   /** Display-only changes: does not reset the page. */
@@ -39,6 +40,7 @@ export function MarketToolbar({
   fixedCategory?: string
   resultsId: string
   facets?: MarketFacetCounts | null
+  total?: number | null
 }) {
   const sentinel = useRef<HTMLDivElement>(null)
   const [stuck, setStuck] = useState(false)
@@ -108,7 +110,7 @@ export function MarketToolbar({
             />
           </div>
 
-          <MarketFilters state={state} patch={patchFilter} activeCount={chips.length} facets={facets ?? null} />
+          <MarketFilters state={state} patch={patchFilter} activeCount={chips.length} facets={facets ?? null} total={total} />
 
           <label className={styles.sortWrap}>
             <span className={styles.sortLabel}>Sort</span>

@@ -1,6 +1,6 @@
 export * from './tolerances.js'
 export * from './types.js'
-export { observeCase, captureCase, capturePublishedCase, loadCase, grade, runConformance, formatOutcome, hash, stableHash, type GroundTruth } from './harness.js'
+export { observeCase, captureCase, capturePublishedCase, loadCase, loadCaseById, grade, runConformance, formatOutcome, hash, stableHash, type GroundTruth } from './harness.js'
 export { MCS_CODE_ANCHOR } from './code-anchor.js'
 export { buildWarrantBundle, verifyWarrantBundle, warrantRecordMetadata } from './portable.js'
 export { CASES, REB_FALLBACK_SUBJECTS, caseFor, type CaseSpec } from './cases.js'

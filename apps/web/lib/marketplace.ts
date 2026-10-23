@@ -102,6 +102,8 @@ export interface MarketQuery {
   search?: string | null
   liveNow?: boolean
   warranted?: boolean
+  /** Has any Marque test result, pass or fail (the Proof facet's middle option). */
+  tested?: boolean
   thirdPartyOnly?: boolean
   /** Only agents a buyer's wallet can hire through ERC-8183 right now. */
   hireableOnly?: boolean
@@ -556,7 +558,18 @@ function otherLast(rows: MarketRow[]): MarketRow[] {
   return [...rows.filter((r) => !isOther(r)), ...rows.filter(isOther)]
 }
 
-export interface MarketFacets { network: { 56: number; 97: number }; token: Record<string, number> }
+export interface MarketFacets {
+  network: { 56: number; 97: number }
+  token: Record<string, number>
+  proof: { any: number; tested: number; warranted: number }
+  live: { any: number; live: number }
+  provider: { any: number; thirdParty: number; reference: number }
+  iface: Record<string, number>
+  rating: Record<string, number>
+  hasPrice: number
+  /** Live quotes under every other filter: the price slider's range, in the lane's commonest token. */
+  price: { min: number | null; max: number | null; quoted: number; unit: string | null }
+}
 
 export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: MarketRow[]; generatedAt: string; total: number; offset: number; hasMore: boolean; supply: MarketSupplyCategory[]; quoteObservedAt: string | null; facets: MarketFacets; lane: Lane }> {
   const lane: Lane = q.lane ?? (q.network === 97 ? 'practice' : 'mainnet')
@@ -590,17 +603,9 @@ export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: Ma
   if (q.category) all = all.filter((r) => r.category === q.category)
   else if (!q.includeUnclassified && !readyAll) all = all.filter((r) => r.category !== null && r.category !== 'unclassified')
   if (q.hireableOnly) all = all.filter((r) => r.commerce.state === 'hireable' || r.commerce.state === 'settleable')
-  if (q.liveNow) all = all.filter((r) => r.liveness === 'live')
-  if (q.warranted) all = all.filter((r) => r.warrant.status === 'warranted')
-  if (q.thirdPartyOnly) all = all.filter((r) => !r.isReference)
-  if (q.firstPartyOnly) all = all.filter((r) => r.isReference)
   if (q.tab === 'ready') all = all.filter((r) => r.commerce.state === 'hireable' || r.commerce.state === 'settleable')
   if (q.tab === 'free') all = all.filter(answersFree)
   if (q.tab === 'tested') all = all.filter((r) => r.warrant.status !== 'untested')
-  if (q.maxPrice != null && Number.isFinite(q.maxPrice)) all = all.filter((r) => { const p = quotedPrice(r); return p !== null && p <= q.maxPrice! })
-  if (q.minRating != null && Number.isFinite(q.minRating)) all = all.filter((r) => (r.track.verified.averageStars ?? 0) >= q.minRating!)
-  if (q.hasPrice) all = all.filter((r) => !!r.price)
-  if (q.iface) all = all.filter((r) => r.interfaces.includes(q.iface as string) || (q.iface === 'erc8183' && r.protocols.some((p) => /8183/.test(p))))
   if (q.search) {
     const s = q.search.toLowerCase()
     all = all.filter((r) =>
@@ -617,21 +622,49 @@ export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: Ma
       || (r.category ?? '').includes(s))
   }
 
-  // Clone groups collapse before anything is counted, so facet counts and the total agree.
-  if (readyAll) all = groupClones(all)
-
-  // Facet counts (D6): each option counted under every other filter, so a zero option can be
-  // disabled with its reason instead of leading to an unexplained empty list.
+  // Faceted filters (D6, SPEC-WORKSPACE 3.4). Each dimension is one predicate; an option's count
+  // is the result size with every OTHER dimension applied and that option chosen, after clone
+  // grouping, so the number on an option is exactly the number of rows it leads to.
   const quoteToken = (r: MarketRow) => (r.commerce.token ?? r.commerce.lastQuote?.token)?.symbol.toLowerCase() ?? null
-  const byToken = q.token ? all.filter((r) => quoteToken(r) === q.token!.toLowerCase()) : all
+  const isTested = (r: MarketRow) => r.warrant.status !== 'untested'
+  const isWarranted = (r: MarketRow) => r.warrant.status === 'warranted'
+  const isLive = (r: MarketRow) => r.liveness === 'live'
+  const hasIface = (v: string) => (r: MarketRow) => r.interfaces.includes(v) || (v === 'erc8183' && r.protocols.some((p) => /8183/.test(p)))
+  const atMost = (max: number) => (r: MarketRow) => { const p = quotedPrice(r); return p !== null && p <= max }
+  const ratedAtLeast = (min: number) => (r: MarketRow) => (r.track.verified.averageStars ?? 0) >= min
+  const dims: Record<string, ((r: MarketRow) => boolean) | null> = {
+    proof: q.warranted ? isWarranted : q.tested ? isTested : null,
+    live: q.liveNow ? isLive : null,
+    provider: q.thirdPartyOnly ? (r) => !r.isReference : q.firstPartyOnly ? (r) => r.isReference : null,
+    price: q.maxPrice != null && Number.isFinite(q.maxPrice) ? atMost(q.maxPrice) : null,
+    rating: q.minRating != null && Number.isFinite(q.minRating) ? ratedAtLeast(q.minRating) : null,
+    hasPrice: q.hasPrice ? (r) => !!r.price : null,
+    iface: q.iface ? hasIface(q.iface) : null,
+    token: q.token ? (r) => quoteToken(r) === q.token!.toLowerCase() : null,
+  }
+  // Clone groups collapse after filtering, so facet counts and the total agree.
+  const finish = (rows: MarketRow[]) => (readyAll ? groupClones(rows) : rows)
+  const except = (dim: string | null) => all.filter((r) => Object.entries(dims).every(([k, p]) => k === dim || !p || p(r)))
+  const any = () => true
+  const count = (dim: string, pred: (r: MarketRow) => boolean) => finish(except(dim).filter(pred)).length
+  const priced = except('price').map(quotedPrice).filter((n): n is number => n !== null)
+  const units = except('price').map((r) => (r.commerce.token ? r.commerce.token.symbol : null)).filter((u): u is string => u !== null)
+  const unit = q.token ?? (units.length ? [...units].sort((a, b) => units.filter((u) => u === b).length - units.filter((u) => u === a).length)[0]! : null)
+  const facets: MarketFacets = {
+    network: { 56: 0, 97: 0 },
+    token: Object.fromEntries(['u', 'usdt', 'usdc'].map((t) => [t, count('token', (r) => quoteToken(r) === t)])) as Record<string, number>,
+    proof: { any: count('proof', any), tested: count('proof', isTested), warranted: count('proof', isWarranted) },
+    live: { any: count('live', any), live: count('live', isLive) },
+    provider: { any: count('provider', any), thirdParty: count('provider', (r) => !r.isReference), reference: count('provider', (r) => r.isReference) },
+    iface: { any: count('iface', any), ...Object.fromEntries(['a2a', 'mcp', 'x402', 'erc8183'].map((v) => [v, count('iface', hasIface(v))])) },
+    rating: { any: count('rating', any), ...Object.fromEntries(['3', '4', '4.5'].map((v) => [v, count('rating', ratedAtLeast(Number(v)))])) },
+    hasPrice: count('hasPrice', (r) => !!r.price),
+    price: { min: priced.length ? Math.min(...priced) : null, max: priced.length ? Math.max(...priced) : null, quoted: count('price', (r) => quotedPrice(r) !== null), unit },
+  }
+  all = finish(except(null))
   // A listing's lane is its registry chain (the base query); a quote bound to another chain is
   // already 'quoteable' with failure wrong_lane, so it lists with its reason and never as hireable.
-  const byNetwork = all
-  const facets = {
-    network: { 56: lane === 'mainnet' ? byToken.length : 0, 97: lane === 'practice' ? byToken.length : 0 },
-    token: Object.fromEntries(['u', 'usdt', 'usdc'].map((t) => [t, byNetwork.filter((r) => quoteToken(r) === t).length])) as Record<string, number>,
-  }
-  if (q.token) all = all.filter((r) => quoteToken(r) === q.token!.toLowerCase())
+  facets.network = { 56: lane === 'mainnet' ? all.length : 0, 97: lane === 'practice' ? all.length : 0 }
 
   const COMMERCE_RANK: Record<CommercialState, number> = { settleable: 0, hireable: 1, quoteable: 2, preview_only: 3, unavailable: 4 }
   // Hireable first (signed quotes before unsigned), then quality. Two axes, never merged into one badge.

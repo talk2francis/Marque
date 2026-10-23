@@ -167,7 +167,16 @@
   .pill--hireable { color: var(--moss); border-color: color-mix(in srgb, var(--moss) 40%, transparent); background: color-mix(in srgb, var(--moss) 9%, transparent); }
   .pill--preview { color: var(--ink-2); border-color: var(--hair-2); }
   .pill--warranted { color: var(--brass); border-color: color-mix(in srgb, var(--brass) 55%, transparent); }
-  .pill--failed { color: var(--oxide); border-color: transparent; padding-inline: 0; height: auto; font-size: var(--fs-small); font-weight: 400; }
+  /* A failed test is ink-2 text with an oxide dot, not a red label: most third parties fail one field (DESIGN-V4 4). */
+  .pill--failed { color: var(--ink-2); border-color: transparent; padding-inline: 0; height: auto; font-size: var(--fs-small); font-weight: 400; gap: 7px; }
+  .pill--failed::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--oxide); flex: none; }
+  /* Saved-agent star (SPEC-WORKSPACE 1.7): a quiet outline that fills brass when saved, on this device only. */
+  .savestar { appearance: none; display: inline-grid; place-items: center; width: 30px; height: 30px; padding: 0; border: 1px solid var(--hair-2); border-radius: 50%; background: transparent; color: var(--ink-3); cursor: pointer; transition: color var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease), background-color var(--t-fast) var(--ease); }
+  .savestar svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linejoin: round; }
+  .savestar:hover { color: var(--ink); border-color: var(--ink-3); }
+  .savestar[data-on] { color: var(--brass); border-color: color-mix(in srgb, var(--brass) 55%, transparent); background: color-mix(in srgb, var(--brass) 10%, transparent); }
+  .savestar[data-on] svg { fill: currentColor; }
+  .savestar:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
   .pill--untested { color: var(--ink-3); border-style: dashed; }
   .pill--retest { color: var(--amber); border-color: color-mix(in srgb, var(--amber) 45%, transparent); }
   .pill--reference { color: var(--ink-2); border-color: var(--hair-2); background: color-mix(in srgb, var(--ink) 4%, transparent); }

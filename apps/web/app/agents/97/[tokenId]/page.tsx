@@ -1,6 +1,5 @@
 import { notFound } from 'next/navigation'
-import { SiteHeader, SiteFooter } from '../../../_components/SiteHeader'
-import { Storefront } from '../../_storefront/Storefront'
+import { AgentSection } from '../../_storefront/render'
 import { storefrontByToken } from '../../../../lib/storefront'
 
 // Same for every visitor, so served from Next's cache and re-rendered at most every 30 s
@@ -28,11 +27,5 @@ export default async function AgentStorefront({ params }: { params: Promise<{ to
   const d = await storefrontByToken(tokenId, 97)
   if (!d) notFound()
   // A reference agent's testnet twin has its own page: same agent, practice lane.
-  return (
-    <>
-      <SiteHeader active="register" />
-      <main><Storefront d={d} /></main>
-      <SiteFooter />
-    </>
-  )
+  return <AgentSection d={d} section="overview" />
 }

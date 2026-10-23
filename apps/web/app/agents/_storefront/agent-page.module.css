@@ -1,0 +1,97 @@
+/* Agent page sections (SPEC-WORKSPACE 3, DESIGN-V4 5): section links, the Overview, the Warrant card, Evidence. */
+.tabs { display: flex; gap: 4px 22px; margin: var(--s-5) 0 0; border-bottom: 1px solid var(--hair); overflow-x: auto; scrollbar-width: none; }
+.tabs::-webkit-scrollbar { display: none; }
+.tab { position: relative; flex: none; display: inline-flex; align-items: center; min-height: 44px; padding: 0 2px; font-size: 14.5px; color: var(--ink-3); text-decoration: none; white-space: nowrap; transition: color var(--t-fast) var(--ease); }
+.tab:hover { color: var(--ink); }
+.tab[aria-current='page'] { color: var(--ink); }
+.tab[aria-current='page']::after { content: ''; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: var(--brass); }
+.tab:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; border-radius: 3px; }
+.proofPrice { font-family: var(--font-mono); font-size: 13px; color: var(--ink); padding: 0 2px; }
+
+.h2 { margin: 0 0 var(--s-3); font-size: var(--fs-h3); font-weight: 500; }
+.intro { padding: var(--s-6) 0 var(--s-5); }
+.clamp { margin: 0; font-size: 16px; line-height: 1.6; color: var(--ink-2); max-width: 68ch; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.sendGet { display: grid; grid-template-columns: 1fr 1fr; gap: 0 var(--s-5); margin: var(--s-5) 0 0; }
+.sendGet > div { display: grid; gap: 6px; padding-top: 12px; border-top: 1px solid var(--hair); }
+.sendGet dt { font-size: var(--fs-label); letter-spacing: var(--tracking-eyebrow); text-transform: uppercase; color: var(--ink-3); }
+.sendGet dd { margin: 0; font-size: 14.5px; line-height: 1.55; color: var(--ink); }
+
+/* The Warrant card: a double rule (brass inset 6 px inside a hairline), the one ceremonial surface. */
+.warrant { position: relative; margin: var(--s-3) 0 var(--s-5); padding: 6px; border: 1px solid var(--hair-2); border-radius: 4px; background: color-mix(in srgb, var(--panel) 70%, transparent); }
+.warrantInner { display: grid; gap: 10px; padding: 22px 24px 18px; border: 1px solid var(--brass-mark, var(--brass)); border-radius: 2px; }
+.warrant[data-kind='fail'] .warrantInner, .warrant[data-kind='none'] .warrantInner { border-color: var(--hair-2); }
+.warrantTop { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; }
+.warrantTitle { font-family: var(--font-serif); font-size: 30px; line-height: 1; letter-spacing: -0.01em; color: var(--ink); }
+.warrantTitleQuiet { font-size: 20px; font-weight: 500; line-height: 1.1; color: var(--ink-2); }
+.warrantId { font-family: var(--font-mono); font-size: 13px; color: var(--ink-2); text-decoration: none; letter-spacing: 0.02em; }
+.warrantId:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+.warrantLine { margin: 0; font-size: 15px; line-height: 1.5; color: var(--ink); max-width: 64ch; }
+.warrantMeta { margin: 0; font-size: 13px; color: var(--ink-3); }
+.warrantRule { margin: 6px 0 2px; }
+.asserts { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px 14px; font-family: var(--font-mono); font-size: 12.5px; color: var(--ink-2); }
+.asserts li { display: inline-flex; align-items: center; gap: 6px; }
+.asserts li::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--hair-2); }
+.asserts li[data-pass]::before { background: var(--moss); }
+.asserts li[data-fail] { color: var(--ink); }
+.asserts li[data-fail]::before { background: var(--oxide); }
+.warrantFoot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; padding-top: 10px; margin-top: 4px; border-top: 1px solid var(--hair); font-size: 12.5px; color: var(--ink-3); }
+.warrantDue { color: var(--amber); }
+.warrantLink { font-size: 13.5px; color: var(--chain); text-decoration: none; }
+.warrantLink:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+.three { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 0; border-top: 1px solid var(--hair); border-bottom: 1px solid var(--hair); }
+.three > div { display: grid; gap: 6px; padding: 14px 16px 14px 0; }
+.three > div + div { padding-left: 16px; border-left: 1px solid var(--hair); }
+.three dt { font-size: 12.5px; color: var(--ink-3); }
+.three dd { margin: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 8px; font-size: 22px; font-weight: 500; letter-spacing: -0.02em; }
+.three dd :global(.chip), .three dd span:not(:first-child) { font-size: 12px; font-weight: 400; letter-spacing: 0; }
+.termsLine { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; margin: var(--s-4) 0 0; font-size: 13.5px; color: var(--ink-2); }
+.termsLine svg { width: 15px; height: 15px; color: var(--moss); flex: none; }
+.termsLine b { font-family: var(--font-mono); font-weight: 500; color: var(--ink); }
+.termsLine a { color: var(--chain); }
+.similar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px 24px; margin: var(--s-5) 0 var(--s-6); padding: 18px 20px; border: 1px solid var(--hair-2); border-left: 2px solid var(--brass); border-radius: 4px; }
+.similar h3 { margin: 0 0 4px; font-size: 16px; font-weight: 500; }
+.similar p { margin: 0; font-size: 13.5px; line-height: 1.5; color: var(--ink-2); max-width: 54ch; }
+
+/* Evidence */
+.timeline { list-style: none; display: flex; gap: 0; margin: var(--s-4) 0 0; padding: 0 0 4px; overflow-x: auto; position: relative; }
+.timeline::before { content: ''; position: absolute; left: 6px; right: 6px; top: 6px; height: 1px; background: var(--hair-2); }
+.timeline li { position: relative; flex: 0 0 auto; display: grid; justify-items: center; gap: 6px; min-width: 26px; }
+.tlDate { min-height: 13px; }
+.tlDot { width: 13px; height: 13px; border-radius: 50%; border: 2px solid var(--oxide); background: var(--canvas); position: relative; }
+.timeline li[data-pass] .tlDot { border-color: var(--brass); background: var(--brass); }
+.timeline li[data-error] .tlDot { border-style: dashed; border-color: var(--ink-3); }
+.tlDate { font-family: var(--font-mono); font-size: 10.5px; color: var(--ink-3); white-space: nowrap; width: 0; display: flex; justify-content: center; }
+.chart { margin: var(--s-4) 0 var(--s-4); }
+.chart svg { display: block; width: 100%; height: 200px; }
+.grid { stroke: var(--hair); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.rate { fill: var(--moss); opacity: 0.85; }
+.rate[data-low] { fill: var(--amber); }
+.gap { fill: var(--hair-2); }
+.lat { fill: var(--chain); opacity: 0.7; }
+.chartKey { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 20px; margin-top: 10px; font-size: 12.5px; color: var(--ink-3); }
+.chartKey span { display: inline-flex; align-items: center; gap: 6px; }
+.keyRate, .keyLat { display: inline-block; width: 10px; height: 10px; border-radius: 2px; background: var(--moss); }
+.keyLat { background: var(--chain); opacity: 0.7; }
+.caption { caption-side: top; text-align: left; padding: 0 0 8px; font-size: 12.5px; color: var(--ink-3); }
+.probeLog td { white-space: nowrap; }
+.detail { white-space: normal !important; max-width: 360px; overflow-wrap: anywhere; }
+.live { display: inline-block; width: 6px; height: 6px; margin-right: 8px; border-radius: 50%; background: var(--ink-3); vertical-align: middle; }
+.live[data-live] { background: var(--moss); }
+
+.quick { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px; }
+.quick span { font-size: 12px; padding: 2px 9px; border-radius: var(--r-pill); border: 1px solid var(--hair-2); color: var(--ink-2); }
+.quick span[data-tone='good'] { border-color: color-mix(in srgb, var(--moss) 45%, transparent); color: var(--ink); }
+.quick span[data-tone='bad'] { border-color: color-mix(in srgb, var(--oxide) 45%, transparent); }
+.code { margin: var(--s-3) 0 0; padding: 14px 16px; border: 1px solid var(--hair); border-radius: 4px; background: var(--sunk, transparent); font-family: var(--font-mono); font-size: 12.5px; line-height: 1.7; overflow-x: auto; white-space: pre; color: var(--ink-2); }
+
+@media (max-width: 720px) {
+  .sendGet { grid-template-columns: 1fr; gap: var(--s-3); }
+  .three { grid-template-columns: 1fr; }
+  .three > div + div { padding-left: 0; border-left: 0; border-top: 1px solid var(--hair); }
+  .three > div { padding: 12px 0; display: flex; justify-content: space-between; align-items: baseline; }
+  .three dd { font-size: 18px; }
+  .warrantInner { padding: 18px 16px 14px; }
+  .warrantTitle { font-size: 26px; }
+  .chart svg { height: 160px; }
+}

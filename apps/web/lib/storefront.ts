@@ -19,8 +19,9 @@ const rowsOf = (r: unknown) => ((r as { rows?: unknown[] }).rows ?? (r as unknow
 const s = (v: unknown): string | null => (v === null || v === undefined || v === '' ? null : String(v))
 const iso = (v: unknown): string | null => (v ? new Date(v as string).toISOString() : null)
 
-export interface StoreTest { testId: string; pass: boolean; failedFields: string[]; ranAt: string | null; block: string | null; error: string | null; latencyMs: number | null }
-export interface StoreReview { stars: number; client: string; at: string | null; tx: string; verified: boolean; team: boolean; comment: string | null; jobId: string | null }
+export interface StoreDiff { field: string; pass: boolean; expected: string; actual: string; tolerance: string; missing: boolean }
+export interface StoreTest { testId: string; caseId: string | null; pass: boolean; failedFields: string[]; diffs: StoreDiff[]; ranAt: string | null; block: string | null; error: string | null; latencyMs: number | null }
+export interface StoreReview { stars: number; client: string; at: string | null; tx: string; verified: boolean; team: boolean; comment: string | null; jobId: string | null; quick: { answered: string; onTime: string; hireAgain: string } | null }
 export interface StoreSample { jobId: string; chainId: number; at: string | null; manifest: Manifest; hashOnChain: string | null }
 
 export interface Storefront {
@@ -66,7 +67,7 @@ export async function storefront(agentId: string): Promise<Storefront | null> {
   const live = currentTerms(agentId).catch(() => null)
   let value: Storefront | null
   try {
-    value = (await cachedProjection(`storefront:v4:${agentId}`, () => computeStorefront(agentId), { freshMs: 30_000, timeoutMs: 12_000, staleWhileRevalidate: true })).value
+    value = (await cachedProjection(`storefront:v5:${agentId}`, () => computeStorefront(agentId), { freshMs: 30_000, timeoutMs: 12_000, staleWhileRevalidate: true })).value
   } catch {
     value = await computeStorefront(agentId)
   }
@@ -90,8 +91,8 @@ async function computeStorefront(agentId: string): Promise<Storefront | null> {
   const [services, tests, probe, probes24, reviewsRaw, states, track, windowS, seller] = await Promise.all([
     db().execute(sql`select kind, coalesce(resolved_endpoint, endpoint) as endpoint from agent_service where agent_id = ${agentId} order by kind`).then(rowsOf).catch(() => []),
     db().execute(sql`
-      select test_id, pass, failed_fields, ran_at, block_number, error, latency_ms from conformance_result
-      where ${canonicalAgentIdSql(sql`agent_id`)} = ${agentId} order by ran_at desc limit 8`).then(rowsOf).catch(() => []),
+      select test_id, case_id, pass, failed_fields, diffs, ran_at, block_number, error, latency_ms from conformance_result
+      where ${canonicalAgentIdSql(sql`agent_id`)} = ${agentId} order by ran_at desc limit 30`).then(rowsOf).catch(() => []),
     db().execute(sql`
       select p.checked_at, p.liveness, p.latency_ms, p.failure_class, p.detail from probe p
       where p.agent_id = ${agentId} order by p.checked_at desc limit 1`).then(rowsOf).catch(() => []),
@@ -100,7 +101,7 @@ async function computeStorefront(agentId: string): Promise<Storefront | null> {
         count(*) filter (where status_code between 200 and 299)::int as reachable from probe
       where agent_id = ${agentId} and checked_at > now() - interval '24 hours'`).then(rowsOf).catch(() => []),
     db().execute(sql`
-      select r.client, r.value, r.value_decimals, r.tx_hash, r.block_time, r.feedback_hash, c.comment, c.job_id,
+      select r.client, r.value, r.value_decimals, r.tx_hash, r.block_time, r.feedback_hash, c.comment, c.job_id, c.canonical,
              ${buyerFeedbackBinding(sql`${s(a['agent_wallet']) ?? ''}`, sql`${agentId}`)} as verified
       from rating r left join rating_comment c on lower(c.feedback_hash) = lower(r.feedback_hash) and c.chain_id = r.chain_id and c.agent_token_id = r.agent_token_id and lower(c.client) = lower(r.client)
       where r.chain_id = ${chainId} and r.agent_token_id = ${tokenId} and not r.revoked and r.tag1 = 'starred'
@@ -155,7 +156,8 @@ async function computeStorefront(agentId: string): Promise<Storefront | null> {
     terms: states?.terms ?? termsOf(null),
     track,
     tests: tests.map((t) => ({
-      testId: String(t['test_id']), pass: t['pass'] === true, failedFields: Array.isArray(t['failed_fields']) ? (t['failed_fields'] as string[]) : [],
+      testId: String(t['test_id']), caseId: s(t['case_id']), pass: t['pass'] === true, failedFields: Array.isArray(t['failed_fields']) ? (t['failed_fields'] as string[]) : [],
+      diffs: Array.isArray(t['diffs']) ? (t['diffs'] as Array<Record<string, unknown>>).map((x) => ({ field: String(x['field'] ?? ''), pass: x['pass'] === true, expected: String(x['expected'] ?? ''), actual: String(x['actual'] ?? ''), tolerance: String(x['tolerance'] ?? ''), missing: x['missing'] === true })) : [],
       ranAt: iso(t['ran_at']), block: s(t['block_number']), error: s(t['error']), latencyMs: t['latency_ms'] == null ? null : Number(t['latency_ms']),
     })),
     lastProbe: lp ? { at: iso(lp['checked_at'])!, liveness: String(lp['liveness']), latencyMs: lp['latency_ms'] == null ? null : Number(lp['latency_ms']), failure: s(lp['failure_class']), detail: s(lp['detail']) } : null,
@@ -164,7 +166,7 @@ async function computeStorefront(agentId: string): Promise<Storefront | null> {
       stars: Math.round(Number(r['value']) / 10 ** Number(r['value_decimals'] ?? 0) / 20),
       client: String(r['client']), at: iso(r['block_time']), tx: String(r['tx_hash']),
       verified: r['verified'] === true && !team.has(String(r['client'])), team: team.has(String(r['client'])),
-      comment: s(r['comment']), jobId: r['verified'] === true ? s(r['job_id']) : null,
+      comment: s(r['comment']), jobId: r['verified'] === true ? s(r['job_id']) : null, quick: quickOf(r['canonical']),
     })),
     sample,
     disputeWindowSeconds: windowS,
@@ -176,4 +178,13 @@ export async function storefrontByToken(tokenId: string, chainId: 56 | 97 = 56):
   if (!/^\d{1,12}$/.test(tokenId)) return null
   const [r] = rowsOf(await db().execute(sql`select id from agent where chain_id = ${chainId} and token_id = ${tokenId} order by id limit 1`).catch(() => []))
   return r ? storefront(String(r['id'])) : null
+}
+
+/** Quick answers committed in the canonical feedback JSON (SPEC-WORKSPACE 2.3), when the buyer gave any. */
+function quickOf(canonical: unknown): StoreReview['quick'] {
+  if (typeof canonical !== 'string') return null
+  try {
+    const q = (JSON.parse(canonical) as { quick?: { answered?: string; onTime?: string; hireAgain?: string } }).quick
+    return q ? { answered: q.answered ?? '', onTime: q.onTime ?? '', hireAgain: q.hireAgain ?? '' } : null
+  } catch { return null }
 }

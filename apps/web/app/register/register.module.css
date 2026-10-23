@@ -454,15 +454,17 @@ a.introBack:hover { color: var(--fg); }
   grid-template-columns: 28px 44px minmax(0, 1fr) 208px 132px 100px auto;
   align-items: center;
   gap: var(--s4);
-  min-height: 84px;
-  padding: var(--s3);
+  min-height: 64px;
+  padding: 10px var(--s3);
   border-bottom: 1px solid var(--line);
   border-radius: var(--r-sm);
+  outline: none;
   transition: background-color var(--dur-fast) var(--ease);
 }
 .row[data-linked]:hover { background: color-mix(in srgb, var(--ground-raised) 78%, transparent); }
 .row[data-picked] { background: color-mix(in srgb, var(--brass-mark) 6%, transparent); }
 .row:focus-within { background: color-mix(in srgb, var(--ground-raised) 78%, transparent); }
+.row:focus-visible { box-shadow: inset 2px 0 0 var(--brass); background: color-mix(in srgb, var(--ground-raised) 78%, transparent); }
 
 /* `display: contents` keeps qualification / availability / price as real
    columns of the row grid on desktop, and lets them become one wrapped strip
@@ -529,8 +531,8 @@ a.introBack:hover { color: var(--fg); }
 .qual[data-tone='qualified'] .qualDot { background: var(--brass-mark); }
 .qual[data-tone='stale'] .qualLabel { color: var(--watch); }
 .qual[data-tone='stale'] .qualDot { background: var(--watch); }
-.qual[data-tone='failed'] .qualLabel { color: var(--breach); }
-.qual[data-tone='failed'] .qualDot { background: var(--breach); }
+.qual[data-tone='failed'] .qualLabel { color: var(--ink-2); }
+.qual[data-tone='failed'] .qualDot { background: var(--oxide); }
 .qual[data-tone='callable'] .qualLabel { color: var(--fg-soft); font-weight: 500; }
 .qual[data-tone='unavailable'] .qualLabel { color: var(--fg-faint); font-weight: 500; }
 
@@ -991,3 +993,13 @@ a.introBack:hover { color: var(--fg); }
 }
 @media (prefers-reduced-motion: reduce) { .laneOpt { transition: none; } }
 .laneBanner { margin: -4px 0 14px; font-size: 13px; color: var(--ink-2); padding-left: 10px; border-left: 2px dashed var(--ink-3); }
+
+/* Price per job (DESIGN-V4 4): a slider over live quotes, in the lane's token. */
+.priceSlide { display: grid; gap: 8px; max-width: 320px; }
+.priceSlide input[type='range'] { width: 100%; accent-color: var(--brass); height: 28px; margin: 0; cursor: pointer; }
+.priceSlide input[type='range']:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 4px; }
+.priceRead { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; font-size: 13.5px; color: var(--fg); }
+.priceRead b { font-weight: 500; }
+.sheetApply:disabled { opacity: 0.55; cursor: not-allowed; }
+.listKeys { margin: 6px 0 0; font-size: 12px; color: var(--fg-faint); }
+.listKeys kbd { font-family: var(--font-mono); font-size: 11px; padding: 1px 5px; border: 1px solid var(--hair-2); border-radius: 3px; }

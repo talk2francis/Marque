@@ -306,6 +306,7 @@ export function Marketplace({ category: fixedCategory, initial }: { category?: s
         fixedCategory={fixedCategory}
         resultsId={resultsId}
         facets={facets}
+        total={total}
       />
 
       {/* Result utility bar: what this set is, and how it was ranked. */}

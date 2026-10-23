@@ -50,6 +50,10 @@ export function JobActions(p: JobActionProps) {
   const [steps, setSteps] = useState<TxStep[] | null>(null)
   const [confirmDispute, setConfirmDispute] = useState(false)
   const [now, setNow] = useState<number | null>(null)
+  // Quick answers (SPEC-WORKSPACE 2.3): committed in the same signed rating, nothing extra to sign.
+  const [answered, setAnswered] = useState<'yes' | 'partly' | 'no' | null>(null)
+  const [onTime, setOnTime] = useState<'yes' | 'no' | null>(null)
+  const [again, setAgain] = useState<'yes' | 'no' | null>(null)
 
   useEffect(() => { setNow(Math.floor(Date.now() / 1000)); const t = setInterval(() => setNow(Math.floor(Date.now() / 1000)), 15_000); return () => clearInterval(t) }, [])
   // The page is the chain's view of the job: re-read it until nothing more can happen.
@@ -127,7 +131,7 @@ export function JobActions(p: JobActionProps) {
 
   const submitRating = async () => {
     if (!address || !stars) return
-    const tx = await rate({ chainId: p.chainId, jobId: p.jobId, wallet: address, stars, comment: comment.trim() || undefined })
+    const tx = await rate({ chainId: p.chainId, jobId: p.jobId, wallet: address, stars, comment: comment.trim() || undefined, quick: { answered, onTime, hireAgain: again } })
     if (tx) { toast({ tone: 'success', title: 'Rated on chain', body: `${stars} of 5 for ${p.agentName}, from your wallet.`, href: explorerTx(p.chainId, tx) }); router.refresh() }
   }
 
@@ -164,12 +168,19 @@ export function JobActions(p: JobActionProps) {
         <div className="ja-row">
           <Button variant="quiet" onClick={() => setConfirmDispute(true)} disabled={busy !== null}>Report a problem</Button>
         </div>
+      ) : isClient && p.state === 'SUBMITTED' && p.reviewEndsAt !== null && now !== null && now >= p.reviewEndsAt ? (
+        <p className="ja-note">The review window closed on {utcStamp(p.reviewEndsAt * 1000)}, so this delivery can no longer be disputed. It settles to {p.agentName} under BNB Chain&apos;s escrow policy. You can still rate it.</p>
       ) : null}
 
       {isClient && canRate ? (
         <div className="ja-rate">
           <span className="t-label">Rate {p.agentName}</span>
           <StarInput value={stars} onChange={setStars} legend={`Rate ${p.agentName}`} disabled={rateState.phase === 'preparing' || rateState.phase === 'signing'} />
+          <div className="ja-quick">
+            <Quick legend="Did it answer what you asked?" value={answered} onChange={setAnswered} options={['yes', 'partly', 'no']} />
+            <Quick legend="On time?" value={onTime} onChange={setOnTime} options={['yes', 'no']} />
+            <Quick legend="Would you hire it again?" value={again} onChange={setAgain} options={['yes', 'no']} />
+          </div>
           <textarea className="taskform-text ja-comment" rows={2} maxLength={280} placeholder="What was good or bad about it? (optional)" value={comment} onChange={(e) => setComment(e.target.value)} />
           <Button variant="primary" disabled={!stars || rateState.phase === 'preparing' || rateState.phase === 'signing'} loading={rateState.phase === 'preparing' || rateState.phase === 'signing'} onClick={submitRating}>
             {stars ? `Rate ${stars} of 5 on chain` : 'Choose a rating'}
@@ -190,5 +201,19 @@ export function JobActions(p: JobActionProps) {
         <p className="ja-note">This opens a dispute on BNB Chain&apos;s escrow. Independent voters decide; if they reject the delivery you are refunded, otherwise {p.agentName} is paid. Payment stays in escrow until then. It costs only the network fee.</p>
       </Modal>
     </div>
+  )
+}
+
+/** One quick question as a small segmented choice; tapping the chosen answer again clears it. */
+function Quick<T extends string>({ legend, value, onChange, options }: { legend: string; value: T | null; onChange: (v: T | null) => void; options: readonly T[] }) {
+  return (
+    <fieldset className="ja-q">
+      <legend>{legend}</legend>
+      <div className="ja-seg">
+        {options.map((o) => (
+          <button key={o} type="button" aria-pressed={value === o} data-on={value === o || undefined} onClick={() => onChange(value === o ? null : o)}>{o.charAt(0).toUpperCase() + o.slice(1)}</button>
+        ))}
+      </div>
+    </fieldset>
   )
 }

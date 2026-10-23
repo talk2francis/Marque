@@ -15,7 +15,7 @@ export interface RateState { phase: 'idle' | 'preparing' | 'signing' | 'done' | 
 export function useRate() {
   const config = useConfig()
   const [state, setState] = useState<RateState>({ phase: 'idle', tx: null, error: null })
-  const rate = useCallback(async (input: { chainId: number; jobId: string; wallet: string; stars: number; comment?: string }) => {
+  const rate = useCallback(async (input: { chainId: number; jobId: string; wallet: string; stars: number; comment?: string; quick?: { answered: 'yes' | 'partly' | 'no' | null; onTime: 'yes' | 'no' | null; hireAgain: 'yes' | 'no' | null } }) => {
     setState({ phase: 'preparing', tx: null, error: null })
     try {
       const res = await fetch('/api/v1/phase2/rate', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(input) })

@@ -57,13 +57,18 @@ export async function ratingTarget(chainId: ChainId, jobId: string): Promise<Rat
 }
 
 /** The canonical JSON a rating's feedbackHash commits to (SPEC-TRACKING 8). Key order is fixed. */
-export function canonicalFeedback(x: { chainId: number; jobId: string; agentId: string; client: string; stars: number; comment: string | null }): string {
-  return JSON.stringify({ chainId: x.chainId, jobId: x.jobId, agentId: x.agentId, client: x.client.toLowerCase(), stars: x.stars, comment: x.comment ?? '' })
+export interface QuickAnswers { answered: 'yes' | 'partly' | 'no' | null; onTime: 'yes' | 'no' | null; hireAgain: 'yes' | 'no' | null }
+
+export function canonicalFeedback(x: { chainId: number; jobId: string; agentId: string; client: string; stars: number; comment: string | null; quick?: QuickAnswers | null }): string {
+  const base = { chainId: x.chainId, jobId: x.jobId, agentId: x.agentId, client: x.client.toLowerCase(), stars: x.stars, comment: x.comment ?? '' }
+  // V4 quick answers (SPEC-WORKSPACE 2.3) join the same committed JSON; a rating without them hashes exactly as before.
+  const q = x.quick && (x.quick.answered || x.quick.onTime || x.quick.hireAgain) ? { answered: x.quick.answered ?? '', onTime: x.quick.onTime ?? '', hireAgain: x.quick.hireAgain ?? '' } : null
+  return JSON.stringify(q ? { ...base, quick: q } : base)
 }
 
 export interface PreparedRating { call: Call; feedbackHash: `0x${string}`; feedbackURI: string; canonical: string; agentId: string }
 
-export async function prepareRating(input: { chainId: ChainId; jobId: string; wallet: string; stars: number; comment?: string | null }): Promise<PreparedRating> {
+export async function prepareRating(input: { chainId: ChainId; jobId: string; wallet: string; stars: number; comment?: string | null; quick?: QuickAnswers | null }): Promise<PreparedRating> {
   const wallet = input.wallet.toLowerCase()
   if (!Number.isInteger(input.stars) || input.stars < 1 || input.stars > 5) throw new HireError('bad_stars', 'Choose between 1 and 5 stars.')
   const comment = input.comment?.trim() ? input.comment.trim().slice(0, 280) : null
@@ -79,7 +84,7 @@ export async function prepareRating(input: { chainId: ChainId; jobId: string; wa
   const operator = await c.readContract({ address: reg, abi: identityAbi, functionName: 'isApprovedForAll', args: [owner as `0x${string}`, wallet as `0x${string}`] }).catch(() => false)
   if (wallet === owner || wallet === approved || operator === true) throw new HireError('self_feedback', 'You cannot rate an agent you own or operate. Ratings must come from a buyer.', 403)
 
-  const canonical = canonicalFeedback({ chainId: input.chainId, jobId: input.jobId, agentId: t.agentTokenId, client: wallet, stars: input.stars, comment })
+  const canonical = canonicalFeedback({ chainId: input.chainId, jobId: input.jobId, agentId: t.agentTokenId, client: wallet, stars: input.stars, comment, quick: input.quick ?? null })
   const feedbackHash = keccak256(toBytes(canonical))
   const feedbackURI = `https://marque.trade/api/v1/phase2/job/${input.chainId}/${input.jobId}`
   await db().insert(ratingComment).values({

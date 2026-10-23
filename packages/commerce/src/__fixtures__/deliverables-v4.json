@@ -1,0 +1,494 @@
+{
+ "note": "Delivered answers recorded 23 Oct 2026 from public ERC-8183 jobs (deliverable files hash-matched on chain). Long arrays trimmed to 12 items.",
+ "answers": {
+  "Lattice": {
+   "job": "56:57035",
+   "category": "grid",
+   "content": {
+    "spacingType": "geometric",
+    "levels": [
+     {
+      "price": 100,
+      "allocationUsd": 10
+     },
+     {
+      "price": 103.72432989,
+      "allocationUsd": 10
+     },
+     {
+      "price": 107.58736612,
+      "allocationUsd": 10
+     },
+     {
+      "price": 111.59427455,
+      "allocationUsd": 10
+     },
+     {
+      "price": 115.75041348,
+      "allocationUsd": 10
+     },
+     {
+      "price": 120.06134073,
+      "allocationUsd": 10
+     },
+     {
+      "price": 124.53282113,
+      "allocationUsd": 10
+     },
+     {
+      "price": 129.17083421,
+      "allocationUsd": 10
+     },
+     {
+      "price": 133.9815822,
+      "allocationUsd": 10
+     },
+     {
+      "price": 138.97149831,
+      "allocationUsd": 10
+     },
+     {
+      "price": 144.14725537,
+      "allocationUsd": 10
+     },
+     {
+      "price": 149.51577469,
+      "allocationUsd": 10
+     }
+    ],
+    "feeDragPct": 25,
+    "levelCount": 50,
+    "allocationTotalUsd": 500,
+    "capitalUsd": 500,
+    "bandLow": 100,
+    "bandHigh": 600,
+    "narrowedToClearStop": false,
+    "narrowedNote": null,
+    "feeDragBasis": "50 levels \u00d7 25 bps \u00d7 2 legs",
+    "assumptions": [
+     "no trading fee stated; 25 bps per trade used (PancakeSwap's swap fee)"
+    ],
+    "blockNumber": "128797253",
+    "source": "arithmetic over the constraints supplied in the request; no position was read"
+   }
+  },
+  "Redcell": {
+   "job": "56:57034",
+   "category": "security",
+   "content": {
+    "address": "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
+    "symbol": "WBNB",
+    "isContract": true,
+    "codeSize": 3124,
+    "proxy": {
+     "isProxy": false,
+     "implementation": null,
+     "beacon": null,
+     "admin": null
+    },
+    "owner": null,
+    "paused": null,
+    "approval": null,
+    "findings": [],
+    "severityCounts": {
+     "critical": 0,
+     "high": 0,
+     "medium": 0,
+     "low": 0,
+     "info": 0
+    },
+    "verdict": "nothing found by this method",
+    "method": "deployed bytecode selector scan plus EIP-1967/1822 storage slots and view calls, read on-chain",
+    "limitations": [
+     "Selector presence is read from the deployed dispatcher. A function reachable only through a proxy, a fallback router or an unusual optimiser layout can be missed.",
+     "No source code is read, so logic bugs, reentrancy and accounting errors are entirely out of scope.",
+     "A clean result means nothing was found by this method. It never means the contract is safe."
+    ],
+    "blockNumber": "128797040",
+    "readAt": "2026-10-20T18:50:28.527Z"
+   }
+  },
+  "Bound": {
+   "job": "56:56984",
+   "category": "rebalancing",
+   "content": {
+    "currentTick": -57856,
+    "inRange": true,
+    "pctToNearestBound": 11.912473002244647,
+    "proposedTickLower": -59680,
+    "proposedTickUpper": -56040,
+    "distanceToBound": 11.912473002244647,
+    "amount0": 337.4031298751293,
+    "amount1": 1.0409839392524962,
+    "maxSlippageBps": 10,
+    "slippageBasis": "twice the pool's 5 bps fee; the request stated no bound",
+    "tokenId": "7637521",
+    "owner": "0xbFAA69233741924eD5b9d5DAA9B4Bf7B84567F0A",
+    "pool": "0xAfB2Da14056725E3BA3a30dD846B6BBbd7886c56",
+    "tickSpacing": 10,
+    "feeTier": 500,
+    "pair": "Cake/WBNB",
+    "rangeHalfWidthPct": 19.9603,
+    "assumptions": [
+     "no range width stated; the position keeps its current width, re-centred on spot"
+    ],
+    "blockNumber": "127398402",
+    "readAt": "2026-10-13T11:55:46.745Z",
+    "source": "PancakeSwap V3 NonfungiblePositionManager and pool slot0, read on-chain"
+   }
+  },
+  "Sluicegate": {
+   "job": "56:56982",
+   "category": "yield",
+   "content": {
+    "recommend": true,
+    "venue": "venus",
+    "netAprPct": 3.4278663362763844,
+    "aprSources": [
+     {
+      "value": 3.4322372701227843,
+      "source": "Venus vUSDT supplyRatePerBlock at block 127398218, compounded over 70080000 blocks/year",
+      "timestamp": "2026-10-13T11:54:23.634Z"
+     },
+     {
+      "value": 0,
+      "source": "token incentives; zero until an incentive source is wired in, and reported as zero rather than omitted",
+      "timestamp": "2026-10-13T11:54:23.634Z"
+     }
+    ],
+    "switchingCost": {
+     "gasUsd": 0.0437,
+     "swapUsd": 0,
+     "exitUsd": 0
+    },
+    "usesLeverage": false,
+    "improvementBps": 342.79,
+    "thresholdBps": 0,
+    "declineReason": null,
+    "breakEvenUsd": 1.2734940805079116,
+    "grossAprPct": 3.4322372701227843,
+    "sizeUsd": 1000,
+    "alternatives": [],
+    "excluded": [
+     {
+      "symbol": "BUSD",
+      "reason": "zero_rate",
+      "detail": "market pays no supply rate"
+     },
+     {
+      "symbol": "SXP",
+      "reason": "zero_rate",
+      "detail": "market pays no supply rate"
+     },
+     {
+      "symbol": "XVS",
+      "reason": "zero_rate",
+      "detail": "market pays no supply rate"
+     },
+     {
+      "symbol": "DOT",
+      "reason": "zero_rate",
+      "detail": "market pays no supply rate"
+     },
+     {
+      "symbol": "FIL",
+      "reason": "zero_rate",
+      "detail": "market pays no supply rate"
+     },
+     {
+      "symbol": "BETH",
+      "reason": "zero_rate",
+      "detail": "market pays no supply rate"
+     },
+     {
+      "symbol": "CAN",
+      "reason": "no_liquidity",
+      "detail": "$0.00 available, below the $25,000 floor"
+     },
+     {
+      "symbol": "MATIC",
+      "reason": "zero_rate",
+      "detail": "market pays no supply rate"
+     },
+     {
+      "symbol": "TUSD",
+      "reason": "zero_rate",
+      "detail": "market pays no supply rate"
+     },
+     {
+      "symbol": "TRX",
+      "reason": "zero_rate",
+      "detail": "market pays no supply rate"
+     },
+     {
+      "symbol": "UST",
+      "reason": "implausible_rate",
+      "detail": "reported 1.053e+14% APR, above the 200% credibility ceiling"
+     },
+     {
+      "symbol": "LUNA",
+      "reason": "zero_rate",
+      "detail": "market pays no supply rate"
+     }
+    ],
+    "blockNumber": "127398218",
+    "readAt": "2026-10-13T11:54:23.634Z",
+    "source": "Venus Comptroller and vToken rate reads, on-chain",
+    "assumptions": [
+     "no protocols named; Venus, the venue this agent reads, is used",
+     "no current APR stated; the money is treated as idle, earning 0%",
+     "no threshold stated; any move that beats the current rate after costs is recommended"
+    ]
+   }
+  },
+  "Brain on BNB \u2014 Venus Health Factor Monitor": {
+   "job": "56:57030",
+   "category": "health_factor",
+   "content": {
+    "job_id": "57030",
+    "service": "health_factor",
+    "provider": "0x73809F69916FcF7Ddc5BB1315fBdf96A569a5963",
+    "client": "0x0d8c9ad8eebb6879fefa218f0799219bcaabe999",
+    "produced_at": "2026-10-20T09:09:10.886Z",
+    "health_factor": null,
+    "result": {
+     "service": "health_factor",
+     "position": {
+      "account": "0x0d8c9Ad8eebB6879fefA218f0799219BcAAbE999",
+      "protocol": "Venus",
+      "chain": "eip155:56",
+      "has_position": false,
+      "note": "This address has entered no Venus markets. Nothing to monitor \u2014 which is an answer, not a failure.",
+      "measured_at": "2026-10-20T09:09:10.886Z"
+     }
+    },
+    "method": "Every figure here is read from the chain at the time above. Nothing is cached and nothing is self-reported.",
+    "verify": "The bytes32 on this job is the SHA-256 of exactly this document as served."
+   }
+  },
+  "Mandate Grid-1": {
+   "job": "97:1645",
+   "category": "grid",
+   "content": {
+    "job": {
+     "kernel": "0xa206c0517B6371C6638CD9e4a42Cc9f02A33B0DE",
+     "chainId": 97,
+     "id": "1645",
+     "client": "0x3e8f9346cb2c142d7184e8d08a20934b1d477067",
+     "budget": "10000000000000000"
+    },
+    "agent": {
+     "name": "Grid-1",
+     "erc8004": "2589",
+     "network": "bsc-testnet",
+     "mainnetErc8004": "344121",
+     "provider": "0xbebf6b026e1ffc06a3c8d3c1b57b8142bf027454"
+    },
+    "subject": "0x3e8F9346CB2c142D7184e8D08A20934b1D477067",
+    "answer": {
+     "block": 129371421,
+     "priceUsdtPerBnb": 744.320622246513,
+     "signal": "sell 0.0002 WBNB: price $744.32 has crossed up into level 4",
+     "policy": {
+      "anchorUsd": 711.1034173901272,
+      "stepBps": 25,
+      "levels": 4,
+      "clipWbnb": "0.0002",
+      "stateUpdatedAt": "2026-09-11T05:21:14.749Z"
+     },
+     "window": {
+      "fills": 5,
+      "roundTrips": 1,
+      "winRate": 0,
+      "pnlUsd": -0.07395672696171458,
+      "maxDrawdownUsd": 0.07395672696171458,
+      "gasUsd": 0.055511864348135334,
+      "start": "2026-09-11T03:41:35.000Z",
+      "end": "2026-09-11T04:36:39.000Z",
+      "source": "SwapBound 0x1cf9C5E9339E99e3Bfd45f117ca17E6e1A4E59D1 Swapped events, blocks 121188454 to 129370207",
+      "readAt": "2026-10-23T18:30:43.893Z",
+      "verify": "cast logs --address 0x1cf9C5E9339E99e3Bfd45f117ca17E6e1A4E59D1 \"Swapped(address indexed,address indexed,uint256,uint256)\" --from-block 121188454 --rpc-url https://bsc.rpc.blxrbdn.com"
+     },
+     "fills": [
+      {
+       "at": "2026-09-11T03:41:35.000Z",
+       "side": "sell",
+       "usdt": 0.1423441842228874,
+       "wbnb": 0.0002,
+       "price": 711.7209211144369,
+       "tx": "0x0e2af2aeb5c5387bc67971a07c333b4fd83632fe6b877cf3cbb879f40cc1b11b"
+      },
+      {
+       "at": "2026-09-11T03:48:50.000Z",
+       "side": "buy",
+       "usdt": 0.14237395700803293,
+       "wbnb": 0.00019989999965821,
+       "price": 712.2258992069266,
+       "tx": "0xcbbd9767d86b1158060bc0d760f2a448aed633bea884edf5963a315b3be67d9b"
+      },
+      {
+       "at": "2026-09-11T03:59:20.000Z",
+       "side": "sell",
+       "usdt": 0.14233270721560512,
+       "wbnb": 0.0002,
+       "price": 711.6635360780256,
+       "tx": "0xc3a17bf776ad0b3f544fe2dd119b12b37e5ba3fd187ff5da5ee611441a1e5d57"
+      },
+      {
+       "at": "2026-09-11T04:23:14.000Z",
+       "side": "sell",
+       "usdt": 0.1427592870287542,
+       "wbnb": 0.0002,
+       "price": 713.796435143771,
+       "tx": "0x2da9ccadac5d90678b4a723a7ef95487c563e43e6ef4032e5d32a5d0a288340d"
+      },
+      {
+       "at": "2026-09-11T04:36:39.000Z",
+       "side": "sell",
+       "usdt": 0.143138343712958,
+       "wbnb": 0.0002,
+       "price": 715.69171856479,
+       "tx": "0x01856d5492d12a63fb256c95aa9b71397dbbf3db711a787855335fdb2297f493"
+      }
+     ],
+     "executed": "Nothing was executed for this payment. Our agents act only through a session the owner of the funds granted; a payment buys the answer, not authority."
+    },
+    "deliveredAt": "2026-10-23T18:39:50.287Z"
+   }
+  },
+  "Mandate Range-1": {
+   "job": "97:1644",
+   "category": "rebalancing",
+   "content": {
+    "job": {
+     "kernel": "0xa206c0517B6371C6638CD9e4a42Cc9f02A33B0DE",
+     "chainId": 97,
+     "id": "1644",
+     "client": "0x3e8f9346cb2c142d7184e8d08a20934b1d477067",
+     "budget": "10000000000000000"
+    },
+    "agent": {
+     "name": "Range-1",
+     "erc8004": "2588",
+     "network": "bsc-testnet",
+     "mainnetErc8004": "344119",
+     "provider": "0x004c7ae8077560c75fe5687da39e7be0697ddbfd"
+    },
+    "subject": "0x2e010AaDFdFEbC2AdFCAFA5F83e9687ffA47C573",
+    "answer": {
+     "wallet": "0x2e010AaDFdFEbC2AdFCAFA5F83e9687ffA47C573",
+     "found": 5,
+     "outOfRange": 0,
+     "positions": [
+      {
+       "position": "7367162",
+       "pair": "USDT/WBNB 0.01%",
+       "range": [
+        -66092,
+        -66062
+       ],
+       "tick": -66127,
+       "inRange": false,
+       "ticksOut": 35,
+       "closed": true,
+       "plan": {
+        "lower": -66280,
+        "upper": -66070,
+        "tick": -66127,
+        "note": "150 ticks below the price to 50 above, so most of the re-mint is the token the stale range already holds"
+       }
+      },
+      {
+       "position": "7367450",
+       "pair": "USDT/WBNB 0.01%",
+       "range": [
+        -66085,
+        -66073
+       ],
+       "tick": -66127,
+       "inRange": false,
+       "ticksOut": 42,
+       "closed": true,
+       "plan": {
+        "lower": -66280,
+        "upper": -66070,
+        "tick": -66127,
+        "note": "150 ticks below the price to 50 above, so most of the re-mint is the token the stale range already holds"
+       }
+      },
+      {
+       "position": "7367515",
+       "pair": "USDT/WBNB 0.01%",
+       "range": [
+        -66081,
+        -66077
+       ],
+       "tick": -66127,
+       "inRange": false,
+       "ticksOut": 46,
+       "closed": true,
+       "plan": {
+        "lower": -66280,
+        "upper": -66070,
+        "tick": -66127,
+        "note": "150 ticks below the price to 50 above, so most of the re-mint is the token the stale range already holds"
+       }
+      },
+      {
+       "position": "7367547",
+       "pair": "USDT/WBNB 0.01%",
+       "range": [
+        -66078,
+        -66076
+       ],
+       "tick": -66127,
+       "inRange": false,
+       "ticksOut": 49,
+       "closed": true,
+       "plan": {
+        "lower": -66280,
+        "upper": -66070,
+        "tick": -66127,
+        "note": "150 ticks below the price to 50 above, so most of the re-mint is the token the stale range already holds"
+       }
+      },
+      {
+       "position": "7367728",
+       "pair": "USDT/WBNB 0.01%",
+       "range": [
+        -66135,
+        -66045
+       ],
+       "tick": -66127,
+       "inRange": true,
+       "ticksOut": 0,
+       "closed": false,
+       "plan": null
+      }
+     ],
+     "detail": null,
+     "convention": "half open: at the upper tick a position is out",
+     "howRange1Acts": "Through RecipientBound (0x5863edaede7394470db19395ca05b1439662952e): withdraw, collect and re-mint with the principal written as the recipient on chain. Its own record: /desk#range-1.",
+     "executed": "Nothing was executed for this payment. Our agents act only through a session the owner of the funds granted; a payment buys the answer, not authority."
+    },
+    "deliveredAt": "2026-10-23T18:37:56.412Z"
+   }
+  },
+  "Keel": {
+   "job": "97:1639",
+   "category": "health_factor",
+   "content": {
+    "healthFactor": 1.088,
+    "primaryCollateralSymbol": "BTCB",
+    "primaryCollateralFactor": 0.8,
+    "primaryLiquidationPriceUsd": 74980.92039692665,
+    "repayUsdToReachTarget": 6775.555445869571,
+    "targetHealthFactor": 2.5,
+    "assumptions": [],
+    "blockNumber": "129357711",
+    "readAt": "2026-10-23T16:57:00.293Z",
+    "source": "Venus Comptroller, read on-chain"
+   }
+  }
+ }
+}

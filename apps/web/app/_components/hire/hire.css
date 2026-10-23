@@ -70,6 +70,13 @@
   .ja-note { margin: 0; color: var(--ink-2); font-size: 14px; line-height: 1.55; }
   .ja-rate { display: grid; gap: 12px; justify-items: start; max-width: 560px; padding: 18px; border: 1px solid var(--hair-2); border-radius: var(--r-3); background: color-mix(in srgb, var(--panel) 60%, transparent); }
   .ja-comment { min-height: 64px; }
+  .ja-quick { display: grid; gap: 10px; justify-self: stretch; }
+  .ja-q { margin: 0; padding: 0; border: 0; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 12px; }
+  .ja-q legend { float: left; padding: 0; font-size: 13.5px; color: var(--ink-2); }
+  .ja-seg { display: inline-flex; padding: 2px; border-radius: 999px; border: 1px solid var(--hair-2); gap: 2px; }
+  .ja-seg button { border: 0; background: none; padding: 5px 13px; border-radius: 999px; font: inherit; font-size: 13px; color: var(--ink-2); cursor: pointer; min-height: 32px; }
+  .ja-seg button[data-on] { background: var(--ink); color: var(--ink-inverse); }
+  .ja-seg button:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
   .ja-fine { margin: 0; font-size: 12.5px; color: var(--ink-3); line-height: 1.5; }
 
   /* Try free: the agent's own answer, before any price or signature. */

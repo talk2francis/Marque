@@ -12,6 +12,7 @@ const Body = z.object({
   wallet: z.string().regex(/^0x[0-9a-fA-F]{40}$/),
   stars: z.number().int().min(1).max(5),
   comment: z.string().max(280).optional(),
+  quick: z.object({ answered: z.enum(['yes', 'partly', 'no']).nullable(), onTime: z.enum(['yes', 'no']).nullable(), hireAgain: z.enum(['yes', 'no']).nullable() }).optional(),
 })
 
 /**

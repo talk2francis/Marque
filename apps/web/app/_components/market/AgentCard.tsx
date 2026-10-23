@@ -3,6 +3,7 @@ import { Check } from 'lucide-react'
 import { useAgentTerms } from '../terms/useTerms'
 import { TermsLine } from '../terms/TermsLine'
 import { AgentAvatar } from '../AgentAvatar'
+import { SaveStar } from '../SaveStar'
 import { Badge } from '../ui'
 import { avatarSource } from '../../../lib/avatar-source'
 import { utcDay } from '../../../lib/time'
@@ -80,6 +81,7 @@ export function AgentCard({ a, compare, base = '', variant = 'default' }: {
           </span>
         </div>
         {a.isReference ? <a href="/register#reference-agents" className={styles.ref} title="Why Marque runs its own agents"><Badge kind="reference" /></a> : null}
+        <SaveStar agentId={a.agentId} name={a.name} chainId={practice ? 97 : 56} tokenId={a.tokenId} />
       </header>
 
       {blurb ? <p className={styles.blurb}>{blurb}</p> : <p className={styles.blurbNone}>No description published.</p>}

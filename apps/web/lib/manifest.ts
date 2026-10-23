@@ -21,8 +21,21 @@ export interface Manifest {
 }
 
 export async function readManifest(url: string, onchainHash: string | null): Promise<Manifest | null> {
+  const m = await readOne(url, onchainHash)
+  // Practice jobs from before a reference agent had its own testnet seller were answered by its
+  // mainnet process, so the file lives without /testnet. Accepted only when it matches the chain hash.
+  if (m === MISSING && onchainHash && /^https:\/\/marque\.trade\/agents\/[a-z0-9-]+\/testnet\//.test(url)) {
+    const alt = await readOne(url.replace('/testnet/', '/'), onchainHash)
+    return alt !== MISSING && alt?.matches ? alt : null
+  }
+  return m === MISSING ? null : m
+}
+
+const MISSING = Symbol('missing')
+async function readOne(url: string, onchainHash: string | null): Promise<Manifest | null | typeof MISSING> {
   try {
     const r = await safeFetch(url, { timeoutMs: 8_000, maxBytes: 512 * 1024 })
+    if (r.ok && r.status === 404) return MISSING
     if (r.ok && r.status === 409) {
       const disclosure = JSON.parse(r.body) as Record<string, unknown>
       if (disclosure['schema'] !== 'marque.withheld-error-deliverable.v1' || disclosure['originalPreserved'] !== true

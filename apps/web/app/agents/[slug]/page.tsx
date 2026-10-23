@@ -1,6 +1,5 @@
 import { notFound, permanentRedirect } from 'next/navigation'
-import { SiteHeader, SiteFooter } from '../../_components/SiteHeader'
-import { Storefront } from '../_storefront/Storefront'
+import { AgentSection } from '../_storefront/render'
 import { referenceAgent } from '../../../lib/reference-agents'
 import { storefrontByToken } from '../../../lib/storefront'
 
@@ -31,11 +30,5 @@ export default async function ReferenceStorefront({ params }: { params: Promise<
   if (!ref) notFound()
   const d = await storefrontByToken(String(ref.erc8004.tokenId))
   if (!d) notFound()
-  return (
-    <>
-      <SiteHeader active="register" />
-      <main><Storefront d={d} /></main>
-      <SiteFooter />
-    </>
-  )
+  return <AgentSection d={d} section="overview" />
 }

@@ -1,9 +1,9 @@
-import { marketplaceAgents } from '../../lib/marketplace'
+import { marketplaceAgents, type MarketFacets } from '../../lib/marketplace'
 import { DEFAULT_STATE, apiQuery } from './market-url'
 import type { MarketRow } from './market-model'
 
 /** The first page of the default view, rendered on the server so cards are in the first paint. */
-export interface MarketFacetCounts { network: { 56: number; 97: number }; token: Record<string, number> }
+export type MarketFacetCounts = MarketFacets
 export interface InitialMarket { key: string; agents: MarketRow[]; total: number | null; hasMore: boolean; generatedAt: string | null; facets: MarketFacetCounts | null }
 
 export async function initialMarket(category?: string): Promise<InitialMarket | null> {

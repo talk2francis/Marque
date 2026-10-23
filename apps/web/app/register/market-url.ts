@@ -34,6 +34,8 @@ export interface MarketState {
   firstParty: boolean
   liveNow: boolean
   warranted: boolean
+  /** Any Marque test result, pass or fail. With `warranted`, the Proof facet: Any, Tested, Warranted. */
+  tested: boolean
   thirdParty: boolean
   hasPrice: boolean
   iface: string | null
@@ -54,6 +56,7 @@ export const DEFAULT_STATE: MarketState = {
   firstParty: false,
   liveNow: false,
   warranted: false,
+  tested: false,
   thirdParty: false,
   hasPrice: false,
   iface: null,
@@ -87,6 +90,7 @@ export function apiQuery(s: MarketState): string {
   if (s.sort !== 'best') p.set('sort', s.sort)
   if (s.liveNow) p.set('live', '1')
   if (s.warranted) p.set('warranted', '1')
+  if (s.tested && !s.warranted) p.set('tested', '1')
   if (s.thirdParty) p.set('thirdParty', '1')
   if (s.hasPrice) p.set('hasPrice', '1')
   if (s.iface) p.set('iface', s.iface)
@@ -109,6 +113,7 @@ export function stateToParams(s: MarketState, opts: { fixedCategory?: boolean } 
   if (s.sort !== DEFAULT_STATE.sort) p.set('sort', s.sort)
   if (s.liveNow) p.set('live', '1')
   if (s.warranted) p.set('warranted', '1')
+  if (s.tested && !s.warranted) p.set('tested', '1')
   if (s.thirdParty) p.set('thirdParty', '1')
   if (s.hasPrice) p.set('hasPrice', '1')
   if (s.iface) p.set('iface', s.iface)
@@ -159,6 +164,7 @@ export function paramsToState(
     sort: rawSort && SORT_VALUES.includes(rawSort) ? rawSort : DEFAULT_STATE.sort,
     liveNow: isOn(p.get('live')),
     warranted: isOn(p.get('warranted')),
+    tested: isOn(p.get('tested')) && !isOn(p.get('warranted')),
     thirdParty: isOn(p.get('thirdParty')),
     hasPrice: isOn(p.get('hasPrice')),
     iface: rawIface && IFACE_VALUES.includes(rawIface) ? rawIface : null,
@@ -180,13 +186,14 @@ export interface ActiveFilter {
 export function activeFilters(s: MarketState, ifaceLabel: (v: string) => string): ActiveFilter[] {
   const out: ActiveFilter[] = []
   if (s.liveNow) out.push({ key: 'liveNow', label: 'Live now', clear: { liveNow: false } })
-  if (s.warranted) out.push({ key: 'warranted', label: 'Qualified', clear: { warranted: false } })
+  if (s.warranted) out.push({ key: 'warranted', label: 'Warranted', clear: { warranted: false } })
+  if (s.tested && !s.warranted) out.push({ key: 'tested', label: 'Tested', clear: { tested: false } })
   if (s.thirdParty) out.push({ key: 'thirdParty', label: 'Third-party only', clear: { thirdParty: false } })
   if (s.hasPrice) out.push({ key: 'hasPrice', label: 'Price listed', clear: { hasPrice: false } })
   if (s.iface) out.push({ key: 'iface', label: ifaceLabel(s.iface), clear: { iface: null } })
   if (s.firstParty) out.push({ key: 'firstParty', label: 'Marque reference only', clear: { firstParty: false } })
   if (s.token) out.push({ key: 'token', label: `Paid in ${s.token}`, clear: { token: null } })
-  if (s.maxPrice !== null) out.push({ key: 'maxPrice', label: `Up to ${s.maxPrice}`, clear: { maxPrice: null } })
+  if (s.maxPrice !== null) out.push({ key: 'maxPrice', label: `Under ${s.maxPrice}${s.token ? ` ${s.token}` : ''}`, clear: { maxPrice: null } })
   if (s.minRating !== null) out.push({ key: 'minRating', label: `${s.minRating}+ stars`, clear: { minRating: null } })
   return out
 }
@@ -198,6 +205,7 @@ export const CLEARED_FILTERS: Partial<MarketState> = {
   firstParty: false,
   liveNow: false,
   warranted: false,
+  tested: false,
   thirdParty: false,
   hasPrice: false,
   iface: null,
