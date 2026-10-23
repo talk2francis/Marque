@@ -203,6 +203,7 @@ No API key is needed for public reads. Check response freshness and expiry; erro
 | OpenAPI and schemas | `/api/v1/openapi.json`, `/api/v1/schemas/catalog.v1.json` |
 | Complete category listing counts | `/api/v1/phase2/coverage?chainId=56` |
 | Contracts and campaign configuration | `/api/v1/phase2/config` |
+| Set and Earn progress for any wallet, every marketplace, both networks (CORS open, 60 s cache) | `/api/v1/quest/{address}?chains=56,97` |
 | Wallet's local quest observations | `/api/v1/phase2/wallet/{address}` |
 | Owner listing diagnostics | `/api/v1/phase2/owner/{address}` |
 | Job event timeline | `/api/v1/phase2/job/{chainId}/{jobId}` |

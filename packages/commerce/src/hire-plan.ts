@@ -2,7 +2,7 @@ import { z } from 'zod'
 import { encodeFunctionData, getAddress, zeroAddress, keccak256, toBytes } from 'viem'
 import { network, assetAt, formatAmount } from './config.js'
 import { createJobCall } from './calls.js'
-import { descriptionHash, sanitizeForClaim, canonicalJson, MAX_DESCRIPTION_BYTES } from './description.js'
+import { descriptionHash, sanitizeForClaim, canonicalJson, MAX_DESCRIPTION_BYTES, withAttribution } from './description.js'
 
 const address = z.string().regex(/^0x[\da-fA-F]{40}$/).refine(s => s.toLowerCase() !== zeroAddress)
 const digest = z.string().regex(/^0x[\da-fA-F]{64}$/)
@@ -69,7 +69,8 @@ export function buildHirePlan(input: unknown, nowMs = Date.now()) {
     const description = z.object({ version: z.literal(1), task: z.string(), price: raw, currency: address, chain_id: chain, verifying_contract: address, provider: address.optional(), marque_intent: z.string().optional(), client_ref: z.string().optional(), provider_sig: z.string().regex(/^0x[\da-fA-F]+$/).optional(), negotiation_hash: digest.optional(), negotiated_at: z.number().int().positive().safe().optional(), quote_expires_at: z.number().int().positive().safe().optional() }).passthrough().safeParse(JSON.parse(i.description))
     if (!description.success) return fail('invalid_task_description')
     const d = description.data
-    if (d.task !== sanitizeForClaim(e.task)) return fail('wrong_selected_task')
+    // Since V4 the task carries the attribution suffix (invariant 36); earlier intents do not.
+    if (d.task !== sanitizeForClaim(withAttribution(e.task)) && d.task !== sanitizeForClaim(e.task)) return fail('wrong_selected_task')
     if (d.price !== q.price || !same(d.currency, asset.address) || d.chain_id !== q.chainId || !same(d.verifying_contract, n.commerce)) return fail('description_money_or_domain_mismatch')
     if (q.signed && (!d.provider_sig || !d.negotiation_hash || !d.negotiated_at || d.quote_expires_at !== q.expiresAt || d.quote_expires_at - d.negotiated_at > 900 || d.quote_expires_at <= d.negotiated_at)) return fail('signed_description_evidence_mismatch')
     if (q.signed) {

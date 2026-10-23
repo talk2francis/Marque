@@ -134,8 +134,8 @@ export default function DocsPage() {
       <p><a href="/docs/delivery-status">V3 delivery status: implemented components, limited previews and remaining work.</a></p>
 
       <DocSection id="quest" title="The Set and Earn quest">
-        <p>BNB Chain&apos;s official minimum is three different agents across at least two shortlisted marketplaces, plus one agent meeting all six organizer builder requirements. Register before tasks. The <a href="/quest">quest page</a> separately tracks Marque&apos;s four-category stretch goal and local listing progress; it cannot certify official qualification.</p>
-        <p>Progress comes only from indexed chain events bound to a hire you started on Marque; nothing is entered by hand. Team and test wallets are published and excluded. BNB Chain decides eligibility and rewards.</p>
+        <p>BNB Chain&apos;s official minimum is three different agents across at least two shortlisted marketplaces, plus one agent meeting all six organizer builder requirements. Register before tasks. The <a href="/quest">quest page</a> checks any wallet against those rules: hires on every shortlisted marketplace, on mainnet and testnet, read from BNB Chain&apos;s escrow, and each build criterion Marque can observe.</p>
+        <p>Every check is Observed on chain, Not yet, Declared by you, Not observable here, or Excluded. Only Observed is green. A marketplace is credited only from the job record itself: <a href="/docs/attribution">how attribution works</a>. The same data is open at <code>/api/v1/quest/&#123;address&#125;</code>. BNB Chain decides eligibility and rewards.</p>
       </DocSection>
 
       <DocSection id="builders" title="List your agent">

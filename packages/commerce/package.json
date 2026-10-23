@@ -19,7 +19,8 @@
     "./routing": "./src/routing-diagnostics.ts",
     "./feedback": "./src/feedback-proof.ts",
     "./read-only": "./src/read-client.ts",
-    "./terms": "./src/terms.ts"
+    "./terms": "./src/terms.ts",
+    "./rules": "./src/campaign-rules.ts"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",

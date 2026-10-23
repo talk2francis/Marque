@@ -257,6 +257,23 @@ module.exports = {
       error_file: '/root/.pm2/logs/marque-quotes-err.log',
     },
     {
+      // V4-03: every ERC-8183 job in the Set and Earn window on 56 and 97 (derived), plus
+      // @MarqueTradeBot reminders for chats that asked. Never signs or sends a transaction.
+      name: 'marque-campaign',
+      cwd: `${ROOT}/apps/worker`,
+      script: 'src/campaign.ts',
+      interpreter: 'node',
+      node_args: '--import tsx',
+      env: { ...env, NODE_ENV: 'production' },
+      autorestart: true,
+      max_restarts: 50,
+      restart_delay: 5000,
+      max_memory_restart: '300M',
+      time: true,
+      out_file: '/root/.pm2/logs/marque-campaign-out.log',
+      error_file: '/root/.pm2/logs/marque-campaign-err.log',
+    },
+    {
       // Re-runs every MCS test on a 24h cycle so a Warrant has a date and can
       // go stale (P10.5C item 4). Depends on the reference agents being up.
       name: 'marque-conform',

@@ -59,7 +59,7 @@ describe('plain quote description', () => {
   it('names the task, price, token, provider, chain, contract and Marque intent, canonically', () => {
     const d = buildPlainDescription({ accepted: true, provider: '0x73809f69916fcf7ddc5bb1315fbdf96a569a5963', price: '100', payment_token: '0xce24439f2d9c6a2289f741120fe202248b666666', chain_id: 56, verifying_contract: '0xea4daa3100a767e86fded867729ae7446476eba6', service: 'yield_plan' }, 'Rank [Venus]', 'intent-1')
     const j = JSON.parse(d)
-    expect(j).toMatchObject({ version: 1, task: 'Rank (Venus)', price: '100', chain_id: 56, marque_intent: 'intent-1', client_ref: 'marque.trade', provider: '0x73809F69916FcF7Ddc5BB1315fBdf96A569a5963' })
+    expect(j).toMatchObject({ version: 1, task: 'Rank (Venus) (via marque.trade)', price: '100', chain_id: 56, marque_intent: 'intent-1', client_ref: 'marque.trade', provider: '0x73809F69916FcF7Ddc5BB1315fBdf96A569a5963' })
     expect(Object.keys(j)).toEqual([...Object.keys(j)].sort())
     expect(descriptionHash(d)).toMatch(/^0x[0-9a-f]{64}$/)
   })

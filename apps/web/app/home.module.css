@@ -134,7 +134,10 @@
 
 /* The record: light numerals, one hairline grid. */
 .kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 0; border-top: 1px solid var(--hair); }
-.kpis > div { display: flex; flex-direction: column; gap: 10px; padding: 22px 22px 4px 0; }
+/* Label, number and note share rows across the four columns (subgrid), so a label that wraps
+   never pushes its number below the others. */
+.kpis > div { display: grid; grid-row: span 3; grid-template-rows: subgrid; row-gap: 10px; align-content: start; padding: 22px 22px 4px 0; }
+.kpis dt { align-self: end; }
 .kpis > div + div { padding-left: 22px; border-left: 1px solid var(--hair); }
 .kpis dt { font-size: var(--fs-label); font-weight: 500; letter-spacing: var(--tracking-eyebrow); text-transform: uppercase; color: var(--ink-3); }
 .kpiNum { margin: 0; font-size: clamp(38px, 4.2vw, 56px); font-weight: 300; line-height: 1; letter-spacing: -0.02em; color: var(--ink); font-variant-numeric: tabular-nums; }

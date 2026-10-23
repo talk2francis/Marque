@@ -49,6 +49,7 @@ export function TaskForm({ category, agentName, onChange, disabled, taskExample 
           {own ? 'Use the form instead' : 'Write the task yourself'}
         </button>
       ) : null}
+      <p className="fld-help">Marque adds &ldquo;(via marque.trade)&rdquo; to the end of a written task, so the job record names the marketplace. <a href="/docs/attribution">Why</a></p>
     </div>
   )
 }

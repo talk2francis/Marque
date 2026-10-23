@@ -7,7 +7,7 @@ import { agenticCommerceAbi } from './generated.js'
 import { network, isSupportedChain, formatAmount, type ChainId } from './config.js'
 import { chainClient, disputeWindowSeconds, fromAny, receiptFromAny, sellerIdentity } from './chain.js'
 import { priceLabel as priceLabelOf } from './terms.js'
-import { buildJobDescription, buildPlainDescription, descriptionHash } from './description.js'
+import { buildJobDescription, buildPlainDescription, descriptionHash, withAttribution } from './description.js'
 import { computeExpiredAt, createJobCall } from './calls.js'
 import { requestQuote, verifySimpleQuote, verifyNegotiation, type NegotiateTask, type QuoteResult, NegotiationSchema, SimpleQuoteSchema } from './quote.js'
 import { sellerCandidates, recordQuote, type SellerCandidate } from './supply.js'
@@ -68,6 +68,8 @@ export interface PublicQuote {
 export async function quoteForBuyer(agentId: string, serviceId: number | null, task: NegotiateTask, quoteAccessVersion?: 2): Promise<PublicQuote> {
   const seller = await sellerFor(agentId, serviceId)
   const identity = await currentIdentity(seller)
+  // The job record names the marketplace (invariant 36): the suffix reaches the seller and the chain unchanged.
+  task = { ...task, task_description: withAttribution(task.task_description) }
   const q: QuoteResult = await requestQuote(seller.endpoint, task, { ...identity, timeoutMs: 10_000 })
   // A plain quote does not echo the task, so the task we asked is kept with it for the job description.
   const quoteAccessToken = quoteAccessVersion === 2 ? randomBytes(32).toString('hex') : undefined

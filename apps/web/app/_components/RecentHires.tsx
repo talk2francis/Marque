@@ -37,10 +37,32 @@ export function RecentHires({ hires }: { hires: RecentHire[] }) {
     media.addEventListener('change', sync)
     return () => media.removeEventListener('change', sync)
   }, [])
+  // Runs only while the band is on screen and the tab is visible; coming back into view starts
+  // a fresh interval instead of jumping at once.
+  const band = useRef<HTMLElement>(null)
+  const [inView, setInView] = useState(false)
   useEffect(() => {
     const sync = () => setVisible(!document.hidden)
     document.addEventListener('visibilitychange', sync)
-    return () => document.removeEventListener('visibilitychange', sync)
+    const el = band.current
+    const io = el && 'IntersectionObserver' in window ? new IntersectionObserver(([e]) => setInView(Boolean(e?.isIntersecting && e.intersectionRatio >= 0.35)), { threshold: [0, 0.35, 0.6] }) : null
+    if (io && el) io.observe(el); else setInView(true)
+    return () => { document.removeEventListener('visibilitychange', sync); io?.disconnect() }
+  }, [])
+  // Hover pauses only while the pointer really moves over the band, and resumes 6 s after it
+  // stops. Scrolling past under a still pointer (Chrome sends zero-movement mouse events after a
+  // scroll) never freezes it; keyboard focus inside pauses until focus leaves.
+  const holdTimer = useRef<number | null>(null)
+  const [focusHold, setFocusHold] = useState(false)
+  const hold = useCallback(() => {
+    setPaused(true)
+    if (holdTimer.current !== null) window.clearTimeout(holdTimer.current)
+    holdTimer.current = window.setTimeout(() => { setPaused(false); holdTimer.current = null }, 6_000)
+  }, [])
+  const release = useCallback(() => {
+    if (holdTimer.current !== null) window.clearTimeout(holdTimer.current)
+    holdTimer.current = null
+    setPaused(false)
   }, [])
   const choose = useCallback((next: number, manual = true) => {
     if (phase === 'leave' || hires.length < 2) return
@@ -61,11 +83,12 @@ export function RecentHires({ hires }: { hires: RecentHire[] }) {
     }, 220)
   }, [hires.length, index, phase, reducedMotion])
   useEffect(() => {
-    if (hires.length < 2 || paused || reducedMotion || !visible || phase !== 'ready') return
+    if (hires.length < 2 || paused || focusHold || reducedMotion || !visible || !inView || phase !== 'ready') return
     const timer = window.setTimeout(() => choose(index + 1, false), ADVANCE_MS)
     return () => window.clearTimeout(timer)
-  }, [index, paused, reducedMotion, visible, hires.length, phase, choose])
+  }, [index, paused, focusHold, reducedMotion, visible, inView, hires.length, phase, choose])
   useEffect(() => () => {
+    if (holdTimer.current !== null) window.clearTimeout(holdTimer.current)
     if (transitionTimer.current !== null) window.clearTimeout(transitionTimer.current)
     if (announceTimer.current !== null) window.clearTimeout(announceTimer.current)
   }, [])
@@ -78,9 +101,11 @@ export function RecentHires({ hires }: { hires: RecentHire[] }) {
     { key: 'settle', label: h.settledTx ? 'Settled to the agent' : 'Settles to the agent', note: h.settledTx ? 'Review window closed' : 'When the review window closes; the Job Room shows the exact time', tx: h.settledTx, at: null, done: Boolean(h.settledTx) },
   ]
   return (
-    <section className={styles.hireBand} id="latest" aria-labelledby="latest-h" data-paused={paused || reducedMotion || !visible || phase !== 'ready' ? '' : undefined}
-      onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)}
-      onFocusCapture={() => setPaused(true)} onBlurCapture={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) setPaused(false) }}
+    <section ref={band} className={styles.hireBand} id="latest" aria-labelledby="latest-h" data-paused={paused || focusHold || reducedMotion || !visible || !inView || phase !== 'ready' ? '' : undefined}
+      onPointerMove={(event) => { if (event.pointerType === 'mouse' && (event.movementX !== 0 || event.movementY !== 0)) hold() }}
+      onPointerLeave={release}
+      onFocusCapture={(event) => { if ((event.target as Element).matches?.(':focus-visible')) setFocusHold(true) }}
+      onBlurCapture={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) setFocusHold(false) }}
       onTouchStart={(event) => { touch.current = { x: event.touches[0]!.clientX, y: event.touches[0]!.clientY } }}
       onTouchEnd={(event) => {
         const start = touch.current

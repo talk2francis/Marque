@@ -1,27 +1,17 @@
-import { Suspense } from 'react'
 import { BRAND } from '@marque/ui'
-import { campaignChainId, NETWORKS } from '@marque/commerce'
 import { SiteHeader, SiteFooter } from '../_components/SiteHeader'
-import { network as net } from '../../lib/network'
-import { questRecommendations } from '../../lib/quest-recs'
-import { CampaignNotice } from '../_components/CampaignNotice'
-import { QuestView } from './QuestView'
+import { QuestChecker } from './QuestIslands'
+import { QuestStrip } from './QuestStrip'
+import { QuestHome } from './QuestHome'
 import styles from './quest.module.css'
 
 export const metadata = {
-  title: `${BRAND.name} stretch quest`,
-  description: 'Hire one agent in each of the four categories on BNB Chain, rate them, and list an agent you built. Progress is read from the chain.',
+  title: `Set and Earn checker · ${BRAND.name}`,
+  description: 'Check any wallet against BNB Chain Set and Earn: hires across all nine shortlisted marketplaces and the six build criteria, read from chain on mainnet and testnet.',
 }
-// Same for every visitor, so served from Next's cache and re-rendered at most every 30 s
-// (P2-11 load test: rendering per request capped the site near 15 requests a second).
-export const revalidate = 30
+export const revalidate = 300
 
-export default async function QuestPage() {
-  const chainId = campaignChainId()
-  const recs = await questRecommendations()
-  const n = NETWORKS[chainId]
-  const u = n.assets.find((a) => a.isDefault) ?? null
-  const usdt = n.assets.find((a) => a.symbol === 'USDT') ?? null
+export default function QuestPage() {
   return (
     <>
       <SiteHeader active="quest" />
@@ -29,20 +19,12 @@ export default async function QuestPage() {
         <header className={`${styles.head} construct`}>
           <span className="construct-grid" aria-hidden="true" />
           <span className={styles.art} aria-hidden="true"><span className={styles.artImg} /></span>
-          <span className="t-label">{BRAND.name} stretch quest · {net(chainId).short.split(' · ')[0]}</span>
-          <h1 className="t-display">Complete the quest <em>on Marque.</em></h1>
-          <p className={styles.lede}>Hire one agent in each category, rate them, and list an agent you built.</p>
+          <QuestStrip />
+          <h1 className="t-display">Set and Earn, <em>checked on chain.</em></h1>
+          <p className={styles.lede}>Hires on every shortlisted marketplace and your build&apos;s six criteria, for any wallet.</p>
+          <QuestChecker />
         </header>
-        <CampaignNotice />
-        <Suspense fallback={null}>
-          <QuestView
-            chainId={chainId}
-            recs={recs?.categories ?? null}
-            recsAt={recs?.at ?? null}
-            u={u ? { address: u.address, symbol: u.symbol, decimals: u.decimals } : null}
-            usdt={usdt ? { address: usdt.address, symbol: usdt.symbol, decimals: usdt.decimals } : null}
-          />
-        </Suspense>
+        <QuestHome />
       </main>
       <SiteFooter />
     </>

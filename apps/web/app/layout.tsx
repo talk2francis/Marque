@@ -4,6 +4,7 @@ import { BRAND } from '@marque/ui/brand'
 import { Suspense } from 'react'
 import { Providers } from './_components/Providers'
 import { HireSheetGate } from './_components/HireSheetGate'
+import { CampaignDock } from './_components/campaign/CampaignDock'
 import { Toaster } from './_components/ui/Toaster'
 import { THEME_BOOTSTRAP } from '../lib/theme'
 import './globals.css'
@@ -86,6 +87,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Providers>
           {children}
           <Suspense fallback={null}><HireSheetGate /></Suspense>
+          <CampaignDock />
           <Toaster />
         </Providers>
       </body>

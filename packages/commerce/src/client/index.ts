@@ -8,4 +8,5 @@ export { claimRefundCall, disputeCall, revokeAllowanceCall, cancelCall, settleCa
 export { agenticCommerceAbi, evaluatorRouterAbi } from '../generated.js'
 export { useRate, type RateState } from './useRate.js'
 export { termsOf, ageWords, validForWords, msUntilLapse, priceLabel, reasonWords, type Terms, type TermsState, type CommerceFacts, type LastQuote } from '../terms.js'
+export { CAMPAIGN, SHORTLIST, campaignClock, clockShort, clockWords, campaignEndMs, campaignStartMs, shortlistDomain, marketplaceName, type CampaignClock } from '../campaign-rules.js'
 export { LANES, LANE_CHAIN, LANE_LABEL, laneOf, chainOf, parseLane, quoteInLane, type Lane } from '../lane.js'

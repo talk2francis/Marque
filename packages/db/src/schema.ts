@@ -1081,3 +1081,50 @@ export const chainCursor = pgTable('chain_cursor', {
 }, (t) => ({
   pk: primaryKey({ columns: [t.chainId, t.contract] }),
 }))
+
+/**
+ * DERIVED. Every ERC-8183 job created in the Set and Earn window on chains 56 and 97, whoever
+ * the marketplace (SPEC-ADOPTION 2.3). Read from the kernel's getJob plus the indexed events;
+ * rebuildable from chain at any time, so it is never first-party.
+ */
+export const campaignJob = pgTable('campaign_job', {
+  chainId: integer('chain_id').notNull(),
+  jobId: text('job_id').notNull(),
+  client: text('client').notNull(),
+  provider: text('provider').notNull(),
+  evaluator: text('evaluator'),
+  hook: text('hook'),
+  budgetRaw: text('budget_raw'),
+  /** IACP.JobStatus as stored on chain, and its name. */
+  status: integer('status').notNull(),
+  statusName: text('status_name').notNull(),
+  expiredAt: bigint('expired_at', { mode: 'number' }),
+  description: text('description').notNull(),
+  descriptionHash: text('description_hash').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }),
+  fundedAt: timestamp('funded_at', { withTimezone: true }),
+  fundedTx: text('funded_tx'),
+  submittedAt: timestamp('submitted_at', { withTimezone: true }),
+  completedAt: timestamp('completed_at', { withTimezone: true }),
+  /** A shortlisted marketplace domain, or null when the job record names none. */
+  marketplace: text('marketplace'),
+  attribution: text('attribution').$type<'marque_intent' | 'client_ref' | 'via_suffix' | 'envelope'>(),
+  clientRef: text('client_ref'),
+  readAt: timestamp('read_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({
+  pk: primaryKey({ columns: [t.chainId, t.jobId] }),
+  clientIdx: index('campaign_job_client_idx').on(t.client),
+  providerIdx: index('campaign_job_provider_idx').on(t.chainId, t.provider),
+}))
+
+/** A Telegram chat watching one address's quest progress. Deleted on /stop. */
+export const questWatch = pgTable('quest_watch', {
+  chatId: text('chat_id').notNull(),
+  address: text('address').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  lastState: jsonb('last_state').$type<Record<string, unknown>>(),
+  /** Reminder and event keys already sent, so a restart never repeats one. */
+  sent: jsonb('sent').$type<string[]>().notNull().default([]),
+}, (t) => ({
+  pk: primaryKey({ columns: [t.chatId, t.address] }),
+}))

@@ -99,7 +99,7 @@ export function negotiationHashOf(neg: Negotiation): `0x${string}` {
 export function buildPlainDescription(q: SimpleQuote, task: string, intentId: string): string {
   const content = {
     version: 1,
-    task: sanitizeForClaim(task),
+    task: sanitizeForClaim(withAttribution(task)),
     terms: { deliverables: sanitizeForClaim(q.deliverables ?? q.service ?? ''), quality_standards: '' },
     price: q.price,
     currency: getAddress(q.payment_token as string),
@@ -112,6 +112,23 @@ export function buildPlainDescription(q: SimpleQuote, task: string, intentId: st
   const d = canonicalJson(content)
   if (d.length > MAX_DESCRIPTION_BYTES) throw new Error(`on-chain description is ${d.length} bytes, exceeds ${MAX_DESCRIPTION_BYTES}; shorten the task`)
   return d
+}
+
+/**
+ * Invariant 36: every hire made through Marque names marque.trade in the job record. The
+ * suffix goes on the task BEFORE negotiation, so a signed quote carries it verbatim (the
+ * seller signs the task text, FACTS 10); a plain description also carries client_ref.
+ */
+export const ATTRIBUTION_SUFFIX = ' (via marque.trade)'
+
+export function withAttribution(task: string): string {
+  const t = task.trimEnd()
+  if (/\(via marque\.trade\)\s*$/i.test(t)) return t
+  // A task written in the seller's own JSON format must reach it unchanged: text after the
+  // JSON would break the seller's parser. Those hires keep Marque's own record (and client_ref
+  // when unsigned) as their attribution.
+  if (/^[[{]/.test(t)) { try { JSON.parse(t); return t } catch { /* not JSON: suffix it */ } }
+  return `${t}${ATTRIBUTION_SUFFIX}`
 }
 
 export function descriptionHash(description: string): `0x${string}` {

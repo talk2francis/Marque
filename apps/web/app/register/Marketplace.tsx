@@ -463,7 +463,7 @@ export function Marketplace({ category: fixedCategory, initial }: { category?: s
       )}
 
       {selected.length >= 1 && (
-        <div className={styles.tray} role="region" aria-label="Compare tray">
+        <div className={styles.tray} role="region" aria-label="Compare tray" data-compare-tray="">
           <span className={styles.traySlots}>
             {selected.map((s) => (
               <button key={s.agentId} type="button" className={styles.traySlot} onClick={() => toggleSelect(s)} aria-label={`Remove ${s.name} from comparison`} title={`Remove ${s.name}`}>

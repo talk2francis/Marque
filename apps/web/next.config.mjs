@@ -7,7 +7,7 @@ const nextConfig = {
   outputFileTracingRoot: new URL('../../', import.meta.url).pathname,
   // First-party config is read at runtime by @marque/db; ship it inside the standalone
   // bundle so a build runs anywhere, not only beside the repo it was built from.
-  outputFileTracingIncludes: { '/**': ['../../config/first-party.json'] },
+  outputFileTracingIncludes: { '/**': ['../../config/first-party.json', '../../config/team-wallets.json', './assets/fonts/InstrumentSerif-Regular.ttf'] },
   reactStrictMode: true,
   // Workspace packages ship TypeScript source, not a build step.
   transpilePackages: ['@marque/db', '@marque/ui', '@marque/chain', '@marque/registry', '@marque/probe', '@marque/positions', '@marque/mandates', '@marque/execution', '@marque/conformance', '@marque/ledger', '@marque/agent-engines', '@marque/commerce'],

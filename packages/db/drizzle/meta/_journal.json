@@ -169,6 +169,13 @@
       "when": 1792489400497,
       "tag": "0023_service_declarations",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1792748000000,
+      "tag": "0024_campaign_job",
+      "breakpoints": true
     }
   ]
 }
