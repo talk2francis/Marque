@@ -1,50 +1,79 @@
 import { BRAND } from '@marque/ui'
-import { ArrowUpRight, Terminal } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 import { SiteHeader, SiteFooter } from '../_components/SiteHeader'
 import { CampaignNotice } from '../_components/CampaignNotice'
-import { BuilderChecklist } from './BuilderChecklist'
-import styles from './checklist.module.css'
+import { unmetDemand } from '../../lib/forge-signals'
+import { ForgeRail } from './ForgeRail'
+import { YourAgents } from './YourAgents'
+import styles from './forge.module.css'
 
+export const dynamic = 'force-dynamic'
 export const metadata = {
-  title: 'List an agent you built',
-  description: `Check local listing readiness, prove ownership and publish your agent on ${BRAND.name}. BNB campaign qualification is reviewed separately.`,
+  title: 'Agent Forge: bring an agent to BNB Chain buyers',
+  description: `Register an agent, test it against the Standard and list it on ${BRAND.name}. Your wallet signs, your server runs it.`,
 }
 
+const DOORS = [
+  { href: '/builders/run', title: 'I already run an agent', action: 'Check and list it', body: 'Look it up by token id or wallet. Marque checks the card, ownership, the task protocol, a quote and the Standard, and shows the exact fix for anything that fails.' },
+  { href: '/builders/register', title: 'I have an endpoint, no identity', action: 'Register it on ERC-8004 here', body: 'Marque checks your card first, builds the registration file, and your wallet signs one transaction. Then the same checks run and it lists.' },
+  { href: '/builders/start', title: 'Start from a starter', action: 'Generate a working scaffold', body: 'Pick a category and download the card, task schema, chain reads, tests and deploy notes. You write the strategy; the tests tell you when it is right.' },
+] as const
+
 /**
- * /builders (DESIGN-SYSTEM.md 8.8): the five-check list for a builder's own agent,
- * with the Build-one panel beside it. The claim and test routes are steps inside it.
+ * The Agent Forge (SPEC-BUILDERS 2): three doors, one progress rail, and what buyers asked for that
+ * few agents could price. Marque does the protocol, paperwork and proof; the builder writes the
+ * judgement and runs the server (invariant 39).
  */
-export default function BuildersPage() {
+export default async function ForgePage() {
+  const demand = await unmetDemand()
   return (
     <>
       <SiteHeader active="builders" />
       <main className={styles.page}>
         <header className={styles.head}>
-          <p className="t-label">Builders · BNB Smart Chain</p>
-          <h1 className={styles.title}>List an agent you built.</h1>
-          <p className={styles.lede}>
-            Check local listing readiness using your wallet, the chain and your agent&apos;s endpoint.
-            Prove ownership and publish through the existing listing flow. Your seller status and recovery steps appear below after the ownership check.
-          </p>
+          <p className="t-label">Builders · Agent Forge</p>
+          <h1 className={styles.title}>Bring an agent to BNB Chain buyers.</h1>
+          <p className={styles.lede}>Register it, test it against the Standard, and list it. Your wallet signs, your server runs it.</p>
         </header>
+        <ForgeRail />
         <CampaignNotice builders />
-        <div className={styles.grid}>
-          <BuilderChecklist />
-          <aside className={styles.side} aria-labelledby="build-one">
-            <h2 id="build-one" className={styles.sideTitle}>Build one</h2>
-            <p className={styles.muted}>BNB Agent Studio scaffolds an ERC-8004 agent, its A2A card and its ERC-8183 selling side.</p>
-            <pre className={styles.cmd} tabIndex={0} role="region" aria-label="BNB Agent Studio install command"><Terminal aria-hidden="true" /><code>npm install --global @bnbagent/studio-cli</code></pre>
-            <p className={styles.muted}>Then run <code className={styles.inline}>bag</code> in Claude Code or Cursor and describe the agent you want.</p>
-            <a className={styles.ext} href="https://docs.bnbchain.org/developer-kit/bnbchain-studio/quickstart/" target="_blank" rel="noreferrer">BNB Agent Studio quickstart<ArrowUpRight aria-hidden="true" /></a>
-            <a className={styles.ext} href="/docs/sellers">Seller protocol and recovery guide<ArrowUpRight aria-hidden="true" /></a>
-            <hr className={styles.rule} />
-            <p className={styles.muted}>Your ERC-8004 registration file can include an optional <code>image</code> URL. Marque uses that owner-supplied image for the avatar and storefront atmosphere; an agent with no image gets a neutral identity tile. Artwork is not a listing check.</p>
-            <a className={styles.ext} href="https://eips.ethereum.org/EIPS/eip-8004" target="_blank" rel="noreferrer">ERC-8004 registration format<ArrowUpRight aria-hidden="true" /></a>
-            <hr className={styles.rule} />
-            <p className={styles.note}>Marque&apos;s local fifth step needs an agent you built and own. Marque&apos;s own reference agents never count, and neither does an agent owned by a wallet on Marque&apos;s published team list.</p>
-            <p className={styles.muted}><a href="/builders/test">Test an authorized endpoint</a>, with no wallet. This sends a real task only after confirmation; it does not pay a provider.</p>
-          </aside>
+        <div className={styles.doors}>
+          {DOORS.map((d) => (
+            <a key={d.href} href={d.href} className={styles.door}>
+              <h2>{d.title}</h2>
+              <p>{d.body}</p>
+              <span className={styles.doorAction}>{d.action}<ArrowRight aria-hidden="true" /></span>
+            </a>
+          ))}
         </div>
+
+        <section className={styles.section} aria-labelledby="demand">
+          <h2 id="demand">What buyers asked for this week that few agents could price</h2>
+          {demand.length ? (
+            <ul className={styles.demand}>
+              {demand.map((x, i) => (
+                <li key={i}>
+                  <span className={styles.demandLabel}>{x.label}{x.chainId === 97 ? <span className={styles.lane}> · testnet</span> : null}</span>
+                  <span className={styles.demandNums}><b>{x.requests}</b> requests · <b>{x.bestPriced}</b> {x.bestPriced === 1 ? 'agent' : 'agents'} priced</span>
+                  <a href={`/builders/start?category=${x.category}`}>Build for it</a>
+                </li>
+              ))}
+            </ul>
+          ) : <p className={styles.fine}>No task shape went under-priced 3 or more times in the last 7 days. This fills from real requests buyers send through Compare; aggregates only, never addresses.</p>}
+        </section>
+
+        <section className={styles.section} aria-labelledby="yours">
+          <h2 id="yours">Your agents</h2>
+          <YourAgents />
+        </section>
+
+        <section className={styles.section} aria-labelledby="split">
+          <h2 id="split">Who does what</h2>
+          <dl className={styles.split}>
+            <div><dt>Marque</dt><dd>Scaffold, card check, ERC-8004 registration from your wallet, the Standard&apos;s self-test, listing once checks pass, launch posts and badge, Set and Earn build criteria.</dd></div>
+            <div><dt>You</dt><dd>The strategy (the agent&apos;s judgement) and hosting: Agent Studio with NodeOps, any VPS or any Node host. Marque never holds your key and never runs your server.</dd></div>
+          </dl>
+        </section>
       </main>
       <SiteFooter />
     </>

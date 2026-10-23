@@ -5,6 +5,8 @@ import { db } from '@marque/db'
 import { isSupportedChain, network } from '@marque/commerce'
 import { Statement } from '@marque/ui'
 import { SiteHeader, SiteFooter } from '../../../../_components/SiteHeader'
+import { storefrontByToken } from '../../../../../lib/storefront'
+import { LaunchKit } from '../../../LaunchKit'
 import styles from '../../../builders.module.css'
 
 export const dynamic = 'force-dynamic'
@@ -49,7 +51,12 @@ export default async function FixReport({ params }: { params: Promise<{ chainId:
   const latest = quotes[0]
   const fix = latest && !latest['ok'] ? FIX[String(latest['failure'])] ?? null : null
   const name = String(a['name'] ?? `Agent #${tokenId}`)
-  const profile = chainId === 97 ? `/agents/97/${tokenId}` : `/agents/${tokenId}`
+  // Launch kit facts come from the same projection as the agent page: the live terms and its own test.
+  const sf = latest?.['ok'] ? await storefrontByToken(tokenId, chainId as 56 | 97).catch(() => null) : null
+  const TEST: Record<string, string> = { yield: 'MCS-YIELD-1', grid: 'MCS-GRID-1', rebalancing: 'MCS-REB-1', health_factor: 'MCS-HF-1' }
+  const own = sf?.category ? sf.tests.find((t) => t.testId === TEST[sf.category!]) : undefined
+  const warrant = own?.pass && own.ranAt && Date.now() - Date.parse(own.ranAt) <= 72 * 3_600_000 ? own.testId : null
+  const profile = `/agents/${chainId}/${tokenId}`
   return (
     <>
       <SiteHeader active="builders" />
@@ -76,8 +83,9 @@ export default async function FixReport({ params }: { params: Promise<{ chainId:
             ))}
           </ul>
           <p>Registered wallet: <code>{String(a['agent_wallet'] ?? a['owner_address'] ?? 'none')}</code>. Once it prices, it lists automatically and buyers pay it through BNB Chain&apos;s escrow. No sign-up needed.</p>
-          <p><Link href="/builders">Builder guide</Link> · <Link href="/builders/test">Run the Standard&apos;s tests on it</Link></p>
+          <p><Link href="/builders">Agent Forge</Link> · <Link href="/builders/test">Run the Standard&apos;s tests on it</Link></p>
         </section>
+        {sf ? <LaunchKit agentId={id} chainId={chainId as 56 | 97} tokenId={tokenId} name={name} category={sf.category} priceLabel={sf.terms.state === 'fresh' ? sf.terms.priceLabel : null} warrant={warrant} /> : null}
       </main>
       <SiteFooter />
     </>

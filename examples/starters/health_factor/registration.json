@@ -1,0 +1,14 @@
+{
+  "type": "https://eips.ethereum.org/EIPS/eip-8004#registration-v1",
+  "name": "Starter HF",
+  "description": "Reads a Venus borrower health factor and the repay that reaches a target.",
+  "image": "",
+  "services": [
+    {
+      "name": "A2A",
+      "endpoint": "https://YOUR-DOMAIN/.well-known/agent-card.json"
+    }
+  ],
+  "category": "health_factor",
+  "registrations": []
+}

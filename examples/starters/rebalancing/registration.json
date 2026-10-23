@@ -1,0 +1,14 @@
+{
+  "type": "https://eips.ethereum.org/EIPS/eip-8004#registration-v1",
+  "name": "Starter Range",
+  "description": "Re-centres a PancakeSwap V3 position on valid ticks.",
+  "image": "",
+  "services": [
+    {
+      "name": "A2A",
+      "endpoint": "https://YOUR-DOMAIN/.well-known/agent-card.json"
+    }
+  ],
+  "category": "rebalancing",
+  "registrations": []
+}

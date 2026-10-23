@@ -1,0 +1,14 @@
+{
+  "type": "https://eips.ethereum.org/EIPS/eip-8004#registration-v1",
+  "name": "Starter Yield",
+  "description": "Finds where a stablecoin amount earns most, net of switching cost.",
+  "image": "",
+  "services": [
+    {
+      "name": "A2A",
+      "endpoint": "https://YOUR-DOMAIN/.well-known/agent-card.json"
+    }
+  ],
+  "category": "yield",
+  "registrations": []
+}

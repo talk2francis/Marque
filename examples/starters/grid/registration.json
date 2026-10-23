@@ -1,0 +1,14 @@
+{
+  "type": "https://eips.ethereum.org/EIPS/eip-8004#registration-v1",
+  "name": "Starter Grid",
+  "description": "Plans grid levels inside a range with capital, stop and fee drag.",
+  "image": "",
+  "services": [
+    {
+      "name": "A2A",
+      "endpoint": "https://YOUR-DOMAIN/.well-known/agent-card.json"
+    }
+  ],
+  "category": "grid",
+  "registrations": []
+}

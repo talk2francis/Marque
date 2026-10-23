@@ -25,6 +25,32 @@ interface Result {
   note: string
 }
 
+/** One line per assertion on how to fix it (SPEC-BUILDERS 6.2). Keyed by the Standard's tolerance ids. */
+const HINT: Record<string, string> = {
+  healthFactor: 'Sum collateral USD x collateral factor across markets entered, divide by total borrow USD, at the case block. Round to 3 dp.',
+  collateralFactor: 'Read markets(vToken).collateralFactorMantissa / 1e18 for the largest collateral market.',
+  repayToTarget: 'Solve weighted collateral / (debt - repay) = target for repay; 0 when the account is already at or above the target.',
+  liquidationPrice: 'The price at which the primary collateral alone brings the health factor to 1, other prices held.',
+  primaryCollateralSymbol: 'The underlying symbol of the market with the largest collateral USD.',
+  currentTick: 'Read slot0().tick from the position\'s pool at the case block.',
+  inRange: 'tickLower <= tick < tickUpper, from positions(tokenId) and slot0.',
+  distanceToBound: 'Percent from spot to the nearer bound, by price, not by tick count.',
+  proposedTickSpacing: 'Ticks must be multiples of the pool\'s tickSpacing: 50 on the 0.25% tier, 10 on 0.05%, 1 on 0.01%, 200 on 1%.',
+  amounts: 'Use the V3 liquidity formula with the position\'s liquidity across the proposed range.',
+  slippageBound: 'State maxSlippageBps as a number.',
+  levelSpacing: 'Return levels as [{ price, allocationUsd }] and declare spacingType; arithmetic levels share one difference.',
+  feeDragDisclosed: 'Disclose feeDragPct from the fee per trade and the trades the grid implies.',
+  improvementThreshold: 'State recommend: true or false. Silence is not a decision.',
+  netApr: 'Net of fees at the stated size, from the protocol\'s own rate at the case block.',
+  aprProvenance: 'Give each APR a source and timestamp.',
+  switchingCost: 'Itemise gasUsd, swapUsd and exitUsd.',
+  policyRange: 'Centre the range on spot at the policy\'s +/- percent, within one tick spacing.',
+  allocationSum: 'The level allocations must add up to no more than the capital.',
+  levelsWithinBounds: 'Every level price inside the lower and upper bound.',
+  levelsAboveStop: 'No level at or below the stop price.',
+  leverageFlagged: 'Set usesLeverage, and never recommend leverage when the case excludes it.',
+}
+
 const TESTS = [
   { id: 'MCS-REB-1', label: 'Rebalancing: PancakeSwap V3 range' },
   { id: 'MCS-GRID-1', label: 'Grid trading: spacing, allocation, fee drag' },
@@ -171,7 +197,7 @@ export function TestForm() {
                       <td className="mono">{d.expected}</td>
                       <td className="mono">{d.actual}</td>
                       <td className="mono">{d.tolerance}</td>
-                      <td className="wrap">{d.pass ? '' : (d.detail ?? '')}</td>
+                      <td className="wrap">{d.pass ? '' : <>{d.detail ?? ''}{HINT[d.field] ? <span className={styles.hint}>{HINT[d.field]}</span> : null}</>}</td>
                     </tr>
                   ))}
                 </tbody>

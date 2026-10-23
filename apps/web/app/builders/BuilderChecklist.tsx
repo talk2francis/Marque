@@ -107,6 +107,14 @@ export function BuilderChecklist() {
   }, [wallet, address])
 
   useEffect(() => { ++loadSequence.current; setList(null); setSelected(null); if (wallet) void load() }, [wallet, load])
+  // Door 2 hands off here with ?chain=&token= (SPEC-BUILDERS 4.6): prefill and check that identity.
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search)
+    const t = q.get('token'), c = q.get('chain') === '97' ? 97 : 56
+    if (!t || !/^\d{1,12}$/.test(t)) return
+    setLookNet(c); setLookToken(t)
+    if (wallet) void load({ chainId: c, tokenId: t })
+  }, [wallet, load])
 
   const cur = useMemo(() => list?.find((x) => x.identity.agentKey === selected) ?? null, [list, selected])
   useEffect(() => {

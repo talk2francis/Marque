@@ -13,6 +13,7 @@ import { utcDay, utcStamp } from '../../../lib/time'
 import type { Storefront as Data, StoreTest } from '../../../lib/storefront'
 import type { AgentEvidence } from '../../../lib/agent-evidence'
 import type { JobLens } from '../../../lib/lens'
+import type { Twin } from '../../../lib/forge-signals'
 import styles from './storefront.module.css'
 import page from './agent-page.module.css'
 import { AgentActivity } from './AgentActivity'
@@ -72,7 +73,7 @@ export function agentBase(d: Pick<Data, 'slug' | 'chainId' | 'tokenId'>): string
   return d.slug && d.chainId === 56 ? `/agents/${d.slug}` : `/agents/${d.chainId}/${d.tokenId}`
 }
 
-export function Storefront({ d, section = 'overview', evidence = null, lens = null }: { d: Data; section?: SectionId; evidence?: AgentEvidence | null; lens?: JobLens | null }) {
+export function Storefront({ d, section = 'overview', evidence = null, lens = null, twins = [] }: { d: Data; section?: SectionId; evidence?: AgentEvidence | null; lens?: JobLens | null; twins?: Twin[] }) {
   const c = d.commerce
   // Badges follow the same terms as the rail (invariant 41); the rail island re-reads them live.
   const hireable = d.terms.state === 'fresh'
@@ -163,7 +164,7 @@ export function Storefront({ d, section = 'overview', evidence = null, lens = nu
           {section === 'evidence' ? <Evidence d={d} tests={d.tests} own={own} evidence={evidence} cat={cat} /> : null}
           {section === 'record' ? <TrackRecord d={d} net={net} /> : null}
           {section === 'terms' ? <Terms d={d} net={net} /> : null}
-          {section === 'technical' ? <Technical d={d} net={net} /> : null}
+          {section === 'technical' ? <Technical d={d} net={net} twins={twins} /> : null}
         </div>
 
         <div className={styles.side}>{panel}</div>
@@ -486,7 +487,7 @@ function Terms({ d, net }: { d: Data; net: string }) {
 
 /* ------------------------------------------------------------------ Technical */
 
-function Technical({ d, net }: { d: Data; net: string }) {
+function Technical({ d, net, twins }: { d: Data; net: string; twins: Twin[] }) {
   const c = d.commerce
   const machine = d.chainId === 56 ? `/api/v1/agents/56/${d.tokenId}` : null
   return (
@@ -513,6 +514,16 @@ function Technical({ d, net }: { d: Data; net: string }) {
           <div><dt>How Marque quotes it</dt><dd>{c ? `ERC-8183 negotiate on service ${c.serviceId}, ${c.signatureEvidence === 'provider_signed' ? 'provider-signed' : c.signatureEvidence === 'identity_matched_unsigned' ? 'unsigned and identity-checked' : 'signature not yet established'}` : 'Not quoted through escrow'}</dd></div>
           <div><dt>Last quote</dt><dd>{c?.quotedAt ? <>{c.priceLabel ?? (c.failure === 'expired_or_unproven' ? 'expired or unproven' : 'not accepted')}, {ago(c.quotedAt)}</> : 'never quoted'} <ProvenanceChip provenance="MEASURED" /></dd></div>
         </dl>
+      </section>
+
+      <section className={styles.section} aria-labelledby="tech-orig">
+        <h2 id="tech-orig">Originality</h2>
+        {twins.length ? (
+          <ul className={page.twins}>
+            {twins.map((t) => <li key={t.agentId}>Answers match <a href={`/agents/${t.chainId}/${t.tokenId}/technical`}>{t.name ?? 'agent'} #{t.tokenId}</a> byte for byte on {t.cases} test cases.</li>)}
+          </ul>
+        ) : <p className={styles.muted}>No other agent returned identical answers to the same test cases.</p>}
+        <p className={styles.muted}>An observation from {BRAND.name}&apos;s test runs, shown so buyers can judge. It never blocks a listing. <ProvenanceChip provenance="TESTED" /></p>
       </section>
 
       <section className={styles.section} aria-labelledby="tech-machine">

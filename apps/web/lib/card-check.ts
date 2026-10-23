@@ -48,7 +48,12 @@ export async function checkCard(url: string, want: ForgeCategory | null = null):
     skip(['shape', 'category', 'task', 'domain']); return done(null, null, null)
   }
   if (r.status !== 200) {
-    steps.push({ id: 'fetch', title: TITLES.fetch, state: 'fail', detail: `The server answered HTTP ${r.status}, not 200.`, fix: 'Point the URL at the card itself; a 404 usually means the path is wrong (most agents serve /.well-known/agent-card.json).', got: redact(r.body) })
+    const fix = r.status === 404 ? 'Point the URL at the card itself; a 404 usually means the path is wrong (most agents serve /.well-known/agent-card.json).'
+      : r.status === 401 || r.status === 403 ? 'The card must be public: buyers\' clients read it without credentials. Serve it without auth.'
+        : r.status === 429 ? 'Your host rate-limited a single request. Serve the card as a static file, or raise the limit for GET requests.'
+          : r.status >= 500 ? 'Your server errored. Free hosts that sleep (Render, Railway) answer 503 while waking: keep the agent warm or use an always-on host, then check again.'
+            : 'Serve the card with HTTP 200.'
+    steps.push({ id: 'fetch', title: TITLES.fetch, state: 'fail', detail: `The server answered HTTP ${r.status}, not 200.`, fix, got: redact(r.body) })
     skip(['shape', 'category', 'task', 'domain']); return done(null, null, null)
   }
   let card: unknown
@@ -75,7 +80,7 @@ export async function checkCard(url: string, want: ForgeCategory | null = null):
     skills: skills.flatMap((s) => [s['name'], s['description']].filter((x): x is string => typeof x === 'string')),
   })
   const category = (FORGE_CATEGORIES as readonly string[]).includes(cls.category) ? (cls.category as ForgeCategory) : null
-  if (!category) steps.push({ id: 'category', title: TITLES.category, state: 'fail', detail: 'No skill names, descriptions or tags place it in health factor, yield, grid trading, rebalancing or security.', fix: `Describe the skill in plain words a buyer would search for, and tag it.${want ? ` For ${CATEGORY_WORDS[want]}, for example tags ${JSON.stringify(exampleCard(want).skills[0]!.tags)}.` : ''}`, example: example(want) })
+  if (!category) steps.push({ id: 'category', title: TITLES.category, state: 'fail', detail: 'No skill names, descriptions or tags place it in health factor, yield, grid trading, rebalancing or security.', fix: `Describe the skill in plain words a buyer would search for, and tag it.${want ? ` For ${CATEGORY_WORDS[want]}, for example tags ${JSON.stringify(exampleCard(want).skills[0]!.tags)}.` : ''}`, ...(issues.length ? {} : { example: example(want) }) })
   else if (want && category !== want) steps.push({ id: 'category', title: TITLES.category, state: 'warn', detail: `It reads as ${CATEGORY_WORDS[category]}, not ${CATEGORY_WORDS[want]} (${cls.rationale}).`, fix: `If it is ${CATEGORY_WORDS[want]}, say so in the skill description and tags.` })
   else steps.push({ id: 'category', title: TITLES.category, state: 'pass', detail: `Reads as ${CATEGORY_WORDS[category]}, confidence ${Math.round(cls.confidence * 100)}%. Deciding words: ${cls.rationale}.` })
 

@@ -373,7 +373,7 @@ interface OwnerAgent { agentKey: string; chainId: number; agentId: string; name:
 interface QuestBuild { build: { agents: Array<{ chainId: number; tokenId: string; observed: number; checks: Record<string, { state: string; reason: string; next?: { label: string; href: string } | null }> }> } }
 const CRIT: Array<[string, string]> = [['registered', 'Registered'], ['card', 'Agent card'], ['probes', 'Answers'], ['hires', '3 hirers'], ['actions', 'Actions'], ['category', 'In category']]
 
-function Agents({ address }: { address: string }) {
+export function Agents({ address }: { address: string }) {
   const [owner, setOwner] = useState<OwnerAgent[] | null>(null)
   const [quest, setQuest] = useState<QuestBuild | null>(null)
   useEffect(() => {

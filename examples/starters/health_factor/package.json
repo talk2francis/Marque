@@ -1,0 +1,31 @@
+{
+  "name": "starter-hf",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test:mcs": "node --import tsx --test test/mcs.test.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "viem": "^2.21.0",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.0",
+    "typescript": "^5.5.0",
+    "@types/node": "^22.0.0"
+  },
+  "marque": {
+    "forge": 1,
+    "category": "health_factor",
+    "test": "MCS-HF-1",
+    "agentStudio": {
+      "cli": "0.0.15",
+      "sdk": "0.6.0"
+    }
+  }
+}
