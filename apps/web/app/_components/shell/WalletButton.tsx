@@ -2,7 +2,10 @@
 import { ConnectButton, useConnectModal } from '@rainbow-me/rainbowkit'
 import { ArrowUpRight, Check, ChevronDown, Copy, LogOut, Repeat, ShieldCheck, Target, User, Wallet } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
-import { useDisconnect } from 'wagmi'
+import { useAccount, useDisconnect } from 'wagmi'
+import { KeyRound, Lock as LockIcon, HelpCircle, Droplets } from 'lucide-react'
+import { MARQUE_PASS_ID } from '../pass/connector'
+import { passBridge, lock as lockPass } from '../pass/bridge'
 import { explorerAddress } from '../../../lib/network'
 import { copyText } from '../../../lib/clipboard'
 import { useOfficialQuest } from '../campaign/useOfficialQuest'
@@ -58,6 +61,9 @@ function AccountMenu({ address, display, chainId, compact, openChainModal }: { a
   const [copied, setCopied] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
   const { disconnect } = useDisconnect()
+  const { connector } = useAccount()
+  const isPass = connector?.id === MARQUE_PASS_ID
+  const [tokensCopied, setTokensCopied] = useState(false)
   const official = useOfficialQuest(address)
   const hired = Math.min(official?.hire.distinctAgents ?? 0, 3)
   const built = official?.build.agents[0]?.observed ?? 0
@@ -100,6 +106,19 @@ function AccountMenu({ address, display, chainId, compact, openChainModal }: { a
           <a role="menuitem" className="menu-item" href="/me"><User />My Marque</a>
           <a role="menuitem" className="menu-item" href="/quest"><Target />Set and Earn quest</a>
           <a role="menuitem" className="menu-item" href="/me#controls"><ShieldCheck />Spending controls</a>
+          {isPass ? (
+            <>
+              <div className="menu-sep" />
+              <button role="menuitem" type="button" className="menu-item" onClick={async () => {
+                // BNB Chain's bot sends 0.1 tBNB and 20 test U for this exact sentence (FACTS 6).
+                if (await copyText(`I would like to get tBNB and U on BNB Smart Chain Testnet to my wallet ${address}`)) { setTokensCopied(true); setTimeout(() => setTokensCopied(false), 2500) }
+                window.open('https://t.me/bnbchain_official_bot', '_blank', 'noopener')
+              }}><Droplets />{tokensCopied ? 'Message copied: paste it to the bot' : 'Get test tokens'}</button>
+              <button role="menuitem" type="button" className="menu-item" onClick={() => { setOpen(false); void passBridge.exportKey() }}><KeyRound />Export key</button>
+              <button role="menuitem" type="button" className="menu-item" onClick={() => { lockPass(); disconnect(); setOpen(false) }}><LockIcon />Lock</button>
+              <button role="menuitem" type="button" className="menu-item" onClick={() => { setOpen(false); passBridge.about() }}><HelpCircle />What is this?</button>
+            </>
+          ) : null}
           <div className="menu-sep" />
           <button role="menuitem" type="button" className="menu-item" onClick={copy}>{copied ? <Check /> : <Copy />}{copied ? 'Copied' : 'Copy address'}</button>
           <a role="menuitem" className="menu-item" href={explorerAddress(chainId, address)} target="_blank" rel="noreferrer"><ArrowUpRight />View on BscScan</a>

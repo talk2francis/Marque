@@ -6,6 +6,7 @@ import { useEffect } from 'react'
 import { WagmiProvider } from 'wagmi'
 import { marqueTheme, wagmiConfig } from './config'
 import { WalletReady } from './ready'
+import { PassHost } from '../pass/PassHost'
 
 /**
  * The wallet layer: wagmi for the connection, RainbowKit for the connect UI (it
@@ -22,6 +23,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     <WagmiProvider config={wagmiConfig} reconnectOnMount>
       <RainbowKitProvider modalSize="compact" theme={marqueTheme}>
         <WalletIconAccessibility />
+        <PassHost />
         <WalletReady.Provider value={true}>{children}</WalletReady.Provider>
       </RainbowKitProvider>
     </WagmiProvider>

@@ -5,6 +5,7 @@ import { ArrowUpRight, Check, Copy, Share2 } from 'lucide-react'
 import { campaignClock } from '@marque/commerce/client'
 import { declaredFor, questAddress, rememberQuestAddress, setDeclared } from '../_components/campaign/store'
 import { copyText } from '../../lib/clipboard'
+import { NoWalletLine } from '../_components/pass/NoWalletLine'
 import styles from './quest.module.css'
 
 const ADDR = /^0x[0-9a-fA-F]{40}$/
@@ -64,6 +65,7 @@ export function QuestChecker({ initial }: { initial?: string }) {
         <input id="quest-address" className={styles.checkerInput} value={value} onChange={(e) => setValue(e.target.value)} placeholder="0x… paste an address" spellCheck={false} autoComplete="off" inputMode="text" aria-invalid={error ? true : undefined} aria-describedby="quest-address-hint" />
         <button type="submit" className="btn btn--primary">Check</button>
       </div>
+      <NoWalletLine />
       <p id="quest-address-hint" className={styles.checkerHint} role={error ? 'alert' : undefined}>
         {error ?? <>No signature, nothing is sent.{remembered && remembered.toLowerCase() !== value.trim().toLowerCase() ? <> <button type="button" className={styles.linkBtn} onClick={() => go(remembered)}>Use {remembered.slice(0, 6)}…{remembered.slice(-4)}</button></> : null}</>}
       </p>

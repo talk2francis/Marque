@@ -8,6 +8,7 @@ import { ArrowUpRight, Check, Clock, ShieldCheck } from 'lucide-react'
 import { useHire, NETWORKS, type HireStep, type HireQuote, type StructuredTask } from '@marque/commerce/client'
 import { AgentAvatar } from './AgentAvatar'
 import { TaskForm, type TaskValue } from './hire/TaskForm'
+import { NoWalletLine } from './pass/NoWalletLine'
 import { AddressChip, Badge, Button, ButtonLink, Disclosure, ErrorNote, PriceTag, Sheet, TxStepper, type TxStep } from './ui'
 import { toast } from '../../lib/toast'
 import { explorerTx } from '../../lib/network'
@@ -231,7 +232,12 @@ export function HireSheet() {
         </Button>
       )
     }
-    if (!isConnected) return <Button variant="primary" block onClick={openConnectModal}>Connect a wallet to hire</Button>
+    if (!isConnected) return (
+      <>
+        <Button variant="primary" block onClick={openConnectModal}>Connect a wallet to hire</Button>
+        {state.quote?.chainId === 97 ? <NoWalletLine className="hs-nowallet" /> : null}
+      </>
+    )
     if (signing) return <Button variant="primary" block loading>Continue in wallet</Button>
     if (state.jobId && state.phase === 'error') return <Button variant="primary" block onClick={() => start()}>Continue the hire</Button>
     if (short?.token || short?.gas) return <Button variant="primary" block onClick={() => precheck()}>Check my balance again</Button>

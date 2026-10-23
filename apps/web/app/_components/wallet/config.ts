@@ -5,6 +5,7 @@ import {
   injectedWallet, rabbyWallet, walletConnectWallet, metaMaskWallet,
 } from '@rainbow-me/rainbowkit/wallets'
 import { createConfig, http } from 'wagmi'
+import { marquePassWallet, passCapableBrowser } from '../pass/connector'
 import { bsc, bscTestnet } from 'wagmi/chains'
 
 /**
@@ -19,12 +20,15 @@ import { bsc, bscTestnet } from 'wagmi/chains'
  */
 const WC_PROJECT_ID = process.env['NEXT_PUBLIC_WC_PROJECT_ID']
 
+const appWallets = WC_PROJECT_ID ? [injectedWallet, rabbyWallet, metaMaskWallet, walletConnectWallet] : [injectedWallet, rabbyWallet]
+// Marque Pass (V4-05): first on a device with no wallet installed, last otherwise; absent where the
+// browser has no WebAuthn at all (PRF itself is checked when the passkey is made).
+const hasInjected = typeof window !== 'undefined' && Boolean((window as { ethereum?: unknown }).ethereum)
+const pass = passCapableBrowser() ? [marquePassWallet] : []
 const walletGroups = [
   {
     groupName: 'Recommended',
-    wallets: WC_PROJECT_ID
-      ? [injectedWallet, rabbyWallet, metaMaskWallet, walletConnectWallet]
-      : [injectedWallet, rabbyWallet],
+    wallets: hasInjected ? [...appWallets, ...pass] : [...pass, ...appWallets],
   },
 ]
 
