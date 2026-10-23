@@ -952,3 +952,25 @@ a.introBack:hover { color: var(--fg); }
 .compareFoot a { color: var(--fg); }
 
 .trustLimits { margin-top: 0; margin-bottom: var(--s4, 16px); }
+
+/* Lane switch (V4 practice lane): two networks, side by side, never blended. */
+.laneSwitch { display: inline-flex; gap: 6px; padding: 4px; margin: 0 0 14px; border: 1px solid var(--hair); border-radius: var(--r-pill, 999px); background: var(--canvas-2); max-width: 100%; }
+.laneOpt {
+  appearance: none; border: 1px solid transparent; background: transparent; color: var(--ink-2); cursor: pointer;
+  display: inline-flex; align-items: baseline; gap: 8px; padding: 8px 14px; border-radius: var(--r-pill, 999px);
+  font: inherit; font-size: 14px; line-height: 1.2; white-space: nowrap;
+  transition: background 140ms ease, color 140ms ease, border-color 140ms ease;
+}
+.laneOpt:hover { color: var(--ink); }
+.laneOpt:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.laneOpt[aria-checked='true'] { background: var(--panel-2); color: var(--ink); border-color: var(--hair-2); }
+.laneOpt[data-lane='practice'][aria-checked='true'] { border-style: dashed; border-color: var(--ink-3); }
+.laneTitle { font-weight: 600; }
+.laneNote { font-size: 12.5px; color: var(--ink-3); }
+.laneCount { font-variant-numeric: tabular-nums; font-size: 12.5px; color: var(--ink-2); padding: 1px 7px; border-radius: 999px; background: var(--canvas); }
+@media (max-width: 520px) {
+  .laneSwitch { display: flex; }
+  .laneOpt { flex: 1 1 0; flex-direction: column; align-items: flex-start; gap: 2px; padding: 8px 12px; white-space: normal; }
+}
+@media (prefers-reduced-motion: reduce) { .laneOpt { transition: none; } }
+.laneBanner { margin: -4px 0 14px; font-size: 13px; color: var(--ink-2); padding-left: 10px; border-left: 2px dashed var(--ink-3); }

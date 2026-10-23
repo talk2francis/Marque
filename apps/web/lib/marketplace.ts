@@ -622,7 +622,6 @@ export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: Ma
 
   // Facet counts (D6): each option counted under every other filter, so a zero option can be
   // disabled with its reason instead of leading to an unexplained empty list.
-  const quoteChain = (r: MarketRow) => r.commerce.chainId ?? r.commerce.lastQuote?.chainId ?? null
   const quoteToken = (r: MarketRow) => (r.commerce.token ?? r.commerce.lastQuote?.token)?.symbol.toLowerCase() ?? null
   const byToken = q.token ? all.filter((r) => quoteToken(r) === q.token!.toLowerCase()) : all
   // A listing's lane is its registry chain (the base query); a quote bound to another chain is

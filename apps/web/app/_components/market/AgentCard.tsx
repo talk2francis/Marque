@@ -6,6 +6,7 @@ import { AgentAvatar } from '../AgentAvatar'
 import { Badge } from '../ui'
 import { avatarSource } from '../../../lib/avatar-source'
 import { utcDay } from '../../../lib/time'
+import { referenceAgentByToken } from '../../../lib/reference-agents'
 import {
   CATEGORY_LABEL, answersFree, deliveryWords, describe, hireBlocked, hireHref,
   profileHref, tryHref, warrantIsStale, type MarketRow,
@@ -47,6 +48,9 @@ export function AgentCard({ a, compare, base = '', variant = 'default' }: {
   const delivery = deliveryWords(a.track.delivery.medianSeconds)
   const w = a.warrant
   const stale = w.status === 'warranted' && warrantIsStale(w.date)
+  // The practice lane (BSC testnet) uses the same card; only a dashed network badge differs.
+  const practice = a.agentId.startsWith('97:')
+  const twin = !practice && a.isReference ? referenceAgentByToken(a.agentId)?.erc8004Testnet ?? null : null
   const art = avatarSource({ id: a.agentId, reference: a.isReference, imageUrl: a.identity.imageUrl, size: 512 })
 
   return (
@@ -72,6 +76,7 @@ export function AgentCard({ a, compare, base = '', variant = 'default' }: {
             <span className={styles.mark} data-tone={classified ? TONE[a.category!] : 'other'} aria-hidden="true" />
             {cat}
             {a.identityCount > 1 && !classified ? <span className={styles.count}> · {a.identityCount} identities</span> : null}
+            {practice ? <span className={styles.testnet} title="BSC testnet: test tokens, no real value">Testnet</span> : null}
           </span>
         </div>
         {a.isReference ? <a href="/register#reference-agents" className={styles.ref} title="Why Marque runs its own agents"><Badge kind="reference" /></a> : null}
@@ -128,6 +133,7 @@ export function AgentCard({ a, compare, base = '', variant = 'default' }: {
               : profile ? <a className="btn btn--sm" href={profile} title={hireBlocked(a)}>View record</a> : null}
         </span>
       </footer>
+      {twin ? <p className={styles.twin}><a href={`/agents/97/${twin.tokenId}`}>Also on testnet, free</a></p> : null}
       {terms.state === 'none' ? <p className={styles.why}>{terms.reason ?? `${hireBlocked(a)}.`}</p> : null}
     </article>
   )

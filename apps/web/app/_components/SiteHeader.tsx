@@ -108,6 +108,7 @@ const COLS: Array<{ label: string; links: Array<{ label: string; href: string; e
 ]
 
 const MAINNET = SDK_NETWORKS.find((n) => n.chainId === 56)
+const TESTNET = SDK_NETWORKS.find((n) => n.chainId === 97)
 const REGISTRY_TESTNET = '0x01D584f3a07Ba07D114386A78CA7fa3103db7AE7'
 const short = (a: string) => `${a.slice(0, 6)}…${a.slice(-4)}`
 
@@ -144,6 +145,11 @@ export function SiteFooter() {
             {MAINNET ? (
               <a href={`https://bscscan.com/address/${MAINNET.commerce}`} target="_blank" rel="noreferrer">
                 Hires settle on BSC mainnet · 56 through BNB Chain&apos;s ERC-8183 escrow {short(MAINNET.commerce)}
+              </a>
+            ) : null}
+            {TESTNET ? (
+              <a href={`https://testnet.bscscan.com/address/${TESTNET.commerce}`} target="_blank" rel="noreferrer">
+                Practice hires on BSC testnet · 97 through escrow {short(TESTNET.commerce)}, test tokens only
               </a>
             ) : null}
             <a href={`https://testnet.bscscan.com/address/${REGISTRY_TESTNET}`} target="_blank" rel="noreferrer">

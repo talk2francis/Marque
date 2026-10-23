@@ -6,6 +6,7 @@ import { EmptyState, Limits } from '@marque/ui'
 import type { InitialMarket, MarketFacetCounts } from './initial'
 import { track } from '../../lib/track'
 import { MarketToolbar } from './MarketToolbar'
+import { LaneSwitch } from './LaneSwitch'
 import { MarketList } from './MarketList'
 import { RegisterTable } from './RegisterTable'
 import { AgentCard } from '../_components/market/AgentCard'
@@ -127,6 +128,8 @@ export function Marketplace({ category: fixedCategory, initial }: { category?: s
     } else {
       window.history.pushState(null, '', next)
     }
+    // The header pill reads the lane from the address; tell it the address changed.
+    window.dispatchEvent(new Event('marque:lane'))
   }, [state, ready, fixedCategory])
 
   useEffect(() => {
@@ -270,6 +273,8 @@ export function Marketplace({ category: fixedCategory, initial }: { category?: s
 
   return (
     <>
+      <LaneSwitch lane={state.lane} onPick={(l) => patchFilter({ lane: l })} />
+      {state.lane === 'practice' ? <p className={styles.laneBanner}>BSC testnet · test tokens, no real value. Practice hires count for Set and Earn.</p> : null}
       <div className={styles.marketTabs} role="tablist" aria-label="What to show">
         {TABS.map((t) => (
           <button

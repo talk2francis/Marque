@@ -118,3 +118,9 @@
 
 /* A figure that does not exist yet reads as a state, not as a number. */
 .none { color: var(--ink-3); font-weight: 400; }
+
+/* Practice lane (BSC testnet): a dashed network badge, nothing else changes. */
+.testnet { margin-left: 8px; padding: 0 6px; border: 1px dashed var(--ink-3); border-radius: 999px; font-size: 11px; line-height: 1.6; color: var(--ink-2); }
+.twin { margin: 10px 0 0; font-size: 12.5px; }
+.twin a { color: var(--ink-2); text-decoration: underline; text-decoration-color: var(--hair-2); text-underline-offset: 3px; }
+.twin a:hover { color: var(--ink); text-decoration-color: currentColor; }

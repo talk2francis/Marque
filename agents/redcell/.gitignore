@@ -22,3 +22,6 @@ dist/
 
 # Skills installed at workspace root (regeneratable via `bag skills install`).
 .claude/skills/
+
+# Practice-lane seller config and data (scripts/testnet-sellers.mjs).
+.testnet/

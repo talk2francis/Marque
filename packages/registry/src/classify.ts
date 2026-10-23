@@ -49,7 +49,7 @@ async function candidates(limit: number, onlyLive: boolean): Promise<Row[]> {
              order by p.checked_at desc limit 1
            ), '[]'::jsonb) as skills
     from agent a
-    where a.chain_id = 56
+    where a.chain_id in (56, 97)
       and not exists (select 1 from agent_category c where c.agent_id = a.id)
       and (a.name is not null or a.description is not null or jsonb_array_length(a.tags) > 0)
       ${liveFilter}
@@ -100,7 +100,7 @@ async function semanticCandidates(limit: number): Promise<Row[]> {
            ), '[]'::jsonb) as skills
     from agent a
     join agent_category c on c.agent_id = a.id and c.category = 'unclassified'
-    where a.chain_id = 56
+    where a.chain_id in (56, 97)
       and exists (select 1 from probe p where p.agent_id = a.id and p.liveness = 'live')
       and (a.name is not null or a.description is not null or jsonb_array_length(a.tags) > 0)
     limit ${limit}
@@ -253,7 +253,7 @@ export async function reclassifyUnclassified(limit = 20000, opts: { staleOnly?: 
              order by p.checked_at desc limit 1
            ), '[]'::jsonb) as skills
     from agent a
-    where a.chain_id = 56
+    where a.chain_id in (56, 97)
       and exists (select 1 from agent_category c where c.agent_id = a.id and c.category = 'unclassified' and c.method = 'keyword')
       and not exists (select 1 from agent_category c where c.agent_id = a.id and c.category <> 'unclassified')
       and coalesce(a.description, '') <> ''

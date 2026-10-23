@@ -14,6 +14,7 @@ import { explorerTx } from '../../lib/network'
 import { utcStamp } from '../../lib/time'
 import { DeliverableView } from '../jobs/[chainId]/[jobId]/Deliverable'
 import { TermsBeforeQuote } from './terms/TermsCell'
+import { PracticeFunds } from './hire/PracticeFunds'
 
 /**
  * The hire sheet (DESIGN-SYSTEM.md 8.5). Opens over any page from `?hire=<agentKey>`,
@@ -42,7 +43,6 @@ const NET: Record<number, string> = { 56: 'BSC mainnet', 97: 'BSC testnet' }
 const CAT: Record<string, string> = { yield: 'Yield', grid: 'Grid', rebalancing: 'Rebalancing', health_factor: 'Health factor', security: 'Security' }
 const VERB: Record<string, string> = { health_factor: 'check', yield: 'find', grid: 'plan', rebalancing: 're-centre', security: 'review' }
 const USDT = '0x55d398326f99059fF775485246999027B3197955'
-const U_FAUCET = 'https://united-coin-u.github.io/u-faucet/'
 
 const duration = (s: number) => (s >= 86_400 ? `${Math.round(s / 86_400)} days` : s >= 3600 ? `${Math.round(s / 3600)} hours` : `${Math.round(s / 60)} minutes`)
 const bnb = (wei: string) => Number(formatUnits(BigInt(wei), 18))
@@ -257,6 +257,9 @@ export function HireSheet() {
             </div>
             {agent.firstParty ? <Badge kind="reference" /> : null}
           </header>
+          {agent.registryChainId === 97 ? (
+            <p className="hs-lane" role="note">BSC testnet · test tokens, no real value · counts for Set and Earn.{isConnected && walletChain !== 97 ? ' Your wallet will switch to BSC testnet for this hire only.' : ''}</p>
+          ) : null}
 
           {!agent.firstParty ? <p className="hs-fine">Service {agent.serviceId ?? 'unknown'}. Free execution has not been verified for this outside service. Requesting a price does not commission work or authorize payment.</p> : null}
           {!q && agent.preflight?.lastFailure ? <p className="hs-fine">{agent.preflight.lastFailure === 'expired_or_unproven' ? 'The stored price expired or lacks current validity evidence.' : 'The last stored price did not pass its checks.'} A fresh quote is required.</p> : null}
@@ -356,15 +359,16 @@ export function HireSheet() {
                       ) : <span className="hs-bal">Reading balances…</span>}
                     </div>
                   ) : null}
-                  {short?.token ? (
+                  {q.chainId === 97 && address && (short?.token || short?.gas) ? (
+                    <PracticeFunds address={address} needGas={Boolean(short?.gas)} needToken={Boolean(short?.token)} onDone={() => { void precheck() }} />
+                  ) : null}
+                  {short?.token && q.chainId !== 97 ? (
                     <ErrorNote
-                      error={{ title: `You need ${q.priceLabel} and have ${state.balances ? tokenAmt(state.balances.token, q.token.decimals) : '0'} ${q.token.symbol}.`, action: q.chainId === 97 ? 'Get test U from the faucet, then check again.' : `Swap USDT for ${q.token.symbol} on PancakeSwap, then check again.` }}
-                      action={q.chainId === 97
-                        ? <ButtonLink size="sm" href={U_FAUCET} external>Get test U</ButtonLink>
-                        : <ButtonLink size="sm" href={`https://pancakeswap.finance/swap?chain=bsc&inputCurrency=${USDT}&outputCurrency=${q.token.address}`} external>Swap to {q.token.symbol}<ArrowUpRight /></ButtonLink>}
+                      error={{ title: `You need ${q.priceLabel} and have ${state.balances ? tokenAmt(state.balances.token, q.token.decimals) : '0'} ${q.token.symbol}.`, action: `Swap USDT for ${q.token.symbol} on PancakeSwap, then check again.` }}
+                      action={<ButtonLink size="sm" href={`https://pancakeswap.finance/swap?chain=bsc&inputCurrency=${USDT}&outputCurrency=${q.token.address}`} external>Swap to {q.token.symbol}<ArrowUpRight /></ButtonLink>}
                     />
                   ) : null}
-                  {short?.gas ? (
+                  {short?.gas && q.chainId !== 97 ? (
                     <ErrorNote error={{ title: 'Add a little BNB for network fees.', action: `This hire needs up to ${gasBnb?.toFixed(5) ?? 'a little'} BNB on ${NET[q.chainId]}. Send some to this wallet, then check again.` }} />
                   ) : null}
                   <TxStepper steps={steps} label="Hire steps" onRetry={() => start()} />

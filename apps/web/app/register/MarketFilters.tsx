@@ -103,13 +103,7 @@ function Facets({
         </div>
       ))}
 
-      <Choice id="net-group" group="Network" value={state.network}
-        options={[
-          { value: null, label: 'Any' },
-          { value: 56, label: 'Mainnet', count: facets?.network[56] ?? null, disabledReason: zero(facets?.network[56], 'No agent in this view has a mainnet price right now.') },
-          { value: 97, label: 'Testnet practice', count: facets?.network[97] ?? null, disabledReason: zero(facets?.network[97], 'No agent in this view has a testnet price.') },
-        ]}
-        onPick={(v) => patch({ network: v })} />
+      {/* Network is not a filter: the lane switch above the tabs chooses mainnet or practice (invariant 32). */}
       <Choice id="token-group" group="Paid in" value={state.token}
         options={[{ value: null, label: 'Any' }, ...(['U', 'USDT', 'USDC'] as const).map((t) => ({
           value: t, label: t, count: facets?.token[t.toLowerCase()] ?? null,

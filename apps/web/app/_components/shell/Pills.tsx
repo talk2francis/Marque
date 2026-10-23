@@ -1,4 +1,5 @@
 'use client'
+import { useEffect, useState } from 'react'
 import { Tooltip } from '../ui/Tooltip'
 import { usePulse } from './usePulse'
 
@@ -14,13 +15,34 @@ const n = (v: number | null | undefined) => (v === null || v === undefined ? 'un
  * word joins the name only when something is wrong. The tooltip carries both
  * reads, and the pill opens /status.
  */
+/**
+ * The lane of the current view (SPEC-ACCESS 4): practice on `?lane=practice` and on any
+ * chain-97 agent, job or receipt address; mainnet otherwise. Read after mount from the
+ * address, and again when the marketplace changes it.
+ */
+function useViewLane(): 'mainnet' | 'practice' {
+  const [lane, setLane] = useState<'mainnet' | 'practice'>('mainnet')
+  useEffect(() => {
+    const read = () => {
+      const { pathname, search } = window.location
+      setLane(/[?&]lane=practice\b/.test(search) || /^\/(agents|jobs|receipts)\/97\//.test(pathname) ? 'practice' : 'mainnet')
+    }
+    read()
+    window.addEventListener('popstate', read)
+    window.addEventListener('marque:lane', read)
+    return () => { window.removeEventListener('popstate', read); window.removeEventListener('marque:lane', read) }
+  }, [])
+  return lane
+}
+
 export function NetworkPill() {
   const { data, isError, isPending } = usePulse()
+  const lane = useViewLane()
   const net = isPending ? 'loading' : isError || !data ? 'down' : data.network.state
   const sys = data?.system.state ?? null
   const state = net === 'loading' ? 'loading' : net === 'down' ? 'down' : net === 'lagging' || sys === 'degraded' ? 'degraded' : 'ok'
-  const chain = data?.network.chainId ?? 56
-  const name = NAME[chain] ?? `Chain ${chain}`
+  const chain = lane === 'practice' ? 97 : data?.network.chainId ?? 56
+  const name = lane === 'practice' ? 'Practice · BSC testnet' : NAME[chain] ?? `Chain ${chain}`
   const word = net === 'down' ? 'Status unknown' : net === 'lagging' ? 'Catching up' : sys === 'degraded' ? 'Degraded' : null
   const tip = isPending
     ? 'Reading the Quest Index and service checks.'
@@ -34,7 +56,7 @@ export function NetworkPill() {
   const all = state === 'ok' ? 'all systems normal' : state === 'loading' ? 'checking' : (word ?? '').toLowerCase()
   return (
     <Tooltip content={tip} side="bottom">
-      <a href="/status" className="hpill" data-state={state} aria-label={`${name}, ${all}. Open the status page.`}>
+      <a href="/status" className="hpill" data-state={state} data-lane={lane} aria-label={`${name}, ${all}. Open the status page.`}>
         <span className="hpill-dot" aria-hidden="true" />
         <span className="hpill-text">{name}{word ? <span className="hpill-sub"> · {word}</span> : null}</span>
       </a>

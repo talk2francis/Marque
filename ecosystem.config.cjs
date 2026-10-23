@@ -102,6 +102,37 @@ const agentApps = REFERENCE_AGENTS.map(({ name, port }) => ({
   error_file: `/root/.pm2/logs/marque-${name}-err.log`,
 }))
 
+/**
+ * The practice lane's reference sellers (BSC testnet, 97): the same code, engine and wallet
+ * as each mainnet seller, run from agents/<name>/.testnet with the config written by
+ * scripts/testnet-sellers.mjs (network, testnet U, keystore, escrow only). Caddy routes
+ * /agents/<name>/testnet/* here. Tidemark stays withheld while its archive read is down.
+ */
+const testnetApps = REFERENCE_AGENTS.filter(({ name }) => name !== 'tidemark').map(({ name, port }) => ({
+  name: `marque-${name}-testnet`,
+  cwd: `${ROOT}/agents/${name}/.testnet`,
+  script: `${ROOT}/node_modules/.bin/tsx`,
+  args: `${ROOT}/agents/${name}/src/unifiedMain.ts`,
+  interpreter: 'none',
+  env: {
+    ...env,
+    ...loadAgentEnv(name),
+    NODE_ENV: 'production',
+    TSX_TSCONFIG_PATH: `${ROOT}/agents/${name}/tsconfig.json`,
+    AGENT_PORT: String(port + 10),
+    AGENT_BIND_HOST: '127.0.0.1',
+    MARQUE_AGENT_PUBLIC_URL: `${env.MARQUE_PUBLIC_URL || 'https://marque.trade'}/agents/${name}/testnet`,
+    ERC8183_AGENT_URL: `${env.MARQUE_PUBLIC_URL || 'https://marque.trade'}/agents/${name}/testnet/erc8183`,
+  },
+  autorestart: true,
+  max_restarts: 50,
+  restart_delay: 3000,
+  max_memory_restart: '300M',
+  time: true,
+  out_file: `/root/.pm2/logs/marque-${name}-testnet-out.log`,
+  error_file: `/root/.pm2/logs/marque-${name}-testnet-err.log`,
+}))
+
 module.exports = {
   apps: [
     {
@@ -245,6 +276,7 @@ module.exports = {
       error_file: '/root/.pm2/logs/marque-conform-err.log',
     },
     ...agentApps,
+    ...testnetApps,
     // Blue/green web (P2-11): two slots behind Caddy. scripts/deploy-web.sh points
     // releases/slot-<port> at a build, starts the idle slot, health-checks it, switches the
     // Caddy upstream (/etc/caddy/marque-upstream.caddy) and stops the old slot 5 min later.

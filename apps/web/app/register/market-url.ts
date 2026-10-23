@@ -22,8 +22,8 @@ export interface MarketState {
   search: string
   category: string | null
   sort: string
-  /** The network of the live quote: 56 or 97. */
-  network: number | null
+  /** The lane: mainnet (real money, default) or practice (BSC testnet, test tokens). Never blended. */
+  lane: 'mainnet' | 'practice'
   /** The quote token, by symbol. */
   token: string | null
   /** Live quote at or under this, in token units. */
@@ -47,7 +47,7 @@ export const DEFAULT_STATE: MarketState = {
   search: '',
   category: null,
   sort: 'best',
-  network: null,
+  lane: 'mainnet',
   token: null,
   maxPrice: null,
   minRating: null,
@@ -77,7 +77,7 @@ const CATEGORY_VALUES = ['rebalancing', 'grid', 'yield', 'health_factor', 'secur
 export function apiQuery(s: MarketState): string {
   const p = new URLSearchParams()
   if (s.tab !== 'registry') p.set('tab', s.tab)
-  if (s.network) p.set('network', String(s.network))
+  if (s.lane === 'practice') p.set('lane', 'practice')
   if (s.token) p.set('token', s.token)
   if (s.maxPrice !== null) p.set('maxPrice', String(s.maxPrice))
   if (s.minRating !== null) p.set('minRating', String(s.minRating))
@@ -97,7 +97,7 @@ export function apiQuery(s: MarketState): string {
 export function stateToParams(s: MarketState, opts: { fixedCategory?: boolean } = {}): string {
   const p = new URLSearchParams()
   if (s.tab !== DEFAULT_STATE.tab) p.set('tab', s.tab)
-  if (s.network) p.set('network', String(s.network))
+  if (s.lane === 'practice') p.set('lane', 'practice')
   if (s.token) p.set('token', s.token)
   if (s.maxPrice !== null) p.set('maxPrice', String(s.maxPrice))
   if (s.minRating !== null) p.set('minRating', String(s.minRating))
@@ -144,7 +144,8 @@ export function paramsToState(
   const rawToken = p.get('token')
   return {
     tab: rawTab && TAB_VALUES.includes(rawTab) ? rawTab : DEFAULT_STATE.tab,
-    network: rawNet === '56' ? 56 : rawNet === '97' ? 97 : null,
+    // `lane=practice` is the address; the older `network=97` link still lands in the practice lane.
+    lane: p.get('lane') === 'practice' || rawNet === '97' ? 'practice' : 'mainnet',
     token: rawToken && /^[A-Za-z0-9]{1,12}$/.test(rawToken) ? rawToken : null,
     maxPrice: num(p.get('maxPrice')),
     minRating: num(p.get('minRating')) !== null ? Math.min(5, num(p.get('minRating'))!) : null,
@@ -184,7 +185,6 @@ export function activeFilters(s: MarketState, ifaceLabel: (v: string) => string)
   if (s.hasPrice) out.push({ key: 'hasPrice', label: 'Price listed', clear: { hasPrice: false } })
   if (s.iface) out.push({ key: 'iface', label: ifaceLabel(s.iface), clear: { iface: null } })
   if (s.firstParty) out.push({ key: 'firstParty', label: 'Marque reference only', clear: { firstParty: false } })
-  if (s.network) out.push({ key: 'network', label: s.network === 56 ? 'BSC mainnet' : 'BSC testnet', clear: { network: null } })
   if (s.token) out.push({ key: 'token', label: `Paid in ${s.token}`, clear: { token: null } })
   if (s.maxPrice !== null) out.push({ key: 'maxPrice', label: `Up to ${s.maxPrice}`, clear: { maxPrice: null } })
   if (s.minRating !== null) out.push({ key: 'minRating', label: `${s.minRating}+ stars`, clear: { minRating: null } })
@@ -192,7 +192,6 @@ export function activeFilters(s: MarketState, ifaceLabel: (v: string) => string)
 }
 
 export const CLEARED_FILTERS: Partial<MarketState> = {
-  network: null,
   token: null,
   maxPrice: null,
   minRating: null,

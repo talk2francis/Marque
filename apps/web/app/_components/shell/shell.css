@@ -129,6 +129,8 @@
     transition: color var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease);
   }
   .hpill:hover { color: var(--ink); border-color: color-mix(in srgb, var(--ink) 30%, transparent); }
+  /* Practice lane (BSC testnet): the same pill with a dashed outline (SPEC-ACCESS 4). */
+  .hpill[data-lane="practice"] { border-style: dashed; border-color: var(--ink-3); }
   .hpill-sub { font-weight: 400; color: var(--ink-3); }
   .hpill-dot { position: relative; width: 7px; height: 7px; border-radius: 50%; background: var(--moss); flex: none; }
   .hpill-dot::after { content: ''; position: absolute; inset: -3px; border-radius: 50%; background: inherit; opacity: 0.22; }
