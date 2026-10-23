@@ -1,6 +1,6 @@
 import { sql } from 'drizzle-orm'
 import { keccak256, parseAbi, toBytes, type Abi } from 'viem'
-import { db, ratingComment, firstPartyAgents } from '@marque/db'
+import { db, ratingComment, firstPartyAgents, firstPartyAgentsAllLanes } from '@marque/db'
 import { network, type ChainId } from './config.js'
 import { chainClient } from './chain.js'
 import { REPUTATION_REGISTRY, reputationAbi } from './indexer.js'
@@ -30,24 +30,29 @@ export interface RatingTarget { chainId: ChainId; jobId: string; client: string;
 /** The job, and the ERC-8004 token id its agent has on THIS chain's registry. */
 export async function ratingTarget(chainId: ChainId, jobId: string): Promise<RatingTarget> {
   const [j] = rowsOf(await db().execute(sql`
-    select j.client, j.state, j.provider, i.agent_id, i.category,
+    select j.client, j.state, j.provider, i.category,
            (select a.token_id from agent a where a.id = i.agent_id or (i.agent_id is null and a.agent_wallet = j.provider and a.chain_id = 56) limit 1) as token_id,
+           i.agent_id,
            (select coalesce(p.manifest->>'url', s.resolved_endpoint, s.endpoint) from agent_service s left join probe_schedule ps on ps.service_id = s.id left join probe p on p.id = ps.last_probe_id
               where s.id = i.service_id limit 1) as endpoint
     from commerce_job j left join hire_intent i on i.id = j.intent_id
     where j.chain_id = ${chainId} and j.job_id = ${jobId}`))
   if (!j) throw new HireError('unknown_job', 'Marque has not indexed that job yet. Give it a few seconds.', 404)
-  const mainnetToken = j['token_id'] ? String(j['token_id']) : null
-  if (!mainnetToken) throw new HireError('unknown_agent', 'That job pays an address with no ERC-8004 identity Marque knows.', 422)
-  const first = firstPartyAgents().find((f) => String(f.tokenId) === mainnetToken) ?? null
-  // Testnet: first-party agents carry a separate testnet registration.
-  const agentTokenId = chainId === 56 ? mainnetToken : first?.testnet?.chainId === chainId ? String(first.testnet.tokenId) : null
+  const tokenId = j['token_id'] ? String(j['token_id']) : null
+  if (!tokenId) throw new HireError('unknown_agent', 'That job pays an address with no ERC-8004 identity Marque knows.', 422)
+  // The hired identity's own registry chain (its lane). A practice-lane hire names the
+  // testnet identity directly; an older testnet hire of a mainnet agent maps to its twin.
+  const registryChain = j['agent_id'] ? Number(String(j['agent_id']).split(':')[0]) : 56
+  const first = firstPartyAgentsAllLanes().find((f) => f.chainId === registryChain && String(f.tokenId) === tokenId) ?? null
+  const mainnetFirst = registryChain === 56 ? firstPartyAgents().find((f) => String(f.tokenId) === tokenId) ?? null : null
+  const agentTokenId = registryChain === chainId ? tokenId
+    : mainnetFirst?.testnet?.chainId === chainId ? String(mainnetFirst.testnet.tokenId) : null
   if (!agentTokenId) throw new HireError('no_identity_on_chain', 'This agent has no ERC-8004 identity on this network to rate.', 422)
   return {
     chainId, jobId, client: String(j['client']), state: String(j['state']) as JobState, agentTokenId,
-    category: j['category'] ? String(j['category']) : first?.category ?? null,
-    endpoint: j['endpoint'] ? String(j['endpoint']) : first ? `https://marque.trade/agents/${first.slug}/a2a` : '',
-    slug: first?.slug ?? null,
+    category: j['category'] ? String(j['category']) : (first ?? mainnetFirst)?.category ?? null,
+    endpoint: j['endpoint'] ? String(j['endpoint']) : (first ?? mainnetFirst) ? `https://marque.trade/agents/${(first ?? mainnetFirst)!.slug}${registryChain === 97 ? '/testnet' : ''}/a2a` : '',
+    slug: (first ?? mainnetFirst)?.slug ?? null,
   }
 }
 

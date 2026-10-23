@@ -129,6 +129,13 @@
       "chainIds": [
         56
       ]
+    },
+    {
+      "address": "0xf737713bDdE05b053830cd5C9B0423D7431c9652",
+      "role": "Practice-lane golden path: a fresh wallet hires a reference agent on BSC testnet, funded from a team testnet wallet",
+      "chainIds": [
+        97
+      ]
     }
   ]
 }

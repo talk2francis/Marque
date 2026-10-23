@@ -326,7 +326,7 @@ export function HireSheet() {
                     </div>
                     <dl className="hs-facts">
                       <div><dt>Escrow fee</dt><dd>{agent.platformFeeBP === null ? 'unknown' : `${agent.platformFeeBP / 100}%`}</dd></div>
-                      <div><dt>Network fees</dt><dd>{gasBnb !== null ? `up to ${gasBnb.toFixed(5)} BNB${spotBnb ? ` (about $${(gasBnb * spotBnb).toFixed(2)})` : ''}` : 'paid in BNB, shown by your wallet'}</dd></div>
+                      <div><dt>Network fees</dt><dd>{gasBnb !== null ? `up to ${gasBnb.toFixed(5)} ${q.chainId === 97 ? 'tBNB, test BNB with no value' : 'BNB'}${spotBnb && q.chainId !== 97 ? ` (about $${(gasBnb * spotBnb).toFixed(2)})` : ''}` : 'paid in BNB, shown by your wallet'}</dd></div>
                       <div><dt>If it does not deliver</dt><dd>{refundDate ? `Reclaim your payment from ${refundDate}` : agent.reviewWindowSeconds ? `Reclaim your payment once the job's deadline passes, about ${duration(agent.reviewWindowSeconds)} after you pay` : 'Reclaim your payment once the job\'s deadline passes'}</dd></div>
                     </dl>
                     {q.assumptions && q.assumptions.length > 0 ? (
@@ -353,8 +353,8 @@ export function HireSheet() {
                       <AddressChip value={address} chainId={q.chainId} label="You" />
                       {state.balances ? (
                         <>
-                          <span className="hs-bal" data-ok={!short?.token}>{short?.token ? '' : <Check aria-hidden="true" />}{tokenAmt(state.balances.token, q.token.decimals)} {q.token.symbol}</span>
-                          <span className="hs-bal" data-ok={!short?.gas}>{short?.gas ? '' : <Check aria-hidden="true" />}{bnb(state.balances.gas).toFixed(4)} BNB for fees</span>
+                          <span className="hs-bal" data-ok={!short?.token}>{short?.token ? '' : <Check aria-hidden="true" />}{tokenAmt(state.balances.token, q.token.decimals)} {q.chainId === 97 ? 'test ' : ''}{q.token.symbol}</span>
+                          <span className="hs-bal" data-ok={!short?.gas}>{short?.gas ? '' : <Check aria-hidden="true" />}{bnb(state.balances.gas).toFixed(4)} {q.chainId === 97 ? 'tBNB' : 'BNB'} for fees</span>
                         </>
                       ) : <span className="hs-bal">Reading balances…</span>}
                     </div>

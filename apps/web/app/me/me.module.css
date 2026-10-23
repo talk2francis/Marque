@@ -59,3 +59,7 @@
 .help p { margin: 0; font-size: 14px; line-height: 1.55; color: var(--ink-2); max-width: 72ch; }
 .help p b { font-weight: 500; color: var(--ink); }
 .help a { width: fit-content; font-size: 14px; color: var(--ink); text-underline-offset: 3px; }
+
+/* Practice lane jobs: their own group, dashed rule, never summed with mainnet. */
+.practiceJobs { margin-top: 18px; padding-top: 14px; border-top: 1px dashed var(--hair-2); }
+.practiceHead { margin: 0 0 8px; font-size: 14px; font-weight: 600; display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }

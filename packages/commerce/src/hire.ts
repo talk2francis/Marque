@@ -6,6 +6,7 @@ import { safeFetch } from '@marque/probe'
 import { agenticCommerceAbi } from './generated.js'
 import { network, isSupportedChain, formatAmount, type ChainId } from './config.js'
 import { chainClient, disputeWindowSeconds, fromAny, receiptFromAny, sellerIdentity } from './chain.js'
+import { priceLabel as priceLabelOf } from './terms.js'
 import { buildJobDescription, buildPlainDescription, descriptionHash } from './description.js'
 import { computeExpiredAt, createJobCall } from './calls.js'
 import { requestQuote, verifySimpleQuote, verifyNegotiation, type NegotiateTask, type QuoteResult, NegotiationSchema, SimpleQuoteSchema } from './quote.js'
@@ -78,7 +79,7 @@ export async function quoteForBuyer(agentId: string, serviceId: number | null, t
   return {
     quoteId, quoteHash: q.quoteHash, quoteHashVersion: 1, agentId, serviceId: seller.serviceId, agentName: seller.name, category: seller.category,
     chainId: q.chainId, provider: q.provider, price: q.price.toString(),
-    priceLabel: `${formatAmount(q.price, q.token.decimals)} ${q.token.symbol}`,
+    priceLabel: priceLabelOf(q.price.toString(), q.token, q.chainId),
     token: q.token, signed: q.signed, expiresAt: q.expiresAt, estimatedCompletionSeconds: q.estimatedCompletionSeconds,
     sourceClaimVersion: 1, signatureEvidence: q.signatureEvidence, expirySource: q.expirySource,
     providerMatchesRegistry: true,
@@ -171,7 +172,7 @@ export async function createIntent(input: { wallet: string; quoteId: number; quo
   const window = await disputeWindowSeconds(chainId)
   const raw = q.raw as Record<string, unknown>
   const price = BigInt(q.priceRaw)
-  const priceLabel = `${formatAmount(price, token.decimals)} ${token.symbol}`
+  const priceLabel = priceLabelOf(price.toString(), token, chainId)
   const intent = await db().transaction(async tx => {
     await tx.execute(sql`set local statement_timeout = '5000ms'`)
     await tx.execute(sql`set local lock_timeout = '500ms'`)

@@ -58,12 +58,13 @@ export function questStates(w: WalletQuest | null | undefined): QuestStepState[]
   return [...cats, w.quest.ownAgentListed.done ? 'done' : 'todo']
 }
 
-export function useWalletQuest(address: string | undefined) {
+/** One wallet's hires on one chain: the campaign chain by default, or 97 for the practice lane. */
+export function useWalletQuest(address: string | undefined, chainId?: 56 | 97) {
   return useQuery<WalletQuest>({
-    queryKey: ['quest-wallet', address?.toLowerCase()],
+    queryKey: ['quest-wallet', address?.toLowerCase(), chainId ?? 'campaign'],
     enabled: Boolean(address),
     queryFn: async () => {
-      const r = await fetch(`/api/v1/phase2/wallet/${address}`, { cache: 'no-store', signal: AbortSignal.timeout(12_000) })
+      const r = await fetch(`/api/v1/phase2/wallet/${address}${chainId ? `?chainId=${chainId}` : ''}`, { cache: 'no-store', signal: AbortSignal.timeout(12_000) })
       if (!r.ok) throw new Error(String(r.status))
       const value = (await r.json()) as WalletQuest
       return { ...value, projection: {

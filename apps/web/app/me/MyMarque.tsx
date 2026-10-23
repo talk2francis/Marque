@@ -33,6 +33,8 @@ export function MyMarque({ addrParam, chainId }: { addrParam: string | null; cha
   const address = addrParam ?? connected ?? null
   const own = Boolean(address && connected && address.toLowerCase() === connected.toLowerCase())
   const quest = useWalletQuest(address ?? undefined)
+  // Practice-lane hires (BSC testnet) are their own list: never merged, never summed (invariant 32).
+  const practice = useWalletQuest(address ?? undefined, 97)
   const [owner, setOwner] = useState<OwnerAgent[] | null>(null)
 
   useEffect(() => {
@@ -94,6 +96,12 @@ export function MyMarque({ addrParam, chainId }: { addrParam: string | null; cha
         {quest.isPending ? <Rows /> : hires.length ? <JobList hires={[...hires].reverse()} /> : (
           <EmptyState title="No jobs yet" action={<ButtonLink size="sm" variant="primary" href="/quest">Start the quest</ButtonLink>}>Hires this wallet pays for appear here, every step read from the chain.</EmptyState>
         )}
+        {practice.data?.hires?.length ? (
+          <div className={styles.practiceJobs}>
+            <h3 className={styles.practiceHead}>Practice · BSC testnet <span className={styles.muted}>test tokens, no real value</span></h3>
+            <JobList hires={[...practice.data.hires].reverse()} />
+          </div>
+        ) : null}
         {own && hires.length ? (
           <aside className={styles.help} aria-label="Something wrong with a hire?">
             <b>Something wrong with a hire?</b>

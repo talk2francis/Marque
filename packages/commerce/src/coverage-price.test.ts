@@ -9,7 +9,7 @@ beforeEach(() => {
   execute.mockReset()
   transaction.mockReset().mockImplementation(async fn => fn({ execute }))
 })
-async function priceScope(offers: Array<{ chain: 56 | 97; token: string; decimals: number; price: string; symbol?: string }>) {
+async function priceScope(offers: Array<{ chain: 56 | 97; token: string; decimals: number; price: string; symbol?: string }>, lane: 'mainnet' | 'practice' = 'mainnet') {
   const candidates = offers.map((o, i) => ({ service_id: 900001 + i, agent_id: `${o.chain}:${network(o.chain).identityRegistry.toLowerCase()}:${990001+i}`, chain_id: o.chain, token_id: String(990001+i), name: 'Synthetic price-scope fixture', category: 'yield', endpoint: 'https://fixture.invalid/a2a', advertises: true }))
   const quotes = offers.map((o, i) => ({ service_id: 900001+i, agent_id: candidates[i]!.agent_id, chain_id: o.chain, token: o.token, token_decimals: o.decimals, token_symbol: o.symbol ?? 'U', price_raw: o.price, provider: '0x1111111111111111111111111111111111111111', created_at: new Date(), quote_expires_at: new Date(Date.now()+120000), ok: true, signed: false }))
   execute.mockImplementation(async q => {
@@ -18,7 +18,7 @@ async function priceScope(offers: Array<{ chain: 56 | 97; token: string; decimal
     if (text.includes('from commerce_quote')) return quotes
     return []
   })
-  return (await coverage()).categories.find(c => c.category === 'yield')!
+  return (await coverage(lane)).categories.find(c => c.category === 'yield')!
 }
 const token = network(56).assets[0]!.address
 const offer = { chain: 56 as const, token, decimals: 18, price: '10000000000000000' }
@@ -28,10 +28,14 @@ describe('coverage minimum price uses comparable atomic units', () => {
     expect(scope.hireable).toBe(2)
     expect(scope.cheapest).toBeNull()
   })
-  it('does not compare the same token symbol across chains', async () => {
-    const scope = await priceScope([offer, { ...offer, chain: 97, token: network(97).assets[0]!.address, price: '1' }])
-    expect(scope.hireable).toBe(2)
-    expect(scope.cheapest).toBeNull()
+  it('never blends lanes: each chain counts and prices only in its own lane (invariant 32)', async () => {
+    const both = [offer, { ...offer, chain: 97 as const, token: network(97).assets[0]!.address, price: '1' }]
+    const mainnet = await priceScope(both, 'mainnet')
+    expect(mainnet.hireable).toBe(1)
+    expect(mainnet.cheapest).toMatchObject({ chainId: 56, priceRaw: offer.price })
+    const practice = await priceScope(both, 'practice')
+    expect(practice.hireable).toBe(1)
+    expect(practice.cheapest).toMatchObject({ chainId: 97, priceRaw: '1' })
   })
   it('does not compare inconsistent decimal metadata', async () => {
     expect((await priceScope([offer, { ...offer, decimals: 6, price: '1' }])).cheapest).toBeNull()
