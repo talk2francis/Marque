@@ -181,8 +181,10 @@ export function ifaceLabel(v: string | null): string {
  * the rule the marketplace has always used.
  */
 export function profileHref(a: MarketRow): string | null {
-  if (a.isReference) return `/agents/${referenceAgent(a.agentId)?.slug ?? a.tokenId}`
-  if (a.tokenId && /^\d+$/.test(a.tokenId)) return `/agents/56/${a.tokenId}`
+  const chain = a.agentId.startsWith('97:') ? 97 : 56
+  // A reference agent's mainnet record lives at its readable slug; its testnet twin at /agents/97/<id>.
+  if (a.isReference && chain === 56) return `/agents/${referenceAgent(a.agentId)?.slug ?? a.tokenId}`
+  if (a.tokenId && /^\d+$/.test(a.tokenId)) return `/agents/${chain}/${a.tokenId}`
   return null
 }
 

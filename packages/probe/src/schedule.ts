@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm'
-import { db, firstPartyAgents, type Liveness, type ServiceKind } from '@marque/db'
+import { db, firstPartyAgentsAllLanes, type Liveness, type ServiceKind } from '@marque/db'
 
 /**
  * Tiered probe scheduling (P2-00 probe incident).
@@ -11,7 +11,8 @@ import { db, firstPartyAgents, type Liveness, type ServiceKind } from '@marque/d
  * and fills each cycle strictly by tier:
  *
  *   T0  first-party services (config/first-party.json)               every 5 min
- *   T1  services of agents classified into a category                every 30 min
+ *   T1  services of mainnet agents classified into a category        every 30 min
+ *       (practice-lane agents on BSC testnet are never T1: they ride T1b/T2/T3)
  *   T1b services whose last verdict was live / unbound / bad_schema  every 12 h
  *   T2  services never probed                                        FIFO
  *   T3  dead services, backing off by consecutive dead verdicts      1 h, 3 h, 6 h, 24 h, 72 h
@@ -94,7 +95,7 @@ const rowsOf = (r: unknown): Array<Record<string, unknown>> =>
 
 /** Agent ids of first-party rows, matched on chain id + token id from config. */
 export async function firstPartyAgentIds(): Promise<string[]> {
-  const fp = firstPartyAgents()
+  const fp = firstPartyAgentsAllLanes()
   if (!fp.length) return []
   const pairs = sql.join(fp.map((a) => sql`(${a.chainId}::int, ${String(a.tokenId)}::text)`), sql`, `)
   const r = await db().execute(sql`select id from agent where (chain_id, token_id) in (${pairs})`)
@@ -126,7 +127,7 @@ export async function syncSchedule(): Promise<{ inserted: number; backfilled: bo
   const hist = rowsOf(await d.execute(sql`
     select s.id as service_id, s.agent_id,
            h.lv as livenesses, h.at as last_checked_at, h.last_id,
-           exists (select 1 from agent_category c where c.agent_id = s.agent_id and c.category <> 'unclassified') as classified
+           (s.agent_id like '56:%' and exists (select 1 from agent_category c where c.agent_id = s.agent_id and c.category <> 'unclassified')) as classified
     from agent_service s
     left join lateral (
       select array_agg(coalesce(p.liveness, case when p.ok then 'live' else 'dead' end) order by p.checked_at desc) as lv,
@@ -169,22 +170,23 @@ export async function syncSchedule(): Promise<{ inserted: number; backfilled: bo
  * checked every ~10 min, flapping the header's status pill against the 10 min T0
  * freshness window (found 26 Sep).
  */
-export async function dueByTier(limit: number, deadCap: number, fpIds: readonly string[]): Promise<DueService[]> {
+export async function dueByTier(limit: number, deadCap: number, fpIds: readonly string[], chainId?: number): Promise<DueService[]> {
   const fpList = fpIds.length ? sql.join(fpIds.map((id) => sql`${id}`), sql`, `) : sql`''`
   const r = await db().execute(sql`
     select ps.service_id, ps.agent_id, s.kind, coalesce(s.resolved_endpoint, s.endpoint) as url,
            ps.last_liveness, ps.consecutive_dead,
            (ps.agent_id in (${fpList})) as first_party,
-           exists (select 1 from agent_category c where c.agent_id = ps.agent_id and c.category <> 'unclassified') as classified
+           (ps.agent_id like '56:%' and exists (select 1 from agent_category c where c.agent_id = ps.agent_id and c.category <> 'unclassified')) as classified
     from probe_schedule ps
     join agent_service s on s.id = ps.service_id
     where ps.next_due_at <= now() + make_interval(secs => ${DUE_GRACE_SECONDS}::int)
       and s.currently_declared is distinct from false
       and (s.is_template = false or s.resolved_endpoint is not null)
+      ${chainId ? sql`and ps.agent_id like ${`${chainId}:%`}` : sql``}
     order by
       case
         when ps.agent_id in (${fpList}) then 0
-        when exists (select 1 from agent_category c where c.agent_id = ps.agent_id and c.category <> 'unclassified') then 1
+        when ps.agent_id like '56:%' and exists (select 1 from agent_category c where c.agent_id = ps.agent_id and c.category <> 'unclassified') then 1
         when ps.last_checked_at is null then 3
         when ps.last_liveness in ('live', 'discovered', 'unbound', 'bad_schema') then 2
         else 4
@@ -255,7 +257,7 @@ export async function tierFreshness(opts: { firstPartyOnly?: boolean } = {}): Pr
     with t as (
       select ps.service_id, ps.last_checked_at,
              case when ps.agent_id in (${fpList}) then 'T0'
-                  when exists (select 1 from agent_category c where c.agent_id = ps.agent_id and c.category <> 'unclassified') then 'T1'
+                  when ps.agent_id like '56:%' and exists (select 1 from agent_category c where c.agent_id = ps.agent_id and c.category <> 'unclassified') then 'T1'
              end as tier
       from probe_schedule ps join agent_service s on s.id = ps.service_id
       where (s.is_template = false or s.resolved_endpoint is not null)

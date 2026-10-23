@@ -92,7 +92,7 @@ class HostLimiter {
   }
 }
 
-export async function runProbeCycle(opts: { limit?: number; concurrency?: number; deadCap?: number; deadlineMs?: number } = {}): Promise<ProbeCycleResult> {
+export async function runProbeCycle(opts: { limit?: number; concurrency?: number; deadCap?: number; deadlineMs?: number; /** Only one chain's services (operator runs). */ chainId?: number } = {}): Promise<ProbeCycleResult> {
   const limit = opts.limit ?? 400
   const concurrency = opts.concurrency ?? 12
   const deadCap = opts.deadCap ?? Number(process.env.PROBE_DEAD_CAP ?? 150)
@@ -100,7 +100,7 @@ export async function runProbeCycle(opts: { limit?: number; concurrency?: number
 
   const sync = await syncSchedule()
   const fpIds = await firstPartyAgentIds()
-  const candidates = await dueByTier(limit, deadCap, fpIds)
+  const candidates = await dueByTier(limit, deadCap, fpIds, opts.chainId)
   const byTier: Record<Tier, number> = { T0: 0, T1: 0, T1b: 0, T2: 0, T3: 0 }
   for (const c of candidates) byTier[c.tier]++
   const result: ProbeCycleResult = {

@@ -47,8 +47,22 @@ export function firstPartyAgents(): FirstPartyAgent[] {
 }
 
 /** `chainId:tokenId` keys, the stable identity a row is matched on. */
+/**
+ * Mainnet reference agents plus their BSC testnet twins (the practice lane). A twin is the
+ * same agent, wallet and engine registered on chain 97; it carries `<legacyId>:testnet` so it
+ * never folds onto the mainnet record. Use only where identities are chain-qualified
+ * (canonical ids, or chain id plus token id): a token id alone collides across chains.
+ */
+export function firstPartyAgentsAllLanes(): FirstPartyAgent[] {
+  const main = firstPartyAgents()
+  const twins = main.filter((a) => a.testnet).map((a) => ({
+    ...a, chainId: a.testnet!.chainId, tokenId: a.testnet!.tokenId, legacyId: `${a.legacyId}:testnet`, testnet: undefined,
+  }))
+  return [...main, ...twins]
+}
+
 export function firstPartyKeys(): Set<string> {
-  return new Set(firstPartyAgents().map((a) => `${a.chainId}:${a.tokenId}`))
+  return new Set(firstPartyAgentsAllLanes().map((a) => `${a.chainId}:${a.tokenId}`))
 }
 
 export function isFirstParty(chainId: number, tokenId: string | number): boolean {
@@ -76,13 +90,13 @@ export function canonicalAgentId(a: Pick<FirstPartyAgent, 'chainId' | 'tokenId'>
  * from Phase 2 on. Any query that says "third party" must exclude all of them.
  */
 export function firstPartyIds(): string[] {
-  return firstPartyAgents().flatMap((a) => [a.legacyId, canonicalAgentId(a)])
+  return firstPartyAgentsAllLanes().flatMap((a) => [a.legacyId, canonicalAgentId(a)])
 }
 
 /** Maps any first-party id to its legacy id, so both count as one agent. */
 export function firstPartyIdMap(): Map<string, string> {
   const m = new Map<string, string>()
-  for (const a of firstPartyAgents()) {
+  for (const a of firstPartyAgentsAllLanes()) {
     m.set(a.legacyId, a.legacyId)
     m.set(canonicalAgentId(a), a.legacyId)
   }

@@ -67,6 +67,7 @@ export function reasonWords(failure: string | null): string {
     case 'unreachable': case 'timeout': return 'It did not answer the last price check.'
     case 'declined': return 'It declined the last price check, usually because the task needs more detail.'
     case 'provider_mismatch': return 'Its price pays a different wallet than the one it registered.'
+    case 'wrong_lane': return 'Its price is for a different network than the one it is registered on.'
     case 'currency_unsupported': return 'It quotes in a token BNB Chain escrow does not take.'
     case 'chain_unsupported': case 'wrong_contract': return 'Its quote is not for BNB Chain escrow.'
     case 'bad_signature': case 'unsigned': case 'malformed': return 'Its quote could not be verified.'

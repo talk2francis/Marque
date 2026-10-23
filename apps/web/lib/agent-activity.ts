@@ -17,12 +17,12 @@ const str = (v: unknown) => v == null ? null : String(v)
 const iso = (v: unknown) => v == null ? null : new Date(v as string).toISOString()
 
 /** Only public chain evidence. No task text, IP, contact information or inferred identity. */
-export async function agentActivity(agentId: string, provider: string | null): Promise<AgentActivity> {
+export async function agentActivity(agentId: string, provider: string | null, chainId: 56 | 97 = 56): Promise<AgentActivity> {
   const p = await cachedProjection(`agent:activity:v1:${agentId}:${provider ?? ''}`, async () => {
     const team = teamWallets()
     const teamSql = team.length ? sql.join(team.map(w => sql`${w.toLowerCase()}`), sql`,`) : sql`''`
     // An intent identifies the exact agent. Without one we can only attribute the provider wallet.
-    const scope = sql`j.chain_id = 56 and (i.agent_id = ${agentId}
+    const scope = sql`j.chain_id = ${chainId} and (i.agent_id = ${agentId}
       or (j.intent_id is null and j.provider = ${provider?.toLowerCase() ?? ''}))`
     const [counts, jobs] = await Promise.all([
       db().execute(sql`select count(*)::int as total,

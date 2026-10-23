@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { marketplaceAgents, type MarketQuery } from '../../../../lib/marketplace'
 import { parseCatalogQuery } from '@marque/commerce/catalog'
+import { chainOf, parseLane } from '@marque/commerce'
 import { machineCatalog } from '../../../../lib/machine-catalog'
 import { checkWindow, clientKey } from '../../../../lib/limits'
 import { withDeadline } from '../../../../lib/deadline'
@@ -40,6 +41,7 @@ export async function GET(req: NextRequest) {
     iface: p.get('iface'),
     tab: (['ready', 'free', 'tested', 'all'] as const).find((t) => t === p.get('tab')) ?? null,
     firstPartyOnly: bool('firstParty'),
+    lane: p.get('lane') ? parseLane(p.get('lane')) : null,
     network: p.get('network') === '56' ? 56 : p.get('network') === '97' ? 97 : null,
     token: p.get('token') && /^[A-Za-z0-9]{1,12}$/.test(p.get('token')!) ? p.get('token') : null,
     maxPrice: p.get('maxPrice') && Number.isFinite(Number(p.get('maxPrice'))) ? Number(p.get('maxPrice')) : null,
@@ -54,14 +56,14 @@ export async function GET(req: NextRequest) {
   }
   try {
     const result = await withDeadline(marketplaceAgents(q), 12_000)
-    const { rows, generatedAt, total, offset, hasMore, facets } = result
+    const { rows, generatedAt, total, offset, hasMore, facets, lane } = result
     const age = Date.now() - Date.parse(generatedAt)
     const headers = { ...baseHeaders, 'X-Marque-Projection-Computed-At': generatedAt, 'X-Marque-Projection-Age-Ms': Number.isFinite(age) && age >= 0 ? String(age) : 'UNKNOWN', 'X-Marque-Projection-Stale': String(!Number.isFinite(age) || age < 0 || age > 180_000) }
     if (machine) {
       const body = machineCatalog(result, q.limit ?? 120)
       return NextResponse.json(body, { headers: { ...headers, 'Cache-Control': body.cacheMaxAgeSeconds ? `public, max-age=${body.cacheMaxAgeSeconds}` : 'no-store', Link: '</api/v1/openapi.json>; rel="describedby"' } })
     }
-    return NextResponse.json({ chainId: 56, generatedAt, provenance: 'MEASURED', count: rows.length, total, offset, hasMore, facets, agents: rows }, { headers })
+    return NextResponse.json({ chainId: chainOf(lane), lane, generatedAt, provenance: 'MEASURED', count: rows.length, total, offset, hasMore, facets, agents: rows }, { headers })
   } catch (error) {
     // Classify failures for operators without logging query values or credentials.
     console.warn('[marketplace]', error instanceof Error && error.message === 'Check timed out'

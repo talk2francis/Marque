@@ -1,0 +1,38 @@
+import { notFound } from 'next/navigation'
+import { SiteHeader, SiteFooter } from '../../../_components/SiteHeader'
+import { Storefront } from '../../_storefront/Storefront'
+import { storefrontByToken } from '../../../../lib/storefront'
+
+// Same for every visitor, so served from Next's cache and re-rendered at most every 30 s
+// (P2-11 load test: rendering per request capped the site near 15 requests a second).
+export const revalidate = 30
+// A dynamic segment is only page-cached when it declares its params; none are
+// prerendered at build, each renders on its first request and is then cached.
+export async function generateStaticParams() { return [] }
+
+/**
+ * Any agent's storefront by its ERC-8004 token on BSC testnet: the practice lane (invariant 32).
+ * Marque's reference agents live at their readable address and redirect there.
+ */
+export async function generateMetadata({ params }: { params: Promise<{ tokenId: string }> }) {
+  const { tokenId } = await params
+  const d = /^\d{1,12}$/.test(tokenId) ? await storefrontByToken(tokenId, 97).catch(() => null) : null
+  return d
+    ? { title: `${d.name} on testnet, agent #${tokenId}`, description: d.description ? d.description.slice(0, 180) : `ERC-8004 agent #${tokenId} on BSC testnet, the practice lane: its price, record and Marque test result.` }
+    : { title: 'Agent not found' }
+}
+
+export default async function AgentStorefront({ params }: { params: Promise<{ tokenId: string }> }) {
+  const { tokenId } = await params
+  if (!/^\d{1,12}$/.test(tokenId)) notFound()
+  const d = await storefrontByToken(tokenId, 97)
+  if (!d) notFound()
+  // A reference agent's testnet twin has its own page: same agent, practice lane.
+  return (
+    <>
+      <SiteHeader active="register" />
+      <main><Storefront d={d} /></main>
+      <SiteFooter />
+    </>
+  )
+}

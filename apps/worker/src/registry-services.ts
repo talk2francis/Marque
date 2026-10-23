@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm'
-import { db, firstPartyAgents, canonicalAgentId } from '@marque/db'
+import { db, firstPartyAgentsAllLanes, canonicalAgentId } from '@marque/db'
 import { chainClient, isSupportedChain, network } from '@marque/commerce'
 import { readRegistrationMetadata } from '@marque/probe'
 import { syncDeclaredServices } from '@marque/registry'
@@ -70,7 +70,7 @@ export async function refreshRegistryServices(): Promise<{ attempted: number; re
   // Future URI updates have a durable change cursor; priority/rolling reads repair older snapshots
   // and mutable HTTPS documents whose URI never changes. Log failure without starving those reads.
   const queuedChanges = await queueUriUpdates().catch(() => null)
-  const fp = firstPartyAgents().map(canonicalAgentId)
+  const fp = firstPartyAgentsAllLanes().map(canonicalAgentId)
   const active = rows(await db().execute(registryRefreshCandidatesQuery(fp)))
   // A second small rotating batch keeps non-listed indexed services refreshable too.
   const [cursor] = rows(await db().execute(sql`select cursor from ingest_cursor where source = 'registry:services-walk'`))

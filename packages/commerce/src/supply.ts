@@ -1,6 +1,7 @@
 import { sql, type SQL } from 'drizzle-orm'
-import { db, commerceQuote, firstPartyAgents, canonicalAgentId, type FirstPartyAgent } from '@marque/db'
+import { db, commerceQuote, firstPartyAgentsAllLanes, canonicalAgentId, type FirstPartyAgent } from '@marque/db'
 import { requestQuote, probeTask, type QuoteResult } from './quote.js'
+import { chainOf, type Lane } from './lane.js'
 import { boundedCommerceRead, coalescedCatalogRead } from './read-budget.js'
 import { dueQuoteProbes, type QuoteProbeObservation } from './quote-schedule.js'
 
@@ -57,7 +58,7 @@ export interface SellerCandidate {
  * The negotiate endpoint is the card's own `url`, the address the agent publishes.
  */
 export async function sellerCandidates(scope?: { agentId: string; serviceId?: number | null }): Promise<SellerCandidate[]> {
-  const fp = firstPartyAgents()
+  const fp = firstPartyAgentsAllLanes()
   const fpIds = fp.map((a) => canonicalAgentId(a))
   const rows = await supplyRows(sql`
     with cat as (
@@ -271,7 +272,7 @@ export async function refreshQuoteFor(agentId: string): Promise<{ attempted: num
 /** First-party agents carry their category from config, as an owner-declared label. */
 export async function syncFirstPartyCategories(): Promise<number> {
   let n = 0
-  for (const a of firstPartyAgents()) {
+  for (const a of firstPartyAgentsAllLanes()) {
     const id = canonicalAgentId(a)
     const r = await db().execute(sql`
       insert into agent_category (agent_id, category, confidence, method, rationale)
@@ -362,7 +363,10 @@ export function serviceCommerceFromQuote(q: Record<string, unknown>, delivered: 
     if (typeof providerExpiry === 'number') expiry = Math.min(expiry, providerExpiry * 1000)
     if (q['signed'] === true && typeof responseExpiry === 'number') expiry = Math.min(expiry, responseExpiry * 1000)
     const conflicting = q['signed'] === true && typeof providerExpiry === 'number' && typeof responseExpiry === 'number' && providerExpiry !== responseExpiry
-    const valid = fresh && Number.isFinite(expiry) && expiry > now && !conflicting && typeof q['signed'] === 'boolean'
+    // Invariant 32: a quote counts only on the chain the agent is registered on.
+    const registryChain = Number(String(q['agent_id']).split(':')[0])
+    const inLane = q['chain_id'] == null || Number(q['chain_id']) === registryChain
+    const valid = fresh && Number.isFinite(expiry) && expiry > now && !conflicting && typeof q['signed'] === 'boolean' && inLane
     const wellFormed = typeof q['negotiation_hash'] === 'string' && typeof q['provider_sig'] === 'string' && (q['provider_sig'] as string).length > 2
     const chainId = q['chain_id'] == null ? null : Number(q['chain_id'])
     const provider = q['provider'] ? String(q['provider']) : null
@@ -377,10 +381,10 @@ export function serviceCommerceFromQuote(q: Record<string, unknown>, delivered: 
       chainId,
       provider,
       priceRaw: q['price_raw'] ? String(q['price_raw']) : null,
-      token: q['ok'] === true && q['token'] ? { address: String(q['token']), symbol: String(q['token_symbol']), decimals: Number(q['token_decimals']) } : null,
+      token: q['ok'] === true && inLane && q['token'] ? { address: String(q['token']), symbol: String(q['token_symbol']), decimals: Number(q['token_decimals']) } : null,
       quotedAt: new Date(at).toISOString(),
       quoteExpiresAt: Number.isFinite(expiry) ? new Date(expiry).toISOString() : null,
-      failure: q['ok'] === true ? (valid ? null : 'expired_or_unproven') : (q['failure'] ? String(q['failure']) : null),
+      failure: q['ok'] === true ? (valid ? null : inLane ? 'expired_or_unproven' : 'wrong_lane') : (q['failure'] ? String(q['failure']) : null),
       failureDetail: q['ok'] === true ? (valid ? null : 'Stored price is expired or its quote evidence is incomplete. Request a fresh exact-task quote.') : (q['detail'] ? String(q['detail']) : null),
       deliveredJobs: n,
       signed: q['ok'] === true && typeof q['signed'] === 'boolean' ? q['signed'] : null,
@@ -420,8 +424,10 @@ export interface CategoryCoverage {
 }
 
 /** Per-category commercial supply (SPEC-TRACKING 6.5), from stored quotes only. */
-export async function coverage(): Promise<{ measuredAt: string; categories: CategoryCoverage[]; unclassifiedHireable: CoverageAgent[] }> {
-  const [candidates, states] = await Promise.all([sellerCandidates(), commercialStates()])
+export async function coverage(lane: Lane = 'mainnet'): Promise<{ measuredAt: string; lane: Lane; categories: CategoryCoverage[]; unclassifiedHireable: CoverageAgent[] }> {
+  // One lane at a time: a testnet identity never counts toward mainnet supply (invariant 32).
+  const [allCandidates, states] = await Promise.all([sellerCandidates(), commercialStates()])
+  const candidates = allCandidates.filter((c) => c.chainId === chainOf(lane))
   const now = Date.now()
   const agents: Array<CoverageAgent & { category: string | null }> = candidates.map((c) => {
     const s = states.get(c.serviceId)
@@ -477,6 +483,7 @@ export async function coverage(): Promise<{ measuredAt: string; categories: Cate
   })
   return {
     measuredAt: new Date().toISOString(),
+    lane,
     categories,
     unclassifiedHireable: agents.filter((a) => a.category === null && isHire(a)),
   }

@@ -2,7 +2,7 @@ import 'server-only'
 import { sql } from 'drizzle-orm'
 import { firstPartyIds, canonicalAgentIdSql } from '@marque/db'
 import { boundedCommerceRead, coalescedCatalogRead } from '@marque/commerce/reads'
-import { commercialStates, formatAmount, type CommercialState } from '@marque/commerce'
+import { chainOf, commercialStates, formatAmount, type CommercialState, type Lane } from '@marque/commerce'
 import { agentStates, TASK_FOR_CATEGORY, type AgentStateView } from './agent-state'
 import { agentTracks, trackFromSource, type AgentTrack } from './agent-track'
 import { selectedAgentRows } from './compare-selection'
@@ -116,7 +116,9 @@ export interface MarketQuery {
   tab?: 'ready' | 'free' | 'tested' | 'all' | null
   /** Only Marque reference agents. `thirdPartyOnly` is the opposite toggle. */
   firstPartyOnly?: boolean
-  /** The network its live quote is on (56 or 97). */
+  /** The lane: mainnet (56, default) or practice (97). Listings and counts never mix lanes. */
+  lane?: Lane | null
+  /** Legacy alias of `lane`: 97 selects the practice lane, anything else mainnet. */
   network?: number | null
   /** The token its live quote is in, by symbol. */
   token?: string | null
@@ -170,24 +172,28 @@ function originOf(v: unknown): string | null {
  * that refresh. Recomputing inline stalled whichever request came next for 2 to 5 s, and on a
  * cold process after a deploy, concurrent home loads piled onto it for 20 s (P2-11 swap proof).
  */
-let baseMemo: { at: number; rows: MarketRow[] } | null = null
-let baseInflight: Promise<MarketRow[]> | null = null
+const baseMemo = new Map<number, { at: number; rows: MarketRow[] }>()
+const baseInflight = new Map<number, Promise<MarketRow[]>>()
 const BASE_TTL_MS = 3 * 60_000
 
-async function marketplaceBase(): Promise<MarketRow[]> {
-  if (baseMemo && Date.now() - baseMemo.at < BASE_TTL_MS) return baseMemo.rows
-  if (!baseInflight) {
-    baseInflight = queryAgents()
-      .then((rows) => { baseMemo = { at: Date.now(), rows }; return rows })
-      .finally(() => { baseInflight = null })
+/** One memo per lane: the two networks never share a base set (invariant 32). */
+async function marketplaceBase(chainId: 56 | 97 = 56): Promise<MarketRow[]> {
+  const memo = baseMemo.get(chainId)
+  if (memo && Date.now() - memo.at < BASE_TTL_MS) return memo.rows
+  let run = baseInflight.get(chainId)
+  if (!run) {
+    run = queryAgents(undefined, undefined, chainId)
+      .then((rows) => { baseMemo.set(chainId, { at: Date.now(), rows }); return rows })
+      .finally(() => { baseInflight.delete(chainId) })
+    baseInflight.set(chainId, run)
     // A background refresh that fails keeps serving the last good set.
-    if (baseMemo) baseInflight.catch(() => undefined)
+    if (memo) run.catch(() => undefined)
   }
-  return baseMemo ? baseMemo.rows : baseInflight
+  return memo ? memo.rows : run
 }
 
 /** Same eligibility and owner/host counts; scope only whole owner partitions. */
-export function marketplaceSourceQuery(owners?: readonly string[]) {
+export function marketplaceSourceQuery(owners?: readonly string[], chainId: 56 | 97 = 56) {
   return sql`
     with latest as (
       -- Newest probe per service by primary key (probe_schedule), not a scan of history.
@@ -196,7 +202,7 @@ export function marketplaceSourceQuery(owners?: readonly string[]) {
       from probe_schedule ps join probe p on p.id = ps.last_probe_id
       ${owners ? sql`where ps.service_id in (
         select ss.id from agent_service ss join agent scoped on scoped.id = ss.agent_id
-        where scoped.chain_id = 56 and scoped.owner_address in (${sql.join(owners.map(owner => sql`${owner}`), sql`, `)})
+        where scoped.chain_id = ${chainId} and scoped.owner_address in (${sql.join(owners.map(owner => sql`${owner}`), sql`, `)})
       )` : sql``}
     ),
     svc as (
@@ -221,7 +227,7 @@ export function marketplaceSourceQuery(owners?: readonly string[]) {
       from agent_service s left join latest p on p.service_id = s.id
       where s.currently_declared is distinct from false
       ${owners ? sql`and s.agent_id in (
-        select scoped.id from agent scoped where scoped.chain_id = 56
+        select scoped.id from agent scoped where scoped.chain_id = ${chainId}
           and scoped.owner_address in (${sql.join(owners.map(owner => sql`${owner}`), sql`, `)})
       )` : sql``}
       group by s.agent_id
@@ -237,7 +243,7 @@ export function marketplaceSourceQuery(owners?: readonly string[]) {
       select distinct on (cid, test_id) cid as agent_id, test_id, pass, failed_fields, ran_at
       from (
         select ${canonicalAgentIdSql(sql`agent_id`)} as cid, test_id, pass, failed_fields, ran_at
-        from conformance_result where agent_id like '56:%' or agent_id like 'marque:%'
+        from conformance_result where agent_id like ${`${chainId}:%`} or agent_id like 'marque:%'
       ) cr
       -- The latest run wins. A failed retest cannot leave an older pass looking current.
       order by cid, test_id, ran_at desc
@@ -246,7 +252,7 @@ export function marketplaceSourceQuery(owners?: readonly string[]) {
       select distinct on (agent_id) agent_id, category, confidence
       from agent_category
       ${owners ? sql`where agent_id in (
-        select scoped.id from agent scoped where scoped.chain_id = 56
+        select scoped.id from agent scoped where scoped.chain_id = ${chainId}
           and scoped.owner_address in (${sql.join(owners.map(owner => sql`${owner}`), sql`, `)})
       )` : sql``}
       order by agent_id, (category <> 'unclassified') desc, confidence desc, assigned_at desc
@@ -278,7 +284,7 @@ export function marketplaceSourceQuery(owners?: readonly string[]) {
       left join svc s on s.agent_id = a.id
       left join conf_pick c on c.agent_id = a.id
       left join cat on cat.agent_id = a.id
-      where a.chain_id = 56
+      where a.chain_id = ${chainId}
         and (s.any_reachable or c.agent_id is not null)
         and a.id <> 'canary:ssrf'
         ${owners ? sql`and a.owner_address in (${sql.join(owners.map(owner => sql`${owner}`), sql`, `)})` : sql``}
@@ -315,11 +321,11 @@ export function marketplaceSourceQuery(owners?: readonly string[]) {
 }
 
 /** Select a category superset; the original projection still chooses its winner. */
-export function marketplaceCategoryQuery(category?: string | null) {
+export function marketplaceCategoryQuery(category?: string | null, chainId: 56 | 97 = 56) {
   return sql`
     select distinct cat.agent_id
     from agent_category cat join agent a on a.id = cat.agent_id
-    where a.chain_id = 56
+    where a.chain_id = ${chainId}
       ${category ? sql`and cat.category = ${category}` : sql`and cat.category is not null and cat.category <> 'unclassified'`}
   `
 }
@@ -343,9 +349,9 @@ export async function marketPageAgentStates(page: readonly Pick<MarketRow, 'agen
 // checked on every response. Never turn a failed commerce read into zero supply.
 let scopeMemo: { key: string; at: number; rows: MarketRow[] } | null = null
 let scopeInflight: { key: string; promise: Promise<{ rows: MarketRow[]; at: number }> } | null = null
-async function scopedBase(ids: readonly string[], states?: Awaited<ReturnType<typeof commercialStates>>) {
+async function scopedBase(ids: readonly string[], states?: Awaited<ReturnType<typeof commercialStates>>, chainId: 56 | 97 = 56) {
   if (!ids.length) return { rows: [] as MarketRow[], at: Date.now() }
-  const key = [...new Set(ids)].sort().join(',')
+  const key = `${chainId}|${[...new Set(ids)].sort().join(',')}`
   if (scopeMemo?.key === key && Date.now() - scopeMemo.at < BASE_TTL_MS) return scopeMemo
   if (scopeInflight?.key === key) return scopeInflight.promise
   const promise = (async () => {
@@ -354,11 +360,11 @@ async function scopedBase(ids: readonly string[], states?: Awaited<ReturnType<ty
     // SQL groups null owners together. Preserve that entire partition using the
     // original path rather than dropping unknown-owner clones from its counts.
     if (owners.some(row => row.owner_address === null)) {
-      const rows = await marketplaceBase()
-      return { rows, at: baseMemo?.at ?? Date.now() }
+      const rows = await marketplaceBase(chainId)
+      return { rows, at: baseMemo.get(chainId)?.at ?? Date.now() }
     }
     const addresses = [...new Set(owners.map(row => row.owner_address!))]
-    const rows = addresses.length ? await queryAgents(addresses, states) : []
+    const rows = addresses.length ? await queryAgents(addresses, states, chainId) : []
     const value = { key, rows, at: Date.now() }
     scopeMemo = value
     return value
@@ -382,14 +388,14 @@ function bestCommerceByAgent(commerce: Awaited<ReturnType<typeof commercialState
   return bestByAgent
 }
 
-async function queryAgents(owners?: readonly string[], states?: Awaited<ReturnType<typeof commercialStates>>): Promise<MarketRow[]> {
+async function queryAgents(owners?: readonly string[], states?: Awaited<ReturnType<typeof commercialStates>>, chainId: 56 | 97 = 56): Promise<MarketRow[]> {
   const fp = new Set(firstPartyIds())
   // Independent observations share the request deadline; do not add their
   // cold read times serially before filtering and pagination can begin.
   const [commerce, rows, tracks] = await Promise.all([
     states ?? commercialStates(),
-    coalescedCatalogRead(marketplaceSourceQuery(owners)),
-    agentTracks(56),
+    coalescedCatalogRead(marketplaceSourceQuery(owners, chainId)),
+    agentTracks(chainId),
   ])
 
   const list = (((rows as unknown as { rows?: unknown[] }).rows ?? (rows as unknown as unknown[])) as Array<Record<string, unknown>>)
@@ -467,7 +473,7 @@ async function queryAgents(owners?: readonly string[], states?: Awaited<ReturnTy
     }
   })
 
-  return thirdParty.map((r) => ({ ...r, track: trackFromSource(r.tokenId ?? '', 56, tracks) }))
+  return thirdParty.map((r) => ({ ...r, track: trackFromSource(r.tokenId ?? '', chainId, tracks) }))
 }
 
 type ServiceCommerceRow = Awaited<ReturnType<typeof commercialStates>> extends Map<number, infer V> ? V : never
@@ -552,16 +558,19 @@ function otherLast(rows: MarketRow[]): MarketRow[] {
 
 export interface MarketFacets { network: { 56: number; 97: number }; token: Record<string, number> }
 
-export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: MarketRow[]; generatedAt: string; total: number; offset: number; hasMore: boolean; supply: MarketSupplyCategory[]; quoteObservedAt: string | null; facets: MarketFacets }> {
+export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: MarketRow[]; generatedAt: string; total: number; offset: number; hasMore: boolean; supply: MarketSupplyCategory[]; quoteObservedAt: string | null; facets: MarketFacets; lane: Lane }> {
+  const lane: Lane = q.lane ?? (q.network === 97 ? 'practice' : 'mainnet')
+  const chainId = chainOf(lane)
+  const inLane = (agentId: string) => agentId.startsWith(`${chainId}:`)
   const hireable = q.tab === 'ready' || q.hireableOnly === true
   const states = hireable ? await commercialStates() : undefined
-  const readyIds = states ? [...new Set([...states.values()].filter(c => c.state === 'hireable' || c.state === 'settleable').map(c => c.agentId))] : null
-  let ids = q.agentIds ? (readyIds ? q.agentIds.filter(id => readyIds.includes(id)) : q.agentIds) : readyIds
+  const readyIds = states ? [...new Set([...states.values()].filter(c => (c.state === 'hireable' || c.state === 'settleable') && inLane(c.agentId)).map(c => c.agentId))] : null
+  let ids = q.agentIds ? (readyIds ? q.agentIds.filter(id => readyIds.includes(id)) : q.agentIds.filter(inLane)) : readyIds
   if (ids === null && (q.category || !q.includeUnclassified)) {
-    const matches = await boundedCommerceRead(marketplaceCategoryQuery(q.category), 'exact')
+    const matches = await boundedCommerceRead(marketplaceCategoryQuery(q.category, chainId), 'exact')
     ids = Array.from(matches as unknown as Array<{ agent_id: string }>).map(row => row.agent_id)
   }
-  const base = ids ? await scopedBase(ids, states) : { rows: await marketplaceBase(), at: baseMemo?.at ?? Date.now() }
+  const base = ids ? await scopedBase(ids, states, chainId) : { rows: await marketplaceBase(chainId), at: baseMemo.get(chainId)?.at ?? Date.now() }
   // Clone: the base is memoised and the sort below is in place.
   const observedAt = Date.now()
   const freshCommerce = states ? bestCommerceByAgent(states) : null
@@ -616,12 +625,13 @@ export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: Ma
   const quoteChain = (r: MarketRow) => r.commerce.chainId ?? r.commerce.lastQuote?.chainId ?? null
   const quoteToken = (r: MarketRow) => (r.commerce.token ?? r.commerce.lastQuote?.token)?.symbol.toLowerCase() ?? null
   const byToken = q.token ? all.filter((r) => quoteToken(r) === q.token!.toLowerCase()) : all
-  const byNetwork = q.network ? all.filter((r) => quoteChain(r) === q.network) : all
+  // A listing's lane is its registry chain (the base query); a quote bound to another chain is
+  // already 'quoteable' with failure wrong_lane, so it lists with its reason and never as hireable.
+  const byNetwork = all
   const facets = {
-    network: { 56: byToken.filter((r) => quoteChain(r) === 56).length, 97: byToken.filter((r) => quoteChain(r) === 97).length },
+    network: { 56: lane === 'mainnet' ? byToken.length : 0, 97: lane === 'practice' ? byToken.length : 0 },
     token: Object.fromEntries(['u', 'usdt', 'usdc'].map((t) => [t, byNetwork.filter((r) => quoteToken(r) === t).length])) as Record<string, number>,
   }
-  if (q.network) all = all.filter((r) => quoteChain(r) === q.network)
   if (q.token) all = all.filter((r) => quoteToken(r) === q.token!.toLowerCase())
 
   const COMMERCE_RANK: Record<CommercialState, number> = { settleable: 0, hireable: 1, quoteable: 2, preview_only: 3, unavailable: 4 }
@@ -685,6 +695,6 @@ export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: Ma
       hireBlockedReason,
     } satisfies MarketRow
   })
-  return { rows, total: all.length, offset, supply, facets, quoteObservedAt: states ? new Date(observedAt).toISOString() : null,
+  return { rows, total: all.length, offset, supply, facets, lane, quoteObservedAt: states ? new Date(observedAt).toISOString() : null,
     hasMore: offset + limit < all.length, generatedAt: new Date(base.at).toISOString() }
 }

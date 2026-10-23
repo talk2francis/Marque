@@ -1,7 +1,7 @@
 import { sql, eq, and, desc } from 'drizzle-orm'
 import { createHash, randomBytes, timingSafeEqual } from 'node:crypto'
 import { decodeEventLog, getAddress, isAddress, type Hex } from 'viem'
-import { db, hireIntent, commerceQuote, notifyAttempt, firstPartyAgents, canonicalAgentId } from '@marque/db'
+import { db, hireIntent, commerceQuote, notifyAttempt, firstPartyAgentsAllLanes, canonicalAgentId } from '@marque/db'
 import { safeFetch } from '@marque/probe'
 import { agenticCommerceAbi } from './generated.js'
 import { network, isSupportedChain, formatAmount, type ChainId } from './config.js'
@@ -99,7 +99,7 @@ export function quoteFailureSentence(reason: string): string {
 
 /** The category frozen into the intent: first-party config, else Marque's current label. Never from the request. */
 async function categoryOf(agentId: string): Promise<string> {
-  const fp = firstPartyAgents().find((a) => canonicalAgentId(a) === agentId)
+  const fp = firstPartyAgentsAllLanes().find((a) => canonicalAgentId(a) === agentId)
   if (fp) return fp.category
   const r = rowsOf(await db().execute(sql`
     select category from agent_category where agent_id = ${agentId}

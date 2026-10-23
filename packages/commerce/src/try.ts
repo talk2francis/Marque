@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm'
-import { db, firstPartyAgents, canonicalAgentId } from '@marque/db'
+import { db, firstPartyAgentsAllLanes, canonicalAgentId } from '@marque/db'
 import { safeFetch } from '@marque/probe'
 import { HireError, sellerFor } from './hire.js'
 
@@ -78,7 +78,7 @@ export async function freeTarget(agentId: string, serviceId?: number | null): Pr
   // A2A liveness and a card are not evidence that message/send is free or read-only.
   // Keep the audited reference preview; outside providers require a separate reviewed
   // operation contract before their tasks may be invoked through this free rail.
-  if (!firstPartyAgents().some(a => canonicalAgentId(a) === agentId)) throw new HireError('free_preview_unsupported', 'A free, read-only task has not been verified for this outside service. Request a quote or inspect its record.', 422)
+  if (!firstPartyAgentsAllLanes().some(a => canonicalAgentId(a) === agentId)) throw new HireError('free_preview_unsupported', 'A free, read-only task has not been verified for this outside service. Request a quote or inspect its record.', 422)
   try {
     const seller = await sellerFor(agentId, serviceId)
     return { name: seller.name, category: seller.category, endpoint: seller.endpoint, firstPartySlug: seller.firstParty?.slug ?? null }

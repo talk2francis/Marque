@@ -1,6 +1,6 @@
 import 'server-only'
 import { sql } from 'drizzle-orm'
-import { cachedProjection, canonicalAgentIdSql, db, firstPartyAgents } from '@marque/db'
+import { cachedProjection, canonicalAgentIdSql, db, firstPartyAgentsAllLanes } from '@marque/db'
 import { currentTerms, disputeWindowSeconds, sellerFor, teamWallets, termsOf, type LastQuote, type ServiceCommerce, type Terms } from '@marque/commerce'
 import { buyerFeedbackBinding } from '@marque/commerce/feedback'
 import { agentTrack, type AgentTrack } from './agent-track'
@@ -25,6 +25,8 @@ export interface StoreSample { jobId: string; chainId: number; at: string | null
 
 export interface Storefront {
   agentId: string
+  /** The agent's registry chain: its lane (56 mainnet, 97 practice). */
+  chainId: 56 | 97
   tokenId: string
   name: string
   description: string | null
@@ -81,7 +83,8 @@ async function computeStorefront(agentId: string): Promise<Storefront | null> {
     from agent a where a.id = ${agentId} limit 1`))
   if (!a) return null
   const tokenId = String(a['token_id'])
-  const fp = firstPartyAgents().find((f) => f.chainId === 56 && String(f.tokenId) === tokenId) ?? null
+  const chainId = Number(agentId.split(':')[0]) === 97 ? 97 : 56
+  const fp = firstPartyAgentsAllLanes().find((f) => f.chainId === chainId && String(f.tokenId) === tokenId) ?? null
   const ref = fp ? referenceAgent(fp.slug) : null
 
   const [services, tests, probe, probes24, reviewsRaw, states, track, windowS, seller] = await Promise.all([
@@ -100,11 +103,11 @@ async function computeStorefront(agentId: string): Promise<Storefront | null> {
       select r.client, r.value, r.value_decimals, r.tx_hash, r.block_time, r.feedback_hash, c.comment, c.job_id,
              ${buyerFeedbackBinding(sql`${s(a['agent_wallet']) ?? ''}`, sql`${agentId}`)} as verified
       from rating r left join rating_comment c on lower(c.feedback_hash) = lower(r.feedback_hash) and c.chain_id = r.chain_id and c.agent_token_id = r.agent_token_id and lower(c.client) = lower(r.client)
-      where r.chain_id = 56 and r.agent_token_id = ${tokenId} and not r.revoked and r.tag1 = 'starred'
+      where r.chain_id = ${chainId} and r.agent_token_id = ${tokenId} and not r.revoked and r.tag1 = 'starred'
       order by r.block_number desc limit 8`).then(rowsOf).catch(() => []),
     currentTerms(agentId).catch(() => null),
-    agentTrack(tokenId),
-    disputeWindowSeconds(56).catch(() => null),
+    agentTrack(tokenId, chainId),
+    disputeWindowSeconds(chainId).catch(() => null),
     sellerFor(agentId, null).catch(() => null),
   ])
 
@@ -118,12 +121,12 @@ async function computeStorefront(agentId: string): Promise<Storefront | null> {
       select j.job_id, j.deliverable, e.block_time from commerce_job j
       join hire_intent i on i.id = j.intent_id
       left join commerce_event e on e.chain_id = j.chain_id and e.job_id = j.job_id and e.name = 'JobSubmitted'
-      where j.chain_id = 56 and i.agent_id = ${agentId} and j.state in ('SUBMITTED', 'DISPUTED', 'COMPLETED', 'PAID')
+      where j.chain_id = ${chainId} and i.agent_id = ${agentId} and j.state in ('SUBMITTED', 'DISPUTED', 'COMPLETED', 'PAID')
       order by j.updated_block desc nulls last limit 1`).catch(() => []))
     if (j) {
       const url = `https://marque.trade/agents/${fp.slug}/erc8183/job/${j['job_id']}/response`
       const manifest = await readManifest(url, s(j['deliverable']))
-      if (manifest?.content) sample = { jobId: String(j['job_id']), chainId: 56, at: iso(j['block_time']), manifest, hashOnChain: s(j['deliverable']) }
+      if (manifest?.content) sample = { jobId: String(j['job_id']), chainId, at: iso(j['block_time']), manifest, hashOnChain: s(j['deliverable']) }
     }
   }
 
@@ -131,6 +134,7 @@ async function computeStorefront(agentId: string): Promise<Storefront | null> {
   const mintTx = s(a['contract_address']) ? await registrationTx(tokenId, String(a['contract_address']), (a['raw_metadata'] as Record<string,unknown> | null)?.['scan_created_tx_hash'] ?? ref?.erc8004.registerTx) : null
   return {
     agentId,
+    chainId,
     tokenId,
     name: s(a['name']) ?? `Agent #${tokenId}`,
     description: s(a['description']) ?? ref?.blurb ?? null,
@@ -168,8 +172,8 @@ async function computeStorefront(agentId: string): Promise<Storefront | null> {
 }
 
 /** The storefront for an ERC-8004 token on BSC mainnet, or null when Marque has not indexed it. */
-export async function storefrontByToken(tokenId: string): Promise<Storefront | null> {
+export async function storefrontByToken(tokenId: string, chainId: 56 | 97 = 56): Promise<Storefront | null> {
   if (!/^\d{1,12}$/.test(tokenId)) return null
-  const [r] = rowsOf(await db().execute(sql`select id from agent where chain_id = 56 and token_id = ${tokenId} order by id limit 1`).catch(() => []))
+  const [r] = rowsOf(await db().execute(sql`select id from agent where chain_id = ${chainId} and token_id = ${tokenId} order by id limit 1`).catch(() => []))
   return r ? storefront(String(r['id'])) : null
 }

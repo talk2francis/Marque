@@ -47,7 +47,7 @@ export function Storefront({ d }: { d: Data }) {
   const c = d.commerce
   // Badges follow the same terms as the rail (invariant 41); the rail island re-reads them live.
   const hireable = d.terms.state === 'fresh'
-  const net = NET[c?.chainId ?? 56] ?? 'BNB Smart Chain'
+  const net = NET[d.chainId] ?? 'BNB Smart Chain'
   const cat = d.category && d.category !== 'unclassified' ? CAT[d.category] ?? d.category : 'Unclassified'
   // The badge and verdict read the agent's own category test: the conformance worker runs
   // all four on a third party, and failing another category's test says nothing about it.
@@ -117,7 +117,7 @@ export function Storefront({ d }: { d: Data }) {
           </AgentIdentityHero>
           )}
 
-          <StorefrontTabs activity={<AgentActivity agentId={d.agentId} provider={d.wallet} />}>
+          <StorefrontTabs activity={<AgentActivity agentId={d.agentId} provider={d.wallet} chainId={d.chainId} />}>
           {/* 1. What it does */}
           <section className={styles.section} aria-labelledby="sf-does">
             <h2 id="sf-does">What it does</h2>
@@ -196,14 +196,14 @@ export function Storefront({ d }: { d: Data }) {
                   <li key={r.tx}>
                     <Stars value={r.stars} count={1} mine />
                     <span className={styles.revWho}>
-                      <AddressChip value={r.client} chainId={56} />
+                      <AddressChip value={r.client} chainId={d.chainId} />
                       {r.verified ? <span className={styles.verified}>Exact {BRAND.name} job link</span> : r.team ? <span className={styles.teamTag}>Team wallet</span> : <span className={styles.registryTag}>Registry feedback</span>}
                     </span>
                     {r.comment ? <p className={styles.revText}>{r.comment}</p> : null}
                     <span className={styles.revMeta}>
                       {r.at ? utcDay(r.at) : null}
-                      {r.jobId ? <> · <a href={`/jobs/56/${r.jobId}`}>job {r.jobId}</a></> : null}
-                      {' · '}<a href={explorerTx(56, r.tx)} target="_blank" rel="noreferrer">on BscScan</a>
+                      {r.jobId ? <> · <a href={`/jobs/${d.chainId}/${r.jobId}`}>job {r.jobId}</a></> : null}
+                      {' · '}<a href={explorerTx(d.chainId, r.tx)} target="_blank" rel="noreferrer">on BscScan</a>
                     </span>
                   </li>
                 ))}
@@ -281,17 +281,17 @@ export function Storefront({ d }: { d: Data }) {
           <section className={styles.section} aria-labelledby="sf-id">
             <h2 id="sf-id">Identity and evidence</h2>
             <dl className={styles.facts}>
-              <div><dt>ERC-8004 identity</dt><dd>#{d.tokenId} on BSC mainnet · 56{d.testnetTokenId ? ` (and #${d.testnetTokenId} on BSC testnet · 97)` : ''}</dd></div>
-              {d.registry ? <div><dt>Identity contract</dt><dd><AddressChip value={d.registry} chainId={56} /> <a className={styles.ext} href={`https://bscscan.com/token/${d.registry}?a=${d.tokenId}`} target="_blank" rel="noreferrer">token #{d.tokenId}<ArrowUpRight aria-hidden="true" /></a></dd></div> : null}
-              {d.registerTx ? <div><dt>Registration</dt><dd><HashChip value={d.registerTx} chainId={56} /></dd></div> : d.registeredAt ? <div><dt>Registered</dt><dd>{utcDay(d.registeredAt)} <span className={styles.muted}>(the mint is on the token page)</span></dd></div> : null}
-              {d.owner ? <div><dt>Owner</dt><dd><AddressChip value={d.owner} chainId={56} /></dd></div> : null}
-              {d.wallet ? <div><dt>Agent wallet</dt><dd><AddressChip value={d.wallet} chainId={56} /> <span className={styles.muted}>paid on delivery; the signer of its quotes</span></dd></div> : null}
+              <div><dt>ERC-8004 identity</dt><dd>#{d.tokenId} on {net} · {d.chainId}{d.chainId === 56 && d.testnetTokenId ? <> (and <a href={`/agents/97/${d.testnetTokenId}`}>#{d.testnetTokenId} on BSC testnet · 97</a>)</> : ''}</dd></div>
+              {d.registry ? <div><dt>Identity contract</dt><dd><AddressChip value={d.registry} chainId={d.chainId} /> <a className={styles.ext} href={`https://${d.chainId === 97 ? 'testnet.' : ''}bscscan.com/token/${d.registry}?a=${d.tokenId}`} target="_blank" rel="noreferrer">token #{d.tokenId}<ArrowUpRight aria-hidden="true" /></a></dd></div> : null}
+              {d.registerTx ? <div><dt>Registration</dt><dd><HashChip value={d.registerTx} chainId={d.chainId} /></dd></div> : d.registeredAt ? <div><dt>Registered</dt><dd>{utcDay(d.registeredAt)} <span className={styles.muted}>(the mint is on the token page)</span></dd></div> : null}
+              {d.owner ? <div><dt>Owner</dt><dd><AddressChip value={d.owner} chainId={d.chainId} /></dd></div> : null}
+              {d.wallet ? <div><dt>Agent wallet</dt><dd><AddressChip value={d.wallet} chainId={d.chainId} /> <span className={styles.muted}>paid on delivery; the signer of its quotes</span></dd></div> : null}
               <div><dt>Metadata last read</dt><dd>{d.metadataReadAt ? `${utcStamp(d.metadataReadAt)} UTC` : 'not read yet'} <ProvenanceChip provenance="CLAIMED" /></dd></div>
               <div><dt>Last discovery check</dt><dd>{d.lastProbe ? <>{d.lastProbe.detail?.startsWith('card readable') ? 'Agent card readable; task call not tested by this check' : d.lastProbe.detail ?? d.lastProbe.liveness}{d.lastProbe.latencyMs !== null ? ` in ${d.lastProbe.latencyMs} ms` : ''}, {ago(d.lastProbe.at)}</> : 'not probed yet'} <ProvenanceChip provenance="MEASURED" /></dd></div>
               <div><dt>Endpoint observations, 24 h</dt><dd>{d.probes24h.total ? `${d.probes24h.reachable} of ${d.probes24h.total} discovery requests returned HTTP success. This is sampled reachability across services, not task success or guaranteed uptime.` : 'No observations in the last 24 hours.'} <ProvenanceChip provenance="MEASURED" /></dd></div>
               <div><dt>Last quote</dt><dd>{c?.quotedAt ? <>{c.priceLabel ?? (c.failure === 'expired_or_unproven' ? 'expired or unproven' : 'not accepted')}, {ago(c.quotedAt)}{c.signed ? ', signed by the agent wallet' : c.signed === false ? ', plain quote naming the agent wallet' : ''}</> : 'never quoted'} <ProvenanceChip provenance="MEASURED" /></dd></div>
             </dl>
-            {d.wallet ? <p className={styles.muted}><a className={styles.ext} href={explorerAddress(56, d.wallet)} target="_blank" rel="noreferrer">Every transaction of this agent on BscScan<ArrowUpRight aria-hidden="true" /></a></p> : null}
+            {d.wallet ? <p className={styles.muted}><a className={styles.ext} href={explorerAddress(d.chainId, d.wallet)} target="_blank" rel="noreferrer">Every transaction of this agent on BscScan<ArrowUpRight aria-hidden="true" /></a></p> : null}
           </section>
           </StorefrontTabs>
         </div>

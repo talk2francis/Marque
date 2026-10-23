@@ -39,6 +39,16 @@ const DEEP_ENABLED = process.env.INGEST_DEEP_DISABLED !== '1'
 const CHAIN_COOLDOWN_MS = Number(process.env.INGEST_CHAIN_COOLDOWN_MS ?? 60_000)
 const CHAIN_MAX_IDS = Number(process.env.INGEST_CHAIN_MAX_IDS ?? 20_000)
 const CHAIN_ENABLED = process.env.INGEST_CHAIN_DISABLED !== '1'
+/**
+ * The practice lane (BSC testnet, 97). Its own small pass on its own cooldown, after the
+ * mainnet work and never instead of it: a list sweep plus a little enrichment. Testnet
+ * rows carry chain_id 97 and only ever surface in the practice lane (invariant 32).
+ */
+const TESTNET_ENABLED = process.env.INGEST_TESTNET_DISABLED !== '1'
+const TESTNET_COOLDOWN_MS = Number(process.env.INGEST_TESTNET_COOLDOWN_MS ?? 20 * 60_000)
+const TESTNET_PAGES = Number(process.env.INGEST_TESTNET_PAGES ?? 40)
+const TESTNET_ENRICH = Number(process.env.INGEST_TESTNET_ENRICH ?? 150)
+const BSC_TESTNET = 97
 
 const sleep = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
 
@@ -61,7 +71,7 @@ function log(event: string, data: Record<string, unknown>): void {
  * whole tick, so a single slow page at a deep offset starved enrichment for an
  * hour — the sweep is the fragile stage and the enrich is the valuable one.
  */
-async function tick(client: ScanClient, state: { lastFunnelAt: number; lastFullSweepAt: number; lastDeepAt: number; lastChainAt: number }): Promise<void> {
+async function tick(client: ScanClient, state: { lastFunnelAt: number; lastFullSweepAt: number; lastDeepAt: number; lastChainAt: number; lastTestnetAt: number }): Promise<void> {
   // The reachable list is a ~10k window swept whole in one pass (~100 calls).
   // Doing that every tick would blow the daily API budget, and new agents only
   // trickle in — so a full window sweep runs at most once per cooldown.
@@ -124,6 +134,18 @@ async function tick(client: ScanClient, state: { lastFunnelAt: number; lastFullS
     log('enrich_error', { error: err instanceof Error ? err.message : String(err) })
   }
 
+  if (TESTNET_ENABLED && Date.now() - state.lastTestnetAt >= TESTNET_COOLDOWN_MS) {
+    state.lastTestnetAt = Date.now()
+    try {
+      const sweep = await sweepList({ client, chainId: BSC_TESTNET, maxPages: TESTNET_PAGES })
+      const enrich = await enrichDetails({ client, chainId: BSC_TESTNET, limit: TESTNET_ENRICH })
+      log('testnet', { pages: sweep.pagesFetched, seen: sweep.agentsSeen, upserted: sweep.agentsUpserted, stopped: sweep.stoppedBecause,
+        enriched: enrich.succeeded, failed: enrich.failed, services: enrich.servicesWritten })
+    } catch (err) {
+      log('testnet_error', { error: err instanceof Error ? err.message : String(err) })
+    }
+  }
+
   if (Date.now() - state.lastFunnelAt > FUNNEL_EVERY_MS) {
     try {
       const stages = await snapshotFunnel({ client, chainId: BSC })
@@ -157,7 +179,7 @@ async function sweepStage(client: ScanClient): Promise<boolean> {
 
 async function main(): Promise<void> {
   const client = new ScanClient()
-  const state = { lastFunnelAt: 0, lastFullSweepAt: 0, lastDeepAt: 0, lastChainAt: 0 }
+  const state = { lastFunnelAt: 0, lastFullSweepAt: 0, lastDeepAt: 0, lastChainAt: 0, lastTestnetAt: 0 }
   log('start', { once: ONCE, sweepPages: SWEEP_PAGES, enrichLimit: ENRICH_LIMIT })
 
   do {

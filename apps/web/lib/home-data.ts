@@ -111,7 +111,7 @@ export async function categoryTiles(ready: MarketRow[], supply: Awaited<ReturnTy
 
 /** Six hireable agents for "Ready to hire now": outside agents first, at most two reference agents (pickReady). */
 export async function readyToHire(): Promise<{ all: MarketRow[]; picks: MarketRow[]; supply: Awaited<ReturnType<typeof marketplaceAgents>>['supply']; generatedAt: string; total: number }> {
-  const { rows, supply, generatedAt, quoteObservedAt, total } = await marketplaceAgents({ tab: 'ready', network: 56, sort: 'best', limit: 60 })
+  const { rows, supply, generatedAt, quoteObservedAt, total } = await marketplaceAgents({ tab: 'ready', lane: 'mainnet', sort: 'best', limit: 60 })
   return { all: rows, picks: pickReady(rows), supply, generatedAt: quoteObservedAt ?? generatedAt, total }
 }
 

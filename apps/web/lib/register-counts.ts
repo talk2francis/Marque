@@ -1,4 +1,5 @@
 import 'server-only'
+import { chainOf, type Lane } from '@marque/commerce'
 import { sql } from 'drizzle-orm'
 import { db, funnelSnapshot } from '@marque/db'
 
@@ -30,8 +31,9 @@ export interface RegisterCounts {
 const TTL_MS = 5 * 60_000
 const memo = new Map<string, { value: Omit<RegisterCounts, 'cached'>; at: number }>()
 
-export async function getRegisterCounts(category?: string | null): Promise<RegisterCounts> {
-  const key = category ?? '*'
+export async function getRegisterCounts(category?: string | null, lane: Lane = 'mainnet'): Promise<RegisterCounts> {
+  const chainId = chainOf(lane)
+  const key = `${chainId}|${category ?? '*'}`
   const hit = memo.get(key)
   if (hit && Date.now() - hit.at < TTL_MS) return { ...hit.value, cached: true }
 
@@ -54,7 +56,7 @@ export async function getRegisterCounts(category?: string | null): Promise<Regis
     from agent a
     ${categoryJoin}
     left join latest p on p.agent_id = a.id
-    where a.chain_id = 56
+    where a.chain_id = ${chainId}
   `)
   const r = (((rows as unknown as { rows?: unknown[] }).rows ?? (rows as unknown as unknown[]))[0] ?? {}) as Record<string, unknown>
   const num = (v: unknown) => Number(v ?? 0)
@@ -70,7 +72,7 @@ export async function getRegisterCounts(category?: string | null): Promise<Regis
   memo.set(key, { value, at: Date.now() })
 
   // Durable, dated copy of the global figures.
-  if (!category) {
+  if (!category && lane === 'mainnet') {
     try {
       await db().insert(funnelSnapshot).values([
         { chainId: 56, stage: 'register_working', count: value.working, method: "COUNT(*) distinct agent, latest probe liveness = 'live'" },

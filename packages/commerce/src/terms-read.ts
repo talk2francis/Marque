@@ -37,7 +37,7 @@ export async function currentTermsMany(agentIds: readonly string[], now = Date.n
     boundedCommerceRead(sql`
       select distinct on (q.agent_id) q.agent_id, q.price_raw, q.token, q.token_symbol, q.token_decimals, q.chain_id, q.created_at, q.signed
       from commerce_quote q
-      where q.agent_id in (${list}) and q.ok and q.created_at > now() - interval '7 days'
+      where q.agent_id in (${list}) and q.ok and q.chain_id::text = split_part(q.agent_id, ':', 1) and q.created_at > now() - interval '7 days'
       order by q.agent_id, q.created_at desc, q.id desc`, 'exact').then(rowsOf),
   ])
   const providers = [...new Set(latest.map((q) => (q['provider'] ? String(q['provider']).toLowerCase() : '')).filter(Boolean))]
