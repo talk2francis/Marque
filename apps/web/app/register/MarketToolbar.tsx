@@ -12,6 +12,7 @@ import {
 } from './market-model'
 import { activeFilters, CLEARED_FILTERS, type MarketState } from './market-url'
 import { MarketFilters } from './MarketFilters'
+import type { MarketFacetCounts } from './initial'
 import styles from './register.module.css'
 
 /**
@@ -28,6 +29,7 @@ export function MarketToolbar({
   patchFilter,
   fixedCategory,
   resultsId,
+  facets,
 }: {
   state: MarketState
   /** Display-only changes: does not reset the page. */
@@ -36,6 +38,7 @@ export function MarketToolbar({
   patchFilter: (p: Partial<MarketState>) => void
   fixedCategory?: string
   resultsId: string
+  facets?: MarketFacetCounts | null
 }) {
   const sentinel = useRef<HTMLDivElement>(null)
   const [stuck, setStuck] = useState(false)
@@ -105,7 +108,7 @@ export function MarketToolbar({
             />
           </div>
 
-          <MarketFilters state={state} patch={patchFilter} activeCount={chips.length} />
+          <MarketFilters state={state} patch={patchFilter} activeCount={chips.length} facets={facets ?? null} />
 
           <label className={styles.sortWrap}>
             <span className={styles.sortLabel}>Sort</span>

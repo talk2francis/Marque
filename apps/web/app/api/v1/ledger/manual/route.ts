@@ -65,7 +65,7 @@ export async function POST(request: Request) {
     .where(eq(benchmarkRun.benchmarkId, input.benchmarkId))
   if (existing.some((r) => r.arm === 'manual' && r.rep === input.rep)) {
     return NextResponse.json(
-      { error: `manual repetition ${input.rep} of ${input.benchmarkId} is already recorded. A benchmark arm is never overwritten — record it as the next repetition, or say what went wrong.` },
+      { error: `manual repetition ${input.rep} of ${input.benchmarkId} is already recorded. A benchmark arm is never overwritten: record it as the next repetition, or say what went wrong.` },
       { status: 409 },
     )
   }

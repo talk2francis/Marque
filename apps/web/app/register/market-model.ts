@@ -32,8 +32,10 @@ export interface MarketRow {
     x402: boolean
     registeredAt: string | null
   }
+  /** live, reachable (card answers), down (probed, no answer), or null (not probed). */
   liveness: string | null
   latencyMs: number | null
+  latencySource?: 'probe' | 'quote' | null
   interfaces: string[]
   protocols: string[]
   price: string | null
@@ -51,6 +53,8 @@ export interface MarketRow {
     signatureEvidence?: 'provider_signed' | 'identity_matched_unsigned' | 'unknown'
     deliveredJobs: number
     failure: string | null
+    /** The newest successful quote, kept after it lapses so it shows dated, never current. */
+    lastQuote?: { priceRaw: string; token: { address: string; symbol: string; decimals: number }; chainId: number | null; quotedAt: string; signed: boolean | null } | null
   }
   warrant: {
     status: 'warranted' | 'failed' | 'untested'
@@ -116,7 +120,7 @@ export const SORTS: Array<{ value: string; label: string }> = [
 /** The four marketplace tabs (DESIGN-SYSTEM.md 8.3). Registry is the graveyard, kept one tap away. */
 export type MarketTab = 'ready' | 'free' | 'tested' | 'registry'
 export const TABS: Array<{ value: MarketTab; label: string; hint: string }> = [
-  { value: 'ready', label: 'Ready to hire', hint: 'A live price from the agent itself, payable into BNB Chain escrow now' },
+  { value: 'ready', label: 'Ready to hire', hint: 'Live price, payable into escrow now' },
   { value: 'free', label: 'Try free', hint: 'Answers a real task at its own endpoint, no wallet and no payment' },
   { value: 'tested', label: 'All tested', hint: 'Ran a published Marque test, pass or fail, with the result kept' },
   { value: 'registry', label: 'Registry', hint: 'Registered but not answering, with the measured reason' },
@@ -301,7 +305,7 @@ export function qualView(a: MarketRow): QualView {
       flag: null,
       detail: [a.warrant.testId, a.warrant.failedField].filter(Boolean).join(' · ') || null,
       title: `Ran Marque’s published test${a.warrant.testId ? ` ${a.warrant.testId}` : ''} and did not pass${
-        a.warrant.failedField ? ` — failed field: ${a.warrant.failedField}` : ''
+        a.warrant.failedField ? `, failed field: ${a.warrant.failedField}` : ''
       }. The result is kept, not hidden.`,
     }
   }
@@ -320,7 +324,7 @@ export function qualView(a: MarketRow): QualView {
       flag: null,
       detail: null,
       title:
-        'Answers a probe, so it can be called — but it has not been measured against Marque’s published test. Callability is not a warrant.',
+        'Answers a probe, so it can be called, but it has not been measured against Marque’s published test. Callability is not a warrant.',
     }
   }
 

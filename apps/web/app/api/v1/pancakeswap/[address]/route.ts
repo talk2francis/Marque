@@ -151,7 +151,7 @@ async function rankAgentsForPool(): Promise<RankedAgent[]> {
  */
 const THIRD_PARTY_CAVEAT =
   'ERC-8004 metadata does not declare which pools or fee tiers an agent supports. '
-  + 'For every third party below, we can verify its category and whether it answers — '
+  + 'For every third party below, we can verify its category and whether it answers: '
   + 'never that it handles this specific pool and tier.'
 
 export async function GET(_req: Request, { params }: { params: Promise<{ address: string }> }) {

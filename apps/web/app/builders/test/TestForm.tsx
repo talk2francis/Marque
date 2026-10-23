@@ -26,10 +26,10 @@ interface Result {
 }
 
 const TESTS = [
-  { id: 'MCS-REB-1', label: 'Rebalancing — PancakeSwap V3 range' },
-  { id: 'MCS-GRID-1', label: 'Grid trading — spacing, allocation, fee drag' },
-  { id: 'MCS-YIELD-1', label: 'Yield — net APR at size, sourced' },
-  { id: 'MCS-HF-1', label: 'Health factor — Venus, exact repay' },
+  { id: 'MCS-REB-1', label: 'Rebalancing: PancakeSwap V3 range' },
+  { id: 'MCS-GRID-1', label: 'Grid trading: spacing, allocation, fee drag' },
+  { id: 'MCS-YIELD-1', label: 'Yield: net APR at size, sourced' },
+  { id: 'MCS-HF-1', label: 'Health factor: Venus, exact repay' },
 ] as const
 
 /**
@@ -90,8 +90,7 @@ export function TestForm() {
             placeholder="https://your-agent.example/.well-known/agent-card.json"
           />
           <span className={styles.hint}>
-            For A2A, the agent card URL. We read the card and call the <code>url</code> inside it —
-            posting at the card itself is a mistake that once looked like thirty dead agents and
+            For A2A, the agent card URL. We read the card and call the <code>url</code> inside it: posting at the card itself is a mistake that once looked like thirty dead agents and
             was a broken client.
           </span>
           <div className={styles.refRow}>
@@ -112,8 +111,8 @@ export function TestForm() {
         <div className={styles.field}>
           <label htmlFor="kind">Interface</label>
           <select id="kind" value={kind} onChange={(e) => setKind(e.target.value as 'a2a' | 'mcp')}>
-            <option value="a2a">A2A — agent card and message/send</option>
-            <option value="mcp">MCP — streamable HTTP</option>
+            <option value="a2a">A2A: agent card and message/send</option>
+            <option value="mcp">MCP: streamable HTTP</option>
           </select>
         </div>
 
@@ -151,7 +150,7 @@ export function TestForm() {
               Your endpoint did not produce an answer we could grade: {result.error}
               <br />
               Failing to answer is recorded as a different fact from answering wrongly, so no
-              field diff is shown — there was nothing to compare.
+              field diff is shown: there was nothing to compare.
             </p>
           ) : (
             <>

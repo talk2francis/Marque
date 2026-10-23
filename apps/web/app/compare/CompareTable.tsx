@@ -3,10 +3,11 @@ import { Children, type CSSProperties, type ReactNode } from 'react'
 import { BRAND, Chip, WarrantBadge, ProvenanceChip } from '@marque/ui'
 import { Badge, Stars } from '../_components/ui'
 import { AgentAvatar } from '../_components/AgentAvatar'
+import { TermsHireStateCell, TermsPriceCell } from '../_components/terms/TermsCell'
 import type { MarketRow } from '../register/market-model'
 import { referenceAgent } from '../../lib/reference-agents'
 import { explorerAddress } from '../../lib/network'
-import { agoWords, answersFree, deliveryWords, hireBlocked, isHireable, profileHref } from '../register/market-model'
+import { answersFree, deliveryWords, hireBlocked, isHireable, profileHref } from '../register/market-model'
 import styles from './compare.module.css'
 
 /**
@@ -52,9 +53,7 @@ export function CompareTable({ chosen, hireLink, tryLink, onNavigate }: {
       <div className={styles.rowLabel}>Can you hire it now</div>
       {chosen.map((a) => (
         <div key={a.agentId} className={styles.cell}>
-          {isHireable(a)
-            ? <><Badge kind="hireable" /><span className={styles.muted}>{a.commerce.quotedAt ? `live quote ${agoWords(a.commerce.quotedAt)}` : 'live quote'}</span></>
-            : <span className={styles.muted}>{hireBlocked(a)}</span>}
+          <TermsHireStateCell agentId={a.agentId} facts={a.commerce} blocked={hireBlocked(a)} />
         </div>
       ))}
 
@@ -109,9 +108,7 @@ export function CompareTable({ chosen, hireLink, tryLink, onNavigate }: {
       <div className={styles.rowLabel}>What it costs</div>
       {chosen.map((a) => (
         <div key={a.agentId} className={styles.cell}>
-          {a.price
-            ? <><span>{a.price}</span>{a.priceProvenance && <ProvenanceChip provenance={a.priceProvenance} />}</>
-            : <span className={styles.muted}>price not advertised</span>}
+          <TermsPriceCell agentId={a.agentId} facts={a.commerce} declared={a.priceProvenance === 'CLAIMED' ? a.price : null} />
         </div>
       ))}
 

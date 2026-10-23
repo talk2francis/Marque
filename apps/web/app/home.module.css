@@ -107,6 +107,8 @@
 }
 .tapeRun { flex: 1; min-width: 0; }
 .tapeRun :global(.tp) { border-block: 0; height: 52px; }
+/* Reduced motion: the Tape stops and wraps onto rows (ui.css); let the band grow with it. */
+@media (prefers-reduced-motion: reduce) { .tapeRun :global(.tp) { height: auto; min-height: 52px; } }
 
 /* ---------- Sections ---------- */
 .section { padding-top: clamp(64px, 7.5vw, 104px); }

@@ -33,13 +33,13 @@ export const GUARDRAILS: Guardrail[] = [
   },
   {
     name: 'Approvals scoped to the exact amount',
-    value: 'Permit2, approved for the amount being spent — never an infinite allowance',
+    value: 'Permit2, approved for the amount being spent, never an infinite allowance',
     why: 'The guide is explicit: allowance scoped to the amount, not infinite. An infinite approval outlives the transaction that needed it.',
     source: 'PancakeSwap guide',
   },
   {
     name: 'Atomic multicall',
-    value: 'Multicall.encodeMulticall([...]) — decreaseLiquidity, collect and burn in one transaction',
+    value: 'Multicall.encodeMulticall([...]): decreaseLiquidity, collect and burn in one transaction',
     why: 'The guide calls this a safety property rather than a gas saving: a rebalance that removes liquidity and then collects must never half-execute.',
     source: 'PancakeSwap guide',
   },
@@ -76,7 +76,7 @@ export const GUARDRAILS: Guardrail[] = [
   {
     name: 'Token safelist',
     value: 'Charter allowlist limits which contracts may be touched at all',
-    why: 'The guide prescribes NO safelist and offers no honeypot filtering — we checked. This one is ours, and it is enforced by the charter’s contract allowlist rather than by a curated token list we would have to maintain and could get wrong.',
+    why: 'The guide prescribes NO safelist and offers no honeypot filtering: we checked. This one is ours, and it is enforced by the charter’s contract allowlist rather than by a curated token list we would have to maintain and could get wrong.',
     source: 'Marque',
   },
 ]

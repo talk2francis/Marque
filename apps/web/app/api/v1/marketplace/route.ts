@@ -54,14 +54,14 @@ export async function GET(req: NextRequest) {
   }
   try {
     const result = await withDeadline(marketplaceAgents(q), 12_000)
-    const { rows, generatedAt, total, offset, hasMore } = result
+    const { rows, generatedAt, total, offset, hasMore, facets } = result
     const age = Date.now() - Date.parse(generatedAt)
     const headers = { ...baseHeaders, 'X-Marque-Projection-Computed-At': generatedAt, 'X-Marque-Projection-Age-Ms': Number.isFinite(age) && age >= 0 ? String(age) : 'UNKNOWN', 'X-Marque-Projection-Stale': String(!Number.isFinite(age) || age < 0 || age > 180_000) }
     if (machine) {
       const body = machineCatalog(result, q.limit ?? 120)
       return NextResponse.json(body, { headers: { ...headers, 'Cache-Control': body.cacheMaxAgeSeconds ? `public, max-age=${body.cacheMaxAgeSeconds}` : 'no-store', Link: '</api/v1/openapi.json>; rel="describedby"' } })
     }
-    return NextResponse.json({ chainId: 56, generatedAt, provenance: 'MEASURED', count: rows.length, total, offset, hasMore, agents: rows }, { headers })
+    return NextResponse.json({ chainId: 56, generatedAt, provenance: 'MEASURED', count: rows.length, total, offset, hasMore, facets, agents: rows }, { headers })
   } catch (error) {
     // Classify failures for operators without logging query values or credentials.
     console.warn('[marketplace]', error instanceof Error && error.message === 'Check timed out'

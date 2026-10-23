@@ -13,6 +13,7 @@ import { toast } from '../../lib/toast'
 import { explorerTx } from '../../lib/network'
 import { utcStamp } from '../../lib/time'
 import { DeliverableView } from '../jobs/[chainId]/[jobId]/Deliverable'
+import { TermsBeforeQuote } from './terms/TermsCell'
 
 /**
  * The hire sheet (DESIGN-SYSTEM.md 8.5). Opens over any page from `?hire=<agentKey>`,
@@ -335,7 +336,7 @@ export function HireSheet() {
                 ) : (
                   <p className="hs-note">
                     Request a price without connecting a wallet. The response shows its expiry and signature evidence.
-                    {agent.lastQuote?.priceLabel ? ` Its last observed quote was ${agent.lastQuote.priceLabel} on ${NET[agent.lastQuote.chainId ?? 56]}.` : ''}
+                    <TermsBeforeQuote agentId={agent.agentId} network={(id) => NET[id ?? 56] ?? 'BNB Smart Chain'} />
                   </p>
                 )}
               </section>

@@ -84,6 +84,15 @@ export function MeasureRule({
     '--measure-i': Math.max(0, index),
   } as CSSProperties
 
+  // D9 (DESIGN-V4 9): the value reads above the rule, at its own marker; the threshold and the
+  // bounds read below. Each label is anchored proportionally (left: p, translateX(-p)), so it
+  // stays inside the rule at either end without measuring anything, and the value can never
+  // collide with a threshold label. A threshold sitting at an end replaces that end's label.
+  const near = (p: number | null, end: 0 | 1) => p !== null && Math.abs(p - end) < 0.1
+  const tAtLower = thresholdLabel !== undefined && near(thresholdPos, 0)
+  const tAtUpper = thresholdLabel !== undefined && !tAtLower && near(thresholdPos, 1)
+  const anchored = (p: number): CSSProperties => ({ left: `${p * 100}%`, transform: `translateX(${-p * 100}%)` })
+
   return (
     <div
       className={['measure', animate ? 'measure--animate' : '', className].filter(Boolean).join(' ')}
@@ -91,6 +100,11 @@ export function MeasureRule({
       role="img"
       aria-label={label}
     >
+      {valueLabel ? (
+        <div className="measure__above" aria-hidden="true">
+          <span className="mono measure__value" style={anchored(pos)}>{valueLabel}</span>
+        </div>
+      ) : null}
       <div className="measure__track">
         <div className="measure__rule" />
         {thresholdPos !== null && (
@@ -104,14 +118,13 @@ export function MeasureRule({
           {below ? '‹' : above ? '›' : ''}
         </div>
       </div>
-      {(lowerLabel || upperLabel || valueLabel || thresholdLabel) && (
-        <div className="measure__labels">
-          <span className="measure__bound mono">{lowerLabel}</span>
-          <span className="measure__readout">
-            {valueLabel && <span className="mono measure__value">{valueLabel}</span>}
-            {thresholdLabel && <span className="measure__thresholdLabel">{thresholdLabel}</span>}
-          </span>
-          <span className="measure__bound mono">{upperLabel}</span>
+      {(lowerLabel || upperLabel || thresholdLabel) && (
+        <div className="measure__below" aria-hidden="true">
+          {tAtLower ? null : <span className="measure__bound mono" style={anchored(0)}>{lowerLabel}</span>}
+          {thresholdLabel && thresholdPos !== null ? (
+            <span className="measure__thresholdLabel" style={anchored(tAtLower ? 0 : tAtUpper ? 1 : thresholdPos)}>{thresholdLabel}</span>
+          ) : null}
+          {tAtUpper ? null : <span className="measure__bound mono" style={anchored(1)}>{upperLabel}</span>}
         </div>
       )}
     </div>

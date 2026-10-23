@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { readFileSync } from 'node:fs'
 import { sql } from 'drizzle-orm'
-import { db } from '@marque/db'
+import { db, cachedProjection } from '@marque/db'
 import { publicClient } from '@marque/chain'
 import { tierFreshness } from '@marque/probe'
 import { indexerStatus, questStats, campaignChainId } from '@marque/commerce'
@@ -14,7 +14,7 @@ import { cursorReading, serviceReconciliationQuery, statusCursorsQuery } from '.
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 export const metadata = {
-  title: 'Status — what is fresh, what is stale, and how stale',
+  title: 'Status: what is fresh, what is stale, and how stale',
   description:
     'Real uptime, probe coverage, index freshness in blocks behind head, reference-agent health and the last conformance run. Honest degradation, never a silently stale number.',
 }
@@ -94,7 +94,12 @@ async function agentHealth(): Promise<Array<{ id: string; ok: boolean; ms: numbe
   }))
 }
 
-export default async function StatusPage() {
+/**
+ * Everything the page reads, gathered once and kept as a Redis projection (D13): the page
+ * answers from the last good gather at once and refreshes it in the background, and it says
+ * how old that gather is. Ages are recomputed per request from the stored timestamps.
+ */
+async function gatherStatus() {
   const [head, cursorQ, probesQ, confQ, watchQ, usageQ, agents, tiers, quest, questTotals, reconciliationQ] = await Promise.all([
     withDeadline(publicClient().getBlockNumber(), 5000).then((b) => b.toString()).catch(() => null),
     queried('operational cursors', db().execute(statusCursorsQuery())),
@@ -125,6 +130,21 @@ export default async function StatusPage() {
     withDeadline(questStats(campaignChainId()), 4000).catch(() => null),
     queried('service reconciliation', db().execute(serviceReconciliationQuery())),
   ])
+  return JSON.parse(JSON.stringify({ head, cursorQ, probesQ, confQ, watchQ, usageQ, agents, tiers, quest, questTotals, reconciliationQ })) as {
+    head: typeof head; cursorQ: typeof cursorQ; probesQ: typeof probesQ; confQ: typeof confQ; watchQ: typeof watchQ; usageQ: typeof usageQ
+    agents: typeof agents; tiers: typeof tiers; quest: typeof quest; questTotals: typeof questTotals; reconciliationQ: typeof reconciliationQ
+  }
+}
+
+function measuredAt(iso: string, ago: string) {
+  return <time dateTime={iso} title={`${iso.replace('T', ' ').slice(0, 19)} UTC`}>{ago}</time>
+}
+
+export default async function StatusPage() {
+  const projection = await cachedProjection('status:v4', gatherStatus, { freshMs: 30_000, timeoutMs: 6_000, staleWhileRevalidate: true })
+    .catch(async () => ({ value: await gatherStatus(), computedAt: new Date().toISOString(), ageMs: 0, stale: false }))
+  const { head, cursorQ, probesQ, confQ, watchQ, usageQ, agents, tiers, quest, questTotals, reconciliationQ } = projection.value
+  const measuredAgo = projection.ageMs < 90_000 ? `${Math.max(1, Math.round(projection.ageMs / 1000))} s ago` : `${Math.round(projection.ageMs / 60_000)} min ago`
   let keeper: { at: string; keeper: string; settlesLastHour: number; capPerHour: number; chains: Record<string, { balanceBnb: string | null; floorBnb: string; submittedBound: number; due: number }> } | null = null
   try { keeper = JSON.parse(readFileSync(process.env.KEEPER_STATUS ?? '/root/.marque/keeper/status.json', 'utf8')) } catch { keeper = null }
   const cursor = cursorQ.rows
@@ -188,9 +208,9 @@ export default async function StatusPage() {
           </p>
           <p className={styles.note}>
             <ProvenanceChip provenance="MEASURED" />
-            Read live from the database and the chain on every request. Nothing on this page is
-            cached, and no uptime percentage is shown, because we do not run an external prober
-            against ourselves and would have to invent one.
+            Read from the database and the chain {measuredAt(projection.computedAt, measuredAgo)}, and
+            refreshed at most every 30 seconds. No uptime percentage is shown, because we do not run
+            an external prober against ourselves and would have to invent one.
           </p>
         </header>
 
@@ -215,7 +235,7 @@ export default async function StatusPage() {
             <p className={`${styles.warn} ${styles.stale}`}>The usage query failed: {usageQ.failed}</p>
           ) : usageRows.length === 0 ? (
             <p className={styles.note}>
-              No product events recorded yet. They are anonymous — an event name and, at most, a
+              No product events recorded yet. They are anonymous: an event name and, at most, a
               category or a count. No IP, no wallet, no cookie, no third-party analytics.
             </p>
           ) : (
@@ -248,7 +268,7 @@ export default async function StatusPage() {
             <tbody>
               <tr>
                 <td>BSC head</td>
-                <td className="mono">{head ?? '—'}</td>
+                <td className="mono">{head ?? 'n/a'}</td>
                 <td className="mono">read just now</td>
                 <td>{head === null ? <Chip tone="breach">unreadable</Chip> : <Chip tone="holds">live</Chip>}</td>
               </tr>
@@ -286,7 +306,7 @@ export default async function StatusPage() {
             The registry index is an offset into 8004scan&rsquo;s listing, not a block height, so
             &ldquo;blocks behind&rdquo; does not describe it. What matters is when it last
             advanced, which is what is shown. The pool watcher IS block-shaped and is the one that
-            must not go quiet — the hours-out-of-range figure on{' '}
+            must not go quiet: the hours-out-of-range figure on{' '}
             <Link href="/pancakeswap">the PancakeSwap Desk</Link> is only as dense as this series.
           </p>
         </section>
@@ -398,7 +418,7 @@ export default async function StatusPage() {
             </tbody>
           </table>
           <p className={styles.note}>
-            Checked on this request, through the public HTTPS path a buyer would use — including
+            Checked on this request, through the public HTTPS path a buyer would use, including
             TLS and the reverse proxy, because a buyer waits for those too.
           </p>
         </section>
@@ -417,7 +437,7 @@ export default async function StatusPage() {
                       <td className="mono">{String(c['test_id'])}</td>
                       <td className="mono">{String(c['runs'])}</td>
                       <td className="mono">{String(c['passes'])}</td>
-                      <td className="mono">{c['last_run'] ? String(c['last_run']).slice(0, 16).replace('T', ' ') : '—'}</td>
+                      <td className="mono">{c['last_run'] ? String(c['last_run']).slice(0, 16).replace('T', ' ') : 'n/a'}</td>
                     </tr>
                   ))}
                 </tbody>

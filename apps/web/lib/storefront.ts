@@ -1,7 +1,7 @@
 import 'server-only'
 import { sql } from 'drizzle-orm'
 import { cachedProjection, canonicalAgentIdSql, db, firstPartyAgents } from '@marque/db'
-import { commercialStates, disputeWindowSeconds, formatAmount, sellerFor, teamWallets, type ServiceCommerce } from '@marque/commerce'
+import { currentTerms, disputeWindowSeconds, sellerFor, teamWallets, termsOf, type LastQuote, type ServiceCommerce, type Terms } from '@marque/commerce'
 import { buyerFeedbackBinding } from '@marque/commerce/feedback'
 import { agentTrack, type AgentTrack } from './agent-track'
 import { readManifest, type Manifest } from './manifest'
@@ -41,7 +41,9 @@ export interface Storefront {
   testnetTokenId: number | null
   endpoint: string | null
   services: Array<{ kind: string; endpoint: string }>
-  commerce: (ServiceCommerce & { priceLabel: string | null }) | null
+  commerce: (ServiceCommerce & { priceLabel: string | null; lastQuote?: LastQuote | null }) | null
+  /** Current terms, read per request from the newest quote observations (invariant 41). */
+  terms: Terms
   track: AgentTrack
   tests: StoreTest[]
   lastProbe: { at: string; liveness: string; latencyMs: number | null; failure: string | null; detail: string | null } | null
@@ -56,14 +58,20 @@ export interface Storefront {
  * move on minutes, and computing a storefront reads the whole quote table.
  */
 export async function storefront(agentId: string): Promise<Storefront | null> {
+  // The heavy parts come from a 30 s projection; the price never does. It is read per
+  // request from the agent's own newest quotes, the same reader the marketplace and the
+  // terms API use, so the rail can never contradict a marketplace row (defect D2).
+  const live = currentTerms(agentId).catch(() => null)
+  let value: Storefront | null
   try {
-    const p = await cachedProjection(`storefront:v3:${agentId}`, () => computeStorefront(agentId), { freshMs: 30_000, timeoutMs: 12_000, staleWhileRevalidate: true })
-    // A projection can outlive the price it contains, including on refresh failure.
-    if (p.value?.commerce && (!p.value.commerce.quoteExpiresAt || Date.parse(p.value.commerce.quoteExpiresAt) <= Date.now())) return { ...p.value, commerce: { ...p.value.commerce, state: 'quoteable', failure: 'expired', priceLabel: null } }
-    return p.value
+    value = (await cachedProjection(`storefront:v4:${agentId}`, () => computeStorefront(agentId), { freshMs: 30_000, timeoutMs: 12_000, staleWhileRevalidate: true })).value
   } catch {
-    return computeStorefront(agentId)
+    value = await computeStorefront(agentId)
   }
+  if (!value) return null
+  const t = await live
+  if (!t) return { ...value, terms: termsOf(value.commerce) }
+  return { ...value, commerce: t.commerce ? { ...t.commerce, priceLabel: t.terms.priceLabel } : null, terms: t.terms }
 }
 
 async function computeStorefront(agentId: string): Promise<Storefront | null> {
@@ -94,15 +102,13 @@ async function computeStorefront(agentId: string): Promise<Storefront | null> {
       from rating r left join rating_comment c on lower(c.feedback_hash) = lower(r.feedback_hash) and c.chain_id = r.chain_id and c.agent_token_id = r.agent_token_id and lower(c.client) = lower(r.client)
       where r.chain_id = 56 and r.agent_token_id = ${tokenId} and not r.revoked and r.tag1 = 'starred'
       order by r.block_number desc limit 8`).then(rowsOf).catch(() => []),
-    commercialStates().catch(() => new Map<number, ServiceCommerce>()),
+    currentTerms(agentId).catch(() => null),
     agentTrack(tokenId),
     disputeWindowSeconds(56).catch(() => null),
     sellerFor(agentId, null).catch(() => null),
   ])
 
-  const RANK: Record<string, number> = { settleable: 0, hireable: 1, quoteable: 2, preview_only: 3, unavailable: 4 }
-  const mine = [...states.values()].filter((c) => c.agentId === agentId).sort((x, y) => (RANK[x.state] ?? 9) - (RANK[y.state] ?? 9))
-  const best = mine[0] ?? null
+  const best = states?.commerce ?? null
   const team = new Set(teamWallets())
 
   // The sample: the newest delivered Marque job, read from the deliverable the agent published.
@@ -141,7 +147,8 @@ async function computeStorefront(agentId: string): Promise<Storefront | null> {
     testnetTokenId: fp?.testnet?.tokenId ?? null,
     endpoint: seller?.endpoint ?? null,
     services: services.map((x) => ({ kind: String(x['kind']), endpoint: String(x['endpoint']) })),
-    commerce: best ? { ...best, priceLabel: best.priceRaw && best.token ? `${formatAmount(best.priceRaw, best.token.decimals)} ${best.token.symbol}` : null } : null,
+    commerce: best ? { ...best, priceLabel: states?.terms.priceLabel ?? null } : null,
+    terms: states?.terms ?? termsOf(null),
     track,
     tests: tests.map((t) => ({
       testId: String(t['test_id']), pass: t['pass'] === true, failedFields: Array.isArray(t['failed_fields']) ? (t['failed_fields'] as string[]) : [],

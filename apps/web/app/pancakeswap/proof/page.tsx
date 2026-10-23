@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic'
 export const metadata = {
   title: 'The PancakeSwap proof run',
   description:
-    'One real mainnet PancakeSwap V3 rebalance under a capped, revocable charter — a deliberately narrow range drifting out and earning nothing, the transactions that re-centre it, and every cost.',
+    'One real mainnet PancakeSwap V3 rebalance under a capped, revocable charter: a deliberately narrow range drifting out and earning nothing, the transactions that re-centre it, and every cost.',
 }
 
 type Status = 'pending' | 'drifting' | 'complete' | 'failed'
@@ -54,9 +54,9 @@ const fmtTicksToPrice = (t: number) => (1 / Math.pow(1.0001, t)).toFixed(2) // U
 function StatusLine({ p, net }: { p: Proof; net: number }) {
   const map: Record<Status, { tone: 'holds' | 'watch' | 'breach' | 'chain'; label: string }> = {
     pending: { tone: 'chain', label: 'Not started' },
-    drifting: { tone: 'watch', label: 'Live on mainnet — position open, waiting to drift out' },
-    complete: { tone: 'holds', label: 'Complete — re-centred on mainnet' },
-    failed: { tone: 'breach', label: 'Attempted on mainnet — reverted, published as-is' },
+    drifting: { tone: 'watch', label: 'Live on mainnet: position open, waiting to drift out' },
+    complete: { tone: 'holds', label: 'Complete: re-centred on mainnet' },
+    failed: { tone: 'breach', label: 'Attempted on mainnet: reverted, published as-is' },
   }
   const s = map[p.status]
   return (
@@ -76,7 +76,7 @@ function Charter({ scope, net }: { scope: NonNullable<Proof['charterScope']>; ne
         <div><dt>Spend cap</dt><dd>${scope.capUsd.toFixed(2)} <ProvenanceChip provenance="MEASURED" /></dd></div>
         <div><dt>Expires</dt><dd>{new Date(scope.expiresAt).toISOString().replace('T', ' ').slice(0, 16)}Z</dd></div>
         <div style={{ gridColumn: '1 / -1' }}>
-          <dt>Contract allowlist — the only addresses it can touch</dt>
+          <dt>Contract allowlist: the only addresses it can touch</dt>
           <dd>
             {scope.allowlist.map((c) => (
               <a key={c} href={explorerAddress(net, c)} target="_blank" rel="noreferrer" className="mono">
@@ -87,8 +87,8 @@ function Charter({ scope, net }: { scope: NonNullable<Proof['charterScope']>; ne
         </div>
       </dl>
       <p className={styles.note}>
-        The same guardrails the <a href="/pancakeswap">Desk</a> states — slippage cap, deadline ≤ 5 minutes,
-        approvals scoped to the exact amount, atomic multicall, a token safelist — apply to every transaction below.
+        The same guardrails the <a href="/pancakeswap">Desk</a> states (slippage cap, deadline ≤ 5 minutes,
+        approvals scoped to the exact amount, atomic multicall, a token safelist) apply to every transaction below.
       </p>
     </section>
   )
@@ -127,7 +127,7 @@ export default async function PancakeProof() {
           <p className={styles.lede}>
             One real mainnet PancakeSwap V3 rebalance, executed under a spend-capped, revocable charter.
             A deliberately narrow range (~0.3%) is opened so it drifts out within hours; this page captures it
-            earning nothing, the agent re-centring it, and every cost — and if the rebalance reverts, it
+            earning nothing, the agent re-centring it, and every cost, and if the rebalance reverts, it
             captures that instead.
           </p>
           <StatusLine p={p} net={net} />
@@ -137,7 +137,7 @@ export default async function PancakeProof() {
           <EmptyState title="The proof run has not started.">
             <p>
               {p.note ??
-                'It is a real mainnet transaction — escalation gate 1 — so it runs only after written "approved, mainnet" and a funded, deliberately-tight range position. Nothing is simulated in its place.'}
+                'It is a real mainnet transaction (escalation gate 1), so it runs only after written "approved, mainnet" and a funded, deliberately-tight range position. Nothing is simulated in its place.'}
             </p>
             <p>The guardrails it will follow are already stated on <a href="/pancakeswap">the Desk</a>.</p>
           </EmptyState>
@@ -155,20 +155,20 @@ export default async function PancakeProof() {
         {p.before ? (
           <section className={styles.section}>
             <h2 className={styles.h2}>
-              {p.status === 'complete' ? 'Before — out of range, earning nothing' : 'The open position'}
+              {p.status === 'complete' ? 'Before: out of range, earning nothing' : 'The open position'}
             </h2>
             <dl className={styles.facts}>
               <div>
                 <dt>Range</dt>
                 <dd className="mono">
-                  ${fmtTicksToPrice(p.before.tickUpper)} — ${fmtTicksToPrice(p.before.tickLower)} / BNB
+                  ${fmtTicksToPrice(p.before.tickUpper)} to ${fmtTicksToPrice(p.before.tickLower)} / BNB
                 </dd>
               </div>
               <div><dt>Range ticks</dt><dd className="mono">[{p.before.tickLower}, {p.before.tickUpper}]</dd></div>
               <div><dt>Current tick</dt><dd className="mono">{p.before.currentTick} <ProvenanceChip provenance="ONCHAIN" /></dd></div>
               <div>
                 <dt>Out of range since</dt>
-                <dd className="mono">{p.before.outOfRangeSince ? `${p.before.outOfRangeSince.replace('T', ' ').slice(0, 16)}Z` : '— still in range'}</dd>
+                <dd className="mono">{p.before.outOfRangeSince ? `${p.before.outOfRangeSince.replace('T', ' ').slice(0, 16)}Z` : 'still in range'}</dd>
               </div>
               <div>
                 <dt>Hours out of range</dt>
@@ -186,7 +186,7 @@ export default async function PancakeProof() {
 
         {p.status === 'failed' ? (
           <section className={styles.section}>
-            <h2 className={styles.h2}>It reverted — and that is the record</h2>
+            <h2 className={styles.h2}>It reverted, and that is the record</h2>
             <p className={styles.note}>
               A receipted failure on mainnet is still evidence of a real system operating under real
               constraints. The revert reason, verbatim:
@@ -199,15 +199,15 @@ export default async function PancakeProof() {
         {p.status === 'complete' && p.after ? (
           <>
             <section className={styles.section}>
-              <h2 className={styles.h2}>After — re-centred, earning again</h2>
+              <h2 className={styles.h2}>After: re-centred, earning again</h2>
               <dl className={styles.facts}>
                 <div>
                   <dt>New range</dt>
-                  <dd className="mono">${fmtTicksToPrice(p.after.tickUpper)} — ${fmtTicksToPrice(p.after.tickLower)} / BNB</dd>
+                  <dd className="mono">${fmtTicksToPrice(p.after.tickUpper)} to ${fmtTicksToPrice(p.after.tickLower)} / BNB</dd>
                 </div>
                 <div><dt>New range ticks</dt><dd className="mono">[{p.after.tickLower}, {p.after.tickUpper}]</dd></div>
                 <div><dt>Current tick</dt><dd className="mono">{p.after.currentTick}</dd></div>
-                <div><dt>In range</dt><dd>{p.after.inRange ? 'yes — fees resumed' : 'no'}</dd></div>
+                <div><dt>In range</dt><dd>{p.after.inRange ? 'yes: fees resumed' : 'no'}</dd></div>
                 {p.after.resumedAtBlock ? (
                   <div><dt>Fees resumed at block</dt><dd className="mono">{p.after.resumedAtBlock}</dd></div>
                 ) : null}

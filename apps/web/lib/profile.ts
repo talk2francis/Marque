@@ -124,7 +124,7 @@ export function mergeActivity(input: {
     items.push({
       at: c.grantedAt,
       kind: 'charter_granted',
-      label: `Charter granted — ${name}`,
+      label: `Charter granted: ${name}`,
       detail: c.caps[0] ? `cap ${c.caps[0].limit} ${c.caps[0].symbol}` : null,
       href: '/app/charters',
       provenance: 'MEASURED',
@@ -133,7 +133,7 @@ export function mergeActivity(input: {
       items.push({
         at: c.revokedAt,
         kind: 'charter_revoked',
-        label: `Charter revoked — ${name}`,
+        label: `Charter revoked: ${name}`,
         detail: c.revokeTxHash ? 'on chain' : null,
         href: '/app/charters',
         provenance: c.revokeTxHash ? 'ONCHAIN' : 'MEASURED',
@@ -142,7 +142,7 @@ export function mergeActivity(input: {
       items.push({
         at: c.expiresAt,
         kind: 'charter_expired',
-        label: `Charter expired — ${name}`,
+        label: `Charter expired: ${name}`,
         detail: null,
         href: '/app/charters',
         provenance: 'MEASURED',
@@ -186,7 +186,7 @@ export function mergeActivity(input: {
     items.push({
       at: s.issuedAt,
       kind: 'seal_issued',
-      label: `Recommendation sealed — ${s.category}`,
+      label: `Recommendation sealed: ${s.category}`,
       detail: s.sealTxHash ? 'hash anchored before the outcome' : 'seal not anchored',
       href: '/ledger',
       provenance: s.sealTxHash ? 'ONCHAIN' : 'MEASURED',
@@ -195,7 +195,7 @@ export function mergeActivity(input: {
       items.push({
         at: s.resolvedAt,
         kind: 'seal_resolved',
-        label: `Sealed call resolved — ${s.outcome}`,
+        label: `Sealed call resolved: ${s.outcome}`,
         detail: null,
         href: '/ledger',
         provenance: 'MEASURED',

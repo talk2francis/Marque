@@ -6,3 +6,4 @@ export {
   Statement, DataCell, ProvenanceChip, Chip, WarrantBadge,
   Button, LinkButton, Row, EmptyState, Grain, type Provenance,
 } from './components/primitives.js'
+export { Limits } from './components/Limits.js'

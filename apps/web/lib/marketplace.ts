@@ -51,9 +51,11 @@ export interface MarketRow {
     x402: boolean
     registeredAt: string | null
   }
+  /** live (answered a probe or priced a quote in the last hour), reachable (card answers), down (probed, no answer), null (not probed). */
   liveness: string | null
-  /** measured p95-ish: we store one latency per probe; this is the last one. */
+  /** One measured round trip: the latest probe, or the latest priced quote when that is the live evidence. */
   latencyMs: number | null
+  latencySource?: 'probe' | 'quote' | null
   interfaces: string[]
   protocols: string[]
   price: string | null
@@ -77,6 +79,8 @@ export interface MarketRow {
     signatureEvidence?: 'provider_signed' | 'identity_matched_unsigned' | 'unknown'
     deliveredJobs: number
     failure: string | null
+    /** The newest successful quote, kept after it lapses so it shows dated, never current. */
+    lastQuote?: { priceRaw: string; token: { address: string; symbol: string; decimals: number }; chainId: number | null; quotedAt: string; signed: boolean | null } | null
   }
   warrant: { status: 'warranted' | 'failed' | 'untested'; testId: string | null; date: string | null; failedField: string | null }
   qual: Qual
@@ -207,6 +211,8 @@ export function marketplaceSourceQuery(owners?: readonly string[]) {
                  and s.kind in ('a2a', 'mcp', 'x402', 'erc8183')
              ), '[]'::jsonb) as live_task_kinds,
              bool_or(p.liveness in ('live', 'discovered', 'unbound', 'bad_schema') and p.checked_at > now() - interval '24 hours') as any_reachable,
+             bool_or(p.checked_at > now() - interval '24 hours') as probed_recently,
+             min(p.latency_ms) filter (where p.liveness in ('discovered', 'unbound', 'bad_schema') and p.checked_at > now() - interval '24 hours') as reach_latency_ms,
              bool_or(p.liveness = 'live' and p.checked_at > now() - interval '24 hours'
                and s.kind in ('a2a', 'mcp', 'x402', 'erc8183')) as any_callable,
              min(p.latency_ms) filter (where p.liveness = 'live' and p.checked_at > now() - interval '24 hours') as latency_ms,
@@ -262,8 +268,8 @@ export function marketplaceSourceQuery(owners?: readonly string[]) {
       select a.id, a.token_id, a.name, a.owner_address, a.supported_protocols,
              a.image_url, a.description, a.contract_address, a.x402_supported, a.registry_created_at,
              (a.raw_metadata #>> '{offchain_content,image}') as meta_image,
-             case when s.any_callable then 'live' when s.any_reachable then 'unbound' else null end as liveness,
-             s.latency_ms,
+             case when s.any_callable then 'live' when s.any_reachable then 'unbound' when s.probed_recently then 'down' else null end as liveness,
+             coalesce(s.latency_ms, s.reach_latency_ms) as latency_ms,
              s.kinds, s.live_kinds, s.live_task_kinds, s.price,
              regexp_replace(coalesce(s.endpoint, ''), '^(https?://[^/]+).*', '\\1') as host,
              c.test_id as conf_test, c.pass as conf_pass, c.failed_fields as conf_failed, c.ran_at as conf_at,
@@ -285,6 +291,7 @@ export function marketplaceSourceQuery(owners?: readonly string[]) {
       host,
       count(*) over (partition by owner_address, host) as identities,
       (liveness = 'live') as any_live,
+      liveness,
       latency_ms,
       coalesce(kinds, array[]::text[]) as kinds,
       coalesce(live_kinds, array[]::text[]) as live_kinds,
@@ -389,8 +396,13 @@ async function queryAgents(owners?: readonly string[], states?: Awaited<ReturnTy
 
   const bestByAgent = bestCommerceByAgent(commerce)
 
+  const now = Date.now()
   const thirdParty: Array<Omit<MarketRow, 'track'>> = list.map((r) => {
-    const live = r['any_live'] === true
+    const best = bestByAgent.get(String(r['agent_id']))
+    // A priced answer to `negotiate` in the last hour proves the agent answers, whatever
+    // the card probe concluded (sellers that only sell never pass a free work probe).
+    const quotedLive = !!best && best.signed !== null && best.quotedAt !== null && now - Date.parse(best.quotedAt) < 3_600_000
+    const live = r['any_live'] === true || quotedLive
     const confTest = r['conf_test'] ? String(r['conf_test']) : null
     const confPass = r['any_pass'] === true
     const failed = Array.isArray(r['conf_failed']) ? (r['conf_failed'] as string[]) : []
@@ -431,8 +443,9 @@ async function queryAgents(owners?: readonly string[], states?: Awaited<ReturnTy
           ? (r['registered_at'] as Date).toISOString()
           : (r['registered_at'] ? String(r['registered_at']) : null),
       },
-      liveness: live ? 'live' : (r['liveness'] ? String(r['liveness']) : null),
-      latencyMs: r['latency_ms'] == null ? null : Number(r['latency_ms']),
+      liveness: live ? 'live' : r['liveness'] === 'unbound' ? 'reachable' : (r['liveness'] ? String(r['liveness']) : null),
+      latencyMs: r['any_live'] !== true && quotedLive ? (best?.latencyMs ?? null) : (r['latency_ms'] == null ? null : Number(r['latency_ms'])),
+      latencySource: r['any_live'] !== true && quotedLive ? 'quote' : (r['latency_ms'] == null ? null : 'probe'),
       interfaces: kinds,
       protocols: Array.isArray(r['protocols']) ? (r['protocols'] as string[]) : [],
       ...priceAndCommerce(bestByAgent.get(String(r['agent_id'])), live, r['price'] ? String(r['price']) : null),
@@ -479,6 +492,11 @@ function priceAndCommerce(c: ServiceCommerceRow | undefined, live: boolean, decl
       signatureEvidence: c?.signatureEvidence ?? 'unknown',
       deliveredJobs: c?.deliveredJobs ?? 0,
       failure: c?.failure ?? null,
+      // An observation that succeeded keeps its price and token even after the acceptance
+      // window closes (commercialStates sets the token only for a successful quote).
+      lastQuote: c && c.priceRaw && c.token && c.quotedAt
+        ? { priceRaw: c.priceRaw, token: c.token, chainId: c.chainId, quotedAt: c.quotedAt, signed: c.signed }
+        : null,
     },
   }
 }
@@ -532,7 +550,9 @@ function otherLast(rows: MarketRow[]): MarketRow[] {
   return [...rows.filter((r) => !isOther(r)), ...rows.filter(isOther)]
 }
 
-export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: MarketRow[]; generatedAt: string; total: number; offset: number; hasMore: boolean; supply: MarketSupplyCategory[]; quoteObservedAt: string | null }> {
+export interface MarketFacets { network: { 56: number; 97: number }; token: Record<string, number> }
+
+export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: MarketRow[]; generatedAt: string; total: number; offset: number; hasMore: boolean; supply: MarketSupplyCategory[]; quoteObservedAt: string | null; facets: MarketFacets }> {
   const hireable = q.tab === 'ready' || q.hireableOnly === true
   const states = hireable ? await commercialStates() : undefined
   const readyIds = states ? [...new Set([...states.values()].filter(c => c.state === 'hireable' || c.state === 'settleable').map(c => c.agentId))] : null
@@ -568,8 +588,6 @@ export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: Ma
   if (q.tab === 'ready') all = all.filter((r) => r.commerce.state === 'hireable' || r.commerce.state === 'settleable')
   if (q.tab === 'free') all = all.filter(answersFree)
   if (q.tab === 'tested') all = all.filter((r) => r.warrant.status !== 'untested')
-  if (q.network) all = all.filter((r) => r.commerce.chainId === q.network)
-  if (q.token) all = all.filter((r) => r.commerce.token?.symbol.toLowerCase() === q.token!.toLowerCase())
   if (q.maxPrice != null && Number.isFinite(q.maxPrice)) all = all.filter((r) => { const p = quotedPrice(r); return p !== null && p <= q.maxPrice! })
   if (q.minRating != null && Number.isFinite(q.minRating)) all = all.filter((r) => (r.track.verified.averageStars ?? 0) >= q.minRating!)
   if (q.hasPrice) all = all.filter((r) => !!r.price)
@@ -589,6 +607,22 @@ export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: Ma
       || r.protocols.some((p) => p.toLowerCase().includes(s))
       || (r.category ?? '').includes(s))
   }
+
+  // Clone groups collapse before anything is counted, so facet counts and the total agree.
+  if (readyAll) all = groupClones(all)
+
+  // Facet counts (D6): each option counted under every other filter, so a zero option can be
+  // disabled with its reason instead of leading to an unexplained empty list.
+  const quoteChain = (r: MarketRow) => r.commerce.chainId ?? r.commerce.lastQuote?.chainId ?? null
+  const quoteToken = (r: MarketRow) => (r.commerce.token ?? r.commerce.lastQuote?.token)?.symbol.toLowerCase() ?? null
+  const byToken = q.token ? all.filter((r) => quoteToken(r) === q.token!.toLowerCase()) : all
+  const byNetwork = q.network ? all.filter((r) => quoteChain(r) === q.network) : all
+  const facets = {
+    network: { 56: byToken.filter((r) => quoteChain(r) === 56).length, 97: byToken.filter((r) => quoteChain(r) === 97).length },
+    token: Object.fromEntries(['u', 'usdt', 'usdc'].map((t) => [t, byNetwork.filter((r) => quoteToken(r) === t).length])) as Record<string, number>,
+  }
+  if (q.network) all = all.filter((r) => quoteChain(r) === q.network)
+  if (q.token) all = all.filter((r) => quoteToken(r) === q.token!.toLowerCase())
 
   const COMMERCE_RANK: Record<CommercialState, number> = { settleable: 0, hireable: 1, quoteable: 2, preview_only: 3, unavailable: 4 }
   // Hireable first (signed quotes before unsigned), then quality. Two axes, never merged into one badge.
@@ -621,7 +655,7 @@ export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: Ma
     }
   })
 
-  if (readyAll) all = otherLast(groupClones(all))
+  if (readyAll) all = otherLast(all)
 
   const limit = Number.isFinite(q.limit) ? Math.max(1, Math.min(Math.floor(q.limit!), 300)) : 120
   const requestedOffset = Number.isFinite(q.offset) ? Math.max(0, Math.floor(q.offset!)) : 0
@@ -645,12 +679,12 @@ export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: Ma
             : `No live service has proved compatibility with ${task}`
     return {
       ...row,
-      liveness: state?.callable ? 'live' : state?.reachable ? 'reachable' : row.liveness,
+      liveness: row.liveness === 'live' || state?.callable ? 'live' : state?.reachable ? 'reachable' : row.liveness,
       qual: row.qual === 'warranted' || row.qual === 'failed' ? row.qual : state?.callable ? 'callable' : 'unbound',
       previewable: state?.previewable === true,
       hireBlockedReason,
     } satisfies MarketRow
   })
-  return { rows, total: all.length, offset, supply, quoteObservedAt: states ? new Date(observedAt).toISOString() : null,
+  return { rows, total: all.length, offset, supply, facets, quoteObservedAt: states ? new Date(observedAt).toISOString() : null,
     hasMore: offset + limit < all.length, generatedAt: new Date(base.at).toISOString() }
 }

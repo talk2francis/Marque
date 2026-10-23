@@ -36,7 +36,7 @@ async function recs(): Promise<QuestCategoryRecs[]> {
   const chain = campaignChainId()
   return Promise.all(QUEST_ORDER.map(async (category) => {
     const { rows } = await marketplaceAgents({ category, hireableOnly: true, limit: 40 })
-    const live = rows.filter((r) => r.commerce.state === 'hireable' && r.commerce.chainId === chain && r.commerce.priceRaw && r.commerce.token)
+    const live = rows.filter((r) => (r.commerce.state === 'hireable' || r.commerce.state === 'settleable') && r.commerce.chainId === chain && r.commerce.priceRaw && r.commerce.token)
     const rated = await Promise.all(live.map(async (r): Promise<QuestRec> => {
       const rating = r.tokenId && r.commerce.provider
         ? await agentRatings(chain, r.tokenId, r.commerce.provider).then((x) => x.verifiedBuyers).catch(() => ({ count: 0, averageStars: null }))

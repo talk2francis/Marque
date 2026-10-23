@@ -77,7 +77,7 @@ export function ProvenanceChip({
   )
   if (!onClick) return label
   return (
-    <button type="button" className="prov__button" onClick={onClick} aria-label={`${provenance} — show evidence`}>
+    <button type="button" className="prov__button" onClick={onClick} aria-label={`${provenance}: show evidence`}>
       {label}
     </button>
   )

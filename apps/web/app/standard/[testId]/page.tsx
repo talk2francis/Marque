@@ -15,7 +15,7 @@ export const revalidate = 0
 const TEST_IDS = Object.keys(ALL_TOLERANCES) as TestId[]
 
 const TITLES: Record<TestId, string> = {
-  'MCS-REB-1': 'Rebalancing — PancakeSwap V3',
+  'MCS-REB-1': 'Rebalancing: PancakeSwap V3',
   'MCS-GRID-1': 'Grid trading',
   'MCS-YIELD-1': 'Yield optimisation',
   'MCS-HF-1': 'Health factor monitoring',
@@ -29,7 +29,7 @@ export async function generateMetadata({ params }: { params: Promise<{ testId: s
   const { testId } = await params
   if (!TEST_IDS.includes(testId as TestId)) return { title: 'Unknown test' }
   return {
-    title: `${testId} — ${TITLES[testId as TestId]}`,
+    title: `${testId}: ${TITLES[testId as TestId]}`,
     description: `The published spec, ground-truth method, tolerances and live results for ${testId}, including every failure.`,
   }
 }
@@ -114,7 +114,7 @@ export default async function TestPage({ params }: { params: Promise<{ testId: s
           <p className={styles.note}>
             The expected values are computed by us from chain state at a pinned block, never taken
             from a third party. A case is captured immediately before a run because BSC keeps
-            roughly 64 blocks of state — about 29 seconds — so a case captured earlier could not be
+            roughly 64 blocks of state (about 29 seconds), so a case captured earlier could not be
             read by the agent under test or by us.
           </p>
           {cases.length === 0 ? (
@@ -186,10 +186,10 @@ export default async function TestPage({ params }: { params: Promise<{ testId: s
                         <td style={{ whiteSpace: 'normal', minWidth: '24ch' }}>
                           {r['error']
                             ? String(r['error']).slice(0, 90)
-                            : fields.length > 0 ? fields.join(', ') : '—'}
+                            : fields.length > 0 ? fields.join(', ') : 'n/a'}
                         </td>
-                        <td className="mono">{String(r['block_number'] ?? '—')}</td>
-                        <td className="mono">{r['latency_ms'] === null ? '—' : `${String(r['latency_ms'])} ms`}</td>
+                        <td className="mono">{String(r['block_number'] ?? 'n/a')}</td>
+                        <td className="mono">{r['latency_ms'] === null ? 'n/a' : `${String(r['latency_ms'])} ms`}</td>
                         <td className="mono">{String(r['ran_at']).slice(0, 16).replace('T', ' ')}</td>
                       </tr>
                     )

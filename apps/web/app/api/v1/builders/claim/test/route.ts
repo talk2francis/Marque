@@ -43,7 +43,7 @@ export async function POST(request: Request) {
   }
 
   const claim = readClaimToken(input.claimToken)
-  if (!claim) return NextResponse.json({ error: 'claim_expired', detail: 'Prove control again — the claim window closed.' }, { status: 401 })
+  if (!claim) return NextResponse.json({ error: 'claim_expired', detail: 'Prove control again: the claim window closed.' }, { status: 401 })
 
   if (input.taskConsent !== true) return NextResponse.json({ error: 'task_consent_required', detail: 'This invokes a real task. Confirm that you control or have permission for this endpoint and that the test needs no payment or other side effects.' }, { status: 428 })
 

@@ -193,7 +193,7 @@ async function resolveByOwner(owner: Address): Promise<IdentityLookup> {
     SCAN_BUDGET_MS,
   )
   if (!page) {
-    return { status: 'error', detail: '8004scan is not responding, so looking up by owner address is unavailable right now. Paste the token id instead — that path reads the chain directly.' }
+    return { status: 'error', detail: '8004scan is not responding, so looking up by owner address is unavailable right now. Paste the token id instead. That path reads the chain directly.' }
   }
   // Never trust the upstream filter (AGENTS.md gotcha 5).
   const items = page.items.filter((it) => (it.owner_address ?? '').toLowerCase() === owner.toLowerCase())

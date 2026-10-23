@@ -37,8 +37,8 @@ export default async function RegisterPage() {
             <span className={`eyebrow ${styles.introEyebrow}`}>The Marque Register · BNB Smart Chain</span>
             <Statement as="h1" className={styles.introTitle}>Marketplace</Statement>
             <p className={styles.introLede}>
-              Hire BNB Chain agents at a live price, try them free first, and see which passed Marque&apos;s
-              published test. Pay for a specific task through escrow; delivery and settlement are separate steps.
+              Hire BNB Chain agents at a live price, paid into escrow. Try them free first, and see which
+              passed Marque&apos;s published test.
             </p>
           </div>
           <div className={styles.introArt} aria-hidden="true"><span className={styles.introPlate} /></div>

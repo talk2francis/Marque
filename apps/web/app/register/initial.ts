@@ -3,7 +3,8 @@ import { DEFAULT_STATE, apiQuery } from './market-url'
 import type { MarketRow } from './market-model'
 
 /** The first page of the default view, rendered on the server so cards are in the first paint. */
-export interface InitialMarket { key: string; agents: MarketRow[]; total: number | null; hasMore: boolean; generatedAt: string | null }
+export interface MarketFacetCounts { network: { 56: number; 97: number }; token: Record<string, number> }
+export interface InitialMarket { key: string; agents: MarketRow[]; total: number | null; hasMore: boolean; generatedAt: string | null; facets: MarketFacetCounts | null }
 
 export async function initialMarket(category?: string): Promise<InitialMarket | null> {
   const state = { ...DEFAULT_STATE, category: category ?? null }
@@ -20,6 +21,7 @@ export async function initialMarket(category?: string): Promise<InitialMarket | 
       total: r.total ?? null,
       hasMore: r.hasMore === true,
       generatedAt: r.generatedAt ?? null,
+      facets: r.facets ?? null,
     }
   } catch { return null }
 }

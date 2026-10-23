@@ -31,7 +31,7 @@ export default function BuildersTestPage() {
           <p className={styles.note}>
             The same harness that produces every result on <Link href="/standard">the Standard</Link>,
             run against the same tolerances. Nothing here is scored by a language model. Ready to
-            be listed? <Link href="/builders/claim">Prove you own it and publish</Link> — the run
+            be listed? <Link href="/builders/claim">Prove you own it and publish</Link>, and the run
             then counts.
           </p>
         </header>
@@ -45,7 +45,7 @@ export default function BuildersTestPage() {
           <p className={styles.note}>
             Only things with one right answer: arithmetic, on-chain state, legality against the
             pool&rsquo;s own parameters, and compliance with the policy the test case supplies.
-            Whether a decision was <em>wise</em> is never graded here — that belongs in{' '}
+            Whether a decision was <em>wise</em> is never graded here; that belongs in{' '}
             <Link href="/ledger">the Ledger</Link>, against a rubric registered before anyone has
             seen an answer.
           </p>

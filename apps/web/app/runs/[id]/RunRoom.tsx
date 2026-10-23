@@ -223,7 +223,7 @@ export function RunRoom({
           ))}
           {running && (
             <li className={styles.event} data-kind="pending">
-              <span className={`mono ${styles.eventTime}`}>—</span>
+              <span className={`mono ${styles.eventTime}`}>now</span>
               <span className={`mono ${styles.eventSince}`} />
               <span className={styles.eventBody}>
                 <span className={styles.eventKind}>Waiting</span>

@@ -27,7 +27,7 @@ export default function MethodologyPage() {
           <p className={styles.lede}>
             The Standard asks whether an agent is correct, and settles it by assertion. The Ledger
             asks whether an agent is better than doing the work yourself, which cannot be settled
-            by assertion — so it is settled by a rubric written before anyone has seen an answer.
+            by assertion, so it is settled by a rubric written before anyone has seen an answer.
           </p>
           <p className={styles.note}><Link href="/ledger">Back to the Ledger</Link></p>
         </header>
@@ -40,8 +40,7 @@ export default function MethodologyPage() {
             Each arm is run twice, because a single run is an anecdote.
           </p>
           <p>
-            The agent arm records the block it read. The human arm, run by hand, recorded none —
-            but the block is not lost: each frozen benchmark task contains exactly one BSC block
+            The agent arm records the block it read. The human arm, run by hand, recorded none, but the block is not lost: each frozen benchmark task contains exactly one BSC block
             number, and every human run&rsquo;s manifest hash matches that frozen task. So the
             block is recovered from the immutable task and recorded in an <em>append-only</em>
             provenance supplement. The raw run row is never rewritten; the recovered value is
@@ -66,7 +65,7 @@ export default function MethodologyPage() {
           <p>
             The manual arm is a person doing the task by hand, on camera. Each benchmark links a
             screen recording of the analyst reading the contract on BscScan, querying pool state
-            with <code>cast call</code>, or working the health factor — pinned to the benchmark
+            with <code>cast call</code>, or working the health factor, pinned to the benchmark
             block. The recordings are shown on each benchmark page, not hidden behind a link,
             because &ldquo;a human really did this&rdquo; is a claim that deserves to be seen
             rather than asserted. The result the analyst produced is pasted into the intake,
@@ -85,7 +84,7 @@ export default function MethodologyPage() {
           <h2>Timing</h2>
           <p>
             Wall clock, always, never an estimate. The agent arm is timed around the same public
-            HTTPS request a buyer would make — including TLS, the reverse proxy and the SSRF
+            HTTPS request a buyer would make, including TLS, the reverse proxy and the SSRF
             guard, because a buyer waits for those too, and excluding them would flatter the
             agent. The manual arm is timed by the analyst&rsquo;s own stopwatch, and the analyst
             states in their own words how they measured it. That statement is published with the
@@ -98,7 +97,7 @@ export default function MethodologyPage() {
             separate lines, with the hourly rate recorded so a reader can re-price the result
             against their own. Where a line is genuinely zero it is zero, and where it is unknown
             it is not filled in. The agent arms below spent no gas and no model budget, because
-            the engines are deterministic arithmetic over chain reads — that is why those lines
+            the engines are deterministic arithmetic over chain reads; that is why those lines
             read zero rather than unknown.
           </p>
 
@@ -113,7 +112,7 @@ export default function MethodologyPage() {
           <p>
             The <em>reproduce</em> button on a benchmark page runs the agent arm live against
             today&rsquo;s block. It is recorded as a reproduction and is deliberately excluded
-            from the published result — otherwise anyone could replace a registered comparison by
+            from the published result; otherwise anyone could replace a registered comparison by
             pressing a button.
           </p>
 
@@ -142,7 +141,7 @@ export default function MethodologyPage() {
 
           <h2>What is not settled here</h2>
           <p>
-            The Ledger measures judgement, speed and cost. It does not measure correctness — that
+            The Ledger measures judgement, speed and cost. It does not measure correctness; that
             is the <Link href="/standard">Standard</Link>, and a check belongs there only if it
             can be written as an assertion with a numeric tolerance. Nothing that requires an
             opinion is ever graded as conformance, and nothing with one right answer is ever
@@ -153,7 +152,7 @@ export default function MethodologyPage() {
           <ul>
             {BENCHMARKS.map((b) => (
               <li key={b.id}>
-                <Link href={`/ledger/${b.id}`}><code>{b.id}</code></Link> — {b.title}
+                <Link href={`/ledger/${b.id}`}><code>{b.id}</code></Link>: {b.title}
                 {b.mandatory ? '' : ' (stretch)'}
               </li>
             ))}

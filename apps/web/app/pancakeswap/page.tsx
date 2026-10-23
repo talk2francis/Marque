@@ -8,7 +8,7 @@ import styles from './pancake.module.css'
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 export const metadata = {
-  title: 'The PancakeSwap Desk — every V3 position, and what it is costing you',
+  title: 'The PancakeSwap Desk: every V3 position, and what it is costing you',
   description:
     'Live PancakeSwap V3 positions with measured hours out of range, uncollected fees, and the agents that can re-centre them under a capped, revocable charter.',
 }
@@ -38,7 +38,7 @@ export default function PancakeSwapPage() {
           <Statement as="h1">The PancakeSwap Desk</Statement>
           <p className={styles.lede}>
             Every V3 position at an address, where its price sits inside its range, what it has
-            earned but not collected, and — the number that actually costs money — how long it has
+            earned but not collected, and (the number that actually costs money) how long it has
             been out of range earning nothing.
           </p>
           <p className={styles.note}>
@@ -47,7 +47,7 @@ export default function PancakeSwapPage() {
           <Link href="/pancakeswap/proof" className={styles.proofBanner}>
             <span className={styles.proofDot} aria-hidden="true" />
             <span>
-              <strong>The proof run</strong> — one real mainnet V3 rebalance under a $60 charter,
+              <strong>The proof run:</strong> one real mainnet V3 rebalance under a $60 charter,
               every transaction hash on bscscan.
             </span>
             <span className={styles.proofArrow} aria-hidden="true">→</span>
@@ -67,8 +67,7 @@ export default function PancakeSwapPage() {
             >
               PancakeSwap&rsquo;s own guide for building V3 trading agents
             </a>{' '}
-            and enforced on every execution. Where a rule is ours rather than theirs, it says so —
-            attributing our own choices to their guide would misrepresent it.
+            and enforced on every execution. Where a rule is ours rather than theirs, it says so: attributing our own choices to their guide would misrepresent it.
           </p>
           <div className={styles.guardrails}>
             {GUARDRAILS.map((g) => (

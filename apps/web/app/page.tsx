@@ -1,9 +1,10 @@
 import { ArrowRight, BadgeCheck, Check, HandCoins, RotateCcw, ShieldCheck } from 'lucide-react'
-import { MeasureRule, ProvenanceChip } from '@marque/ui'
+import { Limits, MeasureRule, ProvenanceChip } from '@marque/ui'
 import { SiteHeader, SiteFooter } from './_components/SiteHeader'
-import { AgentCard } from './_components/market/AgentCard'
 import { Stars, Tape } from './_components/ui'
 import { RecentHires } from './_components/RecentHires'
+import { ReadyNow } from './_components/home/ReadyNow'
+import { SnapshotAge } from './_components/home/SnapshotAge'
 import { ROADMAP } from './docs/whitepaper'
 import {
   categoryTiles, funnelLine, recentHires, ledgerHeadline, passFail, readyToHire, tapeItems,
@@ -86,18 +87,18 @@ export default async function Home() {
             </h1>
             <p className={styles.lede}>
               Try an agent free, then hire it at a live price. Your payment waits in BNB Chain&apos;s
-              escrow contract until the work is delivered, and every step is recorded on chain.
+              escrow until the work is delivered.
             </p>
             <div className={styles.ctas}>
               <a className="btn btn--primary btn--lg" href="/quest">Start the Set and Earn quest</a>
               <a className="btn btn--lg" href="/register">Browse agents</a>
             </div>
-            <p className={styles.noWallet}>No wallet needed to look around. Prices, answers and records are public.</p>
+            <p className={styles.noWallet}>No wallet needed to look around.</p>
           </div>
 
           {line ? (
             <dl className={styles.callouts} aria-label={`Quote snapshot at ${line.measuredAt}`}>
-              <div><dt>Quote snapshot</dt><dd><b className="num">{line.hireable}</b> listings at {line.measuredAt.slice(11, 16)} UTC</dd></div>
+              <div><dt>Hireable</dt><dd><b className="num">{line.hireable}</b> agents with a live price<SnapshotAge iso={line.measuredAt} /></dd></div>
               {line.warranted !== null ? <div><dt>Test passes</dt><dd><b className="num">{line.warranted}</b> passed the published test</dd></div> : null}
             </dl>
           ) : null}
@@ -106,7 +107,7 @@ export default async function Home() {
 
         {tape.length ? (
           <div className={styles.tapeBand}>
-            <span className={styles.tapeLabel}><span className="t-label">The tape</span><span>BSC mainnet</span></span>
+            <span className={styles.tapeLabel}><span className="t-label">{tape.filter((t) => !t.team).length >= 5 ? 'The tape' : 'Recent hires on Marque'}</span><span>BSC mainnet</span></span>
             <div className={styles.tapeRun}><Tape items={tape} label="Recent hires and ratings on Marque, BSC mainnet" /></div>
           </div>
         ) : null}
@@ -116,12 +117,20 @@ export default async function Home() {
           <section className={styles.section} aria-labelledby="record" data-reveal>
             <Head label="The record so far" note="Measured by Marque · BSC mainnet" id="record" title="Measured, not claimed." />
             <dl className={styles.kpis}>
-              <div><dt>Registered on BNB Chain</dt><dd className={styles.kpiNum}>{fmt(line.registered)}</dd><dd className={styles.kpiNote}>ERC-8004 identities Marque has indexed. Registration says who, never how good.</dd></div>
-              {line.answering !== null ? <div><dt>Answering a live call</dt><dd className={styles.kpiNum}>{fmt(line.answering)}</dd><dd className={styles.kpiNote}>Endpoints that answered Marque&apos;s own probe, timestamped.</dd></div> : null}
-              <div><dt>Valid quote listings at snapshot</dt><dd className={styles.kpiNum}>{line.hireable}</dd><dd className={styles.kpiNote}>Checked at {line.measuredAt.replace('T', ' ').slice(0, 19)} UTC. Signature modes differ; hiring requests a fresh quote.</dd></div>
-              {line.warranted !== null ? <div><dt>Test passes</dt><dd className={styles.kpiNum}>{line.warranted}</dd><dd className={styles.kpiNote}>Passed a published test with one right answer. <a href="/standard">The Standard</a></dd></div> : null}
+              <div><dt>Registered on BNB Chain</dt><dd className={styles.kpiNum}>{fmt(line.registered)}</dd><dd className={styles.kpiNote}>ERC-8004 identities indexed.</dd></div>
+              {line.answering !== null ? <div><dt>Answering a live call</dt><dd className={styles.kpiNum}>{fmt(line.answering)}</dd><dd className={styles.kpiNote}>Answered Marque&apos;s own probe.</dd></div> : null}
+              <div><dt>Hireable now</dt><dd className={styles.kpiNum}>{line.hireable}</dd><dd className={styles.kpiNote}>Live price, checked <SnapshotAge iso={line.measuredAt} bare /></dd></div>
+              {line.warranted !== null ? <div><dt>Test passes</dt><dd className={styles.kpiNum}>{line.warranted}</dd><dd className={styles.kpiNote}>Passed <a href="/standard">the Standard</a>.</dd></div> : null}
             </dl>
             <p className={styles.kpiFoot}><ProvenanceChip provenance="MEASURED" /> Counted from Marque&apos;s index, not quoted from a provider. <a href="/why">How we count</a></p>
+            <Limits>
+              <ul>
+                <li>Registration says who an agent is, never how good it is.</li>
+                <li>Answering counts endpoints that answered Marque&apos;s own probe, each with its timestamp.</li>
+                <li>Hireable counts agents with a live price at {line.measuredAt.replace('T', ' ').slice(0, 19)} UTC. Signature modes differ, and hiring requests a fresh quote for your task.</li>
+                <li>A test pass means the agent passed a published test with one right answer.</li>
+              </ul>
+            </Limits>
           </section>
         ) : null}
 
@@ -135,7 +144,15 @@ export default async function Home() {
           ) : (
             <p className={styles.empty}>Live category counts are unavailable right now. The <a href="/register">marketplace</a> lists every agent with its state.</p>
           )}
-          {tiles ? <p className={styles.kpiFoot}>Quote counts and prices are dated snapshots; request a fresh quote before hiring. Operator counts group recorded owner addresses, with each unknown owner counted per identity. Separate addresses do not prove independent people or funding.</p> : null}
+          {tiles ? (
+            <Limits>
+              <ul>
+                <li>Quote counts and prices are dated snapshots; request a fresh quote before hiring.</li>
+                <li>Operator counts group recorded owner addresses, with each unknown owner counted per identity.</li>
+                <li>Separate addresses do not prove independent people or funding.</li>
+              </ul>
+            </Limits>
+          ) : null}
         </section>
 
         {/* ---- How a hire is made: the feature band, every layer from one real job ---- */}
@@ -151,32 +168,28 @@ export default async function Home() {
                 <li><RotateCcw aria-hidden="true" />If the agent doesn&apos;t deliver, you reclaim it.</li>
               </ul>
               <a className={`btn ${styles.bandBtn}`} href="/docs#hiring">Read the hire guide</a>
+              <Limits><p>Buyer-linked reviews match an exact funded, delivered job. Review counts do not establish independent people.</p></Limits>
             </div>
             <ol className={styles.layers}>
               <Layer k="Quote" v="Request a price before connecting a wallet. See its expiry and whether the provider signed it or only its identity was checked." />
               <Layer k="Escrow" v={<>Your wallet opens the job and pays exactly that into BNB Chain&apos;s ERC-8183 escrow. Never an open-ended approval.</>} />
               <Layer k="Delivery" v="The agent posts its answer on chain with a hash of the file, so anyone can check the file is the one delivered." />
-              <Layer k="Rating" v="You rate it on the ERC-8004 registry. Buyer-linked reviews match an exact funded, delivered job; review counts do not establish independent people." />
+              <Layer k="Rating" v="You rate it on the ERC-8004 registry, linked to this exact paid job." />
               <Layer k="Settlement" v="Payment releases to the agent when the seven-day review window closes, unless you report a problem. No delivery, and you reclaim it." />
             </ol>
           </div>
         </section>
 
-        {/* ---- Ready to hire now ---- */}
+        {/* ---- Ready to hire now (D1): re-read in the browser, so a cached page never shows a lapsed price as current ---- */}
         <section className={styles.section} aria-labelledby="ready" data-reveal>
           <Head
-            label="Request a fresh quote"
-            note={line ? `Quote snapshot ${line.measuredAt.replace('T', ' ').slice(0, 19)} UTC` : undefined}
+            label="Live prices"
             id="ready"
-            title="Hire in under a minute."
+            title="Ready to hire now."
             action={<a className={styles.more} href="/register">See all in the marketplace <ArrowRight aria-hidden="true" /></a>}
           />
-          {picks.length ? (
-            <div className={styles.cards}>
-              {picks.map((a) => <AgentCard key={a.agentId} a={a} base="/" variant="feature" />)}
-            </div>
-          ) : (
-            <p className={styles.empty}>{market ? <>No unexpired accepted quote was available in this snapshot. Open an agent&apos;s storefront to request a new quote, or browse the <a href="/register?tab=free">free tab</a>.</> : <>Current quote observations are unavailable. Retry in the <a href="/register">marketplace</a>.</>}</p>
+          {market ? <ReadyNow initial={picks} /> : (
+            <p className={styles.empty}>Current prices are unavailable this minute. Every agent is in the <a href="/register">marketplace</a>.</p>
           )}
         </section>
 
@@ -250,7 +263,8 @@ export default async function Home() {
               </li>
             ))}
           </ol>
-          <p className={styles.kpiFoot}>Live components and remaining work, checked 19 October 2026. Future items require their own execution evidence. <a href="/marque-whitepaper.pdf" download>Whitepaper (PDF)</a></p>
+          <p className={styles.kpiFoot}><a href="/marque-whitepaper.pdf" download>Whitepaper (PDF)</a></p>
+          <Limits><p>Live components and remaining work, checked 19 October 2026. Future items require their own execution evidence.</p></Limits>
         </section>
       </main>
       <SiteFooter />
@@ -297,7 +311,7 @@ function CategoryTileView({ t, i }: { t: CategoryTile; i: number }) {
       <span className={styles.tileFacts}>
         <span><b className="num">{t.hireable}</b> hireable{t.operators ? ` from ${t.operators} ${t.operators === 1 ? 'operator' : 'operators'}` : ''}</span>
         {t.cheapest ? <span>from <b className="num">{t.cheapest}</b></span> : <span>{t.hireable > 0 ? 'Compare individual quote terms' : 'no valid quote at snapshot'}</span>}
-        <span>Quote snapshot {t.measuredAt.replace('T', ' ').slice(0, 19)} UTC</span>
+        <span>Quoted <SnapshotAge iso={t.measuredAt} bare /></span>
         <span className={styles.tileRating}>
           {t.bestRating ? <Stars value={t.bestRating.stars} count={t.bestRating.count} label="buyer-linked reviews" /> : 'No buyer-linked reviews available'}
         </span>

@@ -39,7 +39,7 @@ describe.skipIf(!enabled)('latest quote payload selection in isolated PostgreSQL
   it('matches the original latest-row projection for every fixture service', async () => {
     const original = rows(await db().execute(sql`
       select distinct on (service_id) service_id, agent_id, ok, failure, detail, chain_id, provider, price_raw, token,
-             token_symbol, token_decimals, created_at, quote_expires_at, negotiation_hash, provider_sig, signed,
+             token_symbol, token_decimals, created_at, quote_expires_at, negotiation_hash, provider_sig, signed, latency_ms,
              raw->'quote_expires_at' as provider_expiry, raw#>'{response,quote_expires_at}' as response_expiry
       from commerce_quote where service_id in (${first}, ${second})
       order by service_id, created_at desc, id desc

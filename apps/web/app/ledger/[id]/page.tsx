@@ -14,7 +14,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const { id } = await params
   const b = await readBenchmark(id).catch(() => null)
   return {
-    title: b ? `${b.id} — ${b.title}` : 'Benchmark not found',
+    title: b ? `${b.id}: ${b.title}` : 'Benchmark not found',
     description: b?.method ?? 'A Marque Ledger benchmark.',
   }
 }
@@ -24,7 +24,7 @@ function ms(n: number): string {
 }
 
 function money(v: unknown): string {
-  return typeof v === 'number' ? `$${v.toFixed(4)}` : '—'
+  return typeof v === 'number' ? `$${v.toFixed(4)}` : 'n/a'
 }
 
 function Arm({ run, label }: { run: LedgerRun; label: string }) {
@@ -65,7 +65,7 @@ function Arm({ run, label }: { run: LedgerRun; label: string }) {
       </p>
 
       <p className={styles.note}>
-        Cost — gas {money(run.costBreakdown['gasUsd'])}, model {money(run.costBreakdown['llmUsd'])},
+        Cost: gas {money(run.costBreakdown['gasUsd'])}, model {money(run.costBreakdown['llmUsd'])},
         agent fee {money(run.costBreakdown['agentFeeUsd'])}, human time{' '}
         {run.costBreakdown['humanUsd'] === null ? 'n/a' : money(run.costBreakdown['humanUsd'])}.
       </p>
@@ -140,8 +140,8 @@ export default async function BenchmarkPage({ params }: { params: Promise<{ id: 
                 {criteria.map((c, i) => (
                   <tr key={c.id ?? i}>
                     <td>{c.name ?? c.id ?? `c${i + 1}`}</td>
-                    <td className="mono">{c.points ?? '—'}</td>
-                    <td style={{ whiteSpace: 'normal', minWidth: '32ch' }}>{c.standard ?? '—'}</td>
+                    <td className="mono">{c.points ?? 'n/a'}</td>
+                    <td style={{ whiteSpace: 'normal', minWidth: '32ch' }}>{c.standard ?? 'n/a'}</td>
                   </tr>
                 ))}
                 <tr>
@@ -168,7 +168,7 @@ export default async function BenchmarkPage({ params }: { params: Promise<{ id: 
             <>
               <p className={styles.warn}>
                 Not run yet. A human analyst runs this arm by hand, with a timer and a screen
-                recording, and pastes the result into the intake — which hashes it into the
+                recording, and pastes the result into the intake, which hashes it into the
                 manifest exactly as the agent&rsquo;s answer was hashed. Until both arms exist
                 there is no comparison here, and none is shown. Simulating this arm would be
                 trivial and would make every number on this page worthless.
@@ -181,7 +181,7 @@ export default async function BenchmarkPage({ params }: { params: Promise<{ id: 
             <>
               <p className={styles.note}>
                 This arm was run by a person, on camera. The recording below is the analyst
-                doing exactly this task by hand at the pinned block — not a re-enactment, and
+                doing exactly this task by hand at the pinned block, not a re-enactment, and
                 not something Marque could have generated.
               </p>
               <HumanArmEvidence id={b.id} />

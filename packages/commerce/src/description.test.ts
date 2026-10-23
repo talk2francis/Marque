@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import { buildJobDescription as sdkBuild, buildDescriptionContent as sdkContent } from '@bnbagent/sdk/erc8183'
 import { buildJobDescription, buildDescriptionContent, canonicalJson, sanitizeForClaim, negotiationHashOf, buildPlainDescription, descriptionHash } from './description.js'
 import type { Negotiation } from './quote.js'
@@ -27,7 +27,11 @@ describe('job description matches @bnbagent/sdk 0.6.0 byte for byte', () => {
   it('builds the same signed content as the SDK', () => {
     expect(canonicalJson(buildDescriptionContent(base, 97, base.verifying_contract!))).toBe(canonicalJson(sdkContent(base as never, 97, base.verifying_contract!)))
   })
+  afterEach(() => { vi.useRealTimers() })
   it('matches without optional fields', () => {
+    // Both builders default negotiated_at to the current second; pin the clock so the two
+    // calls cannot straddle a second boundary (an intermittent false failure).
+    vi.useFakeTimers({ now: Date.parse('2026-10-23T12:00:00.500Z'), toFake: ['Date'] })
     const lean = { ...base, response: { accepted: true, terms: { price: '1', currency: base.response.terms!.currency } }, chain_id: undefined, verifying_contract: undefined } as unknown as Negotiation
     expect(buildJobDescription(lean)).toBe(sdkBuild(lean as never))
   })

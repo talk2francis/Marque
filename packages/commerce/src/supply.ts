@@ -246,6 +246,28 @@ export async function runQuoteProbe(opts: { concurrency?: number; limit?: number
   return { attempted: due.length, ok, failures }
 }
 
+/**
+ * A buyer pressed Refresh on a dated price: run the same harmless probe the quote worker
+ * runs, for this one agent, now. Stored as a probe observation, exactly as the worker
+ * would store it. Never creates a job. Callers rate limit.
+ */
+export async function refreshQuoteFor(agentId: string): Promise<{ attempted: number; ok: number }> {
+  const candidates = (await sellerCandidates({ agentId })).sort((a, b) => Number(b.advertisesCommerce) - Number(a.advertisesCommerce))
+  let ok = 0
+  let attempted = 0
+  for (const c of candidates.slice(0, 2)) {
+    attempted++
+    const task = probeTask(c.category ?? 'general')
+    let q = await requestQuote(c.endpoint, task, { agentWallet: c.agentWallet, agentOwner: c.owner })
+    if (!q.ok && q.reason === 'declined' && c.taskExample) {
+      q = await requestQuote(c.endpoint, { ...task, task_description: c.taskExample }, { agentWallet: c.agentWallet, agentOwner: c.owner })
+    }
+    await recordQuote('probe', c, q)
+    if (q.ok) { ok++; break }
+  }
+  return { attempted, ok }
+}
+
 /** First-party agents carry their category from config, as an owner-declared label. */
 export async function syncFirstPartyCategories(): Promise<number> {
   let n = 0
@@ -277,6 +299,8 @@ export interface ServiceCommerce {
   deliveredJobs: number
   /** Null when no quote succeeded; false for a plain quote bound to the registered wallet. */
   signed: boolean | null
+  /** Round trip of this quote request, a single measurement. */
+  latencyMs?: number | null
   sourceClaimVersion: 1
   signatureEvidence: 'provider_signed' | 'identity_matched_unsigned' | 'unknown'
 }
@@ -292,7 +316,7 @@ export function latestCommerceQuoteQuery(serviceId?: number) {
       order by service_id, created_at desc, id desc
     )
     select q.service_id, q.agent_id, q.ok, q.failure, q.detail, q.chain_id, q.provider, q.price_raw, q.token,
-           q.token_symbol, q.token_decimals, q.created_at, q.quote_expires_at, q.negotiation_hash, q.provider_sig, q.signed,
+           q.token_symbol, q.token_decimals, q.created_at, q.quote_expires_at, q.negotiation_hash, q.provider_sig, q.signed, q.latency_ms,
            q.raw->'quote_expires_at' as provider_expiry, q.raw#>'{response,quote_expires_at}' as response_expiry
     from latest_ids l join commerce_quote q on q.id = l.id
     order by q.service_id
@@ -317,6 +341,18 @@ export async function commercialStates(serviceId?: number): Promise<Map<number, 
   const out = new Map<number, ServiceCommerce>()
   const now = Date.now()
   for (const q of quotes) {
+    const c = serviceCommerceFromQuote(q, delivered, now)
+    out.set(c.serviceId, c)
+  }
+  return out
+}
+
+/**
+ * One stored quote observation to its commercial state. Shared by the catalog projection
+ * (`commercialStates`) and the exact-agent terms reader, so both apply the same freshness,
+ * expiry and signature rules.
+ */
+export function serviceCommerceFromQuote(q: Record<string, unknown>, delivered: Map<string, number>, now = Date.now()): ServiceCommerce {
     const at = new Date(q['created_at'] as string).getTime()
     const fresh = at <= now && now - at <= QUOTE_FRESH_MS
     let expiry = q['quote_expires_at'] ? new Date(q['quote_expires_at'] as string).getTime() : NaN
@@ -334,7 +370,7 @@ export async function commercialStates(serviceId?: number): Promise<Map<number, 
     let state: CommercialState = 'unavailable'
     if (valid && q['ok'] === true) state = n > 0 ? 'settleable' : 'hireable'
     else if (fresh && wellFormed) state = 'quoteable'
-    out.set(Number(q['service_id']), {
+    return {
       serviceId: Number(q['service_id']),
       agentId: String(q['agent_id']),
       state,
@@ -348,11 +384,10 @@ export async function commercialStates(serviceId?: number): Promise<Map<number, 
       failureDetail: q['ok'] === true ? (valid ? null : 'Stored price is expired or its quote evidence is incomplete. Request a fresh exact-task quote.') : (q['detail'] ? String(q['detail']) : null),
       deliveredJobs: n,
       signed: q['ok'] === true && typeof q['signed'] === 'boolean' ? q['signed'] : null,
+      latencyMs: q['latency_ms'] == null ? null : Number(q['latency_ms']),
       sourceClaimVersion: 1,
       signatureEvidence: q['ok'] === true && q['signed'] === true ? 'provider_signed' : q['ok'] === true && q['signed'] === false ? 'identity_matched_unsigned' : 'unknown',
-    })
-  }
-  return out
+    }
 }
 
 export interface CoverageAgent {

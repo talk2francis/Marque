@@ -1,9 +1,10 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { IFACES } from './market-model'
 import { CLEARED_FILTERS, type MarketState } from './market-url'
+import type { MarketFacetCounts } from './initial'
 import styles from './register.module.css'
 
 /**
@@ -27,7 +28,7 @@ const TOGGLES: Array<{ key: keyof MarketState; group: string; label: string; hin
 
 /** One row of mutually exclusive options, the same control the interface facet uses. */
 function Choice<T extends string | number | null>({ id, group, value, options, onPick }: {
-  id: string; group: string; value: T; options: Array<{ value: T; label: string }>; onPick: (v: T) => void
+  id: string; group: string; value: T; options: Array<{ value: T; label: string; count?: number | null; disabledReason?: string | null }>; onPick: (v: T) => void
 }) {
   return (
     <div className={styles.facet}>
@@ -40,9 +41,13 @@ function Choice<T extends string | number | null>({ id, group, value, options, o
             role="radio"
             aria-checked={value === o.value}
             className={`${styles.ifaceOpt} ${value === o.value ? styles.ifaceOptOn : ''}`}
+            // A zero option stays visible with its reason; it never leads to an unexplained empty list (D6).
+            disabled={Boolean(o.disabledReason) && value !== o.value}
+            title={o.disabledReason ?? undefined}
             onClick={() => onPick(o.value)}
           >
             {o.label}
+            {typeof o.count === 'number' ? <span className={styles.optCount}>{o.count}</span> : null}
           </button>
         ))}
       </div>
@@ -53,7 +58,7 @@ function Choice<T extends string | number | null>({ id, group, value, options, o
 function useIsNarrow(): boolean {
   const [narrow, setNarrow] = useState(false)
   useEffect(() => {
-    const mq = window.matchMedia('(max-width: 760px)')
+    const mq = window.matchMedia('(max-width: 899px)')
     const sync = () => setNarrow(mq.matches)
     sync()
     mq.addEventListener('change', sync)
@@ -66,11 +71,14 @@ function Facets({
   state,
   patch,
   activeCount,
+  facets,
 }: {
   state: MarketState
   patch: (p: Partial<MarketState>) => void
   activeCount: number
+  facets: MarketFacetCounts | null
 }) {
+  const zero = (n: number | undefined, why: string) => (facets && n === 0 ? why : null)
   return (
     <>
       {TOGGLES.map((t) => (
@@ -96,10 +104,17 @@ function Facets({
       ))}
 
       <Choice id="net-group" group="Network" value={state.network}
-        options={[{ value: null, label: 'Any' }, { value: 56, label: 'BSC mainnet' }, { value: 97, label: 'BSC testnet' }]}
+        options={[
+          { value: null, label: 'Any' },
+          { value: 56, label: 'Mainnet', count: facets?.network[56] ?? null, disabledReason: zero(facets?.network[56], 'No agent in this view has a mainnet price right now.') },
+          { value: 97, label: 'Testnet practice', count: facets?.network[97] ?? null, disabledReason: zero(facets?.network[97], 'No agent in this view has a testnet price.') },
+        ]}
         onPick={(v) => patch({ network: v })} />
       <Choice id="token-group" group="Paid in" value={state.token}
-        options={[{ value: null, label: 'Any' }, { value: 'U', label: 'U' }, { value: 'USDT', label: 'USDT' }, { value: 'USDC', label: 'USDC' }]}
+        options={[{ value: null, label: 'Any' }, ...(['U', 'USDT', 'USDC'] as const).map((t) => ({
+          value: t, label: t, count: facets?.token[t.toLowerCase()] ?? null,
+          disabledReason: zero(facets?.token[t.toLowerCase()], `No agent in this view quotes in ${t} right now.`),
+        }))]}
         onPick={(v) => patch({ token: v })} />
       <Choice id="rating-group" group="Verified rating" value={state.minRating}
         options={[{ value: null, label: 'Any' }, { value: 3, label: '3+' }, { value: 4, label: '4+' }, { value: 4.5, label: '4.5+' }]}
@@ -159,10 +174,12 @@ export function MarketFilters({
   state,
   patch,
   activeCount,
+  facets,
 }: {
   state: MarketState
   patch: (p: Partial<MarketState>) => void
   activeCount: number
+  facets: MarketFacetCounts | null
 }) {
   const [open, setOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
@@ -172,6 +189,34 @@ export function MarketFilters({
   const panelRef = useRef<HTMLDivElement>(null)
 
   const close = useCallback(() => setOpen(false), [])
+
+  // Collision-aware placement (D5): right-aligned to the trigger, clamped inside the viewport
+  // with 16 px margins, opened above when there is more room there, and scrolled internally.
+  const [place, setPlace] = useState<{ left: number; width: number; maxHeight: number; above: boolean } | null>(null)
+  const measure = useCallback(() => {
+    const wrap = wrapRef.current
+    if (!wrap) return
+    const r = wrap.getBoundingClientRect()
+    const vw = document.documentElement.clientWidth
+    const vh = window.innerHeight
+    const M = 16
+    const width = Math.min(640, vw - 2 * M)
+    let left = r.right - width
+    if (left < M) left = r.left
+    left = Math.max(M, Math.min(left, vw - M - width))
+    const header = document.querySelector<HTMLElement>('.site-header')?.getBoundingClientRect().bottom ?? 0
+    const below = vh - r.bottom - 8 - M
+    const aboveRoom = r.top - 8 - Math.max(M, header + 8)
+    const above = below < 360 && aboveRoom > below
+    setPlace({ left: left - r.left, width, maxHeight: Math.max(220, Math.floor(above ? aboveRoom : below)), above })
+  }, [])
+  useLayoutEffect(() => {
+    if (!open || narrow) return
+    measure()
+    window.addEventListener('resize', measure)
+    window.addEventListener('scroll', measure, { passive: true })
+    return () => { window.removeEventListener('resize', measure); window.removeEventListener('scroll', measure) }
+  }, [open, narrow, measure])
 
   useEffect(() => setMounted(true), [])
 
@@ -215,7 +260,19 @@ export function MarketFilters({
       className={`${styles.toolBtn} ${activeCount > 0 ? styles.toolBtnOn : ''}`}
       aria-expanded={open}
       aria-haspopup="dialog"
-      onClick={() => setOpen((v) => !v)}
+      onClick={() => {
+        if (!open && !narrow) {
+          // Give the panel room below: bring the sticky toolbar up under the header first,
+          // so the results stay in view behind it. Placement still flips if room is short.
+          const r = wrapRef.current?.getBoundingClientRect()
+          const header = document.querySelector<HTMLElement>('.site-header')?.getBoundingClientRect().bottom ?? 0
+          if (r && window.innerHeight - r.bottom < 420 && r.top - header > 24) {
+            const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+            window.scrollBy({ top: r.top - header - 12, behavior: reduce ? 'auto' : 'smooth' })
+          }
+        }
+        setOpen((v) => !v)
+      }}
     >
       <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true">
         <path d="M2 4h12M4.5 8h7M7 12h2" />
@@ -225,7 +282,7 @@ export function MarketFilters({
     </button>
   )
 
-  const facets = <Facets state={state} patch={patch} activeCount={activeCount} />
+  const facetsEl = <Facets state={state} patch={patch} activeCount={activeCount} facets={facets} />
 
   return (
     <div ref={wrapRef} className={styles.filtersWrap}>
@@ -233,8 +290,15 @@ export function MarketFilters({
 
       {/* Desktop: an anchored popover inside the toolbar. */}
       {!narrow && open && (
-        <div ref={panelRef} className={styles.filterPop} role="dialog" aria-label="Filters">
-          {facets}
+        <div
+          ref={panelRef}
+          className={styles.filterPop}
+          role="dialog"
+          aria-label="Filters"
+          data-above={place?.above || undefined}
+          style={place ? { left: place.left, width: place.width, maxHeight: place.maxHeight } : { visibility: 'hidden' }}
+        >
+          {facetsEl}
         </div>
       )}
 
@@ -250,7 +314,7 @@ export function MarketFilters({
                   ×
                 </button>
               </div>
-              <div className={styles.sheetBody}>{facets}</div>
+              <div className={styles.sheetBody}>{facetsEl}</div>
               <div className={styles.sheetFoot}>
                 <button type="button" className={styles.sheetApply} onClick={close}>
                   Show results

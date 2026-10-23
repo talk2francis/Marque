@@ -4,6 +4,7 @@ import { db, firstPartyIdListSql, oneAgentIdSql } from '@marque/db'
 import { formatAmount, QUEST_CATEGORIES, teamWallets, assetAt, type ChainId } from '@marque/commerce'
 import { funnel } from '@marque/registry'
 import { marketplaceAgents, type MarketRow } from './marketplace'
+import { pickReady } from './ready-picks'
 import { readLedger } from './ledger'
 import { referenceAgent } from './reference-agents'
 import { registryImageUrl } from './avatar-source'
@@ -71,7 +72,16 @@ export async function tapeItems(limit = 14): Promise<TapeItem[]> {
       team: team.has(String(r['client'])), at: Date.parse(at),
     })
   }
-  return items.sort((a, b) => b.at - a.at).slice(0, limit).map(({ at: _at, ...t }) => t)
+  // D10: outside activity leads. With at least five outside events in seven days, they come
+  // first (newest first) and team tests follow; with fewer, everything runs by time, so the
+  // Tape never reads as a list of team activity when outside activity exists.
+  const weekAgo = Date.now() - 7 * 86_400_000
+  const outsideRecent = items.filter((i) => !i.team && i.at >= weekAgo).length
+  const byTime = (a: { at: number }, b: { at: number }) => b.at - a.at
+  const ordered = outsideRecent >= 5
+    ? [...items.filter((i) => !i.team).sort(byTime), ...items.filter((i) => i.team).sort(byTime)]
+    : items.sort(byTime)
+  return ordered.slice(0, limit).map(({ at: _at, ...t }) => t)
 }
 
 export interface CategoryTile {
@@ -99,22 +109,10 @@ export async function categoryTiles(ready: MarketRow[], supply: Awaited<ReturnTy
   })
 }
 
-/** Six hireable agents, mixing categories: best of each category first, then the next best. */
+/** Six hireable agents for "Ready to hire now": outside agents first, at most two reference agents (pickReady). */
 export async function readyToHire(): Promise<{ all: MarketRow[]; picks: MarketRow[]; supply: Awaited<ReturnType<typeof marketplaceAgents>>['supply']; generatedAt: string; total: number }> {
   const { rows, supply, generatedAt, quoteObservedAt, total } = await marketplaceAgents({ tab: 'ready', network: 56, sort: 'best', limit: 60 })
-  const byCat = new Map<string, MarketRow[]>()
-  for (const r of rows) {
-    const k = r.category ?? 'other'
-    byCat.set(k, [...(byCat.get(k) ?? []), r])
-  }
-  const picks: MarketRow[] = []
-  for (let round = 0; picks.length < 6 && round < 6; round++) {
-    for (const cat of [...QUEST_CATEGORIES, 'security', 'other']) {
-      const r = byCat.get(cat)?.[round]
-      if (r && picks.length < 6) picks.push(r)
-    }
-  }
-  return { all: rows, picks, supply, generatedAt: quoteObservedAt ?? generatedAt, total }
+  return { all: rows, picks: pickReady(rows), supply, generatedAt: quoteObservedAt ?? generatedAt, total }
 }
 
 export interface FunnelLine { registered: number | null; answering: number | null; hireable: number; warranted: number | null; measuredAt: string }
@@ -216,11 +214,17 @@ export async function recentHires(): Promise<RecentHire[]> {
     join commerce_event funded on funded.chain_id = j.chain_id and funded.job_id = j.job_id and funded.name = 'JobFunded'
     where j.chain_id = 56 and j.state in ('FUNDED', 'SUBMITTED', 'COMPLETED', 'PAID')
     order by funded.block_time desc nulls last limit 60`).catch(() => []))
+  // D11: outside wallets first. Within each lifecycle stage an outside job beats a team test,
+  // and the carousel leads with outside jobs; team tests follow with their own caption.
+  const team = new Set(teamWallets())
+  const isTeam = (j: Record<string, unknown>) => team.has(String(j['client']))
+  const stage = (pred: (j: Record<string, unknown>) => boolean, n: number) =>
+    [...jobs.filter((j) => pred(j) && !isTeam(j)), ...jobs.filter((j) => pred(j) && isTeam(j))].slice(0, n)
   const selected = [
-    ...jobs.filter((j) => j['state'] === 'FUNDED').slice(0, 1),
-    ...jobs.filter((j) => j['state'] === 'SUBMITTED').slice(0, 2),
-    ...jobs.filter((j) => j['state'] === 'COMPLETED' || j['state'] === 'PAID').slice(0, 2),
-  ].sort((a, b) => Date.parse(String(b['funded_at'])) - Date.parse(String(a['funded_at']))).slice(0, 5)
+    ...stage((j) => j['state'] === 'FUNDED', 1),
+    ...stage((j) => j['state'] === 'SUBMITTED', 2),
+    ...stage((j) => j['state'] === 'COMPLETED' || j['state'] === 'PAID', 2),
+  ].sort((a, b) => Number(isTeam(a)) - Number(isTeam(b)) || Date.parse(String(b['funded_at'])) - Date.parse(String(a['funded_at']))).slice(0, 5)
   return Promise.all(selected.map(async (j): Promise<RecentHire> => {
     const ev = (j['ev'] ?? {}) as Record<string, { tx: string; at: string | null; block?: number }>
     const [r] = rowsOf(await db().execute(sql`

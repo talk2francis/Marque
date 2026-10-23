@@ -51,7 +51,7 @@ export async function POST(request: Request) {
   }
 
   const claim = readClaimToken(input.claimToken)
-  if (!claim) return NextResponse.json({ error: 'claim_expired', detail: 'Prove control again — the claim window closed.' }, { status: 401 })
+  if (!claim) return NextResponse.json({ error: 'claim_expired', detail: 'Prove control again: the claim window closed.' }, { status: 401 })
 
   const [row] = await db().select({ id: agent.id, tokenId: agent.tokenId, chainId: agent.chainId, registry: agent.contractAddress }).from(agent).where(eq(agent.id, claim.agentId)).limit(1)
   if (!row && claim.chainId !== 97) {
@@ -74,7 +74,7 @@ export async function POST(request: Request) {
   }
 
   if (!claim.proofSignature || !claim.proofMessage) {
-    return NextResponse.json({ error: 'claim_expired', detail: 'Prove control again — the proof did not carry through.' }, { status: 401 })
+    return NextResponse.json({ error: 'claim_expired', detail: 'Prove control again: the proof did not carry through.' }, { status: 401 })
   }
 
   const now = new Date()

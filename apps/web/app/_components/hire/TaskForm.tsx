@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useAccount } from 'wagmi'
 import { Field, SelectField } from '../ui/Field'
 import { gridTask, hfTask, rebalanceTask, securityTask, yieldTask } from '../../../lib/hire-tasks'
+import { readBrief } from '../../../lib/brief'
 
 /**
  * The task, as a small form per category (DESIGN-SYSTEM.md 8.5 step 1). Each form
@@ -71,6 +72,8 @@ function HealthFactor({ agentName, onChange, disabled }: { agentName: string; on
   const { address } = useAccount()
   const [addr, setAddr] = useState('')
   const [target, setTarget] = useState('2.5')
+  // A brief from /positions fills the form; the buyer still sees and edits every field.
+  useEffect(() => { const b = readBrief('health_factor'); if (b?.category === 'health_factor') { setAddr(b.address); setTarget(String(b.targetHf)) } }, [])
   useEffect(() => { if (!addr && address) setAddr(address) }, [address])
   const t = num(target)
   const addrOk = ADDR.test(addr)
@@ -99,6 +102,7 @@ function Grid({ onChange, disabled }: { onChange: (v: TaskValue) => void; disabl
   const [lo, setLo] = useState('')
   const [hi, setHi] = useState('')
   const [cap, setCap] = useState('500')
+  useEffect(() => { const b = readBrief('grid'); if (b?.category === 'grid') { if (PAIRS.some((p) => p.value === b.pair)) setPair(b.pair); setCap(String(Math.round(b.capitalUsd))) } }, [])
   const [stop, setStop] = useState('')
   const [levels, setLevels] = useState('10')
   const [spot, setSpot] = useState<{ price: number; block: string } | null>(null)
@@ -138,6 +142,7 @@ function Rebalance({ onChange, disabled }: { onChange: (v: TaskValue) => void; d
   const { address } = useAccount()
   const [id, setId] = useState('')
   const [pct, setPct] = useState('5')
+  useEffect(() => { const b = readBrief('rebalancing'); if (b?.category === 'rebalancing') setId(b.positionId) }, [])
   const [mine, setMine] = useState<Array<{ tokenId: string; pair: string; inRange: boolean }> | null>(null)
   useEffect(() => {
     if (!address) { setMine(null); return }
@@ -146,7 +151,7 @@ function Rebalance({ onChange, disabled }: { onChange: (v: TaskValue) => void; d
       if (!live || !j) return
       const list = (j.positions ?? []) as Array<{ tokenId: string; pair: string; inRange: boolean }>
       setMine(list.map((p) => ({ tokenId: String(p.tokenId), pair: p.pair, inRange: Boolean(p.inRange) })))
-      if (list[0] && !id) setId(String(list[0].tokenId))
+      if (list[0]) setId((cur) => cur || String(list[0]!.tokenId))
     }).catch(() => setMine([]))
     return () => { live = false }
   }, [address])
@@ -174,6 +179,7 @@ function Rebalance({ onChange, disabled }: { onChange: (v: TaskValue) => void; d
 function Yield({ onChange, disabled }: { onChange: (v: TaskValue) => void; disabled?: boolean }) {
   const [asset, setAsset] = useState('USDT')
   const [amount, setAmount] = useState('1000')
+  useEffect(() => { const b = readBrief('yield'); if (b?.category === 'yield') { if (b.asset === 'USDT' || b.asset === 'USDC') setAsset(b.asset); setAmount(String(Number(b.amount.toFixed(2)))) } }, [])
   const A = num(amount)
   const ok = A !== null && A > 0
   const v = useMemo<TaskValue>(() => ({

@@ -70,7 +70,7 @@ export function CountUp({
 
   return (
     <span ref={ref} className={className}>
-      {display === null ? '—' : display.toLocaleString('en-US')}
+      {display === null ? 'n/a' : display.toLocaleString('en-US')}
     </span>
   )
 }

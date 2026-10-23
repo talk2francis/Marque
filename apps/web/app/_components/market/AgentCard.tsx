@@ -1,12 +1,13 @@
 'use client'
-import { useEffect, useState } from 'react'
 import { Check } from 'lucide-react'
+import { useAgentTerms } from '../terms/useTerms'
+import { TermsLine } from '../terms/TermsLine'
 import { AgentAvatar } from '../AgentAvatar'
 import { Badge } from '../ui'
 import { avatarSource } from '../../../lib/avatar-source'
 import { utcDay } from '../../../lib/time'
 import {
-  CATEGORY_LABEL, agoWords, answersFree, deliveryWords, describe, hireBlocked, hireHref, isHireable,
+  CATEGORY_LABEL, answersFree, deliveryWords, describe, hireBlocked, hireHref,
   profileHref, tryHref, warrantIsStale, type MarketRow,
 } from '../../register/market-model'
 import styles from './AgentCard.module.css'
@@ -33,26 +34,17 @@ export function AgentCard({ a, compare, base = '', variant = 'default' }: {
 }) {
   const feature = variant === 'feature'
   const profile = profileHref(a)
-  const [quoteExpired, setQuoteExpired] = useState(false)
-  const expiry = a.commerce.quoteExpiresAt
-  useEffect(() => {
-    const until = expiry ? Date.parse(expiry) : NaN
-    const remaining = until - Date.now()
-    setQuoteExpired(!Number.isFinite(remaining) || remaining <= 0)
-    if (remaining > 0) {
-      const timer = setTimeout(() => setQuoteExpired(true), Math.min(remaining, 2_147_483_647))
-      return () => clearTimeout(timer)
-    }
-  }, [expiry])
-  const hireable = isHireable(a) && !quoteExpired
-  const price = quoteExpired && a.priceProvenance === 'MEASURED' ? null : a.price
+  // One price source for every surface (invariant 41): fresh, dated with its age, or none.
+  const { terms, now, refresh, refreshing } = useAgentTerms(a.agentId, a.commerce)
+  const hireable = terms.state === 'fresh'
+  const quoted = terms.state !== 'none'
+  const declared = !quoted && a.priceProvenance === 'CLAIMED' ? a.price : null
   const free = answersFree(a)
   const classified = a.category && a.category !== 'unclassified'
   const cat = classified ? CATEGORY_LABEL[a.category!] ?? a.category! : 'Other'
   const blurb = describe(a)
   const verified = a.track.verified
   const delivery = deliveryWords(a.track.delivery.medianSeconds)
-  const priced = agoWords(a.commerce.quotedAt)
   const w = a.warrant
   const stale = w.status === 'warranted' && warrantIsStale(w.date)
   const art = avatarSource({ id: a.agentId, reference: a.isReference, imageUrl: a.identity.imageUrl, size: 512 })
@@ -90,7 +82,9 @@ export function AgentCard({ a, compare, base = '', variant = 'default' }: {
       <p className={styles.status}>
         {hireable
           ? <span className={styles.ok}><span className={styles.dot} aria-hidden="true" />Hireable</span>
-          : <span className={styles.off}>{a.commerce.state === 'preview_only' || free ? 'Preview only' : 'Not hireable'}</span>}
+          : terms.state === 'dated'
+            ? <span className={styles.off}>Quote lapsed</span>
+            : <span className={styles.off}>{a.commerce.state === 'preview_only' || free ? 'Preview only' : 'Not hireable'}</span>}
         <span className={styles.sep} aria-hidden="true" />
         {w.status === 'warranted' && w.date
           ? stale ? <span className={styles.retest}>Retest due</span> : <span className={styles.warrant}><Check aria-hidden="true" />Test passed {utcDay(w.date)}</span>
@@ -102,9 +96,8 @@ export function AgentCard({ a, compare, base = '', variant = 'default' }: {
       <dl className={styles.stats} title={a.track.computedAt ? `Job and review index observed ${a.track.computedAt}${a.track.sourceStale ? ' (cached, refresh pending)' : ''}` : 'Index observation time unavailable'}>
         <div>
           <dt>Price</dt>
-          <dd className={a.priceProvenance === 'MEASURED' ? styles.live : styles.claimed}>{price ?? 'Request a quote'}</dd>
-          {/* Relative time is computed at render: server and browser clocks differ by the page's age. */}
-          <dd className={styles.src} suppressHydrationWarning>{price ? (a.priceProvenance === 'MEASURED' ? (priced ? `live quote, ${priced}` : 'live quote') : 'declared') : quoteExpired ? 'No current price' : 'not published'}</dd>
+          <dd className={terms.state === 'fresh' ? styles.live : styles.claimed} data-terms={terms.state}>{terms.priceLabel ?? declared ?? 'No current price'}</dd>
+          <dd className={styles.src}>{quoted ? <TermsLine terms={terms} now={now} refresh={refresh} refreshing={refreshing} short /> : declared ? 'declared, not quoted' : 'not quoted yet'}</dd>
         </div>
         <div>
           <dt>Delivers</dt>
@@ -130,10 +123,12 @@ export function AgentCard({ a, compare, base = '', variant = 'default' }: {
           {free ? <a className={`btn btn--sm btn--quiet ${styles.try}`} href={`${base}${tryHref(a)}`}>Try free</a> : null}
           {hireable
             ? <a className="btn btn--sm btn--hire" href={`${base}${hireHref(a)}`}>Hire</a>
-            : profile ? <a className="btn btn--sm" href={profile} title={hireBlocked(a)}>View record</a> : null}
+            : terms.state === 'dated'
+              ? <a className="btn btn--sm" href={`${base}${hireHref(a)}`} title="Opens the hire sheet, which asks for a fresh price for your task">Hire</a>
+              : profile ? <a className="btn btn--sm" href={profile} title={hireBlocked(a)}>View record</a> : null}
         </span>
       </footer>
-      {!hireable ? <p className={styles.why}>{quoteExpired && isHireable(a) ? 'The stored quote expired. Open the record to request a fresh one.' : hireBlocked(a)}.</p> : null}
+      {terms.state === 'none' ? <p className={styles.why}>{terms.reason ?? `${hireBlocked(a)}.`}</p> : null}
     </article>
   )
 }

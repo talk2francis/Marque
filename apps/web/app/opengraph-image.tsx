@@ -14,7 +14,7 @@ import { BRAND } from '@marque/ui/brand'
 export const runtime = 'nodejs'
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
-export const alt = `${BRAND.name} — ${BRAND.tagline}`
+export const alt = `${BRAND.name}: ${BRAND.tagline}`
 
 const INK = '#15160F'
 const PAPER = '#EDEDE7'
@@ -51,7 +51,7 @@ export default function Image() {
             {BRAND.tagline}
           </div>
           <div style={{ display: 'flex', fontSize: 24, color: SOFT, fontFamily: 'ui-monospace, "SF Mono", Menlo, monospace' }}>
-            {`${BRAND.domain}  —  a marketplace on ${BRAND.chain}`}
+            {`${BRAND.domain}: a marketplace on ${BRAND.chain}`}
           </div>
         </div>
 

@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
-import { EmptyState } from '@marque/ui'
-import type { InitialMarket } from './initial'
+import { EmptyState, Limits } from '@marque/ui'
+import type { InitialMarket, MarketFacetCounts } from './initial'
 import { track } from '../../lib/track'
 import { MarketToolbar } from './MarketToolbar'
 import { MarketList } from './MarketList'
@@ -55,6 +55,7 @@ export function Marketplace({ category: fixedCategory, initial }: { category?: s
   const [generatedAt, setGeneratedAt] = useState<string | null>(initial?.generatedAt ?? null)
   const [total, setTotal] = useState<number | null>(initial?.total ?? null)
   const [hasMore, setHasMore] = useState(initial?.hasMore ?? false)
+  const [facets, setFacets] = useState<MarketFacetCounts | null>(initial?.facets ?? null)
   const seeded = useRef(initial?.key ?? null)
   const [retry, setRetry] = useState(0)
   const [rankInfo, setRankInfo] = useState(false)
@@ -181,6 +182,7 @@ export function Marketplace({ category: fixedCategory, initial }: { category?: s
             setRows(j.agents ?? [])
             setTotal(typeof j.total === 'number' ? j.total : null)
             setHasMore(j.hasMore === true)
+            setFacets(j.facets ?? null)
             // The API clamps an out-of-range offset; follow it rather than
             // showing page 9 of 3.
             if (typeof j.offset === 'number' && j.offset !== page * pageSize) {
@@ -297,6 +299,7 @@ export function Marketplace({ category: fixedCategory, initial }: { category?: s
         patchFilter={patchFilter}
         fixedCategory={fixedCategory}
         resultsId={resultsId}
+        facets={facets}
       />
 
       {/* Result utility bar: what this set is, and how it was ranked. */}
@@ -334,12 +337,15 @@ export function Marketplace({ category: fixedCategory, initial }: { category?: s
       <p className={styles.trust}>
         <span className={styles.trustDot} aria-hidden="true" />
         <span>
-          <b>Try free</b> is available for supported Marque reference services. Outside-agent task calls are not assumed free. No wallet or signature is needed for a supported preview.
+          <b>Try free</b> runs Marque reference agents with no wallet.
         </span>
         <Link className={styles.trustLink} href="/standard">
           How Marque tests agents
         </Link>
       </p>
+      <Limits className={styles.trustLimits}>
+        <p>Try free is available for supported Marque reference services. Outside-agent task calls are not assumed free. No wallet or signature is needed for a supported preview.</p>
+      </Limits>
 
       {error && (
         <div className={styles.error} role="alert">
@@ -369,7 +375,7 @@ export function Marketplace({ category: fixedCategory, initial }: { category?: s
         {!loading && !error && rows.length === 0 && (
           <EmptyState title="No agent matches these filters.">
             <p>
-              This is the real count, not a loading state — Marque does not pad a category with agents that do
+              This is the real count, not a loading state: Marque does not pad a category with agents that do
               not exist.
             </p>
             {(chips.length > 0 || state.search.trim() || state.category) && (

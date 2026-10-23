@@ -19,15 +19,15 @@ interface Recording {
 const RECORDINGS: Record<string, Recording> = {
   'ADV-01': {
     videoId: 'pt0EkL6wY6A',
-    caption: 'The analyst on BscScan, reading the BEP-20 USDT contract source — the exact token the task names — line by line for upgrade, mint, pause and blacklist powers.',
+    caption: 'The analyst on BscScan, reading the BEP-20 USDT contract source (the exact token the task names) line by line for upgrade, mint, pause and blacklist powers.',
   },
   'ADV-02': {
     videoId: '0xT6JBNv1zQ',
-    caption: 'The analyst querying PancakeSwap V3 pool state by hand — getPool, slot0, tickSpacing — pinned to the benchmark block with a cast call.',
+    caption: 'The analyst querying PancakeSwap V3 pool state by hand (getPool, slot0, tickSpacing), pinned to the benchmark block with a cast call.',
   },
   'ADV-03': {
     videoId: 'eWAAFVw9Hs0',
-    caption: 'The analyst pulling Venus supply rates — supplyRatePerBlock, venusSupplySpeeds — against the Comptroller at the pinned block, to price the route by hand.',
+    caption: 'The analyst pulling Venus supply rates (supplyRatePerBlock, venusSupplySpeeds) against the Comptroller at the pinned block, to price the route by hand.',
   },
   'ADV-04': {
     videoId: 'UKWhdf4GwO8',
@@ -64,7 +64,7 @@ export function HumanArmEvidence({ id, compact = false }: { id: string; compact?
       </a>
       <figcaption className={styles.evCaption}>
         <span className={styles.evHead}>
-          Watch the human arm — {id} <ProvenanceChip provenance="MEASURED" />
+          Watch the human arm: {id} <ProvenanceChip provenance="MEASURED" />
         </span>
         <span className={styles.evBody}>{r.caption}</span>
         <a className={styles.evLink} href={href} rel="noreferrer noopener" target="_blank">

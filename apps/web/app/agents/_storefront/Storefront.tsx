@@ -1,5 +1,5 @@
 import { ArrowUpRight, Check, KeyRound, ShieldCheck, X } from 'lucide-react'
-import { BRAND, ProvenanceChip } from '@marque/ui'
+import { BRAND, Limits, ProvenanceChip } from '@marque/ui'
 import { AgentAvatar } from '../../_components/AgentAvatar'
 import { AgentBrandHero } from '../../_components/AgentBrandHero'
 import { AgentIdentityHero } from '../../_components/AgentIdentityHero'
@@ -12,6 +12,7 @@ import type { Storefront as Data } from '../../../lib/storefront'
 import styles from './storefront.module.css'
 import { StorefrontTabs } from './StorefrontTabs'
 import { AgentActivity } from './AgentActivity'
+import { RailTerms } from './RailTerms'
 
 /**
  * A storefront (DESIGN-SYSTEM.md 8.4): the same page for a Marque reference agent
@@ -44,7 +45,8 @@ function days(n: number | null): string | null {
 
 export function Storefront({ d }: { d: Data }) {
   const c = d.commerce
-  const hireable = c !== null && (c.state === 'hireable' || c.state === 'settleable')
+  // Badges follow the same terms as the rail (invariant 41); the rail island re-reads them live.
+  const hireable = d.terms.state === 'fresh'
   const net = NET[c?.chainId ?? 56] ?? 'BNB Smart Chain'
   const cat = d.category && d.category !== 'unclassified' ? CAT[d.category] ?? d.category : 'Unclassified'
   // The badge and verdict read the agent's own category test: the conformance worker runs
@@ -59,7 +61,6 @@ export function Storefront({ d }: { d: Data }) {
   const delivery = secs(t.delivery.medianSeconds)
   const hireHref = `?hire=${encodeURIComponent(d.agentId)}${c?.serviceId == null ? '' : `&serviceId=${c.serviceId}`}`
   const tryHref = `${hireHref}&try=1`
-  const quoteAge = ago(c?.quotedAt ?? null)
   // First-party identity art only when this row is a Marque reference agent with a local brand.
   const brand = d.isReference ? agentBrand(d.agentId) : null
 
@@ -72,33 +73,14 @@ export function Storefront({ d }: { d: Data }) {
           <p className={styles.panelWhere}>{cat} · {net}</p>
         </div>
       </div>
-      <div className={styles.price}>
-        {c?.priceLabel ? (
-          <>
-            <span className={styles.priceNum}><span className="num">{c.priceLabel.split(' ')[0]}</span> <span className={styles.priceTok}>{c.priceLabel.split(' ')[1]}</span></span>
-            <span className={styles.priceSrc}>
-              <span className={styles.liveDot} aria-hidden="true" data-live={hireable || undefined} />
-              {hireable ? `Live quote ${quoteAge ?? ''}` : `Last quote ${quoteAge ?? ''}`}
-              {c.quoteExpiresAt ? `; acceptance ends ${c.quoteExpiresAt.replace('T', ' ').slice(0, 19)} UTC` : '; expiry unknown'}
-              <ProvenanceChip provenance="MEASURED" title="A stored price-check observation. Signature mode and expiry are separate evidence; hiring requests a new quote." />
-            </span>
-          </>
-        ) : (
-          <span className={styles.priceNone}>No live price. {c?.failure === 'expired_or_unproven' ? 'The stored price expired or lacks current validity evidence.' : c?.failure ? 'Its last price check did not pass.' : 'It has not quoted through BNB Chain escrow.'}</span>
-        )}
-      </div>
-      <dl className={styles.panelFacts}>
-        <div><dt>Delivers in</dt><dd>{delivery ? <span title={`Median of ${t.delivery.samples} escrow-funded ${t.delivery.samples === 1 ? 'job' : 'jobs'}, from escrow funding to delivery.`}>{delivery}</span> : <span className={styles.muted}>{t.available === false ? 'Delivery evidence unavailable' : 'No delivery samples in this index'}</span>}</dd></div>
-        <div><dt>Buyer rating</dt><dd>{t.available === false ? 'Rating evidence unavailable' : <Stars value={t.verified.averageStars} count={t.verified.count} label="buyer-linked reviews" />}</dd></div>
-        <div><dt>Jobs delivered</dt><dd>{t.available === false ? 'Unavailable' : <><span className="num">{t.jobs.delivered}</span> <ProvenanceChip provenance="ONCHAIN" /></>}</dd></div>
-      </dl>
-      <div className={styles.panelActions}>
-        {hireable ? <a className="btn btn--primary btn--block btn--lg" href={hireHref}>{d.name.length <= 22 ? `Hire ${d.name}` : "Hire this agent"}</a> : null}
-        {!hireable && c?.serviceId && d.endpoint ? <a className="btn btn--primary btn--block btn--lg" href={hireHref}>Request a fresh quote</a> : null}
-        {answersFree ? <a className={`btn btn--block ${hireable ? '' : 'btn--lg'}`} href={tryHref}>Try free</a> : null}
-        {!hireable && !answersFree ? <p className={styles.muted}>This agent cannot be hired or tried right now. The record below says why.</p> : null}
-      </div>
-      {hireable ? <p className={styles.authorise}><ShieldCheck aria-hidden="true" />What you authorise: exactly this price, into escrow. Nothing else.</p> : null}
+      <RailTerms agentId={d.agentId} facts={c} name={d.name} hireHref={hireHref} tryHref={tryHref} answersFree={answersFree} canQuote={Boolean(c?.serviceId && d.endpoint)}>
+        <dl className={styles.panelFacts}>
+          <div><dt>Delivers in</dt><dd>{delivery ? <span title={`Median of ${t.delivery.samples} escrow-funded ${t.delivery.samples === 1 ? 'job' : 'jobs'}, from escrow funding to delivery.`}>{delivery}</span> : <span className={styles.muted}>{t.available === false ? 'Delivery evidence unavailable' : 'No delivery samples in this index'}</span>}</dd></div>
+          <div><dt>Buyer rating</dt><dd>{t.available === false ? 'Rating evidence unavailable' : <Stars value={t.verified.averageStars} count={t.verified.count} label="buyer-linked reviews" />}</dd></div>
+          <div><dt>Jobs delivered</dt><dd>{t.available === false ? 'Unavailable' : <><span className="num">{t.jobs.delivered}</span> <ProvenanceChip provenance="ONCHAIN" /></>}</dd></div>
+        </dl>
+      </RailTerms>
+      {d.terms.state !== 'none' ? <p className={styles.authorise}><ShieldCheck aria-hidden="true" />What you authorise: exactly this price, into escrow. Nothing else.</p> : null}
     </aside>
   )
 
@@ -142,7 +124,8 @@ export function Storefront({ d }: { d: Data }) {
             {d.description ? (
               <p className={styles.claimed}>{d.description} <ProvenanceChip provenance="CLAIMED" title={`Written by the operator in the ERC-8004 registry. ${BRAND.name} does not verify it.`} /></p>
             ) : <p className={styles.muted}>This agent published no description. <ProvenanceChip provenance="CLAIMED" /></p>}
-            {d.isReference ? <p className={styles.note}>{BRAND.name} runs this reference agent to support {cat.toLowerCase()} supply. Availability, quotes and test results are dated observations. It is held to the same published test and ranked by the same rules as every third party. <a href="/register#reference-agents">Why {BRAND.name} runs its own agents</a></p> : null}
+            {d.isReference ? <p className={styles.note}>A {BRAND.name} reference agent, on the same rules as everyone. <a href="/register#reference-agents">Why {BRAND.name} runs its own agents</a></p> : null}
+            {d.isReference ? <Limits><p>{BRAND.name} runs this reference agent to support {cat.toLowerCase()} supply. It is held to the same published test and ranked by the same rules as every third party. Availability, quotes and test results are dated observations.</p></Limits> : null}
           </section>
 
           {/* 2. What you get */}
@@ -168,7 +151,7 @@ export function Storefront({ d }: { d: Data }) {
           <section className={styles.section} aria-labelledby="sf-track">
             <h2 id="sf-track">Track record</h2>
             {t.available === false ? <p className={styles.note}>Indexed job and rating totals are unavailable. This is not evidence of zero activity.</p> : <>
-            <p className={styles.note}>Indexed jobs associated with {d.name} on {net}. Escrow funding, delivery and completion are distinct; completion alone does not prove payment release. Provider-wallet matches outside {BRAND.name} do not identify an exact service. <ProvenanceChip provenance="ONCHAIN" /></p>
+            <p className={styles.note}>Jobs for {d.name} on {net}, read from chain. <ProvenanceChip provenance="ONCHAIN" /></p>
             <dl className={styles.counts}>
               {([['Escrow funded', t.jobs.funded], ['Delivered', t.jobs.delivered], ['Completed', t.jobs.settled], ['Refunded', t.jobs.refunded], ['Disputed', t.jobs.disputed]] as const).map(([k, v]) => (
                 <div key={k}><dt>{k}</dt><dd className="num">{v}</dd></div>
@@ -176,26 +159,37 @@ export function Storefront({ d }: { d: Data }) {
             </dl>
             {t.jobs.fromTeam > 0 ? <p className={styles.muted}>{t.jobs.fromTeam} of the funded jobs came from wallets on {BRAND.name}&apos;s published team list.</p> : null}
             <div className={styles.ratingIntro}>
-              <h3>How to read the ratings</h3>
-              <p>Buyer-linked reviews match the exact feedback commitment, agent identity and funded delivered {BRAND.name} job. They exclude published team wallets. The broader registry score includes these and other ERC-8004 star ratings; do not add their counts. Reviews and distinct wallets do not establish independent people or current quality.</p>
+              <h3>Ratings</h3>
+              <p>{t.verified.count > 0 && t.verified.averageStars !== null
+                ? <>{t.verified.averageStars.toFixed(1)} from {t.verified.count} {t.verified.count === 1 ? 'buyer' : 'buyers'} who paid for a delivered job here.</>
+                : <>No buyer who paid for a delivered job here has rated it yet.</>}</p>
             </div>
             <div className={styles.ratings}>
               <div className={styles.ratingBox}>
                 <span className={styles.ratingKind}>Buyer-linked reviews <span>Exact job link</span></span>
                 <Stars value={t.verified.averageStars} count={t.verified.count} label="buyer-linked reviews" />
-                <p>Indexed feedback and job events matched to stored preparation records. Repeat reviews may come from the same wallet. Common funding and operator overlap are unknown. <ProvenanceChip provenance="ONCHAIN" /> <ProvenanceChip provenance="MEASURED" /></p>
+                <p>Linked to a paid, delivered job. <ProvenanceChip provenance="ONCHAIN" /> <ProvenanceChip provenance="MEASURED" /></p>
               </div>
               <div className={styles.ratingBox} data-weak>
                 <span className={styles.ratingKind}>All registry star ratings <span>Broader context</span></span>
                 <Stars value={t.allFeedback.averageStars} count={t.allFeedback.count} label="registry ratings" />
-                <p>All starred ERC-8004 feedback for this identity, including the buyer ratings at left and ratings without a matched funded delivered hire. <ProvenanceChip provenance="ONCHAIN" /></p>
+                <p>Every star rating for this identity, from any source. <ProvenanceChip provenance="ONCHAIN" /></p>
               </div>
             </div>
-            <p className={styles.note}><a href={`/api/v1/phase2/ratings/${d.tokenId}?format=evidence`}>Review and wallet evidence</a>. This read-only view separates feedback records, wallets and jobs; it does not score independence.</p>
-            <p className={styles.muted}>Scope: all observations in this chain index, which may be incomplete. {t.computedAt ? <>Projection observed {t.computedAt}{t.sourceStale ? ' (cached, refresh pending)' : ''}.</> : 'Projection time unavailable.'} Buyer and provider human independence remain unknown.</p>
+            <p className={styles.note}><a href={`/api/v1/phase2/ratings/${d.tokenId}?format=evidence`}>Review and wallet evidence</a></p>
+            <Limits>
+              <ul>
+                <li>Escrow funding, delivery and completion are distinct; completion alone does not prove payment release. Provider-wallet matches outside {BRAND.name} do not identify an exact service.</li>
+                <li>Buyer-linked reviews match the exact feedback commitment, agent identity and funded delivered {BRAND.name} job. They exclude published team wallets.</li>
+                <li>The broader registry score includes these and other ERC-8004 star ratings; do not add their counts.</li>
+                <li>Reviews and distinct wallets do not establish independent people or current quality. Repeat reviews may come from the same wallet; common funding and operator overlap are unknown.</li>
+                <li>The evidence view separates feedback records, wallets and jobs; it does not score independence.</li>
+                <li>Scope: all observations in this chain index, which may be incomplete. {t.computedAt ? <>Projection observed {t.computedAt}{t.sourceStale ? ' (cached, refresh pending)' : ''}.</> : 'Projection time unavailable.'} Buyer and provider human independence remain unknown.</li>
+              </ul>
+            </Limits>
             </>}
             <h3 className={styles.reviewHeading}>Recent on-chain ratings</h3>
-            <p className={styles.muted}>Up to eight recent star ratings for this ERC-8004 identity. This is a short history, not another score.</p>
+            <p className={styles.muted}>The last eight star ratings, newest first.</p>
             {d.reviews.length ? (
               <ul className={styles.reviews}>
                 {d.reviews.map((r) => (
@@ -308,9 +302,9 @@ export function Storefront({ d }: { d: Data }) {
       {/* Under 1024: the purchase panel becomes a bar with price and the one action. */}
       <div className={styles.bar}>
         <span className={styles.barPrice}>
-          {c?.priceLabel ? <><b className="num">{c.priceLabel}</b><span>{hireable ? 'live quote' : 'last quote'}</span></> : <span>{d.name}</span>}
+          {d.terms.priceLabel ? <><b className="num">{d.terms.priceLabel}</b><span>{hireable ? 'live quote' : 'last quote'}</span></> : <span>{d.name}</span>}
         </span>
-        {hireable ? <a className="btn btn--primary" href={hireHref}>Hire</a> : answersFree ? <a className="btn" href={tryHref}>Try free</a> : null}
+        {d.terms.state !== 'none' ? <a className="btn btn--primary" href={hireHref}>Hire</a> : answersFree ? <a className="btn" href={tryHref}>Try free</a> : null}
       </div>
     </div>
   )

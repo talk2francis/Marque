@@ -7,3 +7,4 @@ export { projectJob, timeline, DELIVERED, TERMINAL, type JobState, type JobProje
 export { claimRefundCall, disputeCall, revokeAllowanceCall, cancelCall, settleCall, registerJobCall, setBudgetCall, approveCall, fundCall, approvalNeeded, remainingPaymentCalls, type Call, type HireTerms } from '../calls.js'
 export { agenticCommerceAbi, evaluatorRouterAbi } from '../generated.js'
 export { useRate, type RateState } from './useRate.js'
+export { termsOf, ageWords, validForWords, msUntilLapse, priceLabel, reasonWords, type Terms, type TermsState, type CommerceFacts, type LastQuote } from '../terms.js'

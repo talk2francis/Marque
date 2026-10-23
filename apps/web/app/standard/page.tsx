@@ -10,7 +10,7 @@ import styles from './standard.module.css'
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 export const metadata = {
-  title: 'MCS v1.0 — the Marque Conformance Standard',
+  title: 'MCS v1.0: the Marque Conformance Standard',
   description: 'The published, deterministic standard every agent on Marque is tested against.',
 }
 
@@ -220,7 +220,7 @@ export default async function StandardPage() {
                 ? 'zero passed'
                 : `${Number(totals[0]?.['third_party_pass']).toLocaleString('en-US')} passed`}.
               Of those, {Number((totals[0]?.['errored'] as number) ?? 0).toLocaleString('en-US')}{' '}
-              could not be reached or exposed no interface we could address — recorded as a failure
+              could not be reached or exposed no interface we could address: recorded as a failure
               to answer, which is distinct from answering wrongly. The table above shows the 200
               most recent.
             </p>

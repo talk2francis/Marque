@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 // lint:copy — no em dash (U+2014) or en dash (U+2013) in user-facing copy.
 //
-// Scope: string literals and JSX text in apps/web/**/*.tsx, README.md, docs/**/*.md.
+// Scope: string literals and JSX text in apps/web/**/*.tsx and *.ts (copy modules, API messages;
+// tests excluded), README.md, docs/**/*.md.
 // Comments in .tsx are not copy and are ignored.
 //
 // Ratchet: historical files are not mass-edited (AGENTS 13.6). Their current counts live in
@@ -25,12 +26,12 @@ function files() {
   return out
     .split('\n')
     .filter(Boolean)
-    .filter((f) => (f.startsWith('apps/web/') ? f.endsWith('.tsx') : f === 'README.md' || f.endsWith('.md')))
+    .filter((f) => (f.startsWith('apps/web/') ? (f.endsWith('.tsx') || (f.endsWith('.ts') && !/\.(test|d)\.ts$/.test(f))) : f === 'README.md' || f.endsWith('.md')))
     .filter((f) => existsSync(path.join(ROOT, f)));
 }
 
 function countTsx(src, file) {
-  const sf = ts.createSourceFile(file, src, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+  const sf = ts.createSourceFile(file, src, ts.ScriptTarget.Latest, true, file.endsWith(".tsx") ? ts.ScriptKind.TSX : ts.ScriptKind.TS);
   const hits = [];
   const visit = (node) => {
     const k = node.kind;
@@ -69,7 +70,7 @@ const failures = [];
 
 for (const f of files()) {
   const src = readFileSync(path.join(ROOT, f), 'utf8');
-  const hits = f.endsWith('.tsx') ? countTsx(src, f) : countText(src);
+  const hits = /\.tsx?$/.test(f) ? countTsx(src, f) : countText(src);
   const n = hits.reduce((a, h) => a + h.n, 0);
   if (!n) continue;
   counts[f] = n;

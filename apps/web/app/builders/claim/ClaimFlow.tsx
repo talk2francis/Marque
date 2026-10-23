@@ -42,10 +42,10 @@ const CATEGORIES = [
 ] as const
 
 const KINDS = [
-  { v: 'a2a', label: 'A2A — agent card and message/send' },
-  { v: 'mcp', label: 'MCP — streamable HTTP' },
-  { v: 'x402', label: 'x402 — per-call payment' },
-  { v: 'erc8183', label: 'ERC-8183 — commerce rail' },
+  { v: 'a2a', label: 'A2A: agent card and message/send' },
+  { v: 'mcp', label: 'MCP: streamable HTTP' },
+  { v: 'x402', label: 'x402: per-call payment' },
+  { v: 'erc8183', label: 'ERC-8183: commerce rail' },
 ] as const
 
 const short = (a: string) => `${a.slice(0, 6)}…${a.slice(-4)}`
@@ -100,7 +100,7 @@ export function ClaimFlow() {
   async function connect() {
     setError(null)
     if (typeof window === 'undefined' || !window.ethereum) {
-      setError('No injected wallet found. Install one to prove control — everything else on Marque works without a wallet.')
+      setError('No injected wallet found. Install one to prove control. Everything else on Marque works without a wallet.')
       return
     }
     try {
@@ -188,7 +188,7 @@ export function ClaimFlow() {
             />
             <span className={styles.hint}>
               On BNB Smart Chain (56). We read the identity contract directly for the current
-              owner — the index is only used to find which contract.
+              owner: the index is only used to find which contract.
             </span>
           </div>
           {candidates.length > 0 && (
@@ -231,7 +231,7 @@ export function ClaimFlow() {
                 </td></tr>
               {identity.indexerLag && (
                 <tr><td className="mono">Index says</td>
-                  <td className="mono wrap">{identity.indexerOwner} — stale. The chain value above is what must sign.</td></tr>
+                  <td className="mono wrap">{identity.indexerOwner} (stale). The chain value above is what must sign.</td></tr>
               )}
             </tbody>
           </table>
@@ -245,7 +245,7 @@ export function ClaimFlow() {
             {!wallet && <Button variant="primary" size="md" type="button" onClick={connect}>Connect wallet</Button>}
             {wallet && (
               <>
-                <span className={styles.note}>Connected {short(wallet)}{walletIsOwner ? '' : ' — not the owner'}</span>
+                <span className={styles.note}>Connected {short(wallet)}{walletIsOwner ? '' : ', not the owner'}</span>
                 <Button variant="primary" size="md" type="button" disabled={busy || !walletIsOwner} onClick={sign}>
                   {busy ? 'Verifying…' : 'Sign to prove control'}
                 </Button>
@@ -302,7 +302,7 @@ export function ClaimFlow() {
             <label htmlFor="claim-price">Price</label>
             <input id="claim-price" value={price} onChange={(e) => setPrice(e.target.value)}
               placeholder="e.g. 0.15 U per call" style={{ fontFamily: 'inherit' }} />
-            <span className={styles.hint}>Leave blank if you do not advertise one — the marketplace shows that as a finding, not a gap.</span>
+            <span className={styles.hint}>Leave blank if you do not advertise one: the marketplace shows that as a finding, not a gap.</span>
           </div>
           <div className={styles.field}>
             <strong>Agent image · optional</strong>

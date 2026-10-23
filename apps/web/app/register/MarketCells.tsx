@@ -1,5 +1,7 @@
 'use client'
 import { ProvenanceChip } from '@marque/ui'
+import { useAgentTerms } from '../_components/terms/useTerms'
+import { TermsLine } from '../_components/terms/TermsLine'
 
 import Link from 'next/link'
 import { Chip, LinkButton } from '@marque/ui'
@@ -77,15 +79,23 @@ export function QualCell({ a, compact = false }: { a: MarketRow; compact?: boole
 const PROBE_HINT =
   'Round-trip time of the most recent probe Marque ran against this agent. A single measurement, not a percentile or an average.'
 
+const AVAIL: Record<string, { word: string; tone: 'live' | 'slow' | 'down' | 'none' }> = {
+  live: { word: 'Live', tone: 'live' },
+  reachable: { word: 'Reachable', tone: 'slow' },
+  down: { word: 'Not answering', tone: 'down' },
+}
+
+/** Availability in four states, never "Unknown" for an agent Marque has probed (defect D4). */
 export function LiveCell({ a }: { a: MarketRow }) {
-  const live = a.liveness === 'live'
+  const v = AVAIL[a.liveness ?? ''] ?? { word: 'Not probed', tone: 'none' as const }
+  const label = a.latencySource === 'quote' ? 'Price check' : 'Last probe'
   return (
-    <span className={styles.live} data-live={live || undefined}>
-      <span className={`${styles.liveDot} ${live ? styles.liveDotOn : styles.liveDotOff}`} aria-hidden="true" />
-      <span className={styles.liveWord}>{live ? 'Live' : (a.liveness ?? 'Unknown')}</span>
-      {a.latencyMs != null && (
-        <span className={styles.liveProbe} title={PROBE_HINT}>
-          <span className={styles.liveProbeLabel}>Last probe</span>
+    <span className={styles.live} data-live={v.tone === 'live' || undefined}>
+      <span className={styles.liveDot} data-tone={v.tone} aria-hidden="true" />
+      <span className={styles.liveWord}>{v.word}</span>
+      {a.latencyMs != null && v.tone !== 'down' && (
+        <span className={styles.liveProbe} title={a.latencySource === 'quote' ? 'Round trip of the latest price check this agent answered. A single measurement.' : PROBE_HINT}>
+          <span className={styles.liveProbeLabel}>{label}</span>
           <span className={`mono ${styles.liveLatency}`}>{a.latencyMs} ms</span>
         </span>
       )}
@@ -93,22 +103,30 @@ export function LiveCell({ a }: { a: MarketRow }) {
   )
 }
 
-/* --- Price: the advertised string, split so the amount carries the weight --- */
-
+/** Price through the one terms source (invariant 41): fresh, dated with Refresh, or a declared price styled weaker. */
 export function PriceCell({ a }: { a: MarketRow }) {
-  const p = priceParts(a.price)
-  if (!p) return <span className={styles.priceNone}>No listed price</span>
-  const net = a.commerce.chainId === 56 ? 'BSC mainnet' : a.commerce.chainId === 97 ? 'BSC testnet' : null
+  const { terms, now, refresh, refreshing } = useAgentTerms(a.agentId, a.commerce)
+  const net = terms.chainId === 56 ? 'BSC mainnet' : terms.chainId === 97 ? 'BSC testnet' : null
+  if (terms.state !== 'none' && terms.priceLabel) {
+    const [value, ...unit] = terms.priceLabel.split(' ')
+    return (
+      <span className={styles.price} data-terms={terms.state}>
+        <span className={`mono ${styles.priceValue}`}>{value}</span>
+        <span className={styles.priceNote}>{unit.join(' ')}</span>
+        {terms.state === 'fresh' ? (
+          <span title={`Live quote from this agent${net ? ` on ${net}` : ''}`}><ProvenanceChip provenance="MEASURED" /></span>
+        ) : null}
+        <span className={styles.priceTerms}><TermsLine terms={terms} now={now} refresh={refresh} refreshing={refreshing} short /></span>
+      </span>
+    )
+  }
+  const p = a.priceProvenance === 'CLAIMED' ? priceParts(a.price) : null
+  if (!p) return <span className={styles.priceNone}>No current price</span>
   return (
     <span className={styles.price}>
       <span className={`mono ${styles.priceValue}`}>{p.value}</span>
       {p.note && <span className={styles.priceNote}>{p.note}</span>}
-      {a.priceProvenance && (
-        <span title={a.priceProvenance === 'MEASURED' ? `Live quote from this agent${net ? ` on ${net}` : ''}` : 'Declared by the agent, not measured'}>
-          <ProvenanceChip provenance={a.priceProvenance} />
-        </span>
-      )}
-      {a.priceProvenance === 'MEASURED' && net && <span className={styles.priceNote}>{net}</span>}
+      <span title="Declared by the agent, not measured"><ProvenanceChip provenance="CLAIMED" /></span>
     </span>
   )
 }
@@ -152,7 +170,9 @@ export function CompareToggle({
 
 export function RowActions({ a }: { a: MarketRow }) {
   const href = profileHref(a)
-  const hireable = isHireable(a)
+  const { terms } = useAgentTerms(a.agentId, a.commerce)
+  // Fresh: hire at this price. Dated: the hire sheet asks for a fresh price for the task.
+  const hireable = terms.state !== 'none' && (isHireable(a) || terms.state === 'dated')
   return (
     <span className={styles.actions}>
       {a.previewable && href && (
@@ -167,7 +187,7 @@ export function RowActions({ a }: { a: MarketRow }) {
       )}
       {hireable ? (
         <Link className="btn btn--sm btn--hire" href={hireHref(a)} scroll={false} prefetch={false}>
-          {a.price && a.priceProvenance === 'MEASURED' ? `Hire for ${a.price}` : 'Hire'}
+          {terms.state === 'fresh' && terms.priceLabel ? `Hire for ${terms.priceLabel}` : 'Hire'}
         </Link>
       ) : (
         <span className={styles.hireBlocked}>

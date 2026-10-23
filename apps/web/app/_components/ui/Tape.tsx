@@ -34,7 +34,7 @@ export function Tape({ items, label = 'Recent hires and ratings on Marque' }: { 
         <span className="num">{e.value}</span>
         <span className="tp-mono">{middle(e.tx, 4, 4)}</span>
         <span className="tp-age">{e.age}</span>
-        {e.team ? <span className="tp-team" title="A wallet on Marque's published team list. Real on chain, never counted for the campaign.">team wallet</span> : null}
+        {e.team ? <span className="tp-team" title="A test from a wallet on Marque's published team list. Real on chain, never counted for the campaign.">test</span> : null}
       </a>
     ))
   const speed = { '--tape-s': `${Math.max(40, items.length * 9)}s` } as CSSProperties

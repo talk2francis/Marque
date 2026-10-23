@@ -7,6 +7,28 @@
  */
 
 @layer components {
+  /* ---- Limits (DESIGN-V4 8): one quiet line, the caveats one tap away ---- */
+  .limits { margin-top: 10px; font-size: 13px; color: var(--ink-3); }
+  .limits > summary {
+    display: inline-flex; align-items: center; gap: 6px; cursor: pointer; list-style: none;
+    padding: 4px 0; border-radius: 2px; color: var(--ink-3);
+    text-decoration: underline; text-decoration-color: transparent; text-underline-offset: 3px;
+    transition: color 120ms ease, text-decoration-color 120ms ease;
+  }
+  .limits > summary::-webkit-details-marker { display: none; }
+  .limits > summary:hover { color: var(--ink-2); text-decoration-color: var(--hair-2); }
+  .limits > summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  .limits-glyph { flex: none; opacity: 0.85; }
+  .limits[open] > summary { color: var(--ink-2); }
+  .limits-body {
+    margin-top: 8px; padding-top: 10px; border-top: 1px solid var(--hair);
+    font-size: 13.5px; line-height: 1.55; color: var(--ink-2); max-width: 68ch;
+  }
+  .limits-body > p { margin: 0 0 8px; }
+  .limits-body > p:last-child, .limits-body > ul:last-child { margin-bottom: 0; }
+  .limits-body > ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
+  @media (prefers-reduced-motion: reduce) { .limits > summary { transition: none; } }
+
   /* ---- Layout ---------------------------------------------------------- */
   .wrap { width: 100%; max-width: var(--maxw); margin-inline: auto; padding-inline: var(--margin); }
   .prose { max-width: var(--measure); }
@@ -298,7 +320,7 @@
   .row--muted .data { color: var(--ink-2); }
 
   /* ---- MeasureRule: the signature device -------------------------------- */
-  .measure { display: flex; flex-direction: column; gap: 7px; width: 100%; min-width: 140px; }
+  .measure { display: flex; flex-direction: column; gap: 5px; width: 100%; min-width: 140px; }
   .measure__track { position: relative; height: 14px; display: flex; align-items: center; }
   .measure__rule {
     height: 3px;
@@ -334,18 +356,11 @@
     animation-delay: calc(var(--measure-i, 0) * 30ms);
   }
   @keyframes measure-settle { from { left: 0%; opacity: 0; } to { left: var(--measure-pos); opacity: 1; } }
-  .measure__labels {
-    display: grid;
-    grid-template-columns: minmax(0, auto) minmax(0, 1fr) minmax(0, auto);
-    align-items: baseline;
-    gap: var(--s-3);
-    font-size: 12.5px;
-    color: var(--ink-2);
-  }
-  .measure__bound { font-size: 12.5px; color: var(--ink-3); min-width: 0; overflow-wrap: anywhere; font-family: var(--font-mono); }
-  .measure__readout { display: inline-flex; gap: var(--s-2); align-items: baseline; justify-content: center; flex-wrap: wrap; min-width: 0; }
+  .measure__above, .measure__below { position: relative; height: 1.35em; font-size: 12.5px; }
+  .measure__above > span, .measure__below > span { position: absolute; top: 0; white-space: nowrap; line-height: 1.35; }
+  .measure__bound { font-size: 12.5px; color: var(--ink-3); font-family: var(--font-mono); }
   .measure__value { color: var(--ink); font-weight: 500; }
-  .measure__thresholdLabel { color: var(--ink-3); white-space: nowrap; }
+  .measure__thresholdLabel { color: var(--ink-3); }
 
   /* ---- Tape: real events only ------------------------------------------ */
   .tape {

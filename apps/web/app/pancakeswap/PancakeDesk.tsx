@@ -61,7 +61,7 @@ function OutOfRange({ r }: { r: RangeMeasure }) {
         <dt>Out of range for</dt>
         <dd>
           <span className={styles.lossFloor}>
-            not yet measured — we started watching this pool just now, and the time before that
+            not yet measured: we started watching this pool just now, and the time before that
             is not knowable from any public source
           </span>
         </dd>
@@ -73,7 +73,7 @@ function OutOfRange({ r }: { r: RangeMeasure }) {
       <div>
         <dt>Out of range for</dt>
         <dd>
-          <span className={styles.loss}>—</span>{' '}
+          <span className={styles.loss}>0 h</span>{' '}
           <span className={styles.lossFloor}>in range now, across {r.observations} observations</span>
         </dd>
       </div>
@@ -198,7 +198,7 @@ export function PancakeDesk({ demoAddress }: { demoAddress: string }) {
 
               <div className={styles.positionValue}>
                 {p.positionValueUsd === null ? (
-                  <span className={styles.pvUnpriced}>value not shown — one leg could not be priced on chain</span>
+                  <span className={styles.pvUnpriced}>value not shown: one leg could not be priced on chain</span>
                 ) : (
                   <>
                     <span className={styles.pvFigure}>${num(p.positionValueUsd, 2)}</span>
@@ -228,7 +228,7 @@ export function PancakeDesk({ demoAddress }: { demoAddress: string }) {
                     </DataCell>
                     <br />
                     {p.feesUsd === null
-                      ? <span className={styles.lossFloor}>not priced — we could not price both tokens, so no USD figure is shown</span>
+                      ? <span className={styles.lossFloor}>not priced: we could not price both tokens, so no USD figure is shown</span>
                       : <span className={styles.lossFloor}>${num(p.feesUsd, 2)}</span>}
                   </dd>
                 </div>
@@ -272,7 +272,7 @@ export function PancakeDesk({ demoAddress }: { demoAddress: string }) {
           <ThirdParties agents={data.agents.filter((a) => a.kind === 'third-party')} caveat={data.thirdPartyCaveat} />
           <p className={styles.warn}>
             No third-party agent on BNB Chain has yet passed MCS-REB-1. That is the measured state
-            of the supply, not a filter we applied — the failures are listed above with their
+            of the supply, not a filter we applied: the failures are listed above with their
             reasons, and on <Link href="/standard">the Standard</Link>.
           </p>
         </section>

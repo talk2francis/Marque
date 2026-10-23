@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { MeasureRule, Chip, DataCell, ProvenanceChip, EmptyState, Button } from '@marque/ui'
 import styles from './desk.module.css'
+import { saveBrief, briefHref, type Brief } from '../../lib/brief'
 
 /**
  * The Desk — an address and its live positions.
@@ -127,12 +128,26 @@ export function Desk({
 
   const hfState = (hf: number) => (hf < 1.25 ? 'breach' : hf < 1.8 ? 'watch' : 'holds')
 
-  const attention =
-    (venus?.healthFactor != null && venus.healthFactor < 1.8 ? 1 : 0) +
-    (v3?.positions.filter((p) => !p.inRange || Math.min(Math.abs(p.pctToLower), Math.abs(p.pctToUpper)) < 5).length ?? 0) +
-    ((spot?.idleStableUsd ?? 0) > 1 ? 1 : 0)
+  // D7: a position is an LP NFT with liquidity, a lending account, or an idle balance worth
+  // at least $1. Dust is listed as small balances and never counted.
+  const DUST_USD = 1
+  const kept = spot?.balances.filter((b) => (b.valueUsd ?? 0) >= DUST_USD) ?? []
+  const dust = spot?.balances.filter((b) => b.valueUsd !== null && b.valueUsd < DUST_USD && b.amount > 0) ?? []
+  const dustUsd = dust.reduce((t, b) => t + (b.valueUsd ?? 0), 0)
+  // D8: idle stablecoins are "earning nothing" only when moving them pays for itself.
+  const best = data?.bestYield ?? null
+  const idleUsd = spot?.idleStableUsd ?? 0
+  const idleWorthMoving = best !== null && idleUsd > 0 && idleUsd >= best.breakEvenUsd
+  const idleTooSmall = best !== null && idleUsd > 0 && !idleWorthMoving
+  const nearEdge = (p: V3Position) => !p.inRange || Math.min(Math.abs(p.pctToLower), Math.abs(p.pctToUpper)) < 5
+  const hfNeedsWork = venus?.healthFactor != null && venus.healthFactor < 1.8
 
-  const positionCount = (v3?.positions.length ?? 0) + (venus?.hasPosition ? 1 : 0) + (spot?.balances.length ?? 0)
+  const attention = (hfNeedsWork ? 1 : 0) + (v3?.positions.filter(nearEdge).length ?? 0) + (idleWorthMoving ? 1 : 0)
+  const positionCount = (v3?.positions.length ?? 0) + (venus?.hasPosition ? 1 : 0) + kept.length
+  // A grid candidate: an idle volatile balance large enough to plan levels around.
+  const GRID_MIN_USD = 50
+  const gridCandidate = kept.find((b) => ['BNB', 'WBNB', 'BTCB', 'ETH'].includes(b.symbol) && (b.valueUsd ?? 0) >= GRID_MIN_USD) ?? null
+  const largestStable = [...kept].filter((b) => ['USDT', 'USDC', 'FDUSD', 'U'].includes(b.symbol)).sort((a, b) => (b.valueUsd ?? 0) - (a.valueUsd ?? 0))[0] ?? null
 
   return (
     <div className={styles.desk}>
@@ -203,6 +218,7 @@ export function Desk({
                     <div><dt>Holding</dt><dd><DataCell align="left">{fmtNum(p.amount0)} {p.token0} + {fmtNum(p.amount1)} {p.token1}</DataCell></dd></div>
                     <div><dt>Uncollected fees</dt><dd><DataCell align="left">{fmtNum(p.fees0)} {p.token0} + {fmtNum(p.fees1)} {p.token1}</DataCell></dd></div>
                   </dl>
+                  {nearEdge(p) ? <RowAction label="Get a re-centre plan" brief={{ category: 'rebalancing', positionId: p.tokenId, address }} /> : null}
                 </article>
               )
             })
@@ -247,6 +263,7 @@ export function Desk({
                   </div>
                 ))}
               </dl>
+              {hfNeedsWork ? <RowAction label="Get a repay plan" brief={{ category: 'health_factor', address, targetHf: 1.5 }} /> : null}
             </article>
           ) : (
             <article className={styles.position}>
@@ -261,13 +278,16 @@ export function Desk({
           <article className={styles.position}>
             <header className={styles.positionHead}>
               <span className={styles.positionTitle}>Idle</span>
-              {data.bestYield && (spot?.idleStableUsd ?? 0) > 0
+              {idleWorthMoving
                 ? <Chip tone="watch">earning nothing</Chip>
-                : <Chip>—</Chip>}
+                : idleTooSmall
+                  ? <Chip>too small to move</Chip>
+                  : <Chip>{kept.length ? 'held' : 'none'}</Chip>}
             </header>
-            {spot && spot.balances.length > 0 ? (
+            {spot && (kept.length > 0 || dust.length > 0) ? (
               <>
-                {data.bestYield && spot.idleStableUsd > 0 && (
+                {idleTooSmall ? <p className={styles.absent}>A move would cost more than a year of yield at this size.</p> : null}
+                {data.bestYield && idleWorthMoving && (
                   <MeasureRule
                     label={`Currently earning 0 percent against a best net APR of ${data.bestYield.netAprPct.toFixed(2)} percent at this size`}
                     value={0} lower={0} upper={Math.max(data.bestYield.netAprPct, 0.01)}
@@ -277,7 +297,7 @@ export function Desk({
                   />
                 )}
                 <dl className={styles.facts}>
-                  {spot.balances.map((b) => (
+                  {kept.map((b) => (
                     <div key={b.symbol}>
                       <dt>{b.symbol}</dt>
                       <dd>
@@ -288,6 +308,12 @@ export function Desk({
                       </dd>
                     </div>
                   ))}
+                  {dust.length ? (
+                    <div>
+                      <dt>Small balances</dt>
+                      <dd><DataCell align="left">{dust.map((b) => b.symbol).join(', ')} · {fmtUsd(dustUsd)} in all</DataCell></dd>
+                    </div>
+                  ) : null}
                   {data.bestYield && (
                     <div>
                       <dt>Best net APR at this size</dt>
@@ -299,6 +325,8 @@ export function Desk({
                     </div>
                   )}
                 </dl>
+                {idleWorthMoving && largestStable ? <RowAction label="Find the best net yield" brief={{ category: 'yield', asset: largestStable.symbol, amount: largestStable.amount }} /> : null}
+                {gridCandidate ? <RowAction label="Plan a grid" brief={{ category: 'grid', pair: gridCandidate.symbol === 'WBNB' ? 'BNB' : gridCandidate.symbol, capitalUsd: gridCandidate.valueUsd ?? 0 }} /> : null}
               </>
             ) : (
               <p className={styles.absent}>No tracked balances at this address.</p>
@@ -311,7 +339,8 @@ export function Desk({
         <p className={styles.summary}>
           {positionCount} position{positionCount === 1 ? '' : 's'}
           {attention > 0 ? ` · ${attention} need${attention === 1 ? 's' : ''} attention` : ''}
-          {' · read in '}{data.elapsedMs}ms
+          {dust.length ? ` · ${fmtUsd(dustUsd)} in small balances` : ''}
+          {' · read in '}{(data.elapsedMs / 1000).toFixed(1)} s
         </p>
       )}
 
@@ -321,5 +350,19 @@ export function Desk({
         </EmptyState>
       )}
     </div>
+  )
+}
+
+/**
+ * One primary action for a row that needs attention (SPEC-ADOPTION 1.2). It carries a brief
+ * to the marketplace for this category, where the hire sheet shows it in its form, editable,
+ * before anything is sent. Nothing is signed here.
+ */
+function RowAction({ label, brief }: { label: string; brief: Brief }) {
+  return (
+    <p className={styles.rowAction}>
+      <a className="btn btn--sm btn--primary" href={briefHref(brief)} onClick={() => saveBrief(brief)}>{label}</a>
+      <span className={styles.rowActionNote}>Compare agents that do this, with your details filled in. Nothing is sent until you choose one.</span>
+    </p>
   )
 }

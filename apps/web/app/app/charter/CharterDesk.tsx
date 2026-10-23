@@ -275,7 +275,7 @@ export function CharterDesk({
             <option value="" disabled>Choose an agent</option>
             {agents.map((a) => (
               <option key={a.agentId} value={a.agentId}>
-                {a.name} — {a.kind}{a.latencyMs !== null ? ` · ${a.latencyMs}ms` : ''}
+                {a.name} · {a.kind}{a.latencyMs !== null ? ` · ${a.latencyMs}ms` : ''}
               </option>
             ))}
           </select>

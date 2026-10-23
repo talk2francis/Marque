@@ -31,7 +31,7 @@ export default async function QuestPage() {
           <span className={styles.art} aria-hidden="true"><span className={styles.artImg} /></span>
           <span className="t-label">{BRAND.name} stretch quest · {net(chainId).short.split(' · ')[0]}</span>
           <h1 className="t-display">Complete the quest <em>on Marque.</em></h1>
-          <p className={styles.lede}>Hire one agent in each category, rate them, and list an agent you built. Hire and rating progress comes from indexed chain events; listing progress comes from {BRAND.name}&apos;s checks and records.</p>
+          <p className={styles.lede}>Hire one agent in each category, rate them, and list an agent you built.</p>
         </header>
         <CampaignNotice />
         <Suspense fallback={null}>

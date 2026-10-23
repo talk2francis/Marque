@@ -30,7 +30,7 @@ interface AgentRow {
 }
 
 const FAILURE_COPY: Record<string, string> = {
-  unbound: 'answers, but was never bound to a runtime — nothing to call',
+  unbound: 'answers, but was never bound to a runtime; nothing to call',
   empty_tools: 'answers, but exposes no tools',
   timeout: 'endpoint did not respond in time',
   dns: 'hostname does not resolve',
@@ -204,7 +204,7 @@ export function RegisterTable({ category, graveyard }: { category?: string; grav
                 </span>
 
                 <DataCell muted={!live}>
-                  {a.liveness?.latencyMs != null ? `${a.liveness.latencyMs}ms` : '—'}
+                  {a.liveness?.latencyMs != null ? `${a.liveness.latencyMs}ms` : 'n/a'}
                 </DataCell>
 
                 <span className={styles.warrant}>

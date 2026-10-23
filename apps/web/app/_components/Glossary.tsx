@@ -29,7 +29,7 @@ export function Term({ k, children }: { k: keyof typeof GLOSSARY | string; child
   const entry = GLOSSARY[k]
   if (!entry) return <>{children}</>
   return (
-    <span className={styles.term} title={`${String(k).toUpperCase()} — ${entry.short}`} tabIndex={0}>
+    <span className={styles.term} title={`${String(k).toUpperCase()}: ${entry.short}`} tabIndex={0}>
       {children}
     </span>
   )

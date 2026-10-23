@@ -77,7 +77,7 @@ export function IntakeForm({ benchmarks }: { benchmarks: BenchOption[] }) {
         <select id="benchmark" value={benchmarkId} onChange={(e) => setBenchmarkId(e.target.value)}>
           {benchmarks.map((b) => (
             <option key={b.id} value={b.id}>
-              {b.id} — {b.title} ({b.manualReps} of 2 manual repetitions recorded)
+              {b.id}: {b.title} ({b.manualReps} of 2 manual repetitions recorded)
             </option>
           ))}
         </select>

@@ -19,6 +19,11 @@ mkdir -p "$STATE_DIR"
 
 CHECKS=(
   "status|${BASE}/status"
+  # Key pages (V4-01): a cached page is regenerated on the request after it ages, so a
+  # minute's check keeps the first real visitor from meeting an hours-old render.
+  "home|${BASE}/"
+  "marketplace|${BASE}/register"
+  "quest|${BASE}/quest"
   "web-liveness|${BASE}/api/health"
   "api-funnel|${BASE}/api/v1/funnel"
   "agent-bound|${BASE}/agents/bound/health"

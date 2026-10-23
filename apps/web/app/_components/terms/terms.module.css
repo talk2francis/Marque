@@ -1,0 +1,11 @@
+/* The terms line: quiet, one size, state carried by words first and tone second. */
+.line { font-size: 12.5px; line-height: 1.35; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.line[data-state='fresh'] { color: var(--ink-2); }
+.sig { color: var(--ink-3); }
+.refresh {
+  appearance: none; border: 0; padding: 0; background: none; font: inherit; color: var(--ink);
+  text-decoration: underline; text-decoration-color: var(--hair-2); text-underline-offset: 3px; cursor: pointer;
+}
+.refresh:hover { text-decoration-color: currentColor; }
+.refresh:focus-visible { outline: 2px solid var(--focus, var(--ink)); outline-offset: 2px; border-radius: 2px; }
+.refresh:disabled { cursor: progress; color: var(--ink-3); text-decoration: none; }

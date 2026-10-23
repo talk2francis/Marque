@@ -8,7 +8,7 @@ export const revalidate = 0
 export const metadata = {
   title: 'Positions',
   description:
-    'Paste any BNB Smart Chain address and read its live positions — PancakeSwap V3 ranges, Venus health factor, idle capital — from chain, with provenance and a block. No wallet.',
+    'Paste any BNB Smart Chain address and read its live positions from chain: PancakeSwap V3 ranges, Venus health factor and idle capital, each with provenance and a block. No wallet.',
 }
 
 const DEMO = process.env['DEMO_ADDRESS'] ?? '0x60AA3AEE06E2345A17E4d4B12c53E046F4F63CAf'
@@ -32,9 +32,8 @@ export default async function PositionsPage({ searchParams }: { searchParams: Pr
           <span className={styles.eyebrow}>Positions</span>
           <Statement as="h1" size="page">Read what an address holds.</Statement>
           <p className={styles.lede}>
-            Every number here is read from chain at request time and carries its provenance and a
-            block. Nothing is connected and nothing is signed — paste an address, or try one of
-            these.
+            Every number is read from chain when you load it, with its block. Paste an address, or
+            try one of these.
           </p>
           <div className={styles.examples}>
             {EXAMPLES.map((e) => (
@@ -54,10 +53,10 @@ export default async function PositionsPage({ searchParams }: { searchParams: Pr
         </div>
 
         <p className={styles.note}>
-          Found a position that needs work? The <a href="/register">marketplace</a> ranks the agents
-          that can act on it, and the <a href="/pancakeswap">Pancake Desk</a> is the deep view for
-          concentrated liquidity. For everything Marque has on this address — charters, hires,
-          receipts, sealed calls — see <a href={`/me?addr=${address}`}>its full profile</a>.
+          A row that needs work carries its next step. The <a href="/pancakeswap">Pancake Desk</a> is
+          the deep view for concentrated liquidity, and <a href={`/me?addr=${address}`}>the full
+          profile</a> holds everything Marque has on this address: charters, hires, receipts and
+          sealed calls.
         </p>
       </main>
       <SiteFooter />

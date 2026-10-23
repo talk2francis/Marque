@@ -45,7 +45,7 @@ export default async function IntakePage() {
         <section className={styles.section}>
           <p className={styles.warn}>
             Nothing here is scored on submission. Grading happens later and blind, from both
-            outputs with their source labels stripped — so this form has no field for how well
+            outputs with their source labels stripped, so this form has no field for how well
             you think you did, and adding one would defeat the design.
           </p>
           <IntakeForm

@@ -1,4 +1,5 @@
 'use client'
+import { SnapshotAge } from '../_components/home/SnapshotAge'
 import Link from 'next/link'
 import { BRAND } from '@marque/ui'
 import { useEffect, useMemo, useState } from 'react'
@@ -132,7 +133,7 @@ export function QuestView({ chainId, recs, recsAt, u, usdt }: { chainId: number;
           </>
         ) : (
           <div className={styles.connect}>
-            <p>Connect a wallet to track your progress. You can read every step and price below without one.</p>
+            <p>Connect a wallet to see your progress.</p>
             <Button variant="primary" onClick={openConnectModal}>Connect wallet</Button>
           </div>
         )}
@@ -154,7 +155,7 @@ export function QuestView({ chainId, recs, recsAt, u, usdt }: { chainId: number;
         {data?.projection?.computedAt ? <p role={data.projection.stale ? 'status' : undefined}>
           Snapshot computed {data.projection.computedAt}.{data.projection.stale ? ' Refresh delayed: this is the last available progress, not a current chain confirmation.' : ''}
         </p> : null}
-        <p>{remaining.length ? <>To finish: {totalLabel ? <strong>{totalLabel}</strong> : 'the prices above'} plus network fees, across {remaining.length} {remaining.length === 1 ? 'hire' : 'hires'}.</> : doneCount >= 4 ? 'All four hires are funded.' : null} Prices are live quotes{recsAt ? `, read ${new Date(recsAt).toISOString().slice(11, 16)} UTC` : ''}.</p>
+        <p>{remaining.length ? <>To finish: {totalLabel ? <strong>{totalLabel}</strong> : 'the prices above'} plus network fees, across {remaining.length} {remaining.length === 1 ? 'hire' : 'hires'}.</> : doneCount >= 4 ? 'All four hires are funded.' : null} Prices are quotes{recsAt ? <>, read <SnapshotAge iso={recsAt} bare /></> : ''}; each hire asks for a fresh price.</p>
         <p className={styles.muted}>Progress is read from the chain. Check it yourself: {target ? <a href={`/api/v1/phase2/wallet/${target}`}>/api/v1/phase2/wallet/{target.slice(0, 6)}…{target.slice(-4)}</a> : <a href="/api/v1/phase2/config">/api/v1/phase2/config</a>}</p>
       </div>
 
