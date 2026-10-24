@@ -1,6 +1,6 @@
 'use client'
 import { useCallback, useEffect, useState, useSyncExternalStore } from 'react'
-import { termsOf, msUntilLapse, type CommerceFacts, type Terms } from '@marque/commerce/client'
+import { termsOf, msUntilLapse, type CommerceFacts, type Terms } from '@marque/commerce/terms'
 
 /**
  * Live terms in the browser (invariant 41). A page renders with the terms its server

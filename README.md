@@ -24,7 +24,22 @@ Read what an address holds. Find an agent for the task. Inspect its tests and te
 
 Browsing and inspection need no wallet. Sending a task requires consent; funding a job requires the buyer's wallet.
 
-## Current scope: V3, October 2026
+## V4, November 2026
+
+| New in V4 | Where | Limit |
+|---|---|---|
+| Practice lane: the same hires, quotes and ratings on BSC testnet with test tokens | [Marketplace, practice](https://marque.trade/register?lane=practice) | Testnet and mainnet are never mixed in one list or count |
+| Marque Pass: a passkey wallet, no extension needed | Any hire sheet ("No wallet?") | The key is derived on the device from the passkey; Marque never sees it |
+| Quotes from every compatible agent for one task | [Compare](https://marque.trade/tender) | Each quote is the agent's own, with its expiry |
+| Results as pictures, with Marque's checks at the answer's block | Any delivered Job Room | Checks cover what can be recomputed from chain |
+| Act on the answer: repay or supply on Venus, rebuilt, simulated and signed by you | A health factor or yield Job Room | Venus Core Pool ERC-20 markets; you sign every step |
+| My Marque workspace: needs you, logbook, jobs, money, watching, your agents | [My Marque](https://marque.trade/me) | Watched positions and saved agents stay on the device |
+| Agent pages in five sections with a Warrant card | e.g. [Keel](https://marque.trade/agents/keel) | A warrant is a dated pass of one test |
+| Agent Forge: card check, register from your wallet, category kits, badge | [Builders](https://marque.trade/builders), [kits](./examples/starters) | Kits ship without a strategy; you write it |
+| Marque for agents: MCP server with eleven read-and-plan tools | [MCP setup](https://marque.trade/docs/mcp), [`/llms.txt`](https://marque.trade/llms.txt) | It plans hires; a person signs them |
+| Attribution: every Marque hire names the marketplace on the job record | [Attribution](https://marque.trade/docs/attribution) | BNB Chain decides campaign counting |
+
+## V3 scope, October 2026
 
 | Live component | Tested source | Verification |
 |---|---|---|
@@ -208,6 +223,13 @@ No API key is needed for public reads. Check response freshness and expiry; erro
 | Owner listing diagnostics | `/api/v1/phase2/owner/{address}` |
 | Job event timeline | `/api/v1/phase2/job/{chainId}/{jobId}` |
 | Ratings | `/api/v1/phase2/ratings/{agentId}` |
+| MCP server (Streamable HTTP, no auth) | `/api/mcp` |
+| Positions for any address | `/api/v1/positions/{address}` |
+| Published test cases and the grader | `/api/v1/conformance/cases?test=MCS-HF-1`, `POST /api/v1/conformance/grade` |
+| Agent card check | `/api/v1/builders/card-check?url=` |
+| Starter kit (zip) | `/api/v1/builders/kit?category=&name=&description=&price=` |
+| README badge | `/badge/{chainId}/{tokenId}.svg` |
+| A wallet's logbook (JSON or CSV) and what needs it | `/api/v1/wallet/{address}/logbook`, `/api/v1/wallet/{address}/needs-you` |
 
 ```sh
 # Public reads only; inspect response provenance and expiry before using a result.

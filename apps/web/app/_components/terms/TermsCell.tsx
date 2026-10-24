@@ -1,6 +1,6 @@
 'use client'
 import { ProvenanceChip } from '@marque/ui'
-import type { CommerceFacts } from '@marque/commerce/client'
+import type { CommerceFacts } from '@marque/commerce/terms'
 import { useAgentTerms } from './useTerms'
 import { TermsLine } from './TermsLine'
 import { Badge } from '../ui'

@@ -62,7 +62,7 @@ const block = (b: Block): string => {
     case 'table': return `<figure class="tbl"><table><thead><tr>${b.head.map((h) => `<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${b.rows.map((r) => `<tr>${r.map((c, j) => `<td${b.mono?.includes(j) ? ' class="mono"' : ''}>${esc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table>${b.caption ? `<figcaption>${esc(b.caption)}</figcaption>` : ''}</figure>`
     case 'callout': return `<aside class="callout"><b>${esc(b.title)}</b><p>${esc(b.text)}</p></aside>`
     case 'figures': return `<div class="figs">${b.items.map((f) => `<div><span class="fl">${esc(f.label)}</span><span class="fv">${esc(f.value)}</span><span class="fn">${esc(f.note)}</span></div>`).join('')}</div>`
-    case 'roadmap': return `<div class="rm">${b.horizons.map((h) => `<div class="rmcol" data-h="${h.key}"><div class="rmh"><i></i><b>${esc(h.title)}</b><span>${esc(h.when)}</span></div>${h.items.map((it) => `<div class="rmi"><b>${esc(it.title)}</b><p>${esc(it.text)}</p></div>`).join('')}</div>`).join('')}</div>`
+    case 'roadmap': return `<div class="rm">${b.horizons.map((h) => `<div class="rmcol" data-h="${h.key}"><div class="rmh"><i></i><b>${esc(h.title)}</b><span>${esc(h.when)}</span></div>${h.lead ? `<p class="rml">${esc(h.lead)}</p>` : ''}${h.items.map((it) => `<div class="rmi"><b>${esc(it.title)}</b><p>${esc(it.text)}</p>${it.exit ? `<p class="rmx">${esc(it.exit)}</p>` : ''}</div>`).join('')}</div>`).join('')}</div>`
   }
 }
 
@@ -158,6 +158,8 @@ figcaption{font-size:7.8pt;color:${INK3};margin-top:2mm}
 .rmh i{width:3mm;height:3mm;border-radius:50%;border:1px solid ${INK3};margin-bottom:1.5mm}
 .rmcol[data-h=shipped] .rmh i{background:${MOSS};border-color:${MOSS}}
 .rmcol[data-h=next] .rmh i{background:${BRONZE};border-color:${BRONZE}}
+.rml{font-size:8.6pt;line-height:1.4;margin:0 0 2.5mm}
+.rmx{font-size:7.6pt;font-style:italic;opacity:.75;margin-top:.8mm}
 .rmh b{font-size:12pt;font-weight:500;color:${INK}}
 .rmh span{font-size:7.4pt;letter-spacing:.14em;text-transform:uppercase;color:${INK3}}
 .rmi{margin:0 0 3.2mm;break-inside:avoid}

@@ -1,5 +1,5 @@
 'use client'
-import { usePulse } from './usePulse'
+import { useRenderedPulse } from './usePulse'
 
 /**
  * The footer's live line (Kerb's market clocks, Marque's chain): the campaign
@@ -8,7 +8,7 @@ import { usePulse } from './usePulse'
  * nothing rather than a stale number when the read fails.
  */
 export function FooterPulse() {
-  const { data } = usePulse()
+  const { data } = useRenderedPulse()
   if (!data) return <a className="footer-pulse" href="/status"><span className="footer-pulse-dot" data-state="unknown" aria-hidden="true" />Live status</a>
   const n = data.network
   const net = n.chainId === 56 ? 'BSC mainnet' : 'BSC testnet'

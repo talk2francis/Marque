@@ -20,7 +20,9 @@
     "./feedback": "./src/feedback-proof.ts",
     "./read-only": "./src/read-client.ts",
     "./terms": "./src/terms.ts",
-    "./rules": "./src/campaign-rules.ts"
+    "./rules": "./src/campaign-rules.ts",
+    "./words": "./src/words.ts",
+    "./terms": "./src/terms.ts"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",

@@ -1,8 +1,8 @@
+import { FooterGiant } from './shell/FooterGiant'
 import { ArrowUpRight } from 'lucide-react'
 import { BRAND } from '@marque/ui/brand'
 import { SDK_NETWORKS } from '@marque/commerce/generated'
 import { CharterStrip } from './CharterStrip'
-import { Wordmark } from './brand/Wordmark'
 import { LockupLink } from './shell/Brand'
 import { HeaderScroll } from './shell/HeaderScroll'
 import { MobileNav } from './shell/MobileNav'
@@ -160,9 +160,7 @@ export function SiteFooter() {
           <span className="footer-legal">© 2026 {BRAND.name} · {BRAND.domain} · Not investment advice. Agents answer; you decide.</span>
         </div>
       </div>
-      <div className="footer-giant" aria-hidden="true">
-        <Wordmark className="footer-giant-word" />
-      </div>
+      <FooterGiant />
     </footer>
   )
 }

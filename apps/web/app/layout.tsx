@@ -5,6 +5,8 @@ import { Suspense } from 'react'
 import { Providers } from './_components/Providers'
 import { HireSheetGate } from './_components/HireSheetGate'
 import { CampaignDock } from './_components/campaign/CampaignDock'
+import { FacetField } from './_components/shell/FacetField'
+import { MarketGlint } from './_components/shell/MarketGlint'
 import { Toaster } from './_components/ui/Toaster'
 import { THEME_BOOTSTRAP } from '../lib/theme'
 import './globals.css'
@@ -33,6 +35,8 @@ const instrumentSerif = localFont({
   ],
   variable: '--ff-instrument-serif',
   display: 'swap',
+  // A size-adjusted fallback so the swap does not rewrap display lines (the quest headline shifted the page, CLS 0.55).
+  adjustFontFallback: 'Times New Roman',
   fallback: ['Iowan Old Style', 'Georgia', 'serif'],
 })
 
@@ -84,7 +88,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script dangerouslySetInnerHTML={{ __html: THEME_BOOTSTRAP }} />
       </head>
       <body>
+        <FacetField />
         <Providers>
+          <MarketGlint />
           {children}
           <Suspense fallback={null}><HireSheetGate /></Suspense>
           <CampaignDock />

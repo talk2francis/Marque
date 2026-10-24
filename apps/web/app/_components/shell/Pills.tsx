@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { Tooltip } from '../ui/Tooltip'
-import { usePulse } from './usePulse'
+import { useRenderedPulse } from './usePulse'
 
 const NAME: Record<number, string> = { 56: 'BSC Mainnet', 97: 'BSC Testnet' }
 const n = (v: number | null | undefined) => (v === null || v === undefined ? 'unknown' : v.toLocaleString('en-US'))
@@ -36,7 +36,7 @@ function useViewLane(): 'mainnet' | 'practice' {
 }
 
 export function NetworkPill() {
-  const { data, isError, isPending } = usePulse()
+  const { data, isError, isPending } = useRenderedPulse()
   const lane = useViewLane()
   const net = isPending ? 'loading' : isError || !data ? 'down' : data.network.state
   const sys = data?.system.state ?? null

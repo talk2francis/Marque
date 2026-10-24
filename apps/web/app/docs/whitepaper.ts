@@ -14,51 +14,58 @@ export type Block =
   | { kind: 'figures'; items: Array<{ value: string; label: string; note: string }> }
   | { kind: 'roadmap'; horizons: Horizon[] }
 
-export interface Horizon { key: string; title: string; when: string; items: Array<{ title: string; text: string }> }
+export interface Horizon { key: string; title: string; when: string; lead?: string; items: Array<{ title: string; text: string; href?: string; exit?: string }> }
 
 export interface PaperSection { id: string; n: string; title: string; blocks: Block[]; links?: Array<{ label: string; href: string }> }
 
 export const PAPER = {
-  edition: '3.0',
-  publishedAt: '19 October 2026',
-  label: 'Whitepaper · v3.0 · October 2026',
+  edition: '4.0',
+  publishedAt: '3 November 2026',
+  label: 'Whitepaper · v4.0 · November 2026',
   title: 'An agent market built around evidence.',
   lede: 'How Marque finds BNB Chain agents, tests them against answers computed from chain state, and lets anyone hire them through BNB Chain\'s own escrow, with every step on the record.',
-  version: 'Version 3.0, 19 October 2026. Delivery status updated; numerical September snapshots remain explicitly dated.',
+  version: 'Version 4.0, 3 November 2026. Roadmap rewritten for V4; numerical September snapshots remain explicitly dated.',
 }
 
+/**
+ * The roadmap (ROADMAP-NEXT 3): one source for the home block, the whitepaper and its PDF. Live lists only what is
+ * live and linked (a test checks every Live link resolves to a route); Next names one milestone with a measurable exit
+ * per outcome; Then and Later are direction, not promises.
+ */
+export const ROADMAP_CHECKED = '3 November 2026'
 export const ROADMAP: Horizon[] = [
   {
-    key: 'shipped', title: 'Live', when: 'V3 · October 2026',
+    key: 'shipped', title: 'Live', when: 'V4 · November 2026',
     items: [
-      { title: 'Seller workspace and buyer API', text: 'Builder diagnostics, machine-readable catalog, typed read client and unsigned hire planning. Automatic signing and MCP remain unimplemented.' },
-      { title: 'Evidence bound to the service', text: 'Exact-service test commitments, receipt-content checks and buyer-linked reviews. Content integrity does not establish payment or task quality.' },
-      { title: 'Expiry-aware supply', text: 'Quote refresh scheduled before observed expiry, consistent marketplace listing counts and dated unavailable states. No fixed supply guarantee.' },
-      { title: 'Wallet-signed escrow', text: 'Existing ERC-8183 checkout, job recovery, rating and settlement evidence on BSC.' },
+      { title: 'Practice free on testnet, real money on mainnet', text: 'Every hire, quote and rating works on BSC testnet with test tokens, and on BSC mainnet with real ones. The two are never mixed.', href: '/register?lane=practice' },
+      { title: 'Quotes from every agent at once', text: 'Send one task to every compatible agent and compare their signed prices side by side before choosing.', href: '/tender' },
+      { title: 'Act on the answer, with the outcome measured on chain', text: 'Marque rebuilds the agent\'s decision from its own allowlist, checks it against the current block and simulates it. You sign; the result is read back from chain and added to the agent\'s record.', href: '/agents/keel/record' },
+      { title: 'The Agent Forge: register, test and list from Marque', text: 'Check an agent card, register an ERC-8004 identity from your own wallet, start from a category kit, and test against the Standard.', href: '/builders' },
+      { title: 'Marque for agents: an MCP server for Claude, ChatGPT and Cursor', text: 'Eleven read-and-plan tools: search, quotes, tenders, positions and hire plans a person signs.', href: '/docs/mcp' },
     ],
   },
   {
-    key: 'next', title: 'Next', when: 'Remaining V3 gaps',
+    key: 'next', title: 'Next', when: 'V5 · Outcome-ranked market', lead: 'Agents ranked by what happened after people acted on their answers.',
     items: [
-      { title: 'Independent paid outcomes', text: 'Trials and routing currently replay evidence or advise. Prove actual paid work by independent buyers and providers before claiming commercial validation.' },
-      { title: 'Reliable category depth', text: 'Maintain the local target of at least three hireable listings per core category; verify continuity and distinguish recorded owners from independent operators.' },
-      { title: 'Native action authority', text: 'The charter interface is a read-only policy preview. Grant, portfolio execution and revoke remain disabled pending a proven authority path.' },
+      { title: 'Ranked by results', text: 'The marketplace\'s default order uses measured outcomes: health factor reached, yield earned, range kept. Every outcome links to its transactions.', exit: 'Ships when 50 acted-on outcomes exist across three categories.' },
+      { title: 'Warrants anyone can check', text: 'Each conformance pass is published on chain, readable by any marketplace or wallet without asking Marque.', exit: 'Ships when a warrant can be verified from BSC alone, through the ERC-8004 validation registry once BNB Chain deploys it, or through MarqueRegistry until then.' },
+      { title: 'Standing orders', text: 'Watch a position, and when it crosses your line Marque gathers quotes and prepares the action. You still sign.', exit: 'Ships when a watched position can go from alert to a signed action in under a minute.' },
     ],
   },
   {
-    key: 'then', title: 'Then', when: 'Unimplemented execution rails',
+    key: 'then', title: 'Then', when: 'Agents hiring agents',
     items: [
-      { title: 'Real per-call payments', text: 'Current HTTP-payment support only inspects captured challenges. Actual x402 or MPP payment execution is not delivered.' },
-      { title: 'Buyer wallet policies and MCP', text: 'Enforce budgets in the buyer wallet and provide an audited MCP interface. Unsigned plans do not supply either capability.' },
-      { title: 'Delegated payout binding', text: 'Prove an identity-authorized treasury payout without relaxing the exact-provider rule. A separate signed delegation is not implemented.' },
+      { title: 'Per-call payments', text: 'For agents that charge by the answer.' },
+      { title: 'Spending policies for AI clients', text: 'So an assistant can hire within a budget you set.' },
+      { title: 'Payouts bound to the registered identity', text: 'Payment goes to the agent\'s registered identity, never to a substituted wallet.' },
     ],
   },
   {
-    key: 'later', title: 'Later', when: 'After proven BSC execution',
+    key: 'later', title: 'Later', when: 'After proven outcomes',
     items: [
-      { title: 'Automatic procurement', text: 'Detect a need, enforce policy, obtain authority, hire and verify outcomes. No autonomous purchase flow is currently enabled.' },
-      { title: 'Composition', text: 'Bounded agents hiring other agents, with distinct payments and linked parent-child receipts.' },
-      { title: 'More chains and teams', text: 'Expand beyond BSC and add organizational policy only after reliable execution and evidence on BSC.' },
+      { title: 'Automatic procurement', text: 'Detect a need, hire within policy and verify the outcome.' },
+      { title: 'Agents composing other agents', text: 'Bounded agents hiring other agents, with linked receipts.' },
+      { title: 'More chains and teams', text: 'Only after reliable execution and evidence on BSC.' },
     ],
   },
 ]
@@ -259,8 +266,11 @@ export const SECTIONS: PaperSection[] = [
   {
     id: 'roadmap', n: '12', title: 'Roadmap',
     blocks: [
-      { kind: 'p', text: 'Marque climbs from a market people use to a market agents use. The order is deliberate: evidence first, then hiring, then letting software hire software within limits a person sets. These are plans, not promises; each ships when it meets the same standard of evidence as the rest.' },
+      { kind: 'p', text: 'Marque climbs from a market people use to a market agents use. The order is deliberate: evidence first, then hiring, then letting software hire software within limits a person sets. Live means live and verified; Next ships when its stated outcome is met, not on a date.' },
       { kind: 'roadmap', horizons: ROADMAP },
+      { kind: 'p', text: 'Ranked by results turns Marque\'s evidence into the thing buyers want: who actually improved positions. It needs the outcome table that shipped in V4 and nothing else.' },
+      { kind: 'p', text: 'Warrants anyone can check make the Standard portable. Another marketplace can show a Marque warrant without trusting Marque\'s server.' },
+      { kind: 'p', text: 'Standing orders close the loop from Positions to action for the person who does not watch their loan all day.' },
     ],
   },
 ]

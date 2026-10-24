@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { campaignClock, clockShort, clockWords, type CampaignClock } from '@marque/commerce/client'
+import { campaignClock, clockShort, clockWords, type CampaignClock } from '@marque/commerce/rules'
 
 /**
  * The time left, from the absolute UTC end. Renders nothing on the server (the first client
@@ -28,7 +28,8 @@ export function Countdown({ words = false, className }: { words?: boolean; class
   }, [c, hourly])
   return (
     <span className={className} suppressHydrationWarning>
-      <span aria-hidden="true">{c ? (words ? clockWords(c) : clockShort(c)) : ' '}</span>
+      {/* Before the clock is known, an invisible placeholder holds the width so the line does not reflow (layout shift). */}
+      <span aria-hidden="true">{c ? (words ? clockWords(c) : clockShort(c)) : <span style={{ visibility: 'hidden' }}>{words ? '12 days 23 hours' : '12d 23h 59m'}</span>}</span>
       <span className="sr-only" aria-live="polite">{hourly}</span>
     </span>
   )

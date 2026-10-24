@@ -90,7 +90,11 @@
 @media print { .dock { display: none; } }
 
 /* ---- The Set and Earn dial (replaces the prism) ---- */
-.dial { display: inline-grid; place-items: center; flex: none; }
+.dial { display: inline-grid; place-items: center; flex: none; color: var(--brass-lit); border-radius: 50%; transition: box-shadow 600ms cubic-bezier(.16,1,.3,1); }
+.dial[data-warn] { color: var(--amber); }
+.dial[data-complete] { color: var(--moss); box-shadow: 0 0 0 3px color-mix(in srgb, var(--moss) 14%, transparent), 0 0 18px color-mix(in srgb, var(--moss) 22%, transparent); }
+.dial[data-complete] .dialFace { stroke: color-mix(in srgb, var(--moss) 45%, transparent); fill: color-mix(in srgb, var(--moss) 8%, transparent); }
+.dialCheck { fill: none; stroke: var(--moss); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 .dial svg { display: block; overflow: visible; }
 .dialFace { fill: color-mix(in srgb, var(--ink) 4%, transparent); stroke: color-mix(in srgb, var(--ink) 10%, transparent); stroke-width: 0.6; }
 .dialSeg { fill: none; stroke: color-mix(in srgb, var(--ink) 14%, transparent); stroke-linecap: round; transition: stroke 600ms cubic-bezier(.16,1,.3,1); }
@@ -104,5 +108,6 @@
 .dialUnit { fill: var(--ink-3); font-size: 4.6px; }
 .dialSweep { transform-origin: 0 0; animation: dial-sweep 9s cubic-bezier(.45,0,.25,1) infinite; opacity: 0.85; }
 @keyframes dial-sweep { 0% { transform: rotate(0deg); opacity: 0; } 8% { opacity: 0.85; } 60% { opacity: 0.85; } 72% { transform: rotate(360deg); opacity: 0; } 100% { transform: rotate(360deg); opacity: 0; } }
-@media (prefers-reduced-motion: reduce) { .dialSweep { animation: none; opacity: 0; } }
+.dial[data-warn] .dialSweep { animation-duration: 4.5s; }
+@media (prefers-reduced-motion: reduce) { .dialSweep, .dial[data-warn] .dialSweep { animation: none; opacity: 0; } }
 :global(html[data-hidden]) .dialSweep { animation-play-state: paused; }

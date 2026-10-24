@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { ageWords } from '@marque/commerce/client'
+import { ageWords } from '@marque/commerce/words'
 
 /**
  * The age of a measurement. The server (and hydration) render the absolute UTC time; after

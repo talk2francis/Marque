@@ -47,3 +47,5 @@
   .figures > div:nth-child(n + 3) { border-top: 1px solid var(--hair); }
   .roadmap ul { grid-template-columns: 1fr; }
 }
+.rmLead { margin: 0 0 8px; font-size: 14.5px; line-height: 1.5; color: var(--ink); }
+.rmExit { display: block; margin-top: 3px; font-size: 13px; color: var(--ink-3); }

@@ -1,4 +1,4 @@
-import { formatAmount } from './config.js'
+import { formatAmount } from './words.js'
 
 /**
  * Current terms: the one answer to "what does this agent charge right now?" (AGENTS
@@ -94,17 +94,7 @@ export function termsOf(c: CommerceFacts | null | undefined, now = Date.now()): 
     reason: reasonWords(c.failure) }
 }
 
-/** "just now", "4 min ago", "3 h ago": the age of an observation at `now`. */
-export function ageWords(iso: string | null, now = Date.now()): string | null {
-  if (!iso) return null
-  const t = Date.parse(iso)
-  if (!Number.isFinite(t)) return null
-  const s = Math.max(0, Math.round((now - t) / 1000))
-  if (s < 90) return 'just now'
-  if (s < 5400) return `${Math.round(s / 60)} min ago`
-  if (s < 172_800) return `${Math.round(s / 3600)} h ago`
-  return `${Math.round(s / 86_400)} days ago`
-}
+export { ageWords } from './words.js'
 
 /** "valid 12 min" for a fresh quote. */
 export function validForWords(expiresAt: string | null, now = Date.now()): string | null {

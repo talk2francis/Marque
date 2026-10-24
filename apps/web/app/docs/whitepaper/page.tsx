@@ -69,7 +69,8 @@ function BlockView({ b }: { b: Block }) {
         {b.horizons.map((h) => (
           <li key={h.key} data-h={h.key}>
             <div className={styles.rmHead}><span className={styles.rmDot} aria-hidden="true" /><b>{h.title}</b><span>{h.when}</span></div>
-            <ul>{h.items.map((it) => <li key={it.title}><b>{it.title}.</b> {it.text}</li>)}</ul>
+            {h.lead ? <p className={styles.rmLead}>{h.lead}</p> : null}
+            <ul>{h.items.map((it) => <li key={it.title}><b>{it.href ? <a href={it.href}>{it.title}</a> : it.title}.</b> {it.text}{it.exit ? <em className={styles.rmExit}> {it.exit}</em> : null}</li>)}</ul>
           </li>
         ))}
       </ol>

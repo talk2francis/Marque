@@ -1,5 +1,5 @@
 'use client'
-import { ageWords, validForWords, type Terms } from '@marque/commerce/client'
+import { ageWords, validForWords, type Terms } from '@marque/commerce/terms'
 import styles from './terms.module.css'
 
 /**

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
-import { cachedProjection } from '@marque/db'
+import { sql } from 'drizzle-orm'
+import { cachedProjection, db } from '@marque/db'
 import { indexerStatus, campaignChainId } from '@marque/commerce'
 import { tierFreshness } from '@marque/probe'
 
@@ -26,13 +27,16 @@ export interface Pulse {
   at: string
   network: { chainId: number; state: 'ok' | 'lagging' | 'down'; lagBlocks: number | null; cursorBlock: number | null; headBlock: number | null }
   system: { state: 'ok' | 'degraded'; firstPartyFresh: number | null; firstPartyServices: number | null }
+  /** The newest indexed hire or settlement on either network: lets the page notice the market moving (ambient only). */
+  market: { latestAt: string | null }
 }
 
 async function compute(): Promise<Pulse> {
   const chainId = campaignChainId()
-  const [idx, tiers] = await Promise.all([
+  const [idx, tiers, latest] = await Promise.all([
     indexerStatus().catch(() => null),
     tierFreshness({ firstPartyOnly: true }).catch(() => null),
+    db().execute(sql`select max(block_time) as at from commerce_event where name in ('JobFunded', 'JobCompleted', 'PaymentReleased') and block_time > now() - interval '1 day'`).then((r) => (r as unknown as Array<{ at: string | Date | null }>)[0]?.at ?? null).catch(() => null),
   ])
   const mine = idx?.find((c) => c.chainId === chainId) ?? null
   const lag = mine?.lagBlocks ?? null
@@ -47,12 +51,13 @@ async function compute(): Promise<Pulse> {
     at: new Date().toISOString(),
     network: { chainId, state: netState, lagBlocks: lag, cursorBlock: mine?.cursorBlock ?? null, headBlock: mine?.headBlock ?? null },
     system: { state: sysState, firstPartyFresh: t0?.fresh ?? null, firstPartyServices: t0?.services ?? null },
+    market: { latestAt: latest ? new Date(latest).toISOString() : null },
   }
 }
 
 export async function GET() {
   try {
-    const p = await cachedProjection('pulse:v1', compute, { freshMs: 20_000, timeoutMs: 8_000 })
+    const p = await cachedProjection('pulse:v2', compute, { freshMs: 20_000, timeoutMs: 8_000 })
     return NextResponse.json(p.value, { headers: { 'Cache-Control': 'public, max-age=15', 'Access-Control-Allow-Origin': '*' } })
   } catch (err) {
     console.error('[api/v1/pulse]', err instanceof Error ? err.message : String(err))

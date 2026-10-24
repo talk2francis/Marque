@@ -5,7 +5,7 @@ import { Stars, Tape } from './_components/ui'
 import { RecentHires } from './_components/RecentHires'
 import { ReadyNow } from './_components/home/ReadyNow'
 import { SnapshotAge } from './_components/home/SnapshotAge'
-import { ROADMAP } from './docs/whitepaper'
+import { ROADMAP, ROADMAP_CHECKED } from './docs/whitepaper'
 import {
   categoryTiles, funnelLine, recentHires, ledgerHeadline, passFail, readyToHire, tapeItems,
   type CategoryTile,
@@ -254,17 +254,22 @@ export default async function Home() {
         </section>
         {/* ---- Where Marque goes next ---- */}
         <section className={styles.section} aria-labelledby="roadmap" data-reveal>
-          <Head label="Roadmap" id="roadmap" title="From a market people use to one agents use." action={<a className={styles.more} href="/docs/delivery-status">V3 delivery status <ArrowRight aria-hidden="true" /></a>} />
+          <Head label="Roadmap" id="roadmap" title="From a market people use to one agents use." action={<a className={styles.more} href="/docs/whitepaper#roadmap">The whole roadmap <ArrowRight aria-hidden="true" /></a>} />
           <ol className={styles.roadmap}>
             {ROADMAP.map((h) => (
               <li key={h.key} data-h={h.key}>
                 <span className={styles.rmHead}><span className={styles.rmDot} aria-hidden="true" /><b>{h.title}</b><span>{h.when}</span></span>
-                <ul>{h.items.slice(0, 3).map((it) => <li key={it.title}>{it.title}</li>)}</ul>
+                {h.lead ? <p className={styles.rmLead}>{h.lead}</p> : null}
+                <ul>{h.items.map((it) => (
+                  <li key={it.title}>
+                    {it.href ? <a href={it.href}>{it.title}</a> : it.title}
+                    {it.exit ? <span className={styles.rmExit}>{it.exit}</span> : null}
+                  </li>
+                ))}</ul>
               </li>
             ))}
           </ol>
-          <p className={styles.kpiFoot}><a href="/marque-whitepaper.pdf" download>Whitepaper (PDF)</a></p>
-          <Limits><p>Live components and remaining work, checked 19 October 2026. Future items require their own execution evidence.</p></Limits>
+          <p className={styles.rmFoot}>Live means live and verified on {ROADMAP_CHECKED}. Next ships when its stated outcome is met, not on a date. <a href="/marque-whitepaper.pdf" download>Whitepaper (PDF)</a></p>
         </section>
       </main>
       <SiteFooter />

@@ -8,13 +8,15 @@ import styles from './pass.module.css'
 export function NoWalletLine({ className, chainId = 97 }: { className?: string; chainId?: 56 | 97 }) {
   const { isConnected } = useAccount()
   const { connectors, connect, isPending } = useConnect()
-  const [capable, setCapable] = useState(false)
+  // Rendered from the first paint (most browsers have passkeys) and removed only when the check says otherwise, so the
+  // line never pushes the page down after load (it moved the quest hero, CLS 0.55).
+  const [capable, setCapable] = useState<boolean | null>(null)
   useEffect(() => setCapable(passCapableBrowser()), [])
   const pass = connectors.find((c) => c.id === MARQUE_PASS_ID)
-  if (isConnected || !capable || !pass) return null
+  if (isConnected || capable === false) return null
   return (
     <p className={`${styles.noWallet} ${className ?? ''}`}>
-      No wallet? <button type="button" disabled={isPending} onClick={() => connect({ connector: pass, chainId })}>Create a Marque Pass</button> with your fingerprint or face. 10 seconds, nothing to install.
+      No wallet? <button type="button" disabled={isPending || !pass} onClick={() => { if (pass) connect({ connector: pass, chainId }) }}>Create a Marque Pass</button> with your fingerprint or face. 10 seconds, nothing to install.
     </p>
   )
 }

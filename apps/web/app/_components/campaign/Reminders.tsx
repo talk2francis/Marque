@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
 import { Bell, CalendarPlus, ChevronDown, Send } from 'lucide-react'
-import { campaignEndMs, type CampaignClock } from '@marque/commerce/client'
+import { campaignEndMs, type CampaignClock } from '@marque/commerce/rules'
 import { notifyPrefs, saveNotifyPrefs, REMIND_MARKS, TELEGRAM_BOT } from './store'
 import styles from './campaign.module.css'
 

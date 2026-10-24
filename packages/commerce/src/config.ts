@@ -85,16 +85,4 @@ export function explorerAddress(chainId: number, address: string): string {
   return `${network(chainId).explorer}/address/${address}`
 }
 
-/** Format a raw token amount for people: truncates to `maxDp`, trims trailing zeros, and says "<0.000001" rather than show a nonzero amount as 0. */
-/** Money reads with at least two decimals ("0.10 U", never "0.1 U"), at most `maxDp`. */
-export function formatAmount(raw: bigint | string, decimals: number, maxDp = 6, minDp = 2): string {
-  const v = typeof raw === 'bigint' ? raw : BigInt(raw)
-  const neg = v < 0n
-  const abs = neg ? -v : v
-  const base = 10n ** BigInt(decimals)
-  const whole = abs / base
-  const frac = (abs % base).toString().padStart(decimals, '0').slice(0, maxDp).replace(/0+$/, '')
-  if (!frac && whole === 0n && abs !== 0n) return `${neg ? '-' : ''}<0.${'0'.repeat(maxDp - 1)}1`
-  const shown = frac.padEnd(Math.min(minDp, maxDp), '0')
-  return `${neg ? '-' : ''}${whole.toString()}${shown ? `.${shown}` : ''}`
-}
+export { formatAmount } from './words.js'
