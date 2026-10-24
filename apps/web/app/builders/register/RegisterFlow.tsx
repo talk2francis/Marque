@@ -12,6 +12,7 @@ import { toast } from '../../../lib/toast'
 import { explorerTx } from '../../../lib/network'
 import { CardCheck, type CardCheckView } from '../CardCheck'
 import { LaunchKit } from '../LaunchKit'
+import { NoWalletLine } from '../../_components/pass/NoWalletLine'
 import { markForge } from '../ForgeRail'
 import styles from '../forge.module.css'
 
@@ -54,7 +55,14 @@ export function RegisterFlow() {
 
   const input = useMemo(() => ({ name: f.name, description: f.description, category: f.category, a2aCardUrl: f.cardUrl.trim(), mcpUrl: f.mcpUrl.trim() || null, imageUrl: f.imageUrl.trim() || null }), [f])
   const text = useMemo(() => registrationText(registrationJson(input)), [input])
-  const hostUrl = useMemo(() => { try { const u = new URL(f.cardUrl); return `${u.origin}/.well-known/agent-registration.json` } catch { return '' } }, [f.cardUrl])
+  // Beside the card: an agent served under a path keeps its path (…/agent/.well-known/agent-registration.json).
+  const hostUrl = useMemo(() => {
+    try {
+      const u = new URL(f.cardUrl.trim())
+      const base = u.pathname.includes('/.well-known/') ? u.pathname.slice(0, u.pathname.indexOf('/.well-known/')) : ''
+      return `${u.origin}${base}/.well-known/agent-registration.json`
+    } catch { return '' }
+  }, [f.cardUrl])
   const uri = hosting === 'data' ? dataUri(text) : hostUrl
   const n = NETWORKS[f.chainId]
   const net = f.chainId === 97 ? 'BSC testnet' : 'BSC mainnet'
@@ -96,6 +104,8 @@ export function RegisterFlow() {
       const got = registeredAgent(receipt.logs, n.identityRegistry)
       if (!got) throw new Error('no Registered event')
       setDone({ agentId: got.agentId, tx, uri })
+      // Index it now so My Marque and the quest build track show it at once (best effort; the sweep also finds it).
+      void fetch('/api/v1/builders/index', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ chainId: f.chainId, tokenId: got.agentId.toString() }) }).catch(() => undefined)
       setPhase('done')
       markForge('register', { chain: String(f.chainId), token: got.agentId.toString() })
       try { localStorage.removeItem('marque:forge:register') } catch { /* fine */ }
@@ -182,6 +192,8 @@ export function RegisterFlow() {
             <div><dt>metadata</dt><dd className="mono">launched_with = &quot;Marque Forge · https://marque.trade/builders&quot;</dd></div>
           </dl>
           <p className={styles.fine}>Your wallet signs and pays the fee. Marque never registers on anyone&apos;s behalf and never holds a key.</p>
+          {!address ? <NoWalletLine chainId={f.chainId} /> : null}
+          <p className={styles.fine}>Buyers&apos; quotes must be signed by the agent wallet on this identity, which starts as the wallet that registers it. If your seller signs with its own key (a BNB Agent Studio seller does), register from that key instead with <code>bag erc8004 register</code>, then <a href="/builders/run">check and list it in Door 1</a>.</p>
           {error ? <ErrorNote error={error} /> : null}
           <div className={styles.actions}>
             <Button onClick={() => setPhase('file')} disabled={busy}>Back</Button>

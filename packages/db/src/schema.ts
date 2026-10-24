@@ -1169,3 +1169,29 @@ export const tenderQuote = pgTable('tender_quote', {
 }, (t) => ({
   tenderIdx: index('tender_quote_tender_idx').on(t.tenderId),
 }))
+
+/**
+ * FIRST-PARTY. Acted-on outcomes (SPEC-ACT 4): a buyer signed an action Marque rebuilt from an agent's
+ * decision. `before` is read when the plan is made, `after` at the confirmed block plus 2; both are chain
+ * reads, the delta is computed, never estimated. Append-only and never deleted (invariant 12).
+ */
+export const outcome = pgTable('outcome', {
+  id: serial('id').primaryKey(),
+  chainId: integer('chain_id').notNull(),
+  jobKey: text('job_key').notNull(),
+  agentKey: text('agent_key').notNull(),
+  userAddress: text('user_address').notNull(),
+  category: text('category').notNull(),
+  action: text('action').$type<'repay' | 'supply'>().notNull(),
+  planJson: jsonb('plan_json').$type<Record<string, unknown>>().notNull(),
+  simulatedAfterJson: jsonb('simulated_after_json').$type<Record<string, unknown>>().notNull(),
+  txHashes: jsonb('tx_hashes').$type<string[]>().notNull(),
+  confirmedBlock: text('confirmed_block').notNull(),
+  beforeJson: jsonb('before_json').$type<Record<string, unknown>>().notNull(),
+  afterJson: jsonb('after_json').$type<Record<string, unknown>>().notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({
+  agentIdx: index('outcome_agent_idx').on(t.agentKey, t.createdAt.desc()),
+  jobIdx: index('outcome_job_idx').on(t.jobKey),
+  txUq: uniqueIndex('outcome_tx_uq').on(t.chainId, t.confirmedBlock, t.userAddress, t.action),
+}))

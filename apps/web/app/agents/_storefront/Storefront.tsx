@@ -14,6 +14,7 @@ import type { Storefront as Data, StoreTest } from '../../../lib/storefront'
 import type { AgentEvidence } from '../../../lib/agent-evidence'
 import type { JobLens } from '../../../lib/lens'
 import type { Twin } from '../../../lib/forge-signals'
+import type { OutcomeView } from '../../../lib/act'
 import styles from './storefront.module.css'
 import page from './agent-page.module.css'
 import { AgentActivity } from './AgentActivity'
@@ -73,7 +74,7 @@ export function agentBase(d: Pick<Data, 'slug' | 'chainId' | 'tokenId'>): string
   return d.slug && d.chainId === 56 ? `/agents/${d.slug}` : `/agents/${d.chainId}/${d.tokenId}`
 }
 
-export function Storefront({ d, section = 'overview', evidence = null, lens = null, twins = [] }: { d: Data; section?: SectionId; evidence?: AgentEvidence | null; lens?: JobLens | null; twins?: Twin[] }) {
+export function Storefront({ d, section = 'overview', evidence = null, lens = null, twins = [], acted = [] }: { d: Data; section?: SectionId; evidence?: AgentEvidence | null; lens?: JobLens | null; twins?: Twin[]; acted?: OutcomeView[] }) {
   const c = d.commerce
   // Badges follow the same terms as the rail (invariant 41); the rail island re-reads them live.
   const hireable = d.terms.state === 'fresh'
@@ -123,6 +124,7 @@ export function Storefront({ d, section = 'overview', evidence = null, lens = nu
       {hireable ? <Badge kind="hireable" /> : answersFree ? <Badge kind="preview" /> : null}
       {d.terms.priceLabel && hireable ? <span className={page.proofPrice}>{d.terms.priceLabel}</span> : null}
       {passed && passed === latest && passed.ranAt ? (Date.now() - Date.parse(passed.ranAt) > 72 * 3_600_000 ? <Badge kind="retest" /> : <Badge kind="warranted" date={passed.ranAt} />) : latest && !latest.pass ? <Badge kind="failed" test={latest.testId} field={latest.failedFields[0]} date={latest.ranAt ?? undefined} /> : <Badge kind="untested" />}
+      {acted.length ? <a href={`${agentBase(d)}/record#rec-acted`} className={page.actedChip}>Acted on {acted.length}</a> : null}
       {d.isReference ? <a href="/register#reference-agents" className={styles.refLink}><Badge kind="reference" /></a> : null}
       <SaveStar agentId={d.agentId} name={d.name} chainId={d.chainId} tokenId={d.tokenId} />
     </div>
@@ -162,7 +164,7 @@ export function Storefront({ d, section = 'overview', evidence = null, lens = nu
 
           {section === 'overview' ? <Overview d={d} cat={cat} shown={shown} tenderHref={tenderHref} tryHref={tryHref} delivery={delivery} lens={lens} base={base} /> : null}
           {section === 'evidence' ? <Evidence d={d} tests={d.tests} own={own} evidence={evidence} cat={cat} /> : null}
-          {section === 'record' ? <TrackRecord d={d} net={net} /> : null}
+          {section === 'record' ? <TrackRecord d={d} net={net} acted={acted} /> : null}
           {section === 'terms' ? <Terms d={d} net={net} /> : null}
           {section === 'technical' ? <Technical d={d} net={net} twins={twins} /> : null}
         </div>
@@ -384,7 +386,7 @@ const QUICK: Record<string, Record<string, string>> = {
   hireAgain: { yes: 'Would hire again', no: 'Would not hire again' },
 }
 
-function TrackRecord({ d, net }: { d: Data; net: string }) {
+function TrackRecord({ d, net, acted }: { d: Data; net: string; acted: OutcomeView[] }) {
   const t = d.track
   return (
     <>
@@ -453,7 +455,26 @@ function TrackRecord({ d, net }: { d: Data; net: string }) {
 
       <section className={styles.section} aria-labelledby="rec-acted">
         <h2 id="rec-acted">Acted on</h2>
-        <p className={styles.muted}>No buyer has acted on an answer from this agent through {BRAND.name} yet. When one does, the transaction and what changed on chain are listed here.</p>
+        {acted.length ? (
+          <>
+            {(() => {
+              const hfs = acted.filter((o) => o.action === 'repay' && o.after.healthFactor !== null && o.after.healthFactor <= 100).map((o) => o.after.healthFactor!).sort((a, b) => a - b)
+              const targets = acted.filter((o) => o.target !== null).map((o) => o.target!).sort((a, b) => a - b)
+              const med = (v: number[]) => (v.length ? v[Math.floor(v.length / 2)]! : null)
+              return <p className={styles.note}>Acted on {acted.length} {acted.length === 1 ? 'time' : 'times'} on BSC mainnet.{hfs.length ? <> Health factor after acting: median {med(hfs)!.toFixed(2)}{targets.length ? <> against a median target of {med(targets)!.toFixed(2)}</> : null}.</> : null} <ProvenanceChip provenance="ONCHAIN" /></p>
+            })()}
+            <ul className={page.actedList}>
+              {acted.map((o) => (
+                <li key={o.id}>
+                  <span className={page.actedWhat}>{o.action === 'repay' ? 'Repay' : 'Supply'} {o.amount.toLocaleString('en-US', { maximumFractionDigits: 4 })} {o.symbol}</span>
+                  <span className="mono">{o.action === 'repay' ? `HF ${o.before.healthFactor === null ? 'n/a' : o.before.healthFactor > 100 ? 'over 100' : o.before.healthFactor.toFixed(3)} → ${o.after.healthFactor === null ? 'no debt' : o.after.healthFactor > 100 ? 'over 100' : o.after.healthFactor.toFixed(3)}` : `${o.before.market.supplied.toFixed(4)} → ${o.after.market.supplied.toFixed(4)} ${o.symbol}`}</span>
+                  <span className={styles.muted}>block {Number(o.after.block).toLocaleString('en-US')} · <a href={`/jobs/${o.jobKey.replace(':', '/')}`}>job {o.jobKey.split(':')[1]}</a> · {o.txHashes.map((h) => <a key={h} href={explorerTx(56, h)} target="_blank" rel="noreferrer">tx </a>)}</span>
+                </li>
+              ))}
+            </ul>
+            <p className={styles.muted}>Each row is a buyer who signed the action Marque rebuilt from this agent&apos;s answer. Before and after are chain reads; acting on an answer never implies Warranted or Hireable.</p>
+          </>
+        ) : <p className={styles.muted}>No buyer has acted on an answer from this agent through {BRAND.name} yet. When one does, the transaction and what changed on chain are listed here.</p>}
       </section>
 
       <section className={styles.section} aria-label="Recent activity">

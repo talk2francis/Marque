@@ -105,3 +105,21 @@ jobs:
         env:
           SMOKE_BASE: https://marque.trade
         run: node "$RUNNER_TEMP/smoke/ci-smoke.mjs"
+
+  act-fork:
+    name: Act on the answer, BSC mainnet fork
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      BSC_FORK_RPC: ${{ secrets.BSC_FORK_RPC }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+      - uses: foundry-rs/foundry-toolchain@v1
+      - run: pnpm install --frozen-lockfile
+      # An archive RPC secret is required to fork at the pinned block; without it the suite reports skipped.
+      - run: pnpm exec vitest run packages/act

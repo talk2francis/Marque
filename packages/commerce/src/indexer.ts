@@ -245,10 +245,15 @@ export async function indexChain(chainId: ChainId, opts: { maxChunks?: number } 
         total.stored += r.stored; total.jobs += r.jobs; total.ratings += r.ratings; total.bound += r.bound
       }
       await setCursor(chainId, Number(until))
-      return { chainId, from: Number(start), to: Number(until), head: Number(head), ...total }
+      // Still behind the window: the next pass continues. Caught up to the floor: carry on through the
+      // public window in this same pass (24 Oct: returning here pinned the index exactly LOG_WINDOW
+      // behind head, because the next pass's rescan dipped below the floor into archive mode again).
+      if (until < windowFloor) return { chainId, from: Number(start), to: Number(until), head: Number(head), ...total }
+      from = until + 1n
+    } else {
+      await db().insert(chainCursor).values({ chainId, contract: `gap:${from}-${windowFloor - 1n}`, lastBlock: Number(windowFloor - 1n), updatedAt: new Date() }).onConflictDoNothing()
+      from = windowFloor
     }
-    await db().insert(chainCursor).values({ chainId, contract: `gap:${from}-${windowFloor - 1n}`, lastBlock: Number(windowFloor - 1n), updatedAt: new Date() }).onConflictDoNothing()
-    from = windowFloor
   }
   while (from <= safe && chunks < (opts.maxChunks ?? 20)) {
     const to = from + CHUNK - 1n > safe ? safe : from + CHUNK - 1n

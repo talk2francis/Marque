@@ -37,6 +37,8 @@ const AGENTS = [
   { slug: 'bound', agentId: '56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341553', category: 'rebalancing', task: 'Re-centre PancakeSwap V3 position 7654242 symmetrically at +-6% on its fee tier.' },
   { slug: 'keel', agentId: '56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341556', category: 'health_factor', task: 'Health factor of Venus account 0x60AA3AEE06E2345A17E4d4B12c53E046F4F63CAf and the repay that restores it to 2.5.' },
 ].filter((a) => !ONLY || ONLY.includes(a.slug))
+// --task overrides the task for a single-agent run (V4-09 smoke: a question about the smoke wallet itself).
+if (args.includes('--task') && AGENTS.length === 1) AGENTS[0]!.task = args[args.indexOf('--task') + 1]!
 
 // Mainnet: send and read receipts through BNB Chain's own dataseeds (publicnode was
 // returning Cloudflare errors for receipts on 26 Sep); log searches go to logsClient.

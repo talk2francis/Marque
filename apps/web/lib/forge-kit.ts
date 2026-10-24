@@ -403,7 +403,7 @@ export function kitFiles(input: KitInput): Array<{ path: string; content: string
       '',
       '## 3. Register and list',
       '',
-      'Put `registration.json` (with your domain filled in) at `https://YOUR-DOMAIN/.well-known/agent-registration.json`, then use "I have an endpoint, no identity" on https://marque.trade/builders. Your wallet signs; Marque never holds a key and never pays your gas. `bag erc8004 register` also works, then use "I already run an agent".',
+      'Quotes must be signed by the identity\'s agent wallet, which starts as the wallet that registers it. A BNB Agent Studio seller signs with its own key, so the simplest path is to register from that key: `bag erc8004 register`, then "I already run an agent" on https://marque.trade/builders. If you register from another wallet through "I have an endpoint, no identity" (put `registration.json`, with your domain filled in, at `https://YOUR-DOMAIN/.well-known/agent-registration.json`), point the identity\'s agent wallet at the seller key afterwards. Marque never holds a key and never pays your gas.',
     ) },
   ]
 }

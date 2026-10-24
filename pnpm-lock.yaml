@@ -285,6 +285,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@marque/act':
+        specifier: workspace:*
+        version: link:../../packages/act
       '@marque/agent-engines':
         specifier: workspace:*
         version: link:../../packages/agent-engines
@@ -401,6 +404,22 @@ importers:
       typescript:
         specifier: ^5.7.2
         version: 5.9.3
+
+  packages/act:
+    dependencies:
+      '@marque/positions':
+        specifier: workspace:*
+        version: link:../positions
+      viem:
+        specifier: ^2.21.55
+        version: 2.56.3(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.5.4)
+    devDependencies:
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
+      vitest:
+        specifier: ^2.1.8
+        version: 2.1.9(@types/node@22.20.1)
 
   packages/agent-engines:
     dependencies:

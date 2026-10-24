@@ -23,10 +23,19 @@ const cancelled = () => Object.assign(new Error('You cancelled. Nothing was sign
 const TOKENS: Record<string, { symbol: string; decimals: number }> = {
   '0xc70b8741b8b07a6d61e54fd4b20f22fa648e5565': { symbol: 'test U', decimals: 18 },
   '0xce24439f2d9c6a2289f741120fe202248b666666': { symbol: 'U', decimals: 18 },
+  '0x55d398326f99059ff775485246999027b3197955': { symbol: 'USDT', decimals: 18 },
+  '0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d': { symbol: 'USDC', decimals: 18 },
+}
+/** Venus Core Pool markets Marque builds for (Act on the answer), by vToken. */
+const VENUS: Record<string, string> = {
+  '0xfd5840cd36d94d7229439859c0112a4185bc0255': 'vUSDT', '0xeca88125a5adbe82614ffc12d0db554e2e2867c8': 'vUSDC',
 }
 const extraAbi = parseAbi([
   'function requestTokens()',
   'function giveFeedback(uint256 agentId, int128 value, uint8 valueDecimals, string tag1, string tag2, string endpoint, string feedbackURI, bytes32 feedbackHash)',
+  'function register(string agentURI, (string metadataKey, bytes metadataValue)[] metadata) returns (uint256 agentId)',
+  'function repayBorrow(uint256 repayAmount) returns (uint256)',
+  'function mint(uint256 mintAmount) returns (uint256)',
 ])
 
 /** The transaction in the same plain words the hire sheet uses. */
@@ -41,10 +50,17 @@ export function describe(req: Extract<ConfirmRequest, { kind: 'transaction' }>):
         case 'registerJob': return 'Turn on buyer protection for the job'
         case 'setBudget': return 'Lock the agreed price on the job'
         case 'fund': { return `Pay ${formatUnits(BigInt(String(a[1] ?? 0)), 18)} ${req.chainId === 97 ? 'test U' : 'U'} into escrow for job #${String(a[0])}` }
-        case 'approve': { const t = TOKENS[req.tx.to.toLowerCase()]; return `Allow the escrow to take exactly ${formatUnits(BigInt(String(a[1] ?? 0)), t?.decimals ?? 18)} ${t?.symbol ?? 'tokens'}` }
+        case 'approve': {
+          const t = TOKENS[req.tx.to.toLowerCase()]
+          const spender = VENUS[String(a[0]).toLowerCase()]
+          return `Allow ${spender ? `Venus ${spender}` : 'the escrow'} to take exactly ${formatUnits(BigInt(String(a[1] ?? 0)), t?.decimals ?? 18)} ${t?.symbol ?? 'tokens'}`
+        }
+        case 'repayBorrow': return `Repay ${formatUnits(BigInt(String(a[0] ?? 0)), 18)} of your own ${VENUS[req.tx.to.toLowerCase()]?.slice(1) ?? ''} borrow on Venus`.replace('  ', ' ')
+        case 'mint': return `Supply ${formatUnits(BigInt(String(a[0] ?? 0)), 18)} ${VENUS[req.tx.to.toLowerCase()]?.slice(1) ?? ''} to Venus, credited to your wallet`.replace('  ', ' ')
         case 'requestTokens': return 'Claim 10 test U from the public test U faucet'
         case 'giveFeedback': return `Rate the agent ${Number(a[1]) / 10 ** Number(a[2] ?? 0) / 20} of 5 on its public record`
         case 'claimRefund': return `Reclaim the payment for job #${String(a[0])}`
+        case 'register': return `Register a new agent on ERC-8004 (${req.chainId === 97 ? 'BSC testnet' : 'BSC mainnet'}). You will own it`
         case 'transfer': { const t = TOKENS[req.tx.to.toLowerCase()]; return `Send ${formatUnits(BigInt(String(a[1] ?? 0)), t?.decimals ?? 18)} ${t?.symbol ?? 'tokens'} to ${String(a[0]).slice(0, 8)}…` }
         default: return `Call ${d.functionName} on ${req.tx.to.slice(0, 8)}…`
       }

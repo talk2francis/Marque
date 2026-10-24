@@ -11,6 +11,8 @@ import { AddressChip, Badge, HashChip } from '../../../_components/ui'
 import { network as net } from '../../../../lib/network'
 import { utcStamp } from '../../../../lib/time'
 import { jobHeadline } from '../../../../lib/job-copy'
+import { outcomesForJob } from '../../../../lib/act'
+import { intentFromLens } from '@marque/act'
 import { ResultLens } from './ResultLens'
 import { jobLens } from '../../../../lib/lens'
 import { readManifest } from '../../../../lib/manifest'
@@ -77,6 +79,8 @@ export default async function JobRoom({ params }: { params: Promise<{ chainId: s
   const manifest = job?.deliverable?.url ? await readManifest(job.deliverable.url, onchainHash) : null
   // The Result Lens reads the same file and checks it against the chain (cached per job).
   const lensData = manifest && !manifest.withheld ? await jobLens(cid, jobId).then((p) => p.value).catch(() => null) : null
+  const actIntent = lensData?.lens ? intentFromLens(lensData.lens as never) : null
+  const acted = await outcomesForJob(`${cid}:${jobId}`)
   const lensContent: unknown = manifest?.content ?? (() => { try { return manifest?.raw ? JSON.parse(manifest.raw) : null } catch { return null } })()
   // The description can be signed or identity-matched unsigned; the buyer's words are its `task`.
   const asked = (() => {
@@ -151,7 +155,24 @@ export default async function JobRoom({ params }: { params: Promise<{ chainId: s
                 <div className={styles.asked}><span className="t-label">{job?.client ? 'The buyer asked' : 'Asked'}</span><p>{asked}</p></div>
               ) : null}
               {lensData && lensData.manifest?.raw ? (
-                <ResultLens data={lensData} agentName={agentName} content={lensContent} />
+                <>
+                  <ResultLens data={lensData} agentName={agentName} content={lensContent} />
+                  {acted.map((o) => (
+                    <p key={o.id} className={styles.acted}>
+                      <strong>Acted on:</strong> {o.action === 'repay' ? <>HF {o.before.healthFactor === null ? 'n/a' : o.before.healthFactor > 100 ? 'over 100' : o.before.healthFactor.toFixed(3)} → {o.after.healthFactor === null ? 'no debt' : o.after.healthFactor > 100 ? 'over 100' : o.after.healthFactor.toFixed(3)}</> : <>{o.symbol} supply {o.before.market.supplied.toFixed(4)} → {o.after.market.supplied.toFixed(4)}</>} at block {Number(o.after.block).toLocaleString('en-US')}. {o.action === 'repay' ? 'Repay' : 'Supply'} {o.amount.toLocaleString('en-US', { maximumFractionDigits: 4 })} {o.symbol}.{' '}
+                      {o.txHashes.map((h) => <a key={h} href={net(56).explorer + '/tx/' + h} target="_blank" rel="noreferrer">tx ↗</a>)}
+                    </p>
+                  ))}
+                  {actIntent ? (
+                    <div className={styles.actEntry}>
+                      <div>
+                        <strong>Act on the answer</strong>
+                        <span>{actIntent.action === 'repay' ? `Repay toward a health factor of ${actIntent.targetHf} from the wallet that holds the position.` : `Supply ${actIntent.asset} to Venus from your own wallet.`} Marque rebuilds it, checks it against the current block and simulates it; you sign.</span>
+                      </div>
+                      <a className="btn" href={`/jobs/${cid}/${jobId}/act`}>See the plan</a>
+                    </div>
+                  ) : null}
+                </>
               ) : manifest?.withheld ? (
                 <p className={styles.note}>The original error response is preserved privately. Raw diagnostics are withheld to avoid exposing private provider details. The provider reports its original content hash as <code>{manifest.withheld.originalContentHash}</code>. The original bytes are unavailable here, so this page cannot independently verify that hash against the chain. Payment state above is separate from a usable result.</p>
               ) : state === 'OPEN' || state === 'FUNDED' ? (
