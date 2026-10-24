@@ -73,6 +73,18 @@ start_slot() {
   say "started $name on :$port -> $(readlink "$REL/slot-$port")"
 }
 
+# The key-less MCP process (V4-10) runs the same release as the slot that serves the site.
+start_mcp() {
+  ln -sfn "$REL/$1" "$REL/mcp"
+  pm2 delete marque-mcp >/dev/null 2>&1 || true
+  pm2 start "$ROOT/ecosystem.config.cjs" --only marque-mcp >/dev/null
+  for _ in $(seq 1 30); do
+    [ "$(curl -s -o /dev/null -w '%{http_code}' -m 3 http://127.0.0.1:3297/api/health)" = "200" ] && { say "marque-mcp on :3297 -> $1"; return 0; }
+    sleep 2
+  done
+  say "marque-mcp did not answer on :3297 (the site still works; /api/mcp answers 503 until it does)"
+}
+
 # Save while both slots are available, before the proxy can depend on the new one.
 # A reboot must never restore a stopped live slot from an older PM2 snapshot.
 persist_processes() {
@@ -109,6 +121,7 @@ if [ "${1:-}" = "--rollback" ]; then
   done
   if [ "$(http_health "http://127.0.0.1:$PREV/api/health" 3)" != "200 0" ]; then start_slot "$PREV"; fi
   healthy "$PREV" || { say "previous slot is not healthy; not switching"; exit 1; }
+  start_mcp "$(basename -- "$(readlink -f "$REL/slot-$PREV")")"
   persist_processes
   switch_to "$PREV"
   retire_later "$(name_of "$LIVE")"
@@ -186,6 +199,8 @@ if ! EXPECTED_RELEASE_SHA="$(git rev-parse HEAD)" PREVIOUS_BASE_URL="http://127.
   exit 1
 fi
 
+start_mcp "$SHA"
+
 # Warm the new slot's projections right before it takes traffic (a cold home page
 # recomputes the marketplace, coverage and ledger reads on first hit).
 for u in / /register /register/yield /agents/keel /quest /builders /api/v1/phase2/coverage; do
@@ -203,7 +218,7 @@ for u in / /register /quest /api/health "/api/v1/marketplace?limit=3&offset=0" /
 done
 if [ "$fails" -gt 0 ]; then
   say "public smoke failed ($fails); switching back to :$LIVE"
-  switch_to "$LIVE"; exit 1
+  switch_to "$LIVE"; start_mcp "$(basename -- "$(readlink -f "$REL/slot-$LIVE")")"; exit 1
 fi
 
 retire_later "$(name_of "$LIVE")"

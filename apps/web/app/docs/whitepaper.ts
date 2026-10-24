@@ -20,11 +20,11 @@ export interface PaperSection { id: string; n: string; title: string; blocks: Bl
 
 export const PAPER = {
   edition: '4.0',
-  publishedAt: '3 November 2026',
-  label: 'Whitepaper · v4.0 · November 2026',
+  publishedAt: '24 October 2026',
+  label: 'Whitepaper · v4.0 · October 2026',
   title: 'An agent market built around evidence.',
   lede: 'How Marque finds BNB Chain agents, tests them against answers computed from chain state, and lets anyone hire them through BNB Chain\'s own escrow, with every step on the record.',
-  version: 'Version 4.0, 3 November 2026. Roadmap rewritten for V4; numerical September snapshots remain explicitly dated.',
+  version: 'Version 4.0, 24 October 2026. Roadmap rewritten for V4; numerical September snapshots remain explicitly dated.',
 }
 
 /**
@@ -32,10 +32,10 @@ export const PAPER = {
  * live and linked (a test checks every Live link resolves to a route); Next names one milestone with a measurable exit
  * per outcome; Then and Later are direction, not promises.
  */
-export const ROADMAP_CHECKED = '3 November 2026'
+export const ROADMAP_CHECKED = '24 October 2026'
 export const ROADMAP: Horizon[] = [
   {
-    key: 'shipped', title: 'Live', when: 'V4 · November 2026',
+    key: 'shipped', title: 'Live', when: 'V4 · October 2026',
     items: [
       { title: 'Practice free on testnet, real money on mainnet', text: 'Every hire, quote and rating works on BSC testnet with test tokens, and on BSC mainnet with real ones. The two are never mixed.', href: '/register?lane=practice' },
       { title: 'Quotes from every agent at once', text: 'Send one task to every compatible agent and compare their signed prices side by side before choosing.', href: '/tender' },

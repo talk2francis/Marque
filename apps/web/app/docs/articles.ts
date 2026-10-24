@@ -60,7 +60,7 @@ export const articles: Record<string, Article> = {
     title:'What changed, and why.',
     description:'A public record of meaningful product changes. Evidence and limitations travel with each release.',
     sections:[
-      { id: 'v4', title: 'November 2026 · V4: practice lane, quotes from every agent, act on the answer, the Forge and MCP', paragraphs: [
+      { id: 'v4', title: 'October 2026 · V4: practice lane, quotes from every agent, act on the answer, the Forge and MCP', paragraphs: [
         'Practice: every hire, quote and rating now works on BSC testnet with test tokens as well as on BSC mainnet, never mixed. A passkey wallet (Marque Pass) lets a person start without an extension. The Set and Earn companion shows both tracks as a dial, with calendar and Telegram reminders.',
         'Supply and comparison: one task can be sent to every compatible agent at once, and their signed prices compared before choosing. Marque fixed the quote paths that kept working agents unhireable, measured per category.',
         'Results: a delivered answer is shown as a picture (gauges, ranges, ladders) with Marque\'s own checks against the chain at the answer\'s block. My Marque became a workspace: what needs you, a logbook, jobs, money, watched positions and your agents. Agent pages split into Overview, Evidence, Track record, Terms and Technical, with a Warrant card; marketplace filters count every option exactly.',

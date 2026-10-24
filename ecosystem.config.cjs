@@ -51,6 +51,9 @@ function loadAgentEnv(name) {
 
 const env = loadEnv()
 const ROOT = '/root/marque'
+// The MCP process holds no private key (V4 invariant 40): key-like and unneeded secrets are dropped, and PM2's shell
+// env is filtered (filter_env), so an MCP tool can never reach a signing key even if it were tricked into trying.
+const keyless = Object.fromEntries(Object.entries(env).filter(([k]) => !/(_PK$|PRIVATE|MNEMONIC|SEED|WALLET_PASSWORD|TELEGRAM|ANTHROPIC|OPENAI|DEEPSEEK|ELEVENLABS)/.test(k)))
 
 /**
  * The five reference agents (P8a).
@@ -307,7 +310,7 @@ module.exports = {
       instances: 2,
       exec_mode: 'cluster',
       // Set and Earn runs on BSC mainnet (P2-05 step 8); testnet 97 stays as staging.
-      env: { ...env, NODE_ENV: 'production', PORT: port, HOSTNAME: '127.0.0.1', MARQUE_RELEASE_SHA: process.env.MARQUE_RELEASE_SHA || '', MARQUE_ROOT: ROOT, MARQUE_CAMPAIGN_CHAIN: '56', NEXT_PUBLIC_MARQUE_CAMPAIGN_CHAIN: '56' },
+      env: { ...env, NODE_ENV: 'production', PORT: port, HOSTNAME: '127.0.0.1', MARQUE_RELEASE_SHA: process.env.MARQUE_RELEASE_SHA || '', MARQUE_ROOT: ROOT, MARQUE_CAMPAIGN_CHAIN: '56', NEXT_PUBLIC_MARQUE_CAMPAIGN_CHAIN: '56', MARQUE_MCP_UPSTREAM: 'http://127.0.0.1:3297/api/mcp' },
       autorestart: true,
       max_restarts: 50,
       restart_delay: 3000,
@@ -316,6 +319,23 @@ module.exports = {
       out_file: `/root/.pm2/logs/${name}-out.log`,
       error_file: `/root/.pm2/logs/${name}-err.log`,
     })),
+    {
+      // Hosted MCP server (V4-10): the same release as the live web slot (releases/mcp), on 127.0.0.1:3297, without keys.
+      // The web slots forward POST /api/mcp here; scripts/deploy-web.sh moves it with each release and each rollback.
+      name: 'marque-mcp',
+      cwd: `${ROOT}/releases/mcp/apps/web`,
+      script: `${ROOT}/releases/mcp/apps/web/server.js`,
+      interpreter: 'node',
+      env: { ...keyless, NODE_ENV: 'production', PORT: '3297', HOSTNAME: '127.0.0.1', MARQUE_ROOT: ROOT, MARQUE_CAMPAIGN_CHAIN: '56', NEXT_PUBLIC_MARQUE_CAMPAIGN_CHAIN: '56' },
+      filter_env: true,
+      autorestart: true,
+      max_restarts: 50,
+      restart_delay: 3000,
+      max_memory_restart: '500M',
+      time: true,
+      out_file: '/root/.pm2/logs/marque-mcp-out.log',
+      error_file: '/root/.pm2/logs/marque-mcp-err.log',
+    },
     {
       // P2-11 item 5, LAUNCH-RUNBOOK 3: indexer lag, seller quotes, hireable per category,
       // 5xx rate, keeper BNB, disk, restart loops, stuck jobs. Telegram when configured.
