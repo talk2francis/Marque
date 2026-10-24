@@ -145,7 +145,7 @@ export async function builderIdentities(wallet: string): Promise<Array<{ chainId
   const w = wallet.toLowerCase()
   const rows = rowsOf(await db().execute(sql`
     select chain_id, token_id from (
-      select 56 as chain_id, token_id, 0 as src from agent where owner_address = ${w} and chain_id = 56
+      select chain_id, token_id, 0 as src from agent where owner_address = ${w} and chain_id in (56, 97)
       union select chain_id, token_id, 1 as src from builder_proof where owner_address = ${w}
       union select chain_id, token_id, 1 as src from builder_listing where owner_address = ${w} and withdrawn_at is null
     ) x group by chain_id, token_id order by max(src) desc, token_id::numeric desc limit 20`))

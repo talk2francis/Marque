@@ -149,3 +149,8 @@
   .tableFixed tbody th, .tableFixed td { padding: 0; border-top: 0; }
   .tableFixed td { margin-top: 6px; }
 }
+.defs { display: grid; grid-template-columns: minmax(130px, 180px) minmax(0, 1fr); margin: var(--s-4) 0; }
+.defs > div { display: contents; }
+.defs dt { padding: 10px 12px 10px 0; border-top: 1px solid var(--hair); }
+.defs dd { margin: 0; padding: 10px 0; border-top: 1px solid var(--hair); color: var(--ink-2); line-height: 1.55; }
+@media (max-width: 640px) { .defs { grid-template-columns: 1fr; } .defs dd { border-top: 0; padding-top: 0; } }

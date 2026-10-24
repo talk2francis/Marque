@@ -270,6 +270,20 @@ async function ownedAgents(address: string, chains: ChainId[]): Promise<OwnedAge
   return out
 }
 
+/** The six build criteria for one identity, read now (MCP check_agent, SPEC-ACCESS 3.2). Null when the token does not exist. */
+export async function checkAgent(chainId: ChainId, tokenId: string) {
+  const c = chainClient(chainId)
+  const reg = network(chainId).identityRegistry as `0x${string}`
+  let owner: string
+  try { owner = String(await c.readContract({ address: reg, abi: identityAbi, functionName: 'ownerOf', args: [BigInt(tokenId)] })).toLowerCase() } catch { return null }
+  const w = await c.readContract({ address: reg, abi: identityAbi, functionName: 'getAgentWallet', args: [BigInt(tokenId)] }).catch(() => null)
+  const [r] = rowsOf(await db().execute(sql`select id, name, agent_wallet, registry_created_at from agent where chain_id = ${chainId} and token_id = ${tokenId} limit 1`))
+  return buildChecks({
+    chainId, tokenId, id: r ? String(r['id']) : `${chainId}:${reg.toLowerCase()}:${tokenId}`, name: r ? str(r['name']) : null,
+    wallet: w && !/^0x0{40}$/i.test(String(w)) ? String(w).toLowerCase() : r ? str(r['agent_wallet']) : null, owner, registeredAt: r ? iso(r['registry_created_at']) : null,
+  })
+}
+
 /** When this exact token reached its owner: the registry's ERC-721 transfer (mint) for the token id. */
 async function registrationTime(a: OwnedAgent): Promise<string | null> {
   if (a.registeredAt) return a.registeredAt

@@ -150,6 +150,18 @@ export function HireSheet() {
           setTask({ task: held.task, ready: true, missing: null, structured: held.structured })
           adoptQuote(held.quote, { task: held.task, structured: held.structured })
         }
+        // Hire from an assistant's plan_hire link: the exact quote Marque sealed for this task (SPEC-ACCESS 3.2).
+        const sealed = params.get('held')
+        if (active && !held && sealed) {
+          fetch('/api/v1/hire/held', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ held: sealed }) })
+            .then((r) => (r.ok ? r.json() : null))
+            .then((h: { quote: HireQuote; task: string } | null) => {
+              if (!active || !h || h.quote.agentId !== agentId) return
+              setTask({ task: h.task, ready: true, missing: null, structured: null })
+              adoptQuote(h.quote, { task: h.task, structured: null })
+            })
+            .catch(() => undefined)
+        }
       })
       .catch((e: Error) => {
         if (active) setLoadError(signal.aborted ? 'The agent details took too long to load. Try again.' : e.message)
