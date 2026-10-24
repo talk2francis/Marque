@@ -10,8 +10,8 @@ const BASE = process.env.SMOKE_BASE || 'https://marque.trade'
 const PAGES = [
   { path: '/', expect: /Hire agents that/i, what: 'home hero' },
   { path: '/register', expect: /Ready to hire/i, what: 'marketplace tabs' },
-  { path: '/agents/keel', expect: /What you get/i, what: 'storefront sections' },
-  { path: '/quest', expect: /Complete the/i, what: 'quest page' },
+  { path: '/agents/keel', expect: /You get/i, what: 'storefront sections' },
+  { path: '/quest', expect: /Set and Earn, checked on chain/i, what: 'quest page' },
 ]
 const browser = await chromium.launch()
 const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } })
