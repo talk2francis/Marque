@@ -1,5 +1,5 @@
 /* The Job Room (DESIGN-SYSTEM.md 8.6): the Chamber, full page. */
-.page { background: var(--canvas); background-image: radial-gradient(80% 50% at 85% -10%, var(--glow), transparent 60%); color: var(--ink); padding: var(--s-7) var(--margin) var(--s-8); margin-bottom: calc(-1 * var(--s-9)); }
+.page { background: var(--canvas); background-image: radial-gradient(80% 50% at 85% -10%, var(--glow), transparent 60%); color: var(--ink); padding: var(--s-7) var(--margin) var(--s-8); margin-bottom: calc(-1 * var(--s-8)); /* meets the slim footer (margin-top s-8) edge to edge */ }
 .inner { max-width: var(--maxw); margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--s-7); }
 .head { display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px; padding-bottom: var(--s-6); border-bottom: 1px solid var(--hair); }
 .headTop { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }

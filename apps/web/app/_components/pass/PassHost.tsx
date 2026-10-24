@@ -36,6 +36,7 @@ const extraAbi = parseAbi([
   'function register(string agentURI, (string metadataKey, bytes metadataValue)[] metadata) returns (uint256 agentId)',
   'function repayBorrow(uint256 repayAmount) returns (uint256)',
   'function mint(uint256 mintAmount) returns (uint256)',
+  'function setAgentWallet(uint256 agentId, address newWallet, uint256 deadline, bytes signature)',
 ])
 
 /** The transaction in the same plain words the hire sheet uses. */
@@ -60,6 +61,7 @@ export function describe(req: Extract<ConfirmRequest, { kind: 'transaction' }>):
         case 'requestTokens': return 'Claim 10 test U from the public test U faucet'
         case 'giveFeedback': return `Rate the agent ${Number(a[1]) / 10 ** Number(a[2] ?? 0) / 20} of 5 on its public record`
         case 'claimRefund': return `Reclaim the payment for job #${String(a[0])}`
+        case 'setAgentWallet': return `Let agent #${String(a[0])} answer with your seller's key ${String(a[1]).slice(0, 6)}…${String(a[1]).slice(-4)}, so buyers accept its quotes`
         case 'register': return `Register a new agent on ERC-8004 (${req.chainId === 97 ? 'BSC testnet' : 'BSC mainnet'}). You will own it`
         case 'transfer': { const t = TOKENS[req.tx.to.toLowerCase()]; return `Send ${formatUnits(BigInt(String(a[1] ?? 0)), t?.decimals ?? 18)} ${t?.symbol ?? 'tokens'} to ${String(a[0]).slice(0, 8)}…` }
         default: return `Call ${d.functionName} on ${req.tx.to.slice(0, 8)}…`

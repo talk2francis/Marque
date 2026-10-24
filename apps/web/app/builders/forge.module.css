@@ -253,3 +253,4 @@
   .demand li { grid-template-columns: minmax(0, 1fr); gap: 6px; }
   .demandNums { white-space: normal; }
 }
+.afterDoors { margin-top: 14px; }

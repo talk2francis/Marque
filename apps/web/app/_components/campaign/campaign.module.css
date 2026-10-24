@@ -145,3 +145,5 @@
 .dial[data-warn] .dialSweep { animation-duration: 4.5s; }
 @media (prefers-reduced-motion: reduce) { .dialSweep, .dial[data-warn] .dialSweep { animation: none; opacity: 0; } }
 :global(html[data-hidden]) .dialSweep { animation-play-state: paused; }
+/* The account menu opens downward from the header: the companion steps back while it is open. */
+:global(body:has(.acct-menu)) .dock { opacity: 0; pointer-events: none; transition: opacity 150ms ease; }

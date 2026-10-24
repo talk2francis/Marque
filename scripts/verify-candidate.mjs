@@ -139,8 +139,9 @@ for (const line of body.split('\n')) {
   // renders and the job history is populated from the Quest API.
   const page = await newReadOnlyPage({ viewport: { width: 1280, height: 900 } })
   const walletPath = '/api/v1/phase2/wallet/' + HIRER_ADDR.toLowerCase()
+  // V4 reads the wallet once per lane (mainnet and practice); the history counts the mainnet reply.
   const walletReply = page.waitForResponse(
-    (response) => new URL(response.url()).pathname.toLowerCase() === walletPath,
+    (response) => { const u = new URL(response.url()); return u.pathname.toLowerCase() === walletPath && u.searchParams.get('chainId') !== '97' },
     { timeout: 30000 },
   ).then(async (response) => ({
     status: response.status(),

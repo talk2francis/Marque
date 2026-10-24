@@ -308,8 +308,11 @@ function Logbook({ address, building = false }: { address: string; building?: bo
     setEntries((e) => (cursor ? [...e, ...(r?.entries ?? [])] : r?.entries ?? [])); setNext(r?.next ?? null); setLoading(false)
   }, [address])
   useEffect(() => { void load(null) }, [load])
+  const [all, setAll] = useState(false)
   const kinds = FILTERS.find((f) => f.id === filter)?.kinds
-  const shown = entries.filter((e) => !kinds || kinds.includes(e.kind))
+  const matching = entries.filter((e) => !kinds || kinds.includes(e.kind))
+  // The latest dozen first; the rest one tap away, so the page stays readable on a phone.
+  const shown = all ? matching : matching.slice(0, 12)
   const days = useMemo(() => { const m = new Map<string, LogEntry[]>(); for (const e of shown) { const d = dayOf(e.at); m.set(d, [...(m.get(d) ?? []), e]) } return [...m] }, [shown])
   return (
     <div className={styles.logbook}>
@@ -335,7 +338,8 @@ function Logbook({ address, building = false }: { address: string; building?: bo
               </ol>
             </section>
           ))}
-      {next ? <Button size="sm" loading={loading} onClick={() => load(next)}>Show older</Button> : null}
+      {!all && matching.length > 12 ? <Button size="sm" onClick={() => setAll(true)}>Show all {matching.length}{next ? '+' : ''}</Button>
+        : next ? <Button size="sm" loading={loading} onClick={() => load(next)}>Show older</Button> : null}
     </div>
   )
 }

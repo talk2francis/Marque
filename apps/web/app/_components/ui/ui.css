@@ -277,7 +277,6 @@
 
   /* ================= Overlays: Drawer, Sheet, Modal ================= */
   /* While an overlay is open the page underneath holds still: no scroll behind it, no looping animations. */
-  html { scrollbar-gutter: stable; }
   html:has(body > [aria-modal='true']), html:has(body > .sheet) { overflow: hidden; }
   body:has(> [aria-modal='true']) .site-header *, body:has(> [aria-modal='true']) main * { animation-play-state: paused !important; }
   .overlay-scrim {

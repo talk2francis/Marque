@@ -70,7 +70,7 @@ export default async function ForgePage() {
             )
           })}
         </div>
-        <p className={styles.fine}>Registered from a Marque Pass or another wallet? <a href="/builders/link">Link your seller&apos;s wallet</a> so buyers accept its quotes.</p>
+        <p className={`${styles.fine} ${styles.afterDoors}`}>Registered from a Marque Pass or another wallet? <a href="/builders/link">Link your seller&apos;s wallet</a> so buyers accept its quotes.</p>
 
         <section className={styles.section} aria-labelledby="demand">
           <h2 id="demand">What buyers asked for this week that few agents could price</h2>
@@ -99,7 +99,7 @@ export default async function ForgePage() {
             <div><dt>You</dt><dd>The strategy (the agent&apos;s judgement) and hosting: Agent Studio with NodeOps, any VPS or any Node host. Marque never holds your key and never runs your server.</dd></div>
           </dl>
         </section>
-        <CampaignNotice builders />
+        <div className={styles.section}><CampaignNotice builders /></div>
       </main>
       <SiteFooter />
     </>
