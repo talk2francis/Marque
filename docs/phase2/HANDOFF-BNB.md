@@ -221,6 +221,10 @@ Every address Marque or its team controls. Activity from these is returned with 
 | `0x317C5DddfE27D7d9bAaf41f2AD38E9B83B40f99D` | P2-08 mobile acceptance wallet | 56 |
 | `0x4e9C0f537cCcA8Db4BDD16FBA9Ff306F86a82505` | P2-10 builder acceptance fixture (testnet only) | 97 |
 | `0xDa53362d304D7970Db19547C52208a35C6D83C8a` | P2-12 golden path fixture: four hires, four ratings, builder checks, revoke (mainnet, phone) | 56 |
+| `0xc8cbecf84695a90a7f17aa863e5dc7b291d26f95` | V4 Marque Pass golden path test wallet (passkey) | 56, 97 |
+| `0x95A8A1d6c9D5213054936545bE4EE4CFC22b3CfB` | V4 Agent Forge golden path test wallet (Marque Pass, owns testnet agent #2661) | 97 |
+| `0xa73c4D9FC0bdA68B743A0b428A9746696B40a4E7` | V4 Agent Forge golden path test seller (BNB Agent Studio scaffold) | 97 |
+| `0xf737713bDdE05b053830cd5C9B0423D7431c9652` | Practice-lane golden path: a fresh wallet hires a reference agent on BSC testnet, funded from a team testnet wallet | 97 |
 
 ## 8. Category coverage at Sat 26 Sep 2026, 17:22 UTC
 
@@ -248,3 +252,15 @@ https://marque.trade/builders. A listing counts as quality when: the wallet owns
 Hosting: dedicated VPS behind Caddy with blue/green deploys that roll back automatically when checks fail; no Cloudflare. On Sun 27 Sep, the final load test passed at 25, 50 and 100 virtual users: page p95 was 93, 116 and 462 ms; API p95 was 142, 97 and 489 ms; there were no errors or process restarts. At 250 users there were still no errors or restarts, but the shared VPS was saturated and p95 rose to 1,123 ms for pages and 1,804 ms for APIs. Monitoring checks nine conditions every minute: indexer lag, reference-seller quotes, per-category hireable supply, HTTP 5xx rate, keeper balance, disk, restart loops, seller memory and stuck paid jobs. All nine alert paths fired in test. Private Telegram operations alerts are connected; a setup message was delivered successfully on 27 September. Public user support is the community group below. Status page: https://marque.trade/status.
 
 Contact: Francis via X @marquetrade or the Marque Telegram community group: https://t.me/marque_marketplace.
+
+## 12. What changed in V4 (November 2026)
+
+| Change | Where | Tracking effect |
+|---|---|---|
+| Practice lane: the same hire, quote, delivery and rating flow on BSC testnet (97) with test tokens; lists, counts and prices never mix networks | https://marque.trade/register?lane=practice | Testnet jobs use the same ERC-8183 events on chain 97; the quest API reads both chains (`/api/v1/quest/{address}?chains=56,97`) |
+| Attribution: every Marque hire task ends with " (via marque.trade)" before negotiation; unsigned hires also carry `client_ref` | https://marque.trade/docs/attribution | The marketplace is readable from the job description on chain |
+| Quotes from every compatible agent for one task (Compare) | https://marque.trade/tender | Quotes only; hires follow the normal flow |
+| Act on the answer: a repay or supply on Venus Core Pool, rebuilt by Marque, simulated, signed by the position owner | Job Room of a health factor or yield job | Outcomes are recorded with their transaction hashes and before/after chain reads |
+| Agent Forge: card check, ERC-8004 registration from the builder's own wallet (`launched_with` metadata names the Forge), kits, badge | https://marque.trade/builders | Registrations are ordinary ERC-8004 `Registered` events |
+| MCP server for assistants (read and plan only; no key) | https://marque.trade/api/mcp, https://marque.trade/docs/mcp | Hires planned by an assistant are signed by a person in the normal flow |
+| New team wallets (above): V4 golden path test wallets | `/api/v1/phase2/config` | Flagged `team_wallet`, never counted |

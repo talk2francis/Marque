@@ -261,7 +261,7 @@ function Evidence({ d, tests, own, evidence, cat }: { d: Data; tests: StoreTest[
         {runs.length ? (
           <>
             <p className={styles.note}>Every run of {own[0]!.testId} against this agent, oldest first. Each dot is one run at a pinned block. <ProvenanceChip provenance="TESTED" /></p>
-            <ol className={page.timeline} aria-label="Test runs, oldest first">
+            <ol className={page.timeline} aria-label="Test runs, oldest first" tabIndex={0}>
               {runs.map((r, i) => (
                 <li key={i} data-pass={r.pass || undefined} data-error={r.error ? true : undefined} title={`${r.pass ? 'Passed' : r.error ? 'No answer' : `Failed on ${r.failedFields[0] ?? 'a field'}`}${r.ranAt ? `, ${utcStamp(r.ranAt)}` : ''}`}>
                   <span className={page.tlDot} aria-hidden="true" />
@@ -274,7 +274,7 @@ function Evidence({ d, tests, own, evidence, cat }: { d: Data; tests: StoreTest[
         ) : <p className={styles.muted}>Not run against {d.category && TEST[d.category] ? <a href={`/standard/${TEST[d.category]}`}>{TEST[d.category]}</a> : `a ${BRAND.name} test`} yet. <Badge kind="untested" /></p>}
         {d.slug === 'tidemark' ? <p className={styles.muted}>This published test asks for a quoted net APR and a switching decision. Tidemark measures trailing realised yield instead; it has not passed this test, and the test does not certify its specialised method.</p> : null}
         {tests.length ? (
-          <div className={styles.tableWrap}>
+          <div className={styles.tableWrap} tabIndex={0} role="region" aria-label="Scrollable table">
             <table className={styles.table}>
               <thead><tr><th>Test</th><th>Result</th><th>Assertions</th><th>Block</th><th>Ran (UTC)</th></tr></thead>
               <tbody>
@@ -302,7 +302,7 @@ function Evidence({ d, tests, own, evidence, cat }: { d: Data; tests: StoreTest[
           <div><dt>Last 24 hours</dt><dd>{d.probes24h.total ? `${d.probes24h.reachable} of ${d.probes24h.total} discovery requests returned HTTP success.` : 'No observations in the last 24 hours.'} <ProvenanceChip provenance="MEASURED" /></dd></div>
         </dl>
         {evidence?.probes.length ? (
-          <div className={styles.tableWrap}>
+          <div className={styles.tableWrap} tabIndex={0} role="region" aria-label="Scrollable table">
             <table className={`${styles.table} ${page.probeLog}`}>
               <caption className={page.caption}>Probe log, newest first</caption>
               <thead><tr><th>When (UTC)</th><th>Result</th><th>HTTP</th><th>Latency</th><th>Detail</th></tr></thead>
@@ -550,7 +550,7 @@ function Technical({ d, net, twins }: { d: Data; net: string; twins: Twin[] }) {
       <section className={styles.section} aria-labelledby="tech-machine">
         <h2 id="tech-machine">For code</h2>
         <p className={styles.note}>The same facts as JSON, open to any client.{machine ? <> <a href={machine}>{machine}</a></> : null}</p>
-        <pre className={page.code}>{`${machine ? `curl -s https://marque.trade${machine}\n` : ''}curl -s "https://marque.trade/api/v1/terms?agents=${d.agentId}"`}</pre>
+        <pre className={page.code} tabIndex={0} role="region" aria-label="Example requests">{`${machine ? `curl -s https://marque.trade${machine}\n` : ''}curl -s "https://marque.trade/api/v1/terms?agents=${d.agentId}"`}</pre>
       </section>
     </>
   )

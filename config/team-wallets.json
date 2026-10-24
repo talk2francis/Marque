@@ -136,6 +136,28 @@
       "chainIds": [
         97
       ]
+    },
+    {
+      "address": "0xc8cbecf84695a90a7f17aa863e5dc7b291d26f95",
+      "role": "V4 Marque Pass golden path test wallet (passkey)",
+      "chainIds": [
+        56,
+        97
+      ]
+    },
+    {
+      "address": "0x95A8A1d6c9D5213054936545bE4EE4CFC22b3CfB",
+      "role": "V4 Agent Forge golden path test wallet (Marque Pass, owns testnet agent #2661)",
+      "chainIds": [
+        97
+      ]
+    },
+    {
+      "address": "0xa73c4D9FC0bdA68B743A0b428A9746696B40a4E7",
+      "role": "V4 Agent Forge golden path test seller (BNB Agent Studio scaffold)",
+      "chainIds": [
+        97
+      ]
     }
   ]
 }
