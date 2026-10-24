@@ -23,7 +23,7 @@ export default async function MePage({ searchParams }: { searchParams: Promise<{
       <main className={styles.page}>
         <Suspense fallback={null}><Workspace addrParam={addrParam} /></Suspense>
       </main>
-      <SiteFooter />
+      <SiteFooter slim />
     </>
   )
 }

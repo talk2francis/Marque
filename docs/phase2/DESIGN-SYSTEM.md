@@ -1,5 +1,24 @@
 # DESIGN-SYSTEM.md
 
+## 24 October: colour with a job, and calmer working pages
+
+The owner asked for more colour than graphite, porcelain and one champagne accent. Colour now does three jobs, and only
+those, from tokens in `packages/ui/src/tokens.css` (`--v-*`, `--lane-*`, `--aurora`):
+
+- **Lanes.** Gold `--lane-main` is real money (BSC mainnet), cyan `--lane-practice` is practice (BSC testnet). The wallet
+  chip, the account card, My Marque's balances and every lane marker use them. With a wallet connected, the wallet chip
+  is the header's only network indicator (the lane pill steps aside), so the header never shows two networks.
+- **Categories.** `--cat-*` moved from mineral tints to vivid hues: health factor ember, grid azure, rebalancing orchid,
+  yield jade, security rose (darker in Day for contrast). Cards carry a 2 px category hairline and a faint corner wash.
+- **One signature gradient** (`--aurora`: gold, ember, orchid) for the few things that should pull the eye: the Set and
+  Earn companion (a slowly turning hairline and a soft glow), the Agent Forge spark in the navigation, quest progress
+  bars. Never a page field, never body text, never a state colour. State colours (moss/jade, amber, oxide) are unchanged.
+
+Motion added with it stays decorative and stops for reduced motion and hidden tabs. The footer wordmark is the plain
+lockup again; it grows from 92% to 100% as the footer scrolls in, tied to the scroll. Overlays dim without a backdrop
+blur (a full-screen blur stuttered scrolling in sheets), and the page underneath holds still. Working pages (My Marque,
+a job, compare, tender, the Forge steps, receipts, charters) use a one-line footer; landing and reading pages keep the full one.
+
 ## 9 October: evidence tabs and mobile comparison
 
 Storefront Overview and Activity use keyboard-operable tabs with a quiet accent

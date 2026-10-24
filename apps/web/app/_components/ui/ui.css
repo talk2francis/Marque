@@ -276,10 +276,15 @@
   @keyframes tip-in { from { opacity: 0; transform: translate(-50%, 3px); } }
 
   /* ================= Overlays: Drawer, Sheet, Modal ================= */
+  /* While an overlay is open the page underneath holds still: no scroll behind it, no looping animations. */
+  html { scrollbar-gutter: stable; }
+  html:has(body > [aria-modal='true']), html:has(body > .sheet) { overflow: hidden; }
+  body:has(> [aria-modal='true']) .site-header *, body:has(> [aria-modal='true']) main * { animation-play-state: paused !important; }
   .overlay-scrim {
     position: fixed; inset: 0; z-index: 80;
+    /* A plain dim, no backdrop blur: a full-screen blur is re-computed on every repaint underneath (the live
+       status dot, the quest countdown) and made scrolling inside sheets stutter. */
     background: var(--scrim);
-    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
     animation: fade-in var(--t-fast) var(--ease) both;
   }
   .drawer {
@@ -308,7 +313,7 @@
   .sheet-grip { width: 40px; height: 4px; border-radius: 2px; background: var(--hair-2); margin: 8px auto 0; flex: none; }
   .sheet-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px var(--margin) 12px; border-bottom: 1px solid var(--hair); flex: none; }
   .sheet-title { display: flex; align-items: center; gap: 10px; min-width: 0; }
-  .sheet-body { overflow-y: auto; overscroll-behavior: contain; padding: var(--s-5) var(--margin) var(--s-6); flex: 1; }
+  .sheet-body { overflow-y: auto; overscroll-behavior: contain; padding: var(--s-5) var(--margin) var(--s-6); flex: 1; contain: layout paint; -webkit-overflow-scrolling: touch; }
   .sheet-foot { flex: none; padding: 14px var(--margin) calc(14px + env(safe-area-inset-bottom)); border-top: 1px solid var(--hair); background: var(--canvas); }
   @media (min-width: 1024px) {
     .sheet {

@@ -47,8 +47,8 @@ export function Dial({ hire, build, days, size = 30, warn = false, team = false 
           </linearGradient>
         </defs>
         <circle r="15.2" className={styles.dialFace} />
-        {outer.map((d, i) => <path key={`o${i}`} d={d} className={styles.dialSeg} data-on={i < hire || undefined} data-met={hireMet || undefined} strokeWidth={big ? 2.4 : 2.6} />)}
-        {inner.map((d, i) => <path key={`i${i}`} d={d} className={styles.dialSeg} data-on={i < build || undefined} data-met={buildMet || undefined} strokeWidth={big ? 1.8 : 2} />)}
+        {outer.map((d, i) => <path key={`o${i}`} d={d} className={styles.dialSeg} data-ring="hire" data-on={i < hire || undefined} data-met={hireMet || undefined} strokeWidth={big ? 2.4 : 2.6} />)}
+        {inner.map((d, i) => <path key={`i${i}`} d={d} className={styles.dialSeg} data-ring="build" data-on={i < build || undefined} data-met={buildMet || undefined} strokeWidth={big ? 1.8 : 2} />)}
         <g className={styles.dialSweep}><path d="M 0 -15.2 A 15.2 15.2 0 0 1 10.75 -10.75" stroke={`url(#${sheen})`} strokeWidth="1.2" fill="none" strokeLinecap="round" /></g>
         {complete
           ? <path className={styles.dialCheck} d={big ? 'M -3.6 0.4 L -1 3 L 4 -2.6' : 'M -2.6 0.3 L -0.7 2.2 L 2.9 -1.9'} />

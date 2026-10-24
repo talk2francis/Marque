@@ -105,7 +105,8 @@ a.introBack:hover { color: var(--fg); }
 
 .toolbarWrap {
   position: sticky;
-  top: 66px;
+  /* Flush with the header's bottom edge: any gap lets scrolled cards show between the two. */
+  top: calc(var(--header-h) - 1px);
   z-index: 20;
   display: flex;
   flex-direction: column;

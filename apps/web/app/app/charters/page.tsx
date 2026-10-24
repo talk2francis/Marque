@@ -85,7 +85,7 @@ export default async function ChartersPage() {
           </section>
         )}
       </main>
-      <SiteFooter />
+      <SiteFooter slim />
     </>
   )
 }

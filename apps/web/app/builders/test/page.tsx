@@ -58,7 +58,7 @@ export default function BuildersTestPage() {
           </p>
         </section>
       </main>
-      <SiteFooter />
+      <SiteFooter slim />
     </>
   )
 }

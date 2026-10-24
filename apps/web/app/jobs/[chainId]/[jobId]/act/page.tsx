@@ -21,7 +21,7 @@ export default async function ActPage({ params }: { params: Promise<{ chainId: s
         <nav className={styles.crumbs} aria-label="Breadcrumb"><a href={`/jobs/${c}/${jobId}`}>Job {jobId}</a><span aria-hidden="true">/</span><span aria-current="page">Act on the answer</span></nav>
         <ActPlan chainId={c as 56 | 97} jobId={jobId} agentName={agentName} />
       </main>
-      <SiteFooter />
+      <SiteFooter slim />
     </>
   )
 }

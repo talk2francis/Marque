@@ -1,4 +1,4 @@
-import { decodeEventLog, parseAbi, stringToHex, type Hex, type Log } from 'viem'
+import { decodeEventLog, parseAbi, recoverTypedDataAddress, stringToHex, type Hex, type Log } from 'viem'
 
 /**
  * The Agent Forge's registration helpers (SPEC-BUILDERS 4). Pure: they build what the builder's own
@@ -10,6 +10,8 @@ import { decodeEventLog, parseAbi, stringToHex, type Hex, type Log } from 'viem'
 export const identityRegistryAbi = parseAbi([
   'function register(string agentURI, (string metadataKey, bytes metadataValue)[] metadata) returns (uint256 agentId)',
   'function setAgentURI(uint256 agentId, string newURI)',
+  'function setAgentWallet(uint256 agentId, address newWallet, uint256 deadline, bytes signature)',
+  'function getAgentWallet(uint256 agentId) view returns (address)',
   'event Registered(uint256 indexed agentId, string agentURI, address indexed owner)',
 ])
 
@@ -125,4 +127,49 @@ export function hostVerdict(url: string): { state: 'ok' | 'warn' | 'fail'; reaso
   if (/^\d{1,3}(\.\d{1,3}){3}$/.test(h) || h.includes(':')) return { state: 'fail', reason: 'A raw IP address is not a domain you control. Put the card on a domain.' }
   if (PLATFORMS.test(h)) return { state: 'warn', reason: `${h} is a shared platform subdomain. It works, but a domain you own reads as a "domain agent card".` }
   return { state: 'ok', reason: `Served from ${h}.` }
+}
+
+/* ------------------------------------------------------------------ agent wallet link (ERC-8004 setAgentWallet) */
+
+/**
+ * The identity's agent wallet signs buyers' quotes. It starts as the wallet that registered the identity, so an
+ * identity registered from a Marque Pass or a personal wallet must be pointed at the seller's own key before the
+ * seller's signed quotes match it. The registry needs two signatures: the new wallet signs this EIP-712 message
+ * (proving it consents), and the owner sends setAgentWallet with it. The deadline may be at most 5 minutes ahead.
+ */
+export const AGENT_WALLET_TYPES = {
+  AgentWalletSet: [
+    { name: 'agentId', type: 'uint256' }, { name: 'newWallet', type: 'address' },
+    { name: 'owner', type: 'address' }, { name: 'deadline', type: 'uint256' },
+  ],
+} as const
+export const AGENT_WALLET_MAX_DELAY_S = 300
+
+export function agentWalletTypedData(chainId: 56 | 97, registry: `0x${string}`, m: { agentId: bigint; newWallet: `0x${string}`; owner: `0x${string}`; deadline: bigint }) {
+  return {
+    domain: { name: 'ERC8004IdentityRegistry', version: '1', chainId, verifyingContract: registry },
+    types: AGENT_WALLET_TYPES, primaryType: 'AgentWalletSet' as const, message: m,
+  }
+}
+
+/** True when the pasted signature was made by `newWallet` for exactly this agent, owner and deadline. */
+export async function agentWalletSignatureOk(chainId: 56 | 97, registry: `0x${string}`, m: { agentId: bigint; newWallet: `0x${string}`; owner: `0x${string}`; deadline: bigint }, signature: Hex): Promise<boolean> {
+  try {
+    const got = await recoverTypedDataAddress({ ...agentWalletTypedData(chainId, registry, m), signature })
+    return got.toLowerCase() === m.newWallet.toLowerCase()
+  } catch { return false }
+}
+
+/** The exact setAgentWallet call the identity's owner sends. */
+export function setAgentWalletCall(registry: `0x${string}`, agentId: bigint, newWallet: `0x${string}`, deadline: bigint, signature: Hex) {
+  return { address: registry, abi: identityRegistryAbi, functionName: 'setAgentWallet' as const, args: [agentId, newWallet, deadline, signature] as const }
+}
+
+/** What the seller prints: {"wallet":"0x…","signature":"0x…"}. Null when the text is not that. */
+export function parseWalletSignature(text: string): { wallet: `0x${string}`; signature: Hex } | null {
+  try {
+    const j = JSON.parse(text.trim().split('\n').filter((l) => l.trim().startsWith('{')).pop() ?? '') as { wallet?: string; signature?: string }
+    if (j && /^0x[0-9a-fA-F]{40}$/.test(j.wallet ?? '') && /^0x[0-9a-fA-F]{130}$/.test(j.signature ?? '')) return { wallet: j.wallet as `0x${string}`, signature: j.signature as Hex }
+  } catch { /* not JSON */ }
+  return null
 }

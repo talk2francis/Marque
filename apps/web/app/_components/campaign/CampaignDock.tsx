@@ -127,18 +127,27 @@ export function CampaignDock() {
         <button type="button" className={styles.pill} onClick={() => setOpen(true)} aria-expanded="false" aria-label={`${pill}. Open the Set and Earn companion`}>
           <Dial hire={agents} build={buildObserved} warn={warn} team={team} size={28} />
           <span className={styles.pillText}>{pill}</span>
+          <span className={styles.pillGlow} aria-hidden="true" />
         </button>
       ) : (
         <div className={styles.panel} ref={panelRef}>
+          <span className={styles.aura} aria-hidden="true" />
           <div className={styles.panelHead}>
             <Dial hire={agents} build={buildObserved} days={clock.closed ? null : clock.days} warn={warn} team={team} size={52} />
             <div className={styles.panelTitle}>
+              <span className={styles.kicker}>BNB Chain quest</span>
               <strong>Set and Earn</strong>
-              <span>Closes Thu 5 Nov, 12:00 UTC</span>
             </div>
             <button type="button" className={styles.iconBtn} onClick={collapse} aria-label="Collapse"><ChevronDown aria-hidden="true" /></button>
           </div>
-          <p className={styles.clock} data-warn={warn || undefined}>{clock.closed ? `Closed. BNB Chain announces winners after 13 November.` : `${clockWords(clock)} left`}</p>
+          {clock.closed ? <p className={styles.clock}>Closed. BNB Chain announces winners after 13 November.</p> : (
+            <div className={styles.face} data-warn={warn || undefined} role="timer" aria-label={`${clockWords(clock)} left. Closes Thursday 5 November, 12:00 UTC`}>
+              {([[clock.days, 'days'], [clock.hours, 'hours'], [clock.minutes, 'min']] as const).map(([v, u]) => (
+                <span key={u} className={styles.unit}><b>{String(v).padStart(2, '0')}</b><small>{u}</small></span>
+              ))}
+              <span className={styles.closes}>Closes Thu 5 Nov, 12:00 UTC</span>
+            </div>
+          )}
 
           {address && quest ? (
             <>
@@ -171,7 +180,7 @@ function DockRule({ label, value, of, met, sub }: { label: string; value: number
   return (
     <div className={styles.rule} data-met={met || undefined}>
       <span className={styles.ruleLabel}>{label}</span>
-      <span className={styles.ruleTrack} aria-hidden="true"><span style={{ width: `${(Math.min(value, of) / of) * 100}%` }} /><i /></span>
+      <span className={styles.ruleTrack} aria-hidden="true"><span style={{ width: `${(Math.min(value, of) / of) * 100}%` }} /></span>
       <span className={styles.ruleValue}>{value} of {of}</span>
       {sub ? <span className={styles.ruleSub}>{sub}</span> : null}
     </div>

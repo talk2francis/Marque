@@ -28,7 +28,7 @@ export default async function TenderPage({ searchParams }: { searchParams: Promi
           <TenderView initialCategory={c && CATS.has(c) ? c : 'health_factor'} initialLane={lane} />
         </Suspense>
       </main>
-      <SiteFooter />
+      <SiteFooter slim />
     </>
   )
 }

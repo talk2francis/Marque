@@ -42,7 +42,7 @@ export default function RunPage() {
           </aside>
         </div>
       </main>
-      <SiteFooter />
+      <SiteFooter slim />
     </>
   )
 }

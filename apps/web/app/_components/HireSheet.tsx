@@ -356,7 +356,7 @@ export function HireSheet() {
                 <h3 id="hs-2" className="hs-h"><span className="hs-n">2</span>Price</h3>
                 {q ? (
                   <div className="hs-price">
-                    <p className="hs-note">{q.signed === true ? 'Provider-signed quote: its signature covers the quoted task and terms.' : q.signed === false ? 'Unsigned quote: the provider matches the selected identity. This does not prove signed acceptance of your task.' : 'Signature evidence unavailable. Request a fresh quote.'} {q.expirySource === 'server_assigned' ? 'The acceptance deadline is assigned by Marque because the provider omitted one.' : 'The displayed expiry limits when this quote can be used.'}</p>
+                    <p className="hs-note">{q.signed === true ? `Signed by ${q.agentName} for this exact task.` : q.signed === false ? 'Unsigned quote: the provider matches the selected identity. This does not prove signed acceptance of your task.' : 'Signature evidence unavailable. Request a fresh quote.'} {q.expirySource === 'server_assigned' ? 'The acceptance deadline is assigned by Marque because the provider omitted one.' : 'The displayed expiry limits when this quote can be used.'}</p>
                     <div className="hs-price-row">
                       <PriceTag amount={q.priceLabel.split(' ')[0]!} token={q.token.symbol} source={{ kind: 'quote', expiresAt: q.expiresAt * 1000 }} />
                       {q.estimatedCompletionSeconds ? <span className="hs-eta">delivers in about {q.estimatedCompletionSeconds < 120 ? `${q.estimatedCompletionSeconds} s` : duration(q.estimatedCompletionSeconds)}<span className="hs-eta-src">agent&apos;s estimate</span></span> : null}
@@ -375,7 +375,7 @@ export function HireSheet() {
                   </div>
                 ) : (
                   <p className="hs-note">
-                    Request a price without connecting a wallet. The response shows its expiry and signature evidence.
+                    No wallet needed to see the price. {agent.name} prices your exact task, and the quote holds for a few minutes.
                     <TermsBeforeQuote agentId={agent.agentId} network={(id) => NET[id ?? 56] ?? 'BNB Smart Chain'} />
                   </p>
                 )}

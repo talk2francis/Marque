@@ -40,15 +40,17 @@ function HfGauge({ hf, target }: { hf: number; target: number | null }) {
   const arc = (a: number, b: number, r: number) => { const [x0, y0] = pt(a, r), [x1, y1] = pt(b, r); return `M ${x0} ${y0} A ${r} ${r} 0 0 1 ${x1} ${y1}` }
   const t = target ?? 1.5
   const [nx, ny] = pt(hf, 64)
-  const state = hf < 1.0 ? 'breach' : hf < t ? 'watch' : 'holds'
+  const state = hf < 1.0 ? 'breach' : hf < 1.2 ? 'watch' : 'holds'
   return (
-    <svg className={styles.gauge} viewBox="0 0 200 116" role="img" aria-label={`Health factor ${hf.toFixed(3)}, liquidation at 1.00${target ? `, target ${target}` : ''}`}>
+    <svg className={styles.gauge} viewBox="8 8 184 100" role="img" aria-label={`Health factor ${hf.toFixed(3)}, liquidation at 1.00${target ? `, target ${target}` : ''}`}>
       <path d={arc(lo, hi, 82)} className={styles.gTrack} />
       <path d={arc(lo, 1.0, 82)} className={styles.gBreach} />
-      <path d={arc(1.0, Math.min(t, hi), 82)} className={styles.gWatch} />
-      <path d={arc(Math.min(t, hi), hi, 82)} className={styles.gHolds} />
-      {target ? (() => { const [a, b] = pt(target, 92), [c, d] = pt(target, 72); return <><line x1={a} y1={b} x2={c} y2={d} className={styles.gTick} /><text x={pt(target, 102)[0]} y={pt(target, 102)[1]} className={styles.gTickLabel} textAnchor="middle">target {target}</text></> })() : null}
-      {(() => { const [a, b] = pt(1.0, 92), [c, d] = pt(1.0, 72); return <><line x1={a} y1={b} x2={c} y2={d} className={styles.gTick} /><text x={pt(1.0, 102)[0] - 6} y={pt(1.0, 102)[1]} className={styles.gTickLabel} textAnchor="middle">1.00</text></> })()}
+      <path d={arc(1.0, Math.min(1.2, hi), 82)} className={styles.gWatch} />
+      {t > 1.2 ? <path d={arc(1.2, Math.min(t, hi), 82)} className={styles.gSafe} /> : null}
+      <path d={arc(Math.min(Math.max(t, 1.2), hi), hi, 82)} className={styles.gHolds} />
+      {/* Ticks only: their meaning is in the legend under the dial, so no label can fall outside the card. */}
+      {target ? (() => { const [a, b] = pt(target, 90), [c, d] = pt(target, 74); return <line x1={a} y1={b} x2={c} y2={d} className={styles.gTick} /> })() : null}
+      {(() => { const [a, b] = pt(1.0, 90), [c, d] = pt(1.0, 74); return <line x1={a} y1={b} x2={c} y2={d} className={styles.gTick} /> })()}
       <line x1="100" y1="100" x2={nx} y2={ny} className={styles.gNeedle} data-state={state} />
       <circle cx="100" cy="100" r="4.5" className={styles.gHub} data-state={state} />
     </svg>
@@ -67,7 +69,10 @@ function HfView({ l }: { l: HfLens }) {
       </div>
     )
   }
-  const state = l.healthFactor < 1 ? 'breach' : l.target && l.healthFactor < l.target ? 'watch' : 'holds'
+  // The number's colour is liquidation risk (under 1 can be liquidated, under 1.2 close); the words say where it sits
+  // against the buyer's own target, so a safe 4.0 below an ambitious target of 8 reads safe, not alarming.
+  const state = l.healthFactor < 1 ? 'breach' : l.healthFactor < 1.2 ? 'watch' : 'holds'
+  const belowTarget = l.target !== null && l.healthFactor < l.target
   const borrowed = l.markets.reduce((s, m) => s + (m.borrowedUsd ?? 0), 0)
   const supplied = l.markets.reduce((s, m) => s + (m.suppliedUsd ?? 0), 0)
   const scale = Math.max(borrowed, supplied, 1)
@@ -77,8 +82,9 @@ function HfView({ l }: { l: HfLens }) {
         <HfGauge hf={l.healthFactor} target={l.target} />
         <div className={styles.hfReading}>
           <span className={styles.hfValue} data-state={state}>{l.healthFactor.toFixed(3)}</span>
-          <span className={styles.hfWord}>{state === 'breach' ? 'Can be liquidated now' : state === 'watch' ? `Below the ${l.target} target` : 'Above the target'}</span>
+          <span className={styles.hfWord}>{state === 'breach' ? 'Can be liquidated now' : belowTarget ? `Below the ${l.target} target` : l.target ? `At or above the ${l.target} target` : state === 'watch' ? 'Close to liquidation' : 'Safe from liquidation'}</span>
         </div>
+        <p className={styles.gLegend}><i data-k="breach" />liquidation below 1.00{l.target ? <><i data-k="target" />target {l.target}</> : null}</p>
       </div>
       <div className={styles.tiles}>
         <div className={styles.tile} data-tone="primary">
@@ -322,7 +328,7 @@ export function ResultLens({ data, agentName, content }: { data: JobLens; agentN
                 <CheckMark state={c.state} />
                 <div>
                   <span className={styles.checkLabel}>{c.label}</span>
-                  <span className={styles.checkVals}>{STATE_WORD[c.state]}{c.agent ? ` · agent ${c.agent}` : ''}{c.marque ? ` · ${c.how === 'chain' ? 'Marque' : 'check'} ${c.marque}` : ''}</span>
+                  <span className={styles.checkVals}>{STATE_WORD[c.state]}{c.agent ? ` · ${agentName} ${c.agent}` : ''}{c.marque ? ` · ${c.how === 'chain' ? 'Marque' : 'check'} ${c.marque}` : ''}</span>
                 </div>
                 <span className={styles.how}>{c.how === 'chain' ? 'read on chain' : 'arithmetic'}</span>
               </li>
@@ -332,7 +338,7 @@ export function ResultLens({ data, agentName, content }: { data: JobLens; agentN
       ) : null}
 
       <div className={styles.foot}>
-        {l && (l.meta.source || l.meta.readAt) ? <p className={styles.legend}>The agent&apos;s own answer{l.meta.source ? `: ${l.meta.source}` : ''}{l.meta.block ? `, block ${Number(l.meta.block).toLocaleString('en-US')}` : ''}{l.meta.readAt ? `, read ${l.meta.readAt.replace('T', ' ').slice(0, 16)} UTC` : ''}.</p> : null}
+        {l && (l.meta.source || l.meta.readAt) ? <p className={styles.legend}>The agent&apos;s own answer{l.meta.source ? `: ${l.meta.source}` : ''}{l.meta.block ? `, block ${Number(l.meta.block).toLocaleString('en-US')}` : ''}{l.meta.readAt && !Number.isNaN(Date.parse(l.meta.readAt)) ? `, read ${new Date(l.meta.readAt).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'UTC' })} UTC` : ''}.</p> : null}
         {l && (l.meta.assumptions.length || l.meta.limitations.length || l.meta.method) ? (
           <Limits label="Assumptions and limits the agent stated">
             <ul>{[...l.meta.assumptions, ...l.meta.limitations, ...(l.meta.method ? [l.meta.method] : [])].map((x) => <li key={x}>{x}</li>)}</ul>

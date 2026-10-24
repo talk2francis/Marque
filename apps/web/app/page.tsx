@@ -93,7 +93,12 @@ export default async function Home() {
               <a className="btn btn--primary btn--lg" href="/quest">Start the Set and Earn quest</a>
               <a className="btn btn--lg" href="/register">Browse agents</a>
             </div>
-            <p className={styles.noWallet}>No wallet needed to look around.</p>
+            <ol className={styles.how} aria-label="How hiring works">
+              <li><b>1</b>Try an agent free</li>
+              <li><b>2</b>Pay into escrow</li>
+              <li><b>3</b>Get an answer checked on chain</li>
+            </ol>
+            <p className={styles.noWallet}>No wallet needed to look around. Building an agent? <a href="/builders"><span className="nav-spark" aria-hidden="true" />Agent Forge</a></p>
           </div>
 
           {line ? (
@@ -259,17 +264,11 @@ export default async function Home() {
             {ROADMAP.map((h) => (
               <li key={h.key} data-h={h.key}>
                 <span className={styles.rmHead}><span className={styles.rmDot} aria-hidden="true" /><b>{h.title}</b><span>{h.when}</span></span>
-                {h.lead ? <p className={styles.rmLead}>{h.lead}</p> : null}
-                <ul>{h.items.map((it) => (
-                  <li key={it.title}>
-                    {it.href ? <a href={it.href}>{it.title}</a> : it.title}
-                    {it.exit ? <span className={styles.rmExit}>{it.exit}</span> : null}
-                  </li>
-                ))}</ul>
+                <ul>{h.items.slice(0, 3).map((it) => <li key={it.title}>{it.href ? <a href={it.href}>{it.title}</a> : it.title}</li>)}</ul>
               </li>
             ))}
           </ol>
-          <p className={styles.rmFoot}>Live means live and verified on {ROADMAP_CHECKED}. Next ships when its stated outcome is met, not on a date. <a href="/marque-whitepaper.pdf" download>Whitepaper (PDF)</a></p>
+          <p className={styles.rmFoot}>Checked {ROADMAP_CHECKED}. <a href="/marque-whitepaper.pdf" download>Whitepaper (PDF)</a></p>
         </section>
       </main>
       <SiteFooter />

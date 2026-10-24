@@ -87,7 +87,7 @@ export default async function FixReport({ params }: { params: Promise<{ chainId:
         </section>
         {sf ? <LaunchKit agentId={id} chainId={chainId as 56 | 97} tokenId={tokenId} name={name} category={sf.category} priceLabel={sf.terms.state === 'fresh' ? sf.terms.priceLabel : null} warrant={warrant} /> : null}
       </main>
-      <SiteFooter />
+      <SiteFooter slim />
     </>
   )
 }

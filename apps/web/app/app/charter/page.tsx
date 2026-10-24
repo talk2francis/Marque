@@ -35,6 +35,6 @@ export default async function CharterDeskPage({ searchParams }: {
         <p><a href="/app/charters">Inspect historical policy records</a></p>
       </section>
     </main>
-    <SiteFooter />
+    <SiteFooter slim />
   </>
 }

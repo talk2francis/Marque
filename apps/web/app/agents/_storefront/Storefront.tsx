@@ -122,8 +122,8 @@ export function Storefront({ d, section = 'overview', evidence = null, lens = nu
     <div className={styles.badges}>
       <Badge kind="network" label={net} />
       {hireable ? <Badge kind="hireable" /> : answersFree ? <Badge kind="preview" /> : null}
-      {d.terms.priceLabel && hireable ? <span className={page.proofPrice}>{d.terms.priceLabel}</span> : null}
-      {passed && passed === latest && passed.ranAt ? (Date.now() - Date.parse(passed.ranAt) > 72 * 3_600_000 ? <Badge kind="retest" /> : <Badge kind="warranted" date={passed.ranAt} />) : latest && !latest.pass ? <Badge kind="failed" test={latest.testId} field={latest.failedFields[0]} date={latest.ranAt ?? undefined} /> : <Badge kind="untested" />}
+      {/* The price lives in the hire panel and "not tested yet" in Evidence: the header keeps only what identifies and proves. */}
+      {passed && passed === latest && passed.ranAt ? (Date.now() - Date.parse(passed.ranAt) > 72 * 3_600_000 ? <Badge kind="retest" /> : <Badge kind="warranted" date={passed.ranAt} />) : latest && !latest.pass ? <Badge kind="failed" test={latest.testId} field={latest.failedFields[0]} date={latest.ranAt ?? undefined} /> : null}
       {acted.length ? <a href={`${agentBase(d)}/record#rec-acted`} className={page.actedChip}>Acted on {acted.length}</a> : null}
       {d.isReference ? <a href="/register#reference-agents" className={styles.refLink}><Badge kind="reference" /></a> : null}
       <SaveStar agentId={d.agentId} name={d.name} chainId={d.chainId} tokenId={d.tokenId} />

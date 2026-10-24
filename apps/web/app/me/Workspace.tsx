@@ -5,7 +5,10 @@ import { useAccount, useBalance, useConfig, useReadContracts } from 'wagmi'
 import { useConnectModal } from '@rainbow-me/rainbowkit'
 import { switchChain, waitForTransactionReceipt, writeContract } from '@wagmi/core'
 import { erc20Abi, formatUnits } from 'viem'
-import { ArrowUpRight, Copy, Download } from 'lucide-react'
+import { ArrowUpRight, Check, Copy, Download, Hammer, ShieldCheck, ShoppingBag } from 'lucide-react'
+import { AgentAvatar } from '../_components/AgentAvatar'
+import { Dial } from '../_components/campaign/Dial'
+import { useOfficialQuest } from '../_components/campaign/useOfficialQuest'
 import { friendlyError, NETWORKS, revokeAllowanceCall, type ChainId, type FriendlyError } from '@marque/commerce/client'
 import { Button, ButtonLink, ErrorNote, Skeleton, Tabs } from '../_components/ui'
 import { useWalletQuest, type WalletHire } from '../_components/shell/useQuest'
@@ -47,7 +50,13 @@ export function Workspace({ addrParam }: { addrParam: string | null }) {
   const [view, setView] = useState<View>('hiring')
   useEffect(() => { try { const v = localStorage.getItem('marque:me-view'); if (v === 'building' || v === 'hiring') setView(v) } catch { /* default */ } }, [])
   const pickView = (v: View) => { setView(v); try { localStorage.setItem('marque:me-view', v) } catch { /* fine */ } }
-  const tab = params.get('view') ?? (view === 'building' ? 'agents' : 'logbook')
+  // A link to a tab of the other view (the wallet menu's "Spending controls" is ?view=money) switches the view too.
+  const asked = params.get('view')
+  useEffect(() => {
+    if (asked === 'money' || asked === 'jobs' || asked === 'watching') setView('hiring')
+    else if (asked === 'agents') setView('building')
+  }, [asked])
+  const tab = asked ?? (view === 'building' ? 'agents' : 'logbook')
   const setTab = (t: string) => { const p = new URLSearchParams(params.toString()); p.set('view', t); router.replace(`${pathname}?${p.toString()}`, { scroll: false }) }
 
   if (!address) return <Landing onConnect={openConnectModal} />
@@ -66,23 +75,107 @@ export function Workspace({ addrParam }: { addrParam: string | null }) {
   const tabs = view === 'building' ? buildingTabs : hiringTabs
   return (
     <div className={styles.wrap}>
-      <header className={styles.head}>
-        <div className={styles.headTop}>
-          <span className="t-label">My Marque{own ? '' : ' · viewing an address'}</span>
-          <div className={styles.toggle} role="radiogroup" aria-label="View">
-            {(['hiring', 'building'] as const).map((v) => <button key={v} type="button" role="radio" aria-checked={view === v} data-on={view === v || undefined} onClick={() => pickView(v)}>{v === 'hiring' ? 'Hiring' : 'Building'}</button>)}
+      <header className={styles.hero}>
+        <div className={styles.heroId}>
+          <span className={styles.orb} style={{ ['--h' as string]: String(hueOf(address)) }} aria-hidden="true" />
+          <div className={styles.heroText}>
+            <span className={styles.kicker}>My Marque{own ? '' : ' · viewing an address'}</span>
+            <div className={styles.identity}>
+              <span className={styles.addrText} title={address}>{short(address)}</span>
+              <button type="button" className={styles.iconBtn} onClick={async () => { if (await copyText(address)) toast({ tone: 'success', title: 'Address copied' }) }} aria-label="Copy address" title="Copy address"><Copy aria-hidden="true" /></button>
+              <a className={styles.iconBtn} href={`https://bscscan.com/address/${address}`} target="_blank" rel="noreferrer" aria-label="View on BscScan" title="View on BscScan"><ArrowUpRight aria-hidden="true" /></a>
+              {isPass ? <span className={styles.tag}>Marque Pass</span> : null}
+              {own ? null : <a className={styles.link} href="/me">Back to my wallet</a>}
+            </div>
           </div>
         </div>
-        <div className={styles.identity}>
-          <button type="button" className={styles.addr} onClick={async () => { if (await copyText(address)) toast({ tone: 'success', title: 'Address copied' }) }} title="Copy address"><span>{short(address)}</span><Copy aria-hidden="true" /></button>
-          {isPass ? <span className={styles.tag}>Marque Pass</span> : null}
-          {own ? null : <a className={styles.link} href="/me">Back to my wallet</a>}
+        <div className={styles.toggle} role="radiogroup" aria-label="View">
+          {(['hiring', 'building'] as const).map((v) => <button key={v} type="button" role="radio" aria-checked={view === v} data-on={view === v || undefined} onClick={() => pickView(v)}>{v === 'hiring' ? <ShoppingBag aria-hidden="true" /> : <Hammer aria-hidden="true" />}{v === 'hiring' ? 'Hiring' : 'Building'}</button>)}
         </div>
-        <Balances address={address} own={own} />
       </header>
-      <Dockets address={address} own={own} view={view} />
-      <Tabs label="My Marque sections" tabs={tabs} value={tabs.some((t) => t.id === tab) ? tab : tabs[0]!.id} onChange={setTab} />
+      <Summary address={address} view={view} />
+      <div className={styles.body}>
+        <div className={styles.main}>
+          <Dockets address={address} own={own} view={view} />
+          <Tabs label="My Marque sections" tabs={tabs} value={tabs.some((t) => t.id === tab) ? tab : tabs[0]!.id} onChange={setTab} />
+        </div>
+        <aside className={styles.aside} aria-label="Wallet">
+          <Balances address={address} own={own} />
+          {view === 'hiring' ? (
+            <a className={styles.asideLink} href="?view=money" onClick={(e) => { e.preventDefault(); setTab('money') }}>
+              <ShieldCheck aria-hidden="true" /><span><b>Spending controls</b><small>Allowances to the escrow, and your own reminder line</small></span>
+            </a>
+          ) : (
+            <a className={styles.asideLink} href="/builders"><Hammer aria-hidden="true" /><span><b>Agent Forge</b><small>Make, check and list an agent</small></span></a>
+          )}
+        </aside>
+      </div>
     </div>
+  )
+}
+
+/** A stable hue per address, for the identity orb (decoration only). */
+function hueOf(a: string): number {
+  let h = 0
+  for (let i = 2; i < a.length; i++) h = (h * 31 + a.charCodeAt(i)) % 360
+  return h
+}
+
+/* ---------------------------------------------------------------- summary */
+
+const sumOf = (hs: WalletHire[], states: string[]) => {
+  const by = new Map<string, number>()
+  for (const h of hs) if (states.includes(h.state) && h.amount && h.token) by.set(h.token.symbol, (by.get(h.token.symbol) ?? 0) + Number(formatUnits(BigInt(h.amount), h.token.decimals)))
+  return [...by].map(([sym, v]) => `${v.toLocaleString('en-US', { maximumFractionDigits: 2 })} ${sym}`).join(' · ') || '0'
+}
+
+function Summary({ address, view }: { address: string; view: View }) {
+  const main = useWalletQuest(address, 56), practice = useWalletQuest(address, 97)
+  const official = useOfficialQuest(address)
+  const [owner, setOwner] = useState<{ agents: number; received: number; paid: number } | null>(null)
+  useEffect(() => {
+    if (view !== 'building') return
+    let live = true
+    fetch(`/api/v1/phase2/owner/${address}`).then((r) => (r.ok ? r.json() : null)).then((j: { agents?: OwnerAgent[] } | null) => {
+      if (!live) return
+      const a = j?.agents ?? []
+      setOwner({ agents: a.length, received: a.reduce((s, x) => s + x.jobsReceived, 0), paid: a.reduce((s, x) => s + x.jobsPaid, 0) })
+    }).catch(() => { if (live) setOwner({ agents: 0, received: 0, paid: 0 }) })
+    return () => { live = false }
+  }, [address, view])
+  const hm = main.data?.hires ?? [], hp = practice.data?.hires ?? []
+  const all = [...hm, ...hp]
+  const pending = main.isPending || practice.isPending
+  const running = all.filter((h) => ['OPEN', 'FUNDED', 'SUBMITTED'].includes(h.state)).length
+  const hired = Math.min(official?.hire.distinctAgents ?? 0, 3)
+  const built = official?.build.agents[0]?.observed ?? 0
+  const agents = [...new Map(all.map((h) => [h.agent.agentKey, h.agent])).values()].slice(0, 5)
+  const v = (x: string | number) => (pending ? <Skeleton w={56} h={22} /> : x)
+  return (
+    <section className={styles.summary} aria-label="At a glance">
+      {view === 'hiring' ? (
+        <>
+          <div className={styles.stat} data-tone="gold">
+            <span>Jobs</span><b>{v(all.length)}</b>
+            <small>{pending ? '' : `${running} running · ${hm.length} on mainnet, ${hp.length} practice`}</small>
+            {agents.length ? <span className={styles.faces} aria-label={`Hired ${agents.map((a) => a.name).join(', ')}`}>{agents.map((a) => <AgentAvatar key={a.agentKey} id={a.agentKey} reference={a.firstParty} size={24} />)}</span> : null}
+          </div>
+          <div className={styles.stat} data-tone="azure"><span>In escrow now</span><b>{v(sumOf(hm, ['FUNDED', 'SUBMITTED', 'DISPUTED']))}</b><small>{pending ? '' : `practice ${sumOf(hp, ['FUNDED', 'SUBMITTED', 'DISPUTED'])}`}</small></div>
+          <div className={styles.stat} data-tone="jade"><span>Paid to agents</span><b>{v(sumOf(hm, ['COMPLETED', 'PAID']))}</b><small>{pending ? '' : `refunded ${sumOf(hm, ['REFUNDED'])}`}</small></div>
+        </>
+      ) : (
+        <>
+          <div className={styles.stat} data-tone="gold"><span>Your agents</span><b>{owner ? owner.agents : <Skeleton w={40} h={22} />}</b><small>registered on ERC-8004</small></div>
+          <div className={styles.stat} data-tone="azure"><span>Jobs received</span><b>{owner ? owner.received : <Skeleton w={40} h={22} />}</b><small>funded by buyers</small></div>
+          <div className={styles.stat} data-tone="jade"><span>Paid out</span><b>{owner ? owner.paid : <Skeleton w={40} h={22} />}</b><small>settled to your agents</small></div>
+        </>
+      )}
+      <a className={styles.stat} data-tone="aurora" href={`/quest/${address}`}>
+        <span>Set and Earn</span>
+        <span className={styles.questLine}><Dial hire={hired} build={built} size={40} team={official?.excluded.team ?? false} /><b>{official ? `${hired}/3` : '·'}</b><em>hired · build {built}/6</em></span>
+        <small>{official?.excluded.team ? 'Team wallet, not counted' : 'Your progress, from chain events'}</small>
+      </a>
+    </section>
   )
 }
 
@@ -118,20 +211,25 @@ function Balances({ address, own }: { address: string; own: boolean }) {
   }))
   const fmt = (v: bigint | undefined, d: number) => (v === undefined ? null : Number(formatUnits(v, d)).toLocaleString('en-US', { maximumFractionDigits: 4 }))
   return (
-    <dl className={styles.balances}>
-      {rows.map((r) => (
-        <div key={r.c} className={styles.balRow} data-net={r.c}>
-          <dt>{net(r.c)}{r.c === 97 ? <span> test tokens</span> : null}</dt>
-          <dd>
-            <span className={styles.bal}><b>{r.native ? fmt(r.native.value, 18) : <Skeleton w={40} h={12} />}</b> {r.c === 97 ? 'tBNB' : 'BNB'}</span>
-            {r.tokens.map(({ t, v }) => <span key={t.address} className={styles.bal}><b>{fmt(v, t.decimals) ?? '·'}</b> {r.c === 97 ? 'test ' : ''}{t.symbol}</span>)}
+    <div className={styles.wallet}>
+      {rows.map((r) => {
+        const held = r.tokens.filter(({ v }) => v !== undefined && v > 0n)
+        const zero = r.tokens.filter(({ v }) => v === 0n).map(({ t }) => t.symbol)
+        return (
+          <section key={r.c} className={styles.walletNet} data-net={r.c}>
+            <h3><i aria-hidden="true" />{r.c === 56 ? 'BSC mainnet' : 'Practice · BSC testnet'}</h3>
+            <dl>
+              <div><dt>{r.c === 97 ? 'tBNB' : 'BNB'}</dt><dd>{r.native ? fmt(r.native.value, 18) : <Skeleton w={40} h={12} />}</dd></div>
+              {held.map(({ t, v }) => <div key={t.address}><dt>{r.c === 97 ? 'test ' : ''}{t.symbol}</dt><dd>{fmt(v, t.decimals)}</dd></div>)}
+            </dl>
+            {zero.length ? <p className={styles.zero}>{zero.join(', ')}: none</p> : null}
             {own ? (r.c === 56
               ? <a className={styles.link} href="https://pancakeswap.finance/swap?chain=bsc&outputCurrency=0xcE24439F2D9C6a2289F741120FE202248B666666" target="_blank" rel="noreferrer">Get U<ArrowUpRight aria-hidden="true" /></a>
               : <a className={styles.link} href="https://t.me/bnbchain_official_bot" target="_blank" rel="noreferrer">Get test tokens<ArrowUpRight aria-hidden="true" /></a>) : null}
-          </dd>
-        </div>
-      ))}
-    </dl>
+          </section>
+        )
+      })}
+    </div>
   )
 }
 
@@ -167,23 +265,25 @@ function Dockets({ address, own, view }: { address: string; own: boolean; view: 
     <section className={styles.needs} aria-labelledby="needs-title">
       <h2 id="needs-title" className={styles.h2}>Needs you{items ? <span className={styles.count}>{list.length}</span> : null}</h2>
       {team ? <p className={styles.fine}>A published Marque team wallet: its activity is shown, never counted for Set and Earn.</p> : null}
-      {items === null ? <div className={styles.dockets}>{[0, 1, 2].map((i) => <div key={i} className={styles.docket}><Skeleton h={96} /></div>)}</div>
-        : list.length === 0 ? <p className={styles.empty}>Nothing needs you. Your jobs, money and agents are below.</p>
+      {items === null ? <div className={styles.skel}><Skeleton h={56} /></div>
+        : list.length === 0 ? <p className={styles.calm}><Check aria-hidden="true" />Nothing needs you right now.</p>
           : (
-            <div className={styles.dockets} role="list">
+            <ul className={styles.dockets}>
               {list.map((n, i) => (
-                <article key={`${n.kind}-${n.chainId}-${n.jobId}-${i}`} className={styles.docket} data-urgency={urgency(n.deadline)} role="listitem">
-                  <span className={styles.docketNet}>{n.chainId ? net(n.chainId) : 'This device'}</span>
-                  <h3>{n.title}</h3>
-                  <p>{n.sentence}</p>
-                  <div className={styles.docketFoot}>
-                    <span className={styles.deadline}>{n.deadline ? until(n.deadline) : ''}</span>
+                <li key={`${n.kind}-${n.chainId}-${n.jobId}-${i}`} className={styles.docket} data-urgency={urgency(n.deadline)}>
+                  <span className={styles.docketMark} aria-hidden="true" />
+                  <div className={styles.docketText}>
+                    <h3>{n.title}</h3>
+                    <p>{n.sentence}</p>
+                  </div>
+                  <span className={styles.docketMeta}><span className={styles.docketNet}>{n.chainId ? net(n.chainId) : 'This device'}</span>{n.deadline ? <span className={styles.deadline}>{until(n.deadline)}</span> : null}</span>
+                  <span className={styles.docketAct}>
                     {n.action.do === 'revoke' ? (own ? <Button size="sm" variant="danger" loading={busy === n.title} onClick={() => revoke(n)}>{n.action.label}</Button> : null)
                       : n.action.href ? <ButtonLink size="sm" href={n.action.href}>{n.action.label}</ButtonLink> : null}
-                  </div>
-                </article>
+                  </span>
+                </li>
               ))}
-            </div>
+            </ul>
           )}
     </section>
   )

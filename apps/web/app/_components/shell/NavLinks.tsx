@@ -26,7 +26,7 @@ export function NavLinks({ active }: { active?: Active }) {
       <span className="nav-hi" data-on={hi ? '' : undefined} style={hi ? { width: hi.w, transform: `translateX(${hi.x}px)` } : undefined} aria-hidden="true" />
       {NAV.filter(n => n.key !== 'docs').map((n) => (
         <a key={n.key} href={n.href} className="nav-link" aria-current={active === n.key ? 'page' : undefined} onPointerEnter={(e) => track(e.currentTarget)} onFocus={(e) => track(e.currentTarget)}>
-          {n.label}
+          {n.spark ? <span className="nav-spark" aria-hidden="true" /> : null}{n.label}
         </a>
       ))}
       <ProofMenu label="Docs" groups={DOC_GROUPS} current={active === 'docs'} onHover={track} />

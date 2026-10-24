@@ -218,7 +218,7 @@ export default async function JobRoom({ params }: { params: Promise<{ chainId: s
           </div>
         </div>
       </main>
-      <SiteFooter />
+      <SiteFooter slim />
     </>
   )
 }

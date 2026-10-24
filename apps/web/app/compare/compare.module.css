@@ -21,10 +21,11 @@
 }
 .row, .headRow { display: contents; }
 .corner, .agentHead {
-  position: sticky; top: 0; z-index: 2; padding: 16px 14px 14px;
-  background: color-mix(in srgb, var(--panel) 92%, transparent);
-  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  /* Under the site header on the page, at the sheet's top inside the sheet. Opaque: nothing shows through. */
+  position: sticky; top: var(--compare-sticky-top, 0px); z-index: 2; padding: 16px 14px 14px;
+  background: var(--panel);
   border-bottom: 1px solid var(--hair-2);
+  box-shadow: 0 -1px 0 var(--panel);
 }
 .cornerText { font-size: 12px; color: var(--ink-3); letter-spacing: 0.02em; }
 .agentHead { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; min-width: 0; }
@@ -65,7 +66,7 @@ a.sub:hover { color: var(--ink-2); text-decoration: underline; }
 .muted { color: var(--ink-3); font-size: 12.5px; }
 
 /* The full page: the agent header sticks under the site header. */
-.page .corner, .page .agentHead { top: 64px; }
+.page { --compare-sticky-top: calc(var(--header-h) - 1px); }
 
 @media (max-width: 720px) {
   .page { padding: 28px 16px 64px; }

@@ -106,7 +106,7 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
   const row = await readReceipt(id)
   if (!row) notFound()
   const evidence = receiptEvidence(row)
-  if (evidence.digest.status !== 'MATCH') return <><SiteHeader /><main className={styles.page}><h1>Receipt integrity unavailable</h1><p>The stored receipt failed its content check. Its claims are not displayed as evidence.</p><p>Content status: {evidence.digest.status}.</p><a href={`/api/v1/receipts/${row.id}`}>Inspect the preserved JSON and evidence</a></main><SiteFooter /></>
+  if (evidence.digest.status !== 'MATCH') return <><SiteHeader /><main className={styles.page}><h1>Receipt integrity unavailable</h1><p>The stored receipt failed its content check. Its claims are not displayed as evidence.</p><p>Content status: {evidence.digest.status}.</p><a href={`/api/v1/receipts/${row.id}`}>Inspect the preserved JSON and evidence</a></main><SiteFooter slim /></>
   const body = row.body as unknown as ReceiptBody
   const executionNet = network(body.execution.chainId)
   const issued = new Date(body.issuedAt)
@@ -256,7 +256,7 @@ No test verdict was preserved in this receipt. A different task, missing case or
           </div>
         </section>
       </main>
-      <SiteFooter />
+      <SiteFooter slim />
     </>
   )
 }

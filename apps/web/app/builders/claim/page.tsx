@@ -55,7 +55,7 @@ export default function BuildersClaimPage() {
           </p>
         </section>
       </main>
-      <SiteFooter />
+      <SiteFooter slim />
     </>
   )
 }

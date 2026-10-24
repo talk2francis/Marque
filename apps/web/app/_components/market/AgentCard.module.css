@@ -16,6 +16,16 @@
   transition: border-color var(--t-panel) var(--ease), background-color var(--t-panel) var(--ease);
 }
 .card:hover { border-color: var(--hair-2); background: var(--panel); }
+/* Category colour (24 Oct vivid set): a hairline along the top and a faint wash in the corner, so a page of agents
+   reads by category at a glance. The figures and state colours inside stay neutral. */
+.card[data-cat='yield'] { --cat: var(--cat-yield); }
+.card[data-cat='grid'] { --cat: var(--cat-grid); }
+.card[data-cat='rebalancing'] { --cat: var(--cat-rebalancing); }
+.card[data-cat='health'] { --cat: var(--cat-health); }
+.card[data-cat='security'] { --cat: var(--cat-security); }
+.card[data-cat]::before { content: ''; position: absolute; inset: 0 0 auto 0; height: 2px; z-index: 1; background: linear-gradient(90deg, var(--cat), color-mix(in srgb, var(--cat) 0%, transparent) 75%); opacity: 0.9; }
+.card[data-cat]::after { content: ''; position: absolute; z-index: -1; top: -60px; right: -60px; width: 220px; height: 180px; background: radial-gradient(closest-side, color-mix(in srgb, var(--cat) 13%, transparent), transparent); pointer-events: none; transition: opacity var(--t-panel) var(--ease); opacity: 0.8; }
+.card[data-cat]:hover::after { opacity: 1; }
 .card[data-picked] { border-color: color-mix(in srgb, var(--ink) 45%, transparent); }
 
 /* ---- Header ---- */

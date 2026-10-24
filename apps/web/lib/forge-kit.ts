@@ -1,3 +1,4 @@
+import { LINK_WALLET_SCRIPT } from './link-wallet-script'
 import { ALL_TOLERANCES, type TestId } from '@marque/conformance'
 import { exampleCard, registrationJson, registrationText } from '@marque/commerce'
 
@@ -377,6 +378,7 @@ export function kitFiles(input: KitInput): Array<{ path: string; content: string
       '})',
     ) },
     { path: root('registration.json'), content: reg },
+    { path: root('link-wallet.mjs'), content: LINK_WALLET_SCRIPT },
     { path: root('DEPLOY.md'), content: L(
       `# Deploy ${input.name}`,
       '',
@@ -403,7 +405,7 @@ export function kitFiles(input: KitInput): Array<{ path: string; content: string
       '',
       '## 3. Register and list',
       '',
-      'Quotes must be signed by the identity\'s agent wallet, which starts as the wallet that registers it. A BNB Agent Studio seller signs with its own key, so the simplest path is to register from that key: `bag erc8004 register`, then "I already run an agent" on https://marque.trade/builders. If you register from another wallet through "I have an endpoint, no identity" (put `registration.json`, with your domain filled in, at `https://YOUR-DOMAIN/.well-known/agent-registration.json`), point the identity\'s agent wallet at the seller key afterwards. Marque never holds a key and never pays your gas.',
+      'Quotes must be signed by the identity\'s agent wallet, which starts as the wallet that registers it. A BNB Agent Studio seller signs with its own key, so the simplest path is to register from that key: `bag erc8004 register`, then "I already run an agent" on https://marque.trade/builders. If you register from another wallet through "I have an endpoint, no identity" (put `registration.json`, with your domain filled in, at `https://YOUR-DOMAIN/.well-known/agent-registration.json`), point the identity\'s agent wallet at the seller key afterwards: copy `link-wallet.mjs` into `app/agent/`, and Door 2\'s last step gives you the one line to run there (it signs with the seller\'s own keystore and prints a signature you paste back; your wallet then sends `setAgentWallet`). Marque never holds a key and never pays your gas.',
     ) },
   ]
 }

@@ -33,7 +33,7 @@ export function SiteHeader({ active }: { active?: Active }) {
           <LockupLink />
           <NavLinks active={active} />
           <div className="header-tools">
-            <span className="hide-lt-lg"><NetworkPill /></span>
+            <span className="hide-lt-lg hpill-slot"><NetworkPill /></span>
             <span className="hide-lt-md"><LazyWallet /></span>
             <span className="show-lt-md"><LazyWallet compact /></span>
             <span className="hide-lt-lg"><ThemeMenu /></span>
@@ -112,7 +112,25 @@ const TESTNET = SDK_NETWORKS.find((n) => n.chainId === 97)
 const REGISTRY_TESTNET = '0x01D584f3a07Ba07D114386A78CA7fa3103db7AE7'
 const short = (a: string) => `${a.slice(0, 6)}…${a.slice(-4)}`
 
-export function SiteFooter() {
+/**
+ * `slim` on working pages (My Marque, a job, compare, tender, the Forge steps): one quiet line, so the task keeps the
+ * page. The full footer, with the wordmark, stays on the landing and reading pages.
+ */
+export function SiteFooter({ slim = false }: { slim?: boolean } = {}) {
+  if (slim) {
+    return (
+      <footer className="site-footer site-footer--slim">
+        <div className="wrap footer-slim">
+          <LockupLink height={18} />
+          <nav aria-label="Footer">
+            <a href="/register">Marketplace</a><a href="/builders">Agent Forge</a><a href="/quest">Set and Earn</a><a href="/docs">Docs</a><a href="/status">Status</a>
+            <a href="https://x.com/marquetrade" target="_blank" rel="noreferrer">X<ArrowUpRight size={12} aria-hidden="true" /></a>
+          </nav>
+          <span className="footer-legal">© 2026 {BRAND.name} · Not investment advice</span>
+        </div>
+      </footer>
+    )
+  }
   return (
     <footer className="site-footer">
       <div className="wrap">

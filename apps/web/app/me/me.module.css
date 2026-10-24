@@ -1,4 +1,4 @@
-.page { max-width: calc(1080px + 2 * var(--margin)); margin: 0 auto; padding: var(--s-7) var(--margin) 0; }
+.page { max-width: calc(1240px + 2 * var(--margin)); margin: 0 auto; padding: var(--s-7) var(--margin) 0; }
 .wrap { display: grid; gap: var(--s-7); }
 .head { display: grid; gap: 14px; }
 .head h1, .empty h1 { margin: 0; max-width: 22ch; }

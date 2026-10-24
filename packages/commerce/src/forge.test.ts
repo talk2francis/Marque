@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { encodeAbiParameters, encodeEventTopics, encodeFunctionData, hexToString } from 'viem'
-import { cardShapeIssues, dataUri, exampleCard, hostVerdict, identityRegistryAbi, LAUNCHED_WITH, registerCall, registeredAgent, registrationJson, registrationText } from './forge.js'
+import { cardShapeIssues, dataUri, exampleCard, hostVerdict, identityRegistryAbi, LAUNCHED_WITH, registerCall, registeredAgent, registrationJson, registrationText, agentWalletTypedData, agentWalletSignatureOk, parseWalletSignature, setAgentWalletCall } from './forge.js'
 
 const REG = '0x8004A818BFB912233c491871b3d84c89A494BD9e'
 const input = { name: ' Lattice Mini ', description: 'Grid plans on BSC.', category: 'grid' as const, a2aCardUrl: 'https://agent.example/.well-known/agent-card.json' }
@@ -51,5 +51,21 @@ describe('Forge card checks', () => {
     expect(hostVerdict('http://agent.example/card').state).toBe('fail')
     expect(hostVerdict('https://my-agent.vercel.app/card').state).toBe('warn')
     expect(hostVerdict('https://agent.brainonbnb.com/card').state).toBe('ok')
+  })
+})
+
+describe('agent wallet link', () => {
+  it('accepts the seller signature for exactly this agent, owner and deadline', async () => {
+    const { generatePrivateKey, privateKeyToAccount } = await import('viem/accounts')
+    const seller = privateKeyToAccount(generatePrivateKey())
+    const registry = '0x8004A818BFB912233c491871b3d84c89A494BD9e' as const
+    const m = { agentId: 2661n, newWallet: seller.address, owner: '0x95A8A1d6c9D5213054936545bE4EE4CFC22b3CfB' as const, deadline: 1_800_000_000n }
+    const signature = await seller.signTypedData(agentWalletTypedData(97, registry, m))
+    expect(await agentWalletSignatureOk(97, registry, m, signature)).toBe(true)
+    expect(await agentWalletSignatureOk(97, registry, { ...m, agentId: 2662n }, signature)).toBe(false)
+    expect(await agentWalletSignatureOk(56, registry, m, signature)).toBe(false)
+    expect(parseWalletSignature(`some log line\n${JSON.stringify({ wallet: seller.address, signature })}\n`)).toEqual({ wallet: seller.address, signature })
+    expect(parseWalletSignature('{"wallet":"0x12","signature":"0x"}')).toBeNull()
+    expect(setAgentWalletCall(registry, 1n, seller.address, 2n, signature).functionName).toBe('setAgentWallet')
   })
 })

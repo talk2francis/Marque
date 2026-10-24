@@ -53,7 +53,7 @@ export function TaskForm({ category, agentName, onChange, disabled, taskExample 
           <textarea id="task-note" className="taskform-text" rows={2} maxLength={400} value={note} disabled={disabled} onChange={(e) => setNote(e.target.value)} placeholder="For example: keep it to Venus, or explain each step." />
         </div>
       ) : null}
-      <p className="fld-help">Marque adds &ldquo;(via marque.trade)&rdquo; to the end of a written task, so the job record names the marketplace. <a href="/docs/attribution">Why</a></p>
+      <p className="fld-help">The job record notes it came through marque.trade. <a href="/docs/attribution">Why</a></p>
     </div>
   )
 }

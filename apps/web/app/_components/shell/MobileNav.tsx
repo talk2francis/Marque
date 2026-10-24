@@ -29,7 +29,7 @@ export function MobileNav({ active }: { active?: Active }) {
       <Drawer open={open} onClose={close} label="Menu" head={<LockupLink />}>
         <nav className="dnav" aria-label="Main">
           {NAV.map((n) => (
-            <a key={n.key} href={n.href} className="dnav-link" aria-current={active === n.key ? 'page' : undefined} onClick={close}>{n.label}</a>
+            <a key={n.key} href={n.href} className="dnav-link" aria-current={active === n.key ? 'page' : undefined} onClick={close}>{n.spark ? <span className="nav-spark" aria-hidden="true" /> : null}{n.label}</a>
           ))}
         </nav>
         <div className="dsec">

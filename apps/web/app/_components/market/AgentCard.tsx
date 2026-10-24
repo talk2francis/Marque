@@ -55,7 +55,7 @@ export function AgentCard({ a, compare, base = '', variant = 'default' }: {
   const art = avatarSource({ id: a.agentId, reference: a.isReference, imageUrl: a.identity.imageUrl, size: 512 })
 
   return (
-    <article className={styles.card} data-variant={variant} data-agent={a.agentId} data-hireable={hireable || undefined} data-picked={compare?.picked || undefined}>
+    <article className={styles.card} data-cat={classified ? TONE[a.category!] : undefined} data-variant={variant} data-agent={a.agentId} data-hireable={hireable || undefined} data-picked={compare?.picked || undefined}>
       {feature ? (
         <div className={styles.cover} aria-hidden="true" data-kind={art.kind}>
           <span className={styles.coverEmblem}><AgentAvatar id={a.agentId} name={a.name} category={a.category} reference={a.isReference} imageUrl={a.identity.imageUrl} size={72} /></span>

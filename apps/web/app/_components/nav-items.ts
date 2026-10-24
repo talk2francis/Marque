@@ -11,15 +11,17 @@ export type Active =
   | 'register' | 'quest' | 'positions' | 'builders' | 'docs' | 'me'
   | 'proof' | 'standard' | 'ledger' | 'receipts' | 'status' | 'protocol' | 'pancake' | 'charters' | 'benchmarks'
 
-export interface NavLink { label: string; href: string; key: Active }
+export interface NavLink { label: string; href: string; key: Active; spark?: boolean }
 export interface NavMenuItem { label: string; href: string; note: string; icon: NavIcon; external?: boolean }
 export type NavIcon = 'standard' | 'ledger' | 'receipt' | 'proof' | 'status' | 'protocol' | 'desk' | 'charter' | 'compare' | 'api'
 
 export const NAV: NavLink[] = [
   { label: 'Marketplace', href: '/register', key: 'register' },
-  { label: 'Quest', href: '/quest', key: 'quest' },
+  // Plain names for a first visit (five-second test, 24 Oct): the campaign by its own name, and the place to make
+  // an agent called what it is, marked so it is found.
+  { label: 'Agent Forge', href: '/builders', key: 'builders', spark: true },
+  { label: 'Set and Earn', href: '/quest', key: 'quest' },
   { label: 'Positions', href: '/positions', key: 'positions' },
-  { label: 'Builders', href: '/builders', key: 'builders' },
   { label: 'Docs', href: '/docs', key: 'docs' },
 ]
 

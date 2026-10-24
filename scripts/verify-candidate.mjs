@@ -152,7 +152,8 @@ for (const line of body.split('\n')) {
     await page.locator('a[href^="/jobs/"]').first().waitFor({ timeout: 5000 }).catch(() => {})
   }
   const text = await page.evaluate(() => document.body.innerText)
-  const hasSections = ['Set and Earn', 'Active jobs', 'History', 'Spending controls', 'Ratings you gave', 'Your agents'].every((h) => new RegExp(h, 'i').test(text))
+  // V4 My Marque: at-a-glance tiles, Needs you, the four hiring sections and the wallet rail.
+  const hasSections = ['Set and Earn', 'Jobs', 'In escrow now', 'Paid to agents', 'Needs you', 'Logbook', 'Money', 'Watching', 'Spending controls'].every((h) => new RegExp(h, 'i').test(text))
   const hasJobs = /job \d{3,}/i.test(text)
   const historyOk = wallet.status === 200 && wallet.hires > 0 && hasSections && hasJobs
   console.log(historyOk

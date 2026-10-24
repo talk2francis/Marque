@@ -84,10 +84,16 @@ export function referenceAgent(idOrSlug: string | null | undefined): ReferenceAg
   return BY_ID.get(idOrSlug as ReferenceAgent['id']) ?? BY_SLUG.get(idOrSlug) ?? referenceAgentByToken(idOrSlug)
 }
 
-/** The reference agent behind a canonical ERC-8004 row id or a mainnet token id, if any. */
+/**
+ * The reference agent behind a canonical ERC-8004 row id or a mainnet token id, if any. A BSC testnet row id
+ * (`97:<registry>:<token>`) resolves to its practice twin, so the twins carry the same portrait and hero art;
+ * a bare number only ever means a mainnet token (a testnet number could belong to anyone on mainnet).
+ */
 export function referenceAgentByToken(idOrToken: string | null | undefined): ReferenceAgent | undefined {
   if (!idOrToken) return undefined
-  const token = idOrToken.split(':').pop()
+  const parts = idOrToken.split(':')
+  const token = parts.pop()
+  if (parts[0] === '97') return REFERENCE_AGENTS.find((a) => String(a.erc8004Testnet.tokenId) === token)
   return REFERENCE_AGENTS.find((a) => String(a.erc8004.tokenId) === token)
 }
 

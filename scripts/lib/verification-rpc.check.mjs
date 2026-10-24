@@ -25,3 +25,10 @@ test('fails closed for empty, malformed and unsupported JSON-RPC envelopes', () 
     assert.equal(isVerificationRpcRead(endpoint, body), false, body)
   }
 })
+test('allows practice-lane balance and contract reads at the public BSC testnet RPC, never writes', () => {
+  const t = 'https://bsc-testnet-rpc.publicnode.com/'
+  const bal = { jsonrpc: '2.0', id: 3, method: 'eth_getBalance', params: ['0x5aC2448FC79Ef8d33710b1Bced5AEff90138b452', 'latest'] }
+  assert.equal(isVerificationRpcRead(t, JSON.stringify([read, bal, { jsonrpc: '2.0', id: 4, method: 'eth_chainId' }])), true)
+  assert.equal(isVerificationRpcRead(t, JSON.stringify([bal, { ...read, method: 'eth_sendRawTransaction' }])), false)
+  assert.equal(isVerificationRpcRead(t, JSON.stringify({ ...bal, params: ['not-an-address'] })), false)
+})

@@ -18,7 +18,7 @@ export default async function CardCheckPage({ searchParams }: { searchParams: Pr
         </header>
         <CardCheck initialUrl={url && /^https:\/\//.test(url) ? url : ''} category={category ?? null} />
       </main>
-      <SiteFooter />
+      <SiteFooter slim />
     </>
   )
 }

@@ -12,6 +12,7 @@ import { toast } from '../../../lib/toast'
 import { explorerTx } from '../../../lib/network'
 import { CardCheck, type CardCheckView } from '../CardCheck'
 import { LaunchKit } from '../LaunchKit'
+import { LinkWallet } from '../LinkWallet'
 import { NoWalletLine } from '../../_components/pass/NoWalletLine'
 import { markForge } from '../ForgeRail'
 import styles from '../forge.module.css'
@@ -27,7 +28,7 @@ const CATS: Array<{ v: ForgeCategory; label: string }> = [
   { v: 'rebalancing', label: 'Rebalancing' }, { v: 'security', label: 'Security' },
 ]
 type Phase = 'details' | 'card' | 'file' | 'sign' | 'done'
-const PHASES: Array<{ id: Phase; label: string }> = [{ id: 'details', label: 'Details' }, { id: 'card', label: 'Card' }, { id: 'file', label: 'File' }, { id: 'sign', label: 'Sign' }, { id: 'done', label: 'Registered' }]
+const PHASES: Array<{ id: Phase; label: string }> = [{ id: 'details', label: 'Details' }, { id: 'card', label: 'Card' }, { id: 'file', label: 'File' }, { id: 'sign', label: 'Sign' }, { id: 'done', label: 'Registered and linked' }]
 
 async function sha256(text: string) {
   const d = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text))
@@ -193,7 +194,7 @@ export function RegisterFlow() {
           </dl>
           <p className={styles.fine}>Your wallet signs and pays the fee. Marque never registers on anyone&apos;s behalf and never holds a key.</p>
           {!address ? <NoWalletLine chainId={f.chainId} /> : null}
-          <p className={styles.fine}>Buyers&apos; quotes must be signed by the agent wallet on this identity, which starts as the wallet that registers it. If your seller signs with its own key (a BNB Agent Studio seller does), register from that key instead with <code>bag erc8004 register</code>, then <a href="/builders/run">check and list it in Door 1</a>.</p>
+          <p className={styles.fine}>The identity&apos;s agent wallet starts as the wallet that signs here. If your seller signs quotes with its own key (every BNB Agent Studio seller does), the next step links that key, one command and one more signature.</p>
           {error ? <ErrorNote error={error} /> : null}
           <div className={styles.actions}>
             <Button onClick={() => setPhase('file')} disabled={busy}>Back</Button>
@@ -216,6 +217,7 @@ export function RegisterFlow() {
               <pre>{registrationText(registrationJson(input, { chainId: f.chainId, registry: n.identityRegistry, agentId: done.agentId }))}</pre>
             </div>
           ) : null}
+          <LinkWallet chainId={f.chainId} agentId={done.agentId} />
           <div className={styles.actions}>
             <ButtonLink variant="primary" href={`/builders/run?chain=${f.chainId}&token=${done.agentId}`}>Run the listing checks</ButtonLink>
             <ButtonLink href={`/me?view=agents`}>See it in My Marque</ButtonLink>

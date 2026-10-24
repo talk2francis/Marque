@@ -22,7 +22,7 @@ export default function RegisterPage() {
         <ForgeRail at="register" />
         <RegisterFlow />
       </main>
-      <SiteFooter />
+      <SiteFooter slim />
     </>
   )
 }

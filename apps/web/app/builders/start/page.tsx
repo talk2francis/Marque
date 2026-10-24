@@ -30,7 +30,7 @@ export default function StartPage() {
           <p className={styles.fine}><code>DEPLOY.md</code> covers BNB Agent Studio with NodeOps, a plain VPS with PM2 and Caddy, and any Node host. Then <a href="/builders/register">register it</a>.</p>
         </section>
       </main>
-      <SiteFooter />
+      <SiteFooter slim />
     </>
   )
 }
