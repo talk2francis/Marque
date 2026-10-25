@@ -63,6 +63,7 @@ export function FacetField() {
         verts.push({ x: (c - 1) * COL + (r % 2 ? COL / 2 : 0), y: (r - 1) * ROW, ax: rnd(6, 14), ay: rnd(6, 14), px: rnd(0, Math.PI * 2), py: rnd(0, Math.PI * 2), tx: rnd(40, 70), ty: rnd(40, 70) })
       }
       tris = []
+      lights.length = 0
       for (let r = 0; r < rows - 1; r++) for (let c = 0; c < cols - 1; c++) {
         const i = r * cols + c, right = i + 1, down = i + cols, diag = i + cols + 1
         if (r % 2 === 0) { tris.push([i, right, down]); tris.push([right, diag, down]) } else { tris.push([i, right, diag]); tris.push([i, diag, down]) }
@@ -89,19 +90,25 @@ export function FacetField() {
       for (const l of lights) {
         const a = alphaOf(l, now)
         if (a <= 0) continue
-        const [i, j, k] = tris[l.tri]!
-        ctx.beginPath(); ctx.moveTo(...P[i]!); ctx.lineTo(...P[j]!); ctx.lineTo(...P[k]!); ctx.closePath()
+        // A light can outlive the lattice it was lit on (a resize rebuilds it): skip any index that no longer exists.
+        const tri = tris[l.tri]
+        if (!tri) continue
+        const [i, j, k] = tri
+        const a1 = P[i], b1 = P[j], c1 = P[k]
+        if (!a1 || !b1 || !c1) continue
+        ctx.beginPath(); ctx.moveTo(...a1); ctx.lineTo(...b1); ctx.lineTo(...c1); ctx.closePath()
         ctx.globalAlpha = a * density; ctx.fillStyle = brass; ctx.fill()
       }
       ctx.globalAlpha = (day() ? 0.085 : 0.075) * density
       ctx.strokeStyle = ink; ctx.lineWidth = 1
       ctx.beginPath()
-      for (const [i, j, k] of tris) { ctx.moveTo(...P[i]!); ctx.lineTo(...P[j]!); ctx.lineTo(...P[k]!); ctx.lineTo(...P[i]!) }
+      for (const [i, j, k] of tris) { const a1 = P[i], b1 = P[j], c1 = P[k]; if (!a1 || !b1 || !c1) continue; ctx.moveTo(...a1); ctx.lineTo(...b1); ctx.lineTo(...c1); ctx.lineTo(...a1) }
       ctx.stroke()
       ctx.globalAlpha = 1
     }
 
     const light = (now: number, nearTopRight = false) => {
+      if (!tris.length) return
       let tri = Math.floor(Math.random() * tris.length)
       if (nearTopRight) {
         const target = Math.max(0, cols - 3) // second row, near the right edge

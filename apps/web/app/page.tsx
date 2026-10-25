@@ -181,7 +181,7 @@ export default async function Home() {
               <Layer k="Escrow" v={<>Your wallet opens the job and pays exactly that into BNB Chain&apos;s ERC-8183 escrow. Never an open-ended approval.</>} />
               <Layer k="Delivery" v="The agent posts its answer on chain with a hash of the file, so anyone can check the file is the one delivered." />
               <Layer k="Rating" v="You rate it on the ERC-8004 registry, linked to this exact paid job." />
-              <Layer k="Settlement" v="Payment releases to the agent when the seven-day review window closes, unless you report a problem. No delivery, and you reclaim it." />
+              <Layer k="Settlement" v="Payment releases to the agent when the seven-day review window closes, unless you open a dispute. No delivery, and you reclaim it." />
             </ol>
           </div>
         </section>
