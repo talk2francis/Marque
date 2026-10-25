@@ -68,6 +68,10 @@
   .ja-gate { display: flex; flex-wrap: wrap; gap: 12px 16px; align-items: center; padding: 14px 16px; border: 1px solid var(--hair-2); border-radius: var(--r-3); }
   .ja-gate p { margin: 0; color: var(--ink-2); font-size: 14px; }
   .ja-note { margin: 0; color: var(--ink-2); font-size: 14px; line-height: 1.55; }
+  .ja-dispute { justify-self: stretch; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px; margin-top: 4px; padding-top: 14px; border-top: 1px solid var(--hair); }
+  .ja-dispute b { font-size: 14px; font-weight: 500; }
+  .ja-dispute p { margin: 2px 0 0; max-width: 46ch; font-size: 13px; line-height: 1.5; color: var(--ink-3); }
+  .ja-dispute[data-emph] { padding: 14px; border: 1px solid color-mix(in srgb, var(--oxide) 45%, var(--hair)); border-radius: 12px; background: color-mix(in srgb, var(--oxide) 7%, transparent); }
   .ja-rate { display: grid; gap: 12px; justify-items: start; max-width: 560px; padding: 18px; border: 1px solid var(--hair-2); border-radius: var(--r-3); background: color-mix(in srgb, var(--panel) 60%, transparent); }
   .ja-comment { min-height: 64px; }
   .ja-quick { display: grid; gap: 10px; justify-self: stretch; }
@@ -85,6 +89,15 @@
   .hs-free-text { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 14px; line-height: 1.55; color: var(--ink); }
 
   /* Practice lane (BSC testnet): the lane note and the free test-token steps. */
+  /* Network choice for an agent that sells on both networks: one card in the marketplace, the network picked here. */
+  .hs-net { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; border-radius: 12px; border: 1px solid var(--hair-2); background: var(--sunk); }
+  .hs-net button { appearance: none; display: grid; gap: 1px; justify-items: start; text-align: left; padding: 9px 12px; border: 0; border-radius: 9px; background: none; color: var(--ink-2); font: inherit; cursor: pointer; }
+  .hs-net button b { font-size: 14px; font-weight: 500; color: var(--ink); }
+  .hs-net button span { font-size: 12px; color: var(--ink-3); }
+  .hs-net button[data-on] { background: var(--panel-2); box-shadow: inset 0 0 0 1px var(--hair-2), 0 4px 12px -8px rgba(0, 0, 0, 0.6); }
+  .hs-net button[data-on] b::before { content: ''; display: inline-block; width: 7px; height: 7px; margin-right: 7px; border-radius: 50%; background: var(--lane-main); vertical-align: 1px; }
+  .hs-net button[data-on][data-lane='practice'] b::before { background: var(--lane-practice); }
+  .hs-net button:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
   .hs-lane { margin: 0; padding: 8px 12px; font-size: 13px; color: var(--ink-2); border: 1px dashed var(--ink-3); border-radius: var(--r-sm, 8px); }
   .hs-practice { display: grid; gap: 12px; padding: 14px; border: 1px dashed var(--hair-2); border-radius: var(--r-sm, 8px); background: var(--canvas-2); }
   .hs-practice-title { margin: 0; font-weight: 600; font-size: 14px; color: var(--ink); }

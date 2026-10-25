@@ -51,8 +51,21 @@ export async function GET(req: NextRequest) {
       withDeadline(disputeWindowSeconds(chainId), 2500).catch(() => null),
       withDeadline(platformFeeBp(chainId), 2500).catch(() => null),
     ])
-    return NextResponse.json({ ...agent, imageUrl, reviewWindowSeconds, platformFeeBP, reviewWindowChainId: chainId }, { headers: { 'Cache-Control': 'no-store' } })
+    // The same agent on the other network (same owner, same name): the sheet offers it as a network choice, so the
+    // marketplace can list one card per agent rather than one per chain.
+    const twin = await withDeadline(twinOf(agentId, agent.owner, agent.name), 1500).catch(() => null)
+    return NextResponse.json({ ...agent, imageUrl, reviewWindowSeconds, platformFeeBP, reviewWindowChainId: chainId, twin }, { headers: { 'Cache-Control': 'no-store' } })
   } catch (err) {
     return hireError(err, 'agent')
   }
+}
+
+async function twinOf(agentId: string, owner: string | null, name: string): Promise<{ agentId: string; chainId: 56 | 97 } | null> {
+  const chain = Number(agentId.split(':')[0])
+  if (!owner || (chain !== 56 && chain !== 97)) return null
+  const other = chain === 56 ? 97 : 56
+  const res = await db().execute(sql`select id from agent where chain_id = ${other} and lower(owner_address) = ${owner.toLowerCase()}
+    and lower(btrim(name)) = ${name.trim().toLowerCase()} order by token_id desc limit 1`)
+  const row = (((res as unknown as { rows?: unknown[] }).rows ?? (res as unknown as unknown[])) as Array<Record<string, unknown>>)[0]
+  return row?.['id'] ? { agentId: String(row['id']), chainId: other } : null
 }

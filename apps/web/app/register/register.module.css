@@ -115,16 +115,17 @@ a.introBack:hover { color: var(--fg); }
   /* Opaque, not frosted: a backdrop-filter here would become the containing
      block for the filter sheet and trap it under the site header. */
   background: transparent;
-  transition: box-shadow var(--dur) var(--ease), padding var(--dur) var(--ease), background-color var(--dur) var(--ease);
+  transition: box-shadow var(--dur) var(--ease), padding var(--dur) var(--ease);
 }
 .toolbarWrap[data-stuck] {
-  background: var(--ground);
+  /* Opaque the moment it pins, and a strip of the same ground above it, so nothing shows between it and the header. */
+  background: var(--canvas);
+  box-shadow: 0 -12px 0 var(--canvas), var(--elev-1);
   border-bottom: 1px solid var(--line);
-  box-shadow: var(--elev-1);
   padding-bottom: var(--s3);
 }
 @media (max-width: 900px) {
-  .toolbarWrap { top: 58px; }
+  .toolbarWrap { top: calc(var(--header-h) - 1px); }
   .toolbarWrap[data-stuck] { padding-block: var(--s2); gap: var(--s2); }
 }
 
@@ -438,7 +439,9 @@ a.introBack:hover { color: var(--fg); }
 
 .listHead {
   display: grid;
-  grid-template-columns: 28px 44px minmax(0, 1fr) 208px 132px 100px auto;
+  /* Fixed tracks, the same in the heading and every row, so the columns line up (an `auto` actions track sized
+     to two buttons in rows but to nothing in the heading shifted every heading by its width). */
+  grid-template-columns: 28px 44px minmax(0, 1fr) 184px 132px 156px 236px;
   align-items: center;
   gap: var(--s4);
   padding: var(--s2) var(--s3);
@@ -452,7 +455,9 @@ a.introBack:hover { color: var(--fg); }
 .row {
   position: relative;
   display: grid;
-  grid-template-columns: 28px 44px minmax(0, 1fr) 208px 132px 100px auto;
+  /* Fixed tracks, the same in the heading and every row, so the columns line up (an `auto` actions track sized
+     to two buttons in rows but to nothing in the heading shifted every heading by its width). */
+  grid-template-columns: 28px 44px minmax(0, 1fr) 184px 132px 156px 236px;
   align-items: center;
   gap: var(--s4);
   min-height: 64px;
@@ -472,6 +477,7 @@ a.introBack:hover { color: var(--fg); }
    the moment the row has to stack. */
 .rowStatus { display: contents; }
 .cellQual, .cellLive, .cellPrice { display: block; min-width: 0; }
+.cellPrice > :first-child { white-space: nowrap; }
 
 .rowSel { display: flex; justify-content: center; position: relative; z-index: 2; }
 .rowThumb { display: flex; }
@@ -577,9 +583,10 @@ a.introBack:hover { color: var(--fg); }
 
 /* --- Price ---------------------------------------------------------------- */
 
-.price { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.price { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 6px; min-width: 0; }
+.priceTerms { flex-basis: 100%; font-size: 11.5px; color: var(--fg-faint); line-height: 1.35; }
 .priceValue { font-size: var(--size-control); font-weight: 600; color: var(--fg); white-space: nowrap; }
-.priceNote { font-size: 11px; color: var(--fg-faint); white-space: nowrap; }
+.priceNote { font-size: 12px; color: var(--fg-soft, var(--ink-2)); white-space: nowrap; }
 .priceNone { font-size: var(--size-caption); color: var(--fg-faint); }
 
 /* --- Compare -------------------------------------------------------------- */
@@ -1004,3 +1011,4 @@ a.introBack:hover { color: var(--fg); }
 .sheetApply:disabled { opacity: 0.55; cursor: not-allowed; }
 .listKeys { margin: 6px 0 0; font-size: 12px; color: var(--fg-faint); }
 .listKeys kbd { font-family: var(--font-mono); font-size: 11px; padding: 1px 5px; border: 1px solid var(--hair-2); border-radius: 3px; }
+.headAct { text-align: right; }

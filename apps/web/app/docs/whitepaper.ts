@@ -14,7 +14,7 @@ export type Block =
   | { kind: 'figures'; items: Array<{ value: string; label: string; note: string }> }
   | { kind: 'roadmap'; horizons: Horizon[] }
 
-export interface Horizon { key: string; title: string; when: string; lead?: string; items: Array<{ title: string; text: string; href?: string; exit?: string }> }
+export interface Horizon { key: string; title: string; when: string; lead?: string; items: Array<{ title: string; text: string; href?: string; exit?: string; /** A measured meter shown beside a Next item. */ progress?: 'outcomes' }> }
 
 export interface PaperSection { id: string; n: string; title: string; blocks: Block[]; links?: Array<{ label: string; href: string }> }
 
@@ -37,17 +37,18 @@ export const ROADMAP: Horizon[] = [
   {
     key: 'shipped', title: 'Live', when: 'V4 · October 2026',
     items: [
-      { title: 'Practice free on testnet, real money on mainnet', text: 'Every hire, quote and rating works on BSC testnet with test tokens, and on BSC mainnet with real ones. The two are never mixed.', href: '/register?lane=practice' },
-      { title: 'Quotes from every agent at once', text: 'Send one task to every compatible agent and compare their signed prices side by side before choosing.', href: '/tender' },
+      { title: 'One marketplace, both networks', text: 'Every agent is listed once. Hire it on BSC mainnet with real money, or free on BSC testnet; you pick the network when you hire, and amounts are never mixed.', href: '/register' },
       { title: 'Act on the answer, with the outcome measured on chain', text: 'Marque rebuilds the agent\'s decision from its own allowlist, checks it against the current block and simulates it. You sign; the result is read back from chain and added to the agent\'s record.', href: '/agents/keel/record' },
-      { title: 'The Agent Forge: register, test and list from Marque', text: 'Check an agent card, register an ERC-8004 identity from your own wallet, start from a category kit, and test against the Standard.', href: '/builders' },
-      { title: 'Marque for agents: an MCP server for Claude, ChatGPT and Cursor', text: 'Eleven read-and-plan tools: search, quotes, tenders, positions and hire plans a person signs.', href: '/docs/mcp' },
+      { title: 'Marque for agents: an MCP server any assistant can use', text: 'Eleven read-and-plan tools: search, quotes, tenders, positions and hire plans a person signs. Holds no keys.', href: '/docs/mcp' },
+      { title: 'Quotes from every agent at once', text: 'Send one task to every compatible agent and compare their signed prices side by side before choosing.', href: '/tender' },
+      { title: 'The Agent Forge: register, link, test and list from Marque', text: 'Check an agent card, register an ERC-8004 identity from your own wallet, link your seller\'s key as its agent wallet, start from a category kit, and test against the Standard.', href: '/builders' },
+      { title: 'Any agent\'s answer, read and checked', text: 'Answers from outside agents are found from the hash on chain, accepted only when the file matches it, and shown as a picture, not raw JSON.', href: '/jobs/56/57076' },
     ],
   },
   {
     key: 'next', title: 'Next', when: 'V5 · Outcome-ranked market', lead: 'Agents ranked by what happened after people acted on their answers.',
     items: [
-      { title: 'Ranked by results', text: 'The marketplace\'s default order uses measured outcomes: health factor reached, yield earned, range kept. Every outcome links to its transactions.', exit: 'Ships when 50 acted-on outcomes exist across three categories.' },
+      { title: 'Ranked by results', text: 'The marketplace\'s default order uses measured outcomes: health factor reached, yield earned, range kept. Every outcome links to its transactions.', exit: 'Ships when 50 acted-on outcomes exist across three categories.', progress: 'outcomes' },
       { title: 'Warrants anyone can check', text: 'Each conformance pass is published on chain, readable by any marketplace or wallet without asking Marque.', exit: 'Ships when a warrant can be verified from BSC alone, through the ERC-8004 validation registry once BNB Chain deploys it, or through MarqueRegistry until then.' },
       { title: 'Standing orders', text: 'Watch a position, and when it crosses your line Marque gathers quotes and prepares the action. You still sign.', exit: 'Ships when a watched position can go from alert to a signed action in under a minute.' },
     ],

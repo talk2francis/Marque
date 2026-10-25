@@ -28,3 +28,18 @@ export function pickReady<T extends Pick<MarketRow, 'isReference' | 'category'>>
   for (const r of outside) take(r)
   return picks
 }
+
+/** Marque's six reference agents in their canonical order (rebalancing, grid, yield, health factor, security, realised yield). */
+const SHOWCASE = ['bound', 'lattice', 'sluicegate', 'keel', 'redcell', 'tidemark']
+
+/**
+ * Home "Ready to hire now" since 25 Oct (owner direction): Marque's own six reference agents, each with its live price.
+ * A reference agent without a current quote this minute gives its slot to the best outside agent, so the shelf never
+ * shows a lapsed price as current. Every card carries the Marque reference mark (invariant 17).
+ */
+export function pickShowcase<T extends Pick<MarketRow, 'isReference' | 'category' | 'name'>>(rows: readonly T[], size = 6): T[] {
+  const ref = (slug: string) => rows.find((r) => r.isReference && r.name.toLowerCase() === slug)
+  const picks = SHOWCASE.map(ref).filter((r): r is T => Boolean(r))
+  for (const r of pickReady(rows.filter((x) => !x.isReference), size)) if (picks.length < size) picks.push(r)
+  return picks.slice(0, size)
+}

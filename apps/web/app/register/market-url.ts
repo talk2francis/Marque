@@ -22,8 +22,11 @@ export interface MarketState {
   search: string
   category: string | null
   sort: string
-  /** The lane: mainnet (real money, default) or practice (BSC testnet, test tokens). Never blended. */
-  lane: 'mainnet' | 'practice'
+  /**
+   * The network filter (25 Oct): 'all' (default) lists each agent once whatever networks it sells on, and the hire
+   * sheet picks the network; 'mainnet' and 'practice' list one network only. Amounts are never blended.
+   */
+  lane: 'all' | 'mainnet' | 'practice'
   /** The quote token, by symbol. */
   token: string | null
   /** Live quote at or under this, in token units. */
@@ -49,7 +52,7 @@ export const DEFAULT_STATE: MarketState = {
   search: '',
   category: null,
   sort: 'best',
-  lane: 'mainnet',
+  lane: 'all',
   token: null,
   maxPrice: null,
   minRating: null,
@@ -80,7 +83,7 @@ const CATEGORY_VALUES = ['rebalancing', 'grid', 'yield', 'health_factor', 'secur
 export function apiQuery(s: MarketState): string {
   const p = new URLSearchParams()
   if (s.tab !== 'registry') p.set('tab', s.tab)
-  if (s.lane === 'practice') p.set('lane', 'practice')
+  if (s.lane !== 'mainnet') p.set('lane', s.lane)
   if (s.token) p.set('token', s.token)
   if (s.maxPrice !== null) p.set('maxPrice', String(s.maxPrice))
   if (s.minRating !== null) p.set('minRating', String(s.minRating))
@@ -101,7 +104,7 @@ export function apiQuery(s: MarketState): string {
 export function stateToParams(s: MarketState, opts: { fixedCategory?: boolean } = {}): string {
   const p = new URLSearchParams()
   if (s.tab !== DEFAULT_STATE.tab) p.set('tab', s.tab)
-  if (s.lane === 'practice') p.set('lane', 'practice')
+  if (s.lane !== DEFAULT_STATE.lane) p.set('lane', s.lane)
   if (s.token) p.set('token', s.token)
   if (s.maxPrice !== null) p.set('maxPrice', String(s.maxPrice))
   if (s.minRating !== null) p.set('minRating', String(s.minRating))
@@ -150,7 +153,7 @@ export function paramsToState(
   return {
     tab: rawTab && TAB_VALUES.includes(rawTab) ? rawTab : DEFAULT_STATE.tab,
     // `lane=practice` is the address; the older `network=97` link still lands in the practice lane.
-    lane: p.get('lane') === 'practice' || rawNet === '97' ? 'practice' : 'mainnet',
+    lane: p.get('lane') === 'practice' || rawNet === '97' ? 'practice' : p.get('lane') === 'mainnet' || rawNet === '56' ? 'mainnet' : 'all',
     token: rawToken && /^[A-Za-z0-9]{1,12}$/.test(rawToken) ? rawToken : null,
     maxPrice: num(p.get('maxPrice')),
     minRating: num(p.get('minRating')) !== null ? Math.min(5, num(p.get('minRating'))!) : null,

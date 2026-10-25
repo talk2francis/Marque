@@ -3,7 +3,7 @@ import { useEffect, useRef } from 'react'
 import { Wordmark } from '../brand/Wordmark'
 
 /**
- * The footer wordmark: the plain lockup, which grows very slightly (92% to 100%) as the reader scrolls into the
+ * The footer wordmark: the plain lockup, which rises and grows (78% to 100%) as the reader scrolls into the
  * footer, tied to the scroll itself so it never runs on its own or makes anyone wait. CSS scroll-driven animation
  * where supported (off the main thread); elsewhere a scroll listener that only runs while the footer is on screen.
  * Decorative only (aria-hidden); reduced motion shows the still word at full size.
@@ -18,7 +18,7 @@ export function FooterGiant() {
       raf = 0
       const r = el.getBoundingClientRect()
       const p = Math.min(1, Math.max(0, (innerHeight - r.top) / (r.height + innerHeight * 0.35)))
-      el.style.setProperty('--grow', String(0.92 + 0.08 * p))
+      el.style.setProperty('--grow', String(0.78 + 0.22 * p))
     }
     const onScroll = () => { if (!raf) raf = requestAnimationFrame(update) }
     const io = new IntersectionObserver(([e]) => {

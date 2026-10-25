@@ -164,9 +164,9 @@ export function JobActions(p: JobActionProps) {
       ) : null}
       {p.state === 'FUNDED' && late && !refundable && p.refundFrom ? <p className="ja-note">{p.agentName} has not delivered in time. You can reclaim your payment from {utcStamp(p.refundFrom * 1000)}.</p> : null}
 
-      {isClient && disputable ? (
+      {isClient && disputable && !canRate ? (
         <div className="ja-row">
-          <Button variant="quiet" onClick={() => setConfirmDispute(true)} disabled={busy !== null}>Report a problem</Button>
+          <Button variant="quiet" onClick={() => setConfirmDispute(true)} disabled={busy !== null}>Open a dispute</Button>
         </div>
       ) : isClient && p.state === 'SUBMITTED' && p.reviewEndsAt !== null && now !== null && now >= p.reviewEndsAt ? (
         <p className="ja-note">The review window closed on {utcStamp(p.reviewEndsAt * 1000)}, so this delivery can no longer be disputed. It settles to {p.agentName} under BNB Chain&apos;s escrow policy. You can still rate it.</p>
@@ -187,6 +187,15 @@ export function JobActions(p: JobActionProps) {
           </Button>
           <p className="ja-fine">Your wallet signs the rating to BNB Chain&apos;s ERC-8004 reputation registry. It counts as a verified-buyer rating because you paid for this job.</p>
           {rateState.error ? <ErrorNote error={rateState.error} /> : null}
+          {disputable ? (
+            <div className="ja-dispute" data-emph={answered === 'no' || undefined}>
+              <div>
+                <b>Not what you asked for?</b>
+                <p>Open a dispute{p.reviewEndsAt ? ` before ${utcStamp(p.reviewEndsAt * 1000)}` : ' while the review window is open'}. The payment stays in escrow while independent voters decide; if they reject the delivery, you are refunded.</p>
+              </div>
+              <Button variant="danger" size="sm" onClick={() => setConfirmDispute(true)} disabled={busy !== null}>Open a dispute</Button>
+            </div>
+          ) : null}
         </div>
       ) : null}
 
@@ -196,8 +205,8 @@ export function JobActions(p: JobActionProps) {
       {steps ? <TxStepper steps={steps} label="Transactions" /> : null}
       {error && !steps?.some((s) => s.state === 'failed') ? <ErrorNote error={error} /> : null}
 
-      <Modal open={confirmDispute} onClose={() => setConfirmDispute(false)} title="Report a problem with this delivery?"
-        footer={<><Button onClick={() => setConfirmDispute(false)}>Keep the delivery</Button><Button variant="danger" onClick={() => { setConfirmDispute(false); void one('dispute', disputeCall(p.chainId, BigInt(p.jobId)), { title: 'Problem reported', body: 'Independent voters will decide. Payment stays in escrow meanwhile.' }) }}>Report a problem</Button></>}>
+      <Modal open={confirmDispute} onClose={() => setConfirmDispute(false)} title="Open a dispute about this delivery?"
+        footer={<><Button onClick={() => setConfirmDispute(false)}>Keep the delivery</Button><Button variant="danger" onClick={() => { setConfirmDispute(false); void one('dispute', disputeCall(p.chainId, BigInt(p.jobId)), { title: 'Dispute opened', body: 'Independent voters will decide. Payment stays in escrow meanwhile.' }) }}>Open a dispute</Button></>}>
         <p className="ja-note">This opens a dispute on BNB Chain&apos;s escrow. Independent voters decide; if they reject the delivery you are refunded, otherwise {p.agentName} is paid. Payment stays in escrow until then. It costs only the network fee.</p>
       </Modal>
     </div>

@@ -43,7 +43,16 @@ export interface LensMeta {
 export interface HfLens { kind: 'health_factor'; account: string | null; hasPosition: boolean | null; healthFactor: number | null; target: number | null; repayUsd: number | null; collateralSymbol: string | null; collateralFactor: number | null; liquidationPriceUsd: number | null; markets: Array<{ symbol: string; suppliedUsd: number | null; borrowedUsd: number | null; priceUsd: number | null; liquidationPriceUsd: number | null; threshold: number | null }> }
 export interface RebPosition { id: string | null; pair: string | null; feeTier: number | null; tickSpacing: number | null; current: number | null; range: [number, number] | null; inRange: boolean | null; proposed: [number, number] | null; amount0: number | null; amount1: number | null; slippageBps: number | null; note: string | null; closed: boolean | null }
 export interface RebLens { kind: 'rebalancing'; owner: string | null; positions: RebPosition[] }
-export interface GridLens { kind: 'grid'; pair: string | null; price: number | null; spacing: string | null; levels: Array<{ price: number; allocationUsd: number | null; side: 'buy' | 'sell' | null }>; lower: number | null; upper: number | null; stop: number | null; capitalUsd: number | null; feeDragPct: number | null; signal: string | null; record: { fills: number | null; pnlUsd: number | null; gasUsd: number | null; window: string | null } | null }
+export interface GridLens {
+  kind: 'grid'; pair: string | null; price: number | null; spacing: string | null
+  levels: Array<{ price: number; allocationUsd: number | null; side: 'buy' | 'sell' | null }>
+  lower: number | null; upper: number | null; stop: number | null; capitalUsd: number | null; feeDragPct: number | null; signal: string | null
+  record: { fills: number | null; pnlUsd: number | null; gasUsd: number | null; window: string | null; roundTrips?: number | null; winRate?: number | null; maxDrawdownUsd?: number | null; source?: string | null; verify?: string | null } | null
+  /** A standing grid stated as a policy (anchor, step, levels each side, clip) rather than a list of orders. */
+  policy?: { anchorUsd: number | null; stepBps: number | null; levelsEachSide: number | null; clip: string | null; updatedAt: string | null } | null
+  /** Its own executed fills, each with its transaction. */
+  fills?: Array<{ at: string | null; side: 'buy' | 'sell' | null; base: number | null; quote: number | null; price: number | null; tx: string | null }>
+}
 export interface YieldLens { kind: 'yield'; recommend: boolean | null; venue: string | null; asset: string | null; netAprPct: number | null; grossAprPct: number | null; sizeUsd: number | null; sources: Array<{ value: number | null; label: string }>; switching: { gasUsd: number | null; swapUsd: number | null; exitUsd: number | null }; breakEvenUsd: number | null; improvementBps: number | null; declineReason: string | null; alternatives: Array<{ venue: string; netAprPct: number | null }>; excluded: Array<{ name: string; reason: string }> }
 export interface SecurityLens { kind: 'security'; subject: string | null; symbol: string | null; verdict: string | null; findings: Array<{ severity: string; title: string; detail: string | null }>; counts: Record<string, number> | null; proxy: boolean | null; owner: string | null }
 export interface GenericLens { kind: 'generic' }
@@ -141,6 +150,12 @@ function grid(c: J): GridLens {
     side: ((): 'buy' | 'sell' | null => { const s = str(l['side'])?.toLowerCase(); return s === 'buy' || s === 'sell' ? s : null })(),
   })).filter((l) => Number.isFinite(l.price))
   const win = isObj(pick(c, ['window'])) ? (pick(c, ['window']) as J) : null
+  const pol = isObj(pick(c, ['policy'])) ? (pick(c, ['policy']) as J) : null
+  // A policy-stated grid (anchor, step in bps, N levels each side) gives its levels by arithmetic; stated, not invented.
+  const anchor = pol ? num(pol['anchorUsd'] ?? pol['anchor']) : null, step = pol ? num(pol['stepBps']) : null, each = pol ? num(pol['levels']) : null
+  if (!levels.length && anchor !== null && step !== null && each !== null && each > 0 && each <= 50) {
+    for (let k = -each; k <= each; k++) if (k !== 0) levels.push({ price: anchor * (1 + (k * step) / 10_000), allocationUsd: null, side: k < 0 ? 'buy' : 'sell' })
+  }
   return {
     kind: 'grid',
     pair: str(pick(c, ['pair', 'symbol', 'market'])),
@@ -153,7 +168,16 @@ function grid(c: J): GridLens {
     capitalUsd: num(pick(c, ['capitalUsd', 'capital', 'totalUsd'])),
     feeDragPct: num(pick(c, ['feeDragPct', 'feeDrag', 'fee_drag_pct'])),
     signal: str(pick(c, ['signal', 'action'])),
-    record: win ? { fills: num(win['fills']), pnlUsd: num(win['pnlUsd']), gasUsd: num(win['gasUsd']), window: [str(win['start']), str(win['end'])].filter(Boolean).join(' to ') || null } : null,
+    record: win ? {
+      fills: num(win['fills']), pnlUsd: num(win['pnlUsd']), gasUsd: num(win['gasUsd']), window: [str(win['start']), str(win['end'])].filter(Boolean).join(' to ') || null,
+      roundTrips: num(win['roundTrips']), winRate: num(win['winRate']), maxDrawdownUsd: num(win['maxDrawdownUsd']), source: str(win['source']), verify: str(win['verify']),
+    } : null,
+    policy: pol ? { anchorUsd: num(pol['anchorUsd'] ?? pol['anchor']), stepBps: num(pol['stepBps']), levelsEachSide: num(pol['levels']), clip: str(pol['clipWbnb'] ?? pol['clip'] ?? pol['size']), updatedAt: str(pol['stateUpdatedAt'] ?? pol['updatedAt']) } : null,
+    fills: arr(pick(c, ['fills', 'trades', 'executions'])).slice(0, 50).map((f) => ({
+      at: str(f['at'] ?? f['time'] ?? f['timestamp']),
+      side: ((): 'buy' | 'sell' | null => { const v = str(f['side'])?.toLowerCase(); return v === 'buy' || v === 'sell' ? v : null })(),
+      base: num(f['wbnb'] ?? f['base'] ?? f['amount']), quote: num(f['usdt'] ?? f['quote'] ?? f['usd']), price: num(f['price']), tx: str(f['tx'] ?? f['txHash'] ?? f['hash']),
+    })),
   }
 }
 

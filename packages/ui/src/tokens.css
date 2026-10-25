@@ -66,19 +66,19 @@
 
     /* Category materials, from the six reference agents' artifacts. Identity only:
        a small mark beside a category name, never a state and never a field. */
-    --cat-health: #FF8A5B;       /* Keel: ember (24 Oct vivid set; was steel #AEB8C2) */
-    --cat-grid: #5AA9FF;         /* Lattice: azure (was ice #9DC0D8) */
-    --cat-rebalancing: #C084FC;  /* Bound: orchid (was champagne #D3BD92) */
-    --cat-yield: #34D399;        /* Sluicegate: jade (was verdigris #93C2AC) */
-    --cat-security: #FF6B98;     /* Redcell: rose (was garnet #C98585) */
+    --cat-health: #AEB8C2;       /* Keel: steel */
+    --cat-grid: #9DC0D8;         /* Lattice: ice */
+    --cat-rebalancing: #D3BD92;  /* Bound: champagne */
+    --cat-yield: #93C2AC;        /* Sluicegate: verdigris */
+    --cat-security: #C98585;     /* Redcell: garnet */
 
-    /* Vivid set (24 Oct, owner direction): colour with a job. Lanes (gold = real money, cyan = practice),
-       categories, and one signature gradient for the few places that should pull the eye (the Forge, the
-       quest dock, the active nav mark). Never a page field, never body text. */
-    --v-gold: #F2C14E; --v-ember: #FF7A4F; --v-orchid: #C084FC; --v-azure: #5AA9FF;
-    --v-jade: #34D399; --v-cyan: #3DD6E8; --v-rose: #FF6B98;
-    --lane-main: var(--v-gold); --lane-practice: var(--v-cyan);
-    --aurora: linear-gradient(115deg, var(--v-gold) 0%, var(--v-ember) 48%, var(--v-orchid) 100%);
+    /* Accent set (25 Oct, owner direction: the 24 Oct vivid hues read as off-brand). The names stay so components keep
+       working, but every value is Marque's own: champagne metal, the agents' mineral tones and the state colours. */
+    --v-gold: #E6D6B4; --v-ember: #D6A57A; --v-orchid: #C4AC7C; --v-azure: #8FB0D3;
+    --v-jade: #86B596; --v-cyan: #9DC0D8; --v-rose: #C98585;
+    --lane-main: #D6C29A; --lane-practice: #9DB4C9;
+    /* Champagne metal: the one finish for marks that should catch the eye (quest emblem, Forge spark, progress). */
+    --aurora: linear-gradient(115deg, #F1E6CC 0%, #D6C29A 42%, #A38E64 100%);
 
     --grid-line: rgba(238, 235, 228, 0.045);
     --cross: rgba(238, 235, 228, 0.26);
@@ -135,16 +135,16 @@
     --on-forest-2: #4C5A53;
     --on-forest-hair: rgba(26, 35, 32, 0.13);
 
-    --cat-health: #C4481C;
-    --cat-grid: #1F6BD1;
-    --cat-rebalancing: #8B44D6;
-    --cat-yield: #0D8F69;
-    --cat-security: #C92D63;
+    --cat-health: #5C6873;
+    --cat-grid: #3D6C8C;
+    --cat-rebalancing: #87683A;
+    --cat-yield: #3E7A62;
+    --cat-security: #9A4545;
 
-    --v-gold: #A8740A; --v-ember: #CF4A1C; --v-orchid: #8B44D6; --v-azure: #1F6BD1;
-    --v-jade: #0D8F69; --v-cyan: #0A8597; --v-rose: #C92D63;
-    --lane-main: var(--v-gold); --lane-practice: var(--v-cyan);
-    --aurora: linear-gradient(115deg, var(--v-gold) 0%, var(--v-ember) 48%, var(--v-orchid) 100%);
+    --v-gold: #7A6135; --v-ember: #8F5A2A; --v-orchid: #87683A; --v-azure: #2B5A85;
+    --v-jade: #2F6A47; --v-cyan: #3D6C8C; --v-rose: #9A4545;
+    --lane-main: #7A6135; --lane-practice: #3D6C8C;
+    --aurora: linear-gradient(115deg, #A88A52 0%, #7A6135 55%, #5E4A27 100%);
 
     --grid-line: rgba(26, 25, 22, 0.05);
     --cross: rgba(26, 25, 22, 0.28);

@@ -7,40 +7,26 @@
 .dock[data-tray] { bottom: calc(104px + env(safe-area-inset-bottom)); }
 /* Toasts share the bottom-right corner on desktop: the Dock steps aside while one shows. */
 @media (min-width: 641px) { :global(body:has(.toast)) .dock { visibility: hidden; } }
-/* The companion is the one object on the page that wears the signature gradient: a slowly turning hairline in gold,
-   ember and orchid, and a soft glow under it. Everything inside stays quiet graphite so the colour reads as a frame. */
-@property --dock-a { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
-.pill, .panel { position: relative; isolation: isolate; }
-.pill::before, .panel::before {
-  content: ''; position: absolute; inset: 0; z-index: 1; border-radius: inherit; padding: 1px; pointer-events: none;
-  background: conic-gradient(from var(--dock-a), var(--v-gold), var(--v-ember), var(--v-orchid), var(--v-azure), var(--v-gold));
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
-  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); mask-composite: exclude;
-  opacity: 0.9;
-}
+/* The companion: a graphite capsule with one fine champagne top light, the emblem, and plain words. No colour glow. */
+.pill, .panel { position: relative; }
 .pill {
-  display: inline-flex; align-items: center; gap: 10px; height: 46px; padding: 0 18px 0 9px;
-  border-radius: 23px; border: 0; background: color-mix(in srgb, var(--panel-2) 94%, transparent); color: var(--ink);
-  box-shadow: 0 12px 34px -14px color-mix(in srgb, var(--v-ember) 50%, transparent), 0 6px 28px -10px color-mix(in srgb, var(--v-orchid) 34%, transparent), var(--elev-2);
+  display: inline-flex; align-items: center; gap: 10px; height: 46px; padding: 0 18px 0 12px;
+  border-radius: 23px; border: 1px solid var(--hair-2); background: var(--panel-2); color: var(--ink);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--brass-lit) 22%, transparent), var(--elev-2);
   cursor: pointer; font: inherit;
-  transition: transform 220ms var(--ease-settle), box-shadow 220ms var(--ease-settle);
+  transition: transform 220ms var(--ease-settle), border-color 220ms var(--ease-settle);
 }
-.pill:hover { transform: translateY(-1px); box-shadow: 0 16px 40px -14px color-mix(in srgb, var(--v-ember) 62%, transparent), 0 8px 34px -10px color-mix(in srgb, var(--v-orchid) 46%, transparent), var(--elev-2); }
+.pill:hover { transform: translateY(-1px); border-color: color-mix(in srgb, var(--brass) 55%, var(--hair-2)); }
 .pill:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; }
-.pillGlow { position: absolute; inset: -6px; z-index: -1; border-radius: inherit; pointer-events: none; background: var(--aurora); filter: blur(14px); opacity: 0.16; }
 .pillText { font-size: 13px; font-weight: 500; letter-spacing: 0.005em; white-space: nowrap; font-variant-numeric: tabular-nums; }
-.dock[data-warn] .pillText { color: color-mix(in srgb, var(--v-ember) 75%, var(--ink)); }
+.dock[data-warn] .pillText { color: color-mix(in srgb, var(--amber) 80%, var(--ink)); }
 
 .panel {
-  width: 320px; padding: 16px 18px 12px; border-radius: 18px; border: 0;
-  background: var(--panel-2); color: var(--ink);
-  box-shadow: 0 26px 60px -22px color-mix(in srgb, var(--v-ember) 42%, transparent), 0 10px 50px -18px color-mix(in srgb, var(--v-orchid) 34%, transparent), var(--elev-3, var(--elev-2));
-  display: grid; gap: 12px; overflow: hidden;
-}
-.aura { position: absolute; inset: 0 0 auto 0; height: 132px; z-index: -1; pointer-events: none;
-  background:
-    radial-gradient(120% 90% at 0% 0%, color-mix(in srgb, var(--v-gold) 20%, transparent), transparent 60%),
-    radial-gradient(90% 90% at 100% 0%, color-mix(in srgb, var(--v-orchid) 18%, transparent), transparent 62%);
+  width: 320px; padding: 18px 18px 12px; border-radius: 18px; border: 1px solid var(--hair-2);
+  background: linear-gradient(to bottom, color-mix(in srgb, var(--brass) 5%, var(--panel-2)), var(--panel-2) 120px);
+  color: var(--ink);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--brass-lit) 24%, transparent), var(--elev-3, var(--elev-2));
+  display: grid; gap: 12px;
 }
 .panelHead { display: flex; align-items: center; gap: 12px; }
 .panelTitle { display: grid; gap: 2px; flex: 1; min-width: 0; }
@@ -56,7 +42,7 @@
 .unit { display: grid; justify-items: center; gap: 1px; padding: 9px 0 8px; border-radius: 11px; background: color-mix(in srgb, var(--canvas) 55%, transparent); border: 1px solid var(--hair); }
 .unit b { font-size: 26px; font-weight: 500; line-height: 1; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
 .unit small { font-size: 11px; color: var(--ink-3); }
-.face[data-warn] .unit b { color: var(--v-ember); }
+.face[data-warn] .unit b { color: var(--amber); }
 .closes { grid-column: 1 / -1; font-size: 11.5px; color: var(--ink-3); text-align: center; }
 .clock { margin: 0; font-size: 13.5px; color: var(--ink); }
 .who { margin: 0; font-size: 12px; color: var(--ink-3); font-family: var(--font-mono); }
@@ -79,17 +65,6 @@
 .textBtn:hover { color: var(--ink); }
 .textBtn svg { width: 14px; height: 14px; }
 
-@media (prefers-reduced-motion: no-preference) {
-  .pill::before, .panel::before { animation: dock-turn 9s linear infinite; }
-  .pillGlow { animation: dock-breathe 5.5s ease-in-out infinite alternate; }
-  .dock[data-warn] .pill::before { animation-duration: 4s; }
-}
-@keyframes dock-turn { to { --dock-a: 360deg; } }
-@keyframes dock-breathe { from { opacity: 0.1; } to { opacity: 0.26; } }
-:global(html[data-hidden]) .pill::before, :global(html[data-hidden]) .panel::before, :global(html[data-hidden]) .pillGlow { animation-play-state: paused; }
-:global(html[data-theme='day']) .pillGlow { opacity: 0.12; }
-
-.remind { position: relative; }
 .remindMenu {
   position: absolute; bottom: calc(100% + 6px); left: 0; z-index: 2; width: 264px; padding: 6px;
   border-radius: 12px; border: 1px solid var(--hair-2); background: var(--panel); box-shadow: var(--elev-2);
@@ -121,29 +96,5 @@
   .remindMenu { width: min(300px, calc(100vw - 48px)); }
 }
 @media print { .dock { display: none; } }
-
-/* ---- The Set and Earn dial (replaces the prism) ---- */
-.dial { display: inline-grid; place-items: center; flex: none; color: var(--v-gold); border-radius: 50%; transition: box-shadow 600ms cubic-bezier(.16,1,.3,1); }
-.dial[data-warn] { color: var(--v-ember); }
-.dial[data-complete] { color: var(--v-jade); box-shadow: 0 0 0 3px color-mix(in srgb, var(--v-jade) 14%, transparent), 0 0 18px color-mix(in srgb, var(--v-jade) 26%, transparent); }
-.dial[data-complete] .dialFace { stroke: color-mix(in srgb, var(--v-jade) 45%, transparent); fill: color-mix(in srgb, var(--v-jade) 8%, transparent); }
-.dialCheck { fill: none; stroke: var(--v-jade); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
-.dial svg { display: block; overflow: visible; }
-.dialFace { fill: color-mix(in srgb, var(--ink) 4%, transparent); stroke: color-mix(in srgb, var(--ink) 10%, transparent); stroke-width: 0.6; }
-.dialSeg { fill: none; stroke: color-mix(in srgb, var(--ink) 14%, transparent); stroke-linecap: round; transition: stroke 600ms cubic-bezier(.16,1,.3,1); }
-.dialSeg[data-on] { stroke: var(--v-gold); }
-.dialSeg[data-ring='build'][data-on] { stroke: var(--v-orchid); }
-.dialSeg[data-on][data-met] { stroke: var(--v-jade); }
-.dial[data-warn] .dialSeg:not([data-on]) { stroke: color-mix(in srgb, var(--amber) 35%, transparent); }
-.dial[data-team] .dialSeg[data-on] { stroke: var(--ink-3); }
-.dialDot { fill: var(--v-gold); }
-.dial[data-warn] .dialDot, .dial[data-warn] .dialDays { fill: var(--amber); }
-.dialDays { fill: var(--ink); font-family: var(--font-mono); font-size: 7.4px; font-weight: 500; letter-spacing: -0.02em; }
-.dialUnit { fill: var(--ink-3); font-size: 4.6px; }
-.dialSweep { transform-origin: 0 0; animation: dial-sweep 9s cubic-bezier(.45,0,.25,1) infinite; opacity: 0.85; }
-@keyframes dial-sweep { 0% { transform: rotate(0deg); opacity: 0; } 8% { opacity: 0.85; } 60% { opacity: 0.85; } 72% { transform: rotate(360deg); opacity: 0; } 100% { transform: rotate(360deg); opacity: 0; } }
-.dial[data-warn] .dialSweep { animation-duration: 4.5s; }
-@media (prefers-reduced-motion: reduce) { .dialSweep, .dial[data-warn] .dialSweep { animation: none; opacity: 0; } }
-:global(html[data-hidden]) .dialSweep { animation-play-state: paused; }
 /* The account menu opens downward from the header: the companion steps back while it is open. */
 :global(body:has(.acct-menu)) .dock { opacity: 0; pointer-events: none; transition: opacity 150ms ease; }

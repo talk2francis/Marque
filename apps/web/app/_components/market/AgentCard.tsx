@@ -51,7 +51,9 @@ export function AgentCard({ a, compare, base = '', variant = 'default' }: {
   const stale = w.status === 'warranted' && warrantIsStale(w.date)
   // The practice lane (BSC testnet) uses the same card; only a dashed network badge differs.
   const practice = a.agentId.startsWith('97:')
-  const twin = !practice && a.isReference ? referenceAgentByToken(a.agentId)?.erc8004Testnet ?? null : null
+  // All-networks view: one card per agent; the line says where it sells and the hire sheet picks the network.
+  const both = a.networks?.includes(56) && a.networks?.includes(97)
+  const twin = !a.networks && !practice && a.isReference ? referenceAgentByToken(a.agentId)?.erc8004Testnet ?? null : null
   const art = avatarSource({ id: a.agentId, reference: a.isReference, imageUrl: a.identity.imageUrl, size: 512 })
 
   return (
@@ -77,7 +79,8 @@ export function AgentCard({ a, compare, base = '', variant = 'default' }: {
             <span className={styles.mark} data-tone={classified ? TONE[a.category!] : 'other'} aria-hidden="true" />
             {cat}
             {a.identityCount > 1 && !classified ? <span className={styles.count}> · {a.identityCount} identities</span> : null}
-            {practice ? <span className={styles.testnet} title="BSC testnet: test tokens, no real value">Testnet</span> : null}
+            {both ? <span className={styles.nets} title="Hire on BSC mainnet with real money, or on BSC testnet free">Mainnet · Testnet</span>
+              : practice ? <span className={styles.testnet} title="BSC testnet: test tokens, no real value">{a.networks ? 'Testnet only' : 'Testnet'}</span> : null}
           </span>
         </div>
         {a.isReference ? <a href="/register#reference-agents" className={styles.ref} title="Why Marque runs its own agents"><Badge kind="reference" /></a> : null}

@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { AgentCard } from '../market/AgentCard'
-import { pickReady } from '../../../lib/ready-picks'
+import { pickShowcase } from '../../../lib/ready-picks'
 import type { MarketRow } from '../../register/market-model'
 import styles from '../../home.module.css'
 
@@ -16,9 +16,9 @@ export function ReadyNow({ initial }: { initial: MarketRow[] }) {
   const [checked, setChecked] = useState(false)
   useEffect(() => {
     const controller = new AbortController()
-    fetch('/api/v1/marketplace?tab=ready&sort=best&lane=mainnet&limit=30', { cache: 'no-store', signal: controller.signal })
+    fetch('/api/v1/marketplace?tab=ready&sort=best&lane=mainnet&limit=60', { cache: 'no-store', signal: controller.signal })
       .then((r) => (r.ok ? r.json() : null))
-      .then((j: { agents?: MarketRow[] } | null) => { if (j?.agents) setRows(pickReady(j.agents)) })
+      .then((j: { agents?: MarketRow[] } | null) => { if (j?.agents) setRows(pickShowcase(j.agents)) })
       .catch(() => { /* keep the rendered cards; each still re-reads its own price */ })
       .finally(() => setChecked(true))
     return () => controller.abort()

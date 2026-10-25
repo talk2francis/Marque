@@ -22,7 +22,7 @@
 .row, .headRow { display: contents; }
 .corner, .agentHead {
   /* Under the site header on the page, at the sheet's top inside the sheet. Opaque: nothing shows through. */
-  position: sticky; top: var(--compare-sticky-top, 0px); z-index: 2; padding: 16px 14px 14px;
+  position: sticky; top: var(--compare-sticky-top, calc(-1 * var(--sheet-pad-top, 0px))); z-index: 2; padding: 16px 14px 14px;
   background: var(--panel);
   border-bottom: 1px solid var(--hair-2);
   box-shadow: 0 -1px 0 var(--panel);

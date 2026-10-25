@@ -61,7 +61,7 @@ export function MarketList({
         <span>Proof</span>
         <span>Availability</span>
         <span>Price</span>
-        <span />
+        <span className={styles.headAct}>Try or hire</span>
       </div>
 
       {rows.map((a) => {

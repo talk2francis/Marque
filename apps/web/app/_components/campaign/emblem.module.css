@@ -1,0 +1,22 @@
+/* The Set and Earn emblem: champagne metal on graphite stone, Marque's own palette only. */
+.emblem {
+  --em-hi: #F3E9D2; --em-mid: #D2BC8E; --em-lo: #8F7A52; --em-edge: rgba(214, 194, 154, 0.42);
+  display: block; flex: none; overflow: visible;
+  filter: drop-shadow(0 1px 1.5px rgba(0, 0, 0, 0.5));
+}
+:global(html[data-theme='day']) .emblem { --em-hi: #C9AE78; --em-mid: #9C7F48; --em-lo: #6B5530; --em-edge: rgba(26, 25, 22, 0.3); filter: none; }
+.lit { fill: color-mix(in srgb, var(--ink) 9%, var(--panel-2)); }
+.shade { fill: color-mix(in srgb, var(--ink) 4%, var(--panel-2)); }
+.course { stroke: rgba(0, 0, 0, 0.3); stroke-width: 0.35; }
+:global(html[data-theme='day']) .course { stroke: rgba(0, 0, 0, 0.14); }
+.edge { fill: none; stroke: var(--em-edge); stroke-width: 0.5; stroke-linejoin: round; }
+.emblem[data-warn] .edge { stroke: var(--amber); }
+.plinth { fill: color-mix(in srgb, var(--em-mid) 38%, var(--panel-2)); stroke: var(--em-edge); stroke-width: 0.4; }
+.plinth[data-on] { fill: var(--em-mid); }
+.emblem[data-team] { opacity: 0.6; }
+.spark { fill: #FFF8E8; filter: drop-shadow(0 0 2.2px rgba(255, 244, 214, 0.95)); }
+@media (prefers-reduced-motion: no-preference) {
+  .emblem[data-complete] .spark { animation: em-catch 4.8s ease-in-out infinite; }
+}
+@keyframes em-catch { 0%, 70%, 100% { opacity: 0.4; } 82% { opacity: 1; } }
+:global(html[data-hidden]) .spark { animation-play-state: paused; }

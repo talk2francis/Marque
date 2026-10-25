@@ -2,24 +2,26 @@
 import { useEffect, useState } from 'react'
 import styles from './register.module.css'
 
-type Lane = 'mainnet' | 'practice'
+type Lane = 'all' | 'mainnet' | 'practice'
 const OPTIONS: Array<{ lane: Lane; title: string; note: string }> = [
+  { lane: 'all', title: 'All networks', note: 'pick the network when you hire' },
   { lane: 'mainnet', title: 'Mainnet', note: 'real money' },
-  { lane: 'practice', title: 'Practice', note: 'BSC testnet, free' },
+  { lane: 'practice', title: 'Testnet', note: 'free practice' },
 ]
 
 /**
- * The lane switch (SPEC-ACCESS 1.2, invariant 32). Two networks, two lanes, never blended:
- * mainnet is the default and the only real-money lane; practice is BSC testnet with test
- * tokens. Each option names its own count of agents hireable right now, read per lane.
+ * The network filter (SPEC-ACCESS 1.2, invariant 32; 25 Oct: one list by default). 'All networks' lists each agent
+ * once and the hire sheet picks mainnet (real money) or testnet (test tokens); the two single-network options list one
+ * network only, each with its own count of agents hireable now. Amounts are never blended.
  */
 export function LaneSwitch({ lane, onPick }: { lane: Lane; onPick: (l: Lane) => void }) {
-  const [counts, setCounts] = useState<Record<Lane, number | null>>({ mainnet: null, practice: null })
+  const [counts, setCounts] = useState<Record<Lane, number | null>>({ all: null, mainnet: null, practice: null })
   useEffect(() => {
     fetch('/api/v1/phase2/coverage', { cache: 'no-store' })
       .then((r) => (r.ok ? r.json() : null))
       .then((j: { mainnet?: { totalHireable?: number }; practice?: { totalHireable?: number } } | null) => {
-        if (j) setCounts({ mainnet: j.mainnet?.totalHireable ?? null, practice: j.practice?.totalHireable ?? null })
+        // 'All networks' shows no count: an agent on both networks is one listing, and summing the two would count it twice.
+        if (j) setCounts({ all: null, mainnet: j.mainnet?.totalHireable ?? null, practice: j.practice?.totalHireable ?? null })
       })
       .catch(() => { /* the switch still works without counts */ })
   }, [])

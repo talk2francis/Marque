@@ -15,7 +15,7 @@ import { outcomesForJob } from '../../../../lib/act'
 import { intentFromLens } from '@marque/act'
 import { ResultLens } from './ResultLens'
 import { jobLens } from '../../../../lib/lens'
-import { readManifest } from '../../../../lib/manifest'
+import { jobManifest } from '../../../../lib/manifest'
 import { registryImageUrl } from '../../../../lib/avatar-source'
 import { JobActions } from './JobActions'
 import styles from './job.module.css'
@@ -76,7 +76,8 @@ export default async function JobRoom({ params }: { params: Promise<{ chainId: s
   const fundingDeadline = t?.submitDeadline ?? expiredAt
   const head = jobHeadline(state, agentName, priceLabel ?? 'payment', t?.reviewEndsAt ?? null, t?.refundFrom ?? null, Boolean(t?.awaitingExpiry), fundingDeadline !== null && now >= fundingDeadline)
   const onchainHash = job?.deliverable?.hash ?? (onchain && onchain.submittedAt > 0n ? onchain.deliverable : null)
-  const manifest = job?.deliverable?.url ? await readManifest(job.deliverable.url, onchainHash) : null
+  // The published URL when there is one, otherwise found from the chain hash and accepted only on a hash match.
+  const manifest = await jobManifest(cid, jobId, job as never, onchainHash)
   // The Result Lens reads the same file and checks it against the chain (cached per job).
   const lensData = manifest && !manifest.withheld ? await jobLens(cid, jobId).then((p) => p.value).catch(() => null) : null
   const actIntent = lensData?.lens ? intentFromLens(lensData.lens as never) : null

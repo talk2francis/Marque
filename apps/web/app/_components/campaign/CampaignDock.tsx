@@ -4,7 +4,7 @@ import { usePathname } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { ChevronDown, X } from 'lucide-react'
 import { CAMPAIGN, clockShort, clockWords } from '@marque/commerce/rules'
-import { Dial } from './Dial'
+import { Emblem } from './Emblem'
 import { useCampaignClock } from './Countdown'
 import { RemindMenu, useInPageReminders } from './Reminders'
 import { ADDRESS_EVENT, dockPrefs, questAddress, saveDockPrefs, type DockPrefs } from './store'
@@ -125,15 +125,13 @@ export function CampaignDock() {
     <div className={styles.dock} data-open={open || undefined} data-warn={warn || undefined} data-tray={tray || undefined} role="complementary" aria-label="Set and Earn companion">
       {!open ? (
         <button type="button" className={styles.pill} onClick={() => setOpen(true)} aria-expanded="false" aria-label={`${pill}. Open the Set and Earn companion`}>
-          <Dial hire={agents} build={buildObserved} warn={warn} team={team} size={28} />
+          <Emblem hire={agents} build={buildObserved} warn={warn} team={team} size={30} />
           <span className={styles.pillText}>{pill}</span>
-          <span className={styles.pillGlow} aria-hidden="true" />
         </button>
       ) : (
         <div className={styles.panel} ref={panelRef}>
-          <span className={styles.aura} aria-hidden="true" />
           <div className={styles.panelHead}>
-            <Dial hire={agents} build={buildObserved} days={clock.closed ? null : clock.days} warn={warn} team={team} size={52} />
+            <Emblem hire={agents} build={buildObserved} warn={warn} team={team} size={56} />
             <div className={styles.panelTitle}>
               <span className={styles.kicker}>BNB Chain quest</span>
               <strong>Set and Earn</strong>

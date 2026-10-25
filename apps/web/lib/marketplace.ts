@@ -31,6 +31,9 @@ export type Qual = 'warranted' | 'failed' | 'callable' | 'unbound' | 'dead'
 const QUAL_RANK: Record<Qual, number> = { warranted: 0, failed: 1, callable: 2, unbound: 3, dead: 4 }
 
 export interface MarketRow {
+  /** All-networks view: the networks this agent sells on, and its twin on the other one (see foldNetworks). */
+  networks?: Array<56 | 97>
+  twin?: { agentId: string; chainId: 56 | 97; price: string | null; hireable: boolean } | null
   agentId: string
   tokenId: string | null
   name: string
@@ -118,8 +121,11 @@ export interface MarketQuery {
   tab?: 'ready' | 'free' | 'tested' | 'all' | null
   /** Only Marque reference agents. `thirdPartyOnly` is the opposite toggle. */
   firstPartyOnly?: boolean
-  /** The lane: mainnet (56, default) or practice (97). Listings and counts never mix lanes. */
-  lane?: Lane | null
+  /**
+   * The lane: mainnet (56, default) or practice (97), or 'all' (25 Oct): both networks, one row per agent. An agent on
+   * both networks (same owner, same name) is one row with its twin attached; amounts are never summed across networks.
+   */
+  lane?: Lane | 'all' | null
   /** Legacy alias of `lane`: 97 selects the practice lane, anything else mainnet. */
   network?: number | null
   /** The token its live quote is in, by symbol. */
@@ -571,19 +577,24 @@ export interface MarketFacets {
   price: { min: number | null; max: number | null; quoted: number; unit: string | null }
 }
 
-export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: MarketRow[]; generatedAt: string; total: number; offset: number; hasMore: boolean; supply: MarketSupplyCategory[]; quoteObservedAt: string | null; facets: MarketFacets; lane: Lane }> {
-  const lane: Lane = q.lane ?? (q.network === 97 ? 'practice' : 'mainnet')
+export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: MarketRow[]; generatedAt: string; total: number; offset: number; hasMore: boolean; supply: MarketSupplyCategory[]; quoteObservedAt: string | null; facets: MarketFacets; lane: Lane | 'all' }> {
+  const both = q.lane === 'all'
+  const lane: Lane = q.lane === 'all' ? 'mainnet' : q.lane ?? (q.network === 97 ? 'practice' : 'mainnet')
   const chainId = chainOf(lane)
-  const inLane = (agentId: string) => agentId.startsWith(`${chainId}:`)
+  const chains: Array<56 | 97> = both ? [56, 97] : [chainId]
+  const inLane = (agentId: string) => chains.some((c) => agentId.startsWith(`${c}:`))
   const hireable = q.tab === 'ready' || q.hireableOnly === true
   const states = hireable ? await commercialStates() : undefined
   const readyIds = states ? [...new Set([...states.values()].filter(c => (c.state === 'hireable' || c.state === 'settleable') && inLane(c.agentId)).map(c => c.agentId))] : null
   let ids = q.agentIds ? (readyIds ? q.agentIds.filter(id => readyIds.includes(id)) : q.agentIds.filter(inLane)) : readyIds
   if (ids === null && (q.category || !q.includeUnclassified)) {
-    const matches = await boundedCommerceRead(marketplaceCategoryQuery(q.category, chainId), 'exact')
-    ids = Array.from(matches as unknown as Array<{ agent_id: string }>).map(row => row.agent_id)
+    const matches = (await Promise.all(chains.map((c) => boundedCommerceRead(marketplaceCategoryQuery(q.category, c), 'exact')))).flatMap((m) => Array.from(m as unknown as Array<{ agent_id: string }>))
+    ids = matches.map(row => row.agent_id)
   }
-  const base = ids ? await scopedBase(ids, states, chainId) : { rows: await marketplaceBase(chainId), at: baseMemo.get(chainId)?.at ?? Date.now() }
+  const bases = await Promise.all(chains.map(async (c) => ids
+    ? scopedBase(ids.filter((id) => id.startsWith(`${c}:`)), states, c)
+    : { rows: await marketplaceBase(c), at: baseMemo.get(c)?.at ?? Date.now() }))
+  const base = { rows: bases.flatMap((b) => b.rows), at: Math.min(...bases.map((b) => b.at)) }
   // Clone: the base is memoised and the sort below is in place.
   const observedAt = Date.now()
   const freshCommerce = states ? bestCommerceByAgent(states) : null
@@ -595,6 +606,7 @@ export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: Ma
     return expireMarketQuote(current, observedAt)
   })
   if (q.agentIds) all = selectedAgentRows(all, q.agentIds)
+  if (both) all = foldNetworks(all)
 
   // Filters over the memoised qualifying set.
   // Ready to hire, all categories: every agent a wallet can pay into escrow right now,
@@ -664,7 +676,9 @@ export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: Ma
   all = finish(except(null))
   // A listing's lane is its registry chain (the base query); a quote bound to another chain is
   // already 'quoteable' with failure wrong_lane, so it lists with its reason and never as hireable.
-  facets.network = { 56: lane === 'mainnet' ? all.length : 0, 97: lane === 'practice' ? all.length : 0 }
+  facets.network = both
+    ? { 56: all.filter((r) => (r.networks ?? []).includes(56)).length, 97: all.filter((r) => (r.networks ?? []).includes(97)).length }
+    : { 56: lane === 'mainnet' ? all.length : 0, 97: lane === 'practice' ? all.length : 0 }
 
   const COMMERCE_RANK: Record<CommercialState, number> = { settleable: 0, hireable: 1, quoteable: 2, preview_only: 3, unavailable: 4 }
   // Hireable first (signed quotes before unsigned), then quality. Two axes, never merged into one badge.
@@ -727,6 +741,37 @@ export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: Ma
       hireBlockedReason,
     } satisfies MarketRow
   })
-  return { rows, total: all.length, offset, supply, facets, lane, quoteObservedAt: states ? new Date(observedAt).toISOString() : null,
+  return { rows, total: all.length, offset, supply, facets, lane: both ? 'all' : lane, quoteObservedAt: states ? new Date(observedAt).toISOString() : null,
     hasMore: offset + limit < all.length, generatedAt: new Date(base.at).toISOString() }
+}
+
+/**
+ * One row per agent across networks (25 Oct): rows on BSC mainnet and BSC testnet with the same owner and the same name
+ * are the same agent. The mainnet row leads and carries its testnet twin; an agent only on testnet stays a row of its own.
+ * Nothing is added across networks: each row's price, record and rating stay those of its own chain.
+ */
+export function foldNetworks(rows: MarketRow[]): MarketRow[] {
+  const key = (r: MarketRow) => (r.owner ? `${r.owner.toLowerCase()}|${r.name.trim().toLowerCase()}` : `id|${r.agentId}`)
+  const chainOfRow = (r: MarketRow): 56 | 97 => (r.agentId.startsWith('97:') ? 97 : 56)
+  const main = new Map<string, MarketRow>()
+  for (const r of rows) if (chainOfRow(r) === 56 && !main.has(key(r))) main.set(key(r), r)
+  const out: MarketRow[] = []
+  const twinOf = new Map<string, MarketRow>()
+  for (const r of rows) {
+    if (chainOfRow(r) === 97) {
+      const m = r.owner ? main.get(key(r)) : undefined
+      if (m && !twinOf.has(m.agentId)) { twinOf.set(m.agentId, r); continue }
+    }
+  }
+  for (const r of rows) {
+    const c = chainOfRow(r)
+    if (c === 97 && [...twinOf.values()].includes(r)) continue
+    const t = c === 56 ? twinOf.get(r.agentId) : undefined
+    out.push({
+      ...r,
+      networks: t ? [56, 97] : [c],
+      twin: t ? { agentId: t.agentId, chainId: 97, price: t.price ?? null, hireable: t.commerce.state === 'hireable' || t.commerce.state === 'settleable' } : null,
+    })
+  }
+  return out
 }

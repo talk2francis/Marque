@@ -12,7 +12,7 @@ export async function initialMarket(category?: string): Promise<InitialMarket | 
     const r = await marketplaceAgents({
       category: state.category, search: null, liveNow: false, warranted: false, thirdPartyOnly: false,
       hireableOnly: false, includeUnclassified: false, hasPrice: false, iface: null, tab: 'ready',
-      firstPartyOnly: false, network: null, token: null, maxPrice: null, minRating: null, sort: 'best',
+      firstPartyOnly: false, network: null, lane: state.lane, token: null, maxPrice: null, minRating: null, sort: 'best',
       limit: state.pageSize, offset: 0,
     })
     return {

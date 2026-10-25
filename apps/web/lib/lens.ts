@@ -5,7 +5,7 @@ import { normalizeAnswer, questJob, TICK_SPACING, type ChainId, type Lens } from
 import { archiveClient, publicClient } from '@marque/chain'
 import { venusReader, healthFactorOf, yieldReader, pancakeV3Reader } from '@marque/positions'
 import { HF, GRID, YIELD } from '@marque/conformance'
-import { readManifest, type Manifest } from './manifest'
+import { jobManifest, type Manifest } from './manifest'
 
 /**
  * Result Lens, server side (SPEC-WORKSPACE 2.1): the delivered answer read for its category, and
@@ -122,9 +122,11 @@ async function yieldChecks(l: Extract<Lens, { kind: 'yield' }>, block: bigint | 
 async function build(chainId: ChainId, jobId: string): Promise<JobLens> {
   const job = await questJob(chainId, jobId).catch(() => null)
   const url = job?.deliverable?.url ?? null
-  const manifest: Manifest | null = url ? await readManifest(url, job?.deliverable?.hash ?? null) : null
+  const manifest: Manifest | null = await jobManifest(chainId, jobId, job as never)
   const source = (job?.deliverable as { source?: string | null } | undefined)?.source ?? null
   if (!manifest) return { lens: null, checks: [], checkedAtBlock: null, summary: { checked: 0, agreed: 0 }, manifest: url ? { matches: null, hash: null, raw: null, url, source } : null, readable: false }
+  // A file found from the chain hash (no published URL) still links to where it was read.
+  void source
   let content: unknown = manifest.content
   if (!content) { try { content = JSON.parse(manifest.raw) } catch { content = null } }
   const category = job?.agent?.category ?? null

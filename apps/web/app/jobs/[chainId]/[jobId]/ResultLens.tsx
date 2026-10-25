@@ -204,12 +204,47 @@ function GridView({ l }: { l: GridLens }) {
           </div>
         ) : null}
         <div className={styles.tiles}>
-          {lv.length ? <div className={styles.tile}><span className={styles.tileLabel}>Levels</span><span className={styles.tileValue}>{lv.length}</span><span className={styles.tileSub}>{l.spacing ? `${l.spacing} spacing` : 'spacing not stated'}</span></div> : null}
+          {l.policy ? (
+            <div className={styles.tile}>
+              <span className={styles.tileLabel}>Its standing grid</span>
+              <span className={styles.tileValue}>{l.policy.levelsEachSide ?? '?'} levels each side</span>
+              <span className={styles.tileSub}>{l.policy.anchorUsd !== null ? `around ${usd(l.policy.anchorUsd)}` : ''}{l.policy.stepBps !== null ? `, every ${n(l.policy.stepBps / 100, 2)}%` : ''}{l.policy.clip ? `, ${l.policy.clip} per clip` : ''}</span>
+            </div>
+          ) : lv.length ? <div className={styles.tile}><span className={styles.tileLabel}>Levels</span><span className={styles.tileValue}>{lv.length}</span><span className={styles.tileSub}>{l.spacing ? `${l.spacing} spacing` : 'spacing not stated'}</span></div> : null}
           {l.capitalUsd !== null ? <div className={styles.tile}><span className={styles.tileLabel}>Capital</span><span className={styles.tileValue}>{usd(l.capitalUsd, 0)}</span></div> : null}
           {l.feeDragPct !== null ? <div className={styles.tile}><span className={styles.tileLabel}>Fee drag</span><span className={styles.tileValue}>{n(l.feeDragPct)}%</span><span className={styles.tileSub}>per round trip</span></div> : null}
-          {l.record ? <div className={styles.tile} data-tone="primary"><span className={styles.tileLabel}>Its own track record</span><span className={styles.tileValue}>{l.record.fills ?? 'n/a'} fills</span><span className={styles.tileSub}>{l.record.pnlUsd !== null ? `P&L ${usd(l.record.pnlUsd)}` : ''}{l.record.gasUsd !== null ? ` · gas ${usd(l.record.gasUsd)}` : ''}</span></div> : null}
+          {l.record ? (
+            <div className={styles.tile} data-tone="primary">
+              <span className={styles.tileLabel}>Its own track record</span>
+              <span className={styles.tileValue}>{l.record.pnlUsd !== null ? `${l.record.pnlUsd < 0 ? '−' : '+'}${usd(Math.abs(l.record.pnlUsd))}` : `${l.record.fills ?? 'n/a'} fills`}</span>
+              <span className={styles.tileSub}>{[l.record.fills !== null ? `${l.record.fills} fills` : null, l.record.roundTrips != null ? `${l.record.roundTrips} round trip${l.record.roundTrips === 1 ? '' : 's'}` : null, l.record.winRate != null ? `${n(l.record.winRate * 100, 0)}% won` : null, l.record.maxDrawdownUsd != null ? `worst dip ${usd(l.record.maxDrawdownUsd)}` : null, l.record.gasUsd !== null ? `gas ${usd(l.record.gasUsd)}` : null].filter(Boolean).join(' · ')}</span>
+            </div>
+          ) : null}
         </div>
       </div>
+      {l.fills && l.fills.length ? (
+        <div className={styles.fills}>
+          <span className={styles.tileLabel}>Its fills, on chain</span>
+          <ul>
+            {l.fills.map((f, i) => (
+              <li key={i}>
+                <span className={styles.fillSide} data-side={f.side ?? undefined}>{f.side ?? 'trade'}</span>
+                <span className={styles.fillAmt}>{f.base !== null ? n(f.base, 4) : ''}{f.quote !== null ? <small> for {usd(f.quote)}</small> : null}</span>
+                <span className={styles.fillPrice}>{f.price !== null ? `at ${usd(f.price)}` : ''}</span>
+                <span className={styles.fillAt}>{f.at && !Number.isNaN(Date.parse(f.at)) ? new Date(f.at).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'UTC' }) : ''}</span>
+                {f.tx && /^0x[0-9a-fA-F]{64}$/.test(f.tx) ? <a className={styles.fillTx} href={`https://bscscan.com/tx/${f.tx}`} target="_blank" rel="noreferrer">tx</a> : <span />}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+      {l.record?.verify ? (
+        <details className={styles.verify}>
+          <summary>Check its record yourself</summary>
+          <p className={styles.legend}>{l.record.source ?? ''}</p>
+          <code>{l.record.verify}</code>
+        </details>
+      ) : null}
     </div>
   )
 }
@@ -280,20 +315,73 @@ function SecurityView({ l }: { l: SecurityLens }) {
 
 /* ------------------------------------------------------------------ anything else: an outline, never raw JSON first */
 
-function Outline({ value, depth = 0 }: { value: unknown; depth?: number }) {
-  if (value === null || value === undefined) return <span className={styles.nil}>none</span>
-  if (typeof value === 'string') return /^https:\/\//.test(value) ? <a href={value} rel="nofollow noreferrer" target="_blank">{value.length > 60 ? `${value.slice(0, 57)}…` : value}</a> : /^0x[0-9a-fA-F]{40,64}$/.test(value) ? <code>{short(value)}</code> : <span>{value.length > 400 ? `${value.slice(0, 400)}…` : value}</span>
-  if (typeof value === 'number' || typeof value === 'boolean') return <span className={styles.mono}>{String(value)}</span>
-  if (Array.isArray(value)) {
-    if (!value.length) return <span className={styles.nil}>empty</span>
-    if (depth > 2) return <span className={styles.nil}>{value.length} items</span>
-    return <ol className={styles.outlineList}>{value.slice(0, 8).map((v, i) => <li key={i}><Outline value={v} depth={depth + 1} /></li>)}{value.length > 8 ? <li className={styles.nil}>{value.length - 8} more</li> : null}</ol>
-  }
-  if (typeof value === 'object') {
-    if (depth > 3) return <span className={styles.nil}>more detail in the original answer</span>
-    return <dl className={styles.outline}>{Object.entries(value as Record<string, unknown>).slice(0, 24).map(([k, v]) => <div key={k}><dt>{human(k)}</dt><dd><Outline value={v} depth={depth + 1} /></dd></div>)}</dl>
+/* Any answer Marque has no picture for, read as plainly as possible: summaries first, lists of records as tables,
+   units from the field names, dates and links readable, plumbing folded away. Nothing is computed or re-scored. */
+const PLUMBING = new Set(['contracts', 'kernel', 'chain_id', 'chainid', 'version', 'metadata', 'job', 'agent', 'reconciliation', 'integerreplica', 'emode'])
+const LEAD = ['summary', 'verdict', 'signal', 'recommendation', 'headline', 'status', 'result', 'message']
+const isIso = (v: string) => /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(v) && !Number.isNaN(Date.parse(v))
+const when = (v: string) => new Date(v).toLocaleString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'UTC' }) + ' UTC'
+function asJson(v: string): unknown {
+  const t = v.trim()
+  if (!(t.startsWith('{') || t.startsWith('['))) return undefined
+  try { return JSON.parse(t) } catch { return undefined }
+}
+function numberIn(key: string, v: number) {
+  const k = key.toLowerCase()
+  if (/(usd|price)$/.test(k) || k.endsWith('_usd')) return Math.abs(v) >= 1000 ? `$${n(v, 0)}` : `$${n(v, Math.abs(v) < 1 ? 4 : 2)}`
+  if (/(pct|percent|apr|apy)$/.test(k)) return `${n(v, 2)}%`
+  if (/bps$/.test(k)) return `${n(v, 0)} bps`
+  if (/(rate|ratio)$/.test(k) && v >= 0 && v <= 1) return `${n(v * 100, 1)}%`
+  if (/(block|blocknumber)$/.test(k)) return v.toLocaleString('en-US')
+  if (/(timestamp|time)$/.test(k) && v > 1.5e9 && v < 2.5e9) return when(new Date(v * 1000).toISOString())
+  return Number.isInteger(v) ? v.toLocaleString('en-US') : n(v, Math.abs(v) < 1 ? 6 : 4)
+}
+function Leaf({ k, v }: { k: string; v: unknown }) {
+  if (v === null || v === undefined || v === '') return <span className={styles.nil}>none</span>
+  if (typeof v === 'boolean') return <span>{v ? 'Yes' : 'No'}</span>
+  if (typeof v === 'number') return <span className={styles.mono}>{numberIn(k, v)}</span>
+  if (typeof v === 'string') {
+    if (/^0x[0-9a-fA-F]{64}$/.test(v)) return <a className={styles.mono} href={`https://bscscan.com/tx/${v}`} target="_blank" rel="noreferrer">{`${v.slice(0, 10)}…${v.slice(-6)}`}</a>
+    if (/^0x[0-9a-fA-F]{40}$/.test(v)) return <a className={styles.mono} href={`https://bscscan.com/address/${v}`} target="_blank" rel="noreferrer">{short(v)}</a>
+    if (/^https:\/\//.test(v)) return <a href={v} rel="nofollow noreferrer" target="_blank">{v.length > 60 ? `${v.slice(0, 57)}…` : v}</a>
+    if (isIso(v)) return <span>{when(v)}</span>
+    return <span>{v.length > 400 ? `${v.slice(0, 400)}…` : v}</span>
   }
   return null
+}
+function Outline({ value, depth = 0, k = '' }: { value: unknown; depth?: number; k?: string }) {
+  if (typeof value === 'string') { const j = asJson(value); if (j !== undefined) return <Outline value={j} depth={depth} k={k} /> }
+  if (value === null || typeof value !== 'object') return <Leaf k={k} v={value} />
+  if (Array.isArray(value)) {
+    if (!value.length) return <span className={styles.nil}>none</span>
+    if (value.every((x) => x === null || typeof x !== 'object')) return <span className={styles.chipsRow}>{value.slice(0, 16).map((x, i) => <span key={i} className={styles.pill}><Leaf k={k} v={x} /></span>)}{value.length > 16 ? <span className={styles.nil}>{value.length - 16} more</span> : null}</span>
+    const rows = value.filter((x): x is Record<string, unknown> => !!x && typeof x === 'object' && !Array.isArray(x))
+    const cols = [...new Set(rows.slice(0, 12).flatMap((r) => Object.keys(r)))].filter((c) => rows.slice(0, 12).every((r) => r[c] === null || typeof r[c] !== 'object')).slice(0, 6)
+    if (rows.length >= 2 && cols.length >= 2) {
+      return (
+        <div className={styles.tableWrap}>
+          <table className={styles.table}>
+            <thead><tr>{cols.map((c) => <th key={c}>{human(c)}</th>)}</tr></thead>
+            <tbody>{rows.slice(0, 12).map((r, i) => <tr key={i}>{cols.map((c) => <td key={c}><Leaf k={c} v={r[c]} /></td>)}</tr>)}</tbody>
+          </table>
+          {rows.length > 12 ? <span className={styles.nil}>{rows.length - 12} more in the original answer</span> : null}
+        </div>
+      )
+    }
+    if (depth > 2) return <span className={styles.nil}>{value.length} items</span>
+    return <ol className={styles.outlineList}>{value.slice(0, 8).map((v, i) => <li key={i}><Outline value={v} depth={depth + 1} k={k} /></li>)}{value.length > 8 ? <li className={styles.nil}>{value.length - 8} more</li> : null}</ol>
+  }
+  if (depth > 3) return <span className={styles.nil}>more detail in the original answer</span>
+  const entries = Object.entries(value as Record<string, unknown>).filter(([key, v]) => !(depth === 0 && PLUMBING.has(key.toLowerCase())) && v !== undefined)
+  const lead = depth === 0 ? entries.find(([key, v]) => LEAD.includes(key.toLowerCase()) && typeof v === 'string' && v.length > 3) : undefined
+  return (
+    <>
+      {lead ? <p className={styles.signal}><span>{human(lead[0])}</span>{String(lead[1])}</p> : null}
+      <dl className={styles.outline}>
+        {entries.filter((e) => e !== lead).slice(0, 28).map(([key, v]) => <div key={key}><dt>{human(key)}</dt><dd><Outline value={v} depth={depth + 1} k={key} /></dd></div>)}
+      </dl>
+    </>
+  )
 }
 
 /* ------------------------------------------------------------------ the frame */

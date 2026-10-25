@@ -4,7 +4,7 @@ import { usePathname } from 'next/navigation'
 
 /**
  * The Facet field (DESIGN-V4 6, invariant 38): faceted light behind the page. A low-poly lattice whose vertices drift
- * on slow sine waves, with one facet catching brass light every 18 to 26 s. Ambient only: it carries no information,
+ * on slow sine waves, with one facet catching champagne light every 9 to 14 s (25 Oct: raised so it is seen). Ambient only: it carries no information,
  * except that a real indexed hire or settlement during the visit lights one extra facet near the top right.
  *
  * Budget: 24 fps cap, device pixel ratio at most 1.5, paused when hidden or under a modal, and a single static frame
@@ -93,7 +93,7 @@ export function FacetField() {
         ctx.beginPath(); ctx.moveTo(...P[i]!); ctx.lineTo(...P[j]!); ctx.lineTo(...P[k]!); ctx.closePath()
         ctx.globalAlpha = a * density; ctx.fillStyle = brass; ctx.fill()
       }
-      ctx.globalAlpha = (day() ? 0.05 : 0.035) * density
+      ctx.globalAlpha = (day() ? 0.085 : 0.075) * density
       ctx.strokeStyle = ink; ctx.lineWidth = 1
       ctx.beginPath()
       for (const [i, j, k] of tris) { ctx.moveTo(...P[i]!); ctx.lineTo(...P[j]!); ctx.lineTo(...P[k]!); ctx.lineTo(...P[i]!) }
@@ -107,7 +107,7 @@ export function FacetField() {
         const target = Math.max(0, cols - 3) // second row, near the right edge
         tri = Math.min(tris.length - 1, (cols - 1) * 2 + target * 2)
       }
-      lights.push({ tri, start: now, peak: 0.04 })
+      lights.push({ tri, start: now, peak: 0.085 })
       while (lights.length > 4) lights.shift()
     }
     const onPulse = () => light(performance.now(), true)
@@ -116,7 +116,7 @@ export function FacetField() {
       raf = requestAnimationFrame(loop)
       if (!running || now - last < 1000 / FPS) return
       last = now
-      if (now > nextLight) { light(now); nextLight = now + rnd(18_000, 26_000) }
+      if (now > nextLight) { light(now); nextLight = now + rnd(9_000, 14_000) }
       draw(now)
     }
     const visibility = () => {
@@ -127,7 +127,7 @@ export function FacetField() {
 
     build()
     if (still) { draw(0); addEventListener('resize', resize); return () => removeEventListener('resize', resize) }
-    nextLight = performance.now() + rnd(4000, 9000)
+    nextLight = performance.now() + rnd(2500, 5000)
     raf = requestAnimationFrame(loop)
     const mo = new MutationObserver(visibility)
     mo.observe(document.body, { childList: true, subtree: false, attributes: false })

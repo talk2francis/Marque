@@ -35,6 +35,8 @@ interface SheetAgent {
   sellsJobs?: boolean
   /** The seller's example task when it works from a JSON object (chainhelix). */
   taskExample?: string | null
+  /** The same agent on the other network, offered as a network choice. */
+  twin?: { agentId: string; chainId: 56 | 97 } | null
 }
 
 /** What a free run returned: the agent's own answer, never graded here. */
@@ -294,6 +296,23 @@ export function HireSheet() {
             </div>
             {agent.firstParty ? <Badge kind="reference" /> : null}
           </header>
+          {agent.twin ? (
+            <div className="hs-net" role="radiogroup" aria-label="Network for this hire">
+              {([56, 97] as const).map((c) => {
+                const on = agent.registryChainId === c
+                return (
+                  <button key={c} type="button" role="radio" aria-checked={on} data-on={on || undefined} data-lane={c === 56 ? 'main' : 'practice'}
+                    onClick={() => {
+                      if (on || !agent.twin) return
+                      const next = new URLSearchParams(params.toString()); next.set('hire', agent.twin.agentId); next.delete('serviceId')
+                      router.replace(`${pathname}?${next.toString()}`, { scroll: false })
+                    }}>
+                    <b>{c === 56 ? 'Mainnet' : 'Testnet'}</b><span>{c === 56 ? 'real money' : 'free practice, counts for Set and Earn'}</span>
+                  </button>
+                )
+              })}
+            </div>
+          ) : null}
           {agent.registryChainId === 97 ? (
             <p className="hs-lane" role="note">BSC testnet · test tokens, no real value · counts for Set and Earn.{isConnected && walletChain !== 97 ? ' Your wallet will switch to BSC testnet for this hire only.' : ''}</p>
           ) : null}

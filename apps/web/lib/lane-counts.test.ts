@@ -51,10 +51,12 @@ describe('every count names its lane (invariant 32)', () => {
       expect(unlisted.map((f) => f.name), 'add each to LANE_TABLE with the parameter that carries its lane').toEqual([])
     })
   }
-  it('marketplaceAgents resolves a lane and returns it', () => {
+  it('marketplaceAgents resolves a lane (or both, folded per agent) and returns it', () => {
     const src = readFileSync(join(ROOT, 'apps/web/lib/marketplace.ts'), 'utf8')
-    expect(src).toMatch(/const lane: Lane = q\.lane \?\?/)
-    expect(src).toMatch(/facets, lane, quoteObservedAt/)
+    expect(src).toMatch(/const lane: Lane = q\.lane === 'all' \? 'mainnet' : q\.lane \?\?/)
+    // 'all' lists one row per agent across networks (foldNetworks); a network's amounts are never summed.
+    expect(src).toMatch(/if \(both\) all = foldNetworks\(all\)/)
+    expect(src).toMatch(/facets, lane: both \? 'all' : lane, quoteObservedAt/)
   })
   for (const [file, fns] of Object.entries(AGGREGATES_INPUT)) {
     it(`${file}: input-scoped aggregates stay mainnet or input-bound`, () => {

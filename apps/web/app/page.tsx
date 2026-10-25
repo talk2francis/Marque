@@ -7,7 +7,7 @@ import { ReadyNow } from './_components/home/ReadyNow'
 import { SnapshotAge } from './_components/home/SnapshotAge'
 import { ROADMAP, ROADMAP_CHECKED } from './docs/whitepaper'
 import {
-  categoryTiles, funnelLine, recentHires, ledgerHeadline, passFail, readyToHire, tapeItems,
+  categoryTiles, funnelLine, recentHires, ledgerHeadline, outcomeCount, passFail, readyToHire, tapeItems,
   type CategoryTile,
 } from '../lib/home-data'
 import { CATEGORY_SLUG } from './register/market-model'
@@ -49,12 +49,13 @@ function time(ms: number): string {
 }
 
 export default async function Home() {
-  const [market, tape, hires, pf, ledger] = await Promise.all([
+  const [market, tape, hires, pf, ledger, outcomes] = await Promise.all([
     readyToHire().catch(() => null),
     tapeItems().catch(() => []),
     recentHires().catch(() => []),
     passFail().catch(() => ({ pass: null, fail: null })),
     ledgerHeadline().catch(() => null),
+    outcomeCount().catch(() => null),
   ])
   const ready = market?.all ?? []
   const picks = market?.picks ?? []
@@ -188,7 +189,7 @@ export default async function Home() {
         {/* ---- Ready to hire now (D1): re-read in the browser, so a cached page never shows a lapsed price as current ---- */}
         <section className={styles.section} aria-labelledby="ready" data-reveal>
           <Head
-            label="Live prices"
+            label="Live prices · Marque's own agents"
             id="ready"
             title="Ready to hire now."
             action={<a className={styles.more} href="/register">See all in the marketplace <ArrowRight aria-hidden="true" /></a>}
@@ -264,7 +265,12 @@ export default async function Home() {
             {ROADMAP.map((h) => (
               <li key={h.key} data-h={h.key}>
                 <span className={styles.rmHead}><span className={styles.rmDot} aria-hidden="true" /><b>{h.title}</b><span>{h.when}</span></span>
-                <ul>{h.items.slice(0, 3).map((it) => <li key={it.title}>{it.href ? <a href={it.href}>{it.title}</a> : it.title}</li>)}</ul>
+                <ul>{h.items.slice(0, 3).map((it) => (
+                  <li key={it.title}>
+                    {it.href ? <a href={it.href}>{it.title}</a> : it.title}
+                    {it.progress === 'outcomes' && outcomes !== null ? <span className={styles.rmMeter}><span className={styles.rmTrack}><i style={{ width: `${Math.max(2, Math.min(100, (outcomes / 50) * 100))}%` }} /></span><small>{outcomes} of 50 outcomes measured on chain</small></span> : null}
+                  </li>
+                ))}</ul>
               </li>
             ))}
           </ol>

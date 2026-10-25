@@ -312,7 +312,9 @@
   .sheet-grip { width: 40px; height: 4px; border-radius: 2px; background: var(--hair-2); margin: 8px auto 0; flex: none; }
   .sheet-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px var(--margin) 12px; border-bottom: 1px solid var(--hair); flex: none; }
   .sheet-title { display: flex; align-items: center; gap: 10px; min-width: 0; }
-  .sheet-body { overflow-y: auto; overscroll-behavior: contain; padding: var(--s-5) var(--margin) var(--s-6); flex: 1; contain: layout paint; -webkit-overflow-scrolling: touch; }
+  /* --sheet-pad-top is exported so sticky rows inside (the compare names) can pin to the box's very top edge instead of
+     below the padding, where scrolled rows would show through. */
+  .sheet-body { --sheet-pad-top: var(--s-5); overflow-y: auto; overscroll-behavior: contain; padding: var(--sheet-pad-top) var(--margin) var(--s-6); flex: 1; contain: layout paint; -webkit-overflow-scrolling: touch; }
   .sheet-foot { flex: none; padding: 14px var(--margin) calc(14px + env(safe-area-inset-bottom)); border-top: 1px solid var(--hair); background: var(--canvas); }
   @media (min-width: 1024px) {
     .sheet {
@@ -323,7 +325,7 @@
     }
     .sheet-grip { display: none; }
     .sheet-head { padding: 16px 24px; }
-    .sheet-body { padding: 24px; }
+    .sheet-body { --sheet-pad-top: 24px; padding: 24px; }
     .sheet-foot { padding: 16px 24px; border-radius: 0 0 var(--r-3) var(--r-3); }
     .sheet--wide { width: min(1040px, calc(100vw - 24px)); }
   }

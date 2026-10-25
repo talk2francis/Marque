@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { pickReady } from './ready-picks'
+import { pickReady, pickShowcase } from './ready-picks'
 
 const row = (id: string, category: string | null, isReference = false) => ({ id, category, isReference })
 
@@ -32,5 +32,17 @@ describe('pickReady', () => {
   })
   it('never invents rows', () => {
     expect(pickReady([])).toEqual([])
+  })
+})
+
+describe('pickShowcase', () => {
+  const row = (name: string, isReference: boolean, category = 'yield') => ({ name, isReference, category })
+  it('shows the six reference agents in their order, outside agents only for a missing one', () => {
+    const rows = [row('Mandate Grid-1', false, 'grid'), row('Keel', true, 'health_factor'), row('Bound', true, 'rebalancing'), row('Lattice', true, 'grid'),
+      row('Sluicegate', true), row('Redcell', true, 'security'), row('Vitals', false, 'health_factor')]
+    const picks = pickShowcase(rows).map((r) => r.name)
+    expect(picks.slice(0, 5)).toEqual(['Bound', 'Lattice', 'Sluicegate', 'Keel', 'Redcell'])
+    expect(picks).toHaveLength(6)
+    expect(['Mandate Grid-1', 'Vitals']).toContain(picks[5])
   })
 })

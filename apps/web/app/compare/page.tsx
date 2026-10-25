@@ -19,11 +19,11 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
   const ids = comparisonIds(raw)
 
   let loadFailed = false
-  // The agents' own ids carry their network: practice-lane agents (97:…) are read from the practice market. Networks are
-  // never mixed in one comparison (invariant 32), so a mixed pick says so instead of losing the selection.
-  const lane = ids.length && ids.every((id) => id.startsWith('97:')) ? 'practice' as const : 'mainnet' as const
-  const mixed = ids.some((id) => id.startsWith('97:')) && ids.some((id) => !id.startsWith('97:'))
-  const { rows } = ids.length >= 2 && !mixed
+  // The agents' own ids carry their network. Practice picks read the practice market; a mix of networks reads both, and
+  // each column states its own network (invariant 32: side by side, never summed).
+  const anyPractice = ids.some((id) => id.startsWith('97:'))
+  const lane = ids.length && ids.every((id) => id.startsWith('97:')) ? 'practice' as const : anyPractice ? 'all' as const : 'mainnet' as const
+  const { rows } = ids.length >= 2
     ? await marketplaceAgents({ agentIds: ids, includeUnclassified: true, limit: 3, lane }).catch(() => {
       loadFailed = true
       return { rows: [] as MarketRow[] }
@@ -44,7 +44,7 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
         </header>
 
         {chosen.length < 2 ? (
-          <EmptyState title={mixed ? 'Mainnet and practice agents are compared separately.' : loadFailed ? 'Comparison could not be loaded.' : ids.length >= 2 ? 'Some selected agents are unavailable.' : 'Pick two or three agents to compare.'}>
+          <EmptyState title={loadFailed ? 'Comparison could not be loaded.' : ids.length >= 2 ? 'Some selected agents are unavailable.' : 'Pick two or three agents to compare.'}>
             <p>{ids.length >= 2 ? 'Please refresh, or choose agents in the ' : 'Select agents in the '}<Link href="/register">marketplace</Link>{ids.length >= 2 ? '.' : ' and the compare tray will bring you here.'}</p>
           </EmptyState>
         ) : (

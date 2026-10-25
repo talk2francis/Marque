@@ -4,7 +4,7 @@ import { db, firstPartyIdListSql, oneAgentIdSql } from '@marque/db'
 import { formatAmount, QUEST_CATEGORIES, teamWallets, assetAt, type ChainId } from '@marque/commerce'
 import { funnel } from '@marque/registry'
 import { marketplaceAgents, type MarketRow } from './marketplace'
-import { pickReady } from './ready-picks'
+import { pickShowcase } from './ready-picks'
 import { readLedger } from './ledger'
 import { referenceAgent } from './reference-agents'
 import { registryImageUrl } from './avatar-source'
@@ -109,10 +109,10 @@ export async function categoryTiles(ready: MarketRow[], supply: Awaited<ReturnTy
   })
 }
 
-/** Six hireable agents for "Ready to hire now": outside agents first, at most two reference agents (pickReady). */
+/** Six hireable agents for "Ready to hire now": Marque's six reference agents, outside agents only where one has no live price (pickShowcase). */
 export async function readyToHire(): Promise<{ all: MarketRow[]; picks: MarketRow[]; supply: Awaited<ReturnType<typeof marketplaceAgents>>['supply']; generatedAt: string; total: number }> {
   const { rows, supply, generatedAt, quoteObservedAt, total } = await marketplaceAgents({ tab: 'ready', lane: 'mainnet', sort: 'best', limit: 60 })
-  return { all: rows, picks: pickReady(rows), supply, generatedAt: quoteObservedAt ?? generatedAt, total }
+  return { all: rows, picks: pickShowcase(rows), supply, generatedAt: quoteObservedAt ?? generatedAt, total }
 }
 
 export interface FunnelLine { registered: number | null; answering: number | null; hireable: number; warranted: number | null; measuredAt: string }
@@ -259,4 +259,10 @@ export async function recentHires(): Promise<RecentHire[]> {
       settledTx: ev['JobCompleted']?.tx ?? null,
     }
   }))
+}
+
+/** Acted-on outcomes recorded from chain (the "Ranked by results" roadmap meter). A COUNT(*), never an estimate. */
+export async function outcomeCount(): Promise<number> {
+  const r = await db().execute(sql`select count(*)::int as n from outcome`)
+  return Number(rowsOf(r)[0]?.['n'] ?? 0)
 }

@@ -1,9 +1,9 @@
 'use client'
 import { ConnectButton, useConnectModal } from '@rainbow-me/rainbowkit'
-import { ArrowUpRight, Check, ChevronDown, Copy, Info, LogOut, Repeat, ShieldCheck, User, Wallet } from 'lucide-react'
+import { ArrowUpRight, Check, ChevronDown, Copy, Info, LogOut, Repeat, ShieldCheck, Target, User, Wallet } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useAccount, useDisconnect } from 'wagmi'
-import { KeyRound, Lock as LockIcon, Droplets } from 'lucide-react'
+import { KeyRound, Lock as LockIcon, Droplets, HelpCircle } from 'lucide-react'
 import { MARQUE_PASS_ID } from '../pass/connector'
 import { passBridge, lock as lockPass } from '../pass/bridge'
 import { explorerAddress } from '../../../lib/network'
@@ -121,6 +121,7 @@ function AccountMenu({ address, display, chainId, compact, openChainModal }: { a
             </span>
           </a>
           <a role="menuitem" className="menu-item" href="/me"><User />My Marque</a>
+          <a role="menuitem" className="menu-item" href="/quest"><Target />Set and Earn quest</a>
           <a role="menuitem" className="menu-item" href="/me?view=money" onClick={(e) => { e.preventDefault(); go('/me?view=money') }}><ShieldCheck />Spending controls</a>
           {isPass ? (
             <>
@@ -130,13 +131,13 @@ function AccountMenu({ address, display, chainId, compact, openChainModal }: { a
                 window.open('https://t.me/bnbchain_official_bot', '_blank', 'noopener')
               }}><Droplets />{tokensCopied ? 'Message copied: paste it to the bot' : 'Get test tokens'}</button>
               <button role="menuitem" type="button" className="menu-item" onClick={() => { setOpen(false); void passBridge.exportKey() }}><KeyRound />Export key</button>
+              <button role="menuitem" type="button" className="menu-item" onClick={() => { setOpen(false); passBridge.about() }}><HelpCircle />What is Marque Pass?</button>
             </>
           ) : null}
-          <div className="acct-foot">
-            <button role="menuitem" type="button" onClick={() => { setOpen(false); openChainModal() }}><Repeat />Network</button>
-            {isPass
-              ? <button role="menuitem" type="button" onClick={() => { lockPass(); disconnect(); setOpen(false) }}><LockIcon />Lock</button>
-              : <button role="menuitem" type="button" onClick={() => { setOpen(false); disconnect() }}><LogOut />Disconnect</button>}
+          <div className="acct-foot" data-three={isPass || undefined}>
+            <button role="menuitem" type="button" onClick={() => { setOpen(false); openChainModal() }}><Repeat />Switch network</button>
+            {isPass ? <button role="menuitem" type="button" onClick={() => { lockPass(); disconnect(); setOpen(false) }}><LockIcon />Lock</button> : null}
+            <button role="menuitem" type="button" onClick={() => { setOpen(false); disconnect() }}><LogOut />Disconnect</button>
           </div>
         </div>
       ) : null}

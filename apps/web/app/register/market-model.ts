@@ -16,6 +16,10 @@ import type { AgentTrack } from '../../lib/agent-track'
 /** Mirrors the `/api/v1/marketplace` row exactly. Nothing added, nothing renamed. */
 export interface MarketRow {
   agentId: string
+  /** The networks this agent sells on, in the all-networks view (one card per agent; the network is picked when hiring). */
+  networks?: Array<56 | 97>
+  /** The same agent on the other network (same owner, same name), when listed. */
+  twin?: { agentId: string; chainId: 56 | 97; price: string | null; hireable: boolean } | null
   tokenId: string | null
   name: string
   category: string | null

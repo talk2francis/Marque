@@ -24,7 +24,7 @@
   }
   .site-header[data-scrolled] {
     /* Nearly opaque once the page moves: scrolled content must not ghost through above sticky toolbars. */
-    background: color-mix(in srgb, var(--canvas) 96%, transparent);
+    background: var(--canvas);
     border-bottom-color: var(--hair);
     box-shadow: 0 10px 30px -22px rgba(var(--shadow-ink), 0.6);
   }
@@ -206,8 +206,9 @@
   .acct-quest-bars em { position: relative; display: block; height: 4px; border-radius: 4px; background: var(--hair); overflow: hidden; }
   .acct-quest-bars em::after { content: ''; position: absolute; inset: 0 auto 0 0; width: var(--p, 0%); border-radius: inherit; background: var(--aurora); }
   .acct-quest-bars small { font-size: 11.5px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+  .acct-foot[data-three] > :first-child { grid-column: 1 / -1; }
   .acct-foot { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding-top: 6px; margin-top: 4px; border-top: 1px solid var(--hair); }
-  .acct-foot button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; height: 34px; border: 1px solid var(--hair-2); border-radius: 8px; background: none; color: var(--ink-2); font: inherit; font-size: 13px; cursor: pointer; }
+  .acct-foot button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 34px; padding: 0 6px; white-space: nowrap; border: 1px solid var(--hair-2); border-radius: 8px; background: none; color: var(--ink-2); font: inherit; font-size: 13px; cursor: pointer; }
   .acct-foot button:hover, .acct-foot button:focus-visible { color: var(--ink); border-color: var(--ink-3); }
   .acct-foot svg { width: 14px; height: 14px; }
   .acct-btn[data-compact] { padding: 0 8px 0 6px; }
@@ -315,12 +316,12 @@
   .footer-pulse-dot[data-state='ok'] { background: var(--moss); box-shadow: 0 0 0 3px color-mix(in srgb, var(--moss) 18%, transparent); }
   .footer-pulse-dot[data-state='warn'] { background: var(--amber); }
   .footer-pulse-dot[data-state='down'] { background: var(--oxide); }
-  /* The footer wordmark: grows from 92% to 100% as the footer scrolls in, tied to the scroll (never on a timer). */
-  .footer-giant-word { transform-origin: 50% 100%; transform: scale(var(--grow, 1)); will-change: transform; }
+  /* The footer wordmark: rises and grows from 78% to 100% as the footer scrolls in, tied to the scroll (never on a timer). */
+  .footer-giant-word { transform-origin: 50% 100%; transform: translateY(calc((1 - var(--grow, 1)) * 30%)) scale(var(--grow, 1)); will-change: transform; }
   @media (prefers-reduced-motion: no-preference) {
     @supports (animation-timeline: view()) {
-      .footer-giant-word { animation: giant-grow linear both; animation-timeline: view(); animation-range: entry 0% cover 45%; }
-      @keyframes giant-grow { from { transform: scale(0.92); } to { transform: scale(1); } }
+      .footer-giant-word { animation: giant-grow linear both; animation-timeline: view(); animation-range: entry 0% cover 50%; }
+      @keyframes giant-grow { from { transform: translateY(7%) scale(0.78); opacity: 0.55; } to { transform: none; opacity: 1; } }
     }
   }
   /* The Facet field (DESIGN-V4 6): behind everything, never interactive. */

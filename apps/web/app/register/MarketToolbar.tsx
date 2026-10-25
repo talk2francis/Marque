@@ -50,7 +50,10 @@ export function MarketToolbar({
   useEffect(() => {
     const el = sentinel.current
     if (!el || typeof IntersectionObserver === 'undefined') return
-    const io = new IntersectionObserver(([e]) => setStuck(!(e?.isIntersecting ?? true)), { threshold: 1 })
+    // The site header covers the top of the viewport, so the bar is pinned as soon as the sentinel slides under the
+    // header, not when it leaves the screen: shrink the observed area by the header's height.
+    const headerH = Math.round(parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--header-h')) || 64)
+    const io = new IntersectionObserver(([e]) => setStuck(!(e?.isIntersecting ?? true)), { threshold: 1, rootMargin: `-${headerH + 1}px 0px 0px 0px` })
     io.observe(el)
     return () => io.disconnect()
   }, [])

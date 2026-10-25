@@ -7,7 +7,7 @@ import { switchChain, waitForTransactionReceipt, writeContract } from '@wagmi/co
 import { erc20Abi, formatUnits } from 'viem'
 import { ArrowUpRight, Check, Copy, Download, Hammer, ShieldCheck, ShoppingBag } from 'lucide-react'
 import { AgentAvatar } from '../_components/AgentAvatar'
-import { Dial } from '../_components/campaign/Dial'
+import { Emblem } from '../_components/campaign/Emblem'
 import { useOfficialQuest } from '../_components/campaign/useOfficialQuest'
 import { friendlyError, NETWORKS, revokeAllowanceCall, type ChainId, type FriendlyError } from '@marque/commerce/client'
 import { Button, ButtonLink, ErrorNote, Skeleton, Tabs } from '../_components/ui'
@@ -172,7 +172,7 @@ function Summary({ address, view }: { address: string; view: View }) {
       )}
       <a className={styles.stat} data-tone="aurora" href={`/quest/${address}`}>
         <span>Set and Earn</span>
-        <span className={styles.questLine}><Dial hire={hired} build={built} size={40} team={official?.excluded.team ?? false} /><b>{official ? `${hired}/3` : '·'}</b><em>hired · build {built}/6</em></span>
+        <span className={styles.questLine}><Emblem hire={hired} build={built} size={40} team={official?.excluded.team ?? false} /><b>{official ? `${hired}/3` : '·'}</b><em>hired · build {built}/6</em></span>
         <small>{official?.excluded.team ? 'Team wallet, not counted' : 'Your progress, from chain events'}</small>
       </a>
     </section>
@@ -473,7 +473,7 @@ function Allowances({ address, chainId, own }: { address: string; chainId: Chain
 
 /* ---------------------------------------------------------------- agents (building) */
 
-interface OwnerAgent { agentKey: string; chainId: number; agentId: string; name: string; category: string | null; listedOnMarque: boolean; quality: { checks: Array<{ id: string; pass: boolean; fix: string | null }> }; jobsReceived: number; jobsPaid: number }
+interface OwnerAgent { agentKey: string; chainId: number; agentId: string; name: string; imageUrl?: string | null; category: string | null; listedOnMarque: boolean; quality: { checks: Array<{ id: string; pass: boolean; fix: string | null }> }; jobsReceived: number; jobsPaid: number }
 interface QuestBuild { build: { agents: Array<{ chainId: number; tokenId: string; observed: number; checks: Record<string, { state: string; reason: string; next?: { label: string; href: string } | null }> }> } }
 const CRIT: Array<[string, string]> = [['registered', 'Registered'], ['card', 'Agent card'], ['probes', 'Answers'], ['hires', '3 hirers'], ['actions', 'Actions'], ['category', 'In category']]
 
@@ -495,6 +495,7 @@ export function Agents({ address }: { address: string }) {
         return (
           <li key={a.agentKey} className={styles.agent}>
             <div className={styles.agentTop}>
+              <AgentAvatar id={a.agentKey} reference={false} imageUrl={a.imageUrl ?? null} size={40} />
               <a href={`/agents/${a.chainId}/${a.agentId}`}><b>{a.name}</b></a>
               <span className={styles.fine}>#{a.agentId} · {net(a.chainId)}</span>
               <span className={styles.pill} data-tone={a.listedOnMarque ? 'good' : undefined}>{a.listedOnMarque ? 'Hireable on Marque' : 'Not hireable yet'}</span>

@@ -3,6 +3,7 @@ import { db } from '@marque/db'
 import { served, bad, ADDRESS } from '../../../../../../lib/phase2-api'
 import { sellerProjection } from '../../../../../../lib/seller'
 import { builderIdentities, builderView } from '../../../../../../lib/builder'
+import { registryImageUrl } from '../../../../../../lib/avatar-source'
 
 export const dynamic = 'force-dynamic'
 
@@ -16,7 +17,7 @@ const rowsOf = (r: unknown) => ((r as { rows?: unknown[] }).rows ?? (r as unknow
 export async function GET(_req: Request, { params }: { params: Promise<{ address: string }> }) {
   const { address } = await params
   if (!ADDRESS.test(address)) return bad('Send a 0x address of 40 hex characters.')
-  return served(`phase2:owner:v3:${address.toLowerCase()}`, 'owner', async () => {
+  return served(`phase2:owner:v4:${address.toLowerCase()}`, 'owner', async () => {
     const ids = await builderIdentities(address)
     const agents = await Promise.all(ids.slice(0, 8).map(async (t) => {
       const v = await builderView(address, t.chainId, t.tokenId)
@@ -24,7 +25,10 @@ export async function GET(_req: Request, { params }: { params: Promise<{ address
         select count(*)::int as n, count(*) filter (where j.funded_raw is not null)::int as paid,
           count(*) filter (where j.state = 'PAID')::int as released
         from commerce_job j join agent a on lower(a.agent_wallet) = j.provider and a.chain_id = j.chain_id and a.id = ${v.identity.agentKey}`).catch(() => []))
+      // The owner's own art (CLAIMED), only through the registry indexer's image proxy.
+      const [img] = rowsOf(await db().execute(sql`select image_url, raw_metadata #>> '{offchain_content,image}' as meta_image from agent where id = ${v.identity.agentKey} limit 1`).catch(() => []))
       return {
+        imageUrl: registryImageUrl(img?.['image_url']) ?? registryImageUrl(img?.['meta_image']),
         agentKey: v.identity.agentKey, chainId: v.identity.chainId, agentId: v.identity.tokenId, name: v.identity.name, category: v.category,
         listedOnMarque: v.listed, qualityListing: v.verdict.qualityListing,
         availability: v.availability,
