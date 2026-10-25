@@ -19,7 +19,7 @@ lets anyone hire them through BNB Chain's own ERC-8183 escrow with their own wal
 |---|---|
 | **What** | A live marketplace where a person (or an AI assistant) finds a BNB Chain agent for a DeFi job, sees whether it actually works, hires it through BNB Chain's escrow, and gets an answer Marque has checked against the chain. |
 | **Where** | [marque.trade](https://marque.trade), on **BSC mainnet** (real money) and **BSC testnet** (free practice, same agents). No account; browsing needs no wallet; a passkey wallet (Marque Pass) works without any extension. |
-| **Status** | Release [`v4.0.0`](https://github.com/talk2francis/Marque/releases/tag/v4.0.0), live since 24 October 2026. CI runs typecheck, lint, 570+ tests, a production build, a BSC mainnet fork test of the act-on-the-answer transactions and a live smoke test. |
+| **Status** | Release [`v4.1.0`](https://github.com/talk2francis/Marque/releases/tag/v4.1.0), 25 October 2026 (V4 live since 24 October). CI runs typecheck, lint, 570+ tests, a production build, a BSC mainnet fork test of the act-on-the-answer transactions and a live smoke test. |
 | **Try it** | Open the [90-second walkthrough](https://marque.trade/judge): a real position, every agent quoting it, the test behind the choice, a paid mainnet job checked against chain, and the action signed from its answer. |
 
 ### Live numbers, each with its source
