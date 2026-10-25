@@ -1,0 +1,75 @@
+{
+  "release": "9514bcd",
+  "shots": [
+    {
+      "name": "hero",
+      "url": "https://marque.trade/",
+      "scrollY": 0,
+      "viewport": [
+        1440,
+        820
+      ],
+      "capturedAt": "2026-10-25T18:58:52.415Z"
+    },
+    {
+      "name": "marketplace",
+      "url": "https://marque.trade/register",
+      "scrollY": 640,
+      "viewport": [
+        1440,
+        900
+      ],
+      "capturedAt": "2026-10-25T18:59:05.012Z"
+    },
+    {
+      "name": "storefront",
+      "url": "https://marque.trade/agents/keel",
+      "scrollY": 0,
+      "viewport": [
+        1440,
+        900
+      ],
+      "capturedAt": "2026-10-25T18:59:14.290Z"
+    },
+    {
+      "name": "job",
+      "url": "https://marque.trade/jobs/56/57066",
+      "scrollY": 520,
+      "viewport": [
+        1440,
+        900
+      ],
+      "capturedAt": "2026-10-25T18:59:24.592Z"
+    },
+    {
+      "name": "grid-answer",
+      "url": "https://marque.trade/jobs/56/57076",
+      "scrollY": 520,
+      "viewport": [
+        1440,
+        900
+      ],
+      "capturedAt": "2026-10-25T18:59:35.308Z"
+    },
+    {
+      "name": "forge",
+      "url": "https://marque.trade/builders",
+      "scrollY": 0,
+      "viewport": [
+        1440,
+        900
+      ],
+      "capturedAt": "2026-10-25T18:59:44.894Z"
+    },
+    {
+      "name": "quest",
+      "url": "https://marque.trade/quest",
+      "scrollY": 0,
+      "viewport": [
+        1440,
+        900
+      ],
+      "capturedAt": "2026-10-25T18:59:53.838Z"
+    }
+  ]
+}

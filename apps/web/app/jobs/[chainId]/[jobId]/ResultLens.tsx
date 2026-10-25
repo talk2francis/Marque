@@ -175,7 +175,13 @@ function RebView({ l }: { l: RebLens }) {
 
 function GridView({ l }: { l: GridLens }) {
   const lv = l.levels
-  const prices = [...lv.map((x) => x.price), l.price, l.stop, l.lower, l.upper].filter((x): x is number => x !== null && Number.isFinite(x))
+  // The ladder spans the grid itself; a current price far outside it is pinned to the edge with its value, so the
+  // levels keep the full height instead of crowding into a corner.
+  const gridPrices = [...lv.map((x) => x.price), l.stop, l.lower, l.upper].filter((x): x is number => x !== null && Number.isFinite(x))
+  const gMin = gridPrices.length ? Math.min(...gridPrices) : 0, gMax = gridPrices.length ? Math.max(...gridPrices) : 0
+  const span = gMax - gMin || 1
+  const outside = l.price !== null && lv.length >= 2 && (l.price > gMax + span * 0.35 || l.price < gMin - span * 0.35) ? (l.price > gMax ? 'above' : 'below') : null
+  const prices = [...gridPrices, ...(l.price !== null && !outside ? [l.price] : [])]
   const ladder = lv.length >= 2 && prices.length >= 2
   const min = Math.min(...prices), max = Math.max(...prices)
   const pad = (max - min) * 0.06 || 1
@@ -199,7 +205,8 @@ function GridView({ l }: { l: GridLens }) {
                 </div>
               )
             })}
-            {l.price !== null ? <div className={styles.now} style={{ top: `${y(l.price)}%` }}><span>now {n(l.price)}</span></div> : null}
+            {l.price !== null && !outside ? <div className={styles.now} style={{ top: `${y(l.price)}%` }}><span>now {n(l.price)}</span></div> : null}
+            {l.price !== null && outside ? <div className={styles.nowEdge} data-edge={outside}><span>{outside === 'above' ? '↑' : '↓'} now {n(l.price)}, {outside} the grid</span></div> : null}
             {l.stop !== null ? <div className={styles.stopLine} style={{ top: `${y(l.stop)}%` }}><span>stop {n(l.stop)}</span></div> : null}
           </div>
         ) : null}

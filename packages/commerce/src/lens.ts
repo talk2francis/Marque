@@ -225,7 +225,8 @@ export function normalizeAnswer(category: string | null, content: unknown): Lens
   const m = meta(c)
   const has = (keys: string[]) => pick(c, keys) !== undefined
   const cat = category && ['health_factor', 'rebalancing', 'grid', 'yield', 'security'].includes(category) ? category
-    : has(['healthFactor', 'health_factor']) ? 'health_factor' : has(['proposedTickLower', 'positions']) ? 'rebalancing'
+    // A health factor answer for an account with no borrowing carries healthFactor: null, so its other fields count too.
+    : has(['healthFactor', 'health_factor']) || 'healthFactor' in c || has(['repayUsdToReachTarget', 'healthFactorExact', 'distanceToLiquidationPct']) ? 'health_factor' : has(['proposedTickLower', 'positions']) ? 'rebalancing'
       : has(['levels']) ? 'grid' : has(['netAprPct', 'aprSources']) ? 'yield' : has(['findings', 'severityCounts']) ? 'security' : null
   switch (cat) {
     case 'health_factor': return { ...healthFactor(c), meta: m, error }

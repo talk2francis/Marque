@@ -50,3 +50,11 @@ describe('Result Lens normaliser on real deliveries', () => {
     expect(unwrapAnswer({ answer: { x: 1 }, job: { id: 1 } })).toMatchObject({ x: 1, job: { id: 1 } })
   })
 })
+
+describe('health factor answer with no position', () => {
+  it('reads as health factor, not generic (Vitals shape)', () => {
+    const l = normalizeAnswer(null, { healthFactor: null, status: 'no_position', hasPosition: false, repayUsdToReachTarget: 0, targetHealthFactor: 2, account: '0x893Ce167AACEf83F2b6cCA8BA51d593d797c88Bc', blockNumber: 129551580 })
+    expect(l.kind).toBe('health_factor')
+    expect((l as { hasPosition: boolean | null }).hasPosition).toBe(false)
+  })
+})
