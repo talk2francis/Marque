@@ -1,0 +1,95 @@
+{
+  "title": "Marque Advantage Report v2: pre-registered specification",
+  "version": 2,
+  "writtenAt": "2026-10-26T08:20:00Z",
+  "referenceBlock": {
+    "chainId": 56,
+    "block": 129863036,
+    "note": "Mainnet head when this file was written. Each answer is graded at the block the agent's own answer states, re-read by Marque."
+  },
+  "lockedBy": "keccak256 of this file's bytes, written into the input data of a BSC testnet (97) transaction from the Marque team operator wallet before any task runs. Changing one byte changes the hash.",
+  "hire": {
+    "how": "Each task is hired through Marque's public hire API on BSC mainnet (56), BNB Chain's ERC-8183 escrow, from the Marque team test wallet 0x5aC2448FC79Ef8d33710b1Bced5AEff90138b452 (published team list; every job reads 'Marque team (test)' and is never counted).",
+    "budget": "At most 0.5 USDT (of which up to 0.25 USDT is swapped to U, the reference sellers' payment token, on the PancakeSwap v3 U/USDT 0.01% pool) and 0.002 BNB in network fees, across all three tasks.",
+    "acceptanceTerms": "Each hire proposes Marque's acceptance criteria for its category in the negotiate terms (packages/conformance/src/criteria.ts); sellers on the BNB Agent Studio SDK sign them into the job description on chain."
+  },
+  "tasks": [
+    {
+      "id": "T1-health-factor",
+      "category": "health_factor",
+      "agent": "Keel, ERC-8004 #341556 on BSC mainnet (Marque reference agent)",
+      "task": "Health factor of Venus account 0x60AA3AEE06E2345A17E4d4B12c53E046F4F63CAf and the repay that restores it to 2.5.",
+      "inputs": {
+        "venusAccount": "0x60AA3AEE06E2345A17E4d4B12c53E046F4F63CAf",
+        "targetHealthFactor": 2.5
+      },
+      "rubric": [
+        "Health factor within 0.005 of Venus at the answer's block",
+        "The repay amount brings the health factor to the target within 0.005",
+        "Liquidation price within 1 percent of Venus prices at the answer's block"
+      ],
+      "baseline": {
+        "arm": "manual",
+        "method": "A person reads the account on the Venus app and BscScan, computes the health factor and the repay to 2.5 by hand, timed from start to written answer.",
+        "ifNotRun": "Marked 'not run' with the reason; the agent arm is still graded against the rubric."
+      }
+    },
+    {
+      "id": "T2-yield",
+      "category": "yield",
+      "agent": "Sluicegate, ERC-8004 #341555 on BSC mainnet (Marque reference agent)",
+      "task": "Where should 1000 USDT earn the most on Venus or Lista right now, net of switching cost?",
+      "inputs": {
+        "amount": 1000,
+        "asset": "USDT"
+      },
+      "rubric": [
+        "Net APR is not above gross APR",
+        "Every APR names its source",
+        "Venus supply APR within 15 bps of Venus at the answer's block"
+      ],
+      "baseline": {
+        "arm": "do-nothing",
+        "method": "1000 USDT left idle earns 0 percent. The agent's route is a gain over this baseline only if its named route's net APR, re-read by Marque, is above 0 and every rubric line is met."
+      }
+    },
+    {
+      "id": "T3-rebalancing",
+      "category": "rebalancing",
+      "agent": "Bound, ERC-8004 #341553 on BSC mainnet (Marque reference agent)",
+      "task": "Re-centre PancakeSwap V3 position 7367728 of 0x2e010AaDFdFEbC2AdFCAFA5F83e9687ffA47C573 at +/-5%.",
+      "inputs": {
+        "positionId": 7367728,
+        "owner": "0x2e010AaDFdFEbC2AdFCAFA5F83e9687ffA47C573",
+        "targetRangePct": 5,
+        "stateAtReferenceBlock": {
+          "fee": 100,
+          "tickLower": -66135,
+          "tickUpper": -66045
+        }
+      },
+      "rubric": [
+        "Current tick matches the pool exactly at the answer's block",
+        "Proposed ticks are multiples of the pool's tick spacing",
+        "In-range status matches the pool's current tick",
+        "The proposed range covers the current price"
+      ],
+      "baseline": {
+        "arm": "do-nothing",
+        "method": "Leave the range as it is. The agent's plan is a gain over this baseline only if every rubric line is met and its proposed range covers the current price."
+      }
+    }
+  ],
+  "cost": {
+    "agentArm": "The quoted price paid into escrow (in U) plus the buyer's network fees, both read from the receipts.",
+    "manualArm": "Minutes of a person's time, recorded by that person; no money cost.",
+    "doNothingArm": "Zero."
+  },
+  "outcomeRule": {
+    "win": "Delivered within 30 minutes of funding, the answer file matches its hash on chain, and every rubric line is met (decided, not unchecked).",
+    "loss": "Not delivered within 30 minutes, the file does not match its hash, or any rubric line is not met.",
+    "mixed": "Delivered and matching, no rubric line failed, but at least one line could not be decided (a chain read failed or the answer lacked the input).",
+    "versusManual": "Where the manual arm runs: the agent is ahead if its outcome is a win and the person's answer misses a rubric line or took longer; level if both meet every line; behind otherwise."
+  },
+  "publication": "Every task is published on https://marque.trade/advantage with its job link, funder label, outcome and cost; losses are printed the same size as wins, with what this does not show."
+}

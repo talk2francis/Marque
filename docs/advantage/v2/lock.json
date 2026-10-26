@@ -1,0 +1,10 @@
+{
+  "specFile": "docs/advantage/v2/spec.json",
+  "keccak256": "0x8d851c9c5ee0a25ea56aceb8f9b29462e107a618ba4a9896fda5bb6f6c55e081",
+  "chainId": 97,
+  "from": "0x9598ab46aab33389c2e9ffe0511effd330f67f9b",
+  "tx": "0x019209c0e7520487b8ec32d68656022c1cf6efe216c48a99189ba475f24aee2c",
+  "block": "139003156",
+  "inputData": "marque-advantage-v2 spec keccak256 0x8d851c9c5ee0a25ea56aceb8f9b29462e107a618ba4a9896fda5bb6f6c55e081",
+  "explorer": "https://testnet.bscscan.com/tx/0x019209c0e7520487b8ec32d68656022c1cf6efe216c48a99189ba475f24aee2c"
+}
