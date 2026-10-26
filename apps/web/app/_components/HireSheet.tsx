@@ -385,6 +385,12 @@ export function HireSheet() {
                       {q.estimatedCompletionSeconds ? <span className="hs-eta">delivers in about {q.estimatedCompletionSeconds < 120 ? `${q.estimatedCompletionSeconds} s` : duration(q.estimatedCompletionSeconds)}<span className="hs-eta-src">agent&apos;s estimate</span></span> : null}
                     </div>
                     {q.token.symbol === 'U' ? <UNote /> : null}
+                    {q.criteria && q.criteria.texts.length ? (
+                      <div className="hs-terms">
+                        <p><b>Terms Marque checks after delivery</b> · {q.criteria.signed ? `signed by ${q.agentName} with this price` : `set by you, not signed by ${q.agentName}`}</p>
+                        <ul>{q.criteria.texts.map((t) => <li key={t}>{t}</li>)}</ul>
+                      </div>
+                    ) : null}
                     <dl className="hs-facts">
                       <div><dt>Escrow fee</dt><dd>{agent.platformFeeBP === null ? 'unknown' : `${agent.platformFeeBP / 100}%`}</dd></div>
                       <div><dt>Network fees</dt><dd>{gasBnb !== null ? `up to ${gasBnb.toFixed(5)} ${q.chainId === 97 ? 'tBNB, test BNB with no value' : 'BNB'}${spotBnb && q.chainId !== 97 ? ` (about $${(gasBnb * spotBnb).toFixed(2)})` : ''}` : 'paid in BNB, shown by your wallet'}</dd></div>

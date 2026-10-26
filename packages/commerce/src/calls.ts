@@ -24,6 +24,8 @@ export interface Call {
   label: string
   /** One more sentence: what this signature does and does not allow. */
   detail: string
+  /** Bytes appended after the encoded call (ignored by the contract, kept in the transaction): a dispute's reason. */
+  dataSuffix?: `0x${string}`
 }
 
 const ZERO_REASON = `0x${'0'.repeat(64)}` as const
@@ -93,10 +95,11 @@ export function claimRefundCall(chainId: ChainId, jobId: bigint): Call {
     label: 'Reclaim your payment', detail: 'Returns the escrowed payment to your wallet because the agent did not deliver in time.' }
 }
 
-export function disputeCall(chainId: ChainId, jobId: bigint): Call {
+export function disputeCall(chainId: ChainId, jobId: bigint, reason?: `0x${string}`): Call {
   const n = network(chainId)
   return { step: 'dispute', chainId, to: n.policy, abi: optimisticPolicyAbi as unknown as Abi, functionName: 'dispute', args: [jobId],
-    label: 'Report a problem with this delivery', detail: 'Opens a dispute inside the review window. Independent voters decide; if they reject the delivery, you are refunded.' }
+    label: 'Report a problem with this delivery', detail: reason ? 'Opens a dispute inside the review window, with your reason written into the transaction. Independent voters decide; if they reject the delivery, you are refunded.' : 'Opens a dispute inside the review window. Independent voters decide; if they reject the delivery, you are refunded.',
+    ...(reason ? { dataSuffix: reason } : {}) }
 }
 
 export function revokeAllowanceCall(chainId: ChainId, token: { address: `0x${string}`; symbol: string }): Call {

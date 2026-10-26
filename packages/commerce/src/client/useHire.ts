@@ -43,6 +43,8 @@ export interface HireQuote {
   chainId: ChainId; provider: `0x${string}`; price: string; priceLabel: string
   token: { address: `0x${string}`; symbol: string; decimals: number; isDefault: boolean }
   signed: boolean; expiresAt: number; estimatedCompletionSeconds: number | null
+  /** Acceptance criteria proposed with the task; `signed` when they are inside the terms the agent signed. */
+  criteria?: { texts: string[]; signed: boolean } | null
   sourceClaimVersion?: 1
   signatureEvidence?: 'provider_signed' | 'identity_matched_unsigned'
   expirySource?: 'provider_signed' | 'provider_capped' | 'server_assigned'

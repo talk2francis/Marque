@@ -85,7 +85,7 @@ export async function* runTender(input: { category: string; fields: unknown; lan
           task_description: check.sentence,
           terms: {
             deliverables: 'Complete the task as described, with the result delivered on chain.', quality_standards: 'Figures read from BNB Chain at delivery time, with sources.',
-            ...(process.env['MARQUE_TERMS_CRITERIA'] === '1' && criteriaFor(seller.category).length ? { success_criteria: criteriaFor(seller.category).map((c) => c.text) } : {}),
+            ...(process.env['MARQUE_TERMS_CRITERIA'] !== '0' && criteriaFor(seller.category).length ? { success_criteria: criteriaFor(seller.category).map((c) => c.text) } : {}),
           },
         }, 2)
         return { ...q, assumptions: inspected.assumptions }

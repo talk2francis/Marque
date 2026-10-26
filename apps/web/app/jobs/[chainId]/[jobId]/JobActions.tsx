@@ -12,6 +12,7 @@ import {
 import { Button, ButtonLink, ErrorNote, Modal, StarInput, TxStepper, type TxStep } from '../../../_components/ui'
 import { toast } from '../../../../lib/toast'
 import { trackJobStep } from '../../../../lib/track'
+import { encodeReason } from '@marque/conformance/criteria'
 import { explorerTx } from '../../../../lib/network'
 import { utcStamp } from '../../../../lib/time'
 
@@ -34,6 +35,8 @@ export interface JobActionProps {
   reviewEndsAt: number | null
   submitDeadline: number | null
   rated: { stars: number; tx: string | null } | null
+  /** When a written criterion was not met: the reason, prefilled, that a dispute can carry on chain. */
+  rejectReason?: string | null
 }
 
 const TERMINAL = new Set(['CANCELLED', 'PAID', 'REFUNDED'])
@@ -78,7 +81,7 @@ export function JobActions(p: JobActionProps) {
     if (walletChain !== c.chainId) await switchChain(config, { chainId: c.chainId })
     beforeWrite?.()
     setSteps((s) => s?.map((x) => (x.id === id ? { ...x, state: 'wallet' } : x)) ?? null)
-    const hash = await writeContract(config, { address: c.to, abi: c.abi, functionName: c.functionName, args: c.args as unknown[], chainId: c.chainId })
+    const hash = await writeContract(config, { address: c.to, abi: c.abi, functionName: c.functionName, args: c.args as unknown[], chainId: c.chainId, ...(c.dataSuffix ? { dataSuffix: c.dataSuffix } : {}) })
     setSteps((s) => s?.map((x) => (x.id === id ? { ...x, state: 'confirming', txHash: hash, chainId: c.chainId } : x)) ?? null)
     const r = await waitForTransactionReceipt(config, { hash, chainId: c.chainId })
     if (r.status !== 'success') throw Object.assign(new Error('reverted'), { code: 'reverted' })
@@ -168,6 +171,16 @@ export function JobActions(p: JobActionProps) {
       ) : null}
       {p.state === 'FUNDED' && late && !refundable && p.refundFrom ? <p className="ja-note">{p.agentName} has not delivered in time. You can reclaim your payment from {utcStamp(p.refundFrom * 1000)}.</p> : null}
 
+      {isClient && disputable && p.rejectReason ? (
+        <div className="ja-dispute" data-emph="">
+          <div>
+            <b>A criterion in the terms was not met</b>
+            <p>{p.rejectReason}</p>
+            <p className="ja-fine">Reject with this reason: your wallet opens a dispute{p.reviewEndsAt ? ` before ${utcStamp(p.reviewEndsAt * 1000)}` : ''}, and the reason is written into that transaction for anyone to read. Payment stays in escrow while independent voters decide.</p>
+          </div>
+          <Button variant="danger" size="sm" disabled={busy !== null} loading={busy === 'dispute'} onClick={() => void one('dispute', disputeCall(p.chainId, BigInt(p.jobId), encodeReason(p.rejectReason!)), { title: 'Dispute opened with your reason', body: 'The reason is in the transaction. Independent voters will decide; payment stays in escrow meanwhile.' })}>Reject with reason</Button>
+        </div>
+      ) : null}
       {isClient && disputable && !canRate ? (
         <div className="ja-row">
           <Button variant="quiet" onClick={() => setConfirmDispute(true)} disabled={busy !== null}>Open a dispute</Button>

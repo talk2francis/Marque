@@ -23,3 +23,16 @@
 .links a,.jobHead a { min-height:32px; display:inline-flex; align-items:center; }
 .links a { color:var(--brass); font-size:13px; }
 @media(max-width:480px) { .times { grid-template-columns:1fr; } .stats { gap:10px; } .stats dd { font-size:26px; } }
+.termsWrap { max-width: 100%; overflow-x: auto; }
+.termsTable { width: 100%; border-collapse: collapse; font-size: 14px; }
+.termsTable th { text-align: left; font-size: 12px; font-weight: 600; color: var(--ink-3); padding: 6px 12px 6px 0; border-bottom: 1px solid var(--hair); }
+.termsTable td { padding: 9px 12px 9px 0; border-bottom: 1px solid var(--hair); color: var(--ink-2); font-variant-numeric: tabular-nums; vertical-align: top; }
+.termsTable td:first-child { color: var(--ink); }
+.termsTable b { color: var(--ink); }
+.unchecked { color: var(--ink-3); font-size: 12.5px; }
+@media (max-width: 560px) {
+  .termsTable thead { display: none; }
+  .termsTable tr { display: grid; gap: 3px; padding: 10px 0; border-bottom: 1px solid var(--hair); }
+  .termsTable td { border: 0; padding: 0; }
+  .termsTable td[data-label]::before { content: attr(data-label) ': '; color: var(--ink-3); }
+}

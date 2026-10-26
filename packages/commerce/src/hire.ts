@@ -76,7 +76,14 @@ export async function quoteForBuyer(agentId: string, serviceId: number | null, t
   // The job record names the marketplace (invariant 36): the suffix reaches the seller and the chain unchanged.
   task = { ...task, task_description: withAttribution(task.task_description) }
   const proposed = Array.isArray(task.terms['success_criteria']) ? (task.terms['success_criteria'] as unknown[]).filter((x): x is string => typeof x === 'string') : []
-  const q: QuoteResult = await requestQuote(seller.endpoint, task, { ...identity, timeoutMs: 10_000 })
+  let q: QuoteResult = await requestQuote(seller.endpoint, task, { ...identity, timeoutMs: 10_000 })
+  // A seller that refuses terms it does not recognise still gets the buyer's task: ask once more without the criteria.
+  if (!q.ok && proposed.length && q.reason !== 'unreachable') {
+    const { success_criteria: _dropped, ...rest } = task.terms
+    void _dropped
+    const retry = await requestQuote(seller.endpoint, { ...task, terms: rest as NegotiateTask['terms'] }, { ...identity, timeoutMs: 10_000 })
+    if (retry.ok) { q = retry; proposed.length = 0 }
+  }
   // A plain quote does not echo the task, so the task we asked is kept with it for the job description.
   const quoteAccessToken = quoteAccessVersion === 2 ? randomBytes(32).toString('hex') : undefined
   const quoteId = await recordQuote('user', seller, q, {

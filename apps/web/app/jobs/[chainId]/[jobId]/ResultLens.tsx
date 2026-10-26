@@ -393,6 +393,40 @@ function Outline({ value, depth = 0, k = '' }: { value: unknown; depth?: number;
 
 /* ------------------------------------------------------------------ the frame */
 
+const TERM_WORD = { met: 'Met', not_met: 'Not met', unchecked: 'Not checked' } as const
+const SOURCE_LINE: Record<NonNullable<JobLens['terms']>['source'], string> = {
+  signed: 'Agreed before payment: these criteria are in the terms the agent signed, recorded in the job on chain.',
+  buyer: 'Set by the buyer, not signed by the agent: they are in the job record on chain, and the agent did not sign them.',
+  standard: "This job was hired without written criteria. Shown against Marque's criteria for the category; they were not part of its terms.",
+}
+
+function TermsPanel({ terms, block, agentName }: { terms: NonNullable<JobLens['terms']>; block: string | null; agentName: string }) {
+  return (
+    <div className={styles.terms} data-source={terms.source}>
+      <div className={styles.termsHead}>
+        <span className={styles.tileLabel}>{terms.source === 'standard' ? 'Against the Standard' : 'Terms met'}</span>
+        <b className={styles.termsScore}>{terms.met} of {terms.of}</b>
+      </div>
+      <p className={styles.legend}>{SOURCE_LINE[terms.source]}</p>
+      <div className={styles.tableWrap}>
+        <table className={styles.termsTable}>
+          <thead><tr><th>Criterion</th><th>Result</th><th>{agentName}</th><th>Marque{block ? `, block ${Number(block).toLocaleString('en-US')}` : ''}</th></tr></thead>
+          <tbody>
+            {terms.rows.map((r) => (
+              <tr key={r.id + r.text} data-state={r.state}>
+                <td data-label="Criterion">{r.text}</td>
+                <td data-label="Result"><span className={styles.termState} data-state={r.state}>{TERM_WORD[r.state]}</span></td>
+                <td data-label={agentName}>{r.agent ?? '·'}</td>
+                <td data-label="Marque">{r.marque ?? '·'}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
+
 export function ResultLens({ data, agentName, content }: { data: JobLens; agentName: string; content: unknown }) {
   const l = data.lens
   const checks = data.checks
@@ -432,6 +466,8 @@ export function ResultLens({ data, agentName, content }: { data: JobLens; agentN
           </ul>
         </div>
       ) : null}
+
+      {data.terms ? <TermsPanel terms={data.terms} block={data.checkedAtBlock} agentName={agentName} /> : null}
 
       <div className={styles.foot}>
         {l && (l.meta.source || l.meta.readAt) ? <p className={styles.legend}>The agent&apos;s own answer{l.meta.source ? `: ${l.meta.source}` : ''}{l.meta.block ? `, block ${Number(l.meta.block).toLocaleString('en-US')}` : ''}{l.meta.readAt && !Number.isNaN(Date.parse(l.meta.readAt)) ? `, read ${new Date(l.meta.readAt).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'UTC' })} UTC` : ''}.</p> : null}

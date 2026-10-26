@@ -1,3 +1,4 @@
+import { rejectReason } from '@marque/conformance/criteria'
 import { notFound } from 'next/navigation'
 import { sql } from 'drizzle-orm'
 import { db } from '@marque/db'
@@ -147,6 +148,7 @@ export default async function JobRoom({ params }: { params: Promise<{ chainId: s
               fundingDeadline={fundingDeadline}
               refundFrom={t?.refundFrom ?? null} reviewEndsAt={t?.reviewEndsAt ?? null} submitDeadline={t?.submitDeadline ?? null}
               rated={job?.rating ? { stars: Number(job.rating.stars ?? Math.round(Number(job.rating.value) / 20)), tx: job.rating.tx ?? null } : null}
+              rejectReason={lensData?.terms && lensData.terms.source !== 'standard' && lensData.terms.rows.some((r) => r.state === 'not_met') ? rejectReason(`${cid}:${jobId}`, lensData.terms.rows.filter((r) => r.state === 'not_met'), lensData.checkedAtBlock) : null}
             />
             {refusal ? (
               <div className={styles.refused} role="note">

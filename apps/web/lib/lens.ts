@@ -156,7 +156,7 @@ async function yieldChecks(l: Extract<Lens, { kind: 'yield' }>, block: bigint | 
   return out
 }
 
-async function build(chainId: ChainId, jobId: string): Promise<JobLens> {
+async function build(chainId: ChainId, jobId: string, opts: { replay?: boolean } = {}): Promise<JobLens> {
   const job = await questJob(chainId, jobId).catch(() => null)
   const url = job?.deliverable?.url ?? null
   const manifest: Manifest | null = await jobManifest(chainId, jobId, job as never)
@@ -178,7 +178,7 @@ async function build(chainId: ChainId, jobId: string): Promise<JobLens> {
   const description = onchain?.description ?? intentDescription
   // A decided result never changes: read it before recomputing anything.
   const [kept] = (await db().execute(sql`select block, checks, summary, computed_at from lens_result where chain_id = ${chainId} and job_id = ${jobId} limit 1`).catch(() => [])) as unknown as Array<{ block: string | null; checks: LensCheck[]; summary: { checked: number; agreed: number }; computed_at: string }>
-  if (kept) {
+  if (kept && !opts.replay) {
     return { lens, checks: kept.checks, checkedAtBlock: kept.block, summary: kept.summary, state: 'decided', reason: null, attemptedAt: new Date(kept.computed_at).toISOString(), stored: true, manifest: manifestView, readable: lens.kind !== 'generic', terms: termsOf(description, category, kept.checks) }
   }
   // The buyer's words: the hire intent's signed description (hires started on Marque), else the job's own description
@@ -196,7 +196,7 @@ async function build(chainId: ChainId, jobId: string): Promise<JobLens> {
   const reason = state !== 'no-check' ? null : missingInput(lens, task)
   // Keep the first fully decided result for good; a partial or failed read is recomputed next time.
   let stored = false
-  if (state === 'decided' && decided.length === checks.length) {
+  if (state === 'decided' && decided.length === checks.length && !opts.replay) {
     await db().execute(sql`insert into lens_result (chain_id, job_id, block, checks, summary) values (${chainId}, ${jobId}, ${block ? block.toString() : null}, ${JSON.stringify(checks)}::jsonb, ${JSON.stringify(summary)}::jsonb) on conflict do nothing`).then(() => { stored = true }).catch(() => undefined)
   }
   return {
@@ -223,4 +223,9 @@ function missingInput(lens: Lens, task: string | null): string {
 /** Cached 10 minutes per job: a delivered answer does not change; checks are pinned to its block. */
 export function jobLens(chainId: ChainId, jobId: string) {
   return cachedProjection(`lens:v6:${chainId}:${jobId}`, () => build(chainId, jobId), { freshMs: 10 * 60_000, timeoutMs: 20_000 })
+}
+
+/** Recompute a job's checks and terms from chain now, ignoring and never writing the stored result (the replay command). */
+export function replayLens(chainId: ChainId, jobId: string): Promise<JobLens> {
+  return build(chainId, jobId, { replay: true })
 }

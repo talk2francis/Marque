@@ -18,6 +18,7 @@ import type { OutcomeView } from '../../../lib/act'
 import styles from './storefront.module.css'
 import page from './agent-page.module.css'
 import { AgentActivity } from './AgentActivity'
+import { AgentTerms } from './AgentTerms'
 import { RailTerms } from './RailTerms'
 import { WarrantCard } from './WarrantCard'
 import { UNote } from '../../_components/ui/UNote'
@@ -480,6 +481,7 @@ function TrackRecord({ d, net, acted }: { d: Data; net: string; acted: OutcomeVi
       </section>
 
       <section className={styles.section} aria-label="Recent activity">
+        <AgentTerms agentId={d.agentId} provider={d.wallet} chainId={d.chainId} />
         <AgentActivity agentId={d.agentId} provider={d.wallet} chainId={d.chainId} />
       </section>
     </>

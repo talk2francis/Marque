@@ -107,3 +107,7 @@
   .hs-practice-actions { display: flex; flex-wrap: wrap; gap: 8px; }
   .hs-practice-fine { font-size: 12.5px; color: var(--ink-3); }
 }
+.hs-terms { margin: 10px 0 4px; padding: 10px 12px; border: 1px solid var(--hair-2); border-radius: 10px; font-size: 13.5px; color: var(--ink-2); }
+.hs-terms p { margin: 0 0 6px; }
+.hs-terms b { color: var(--ink); font-weight: 600; }
+.hs-terms ul { margin: 0; padding-left: 18px; display: grid; gap: 3px; }

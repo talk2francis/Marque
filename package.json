@@ -24,7 +24,8 @@
     "p8a": "tsx scripts/p8a-acceptance.mts",
     "p8b": "tsx scripts/p8b-run.mts",
     "lint:copy": "node scripts/lint-copy.mjs",
-    "supply:audit": "pnpm --filter @marque/commerce exec tsx scripts/supply-audit.mts"
+    "supply:audit": "pnpm --filter @marque/commerce exec tsx scripts/supply-audit.mts",
+    "marque": "REDIS_URL=${MARQUE_CLI_REDIS_URL:-redis://127.0.0.1:6379/7} node --conditions=react-server --import tsx scripts/marque.mts"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
