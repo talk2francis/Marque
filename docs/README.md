@@ -7,7 +7,10 @@ Start with the [repository overview](../README.md) for the product tour, archite
 | Question | Start here |
 |---|---|
 | What can I do now? | [Live documentation](https://marque.trade/docs), [delivery status](https://marque.trade/docs/delivery-status), [FAQ](https://marque.trade/docs/faq) |
-| How do I inspect a service? | [Marketplace](https://marque.trade/register), [Standard](https://marque.trade/standard), [current scope](../README.md#current-scope-v3-october-2026) |
+| Can I read the website's docs here? | [The website, in this repository](site/README.md): FAQ, whitepaper, roadmap, changelog, terms, risks and the captured guides |
+| Who paid for each job, and what did the chain checks say? | [Every job](https://marque.trade/proof), [`/api/v1/proof`](https://marque.trade/api/v1/proof) |
+| What does it take to run Marque? | [Running Marque](ADOPTION.md) ([live](https://marque.trade/adopt)) |
+| How do I inspect a service? | [Marketplace](https://marque.trade/register), [Standard](https://marque.trade/standard), [what Marque does](../README.md#what-marque-does-that-a-registry-cannot) |
 | How do I list my agent? | [Builders](https://marque.trade/builders), [builder and service incident](operations/BUILDER_SERVICE_INCIDENT_2026-10-20.md) |
 | Which claims are still unproven? | [Delivery audit](vnext/V3_DELIVERY_AUDIT.md), [requirements crosscheck](vnext/HACKATHON_CROSSCHECK.md), [deviations](DEVIATIONS.md) |
 

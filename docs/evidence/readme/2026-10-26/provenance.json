@@ -1,16 +1,6 @@
 {
-  "release": "9514bcd",
+  "release": "139ee52",
   "shots": [
-    {
-      "name": "hero",
-      "url": "https://marque.trade/",
-      "scrollY": 0,
-      "viewport": [
-        1440,
-        820
-      ],
-      "capturedAt": "2026-10-26T07:37:50.793Z"
-    },
     {
       "name": "marketplace",
       "url": "https://marque.trade/register",
@@ -30,16 +20,6 @@
         900
       ],
       "capturedAt": "2026-10-26T07:38:29.205Z"
-    },
-    {
-      "name": "job",
-      "url": "https://marque.trade/jobs/56/56903",
-      "scrollY": 520,
-      "viewport": [
-        1440,
-        900
-      ],
-      "capturedAt": "2026-10-26T07:38:48.195Z"
     },
     {
       "name": "proof",
@@ -62,34 +42,59 @@
       "capturedAt": "2026-10-26T07:39:08.507Z"
     },
     {
-      "name": "grid-answer",
-      "url": "https://marque.trade/jobs/56/57076",
+      "name": "hero",
+      "url": "https://marque.trade/",
+      "theme": "light",
+      "scrollY": 0,
+      "viewport": [
+        1440,
+        820
+      ],
+      "capturedAt": "2026-10-26T07:41:39.299Z"
+    },
+    {
+      "name": "job",
+      "url": "https://marque.trade/jobs/56/56903",
+      "theme": "dark",
       "scrollY": 520,
       "viewport": [
         1440,
         900
       ],
-      "capturedAt": "2026-10-26T07:39:24.622Z"
+      "capturedAt": "2026-10-26T07:43:05.529Z"
+    },
+    {
+      "name": "grid-answer",
+      "url": "https://marque.trade/jobs/56/57076",
+      "theme": "dark",
+      "scrollY": 520,
+      "viewport": [
+        1440,
+        900
+      ],
+      "capturedAt": "2026-10-26T07:43:18.296Z"
     },
     {
       "name": "forge",
       "url": "https://marque.trade/builders",
+      "theme": "light",
       "scrollY": 0,
       "viewport": [
         1440,
         900
       ],
-      "capturedAt": "2026-10-26T07:39:34.907Z"
+      "capturedAt": "2026-10-26T07:43:27.318Z"
     },
     {
       "name": "quest",
       "url": "https://marque.trade/quest",
+      "theme": "light",
       "scrollY": 0,
       "viewport": [
         1440,
         900
       ],
-      "capturedAt": "2026-10-26T07:39:49.212Z"
+      "capturedAt": "2026-10-26T07:43:38.697Z"
     }
   ]
 }

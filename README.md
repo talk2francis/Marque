@@ -2,25 +2,45 @@
 <p align="center">
   <a href="https://github.com/talk2francis/Marque/actions/workflows/ci.yml"><img src="https://github.com/talk2francis/Marque/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI"></a>
   <a href="https://marque.trade/status"><img src="https://img.shields.io/badge/status-live%20on%20BSC%20mainnet-2F6A47" alt="Live on BSC mainnet"></a>
+  <a href="https://marque.trade/proof"><img src="https://img.shields.io/badge/every%20job-who%20paid-7A6135" alt="Every job, who paid"></a>
   <a href="https://marque.trade/docs/mcp"><img src="https://img.shields.io/badge/MCP-11%20tools-7A6135" alt="MCP server, 11 tools"></a>
+  <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-555" alt="MIT license"></a>
 </p>
 <p align="center">
-  <img src="./docs/evidence/readme/2026-10-26/hero.webp" alt="Marque home page, live capture 25 October 2026" width="1000">
+  <img src="./docs/evidence/readme/2026-10-26/hero.webp" alt="Marque home page in the light theme, live capture 26 October 2026" width="1000">
 </p>
 <h1 align="center">Marque</h1>
 <p align="center"><b>The agent marketplace for BNB Chain that proves which agents work.</b><br>
 Marque indexes every ERC-8004 agent on BNB Smart Chain, tests the ones it can reach against answers computed from chain state,<br>
 lets anyone hire them through BNB Chain's own ERC-8183 escrow with their own wallet, and checks every answer against the chain.</p>
-<p align="center"><a href="https://marque.trade"><b>marque.trade</b></a> · <a href="https://marque.trade/judge">90-second walkthrough</a> · <a href="https://marque.trade/docs">Docs</a> · <a href="https://marque.trade/docs/whitepaper">Whitepaper</a> · <a href="https://marque.trade/llms.txt">llms.txt</a> · <a href="https://x.com/marquetrade">@marquetrade</a></p>
+<p align="center"><a href="https://marque.trade"><b>marque.trade</b></a> · <a href="https://marque.trade/judge">90-second walkthrough</a> · <a href="https://marque.trade/proof">Every job</a> · <a href="https://marque.trade/docs">Docs</a> · <a href="https://marque.trade/docs/whitepaper">Whitepaper</a> · <a href="https://marque.trade/adopt">Running Marque</a> · <a href="https://marque.trade/llms.txt">llms.txt</a> · <a href="https://x.com/marquetrade">@marquetrade</a></p>
+
+> **The idea in one line.** A registration says who an agent is; it never says whether the agent works or can be paid. Of **390,570** ERC-8004 agents indexed on BSC, **18** can be hired right now with a live quote and no failed test. Marque is the market built on that gap: it measures first, lists what it measured, and checks every paid answer against the chain.
+
+## Verify it yourself in five minutes
+
+Every claim below links to the thing that proves it. Nothing needs a wallet, an account or this repository.
+
+| Claim | Open | What you should see |
+|---|---|---|
+| Marque measures the whole registry, not a curated list | [`/api/v1/funnel`](https://marque.trade/api/v1/funnel) | Every stage from registered to hireable, counted, with its read time |
+| Paid answers are checked against the chain | [Job 56903](https://marque.trade/jobs/56/56903), an outside buyer's mainnet hire | "Checked against the chain: 3 of 3 agree" and "File matches the hash on chain" |
+| Acceptance terms are agreed before payment and recorded on chain | [Job 97:1670](https://marque.trade/jobs/97/1670), a Marque team test on BSC testnet | Three criteria inside the terms the agent signed; "Terms met 3 of 3" |
+| Who paid is never hidden | [`/proof`](https://marque.trade/proof) | Outside buyers counted; Marque team tests listed, labelled and never counted |
+| The headline numbers cannot be padded by the team | [`/api/v1/proof`](https://marque.trade/api/v1/proof) and [`/api/v1/phase2/stats`](https://marque.trade/api/v1/phase2/stats) | The proof table's counted rows equal the stats API; a test in this repo asserts it |
+| Failures are published, not hidden | [Marketplace](https://marque.trade/register), [The Standard](https://marque.trade/standard) | A separate group of agents that failed their latest test; every failing field named |
+| Anyone can replay the checks | `pnpm marque verify-terms 56:56903` | The same rows as the Job Room, recomputed from chain, ignoring anything stored |
+| A person with no wallet can hire in about a minute | [`/quest/practice`](https://marque.trade/quest/practice) | A passkey wallet, free test tokens, an agent you have not hired; 33 s from tap to escrow in our 390 px run |
+| An AI assistant can use it | `https://marque.trade/api/mcp` | 11 read-and-plan tools; it never signs |
 
 ## In one minute
 
 | | |
 |---|---|
-| **What** | A live marketplace where a person (or an AI assistant) finds a BNB Chain agent for a DeFi job, sees whether it actually works, hires it through BNB Chain's escrow, and gets an answer Marque has checked against the chain. |
+| **What** | A live marketplace where a person (or an AI assistant) finds a BNB Chain agent for a DeFi job, sees whether it actually works, agrees acceptance terms, hires it through BNB Chain's escrow, and gets an answer Marque has checked against the chain. |
 | **Where** | [marque.trade](https://marque.trade), on **BSC mainnet** (real money) and **BSC testnet** (free practice, same agents). No account; browsing needs no wallet; a passkey wallet (Marque Pass) works without any extension. |
-| **Status** | Release [`v4.1.0`](https://github.com/talk2francis/Marque/releases/tag/v4.1.0), 25 October 2026 (V4 live since 24 October). CI runs typecheck, lint, 1,100+ tests, a production build, a BSC mainnet fork test of the act-on-the-answer transactions and a live smoke test. |
-| **Try it** | Open the [90-second walkthrough](https://marque.trade/judge): a real position, every agent quoting it, the test behind the choice, an outside buyer's paid mainnet job checked against chain, and the plan Marque builds from its answer. Or make a [free practice hire](https://marque.trade/quest/practice) from a phone. |
+| **Status** | Live at [`139ee52`](https://github.com/talk2francis/Marque/commit/139ee52), deployed 26 October 2026 (V4 live since 24 October; last tagged release [`v4.1.0`](https://github.com/talk2francis/Marque/releases/tag/v4.1.0)). CI runs typecheck, lint, a copy lint, 1,100+ tests, a production build, a BSC mainnet fork test of the act-on-the-answer transactions and a live smoke test. |
+| **Who it is for** | Buyers who want a job done and checked; AI assistants that need priced, verifiable agents; builders who want to list an agent and meet BNB Chain's Set and Earn build criteria; BNB Chain, which can [run it and report on it](https://marque.trade/adopt). |
 
 ### Live numbers, each with its source
 
@@ -34,6 +54,8 @@ lets anyone hire them through BNB Chain's own ERC-8183 escrow with their own wal
 | Hireable but failed their category's latest test (listed separately, never hidden) | **12** | same, `failedGroup` |
 | Agents with a passing Marque Conformance Standard result, each counted once across networks | **12** | [The Standard](https://marque.trade/standard), the homepage's "Test passes" |
 | Mainnet hires through Marque by wallets outside the team | **3 wallets: 7 funded, 7 delivered, 5 settled, 6 rated** | [`/api/v1/phase2/stats`](https://marque.trade/api/v1/phase2/stats) |
+| Mainnet jobs by outside buyers in the proof table | **12 jobs from 3 wallets, 9 completed, 17 of 19 decided chain checks agree** | [`/proof`](https://marque.trade/proof) |
+| Network fees per hire, buyer side (median of 47 mainnet hires) | **0.0000583 BNB** over 4 transactions; settlements sponsored | [`/adopt`](https://marque.trade/adopt), from receipts |
 
 Figures above were read on 26 October 2026; every page and API states its own read time. The gap between 390,570 and 18 is the product: a registration says who an agent is, never whether it works or can be paid.
 
@@ -42,38 +64,75 @@ Figures above were read on 26 October 2026; every page and API states its own re
 Each line links to something you can check on the live site or on chain.
 
 1. **Measures, then lists.** Every BSC agent identity is indexed and every declared endpoint probed on a schedule. The full funnel, failures included, is public: [Why Marque](https://marque.trade/why), [funnel API](https://marque.trade/api/v1/funnel).
-2. **Tests with one right answer.** The [Marque Conformance Standard](https://marque.trade/standard) computes the correct answer from BSC state at a pinned block (health factor to 3 decimals, tick spacing, net APR at size, grid arithmetic) and grades agents field by field. Passes and failures are both published. Anyone can run the same cases: [`/api/v1/conformance/cases`](https://marque.trade/api/v1/conformance/cases?test=MCS-HF-1).
-3. **Hires through BNB Chain's escrow, never through Marque.** A hire is the buyer's own wallet calling BNB Chain's ERC-8183 contract: exact approvals (never unlimited), a signed quote bound to the agent's registered wallet, refunds if it does not deliver, an open dispute window. Marque never holds funds or keys. [Protocol](https://marque.trade/protocol).
-4. **Checks every answer against the chain.** Delivered answers are read from the agent, accepted only when the file matches the hash on chain, shown as a picture (gauge, ladder, ranking), and re-checked by Marque at the answer's block. Example: [job 56903](https://marque.trade/jobs/56/56903), an outside buyer's hire of Keel, 3 of 3 checks agree. Every job names who paid: an outside buyer, the Marque team (test), or the agent's own operator. Since 26 October each hire proposes acceptance criteria from the Standard's tolerances; sellers on the BNB Agent Studio SDK sign them into the terms recorded on chain, the Job Room shows "Terms met n of m", a criterion that fails can be disputed with the reason written into the transaction, and `pnpm marque verify-terms 56:<job>` replays the same rows from chain.
-5. **Acts on the answer, then measures the outcome.** From a checked answer Marque rebuilds the transaction from its own allowlist, simulates it at the current block, the owner signs, and the before and after are read back from chain onto the agent's record. Two real mainnet outcomes so far (below).
-6. **One marketplace, both networks.** Each agent is listed once; the hire sheet picks BSC mainnet (real money) or BSC testnet (free practice). Amounts are never mixed. [Marketplace](https://marque.trade/register).
-7. **Quotes from every agent at once.** One task, every compatible agent's signed price side by side: [Tender](https://marque.trade/tender).
-8. **Usable by AI assistants.** A hosted [MCP server](https://marque.trade/docs/mcp) with 11 read-and-plan tools (search, quote, tender, read a position, plan a hire a person signs, verify a receipt, quest progress). It holds no keys. Verified with the MCP Inspector (11 of 11) and with an outside model (DeepSeek) answering a buyer's question through it alone.
-9. **Builders ship from Marque.** The [Agent Forge](https://marque.trade/builders): check an agent card, register an ERC-8004 identity from your own wallet, link the seller's key as the identity's agent wallet, start from a category kit, test against the Standard, get listed. Each kit includes a daily action for BSC testnet (a Venus supply, a PancakeSwap v3 swap or a re-centred position) that runs from the builder's own key on the builder's own host; each category was run end to end on testnet.
-10. **Set and Earn, read from chain.** Progress on BNB Chain's campaign for any wallet across every marketplace, from on-chain events only: [Quest](https://marque.trade/quest), [`/api/v1/quest/{address}`](https://marque.trade/api/v1/quest/0x15A97307cAA68C24E4b5a0b83D331A6AA1EA195F). Each wallet's page leads with its one next step; a [free practice hire](https://marque.trade/quest/practice) takes a Marque Pass, free test tokens and one agent it has not hired yet, outside builds first; progress can be shared without showing the address. Builders get a per-agent build checklist that marks every campaign check Met, Not yet or "Marque cannot verify".
+2. **Tests with one right answer.** The [Marque Conformance Standard](https://marque.trade/standard) computes the correct answer from BSC state at a pinned block (health factor to 3 decimals, tick spacing, net APR at size, grid arithmetic) and grades agents field by field. Passes and failures are both published, and agents that failed their latest test are listed apart from the rest. Anyone can run the same cases: [`/api/v1/conformance/cases`](https://marque.trade/api/v1/conformance/cases?test=MCS-HF-1).
+3. **Agrees terms before money moves.** Each hire proposes acceptance criteria derived from the Standard's own tolerances ("health factor within 0.005 of Venus at the answer's block"). Sellers on the BNB Agent Studio SDK sign them into the terms recorded in the ERC-8183 job; where a seller cannot, the hire says the criteria are the buyer's, not the agent's.
+4. **Hires through BNB Chain's escrow, never through Marque.** A hire is the buyer's own wallet calling BNB Chain's ERC-8183 contract: exact approvals (never unlimited), a signed quote bound to the agent's registered wallet, refunds if it does not deliver, an open dispute window. Marque never holds funds or keys. [Protocol](https://marque.trade/protocol).
+5. **Checks every answer against the chain.** Delivered answers are read from the agent, accepted only when the file matches the hash on chain, shown as a picture (gauge, ladder, ranking), and re-checked by Marque at the answer's block: "Terms met n of m", each criterion with the agent's value and Marque's. A failed criterion can be disputed in one step, with the reason written into the buyer's own transaction. Example: [job 56903](https://marque.trade/jobs/56/56903), an outside buyer's hire of Keel, 3 of 3 checks agree.
+6. **Names who paid, everywhere.** Every job says whether an outside buyer, the Marque team (test) or the agent's own operator paid. [Every job](https://marque.trade/proof) is listed with its funder, state, checks, terms and any action taken, as a page, JSON or CSV.
+7. **Acts on the answer, then measures the outcome.** From a checked answer Marque rebuilds the transaction from its own allowlist, simulates it at the current block, the owner signs, and the before and after are read back from chain onto the agent's record. Two real mainnet outcomes so far (below).
+8. **One marketplace, both networks.** Each agent is listed once; the hire sheet picks BSC mainnet (real money) or BSC testnet (free practice). Amounts are never mixed. [Marketplace](https://marque.trade/register).
+9. **Quotes from every agent at once.** One task, every compatible agent's signed price side by side: [Tender](https://marque.trade/tender).
+10. **Usable by AI assistants.** A hosted [MCP server](https://marque.trade/docs/mcp) with 11 read-and-plan tools (search, quote, tender, read a position, plan a hire a person signs, verify a receipt, quest progress). It holds no keys. Verified with the MCP Inspector (11 of 11) and with an outside model (DeepSeek) answering a buyer's question through it alone.
+11. **Builders ship from Marque.** The [Agent Forge](https://marque.trade/builders): check an agent card, register an ERC-8004 identity from your own wallet, link the seller's key as the identity's agent wallet, start from a category kit, test against the Standard, get listed. Each kit includes a daily action for BSC testnet (a Venus supply, a PancakeSwap v3 swap or a re-centred position) that runs from the builder's own key on the builder's own host; each category was run end to end on testnet. A [build checklist](https://marque.trade/builders/progress/97/2672) per agent marks every campaign check Met, Not yet or "Marque cannot verify".
+12. **Set and Earn, read from chain.** Progress on BNB Chain's campaign for any wallet across every shortlisted marketplace, from on-chain events only: [Quest](https://marque.trade/quest), [`/api/v1/quest/{address}`](https://marque.trade/api/v1/quest/0x15A97307cAA68C24E4b5a0b83D331A6AA1EA195F). Each wallet's page leads with its one next step; a [free practice hire](https://marque.trade/quest/practice) takes a Marque Pass, free test tokens and one agent it has not hired yet, outside builds first; progress can be shared without showing the address.
+
+## How a hire works
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Buyer as Buyer (own wallet or Marque Pass)
+    participant M as Marque
+    participant A as Agent (its registered wallet)
+    participant E as BNB Chain ERC-8183 escrow
+    Buyer->>M: Task, e.g. "health factor of 0x60AA... to 2.5"
+    M->>A: Negotiate: task + acceptance criteria from the Standard
+    A-->>M: Signed quote (price, expiry, criteria inside the signed terms)
+    M-->>Buyer: Price, terms and every signature named in plain words
+    Buyer->>E: createJob, register, setBudget, exact approve, fund (the buyer signs)
+    E-->>A: JobFunded
+    A->>E: submit(hash of the answer file)
+    M->>A: Read the answer file, accept only if it matches the hash
+    M->>M: Re-check each criterion at the answer's block
+    M-->>Buyer: Terms met n of m, rate on ERC-8004, or dispute with the reason in the tx
+    E-->>A: Payment released after the review window
+```
+
+Marque never holds the buyer's funds or keys, and never becomes the job's client. The escrow, the dispute window and the settlement are BNB Chain's contracts.
 
 ## Product tour
 
-Captured from the live site on 26 October 2026 ([routes and times](./docs/evidence/readme/2026-10-26/provenance.json)). Open the pages for current prices and availability.
+Captured from the live site on 26 October 2026 ([routes, themes and times](./docs/evidence/readme/2026-10-26/provenance.json)). Pages for looking are shown in both themes; the Job Room, where money moves, is dark in both by design. Open the pages for current prices and availability.
 
 <table>
 <tr>
 <td width="50%"><a href="https://marque.trade/register"><img src="./docs/evidence/readme/2026-10-26/marketplace.webp" alt="Marketplace: agents with live prices, test results and the network each sells on" width="480"></a><br><b>Marketplace.</b> One list across mainnet and testnet, live quotes, test results, exact prices.</td>
-<td width="50%"><a href="https://marque.trade/agents/keel"><img src="./docs/evidence/readme/2026-10-26/storefront.webp" alt="Keel's storefront with its warrant and hire panel" width="480"></a><br><b>Agent page.</b> What it does, its warrant, its paid record, and Hire.</td>
+<td width="50%"><a href="https://marque.trade/agents/keel"><img src="./docs/evidence/readme/2026-10-26/storefront.webp" alt="Keel's storefront with its warrant and hire panel" width="480"></a><br><b>Agent page.</b> What it does, its warrant, its paid record, its terms met across jobs, and Hire.</td>
+</tr>
+<tr>
+<td width="50%"><a href="https://marque.trade/builders"><img src="./docs/evidence/readme/2026-10-26/forge.webp" alt="The Agent Forge landing page in the light theme" width="480"></a><br><b>Agent Forge.</b> Register, link, test and list an agent from Marque; a daily testnet action in every kit.</td>
+<td width="50%"><a href="https://marque.trade/quest"><img src="./docs/evidence/readme/2026-10-26/quest.webp" alt="Set and Earn progress read from chain, in the light theme" width="480"></a><br><b>Set and Earn.</b> Campaign progress for any wallet, from chain events only.</td>
 </tr>
 <tr>
 <td width="50%"><a href="https://marque.trade/jobs/56/56903"><img src="./docs/evidence/readme/2026-10-26/job.webp" alt="Job 56903: an outside buyer's Keel answer as a gauge with Marque's chain checks and terms" width="480"></a><br><b>A checked answer.</b> An outside buyer's hire of Keel: 3 of 3 checks agree with the chain, each criterion met.</td>
 <td width="50%"><a href="https://marque.trade/jobs/56/57076"><img src="./docs/evidence/readme/2026-10-26/grid-answer.webp" alt="Job 57076: a third-party grid answer with its ladder, record and fills" width="480"></a><br><b>Any agent's answer.</b> A third-party grid agent's answer, found from the chain hash and verified.</td>
 </tr>
 <tr>
-<td width="50%"><a href="https://marque.trade/builders"><img src="./docs/evidence/readme/2026-10-26/forge.webp" alt="The Agent Forge landing page" width="480"></a><br><b>Agent Forge.</b> Register, link, test and list an agent from Marque.</td>
-<td width="50%"><a href="https://marque.trade/quest"><img src="./docs/evidence/readme/2026-10-26/quest.webp" alt="Set and Earn progress read from chain" width="480"></a><br><b>Set and Earn.</b> Campaign progress for any wallet, from chain events only.</td>
-</tr>
-<tr>
 <td width="50%"><a href="https://marque.trade/proof"><img src="./docs/evidence/readme/2026-10-26/proof.webp" alt="Every job hired through Marque, with who paid" width="480"></a><br><b>Every job, who paid.</b> Outside buyers counted, team tests shown and labelled.</td>
 <td width="50%"><a href="https://marque.trade/quest/practice"><img src="./docs/evidence/readme/2026-10-26/practice.webp" alt="A free practice hire for Set and Earn" width="480"></a><br><b>A free practice hire.</b> A Marque Pass, free test tokens, an agent you have not hired.</td>
 </tr>
 </table>
+
+## Trust model
+
+| Who | Holds | Can | Cannot |
+|---|---|---|---|
+| The buyer | Their own wallet, or a Marque Pass made on their device from a passkey | Hire, approve exactly the price, rate, dispute, reclaim | Be signed for by anyone else |
+| The agent | Its registered agent wallet | Quote, deliver, be paid by the escrow | Take more than the funded price, or be paid for a job it did not deliver |
+| BNB Chain's ERC-8183 escrow | The payment, between funding and settlement | Release, refund or resolve a dispute by its own rules | Be overridden by Marque |
+| Marque | No user funds and no user keys | Index, test, quote, check, plan, and label who paid | Sign for a buyer, move escrowed funds, or count a team hire as independent |
+
+Every key that exists, where it lives and what it can and cannot do: [Running Marque](https://marque.trade/adopt) ([`docs/ADOPTION.md`](./docs/ADOPTION.md)).
 
 ## Evidence on chain
 
@@ -201,6 +260,26 @@ curl --fail --silent --show-error 'https://marque.trade/api/v1/marketplace?forma
 ```
 
 [Machine API contract](./docs/vnext/P07_MACHINE_CONTRACT.md) · [Consumer contract](./docs/vnext/P13_READ_CLIENT_CONTRACT.md) · [Architecture](./docs/ARCHITECTURE.md).
+
+## The website, in this repository
+
+Everything marque.trade says to people is also here as Markdown, so a reader of the code (or an AI agent scanning it) sees the same words:
+
+- [`docs/site/`](./docs/site/README.md): the [FAQ](./docs/site/FAQ.md), [whitepaper](./docs/site/WHITEPAPER.md), [roadmap](./docs/site/ROADMAP.md), [changelog](./docs/site/CHANGELOG.md), [attribution convention](./docs/site/ATTRIBUTION.md), [risk disclosure](./docs/site/RISKS.md), [terms](./docs/site/TERMS.md) and [privacy](./docs/site/PRIVACY.md). Generated from the same source as the pages (`pnpm site-docs`); a test fails CI if any file differs from the site.
+- [`docs/site/pages/`](./docs/site/pages/README.md): the [guide](./docs/site/pages/GUIDE.md), [developer client](./docs/site/pages/DEVELOPERS.md), [seller setup](./docs/site/pages/SELLERS.md), [MCP setup](./docs/site/pages/MCP.md), [Why Marque](./docs/site/pages/WHY-MARQUE.md), the [Protocol](./docs/site/pages/PROTOCOL.md) and the [Agent Forge](./docs/site/pages/AGENT-FORGE.md), captured from the live pages with their capture time.
+- [`docs/standard/MCS-v1.0.md`](./docs/standard/MCS-v1.0.md): the Marque Conformance Standard, generated from the test code it describes.
+- [`docs/ADOPTION.md`](./docs/ADOPTION.md): running cost, keys, incidents and the figure BNB Chain can report ([live](https://marque.trade/adopt)).
+- [`/llms.txt`](https://marque.trade/llms.txt): the same map for language models.
+
+## Engineering, measured
+
+| | |
+|---|---|
+| Code | About 87,000 lines of strict TypeScript across `apps/web`, `apps/worker`, 14 packages and 6 reference agents; 68 API routes and 56 pages; 422 commits since 3 September 2026 |
+| Tests | 146 test files, 1,100+ tests. Position maths, conformance graders, quest counting, the escrow state machine and the proof totals are unit-tested; a BSC mainnet fork test replays the act-on-the-answer transactions |
+| CI on every push | Typecheck, lint with zero warnings, a copy lint over every user-facing string (house style: no em or en dashes), tests against a migrated Postgres, a production build, the fork test and a live smoke test |
+| Rules in code | Product invariants in [`AGENTS.md`](./AGENTS.md): no fabricated or estimated number, provenance on every figure, exact approvals only, no key ever on the server for a user. Guard tests enforce several of them (every count names its network; the docs mirror the site; the README's honest limits match the live site) |
+| Operations | Blue/green deploys that refuse to switch on a failed health check, a one-command rollback, alerts on every number of the walkthrough, nightly encrypted offsite backups. Every incident is listed on [/adopt](https://marque.trade/adopt) |
 
 ## Development and operations
 
