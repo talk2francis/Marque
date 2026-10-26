@@ -1,6 +1,7 @@
 import 'server-only'
 import { createHash } from 'node:crypto'
 import { teamWallets } from '@marque/commerce'
+import { firstPartyAgentsAllLanes } from '@marque/db'
 import { marketplaceAgents, type MarketRow } from './marketplace'
 
 /**
@@ -33,6 +34,15 @@ export function orderPicks<T extends { agentId: string; outside: boolean; listed
   return [...rows].sort((a, b) => tier(b) - tier(a) || rank(a.agentId, slot) - rank(b.agentId, slot))
 }
 
+/** A reference agent's category is Marque's own config (the testnet twin's label can lag); others keep Marque's label. */
+function categoryOf(r: MarketRow): string | null {
+  if (r.isReference && r.tokenId) {
+    const fp = firstPartyAgentsAllLanes().find((a) => a.testnet?.tokenId !== undefined && String(a.testnet.tokenId) === r.tokenId)
+    if (fp) return fp.category
+  }
+  return r.category && r.category !== 'unclassified' ? r.category : null
+}
+
 export async function practicePicks(hiredKeys: readonly string[], n = 3): Promise<{ picks: PracticePick[]; available: number }> {
   const { rows } = await marketplaceAgents({ lane: 'practice', tab: 'ready', failed: 'group', limit: 300 })
   const team = new Set(teamWallets())
@@ -40,7 +50,7 @@ export async function practicePicks(hiredKeys: readonly string[], n = 3): Promis
   const open = rows
     .filter((r: MarketRow) => r.tokenId && !hired.has(`97:${r.tokenId}`))
     .map((r): PracticePick => ({
-      agentId: r.agentId, tokenId: r.tokenId, name: r.name, category: r.category, price: r.price,
+      agentId: r.agentId, tokenId: r.tokenId, name: r.name, category: categoryOf(r), price: r.price,
       outside: !r.isReference && !(r.owner && team.has(r.owner.toLowerCase())), listed: Boolean(r.builtOutside),
       reference: r.isReference, imageUrl: r.identity.imageUrl, passed: r.warrant.status === 'warranted',
     }))

@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
       terms: {
         deliverables: 'Complete the task as described, with the result delivered on chain.', quality_standards: 'Figures read from BNB Chain at delivery time, with sources.',
         // The acceptance criteria for this category, from the Standard's tolerances; Marque checks them at the answer's block.
-        ...(criteriaFor(seller.category).length ? { success_criteria: criteriaFor(seller.category).map((c) => c.text) } : {}),
+        ...(process.env['MARQUE_TERMS_CRITERIA'] === '1' && criteriaFor(seller.category).length ? { success_criteria: criteriaFor(seller.category).map((c) => c.text) } : {}),
       },
     }, quoteAccessVersion)
     return NextResponse.json({ ...q, assumptions: check.assumptions }, { headers: { 'Cache-Control': 'no-store' } })

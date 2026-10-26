@@ -165,6 +165,20 @@
       "chainIds": [
         97
       ]
+    },
+    {
+      "address": "0x7441518aB8f9234DCA53De8AB3E6789166b0420f",
+      "role": "Practice-path phone test Pass (390 px run, funded by the testnet operator; aborted before hiring)",
+      "chainIds": [
+        97
+      ]
+    },
+    {
+      "address": "0x4f95F325C695Db933dD767933C895E0f4A3Bf35d",
+      "role": "Practice-path phone test Pass (second 390 px run, funded by the testnet operator; aborted before hiring)",
+      "chainIds": [
+        97
+      ]
     }
   ]
 }

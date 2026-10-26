@@ -159,7 +159,7 @@ export function PracticeFlow() {
                             <div className={styles.pickBody}>
                               <span className={styles.pickName}>{p.name}</span>
                               <span className={styles.pickMeta}>
-                                {p.category ? CAT[p.category] ?? p.category : 'Other'}
+                                {(p.category && CAT[p.category]) || 'Other'}
                                 {p.price ? ` · ${p.price.replace(/ U$/, ' test U')}` : ''}
                               </span>
                               <span className={styles.chips}>
