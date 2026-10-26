@@ -1,6 +1,6 @@
 import 'server-only'
 import { sql } from 'drizzle-orm'
-import { cachedProjection, db } from '@marque/db'
+import { cachedProjection, db, firstPartyAgentsAllLanes } from '@marque/db'
 import { marqueWallets, network, statsFrom, type ChainId, type QuestHire, type WalletQuest } from '@marque/commerce'
 import { jobLens } from './lens'
 
@@ -69,13 +69,18 @@ export function totalsOf(rows: readonly ProofRow[]): Proof['totals'] {
   return out
 }
 
+/** A Marque reference agent's testnet twin (config/first-party.json `testnet`), which the quest projection does not mark. */
+function isReferenceTwin(chainId: number, tokenId: string | null): boolean {
+  return Boolean(tokenId) && firstPartyAgentsAllLanes().some((a) => a.testnet?.chainId === chainId && String(a.testnet.tokenId) === tokenId)
+}
+
 export function rowsFrom(chainId: ChainId, per: readonly WalletQuest[]): ProofRow[] {
   const escrow = network(chainId).commerce
   const scan = chainId === 97 ? 'https://testnet.bscscan.com' : 'https://bscscan.com'
   return per.flatMap((w) => w.hires.map((h): ProofRow => ({
     chainId, jobId: h.jobId, escrow,
     agent: { name: h.agent.name, agentKey: h.agent.agentKey, tokenId: h.agent.agentId, category: h.agent.category },
-    operatorClass: h.agent.firstParty ? 'reference' : 'third_party',
+    operatorClass: h.agent.firstParty || isReferenceTwin(chainId, h.agent.agentId) ? 'reference' : 'third_party',
     funderClass: funderOf(h), client: w.wallet, counted: h.eligible && w.quest.eligible,
     state: h.state, funded: Boolean(h.tx['funded']), delivered: DELIVERED.has(h.state), settled: Boolean(h.tx['completed']),
     refunded: h.state === 'REFUNDED' || Boolean(h.tx['refunded']), rated: Boolean(h.rating && !h.reasons.includes('rating_unbound')),
@@ -132,7 +137,7 @@ export function weeklyOutside(rows: readonly ProofRow[]): Array<{ week: string; 
 }
 
 export function proofProjection() {
-  return cachedProjection('proof:v2', build, { freshMs: 10 * 60_000, timeoutMs: 180_000, staleWhileRevalidate: true })
+  return cachedProjection('proof:v3', build, { freshMs: 10 * 60_000, timeoutMs: 180_000, staleWhileRevalidate: true })
 }
 
 const CSV_COLS = ['chain', 'job_id', 'escrow', 'agent', 'agent_key', 'operator_class', 'funder_class', 'client', 'counted', 'state', 'funded', 'delivered', 'settled', 'refunded', 'rated', 'checks_decided', 'checks_agreed', 'terms_met', 'terms_of', 'terms_source', 'act', 'act_tx', 'hire_tx', 'verify_url'] as const

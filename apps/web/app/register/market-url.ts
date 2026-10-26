@@ -84,8 +84,6 @@ export function apiQuery(s: MarketState): string {
   const p = new URLSearchParams()
   if (s.tab !== 'registry') p.set('tab', s.tab)
   if (s.lane !== 'mainnet') p.set('lane', s.lane)
-  // Ready means hireable and not failed: an agent that failed its category's test is listed in its own group.
-  if (s.tab === 'ready') p.set('failed', 'group')
   if (s.token) p.set('token', s.token)
   if (s.maxPrice !== null) p.set('maxPrice', String(s.maxPrice))
   if (s.minRating !== null) p.set('minRating', String(s.minRating))

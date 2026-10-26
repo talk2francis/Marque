@@ -325,7 +325,7 @@ export function Marketplace({ category: fixedCategory, initial }: { category?: s
           )}
           {ready && ago && <span className={styles.utilityDot}> · Measured {ago}</span>}
           <span className={styles.utilityDot}> · Operator-deduplicated</span>
-          {state.tab === 'ready' ? <span className={styles.utilityDot}> · Passed tests first; failed ones listed below</span> : null}
+          {state.tab === 'ready' ? <span className={styles.utilityDot}> · Passed their test first, then untested, then failed; each result on its card</span> : null}
         </p>
         <button
           type="button"

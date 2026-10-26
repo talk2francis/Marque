@@ -2,36 +2,6 @@
   "release": "139ee52",
   "shots": [
     {
-      "name": "marketplace",
-      "url": "https://marque.trade/register",
-      "scrollY": 640,
-      "viewport": [
-        1440,
-        900
-      ],
-      "capturedAt": "2026-10-26T07:38:15.689Z"
-    },
-    {
-      "name": "storefront",
-      "url": "https://marque.trade/agents/keel",
-      "scrollY": 0,
-      "viewport": [
-        1440,
-        900
-      ],
-      "capturedAt": "2026-10-26T07:38:29.205Z"
-    },
-    {
-      "name": "proof",
-      "url": "https://marque.trade/proof",
-      "scrollY": 0,
-      "viewport": [
-        1440,
-        900
-      ],
-      "capturedAt": "2026-10-26T07:38:58.504Z"
-    },
-    {
       "name": "practice",
       "url": "https://marque.trade/quest/practice",
       "scrollY": 0,
@@ -40,17 +10,6 @@
         900
       ],
       "capturedAt": "2026-10-26T07:39:08.507Z"
-    },
-    {
-      "name": "hero",
-      "url": "https://marque.trade/",
-      "theme": "light",
-      "scrollY": 0,
-      "viewport": [
-        1440,
-        820
-      ],
-      "capturedAt": "2026-10-26T07:41:39.299Z"
     },
     {
       "name": "job",
@@ -95,6 +54,50 @@
         900
       ],
       "capturedAt": "2026-10-26T07:43:38.697Z"
+    },
+    {
+      "name": "proof",
+      "url": "https://marque.trade/proof",
+      "theme": "light",
+      "scrollY": 0,
+      "viewport": [
+        1440,
+        900
+      ],
+      "capturedAt": "2026-10-26T07:57:28.903Z"
+    },
+    {
+      "name": "hero",
+      "url": "https://marque.trade/",
+      "theme": "dark",
+      "scrollY": 0,
+      "viewport": [
+        1440,
+        820
+      ],
+      "capturedAt": "2026-10-26T08:00:32.404Z"
+    },
+    {
+      "name": "marketplace",
+      "url": "https://marque.trade/register",
+      "theme": "light",
+      "scrollY": 640,
+      "viewport": [
+        1440,
+        900
+      ],
+      "capturedAt": "2026-10-26T08:00:50.101Z"
+    },
+    {
+      "name": "storefront",
+      "url": "https://marque.trade/agents/keel",
+      "theme": "light",
+      "scrollY": 0,
+      "viewport": [
+        1440,
+        900
+      ],
+      "capturedAt": "2026-10-26T08:01:02.616Z"
     }
   ]
 }

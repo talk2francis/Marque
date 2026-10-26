@@ -154,7 +154,7 @@ export default async function Home() {
               const core = tiles.reduce((n, t) => n + t.hireable, 0)
               const sec = ready.filter((r) => r.category === 'security').length
               const other = Math.max(0, (market?.total ?? 0) - core - sec)
-              return <p className={styles.tilesSum}>Plus {sec} security and {other} other {other === 1 ? 'agent' : 'agents'}: {core + sec + other} hireable in all, every one with a live price and none that failed its category&apos;s test.</p>
+              return <p className={styles.tilesSum}>Plus {sec} security and {other} other {other === 1 ? 'agent' : 'agents'}: {core + sec + other} hireable in all, every one with a live price; each card shows its test result.</p>
             })()}
             </>
           ) : (
