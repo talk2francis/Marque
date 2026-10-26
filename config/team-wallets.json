@@ -179,6 +179,20 @@
       "chainIds": [
         97
       ]
+    },
+    {
+      "address": "0xBEcF7808d1e1D690Ed22e1b49b0Ff78431c271D4",
+      "role": "Forge daily-action kit test wallet (BSC testnet; runs each category's kit, funded by the testnet operator)",
+      "chainIds": [
+        97
+      ]
+    },
+    {
+      "address": "0x3AD11B93Dee7D1eD1535d1edC93964196696ba03",
+      "role": "Forge daily-action kit checkpoint identity (owner and agent wallet of testnet agent #2672, Kit Test HF)",
+      "chainIds": [
+        97
+      ]
     }
   ]
 }

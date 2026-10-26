@@ -265,9 +265,11 @@ export function marketplaceSourceQuery(owners?: readonly string[], chainId: 56 |
       order by cid, test_id, ran_at desc
     ),
     cat as (
+      -- Only the candidates' labels (a full distinct-on over every category row cost ~3 s).
       select distinct on (agent_id) agent_id, category, confidence
       from agent_category
-      ${owners ? sql`where agent_id in (
+      where agent_id in (select agent_id from svc where any_reachable union select agent_id from conf)
+      ${owners ? sql`and agent_id in (
         select scoped.id from agent scoped where scoped.chain_id = ${chainId}
           and scoped.owner_address in (${sql.join(owners.map(owner => sql`${owner}`), sql`, `)})
       )` : sql``}
@@ -286,6 +288,13 @@ export function marketplaceSourceQuery(owners?: readonly string[], chainId: 56 |
                   when 'rebalancing' then 'MCS-REB-1' when 'health_factor' then 'MCS-HF-1' end) desc nulls last,
                conf.ran_at desc
     ),
+    -- The candidates first (reachable in 24 h, or holding a Standard result: tens of thousands, not the whole
+    -- registry), then their agent rows by primary key. Joining every agent row before this filter took 25 s cold.
+    cand as (
+      select agent_id as id from svc where any_reachable
+      union
+      select agent_id from conf_pick
+    ),
     qualifying as (
       select a.id, a.token_id, a.name, a.owner_address, a.supported_protocols,
              a.image_url, a.description, a.contract_address, a.x402_supported, a.registry_created_at,
@@ -296,7 +305,8 @@ export function marketplaceSourceQuery(owners?: readonly string[], chainId: 56 |
              regexp_replace(coalesce(s.endpoint, ''), '^(https?://[^/]+).*', '\\1') as host,
              c.test_id as conf_test, c.pass as conf_pass, c.failed_fields as conf_failed, c.ran_at as conf_at,
              cat.category
-      from agent a
+      from cand
+      join agent a on a.id = cand.id
       left join svc s on s.agent_id = a.id
       left join conf_pick c on c.agent_id = a.id
       left join cat on cat.agent_id = a.id
@@ -410,7 +420,9 @@ async function queryAgents(owners?: readonly string[], states?: Awaited<ReturnTy
   // cold read times serially before filtering and pagination can begin.
   const [commerce, rows, tracks, listings] = await Promise.all([
     states ?? commercialStates(),
-    coalescedCatalogRead(marketplaceSourceQuery(owners, chainId)),
+    // The whole-catalog read refreshes a memo in the background (requests are served from the last good set), so it
+    // gets 30 s instead of 8: a fresh slot on a busy host took 9 to 16 s and returned 503 to its first visitors.
+    coalescedCatalogRead(marketplaceSourceQuery(owners, chainId), owners ? { jit: false } : { jit: false, timeoutMs: 30_000 }),
     agentTracks(chainId),
     builderListings(chainId),
   ])

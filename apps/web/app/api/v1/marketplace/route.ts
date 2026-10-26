@@ -69,7 +69,9 @@ export async function GET(req: NextRequest) {
   } catch (error) {
     // Classify failures for operators without logging query values or credentials.
     console.warn('[marketplace]', error instanceof Error && error.message === 'Check timed out'
-      ? 'request_deadline' : error instanceof TypeError ? 'type_error' : 'read_failure')
+      ? 'request_deadline' : error instanceof TypeError ? 'type_error' : 'read_failure',
+      // The Postgres error code only (57014 is a statement timeout): never query text or values.
+      (error as { code?: unknown } | null)?.code ?? '')
     return NextResponse.json(
       { error: 'marketplace_unavailable', detail: 'The catalog could not be read just now. Retry after a short pause.' },
       { status: 503, headers: baseHeaders },

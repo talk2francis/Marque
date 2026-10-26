@@ -1,4 +1,5 @@
 import { LINK_WALLET_SCRIPT } from './link-wallet-script'
+import { dailyActionFor } from './forge-action-source'
 import { ALL_TOLERANCES, type TestId } from '@marque/conformance'
 import { exampleCard, registrationJson, registrationText } from '@marque/commerce'
 
@@ -195,6 +196,13 @@ const ABIS = L(
   '} as const',
 )
 
+const ACTION_WORDS: Record<KitCategory, string> = {
+  health_factor: 'supplies a little test BNB to Venus on BSC testnet (vBNB), once a day.',
+  yield: 'supplies test BNB to Venus on even days and moves half of it back out on odd days.',
+  grid: 'swaps a little test BNB for test USDT on PancakeSwap v3 (WBNB/USDT, 0.25%), with a 2% slippage floor from the quoter.',
+  rebalancing: 'keeps one small PancakeSwap v3 WBNB/USDT position centred: each day it closes yesterday\'s and opens one around the current tick, with an exact approval.',
+}
+
 export function slugOf(name: string): string {
   return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'my-agent'
 }
@@ -239,6 +247,17 @@ export function kitFiles(input: KitInput): Array<{ path: string; content: string
       '| `registration.json` | The ERC-8004 registration file to host at `/.well-known/agent-registration.json`. |',
       '',
       `Price: ${input.priceU} U per job (set it in the Agent Studio seller config). The agent never touches a buyer's wallet: service fee only.`,
+      '',
+      '## Daily on-chain action (BSC testnet)',
+      '',
+      `BNB Chain's Set and Earn build rule asks for at least five ${s.label.toLowerCase()} actions on chain, on at least three separate days, from the agent. \`src/daily-action.ts\` takes one small one a day on BSC testnet, from your agent's own wallet:`,
+      '',
+      `- **What it does:** ${ACTION_WORDS[input.category]}`,
+      '- **What it spends:** `ACTION_TBNB` test BNB a day (default 0.0005, capped at 0.005) plus network fees in test BNB. Test tokens have no value. It refuses to run on any chain but BSC testnet (97), and acts at most once a day.',
+      '- **Your key, your host:** it reads `ACTION_PRIVATE_KEY` (the agent wallet\'s testnet key) from your own environment. Marque never sees the key, relays nothing and pays for nothing.',
+      '- **Run it:** `pnpm action:daily`. Schedule it once a day, for example `15 9 * * * cd /path/to/agent && pnpm action:daily >> actions.out 2>&1` in your crontab.',
+      '- **Stop it:** remove that cron line. Nothing else runs it.',
+      '- **Check it:** every action is appended to `actions.log.jsonl`, and https://marque.trade/builders/progress/97/YOUR-TOKEN-ID counts your category-consistent actions and the days they fall on. Approvals are shown, never counted.',
     ) },
     { path: root('BUILD_WITH_AI.md'), content: L(
       `# Build ${input.name} with a coding agent`,
@@ -273,13 +292,14 @@ export function kitFiles(input: KitInput): Array<{ path: string; content: string
     ) },
     { path: root('package.json'), content: `${JSON.stringify({
       name: slug, version: '0.1.0', private: true, type: 'module', engines: { node: '>=22' },
-      scripts: { 'test:mcs': 'node --import tsx --test test/mcs.test.ts', typecheck: 'tsc --noEmit' },
+      scripts: { 'test:mcs': 'node --import tsx --test test/mcs.test.ts', 'action:daily': 'node --import tsx src/daily-action.ts', typecheck: 'tsc --noEmit' },
       dependencies: { viem: '^2.21.0', zod: '^3.25.0' },
       devDependencies: { tsx: '^4.19.0', typescript: '^5.5.0', '@types/node': '^22.0.0' },
       marque: { forge: 1, category: input.category, test: s.test, agentStudio: { cli: STUDIO_CLI, sdk: SDK } },
     }, null, 2)}\n` },
     { path: root('tsconfig.json'), content: `${JSON.stringify({ compilerOptions: { target: 'ES2022', module: 'NodeNext', moduleResolution: 'NodeNext', strict: true, skipLibCheck: true, noEmit: true }, include: ['src', 'test'] }, null, 2)}\n` },
-    { path: root('.env.example'), content: L('# A BSC mainnet RPC that serves historical state (archive). Names only; never commit values.', 'BSC_RPC_URL=', '# Where the published cases and the grader live.', 'MARQUE_API=https://marque.trade') },
+    { path: root('.env.example'), content: L('# A BSC mainnet RPC that serves historical state (archive). Names only; never commit values.', 'BSC_RPC_URL=', '# Where the published cases and the grader live.', 'MARQUE_API=https://marque.trade', '# The daily testnet action (src/daily-action.ts): your agent wallet\'s BSC testnet key, kept in your own environment.', 'ACTION_PRIVATE_KEY=', 'ACTION_TBNB=0.0005', 'BSC_TESTNET_RPC_URL=https://bsc-testnet-rpc.publicnode.com') },
+    { path: root('src/daily-action.ts'), content: dailyActionFor(input.category) },
     { path: root('.gitignore'), content: L('node_modules', '.env') },
     { path: root('src/task.ts'), content: L(
       '/** The task a buyer sends and the report the Standard grades. Do not rename fields. */',

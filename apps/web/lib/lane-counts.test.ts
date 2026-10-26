@@ -15,7 +15,7 @@ const LANE_TABLE: Record<string, Record<string, string>> = {
   'apps/web/lib/register-counts.ts': { getRegisterCounts: 'lane' },
   'apps/web/lib/agent-track.ts': { agentTracks: 'chainId' },
   'packages/commerce/src/supply.ts': { coverage: 'lane', commercialStates: 'serviceId' },
-  'packages/commerce/src/quest.ts': { questStats: 'chainId' },
+  'packages/commerce/src/quest.ts': { questStats: 'chainId', statsFrom: 'per', marqueWallets: 'chainId' },
 }
 // Functions whose rows are already lane-scoped by their input (they only aggregate what they are given).
 const AGGREGATES_INPUT: Record<string, string[]> = {
