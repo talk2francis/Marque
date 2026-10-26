@@ -27,6 +27,8 @@ export interface ProofRow {
   settled: boolean
   refunded: boolean
   rated: boolean
+  /** When the escrow paid out (JobCompleted), for the weekly series. */
+  completedAt: string | null
   checks: { decided: number; agreed: number } | null
   terms: { met: number; of: number; source: 'signed' | 'buyer' | 'standard' } | null
   act: { action: string; tx: string | null } | null
@@ -77,6 +79,7 @@ export function rowsFrom(chainId: ChainId, per: readonly WalletQuest[]): ProofRo
     funderClass: funderOf(h), client: w.wallet, counted: h.eligible && w.quest.eligible,
     state: h.state, funded: Boolean(h.tx['funded']), delivered: DELIVERED.has(h.state), settled: Boolean(h.tx['completed']),
     refunded: h.state === 'REFUNDED' || Boolean(h.tx['refunded']), rated: Boolean(h.rating && !h.reasons.includes('rating_unbound')),
+    completedAt: h.timestamps['completed'] ?? null,
     checks: null, terms: null, act: null,
     hireTx: h.tx['funded'] ?? h.tx['created'] ?? null,
     verifyUrl: `${scan}/address/${escrow}#readContract`,
@@ -113,8 +116,23 @@ async function build(): Promise<Proof> {
   return { measuredAt: new Date().toISOString(), rows, totals: totalsOf(rows), stats }
 }
 
+/** Outside buyers' completed jobs per ISO week (Monday, UTC) and network: the figure BNB Chain can report. */
+export function weeklyOutside(rows: readonly ProofRow[]): Array<{ week: string; '56': number; '97': number }> {
+  const weeks = new Map<string, { '56': number; '97': number }>()
+  for (const r of rows) {
+    if (r.funderClass !== 'outside' || !r.settled || !r.completedAt) continue
+    const d = new Date(r.completedAt)
+    const monday = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() - ((d.getUTCDay() + 6) % 7)))
+    const k = monday.toISOString().slice(0, 10)
+    const w = weeks.get(k) ?? { '56': 0, '97': 0 }
+    w[String(r.chainId) as '56' | '97'] += 1
+    weeks.set(k, w)
+  }
+  return [...weeks.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([week, v]) => ({ week, ...v }))
+}
+
 export function proofProjection() {
-  return cachedProjection('proof:v1', build, { freshMs: 10 * 60_000, timeoutMs: 180_000 })
+  return cachedProjection('proof:v2', build, { freshMs: 10 * 60_000, timeoutMs: 180_000 })
 }
 
 const CSV_COLS = ['chain', 'job_id', 'escrow', 'agent', 'agent_key', 'operator_class', 'funder_class', 'client', 'counted', 'state', 'funded', 'delivered', 'settled', 'refunded', 'rated', 'checks_decided', 'checks_agreed', 'terms_met', 'terms_of', 'terms_source', 'act', 'act_tx', 'hire_tx', 'verify_url'] as const

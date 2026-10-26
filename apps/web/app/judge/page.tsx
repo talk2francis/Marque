@@ -130,6 +130,7 @@ export default async function JudgePage() {
             </li>
           ))}
         </ol>
+        <p className={styles.note}>Every job and who paid for it: <a href="/proof">/proof</a>. What it takes to run Marque, every key and what is not true yet: <a href="/adopt">/adopt</a>.</p>
         <p className={styles.note}>Release {SHA}{BUILT ? `, built ${BUILT}` : ''}. Nothing on this page needs a wallet.</p>
       </main>
       <SiteFooter />
