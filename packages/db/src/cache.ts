@@ -114,6 +114,22 @@ export async function cachedProjection<T>(
   }
 }
 
+/**
+ * A compressed blob in Redis (a large projection, such as the marketplace catalog, that a fresh process can start from).
+ * Redis down or absent: storing is skipped and loading returns null, so the caller computes as before.
+ */
+export async function storeBlob(key: string, value: Buffer, keepMs: number): Promise<boolean> {
+  const r = redis()
+  if (!r) return false
+  try { await r.set(`blob:${key}`, value, 'PX', keepMs); return true } catch { return false }
+}
+
+export async function loadBlob(key: string): Promise<Buffer | null> {
+  const r = redis()
+  if (!r) return null
+  try { return await r.getBuffer(`blob:${key}`) } catch { return null }
+}
+
 /** For tests and shutdown. */
 export async function closeCache(): Promise<void> {
   closed = true

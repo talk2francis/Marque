@@ -1,6 +1,8 @@
 import 'server-only'
 import { sql } from 'drizzle-orm'
-import { db, firstPartyIds, canonicalAgentIdSql } from '@marque/db'
+import { db, firstPartyIds, canonicalAgentIdSql, loadBlob, storeBlob } from '@marque/db'
+import { gzip, gunzip } from 'node:zlib'
+import { promisify } from 'node:util'
 import { boundedCommerceRead, coalescedCatalogRead } from '@marque/commerce/reads'
 import { chainOf, commercialStates, formatAmount, teamWallets, type CommercialState, type Lane } from '@marque/commerce'
 import { agentStates, TASK_FOR_CATEGORY, type AgentStateView } from './agent-state'
@@ -191,15 +193,50 @@ function originOf(v: unknown): string | null {
 const baseMemo = new Map<number, { at: number; rows: MarketRow[] }>()
 const baseInflight = new Map<number, Promise<MarketRow[]>>()
 const BASE_TTL_MS = 3 * 60_000
+const gzipAsync = promisify(gzip)
+const gunzipAsync = promisify(gunzip)
 
 /** One memo per lane: the two networks never share a base set (invariant 32). */
+/*
+ * A fresh server process starts from the last good catalog in Redis (gzip, at most a day old) instead of reading the
+ * whole registry while a deploy is loading the host; the read then refreshes it in the background. Every page that
+ * shows these rows states their read time (generatedAt), so a copy is never presented as newer than it is.
+ */
+const BLOB_KEEP_MS = 24 * 3600_000
+const BLOB_EVERY_MS = 10 * 60_000
+const blobKey = (chainId: 56 | 97) => `market:base:v1:${chainId}`
+const lastStored = new Map<number, number>()
+const storeLoads = new Map<number, Promise<{ at: number; rows: MarketRow[] } | null>>()
+
+async function fromStore(chainId: 56 | 97): Promise<{ at: number; rows: MarketRow[] } | null> {
+  const b = await loadBlob(blobKey(chainId))
+  if (!b) return null
+  try {
+    const j = JSON.parse((await gunzipAsync(b)).toString('utf8')) as { at: number; rows: MarketRow[] }
+    return Array.isArray(j.rows) && Date.now() - j.at < BLOB_KEEP_MS ? j : null
+  } catch { return null }
+}
+
+function toStore(chainId: 56 | 97, entry: { at: number; rows: MarketRow[] }): void {
+  if (Date.now() - (lastStored.get(chainId) ?? 0) < BLOB_EVERY_MS) return
+  lastStored.set(chainId, Date.now())
+  void gzipAsync(Buffer.from(JSON.stringify(entry))).then((gz) => storeBlob(blobKey(chainId), gz, BLOB_KEEP_MS)).catch(() => undefined)
+}
+
 async function marketplaceBase(chainId: 56 | 97 = 56): Promise<MarketRow[]> {
-  const memo = baseMemo.get(chainId)
+  let memo = baseMemo.get(chainId)
+  if (!memo) {
+    let load = storeLoads.get(chainId)
+    if (!load) { load = fromStore(chainId); storeLoads.set(chainId, load) }
+    const stored = await load.catch(() => null)
+    if (stored && !baseMemo.has(chainId)) baseMemo.set(chainId, stored)
+    memo = baseMemo.get(chainId)
+  }
   if (memo && Date.now() - memo.at < BASE_TTL_MS) return memo.rows
   let run = baseInflight.get(chainId)
   if (!run) {
     run = queryAgents(undefined, undefined, chainId)
-      .then((rows) => { baseMemo.set(chainId, { at: Date.now(), rows }); return rows })
+      .then((rows) => { const entry = { at: Date.now(), rows }; baseMemo.set(chainId, entry); toStore(chainId, entry); return rows })
       .finally(() => { baseInflight.delete(chainId) })
     baseInflight.set(chainId, run)
     // A background refresh that fails keeps serving the last good set.
@@ -375,8 +412,18 @@ export async function marketPageAgentStates(page: readonly Pick<MarketRow, 'agen
 // checked on every response. Never turn a failed commerce read into zero supply.
 let scopeMemo: { key: string; at: number; rows: MarketRow[] } | null = null
 let scopeInflight: { key: string; promise: Promise<{ rows: MarketRow[]; at: number }> } | null = null
+/** Above this many ids a scoped read costs more than the memoised whole catalog, which the later filters narrow the same way. */
+const SCOPE_MAX_IDS = 300
+
 async function scopedBase(ids: readonly string[], states?: Awaited<ReturnType<typeof commercialStates>>, chainId: 56 | 97 = 56) {
   if (!ids.length) return { rows: [] as MarketRow[], at: Date.now() }
+  // Every classified agent (the default view) is thousands of owners: one owner-scoped query per request took longer
+  // than its 8 s limit on a fresh process. The whole catalog is memoised, starts from Redis, and refreshes in the
+  // background; the category, ready and selection filters after this return exactly the same rows.
+  if (ids.length > SCOPE_MAX_IDS) {
+    const rows = await marketplaceBase(chainId)
+    return { rows, at: baseMemo.get(chainId)?.at ?? Date.now() }
+  }
   const key = `${chainId}|${[...new Set(ids)].sort().join(',')}`
   if (scopeMemo?.key === key && Date.now() - scopeMemo.at < BASE_TTL_MS) return scopeMemo
   if (scopeInflight?.key === key) return scopeInflight.promise
