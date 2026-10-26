@@ -178,3 +178,29 @@
   .checkerRow { flex-direction: column; }
   .checkerRow :global(.btn) { width: 100%; }
 }
+
+/* The one next step (Set and Earn). Brass hairline on the left, the action as the page's primary button. */
+.nextStep {
+  position: relative; display: grid; gap: 10px; padding: 20px 22px 22px 26px; border-radius: 16px;
+  border: 1px solid var(--hair-2); background: color-mix(in srgb, var(--panel) 92%, transparent); min-width: 0;
+}
+.nextStep::before { content: ''; position: absolute; left: 0; top: 18px; bottom: 18px; width: 2px; border-radius: 2px; background: var(--brass); }
+.nextStep p { margin: 0; color: var(--ink-2); font-size: 15px; line-height: 1.5; }
+.nextStep > a { justify-self: start; margin-top: 4px; }
+.nextKicker { font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-3); font-weight: 600; }
+.nextTitle { margin: 0; font-size: clamp(19px, 2.4vw, 23px); line-height: 1.25; color: var(--ink); font-weight: 600; text-wrap: balance; }
+.nextAlso { font-size: 14px !important; }
+.nextAlso a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--hair-2); }
+@media (max-width: 520px) { .nextStep > a { justify-self: stretch; text-align: center; } }
+
+/* A progress link shared without the address. */
+.shared { display: grid; gap: 22px; }
+.sharedStats { margin: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.sharedStats > div { display: grid; gap: 6px; padding: 18px 20px; border-radius: 16px; border: 1px solid var(--hair-2); background: color-mix(in srgb, var(--panel) 90%, transparent); }
+.sharedStats dt { font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); font-weight: 600; }
+.sharedStats dd { margin: 0; color: var(--ink-2); font-size: 16px; }
+.sharedStats dd b { font-size: 34px; font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; margin-right: 4px; }
+.sharedStats > div[data-met] dd b { color: var(--moss); }
+.sharedActions { display: flex; flex-wrap: wrap; gap: 10px; }
+@media (max-width: 640px) { .sharedStats { grid-template-columns: 1fr; } }
+.shareAddr { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: var(--ink-2); cursor: pointer; }

@@ -82,6 +82,7 @@ export function AgentCard({ a, compare, base = '', variant = 'default' }: {
             {both ? <span className={styles.nets} title="Hire on BSC mainnet with real money, or on BSC testnet free">Mainnet · Testnet</span>
               : practice ? <span className={styles.testnet} title="BSC testnet: test tokens, no real value">{a.networks ? 'Testnet only' : 'Testnet'}</span> : null}
           </span>
+          {a.builtOutside ? <span className={styles.outside} title="Listed on Marque by its own builder, a wallet outside the Marque team">Built by an outside builder</span> : null}
         </div>
         {a.isReference ? <a href="/register#reference-agents" className={styles.ref} title="Why Marque runs its own agents"><Badge kind="reference" /></a> : null}
         <SaveStar agentId={a.agentId} name={a.name} chainId={practice ? 97 : 56} tokenId={a.tokenId} />

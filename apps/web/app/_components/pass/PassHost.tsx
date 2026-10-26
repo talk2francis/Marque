@@ -6,6 +6,7 @@ import type { PrivateKeyAccount } from 'viem/accounts'
 import { agenticCommerceAbi, evaluatorRouterAbi } from '@marque/commerce/client'
 import { createPass, restorePass, unlockPass, exportKey as deriveExport, loadRecord, UNSUPPORTED_REASON, type ConfirmRequest, type PassRecord } from '@marque/pass'
 import { registerHost, heldAccount, holdAccount } from './bridge'
+import { track } from '../../../lib/track'
 import styles from './pass.module.css'
 
 /**
@@ -120,7 +121,7 @@ export function PassHost() {
             </ul>
             {error ? <p className={styles.error} role="alert">{error}</p> : null}
             <div className={styles.actions}>
-              <button type="button" className="btn btn--primary" disabled={busy} onClick={() => run(async () => { const r = await createPass(); (pending as Extract<Pending, { kind: 'onboard' }>).resolve(r); setPending(null) })}>{busy ? 'Waiting for your passkey…' : 'Create a Marque Pass'}</button>
+              <button type="button" className="btn btn--primary" disabled={busy} onClick={() => run(async () => { const r = await createPass(); track('pass_created'); (pending as Extract<Pending, { kind: 'onboard' }>).resolve(r); setPending(null) })}>{busy ? 'Waiting for your passkey…' : 'Create a Marque Pass'}</button>
               <button type="button" className="btn" disabled={busy} onClick={() => run(async () => { const r = await restorePass(); (pending as Extract<Pending, { kind: 'onboard' }>).resolve(r); setPending(null) })}>I already have one</button>
               <button type="button" className={styles.text} disabled={busy} onClick={close}>Cancel</button>
             </div>

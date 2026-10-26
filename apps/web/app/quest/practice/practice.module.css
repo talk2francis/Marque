@@ -1,0 +1,46 @@
+.page { width: min(760px, 100% - 32px); margin: 0 auto; padding: clamp(28px, 6vw, 64px) 0 72px; display: grid; gap: 28px; }
+.head { display: grid; gap: 10px; }
+.kicker { font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-3); font-weight: 600; }
+.lede { margin: 0; color: var(--ink-2); font-size: 16px; line-height: 1.55; max-width: 60ch; }
+.flow { display: grid; gap: 22px; min-width: 0; }
+
+.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; counter-reset: none; }
+.steps > li { position: relative; display: grid; grid-template-columns: 32px minmax(0, 1fr); gap: 14px; padding: 0 0 26px; }
+.steps > li:not(:last-child)::before { content: ''; position: absolute; left: 15.5px; top: 34px; bottom: 4px; width: 1px; background: var(--hair-2); }
+.n {
+  width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; font-size: 13px; font-weight: 600;
+  border: 1px solid var(--hair-2); color: var(--ink-3); background: var(--panel); font-variant-numeric: tabular-nums;
+}
+.steps > li[data-state='now'] .n { border-color: var(--brass); color: var(--ink); box-shadow: 0 0 0 3px color-mix(in srgb, var(--brass) 18%, transparent); }
+.steps > li[data-state='done'] .n { background: var(--moss); border-color: var(--moss); color: var(--panel); }
+.steps > li[data-state='todo'] .h { color: var(--ink-2); }
+.body { display: grid; gap: 8px; min-width: 0; padding-top: 4px; }
+.h { margin: 0; font-size: 17px; font-weight: 600; color: var(--ink); line-height: 1.3; }
+.p { margin: 0; color: var(--ink-2); font-size: 15px; line-height: 1.5; }
+.p a, .fine a, .link { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--hair-2); background: none; border: 0; padding: 0; font: inherit; cursor: pointer; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+.fine { margin: 0; color: var(--ink-3); font-size: 13px; line-height: 1.5; }
+
+.picks { list-style: none; margin: 4px 0 0; padding: 0; display: grid; gap: 10px; }
+.pick {
+  display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 12px 14px;
+  border: 1px solid var(--hair-2); border-radius: 14px; background: color-mix(in srgb, var(--panel) 92%, transparent);
+}
+.pickBody { display: grid; gap: 3px; min-width: 0; }
+.pickName { font-weight: 600; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pickMeta { font-size: 13px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 2px; }
+.chip { font-size: 11.5px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--hair-2); color: var(--ink-2); white-space: nowrap; }
+.chip[data-tone='pass'] { border-color: color-mix(in srgb, var(--moss) 55%, var(--hair-2)); color: var(--ink); }
+
+.funded {
+  display: grid; gap: 6px; padding: 16px 18px; border-radius: 14px; border: 1px solid color-mix(in srgb, var(--moss) 50%, var(--hair-2));
+  background: color-mix(in srgb, var(--moss) 8%, var(--panel)); color: var(--ink-2); font-size: 15px; line-height: 1.5;
+}
+.funded b { color: var(--ink); }
+.fundedActions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+
+@media (max-width: 520px) {
+  .pick { grid-template-columns: 40px minmax(0, 1fr); }
+  .pick > button { grid-column: 1 / -1; width: 100%; }
+}

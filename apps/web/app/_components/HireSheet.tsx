@@ -11,6 +11,7 @@ import { TaskForm, type TaskValue } from './hire/TaskForm'
 import { NoWalletLine } from './pass/NoWalletLine'
 import { AddressChip, Badge, Button, ButtonLink, Disclosure, ErrorNote, PriceTag, Sheet, TxStepper, type TxStep } from './ui'
 import { toast } from '../../lib/toast'
+import { trackJobStep } from '../../lib/track'
 import { explorerTx } from '../../lib/network'
 import { utcStamp } from '../../lib/time'
 import { UNote } from './ui/UNote'
@@ -208,12 +209,14 @@ export function HireSheet() {
   useEffect(() => {
     if (state.phase === 'done' && q && state.jobId && announced.current !== state.jobId) {
       announced.current = state.jobId
+      trackJobStep('funded', q.chainId, state.jobId)
       toast({ tone: 'success', title: 'Paid into escrow', body: `${q.priceLabel} is held until ${q.agentName} delivers.`, href: `/jobs/${q.chainId}/${state.jobId}`, hrefLabel: 'Open the job room' })
     }
   }, [state.phase, state.jobId, q])
 
   const delivered = job?.state && ['SUBMITTED', 'DISPUTED', 'COMPLETED', 'PAID'].includes(job.state)
   useEffect(() => {
+    if (delivered && q && state.jobId) trackJobStep('delivered', q.chainId, state.jobId)
     if (delivered && q && state.jobId) toast({ tone: 'success', title: `${q.agentName} delivered`, body: 'Open the job room to read it and rate it.', href: `/jobs/${q.chainId}/${state.jobId}`, hrefLabel: 'Open the job room' })
   }, [delivered]) // announce once
 

@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import { BRAND } from '@marque/ui'
 import { SiteHeader, SiteFooter } from '../../_components/SiteHeader'
-import { QuestChecker } from '../QuestIslands'
+import { QuestChecker, QuestViewed } from '../QuestIslands'
 import { QuestStrip } from '../QuestStrip'
 import { QuestBoard } from '../QuestBoard'
 import { questProjection, QUEST_ADDRESS } from '../../../lib/quest-api'
@@ -40,6 +40,7 @@ export default async function QuestAddressPage({ params }: { params: Promise<{ a
           </p>
           <QuestChecker initial={address} />
         </header>
+        <QuestViewed />
         {p ? <QuestBoard q={p.value} /> : <p className={styles.loading} role="status">Progress could not be read from chain just now. Try again in a minute.</p>}
       </main>
       <SiteFooter />

@@ -158,6 +158,13 @@
       "chainIds": [
         97
       ]
+    },
+    {
+      "address": "0x968C4aaDf408623BE47792bD7703fBa31a46aCcd",
+      "role": "V4 seller-key link golden path test Pass (owns testnet agent #2668, Harbour HF Linked)",
+      "chainIds": [
+        97
+      ]
     }
   ]
 }

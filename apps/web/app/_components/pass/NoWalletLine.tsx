@@ -12,7 +12,9 @@ export function NoWalletLine({ className, chainId = 97 }: { className?: string; 
   // line never pushes the page down after load (it moved the quest hero, CLS 0.55).
   const [capable, setCapable] = useState<boolean | null>(null)
   useEffect(() => setCapable(passCapableBrowser()), [])
-  const pass = connectors.find((c) => c.id === MARQUE_PASS_ID)
+  // The server's wallet config has no Pass connector (no passkeys there), so the server HTML has the button disabled
+  // and hydration keeps that attribute. Only after mount (capable is set) is the browser's connector list used.
+  const pass = capable ? connectors.find((c) => c.id === MARQUE_PASS_ID) : undefined
   if (isConnected || capable === false) return null
   return (
     <p className={`${styles.noWallet} ${className ?? ''}`}>

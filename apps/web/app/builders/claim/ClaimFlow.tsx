@@ -1,7 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
+import { useAccount, useSignMessage } from 'wagmi'
+import { useConnectModal } from '@rainbow-me/rainbowkit'
 import { Button, LinkButton, Chip, ProvenanceChip } from '@marque/ui'
 import styles from '../builders.module.css'
 
@@ -49,9 +52,17 @@ const KINDS = [
 ] as const
 
 const short = (a: string) => `${a.slice(0, 6)}…${a.slice(-4)}`
-const scan = (path: string) => `https://bscscan.com/${path}`
+const scanOn = (chainId: number, path: string) => `https://${chainId === 97 ? 'testnet.' : ''}bscscan.com/${path}`
 
 export function ClaimFlow() {
+  // ?chain=97&token=N (from a build checklist or the practice lane): look that identity up at once.
+  const params = useSearchParams()
+  const [chainId, setChainId] = useState<56 | 97>(params.get('chain') === '97' ? 97 : 56)
+  const scan = (path: string) => scanOn(chainId, path)
+  // A connected wallet (including a Marque Pass) signs through wagmi; an injected wallet alone still works.
+  const { address: connected } = useAccount()
+  const { signMessageAsync } = useSignMessage()
+  const { openConnectModal } = useConnectModal()
   const [step, setStep] = useState<'find' | 'prove' | 'list' | 'done'>('find')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -82,7 +93,7 @@ export function ClaimFlow() {
     try {
       const res = await fetch('/api/v1/builders/claim/identity', {
         method: 'POST', headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ input: (tokenOverride ?? input).trim() }),
+        body: JSON.stringify({ input: (tokenOverride ?? input).trim(), ...(chainId === 97 ? { chainId: 97 } : {}) }),
       })
       const body = await res.json()
       if (res.status === 409 && body.candidates) { setCandidates(body.candidates); setError(body.detail); return }
@@ -97,8 +108,20 @@ export function ClaimFlow() {
     } finally { setBusy(false) }
   }
 
+  const auto = useRef(false)
+  useEffect(() => {
+    const token = params.get('token')
+    if (auto.current || !token || !/^\d{1,12}$/.test(token)) return
+    auto.current = true
+    setInput(token)
+    void findIdentity(undefined, token)
+  }, [])
+  useEffect(() => { if (connected && step === 'prove' && !wallet) setWallet(connected) }, [connected, step])
+
   async function connect() {
     setError(null)
+    if (connected) { setWallet(connected); return }
+    if ((typeof window === 'undefined' || !window.ethereum) && openConnectModal) { openConnectModal(); return }
     if (typeof window === 'undefined' || !window.ethereum) {
       setError('No injected wallet found. Install one to prove control. Everything else on Marque works without a wallet.')
       return
@@ -112,10 +135,13 @@ export function ClaimFlow() {
   }
 
   async function sign() {
-    if (!identity || !wallet || !window.ethereum) return
+    const viaWagmi = Boolean(connected && wallet && connected.toLowerCase() === wallet.toLowerCase())
+    if (!identity || !wallet || (!viaWagmi && !window.ethereum)) return
     setBusy(true); setError(null)
     try {
-      const signature = (await window.ethereum.request({ method: 'personal_sign', params: [message, wallet] })) as string
+      const signature = viaWagmi
+        ? await signMessageAsync({ message })
+        : (await window.ethereum!.request({ method: 'personal_sign', params: [message, wallet] })) as string
       const res = await fetch('/api/v1/builders/claim/verify', {
         method: 'POST', headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ agentId: identity.agentId, nonceToken, message, signature }),
@@ -187,8 +213,10 @@ export function ClaimFlow() {
               placeholder="e.g. 320933  ·  or  0xabc…"
             />
             <span className={styles.hint}>
-              On BNB Smart Chain (56). We read the identity contract directly for the current
-              owner: the index is only used to find which contract.
+              {chainId === 97
+                ? 'On BSC testnet (97): give the token id. We read the identity contract directly for the current owner. A testnet listing goes in the practice lane.'
+                : 'On BNB Smart Chain (56). We read the identity contract directly for the current owner: the index is only used to find which contract.'}
+              {' '}<button type="button" className={styles.linkBtn} onClick={() => setChainId(chainId === 97 ? 56 : 97)}>{chainId === 97 ? 'Use BSC mainnet instead' : 'Use BSC testnet instead'}</button>
             </span>
           </div>
           {candidates.length > 0 && (

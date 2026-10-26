@@ -5,6 +5,7 @@ import type { QuestResult } from '../../lib/quest-api'
 import { explorerTx } from '../../lib/network'
 import { DeclaredTick, ShareProgress } from './QuestIslands'
 import { RemindersRow } from '../_components/campaign/Reminders'
+import { NextStep } from './NextStep'
 import styles from './quest.module.css'
 
 /**
@@ -182,6 +183,7 @@ export function QuestBoard({ q, shareable = true }: { q: QuestResult; shareable?
     <div className={styles.board}>
       {q.excluded.team ? <p className={styles.excluded} role="note"><StateMark state="excluded" />{q.excluded.reason}</p> : null}
       {q.closed ? <p className={styles.closed} role="note">Set and Earn closed on 5 Nov at 12:00 UTC. BNB Chain verifies and announces winners after 13 November.</p> : null}
+      <NextStep q={q} />
       <div className={styles.tracks}>
         <HireCard q={q} />
         <BuildCard q={q} />
@@ -202,9 +204,9 @@ export function QuestBoard({ q, shareable = true }: { q: QuestResult; shareable?
           <RemindersRow address={q.address} />
         </div>
         {shareable ? (
-          <div className={styles.row}>
+          <div className={styles.row} id="share">
             <span className={styles.rowLabel}>Share your progress</span>
-            <ShareProgress address={q.address} agents={Math.min(q.hire.distinctAgents, 3)} build={q.build.agents[0]?.observed ?? 0} />
+            <ShareProgress address={q.address} agents={Math.min(q.hire.distinctAgents, 3)} markets={Math.min(q.hire.marketplaces.named.length, 2)} build={q.build.agents[0]?.observed ?? 0} />
           </div>
         ) : null}
       </section>

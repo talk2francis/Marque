@@ -1,11 +1,12 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowUpRight, Check, Copy, Share2 } from 'lucide-react'
 import { campaignClock } from '@marque/commerce/client'
 import { declaredFor, questAddress, rememberQuestAddress, setDeclared } from '../_components/campaign/store'
 import { copyText } from '../../lib/clipboard'
 import { NoWalletLine } from '../_components/pass/NoWalletLine'
+import { track } from '../../lib/track'
 import styles from './quest.module.css'
 
 const ADDR = /^0x[0-9a-fA-F]{40}$/
@@ -26,20 +27,30 @@ export function DeclaredTick({ address, formUrl }: { address: string; formUrl: s
   )
 }
 
-export function ShareProgress({ address, agents, build }: { address: string; agents: number; build: number }) {
+export function ShareProgress({ address, agents, markets, build }: { address: string; agents: number; markets: number; build: number }) {
   const [copied, setCopied] = useState(false)
-  const url = `https://marque.trade/quest/${address}`
+  const [showAddress, setShowAddress] = useState(false)
+  const [token, setToken] = useState<string | null>(null)
   const [days, setDays] = useState<number | null>(null)
   useEffect(() => { setDays(campaignClock(Date.now()).days) }, [])
+  // The default link hides the wallet (/quest/s/{token}); the person can choose to show it.
+  useEffect(() => {
+    let live = true
+    fetch(`/api/v1/quest/${address}/share`).then((r) => (r.ok ? r.json() : null)).then((j: { token?: string } | null) => { if (live && j?.token) setToken(j.token) }).catch(() => undefined)
+    return () => { live = false }
+  }, [address])
+  const url = showAddress || !token ? `https://marque.trade/quest/${address}` : `https://marque.trade/quest/s/${token}`
+  const ready = showAddress || token !== null
   const left = days === null ? '' : days > 0 ? `, ${days} day${days === 1 ? '' : 's'} left` : ''
-  const text = `Tracking my BNB Chain Set and Earn progress on Marque: ${agents} of 3 hires, ${build} of 6 build criteria${left}. Check yours:`
+  const text = `My BNB Chain Set and Earn progress, read from chain on Marque: ${agents} of 3 hires, ${markets} of 2 marketplaces, ${build} of 6 build criteria${left}. Check yours:`
   const x = `https://x.com/intent/post?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`
   return (
     <div className={styles.share}>
-      <button type="button" className="btn btn--sm" onClick={async () => { if (await copyText(url)) { setCopied(true); setTimeout(() => setCopied(false), 2000) } }}>
+      <label className={styles.shareAddr}><input type="checkbox" checked={showAddress} onChange={(e) => setShowAddress(e.target.checked)} />Show my address</label>
+      <button type="button" className="btn btn--sm" disabled={!ready} onClick={async () => { if (await copyText(url)) { setCopied(true); setTimeout(() => setCopied(false), 2000) } }}>
         {copied ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}{copied ? 'Link copied' : 'Copy link'}
       </button>
-      <a className="btn btn--sm" href={x} target="_blank" rel="noreferrer"><Share2 aria-hidden="true" />Post on X</a>
+      <a className="btn btn--sm" href={ready ? x : undefined} aria-disabled={!ready || undefined} target="_blank" rel="noreferrer"><Share2 aria-hidden="true" />Post on X</a>
     </div>
   )
 }
@@ -71,4 +82,15 @@ export function QuestChecker({ initial }: { initial?: string }) {
       </p>
     </form>
   )
+}
+
+/** The next-step button: counts the click (anonymous, the step only) and follows the link. */
+export function NextLink({ href, step, children }: { href: string; step: string; children: ReactNode }) {
+  return <a className="btn btn--primary" href={href} onClick={() => track('quest_next_click', { step })}>{children}</a>
+}
+
+/** One anonymous "progress checked" count per page view of /quest/{address}. The address is never sent. */
+export function QuestViewed() {
+  useEffect(() => { track('quest_check', undefined, { once: true }) }, [])
+  return null
 }

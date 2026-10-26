@@ -526,6 +526,7 @@ function Technical({ d, net, twins }: { d: Data; net: string; twins: Twin[] }) {
           <div><dt>Metadata last read</dt><dd>{d.metadataReadAt ? utcStamp(d.metadataReadAt) : 'not read yet'} <ProvenanceChip provenance="CLAIMED" /></dd></div>
         </dl>
         {d.wallet ? <p className={styles.muted}><a className={styles.ext} href={explorerAddress(d.chainId, d.wallet)} target="_blank" rel="noreferrer">Every transaction of this agent on BscScan<ArrowUpRight aria-hidden="true" /></a></p> : null}
+        {!d.isReference ? <p className={styles.muted}><a className={styles.ext} href={`/builders/progress/${d.chainId}/${d.tokenId}`}>Set and Earn build checklist for this agent</a></p> : null}
       </section>
 
       <section className={styles.section} aria-labelledby="tech-ep">

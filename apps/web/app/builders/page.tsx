@@ -70,6 +70,7 @@ export default async function ForgePage() {
             )
           })}
         </div>
+        <p className={styles.builderNote}>Hires on Marque name your agent&apos;s own wallet in the escrow, and each agent&apos;s build checklist shows every check the campaign asks for. Open it from Your agents below, or at <code>/builders/progress/&#123;chain&#125;/&#123;token id&#125;</code>.</p>
         <p className={`${styles.fine} ${styles.afterDoors}`}>Registered from a Marque Pass or another wallet? <a href="/builders/link">Link your seller&apos;s wallet</a> so buyers accept its quotes.</p>
 
         <section className={styles.section} aria-labelledby="demand">

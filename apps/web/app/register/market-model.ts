@@ -24,6 +24,8 @@ export interface MarketRow {
   name: string
   category: string | null
   isReference: boolean
+  /** Listed on Marque by its own builder, a wallet outside the Marque team. */
+  builtOutside?: boolean
   identityCount: number
   owner?: string | null
   ownerLabel: string | null

@@ -8,7 +8,8 @@ export type Brief =
   | { category: 'health_factor'; address: string; targetHf: number }
   | { category: 'rebalancing'; positionId: string; address?: string }
   | { category: 'yield'; asset: string; amount: number }
-  | { category: 'grid'; pair: string; capitalUsd: number }
+  | { category: 'grid'; pair: string; capitalUsd: number; bandPct?: number }
+  | { category: 'security'; token: string }
 
 const KEY = 'marque-brief'
 const TTL_MS = 30 * 60_000
@@ -41,6 +42,7 @@ export function briefWords(b: Brief): string {
     case 'rebalancing': return `Re-centre plan for PancakeSwap V3 position #${b.positionId}`
     case 'yield': return `Best net yield for ${b.amount.toLocaleString('en-US', { maximumFractionDigits: 2 })} ${b.asset}`
     case 'grid': return `Grid plan for ${b.pair}/USDT with ${Math.round(b.capitalUsd).toLocaleString('en-US')} USD`
+    case 'security': return `Security review of token ${short(b.token)}`
   }
 }
 

@@ -1,8 +1,8 @@
 import 'server-only'
 import { sql } from 'drizzle-orm'
-import { firstPartyIds, canonicalAgentIdSql } from '@marque/db'
+import { db, firstPartyIds, canonicalAgentIdSql } from '@marque/db'
 import { boundedCommerceRead, coalescedCatalogRead } from '@marque/commerce/reads'
-import { chainOf, commercialStates, formatAmount, type CommercialState, type Lane } from '@marque/commerce'
+import { chainOf, commercialStates, formatAmount, teamWallets, type CommercialState, type Lane } from '@marque/commerce'
 import { agentStates, TASK_FOR_CATEGORY, type AgentStateView } from './agent-state'
 import { agentTracks, trackFromSource, type AgentTrack } from './agent-track'
 import { selectedAgentRows } from './compare-selection'
@@ -39,6 +39,8 @@ export interface MarketRow {
   name: string
   category: string | null
   isReference: boolean
+  /** Listed on Marque by its owner, a wallet outside the Marque team (a signed claim, builder_listing). */
+  builtOutside?: boolean
   /** How many ERC-8004 identities this one operator+endpoint has registered. */
   identityCount: number
   owner: string | null
@@ -406,10 +408,11 @@ async function queryAgents(owners?: readonly string[], states?: Awaited<ReturnTy
   const fp = new Set(firstPartyIds())
   // Independent observations share the request deadline; do not add their
   // cold read times serially before filtering and pagination can begin.
-  const [commerce, rows, tracks] = await Promise.all([
+  const [commerce, rows, tracks, listings] = await Promise.all([
     states ?? commercialStates(),
     coalescedCatalogRead(marketplaceSourceQuery(owners, chainId)),
     agentTracks(chainId),
+    builderListings(chainId),
   ])
 
   const list = (((rows as unknown as { rows?: unknown[] }).rows ?? (rows as unknown as unknown[])) as Array<Record<string, unknown>>)
@@ -487,7 +490,27 @@ async function queryAgents(owners?: readonly string[], states?: Awaited<ReturnTy
     }
   })
 
-  return thirdParty.map((r) => ({ ...r, track: trackFromSource(r.tokenId ?? '', chainId, tracks) }))
+  // An owner who delisted (a signed withdrawal) is not shown; a published listing by a wallet outside the team is
+  // marked as an outside build.
+  const team = new Set(teamWallets())
+  return thirdParty
+    .filter((r) => listings.get(r.agentId)?.status !== 'withdrawn')
+    .map((r) => {
+      const l = listings.get(r.agentId)
+      return { ...r, builtOutside: Boolean(l && l.status === 'published' && !r.isReference && !team.has(l.owner)), track: trackFromSource(r.tokenId ?? '', chainId, tracks) }
+    })
+}
+
+/** The newest owner listing per agent on one network: published, or withdrawn by its owner. A small table. */
+async function builderListings(chainId: 56 | 97): Promise<Map<string, { status: string; owner: string }>> {
+  let rows: unknown = []
+  try {
+    rows = await db().execute(sql`
+      select distinct on (agent_id) agent_id, status, lower(owner_address) as owner from builder_listing
+      where chain_id = ${chainId} order by agent_id, id desc`)
+  } catch { /* no listing data: nothing hidden, nothing marked */ }
+  const list = ((rows as unknown as { rows?: unknown[] }).rows ?? (rows as unknown as unknown[])) as Array<Record<string, unknown>>
+  return new Map(list.map((r) => [String(r['agent_id']), { status: String(r['status']), owner: String(r['owner']) }]))
 }
 
 type ServiceCommerceRow = Awaited<ReturnType<typeof commercialStates>> extends Map<number, infer V> ? V : never

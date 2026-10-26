@@ -11,6 +11,7 @@ import {
 } from '@marque/commerce/client'
 import { Button, ButtonLink, ErrorNote, Modal, StarInput, TxStepper, type TxStep } from '../../../_components/ui'
 import { toast } from '../../../../lib/toast'
+import { trackJobStep } from '../../../../lib/track'
 import { explorerTx } from '../../../../lib/network'
 import { utcStamp } from '../../../../lib/time'
 
@@ -68,6 +69,9 @@ export function JobActions(p: JobActionProps) {
   const disputable = now !== null && p.reviewEndsAt !== null && now < p.reviewEndsAt && p.state === 'SUBMITTED'
   const late = now !== null && p.submitDeadline !== null && now > p.submitDeadline && p.state === 'FUNDED'
   const canRate = ['SUBMITTED', 'COMPLETED', 'PAID', 'DISPUTED'].includes(p.state) && !p.rated && rateState.phase !== 'done'
+  const deliveredNow = ['SUBMITTED', 'COMPLETED', 'PAID', 'DISPUTED'].includes(p.state)
+  // The buyer's own browser saw the delivery: one funnel count per job, whichever page saw it first.
+  useEffect(() => { if (isClient && deliveredNow) trackJobStep('delivered', p.chainId, p.jobId) }, [isClient, deliveredNow, p.chainId, p.jobId])
   const resumePriceLabel = p.resume ? `${formatAmount(p.resume.priceRaw, p.resume.token.decimals)} ${p.resume.token.symbol}` : null
 
   const send = async (c: Call, id: string, beforeWrite?: () => void) => {
@@ -132,7 +136,7 @@ export function JobActions(p: JobActionProps) {
   const submitRating = async () => {
     if (!address || !stars) return
     const tx = await rate({ chainId: p.chainId, jobId: p.jobId, wallet: address, stars, comment: comment.trim() || undefined, quick: { answered, onTime, hireAgain: again } })
-    if (tx) { toast({ tone: 'success', title: 'Rated on chain', body: `${stars} of 5 for ${p.agentName}, from your wallet.`, href: explorerTx(p.chainId, tx) }); router.refresh() }
+    if (tx) { trackJobStep('rated', p.chainId, p.jobId); toast({ tone: 'success', title: 'Rated on chain', body: `${stars} of 5 for ${p.agentName}, from your wallet.`, href: explorerTx(p.chainId, tx) }); router.refresh() }
   }
 
   const hireAgain = p.agentKey ? <ButtonLink href={`/register?hire=${encodeURIComponent(p.agentKey)}`}>Hire {p.agentName} again</ButtonLink> : null
@@ -200,6 +204,9 @@ export function JobActions(p: JobActionProps) {
       ) : null}
 
       {['COMPLETED', 'PAID'].includes(p.state) || (p.state === 'SUBMITTED' && !disputable && !canRate) ? <div className="ja-row">{hireAgain}</div> : null}
+      {isClient && deliveredNow && (p.rated || rateState.phase === 'done') ? (
+        <div className="ja-row"><ButtonLink href={`/quest/${address}`} variant={p.chainId === 97 ? 'primary' : undefined}>See your Set and Earn progress</ButtonLink></div>
+      ) : null}
       {['REFUNDED', 'REJECTED', 'CANCELLED'].includes(p.state) ? <div className="ja-row">{hireOther}</div> : null}
 
       {steps ? <TxStepper steps={steps} label="Transactions" /> : null}

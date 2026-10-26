@@ -828,6 +828,11 @@ export const PRODUCT_EVENTS = [
   'preflight_run', 'hire_started', 'hire_completed', 'charter_granted',
   'charter_revoked', 'builder_test_run', 'third_party_listing', 'judge_flow_completed',
   'hire_failed',
+  // Set and Earn funnel: checking progress, the next step, a new Pass, and each practice (BSC testnet) or mainnet
+  // hire's deposit, delivery and rating, as seen by the buyer's own browser.
+  'quest_check', 'quest_next_click', 'pass_created',
+  'practice_funded', 'practice_delivered', 'practice_rated',
+  'mainnet_funded', 'mainnet_delivered', 'mainnet_rated',
 ] as const
 export type ProductEventName = (typeof PRODUCT_EVENTS)[number]
 

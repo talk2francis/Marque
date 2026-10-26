@@ -1,0 +1,22 @@
+.page { width: min(820px, 100% - 32px); margin: 0 auto; padding: clamp(28px, 6vw, 64px) 0 72px; display: grid; gap: 26px; }
+.head { display: grid; gap: 10px; }
+.kicker { font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-3); font-weight: 600; }
+.meta { margin: 0; color: var(--ink-3); font-size: 14px; }
+.meta a { color: var(--ink-2); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--hair-2); }
+.lede { margin: 4px 0 0; color: var(--ink); font-size: 17px; line-height: 1.5; max-width: 60ch; padding-left: 14px; border-left: 2px solid var(--brass); }
+.note { margin: 0; color: var(--ink-2); }
+.score { margin: 0; color: var(--ink-2); font-size: 15px; }
+.score b { font-size: 28px; color: var(--ink); font-variant-numeric: tabular-nums; margin-right: 4px; }
+.list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; border-top: 1px solid var(--hair-2); }
+.list > li { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--hair-2); align-items: start; }
+.state { justify-self: start; font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--hair-2); color: var(--ink-2); white-space: nowrap; }
+.state[data-state='met'] { background: var(--moss); border-color: var(--moss); color: var(--panel); }
+.state[data-state='unverifiable'] { border-style: dashed; color: var(--ink-3); }
+.title { margin: 0 0 4px; font-size: 16px; font-weight: 600; color: var(--ink); line-height: 1.35; }
+.reason { margin: 0; color: var(--ink-2); font-size: 14.5px; line-height: 1.55; }
+.next { display: inline-block; margin-top: 6px; font-size: 14px; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--hair-2); }
+.listing { display: grid; gap: 10px; padding: 18px 20px; border: 1px solid var(--hair-2); border-radius: 16px; background: color-mix(in srgb, var(--panel) 92%, transparent); }
+.h2 { margin: 0; font-size: 18px; font-weight: 600; color: var(--ink); }
+.control { display: grid; gap: 8px; justify-items: start; }
+.error { margin: 0; color: var(--oxide); font-size: 14px; }
+@media (max-width: 560px) { .list > li { grid-template-columns: 1fr; gap: 8px; } }

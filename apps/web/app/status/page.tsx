@@ -187,11 +187,22 @@ export default async function StatusPage() {
     builder_test_run: 'independent agent tests',
     third_party_listing: 'third-party listings',
     judge_flow_completed: 'judge walkthroughs finished',
+    quest_check: 'Set and Earn progress checks',
+    quest_next_click: 'next steps followed from a progress page',
+    pass_created: 'Marque Passes created',
+    practice_funded: 'practice hires funded (testnet)',
+    practice_delivered: 'practice hires delivered (testnet)',
+    practice_rated: 'practice hires rated (testnet)',
+    mainnet_funded: 'mainnet hires funded',
+    mainnet_delivered: 'mainnet hires delivered',
+    mainnet_rated: 'mainnet hires rated',
   }
   const USAGE_ORDER = [
     'builder_test_run', 'marketplace_search', 'position_read', 'agent_profile_view',
     'compare_add', 'preflight_run', 'hire_started', 'hire_completed',
     'charter_granted', 'charter_revoked', 'third_party_listing', 'judge_flow_completed',
+    'quest_check', 'quest_next_click', 'pass_created', 'practice_funded', 'practice_delivered', 'practice_rated',
+    'mainnet_funded', 'mainnet_delivered', 'mainnet_rated',
   ]
   const usage = usageQ.rows
   const usageSince = usage.reduce<string | null>((a, r) => {

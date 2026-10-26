@@ -19,10 +19,10 @@ export interface TaskValue {
 
 const ADDR = /^0x[0-9a-fA-F]{40}$/
 // A real Venus account with a live loan, the MCS-HF-1 subject (docs/standard). Shown as an example only.
-const EXAMPLE_LOAN = '0x60AA3AEE06E2345A17E4d4B12c53E046F4F63CAf'
+export const EXAMPLE_LOAN = '0x60AA3AEE06E2345A17E4d4B12c53E046F4F63CAf'
 // Marque's own PancakeSwap V3 position (the proof-run LP, docs/pancakeswap-proof.json).
-const EXAMPLE_POSITION = '7367728'
-const EXAMPLE_POSITION_OWNER = '0x2e010AaDFdFEbC2AdFCAFA5F83e9687ffA47C573'
+export const EXAMPLE_POSITION = '7367728'
+export const EXAMPLE_POSITION_OWNER = '0x2e010AaDFdFEbC2AdFCAFA5F83e9687ffA47C573'
 
 const num = (v: string) => (v.trim() === '' ? null : Number(v))
 const fmt = (n: number) => (Number.isInteger(n) ? String(n) : String(Number(n.toFixed(4))))
@@ -82,7 +82,8 @@ function HealthFactor({ agentName, onChange, disabled }: { agentName: string; on
   const [target, setTarget] = useState('2.5')
   // A brief from /positions fills the form; the buyer still sees and edits every field.
   useEffect(() => { const b = readBrief('health_factor'); if (b?.category === 'health_factor') { setAddr(b.address); setTarget(String(b.targetHf)) } }, [])
-  useEffect(() => { if (!addr && address) setAddr(address) }, [address])
+  // The connected wallet fills an empty field; a brief's own account (same mount) is never replaced.
+  useEffect(() => { if (!addr && address && !readBrief('health_factor')) setAddr(address) }, [address])
   const t = num(target)
   const addrOk = ADDR.test(addr)
   const targetOk = t !== null && t > 1 && t <= 10
@@ -111,7 +112,8 @@ function Grid({ onChange, disabled }: { onChange: (v: TaskValue) => void; disabl
   const [lo, setLo] = useState('')
   const [hi, setHi] = useState('')
   const [cap, setCap] = useState('500')
-  useEffect(() => { const b = readBrief('grid'); if (b?.category === 'grid') { if (PAIRS.some((p) => p.value === b.pair)) setPair(b.pair); setCap(String(Math.round(b.capitalUsd))) } }, [])
+  const [bandAsked, setBandAsked] = useState<number | null>(null)
+  useEffect(() => { const b = readBrief('grid'); if (b?.category === 'grid') { if (PAIRS.some((p) => p.value === b.pair)) setPair(b.pair); setCap(String(Math.round(b.capitalUsd))); if (b.bandPct) setBandAsked(b.bandPct) } }, [])
   const [stop, setStop] = useState('')
   const [levels, setLevels] = useState('10')
   const [spot, setSpot] = useState<{ price: number; block: string } | null>(null)
@@ -136,6 +138,8 @@ function Grid({ onChange, disabled }: { onChange: (v: TaskValue) => void; disabl
   }), [pair, lo, hi, cap, stop, N, S, bandOk, capOk, stopOk, lvOk])
   useEmit(onChange, v)
   const band = (pct: number) => { if (!spot) return; setLo(fmt(spot.price * (1 - pct))); setHi(fmt(spot.price * (1 + pct))) }
+  // A brief that asks for a band (the practice hire) sets it around the live price once that price is read.
+  useEffect(() => { if (bandAsked && spot && !lo && !hi) { band(bandAsked); setBandAsked(null) } }, [bandAsked, spot])
   return (
     <div className="taskform-grid">
       <SelectField label="Pair" value={pair} onChange={setPair} options={PAIRS} help={spot ? <span className="taskform-help">{pair} now {fmt(spot.price)} USDT on PancakeSwap, block {Number(spot.block).toLocaleString('en-US')}. <button type="button" className="taskform-link" onClick={() => band(0.1)}>Band ±10%</button> · <button type="button" className="taskform-link" onClick={() => band(0.05)}>±5%</button></span> : 'Reading the current price…'} />
@@ -154,7 +158,7 @@ function Rebalance({ onChange, disabled }: { onChange: (v: TaskValue) => void; d
   const [owner, setOwner] = useState('')
   const [pct, setPct] = useState('5')
   useEffect(() => { const b = readBrief('rebalancing'); if (b?.category === 'rebalancing') { setId(b.positionId); if (b.address) setOwner(b.address) } }, [])
-  useEffect(() => { if (!owner && address) setOwner(address) }, [address])
+  useEffect(() => { if (!owner && address && !(readBrief('rebalancing') as { address?: string } | null)?.address) setOwner(address) }, [address])
   const [mine, setMine] = useState<Array<{ tokenId: string; pair: string; inRange: boolean }> | null>(null)
   useEffect(() => {
     if (!address) { setMine(null); return }
@@ -227,6 +231,7 @@ function Yield({ onChange, disabled }: { onChange: (v: TaskValue) => void; disab
 
 function Security({ onChange, disabled }: { onChange: (v: TaskValue) => void; disabled?: boolean }) {
   const [token, setToken] = useState('')
+  useEffect(() => { const b = readBrief('security'); if (b?.category === 'security') setToken(b.token) }, [])
   const ok = ADDR.test(token)
   const v = useMemo<TaskValue>(() => ({
     task: taskSentence('security', { token }),

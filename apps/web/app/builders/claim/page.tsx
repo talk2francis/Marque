@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import Link from 'next/link'
 import { Statement } from '@marque/ui'
 import { SiteHeader, SiteFooter } from '../../_components/SiteHeader'
@@ -40,7 +41,7 @@ export default function BuildersClaimPage() {
         </header>
 
         <section className={styles.section}>
-          <ClaimFlow />
+          <Suspense fallback={null}><ClaimFlow /></Suspense>
         </section>
 
         <section className={styles.section}>

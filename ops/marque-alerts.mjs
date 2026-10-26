@@ -161,8 +161,10 @@ const SIGNALS = [
     id: 'judge_truth', title: 'The /judge walkthrough shows an unproven or missing number', holdMs: 0,
     read: async () => {
       if (judgeCache && Date.now() - judgeCache.at < 15 * 60_000) return judgeCache.reading
-      const h = await getJson('/api/v1/judge/health')
-      const html = await fetch(`${BASE}/judge?check=${Date.now()}`, { signal: AbortSignal.timeout(30_000) }).then((r) => r.text())
+      // MARQUE_ALERTS_JUDGE_BASE points this one signal at another server (the alert drill uses a local stub).
+      const base = process.env.MARQUE_ALERTS_JUDGE_BASE || BASE
+      const h = await fetch(`${base}/api/v1/judge/health`, { signal: AbortSignal.timeout(20_000), headers: { 'cache-control': 'no-cache' } }).then((r) => { if (!r.ok) throw new Error(`/api/v1/judge/health ${r.status}`); return r.json() })
+      const html = await fetch(`${base}/judge?check=${Date.now()}`, { signal: AbortSignal.timeout(30_000) }).then((r) => r.text())
       const text = html.replace(/<script[\s\S]*?<\/script>/g, ' ').replace(/<[^>]+>/g, ' ')
       const blanks = ['n/a', 'not read', 'NaN', 'undefined'].filter((w) => new RegExp(`(^|[^a-z])${w.replace('/', '\\/')}([^a-z]|$)`, 'i').test(text))
       const bad = !h.ok || blanks.length > 0
@@ -216,6 +218,49 @@ async function pass({ print = false } = {}) {
   writeState(state)
 }
 
+/*
+ * Daily funnel digest, 20:00 in Lagos (WAT, UTC+1, no daylight saving): each Set and Earn funnel event today (since
+ * Lagos midnight) and to date, from the anonymous product_event table, plus wallets outside the team with a hire on
+ * each network from the public stats API. Sent once per Lagos day; `--digest` sends one now.
+ */
+const FUNNEL = [
+  ['quest_check', 'progress checks'], ['quest_next_click', 'next steps followed'], ['pass_created', 'Marque Passes created'],
+  ['practice_funded', 'practice hires funded'], ['practice_delivered', 'practice hires delivered'], ['practice_rated', 'practice hires rated'],
+  ['mainnet_funded', 'mainnet hires funded'], ['mainnet_delivered', 'mainnet hires delivered'], ['mainnet_rated', 'mainnet hires rated'],
+]
+const lagosDay = (ms = Date.now()) => new Date(ms + 3600_000).toISOString().slice(0, 10)
+async function digestText() {
+  const start = new Date(`${lagosDay()}T00:00:00+01:00`)
+  const rows = await sql`
+    select name, count(*)::int as total, (count(*) filter (where at >= ${start}))::int as today
+    from product_event where name = any(${FUNNEL.map(([n]) => n)}) group by name`
+  const by = Object.fromEntries(rows.map((r) => [r.name, r]))
+  const lines = FUNNEL.map(([n, label]) => `${label}: ${by[n]?.today ?? 0} today, ${by[n]?.total ?? 0} to date`)
+  const outside = []
+  for (const [chain, name] of [[56, 'mainnet'], [97, 'testnet']]) {
+    try {
+      const j = await (await fetch(`${BASE}/api/v1/phase2/stats?chainId=${chain}`, { signal: AbortSignal.timeout(15_000) })).json()
+      outside.push(`${name}: ${j.walletsWithHire} outside wallets with a hire, ${j.deposits} deposits, ${j.ratings} ratings`)
+    } catch (e) { outside.push(`${name}: stats could not be read (${e.message})`) }
+  }
+  return `Marque daily digest, ${lagosDay()} (Lagos)\n\nSet and Earn funnel (anonymous events)\n${lines.join('\n')}\n\nOn chain, team wallets excluded\n${outside.join('\n')}\n${BASE}/status`
+}
+async function maybeDigest() {
+  const now = new Date()
+  if ((now.getUTCHours() + 1) % 24 < 20) return
+  const state = readState()
+  if (state.digestDay === lagosDay()) return
+  const ok = await telegram(await digestText())
+  writeState({ ...readState(), digestDay: lagosDay(), digestAt: now.toISOString(), digestSent: ok })
+}
+
+if (args.has('--digest')) {
+  const text = await digestText()
+  log(text)
+  log(JSON.stringify({ sent: await telegram(text) }))
+  await sql.end(); process.exit(0)
+}
+
 if (args.has('--test')) {
   const sent = []
   for (const s of SIGNALS) {
@@ -231,5 +276,6 @@ if (args.has('--once')) { await pass({ print: true }); await sql.end(); process.
 log(`marque-alerts up, base ${BASE}, telegram ${TOKEN && CHAT ? 'on' : 'OFF (stdout only)'}`)
 for (;;) {
   await pass().catch((e) => log('pass failed', e.message))
+  await maybeDigest().catch((e) => log('digest failed', e.message))
   await new Promise((r) => setTimeout(r, 60_000))
 }

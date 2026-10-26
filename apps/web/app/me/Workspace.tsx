@@ -510,7 +510,7 @@ export function Agents({ address }: { address: string }) {
             <div className={styles.agentFoot}>
               <span>Jobs received <b>{a.jobsReceived}</b> · paid out <b>{a.jobsPaid}</b></span>
               <a className={styles.link} href={`/builders/check/${a.chainId}/${a.agentId}`}>Fix report</a>
-              <a className={styles.link} href={`/quest/${address}`}>Set and Earn detail</a>
+              <a className={styles.link} href={`/builders/progress/${a.chainId}/${a.agentId}`}>Build checklist</a>
             </div>
           </li>
         )
