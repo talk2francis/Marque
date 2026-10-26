@@ -42,6 +42,7 @@ export async function GET(req: NextRequest) {
     iface: p.get('iface'),
     tab: (['ready', 'free', 'tested', 'all'] as const).find((t) => t === p.get('tab')) ?? null,
     firstPartyOnly: bool('firstParty'),
+    failed: p.get('failed') === 'group' ? 'group' : 'include',
     lane: p.get('lane') === 'all' ? 'all' : p.get('lane') ? parseLane(p.get('lane')) : null,
     network: p.get('network') === '56' ? 56 : p.get('network') === '97' ? 97 : null,
     token: p.get('token') && /^[A-Za-z0-9]{1,12}$/.test(p.get('token')!) ? p.get('token') : null,
@@ -57,14 +58,14 @@ export async function GET(req: NextRequest) {
   }
   try {
     const result = await withDeadline(marketplaceAgents(q), 12_000)
-    const { rows, generatedAt, total, offset, hasMore, facets, lane } = result
+    const { rows, generatedAt, total, offset, hasMore, facets, lane, failedGroup } = result
     const age = Date.now() - Date.parse(generatedAt)
     const headers = { ...baseHeaders, 'X-Marque-Projection-Computed-At': generatedAt, 'X-Marque-Projection-Age-Ms': Number.isFinite(age) && age >= 0 ? String(age) : 'UNKNOWN', 'X-Marque-Projection-Stale': String(!Number.isFinite(age) || age < 0 || age > 180_000) }
     if (machine) {
       const body = machineCatalog(result, q.limit ?? 120)
       return NextResponse.json(body, { headers: { ...headers, 'Cache-Control': body.cacheMaxAgeSeconds ? `public, max-age=${body.cacheMaxAgeSeconds}` : 'no-store', Link: '</api/v1/openapi.json>; rel="describedby"' } })
     }
-    return NextResponse.json({ chainId: lane === 'all' ? null : chainOf(lane ?? 'mainnet'), lane: lane ?? 'mainnet', generatedAt, provenance: 'MEASURED', count: rows.length, total, offset, hasMore, facets, agents: rows }, { headers })
+    return NextResponse.json({ chainId: lane === 'all' ? null : chainOf(lane ?? 'mainnet'), lane: lane ?? 'mainnet', generatedAt, provenance: 'MEASURED', count: rows.length, total, offset, hasMore, facets, agents: rows, ...((failedGroup ?? []).length || p.get('failed') === 'group' ? { failedGroup: failedGroup ?? [] } : {}) }, { headers })
   } catch (error) {
     // Classify failures for operators without logging query values or credentials.
     console.warn('[marketplace]', error instanceof Error && error.message === 'Check timed out'

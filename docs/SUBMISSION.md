@@ -18,8 +18,8 @@ This submission-facing audit was prepared on 9 September 2026; judging runs to
 |---|---|---|
 | **Main Track** | ✅ | An agent marketplace on BSC with an on-chain verification primitive (warrant / charter / seal / receipt). |
 | **TermiX** | ✅ | The PancakeSwap Desk reads live V3 / Venus positions and ranks agents that can act on them; the charter is the scoped-authority surface a trading terminal needs. |
-| **PancakeSwap** | ✅ | One real mainnet PancakeSwap V3 rebalance, executed under a spend-capped charter, every transaction on BscScan — `/pancakeswap/proof`. |
-| **AltLayer** | ✅ | Deterministic reference agents + a published conformance standard (MCS) — the "is this rollup-hosted agent actually correct" question AltLayer's autonomous-agent thesis needs answered. |
+| **PancakeSwap** | ✅ | One real mainnet PancakeSwap V3 rebalance, executed under a spend-capped charter, every transaction on BscScan, `/pancakeswap/proof`. |
+| **AltLayer** | ✅ | Deterministic reference agents + a published conformance standard (MCS), the "is this rollup-hosted agent actually correct" question AltLayer's autonomous-agent thesis needs answered. |
 | ~~Altana~~ | ❌ | **Not entered.** Charters run on our own registry (`MarqueRegistry`, BSC testnet). We do not have an Altana integration and will not claim one. |
 
 The scoping deliberately stops at four. Claiming an integration we do not have is
@@ -36,27 +36,27 @@ transaction hash, or a command whose output is pasted in the phase docs.
 
 | # | Requirement | State | Evidence |
 |---|---|---|---|
-| 1 | Read any BSC address → V3 ranges, Venus HF, idle capital, from chain | **PASS** | `/positions`, `/api/v1/pancakeswap/<addr>` — allow-failure multicall, provenance per number |
-| 2 | Marketplace: every indexed agent, warranted at top, graveyard kept honest below, deduped by operator | **PASS** | `/register` — 298,817 indexed, ranked by callable + MCS pass, dupes collapsed |
-| 3 | Four categories equally deep, each with its own published test | **PASS** | `/standard` — MCS-REB-1 / GRID-1 / YIELD-1 / HF-1, all deterministic, live cases at a pinned block |
+| 1 | Read any BSC address → V3 ranges, Venus HF, idle capital, from chain | **PASS** | `/positions`, `/api/v1/pancakeswap/<addr>`, allow-failure multicall, provenance per number |
+| 2 | Marketplace: every indexed agent, warranted at top, graveyard kept honest below, deduped by operator | **PASS** | `/register`, 298,817 indexed, ranked by callable + MCS pass, dupes collapsed |
+| 3 | Four categories equally deep, each with its own published test | **PASS** | `/standard`, MCS-REB-1 / GRID-1 / YIELD-1 / HF-1, all deterministic, live cases at a pinned block |
 | 4 | No fabricated / hardcoded / estimated numbers on the shipped path; empty states instead | **PASS** | Provenance chip on every metric; `CLAIMED` styled weakest; `/status` shows staleness honestly |
 | 5 | Warrant: MCS pass per category; a failure names the field | **PASS** | Agent profiles show the per-field conformance diff, passes and failures |
 | 6 | Charter: allowlist + spend cap + expiry, enforced before signing, revocable in one tx | **PASS** | `/app/charter` composes it line by line; `packages/mandates` refuses an out-of-scope call; `/app/charters` shows every grant and the tx that ended it |
 | 7 | Seal: recommendation hashed on chain before its outcome is known | **PASS** | `MarqueRegistry.sealCall(bytes32,bytes32)` on BSC testnet; `conform` worker seals nightly |
 | 8 | Receipt: four proof blocks + canonical hash + anchor tx | **PASS** | `/receipts/<id>`; 6 compromise-era receipts reanchored (`DEVIATIONS.md` D10.5C-06) |
-| 9 | LLM never signs, never prices | **PASS** | DeepSeek performs classification and disclosed blind Ledger grading; signing and pricing remain deterministic — `docs/SECURITY.md §4` |
+| 9 | LLM never signs, never prices | **PASS** | DeepSeek performs classification and disclosed blind Ledger grading; signing and pricing remain deterministic, `docs/SECURITY.md §4` |
 | 10 | `safeFetch()` SSRF guard on every outbound agent call | **PASS** | `packages/probe/src/safe-fetch.ts`; sole path; `safe-fetch.test.ts` + `redirect.test.ts` |
 | 11 | First-party observations never deleted | **PASS** | No delete path for probe / conformance_result / receipt / run / sealed_call / pool_tick_observation; rebuild drill truncates derived tables only |
 | 12 | The Ledger: agent vs. human, blind-graded against a pre-registered rubric | **PASS** | All four benchmarks complete: 2 blind-graded agent reps + 2 blind-graded human reps, same frozen task, same pinned BSC block. Human arm on camera (`benchmark_run.evidence_url`). Agent arms replayed at the pinned block through an archive endpoint; the human arm's block recovered from the frozen task via an append-only provenance supplement (`docs/DEVIATIONS.md` D8b-02). |
 
-### TermiX Challenge — Agent Advantage Report
+### TermiX Challenge: Agent Advantage Report
 
 | # | Requirement | State | Evidence |
 |---|---|---|---|
 | T1 | ≥ 3 real tasks, run with a marketplace agent vs. without | **PASS** | Four tasks (ADV-01..04), agent vs. human analyst, two blind-graded repetitions each side, same frozen task and pinned block. `docs/AGENT-ADVANTAGE-REPORT.md`. |
 | T2 | ≥ 1 task from trading / stock / security | **PASS** | ADV-01 is a security triage of a live BSC token contract |
 | T3 | Time, cost and output quality per task, actual outputs attached | **PASS** | All 16 runs graded blind; agent elapsed and $0 direct cost, human stopwatch time and rate; raw outputs, manifests and screen recordings on each benchmark page and `/api/v1/ledger`. |
-| T4 | Advantage measured, not asserted | **PASS — split result** | Same-task, same-block, blind-graded. On the mechanical DeFi tasks the agent matches/beats the human (ADV-02 60/60 vs 60/45, ADV-03 60/60 vs 60/0, ADV-04 60/30 vs 60/15) and is sub-second at $0; on the judgement-heavy security triage the human wins (ADV-01 100/0 vs 10/35). Stated as measured, not spun. |
+| T4 | Advantage measured, not asserted | **PASS, split result** | Same-task, same-block, blind-graded. On the mechanical DeFi tasks the agent matches/beats the human (ADV-02 60/60 vs 60/45, ADV-03 60/60 vs 60/0, ADV-04 60/30 vs 60/15) and is sub-second at $0; on the judgement-heavy security triage the human wins (ADV-01 100/0 vs 10/35). Stated as measured, not spun. |
 
 ### PancakeSwap proof run (P9b)
 
@@ -67,30 +67,30 @@ transaction hash, or a command whose output is pasted in the phase docs.
 | 15 | Cost and slippage measured, not estimated | **PASS** | gas $0.10, realised slippage < 1 bps, 0.9 h cumulative out of range earning nothing |
 | 16 | A revert would be published with its reason, not hidden | **PASS** | `/pancakeswap/proof` renders a `failed` state with the revert string; two opening mints did revert `Price slippage check` and are logged (`DEVIATIONS.md` D9b-02) |
 
-### P11 — Hardening
+### P11: Hardening
 
 | # | Requirement | State | Evidence |
 |---|---|---|---|
 | 17 | RPC failover verified | **PASS** | Pool with 2 dead endpoints first returns a block ~350 ms, 20/20 concurrent OK; `packages/chain/src/pool.ts` |
 | 18 | PM2 reboot survival + startup + save | **PASS** | `pm2 kill && pm2 resurrect` → all 12 apps + site back; `pm2-root.service`, `pm2 save` |
-| 19 | Postgres nightly dump to a second location + **tested** restore | **PASS** | `ops/pg-backup.sh` → two on-disk paths + rclone hook; `ops/pg-restore-test.sh` restores to a scratch DB, row-count diff vs prod, first-party non-empty assert — **PASS** |
+| 19 | Postgres nightly dump to a second location + **tested** restore | **PASS** | `ops/pg-backup.sh` → two on-disk paths + rclone hook; `ops/pg-restore-test.sh` restores to a scratch DB, row-count diff vs prod, first-party non-empty assert, **PASS** |
 | 20 | Health monitor every 60s → Telegram on 2 consecutive failures | **PASS** | `ops/health-monitor.sh`, PM2 app `marque-health`; alert + recovery message paths |
 | 21 | Circuit breakers on every upstream | **PASS** | RPC pool bench/cooldown; 8004scan request budget; DeepSeek USD cap; `docs/ARCHITECTURE.md` failure table |
-| 22 | Rate limiting + CSP + security headers | **PASS** | `apps/web/next.config.mjs` — CSP, HSTS, COOP, Permissions-Policy; rate limits on `/api/v1/*` |
-| 23 | Rebuild drill respecting invariant 12 (derived rebuilt in scratch, first-party verified via restore) | **PASS** | `ops/rebuild-drill.sh` — grep proves ingest has no first-party insert; truncate derived; ingest from cursor 0; **agent 300 rebuilt, first-party untouched** |
-| 24 | `docs/RUNBOOK.md` | **PASS** | Present — restart, deploy, backup/restore, monitoring, "agent down at 3am", key rotation, breakers, diagnostics |
-| 25 | Load test: 50 concurrent `/desk` reads | **PASS** | `ops/load-test.sh` — **50/50 return 200**, site healthy immediately after; p50 ~17 s at 50× (graceful degradation, pool spreads load); 12 s cache added |
+| 22 | Rate limiting + CSP + security headers | **PASS** | `apps/web/next.config.mjs`, CSP, HSTS, COOP, Permissions-Policy; rate limits on `/api/v1/*` |
+| 23 | Rebuild drill respecting invariant 12 (derived rebuilt in scratch, first-party verified via restore) | **PASS** | `ops/rebuild-drill.sh`, grep proves ingest has no first-party insert; truncate derived; ingest from cursor 0; **agent 300 rebuilt, first-party untouched** |
+| 24 | `docs/RUNBOOK.md` | **PASS** | Present, restart, deploy, backup/restore, monitoring, "agent down at 3am", key rotation, breakers, diagnostics |
+| 25 | Load test: 50 concurrent `/desk` reads | **PASS** | `ops/load-test.sh`, **50/50 return 200**, site healthy immediately after; p50 ~17 s at 50× (graceful degradation, pool spreads load); 12 s cache added |
 
-### P12 — Submission kit
+### P12: Submission kit
 
 | # | Requirement | State | Evidence |
 |---|---|---|---|
-| 26 | README: judge links first, every link and tx-hash real | **PASS** | `README.md` — 13-row judge table, 4 real proof tx hashes, live funnel link |
+| 26 | README: judge links first, every link and tx-hash real | **PASS** | `README.md`, 13-row judge table, 4 real proof tx hashes, live funnel link |
 | 27 | `docs/ARCHITECTURE.md` with an SVG diagram (all text as `<text>`, full-canvas bg rect, token palette) | **PASS** | `docs/ARCHITECTURE.md` + standalone `docs/architecture.svg` (embedded as `<img>` because GitHub strips inline `<svg>` from markdown; inline copy kept in a `<details>`) |
-| 28 | `docs/SECURITY.md` — SSRF, signing boundary, key handling, LLM boundaries | **PASS** | `docs/SECURITY.md` |
-| 29 | `docs/SUBMISSION.md` — acceptance gate, PASS-with-evidence or honest | **PASS** | this file |
-| 30 | Naming sweep — no lowercase `marque` common noun, no wax-seal / "letter of marque" framing | **PASS** | output below — zero violations |
-| 31 | Demo video ≤ 2:45 | **PASS — mechanical QA** | Final hero 134.6 seconds, 60-second cut, both SRTs and `demo-video/astra/final/QA.json`; all 13 mechanical checks pass. Human listening and full-motion review remain unassessed. |
+| 28 | `docs/SECURITY.md`, SSRF, signing boundary, key handling, LLM boundaries | **PASS** | `docs/SECURITY.md` |
+| 29 | `docs/SUBMISSION.md`, acceptance gate, PASS-with-evidence or honest | **PASS** | this file |
+| 30 | Naming sweep, no lowercase `marque` common noun, no wax-seal / "letter of marque" framing | **PASS** | output below, zero violations |
+| 31 | Demo video ≤ 2:45 | **PASS, mechanical QA** | Final hero 134.6 seconds, 60-second cut, both SRTs and `demo-video/astra/final/QA.json`; all 13 mechanical checks pass. Human listening and full-motion review remain unassessed. |
 
 ---
 
@@ -100,7 +100,7 @@ transaction hash, or a command whose output is pasted in the phase docs.
 $ grep -rniE '\b(a|an|the|your|our|this|that|each|any|one|another|every|no)\s+marque\b|\bmarques\b|letter[s]?\s+of\s+marque' \
     apps/ packages/ docs/ README.md --include=*.ts --include=*.tsx --include=*.css --include=*.md --include=*.mjs
 
-apps/web/app/_components/MarqueMark.tsx:2:  * The Marque symbol — ...            proper noun (capital M)
+apps/web/app/_components/MarqueMark.tsx:2:  * The Marque symbol; ...            proper noun (capital M)
 apps/web/app/docs/page.tsx:20:  { id: 'mcs', title: 'The Marque Conformance Standard' }   proper noun
 apps/web/app/standard/page.tsx:130:  The Marque Conformance Standard ...      proper noun
 apps/web/app/builders/test/page.tsx:10:  ... the Marque Conformance Standard   proper noun
@@ -121,7 +121,7 @@ $ grep -rniE 'wax.?seal|hallmark|letter of marque' apps/ packages/ docs/ README.
 **Zero violations.** Every hit is one of: `Marque` used as a proper-noun
 adjective with a capital M; a guard comment that instructs contributors *not* to
 use it as a common noun; or the literal PostgreSQL role name `marque`. No
-"letter of marque" framing, no wax-seal or hallmark imagery anywhere — the brand
+"letter of marque" framing, no wax-seal or hallmark imagery anywhere; the brand
 mark is a winged-M lockup, not a seal.
 
 ---
@@ -132,7 +132,7 @@ mark is a winged-M lockup, not a seal.
 $ pm2 status
 marque-web, marque-ingest, marque-probe, marque-classify, marque-pancake-watch,
 marque-conform, marque-bound, marque-lattice, marque-sluicegate, marque-keel,
-marque-redcell, marque-health   —  12/12 online
+marque-redcell, marque-health; 12/12 online
 
 $ for u in / /api/v1/agents /api/v1/funnel /pancakeswap/proof /status /register /ledger; do
     curl -so /dev/null -w "%{http_code} $u\n" https://marque.trade$u; done
@@ -152,7 +152,7 @@ Nothing is turned off on the submission date. Judging runs to **23 September
 2026**. From the deadline the deployment is treated as **frozen**:
 
 - **Allowed:** uptime, monitoring, security patches, bug fixes.
-- **Data accrual is not a change** — the index staying fresh, new probes, sealed
+- **Data accrual is not a change**; the index staying fresh, new probes, sealed
   calls resolving, third parties self-listing, real buyers hiring. That is the
   product operating normally.
 - **Not allowed without a written go-ahead:** new features, new pages,

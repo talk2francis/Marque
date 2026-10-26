@@ -23,18 +23,18 @@ Redis and four other products on the same VPS.
 
 ---
 
-## 1. SSRF — `safeFetch()`
+## 1. SSRF: `safeFetch()`
 
 `packages/probe/src/safe-fetch.ts` is the **only** path from Marque to an agent
 endpoint. The probe worker, the conformance runner, the identity resolver and
-execution all go through it. There is no `fetch(agentUrl)` anywhere else — a test
+execution all go through it. There is no `fetch(agentUrl)` anywhere else; a test
 (`safe-fetch.test.ts`, `redirect.test.ts`) and code review enforce that.
 
 What it does, in order:
 
 1. **Resolve DNS first, check every A/AAAA record.** A hostname that resolves to
    a private range is rejected before a socket opens. If a host round-robins
-   between a public and a private address, that is a coin flip we refuse — *all*
+   between a public and a private address, that is a coin flip we refuse; *all*
    resolved addresses must pass.
 2. **Denylist of reserved ranges, not an allowlist of public ones.** Blocked:
    `0.0.0.0/8`, `10/8`, `127/8`, `100.64/10` (CGNAT), `169.254/16` (link-local,
@@ -45,7 +45,7 @@ What it does, in order:
 3. **IPv4-mapped IPv6 in both notations.** `::ffff:169.254.169.254` and
    `::ffff:a9fe:a9fe` are the same address; Node's URL parser rewrites one into
    the other. The guard decodes the embedded v4 from either form and re-checks
-   it. This was caught by the redirect test, not by reading the code — it is
+   it. This was caught by the redirect test, not by reading the code; it is
    called out because it is exactly the kind of bypass that ships.
 4. **Connect to the addresses that were checked, not to the name.** Checking DNS
    and then calling `fetch()` resolves the host *twice*: an attacker who controls
@@ -71,10 +71,10 @@ What it does, in order:
 
 Failure is a typed result (`blocked_ssrf`, `dns`, `tls`, `timeout`, `too_large`,
 …), never an exception that a caller might swallow. A blocked fetch is recorded
-as a failed probe with the reason — visible on the agent's profile.
+as a failed probe with the reason; visible on the agent's profile.
 
 **Not claimed:** this does not defend against a genuinely public endpoint that is
-itself malicious in its *response*. That is handled downstream — responses are
+itself malicious in its *response*. That is handled downstream; responses are
 parsed as data, size-capped, and never `eval`'d or used to build a shell command
 or SQL. Agent output that fails schema validation is a failed probe, not a crash.
 
@@ -86,9 +86,9 @@ Three signers, and nothing crosses between them:
 
 | Signer | Holds | Signs | Never signs |
 |---|---|---|---|
-| **The buyer's browser wallet** | the buyer's key, in the extension | exactly one thing: the **charter grant** (allowlist of contracts + spend cap + expiry) | anything else — there is no "approve all", no session key handed to a server |
+| **The buyer's browser wallet** | the buyer's key, in the extension | exactly one thing: the **charter grant** (allowlist of contracts + spend cap + expiry) | anything else, there is no "approve all", no session key handed to a server |
 | **The operator key** (server-side) | in `/root/.marque/secrets.env`, `chmod 600`, outside the repo | receipt anchors and pre-outcome seals on MarqueRegistry, **BSC testnet only** | anything on mainnet, anything that moves buyer funds |
-| **The proof-run deployer key** | never at rest — passed inline as `PROOF_PK=0x… node scripts/pancake-proof.mjs` for one run, then gone | the one-off mainnet rebalance sequence, under a $60 self-imposed charter scope | reused for anything else; it is not wired into any service |
+| **The proof-run deployer key** | never at rest, passed inline as `PROOF_PK=0x… node scripts/pancake-proof.mjs` for one run, then gone | the one-off mainnet rebalance sequence, under a $60 self-imposed charter scope | reused for anything else; it is not wired into any service |
 
 The charter is enforced **before** a signature is requested, not audited after.
 `packages/mandates` checks the intended call against `{allowlist, capUsd,
@@ -99,7 +99,7 @@ one transaction, immediate, on chain.
 The operator key runs on testnet on purpose. Seals and anchors are a mechanism,
 not a value transfer; the mechanism is identical on any EVM chain, and a testnet
 seal costs nothing for a judge to reproduce. The one thing that had to be
-mainnet — a rebalance with real money at risk — used the deployer key for a
+mainnet; a rebalance with real money at risk; used the deployer key for a
 single documented run (`docs/pancakeswap-proof.json`, `docs/DEVIATIONS.md` D9b).
 
 ---
@@ -116,7 +116,7 @@ single documented run (`docs/pancakeswap-proof.json`, `docs/DEVIATIONS.md` D9b).
 - **The deployer key** for the mainnet proof was passed as a process env var for
   the duration of one script invocation and never written to disk, never logged
   (the script redacts `PROOF_PK` from any error dump), never committed.
-- **`BSC_ARCHIVE_RPC_URL`** — a QuickNode BSC archive endpoint, used only by the
+- **`BSC_ARCHIVE_RPC_URL`**; a QuickNode BSC archive endpoint, used only by the
   historical benchmark replay (`packages/ledger/src/runner.ts` →
   `archiveClient()`). The URL contains its own access token, so it is treated
   like a key: `secrets.env` only, never committed, never logged, never in a
@@ -145,11 +145,11 @@ One rule, stated three ways because it is the one that would matter to a review:
   category label and nothing else. It cannot cause a transaction, set a fee, or
   change a number a buyer sees as measured.
 - **MCS** (the conformance standard) is deterministic arithmetic. It checks
-  facts and compliance with a *supplied* policy — did the agent's numbers
+  facts and compliance with a *supplied* policy; did the agent's numbers
   survive recomputation, did it stay inside the constraints it was given. No
   model is in that loop. Judgement about whether an agent is *good* goes in the
   Ledger, which is **blind-graded by a human against a rubric registered before
-  the task was run** — not by a model.
+  the task was run**; not by a model.
 - Agent responses are parsed as structured data against a schema. They are never
   interpolated into a prompt that then drives an action, never used to build a
   query or a command.
@@ -161,7 +161,7 @@ One rule, stated three ways because it is the one that would matter to a review:
 - **CSP** with `frame-ancestors 'none'`, `object-src 'none'`,
   `upgrade-insecure-requests`; `connect-src` is an explicit allowlist (self, the
   named BSC RPC hosts, WalletConnect). **`'unsafe-eval'` has been dropped from
-  `script-src`** — nothing in the production bundle needs it, and leaving it in
+  `script-src`**; nothing in the production bundle needs it, and leaving it in
   hands an injected string a way to become code. `script-src`/`style-src` still
   carry `'unsafe-inline'`, a known Next.js App Router limitation that a nonce
   would close; not yet done, and tracked rather than glossed.
@@ -169,7 +169,7 @@ One rule, stated three ways because it is the one that would matter to a review:
 - **Rate limiting** on `/api/v1/*` and the write endpoints.
 - `/api/v1/events` (anonymous telemetry) is **name-allowlisted**, drops any meta
   key outside a fixed set, caps string and number values, and always returns 204
-  — it cannot be used to store arbitrary data or to probe for what exists.
+; it cannot be used to store arbitrary data or to probe for what exists.
 - No user accounts, no sessions, no cookies with meaning. The only state a buyer
   has is on chain.
 
@@ -179,7 +179,7 @@ One rule, stated three ways because it is the one that would matter to a review:
 
 Security contact: the address in `README.md`. First-party observations (probe
 history, conformance results, run artifacts, seals) are **append-only by
-policy** — there is no code path that deletes one, which also means an attacker
+policy**; there is no code path that deletes one, which also means an attacker
 who got write access could not quietly rewrite a track record without it showing
 in the anchor chain.
 
@@ -193,7 +193,7 @@ away.
 **Patched.** Next.js was pinned at `15.1.3`, which predates the August 2026
 security release. Production runs **15.5.25** (React 19.2.6) as of 9 September
 2026: full test suite green, lint clean, and `scripts/verify-candidate.mjs`
-green on the candidate before cutover and again on production after — 27
+green on the candidate before cutover and again on production after; 27
 route/width combinations with no console error, no CSP refusal and no real
 horizontal scroll, plus the wallet modal opening under the tightened
 `script-src`.
@@ -207,8 +207,8 @@ database and swapped into place by rename. The previous build is kept at
 
 **Present and not patched, with the reasoning stated:**
 
-- **`drizzle-orm` <0.45.2 — SQL injection via improperly escaped identifiers
-  (high).** Marque is on `0.38.x`. The advisory concerns *identifiers* — table
+- **`drizzle-orm` <0.45.2; SQL injection via improperly escaped identifiers
+  (high).** Marque is on `0.38.x`. The advisory concerns *identifiers*; table
   and column names interpolated into SQL. Marque never builds an identifier from
   input: there is no `sql.identifier` call anywhere in the tree, and the single
   `sql.raw` call site (`packages/probe/src/worker.ts`) interpolates a `case`

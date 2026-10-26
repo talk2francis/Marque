@@ -16,6 +16,8 @@ import { intentFromLens } from '@marque/act'
 import { ResultLens } from './ResultLens'
 import { jobLens } from '../../../../lib/lens'
 import { jobManifest } from '../../../../lib/manifest'
+import { onchainJobTask } from '../../../../lib/job-description'
+import { FUNDER_LABEL, FUNDER_NOTE } from '../../../../lib/funder-label'
 import { registryImageUrl } from '../../../../lib/avatar-source'
 import { JobActions } from './JobActions'
 import styles from './job.module.css'
@@ -84,9 +86,11 @@ export default async function JobRoom({ params }: { params: Promise<{ chainId: s
   const acted = await outcomesForJob(`${cid}:${jobId}`)
   const lensContent: unknown = manifest?.content ?? (() => { try { return manifest?.raw ? JSON.parse(manifest.raw) : null } catch { return null } })()
   // The description can be signed or identity-matched unsigned; the buyer's words are its `task`.
+  // Hires started elsewhere (or on another Marque stack) have no intent here: the job's own description on chain says it.
+  const chainTask = intent?.['description'] ? null : await onchainJobTask(cid, jobId)
   const asked = (() => {
     const d = intent?.['description'] ? String(intent['description']) : null
-    if (!d) return null
+    if (!d) return chainTask?.task ?? null
     try { const j = JSON.parse(d) as { task?: unknown }; return typeof j.task === 'string' ? j.task : null } catch { return d.split('\n')[0] ?? null }
   })()
 
@@ -118,7 +122,10 @@ export default async function JobRoom({ params }: { params: Promise<{ chainId: s
           <header className={styles.head}>
             <div className={styles.headTop}>
               <span className="t-label">Job room · {net(chainId).short}</span>
-              <span className={styles.stateTag} data-state={state}>{state === 'SUBMITTED' ? 'Delivered' : state === 'FUNDED' ? 'Escrow funded' : state.charAt(0) + state.slice(1).toLowerCase()}</span>
+              <span className={styles.tags}>
+                {job?.funderClass ? <span className={styles.funder} data-funder={job.funderClass} title={FUNDER_NOTE[job.funderClass]}>{FUNDER_LABEL[job.funderClass]}</span> : null}
+                <span className={styles.stateTag} data-state={state}>{state === 'SUBMITTED' ? 'Delivered' : state === 'FUNDED' ? 'Escrow funded' : state.charAt(0) + state.slice(1).toLowerCase()}</span>
+              </span>
             </div>
             <div className={styles.agentRow}>
               {job?.agent ? <AgentAvatar id={job.agent.agentKey ?? jobId} name={agentName} category={category} reference={job.agent.firstParty} imageUrl={registryImageUrl(intent?.['image_url']) ?? registryImageUrl(intent?.['meta_image'])} size={52} /> : null}
@@ -153,7 +160,7 @@ export default async function JobRoom({ params }: { params: Promise<{ chainId: s
             <section className={styles.main} aria-labelledby="deliverable">
               {lensData && lensData.manifest?.raw ? null : <h2 id="deliverable" className={styles.h2}>The delivery</h2>}
               {asked ? (
-                <div className={styles.asked}><span className="t-label">{job?.client ? 'The buyer asked' : 'Asked'}</span><p>{asked}</p></div>
+                <div className={styles.asked}><span className="t-label">{job?.client ? (job.funderClass === 'team' ? 'Marque team (test) asked' : job.funderClass === 'operator' ? "The agent's own operator asked" : 'The buyer asked') : 'Asked'}</span><p>{asked}</p></div>
               ) : null}
               {lensData && lensData.manifest?.raw ? (
                 <>

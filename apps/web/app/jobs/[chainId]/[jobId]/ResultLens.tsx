@@ -403,7 +403,8 @@ export function ResultLens({ data, agentName, content }: { data: JobLens; agentN
         <h2 id="lens-title" className={styles.lensTitle}>What {agentName} delivered</h2>
         <div className={styles.badges}>
           {verdict ? <span className={styles.badge} data-tone={verdict}><CheckMark state={verdict === 'good' ? 'match' : 'differs'} />Checked against the chain: {data.summary.agreed} of {data.summary.checked} agree</span>
-            : <span className={styles.badge}>Not checked: Marque has no check for this answer</span>}
+            : data.state === 'unavailable' ? <span className={styles.badge} data-tone="mixed" title="A check exists for this answer; a chain read failed and will be tried again">Chain check could not run just now · last tried {new Date(data.attemptedAt).toISOString().slice(11, 16)} UTC</span>
+              : <span className={styles.badge}>Not checked: {data.reason ?? 'Marque has no check for this answer'}</span>}
           {data.manifest?.matches === true ? <span className={styles.badge} data-tone="good"><CheckMark state="match" />File matches the hash on chain</span> : data.manifest?.matches === false ? <span className={styles.badge} data-tone="mixed"><CheckMark state="differs" />File differs from the hash on chain</span> : null}
         </div>
       </header>

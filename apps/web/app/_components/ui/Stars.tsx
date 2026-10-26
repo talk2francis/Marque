@@ -18,7 +18,7 @@ export function Stars({ value, count, label = 'buyer-linked reviews', mine }: { 
       </span>
       {mine
         ? <span><span className="stars-avg">{Math.round(value)}</span> of 5</span>
-        : <span><span className="stars-avg">{value.toFixed(1)}</span> ({count} {label})</span>}
+        : <span><span className="stars-avg">{value.toFixed(1)}</span> ({count} {count === 1 ? label.replace(/s$/, '') : label})</span>}
     </span>
   )
 }

@@ -1,0 +1,15 @@
+{
+ "answer": {
+  "healthFactor": 4,
+  "primaryCollateralSymbol": "USDT",
+  "primaryCollateralFactor": 0.8,
+  "primaryLiquidationPriceUsd": 0.24967999861875229,
+  "repayUsdToReachTarget": 0.24968002323249033,
+  "targetHealthFactor": 8,
+  "assumptions": [],
+  "blockNumber": "129491555",
+  "readAt": "2026-10-24T09:41:00.391Z",
+  "source": "Venus Comptroller, read on-chain"
+ },
+ "description": "{\"chain_id\":56,\"currency\":\"0xcE24439F2D9C6a2289F741120FE202248B666666\",\"price\":\"50000000000000000\",\"task\":\"Health factor of Venus account 0x5aC2448FC79Ef8d33710b1Bced5AEff90138b452 and the repay that restores it to 8. (via marque.trade)\"}"
+}

@@ -3,9 +3,9 @@
 Date: 2026-09-21  
 Branch: `hardening/third-party-marketplace`  
 Baseline: `a7aedb1`  
-Recommendation: **SUPERSEDED — see the authoritative current state below**
+Recommendation: **SUPERSEDED; see the authoritative current state below**
 
-## Authoritative current state — 2026-09-21 final release pass
+## Authoritative current state: 2026-09-21 final release pass
 
 All findings below this section are retained as historical audit evidence.
 Where an older section says OPEN or recommends NO, this section is authoritative.
@@ -103,7 +103,7 @@ not migrated, modified, or deployed during verification.
 
 ## Release blockers
 
-### P0 — Charter browse path bypasses canonical hireability
+### P0: Charter browse path bypasses canonical hireability
 
 - **Symptom:** `/app/charter?category=yield` enables Grant with a reference
   agent preselected and offers third-party services that their exact profile
@@ -118,7 +118,7 @@ not migrated, modified, or deployed during verification.
   had Grant enabled.
 - **Status:** OPEN. Release rule 5 fails.
 
-### Historical P0 — No independent external end-to-end lifecycle was proven (RESOLVED)
+### Historical P0: No independent external end-to-end lifecycle was proven (RESOLVED)
 
 - **Symptom:** zero independent external agents have yet completed
   Marketplace → profile → exact Charter → external task → result → receipt in
@@ -133,7 +133,7 @@ not migrated, modified, or deployed during verification.
   run `5e3a6cab-d203-491e-bff3-7df5ce06d7fc` and
   `docs/evidence/third-party/338480/production-lifecycle-2026-09-21.json`.
 
-### P1 — A2A “live” is not proof of callability
+### P1: A2A “live” is not proof of callability
 
 - **Symptom:** all ten sampled A2A cards received `ok: true`/`liveness: live`
   after only a GET of the card. The advertised `message/send` endpoint was not
@@ -144,7 +144,7 @@ not migrated, modified, or deployed during verification.
 - **Status:** OPEN. Reachable and callable remain collapsed in persisted probe
   evidence for A2A.
 
-### P1 — Required browser matrix remains incomplete
+### P1: Required browser matrix remains incomplete
 
 Six read-only checks passed on desktop and mobile: no-wallet Marketplace and
 profile, exact unavailable-agent fail-closed behavior, reload, and browser

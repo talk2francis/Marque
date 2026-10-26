@@ -1,3 +1,4 @@
+import { FUNDER_LABEL } from '../../../lib/funder-label'
 import { ProvenanceChip } from '@marque/ui'
 import { agentActivity } from '../../../lib/agent-activity'
 import { utcStamp } from '../../../lib/time'
@@ -19,7 +20,7 @@ export async function AgentActivity({agentId,provider,chainId=56}:{agentId:strin
     <p className={styles.note}>{d.jobs.length ? `Showing the latest ${d.jobs.length} of ${d.total} indexed jobs.` : 'No indexed jobs for this agent yet.'} Free previews are not onchain hires and are not included.</p>
     <ol className={styles.jobs}>{d.jobs.map(j=><li key={j.id} className={styles.job}>
       <div className={styles.jobHead}><a href={`/jobs/${chainId}/${j.id}`}>Job {j.id}</a><span className={styles.state}>{STATES[j.state] ?? 'Unknown state'}</span></div>
-      <div className={styles.wallet}><AddressChip value={j.client} chainId={chainId}/><span>{j.team?'Team wallet':'Non-team wallet'}</span></div>
+      <div className={styles.wallet}><AddressChip value={j.client} chainId={chainId}/><span data-funder={j.funder}>{FUNDER_LABEL[j.funder]}</span></div>
       <p className={styles.source}>{j.viaMarque?'Started on this marketplace':'Provider-wallet activity; origin unverified'}</p>
       <dl className={styles.times}>{([['Created',j.createdAt],['Paid',j.fundedAt],['Delivered',j.deliveredAt],['Settled',j.settledAt]] as const).map(([label,at])=><div key={label}><dt>{label}</dt><dd>{at?<time dateTime={at}>{utcStamp(at)}</time>:'Not recorded'}</dd></div>)}</dl>
       <div className={styles.links}>{j.fundedTx?<a href={`https://bscscan.com/tx/${j.fundedTx}`} target="_blank" rel="noreferrer">Payment transaction</a>:null}{j.deliveredTx?<a href={`https://bscscan.com/tx/${j.deliveredTx}`} target="_blank" rel="noreferrer">Delivery transaction</a>:null}</div>

@@ -4,6 +4,7 @@ import { SiteHeader, SiteFooter } from './_components/SiteHeader'
 import { Stars, Tape } from './_components/ui'
 import { RecentHires } from './_components/RecentHires'
 import { ReadyNow } from './_components/home/ReadyNow'
+import { UNote } from './_components/ui/UNote'
 import { SnapshotAge } from './_components/home/SnapshotAge'
 import { ROADMAP, ROADMAP_CHECKED } from './docs/whitepaper'
 import {
@@ -99,7 +100,7 @@ export default async function Home() {
               <li><b>2</b>Pay into escrow</li>
               <li><b>3</b>Get an answer checked on chain</li>
             </ol>
-            <p className={styles.noWallet}>No wallet needed to look around. Building an agent? <a href="/builders"><span className="nav-spark" aria-hidden="true" />Agent Forge</a></p>
+            <p className={styles.noWallet}>No wallet needed to look around. No wallet? Make a <a href="/docs/faq#what-is-marque-pass">Marque Pass</a> with your face or fingerprint. Building an agent? <a href="/builders"><span className="nav-spark" aria-hidden="true" />Agent Forge</a></p>
           </div>
 
           {line ? (
@@ -144,9 +145,18 @@ export default async function Home() {
         <section className={styles.section} aria-labelledby="cats" data-reveal>
           <Head label="Categories" note={tiles ? 'Dated quote counts · BSC mainnet' : undefined} id="cats" title="Four jobs agents do on BNB Chain." />
           {tiles ? (
+            <>
             <div className={styles.tiles}>
               {tiles.map((t, i) => <CategoryTileView key={t.category} t={t} i={i} />)}
             </div>
+            {(() => {
+              // The four tiles, Security and Other add up to the headline: every hireable agent is counted somewhere.
+              const core = tiles.reduce((n, t) => n + t.hireable, 0)
+              const sec = ready.filter((r) => r.category === 'security').length
+              const other = Math.max(0, (market?.total ?? 0) - core - sec)
+              return <p className={styles.tilesSum}>Plus {sec} security and {other} other {other === 1 ? 'agent' : 'agents'}: {core + sec + other} hireable in all, every one with a live price and none that failed its category&apos;s test.</p>
+            })()}
+            </>
           ) : (
             <p className={styles.empty}>Live category counts are unavailable right now. The <a href="/register">marketplace</a> lists every agent with its state.</p>
           )}
@@ -194,7 +204,7 @@ export default async function Home() {
             title="Ready to hire now."
             action={<a className={styles.more} href="/register">See all in the marketplace <ArrowRight aria-hidden="true" /></a>}
           />
-          {market ? <ReadyNow initial={picks} /> : (
+          {market ? <><ReadyNow initial={picks} /><UNote /></> : (
             <p className={styles.empty}>Current prices are unavailable this minute. Every agent is in the <a href="/register">marketplace</a>.</p>
           )}
         </section>
@@ -319,11 +329,11 @@ function CategoryTileView({ t, i }: { t: CategoryTile; i: number }) {
         />
       </span>
       <span className={styles.tileFacts}>
-        <span><b className="num">{t.hireable}</b> hireable{t.operators ? ` from ${t.operators} ${t.operators === 1 ? 'operator' : 'operators'}` : ''}</span>
-        {t.cheapest ? <span>from <b className="num">{t.cheapest}</b></span> : <span>{t.hireable > 0 ? 'Compare individual quote terms' : 'no valid quote at snapshot'}</span>}
-        <span>Quoted <SnapshotAge iso={t.measuredAt} bare /></span>
+        <span><b className="num">{t.hireable}</b> hireable{t.operators ? ` from ${t.operators} ${t.operators === 1 ? 'operator' : 'operators'}` : ''}.</span>{' '}
+        {t.cheapest ? <span>From <b className="num">{t.cheapest}</b>.</span> : <span>{t.hireable > 0 ? 'Compare individual quote terms.' : 'No valid quote at snapshot.'}</span>}{' '}
+        <span>Quoted <SnapshotAge iso={t.measuredAt} bare />.</span>{' '}
         <span className={styles.tileRating}>
-          {t.bestRating ? <Stars value={t.bestRating.stars} count={t.bestRating.count} label="buyer-linked reviews" /> : 'No buyer-linked reviews available'}
+          {t.bestRating ? <>Best rated, {t.bestRating.agent}: <Stars value={t.bestRating.stars} count={t.bestRating.count} label="buyer-linked reviews" /></> : 'No buyer-linked reviews yet.'}
         </span>
       </span>
       <span className={styles.tileGo}>Browse {j.name.toLowerCase()} <ArrowRight aria-hidden="true" /></span>

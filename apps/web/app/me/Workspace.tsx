@@ -7,6 +7,7 @@ import { switchChain, waitForTransactionReceipt, writeContract } from '@wagmi/co
 import { erc20Abi, formatUnits } from 'viem'
 import { ArrowUpRight, Check, Copy, Download, Hammer, ShieldCheck, ShoppingBag } from 'lucide-react'
 import { AgentAvatar } from '../_components/AgentAvatar'
+import { FUNDER_LABEL } from '../../lib/funder-label'
 import { Emblem } from '../_components/campaign/Emblem'
 import { useOfficialQuest } from '../_components/campaign/useOfficialQuest'
 import { friendlyError, NETWORKS, revokeAllowanceCall, type ChainId, type FriendlyError } from '@marque/commerce/client'
@@ -380,7 +381,7 @@ function Jobs({ address }: { address: string }) {
                 <li key={h.jobKey}>
                   <a href={`/jobs/${h.chainId}/${h.jobId}`} className={styles.jobRow}>
                     <span className={styles.jobAgent}><b>{h.agent.name}</b><span>job {h.jobId}</span></span>
-                    <span className={styles.jobState} data-state={h.state}>{(PLAIN[h.state] ?? (() => h.state))(h)}</span>
+                    <span className={styles.jobState} data-state={h.state}>{(PLAIN[h.state] ?? (() => h.state))(h)}{h.reasons.includes('team_wallet') ? <span className={styles.funderTag}>{FUNDER_LABEL.team}</span> : h.reasons.includes('self_hire') ? <span className={styles.funderTag}>{FUNDER_LABEL.operator}</span> : null}</span>
                     <span className={styles.amount}>{amt(h)}</span>
                   </a>
                 </li>

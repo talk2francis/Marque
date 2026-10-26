@@ -20,6 +20,7 @@ import page from './agent-page.module.css'
 import { AgentActivity } from './AgentActivity'
 import { RailTerms } from './RailTerms'
 import { WarrantCard } from './WarrantCard'
+import { UNote } from '../../_components/ui/UNote'
 import { AnchorRedirect } from './AnchorRedirect'
 
 /**
@@ -114,6 +115,7 @@ export function Storefront({ d, section = 'overview', evidence = null, lens = nu
         </dl>
       </RailTerms>
       {d.terms.state !== 'none' ? <p className={styles.authorise}><ShieldCheck aria-hidden="true" />What you authorise: exactly this price, into escrow. Nothing else.</p> : null}
+      {d.terms.priceLabel && /\bU\b/.test(d.terms.priceLabel) ? <UNote /> : null}
       {tenderHref ? <p className={styles.authorise}><a href={tenderHref}>Compare: the same task, priced by every agent</a></p> : null}
     </aside>
   )

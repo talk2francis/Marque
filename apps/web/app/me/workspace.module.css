@@ -222,3 +222,4 @@ a.stat:hover { border-color: var(--hair-2); }
   .pill { margin-left: 0; }
   .lookup { flex-direction: column; }
 }
+.funderTag { margin-left: 8px; padding: 1px 8px; border-radius: 999px; border: 1px dashed color-mix(in srgb, var(--amber) 50%, transparent); color: var(--amber); font-size: 11.5px; white-space: nowrap; }

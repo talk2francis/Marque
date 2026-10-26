@@ -59,6 +59,22 @@ export function teamWallets(): string[] {
   return list
 }
 
+/**
+ * Who paid for a job (V4.2 L0), shown on every Job Room and job row:
+ *   team      the client is in config/team-wallets.json (Marque's own test wallets);
+ *   operator  the client is the hired agent's owner or its own agent wallet, as far as Marque can see;
+ *   outside   anyone else. Outside means not in Marque's published team list; it does not prove the buyer is unrelated.
+ */
+export type FunderClass = 'outside' | 'team' | 'operator'
+export function funderClass(client: string | null | undefined, agent?: { owner?: string | null; wallet?: string | null } | null): FunderClass | null {
+  if (!client) return null
+  const c = client.toLowerCase()
+  if (teamWallets().includes(c)) return 'team'
+  if (agent && (agent.owner?.toLowerCase() === c || agent.wallet?.toLowerCase() === c)) return 'operator'
+  return 'outside'
+}
+export const FUNDER_LABEL: Record<FunderClass, string> = { outside: 'Outside buyer', team: 'Marque team (test)', operator: "The agent's own operator" }
+
 const rowsOf = (r: unknown) => ((r as { rows?: unknown[] }).rows ?? (r as unknown[])) as Array<Record<string, unknown>>
 const s = (v: unknown): string | null => (v == null ? null : String(v))
 const iso = (v: unknown): string | null => (v == null ? null : new Date(v as string).toISOString())
@@ -247,7 +263,11 @@ export async function questJob(chainId: ChainId, jobId: string, options: { porta
   const deliverableUrl = slug ? `https://marque.trade/agents/${slug}${chainId === 97 ? '/testnet' : ''}/erc8183/job/${jobId}/response` : announcedUrl
   // Opt-in public commitments only. Never export raw quote/task/IP/access-token fields.
   const selectionCommitments = options.portable ? await publicJobSelection(chainId, jobId, h?.intentId ?? null) : undefined
+  // The hired agent's owner and wallet, for the funder class: by the provider wallet, the escrow's own record.
+  const [prov] = j?.['provider'] ? rowsOf(await db().execute(sql`select owner_address, agent_wallet from agent where chain_id = ${chainId} and lower(agent_wallet) = ${String(j['provider']).toLowerCase()} limit 1`).catch(() => [])) : []
+  const funder = funderClass(s(j?.['client']), prov ? { owner: s(prov['owner_address']), wallet: s(prov['agent_wallet']) } : null)
   return {
+    funderClass: funder,
     chainId, jobId, state: h?.state ?? null, client: s(j?.['client']), provider: s(j?.['provider']), evaluator: s(j?.['evaluator']),
     agent: h?.agent ?? null, amount: h?.amount ?? null, token: h?.token ?? null,
     deliverable: { hash: s(j?.['deliverable']), url: deliverableUrl, source: slug ? 'marque_reference' : announcedUrl ? 'agent_announced' : null },

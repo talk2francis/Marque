@@ -1,6 +1,6 @@
 'use client'
 import { ArrowRight, ChevronDown, Search } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { faqSlug, type FaqGroup } from '../faq/faq'
 import styles from '../docs.module.css'
 
@@ -10,6 +10,9 @@ import styles from '../docs.module.css'
  * Answers are native <details>, so they work before hydration and without JS.
  */
 export function FaqBrowser({ groups }: { groups: FaqGroup[] }) {
+  // A link to one answer (#what-is-marque-pass) opens it.
+  const [hash, setHash] = useState('')
+  useEffect(() => { const h = window.location.hash.slice(1); if (h) { setHash(h); requestAnimationFrame(() => document.getElementById(h)?.scrollIntoView({ block: 'start' })) } }, [])
   const [q, setQ] = useState('')
   const needle = q.trim().toLowerCase()
   const shown = useMemo(
@@ -36,7 +39,7 @@ export function FaqBrowser({ groups }: { groups: FaqGroup[] }) {
             {g.items.map((f) => {
               n++
               return (
-                <details key={f.q} className={styles.faqItem} open={Boolean(needle)}>
+                <details key={f.q} id={faqSlug(f.q)} className={styles.faqItem} open={Boolean(needle) || hash === faqSlug(f.q)}>
                   <summary>
                     <span className={styles.faqN}>{String(n).padStart(2, '0')}</span>
                     <span className={styles.faqQ}>{f.q}</span>

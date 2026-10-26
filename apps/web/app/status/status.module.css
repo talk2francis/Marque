@@ -19,3 +19,5 @@
 .stale { border-left-color: var(--breach); }
 
 @media (max-width: 640px) { .page { padding-inline: var(--s4); } }
+.incidents { margin: 0; padding-left: 18px; display: grid; gap: 6px; font-size: 14px; color: var(--oxide); }
+.incidents b { text-transform: capitalize; }

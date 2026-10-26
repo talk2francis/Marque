@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { EmptyState, Limits } from '@marque/ui'
-import type { InitialMarket, MarketFacetCounts } from './initial'
+import type { FailedGroupRow, InitialMarket, MarketFacetCounts } from './initial'
 import { track } from '../../lib/track'
 import { MarketToolbar } from './MarketToolbar'
 import { LaneSwitch } from './LaneSwitch'
@@ -13,6 +13,7 @@ import { AgentCard } from '../_components/market/AgentCard'
 import { AgentAvatar } from '../_components/AgentAvatar'
 import { Sheet } from '../_components/ui'
 import { CompareTable } from '../compare/CompareTable'
+import { UNote } from '../_components/ui/UNote'
 import { TABS, hireHref, ifaceLabel, measuredAgo, type MarketRow, type MarketTab } from './market-model'
 import {
   activeFilters,
@@ -58,6 +59,7 @@ export function Marketplace({ category: fixedCategory, initial }: { category?: s
   const [total, setTotal] = useState<number | null>(initial?.total ?? null)
   const [hasMore, setHasMore] = useState(initial?.hasMore ?? false)
   const [facets, setFacets] = useState<MarketFacetCounts | null>(initial?.facets ?? null)
+  const [failedGroup, setFailedGroup] = useState<FailedGroupRow[]>(initial?.failedGroup ?? [])
   const seeded = useRef(initial?.key ?? null)
   const [retry, setRetry] = useState(0)
   const [rankInfo, setRankInfo] = useState(false)
@@ -187,6 +189,7 @@ export function Marketplace({ category: fixedCategory, initial }: { category?: s
             setTotal(typeof j.total === 'number' ? j.total : null)
             setHasMore(j.hasMore === true)
             setFacets(j.facets ?? null)
+            setFailedGroup(Array.isArray(j.failedGroup) ? j.failedGroup : [])
             // The API clamps an out-of-range offset; follow it rather than
             // showing page 9 of 3.
             if (typeof j.offset === 'number' && j.offset !== page * pageSize) {
@@ -310,6 +313,7 @@ export function Marketplace({ category: fixedCategory, initial }: { category?: s
       />
 
       {/* Result utility bar: what this set is, and how it was ranked. */}
+      <UNote className={styles.uNote} />
       <div className={styles.utility}>
         <p className={styles.utilityCount} role="status" aria-live="polite">
           {!ready || total === null ? (
@@ -321,6 +325,7 @@ export function Marketplace({ category: fixedCategory, initial }: { category?: s
           )}
           {ready && ago && <span className={styles.utilityDot}> · Measured {ago}</span>}
           <span className={styles.utilityDot}> · Operator-deduplicated</span>
+          {state.tab === 'ready' ? <span className={styles.utilityDot}> · Passed tests first; failed ones listed below</span> : null}
         </p>
         <button
           type="button"
@@ -460,6 +465,21 @@ export function Marketplace({ category: fixedCategory, initial }: { category?: s
           </button>
         </div>
       </nav>
+
+      {state.tab === 'ready' && failedGroup.length ? (
+        <details className={styles.failedGroup}>
+          <summary><b>Listed, failed its latest test</b> <span>{failedGroup.length} {failedGroup.length === 1 ? 'agent' : 'agents'}, hireable but not counted above</span></summary>
+          <p className={styles.failedNote}>These agents take paid jobs, but their answers did not pass Marque&apos;s published test for their category. They are listed so nothing is hidden; the Ready count above leaves them out.</p>
+          <ul>
+            {failedGroup.map((f) => (
+              <li key={f.agentId}>
+                <a href={f.agentId.startsWith('97:') ? `/agents/97/${f.agentId.split(':').pop()}` : `/agents/56/${f.agentId.split(':').pop()}`}>{f.name}</a>
+                <span>{f.testId ? `Failed ${f.testId}` : 'Failed its test'}{f.failedField ? `: ${f.failedField.replace(/([a-z])([A-Z])/g, '$1 $2').toLowerCase()} did not match` : ''}{f.date ? `, ${new Date(f.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' })}` : ''}</span>
+              </li>
+            ))}
+          </ul>
+        </details>
+      ) : null}
 
       </>
       )}

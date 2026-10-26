@@ -2,10 +2,10 @@
 
 > Historical September report. The live Ledger audit on 19 October 2026 reports only ADV-02 and ADV-04 complete under current evidence rules. This document does not establish three current marketplace-hired qualifying benchmark tasks. See [the requirements crosscheck](./vnext/HACKATHON_CROSSCHECK.md).
 
-For the TermiX Challenge. Repaired and completed on **9 September 2026** — see the P8b repair
+For the TermiX Challenge. Repaired and completed on **9 September 2026**; see the P8b repair
 section for exactly how, and what was and was not touched.
 
-## Verified status — all four comparisons complete
+## Verified status: all four comparisons complete
 
 Every benchmark is now a genuine same-task, same-input, same-rubric, same-pinned-block
 comparison: two blind-graded agent repetitions and two blind-graded human repetitions, at
@@ -20,7 +20,7 @@ the exact BSC block the frozen task pins.
 
 Time and cost are unchanged from the recorded manifests: the agent arm answers in well under a
 second at $0 direct buyer cost (read-only engine: no gas, no model, no fee); the human arm
-takes 3–9 minutes at the recorded hourly rate. **On the mechanical DeFi tasks (ADV-02/03/04)
+takes 3 to 9 minutes at the recorded hourly rate. **On the mechanical DeFi tasks (ADV-02/03/04)
 the agent matches or beats the human on quality and is thousands of times faster and cheaper.
 On the judgement-heavy security triage (ADV-01) the human is clearly better.** That split is
 the honest result and it is what the rubric, registered before either arm ran, produced.
@@ -29,7 +29,7 @@ The grader systematically under-scores terse answers, which is why the two human
 often diverge sharply (a full write-up vs a one-line summary of the same finding). Both are
 shown; neither is averaged away.
 
-## P8b repair — 9 September 2026
+## P8b repair: 9 September 2026
 
 The gaps above are recoverable without fabricating anything, because the evidence
 that was missing is derivable from evidence that was kept.
@@ -47,7 +47,7 @@ run&rsquo;s manifest `task_hash` matches that frozen task:
 The repair, in order:
 
 1. **Runner fixed.** One comparison sitting now resolves its block, block hash
-   and frozen task ONCE — repetitions no longer each fetch a fresh head, and a
+   and frozen task ONCE; repetitions no longer each fetch a fresh head, and a
    repetition no longer re-registers (and so no longer can rewrite) the frozen
    benchmark. `packages/ledger/src/runner.ts`.
 2. **No silent historical fallback.** `resolveBlock` replaces `readableBlock`:
@@ -63,7 +63,7 @@ The repair, in order:
    the pinned block, it is replayed against that exact block through a BSC
    archive endpoint (`BSC_ARCHIVE_RPC_URL`, server-side). A repetition is
    rejected unless the engine reports it read the pinned block. A replay is a
-   `replay-` batch — eligible to become the published agent sitting, unlike a
+   `replay-` batch; eligible to become the published agent sitting, unlike a
    visitor `repro-` reproduction. Tool: `scripts/advantage-replay.mts`.
 5. **`comparisonMissing` unchanged in strictness.** It now reads the *effective*
    block (raw when valid, else the provenance-recovered value) but still
@@ -79,38 +79,38 @@ marked incomplete with the specific blocker; it is not forced green.
 The current published sitting of each arm, from `/api/v1/ledger`. Agent arms are the
 historical `replay-` batches, run against the pinned block through the archive endpoint;
 human arms are the 8-September sittings with their block recovered by provenance supplement.
-Every earlier batch — the pre-registration agent runs, the refusal replays for ADV-02/03,
-the visitor reproductions — is kept in the database and listed on each benchmark page as an
+Every earlier batch; the pre-registration agent runs, the refusal replays for ADV-02/03,
+the visitor reproductions; is kept in the database and listed on each benchmark page as an
 earlier sitting.
 
 | Benchmark | Block | agent rep1 / rep2 | human rep1 / rep2 | Agent elapsed |
 |---|---|---|---|---|
-| ADV-01 | 120123441 | 10 / 35 | 100 / 0 | ~0.1–0.5 s |
-| ADV-02 | 120077706 | 60 / 60 | 60 / 45 | ~0.4–0.9 s |
+| ADV-01 | 120123441 | 10 / 35 | 100 / 0 | ~0.1 to 0.5 s |
+| ADV-02 | 120077706 | 60 / 60 | 60 / 45 | ~0.4 to 0.9 s |
 | ADV-03 | 120077706 | 60 / 60 | 60 / 0 | ~0.05 s |
-| ADV-04 | 120707631 | 60 / 30 | 60 / 15 | ~0.7–1.0 s |
+| ADV-04 | 120707631 | 60 / 30 | 60 / 15 | ~0.7 to 1.0 s |
 
-Agent direct buyer cost is $0 on every task (read-only engine — no gas, no model, no fee).
+Agent direct buyer cost is $0 on every task (read-only engine; no gas, no model, no fee).
 Human cost is the recorded stopwatch time at the recorded rate. Full manifests, raw outputs
 and cost lines are on each benchmark page and in `/api/v1/ledger`.
 
-## ADV-03 — the parser defect, found and fixed
+## ADV-03: the parser defect, found and fixed
 
 The earlier ADV-03 agent runs refused: *"the task does not state the APR currently earned."*
 Two real defects in `parseAsk` (Sluicegate), not a missing fact:
 
 1. The current-APR extractor matched only *"currently earning"*, never the registered
    phrasing *"the holder currently earns 0% APR"*.
-2. The size extractor read *"1,000 USD"* as `0` — `\d+` stopped at the comma and matched the
+2. The size extractor read *"1,000 USD"* as `0`; `\d+` stopped at the comma and matched the
    `000` after it.
 
 Both fixed in `packages/agent-engines/src/parse.ts` and `sluicegate.ts`, with a regression
 test built from the verbatim frozen ADV-03 task (`sluicegate.test.ts`). The agent then
-replayed against block 120077706 and **answered** — recommends a Venus move at ~2.88% net
+replayed against block 120077706 and **answered**; recommends a Venus move at ~2.88% net
 APR against the holder's 0%. The refusal runs stay in the database as an earlier sitting.
 This is a fix to a real agent defect, not a change to the grader or the rubric.
 
-## The human arm was actually run — here is the tape
+## The human arm was actually run: here is the tape
 
 Each benchmark's manual arm is a person doing the task by hand, on camera. The
 recordings are linked on every benchmark page and embedded below. They are not
@@ -118,9 +118,9 @@ re-enactments and not something Marque could have produced.
 
 | | The analyst, on screen | Recording |
 |---|---|---|
-| **ADV-01** | ![ADV-01 human arm](./evidence/adv-01.jpg) | On BscScan, reading the BEP-20 USDT contract source — the exact token the task names — for upgradeability, mint, pause and blacklist powers. [youtu.be/pt0EkL6wY6A](https://youtu.be/pt0EkL6wY6A) |
-| **ADV-02** | ![ADV-02 human arm](./evidence/adv-02.jpg) | `cast call` against the PancakeSwap V3 pool — `getPool`, `slot0`, `tickSpacing` — pinned to block 120077706. [youtu.be/0xT6JBNv1zQ](https://youtu.be/0xT6JBNv1zQ) |
-| **ADV-03** | ![ADV-03 human arm](./evidence/adv-03.jpg) | Venus supply rates — `supplyRatePerBlock`, `venusSupplySpeeds` — against the Comptroller at block 120077706, pricing the route by hand. [youtu.be/eWAAFVw9Hs0](https://youtu.be/eWAAFVw9Hs0) |
+| **ADV-01** | ![ADV-01 human arm](./evidence/adv-01.jpg) | On BscScan, reading the BEP-20 USDT contract source, the exact token the task names, for upgradeability, mint, pause and blacklist powers. [youtu.be/pt0EkL6wY6A](https://youtu.be/pt0EkL6wY6A) |
+| **ADV-02** | ![ADV-02 human arm](./evidence/adv-02.jpg) | `cast call` against the PancakeSwap V3 pool, `getPool`, `slot0`, `tickSpacing`, pinned to block 120077706. [youtu.be/0xT6JBNv1zQ](https://youtu.be/0xT6JBNv1zQ) |
+| **ADV-03** | ![ADV-03 human arm](./evidence/adv-03.jpg) | Venus supply rates, `supplyRatePerBlock`, `venusSupplySpeeds`, against the Comptroller at block 120077706, pricing the route by hand. [youtu.be/eWAAFVw9Hs0](https://youtu.be/eWAAFVw9Hs0) |
 | **ADV-04** | ![ADV-04 human arm](./evidence/adv-04.jpg) | Venus Comptroller and vToken state at block 120707631, computing the exact repayment to restore a 1.35 health factor. [youtu.be/UKWhdf4GwO8](https://youtu.be/UKWhdf4GwO8) |
 
 Both repetitions of each manual sitting carry the recording URL in

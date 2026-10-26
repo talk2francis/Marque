@@ -4,7 +4,8 @@ import type { MarketRow } from './market-model'
 
 /** The first page of the default view, rendered on the server so cards are in the first paint. */
 export type MarketFacetCounts = MarketFacets
-export interface InitialMarket { key: string; agents: MarketRow[]; total: number | null; hasMore: boolean; generatedAt: string | null; facets: MarketFacetCounts | null }
+export type FailedGroupRow = { agentId: string; name: string; category: string | null; testId: string | null; failedField: string | null; date: string | null; networks?: Array<56 | 97> }
+export interface InitialMarket { key: string; agents: MarketRow[]; total: number | null; hasMore: boolean; generatedAt: string | null; facets: MarketFacetCounts | null; failedGroup: FailedGroupRow[] }
 
 export async function initialMarket(category?: string): Promise<InitialMarket | null> {
   const state = { ...DEFAULT_STATE, category: category ?? null }
@@ -12,7 +13,7 @@ export async function initialMarket(category?: string): Promise<InitialMarket | 
     const r = await marketplaceAgents({
       category: state.category, search: null, liveNow: false, warranted: false, thirdPartyOnly: false,
       hireableOnly: false, includeUnclassified: false, hasPrice: false, iface: null, tab: 'ready',
-      firstPartyOnly: false, network: null, lane: state.lane, token: null, maxPrice: null, minRating: null, sort: 'best',
+      firstPartyOnly: false, network: null, lane: state.lane, failed: 'group', token: null, maxPrice: null, minRating: null, sort: 'best',
       limit: state.pageSize, offset: 0,
     })
     return {
@@ -22,6 +23,7 @@ export async function initialMarket(category?: string): Promise<InitialMarket | 
       hasMore: r.hasMore === true,
       generatedAt: r.generatedAt ?? null,
       facets: r.facets ?? null,
+      failedGroup: r.failedGroup ?? [],
     }
   } catch { return null }
 }

@@ -43,7 +43,7 @@ state and attempts to spoof the mirror. No user or agent secret is involved.
 
 
 One VPS. Caddy terminates TLS and routes; PM2 supervises every process; a native
-PostgreSQL 16 and Redis 7 sit underneath. No containers, no cloud control plane —
+PostgreSQL 16 and Redis 7 sit underneath. No containers, no cloud control plane ;
 so the whole system is legible from one `pm2 status` and one `psql`.
 
 <p align="center">
@@ -127,12 +127,12 @@ Nothing here touches a private key. There is no session to steal.
 Preview   Next calls the agent read-only with the real position at a pinned
           block; grades the answer field-by-field against Marque's own
           computation. safeFetch() SSRF guard on the outbound call.
-Charter   browser signs ONE transaction — MarqueRegistry / the agent's
-          allowlist — setting {contracts, spend cap, expiry}. The screen dims
+Charter   browser signs ONE transaction; MarqueRegistry / the agent's
+          allowlist; setting {contracts, spend cap, expiry}. The screen dims
           to a cockpit and composes the charter line by line, then the brass
           mark settles and the tx hash types in as it confirms.
 Execute   the agent acts strictly inside that scope. A call to a contract not
-          on the allowlist, a spend over the cap, an action after expiry —
+          on the allowlist, a spend over the cap, an action after expiry ;
           refused before it is signed.
 Receipt   four distinct claims plus a sorted-JSON SHA-256 digest. Stored
           anchor references require independent chain verification. Sealed
@@ -145,7 +145,7 @@ Receipt   four distinct claims plus a sorted-JSON SHA-256 digest. Stored
 agent details, snapshots the funnel. `probe` checks liveness and schema.
 `classify` assigns categories (DeepSeek, hard USD cap, never signs or prices).
 `conform` runs MCS nightly and seals live recommendations. `pancake-watch`
-records each watched pool's tick every two minutes — the only source for
+records each watched pool's tick every two minutes; the only source for
 "hours out of range", because BSC keeps ~64 blocks of state and the official
 subgraph is months behind (FINDINGS F-06).
 
@@ -165,7 +165,7 @@ an 8004scan outage degrades *freshness*, not availability.
 | Postgres | `/status` says so; the health monitor pages after 2 checks. |
 | The box reboots | `pm2-root.service` runs `pm2 resurrect`; all 12 apps + the site come back (verified with `pm2 kill && pm2 resurrect`). |
 
-Load: 50 concurrent position reads for arbitrary addresses — 50/50 return 200,
+Load: 50 concurrent position reads for arbitrary addresses; 50/50 return 200,
 site healthy immediately after; latency degrades gracefully (p50 ~17 s at 50×
 vs ~2 s single) because the pool spreads load rather than failing.
 

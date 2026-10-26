@@ -103,3 +103,7 @@
 .acted { margin: var(--s-3) 0 0; padding: 10px 14px; border-left: 2px solid var(--moss); background: color-mix(in srgb, var(--moss) 7%, transparent); font-size: 14px; }
 .acted strong { font-weight: 500; }
 .acted a { color: var(--chain); margin-right: 8px; }
+.tags { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px; justify-content: flex-end; }
+.funder { display: inline-flex; align-items: center; height: 24px; padding: 0 10px; border-radius: 999px; font-size: 12px; border: 1px solid var(--hair-2); color: var(--ink-2); }
+.funder[data-funder='outside'] { color: var(--moss); border-color: color-mix(in srgb, var(--moss) 45%, transparent); }
+.funder[data-funder='team'], .funder[data-funder='operator'] { color: var(--amber); border-color: color-mix(in srgb, var(--amber) 45%, transparent); border-style: dashed; }

@@ -1,16 +1,5 @@
 {
-  "docs/AGENT-ADVANTAGE-REPORT.md": 22,
-  "docs/ARCHITECTURE.md": 6,
   "docs/DEVIATIONS.md": 435,
-  "docs/FINDINGS.md": 13,
-  "docs/HANDOFF.md": 9,
   "docs/LEDGER-MANUAL-ARMS.md": 25,
-  "docs/RUNBOOK.md": 29,
-  "docs/SECURITY.md": 19,
-  "docs/SUBMISSION.md": 25,
-  "docs/SUPPLY-OUTREACH.md": 20,
-  "docs/audit/FINAL-AUDIT.md": 6,
-  "docs/audit/MIGRATION-0012-VERIFICATION.md": 1,
-  "docs/audit/RELEASE-VERIFICATION-SUMMARY.md": 2,
-  "docs/standard/MCS-v1.0.md": 36
+  "docs/SUPPLY-OUTREACH.md": 20
 }

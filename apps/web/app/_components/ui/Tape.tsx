@@ -1,3 +1,4 @@
+import { TapeEcho } from './TapeEcho'
 import type { CSSProperties } from 'react'
 
 /** 0x3a…080a: a local copy, since AddressChip's helper lives in a client module. */
@@ -25,6 +26,7 @@ export interface TapeItem {
 
 export function Tape({ items, label = 'Recent hires and ratings on Marque' }: { items: TapeItem[]; label?: string }) {
   if (items.length === 0) return null
+  // One copy in the page (readers and crawlers see each event once); the loop's second copy is added in the browser.
   const row = (hidden: boolean) =>
     items.map((e) => (
       <a key={`${hidden ? 'b' : 'a'}-${e.id}`} className="tp-item" data-kind={e.kind} href={e.href} tabIndex={hidden ? -1 : undefined} aria-hidden={hidden || undefined} {...(e.href.startsWith('http') ? { target: '_blank', rel: 'noreferrer' } : {})}>
@@ -34,7 +36,7 @@ export function Tape({ items, label = 'Recent hires and ratings on Marque' }: { 
         <span className="num">{e.value}</span>
         <span className="tp-mono">{middle(e.tx, 4, 4)}</span>
         <span className="tp-age">{e.age}</span>
-        {e.team ? <span className="tp-team" title="A test from a wallet on Marque's published team list. Real on chain, never counted for the campaign.">test</span> : null}
+        {e.team ? <span className="tp-team" title="A test from a wallet on Marque's published team list. Real on chain, never counted for the campaign.">team test</span> : null}
       </a>
     ))
   const speed = { '--tape-s': `${Math.max(40, items.length * 9)}s` } as CSSProperties
@@ -42,7 +44,7 @@ export function Tape({ items, label = 'Recent hires and ratings on Marque' }: { 
     <div className="tp" role="region" aria-label={label}>
       <div className="tp-track" style={speed}>
         {row(false)}
-        <span aria-hidden="true" style={{ display: 'contents' }}>{row(true)}</span>
+        <TapeEcho />
       </div>
     </div>
   )

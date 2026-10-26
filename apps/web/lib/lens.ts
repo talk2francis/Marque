@@ -6,6 +6,7 @@ import { archiveClient, publicClient } from '@marque/chain'
 import { venusReader, healthFactorOf, yieldReader, pancakeV3Reader } from '@marque/positions'
 import { HF, GRID, YIELD } from '@marque/conformance'
 import { jobManifest, type Manifest } from './manifest'
+import { onchainJobTask } from './job-description'
 
 /**
  * Result Lens, server side (SPEC-WORKSPACE 2.1): the delivered answer read for its category, and
@@ -22,6 +23,15 @@ export interface JobLens {
   checks: LensCheck[]
   checkedAtBlock: string | null
   summary: { checked: number; agreed: number }
+  /**
+   * V4.2 L0. decided: at least one check ran to an answer. unavailable: a check exists but a chain read failed (say so,
+   * with the time of the attempt). no-check: no check exists for this answer, or it lacks an input a check needs
+   * (`reason` names it). A decided result pinned to a block is stored permanently (lens_result) and read first.
+   */
+  state: 'decided' | 'unavailable' | 'no-check'
+  reason: string | null
+  attemptedAt: string
+  stored: boolean
   manifest: { matches: boolean | null; hash: string | null; raw: string | null; url: string | null; source: string | null } | null
   readable: boolean
 }
@@ -124,32 +134,61 @@ async function build(chainId: ChainId, jobId: string): Promise<JobLens> {
   const url = job?.deliverable?.url ?? null
   const manifest: Manifest | null = await jobManifest(chainId, jobId, job as never)
   const source = (job?.deliverable as { source?: string | null } | undefined)?.source ?? null
-  if (!manifest) return { lens: null, checks: [], checkedAtBlock: null, summary: { checked: 0, agreed: 0 }, manifest: url ? { matches: null, hash: null, raw: null, url, source } : null, readable: false }
+  if (!manifest) return { lens: null, checks: [], checkedAtBlock: null, summary: { checked: 0, agreed: 0 }, state: 'no-check', reason: 'the answer file could not be read', attemptedAt: new Date().toISOString(), stored: false, manifest: url ? { matches: null, hash: null, raw: null, url, source } : null, readable: false }
   // A file found from the chain hash (no published URL) still links to where it was read.
   void source
   let content: unknown = manifest.content
   if (!content) { try { content = JSON.parse(manifest.raw) } catch { content = null } }
   const category = job?.agent?.category ?? null
   const lens = normalizeAnswer(category, content)
-  // The buyer's words live in the hire intent's signed description, as its `task`.
-  const [hi] = (await db().execute(sql`select i.description from commerce_job j join hire_intent i on i.id = j.intent_id where j.chain_id = ${chainId} and j.job_id = ${jobId} limit 1`).catch(() => [])) as unknown as Array<{ description: string | null }>
-  const task = (() => { const d = hi?.description ?? (job?.intent as { description?: string } | null)?.description; if (!d) return null; try { return String((JSON.parse(d) as { task?: string }).task ?? '') } catch { return d } })()
   const block = lens.meta.block && /^\d{6,12}$/.test(lens.meta.block) ? BigInt(lens.meta.block) : null
+  const manifestView = { matches: manifest.matches, hash: manifest.hash, raw: manifest.pretty || manifest.raw, url, source }
+  const attemptedAt = new Date().toISOString()
+  // A decided result never changes: read it before recomputing anything.
+  const [kept] = (await db().execute(sql`select block, checks, summary, computed_at from lens_result where chain_id = ${chainId} and job_id = ${jobId} limit 1`).catch(() => [])) as unknown as Array<{ block: string | null; checks: LensCheck[]; summary: { checked: number; agreed: number }; computed_at: string }>
+  if (kept) {
+    return { lens, checks: kept.checks, checkedAtBlock: kept.block, summary: kept.summary, state: 'decided', reason: null, attemptedAt: new Date(kept.computed_at).toISOString(), stored: true, manifest: manifestView, readable: lens.kind !== 'generic' }
+  }
+  // The buyer's words: the hire intent's signed description (hires started on Marque), else the job's own description
+  // on chain, which every ERC-8183 job carries.
+  const [hi] = (await db().execute(sql`select i.description from commerce_job j join hire_intent i on i.id = j.intent_id where j.chain_id = ${chainId} and j.job_id = ${jobId} limit 1`).catch(() => [])) as unknown as Array<{ description: string | null }>
+  const fromIntent = (() => { const d = hi?.description ?? (job?.intent as { description?: string } | null)?.description; if (!d) return null; try { return String((JSON.parse(d) as { task?: string }).task ?? '') } catch { return d } })()
+  const task = fromIntent || (await onchainJobTask(chainId, jobId))?.task || null
   // The checks read BSC mainnet state: practice jobs ask about mainnet accounts and pools too.
   const checks = await (lens.kind === 'health_factor' ? hfChecks(lens, task, block)
     : lens.kind === 'rebalancing' ? rebChecks(lens, block)
       : lens.kind === 'grid' ? Promise.resolve(gridChecks(lens))
         : lens.kind === 'yield' ? yieldChecks(lens, block) : Promise.resolve([])).catch(() => [] as LensCheck[])
   const decided = checks.filter((c) => c.state !== 'unavailable')
+  const summary = { checked: decided.length, agreed: decided.filter((c) => c.state === 'match' || c.state === 'holds').length }
+  const state: JobLens['state'] = decided.length ? 'decided' : checks.length ? 'unavailable' : 'no-check'
+  const reason = state !== 'no-check' ? null : missingInput(lens, task)
+  // Keep the first fully decided result for good; a partial or failed read is recomputed next time.
+  let stored = false
+  if (state === 'decided' && decided.length === checks.length) {
+    await db().execute(sql`insert into lens_result (chain_id, job_id, block, checks, summary) values (${chainId}, ${jobId}, ${block ? block.toString() : null}, ${JSON.stringify(checks)}::jsonb, ${JSON.stringify(summary)}::jsonb) on conflict do nothing`).then(() => { stored = true }).catch(() => undefined)
+  }
   return {
-    lens, checks, checkedAtBlock: block ? block.toString() : null,
-    summary: { checked: decided.length, agreed: decided.filter((c) => c.state === 'match' || c.state === 'holds').length },
-    manifest: { matches: manifest.matches, hash: manifest.hash, raw: manifest.pretty || manifest.raw, url, source },
+    lens, checks, checkedAtBlock: block ? block.toString() : null, summary, state, reason, attemptedAt, stored,
+    manifest: manifestView,
     readable: lens.kind !== 'generic',
   }
 }
 
+/** Why no check ran, in the buyer's words. */
+function missingInput(lens: Lens, task: string | null): string {
+  if (lens.kind === 'health_factor') {
+    if (lens.healthFactor === null) return lens.hasPosition === false ? 'the agent reports no borrowing on this account, so there is no health factor to check' : 'the answer gives no health factor'
+    const account = (lens.account && ADDR.test(lens.account)) || (task && ADDR.test(task))
+    if (!account) return 'neither the answer nor the job names the account to check'
+  }
+  if (lens.kind === 'rebalancing') return 'the answer names no position Marque can read'
+  if (lens.kind === 'yield') return 'the answer names no Venus rate Marque can compare'
+  if (lens.kind === 'grid') return 'the answer states no levels or capital to check'
+  return 'Marque has no check for this kind of answer yet'
+}
+
 /** Cached 10 minutes per job: a delivered answer does not change; checks are pinned to its block. */
 export function jobLens(chainId: ChainId, jobId: string) {
-  return cachedProjection(`lens:v4:${chainId}:${jobId}`, () => build(chainId, jobId), { freshMs: 10 * 60_000, timeoutMs: 20_000 })
+  return cachedProjection(`lens:v5:${chainId}:${jobId}`, () => build(chainId, jobId), { freshMs: 10 * 60_000, timeoutMs: 20_000 })
 }

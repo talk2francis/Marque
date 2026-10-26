@@ -1012,3 +1012,14 @@ a.introBack:hover { color: var(--fg); }
 .listKeys { margin: 6px 0 0; font-size: 12px; color: var(--fg-faint); }
 .listKeys kbd { font-family: var(--font-mono); font-size: 11px; padding: 1px 5px; border: 1px solid var(--hair-2); border-radius: 3px; }
 .headAct { text-align: right; }
+.failedGroup { margin-top: var(--s5); border-top: 1px solid var(--line); padding-top: var(--s4); }
+.failedGroup summary { cursor: pointer; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; font-size: 15px; }
+.failedGroup summary span { font-size: 13px; color: var(--fg-faint); }
+.failedNote { margin: 10px 0 12px; max-width: 70ch; font-size: 13.5px; line-height: 1.5; color: var(--fg-soft, var(--ink-2)); }
+.failedGroup ul { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+.failedGroup li { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 16px; padding: 10px 2px; border-bottom: 1px solid var(--line); font-size: 14px; }
+.failedGroup li a { color: var(--fg); text-decoration: none; font-weight: 500; }
+.failedGroup li a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.failedGroup li span { font-size: 13px; color: var(--oxide); }
+.uNote { margin: 0 0 6px; font-size: 12.5px; color: var(--fg-faint); }
+.uNote b { color: var(--fg-soft, var(--ink-2)); }

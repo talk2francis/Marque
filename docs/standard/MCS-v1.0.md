@@ -1,7 +1,7 @@
-# Marque Conformance Standard — MCS v1.0.0
+# Marque Conformance Standard: MCS v1.0.0
 
 > Generated 2026-10-11T18:27:30.196Z from `packages/conformance/src/tolerances.ts`.
-> Do not edit by hand — regenerate with `pnpm standard`.
+> Do not edit by hand; regenerate with `pnpm standard`.
 > Tolerance revision 1.
 
 ## What this standard is, and what it refuses to be
@@ -15,7 +15,7 @@ an assertion with a numeric tolerance, it is not a conformance check.
 
 This matters most where it is least convenient. There is no objectively correct
 PancakeSwap V3 range in the abstract, so MCS-REB-1 does not pretend to know one:
-the case supplies a policy — *"re-centre symmetrically at ±6% around spot"* — and the
+the case supplies a policy; *"re-centre symmetrically at ±6% around spot"*; and the
 test checks whether the agent’s answer is arithmetically correct, legal for the pool,
 and compliant with the instruction it was given. Whether ±6% was a *wise* policy is
 a question about judgement, and it is measured in the Ledger against a pre-registered
@@ -34,8 +34,8 @@ A pass is dated and can go stale. Results are re-run nightly.
    that power the rest of the product.
 3. The agent is asked the same question, and its structured answer is diffed field by
    field against our ground truth using the tolerances below.
-4. The result — pass or fail, with every field diff, the raw request and the raw
-   response, both hashed — is written to the public record.
+4. The result; pass or fail, with every field diff, the raw request and the raw
+   response, both hashed; is written to the public record.
 
 Ground truth is **frozen at capture**. BNB Smart Chain public RPC nodes retain only
 about 64 blocks of state (roughly 30 seconds at 0.45s blocks), so a case cannot be
@@ -49,7 +49,7 @@ latest snapshot below is an example, not a shared block for every agent.
 An agent that cannot be reached **fails**. "We asked and it did not answer" is a
 conformance outcome and belongs in the public record.
 
-## MCS-REB-1 — Rebalancing
+## MCS-REB-1: Rebalancing
 
 **Reader:** PancakeSwap V3 NonfungiblePositionManager + pool slot0
 **Category:** `rebalancing`
@@ -77,15 +77,15 @@ conformance outcome and belongs in the public record.
 
 **Why these bounds**
 
-- **`currentTick`** — The tick is a single integer read from slot0 at a fixed block. There is no ambiguity and therefore no tolerance.
-- **`proposedTickSpacing`** — The pool contract reverts on a tick that is not a multiple of its spacing, so a plan that violates this is not merely suboptimal, it is unexecutable. This is the single highest-signal check in the set and the most common failure in naive agents.
-- **`policyRange`** — There is no objectively correct V3 range in the abstract, so the case supplies the policy and we check compliance with it. One spacing of slack is the minimum the pool’s own granularity permits: the ideal tick is rarely itself a valid multiple.
-- **`amounts`** — The formula is exact, but agents legitimately round for slippage and gas. 0.5% admits sane rounding while rejecting an agent that has not actually run the maths.
-- **`inRange`** — Derived from tickLower <= tick < tickUpper. One right answer.
-- **`distanceToBound`** — Derived arithmetic from the tick and the two bounds. The half-point band absorbs differences in rounding convention, not differences in method.
-- **`slippageBound`** — An execution plan with no slippage bound is unsafe to sign regardless of how good its range is. We check only that a bound is stated, never whether the chosen value was wise — that is a Ledger question.
+- **`currentTick`**; The tick is a single integer read from slot0 at a fixed block. There is no ambiguity and therefore no tolerance.
+- **`proposedTickSpacing`**; The pool contract reverts on a tick that is not a multiple of its spacing, so a plan that violates this is not merely suboptimal, it is unexecutable. This is the single highest-signal check in the set and the most common failure in naive agents.
+- **`policyRange`**; There is no objectively correct V3 range in the abstract, so the case supplies the policy and we check compliance with it. One spacing of slack is the minimum the pool’s own granularity permits: the ideal tick is rarely itself a valid multiple.
+- **`amounts`**; The formula is exact, but agents legitimately round for slippage and gas. 0.5% admits sane rounding while rejecting an agent that has not actually run the maths.
+- **`inRange`**; Derived from tickLower <= tick < tickUpper. One right answer.
+- **`distanceToBound`**; Derived arithmetic from the tick and the two bounds. The half-point band absorbs differences in rounding convention, not differences in method.
+- **`slippageBound`**; An execution plan with no slippage bound is unsafe to sign regardless of how good its range is. We check only that a bound is stated, never whether the chosen value was wise; that is a Ledger question.
 
-## MCS-GRID-1 — Grid Trading
+## MCS-GRID-1: Grid Trading
 
 **Reader:** spot balances + pair price
 **Category:** `grid`
@@ -111,13 +111,13 @@ conformance outcome and belongs in the public record.
 
 **Why these bounds**
 
-- **`levelSpacing`** — The agent declares which type it used; we then verify the levels actually follow it. Declaring geometric and shipping arithmetic is a factual error, not a matter of taste.
-- **`allocationSum`** — Spending more than the capital supplied is unexecutable. The 0.1% band covers floating-point summation, nothing more.
-- **`levelsWithinBounds`** — Compliance with a constraint the case supplied. One right answer.
-- **`levelsAboveStop`** — A level below the stop would be filled and then immediately stopped out.
-- **`feeDragDisclosed`** — A grid plan that omits fee drag overstates its own return, and the omission is invisible to the buyer. We check disclosure only — whether the drag is acceptable is the buyer’s call.
+- **`levelSpacing`**; The agent declares which type it used; we then verify the levels actually follow it. Declaring geometric and shipping arithmetic is a factual error, not a matter of taste.
+- **`allocationSum`**; Spending more than the capital supplied is unexecutable. The 0.1% band covers floating-point summation, nothing more.
+- **`levelsWithinBounds`**; Compliance with a constraint the case supplied. One right answer.
+- **`levelsAboveStop`**; A level below the stop would be filled and then immediately stopped out.
+- **`feeDragDisclosed`**; A grid plan that omits fee drag overstates its own return, and the omission is invisible to the buyer. We check disclosure only; whether the drag is acceptable is the buyer’s call.
 
-## MCS-YIELD-1 — Yield Optimisation
+## MCS-YIELD-1: Yield Optimisation
 
 **Reader:** Venus Core markets
 **Category:** `yield`
@@ -143,13 +143,13 @@ conformance outcome and belongs in the public record.
 
 **Why these bounds**
 
-- **`aprProvenance`** — An APR with no source and no timestamp cannot be checked by anyone, including the buyer. This is the yield-category equivalent of a provenance chip.
-- **`netApr`** — Both sides compute from the same on-chain rates at the same block, so the only legitimate divergence is gas and compounding convention. 15bps is generous for that and far tighter than the differences between real venues.
-- **`switchingCost`** — Gas, swap and exit costs behave differently with size. A lump sum hides which one dominates at the buyer’s size.
-- **`improvementThreshold`** — Compliance with a supplied constraint. Declining is a pass: an agent that correctly says "nothing beats your current position by enough" is behaving well.
-- **`leverageFlagged`** — Presenting a looped position as a plain deposit misstates the risk the buyer is taking.
+- **`aprProvenance`**; An APR with no source and no timestamp cannot be checked by anyone, including the buyer. This is the yield-category equivalent of a provenance chip.
+- **`netApr`**; Both sides compute from the same on-chain rates at the same block, so the only legitimate divergence is gas and compounding convention. 15bps is generous for that and far tighter than the differences between real venues.
+- **`switchingCost`**; Gas, swap and exit costs behave differently with size. A lump sum hides which one dominates at the buyer’s size.
+- **`improvementThreshold`**; Compliance with a supplied constraint. Declining is a pass: an agent that correctly says "nothing beats your current position by enough" is behaving well.
+- **`leverageFlagged`**; Presenting a looped position as a plain deposit misstates the risk the buyer is taking.
 
-## MCS-HF-1 — Health Factor
+## MCS-HF-1: Health Factor
 
 **Reader:** Venus Comptroller
 **Category:** `health_factor`
@@ -174,10 +174,10 @@ conformance outcome and belongs in the public record.
 
 **Why these bounds**
 
-- **`healthFactor`** — Both sides read the same Comptroller state at the same block, so this is pure arithmetic. 0.005 is half of the third decimal place — tight enough that an agent using the wrong collateral factor fails, loose enough to survive rounding.
-- **`collateralFactor`** — Read directly from markets(vToken). Getting this wrong is what makes an HF wrong.
-- **`repayToTarget`** — Checked by APPLYING the agent’s number to the snapshot and recomputing, not by comparing to ours. An agent that reaches the target by a different but valid route passes.
-- **`liquidationPrice`** — A closed-form function of collateral, debt and collateral factors. One percent admits oracle rounding, not method error.
+- **`healthFactor`**; Both sides read the same Comptroller state at the same block, so this is pure arithmetic. 0.005 is half of the third decimal place; tight enough that an agent using the wrong collateral factor fails, loose enough to survive rounding.
+- **`collateralFactor`**; Read directly from markets(vToken). Getting this wrong is what makes an HF wrong.
+- **`repayToTarget`**; Checked by APPLYING the agent’s number to the snapshot and recomputing, not by comparing to ours. An agent that reaches the target by a different but valid route passes.
+- **`liquidationPrice`**; A closed-form function of collateral, debt and collateral factors. One percent admits oracle rounding, not method error.
 
 ## Deliberately not tested
 
@@ -189,10 +189,10 @@ standard quietly non-deterministic.
 |---|---|---|
 | Expected number of fills at a stated volatility | MCS-GRID-1 | A model output wearing the clothes of a fact. Two honest agents can differ and both be right, so grading it would make the standard quietly non-deterministic. Moved to the Ledger. |
 | Whether the chosen range is the wisest available | MCS-REB-1 | There is no objectively correct V3 range in the abstract. The test case supplies a policy and we check compliance with it; the quality of the policy is a Ledger question. |
-| Whether the recommended venue is the best one | MCS-YIELD-1 | Judgement. We check that the arithmetic is right, the sources are cited and the supplied threshold is respected — not that the choice was optimal. |
+| Whether the recommended venue is the best one | MCS-YIELD-1 | Judgement. We check that the arithmetic is right, the sources are cited and the supplied threshold is respected, not that the choice was optimal. |
 | Speed, price and helpfulness of the response | MCS-HF-1 | Measured and published, but in the Ledger against a pre-registered rubric, never as a pass/fail certificate. |
 
-These are not ignored — they are measured in the Ledger, against a rubric that is
+These are not ignored; they are measured in the Ledger, against a rubric that is
 version-hashed and published before any run, and reported as a score rather than as
 a certificate.
 

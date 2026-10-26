@@ -134,6 +134,12 @@ export interface MarketQuery {
   maxPrice?: number | null
   /** Verified-buyer average at or over this many stars. */
   minRating?: number | null
+  /**
+   * V4.2 L0 honest shelves. 'group': an agent tested in its category with no pass is taken out of the list, the
+   * total and the facet counts, and returned separately as `failedGroup` ("Listed, failed its latest test").
+   * Default 'include' keeps every row (API consumers, MCP, tender).
+   */
+  failed?: 'include' | 'group'
   sort?: 'best' | 'proven' | 'price' | 'fast' | 'recent' | 'rated'
   limit?: number
   offset?: number
@@ -577,7 +583,7 @@ export interface MarketFacets {
   price: { min: number | null; max: number | null; quoted: number; unit: string | null }
 }
 
-export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: MarketRow[]; generatedAt: string; total: number; offset: number; hasMore: boolean; supply: MarketSupplyCategory[]; quoteObservedAt: string | null; facets: MarketFacets; lane: Lane | 'all' }> {
+export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: MarketRow[]; generatedAt: string; total: number; offset: number; hasMore: boolean; supply: MarketSupplyCategory[]; quoteObservedAt: string | null; facets: MarketFacets; lane: Lane | 'all'; failedGroup: Array<{ agentId: string; name: string; category: string | null; testId: string | null; failedField: string | null; date: string | null; networks?: Array<56 | 97> }> }> {
   const both = q.lane === 'all'
   const lane: Lane = q.lane === 'all' ? 'mainnet' : q.lane ?? (q.network === 97 ? 'practice' : 'mainnet')
   const chainId = chainOf(lane)
@@ -607,6 +613,8 @@ export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: Ma
   })
   if (q.agentIds) all = selectedAgentRows(all, q.agentIds)
   if (both) all = foldNetworks(all)
+  const failedGroup = q.failed === 'group' ? all.filter((r) => r.warrant.status === 'failed') : []
+  if (q.failed === 'group') all = all.filter((r) => r.warrant.status !== 'failed')
 
   // Filters over the memoised qualifying set.
   // Ready to hire, all categories: every agent a wallet can pay into escrow right now,
@@ -686,6 +694,8 @@ export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: Ma
     COMMERCE_RANK[a.commerce.state] - COMMERCE_RANK[b.commerce.state]
     || Number(b.commerce.signedQuote === true) - Number(a.commerce.signedQuote === true)
   const byQual = (a: MarketRow, b: MarketRow) => QUAL_RANK[a.qual] - QUAL_RANK[b.qual]
+  const tested = (r: MarketRow) => (r.warrant.status === 'warranted' ? 0 : r.warrant.status === 'untested' ? 1 : 2)
+  const byTested = (a: MarketRow, b: MarketRow) => tested(a) - tested(b)
   const byWarrantDate = (a: MarketRow, b: MarketRow) => (b.warrant.date ?? '').localeCompare(a.warrant.date ?? '')
   const priceNum = (r: MarketRow) => {
     const m = r.price?.match(/[\d.]+/)
@@ -705,8 +715,9 @@ export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: Ma
       case 'recent': return (b.warrant.date ?? '').localeCompare(a.warrant.date ?? '') || byQual(a, b) || tie
       case 'rated': return byRating(a, b) || byCommerce(a, b) || byQual(a, b) || tie
       default:
-        // Recommended: hireable first, then quality, then verified rating, then price.
-        return byCommerce(a, b) || byQual(a, b) || byRating(a, b) || priceNum(a) - priceNum(b)
+        // Recommended (V4.2 L0): agents that passed their category's test first, untested after them; then hireable
+        // first, quality, verified rating, price. The home headline promises agents that work; the order keeps it.
+        return byTested(a, b) || byCommerce(a, b) || byQual(a, b) || byRating(a, b) || priceNum(a) - priceNum(b)
           || byWarrantDate(a, b) || b.identityCount - a.identityCount || (a.latencyMs ?? 1e9) - (b.latencyMs ?? 1e9) || tie
     }
   })
@@ -741,7 +752,9 @@ export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: Ma
       hireBlockedReason,
     } satisfies MarketRow
   })
-  return { rows, total: all.length, offset, supply, facets, lane: both ? 'all' : lane, quoteObservedAt: states ? new Date(observedAt).toISOString() : null,
+  return { rows, total: all.length, offset, supply, facets, lane: both ? 'all' : lane,
+    failedGroup: failedGroup.slice(0, 60).map((r) => ({ agentId: r.agentId, name: r.name, category: r.category, testId: r.warrant.testId, failedField: r.warrant.failedField, date: r.warrant.date, networks: r.networks })),
+    quoteObservedAt: states ? new Date(observedAt).toISOString() : null,
     hasMore: offset + limit < all.length, generatedAt: new Date(base.at).toISOString() }
 }
 

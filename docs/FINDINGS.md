@@ -1,7 +1,7 @@
 # Findings
 
 Measured facts about BSC agent supply that changed how Marque is built. These
-are not reductions (see `DEVIATIONS.md`) — they are things we learned by
+are not reductions (see `DEVIATIONS.md`); they are things we learned by
 querying the chain and the registry rather than by reading the marketing.
 
 Every number here is dated and reproducible. None of it is hardcoded into the
@@ -15,7 +15,7 @@ product; the product renders `funnel_snapshot`, which is measured continuously.
 
 The master plan's central thesis is that BNB Chain has "a supply problem wearing
 a discovery problem's clothes", and predicted the failure mode would be dead
-endpoints — "Cloudflare tunnels and 525s", "fewer than a dozen BSC agents that
+endpoints; "Cloudflare tunnels and 525s", "fewer than a dozen BSC agents that
 actually answer a request".
 
 The thesis is right. The mechanism is completely different, and it is worse.
@@ -37,7 +37,7 @@ them do not exist yet.** Every one of 120 sampled A2A cards returned:
 { "status": "UNBOUND", "presence": "offline", "endpoint": null, "skills": [] }
 ```
 
-An agent is registered on-chain, resolvable, and discoverable — and has no
+An agent is registered on-chain, resolvable, and discoverable; and has no
 executable endpoint, no declared skills, and has never been bound to a runtime.
 
 ### Why this matters more than the original framing
@@ -51,10 +51,10 @@ It also sharpens the wedge. "Reachable" has stopped being a useful filter,
 because nearly everything is reachable. The questions that matter are the two
 the plan already built for:
 
-- **Is it bound?** — a liveness check that inspects `status`, `presence`,
+- **Is it bound?**; a liveness check that inspects `status`, `presence`,
   `endpoint` and `skills`, not just the HTTP status. This is now a first-class
   probe requirement, not an implementation detail.
-- **Is it capable?** — which is what MCS exists to answer.
+- **Is it capable?**; which is what MCS exists to answer.
 
 ### Consequences for the build
 
@@ -78,7 +78,7 @@ the plan already built for:
 The 120-card sample is drawn from TermiX-published agents, which dominate the
 templated A2A population. This is a statement about the largest publisher on
 BSC, not proof that no capable third-party agent exists anywhere. Non-TermiX
-supply is thin but non-zero — see F-03. The probe worker will replace this
+supply is thin but non-zero; see F-03. The probe worker will replace this
 sample with a continuous census.
 
 ---
@@ -89,7 +89,7 @@ sample with a continuous census.
 
 AGENTS.md gotcha 9 warns that some service endpoints are URL templates
 containing `{agentId}` and will 404 if fetched literally. Measured reality on
-BSC: **763 of 767** indexed A2A endpoints are templated — 99.5%. Without a
+BSC: **763 of 767** indexed A2A endpoints are templated; 99.5%. Without a
 resolver, the entire A2A population of the chain reads as unreachable.
 
 The gotcha understates the trap in one specific way that cost real time. It is
@@ -104,7 +104,7 @@ identifier**, and the obvious choice is wrong:
 | **`320933`** (bare ERC-8004 token id) | **200** |
 
 Verified 8/8 on a random sample, then 59/60 across a wider one. The composite id
-is the natural choice — it is the primary key everywhere else in the registry —
+is the natural choice; it is the primary key everywhere else in the registry ;
 and it silently produces a 404 that looks exactly like a dead agent.
 
 `templateVars()` therefore maps `agentId` to the token id and offers the
@@ -117,10 +117,10 @@ composite as `agentIdFull` for publishers that mean it.
 Of 804 indexed service rows, 40 point somewhere other than TermiX, across four
 distinct hosts. One is genuinely alive and capable:
 
-- **`q402.quackai.ai/api/mcp/info`** — a real EIP-8004 MCP service
+- **`q402.quackai.ai/api/mcp/info`**; a real EIP-8004 MCP service
   (`https://eips.ethereum.org/EIPS/eip-8004#service.mcp`) with x402 support,
   answering 200 with a well-formed descriptor.
-- `example.com` — a placeholder someone registered on mainnet.
+- `example.com`; a placeholder someone registered on mainnet.
 - Two AWS-hosted endpoints, one of which 404s.
 
 This is worth stating in the product exactly as it is: a handful of real
@@ -131,7 +131,7 @@ third-party services, named, rather than a headline count of 301,127.
 ## F-04 · BSC block time is 0.45s, which breaks the Compound APR convention
 
 Compound-family lending code conventionally hardcodes `blocksPerYear` for
-3-second blocks (10,512,000). BSC now produces a block every **0.45 seconds** —
+3-second blocks (10,512,000). BSC now produces a block every **0.45 seconds** ;
 **70,080,000 blocks a year**, measured over spans of 100, 1,000 and 20,000
 blocks and consistent across all three.
 
@@ -166,7 +166,7 @@ measured rather than assumed:
 | `Swap` event logs (carry `tick`) | only the most recent ~5,000 blocks served | Barely |
 
 The subgraph at `thegraph.pancakeswap.com/exchange-v3-bsc` answers happily and
-is **roughly four months behind** — its last indexed block timestamps to late
+is **roughly four months behind**; its last indexed block timestamps to late
 April. It reports no error; it simply serves April. Anything built on it
 presents April's range history as today's.
 

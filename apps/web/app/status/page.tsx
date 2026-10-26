@@ -141,6 +141,13 @@ function measuredAt(iso: string, ago: string) {
 }
 
 export default async function StatusPage() {
+  // Incidents the alerts worker has paged and not yet seen recover (ops/marque-alerts.mjs), in its own words.
+  const openIncidents = (() => {
+    try {
+      const st = JSON.parse(readFileSync(process.env['MARQUE_ALERTS_STATE'] ?? '/root/.marque/alerts-state.json', 'utf8')) as { signals?: Record<string, { alerted?: boolean; detail?: string; since?: number | null }> }
+      return Object.entries(st.signals ?? {}).filter(([, v]) => v.alerted).map(([id, v]) => ({ id, detail: v.detail ?? '', since: v.since ?? null }))
+    } catch { return [] as Array<{ id: string; detail: string; since: number | null }> }
+  })()
   const projection = await cachedProjection('status:v4', gatherStatus, { freshMs: 30_000, timeoutMs: 6_000, staleWhileRevalidate: true })
     .catch(async () => ({ value: await gatherStatus(), computedAt: new Date().toISOString(), ageMs: 0, stale: false }))
   const { head, cursorQ, probesQ, confQ, watchQ, usageQ, agents, tiers, quest, questTotals, reconciliationQ } = projection.value
@@ -227,6 +234,15 @@ export default async function StatusPage() {
             {downAgents.length} of {agents.length} reference agents did not answer just now:{' '}
             {downAgents.map((a) => a.id).join(', ')}. They are listed below with what happened.
           </p>
+        )}
+
+        {openIncidents.length > 0 && (
+          <section className={styles.section} aria-labelledby="incidents-h">
+            <h2 id="incidents-h" className={styles.h2}>Open incidents</h2>
+            <ul className={styles.incidents}>
+              {openIncidents.map((i) => <li key={i.id}><b>{i.id.replace(/_/g, ' ')}</b>: {i.detail}{i.since ? `, since ${new Date(i.since).toISOString().slice(0, 16).replace('T', ' ')} UTC` : ''}</li>)}
+            </ul>
+          </section>
         )}
 
         <section className={styles.section}>

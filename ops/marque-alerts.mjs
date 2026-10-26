@@ -156,6 +156,22 @@ const SIGNALS = [
     },
   },
   {
+    // V4.2 L0: the walkthrough must keep proving what it says. Checked every 15 minutes: the featured job has at least
+    // one decided chain check, and no number on /judge rendered as "n/a", "not read" or NaN.
+    id: 'judge_truth', title: 'The /judge walkthrough shows an unproven or missing number', holdMs: 0,
+    read: async () => {
+      if (judgeCache && Date.now() - judgeCache.at < 15 * 60_000) return judgeCache.reading
+      const h = await getJson('/api/v1/judge/health')
+      const html = await fetch(`${BASE}/judge?check=${Date.now()}`, { signal: AbortSignal.timeout(30_000) }).then((r) => r.text())
+      const text = html.replace(/<script[\s\S]*?<\/script>/g, ' ').replace(/<[^>]+>/g, ' ')
+      const blanks = ['n/a', 'not read', 'NaN', 'undefined'].filter((w) => new RegExp(`(^|[^a-z])${w.replace('/', '\\/')}([^a-z]|$)`, 'i').test(text))
+      const bad = !h.ok || blanks.length > 0
+      const reading = { bad, detail: `${h.job}: ${h.checked} decided, ${h.agreed} agree (${h.state}${h.reason ? `: ${h.reason}` : ''})${blanks.length ? `; /judge shows ${blanks.join(', ')}` : ''}` }
+      judgeCache = { at: Date.now(), reading }
+      return reading
+    },
+  },
+  {
     id: 'stuck_jobs', title: 'Paid jobs with no successful notify', holdMs: 0,
     read: async () => {
       const rows = await sql`
@@ -170,6 +186,7 @@ const SIGNALS = [
 ]
 
 let pending = {}
+let judgeCache = null
 function readState() { try { return JSON.parse(readFileSync(STATE, 'utf8')) } catch { return {} } }
 function writeState(s) { writeFileSync(STATE, JSON.stringify(s, null, 2)) }
 

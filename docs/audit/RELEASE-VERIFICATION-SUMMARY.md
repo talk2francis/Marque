@@ -2,7 +2,7 @@
 
 Date: 2026-09-21  
 Branch: `hardening/third-party-marketplace`  
-Recommendation: **NO — do not deploy**
+Recommendation: **NO; do not deploy**
 
 The fixes and evidence are pushed to `hardening/third-party-marketplace`.
 
@@ -47,7 +47,7 @@ Fresh 30-service audit sample:
 
 ## 6. Genuinely protocol-callable
 
-**19/30** — nine MCP and ten x402. A2A card readability no longer counts.
+**19/30**; nine MCP and ten x402. A2A card readability no longer counts.
 
 ## 7. Task-compatible
 

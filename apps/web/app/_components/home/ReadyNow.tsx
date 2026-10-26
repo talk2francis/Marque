@@ -16,7 +16,7 @@ export function ReadyNow({ initial }: { initial: MarketRow[] }) {
   const [checked, setChecked] = useState(false)
   useEffect(() => {
     const controller = new AbortController()
-    fetch('/api/v1/marketplace?tab=ready&sort=best&lane=mainnet&limit=60', { cache: 'no-store', signal: controller.signal })
+    fetch('/api/v1/marketplace?tab=ready&sort=best&lane=mainnet&limit=60&failed=group', { cache: 'no-store', signal: controller.signal })
       .then((r) => (r.ok ? r.json() : null))
       .then((j: { agents?: MarketRow[] } | null) => { if (j?.agents) setRows(pickShowcase(j.agents)) })
       .catch(() => { /* keep the rendered cards; each still re-reads its own price */ })

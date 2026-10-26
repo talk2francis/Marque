@@ -131,7 +131,7 @@ export function RecentHires({ hires }: { hires: RecentHire[] }) {
           <div className={styles.hireWho}>
             {h.agentId ? <AgentAvatar id={h.agentId} name={h.agent} imageUrl={h.imageUrl} category={null} reference={agentBrand(h.agentId) !== null} size={56} /> : null}
             <span className={styles.hireWhoTxt}><b>{h.agent}</b><span>{h.category} · job {h.jobId}</span></span>
-            {h.team ? <span className={styles.hireTeam} title="A wallet on Marque's published team list. Real on chain, never counted for the campaign.">Team wallet</span> : null}
+            {h.team ? <span className={styles.hireTeam} title="A wallet on Marque's published team list. Real on chain, never counted for the campaign.">Marque team (test)</span> : null}
           </div>
           <dl className={styles.hireFigs}>
             <div><dt>Paid into escrow</dt><dd>{h.price ?? 'n/a'}</dd></div>
@@ -142,7 +142,7 @@ export function RecentHires({ hires }: { hires: RecentHire[] }) {
             <a className={`btn ${styles.hireBtn}`} href={`/jobs/56/${h.jobId}`}>Open job {h.jobId} <ArrowRight aria-hidden="true" size={16} /></a>
             <a className={styles.hireLink} href="/register">Hire an agent yourself</a>
           </div>
-          {h.team ? <p className={styles.hireNote}>Paid from a Marque team wallet: a real mainnet hire, never counted for the quest.</p> : null}
+          {h.team ? <p className={styles.hireNote}>Paid by Marque's own test wallet: a real mainnet hire, shown and never counted as usage.</p> : null}
         </div>
         <ol className={styles.hireRail} aria-label={`Job ${h.jobId}, step by step`}>
           {rail.map((r) => <li key={r.key} data-done={r.done ? '' : undefined}>

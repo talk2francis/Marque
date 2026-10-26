@@ -5,26 +5,26 @@ Written 4 Sep 2026, after P6.
 
 ## Read these first, in this order
 
-1. `AGENTS.md` — the constitution. Invariants, the four escalation gates, the
+1. `AGENTS.md`; the constitution. Invariants, the four escalation gates, the
    degradation ladder. Read in full at the start of every phase.
-2. `docs/FINDINGS.md` — what we measured that changed the plan. F-01 is the
+2. `docs/FINDINGS.md`; what we measured that changed the plan. F-01 is the
    single most important fact in the build.
-3. `docs/DEVIATIONS.md` — every reduction and every correction, with why.
+3. `docs/DEVIATIONS.md`; every reduction and every correction, with why.
 4. This file.
 
 ## Status
 
-**P0–P6 shipped.** Live at https://marque.trade.
+**P0-P6 shipped.** Live at https://marque.trade.
 
 | Phase | What it left behind |
 |---|---|
 | P0 | monorepo, Postgres, RPC failover pool, 8004scan ingest |
 | P1 | four position readers, provenance enforced by the type system |
 | P2 | `safeFetch` SSRF guard, body-grading probe, auditable classifier |
-| P3 | MCS v1.0 — four tests, standard generated from the enforcing code |
+| P3 | MCS v1.0, four tests, standard generated from the enforcing code |
 | P4 | design system, the Desk, the Register, agent profiles, `/standard` |
 | P5 | four executors, run pipeline, four-proof receipts, MarqueRegistry |
-| P6 | CharterService — Altana sessions, plus a working P6-lite fallback |
+| P6 | CharterService, Altana sessions, plus a working P6-lite fallback |
 
 Verification: 149 vitest, 14 Foundry, typecheck across 12 packages, lint clean,
 Playwright audit clean at four widths on every route.
@@ -40,7 +40,7 @@ Playwright audit clean at four widths on every route.
 | revoke | `0x191172f062c624a170bc8c14d403951a419fa65d5e90eb77c2f099a37a2551d6` |
 
 Nothing has touched mainnet. Both charter providers **refuse to be constructed
-for chain 56** — that is escalation gate 1 and needs written approval.
+for chain 56**; that is escalation gate 1 and needs written approval.
 
 ## The one thing to internalise
 
@@ -58,7 +58,7 @@ addressed it correctly before publishing the failure.
 ## Where P7 starts
 
 P7 is the Cockpit: the Charter Desk and the Seal. `CharterService` is built and
-proven, so the UI binds to **our** interface and never to Altana's SDK — an SDK
+proven, so the UI binds to **our** interface and never to Altana's SDK; an SDK
 problem cannot block the phase. Cockpit tokens, Grain and MeasureRule already
 exist in `packages/ui` and are demonstrated at `/_ui`.
 
@@ -69,7 +69,7 @@ screenshots.
 ## What needs attention beyond the phase order
 
 - **A watchdog, urgently.** An OOM killed a foreign process on this shared VPS
-  and took the PM2 daemon with it — all five apps died and the site served 502
+  and took the PM2 daemon with it; all five apps died and the site served 502
   until `pm2 resurrect`. It was found by a failing test, not an alert. Nothing
   restarts PM2 itself. This is P11 work that matters more than its position
   suggests, because the judging window is two weeks long.
