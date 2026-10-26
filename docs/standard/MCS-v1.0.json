@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
   "toleranceRevision": 1,
-  "generatedAt": "2026-10-11T18:27:30.196Z",
+  "generatedAt": "2026-10-26T11:34:57.241Z",
   "generatedFrom": "packages/conformance/src/tolerances.ts",
   "tests": {
     "MCS-REB-1": {
@@ -21,14 +21,14 @@
           "statement": "re-centre the position symmetrically at ±6% around the current spot price, on the 0.25% fee tier, keeping the same liquidity"
         },
         "why": "A live third-party BNCB/WBNB position on PancakeSwap V3’s 0.25% tier, minted about 240,000 blocks before its 11 October 2026 selection and still carrying liquidity. The owner held three enumerable positions, below the reader’s 40-position cap. The previous BTCB/USDC (#7395979) and US/WBNB (#7654242) subjects were withdrawn. Two separately chain-verified BNCB/WBNB positions are published as fallback subjects. Every capture still reads current ownership and liquidity at a fresh block; if none survives, the test is skipped rather than inventing a position. This fixture tests V3 arithmetic, not the investment merits of either token.",
-        "capturedCaseId": "REB-1-bncb-wbnb-2500-final-1791743231671",
+        "capturedCaseId": "REB-1-bncb-wbnb-2500-bound-20261026083250503-c266ce6b",
         "capturedSubject": {
           "pair": "BNCB/WBNB",
-          "owner": "0x2cfD930f4Ca936CAD72a13b62df095D8BA17874f",
-          "tokenId": "7650656"
+          "owner": "0xa9621227DF65696fB2B45b94644b65eA452b9724",
+          "tokenId": "7654391"
         },
-        "blockNumber": "127067260",
-        "groundTruthHash": "0xabc7fcfb58b6f69fd29023f99e145da83877f85d5bc6fc91549aa26571322b40"
+        "blockNumber": "129866199",
+        "groundTruthHash": "0xf8ddbf3b810e9f1640c6a9fcd8883c7c6d546e5bfeb8ff58fe6c522b831fdfd1"
       },
       "checks": [
         {
@@ -103,13 +103,13 @@
           "statement": "build a 12-level grid for BNB/USDT between 600 and 850 using 2,000 USD of capital, with a stop at 580, and disclose the fee drag at 25 bps per trade"
         },
         "why": "Bounds and a stop that are close enough together that a careless plan places levels below the stop, and a level count that makes fee drag material rather than a rounding error.",
-        "capturedCaseId": "GRID-1-bnb-usdt-20261011181053961-5106d70c",
+        "capturedCaseId": "GRID-1-bnb-usdt-lattice-20261026083250503-c266ce6b",
         "capturedSubject": {
           "pair": "BNB/USDT",
           "address": "0x60AA3AEE06E2345A17E4d4B12c53E046F4F63CAf"
         },
-        "blockNumber": "127065270",
-        "groundTruthHash": "0x358a9a8b9dac34ba596622a929b91e6ea9d70e9b2188f10ac7649332a2a79278"
+        "blockNumber": "129866223",
+        "groundTruthHash": "0x9bf1ae916dd58b1d75a46c8a69d3161bc83b032fd5111a852b17e530c12ba4b2"
       },
       "checks": [
         {
@@ -170,12 +170,12 @@
           "statement": "find the best net-of-cost route for 1,000 USD of USDT across the allowed protocols, only recommending a move that beats the current 0% by at least 50 bps, and excluding leveraged strategies"
         },
         "why": "Idle stablecoins are the most common real position on BSC. The 50 bps threshold and the 1,000 USD size make the net-of-cost arithmetic decide the answer, which is exactly the thing agents get wrong by quoting gross APR.",
-        "capturedCaseId": "YIELD-1-usdt-1000-20261011181053961-5106d70c",
+        "capturedCaseId": "YIELD-1-usdt-1000-sluicegate-20261026083250503-c266ce6b",
         "capturedSubject": {
           "asset": "USDT"
         },
-        "blockNumber": "127065270",
-        "groundTruthHash": "0xe2301152d25a486d63daaae28c75a6530a117c31b07560b4a42c2525c44d446d"
+        "blockNumber": "129866236",
+        "groundTruthHash": "0xf8628e1f597c0240a085f3e11d9f8b264ec16b034d75e45a893039b674075ce7"
       },
       "checks": [
         {
@@ -229,12 +229,12 @@
           "statement": "report the account’s current health factor and the exact USD of debt that must be repaid to restore a health factor of 2.5"
         },
         "why": "A genuinely at-risk third-party Venus account carrying real debt across multiple collateral markets. Chosen precisely because it is not ours: it proves the reader works on arbitrary input, and AGENTS.md forbids manufacturing our own liquidation risk for a demo.",
-        "capturedCaseId": "HF-1-venus-at-risk-20261011181053961-5106d70c",
+        "capturedCaseId": "HF-1-venus-at-risk-keel-20261026083250503-c266ce6b",
         "capturedSubject": {
           "address": "0x60AA3AEE06E2345A17E4d4B12c53E046F4F63CAf"
         },
-        "blockNumber": "127065270",
-        "groundTruthHash": "0x6ab25d3c56ad3b51a54b1ad70b5a7d5148a8492a7ceed520b1758ac478e1a9fb"
+        "blockNumber": "129866251",
+        "groundTruthHash": "0xabb049a5ff474ce6d066219fc257788f3794cee12076fcb653a148c2c8efd538"
       },
       "checks": [
         {
@@ -264,6 +264,65 @@
           "bound": 1,
           "unit": "%",
           "rationale": "A closed-form function of collateral, debt and collateral factors. One percent admits oracle rounding, not method error."
+        }
+      ]
+    },
+    "MCS-RYIELD-1": {
+      "name": "Realised Yield",
+      "category": "yield",
+      "reader": "Venus vToken exchangeRateStored at two archived blocks, with their timestamps",
+      "case": {
+        "id": "RYIELD-1-usdt-7d",
+        "subject": {
+          "asset": "USDT"
+        },
+        "policy": {
+          "asset": "USDT",
+          "amount": 1000,
+          "days": 7,
+          "statement": "measure what each Venus USDT supply market actually paid between the two supplied blocks, from its exchange-rate growth, and recommend a venue only if the numbers in your own ranking support it"
+        },
+        "why": "A quoted rate is a promise about the next block; a realised rate is a fact about the last week. Seven days of Venus USDT supply is the most common question a stablecoin holder asks, and two archived exchange-rate reads at supplied blocks give it exactly one right answer.",
+        "capturedCaseId": null,
+        "capturedSubject": null,
+        "blockNumber": null,
+        "groundTruthHash": null
+      },
+      "checks": [
+        {
+          "id": "window",
+          "description": "The measurement window must be exactly the two blocks the test case supplies.",
+          "bound": 0,
+          "unit": "blocks",
+          "rationale": "Realised yield is a fact about a stated interval. Answering for a different interval answers a different question, so the blocks must match exactly."
+        },
+        {
+          "id": "realisedApr",
+          "description": "Each venue's realised APR must reproduce ours within this tolerance: the growth of its on-chain exchange rate between the two blocks, annualised over the true time between them (simple, not compounded).",
+          "bound": 1,
+          "unit": "basis points",
+          "rationale": "Both sides read the same exchange rates and block timestamps, so the only legitimate divergence is rounding of the reported figure. One basis point admits four-decimal rounding and nothing more."
+        },
+        {
+          "id": "netNotAboveGross",
+          "description": "A venue's realised APR net of switching cost may not exceed its realised APR.",
+          "bound": null,
+          "unit": "boolean",
+          "rationale": "A cost can only lower a return. A net figure above the gross one is an arithmetic error."
+        },
+        {
+          "id": "realisedSource",
+          "description": "Every realised figure must name the on-chain read it came from.",
+          "bound": null,
+          "unit": "boolean",
+          "rationale": "A realised rate is checkable only if the buyer can see which contract and which reads produced it."
+        },
+        {
+          "id": "decision",
+          "description": "The answer must state recommend explicitly, and a recommended venue must be the one with the highest net realised APR in the answer's own ranking.",
+          "bound": null,
+          "unit": "boolean",
+          "rationale": "Internal consistency, not judgement: the test does not say which venue is wise, only that a recommendation agrees with the numbers the agent itself reported."
         }
       ]
     }

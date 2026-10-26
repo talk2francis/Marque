@@ -7,7 +7,7 @@ import { MCS_CODE_ANCHOR } from './code-anchor.js'
 import { MCS_VERSION, MCS_TOLERANCE_REVISION, type TestId } from './tolerances.js'
 import type { ConformanceOutcome, TestCase } from './types.js'
 
-const testId = z.enum(['MCS-REB-1', 'MCS-HF-1', 'MCS-GRID-1', 'MCS-YIELD-1'])
+const testId = z.enum(['MCS-REB-1', 'MCS-HF-1', 'MCS-GRID-1', 'MCS-YIELD-1', 'MCS-RYIELD-1'])
 const digest = z.string().regex(/^0x[0-9a-f]{64}$/)
 const http = z.string().max(500).url().refine(value => {
   try {

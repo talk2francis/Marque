@@ -28,7 +28,7 @@ export const TIDEMARK_META: EngineMeta = {
   id: 'tidemark',
   name: 'Tidemark',
   category: 'yield',
-  testId: null,
+  testId: 'MCS-RYIELD-1',
   description:
     'Measures the yield BNB Chain venues actually paid over a trailing window, from on-chain exchange-rate growth, and compares it with what each venue quotes today. Covers Venus supply markets and BNB liquid staking (slisBNB, ankrBNB). Non-custodial: it reads, it never signs.',
   priceUsd: 0.1,
@@ -64,7 +64,7 @@ const LST_EXCLUDED = [
 
 const ASSETS = 'USDT|USDC|USD1|FDUSD|DAI|TUSD|BNB|WBNB|BTCB|ETH'
 
-interface Ask { asset: string; amount: number; days: number; assumptions: string[] }
+interface Ask { asset: string; amount: number; days: number; assumptions: string[]; window?: { fromBlock: bigint; toBlock: bigint } }
 
 export function parseTidemark(prompt: string): Ask | { missing: string[] } {
   const asset = (prompt.match(new RegExp(String.raw`\d[\d,]*(?:\.\d+)?\s*(${ASSETS})\b`, 'i'))?.[1]
@@ -84,6 +84,15 @@ export function parseTidemark(prompt: string): Ask | { missing: string[] } {
   if (!asset) missing.push('the asset (for example USDT or BNB)')
   if (amount === null) missing.push('the amount to deploy')
   if (missing.length) return { missing }
+
+  // An explicit window ("between block X and block Y") is measured exactly; a buyer or a test can pin it.
+  const explicit = prompt.match(/between\s+block\s+(\d{1,12})\s+and\s+block\s+(\d{1,12})/i)
+  if (explicit) {
+    const fromBlock = BigInt(explicit[1]!), toBlock = BigInt(explicit[2]!)
+    const spanDays = Number(toBlock - fromBlock) * BLOCK_SECONDS / 86_400
+    if (toBlock <= fromBlock || spanDays < 1 || spanDays > 90) return { missing: ['a block window between 1 and 90 days long, the earlier block first'] }
+    return { asset: asset as string, amount: amount as number, days: Number(spanDays.toFixed(2)), assumptions: [], window: { fromBlock, toBlock } }
+  }
 
   const assumptions: string[] = []
   const days = daysRaw ?? weeks ?? DEFAULT_DAYS
@@ -118,8 +127,8 @@ export const tidemarkEngine: Engine = {
     try {
       // A few blocks behind the archive's reported head: it can report a block
       // before it will serve it.
-      const head = (await within(archive.getBlockNumber(), 3_000, 'the BNB Smart Chain archive')) - 4n
-      const then = head - BigInt(Math.round((ask.days * 86_400) / BLOCK_SECONDS))
+      const head = ask.window ? ask.window.toBlock : (await within(archive.getBlockNumber(), 3_000, 'the BNB Smart Chain archive')) - 4n
+      const then = ask.window ? ask.window.fromBlock : head - BigInt(Math.round((ask.days * 86_400) / BLOCK_SECONDS))
       // The window's true length, from the two block timestamps, not the nominal days.
       const [bNow, bThen] = await within(
         Promise.all([archive.getBlock({ blockNumber: head }), archive.getBlock({ blockNumber: then })]),

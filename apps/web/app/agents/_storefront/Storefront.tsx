@@ -44,6 +44,8 @@ export const isSection = (s: string): s is Exclude<SectionId, 'overview'> => SEC
 const CAT: Record<string, string> = { yield: 'Yield', grid: 'Grid trading', rebalancing: 'Rebalancing', health_factor: 'Health factor', security: 'Security' }
 const NET: Record<number, string> = { 56: 'BSC mainnet', 97: 'BSC testnet' }
 const TEST: Record<string, string> = { yield: 'MCS-YIELD-1', grid: 'MCS-GRID-1', rebalancing: 'MCS-REB-1', health_factor: 'MCS-HF-1' }
+/** The test an agent is judged on: its own declared standard, else its category's. */
+const testOf = (d: { standard: string | null; category: string | null }) => d.standard ?? (d.category ? TEST[d.category] : undefined)
 const TENDER = new Set(['health_factor', 'yield', 'grid', 'rebalancing', 'security'])
 /** What a buyer sends, in words, from the category's task schema (packages/commerce tasks.ts). */
 const SEND: Record<string, string> = {
@@ -84,7 +86,7 @@ export function Storefront({ d, section = 'overview', evidence = null, lens = nu
   const cat = d.category && d.category !== 'unclassified' ? CAT[d.category] ?? d.category : 'Unclassified'
   // The badge and verdict read the agent's own category test: the conformance worker runs
   // all four on a third party, and failing another category's test says nothing about it.
-  const ownTest = d.category ? TEST[d.category] : undefined
+  const ownTest = testOf(d)
   const own = d.category && d.category !== 'unclassified' ? d.tests.filter((t) => t.testId === ownTest) : d.tests
   const latest = own[0] ?? null
   const passed = own.find((t) => t.pass) ?? null
@@ -201,7 +203,7 @@ function Overview({ d, cat, shown, tenderHref, tryHref, delivery, lens, base }: 
         ) : <p className={styles.muted}>This agent published no description. <ProvenanceChip provenance="CLAIMED" /></p>}
         <dl className={page.sendGet}>
           <div><dt>You send</dt><dd>{send ?? `Whatever its agent card asks for. ${BRAND.name} has no task form for ${cat.toLowerCase()} yet.`}</dd></div>
-          <div><dt>You get</dt><dd>An answer file, recorded by hash on chain when it delivers, and read here as a picture{d.category && TEST[d.category] ? ' with Marque’s own checks beside it' : ''}.</dd></div>
+          <div><dt>You get</dt><dd>An answer file, recorded by hash on chain when it delivers, and read here as a picture{testOf(d) ? ' with Marque’s own checks beside it' : ''}.</dd></div>
         </dl>
       </section>
 
@@ -275,7 +277,7 @@ function Evidence({ d, tests, own, evidence, cat }: { d: Data; tests: StoreTest[
               ))}
             </ol>
           </>
-        ) : <p className={styles.muted}>Not run against {d.category && TEST[d.category] ? <a href={`/standard/${TEST[d.category]}`}>{TEST[d.category]}</a> : `a ${BRAND.name} test`} yet. <Badge kind="untested" /></p>}
+        ) : <p className={styles.muted}>Not run against {testOf(d) ? <a href={`/standard/${testOf(d)}`}>{testOf(d)}</a> : `a ${BRAND.name} test`} yet. <Badge kind="untested" /></p>}
         {d.slug === 'tidemark' ? <p className={styles.muted}>This published test asks for a quoted net APR and a switching decision. Tidemark measures trailing realised yield instead; it has not passed this test, and the test does not certify its specialised method.</p> : null}
         {tests.length ? (
           <div className={styles.tableWrap} tabIndex={0} role="region" aria-label="Scrollable table">

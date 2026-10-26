@@ -120,6 +120,7 @@ Log every one in `docs/DEVIATIONS.md`: *what was planned · what shipped · why 
 | Grid Trading | spot balances + pair price | **MCS-GRID-1** | spacing arithmetic (type declared and correct), allocation sums ≤ capital, all levels inside stated bounds, none below the stop, **fee drag disclosed** |
 | Yield Optimisation | Venus + Lista + Pancake farms | **MCS-YIELD-1** | every APR carries source + timestamp, net APR within 15bps of ours **at the stated size**, switching cost itemized, supplied threshold respected, leverage flagged when excluded |
 | Health Factor | Venus Comptroller | **MCS-HF-1** | HF to 3dp, correct per-market liquidation threshold, exact repay amount for the target HF (tolerance 0.005) |
+| Yield (realised) | Venus vToken `exchangeRateStored` at two archived blocks | **MCS-RYIELD-1** (added 26 Oct 2026) | window exactly the supplied blocks, each venue's realised APR within 1 bp of the exchange-rate growth annualised over the true time between the blocks, net not above gross, every figure sourced, a recommendation consistent with the agent's own ranking. Run only on agents that declare it (Tidemark) |
 
 **No LLM grades a conformance test.** If a field cannot be checked by assertion, it belongs in the Ledger, not MCS. Tolerances are named constants in code and are rendered into the published standard, which is **generated from the test code** so it can never drift from what is enforced.
 

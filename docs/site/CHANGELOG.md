@@ -20,7 +20,9 @@ Running Marque: /adopt states the measured running cost, every key and what it c
 
 Fixed: "Create a Marque Pass" on the progress page stayed disabled; the marketplace catalog read slowed past its limit as the registry grew and now reads candidates first.
 
-Still open: storing each decided chain check permanently waits on a database change; outside buyers are defined by Marque's published team list, which does not prove independence.
+A second yield standard, MCS-RYIELD-1, grades realised yield: what each venue actually paid between two supplied blocks, from its exchange-rate growth. Tidemark, the reference agent built for that question, is now tested on it instead of showing an old result of a test built for a different task. Each fully decided chain check is now stored with its block and never replaced.
+
+Still open: outside buyers are defined by Marque's published team list, which does not prove independence.
 
 [Every job](https://marque.trade/proof) · [A free practice hire](https://marque.trade/quest/practice) · [Running Marque](https://marque.trade/adopt)
 

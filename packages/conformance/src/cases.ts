@@ -3,6 +3,7 @@ import type { RebPolicy } from './tests/mcs-reb-1.js'
 import type { HfPolicy } from './tests/mcs-hf-1.js'
 import type { GridPolicy } from './tests/mcs-grid-1.js'
 import type { YieldPolicy } from './tests/mcs-yield-1.js'
+import type { RyieldPolicy } from './tests/mcs-ryield-1.js'
 
 /**
  * The published test cases.
@@ -21,7 +22,7 @@ export interface CaseSpec {
   id: string
   testId: TestId
   subject: Record<string, string>
-  policy: RebPolicy | HfPolicy | GridPolicy | YieldPolicy
+  policy: RebPolicy | HfPolicy | GridPolicy | YieldPolicy | RyieldPolicy
   /** Why this subject was chosen. Published with the standard. */
   why: string
 }
@@ -96,6 +97,20 @@ export const CASES: readonly CaseSpec[] = [
     } satisfies YieldPolicy,
     why:
       'Idle stablecoins are the most common real position on BSC. The 50 bps threshold and the 1,000 USD size make the net-of-cost arithmetic decide the answer, which is exactly the thing agents get wrong by quoting gross APR.',
+  },
+  {
+    id: 'RYIELD-1-usdt-7d',
+    testId: 'MCS-RYIELD-1',
+    subject: { asset: 'USDT' },
+    policy: {
+      asset: 'USDT',
+      amount: 1_000,
+      days: 7,
+      statement:
+        'measure what each Venus USDT supply market actually paid between the two supplied blocks, from its exchange-rate growth, and recommend a venue only if the numbers in your own ranking support it',
+    } satisfies RyieldPolicy,
+    why:
+      'A quoted rate is a promise about the next block; a realised rate is a fact about the last week. Seven days of Venus USDT supply is the most common question a stablecoin holder asks, and two archived exchange-rate reads at supplied blocks give it exactly one right answer.',
   },
 ]
 

@@ -1,7 +1,7 @@
 # Marque Conformance Standard: MCS v1.0.0
 
-> Generated 2026-10-11T18:27:30.196Z from `packages/conformance/src/tolerances.ts`.
-> Do not edit by hand; regenerate with `pnpm standard`.
+> Generated 2026-10-26T11:34:57.241Z from `packages/conformance/src/tolerances.ts`.
+> Do not edit by hand: regenerate with `pnpm standard`.
 > Tolerance revision 1.
 
 ## What this standard is, and what it refuses to be
@@ -62,8 +62,8 @@ conformance outcome and belongs in the public record.
 
 *Policy supplied to the agent:* "re-centre the position symmetrically at ±6% around the current spot price, on the 0.25% fee tier, keeping the same liquidity"
 
-*Latest captured example:* case `REB-1-bncb-wbnb-2500-final-1791743231671` · block `127067260` · ground-truth hash `0xabc7fcfb58b6f69fd29023f99e145da83877f85d5bc6fc91549aa26571322b40`
-*Actual subject in that snapshot:* pair `BNCB/WBNB` · owner `0x2cfD930f4Ca936CAD72a13b62df095D8BA17874f` · tokenId `7650656`
+*Latest captured example:* case `REB-1-bncb-wbnb-2500-bound-20261026083250503-c266ce6b` · block `129866199` · ground-truth hash `0xf8ddbf3b810e9f1640c6a9fcd8883c7c6d546e5bfeb8ff58fe6c522b831fdfd1`
+*Actual subject in that snapshot:* pair `BNCB/WBNB` · owner `0xa9621227DF65696fB2B45b94644b65eA452b9724` · tokenId `7654391`
 
 | Check | Bound | What is asserted |
 |---|---|---|
@@ -98,7 +98,7 @@ conformance outcome and belongs in the public record.
 
 *Policy supplied to the agent:* "build a 12-level grid for BNB/USDT between 600 and 850 using 2,000 USD of capital, with a stop at 580, and disclose the fee drag at 25 bps per trade"
 
-*Latest captured example:* case `GRID-1-bnb-usdt-20261011181053961-5106d70c` · block `127065270` · ground-truth hash `0x358a9a8b9dac34ba596622a929b91e6ea9d70e9b2188f10ac7649332a2a79278`
+*Latest captured example:* case `GRID-1-bnb-usdt-lattice-20261026083250503-c266ce6b` · block `129866223` · ground-truth hash `0x9bf1ae916dd58b1d75a46c8a69d3161bc83b032fd5111a852b17e530c12ba4b2`
 *Actual subject in that snapshot:* pair `BNB/USDT` · address `0x60AA3AEE06E2345A17E4d4B12c53E046F4F63CAf`
 
 | Check | Bound | What is asserted |
@@ -130,7 +130,7 @@ conformance outcome and belongs in the public record.
 
 *Policy supplied to the agent:* "find the best net-of-cost route for 1,000 USD of USDT across the allowed protocols, only recommending a move that beats the current 0% by at least 50 bps, and excluding leveraged strategies"
 
-*Latest captured example:* case `YIELD-1-usdt-1000-20261011181053961-5106d70c` · block `127065270` · ground-truth hash `0xe2301152d25a486d63daaae28c75a6530a117c31b07560b4a42c2525c44d446d`
+*Latest captured example:* case `YIELD-1-usdt-1000-sluicegate-20261026083250503-c266ce6b` · block `129866236` · ground-truth hash `0xf8628e1f597c0240a085f3e11d9f8b264ec16b034d75e45a893039b674075ce7`
 *Actual subject in that snapshot:* asset `USDT`
 
 | Check | Bound | What is asserted |
@@ -162,7 +162,7 @@ conformance outcome and belongs in the public record.
 
 *Policy supplied to the agent:* "report the account’s current health factor and the exact USD of debt that must be repaid to restore a health factor of 2.5"
 
-*Latest captured example:* case `HF-1-venus-at-risk-20261011181053961-5106d70c` · block `127065270` · ground-truth hash `0x6ab25d3c56ad3b51a54b1ad70b5a7d5148a8492a7ceed520b1758ac478e1a9fb`
+*Latest captured example:* case `HF-1-venus-at-risk-keel-20261026083250503-c266ce6b` · block `129866251` · ground-truth hash `0xabb049a5ff474ce6d066219fc257788f3794cee12076fcb653a148c2c8efd538`
 *Actual subject in that snapshot:* address `0x60AA3AEE06E2345A17E4d4B12c53E046F4F63CAf`
 
 | Check | Bound | What is asserted |
@@ -179,6 +179,35 @@ conformance outcome and belongs in the public record.
 - **`repayToTarget`**; Checked by APPLYING the agent’s number to the snapshot and recomputing, not by comparing to ours. An agent that reaches the target by a different but valid route passes.
 - **`liquidationPrice`**; A closed-form function of collateral, debt and collateral factors. One percent admits oracle rounding, not method error.
 
+## MCS-RYIELD-1: Realised Yield
+
+**Reader:** Venus vToken exchangeRateStored at two archived blocks, with their timestamps
+**Category:** `yield`
+
+**Live case:** `RYIELD-1-usdt-7d`
+
+*Subject:* asset `USDT`
+
+*Why this subject:* A quoted rate is a promise about the next block; a realised rate is a fact about the last week. Seven days of Venus USDT supply is the most common question a stablecoin holder asks, and two archived exchange-rate reads at supplied blocks give it exactly one right answer.
+
+*Policy supplied to the agent:* "measure what each Venus USDT supply market actually paid between the two supplied blocks, from its exchange-rate growth, and recommend a venue only if the numbers in your own ranking support it"
+
+| Check | Bound | What is asserted |
+|---|---|---|
+| `window` | ±0 blocks | The measurement window must be exactly the two blocks the test case supplies. |
+| `realisedApr` | ±1 basis points | Each venue's realised APR must reproduce ours within this tolerance: the growth of its on-chain exchange rate between the two blocks, annualised over the true time between them (simple, not compounded). |
+| `netNotAboveGross` | must hold (boolean) | A venue's realised APR net of switching cost may not exceed its realised APR. |
+| `realisedSource` | must hold (boolean) | Every realised figure must name the on-chain read it came from. |
+| `decision` | must hold (boolean) | The answer must state recommend explicitly, and a recommended venue must be the one with the highest net realised APR in the answer's own ranking. |
+
+**Why these bounds**
+
+- **`window`**; Realised yield is a fact about a stated interval. Answering for a different interval answers a different question, so the blocks must match exactly.
+- **`realisedApr`**; Both sides read the same exchange rates and block timestamps, so the only legitimate divergence is rounding of the reported figure. One basis point admits four-decimal rounding and nothing more.
+- **`netNotAboveGross`**; A cost can only lower a return. A net figure above the gross one is an arithmetic error.
+- **`realisedSource`**; A realised rate is checkable only if the buyer can see which contract and which reads produced it.
+- **`decision`**; Internal consistency, not judgement: the test does not say which venue is wise, only that a recommendation agrees with the numbers the agent itself reported.
+
 ## Deliberately not tested
 
 A standard is defined as much by what it refuses to grade as by what it grades.
@@ -189,7 +218,7 @@ standard quietly non-deterministic.
 |---|---|---|
 | Expected number of fills at a stated volatility | MCS-GRID-1 | A model output wearing the clothes of a fact. Two honest agents can differ and both be right, so grading it would make the standard quietly non-deterministic. Moved to the Ledger. |
 | Whether the chosen range is the wisest available | MCS-REB-1 | There is no objectively correct V3 range in the abstract. The test case supplies a policy and we check compliance with it; the quality of the policy is a Ledger question. |
-| Whether the recommended venue is the best one | MCS-YIELD-1 | Judgement. We check that the arithmetic is right, the sources are cited and the supplied threshold is respected, not that the choice was optimal. |
+| Whether the recommended venue is the best one | MCS-YIELD-1 | Judgement. We check that the arithmetic is right, the sources are cited and the supplied threshold is respected; not that the choice was optimal. |
 | Speed, price and helpfulness of the response | MCS-HF-1 | Measured and published, but in the Ledger against a pre-registered rubric, never as a pass/fail certificate. |
 
 These are not ignored; they are measured in the Ledger, against a rubric that is

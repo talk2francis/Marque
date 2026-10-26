@@ -10,6 +10,7 @@ import { rebGroundTruth, rebPrompt, gradeReb, type RebPolicy, type RebGroundTrut
 import { hfGroundTruth, hfPrompt, gradeHf, type HfPolicy, type HfGroundTruth } from './tests/mcs-hf-1.js'
 import { gridGroundTruth, gridPrompt, gradeGrid, type GridPolicy, type GridGroundTruth } from './tests/mcs-grid-1.js'
 import { yieldGroundTruth, yieldPrompt, gradeYield, type YieldPolicy, type YieldGroundTruth } from './tests/mcs-yield-1.js'
+import { ryieldGroundTruth, ryieldPrompt, gradeRyield, type RyieldPolicy, type RyieldGroundTruth } from './tests/mcs-ryield-1.js'
 import { REB_FALLBACK_SUBJECTS } from './cases.js'
 import { MCS_CODE_ANCHOR } from './code-anchor.js'
 
@@ -26,13 +27,14 @@ import { MCS_CODE_ANCHOR } from './code-anchor.js'
  */
 
 /** Every test's ground-truth shape, keyed by test id. */
-export type GroundTruth = RebGroundTruth | HfGroundTruth | GridGroundTruth | YieldGroundTruth
+export type GroundTruth = RebGroundTruth | HfGroundTruth | GridGroundTruth | YieldGroundTruth | RyieldGroundTruth
 
 const TEST_CATEGORY: Record<TestId, Category> = {
   'MCS-REB-1': 'rebalancing',
   'MCS-GRID-1': 'grid',
   'MCS-YIELD-1': 'yield',
   'MCS-HF-1': 'health_factor',
+  'MCS-RYIELD-1': 'yield',
 }
 
 /**
@@ -46,7 +48,7 @@ export async function observeCase(spec: {
   id: string
   testId: TestId
   subject: Record<string, string>
-  policy: RebPolicy | HfPolicy | GridPolicy | YieldPolicy
+  policy: RebPolicy | HfPolicy | GridPolicy | YieldPolicy | RyieldPolicy
   blockNumber?: bigint
 }): Promise<{ testCase: TestCase; groundTruth: GroundTruth; groundTruthHash: string; prompt: string }> {
   const client = publicClient()
@@ -89,6 +91,12 @@ export async function observeCase(spec: {
       const gt = await yieldGroundTruth(testCase as TestCase<YieldPolicy>)
       groundTruth = gt
       prompt = yieldPrompt(testCase as TestCase<YieldPolicy>, gt)
+      break
+    }
+    case 'MCS-RYIELD-1': {
+      const gt = await ryieldGroundTruth(testCase as TestCase<RyieldPolicy>)
+      groundTruth = gt
+      prompt = ryieldPrompt(testCase as TestCase<RyieldPolicy>, gt)
       break
     }
   }
@@ -210,6 +218,7 @@ export function grade(testId: TestId, groundTruth: GroundTruth, response: unknow
     case 'MCS-HF-1': return gradeHf(groundTruth as HfGroundTruth, response)
     case 'MCS-GRID-1': return gradeGrid(groundTruth as GridGroundTruth, response)
     case 'MCS-YIELD-1': return gradeYield(groundTruth as YieldGroundTruth, response)
+    case 'MCS-RYIELD-1': return gradeRyield(groundTruth as RyieldGroundTruth, response)
   }
 }
 

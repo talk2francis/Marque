@@ -320,9 +320,12 @@ export function marketplaceSourceQuery(owners?: readonly string[], chainId: 56 |
       where cat.category is null or cat.category = 'unclassified'
          or conf.test_id = case cat.category when 'yield' then 'MCS-YIELD-1' when 'grid' then 'MCS-GRID-1'
               when 'rebalancing' then 'MCS-REB-1' when 'health_factor' then 'MCS-HF-1' end
+         -- Realised yield is the yield category's second standard; only agents that declare it are run on it.
+         or (cat.category = 'yield' and conf.test_id = 'MCS-RYIELD-1')
       order by conf.agent_id,
                (conf.test_id = case cat.category when 'yield' then 'MCS-YIELD-1' when 'grid' then 'MCS-GRID-1'
-                  when 'rebalancing' then 'MCS-REB-1' when 'health_factor' then 'MCS-HF-1' end) desc nulls last,
+                  when 'rebalancing' then 'MCS-REB-1' when 'health_factor' then 'MCS-HF-1' end
+                or (cat.category = 'yield' and conf.test_id = 'MCS-RYIELD-1')) desc nulls last,
                conf.ran_at desc
     ),
     -- The candidates first (reachable in 24 h, or holding a Standard result: tens of thousands, not the whole
@@ -477,6 +480,7 @@ async function queryAgents(owners?: readonly string[], states?: Awaited<ReturnTy
   const list = (((rows as unknown as { rows?: unknown[] }).rows ?? (rows as unknown as unknown[])) as Array<Record<string, unknown>>)
 
   const bestByAgent = bestCommerceByAgent(commerce)
+  const declaredStandards = new Map(firstPartyAgentsAllLanes().filter((a) => typeof a.standard === 'string').map((a) => [`${a.chainId}:${a.tokenId}`, a.standard as string]))
   const noStandardTokens = new Set(firstPartyAgentsAllLanes().filter((a) => a.standard === null).flatMap((a) => [`${a.chainId}:${a.tokenId}`, ...(a.testnet ? [`${a.testnet.chainId}:${a.testnet.tokenId}`] : [])]))
 
   const now = Date.now()
@@ -491,8 +495,12 @@ async function queryAgents(owners?: readonly string[], states?: Awaited<ReturnTy
     const failed = Array.isArray(r['conf_failed']) ? (r['conf_failed'] as string[]) : []
     // A reference agent no published standard tests (config `standard: null`, matching its own card) is Untested: an
     // older result of a test built for a different task is history on The Standard, not its status here.
-    const noStandard = noStandardTokens.has(`${String(r['agent_id']).split(':')[0]}:${String(r['token_id'] ?? '')}`)
-    const warrantStatus: 'warranted' | 'failed' | 'untested' = noStandard ? 'untested' : confTest ? (confPass ? 'warranted' : 'failed') : 'untested'
+    const lane = `${String(r['agent_id']).split(':')[0]}:${String(r['token_id'] ?? '')}`
+    const noStandard = noStandardTokens.has(lane)
+    // A reference agent with its own declared standard is judged on that test only, never on another's older result.
+    const declared = declaredStandards.get(lane)
+    const offStandard = Boolean(declared && confTest && confTest !== declared)
+    const warrantStatus: 'warranted' | 'failed' | 'untested' = noStandard || offStandard ? 'untested' : confTest ? (confPass ? 'warranted' : 'failed') : 'untested'
     const kinds = Array.isArray(r['kinds']) ? (r['kinds'] as string[]).filter(Boolean) : []
     const liveKinds = Array.isArray(r['live_kinds']) ? (r['live_kinds'] as string[]).filter(Boolean) : []
     const taskKinds = (Array.isArray(r['live_task_kinds']) ? r['live_task_kinds'] as unknown[] : [])

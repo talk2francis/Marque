@@ -67,7 +67,8 @@ async function referenceSweep(): Promise<void> {
   let fail = 0
   const runId = `${new Date().toISOString().replace(/[^0-9]/g, '')}-${randomUUID().slice(0, 8)}`
   for (const a of fp) {
-    const expectedTest = TEST_FOR_CATEGORY[a.category]
+    // An agent's own standard (config/first-party.json `standard`) when set; null means none applies; else its category's.
+    const expectedTest = a.standard === null ? undefined : (a.standard as TestId | undefined) ?? TEST_FOR_CATEGORY[a.category]
     const agentId = ids.get(a.slug)
     if (!expectedTest || !agentId) {
       log('reference_skip', { agent: a.slug, reason: !expectedTest ? 'no published test for this category' : 'registry row not ingested' })

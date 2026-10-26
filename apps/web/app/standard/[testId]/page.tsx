@@ -19,6 +19,7 @@ const TITLES: Record<TestId, string> = {
   'MCS-GRID-1': 'Grid trading',
   'MCS-YIELD-1': 'Yield optimisation',
   'MCS-HF-1': 'Health factor monitoring',
+  'MCS-RYIELD-1': 'Realised yield',
 }
 
 export function generateStaticParams() {

@@ -19,3 +19,14 @@ describe('tidemark parse', () => {
     expect('missing' in parseTidemark('1000 USDT over the last 400 days')).toBe(true)
   })
 })
+
+describe('tidemark explicit window', () => {
+  it('measures exactly the blocks a buyer or a test supplies', () => {
+    const a = parseTidemark('Where did 1000 USDT earn the most on BNB Chain between block 128537158 and block 129881158, after switching costs?')
+    expect(a).toMatchObject({ asset: 'USDT', amount: 1000, window: { fromBlock: 128537158n, toBlock: 129881158n } })
+  })
+  it('refuses a window in the wrong order or longer than 90 days', () => {
+    expect('missing' in parseTidemark('1000 USDT between block 200 and block 100')).toBe(true)
+    expect('missing' in parseTidemark('1000 USDT between block 100000000 and block 130000000')).toBe(true)
+  })
+})

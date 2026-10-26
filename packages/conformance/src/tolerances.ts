@@ -234,12 +234,60 @@ export const HF = tol({
   },
 })
 
+// ---------------------------------------------------------------------------
+// MCS-RYIELD-1 — Realised yield (added 26 Oct 2026)
+// ---------------------------------------------------------------------------
+
+export const RYIELD = tol({
+  WINDOW_EXACT: {
+    id: 'window',
+    description: 'The measurement window must be exactly the two blocks the test case supplies.',
+    value: 0,
+    unit: 'blocks',
+    rationale:
+      'Realised yield is a fact about a stated interval. Answering for a different interval answers a different question, so the blocks must match exactly.',
+  },
+  REALISED_APR_BPS: {
+    id: 'realisedApr',
+    description:
+      'Each venue\'s realised APR must reproduce ours within this tolerance: the growth of its on-chain exchange rate between the two blocks, annualised over the true time between them (simple, not compounded).',
+    value: 1,
+    unit: 'basis points',
+    rationale:
+      'Both sides read the same exchange rates and block timestamps, so the only legitimate divergence is rounding of the reported figure. One basis point admits four-decimal rounding and nothing more.',
+  },
+  NET_NOT_ABOVE_GROSS: {
+    id: 'netNotAboveGross',
+    description: 'A venue\'s realised APR net of switching cost may not exceed its realised APR.',
+    value: null,
+    unit: 'boolean',
+    rationale: 'A cost can only lower a return. A net figure above the gross one is an arithmetic error.',
+  },
+  SOURCED: {
+    id: 'realisedSource',
+    description: 'Every realised figure must name the on-chain read it came from.',
+    value: null,
+    unit: 'boolean',
+    rationale: 'A realised rate is checkable only if the buyer can see which contract and which reads produced it.',
+  },
+  DECISION_CONSISTENT: {
+    id: 'decision',
+    description:
+      'The answer must state recommend explicitly, and a recommended venue must be the one with the highest net realised APR in the answer\'s own ranking.',
+    value: null,
+    unit: 'boolean',
+    rationale:
+      'Internal consistency, not judgement: the test does not say which venue is wise, only that a recommendation agrees with the numbers the agent itself reported.',
+  },
+})
+
 /** Every tolerance, grouped by test, for the standard generator. */
 export const ALL_TOLERANCES = {
   'MCS-REB-1': REB,
   'MCS-GRID-1': GRID,
   'MCS-YIELD-1': YIELD,
   'MCS-HF-1': HF,
+  'MCS-RYIELD-1': RYIELD,
 } as const
 
 export type TestId = keyof typeof ALL_TOLERANCES

@@ -26,6 +26,18 @@ const TEST_META: Record<TestId, { name: string; category: string; reader: string
   'MCS-GRID-1': { name: 'Grid Trading', category: 'grid', reader: 'spot balances + pair price' },
   'MCS-YIELD-1': { name: 'Yield Optimisation', category: 'yield', reader: 'Venus Core markets' },
   'MCS-HF-1': { name: 'Health Factor', category: 'health_factor', reader: 'Venus Comptroller' },
+  'MCS-RYIELD-1': { name: 'Realised Yield', category: 'yield', reader: 'Venus vToken exchangeRateStored at two archived blocks, with their timestamps' },
+}
+
+/** The published page follows house style (pnpm lint:copy): no em or en dashes. Headings take a colon, prose a semicolon. */
+function houseStyle(md: string): string {
+  return md.split('\n').map((line) => {
+    const heading = /^#{1,6} /.test(line) || /^> /.test(line)
+    return line
+      .replace(/(\d)\s*–\s*(\d)/g, '$1 to $2')
+      .replace(/\s+—\s+/g, heading ? ': ' : '; ')
+      .replace(/[—–]/g, ', ')
+  }).join('\n')
 }
 
 function bound(t: Tolerance): string {
@@ -190,7 +202,7 @@ async function main(): Promise<void> {
   }
 
   mkdirSync(OUT, { recursive: true })
-  writeFileSync(join(OUT, `MCS-v${MCS_VERSION.split('.').slice(0, 2).join('.')}.md`), L.join('\n'))
+  writeFileSync(join(OUT, `MCS-v${MCS_VERSION.split('.').slice(0, 2).join('.')}.md`), houseStyle(L.join('\n')))
   writeFileSync(join(OUT, `MCS-v${MCS_VERSION.split('.').slice(0, 2).join('.')}.json`), JSON.stringify(json, null, 2))
   console.log(`wrote docs/standard/MCS-v1.0.md and .json (v${MCS_VERSION}, revision ${MCS_TOLERANCE_REVISION})`)
   await closeDb()

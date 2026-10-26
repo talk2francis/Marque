@@ -4,6 +4,7 @@ import type { RebGroundTruth } from './tests/mcs-reb-1.js'
 import type { HfGroundTruth } from './tests/mcs-hf-1.js'
 import type { GridGroundTruth } from './tests/mcs-grid-1.js'
 import type { YieldGroundTruth } from './tests/mcs-yield-1.js'
+import type { RyieldGroundTruth } from './tests/mcs-ryield-1.js'
 import { loadCase, type GroundTruth } from './harness.js'
 
 /**
@@ -61,6 +62,15 @@ export function correctAnswer(testId: string, gt: GroundTruth): unknown {
         })),
         feeDragPct: g.minFeeDragPct,
       }
+    }
+    case 'MCS-RYIELD-1': {
+      const g = gt as RyieldGroundTruth
+      const ranking = [...g.venues].sort((a, b) => b.realisedAprPct - a.realisedAprPct).map((v) => ({
+        venue: `Venus ${v.symbol}`, realisedAprPct: Number(v.realisedAprPct.toFixed(4)), netRealisedAprPct: Number((v.realisedAprPct - 0.01).toFixed(4)),
+        source: `${v.symbol} exchangeRateStored at blocks ${g.fromBlock} and ${g.toBlock}`,
+      }))
+      const top = ranking[0]!
+      return { recommend: top.netRealisedAprPct > 0, venue: top.netRealisedAprPct > 0 ? top.venue : null, window: { fromBlock: g.fromBlock, toBlock: g.toBlock }, ranking }
     }
     case 'MCS-YIELD-1': {
       const g = gt as YieldGroundTruth
@@ -120,6 +130,15 @@ export function wrongAnswer(testId: string, gt: GroundTruth): unknown {
           allocationUsd: (g.capitalUsd / g.levels) * 1.5,
         })),
         // Fee drag omitted entirely.
+      }
+    }
+    case 'MCS-RYIELD-1': {
+      const c = correct as { window: { fromBlock: string; toBlock: string }; ranking: Array<Record<string, unknown>> }
+      // The quoted rate passed off as realised, over the head-relative window, with the net above the gross.
+      return {
+        ...c,
+        window: { fromBlock: String(BigInt(c.window.fromBlock) + 100n), toBlock: String(BigInt(c.window.toBlock) + 100n) },
+        ranking: c.ranking.map((row) => ({ ...row, realisedAprPct: (row['realisedAprPct'] as number) + 0.18, netRealisedAprPct: (row['realisedAprPct'] as number) + 0.2, source: '' })),
       }
     }
     case 'MCS-YIELD-1': {
