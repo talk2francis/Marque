@@ -1,0 +1,61 @@
+{
+  "chainId": 56,
+  "base": "https://marque.trade",
+  "wallet": "0x5aC2448FC79Ef8d33710b1Bced5AEff90138b452",
+  "startedAt": "2026-10-26T09:21:13.091Z",
+  "funding": {},
+  "hires": [
+    {
+      "category": "rebalancing",
+      "agent": "Bound",
+      "agentId": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341553",
+      "jobId": "57095",
+      "price": "0.15 U",
+      "signedQuote": true,
+      "signatures": 5,
+      "batched": false,
+      "tx": {
+        "createJob": "0xc769d125575ecac9aeebff44495e3c51451720f279155618341f7f369b36d7ab",
+        "registerJob": "0x7b9321d805f6adfada94b139c27e03ffc82b804e8219f71327c5508e52a4de25",
+        "setBudget": "0x9ac8e6b58c25888dc4cec1758e35c2e7b08839e63e881477809f62d9b90716c7",
+        "approve": "0x440089a7f9ce18060eaf250fff3153b50ef389d1269e97ab402ff0046bf4f1cc",
+        "fund": "0x71495abeea6c6660a0cc54a6231495a7dbaad374e4b7b136eee059b22de8410a",
+        "submit": "0xea56a45e3bf605a18d897c0877dda4c81185d95c9460cf2b45622a1105ef9b8d"
+      },
+      "intentId": "7660a942-d5dc-48c3-9004-aa23a0e170bc",
+      "notified": true,
+      "deliverable": {
+        "url": "https://marque.trade/agents/bound/erc8183/job/57095/response",
+        "ok": true,
+        "error": null,
+        "keys": [
+          "currentTick",
+          "inRange",
+          "pctToNearestBound",
+          "proposedTickLower",
+          "proposedTickUpper",
+          "distanceToBound",
+          "amount0",
+          "amount1",
+          "maxSlippageBps",
+          "slippageBasis",
+          "tokenId",
+          "owner",
+          "pool",
+          "tickSpacing",
+          "feeTier",
+          "pair",
+          "rangeHalfWidthPct",
+          "assumptions",
+          "blockNumber",
+          "readAt",
+          "source"
+        ]
+      },
+      "seconds": 35
+    }
+  ],
+  "cancel": null,
+  "revoke": null,
+  "finishedAt": "2026-10-26T09:21:48.712Z"
+}

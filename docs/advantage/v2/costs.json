@@ -1,0 +1,71 @@
+[
+  {
+    "task": "T1-health-factor",
+    "jobId": "57093",
+    "agent": "Keel",
+    "price": "0.05 U",
+    "buyerTxs": 5,
+    "gas": "1400463",
+    "feesBnb": "0.00007002315",
+    "deliveredSeconds": 20,
+    "txs": {
+      "createJob": "0x08e16a4334979567ec4f7335c734dd8e17c7b32a4b8b9639c4f66ee4f4742bf4",
+      "registerJob": "0x36340d2bb0593c2cc9f54a1d895ff259887163ae429b2292b56f6971e6db7651",
+      "setBudget": "0x0f120272a98195385e43f77e49157a677a6e0f3d481e3cb300ac91d637c169f4",
+      "approve": "0x45841f6c2b838d7446c66f663b3aaf2d58920e76e6fe8f2874cef7dc27266319",
+      "fund": "0x25a88642a774d7790254bbe65dd6450a52600226b3df401e3dc69aac756cd78a",
+      "submit": "0x812db028bf8e3f2a593bc64b1952deb70c952a98a871de585351e9cfd8d0120f"
+    },
+    "rubric": {
+      "met": 3,
+      "of": 3,
+      "unchecked": 0
+    }
+  },
+  {
+    "task": "T2-yield",
+    "jobId": "57094",
+    "agent": "Sluicegate",
+    "price": "0.10 U",
+    "buyerTxs": 5,
+    "gas": "1325639",
+    "feesBnb": "0.00006628195",
+    "deliveredSeconds": 27,
+    "txs": {
+      "createJob": "0xdfaf46f219a116bfd530751dae8c5dd1eca0fe8bdded0084fea6ac85b9f5d94a",
+      "registerJob": "0xf546814f575bff499b9e2c01d72df94a97e65d08e45fb9c4aff6afe13b24ca4d",
+      "setBudget": "0x830b67d6aa8a1dbc1a4a4f4689d190c62bb6cace744823c0385789310f3786aa",
+      "approve": "0x9eb89a15653d70a5d995439c6823efcd16bf6282a65901814856da953b84c530",
+      "fund": "0x2df97b3cc9c0019b27b4f277f58b0203f060836460fd2ecff607b394950db27a",
+      "submit": "0x26faa407f2234e2e73eae14bf6460c5dd765595d08189f127bd160f9f467efb8"
+    },
+    "rubric": {
+      "met": 3,
+      "of": 3,
+      "unchecked": 0
+    }
+  },
+  {
+    "task": "T3-rebalancing",
+    "jobId": "57095",
+    "agent": "Bound",
+    "price": "0.15 U",
+    "buyerTxs": 5,
+    "gas": "1400463",
+    "feesBnb": "0.00007002315",
+    "deliveredSeconds": 35,
+    "txs": {
+      "createJob": "0xc769d125575ecac9aeebff44495e3c51451720f279155618341f7f369b36d7ab",
+      "registerJob": "0x7b9321d805f6adfada94b139c27e03ffc82b804e8219f71327c5508e52a4de25",
+      "setBudget": "0x9ac8e6b58c25888dc4cec1758e35c2e7b08839e63e881477809f62d9b90716c7",
+      "approve": "0x440089a7f9ce18060eaf250fff3153b50ef389d1269e97ab402ff0046bf4f1cc",
+      "fund": "0x71495abeea6c6660a0cc54a6231495a7dbaad374e4b7b136eee059b22de8410a",
+      "submit": "0xea56a45e3bf605a18d897c0877dda4c81185d95c9460cf2b45622a1105ef9b8d"
+    },
+    "rubric": {
+      "met": 3,
+      "of": 4,
+      "unchecked": 1
+    }
+  }
+]

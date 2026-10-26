@@ -1,0 +1,9 @@
+Job 56:57094 · answer block 129872563 · file matches the hash on chain
+Checks: 3 of 3 agree (decided)
+  holds       Net APR is not above gross                     agent 3.51% net        Marque 3.51% gross
+  holds       Every APR names its source                     agent 2 sources        Marque ·
+  match       Venus USDT supply APR                          agent 3.515%           Marque 3.515%
+Terms met: 3 of 3 (signed by the agent)
+  met        Net APR is not above gross APR                                         agent 3.51% net        Marque 3.51% gross
+  met        Every APR names its source                                             agent 2 sources        Marque ·
+  met        Venus supply APR within 15 bps of Venus at the answer's block          agent 3.515%           Marque 3.515%

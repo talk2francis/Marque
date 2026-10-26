@@ -1,0 +1,9 @@
+{
+  "chainId": 56,
+  "wallet": "0x5aC2448FC79Ef8d33710b1Bced5AEff90138b452",
+  "approve": "0x924d792a8191372026c3519fa2a88b8e3fddd9ab74db455244e6f6a56002295c",
+  "swap": "0xf50ae20ee9eeeba002656374ea746914af56e7954c33595e76df9b91b7b6cc88",
+  "amountInUSDT": "0.25",
+  "quotedU": "0.249888631364980387",
+  "uBalanceAfter": "0.329888631364980387"
+}

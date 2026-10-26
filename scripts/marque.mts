@@ -5,6 +5,10 @@
  */
 import { replayLens } from '../apps/web/lib/lens'
 
+if (!process.env['DATABASE_URL']) {
+  console.error('verify-terms reads the job and its answer through a Marque database: set DATABASE_URL (for example by loading the server\'s secrets file) and run again.')
+  process.exit(78)
+}
 const [cmd, ref] = process.argv.slice(2)
 if (cmd !== 'verify-terms' || !ref || !/^(56|97):\d{1,12}$/.test(ref)) {
   console.error('usage: pnpm marque verify-terms <56|97>:<jobId>')

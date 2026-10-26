@@ -171,15 +171,17 @@ if (!ONLY || ONLY.includes('cancel')) {
   evidence.cancel = { jobId: jobId.toString(), createJob: createTx, cancel: cancelTx }
 }
 
-// Approve exactly, then revoke to zero.
+// Approve exactly, then revoke to zero (the allowance demonstration; --no-revoke-demo skips it, as a measured run does).
 const tok = { address: U, symbol: 'U', decimals: 18, isDefault: true }
+if (!args.includes('--no-revoke-demo')) {
 const approveTx = await send(approveCall(CHAIN, tok, parseEther('0.05'), '0.05 U'))
 const revokeTx = await send(revokeAllowanceCall(CHAIN, tok))
 const after = await pub.readContract({ address: U, abi: erc20Abi, functionName: 'allowance', args: [account.address, NETWORKS[CHAIN].commerce] })
 evidence.revoke = { approve: approveTx, revoke: revokeTx, allowanceAfter: after.toString() }
 log('allowance after revoke:', formatAmount(after, 18), 'U')
+}
 
 evidence.finishedAt = new Date().toISOString()
-writeFileSync(path.join(ROOT, `docs/phase2/evidence/${MAINNET ? 'mainnet-smoke' : 'testnet-hire-proof'}.json`), JSON.stringify(evidence, null, 2) + '\n')
+writeFileSync(process.env.EVIDENCE_OUT ?? path.join(ROOT, `docs/phase2/evidence/${MAINNET ? 'mainnet-smoke' : 'testnet-hire-proof'}.json`), JSON.stringify(evidence, null, 2) + '\n')
 log(`evidence written (${MAINNET ? 'mainnet-smoke' : 'testnet-hire-proof'}.json)`)
 void decodeEventLog

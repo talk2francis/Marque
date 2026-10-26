@@ -75,6 +75,7 @@ const COLS: Array<{ label: string; links: Array<{ label: string; href: string; e
     links: [
       { label: 'Why Marque', href: '/why' },
       { label: 'Every job, who paid', href: '/proof' },
+      { label: 'Advantage Report', href: '/advantage' },
       { label: 'Running Marque', href: '/adopt' },
       { label: 'The Standard', href: '/standard' },
       { label: 'The Ledger', href: '/ledger' },

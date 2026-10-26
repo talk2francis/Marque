@@ -1,0 +1,10 @@
+Job 56:57095 · answer block 129872677 · file matches the hash on chain
+Checks: 3 of 3 agree (decided)
+  match       #7367728 current tick                          agent -66058           Marque -66058
+  holds       #7367728 proposed ticks on the pool's grid     agent -66571 to -65570 Marque multiples of 1
+  holds       #7367728 new range covers the price            agent -66571 to -65570 Marque price tick -66058
+Terms met: 3 of 4 (signed by the agent)
+  met        Current tick matches the pool exactly at the answer's block            agent -66058           Marque -66058
+  met        Proposed ticks are multiples of the pool's tick spacing                agent -66571 to -65570 Marque multiples of 1
+  unchecked  In-range status matches the pool's current tick                        agent ·                Marque ·
+  met        The proposed range covers the current price                            agent -66571 to -65570 Marque price tick -66058

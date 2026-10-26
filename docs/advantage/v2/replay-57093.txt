@@ -1,0 +1,9 @@
+Job 56:57093 · answer block 129872453 · file matches the hash on chain
+Checks: 3 of 3 agree (decided)
+  match       Health factor                                  agent 1.183            Marque 1.183
+  match       Repay to reach 2.5                             agent $6,454.16        Marque HF 2.5 after it
+  match       BTCB liquidation price                         agent $67,852.96       Marque $67,852.96
+Terms met: 3 of 3 (signed by the agent)
+  met        Health factor within 0.005 of Venus at the answer's block              agent 1.183            Marque 1.183
+  met        The repay amount brings the health factor to the target within 0.005   agent $6,454.16        Marque HF 2.5 after it
+  met        Liquidation price within 1 percent of Venus prices at the answer's bl… agent $67,852.96       Marque $67,852.96

@@ -1,0 +1,58 @@
+{
+  "chainId": 56,
+  "base": "https://marque.trade",
+  "wallet": "0x5aC2448FC79Ef8d33710b1Bced5AEff90138b452",
+  "startedAt": "2026-10-26T09:20:23.007Z",
+  "funding": {},
+  "hires": [
+    {
+      "category": "yield",
+      "agent": "Sluicegate",
+      "agentId": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341555",
+      "jobId": "57094",
+      "price": "0.10 U",
+      "signedQuote": true,
+      "signatures": 5,
+      "batched": false,
+      "tx": {
+        "createJob": "0xdfaf46f219a116bfd530751dae8c5dd1eca0fe8bdded0084fea6ac85b9f5d94a",
+        "registerJob": "0xf546814f575bff499b9e2c01d72df94a97e65d08e45fb9c4aff6afe13b24ca4d",
+        "setBudget": "0x830b67d6aa8a1dbc1a4a4f4689d190c62bb6cace744823c0385789310f3786aa",
+        "approve": "0x9eb89a15653d70a5d995439c6823efcd16bf6282a65901814856da953b84c530",
+        "fund": "0x2df97b3cc9c0019b27b4f277f58b0203f060836460fd2ecff607b394950db27a",
+        "submit": "0x26faa407f2234e2e73eae14bf6460c5dd765595d08189f127bd160f9f467efb8"
+      },
+      "intentId": "a224cbb6-0b67-4ef2-8634-c0049810f5e8",
+      "notified": true,
+      "deliverable": {
+        "url": "https://marque.trade/agents/sluicegate/erc8183/job/57094/response",
+        "ok": true,
+        "error": null,
+        "keys": [
+          "recommend",
+          "venue",
+          "netAprPct",
+          "aprSources",
+          "switchingCost",
+          "usesLeverage",
+          "improvementBps",
+          "thresholdBps",
+          "declineReason",
+          "breakEvenUsd",
+          "grossAprPct",
+          "sizeUsd",
+          "alternatives",
+          "excluded",
+          "blockNumber",
+          "readAt",
+          "source",
+          "assumptions"
+        ]
+      },
+      "seconds": 27
+    }
+  ],
+  "cancel": null,
+  "revoke": null,
+  "finishedAt": "2026-10-26T09:20:51.098Z"
+}

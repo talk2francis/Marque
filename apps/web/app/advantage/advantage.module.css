@@ -1,0 +1,30 @@
+.page { width: min(880px, 100% - 32px); margin: 0 auto; padding: clamp(28px, 6vw, 64px) 0 72px; display: grid; gap: 28px; }
+.head { display: grid; gap: 10px; }
+.kicker { font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-3); font-weight: 600; }
+.lede { margin: 0; color: var(--ink-2); font-size: 16.5px; line-height: 1.55; max-width: 66ch; }
+.lock { padding: 16px 18px; border: 1px solid var(--hair-2); border-radius: 14px; background: color-mix(in srgb, var(--panel) 92%, transparent); }
+.lock dl, .facts { margin: 0; display: grid; gap: 8px; }
+.lock dl div, .facts div { display: grid; grid-template-columns: 170px minmax(0, 1fr); gap: 12px; }
+.lock dt, .facts dt { color: var(--ink-3); font-size: 13.5px; }
+.lock dd, .facts dd { margin: 0; color: var(--ink); font-size: 14.5px; line-height: 1.5; }
+.lock a, .facts a, .note a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--hair-2); }
+.summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.summary div { display: grid; gap: 2px; padding: 16px 18px; border: 1px solid var(--hair-2); border-radius: 14px; }
+.summary b { font-size: 34px; font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; }
+.summary span { color: var(--ink-2); font-size: 14px; }
+.tasks { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+.tasks > li { display: grid; gap: 12px; padding: 18px 20px; border: 1px solid var(--hair-2); border-radius: 16px; background: color-mix(in srgb, var(--panel) 92%, transparent); }
+.taskHead { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.taskHead h2 { margin: 0; font-size: 19px; font-weight: 600; color: var(--ink); }
+/* Every outcome is printed at the same size; only the mark differs. */
+.outcome { font-size: 13px; font-weight: 600; padding: 3px 12px; border-radius: 999px; border: 1px solid var(--hair-2); color: var(--ink); }
+.outcome[data-o='win'] { border-color: var(--moss); }
+.outcome[data-o='mixed'] { border-style: dashed; }
+.outcome[data-o='loss'] { border-color: var(--oxide); }
+.replay { margin: 0; color: var(--ink-3); font-size: 13.5px; }
+.not { display: grid; gap: 10px; padding-top: 18px; border-top: 1px solid var(--hair-2); }
+.not h2 { margin: 0; font-size: 19px; font-weight: 600; color: var(--ink); }
+.not ul { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
+.not li { color: var(--ink-2); font-size: 15px; line-height: 1.55; }
+.note { margin: 0; color: var(--ink-3); font-size: 13.5px; }
+@media (max-width: 600px) { .lock dl div, .facts div { grid-template-columns: 1fr; gap: 2px; } }

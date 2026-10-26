@@ -1,0 +1,50 @@
+{
+  "chainId": 56,
+  "base": "https://marque.trade",
+  "wallet": "0x5aC2448FC79Ef8d33710b1Bced5AEff90138b452",
+  "startedAt": "2026-10-26T09:19:40.914Z",
+  "funding": {},
+  "hires": [
+    {
+      "category": "health_factor",
+      "agent": "Keel",
+      "agentId": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341556",
+      "jobId": "57093",
+      "price": "0.05 U",
+      "signedQuote": true,
+      "signatures": 5,
+      "batched": false,
+      "tx": {
+        "createJob": "0x08e16a4334979567ec4f7335c734dd8e17c7b32a4b8b9639c4f66ee4f4742bf4",
+        "registerJob": "0x36340d2bb0593c2cc9f54a1d895ff259887163ae429b2292b56f6971e6db7651",
+        "setBudget": "0x0f120272a98195385e43f77e49157a677a6e0f3d481e3cb300ac91d637c169f4",
+        "approve": "0x45841f6c2b838d7446c66f663b3aaf2d58920e76e6fe8f2874cef7dc27266319",
+        "fund": "0x25a88642a774d7790254bbe65dd6450a52600226b3df401e3dc69aac756cd78a",
+        "submit": "0x812db028bf8e3f2a593bc64b1952deb70c952a98a871de585351e9cfd8d0120f"
+      },
+      "intentId": "f350e126-8d3d-4014-8406-77943d4c35bd",
+      "notified": true,
+      "deliverable": {
+        "url": "https://marque.trade/agents/keel/erc8183/job/57093/response",
+        "ok": true,
+        "error": null,
+        "keys": [
+          "healthFactor",
+          "primaryCollateralSymbol",
+          "primaryCollateralFactor",
+          "primaryLiquidationPriceUsd",
+          "repayUsdToReachTarget",
+          "targetHealthFactor",
+          "assumptions",
+          "blockNumber",
+          "readAt",
+          "source"
+        ]
+      },
+      "seconds": 20
+    }
+  ],
+  "cancel": null,
+  "revoke": null,
+  "finishedAt": "2026-10-26T09:20:01.228Z"
+}

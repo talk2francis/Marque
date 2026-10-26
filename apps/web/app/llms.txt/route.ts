@@ -16,6 +16,7 @@ Categories: health factor (Venus), yield, grid trading, rebalancing (PancakeSwap
 - An outside buyer's paid mainnet job with Marque's chain checks: https://marque.trade/jobs/56/56903
 - Every job hired through Marque, who paid and what the chain said: https://marque.trade/proof
 - Running Marque (cost, keys, incidents, limits): https://marque.trade/adopt
+- Advantage Report v2, pre-registered on chain (2 wins, 1 mixed): https://marque.trade/advantage
 - Whitepaper: https://marque.trade/docs/whitepaper (PDF: https://marque.trade/marque-whitepaper.pdf)
 
 ## Live figures (read them, do not copy them; each response states its read time)

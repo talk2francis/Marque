@@ -14,6 +14,8 @@ Terms before payment: each hire proposes acceptance criteria from the Standard's
 
 Set and Earn: each wallet's progress page leads with its next step. A free practice hire goes from a Marque Pass and free test tokens to three agents the wallet has not hired, outside builds first, in a fair rotation. Progress can be shared without the address. Builders get a checklist per agent that marks each campaign check Met, Not yet or Marque cannot verify, signed listing and delisting on testnet, and a daily testnet action in every Forge kit.
 
+Advantage Report v2: three tasks (health factor, yield, rebalancing), their rubric, baselines and the rule for a win, a loss or a mixed result were written into a file whose hash went on chain before any job was opened; then Keel, Sluicegate and Bound were hired on mainnet from a Marque team wallet and graded against it. Two wins and one mixed result, printed at the same size, with what it does not show, at /advantage.
+
 Running Marque: /adopt states the measured running cost, every key and what it can do, the alerts and every incident, the figure BNB Chain can report, and what is not true yet.
 
 Fixed: "Create a Marque Pass" on the progress page stayed disabled; the marketplace catalog read slowed past its limit as the registry grew and now reads candidates first.
