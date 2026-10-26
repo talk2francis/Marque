@@ -132,7 +132,7 @@ export function weeklyOutside(rows: readonly ProofRow[]): Array<{ week: string; 
 }
 
 export function proofProjection() {
-  return cachedProjection('proof:v2', build, { freshMs: 10 * 60_000, timeoutMs: 180_000 })
+  return cachedProjection('proof:v2', build, { freshMs: 10 * 60_000, timeoutMs: 180_000, staleWhileRevalidate: true })
 }
 
 const CSV_COLS = ['chain', 'job_id', 'escrow', 'agent', 'agent_key', 'operator_class', 'funder_class', 'client', 'counted', 'state', 'funded', 'delivered', 'settled', 'refunded', 'rated', 'checks_decided', 'checks_agreed', 'terms_met', 'terms_of', 'terms_source', 'act', 'act_tx', 'hire_tx', 'verify_url'] as const

@@ -193,6 +193,34 @@
       "chainIds": [
         97
       ]
+    },
+    {
+      "address": "0x93dBa9EDFE0769e8748B97d323b466fF60502Ad4",
+      "role": "Practice-path phone test Pass (390 px run on production, hired Redcell testnet job 1668; funded by the testnet operator)",
+      "chainIds": [
+        97
+      ]
+    },
+    {
+      "address": "0x156286f893dE9C4ca189Ff8C57696E182A9D90df",
+      "role": "Practice-path phone test Pass (second 390 px run on production, hired and rated Redcell testnet job 1669; funded by the testnet operator)",
+      "chainIds": [
+        97
+      ]
+    },
+    {
+      "address": "0x15d06032d45828287b9F53757dF330BA2324bAD0",
+      "role": "Practice-path phone test Pass (third 390 px run on production, funded by the testnet operator; no core-category reference agent in its picks, so no hire)",
+      "chainIds": [
+        97
+      ]
+    },
+    {
+      "address": "0xe1d0A3E55970199505fAe30c2EE073c95e987683",
+      "role": "Terms checkpoint test Pass (390 px run on production, hired and rated Keel testnet job 1670 with signed acceptance criteria; funded by the testnet operator)",
+      "chainIds": [
+        97
+      ]
     }
   ]
 }
