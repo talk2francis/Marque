@@ -330,15 +330,26 @@ async function clientOf(chainId: number, jobId: string): Promise<string | null> 
 export async function questStats(chainId: ChainId = campaignChainId()) {
   const clients = rowsOf(await db().execute(sql`select distinct client from commerce_job where chain_id = ${chainId} and intent_id is not null`)).map((r) => String(r['client']))
   const per = await Promise.all(clients.map((c) => walletQuest(c, chainId)))
+  const [listed] = rowsOf(await db().execute(sql`select count(*) as n from builder_listing where status = 'published' and withdrawn_at is null`))
+  return { chainId, ...statsFrom(per), agentsListed: Number(listed?.['n'] ?? 0) }
+}
+
+/** Every wallet that hired through Marque on one network, as walletQuest projects it (the proof table reads the same). */
+export async function marqueWallets(chainId: ChainId): Promise<WalletQuest[]> {
+  const clients = rowsOf(await db().execute(sql`select distinct client from commerce_job where chain_id = ${chainId} and intent_id is not null`)).map((r) => String(r['client']))
+  return Promise.all(clients.map((c) => walletQuest(c, chainId)))
+}
+export type WalletQuest = Awaited<ReturnType<typeof walletQuest>>
+
+/** The counted figures of /api/v1/phase2/stats from per-wallet projections: team, self and duplicate hires left out. */
+export function statsFrom(per: ReadonlyArray<Pick<WalletQuest, 'quest' | 'hires'>>) {
   const eligible = per.filter((w) => w.quest.eligible)
   const counted = eligible.flatMap((w) => w.hires.filter((h) => h.eligible))
-  const hiresPerCategory = Object.fromEntries(QUEST_CATEGORIES.map((c) => [c, counted.filter((h) => h.agent.category === c).length]))
-  const [listed] = rowsOf(await db().execute(sql`select count(*) as n from builder_listing where status = 'published' and withdrawn_at is null`))
   return {
-    chainId, walletsWithHire: eligible.filter((w) => w.hires.some((h) => h.eligible)).length,
-    hiresPerCategory, deposits: counted.filter((h) => h.tx.funded).length, delivered: counted.filter((h) => DELIVERED.has(h.state)).length,
+    walletsWithHire: eligible.filter((w) => w.hires.some((h) => h.eligible)).length,
+    hiresPerCategory: Object.fromEntries(QUEST_CATEGORIES.map((c) => [c, counted.filter((h) => h.agent.category === c).length])) as Record<string, number>,
+    deposits: counted.filter((h) => h.tx.funded).length, delivered: counted.filter((h) => DELIVERED.has(h.state)).length,
     settled: counted.filter((h) => h.tx.completed).length, ratings: counted.filter((h) => h.rating && !h.reasons.includes('rating_unbound')).length,
-    agentsListed: Number(listed?.['n'] ?? 0),
     excluded: { wallets: per.length - eligible.length, hires: per.flatMap((w) => w.hires).length - counted.length },
   }
 }

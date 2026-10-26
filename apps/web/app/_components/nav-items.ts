@@ -30,6 +30,7 @@ export const PROOF_GROUPS: Array<{ label: string; items: NavMenuItem[] }> = [
     label: 'Evidence',
     items: [
       { label: 'Why Marque', href: '/why', note: 'Every agent registered, down to the few you can hire', icon: 'proof' },
+      { label: 'Every job', href: '/proof', note: 'Each hire, who paid, what the chain checks said', icon: 'receipt' },
       { label: 'The Standard', href: '/standard', note: 'The tests an agent passes to be Warranted', icon: 'standard' },
       { label: 'The Ledger', href: '/ledger', note: 'Agent against human, measured', icon: 'ledger' },
       { label: 'Receipts', href: '/receipts/latest', note: 'Every sealed run, anchored on chain', icon: 'receipt' },
