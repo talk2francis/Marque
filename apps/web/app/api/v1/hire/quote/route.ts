@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { z } from 'zod'
 import { quoteForBuyer, sellerFor, validateTask } from '@marque/commerce'
 import { engineFor } from '@marque/agent-engines'
+import { criteriaFor } from '@marque/conformance/criteria'
 import { checkWindow, clientKey } from '../../../../../lib/limits'
 import { hireError, limited } from '../../../../../lib/hire-api'
 
@@ -55,7 +56,11 @@ export async function POST(req: NextRequest) {
     }
     const q = await quoteForBuyer(agentId, serviceId ?? null, {
       task_description: task,
-      terms: { deliverables: 'Complete the task as described, with the result delivered on chain.', quality_standards: 'Figures read from BNB Chain at delivery time, with sources.' },
+      terms: {
+        deliverables: 'Complete the task as described, with the result delivered on chain.', quality_standards: 'Figures read from BNB Chain at delivery time, with sources.',
+        // The acceptance criteria for this category, from the Standard's tolerances; Marque checks them at the answer's block.
+        ...(criteriaFor(seller.category).length ? { success_criteria: criteriaFor(seller.category).map((c) => c.text) } : {}),
+      },
     }, quoteAccessVersion)
     return NextResponse.json({ ...q, assumptions: check.assumptions }, { headers: { 'Cache-Control': 'no-store' } })
   } catch (err) {

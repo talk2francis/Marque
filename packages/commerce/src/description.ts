@@ -96,11 +96,14 @@ export function negotiationHashOf(neg: Negotiation): `0x${string}` {
  * so Marque writes the same canonical shape, naming the task, price, token, provider and
  * the Marque intent, so the job on chain says exactly what was bought and through whom.
  */
-export function buildPlainDescription(q: SimpleQuote, task: string, intentId: string): string {
+export function buildPlainDescription(q: SimpleQuote, task: string, intentId: string, criteria: readonly string[] = []): string {
+  // Criteria on a plain quote are the buyer's: the seller signed nothing, so the record says who set them.
+  const terms: Record<string, unknown> = { deliverables: sanitizeForClaim(q.deliverables ?? q.service ?? ''), quality_standards: '' }
+  if (criteria.length) { terms['success_criteria'] = criteria.map((c) => sanitizeForClaim(c)); terms['criteria_set_by'] = 'buyer' }
   const content = {
     version: 1,
     task: sanitizeForClaim(withAttribution(task)),
-    terms: { deliverables: sanitizeForClaim(q.deliverables ?? q.service ?? ''), quality_standards: '' },
+    terms,
     price: q.price,
     currency: getAddress(q.payment_token as string),
     provider: getAddress(q.provider),

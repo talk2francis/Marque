@@ -62,6 +62,11 @@ export interface PublicQuote {
   registryEvidence: { version: 1; chainId: number; blockNumber: string; observedAt: string }
   quoteAccessVersion?: 2
   quoteAccessToken?: string
+  /**
+   * The acceptance criteria proposed with this task. `signed`: the seller returned them inside the terms it signed, so
+   * they reach the job description on chain as the agent's own. Otherwise they are the buyer's, not the agent's.
+   */
+  criteria: { texts: string[]; signed: boolean } | null
 }
 
 /** Ask the exact service for a price on the buyer's task, verify it, store it. */
@@ -70,11 +75,12 @@ export async function quoteForBuyer(agentId: string, serviceId: number | null, t
   const identity = await currentIdentity(seller)
   // The job record names the marketplace (invariant 36): the suffix reaches the seller and the chain unchanged.
   task = { ...task, task_description: withAttribution(task.task_description) }
+  const proposed = Array.isArray(task.terms['success_criteria']) ? (task.terms['success_criteria'] as unknown[]).filter((x): x is string => typeof x === 'string') : []
   const q: QuoteResult = await requestQuote(seller.endpoint, task, { ...identity, timeoutMs: 10_000 })
   // A plain quote does not echo the task, so the task we asked is kept with it for the job description.
   const quoteAccessToken = quoteAccessVersion === 2 ? randomBytes(32).toString('hex') : undefined
   const quoteId = await recordQuote('user', seller, q, {
-    ...(q.ok && !q.signed ? { _marque_task: task.task_description } : {}),
+    ...(q.ok && !q.signed ? { _marque_task: task.task_description, ...(proposed.length ? { _marque_criteria: proposed } : {}) } : {}),
     ...(quoteAccessToken ? { _marque_access: { version: 2, tokenHash: createHash('sha256').update(quoteAccessToken).digest('hex') } } : {}),
   })
   if (!q.ok) throw new HireError(`quote_${q.reason}`, quoteFailureSentence(q.reason), 422)
@@ -87,7 +93,15 @@ export async function quoteForBuyer(agentId: string, serviceId: number | null, t
     providerMatchesRegistry: true,
     registryEvidence: { version: 1, chainId: seller.chainId, blockNumber: identity.blockNumber, observedAt: new Date().toISOString() },
     ...(quoteAccessToken ? { quoteAccessVersion: 2 as const, quoteAccessToken } : {}),
+    criteria: proposed.length ? { texts: proposed, signed: q.signed && signedCriteria(q.negotiation, proposed) } : null,
   }
+}
+
+/** True when every proposed criterion is inside the terms the seller signed. */
+export function signedCriteria(neg: { response?: unknown } | null, proposed: readonly string[]): boolean {
+  const terms = (neg?.response as { terms?: { success_criteria?: unknown } } | undefined)?.terms
+  const got = Array.isArray(terms?.success_criteria) ? terms!.success_criteria as unknown[] : []
+  return proposed.length > 0 && proposed.every((c) => got.includes(c))
 }
 
 export function quoteFailureSentence(reason: string): string {
@@ -186,7 +200,7 @@ export async function createIntent(input: { wallet: string; quoteId: number; quo
     if (verified.expiresAt <= Date.now() / 1000 + 20) throw new HireError('quote_expired', 'The quote expired while preparing the hire. Ask again.', 410)
     const intentId = crypto.randomUUID()
     const description = q.signed === false
-      ? buildPlainDescription(SimpleQuoteSchema.parse(raw), String(raw['_marque_task'] ?? raw['service'] ?? ''), intentId)
+      ? buildPlainDescription(SimpleQuoteSchema.parse(raw), String(raw['_marque_task'] ?? raw['service'] ?? ''), intentId, Array.isArray(raw['_marque_criteria']) ? (raw['_marque_criteria'] as unknown[]).filter((x): x is string => typeof x === 'string') : [])
       : buildJobDescription(NegotiationSchema.parse(raw))
     const [created] = await tx.insert(hireIntent).values({
       id: intentId, wallet: wallet.toLowerCase(), agentId: q.agentId, serviceId: q.serviceId, category, chainId,

@@ -5,6 +5,7 @@ import { normalizeAnswer, questJob, TICK_SPACING, type ChainId, type Lens } from
 import { archiveClient, publicClient } from '@marque/chain'
 import { venusReader, healthFactorOf, yieldReader, pancakeV3Reader } from '@marque/positions'
 import { HF, GRID, YIELD } from '@marque/conformance'
+import { criteriaFor, criterionByText, evaluateCriteria, type CriterionResult } from '@marque/conformance/criteria'
 import { jobManifest, type Manifest } from './manifest'
 import { onchainJobTask } from './job-description'
 
@@ -34,6 +35,32 @@ export interface JobLens {
   stored: boolean
   manifest: { matches: boolean | null; hash: string | null; raw: string | null; url: string | null; source: string | null } | null
   readable: boolean
+  /** The acceptance criteria and whether each was met, from the same checks. */
+  terms: LensTerms | null
+}
+
+/**
+ * signed: the criteria are in the job description inside the terms the agent signed. buyer: in the description, set by
+ * the buyer, not signed by the agent. standard: the job carries no criteria; Marque's criteria for the category are
+ * shown against the same checks, and are not part of this job's terms.
+ */
+export interface LensTerms { source: 'signed' | 'buyer' | 'standard'; rows: CriterionResult[]; met: number; of: number }
+
+export function termsOf(description: string | null, category: string | null, checks: readonly LensCheck[]): LensTerms | null {
+  let texts: string[] = []
+  let source: LensTerms['source'] = 'standard'
+  try {
+    const d = JSON.parse(description ?? '') as { provider_sig?: unknown; terms?: { success_criteria?: unknown; criteria_set_by?: unknown } }
+    const sc = d?.terms?.success_criteria
+    if (Array.isArray(sc) && sc.length) {
+      texts = sc.filter((x): x is string => typeof x === 'string')
+      source = typeof d.provider_sig === 'string' && d.terms?.criteria_set_by !== 'buyer' ? 'signed' : 'buyer'
+    }
+  } catch { /* plain-text description: no criteria in it */ }
+  const list = texts.length ? texts.map((t) => criterionByText(t) ?? { id: `other-${t.length}`, text: t, check: '\u0000' }) : [...criteriaFor(category)]
+  if (!list.length) return null
+  const rows = evaluateCriteria(list, checks)
+  return { source, rows, met: rows.filter((r) => r.state === 'met').length, of: rows.length }
 }
 
 const f = (v: number | null | undefined, dp = 3) => (v === null || v === undefined || !Number.isFinite(v) ? null : Number(v.toFixed(dp)).toLocaleString('en-US', { maximumFractionDigits: dp }))
@@ -134,7 +161,7 @@ async function build(chainId: ChainId, jobId: string): Promise<JobLens> {
   const url = job?.deliverable?.url ?? null
   const manifest: Manifest | null = await jobManifest(chainId, jobId, job as never)
   const source = (job?.deliverable as { source?: string | null } | undefined)?.source ?? null
-  if (!manifest) return { lens: null, checks: [], checkedAtBlock: null, summary: { checked: 0, agreed: 0 }, state: 'no-check', reason: 'the answer file could not be read', attemptedAt: new Date().toISOString(), stored: false, manifest: url ? { matches: null, hash: null, raw: null, url, source } : null, readable: false }
+  if (!manifest) return { lens: null, checks: [], checkedAtBlock: null, summary: { checked: 0, agreed: 0 }, state: 'no-check', reason: 'the answer file could not be read', attemptedAt: new Date().toISOString(), stored: false, manifest: url ? { matches: null, hash: null, raw: null, url, source } : null, readable: false, terms: null }
   // A file found from the chain hash (no published URL) still links to where it was read.
   void source
   let content: unknown = manifest.content
@@ -144,16 +171,20 @@ async function build(chainId: ChainId, jobId: string): Promise<JobLens> {
   const block = lens.meta.block && /^\d{6,12}$/.test(lens.meta.block) ? BigInt(lens.meta.block) : null
   const manifestView = { matches: manifest.matches, hash: manifest.hash, raw: manifest.pretty || manifest.raw, url, source }
   const attemptedAt = new Date().toISOString()
+  // The job's terms as recorded: Marque's intent (hires started here) or the escrow's own description.
+  const [hi] = (await db().execute(sql`select i.description from commerce_job j join hire_intent i on i.id = j.intent_id where j.chain_id = ${chainId} and j.job_id = ${jobId} limit 1`).catch(() => [])) as unknown as Array<{ description: string | null }>
+  const intentDescription = hi?.description ?? (job?.intent as { description?: string } | null)?.description ?? null
+  const onchain = await onchainJobTask(chainId, jobId)
+  const description = onchain?.description ?? intentDescription
   // A decided result never changes: read it before recomputing anything.
   const [kept] = (await db().execute(sql`select block, checks, summary, computed_at from lens_result where chain_id = ${chainId} and job_id = ${jobId} limit 1`).catch(() => [])) as unknown as Array<{ block: string | null; checks: LensCheck[]; summary: { checked: number; agreed: number }; computed_at: string }>
   if (kept) {
-    return { lens, checks: kept.checks, checkedAtBlock: kept.block, summary: kept.summary, state: 'decided', reason: null, attemptedAt: new Date(kept.computed_at).toISOString(), stored: true, manifest: manifestView, readable: lens.kind !== 'generic' }
+    return { lens, checks: kept.checks, checkedAtBlock: kept.block, summary: kept.summary, state: 'decided', reason: null, attemptedAt: new Date(kept.computed_at).toISOString(), stored: true, manifest: manifestView, readable: lens.kind !== 'generic', terms: termsOf(description, category, kept.checks) }
   }
   // The buyer's words: the hire intent's signed description (hires started on Marque), else the job's own description
   // on chain, which every ERC-8183 job carries.
-  const [hi] = (await db().execute(sql`select i.description from commerce_job j join hire_intent i on i.id = j.intent_id where j.chain_id = ${chainId} and j.job_id = ${jobId} limit 1`).catch(() => [])) as unknown as Array<{ description: string | null }>
-  const fromIntent = (() => { const d = hi?.description ?? (job?.intent as { description?: string } | null)?.description; if (!d) return null; try { return String((JSON.parse(d) as { task?: string }).task ?? '') } catch { return d } })()
-  const task = fromIntent || (await onchainJobTask(chainId, jobId))?.task || null
+  const fromIntent = (() => { const d = intentDescription; if (!d) return null; try { return String((JSON.parse(d) as { task?: string }).task ?? '') } catch { return d } })()
+  const task = fromIntent || onchain?.task || null
   // The checks read BSC mainnet state: practice jobs ask about mainnet accounts and pools too.
   const checks = await (lens.kind === 'health_factor' ? hfChecks(lens, task, block)
     : lens.kind === 'rebalancing' ? rebChecks(lens, block)
@@ -172,6 +203,7 @@ async function build(chainId: ChainId, jobId: string): Promise<JobLens> {
     lens, checks, checkedAtBlock: block ? block.toString() : null, summary, state, reason, attemptedAt, stored,
     manifest: manifestView,
     readable: lens.kind !== 'generic',
+    terms: termsOf(description, category, checks),
   }
 }
 
@@ -190,5 +222,5 @@ function missingInput(lens: Lens, task: string | null): string {
 
 /** Cached 10 minutes per job: a delivered answer does not change; checks are pinned to its block. */
 export function jobLens(chainId: ChainId, jobId: string) {
-  return cachedProjection(`lens:v5:${chainId}:${jobId}`, () => build(chainId, jobId), { freshMs: 10 * 60_000, timeoutMs: 20_000 })
+  return cachedProjection(`lens:v6:${chainId}:${jobId}`, () => build(chainId, jobId), { freshMs: 10 * 60_000, timeoutMs: 20_000 })
 }

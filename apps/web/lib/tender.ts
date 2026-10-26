@@ -1,4 +1,5 @@
 import 'server-only'
+import { criteriaFor } from '@marque/conformance/criteria'
 import { createHash } from 'node:crypto'
 import { sql } from 'drizzle-orm'
 import { db, tender as tenderTable, tenderQuote } from '@marque/db'
@@ -82,7 +83,10 @@ export async function* runTender(input: { category: string; fields: unknown; lan
         if (inspected.missing.length) throw new HireError('task_incomplete', `${seller.name} needs ${inspected.missing.join(' and ')} in the task.`, 422)
         const q = await quoteForBuyer(r.agentId, r.commerce.serviceId, {
           task_description: check.sentence,
-          terms: { deliverables: 'Complete the task as described, with the result delivered on chain.', quality_standards: 'Figures read from BNB Chain at delivery time, with sources.' },
+          terms: {
+            deliverables: 'Complete the task as described, with the result delivered on chain.', quality_standards: 'Figures read from BNB Chain at delivery time, with sources.',
+            ...(criteriaFor(seller.category).length ? { success_criteria: criteriaFor(seller.category).map((c) => c.text) } : {}),
+          },
         }, 2)
         return { ...q, assumptions: inspected.assumptions }
       })()
