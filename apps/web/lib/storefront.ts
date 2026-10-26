@@ -34,6 +34,8 @@ export interface Storefront {
   imageUrl: string | null
   category: string | null
   isReference: boolean
+  /** Set when no published standard tests what this reference agent does (config `standard: null`): the reason, in words. */
+  noStandard: string | null
   slug: string | null
   owner: string | null
   wallet: string | null
@@ -142,6 +144,7 @@ async function computeStorefront(agentId: string): Promise<Storefront | null> {
     imageUrl: registryImageUrl(a['image_url']) ?? registryImageUrl((a['raw_metadata'] as Record<string, unknown> | null)?.['offchain_content'] && ((a['raw_metadata'] as Record<string, unknown>)['offchain_content'] as Record<string, unknown>)['image']),
     category: s(a['category']),
     isReference: fp !== null,
+    noStandard: fp && fp.standard === null ? (fp.standardNote ?? 'No published Marque test applies to what this agent does yet.') : null,
     slug: fp?.slug ?? null,
     owner: s(a['owner_address']),
     wallet: s(a['agent_wallet']),

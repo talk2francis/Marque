@@ -7,6 +7,6 @@
     { "chainId": 56, "tokenId": 341555, "slug": "sluicegate", "category": "yield", "owner": "0x253F7Ad5D52099C4a2293418a661e9974DfB5e84", "legacyId": "marque:sluicegate", "testnet": { "chainId": 97, "tokenId": 2237 } },
     { "chainId": 56, "tokenId": 341556, "slug": "keel", "category": "health_factor",       "owner": "0xdF1074a272C53A1a10b96Fa0201Eb58bbbaaFe00", "legacyId": "marque:keel",       "testnet": { "chainId": 97, "tokenId": 2238 } },
     { "chainId": 56, "tokenId": 341557, "slug": "redcell", "category": "security",    "owner": "0x1F0D0eF5a279888E3b86c8a99A8A99F19fCEc587", "legacyId": "marque:redcell",    "testnet": { "chainId": 97, "tokenId": 2239 } },
-    { "chainId": 56, "tokenId": 358786, "slug": "tidemark", "category": "yield",    "owner": "0x8122991297DC98Dc5c735fDE90a501528922aFdC", "legacyId": "marque:tidemark",    "testnet": { "chainId": 97, "tokenId": 2495 } }
+    { "chainId": 56, "tokenId": 358786, "slug": "tidemark", "category": "yield",    "owner": "0x8122991297DC98Dc5c735fDE90a501528922aFdC", "legacyId": "marque:tidemark",    "testnet": { "chainId": 97, "tokenId": 2495 }, "standard": null, "standardNote": "No published Marque test for realised yield yet: MCS-YIELD-1 grades a forward route at a size, a different task." }
   ]
 }

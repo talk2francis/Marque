@@ -1,6 +1,6 @@
 import 'server-only'
 import { sql } from 'drizzle-orm'
-import { db, firstPartyIds, canonicalAgentIdSql, loadBlob, storeBlob } from '@marque/db'
+import { db, firstPartyAgentsAllLanes, firstPartyIds, canonicalAgentIdSql, loadBlob, storeBlob } from '@marque/db'
 import { gzip, gunzip } from 'node:zlib'
 import { promisify } from 'node:util'
 import { boundedCommerceRead, coalescedCatalogRead } from '@marque/commerce/reads'
@@ -477,6 +477,7 @@ async function queryAgents(owners?: readonly string[], states?: Awaited<ReturnTy
   const list = (((rows as unknown as { rows?: unknown[] }).rows ?? (rows as unknown as unknown[])) as Array<Record<string, unknown>>)
 
   const bestByAgent = bestCommerceByAgent(commerce)
+  const noStandardTokens = new Set(firstPartyAgentsAllLanes().filter((a) => a.standard === null).flatMap((a) => [`${a.chainId}:${a.tokenId}`, ...(a.testnet ? [`${a.testnet.chainId}:${a.testnet.tokenId}`] : [])]))
 
   const now = Date.now()
   const thirdParty: Array<Omit<MarketRow, 'track'>> = list.map((r) => {
@@ -488,7 +489,10 @@ async function queryAgents(owners?: readonly string[], states?: Awaited<ReturnTy
     const confTest = r['conf_test'] ? String(r['conf_test']) : null
     const confPass = r['any_pass'] === true
     const failed = Array.isArray(r['conf_failed']) ? (r['conf_failed'] as string[]) : []
-    const warrantStatus: 'warranted' | 'failed' | 'untested' = confTest ? (confPass ? 'warranted' : 'failed') : 'untested'
+    // A reference agent no published standard tests (config `standard: null`, matching its own card) is Untested: an
+    // older result of a test built for a different task is history on The Standard, not its status here.
+    const noStandard = noStandardTokens.has(`${String(r['agent_id']).split(':')[0]}:${String(r['token_id'] ?? '')}`)
+    const warrantStatus: 'warranted' | 'failed' | 'untested' = noStandard ? 'untested' : confTest ? (confPass ? 'warranted' : 'failed') : 'untested'
     const kinds = Array.isArray(r['kinds']) ? (r['kinds'] as string[]).filter(Boolean) : []
     const liveKinds = Array.isArray(r['live_kinds']) ? (r['live_kinds'] as string[]).filter(Boolean) : []
     const taskKinds = (Array.isArray(r['live_task_kinds']) ? r['live_task_kinds'] as unknown[] : [])

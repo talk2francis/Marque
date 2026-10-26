@@ -16,6 +16,13 @@ export interface FirstPartyAgent {
   owner: `0x${string}`
   legacyId: string
   testnet?: { chainId: number; tokenId: number }
+  /**
+   * null when no published Marque standard tests what this agent does (its agent card declares none; the conformance
+   * worker checks the card and skips it). Shown as Untested with `standardNote`, never as a stale result of a test
+   * built for a different task. Absent means its category's standard applies.
+   */
+  standard?: string | null
+  standardNote?: string
 }
 
 let cached: FirstPartyAgent[] | null = null

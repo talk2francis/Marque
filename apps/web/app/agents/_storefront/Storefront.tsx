@@ -97,7 +97,8 @@ export function Storefront({ d, section = 'overview', evidence = null, lens = nu
   const base = agentBase(d)
   const tenderHref = d.category && TENDER.has(d.category) ? `/tender?category=${d.category}${d.chainId === 97 ? '&lane=practice' : ''}` : null
   // The card shows the run that decides the badge: the latest own-category run, or the pass that still stands.
-  const shown: StoreTest | null = passed && passed === latest ? passed : latest
+  // An agent no published standard tests shows that, not an older run of a test built for a different task.
+  const shown: StoreTest | null = d.noStandard ? null : passed && passed === latest ? passed : latest
 
   const panel = (
     <aside className={styles.panel} aria-label={`Hire ${d.name}`}>
@@ -126,7 +127,7 @@ export function Storefront({ d, section = 'overview', evidence = null, lens = nu
       <Badge kind="network" label={net} />
       {hireable ? <Badge kind="hireable" /> : answersFree ? <Badge kind="preview" /> : null}
       {/* The price lives in the hire panel and "not tested yet" in Evidence: the header keeps only what identifies and proves. */}
-      {passed && passed === latest && passed.ranAt ? (Date.now() - Date.parse(passed.ranAt) > 72 * 3_600_000 ? <Badge kind="retest" /> : <Badge kind="warranted" date={passed.ranAt} />) : latest && !latest.pass ? <Badge kind="failed" test={latest.testId} field={latest.failedFields[0]} date={latest.ranAt ?? undefined} /> : null}
+      {d.noStandard ? <Badge kind="untested" /> : passed && passed === latest && passed.ranAt ? (Date.now() - Date.parse(passed.ranAt) > 72 * 3_600_000 ? <Badge kind="retest" /> : <Badge kind="warranted" date={passed.ranAt} />) : latest && !latest.pass ? <Badge kind="failed" test={latest.testId} field={latest.failedFields[0]} date={latest.ranAt ?? undefined} /> : null}
       {acted.length ? <a href={`${agentBase(d)}/record#rec-acted`} className={page.actedChip}>Acted on {acted.length}</a> : null}
       {d.isReference ? <a href="/register#reference-agents" className={styles.refLink}><Badge kind="reference" /></a> : null}
       <SaveStar agentId={d.agentId} name={d.name} chainId={d.chainId} tokenId={d.tokenId} />
@@ -204,7 +205,7 @@ function Overview({ d, cat, shown, tenderHref, tryHref, delivery, lens, base }: 
         </dl>
       </section>
 
-      <WarrantCard test={shown} category={d.category} />
+      <WarrantCard test={shown} category={d.category} note={d.noStandard} />
 
       <dl className={page.three}>
         <div><dt>Delivered jobs</dt><dd>{t.available === false ? <span className={styles.muted}>unavailable</span> : <span className="num">{t.jobs.delivered}</span>}<ProvenanceChip provenance="ONCHAIN" /></dd></div>

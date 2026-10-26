@@ -13,13 +13,13 @@ const n = (v: string) => (/^-?\d+(\.\d+)?$/.test(v) && Math.abs(Number(v)) >= 10
  * ceremonial surface on an agent page. A failed run renders the same frame as a plain Test report
  * with the first failing assertion in words. Every value comes from the stored conformance row.
  */
-export function WarrantCard({ test, category }: { test: StoreTest | null; category: string | null }) {
+export function WarrantCard({ test, category, note }: { test: StoreTest | null; category: string | null; note?: string | null }) {
   if (!test) {
     return (
       <section className={styles.warrant} data-kind="none" aria-label="Marque test">
         <div className={styles.warrantInner}>
           <div className={styles.warrantTop}><span className={styles.warrantTitleQuiet}>Not tested yet</span><Badge kind="untested" /></div>
-          <p className={styles.warrantLine}>{category ? 'Marque has not run its published test against this agent. A warrant is dated and earned, never assumed.' : 'This agent has no category Marque can test yet.'}</p>
+          <p className={styles.warrantLine}>{note ? `${note} Earlier runs stay on the record at The Standard.` : category ? 'Marque has not run its published test against this agent. A warrant is dated and earned, never assumed.' : 'This agent has no category Marque can test yet.'}</p>
           <a className={styles.warrantLink} href="/standard">How the Standard works</a>
         </div>
       </section>
