@@ -636,34 +636,39 @@ export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: Ma
   })
   if (q.agentIds) all = selectedAgentRows(all, q.agentIds)
   if (both) all = foldNetworks(all)
-  const failedGroup = q.failed === 'group' ? all.filter((r) => r.warrant.status === 'failed') : []
-  if (q.failed === 'group') all = all.filter((r) => r.warrant.status !== 'failed')
-
-  // Filters over the memoised qualifying set.
   // Ready to hire, all categories: every agent a wallet can pay into escrow right now,
   // including ones outside the four quest jobs (listed after them as "Other", 28 Sep).
   const readyAll = q.tab === 'ready' && !q.category
-  if (q.category) all = all.filter((r) => r.category === q.category)
-  else if (!q.includeUnclassified && !readyAll) all = all.filter((r) => r.category !== null && r.category !== 'unclassified')
-  if (q.hireableOnly) all = all.filter((r) => r.commerce.state === 'hireable' || r.commerce.state === 'settleable')
-  if (q.tab === 'ready') all = all.filter((r) => r.commerce.state === 'hireable' || r.commerce.state === 'settleable')
-  if (q.tab === 'free') all = all.filter(answersFree)
-  if (q.tab === 'tested') all = all.filter((r) => r.warrant.status !== 'untested')
-  if (q.search) {
-    const s = q.search.toLowerCase()
-    all = all.filter((r) =>
-      r.name.toLowerCase().includes(s)
-      // The registry description the agent publishes about itself. This is a
-      // predicate over the already-materialised set, not SQL: the column is
-      // read once by the memoised base query, so matching it costs one more
-      // String.includes per row and needs no index and no migration.
-      || (r.identity.description ?? '').toLowerCase().includes(s)
-      || (r.owner ?? '').toLowerCase().includes(s)
-      || (r.ownerLabel ?? '').toLowerCase().includes(s)
-      || r.interfaces.some((k) => k.includes(s))
-      || r.protocols.some((p) => p.toLowerCase().includes(s))
-      || (r.category ?? '').includes(s))
+  const scope = (rows: MarketRow[]) => {
+    let out = rows
+    if (q.category) out = out.filter((r) => r.category === q.category)
+    else if (!q.includeUnclassified && !readyAll) out = out.filter((r) => r.category !== null && r.category !== 'unclassified')
+    if (q.hireableOnly) out = out.filter((r) => r.commerce.state === 'hireable' || r.commerce.state === 'settleable')
+    if (q.tab === 'ready') out = out.filter((r) => r.commerce.state === 'hireable' || r.commerce.state === 'settleable')
+    if (q.tab === 'free') out = out.filter(answersFree)
+    if (q.tab === 'tested') out = out.filter((r) => r.warrant.status !== 'untested')
+    if (q.search) {
+      const s = q.search.toLowerCase()
+      out = out.filter((r) =>
+        r.name.toLowerCase().includes(s)
+        // The registry description the agent publishes about itself. This is a
+        // predicate over the already-materialised set, not SQL: the column is
+        // read once by the memoised base query, so matching it costs one more
+        // String.includes per row and needs no index and no migration.
+        || (r.identity.description ?? '').toLowerCase().includes(s)
+        || (r.owner ?? '').toLowerCase().includes(s)
+        || (r.ownerLabel ?? '').toLowerCase().includes(s)
+        || r.interfaces.some((k) => k.includes(s))
+        || r.protocols.some((p) => p.toLowerCase().includes(s))
+        || (r.category ?? '').includes(s))
+    }
+    return out
   }
+  all = scope(all)
+  // The same view's agents whose latest test in their category failed: out of the list and the counts, in their own
+  // group ("Listed, failed its latest test"), filtered exactly like the list they left.
+  const failedGroup = q.failed === 'group' ? all.filter((r) => r.warrant.status === 'failed') : []
+  if (q.failed === 'group') all = all.filter((r) => r.warrant.status !== 'failed')
 
   // Faceted filters (D6, SPEC-WORKSPACE 3.4). Each dimension is one predicate; an option's count
   // is the result size with every OTHER dimension applied and that option chosen, after clone
