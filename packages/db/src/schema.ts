@@ -833,6 +833,9 @@ export const PRODUCT_EVENTS = [
   'quest_check', 'quest_next_click', 'pass_created',
   'practice_funded', 'practice_delivered', 'practice_rated',
   'mainnet_funded', 'mainnet_delivered', 'mainnet_rated',
+  // The launch film (27 Oct): plays, how far (quarters), chapter jumps, evidence opened from the frame, and the
+  // buttons it leads to. Text column, so no migration.
+  'film_play', 'film_quarter', 'film_chapter', 'film_evidence', 'film_cta',
 ] as const
 export type ProductEventName = (typeof PRODUCT_EVENTS)[number]
 

@@ -1,0 +1,30 @@
+# Large media (the launch film), served by Caddy from disk, never through Next.
+# Caddy cannot read /root, so install a copy (as deploy-web.sh does for the upstream) and import that,
+# inside the marque.trade site block, ABOVE the line that imports the web upstream:
+#
+#     install -m 0644 /root/marque/ops/media.caddy /etc/caddy/marque-media.caddy
+#     import /etc/caddy/marque-media.caddy
+#
+# Files are content-hashed (name.<sha>.ext), so they never change: a year of immutable caching.
+# Caddy's file_server answers byte ranges (Safari needs them to play), ETag and If-Range.
+# Video and images are already compressed; the site's `encode` leaves these types alone.
+# Source of the files: the film pack (docs/RUNBOOK.md, "Film media"). Check with:
+#     node scripts/film-verify.mjs --dir /var/www/marque-media/film --url https://marque.trade
+handle_path /media/* {
+	root * /var/www/marque-media
+	header {
+		Cache-Control "public, max-age=31536000, immutable"
+		X-Content-Type-Options nosniff
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		-Server
+	}
+	@avif path *.avif
+	header @avif Content-Type image/avif
+	@webp path *.webp
+	header @webp Content-Type image/webp
+	@mp4 path *.mp4
+	header @mp4 Content-Type video/mp4
+	file_server {
+		hide .* SHA256SUMS
+	}
+}

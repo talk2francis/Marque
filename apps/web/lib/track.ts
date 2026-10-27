@@ -16,6 +16,7 @@ export type TrackName =
   | 'quest_check' | 'quest_next_click' | 'pass_created'
   | 'practice_funded' | 'practice_delivered' | 'practice_rated'
   | 'mainnet_funded' | 'mainnet_delivered' | 'mainnet_rated'
+  | 'film_play' | 'film_quarter' | 'film_chapter' | 'film_evidence' | 'film_cta'
 
 const sentOnce = new Set<string>()
 

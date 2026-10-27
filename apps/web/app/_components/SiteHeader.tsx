@@ -106,6 +106,7 @@ const COLS: Array<{ label: string; links: Array<{ label: string; href: string; e
       { label: '@marquetrade on X', href: 'https://x.com/marquetrade', external: true },
       { label: 'Telegram support', href: 'https://t.me/marque_marketplace', external: true },
       { label: 'Brand kit', href: '/brand/marque-brand-kit.zip' },
+      { label: 'The film (1:00)', href: '/film' },
     ],
   },
 ]

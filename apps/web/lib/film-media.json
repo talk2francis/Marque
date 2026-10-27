@@ -1,0 +1,225 @@
+{
+ "base": "/media/film/",
+ "codecs": {
+  "h264": "avc1.64002A",
+  "av1": "av01.0.09M.10"
+ },
+ "storyboard": {
+  "cols": 10,
+  "w": 192,
+  "h": 108,
+  "every": 1
+ },
+ "variants": {
+  "d9": {
+   "h264": {
+    "file": "on-the-record-d9.44febfba64.h264.mp4",
+    "bytes": 17605623,
+    "sha256": "44febfba640c64bde1ea6dc7c91054d0f3fcae29487c98826ecbb64a96a441f8"
+   },
+   "av1": {
+    "file": "on-the-record-d9.6e77c4da90.av1.mp4",
+    "bytes": 10769276,
+    "sha256": "6e77c4da905a8697f32cf0d86092a6141ff667471029700366bf2e63742f0dd2"
+   },
+   "storyboard": {
+    "file": "storyboard-d9.954d07846a.webp",
+    "bytes": 168502,
+    "sha256": "954d07846ae70eb39ecddd8f6813added1d6aa6be33d083b4bf49a3c95cf0fb5"
+   }
+  },
+  "d8": {
+   "h264": {
+    "file": "on-the-record-d8.664ed4109a.h264.mp4",
+    "bytes": 17620461,
+    "sha256": "664ed4109a2dd4ea3c280517e94ff82162420d63702d1e88c8546a8ddc14fb02"
+   },
+   "av1": {
+    "file": "on-the-record-d8.f06dfdf758.av1.mp4",
+    "bytes": 10789604,
+    "sha256": "f06dfdf758563c293ba578b57b20484a6b1a812e16561e4f1475b74e400973b3"
+   },
+   "storyboard": {
+    "file": "storyboard-d8.56d1da950b.webp",
+    "bytes": 169208,
+    "sha256": "56d1da950b09d6880bd1f20878e411e3830136b89cbf15e3594072037fbd96fa"
+   }
+  },
+  "d7": {
+   "h264": {
+    "file": "on-the-record-d7.5de2268803.h264.mp4",
+    "bytes": 17532496,
+    "sha256": "5de2268803bfa1019f19eaa3b259a99b16b484558768ea1e57199d63f996aacf"
+   },
+   "av1": {
+    "file": "on-the-record-d7.e299f9e2ce.av1.mp4",
+    "bytes": 10718465,
+    "sha256": "e299f9e2cec1eb3999860076faf269afb0dc74557e0756bf3a9ac4a693f8821c"
+   },
+   "storyboard": {
+    "file": "storyboard-d7.c9a8ca097c.webp",
+    "bytes": 167478,
+    "sha256": "c9a8ca097ce4a32ba33b9188815e86a15ab69210b15b2be7de33675454ccbc5b"
+   }
+  },
+  "d6": {
+   "h264": {
+    "file": "on-the-record-d6.424b9dd068.h264.mp4",
+    "bytes": 17598382,
+    "sha256": "424b9dd068947041ff1c9690fbae4ef93249aa0846752653ad9d9d99630a2526"
+   },
+   "av1": {
+    "file": "on-the-record-d6.cfc3c13bf9.av1.mp4",
+    "bytes": 10760820,
+    "sha256": "cfc3c13bf98cfd6582f4fa28ec3162ce30bef3a2781fa8f160b7ca35e6ba37ab"
+   },
+   "storyboard": {
+    "file": "storyboard-d6.ef6c3b0439.webp",
+    "bytes": 168446,
+    "sha256": "ef6c3b0439eef61b7fe1355b1897c1b46645804b7142a7b0d0c61d054920f1e1"
+   }
+  },
+  "d5": {
+   "h264": {
+    "file": "on-the-record-d5.431c0e2824.h264.mp4",
+    "bytes": 17595930,
+    "sha256": "431c0e2824f3a76f0a18fcadffe23f991b8c7ecdb277761e909ef6cea80da9e7"
+   },
+   "av1": {
+    "file": "on-the-record-d5.b78c6605e8.av1.mp4",
+    "bytes": 10740135,
+    "sha256": "b78c6605e893427a019f3579f7211d44319218769cb95ffa6dc9444970f55ac2"
+   },
+   "storyboard": {
+    "file": "storyboard-d5.9a4d1c03a9.webp",
+    "bytes": 167824,
+    "sha256": "9a4d1c03a95f6b8102ead6790172b9f478b8e4ff9a841c3ffd1f6d0d30840d32"
+   }
+  },
+  "d4": {
+   "h264": {
+    "file": "on-the-record-d4.20e0759d60.h264.mp4",
+    "bytes": 17533088,
+    "sha256": "20e0759d6063eff2e82c3940969ffe47642b650f87642bdcc29972e19871d32c"
+   },
+   "av1": {
+    "file": "on-the-record-d4.52a9343998.av1.mp4",
+    "bytes": 10721144,
+    "sha256": "52a9343998481f7bdcb9ba8eb7eb06e967a948d4857b493dc097556ac59ae358"
+   },
+   "storyboard": {
+    "file": "storyboard-d4.d6985252fc.webp",
+    "bytes": 167710,
+    "sha256": "d6985252fc4b717c96e4320bf576f64cfbf533648f2191b307a81b837a4d1f42"
+   }
+  },
+  "d3": {
+   "h264": {
+    "file": "on-the-record-d3.b3ca84fe34.h264.mp4",
+    "bytes": 17569720,
+    "sha256": "b3ca84fe34325611c34988b0df28faef243979326f1d319d1b3b5ecd25d04528"
+   },
+   "av1": {
+    "file": "on-the-record-d3.267973ad29.av1.mp4",
+    "bytes": 10751710,
+    "sha256": "267973ad29d5efa3f486f53814d51b99a3861df19cc9758fbbe3bd918b9ba06d"
+   },
+   "storyboard": {
+    "file": "storyboard-d3.1503c3ff75.webp",
+    "bytes": 168192,
+    "sha256": "1503c3ff757b89de0effec98ff4001df5c64af69f6bb6a897aa7443cf95611d6"
+   }
+  },
+  "d2": {
+   "h264": {
+    "file": "on-the-record-d2.d208fed681.h264.mp4",
+    "bytes": 17581418,
+    "sha256": "d208fed681723a32359dbe0edd03300b8706b8a3a107439d7d46214a2773541e"
+   },
+   "av1": {
+    "file": "on-the-record-d2.f6d7663853.av1.mp4",
+    "bytes": 10732549,
+    "sha256": "f6d766385362c003586723a27b1c29adc713c52738905fbbe9f45519bee597d7"
+   },
+   "storyboard": {
+    "file": "storyboard-d2.0299633aad.webp",
+    "bytes": 167958,
+    "sha256": "0299633aad8522157210608665862413b1adc2f21702a6aebee018128671d0e5"
+   }
+  },
+  "d1": {
+   "h264": {
+    "file": "on-the-record-d1.f7afa01f2b.h264.mp4",
+    "bytes": 17497694,
+    "sha256": "f7afa01f2b1231e063dd28e62061aceef63c39451290a4740e5a65184047099f"
+   },
+   "av1": {
+    "file": "on-the-record-d1.522f23d596.av1.mp4",
+    "bytes": 10662081,
+    "sha256": "522f23d596f16ef28673f79c5ebdb53b629c54a8ba50d44591311f1e8b9fa471"
+   },
+   "storyboard": {
+    "file": "storyboard-d1.79b7681bbc.webp",
+    "bytes": 165648,
+    "sha256": "79b7681bbc17ebd7f52764cc297645119b667eb82d6b8c3e5c0b9a631127df06"
+   }
+  },
+  "d0": {
+   "h264": {
+    "file": "on-the-record-d0.14108e7cd9.h264.mp4",
+    "bytes": 17571774,
+    "sha256": "14108e7cd9f746ac56addc97b1ba917a1ccb4f395b2c24146e7dc404495f039e"
+   },
+   "av1": {
+    "file": "on-the-record-d0.c8a5594a93.av1.mp4",
+    "bytes": 10762648,
+    "sha256": "c8a5594a936d4e58f24e67a5c2984ee38ffc462b156fecca0880c9a2551b414c"
+   },
+   "storyboard": {
+    "file": "storyboard-d0.60ee98088d.webp",
+    "bytes": 167646,
+    "sha256": "60ee98088d7a45f127392269f19431fa03169181f120d79a61e08e1625a0a0c7"
+   }
+  }
+ },
+ "poster": {
+  "avif": [
+   {
+    "w": 960,
+    "file": "poster-960.7da95f3a26.avif"
+   },
+   {
+    "w": 1600,
+    "file": "poster-1600.16e014a1b3.avif"
+   },
+   {
+    "w": 2400,
+    "file": "poster-2400.469f75b188.avif"
+   }
+  ],
+  "webp": [
+   {
+    "w": 960,
+    "file": "poster-960.94272b716a.webp"
+   },
+   {
+    "w": 1600,
+    "file": "poster-1600.3677c3dd71.webp"
+   },
+   {
+    "w": 2400,
+    "file": "poster-2400.dc1f10a949.webp"
+   }
+  ],
+  "jpg": [
+   {
+    "w": 1280,
+    "file": "poster-1280.2b407fcd0f.jpg"
+   },
+   {
+    "w": 1920,
+    "file": "poster-1920.f95a4431a3.jpg"
+   }
+  ]
+ }
+}

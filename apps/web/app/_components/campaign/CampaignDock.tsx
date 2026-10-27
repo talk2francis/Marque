@@ -77,15 +77,15 @@ export function CampaignDock() {
     return () => document.removeEventListener('visibilitychange', vis)
   }, [])
 
-  // Never over a dialog, the hire sheet or a full-screen overlay; make room for the compare tray.
+  // Never over a dialog, the hire sheet, a full-screen overlay or the film while it plays; make room for the compare tray.
   useEffect(() => {
     const check = () => {
-      setCovered(Boolean(document.querySelector('[aria-modal="true"], [data-hire-sheet], dialog[open]')))
+      setCovered(Boolean(document.querySelector('[aria-modal="true"], [data-hire-sheet], dialog[open], body[data-theater], body[data-film-active]')))
       setTray(Boolean(document.querySelector('[data-compare-tray]')))
     }
     check()
     const mo = new MutationObserver(check)
-    mo.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['aria-modal', 'open', 'data-compare-tray'] })
+    mo.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['aria-modal', 'open', 'data-compare-tray', 'data-theater', 'data-film-active'] })
     return () => mo.disconnect()
   }, [])
 

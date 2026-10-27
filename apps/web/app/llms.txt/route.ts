@@ -12,6 +12,7 @@ Categories: health factor (Venus), yield, grid trading, rebalancing (PancakeSwap
 ## Start here (90 seconds, no wallet)
 
 - Walkthrough: https://marque.trade/judge
+- The launch film, 60 seconds, with every on-screen word as text and what in it is real: https://marque.trade/film
 - Marketplace (one list, both networks): https://marque.trade/register
 - An outside buyer's paid mainnet job with Marque's chain checks: https://marque.trade/jobs/56/56903
 - Every job hired through Marque, who paid and what the chain said: https://marque.trade/proof

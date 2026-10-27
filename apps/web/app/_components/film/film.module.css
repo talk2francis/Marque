@@ -1,0 +1,260 @@
+/* The film (DESIGN-SYSTEM.md, "The film", 27 Oct). Tokens only. The band is a Chamber surface:
+   a screening room, dark in both themes. The rail under the screen is the film's own device
+   continued: marks, a light that runs with the film, champagne for what has played. */
+
+/* ---------- The band ---------- */
+.band {
+  position: relative;
+  margin-top: clamp(56px, 6.5vw, 96px);
+  margin-inline: calc(50% - 50vw);
+  padding-block: clamp(52px, 6.5vw, 96px) clamp(40px, 5vw, 72px);
+  background:
+    var(--grain),
+    linear-gradient(90deg, transparent, color-mix(in srgb, var(--accent) 42%, transparent) 30%, color-mix(in srgb, var(--accent) 42%, transparent) 70%, transparent) top / 100% 1px no-repeat,
+    radial-gradient(72rem 34rem at 50% 46%, color-mix(in srgb, var(--accent) 7%, transparent), transparent 70%),
+    linear-gradient(180deg, var(--canvas-2) 0%, var(--canvas) 38%, var(--canvas) 100%);
+  background-size: 160px 160px, 100% 1px, auto, auto;
+  color: var(--ink);
+  scroll-margin-top: calc(var(--header-h) + 8px);
+}
+/* While the film plays, the band sits above the dimmed page. */
+.band:has([data-theater]) { z-index: 56; }
+.page { margin-top: 0; }
+.inner { max-width: var(--maxw); margin: 0 auto; padding-inline: var(--margin); }
+
+.head { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr); gap: 16px var(--s-7); align-items: end; margin-bottom: clamp(28px, 3.4vw, 44px); transition: opacity var(--t-panel) var(--ease); }
+.headRule { grid-column: 1 / -1; position: relative; display: flex; align-items: center; gap: 14px; padding-top: 14px; border-top: 1px solid var(--hair-2); }
+.headCross { position: absolute; left: -6px; top: -7px; width: 13px; height: 13px; }
+.headCross::before, .headCross::after { content: ''; position: absolute; background: var(--cross); }
+.headCross::before { left: 6px; top: 0; width: 1px; height: 13px; }
+.headCross::after { top: 6px; left: 0; width: 13px; height: 1px; }
+.headNote { margin-left: auto; display: inline-flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.headNote svg { width: 14px; height: 14px; color: var(--ink-2); }
+.title { margin: 0; font-family: var(--font-serif); font-weight: 400; font-size: clamp(36px, 4vw, 56px); line-height: 1; letter-spacing: -0.012em; color: var(--ink); }
+.title em { font-style: italic; color: var(--accent); }
+.lede { margin: 0; max-width: 46ch; justify-self: end; font-size: 15.5px; line-height: 1.6; color: var(--ink-2); }
+.lede a { color: var(--ink); text-underline-offset: 3px; text-decoration-color: var(--hair-2); }
+
+/* ---------- The screen ---------- */
+.player { position: relative; --p: 0; }
+.frameWrap { position: relative; }
+.frame {
+  position: relative; overflow: hidden; isolation: isolate;
+  aspect-ratio: 16 / 9; border-radius: var(--r-3);
+  background: #050504;
+  container-type: inline-size;
+  box-shadow: 0 0 0 1px var(--hair-2), 0 50px 120px -50px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.025) inset;
+}
+.player[data-idle] .frame { cursor: none; }
+.video, .poster, .poster img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.video { object-fit: cover; background: #050504; }
+.poster img { object-fit: cover; }
+.poster { z-index: 1; transition: opacity 420ms var(--ease); }
+.player[data-phase='playing'] .poster,
+.player[data-phase='paused'] .poster,
+.player[data-phase='ended'] .poster { opacity: 0; pointer-events: none; }
+
+/* Registration marks: the construction device, outside the trim. */
+.reg { position: absolute; width: 13px; height: 13px; pointer-events: none; }
+.reg::before, .reg::after { content: ''; position: absolute; background: var(--cross); }
+.reg::before { left: 6px; top: 0; width: 1px; height: 13px; }
+.reg::after { top: 6px; left: 0; width: 13px; height: 1px; }
+.regTl { left: -22px; top: -22px; }
+.regTr { right: -22px; top: -22px; }
+.regBl { left: -22px; bottom: -22px; }
+.regBr { right: -22px; bottom: -22px; }
+
+/* ---------- Start: the whole screen is the button; the pill says what it does ---------- */
+.start {
+  position: absolute; inset: 0; z-index: 3;
+  display: flex; align-items: flex-end; justify-content: flex-start;
+  padding: clamp(14px, 2.6cqw, 32px);
+  border: 0; background: transparent; cursor: pointer; color: var(--ink);
+}
+.player[data-phase='ended'] .start { background: transparent; }
+.pill {
+  display: inline-flex; align-items: center; gap: 14px;
+  height: clamp(48px, 4.6cqw, 60px); padding: 0 clamp(16px, 1.8cqw, 22px) 0 clamp(6px, 0.6cqw, 8px);
+  border-radius: var(--r-pill);
+  background: color-mix(in srgb, #0B0B0A 72%, transparent);
+  box-shadow: 0 0 0 1px var(--hair-2), 0 18px 40px -18px rgba(0, 0, 0, 0.8);
+  transition: box-shadow var(--t-fast) var(--ease), background-color var(--t-fast) var(--ease);
+}
+.pillDisc {
+  display: grid; place-items: center; flex: none;
+  width: clamp(36px, 3.6cqw, 46px); height: clamp(36px, 3.6cqw, 46px); border-radius: 50%;
+  background: var(--accent); color: #0B0B0A;
+  transition: background-color var(--t-fast) var(--ease), transform var(--t-fast) var(--ease);
+}
+.pillDisc svg { width: 46%; height: 46%; margin-left: 6%; }
+.player[data-phase='ended'] .pillDisc svg { margin-left: 0; }
+.pillText { font-size: clamp(14px, 1.3cqw, 16px); font-weight: 500; letter-spacing: -0.005em; color: #EEEBE4; white-space: nowrap; }
+.pillTime { font-family: var(--font-mono); font-size: clamp(11.5px, 1cqw, 13px); color: #B7B3AA; font-variant-numeric: tabular-nums; }
+.start:hover .pill, .start:focus-visible .pill { box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 60%, transparent), 0 18px 40px -18px rgba(0, 0, 0, 0.8); background: color-mix(in srgb, #0B0B0A 82%, transparent); }
+.start:hover .pillDisc, .start:focus-visible .pillDisc { background: var(--brass-lit); }
+.start:active .pillDisc { transform: scale(0.96); }
+.start:focus-visible { outline: none; }
+.start:focus-visible .pill { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+/* ---------- On the frame while it plays ---------- */
+.evidence {
+  position: absolute; z-index: 4; left: clamp(10px, 1.6cqw, 20px); top: clamp(10px, 1.6cqw, 20px);
+  display: inline-flex; align-items: center; gap: 9px; max-width: calc(100% - 40px);
+  min-height: 32px; padding: 4px 12px 4px 6px; border-radius: var(--r-pill);
+  background: color-mix(in srgb, #0B0B0A 74%, transparent); box-shadow: 0 0 0 1px var(--hair);
+  color: #D9D5CC; font-size: 12.5px; line-height: 1.2; text-decoration: none;
+  transition: box-shadow var(--t-fast) var(--ease), opacity var(--t-panel) var(--ease);
+}
+.evidence[data-prov='none'] { padding-left: 12px; }
+.evidence :global(.prov) { flex: none; }
+.evText { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.evidence svg { flex: none; color: #8C8880; }
+a.evidence:hover { box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 55%, transparent); color: #EEEBE4; }
+a.evidence:hover svg { color: var(--accent); }
+.evidence:not([href]) { pointer-events: none; }
+
+/* The end card's button, made real: a hit area exactly over the one in the picture. */
+.cta { position: absolute; z-index: 4; border-radius: 0.84cqw; }
+.cta:hover, .cta:focus-visible { outline: 2px solid var(--accent); outline-offset: 0.35cqw; box-shadow: 0 0 0 0.35cqw color-mix(in srgb, var(--accent) 18%, transparent); }
+@media (prefers-reduced-motion: no-preference) {
+  .player[data-phase='ended'] .cta { animation: cta-call 1600ms var(--ease) 400ms 2 both; }
+  @keyframes cta-call { 0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 0%, transparent); } 40% { box-shadow: 0 0 0 0.6cqw color-mix(in srgb, var(--accent) 22%, transparent); } }
+}
+
+.controls {
+  position: absolute; z-index: 4; left: 0; right: 0; bottom: 0;
+  padding: 44px clamp(10px, 1.4cqw, 18px) clamp(8px, 1.1cqw, 14px);
+  background: linear-gradient(to top, rgba(5, 5, 4, 0.62), rgba(5, 5, 4, 0.28) 55%, transparent);
+  color: #EEEBE4;
+  transition: opacity 280ms var(--ease);
+}
+.player[data-idle] .controls, .player[data-idle] .evidence { opacity: 0; }
+.player[data-idle] .evidence { pointer-events: none; }
+.row { display: flex; align-items: center; gap: 4px; }
+.grow { flex: 1; }
+.ctl { display: grid; place-items: center; width: 40px; height: 40px; border: 0; border-radius: 50%; background: transparent; color: inherit; cursor: pointer; }
+.ctl:hover { background: rgba(255, 255, 255, 0.1); }
+.ctl:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.time { margin-left: 6px; font-family: var(--font-mono); font-size: 12.5px; color: #B7B3AA; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.time span { color: #EEEBE4; }
+.chapterNow { margin-left: 14px; padding-left: 14px; border-left: 1px solid rgba(238, 235, 228, 0.2); font-size: 13px; color: #D9D5CC; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* In-frame scrubber: phones and full screen. On wider screens the rail below is the scrubber. */
+.scrub { position: relative; display: none; height: 22px; margin: 0 8px 2px; cursor: pointer; touch-action: none; }
+.scrubLine, .scrubFill { position: absolute; left: 0; right: 0; top: 10px; height: 2px; border-radius: 2px; }
+.scrubLine { background: rgba(238, 235, 228, 0.24); }
+.scrubFill { background: linear-gradient(90deg, var(--brass-mark), var(--brass-lit)); transform-origin: 0 0; transform: scaleX(var(--p)); }
+.scrubTick { position: absolute; top: 8px; width: 2px; height: 6px; margin-left: -1px; background: rgba(238, 235, 228, 0.45); }
+.player[data-full] .scrub { display: block; }
+.player[data-full] .frame { border-radius: 0; box-shadow: none; }
+
+.spinner { position: absolute; z-index: 2; left: 50%; top: 50%; width: 34px; height: 34px; margin: -17px; border-radius: 50%; border: 2px solid rgba(238, 235, 228, 0.18); border-top-color: var(--accent); opacity: 0; pointer-events: none; }
+.player[data-phase='loading'] .spinner, .player[data-buffering] .spinner { opacity: 1; }
+@media (prefers-reduced-motion: no-preference) {
+  .spinner { animation: spin 900ms linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .evidence { animation: ev-in 320ms var(--ease) both; }
+  @keyframes ev-in { from { opacity: 0; transform: translateY(-4px); } }
+}
+
+/* ---------- The rail ---------- */
+.railWrap { position: relative; height: 84px; margin-top: 26px; }
+.rail { position: absolute; left: 0; right: 0; top: 0; height: 24px; margin-top: -11px; cursor: pointer; touch-action: none; outline: none; }
+.rail:focus-visible { box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 55%, transparent); border-radius: 4px; }
+.railLine { position: absolute; left: 0; right: 0; top: 11px; height: 1px; background: var(--hair-2); }
+.railFill { position: absolute; left: 0; right: 0; top: 10px; height: 2px; background: linear-gradient(90deg, var(--brass-mark), var(--brass-lit)); transform-origin: 0 0; transform: scaleX(var(--p)); box-shadow: 0 0 10px color-mix(in srgb, var(--accent) 45%, transparent); }
+.player[data-phase='poster'] .railFill { opacity: 0; }
+.railLight { position: absolute; top: 11px; left: calc(var(--p) * 100%); width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px; border-radius: 50%; background: #F6E7C8; box-shadow: 0 0 14px 4px color-mix(in srgb, var(--accent) 55%, transparent); opacity: 0; transition: opacity var(--t-panel) var(--ease); }
+.player[data-phase='playing'] .railLight, .player[data-phase='paused'] .railLight { opacity: 1; }
+.railMark { position: absolute; top: 11px; width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px; border-radius: 50%; border: 1px solid var(--hair-2); background: var(--canvas); transition: background-color var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease); }
+.railMark[data-done] { background: var(--accent); border-color: var(--accent); }
+.railEnd { width: 13px; height: 13px; margin: -6.5px 0 0 -6.5px; border-color: color-mix(in srgb, var(--accent) 70%, transparent); }
+.railEndLabel { position: absolute; right: 0; top: 24px; font-family: var(--font-mono); font-size: 11px; color: var(--ink-3); font-variant-numeric: tabular-nums; pointer-events: none; }
+
+.peek { position: absolute; bottom: 30px; transform: translateX(-50%); display: flex; flex-direction: column; gap: 6px; padding: 5px; border-radius: 10px; background: #0B0B0A; box-shadow: 0 0 0 1px var(--hair-2), 0 20px 40px -16px rgba(0, 0, 0, 0.8); pointer-events: none; z-index: 2; }
+.peekImg { display: block; border-radius: 6px; background-repeat: no-repeat; background-color: #050504; }
+.peekText { padding: 0 4px 2px; font-size: 12px; color: var(--ink-2); white-space: nowrap; }
+.peekText b { font-family: var(--font-mono); font-weight: 500; color: var(--ink); margin-right: 6px; }
+
+.chapters { list-style: none; margin: 0; padding: 0; position: absolute; inset: 0; pointer-events: none; }
+.chapters li { position: absolute; top: 14px; pointer-events: auto; }
+.chapters li[data-row='b'] { top: 42px; }
+/* Row b hangs from its mark on a leader line, like a dimension on a drawing. */
+.chapters li[data-row='b']::before { content: ''; position: absolute; left: 0; top: -28px; width: 1px; height: 26px; background: var(--hair); }
+.chapters button {
+  display: inline-flex; align-items: baseline; gap: 7px; transform: translateX(-4px);
+  min-height: 28px; padding: 4px 6px 4px 4px; border: 0; border-radius: 6px; background: transparent;
+  font-size: 13px; color: var(--ink-3); cursor: pointer; white-space: nowrap;
+  transition: color var(--t-fast) var(--ease);
+}
+.chapters li:last-child button { transform: translateX(-4px); }
+.chapters button:hover { color: var(--ink); }
+.chapters li[data-now] button { color: var(--ink); }
+.chapters button:focus-visible { outline: 2px solid var(--accent); outline-offset: 0; }
+
+/* ---------- Under the screen: what is real, and the words ---------- */
+.foot { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px var(--s-6); margin-top: 8px; transition: opacity var(--t-panel) var(--ease); }
+.foot :global(.limits) { margin: 0; }
+.limitsList { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; }
+.limitsList a { color: var(--ink); }
+.transcript { border-top: 1px solid var(--hair); }
+.transcript > summary { display: flex; align-items: center; gap: 8px; min-height: 44px; font-size: 13.5px; color: var(--ink-2); cursor: pointer; list-style: none; }
+.transcript > summary::-webkit-details-marker { display: none; }
+.transcript > summary:hover { color: var(--ink); }
+.transcript > summary svg { width: 14px; height: 14px; transition: transform var(--t-fast) var(--ease); }
+.transcript[open] > summary svg { transform: rotate(90deg); }
+.transcriptNote { margin: 4px 0 16px; font-size: 13px; color: var(--ink-3); }
+.tList { list-style: none; margin: 0 0 8px; padding: 0; display: flex; flex-direction: column; }
+.tList > li { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 14px; padding: 14px 0; border-top: 1px solid var(--hair); }
+.tTime { align-self: start; padding: 2px 0; font-family: var(--font-mono); font-size: 12.5px; color: var(--accent); text-decoration: none; text-align: left; font-variant-numeric: tabular-nums; }
+.tTime:hover { text-decoration: underline; text-underline-offset: 3px; }
+.tBody h3 { margin: 0 0 6px; font-size: 15px; font-weight: 500; color: var(--ink); }
+.tBody p { margin: 0 0 4px; font-size: 14px; line-height: 1.55; color: var(--ink-2); max-width: 72ch; }
+.tEv { display: inline-flex; align-items: center; gap: 8px; margin-top: 6px; font-size: 12.5px; color: var(--ink-3); }
+.tEv a { color: var(--ink-2); text-underline-offset: 3px; }
+.foot .wide { grid-column: 1 / -1; }
+/* An open disclosure takes the whole row, so the words read at full measure. */
+.foot > details[open] { grid-column: 1 / -1; }
+.download { display: inline-flex; align-items: center; gap: 8px; font-size: 13.5px; color: var(--ink-2); }
+
+/* ---------- Lights down ---------- */
+.scrim { position: fixed; inset: 0; z-index: 55; background: rgba(5, 5, 4, 0.84); opacity: 0; pointer-events: none; transition: opacity 700ms var(--ease); }
+.scrim[data-on] { opacity: 1; pointer-events: auto; }
+.band:has([data-theater]) .head, .band:has([data-theater]) .foot { opacity: 0.32; }
+@media (prefers-reduced-motion: reduce) {
+  .scrim, .poster, .controls, .head, .foot, .railLight, .pill, .pillDisc { transition: none; }
+}
+
+/* ---------- The hero cue: a quiet third action ---------- */
+.cue { display: inline-flex; align-items: center; gap: 11px; min-height: 50px; padding: 0 6px; border-radius: var(--r-2); color: var(--ink-2); font-size: 15px; font-weight: 500; text-decoration: none; }
+.cueDisc { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; box-shadow: inset 0 0 0 1px var(--hair-2); color: var(--ink); transition: background-color var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease), color var(--t-fast) var(--ease); }
+.cueDisc svg { width: 13px; height: 13px; margin-left: 2px; }
+.cueTime { font-family: var(--font-mono); font-size: 12.5px; font-weight: 400; color: var(--ink-3); }
+.cue:hover { color: var(--ink); }
+.cue:hover .cueDisc { background: var(--ink); color: var(--ink-inverse); box-shadow: inset 0 0 0 1px var(--ink); }
+.cue:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 900px) {
+  .head { grid-template-columns: 1fr; }
+  .lede { justify-self: start; }
+  .foot { grid-template-columns: 1fr; }
+  .chapterNow { display: none; }
+}
+@media (max-width: 760px) {
+  .reg { display: none; }
+  .railWrap { display: none; }
+  .scrub { display: block; }
+  .frameWrap { margin-inline: calc(-1 * var(--margin)); }
+  .frame { border-radius: 0; box-shadow: 0 1px 0 var(--hair-2), 0 -1px 0 var(--hair-2); }
+  .foot { margin-top: 20px; }
+  .ctl { width: 40px; height: 40px; }
+  .controls { padding-top: 22px; }
+  .scrub { margin-bottom: 0; }
+  .evidence { font-size: 12px; min-height: 28px; }
+}
+@media (max-width: 480px) {
+  .pillTime { display: none; }
+  .evidence .evText { max-width: 52vw; }
+  .tList > li { grid-template-columns: 52px minmax(0, 1fr); gap: 10px; }
+}

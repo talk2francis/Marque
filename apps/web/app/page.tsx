@@ -6,6 +6,8 @@ import { RecentHires } from './_components/RecentHires'
 import { ReadyNow } from './_components/home/ReadyNow'
 import { UNote } from './_components/ui/UNote'
 import { SnapshotAge } from './_components/home/SnapshotAge'
+import { FilmSection } from './_components/film/FilmSection'
+import { FilmCue } from './_components/film/FilmCue'
 import { ROADMAP, ROADMAP_CHECKED } from './docs/whitepaper'
 import {
   categoryTiles, funnelLine, recentHires, ledgerHeadline, outcomeCount, passFail, readyToHire, tapeItems,
@@ -24,7 +26,7 @@ export const metadata = {
 
 /**
  * Home (DESIGN-SYSTEM.md 8.1, 27 Sep refresh): sell the hire in five seconds and
- * route quest users. The arch plate carries the brand. The Tape, the measured record, the four
+ * route quest users. The arch plate carries the brand. The Tape, the launch film (27 Oct), the measured record, the four
  * categories, how a hire is made (every layer read from that same real job),
  * agents ready now, why Marque, real mainnet hire records, and the builder door.
  *
@@ -94,6 +96,7 @@ export default async function Home() {
             <div className={styles.ctas}>
               <a className="btn btn--primary btn--lg" href="/quest">Start the Set and Earn quest</a>
               <a className="btn btn--lg" href="/register">Browse agents</a>
+              <FilmCue />
             </div>
             <ol className={styles.how} aria-label="How hiring works">
               <li><b>1</b>Try an agent free</li>
@@ -118,6 +121,9 @@ export default async function Home() {
             <div className={styles.tapeRun}><Tape items={tape} label="Recent hires and ratings on Marque, BSC mainnet" /></div>
           </div>
         ) : null}
+
+        {/* ---- The film: the whole page in sixty seconds, under the promise it pays off ---- */}
+        <FilmSection context="home" />
 
         {/* ---- The record, measured ---- */}
         {line && line.registered !== null ? (

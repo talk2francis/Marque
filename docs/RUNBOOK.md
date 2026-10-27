@@ -24,6 +24,7 @@ No containers, no cloud control plane.
 | Deploy | `scripts/deploy-web.sh` (build + `pm2 delete && pm2 start` + asset verify) |
 | Live | https://marque.trade |
 | Reference agents | served on paths `/agents/<slug>/*` → local ports 8610 to 8614 |
+| Film media | `/var/www/marque-media/film/`, served by Caddy at `/media/film/` (section 2a) |
 
 ---
 
@@ -95,6 +96,26 @@ without a written yes from Francis. See `docs/SUBMISSION.md` for the standing
 post-deadline rule and the organisers' answer once it arrives.
 
 ---
+
+## 2a. Film media (the launch film, 27 Oct 2026)
+
+The film on `/` and `/film` plays from files Caddy serves from disk, outside the app and outside git:
+
+| | |
+|---|---|
+| Files | `/var/www/marque-media/film/` (content-hashed names, plus `SHA256SUMS`) |
+| URL | `https://marque.trade/media/film/<file>` |
+| Caddy | `ops/media.caddy`, installed as `/etc/caddy/marque-media.caddy` and imported in the marque.trade block above the web upstream |
+| Manifest | `apps/web/lib/film-media.json` (which file the site plays; never edit by hand) |
+| Check | `node scripts/film-verify.mjs --dir /var/www/marque-media/film --url https://marque.trade` |
+
+There is one cut per day count (9 to 1 days left, and the final 24 hours), each in AV1 and H.264.
+`lib/film.ts` picks the cut by the Campaign Dock's clock at the moment someone presses play, so the
+film's countdown is always today's. After the close it plays the film as posted on 27 Oct.
+
+To replace the media: unpack the new pack into the directory (old files can stay; they are never
+requested once the manifest moves on), commit the new manifest, deploy, then run the check above.
+The files are not first-party observations; the pack they came from is the backup.
 
 ## 3. Backups and restore
 

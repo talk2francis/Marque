@@ -1,5 +1,31 @@
 # DESIGN-SYSTEM.md
 
+## 27 October: the film
+
+The launch film ("On the record", 1:00) sits on the home page between the hero and the record, and on
+`/film`. It is part of the product, not an embed (`app/_components/film/`, `lib/film.ts`).
+
+- **The screening room.** A full-bleed Chamber band, dark in both themes, with the champagne hairline and a
+  soft key light behind the screen. Section head as everywhere (crosshair, label, note), a serif statement,
+  a lede. Registration crosses mark the screen's corners, outside the trim.
+- **Costs nothing until wanted.** A date-free poster (0:07, the mark over the gate) in AVIF, WebP and JPEG;
+  the video loads on intent. The hero gains one quiet third action, "Watch the film 1:00".
+- **Sound by choice.** The film only starts from a click or a key, so it starts with sound. No autoplay, no loop.
+- **Lights down.** While it plays, the page around the screen dims (the Chamber's "dark for doing"), the
+  Campaign Dock steps aside, and the lights come back on pause, Escape, the end, or when it scrolls away.
+  This is the one bold moment on the page; everything else stays still.
+- **The rail.** Under the screen, the film's own rail continues: a mark per chapter, a light that runs with the
+  film, champagne for what has played, names on two rows hung from their marks like dimensions on a
+  drawing, scrubbing, and a storyboard frame on hover. On phones the rail folds into the frame.
+- **Evidence on the frame.** Each chapter carries its provenance chip and a link to the real thing (job
+  56903, `/proof`, `/builders`, `/docs/mcp`, `/quest`). "Illustrative" is styled like CLAIMED: the weakest thing on screen.
+- **The end card's button is real.** From 0:55.8 a link sits exactly over the film's "Start the Set and Earn quest".
+- **Always true.** One cut per day count, chosen by the Dock's clock at play time; the final 24 hours has its own;
+  after the close, the film as posted, labelled with its date. Figures in the film carry their measurement date.
+- **Readable.** "Read the film" holds every on-screen word with its time; a time plays from there. Chapters
+  also ship as WebVTT (`/film/chapters.vtt`). Full keyboard: space or K, J and L or arrows, M, F, 0 to 9, Home, End, Escape.
+- Reduced motion: no fades, no lights-down transition; the film still plays when asked.
+
 ## 24 October: colour with a job, and calmer working pages
 
 The owner asked for more colour than graphite, porcelain and one champagne accent. Colour now does three jobs, and only

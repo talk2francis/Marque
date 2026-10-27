@@ -27,6 +27,7 @@ const ROUTES: Array<{ path: string; priority: number; changeFrequency: MetadataR
   { path: '/builders/claim', priority: 0.7, changeFrequency: 'weekly' },
   { path: '/app/charter', priority: 0.6, changeFrequency: 'weekly' },
   { path: '/status', priority: 0.4, changeFrequency: 'hourly' },
+  { path: '/film', priority: 0.6, changeFrequency: 'weekly' },
 ]
 
 export default function sitemap(): MetadataRoute.Sitemap {

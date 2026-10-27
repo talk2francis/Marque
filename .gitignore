@@ -77,3 +77,6 @@ agents/*/.agent-data/
 
 # Blue/green web releases (scripts/deploy-web.sh)
 /releases/
+
+# Film media live outside the app, served by Caddy (ops/media.caddy). A local copy for development only.
+apps/web/public/media/
