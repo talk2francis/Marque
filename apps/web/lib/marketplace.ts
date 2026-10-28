@@ -698,24 +698,25 @@ export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: Ma
   const chains: Array<56 | 97> = both ? [56, 97] : [chainId]
   const inLane = (agentId: string) => chains.some((c) => agentId.startsWith(`${c}:`))
   const hireable = q.tab === 'ready' || q.hireableOnly === true
-  // Fresh quote states for every view, not only Ready: the evidence ladder's Live price rung and every card's price
-  // read current signed quotes (the memoised catalog's own quotes may have lapsed). Ready also narrows to them.
-  const quoteStates = await commercialStates().catch(() => undefined)
-  // Ready never lists without current quotes: a failed read answers unavailable, as it always has.
-  if (hireable && !quoteStates) throw new Error('commercial states unavailable')
-  const states = hireable ? quoteStates : undefined
+  const states = hireable ? await commercialStates() : undefined
   const readyIds = states ? [...new Set([...states.values()].filter(c => (c.state === 'hireable' || c.state === 'settleable') && inLane(c.agentId)).map(c => c.agentId))] : null
   let ids = q.agentIds ? (readyIds ? q.agentIds.filter(id => readyIds.includes(id)) : q.agentIds.filter(inLane)) : readyIds
   if (ids === null && (q.category || !q.includeUnclassified)) {
     const matches = (await Promise.all(chains.map((c) => boundedCommerceRead(marketplaceCategoryQuery(q.category, c), 'exact')))).flatMap((m) => Array.from(m as unknown as Array<{ agent_id: string }>))
     ids = matches.map(row => row.agent_id)
   }
+  // A read served from the memoised catalog (no selection, or more than SCOPE_MAX_IDS ids) carries quotes that may
+  // have lapsed: overlay current ones, read alongside it, so the evidence ladder's Live price rung and every card's
+  // price are current. Small scoped reads already read their own.
+  const memoised = ids === null || ids.length > SCOPE_MAX_IDS
+  const overlay = !states && memoised ? commercialStates().catch(() => undefined) : Promise.resolve(undefined)
   const bases = await Promise.all(chains.map(async (c) => ids
     ? scopedBase(ids.filter((id) => id.startsWith(`${c}:`)), states, c)
     : { rows: await marketplaceBase(c), at: baseMemo.get(c)?.at ?? Date.now() }))
   const base = { rows: bases.flatMap((b) => b.rows), at: Math.min(...bases.map((b) => b.at)) }
   // Clone: the base is memoised and the sort below is in place.
   const observedAt = Date.now()
+  const quoteStates = states ?? await overlay
   const freshCommerce = quoteStates ? bestCommerceByAgent(quoteStates) : null
   let all = base.rows.map(row => {
     // Ready reads already loaded current exact-agent terms. Reuse metadata,
