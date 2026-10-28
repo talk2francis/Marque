@@ -30,7 +30,8 @@ const fp = JSON.parse(readFileSync(join(ROOT, 'config/first-party.json'), 'utf8'
 const REGISTRY = getAddress(fp.identityRegistry[String(CHAIN)])
 const abi = parseAbi(['function tokenURI(uint256) view returns (string)', 'function ownerOf(uint256) view returns (address)', 'function setAgentURI(uint256 agentId, string newURI)'])
 const chain: Chain = CHAIN === 56 ? bsc : bscTestnet
-const rpc = CHAIN === 56 ? (process.env.BSC_RPC_URLS?.split(',')[0] ?? 'https://bsc-rpc.publicnode.com') : (process.env.BSC_TESTNET_RPC_URL ?? 'https://bsc-testnet-rpc.publicnode.com')
+// BNB Chain's dataseed: some public endpoints refuse ordinary reads they class as archive (28 Oct).
+const rpc = CHAIN === 56 ? (process.env.BSC_MAINNET_WRITE_RPC_URL ?? 'https://bsc-dataseed.bnbchain.org') : (process.env.BSC_TESTNET_RPC_URL ?? 'https://bsc-testnet-rpc.publicnode.com')
 const transport = http(rpc)
 const pub = createPublicClient({ chain, transport })
 if ((await pub.getChainId()) !== CHAIN) throw new Error(`refusing: RPC is not chain ${CHAIN}`)

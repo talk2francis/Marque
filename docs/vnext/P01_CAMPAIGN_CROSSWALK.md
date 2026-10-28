@@ -9,7 +9,7 @@ Checked 16 October 2026 against [BNB's campaign rules](https://www.bnbchain.org/
 | Eligibility | Team exclusion; one person/wallet; no controlled or commonly funded buyers or circular activity | Published team flags are preserved; address differences do not prove independence |
 | Dates | 1 Oct to 5 Nov 2026, cutoff 12:00 UTC | Earlier 30 Sep launch plans are historical; exact qualifying X-announcement timestamp remains UNKNOWN |
 
-Nine shortlisted marketplaces: TermiX, AgentSouk, Dolphin, HelloFugu, KATTEGAT, MarqueTrade, Pokter, AgentAtlas, Mandate. Organizer review is final. Marque cannot verify external registration, all-marketplace activity or human/funding independence. No wallet enrollment or qualification certification is added.
+Nine shortlisted marketplaces, as published on BNB Chain's campaign page (the attribution list is `SHORTLIST` in packages/commerce/src/campaign-rules.ts). Organizer review is final. Marque cannot verify external registration, all-marketplace activity or human/funding independence. No wallet enrollment or qualification certification is added.
 
 JobSubmitted records submission; JobCompleted records completion; PaymentReleased establishes released payment. Local completion labels and escrow funding links must not conflate these events. Verified-buyer ratings remain separate from general ERC-8004 feedback.
 

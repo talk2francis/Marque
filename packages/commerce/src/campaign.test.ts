@@ -9,7 +9,7 @@ describe('shortlistDomain', () => {
     expect(shortlistDomain('app.hellofugu.xyz')).toBe('hellofugu.xyz')
     expect(shortlistDomain('agent.family')).toBe('termix.ai')
     expect(shortlistDomain('platform-backend.prod.termix.live')).toBe('termix.ai')
-    expect(shortlistDomain('POKTER.XYZ.')).toBe('pokter.xyz')
+    expect(shortlistDomain('KATTEGAT.XYZ.')).toBe('kattegat.xyz')
   })
   it('never credits a domain that is not on the shortlist, or one that only contains a shortlisted name', () => {
     expect(shortlistDomain('example.com')).toBeNull()
@@ -22,7 +22,7 @@ describe('shortlistDomain', () => {
 
 describe('attributeDescription (the published order)', () => {
   it('1. Marque intent record wins over everything', () => {
-    expect(attributeDescription('{"task":"x via pokter.xyz"}', { marqueIntent: true })).toMatchObject({ marketplace: 'marque.trade', attribution: 'marque_intent' })
+    expect(attributeDescription('{"task":"x via kattegat.xyz"}', { marqueIntent: true })).toMatchObject({ marketplace: 'marque.trade', attribution: 'marque_intent' })
   })
   it('2. client_ref in the description JSON', () => {
     const d = JSON.stringify({ chain_id: 56, client_ref: 'marque.trade', marque_intent: 'fda2', task: 'What is the health factor (via marque.trade)' })
@@ -43,11 +43,11 @@ describe('attributeDescription (the published order)', () => {
     expect(attributeDescription(nested)).toMatchObject({ marketplace: 'marque.trade' })
   })
   it('"via" in the middle of a sentence does not count', () => {
-    expect(attributeDescription('Swap via pokter.xyz routing then report back to me')).toMatchObject({ marketplace: null })
+    expect(attributeDescription('Swap via kattegat.xyz routing then report back to me')).toMatchObject({ marketplace: null })
   })
-  it('4. known envelopes: Pokter jobs and checks, a "via" field', () => {
-    expect(attributeDescription(JSON.stringify({ protocol: 'pokter-job', version: 1, identity: { chainId: 97, tokenId: '2618' }, task: 'x' }))).toMatchObject({ marketplace: 'pokter.xyz', attribution: 'envelope' })
-    expect(attributeDescription(JSON.stringify({ task: 'x', requested_by: 'Pokter' }))).toMatchObject({ marketplace: 'pokter.xyz', attribution: 'envelope' })
+  it('4. known envelopes: a "<marketplace>-job" protocol, requested_by, a "via" field', () => {
+    expect(attributeDescription(JSON.stringify({ protocol: 'kattegat-job', version: 1, identity: { chainId: 97, tokenId: '2618' }, task: 'x' }))).toMatchObject({ marketplace: 'kattegat.xyz', attribution: 'envelope' })
+    expect(attributeDescription(JSON.stringify({ task: 'x', requested_by: 'KATTEGAT' }))).toMatchObject({ marketplace: 'kattegat.xyz', attribution: 'envelope' })
     expect(attributeDescription(JSON.stringify({ task: 'Brain on BNB monitor', via: 'mandatemarkets.com' }))).toMatchObject({ marketplace: 'mandatemarkets.com', attribution: 'envelope' })
   })
   it('5. anything else is Not recorded', () => {

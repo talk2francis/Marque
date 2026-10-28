@@ -48,7 +48,7 @@ export function shortlistDomain(raw: string | null | undefined): string | null {
 }
 
 const squash = (v: string) => v.toLowerCase().replace(/[^a-z0-9]/g, '')
-/** A marketplace named in words ("Pokter", "agent-atlas", "Marque Trade") or by domain. */
+/** A marketplace named in words ("KATTEGAT", "agent-atlas", "Marque Trade") or by domain. */
 export function marketplaceByName(raw: string | null | undefined): string | null {
   if (!raw) return null
   const byDomain = shortlistDomain(raw)

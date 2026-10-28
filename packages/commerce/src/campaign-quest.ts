@@ -70,7 +70,7 @@ async function agentsForProviders(pairs: Array<{ chainId: number; provider: stri
   return out
 }
 
-/** The identity a description names itself (Pokter's envelope carries chainId and tokenId). */
+/** The identity a description names itself (some marketplaces' job envelopes carry chainId and tokenId). */
 function identityInDescription(description: string, chainId: number): string | null {
   try {
     const j = JSON.parse(description) as Record<string, unknown>

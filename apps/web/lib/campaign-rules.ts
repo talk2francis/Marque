@@ -8,5 +8,4 @@ export const CAMPAIGN_RULES = {
   qualifyingAnnouncementAt: null, // Exact qualifying X-announcement timestamp is not established.
   endsAt: '2026-11-05T12:00:00Z',
   hireMinimum: { agents: 3, marketplaces: 2 },
-  marketplaces: ['TermiX', 'AgentSouk', 'Dolphin', 'HelloFugu', 'KATTEGAT', 'MarqueTrade', 'Pokter', 'AgentAtlas', 'Mandate'],
 } as const
