@@ -52,7 +52,8 @@
 .gHub { fill: var(--ink); }
 @keyframes needle-in { from { transform: rotate(-80deg); opacity: 0; } to { transform: rotate(0); opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .gNeedle { animation: none; } }
-.hfReading { display: grid; justify-items: center; margin-top: -30px; }
+/* The reading sits under the dial's pivot, never behind the needle and hub (28 Oct). */
+.hfReading { display: grid; justify-items: center; gap: 2px; margin-top: 10px; }
 .hfValue { font-size: 34px; font-weight: 600; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; color: var(--ink); }
 .hfValue[data-state='breach'] { color: var(--oxide); }
 .hfValue[data-state='watch'] { color: color-mix(in srgb, var(--amber) 85%, var(--ink)); }

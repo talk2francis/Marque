@@ -8,7 +8,8 @@ import { FacetAvatar } from './FacetAvatar'
 import { ProfileAvatar } from './ProfileAvatar'
 import { ImageCropper } from './ImageCropper'
 import { ACCENTS, DEFAULT_PREFS, type Accent, type AvatarChoice, type Prefs, type WalletProfile } from '../../../lib/profile-model'
-import { applyPrefs, deleteProfile, ProfileError, readSession, saveProfile, signInProfile, uploadImage } from '../../../lib/profile-client'
+import { applyPrefs, deleteProfile, ProfileError, readLocalPrefs, readSession, saveProfile, signInProfile, uploadImage } from '../../../lib/profile-client'
+import { readMode } from '../../../lib/theme'
 import { toast } from '../../../lib/toast'
 import styles from './profile.module.css'
 
@@ -41,7 +42,9 @@ export function ProfileEditor({ address, profile, open, onClose }: { address: st
   const [avatarUrl, setAvatarUrl] = useState<string | null>(profile.avatarUrl)
   const [accent, setAccent] = useState<Accent>(profile.accent)
   const [shown, setShown] = useState(profile.public)
-  const [prefs, setPrefs] = useState<Prefs>(profile.prefs ?? DEFAULT_PREFS)
+  // With nothing saved yet, start from how this browser already looks, so a first save never changes the theme.
+  const startPrefs = (): Prefs => profile.prefs ?? { ...DEFAULT_PREFS, ...(readLocalPrefs() ?? {}), theme: readMode() }
+  const [prefs, setPrefs] = useState<Prefs>(startPrefs)
   const [mode, setMode] = useState<Mode>(profile.avatar.kind === 'upload' ? 'upload' : profile.avatar.kind === 'agent' ? 'agent' : 'stone')
   const [base, setBase] = useState(profile.avatar.kind === 'facet' ? profile.avatar.seed : 0)
   const [agents, setAgents] = useState<OwnedAgent[] | null>(null)
@@ -53,7 +56,7 @@ export function ProfileEditor({ address, profile, open, onClose }: { address: st
   useEffect(() => {
     if (!open) return
     setName(profile.displayName ?? ''); setBio(profile.bio ?? ''); setAvatar(profile.avatar); setAvatarUrl(profile.avatarUrl)
-    setAccent(profile.accent); setShown(profile.public); setPrefs(profile.prefs ?? DEFAULT_PREFS); setError(null); setConfirmDelete(false)
+    setAccent(profile.accent); setShown(profile.public); setPrefs(startPrefs()); setError(null); setConfirmDelete(false)
     setMode(profile.avatar.kind === 'upload' ? 'upload' : profile.avatar.kind === 'agent' ? 'agent' : 'stone')
     setBase(profile.avatar.kind === 'facet' ? profile.avatar.seed : 0)
   }, [open, profile])

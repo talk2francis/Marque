@@ -50,7 +50,11 @@ export function Workspace({ addrParam }: { addrParam: string | null }) {
   const { address: connected, connector } = useAccount()
   const { openConnectModal } = useConnectModal()
   const router = useRouter(); const pathname = usePathname(); const params = useSearchParams()
-  const address = addrParam ?? connected ?? null
+  // The server never knows the wallet: the first client render matches it (no connected address), then the wallet
+  // fills in, so a Pass that reconnects instantly does not break hydration (React #418).
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => { setMounted(true) }, [])
+  const address = addrParam ?? (mounted ? connected : undefined) ?? null
   const own = Boolean(address && connected && address.toLowerCase() === connected.toLowerCase())
   const [view, setView] = useState<View>('hiring')
   useEffect(() => { try { const v = localStorage.getItem('marque:me-view'); if (v === 'building' || v === 'hiring') setView(v) } catch { /* default */ } }, [])
