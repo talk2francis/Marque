@@ -256,7 +256,7 @@ export function HireSheet() {
         <NoWalletLine className="hs-nowallet" chainId={state.quote?.chainId === 56 ? 56 : 97} />
       </>
     )
-    if (signing) return <Button variant="primary" block loading>Continue in wallet</Button>
+    if (signing) return <Button variant="primary" block loading>{state.phase === 'checking' && wrongChain ? `Approve the switch to ${NET[q.chainId]} in your wallet` : 'Continue in wallet'}</Button>
     if (state.jobId && state.phase === 'error') return <Button variant="primary" block onClick={() => start()}>Continue the hire</Button>
     if (short?.token || short?.gas) return <Button variant="primary" block onClick={() => precheck()}>Check my balance again</Button>
     return (
@@ -269,7 +269,8 @@ export function HireSheet() {
   return (
     <Sheet
       open
-      onClose={() => { if (!signing) close() }}
+      // Waiting on the network switch signs nothing, so the sheet can close; once a transaction is in flight it stays.
+      onClose={() => { if (state.phase !== 'signing') close() }}
       label={`${tryFirst && agent?.firstParty && !q ? 'Try' : 'Hire'} ${agent?.name ?? 'an agent'}`}
       surface="chamber"
       title={<span className="t-label">{tryFirst && agent?.firstParty && !q ? 'Try free' : 'Hire'} · {NET[chainId] ?? 'BNB Chain'}</span>}

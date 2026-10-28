@@ -161,7 +161,20 @@ export function useHire() {
     set({ phase: 'checking', error: null })
     try {
       const pendingCreateTx = state.steps.find(st => st.id === 'createJob')?.tx
-      if (walletChain !== q.chainId) await switchChain(config, { chainId: q.chainId })
+      // A wallet that never answers the switch (prompt dismissed or hidden, or an older request still pending) used
+      // to hold the hire here with no way out: stop waiting after 45 s and say what to do.
+      if (walletChain !== q.chainId) {
+        let timer: ReturnType<typeof setTimeout> | undefined
+        try {
+          await Promise.race([
+            switchChain(config, { chainId: q.chainId }),
+            new Promise((_, reject) => { timer = setTimeout(() => reject(Object.assign(new Error('switch timeout'), {
+              code: 'switch_timeout',
+              detail: `Your wallet did not switch to ${q.chainId === 56 ? 'BSC mainnet' : 'BSC testnet'}. Open your wallet and approve the switch (or switch it there yourself), then press the button again.`,
+            })), 45_000) }),
+          ])
+        } finally { clearTimeout(timer) }
+      }
       const [tokenBal, gasBal] = await Promise.all([
         readContract(config, { address: q.token.address, abi: erc20Abi, functionName: 'balanceOf', args: [address], chainId: q.chainId }),
         getBalance(config, { address, chainId: q.chainId }),

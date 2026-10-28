@@ -17,6 +17,14 @@ export const PASS_MAINNET = process.env['NEXT_PUBLIC_PASS_MAINNET'] !== '0'
 const ICON = `data:image/svg+xml;utf8,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 28"><rect width="28" height="28" rx="7" fill="#141412"/><path d="M14 6.5a5 5 0 0 0-5 5v2.2h1.8v-2.2a3.2 3.2 0 1 1 6.4 0v2.2H19v-2.2a5 5 0 0 0-5-5Z" fill="#C79A4B"/><rect x="8" y="13" width="12" height="9" rx="2.2" fill="#EEEBE4"/><circle cx="14" cy="17.5" r="1.4" fill="#141412"/></svg>')}`
 
 let shared: PassProvider | null = null
+
+/**
+ * Disconnect is remembered (28 Oct), as wagmi's injected connector does with its shim: without it, isAuthorized()
+ * said yes whenever a Pass existed on the device, so the next page load quietly reconnected a Pass its owner had
+ * just disconnected or locked.
+ */
+const DISCONNECTED = `${MARQUE_PASS_ID}.disconnected`
+type LooseStorage = { getItem(k: string): unknown; setItem(k: string, v: unknown): unknown; removeItem(k: string): unknown } | null | undefined
 function provider(): PassProvider {
   if (!shared) {
     shared = createPassProvider({
@@ -46,13 +54,17 @@ export function passConnector() {
       const want = params?.chainId
       if (want && want !== p.chainId && (want === 97 || (want === 56 && PASS_MAINNET))) await p.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: numberToHex(want) }] })
       p.announce([record.address])
+      await (config.storage as LooseStorage)?.removeItem(DISCONNECTED)
       return { accounts: [record.address as Address], chainId: p.chainId } as never
     },
-    async disconnect() { lock() },
+    async disconnect() { lock(); await (config.storage as LooseStorage)?.setItem(DISCONNECTED, true) },
     async getAccounts() { const r = loadRecord(); return r ? [r.address as Address] : [] },
     async getChainId() { return provider().chainId },
     async getProvider() { return provider() },
-    async isAuthorized() { return Boolean(loadRecord()) },
+    async isAuthorized() {
+      if (await (config.storage as LooseStorage)?.getItem(DISCONNECTED)) return false
+      return Boolean(loadRecord())
+    },
     async switchChain({ chainId }) {
       await provider().request({ method: 'wallet_switchEthereumChain', params: [{ chainId: numberToHex(chainId) }] })
       config.emitter.emit('change', { chainId })
