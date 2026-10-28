@@ -691,7 +691,7 @@ export interface MarketFacets {
   price: { min: number | null; max: number | null; quoted: number; unit: string | null }
 }
 
-export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: MarketRow[]; generatedAt: string; total: number; offset: number; hasMore: boolean; supply: MarketSupplyCategory[]; quoteObservedAt: string | null; facets: MarketFacets; ladder: MarketLadder; lane: Lane | 'all'; failedGroup: Array<{ agentId: string; name: string; category: string | null; testId: string | null; failedField: string | null; date: string | null; networks?: Array<56 | 97> }> }> {
+export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: MarketRow[]; generatedAt: string; total: number; offset: number; hasMore: boolean; supply: MarketSupplyCategory[]; quoteObservedAt: string | null; facets: MarketFacets; ladder: MarketLadder | null; lane: Lane | 'all'; failedGroup: Array<{ agentId: string; name: string; category: string | null; testId: string | null; failedField: string | null; date: string | null; networks?: Array<56 | 97> }> }> {
   const both = q.lane === 'all'
   const lane: Lane = q.lane === 'all' ? 'mainnet' : q.lane ?? (q.network === 97 ? 'practice' : 'mainnet')
   const chainId = chainOf(lane)
@@ -813,7 +813,8 @@ export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: Ma
   // Each rung: the listed set with every other filter applied and that rung chosen, so a rung's number is exactly
   // the number of agents it leads to (the Registry view with that stage).
   const inUniverse = universe.filter((r) => Object.entries(dims).every(([k, p]) => k === 'stage' || !p || p(r)))
-  const ladder: MarketLadder = {
+  // Only a read over the whole listed set can count it: a Ready read starts from the hireable agents alone.
+  const ladder: MarketLadder | null = q.tab && q.tab !== 'all' || q.agentIds || q.hireableOnly ? null : {
     listed: inUniverse.length,
     answering: inUniverse.filter(atStage.answering).length,
     priced: inUniverse.filter(atStage.priced).length,

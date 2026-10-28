@@ -196,7 +196,6 @@ export function Marketplace({ category: fixedCategory, initial }: { category?: s
             setTotal(typeof j.total === 'number' ? j.total : null)
             setHasMore(j.hasMore === true)
             setFacets(j.facets ?? null)
-            if (j.ladder) setLadder(j.ladder)
             setFailedGroup(Array.isArray(j.failedGroup) ? j.failedGroup : [])
             // The API clamps an out-of-range offset; follow it rather than
             // showing page 9 of 3.
@@ -281,6 +280,18 @@ export function Marketplace({ category: fixedCategory, initial }: { category?: s
   const skeletonCount = Math.min(pageSize, state.view === 'grid' ? 8 : 6)
 
   const tabHint = TABS.find((t) => t.value === state.tab)?.hint
+  // The ladder counts the whole listed set (All listed, no rung) under this view's network, category, search and
+  // filters, whatever tab is open: its own small read, refreshed when one of those changes.
+  const ladderQs = ready ? apiQuery({ ...state, tab: 'listed', stage: null, page: 0 }) : null
+  useEffect(() => {
+    if (!ladderQs) return
+    const controller = new AbortController()
+    fetch(`/api/v1/marketplace?${ladderQs}&limit=1`, { cache: 'no-store', signal: controller.signal })
+      .then((r) => (r.ok ? r.json() : null)).then((j: { ladder?: LadderCounts } | null) => { if (j?.ladder) setLadder(j.ladder) })
+      .catch(() => undefined)
+    return () => controller.abort()
+  }, [ladderQs])
+
   // A rung belongs to All listed; leaving that view leaves its rung too.
   const pickTab = (t: MarketTab) => patchFilter({ tab: t, stage: null })
   const pickRung = (stage: MarketStageKey | null) => patchFilter({ tab: 'listed', stage })
