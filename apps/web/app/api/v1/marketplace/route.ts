@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
-import { marketplaceAgents, type MarketQuery, type MarketStage } from '../../../../lib/marketplace'
+import { type MarketQuery, type MarketStage } from '../../../../lib/marketplace'
+import { marketplaceAgentsCached as marketplaceAgents } from '../../../../lib/market-cache'
 import { parseCatalogQuery } from '@marque/commerce/catalog'
 import { chainOf, parseLane } from '@marque/commerce'
 import { machineCatalog } from '../../../../lib/machine-catalog'

@@ -1,7 +1,7 @@
 import 'server-only'
 import { chainOf, type Lane } from '@marque/commerce'
 import { sql } from 'drizzle-orm'
-import { db, funnelSnapshot } from '@marque/db'
+import { db, funnelSnapshot, cachedProjection } from '@marque/db'
 
 /**
  * Real population counts for the Register's status tabs (P10.5A item 1).
@@ -28,14 +28,19 @@ export interface RegisterCounts {
   cached: boolean
 }
 
-const TTL_MS = 5 * 60_000
-const memo = new Map<string, { value: Omit<RegisterCounts, 'cached'>; at: number }>()
-
+/**
+ * The counts cost about 11 s over the whole registry. They were memoised per process for 5 minutes, so every 5
+ * minutes (and on every fresh process after a deploy) one visitor waited for the recount. Now they live in the shared
+ * projection cache (28 Oct): fresh for 5 minutes, then served at once while one refresh runs, across processes and
+ * restarts; only a first-ever read waits.
+ */
 export async function getRegisterCounts(category?: string | null, lane: Lane = 'mainnet'): Promise<RegisterCounts> {
   const chainId = chainOf(lane)
-  const key = `${chainId}|${category ?? '*'}`
-  const hit = memo.get(key)
-  if (hit && Date.now() - hit.at < TTL_MS) return { ...hit.value, cached: true }
+  const p = await cachedProjection(`register:counts:v1:${chainId}:${category ?? '*'}`, () => computeCounts(chainId, category ?? null, lane), { freshMs: 5 * 60_000, timeoutMs: 60_000, staleWhileRevalidate: true })
+  return { ...p.value, cached: p.ageMs > 1000 }
+}
+
+async function computeCounts(chainId: number, category: string | null, lane: Lane): Promise<Omit<RegisterCounts, 'cached'>> {
 
   const categoryJoin = category
     ? sql`join agent_category c on c.agent_id = a.id and c.category = ${category}`
@@ -69,7 +74,6 @@ export async function getRegisterCounts(category?: string | null, lane: Lane = '
     all: num(r['all']),
     computedAt: new Date().toISOString(),
   }
-  memo.set(key, { value, at: Date.now() })
 
   // Durable, dated copy of the global figures.
   if (!category && lane === 'mainnet') {
@@ -82,5 +86,5 @@ export async function getRegisterCounts(category?: string | null, lane: Lane = '
     } catch { /* the snapshot is a convenience; a write failure must not fail the read */ }
   }
 
-  return { ...value, cached: false }
+  return value
 }

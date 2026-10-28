@@ -18,6 +18,7 @@ import { UNote } from './ui/UNote'
 import { DeliverableView } from '../jobs/[chainId]/[jobId]/Deliverable'
 import { TermsBeforeQuote } from './terms/TermsCell'
 import { PracticeFunds } from './hire/PracticeFunds'
+import { fetchRetry } from '../../lib/fetch-retry'
 
 /**
  * The hire sheet (DESIGN-SYSTEM.md 8.5). Opens over any page from `?hire=<agentKey>`,
@@ -143,7 +144,7 @@ export function HireSheet() {
     let active = true
     const timer = setTimeout(() => controller.abort(), 15_000)
     const signal = controller.signal
-    fetch(`/api/v1/hire/agent?agentId=${encodeURIComponent(agentId)}${selectedService !== null ? `&serviceId=${encodeURIComponent(selectedService)}` : ''}${tryFirst ? '&try=1' : ''}`, { signal })
+    fetchRetry(`/api/v1/hire/agent?agentId=${encodeURIComponent(agentId)}${selectedService !== null ? `&serviceId=${encodeURIComponent(selectedService)}` : ''}${tryFirst ? '&try=1' : ''}`, { signal })
       .then(async (r) => {
         const j = await r.json()
         if (!r.ok) throw new Error(j.detail ?? 'This agent cannot be hired right now.')

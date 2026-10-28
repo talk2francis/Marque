@@ -27,6 +27,8 @@ export interface ProofRow {
   settled: boolean
   refunded: boolean
   rated: boolean
+  /** When the job was opened on chain (JobCreated, else JobFunded): the table's order, newest first. */
+  createdAt: string | null
   /** When the escrow paid out (JobCompleted), for the weekly series. */
   completedAt: string | null
   checks: { decided: number; agreed: number } | null
@@ -84,6 +86,7 @@ export function rowsFrom(chainId: ChainId, per: readonly WalletQuest[]): ProofRo
     funderClass: funderOf(h), client: w.wallet, counted: h.eligible && w.quest.eligible,
     state: h.state, funded: Boolean(h.tx['funded']), delivered: DELIVERED.has(h.state), settled: Boolean(h.tx['completed']),
     refunded: h.state === 'REFUNDED' || Boolean(h.tx['refunded']), rated: Boolean(h.rating && !h.reasons.includes('rating_unbound')),
+    createdAt: h.timestamps['created'] ?? h.timestamps['funded'] ?? null,
     completedAt: h.timestamps['completed'] ?? null,
     checks: null, terms: null, act: null,
     hireTx: h.tx['funded'] ?? h.tx['created'] ?? null,
@@ -117,7 +120,9 @@ async function build(): Promise<Proof> {
     const txs = (a['tx_hashes'] as string[] | null) ?? []
     if (r) r.act = { action: String(a['action']), tx: txs[txs.length - 1] ?? null }
   }
-  rows.sort((a, b) => b.chainId - a.chainId || Number(b.jobId) - Number(a.jobId))
+  // Newest first across both networks (28 Oct): sorting testnet before mainnet put a buyer's latest mainnet hires
+  // below every practice job. Ties: mainnet first, then the higher job id.
+  rows.sort((a, b) => (b.createdAt ?? '').localeCompare(a.createdAt ?? '') || a.chainId - b.chainId || Number(b.jobId) - Number(a.jobId))
   return { measuredAt: new Date().toISOString(), rows, totals: totalsOf(rows), stats }
 }
 
@@ -137,7 +142,9 @@ export function weeklyOutside(rows: readonly ProofRow[]): Array<{ week: string; 
 }
 
 export function proofProjection() {
-  return cachedProjection('proof:v3', build, { freshMs: 10 * 60_000, timeoutMs: 180_000, staleWhileRevalidate: true })
+  // Fresh for 90 s (was 10 min, so a new hire could take 20 minutes to appear); still one rebuild at a time, however
+  // many visitors, and a stale copy answers at once while it runs. v4: rows carry createdAt.
+  return cachedProjection('proof:v4', build, { freshMs: 90_000, timeoutMs: 180_000, staleWhileRevalidate: true })
 }
 
 const CSV_COLS = ['chain', 'job_id', 'escrow', 'agent', 'agent_key', 'operator_class', 'funder_class', 'client', 'counted', 'state', 'funded', 'delivered', 'settled', 'refunded', 'rated', 'checks_decided', 'checks_agreed', 'terms_met', 'terms_of', 'terms_source', 'act', 'act_tx', 'hire_tx', 'verify_url'] as const

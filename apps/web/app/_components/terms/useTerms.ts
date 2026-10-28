@@ -1,6 +1,7 @@
 'use client'
 import { useCallback, useEffect, useState, useSyncExternalStore } from 'react'
 import { termsOf, msUntilLapse, type CommerceFacts, type Terms } from '@marque/commerce/terms'
+import { fetchRetry } from '../../../lib/fetch-retry'
 
 /**
  * Live terms in the browser (invariant 41). A page renders with the terms its server
@@ -30,7 +31,7 @@ function flush() {
     const chunk = ids.slice(i, i + 24)
     const release = () => { chunk.forEach((id) => pending.delete(id)); emit() }
     const guard = setTimeout(release, 2500)
-    fetch(`/api/v1/terms?agents=${chunk.map(encodeURIComponent).join(',')}`, { cache: 'no-store' })
+    fetchRetry(`/api/v1/terms?agents=${chunk.map(encodeURIComponent).join(',')}`, { cache: 'no-store' })
       .then((r) => (r.ok ? r.json() : null))
       .then((j: { agents?: Array<{ agentId: string; serviceId: number | null; terms: Terms | null }> } | null) => {
         if (!j?.agents) return

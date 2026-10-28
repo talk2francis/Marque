@@ -185,7 +185,8 @@ export async function GET(req: NextRequest) {
 
   const key = `agents:v2:${status}:${category ?? '-'}:${protocol ?? '-'}:${limit}:${cursor ? cursorRaw : `o${offset}`}`
   try {
-    const p = await cachedProjection(key, () => page({ status, category, protocol, limit, offset, cursor }), { freshMs: 60_000, timeoutMs: 5_000 })
+    // Served at once while a refresh runs (28 Oct); it used to wait up to 5 s for the refresh after each minute.
+    const p = await cachedProjection(key, () => page({ status, category, protocol, limit, offset, cursor }), { freshMs: 60_000, timeoutMs: 20_000, staleWhileRevalidate: true })
     return NextResponse.json(
       {
         chainId: 56,

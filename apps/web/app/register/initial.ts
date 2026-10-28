@@ -1,4 +1,5 @@
-import { marketplaceAgents, type MarketFacets } from '../../lib/marketplace'
+import { type MarketFacets } from '../../lib/marketplace'
+import { marketplaceAgentsCached as marketplaceAgents } from '../../lib/market-cache'
 import { DEFAULT_STATE, apiQuery } from './market-url'
 import type { MarketRow } from './market-model'
 
