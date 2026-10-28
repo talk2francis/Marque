@@ -13,6 +13,9 @@ function cue(e: React.MouseEvent, from: number | undefined, source: 'hero' | 'tr
   const host = document.querySelector('[data-film-ready]')
   if (!host || e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return
   e.preventDefault()
+  // On the home page the film is folded: open it first, inside this click, so it can start with sound.
+  const fold = host.closest('details')
+  if (fold && !fold.open) fold.open = true
   window.dispatchEvent(new CustomEvent('marque:film', { detail: { from, source } }))
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
   host.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'center' })

@@ -258,3 +258,28 @@ a.evidence:hover svg { color: var(--accent); }
   .evidence .evText { max-width: 52vw; }
   .tList > li { grid-template-columns: 52px minmax(0, 1fr); gap: 10px; }
 }
+
+/* ---------- The fold (home, 28 Oct): one quiet line that opens the screening room in place ---------- */
+.fold { margin-top: clamp(40px, 5vw, 72px); scroll-margin-top: calc(var(--header-h) + 8px); }
+.foldDetails > summary { list-style: none; }
+.foldDetails > summary::-webkit-details-marker { display: none; }
+.foldBar { cursor: pointer; }
+.foldInner { max-width: var(--maxw); margin: 0 auto; padding: 16px var(--margin); display: flex; align-items: center; gap: 14px; border-top: 1px solid var(--hair); border-bottom: 1px solid var(--hair); }
+.foldText { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; min-width: 0; flex: 1; }
+.foldText :global(.t-label) { color: var(--ink-3); }
+.foldTitle { font-family: var(--font-serif); font-size: 19px; line-height: 1.2; color: var(--ink); }
+.foldTitle em { font-style: italic; color: var(--ink-2); }
+.foldMeta { font-size: 12.5px; color: var(--ink-3); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.foldAction { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 0 12px; border-radius: var(--r-pill); border: 1px solid var(--hair-2); font-size: 13px; color: var(--ink-2); white-space: nowrap; transition: color var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease); }
+.foldAction svg { width: 14px; height: 14px; transition: transform var(--t-panel) var(--ease); }
+.foldAction [data-open] { display: none; }
+.foldDetails[open] .foldAction [data-open] { display: inline; }
+.foldDetails[open] .foldAction [data-closed] { display: none; }
+.foldDetails[open] .foldAction svg { transform: rotate(180deg); }
+.foldBar:hover .foldAction { color: var(--ink); border-color: var(--ink-3); }
+.foldBar:hover .cueDisc { box-shadow: inset 0 0 0 1px var(--ink-3); }
+.foldBar:focus-visible { outline: none; }
+.foldBar:focus-visible .foldInner { outline: 2px solid var(--focus); outline-offset: -2px; border-radius: var(--r-2); }
+.foldDetails[open] > .band { margin-top: 0; }
+.foldDetails[open] .foldInner { border-bottom-color: transparent; }
+@media (max-width: 640px) { .foldMeta { display: none; } .foldTitle { font-size: 17px; } }

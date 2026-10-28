@@ -4,6 +4,7 @@ import { CHAPTERS, FILM, filmArchived, filmJsonLd, mediaUrl } from '../../../lib
 import { FILM_MEDIA } from '../../../lib/film-media'
 import { FilmPlayer } from './FilmPlayer'
 import { FilmTime } from './FilmCue'
+import { FilmFold } from './FilmFold'
 import styles from './film.module.css'
 
 /**
@@ -14,9 +15,8 @@ import styles from './film.module.css'
 export function FilmSection({ context }: { context: 'home' | 'page' }) {
   const archived = filmArchived(Date.now())
   const Heading = context === 'page' ? 'h1' : 'h2'
-  return (
-    <section id="film" className={`${styles.band}${context === 'page' ? ` ${styles.page}` : ''}`} data-surface="chamber" aria-labelledby="film-title">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(filmJsonLd(BRAND.url)).replace(/</g, '\\u003c') }} />
+  const ld = <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(filmJsonLd(BRAND.url)).replace(/</g, '\\u003c') }} />
+  const inner = (
       <div className={styles.inner}>
         <div className={styles.head}>
           <div className={styles.headRule}>
@@ -76,6 +76,23 @@ export function FilmSection({ context }: { context: 'home' | 'page' }) {
           ) : null}
         </div>
       </div>
+  )
+  // On the home page the film waits folded in one quiet line (28 Oct), so the page stays about hiring agents;
+  // it opens in place, and the hero's "Watch the film" opens it and plays.
+  if (context === 'home') {
+    return (
+      <section id="film" className={styles.fold} aria-label="The film">
+        {ld}
+        <FilmFold>
+          <div className={styles.band} data-surface="chamber" aria-labelledby="film-title">{inner}</div>
+        </FilmFold>
+      </section>
+    )
+  }
+  return (
+    <section id="film" className={`${styles.band} ${styles.page}`} data-surface="chamber" aria-labelledby="film-title">
+      {ld}
+      {inner}
     </section>
   )
 }
