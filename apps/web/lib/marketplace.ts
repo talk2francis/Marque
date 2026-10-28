@@ -217,7 +217,8 @@ const gunzipAsync = promisify(gunzip)
  */
 const BLOB_KEEP_MS = 24 * 3600_000
 const BLOB_EVERY_MS = 10 * 60_000
-const blobKey = (chainId: 56 | 97) => `market:base:v1:${chainId}`
+// v2 (28 Oct): rows carry track.jobs.outsideDelivered; a v1 copy would read every agent as 0.
+const blobKey = (chainId: 56 | 97) => `market:base:v2:${chainId}`
 const lastStored = new Map<number, number>()
 const storeLoads = new Map<number, Promise<{ at: number; rows: MarketRow[] } | null>>()
 
@@ -697,7 +698,12 @@ export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: Ma
   const chains: Array<56 | 97> = both ? [56, 97] : [chainId]
   const inLane = (agentId: string) => chains.some((c) => agentId.startsWith(`${c}:`))
   const hireable = q.tab === 'ready' || q.hireableOnly === true
-  const states = hireable ? await commercialStates() : undefined
+  // Fresh quote states for every view, not only Ready: the evidence ladder's Live price rung and every card's price
+  // read current signed quotes (the memoised catalog's own quotes may have lapsed). Ready also narrows to them.
+  const quoteStates = await commercialStates().catch(() => undefined)
+  // Ready never lists without current quotes: a failed read answers unavailable, as it always has.
+  if (hireable && !quoteStates) throw new Error('commercial states unavailable')
+  const states = hireable ? quoteStates : undefined
   const readyIds = states ? [...new Set([...states.values()].filter(c => (c.state === 'hireable' || c.state === 'settleable') && inLane(c.agentId)).map(c => c.agentId))] : null
   let ids = q.agentIds ? (readyIds ? q.agentIds.filter(id => readyIds.includes(id)) : q.agentIds.filter(inLane)) : readyIds
   if (ids === null && (q.category || !q.includeUnclassified)) {
@@ -710,7 +716,7 @@ export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: Ma
   const base = { rows: bases.flatMap((b) => b.rows), at: Math.min(...bases.map((b) => b.at)) }
   // Clone: the base is memoised and the sort below is in place.
   const observedAt = Date.now()
-  const freshCommerce = states ? bestCommerceByAgent(states) : null
+  const freshCommerce = quoteStates ? bestCommerceByAgent(quoteStates) : null
   let all = base.rows.map(row => {
     // Ready reads already loaded current exact-agent terms. Reuse metadata,
     // but do not hide a renewed quote behind the three-minute catalog memo.

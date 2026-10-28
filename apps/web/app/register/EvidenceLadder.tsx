@@ -12,7 +12,7 @@ export interface LadderCounts { listed: number; answering: number; priced: numbe
 const RUNGS: Array<{ stage: MarketStageKey | null; key: keyof LadderCounts; label: string; note: string }> = [
   { stage: null, key: 'listed', label: 'Listed', note: 'In a category, and answered at its endpoint in the last 24 hours or holds a test result.' },
   { stage: 'answering', key: 'answering', label: STAGE_LABEL.answering, note: 'Marque called it in the last 24 hours and it answered a task.' },
-  { stage: 'priced', key: 'priced', label: STAGE_LABEL.priced, note: 'A live signed price: a wallet can pay it into escrow now.' },
+  { stage: 'priced', key: 'priced', label: STAGE_LABEL.priced, note: 'A live signed price: a wallet can pay it into escrow now. Ready to hire also lists hireable agents outside the categories.' },
   { stage: 'passed', key: 'passed', label: STAGE_LABEL.passed, note: "Passed its category's published Marque test, with the result kept." },
   { stage: 'delivered', key: 'delivered', label: STAGE_LABEL.delivered, note: "Delivered a paid job to a wallet that is not Marque's team, the agent's owner or its own wallet. It does not prove the buyer is unrelated." },
 ]
