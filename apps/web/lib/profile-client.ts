@@ -83,7 +83,6 @@ export function applyPrefs(prefs: Prefs) {
   try { localStorage.setItem(PREFS_KEY, JSON.stringify(prefs)) } catch { /* this page only */ }
   const root = document.documentElement
   if (prefs.motion === 'calm') root.setAttribute('data-motion', 'calm'); else root.removeAttribute('data-motion')
-  if (prefs.ambient === false) root.setAttribute('data-ambient', 'off'); else root.removeAttribute('data-ambient')
   const current = (() => { try { return localStorage.getItem('marque-theme') } catch { return null } })()
   if (current !== prefs.theme) storeMode(prefs.theme)
   window.dispatchEvent(new Event(PREFS_EVENT))

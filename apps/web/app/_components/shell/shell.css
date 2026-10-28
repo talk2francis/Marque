@@ -333,9 +333,13 @@
   .profile-avatar img { display: block; width: 100%; height: 100%; object-fit: cover; }
   /* A profile's Calm preference: nothing moves on its own. Scroll-linked reveals stay tied to the reader's own scroll. */
   html[data-motion='calm'] *, html[data-motion='calm'] *::before, html[data-motion='calm'] *::after { animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
-  /* The Facet field (DESIGN-V4 6): behind everything, never interactive. Lowest layer above the ground (the body is
-     its own stacking context), so decorative art at z-index -1 or -2 sits over it rather than under its lines. */
-  .facet-field { position: fixed; inset: 0; z-index: -10; pointer-events: none; }
+  /* The Facet field (DESIGN-V4 6, faceted light since 28 Oct): the lowest layer above the page ground, under any
+     decorative art; it fades across the reading column so text always sits on the plain ground. */
+  .facet-field {
+    position: fixed; inset: 0; z-index: -10; pointer-events: none;
+    -webkit-mask-image: radial-gradient(ellipse 46% 62% at 50% 46%, rgba(0, 0, 0, 0.22), #000 100%);
+    mask-image: radial-gradient(ellipse 46% 62% at 50% 46%, rgba(0, 0, 0, 0.22), #000 100%);
+  }
   @media (max-width: 1100px) { .footer-cols { grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: var(--s-6); } }
   @media (max-width: 640px) { .footer-cols { grid-template-columns: 1fr 1fr; row-gap: var(--s-5); } }
   @media (max-width: 760px) { .footer-top { align-items: flex-start; } .site-footer { margin-top: var(--s-8); } }

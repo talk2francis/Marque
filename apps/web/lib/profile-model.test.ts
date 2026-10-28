@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { addressAccent, addressSeed, defaultProfile, profileInput } from './profile-model'
 
-const base = { displayName: 'Ada', bio: 'I hire yield agents.', avatar: { kind: 'facet' as const, seed: 12 }, accent: 'champagne' as const, prefs: { theme: 'night' as const, motion: 'full' as const, ambient: true, lane: 'all' as const }, public: true }
+const base = { displayName: 'Ada', bio: 'I hire yield agents.', avatar: { kind: 'facet' as const, seed: 12 }, accent: 'champagne' as const, prefs: { theme: 'night' as const, motion: 'full' as const, lane: 'all' as const }, public: true }
 
 describe('profileInput', () => {
   it('accepts a plain profile', () => { expect(profileInput.safeParse(base).success).toBe(true) })

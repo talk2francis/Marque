@@ -45,9 +45,9 @@ export function storeMode(mode: ThemeMode): void {
 export const THEME_BOOTSTRAP = `(function(){var d=document.documentElement,k='${THEME_KEY}';function m(){try{var t=localStorage.getItem(k);if(t==='light')return'day';if(t==='dark')return'night';if(t==='day'||t==='system')return t;}catch(e){}return'night'}function r(x){return x==='system'?(matchMedia('(prefers-color-scheme: light)').matches?'day':'night'):x}var x=m();d.setAttribute('data-theme',r(x));d.setAttribute('data-theme-mode',x);try{matchMedia('(prefers-color-scheme: light)').addEventListener('change',function(){if(d.getAttribute('data-theme-mode')==='system'){d.setAttribute('data-theme',r('system'));window.dispatchEvent(new Event('${THEME_EVENT}'))}})}catch(e){}})();`
 
 /**
- * The visitor's saved site preferences (a profile's motion and ambient choices, cached in this browser), applied in
- * <head> with the theme so a calm page never starts moving first: data-motion="calm" and data-ambient="off" on <html>.
+ * The visitor's saved site preferences (a profile's motion choice, cached in this browser), applied in <head> with
+ * the theme so a calm page never starts moving first: data-motion="calm" on <html>.
  */
 export const PREFS_KEY = 'marque:prefs'
 export const PREFS_EVENT = 'marque:prefs'
-export const PREFS_BOOTSTRAP = `(function(){try{var p=JSON.parse(localStorage.getItem('${PREFS_KEY}')||'null'),d=document.documentElement;if(p&&p.motion==='calm')d.setAttribute('data-motion','calm');if(p&&p.ambient===false)d.setAttribute('data-ambient','off')}catch(e){}})();`
+export const PREFS_BOOTSTRAP = `(function(){try{var p=JSON.parse(localStorage.getItem('${PREFS_KEY}')||'null'),d=document.documentElement;if(p&&p.motion==='calm')d.setAttribute('data-motion','calm')}catch(e){}})();`

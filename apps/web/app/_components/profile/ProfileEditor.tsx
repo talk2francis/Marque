@@ -181,7 +181,6 @@ export function ProfileEditor({ address, profile, open, onClose }: { address: st
           <h3 id="pf-prefs" className={styles.h}>Preferences</h3>
           <Segmented label="Theme" value={prefs.theme} options={[['night', 'Night'], ['day', 'Day'], ['system', 'Follow device']]} onChange={(theme) => setPrefs({ ...prefs, theme })} />
           <Segmented label="Motion" value={prefs.motion} options={[['full', 'Full'], ['calm', 'Calm']]} onChange={(motion) => setPrefs({ ...prefs, motion })} />
-          <Segmented label="Faceted background" value={prefs.ambient ? 'on' : 'off'} options={[['on', 'On'], ['off', 'Off']]} onChange={(v) => setPrefs({ ...prefs, ambient: v === 'on' })} />
           <Segmented label="Marketplace opens on" value={prefs.lane} options={[['all', 'Both networks'], ['mainnet', 'Mainnet'], ['practice', 'Testnet']]} onChange={(lane) => setPrefs({ ...prefs, lane })} />
           <p className={styles.fine}>Saved to your profile, so they follow you to any device you sign in on.</p>
         </section>

@@ -6,11 +6,11 @@ A public record of meaningful product changes. Evidence and limitations travel w
 
 ## 28 October 2026 · Profiles, agent portraits, the film, and Tidemark on testnet
 
-Profiles: every wallet now has a portrait, a faceted stone cut from its own address, before it saves anything. An owner can sign once (no transaction, no gas) to choose a stone and accent, upload an image of their own or use one of their agents, add a name and a line, keep it public or private, and set preferences that follow them to any device: theme, motion, the faceted background, and which networks the marketplace opens on. Uploads are redrawn in the browser and accepted only as PNG, JPEG or WebP checked by their contents. The privacy page says what is stored.
+Profiles: every wallet now has a portrait, a faceted stone cut from its own address, before it saves anything. An owner can sign once (no transaction, no gas) to choose a stone and accent, upload an image of their own or use one of their agents, add a name and a line, keep it public or private, and set preferences that follow them to any device: theme, motion, and which networks the marketplace opens on. Uploads are redrawn in the browser and accepted only as PNG, JPEG or WebP checked by their contents. The privacy page says what is stored.
 
 Agent portraits: an owner can give an agent a portrait from My Marque or the Forge. Ownership is re-read on chain when it is set; the image gets a permanent URL that can go in the registration file to carry it everywhere ERC-8004 is read.
 
-Also: the sixty-second film on the home page and /film; Tidemark sells on BSC testnet as well as mainnet, so a practice hire of it works; agent cards show their networks as one tag; the faceted background behind the pages is visible again (the page ground had been painting over it).
+Also: the sixty-second film on the home page and /film; Tidemark sells on BSC testnet as well as mainnet, so a practice hire of it works; agent cards show their networks as one tag; the ground behind the pages is redrawn as faceted light, with no lines, quieter than before and not on the landing page.
 
 ## 26 October 2026 · Who paid, terms agreed before payment, and a free practice hire
 

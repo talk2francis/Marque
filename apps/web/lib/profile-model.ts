@@ -23,15 +23,13 @@ export type AvatarChoice = z.infer<typeof avatarSchema>
 
 export const prefsSchema = z.object({
   theme: z.enum(['day', 'night', 'system']).default('night'),
-  /** Calm stops the motion that runs on its own (the Facet field drift, looping animations) on every device. */
+  /** Calm stops the motion that runs on its own (looping animations, eased transitions) on every device. */
   motion: z.enum(['full', 'calm']).default('full'),
-  /** The faceted lattice behind the pages. */
-  ambient: z.boolean().default(true),
   /** Which networks the marketplace opens on: both side by side, mainnet only, or testnet (practice) only. */
   lane: z.enum(['all', 'mainnet', 'practice']).default('all'),
 })
 export type Prefs = z.infer<typeof prefsSchema>
-export const DEFAULT_PREFS: Prefs = { theme: 'night', motion: 'full', ambient: true, lane: 'all' }
+export const DEFAULT_PREFS: Prefs = { theme: 'night', motion: 'full', lane: 'all' }
 
 /** Plain text only: no links, no markup, no control characters. */
 const plain = (max: number) => z.string().trim().max(max)

@@ -34,7 +34,7 @@
   }
   body {
     position: relative;
-    /* Its own stacking context, so the ambient Facet field (z-index -1) paints above this background, not under it. */
+    /* Its own stacking context, so the faceted ground behind the pages (FacetField) paints above this background. */
     isolation: isolate;
     min-height: 100dvh;
     /* Full-bleed bands are 100vw, a scrollbar wider than the content box. `clip`
