@@ -281,12 +281,12 @@ export function Marketplace({ category: fixedCategory, initial }: { category?: s
 
   const tabHint = TABS.find((t) => t.value === state.tab)?.hint
   // The ladder counts the whole listed set (All listed, no rung) under this view's network, category, search and
-  // filters, whatever tab is open: its own small read, refreshed when one of those changes.
+  // filters, whatever tab is open: its own memoised read (/api/v1/marketplace/ladder), refreshed when one changes.
   const ladderQs = ready ? apiQuery({ ...state, tab: 'listed', stage: null, page: 0 }) : null
   useEffect(() => {
     if (!ladderQs) return
     const controller = new AbortController()
-    fetch(`/api/v1/marketplace?${ladderQs}&limit=1`, { cache: 'no-store', signal: controller.signal })
+    fetch(`/api/v1/marketplace/ladder?${ladderQs}`, { cache: 'no-store', signal: controller.signal })
       .then((r) => (r.ok ? r.json() : null)).then((j: { ladder?: LadderCounts } | null) => { if (j?.ladder) setLadder(j.ladder) })
       .catch(() => undefined)
     return () => controller.abort()

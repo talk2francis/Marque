@@ -51,14 +51,24 @@ export function AgentAvatar({
   priority?: boolean
 }) {
   const [failedSrc, setFailedSrc] = useState<string | null>(null)
+  const [loadedSrc, setLoadedSrc] = useState<string | null>(null)
   const src = avatarSource({ id, reference, imageUrl, size })
   const radius = avatarRadius(size)
 
-  if (src.kind === 'registry') {
+  if (src.kind === 'registry' && failedSrc !== src.src) {
+    // The platform mark holds the tile only until the owner's image has loaded, then leaves: an image with a
+    // transparent background (an SVG logo the registry serves as WebP) sits on a plain tile, never on the mark.
+    const loaded = loadedSrc === src.src
     return (
-      <span className="agent-avatar" data-kind="registry" aria-hidden="true" style={{ position: 'relative', flex: 'none', display: 'block', width: size, height: size, borderRadius: radius, overflow: 'hidden' }}>
-        <Fallback id={id} size={size} reference={reference} />
-        <span style={{ position: 'absolute', inset: 0, borderRadius: radius, backgroundImage: `url("${src.src}")`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
+      <span className="agent-avatar" data-kind="registry" aria-hidden="true" style={{ position: 'relative', flex: 'none', display: 'block', width: size, height: size, borderRadius: radius, overflow: 'hidden', background: 'var(--panel-2, var(--panel))' }}>
+        {loaded ? null : <Fallback id={id} size={size} reference={reference} />}
+        <img
+          src={src.src} alt="" width={size} height={size} loading={priority ? 'eager' : 'lazy'} decoding="async"
+          // An image already complete before hydration fires no load event: count it on mount.
+          ref={(el) => { if (el?.complete && el.naturalWidth > 0 && loadedSrc !== src.src) setLoadedSrc(src.src) }}
+          onLoad={() => setLoadedSrc(src.src)} onError={() => setFailedSrc(src.src)}
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: loaded ? 1 : 0 }}
+        />
       </span>
     )
   }

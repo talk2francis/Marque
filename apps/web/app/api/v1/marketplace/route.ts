@@ -1,6 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { marketplaceAgents, type MarketQuery, type MarketStage } from '../../../../lib/marketplace'
-import { funnel } from '@marque/registry'
 import { parseCatalogQuery } from '@marque/commerce/catalog'
 import { chainOf, parseLane } from '@marque/commerce'
 import { machineCatalog } from '../../../../lib/machine-catalog'
@@ -60,18 +59,15 @@ export async function GET(req: NextRequest) {
   }
   try {
     const result = await withDeadline(marketplaceAgents(q), 12_000)
-    const { rows, generatedAt, total, offset, hasMore, facets, ladder, lane, failedGroup } = result
-    // The ladder's widest context: every identity registered on the network(s) in view, from the memoised funnel.
-    const chains = lane === 'all' ? [56, 97] : [chainOf(lane ?? 'mainnet')]
-    const registered = !ladder ? null : await withDeadline(Promise.all(chains.map((c) => funnel(c).then((rows) => rows.find((x) => x.stage === 'registered_bsc')?.count ?? null))), 1500)
-      .then((n) => (n.every((x) => x !== null) ? (n as number[]).reduce((a, b) => a + b, 0) : null)).catch(() => null)
+    // The evidence ladder has its own memoised endpoint (/api/v1/marketplace/ladder); this contract is unchanged.
+    const { rows, generatedAt, total, offset, hasMore, facets, lane, failedGroup } = result
     const age = Date.now() - Date.parse(generatedAt)
     const headers = { ...baseHeaders, 'X-Marque-Projection-Computed-At': generatedAt, 'X-Marque-Projection-Age-Ms': Number.isFinite(age) && age >= 0 ? String(age) : 'UNKNOWN', 'X-Marque-Projection-Stale': String(!Number.isFinite(age) || age < 0 || age > 180_000) }
     if (machine) {
       const body = machineCatalog(result, q.limit ?? 120)
       return NextResponse.json(body, { headers: { ...headers, 'Cache-Control': body.cacheMaxAgeSeconds ? `public, max-age=${body.cacheMaxAgeSeconds}` : 'no-store', Link: '</api/v1/openapi.json>; rel="describedby"' } })
     }
-    return NextResponse.json({ chainId: lane === 'all' ? null : chainOf(lane ?? 'mainnet'), lane: lane ?? 'mainnet', generatedAt, provenance: 'MEASURED', count: rows.length, total, offset, hasMore, facets, ...(ladder ? { ladder: { ...ladder, registered } } : {}), agents: rows, ...((failedGroup ?? []).length || p.get('failed') === 'group' ? { failedGroup: failedGroup ?? [] } : {}) }, { headers })
+    return NextResponse.json({ chainId: lane === 'all' ? null : chainOf(lane ?? 'mainnet'), lane: lane ?? 'mainnet', generatedAt, provenance: 'MEASURED', count: rows.length, total, offset, hasMore, facets, agents: rows, ...((failedGroup ?? []).length || p.get('failed') === 'group' ? { failedGroup: failedGroup ?? [] } : {}) }, { headers })
   } catch (error) {
     // Classify failures for operators without logging query values or credentials.
     console.warn('[marketplace]', error instanceof Error && error.message === 'Check timed out'

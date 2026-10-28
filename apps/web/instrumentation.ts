@@ -11,5 +11,7 @@ export async function register() {
     for (const lane of ['mainnet', 'practice']) {
       void fetch(`http://127.0.0.1:${port}/api/v1/marketplace?lane=${lane}&limit=1`, { signal: AbortSignal.timeout(90_000) }).catch(() => undefined)
     }
+    // The Marketplace's default evidence ladder (both networks), so the first visitor after a start never counts it.
+    void fetch(`http://127.0.0.1:${port}/api/v1/marketplace/ladder?lane=all`, { signal: AbortSignal.timeout(90_000) }).catch(() => undefined)
   }, 1500)
 }
