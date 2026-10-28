@@ -283,3 +283,19 @@ a.evidence:hover svg { color: var(--accent); }
 .foldDetails[open] > .band { margin-top: 0; }
 .foldDetails[open] .foldInner { border-bottom-color: transparent; }
 @media (max-width: 640px) { .foldMeta { display: none; } .foldTitle { font-size: 17px; } }
+
+/* Opened on the home page: the screen at about two thirds, the chapters and notes beside it. */
+.bandHome { padding-block: clamp(28px, 3.4vw, 48px); }
+.split { display: grid; grid-template-columns: minmax(0, 1.85fr) minmax(260px, 1fr); gap: clamp(24px, 3vw, 44px); align-items: start; }
+.splitMain .railWrap { height: 30px; margin-top: 18px; }
+.splitMain .chapters { display: none; }
+.splitSide { display: grid; gap: 18px; align-content: start; font-size: 14px; transition: opacity var(--t-panel) var(--ease); }
+.band:has([data-theater]) .splitSide { opacity: 0.32; }
+.sideLede { margin: 0; color: var(--ink-2); line-height: 1.55; }
+.sideChapters { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--hair); }
+.sideChapters li { display: flex; align-items: baseline; gap: 14px; padding: 9px 0; border-bottom: 1px solid var(--hair); color: var(--ink); }
+.sideChapters li .tTime, .sideChapters li > a { flex: none; min-width: 38px; }
+.splitSide :global(.limits) { margin: 0; }
+.sideMore { width: fit-content; font-size: 13.5px; color: var(--ink-2); text-decoration: underline; text-decoration-color: var(--hair-2); text-underline-offset: 3px; }
+.sideMore:hover { color: var(--ink); text-decoration-color: currentColor; }
+@media (max-width: 960px) { .split { grid-template-columns: minmax(0, 1fr); } }

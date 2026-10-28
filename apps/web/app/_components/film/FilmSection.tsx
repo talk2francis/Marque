@@ -15,6 +15,18 @@ import styles from './film.module.css'
 export function FilmSection({ context }: { context: 'home' | 'page' }) {
   const archived = filmArchived(Date.now())
   const Heading = context === 'page' ? 'h1' : 'h2'
+  const limits = (
+    <Limits label="What is real in this film">
+      <ul className={styles.limitsList}>
+        <li>The hire is <a href="/jobs/56/56903">job 56903</a>: Keel, a Marque reference agent, paid by an outside buyer on BSC mainnet. Its answer, checks and transactions are the real ones, and the frame links to them while it plays.</li>
+        <li>The registry figures at the start were measured on {FILM.measured}. {context === 'home' ? 'The live record is just below.' : <>The live record is on the <a href="/#record">home page</a>.</>}</li>
+        <li>The build and assistant chapters show an illustrative agent and chat. The steps, tools and checks are the real ones, on BSC testnet.</li>
+        <li>{archived
+          ? <>This is the film as posted on 27 Oct 2026. Set and Earn closed on Thu 5 Nov, 12:00 UTC.</>
+          : <>The countdown is today&apos;s. Each day has its own cut, timed to the close on Thu 5 Nov, 12:00 UTC, so the film and the Set and Earn clock always agree.</>}</li>
+      </ul>
+    </Limits>
+  )
   const ld = <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(filmJsonLd(BRAND.url)).replace(/</g, '\\u003c') }} />
   const inner = (
       <div className={styles.inner}>
@@ -36,16 +48,7 @@ export function FilmSection({ context }: { context: 'home' | 'page' }) {
         <FilmPlayer />
 
         <div className={styles.foot}>
-          <Limits label="What is real in this film">
-            <ul className={styles.limitsList}>
-              <li>The hire is <a href="/jobs/56/56903">job 56903</a>: Keel, a Marque reference agent, paid by an outside buyer on BSC mainnet. Its answer, checks and transactions are the real ones, and the frame links to them while it plays.</li>
-              <li>The registry figures at the start were measured on {FILM.measured}. {context === 'home' ? 'The live record is just below.' : <>The live record is on the <a href="/#record">home page</a>.</>}</li>
-              <li>The build and assistant chapters show an illustrative agent and chat. The steps, tools and checks are the real ones, on BSC testnet.</li>
-              <li>{archived
-                ? <>This is the film as posted on 27 Oct 2026. Set and Earn closed on Thu 5 Nov, 12:00 UTC.</>
-                : <>The countdown is today&apos;s. Each day has its own cut, timed to the close on Thu 5 Nov, 12:00 UTC, so the film and the Set and Earn clock always agree.</>}</li>
-            </ul>
-          </Limits>
+{limits}
           <details className={styles.transcript} open={context === 'page' || undefined}>
             <summary>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6" /></svg>
@@ -80,11 +83,25 @@ export function FilmSection({ context }: { context: 'home' | 'page' }) {
   // On the home page the film waits folded in one quiet line (28 Oct), so the page stays about hiring agents;
   // it opens in place, and the hero's "Watch the film" opens it and plays.
   if (context === 'home') {
+    // Opened, a room in two parts: the screen at about two thirds, and beside it the chapters (each plays from its
+    // time), what is real in the film, and the way to every word. The fold line above carries the title.
     return (
       <section id="film" className={styles.fold} aria-label="The film">
         {ld}
         <FilmFold>
-          <div className={styles.band} data-surface="chamber" aria-labelledby="film-title">{inner}</div>
+          <div className={`${styles.band} ${styles.bandHome}`} data-surface="chamber">
+            <div className={`${styles.inner} ${styles.split}`}>
+              <div className={styles.splitMain}><FilmPlayer /></div>
+              <aside className={styles.splitSide} aria-label="About the film">
+                <p className={styles.sideLede}>One real hire on BSC mainnet, from the question to an answer checked against the chain. Then an agent you build, an assistant that hires for you, and the quest.</p>
+                <ol className={styles.sideChapters} aria-label="Chapters">
+                  {CHAPTERS.map((c) => <li key={c.id}><FilmTime at={c.start} /><span>{c.title}</span></li>)}
+                </ol>
+                {limits}
+                <a className={styles.sideMore} href="/film">Every word of the film, and the file</a>
+              </aside>
+            </div>
+          </div>
         </FilmFold>
       </section>
     )
