@@ -124,11 +124,12 @@ export const SORTS: Array<{ value: string; label: string }> = [
 ]
 
 /** The four marketplace tabs (DESIGN-SYSTEM.md 8.3). Registry is the graveyard, kept one tap away. */
-export type MarketTab = 'ready' | 'free' | 'tested' | 'registry'
+export type MarketTab = 'ready' | 'free' | 'tested' | 'listed' | 'registry'
 export const TABS: Array<{ value: MarketTab; label: string; hint: string }> = [
   { value: 'ready', label: 'Ready to hire', hint: 'Live price, payable into escrow now' },
   { value: 'free', label: 'Try free', hint: 'Answers a real task at its own endpoint, no wallet and no payment' },
   { value: 'tested', label: 'All tested', hint: 'Ran a published Marque test, pass or fail, with the result kept' },
+  { value: 'listed', label: 'All listed', hint: 'Every agent in a category that answered at its endpoint in the last 24 hours or holds a test result' },
   { value: 'registry', label: 'Registry', hint: 'Registered but not answering, with the measured reason' },
 ]
 

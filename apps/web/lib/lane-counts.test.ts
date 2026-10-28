@@ -56,7 +56,7 @@ describe('every count names its lane (invariant 32)', () => {
     expect(src).toMatch(/const lane: Lane = q\.lane === 'all' \? 'mainnet' : q\.lane \?\?/)
     // 'all' lists one row per agent across networks (foldNetworks); a network's amounts are never summed.
     expect(src).toMatch(/if \(both\) all = foldNetworks\(all\)/)
-    expect(src).toMatch(/facets, lane: both \? 'all' : lane,\s+failedGroup: [^\n]+\n\s+quoteObservedAt/)
+    expect(src).toMatch(/facets, (?:ladder, )?lane: both \? 'all' : lane,\s+failedGroup: [^\n]+\n\s+quoteObservedAt/)
   })
   for (const [file, fns] of Object.entries(AGGREGATES_INPUT)) {
     it(`${file}: input-scoped aggregates stay mainnet or input-bound`, () => {

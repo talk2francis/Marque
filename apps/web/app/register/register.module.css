@@ -1023,3 +1023,25 @@ a.introBack:hover { color: var(--fg); }
 .failedGroup li span { font-size: 13px; color: var(--oxide); }
 .uNote { margin: 0 0 6px; font-size: 12.5px; color: var(--fg-faint); }
 .uNote b { color: var(--fg-soft, var(--ink-2)); }
+
+/* ---------- The evidence ladder (28 Oct): listed to proven, one rule, every number a filter ---------- */
+.ladder { margin: 18px 0 6px; }
+.ladderHead { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; margin: 0 0 10px; }
+.ladderTitle { font-size: 13px; font-weight: 500; color: var(--ink-2); }
+.ladderContext { font-size: 12.5px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.ladderRungs { position: relative; list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.ladderRungs::before { content: ''; position: absolute; left: 0; right: 0; top: 7px; height: 1px; background: linear-gradient(90deg, var(--hair-2), var(--hair-2) 80%, transparent); pointer-events: none; }
+.rung { position: relative; display: grid; justify-items: start; gap: 2px; width: 100%; padding: 0 10px 8px 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.rungMark { width: 15px; height: 15px; margin-bottom: 8px; border-radius: 50%; background: var(--canvas); box-shadow: inset 0 0 0 1px var(--hair-2); transition: box-shadow var(--t-fast) var(--ease), background-color var(--t-fast) var(--ease); }
+.rungCount { font-size: clamp(18px, 2vw, 22px); font-weight: 500; letter-spacing: -0.01em; color: var(--ink); font-variant-numeric: tabular-nums; line-height: 1.1; }
+.rungLabel { font-size: 12.5px; line-height: 1.35; color: var(--ink-3); }
+.rung:hover .rungMark { box-shadow: inset 0 0 0 1px var(--ink-3); }
+.rung:hover .rungLabel { color: var(--ink-2); }
+.rung[data-on] .rungMark { background: var(--brass); box-shadow: 0 0 0 4px color-mix(in srgb, var(--brass) 18%, transparent); }
+.rung[data-on] .rungLabel { color: var(--ink); }
+.rung:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: var(--r-1); }
+.ladderNote { margin: 4px 0 0; font-size: 12.5px; color: var(--ink-3); max-width: 72ch; }
+@media (max-width: 720px) {
+  .ladderRungs { grid-template-columns: repeat(5, minmax(108px, 1fr)); overflow-x: auto; scrollbar-width: none; margin-right: calc(-1 * var(--margin)); padding-right: var(--margin); }
+  .ladderRungs::-webkit-scrollbar { display: none; }
+}

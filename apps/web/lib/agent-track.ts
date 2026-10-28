@@ -23,7 +23,8 @@ export interface AgentTrack {
   sourceStale?: boolean
   verified: Rating
   allFeedback: Rating & { total: number }
-  jobs: { funded: number; delivered: number; settled: number; refunded: number; disputed: number; fromTeam: number }
+  /** outsideDelivered: delivered jobs paid by a wallet that is neither a Marque team wallet, nor the agent's owner, nor its own wallet. */
+  jobs: { funded: number; delivered: number; settled: number; refunded: number; disputed: number; fromTeam: number; outsideDelivered?: number }
   /** Median seconds from payment into escrow to delivery, over `samples` delivered jobs. */
   delivery: { medianSeconds: number | null; samples: number }
 }
@@ -36,7 +37,7 @@ export const EMPTY_TRACK = (chainId: number): AgentTrack => ({
   chainId, evidenceVersion: 1, available: true, computedAt: null, sourceStale: false,
   verified: { count: 0, averageStars: null },
   allFeedback: { count: 0, averageStars: null, total: 0 },
-  jobs: { funded: 0, delivered: 0, settled: 0, refunded: 0, disputed: 0, fromTeam: 0 },
+  jobs: { funded: 0, delivered: 0, settled: 0, refunded: 0, disputed: 0, fromTeam: 0, outsideDelivered: 0 },
   delivery: { medianSeconds: null, samples: 0 },
 })
 
@@ -71,12 +72,15 @@ async function computeTracks(chainId: number): Promise<Record<string, AgentTrack
              count(*) filter (where j.state = 'REFUNDED')::int as refunded,
              count(*) filter (where exists (select 1 from commerce_event d where d.chain_id = j.chain_id and d.job_id = j.job_id and d.name = 'Disputed'))::int as disputed,
              count(*) filter (where j.funded_raw is not null and j.funded_raw <> '0' and j.client in (${teamList}))::int as from_team,
+             count(*) filter (where j.state in ('SUBMITTED', 'DISPUTED', 'COMPLETED', 'PAID') and j.client not in (${teamList})
+               and j.client <> j.provider and j.client <> lower(coalesce(ag.owner_address, '')))::int as outside_delivered,
              percentile_cont(0.5) within group (order by extract(epoch from (s.block_time - f.block_time)))
                filter (where s.block_time is not null and f.block_time is not null) as median_s,
              count(*) filter (where s.block_time is not null and f.block_time is not null)::int as samples
       from commerce_job j
       left join hire_intent i on i.id = j.intent_id
       left join agent a on i.agent_id is null and a.chain_id = 56 and lower(a.agent_wallet) = j.provider
+      left join agent ag on ag.id = coalesce(i.agent_id, a.id)
       left join commerce_event f on f.chain_id = j.chain_id and f.job_id = j.job_id and f.name = 'JobFunded'
       left join commerce_event s on s.chain_id = j.chain_id and s.job_id = j.job_id and s.name = 'JobSubmitted'
       where j.chain_id = ${chainId} and (i.agent_id is not null or a.token_id is not null)
@@ -93,7 +97,7 @@ async function computeTracks(chainId: number): Promise<Record<string, AgentTrack
     const t = get(String(r['tid']))
     t.jobs = {
       funded: Number(r['funded']), delivered: Number(r['delivered']), settled: Number(r['settled']),
-      refunded: Number(r['refunded']), disputed: Number(r['disputed']), fromTeam: Number(r['from_team']),
+      refunded: Number(r['refunded']), disputed: Number(r['disputed']), fromTeam: Number(r['from_team']), outsideDelivered: Number(r['outside_delivered'] ?? 0),
     }
     const med = num(r['median_s'])
     t.delivery = { medianSeconds: med === null ? null : Math.round(med), samples: Number(r['samples']) }
@@ -104,7 +108,7 @@ async function computeTracks(chainId: number): Promise<Record<string, AgentTrack
 /** Cached for a minute: ratings and jobs change on the indexer's pace, not per page view. */
 export async function agentTracks(chainId = 56): Promise<{ tracks: Record<string, AgentTrack>; computedAt: string; stale: boolean } | null> {
   try {
-    const p = await cachedProjection(`agent:tracks:v2:${chainId}`, () => computeTracks(chainId), { freshMs: 60_000, timeoutMs: 8_000, staleWhileRevalidate: true })
+    const p = await cachedProjection(`agent:tracks:v3:${chainId}`, () => computeTracks(chainId), { freshMs: 60_000, timeoutMs: 8_000, staleWhileRevalidate: true })
     return { tracks: p.value, computedAt: p.computedAt, stale: p.stale }
   } catch {
     return null

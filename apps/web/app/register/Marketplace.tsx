@@ -30,6 +30,8 @@ import styles from './register.module.css'
 import { expireMarketQuote } from '../../lib/quote-expiry'
 import { canReuseInitialMarket } from './initial-freshness'
 import { readLocalPrefs } from '../../lib/profile-client'
+import type { MarketStageKey } from './market-url'
+import { EvidenceLadder, type LadderCounts } from './EvidenceLadder'
 
 /**
  * The marketplace.
@@ -60,6 +62,7 @@ export function Marketplace({ category: fixedCategory, initial }: { category?: s
   const [total, setTotal] = useState<number | null>(initial?.total ?? null)
   const [hasMore, setHasMore] = useState(initial?.hasMore ?? false)
   const [facets, setFacets] = useState<MarketFacetCounts | null>(initial?.facets ?? null)
+  const [ladder, setLadder] = useState<LadderCounts | null>(null)
   const [failedGroup, setFailedGroup] = useState<FailedGroupRow[]>(initial?.failedGroup ?? [])
   const seeded = useRef(initial?.key ?? null)
   const [retry, setRetry] = useState(0)
@@ -193,6 +196,7 @@ export function Marketplace({ category: fixedCategory, initial }: { category?: s
             setTotal(typeof j.total === 'number' ? j.total : null)
             setHasMore(j.hasMore === true)
             setFacets(j.facets ?? null)
+            if (j.ladder) setLadder(j.ladder)
             setFailedGroup(Array.isArray(j.failedGroup) ? j.failedGroup : [])
             // The API clamps an out-of-range offset; follow it rather than
             // showing page 9 of 3.
@@ -277,12 +281,16 @@ export function Marketplace({ category: fixedCategory, initial }: { category?: s
   const skeletonCount = Math.min(pageSize, state.view === 'grid' ? 8 : 6)
 
   const tabHint = TABS.find((t) => t.value === state.tab)?.hint
-  const pickTab = (t: MarketTab) => patchFilter({ tab: t })
+  // A rung belongs to All listed; leaving that view leaves its rung too.
+  const pickTab = (t: MarketTab) => patchFilter({ tab: t, stage: null })
+  const pickRung = (stage: MarketStageKey | null) => patchFilter({ tab: 'listed', stage })
 
   return (
     <>
       <LaneSwitch lane={state.lane} onPick={(l) => patchFilter({ lane: l })} />
       {state.lane === 'practice' ? <p className={styles.laneBanner}>BSC testnet · test tokens, no real value. Practice hires count for Set and Earn.</p> : null}
+      <EvidenceLadder counts={ladder} active={state.tab === 'listed' ? state.stage ?? 'listed' : null} onPick={pickRung}
+        network={state.lane === 'practice' ? 'BSC testnet' : state.lane === 'mainnet' ? 'BSC mainnet' : 'BNB Chain'} />
       <div className={styles.marketTabs} role="tablist" aria-label="What to show">
         {TABS.map((t) => (
           <button

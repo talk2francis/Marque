@@ -103,7 +103,19 @@ export interface MarketRow {
   track: AgentTrack
 }
 
+/**
+ * The evidence ladder (28 Oct): how far an agent has proved itself, each rung a subset of the one before in practice.
+ * answering: called its endpoint and got an answer in the last 24 h. priced: a live signed price (hireable now).
+ * passed: passed its category's published test. delivered: delivered at least one paid job to an outside buyer
+ * (a wallet that is not a Marque team wallet, the agent's owner or its own wallet; that does not prove independence).
+ */
+export type MarketStage = 'answering' | 'priced' | 'passed' | 'delivered'
+export const MARKET_STAGES: readonly MarketStage[] = ['answering', 'priced', 'passed', 'delivered']
+export interface MarketLadder { listed: number; answering: number; priced: number; passed: number; delivered: number }
+
 export interface MarketQuery {
+  /** One rung of the evidence ladder, over the whole listed set (the Registry view). */
+  stage?: MarketStage | null
   /** Internal selection, applied before per-agent capability resolution. */
   agentIds?: readonly string[]
   category?: string | null
@@ -678,7 +690,7 @@ export interface MarketFacets {
   price: { min: number | null; max: number | null; quoted: number; unit: string | null }
 }
 
-export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: MarketRow[]; generatedAt: string; total: number; offset: number; hasMore: boolean; supply: MarketSupplyCategory[]; quoteObservedAt: string | null; facets: MarketFacets; lane: Lane | 'all'; failedGroup: Array<{ agentId: string; name: string; category: string | null; testId: string | null; failedField: string | null; date: string | null; networks?: Array<56 | 97> }> }> {
+export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: MarketRow[]; generatedAt: string; total: number; offset: number; hasMore: boolean; supply: MarketSupplyCategory[]; quoteObservedAt: string | null; facets: MarketFacets; ladder: MarketLadder; lane: Lane | 'all'; failedGroup: Array<{ agentId: string; name: string; category: string | null; testId: string | null; failedField: string | null; date: string | null; networks?: Array<56 | 97> }> }> {
   const both = q.lane === 'all'
   const lane: Lane = q.lane === 'all' ? 'mainnet' : q.lane ?? (q.network === 97 ? 'practice' : 'mainnet')
   const chainId = chainOf(lane)
@@ -711,14 +723,15 @@ export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: Ma
   // Ready to hire, all categories: every agent a wallet can pay into escrow right now,
   // including ones outside the four quest jobs (listed after them as "Other", 28 Sep).
   const readyAll = q.tab === 'ready' && !q.category
-  const scope = (rows: MarketRow[]) => {
+  const scope = (rows: MarketRow[], tab: MarketQuery['tab'] = q.tab) => {
+    const allReady = tab === 'ready' && !q.category
     let out = rows
     if (q.category) out = out.filter((r) => r.category === q.category)
-    else if (!q.includeUnclassified && !readyAll) out = out.filter((r) => r.category !== null && r.category !== 'unclassified')
-    if (q.hireableOnly) out = out.filter((r) => r.commerce.state === 'hireable' || r.commerce.state === 'settleable')
-    if (q.tab === 'ready') out = out.filter((r) => r.commerce.state === 'hireable' || r.commerce.state === 'settleable')
-    if (q.tab === 'free') out = out.filter(answersFree)
-    if (q.tab === 'tested') out = out.filter((r) => r.warrant.status !== 'untested')
+    else if (!q.includeUnclassified && !allReady) out = out.filter((r) => r.category !== null && r.category !== 'unclassified')
+    if (q.hireableOnly && tab === q.tab) out = out.filter((r) => r.commerce.state === 'hireable' || r.commerce.state === 'settleable')
+    if (tab === 'ready') out = out.filter((r) => r.commerce.state === 'hireable' || r.commerce.state === 'settleable')
+    if (tab === 'free') out = out.filter(answersFree)
+    if (tab === 'tested') out = out.filter((r) => r.warrant.status !== 'untested')
     if (q.search) {
       const s = q.search.toLowerCase()
       out = out.filter((r) =>
@@ -736,6 +749,8 @@ export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: Ma
     }
     return out
   }
+  // The ladder counts the whole listed set (the Registry view) under the same category, network and search.
+  const universe = scope(all, null)
   all = scope(all)
   // The same view's agents whose latest test in their category failed: out of the list and the counts, in their own
   // group ("Listed, failed its latest test"), filtered exactly like the list they left.
@@ -752,6 +767,12 @@ export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: Ma
   const hasIface = (v: string) => (r: MarketRow) => r.interfaces.includes(v) || (v === 'erc8183' && r.protocols.some((p) => /8183/.test(p)))
   const atMost = (max: number) => (r: MarketRow) => { const p = quotedPrice(r); return p !== null && p <= max }
   const ratedAtLeast = (min: number) => (r: MarketRow) => (r.track.verified.averageStars ?? 0) >= min
+  const atStage: Record<MarketStage, (r: MarketRow) => boolean> = {
+    answering: isLive,
+    priced: (r) => r.commerce.state === 'hireable' || r.commerce.state === 'settleable',
+    passed: isWarranted,
+    delivered: (r) => (r.track.jobs.outsideDelivered ?? 0) > 0,
+  }
   const dims: Record<string, ((r: MarketRow) => boolean) | null> = {
     proof: q.warranted ? isWarranted : q.tested ? isTested : null,
     live: q.liveNow ? isLive : null,
@@ -761,6 +782,7 @@ export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: Ma
     hasPrice: q.hasPrice ? (r) => !!r.price : null,
     iface: q.iface ? hasIface(q.iface) : null,
     token: q.token ? (r) => quoteToken(r) === q.token!.toLowerCase() : null,
+    stage: q.stage ? atStage[q.stage] : null,
   }
   // Clone groups collapse after filtering, so facet counts and the total agree.
   const finish = (rows: MarketRow[]) => (readyAll ? groupClones(rows) : rows)
@@ -780,6 +802,16 @@ export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: Ma
     rating: { any: count('rating', any), ...Object.fromEntries(['3', '4', '4.5'].map((v) => [v, count('rating', ratedAtLeast(Number(v)))])) },
     hasPrice: count('hasPrice', (r) => !!r.price),
     price: { min: priced.length ? Math.min(...priced) : null, max: priced.length ? Math.max(...priced) : null, quoted: count('price', (r) => quotedPrice(r) !== null), unit },
+  }
+  // Each rung: the listed set with every other filter applied and that rung chosen, so a rung's number is exactly
+  // the number of agents it leads to (the Registry view with that stage).
+  const inUniverse = universe.filter((r) => Object.entries(dims).every(([k, p]) => k === 'stage' || !p || p(r)))
+  const ladder: MarketLadder = {
+    listed: inUniverse.length,
+    answering: inUniverse.filter(atStage.answering).length,
+    priced: inUniverse.filter(atStage.priced).length,
+    passed: inUniverse.filter(atStage.passed).length,
+    delivered: inUniverse.filter(atStage.delivered).length,
   }
   all = finish(except(null))
   // A listing's lane is its registry chain (the base query); a quote bound to another chain is
@@ -855,7 +887,7 @@ export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: Ma
       hireBlockedReason,
     } satisfies MarketRow
   })
-  return { rows, total: all.length, offset, supply, facets, lane: both ? 'all' : lane,
+  return { rows, total: all.length, offset, supply, facets, ladder, lane: both ? 'all' : lane,
     failedGroup: failedGroup.slice(0, 60).map((r) => ({ agentId: r.agentId, name: r.name, category: r.category, testId: r.warrant.testId, failedField: r.warrant.failedField, date: r.warrant.date, networks: r.networks })),
     quoteObservedAt: states ? new Date(observedAt).toISOString() : null,
     hasMore: offset + limit < all.length, generatedAt: new Date(base.at).toISOString() }

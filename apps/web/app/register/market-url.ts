@@ -42,9 +42,18 @@ export interface MarketState {
   thirdParty: boolean
   hasPrice: boolean
   iface: string | null
+  /** One rung of the evidence ladder (lib/marketplace.ts MarketStage), shown over the Registry view. */
+  stage: MarketStageKey | null
   page: number
   pageSize: number
   view: MarketView
+}
+
+/** The evidence ladder's rungs above "listed", in order (the server's MarketStage). */
+export type MarketStageKey = 'answering' | 'priced' | 'passed' | 'delivered'
+export const STAGE_VALUES: readonly MarketStageKey[] = ['answering', 'priced', 'passed', 'delivered']
+export const STAGE_LABEL: Record<MarketStageKey, string> = {
+  answering: 'Answering', priced: 'Live price', passed: 'Passed the test', delivered: 'Delivered to an outside buyer',
 }
 
 export const DEFAULT_STATE: MarketState = {
@@ -63,6 +72,7 @@ export const DEFAULT_STATE: MarketState = {
   thirdParty: false,
   hasPrice: false,
   iface: null,
+  stage: null,
   page: 0,
   pageSize: 15,
   view: 'grid',
@@ -70,7 +80,7 @@ export const DEFAULT_STATE: MarketState = {
 
 const PAGE_SIZES = [10, 15, 20]
 const SORT_VALUES = ['best', 'proven', 'price', 'fast', 'recent', 'rated']
-const TAB_VALUES: MarketTab[] = ['ready', 'free', 'tested', 'registry']
+const TAB_VALUES: MarketTab[] = ['ready', 'free', 'tested', 'listed', 'registry']
 const num = (v: string | null): number | null => (v !== null && v.trim() !== '' && Number.isFinite(Number(v)) && Number(v) >= 0 ? Number(v) : null)
 const IFACE_VALUES = ['a2a', 'mcp', 'x402', 'erc8183']
 const CATEGORY_VALUES = ['rebalancing', 'grid', 'yield', 'health_factor', 'security']
@@ -82,7 +92,8 @@ const CATEGORY_VALUES = ['rebalancing', 'grid', 'yield', 'health_factor', 'secur
  */
 export function apiQuery(s: MarketState): string {
   const p = new URLSearchParams()
-  if (s.tab !== 'registry') p.set('tab', s.tab)
+  // All listed is the API's default set (no tab); Registry is its own table.
+  if (s.tab !== 'registry' && s.tab !== 'listed') p.set('tab', s.tab)
   if (s.lane !== 'mainnet') p.set('lane', s.lane)
   if (s.token) p.set('token', s.token)
   if (s.maxPrice !== null) p.set('maxPrice', String(s.maxPrice))
@@ -97,6 +108,7 @@ export function apiQuery(s: MarketState): string {
   if (s.thirdParty) p.set('thirdParty', '1')
   if (s.hasPrice) p.set('hasPrice', '1')
   if (s.iface) p.set('iface', s.iface)
+  if (s.stage && s.tab === 'listed') p.set('stage', s.stage)
   return p.toString()
 }
 
@@ -120,6 +132,7 @@ export function stateToParams(s: MarketState, opts: { fixedCategory?: boolean } 
   if (s.thirdParty) p.set('thirdParty', '1')
   if (s.hasPrice) p.set('hasPrice', '1')
   if (s.iface) p.set('iface', s.iface)
+  if (s.stage) p.set('stage', s.stage)
   if (s.view !== DEFAULT_STATE.view) p.set('view', s.view)
   if (s.pageSize !== DEFAULT_STATE.pageSize) p.set('rows', String(s.pageSize))
   if (s.page > 0) p.set('page', String(s.page + 1))
@@ -171,6 +184,7 @@ export function paramsToState(
     thirdParty: isOn(p.get('thirdParty')),
     hasPrice: isOn(p.get('hasPrice')),
     iface: rawIface && IFACE_VALUES.includes(rawIface) ? rawIface : null,
+    stage: STAGE_VALUES.find((x) => x === p.get('stage')) ?? null,
     // A view in the URL wins; otherwise keep whatever the caller had (which is
     // the remembered preference on first mount).
     view: rawView === 'grid' || rawView === 'list' ? rawView : has('view') ? DEFAULT_STATE.view : base.view,
@@ -188,6 +202,7 @@ export interface ActiveFilter {
 
 export function activeFilters(s: MarketState, ifaceLabel: (v: string) => string): ActiveFilter[] {
   const out: ActiveFilter[] = []
+  if (s.stage && s.tab === 'listed') out.push({ key: 'stage', label: STAGE_LABEL[s.stage], clear: { stage: null } })
   if (s.liveNow) out.push({ key: 'liveNow', label: 'Live now', clear: { liveNow: false } })
   if (s.warranted) out.push({ key: 'warranted', label: 'Warranted', clear: { warranted: false } })
   if (s.tested && !s.warranted) out.push({ key: 'tested', label: 'Tested', clear: { tested: false } })
@@ -212,6 +227,7 @@ export const CLEARED_FILTERS: Partial<MarketState> = {
   thirdParty: false,
   hasPrice: false,
   iface: null,
+  stage: null,
 }
 
 /**
