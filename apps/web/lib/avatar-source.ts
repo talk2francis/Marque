@@ -5,11 +5,16 @@ export type AvatarSource =
   | { kind: 'registry'; src: string; srcSet?: undefined }
   | { kind: 'fallback'; src?: undefined; srcSet?: undefined }
 
-/** Only render images served by the registry indexer's image proxy. */
+/** A portrait Marque hosts (an owner's upload, checked raster only): /img/p/<id>. */
+const MARQUE_IMAGE = /^\/img\/p\/[0-9a-f]{32}$/
+
+/** Only render images served by the registry indexer's image proxy, or a portrait Marque hosts. */
 export function registryImageUrl(value: unknown): string | null {
   if (typeof value !== 'string') return null
+  if (MARQUE_IMAGE.test(value.trim())) return value.trim()
   try {
     const url = new URL(value.trim())
+    if (url.protocol === 'https:' && /^(www\.)?marque\.trade$/i.test(url.hostname) && MARQUE_IMAGE.test(url.pathname) && !url.search) return url.pathname
     if (url.protocol !== 'https:' || url.username || url.password) return null
     if (!/(^|\.)8004scan\.(io|app)$/i.test(url.hostname)) return null
     return url.href

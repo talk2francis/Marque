@@ -11,7 +11,7 @@ export const maxDuration = 30
  *
  * A projection of existing records — charters granted from it, hires done for
  * it, receipts, sealed calls — plus two chain facts (native balance, tx count).
- * No wallet, no account, no stored profile: pasting an address reaches this the
+ * No wallet, no account (the optional owner-signed profile is /api/v1/me/profile/{address}): pasting an address reaches this the
  * same way it reaches /api/v1/positions, which is the endpoint for the live
  * position read this deliberately does not duplicate.
  */

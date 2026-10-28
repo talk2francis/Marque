@@ -200,6 +200,9 @@ export interface AuthorisedClaim {
  *  without a chain. Not used by the app. */
 export const __testonly = { sign, verify }
 
+/** The same short-lived HMAC tokens for other signed-in flows (the profile session), each with its own `k`. */
+export const serverToken = { sign, verify, fresh }
+
 export function readClaimToken(token: string): AuthorisedClaim | null {
   const claim = verify(token)
   if (!claim || claim['k'] !== 'claim') return null

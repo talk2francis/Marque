@@ -1,6 +1,7 @@
 import 'server-only'
 import { sql } from 'drizzle-orm'
 import { db, firstPartyAgentsAllLanes, firstPartyIds, canonicalAgentIdSql, loadBlob, storeBlob } from '@marque/db'
+import { agentPortraits } from './agent-portraits'
 import { gzip, gunzip } from 'node:zlib'
 import { promisify } from 'node:util'
 import { boundedCommerceRead, coalescedCatalogRead } from '@marque/commerce/reads'
@@ -828,8 +829,11 @@ export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: Ma
   const offset = all.length ? Math.min(requestedOffset, Math.floor((all.length - 1) / limit) * limit) : 0
   const page = all.slice(offset, offset + limit)
   const supply = marketSupply(all, observedAt)
-  const pageStates = await marketPageAgentStates(page)
-  const rows = page.map((row) => {
+  const [pageStates, portraits] = await Promise.all([marketPageAgentStates(page), agentPortraits(page.map((r) => r.agentId))])
+  const rows = page.map((raw) => {
+    // An owner-set portrait (agent-portraits.ts) shows in place of the registry image.
+    const portrait = portraits.get(raw.agentId)
+    const row = portrait ? { ...raw, identity: { ...raw.identity, imageUrl: portrait } } : raw
     // Reference agents answer their free face directly; their Hire is the ERC-8183 rail.
     if (row.isReference) return { ...row, previewable: true, hireBlockedReason: null } satisfies MarketRow
     const task = TASK_FOR_CATEGORY[row.category ?? '']

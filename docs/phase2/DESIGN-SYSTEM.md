@@ -515,3 +515,9 @@ on intent or idle.
 with label, sans title, lede and actions; a sticky rail with a scroll-spy
 contents list and the library; one reading column in the normal scroll. The
 FAQ is searchable, grouped and numbered, answers in native `<details>`.
+
+## Wallet portraits (28 Oct 2026)
+
+People are circles, agents are rounded squares, so a wallet never reads as an agent. A wallet with no saved profile shows its **stone**: `FacetAvatar`, a cut stone seen from above, drawn from the address and a seed (six to eight sides, table size, turn and the light across the facets), in one of six accents (champagne, graphite, porcelain, moss, oxide, tide) on a dark velvet disc. It is the same family as the Facet field behind the pages. An owner can re-cut it, change its accent, upload an image (512 px square, redrawn in the browser) or use one of their agents' portraits (`ProfileAvatar`). Gradient ids come from the stone's own inputs, so two React roots drawing the same stone never collide.
+
+The Facet field is the lowest layer above the page ground: the body is its own stacking context (`isolation: isolate`) and the field sits at `z-index: -10`, under decorative art. Profiles can turn it off (`data-ambient="off"`) or hold it still (`data-motion="calm"`), applied in `<head>` before first paint.

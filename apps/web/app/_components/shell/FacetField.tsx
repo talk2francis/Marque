@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
 import { usePathname } from 'next/navigation'
+import { PREFS_EVENT } from '../../../lib/theme'
 
 /**
  * The Facet field (DESIGN-V4 6, invariant 38): faceted light behind the page. A low-poly lattice whose vertices drift
@@ -8,7 +9,8 @@ import { usePathname } from 'next/navigation'
  * except that a real indexed hire or settlement during the visit lights one extra facet near the top right.
  *
  * Budget: 24 fps cap (12 on a phone, where the drift is just as smooth at its slow speed), device pixel ratio at most
- * 1.5, paused when hidden or under a modal, and a single static frame for reduced motion or save-data.
+ * 1.5, paused when hidden or under a modal, and a single static frame for reduced motion, save-data or a profile's
+ * Calm preference. A profile can also switch the field off.
  * It paints above the body's ground and below every element because the body is its own stacking context
  * (`isolation: isolate` in the UI base styles); without that, the body's background covered it entirely.
  */
@@ -28,7 +30,15 @@ interface Light { tri: number; start: number; peak: number }
 export function FacetField() {
   const ref = useRef<HTMLCanvasElement>(null)
   const path = usePathname()
-  const density = densityFor(path)
+  // A profile can turn the field off, or keep it still (Calm); both arrive as attributes on <html> (lib/theme.ts).
+  const [pref, setPref] = useState({ off: false, calm: false })
+  useEffect(() => {
+    const read = () => { const d = document.documentElement.dataset; setPref({ off: d['ambient'] === 'off', calm: d['motion'] === 'calm' }) }
+    read()
+    addEventListener(PREFS_EVENT, read)
+    return () => removeEventListener(PREFS_EVENT, read)
+  }, [])
+  const density = pref.off ? 0 : densityFor(path)
   // Created after first paint, when the browser is idle: never on the critical path.
   const [ready, setReady] = useState(false)
   useEffect(() => {
@@ -44,7 +54,7 @@ export function FacetField() {
     const ctx = canvas.getContext('2d', { alpha: true })
     if (!ctx) return
     const nav = navigator as Navigator & { connection?: { saveData?: boolean } }
-    const still = matchMedia('(prefers-reduced-motion: reduce)').matches || nav.connection?.saveData === true
+    const still = pref.calm || matchMedia('(prefers-reduced-motion: reduce)').matches || nav.connection?.saveData === true
     const fps = matchMedia('(pointer: coarse)').matches && innerWidth < 768 ? 12 : 24
     let w = 0, h = 0, cols = 0, rows = 0
     let verts: Vertex[] = []
@@ -149,7 +159,7 @@ export function FacetField() {
       document.removeEventListener('visibilitychange', visibility)
       removeEventListener('resize', resize); removeEventListener(PULSE_EVENT, onPulse)
     }
-  }, [density, ready])
+  }, [density, ready, pref.calm])
 
   if (density === 0 || !ready) return null
   return <canvas ref={ref} className="facet-field" aria-hidden="true" />

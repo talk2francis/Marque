@@ -7,5 +7,5 @@ import styles from './forge.module.css'
 export function YourAgents() {
   const { address } = useAccount()
   if (!address) return <p className={styles.fine}>Connect the wallet that owns your agents to see their listing criteria here.</p>
-  return <Agents address={address} />
+  return <Agents address={address} own />
 }

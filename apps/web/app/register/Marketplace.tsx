@@ -29,6 +29,7 @@ import {
 import styles from './register.module.css'
 import { expireMarketQuote } from '../../lib/quote-expiry'
 import { canReuseInitialMarket } from './initial-freshness'
+import { readLocalPrefs } from '../../lib/profile-client'
 
 /**
  * The marketplace.
@@ -100,11 +101,14 @@ export function Marketplace({ category: fixedCategory, initial }: { category?: s
   // never costs an extra request for the default view it is about to replace.
   useEffect(() => {
     const stored = readStoredView()
-    setState((s) =>
-      paramsToState(window.location.search, stored ? { ...s, view: stored } : s, {
-        fixedCategory: fixedCategory ?? null,
-      }),
-    )
+    // A profile's "Marketplace opens on" preference, only when the link names no network of its own.
+    const lane = readLocalPrefs()?.lane
+    const named = /[?&](lane|network)=/.test(window.location.search)
+    if (lane && lane !== 'all' && !named) replaceNext.current = true
+    setState((s) => {
+      const next = paramsToState(window.location.search, stored ? { ...s, view: stored } : s, { fixedCategory: fixedCategory ?? null })
+      return lane && lane !== 'all' && !named ? { ...next, lane } : next
+    })
     setReady(true)
     // Mount only: fixedCategory is fixed by the route.
   }, [])

@@ -1,6 +1,6 @@
 'use client'
 import { ConnectButton, useConnectModal } from '@rainbow-me/rainbowkit'
-import { ArrowUpRight, Check, ChevronDown, Copy, Info, LogOut, Repeat, ShieldCheck, Target, User, Wallet } from 'lucide-react'
+import { ArrowUpRight, Check, ChevronDown, Copy, Info, LogOut, Pencil, Repeat, ShieldCheck, Target, User, Wallet } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useAccount, useDisconnect } from 'wagmi'
 import { KeyRound, Lock as LockIcon, Droplets, HelpCircle } from 'lucide-react'
@@ -9,6 +9,8 @@ import { passBridge, lock as lockPass } from '../pass/bridge'
 import { explorerAddress } from '../../../lib/network'
 import { copyText } from '../../../lib/clipboard'
 import { useOfficialQuest } from '../campaign/useOfficialQuest'
+import { ProfileAvatar } from '../profile/ProfileAvatar'
+import { applyPrefs, readLocalPrefs, useWalletProfile } from '../../../lib/profile-client'
 
 const CHAIN_SHORT: Record<number, string> = { 56: 'BSC', 97: 'BSC testnet' }
 
@@ -68,6 +70,14 @@ function AccountMenu({ address, display, chainId, compact, openChainModal }: { a
   const hired = Math.min(official?.hire.distinctAgents ?? 0, 3)
   const built = official?.build.agents[0]?.observed ?? 0
   const practice = chainId === 97
+  const { profile, signedIn } = useWalletProfile(address)
+  const name = profile?.displayName ?? null
+
+  // The owner's saved preferences follow them: on a device signed in to the profile, apply them if this browser differs.
+  useEffect(() => {
+    if (!signedIn || !profile?.prefs) return
+    if (JSON.stringify(readLocalPrefs()) !== JSON.stringify(profile.prefs)) applyPrefs(profile.prefs)
+  }, [signedIn, profile])
 
   // With a wallet connected, its chip is the one network indicator in the header (the lane pill steps aside).
   useEffect(() => {
@@ -94,8 +104,8 @@ function AccountMenu({ address, display, chainId, compact, openChainModal }: { a
     <div className="acct" ref={ref}>
       <button type="button" className="acct-btn" aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen((o) => !o)} data-compact={compact ? '' : undefined} data-lane={practice ? 'practice' : 'mainnet'}
         aria-label={`Wallet ${display} on ${CHAIN_SHORT[chainId] ?? 'chain ' + chainId}, Set and Earn: ${hired} of 3 agents hired. Open account menu`}>
-        <span className="acct-dot" aria-hidden="true" />
-        <span className="acct-addr">{display}</span>
+        <span className="acct-face" aria-hidden="true"><ProfileAvatar address={address} profile={profile} size={22} /></span>
+        <span className="acct-addr" data-name={name ? '' : undefined} title={name ? address : undefined}>{name ?? display}</span>
         <span className="acct-net" data-dot-only={compact ? '' : undefined}><i aria-hidden="true" /><span className="acct-net-word">{practice ? 'Practice' : 'Mainnet'}</span></span>
         {compact || !official ? null : <span className="acct-quest">{hired}/3</span>}
         <ChevronDown className="acct-chev" aria-hidden="true" />
@@ -104,7 +114,11 @@ function AccountMenu({ address, display, chainId, compact, openChainModal }: { a
         <div className="menu acct-menu" role="menu" aria-label="Account">
           <div className="acct-card" data-lane={practice ? 'practice' : 'mainnet'}>
             <div className="acct-card-row">
-              <span className="acct-card-addr" title={address}>{address.slice(0, 6)}…{address.slice(-4)}</span>
+              <ProfileAvatar address={address} profile={profile} size={34} />
+              <span className="acct-card-who">
+                {name ? <b className="acct-card-name">{name}</b> : null}
+                <span className="acct-card-addr" title={address}>{address.slice(0, 6)}…{address.slice(-4)}</span>
+              </span>
               <button type="button" className="acct-icon" onClick={copy} aria-label={copied ? 'Address copied' : 'Copy address'} title={copied ? 'Copied' : 'Copy address'}>{copied ? <Check /> : <Copy />}</button>
               <a className="acct-icon" href={explorerAddress(chainId, address)} target="_blank" rel="noreferrer" aria-label="View on BscScan" title="View on BscScan"><ArrowUpRight /></a>
             </div>
@@ -121,6 +135,7 @@ function AccountMenu({ address, display, chainId, compact, openChainModal }: { a
             </span>
           </a>
           <a role="menuitem" className="menu-item" href="/me"><User />My Marque</a>
+          <a role="menuitem" className="menu-item" href="/me?edit=profile"><Pencil />{profile?.saved ? 'Edit profile' : 'Make your profile'}</a>
           <a role="menuitem" className="menu-item" href="/quest"><Target />Set and Earn quest</a>
           <a role="menuitem" className="menu-item" href="/me?view=money" onClick={(e) => { e.preventDefault(); go('/me?view=money') }}><ShieldCheck />Spending controls</a>
           {isPass ? (

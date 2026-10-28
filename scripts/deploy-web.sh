@@ -59,7 +59,12 @@ healthy() {
   done
   [ "$code" = "200 0" ] || { say "  :$port /api/health never answered 200"; return 1; }
   for u in / /register /quest /builders "/api/v1/marketplace?limit=3&offset=0" /api/v1/phase2/config; do
-    code="$(http_health "http://127.0.0.1:$port$u" 90)"
+    # A fresh process answers 503 quickly while it warms the catalog (instrumentation.ts) rather than holding the
+    # request: give a 503 up to two minutes to become a 200. Anything else, or a 503 that persists, still fails.
+    for _ in $(seq 1 24); do
+      code="$(http_health "http://127.0.0.1:$port$u" 90)"
+      case "$code" in "503 "*) sleep 5 ;; *) break ;; esac
+    done
     echo "  $code :$port$u" | tee -a "$LOG"
     [ "$code" = "200 0" ] || return 1
   done

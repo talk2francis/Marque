@@ -1,6 +1,7 @@
 import 'server-only'
 import { sql } from 'drizzle-orm'
 import { cachedProjection, canonicalAgentIdSql, db, firstPartyAgentsAllLanes } from '@marque/db'
+import { agentPortraits } from './agent-portraits'
 import { currentTerms, disputeWindowSeconds, sellerFor, teamWallets, termsOf, type LastQuote, type ServiceCommerce, type Terms } from '@marque/commerce'
 import { buyerFeedbackBinding } from '@marque/commerce/feedback'
 import { agentTrack, type AgentTrack } from './agent-track'
@@ -32,6 +33,8 @@ export interface Storefront {
   name: string
   description: string | null
   imageUrl: string | null
+  /** The image is a portrait the owner set on Marque (agent-portraits.ts), not the registry's. */
+  portraitByOwner?: boolean
   category: string | null
   isReference: boolean
   /** Set when no published standard tests what this reference agent does (config `standard: null`): the reason, in words. */
@@ -76,7 +79,9 @@ export async function storefront(agentId: string): Promise<Storefront | null> {
     value = await computeStorefront(agentId)
   }
   if (!value) return null
-  const t = await live
+  // An owner-set portrait is read per request, outside the projection, so a change shows at once.
+  const [t, portrait] = await Promise.all([live, agentPortraits([agentId]).then((m) => m.get(agentId) ?? null)])
+  if (portrait) value = { ...value, imageUrl: portrait, portraitByOwner: true }
   if (!t) return { ...value, terms: termsOf(value.commerce) }
   return { ...value, commerce: t.commerce ? { ...t.commerce, priceLabel: t.terms.priceLabel } : null, terms: t.terms }
 }

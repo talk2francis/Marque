@@ -5,7 +5,7 @@ import { useAccount, useBalance, useConfig, useReadContracts } from 'wagmi'
 import { useConnectModal } from '@rainbow-me/rainbowkit'
 import { switchChain, waitForTransactionReceipt, writeContract } from '@wagmi/core'
 import { erc20Abi, formatUnits } from 'viem'
-import { ArrowUpRight, Check, Copy, Download, Hammer, ShieldCheck, ShoppingBag } from 'lucide-react'
+import { ArrowUpRight, Check, Copy, Download, Hammer, Pencil, ShieldCheck, ShoppingBag } from 'lucide-react'
 import { AgentAvatar } from '../_components/AgentAvatar'
 import { FUNDER_LABEL } from '../../lib/funder-label'
 import { Emblem } from '../_components/campaign/Emblem'
@@ -19,6 +19,10 @@ import { toast } from '../../lib/toast'
 import { copyText } from '../../lib/clipboard'
 import { explorerTx } from '../../lib/network'
 import { savedAgents, watched, saveWatched, hireLimit, setHireLimit, firedAlerts, markFired, SAVED_EVENT, type SavedAgent, type WatchedPosition } from '../../lib/local-watch'
+import { ProfileAvatar } from '../_components/profile/ProfileAvatar'
+import { ProfileEditor } from '../_components/profile/ProfileEditor'
+import { AgentPortraitControl } from '../_components/profile/AgentPortraitControl'
+import { useWalletProfile } from '../../lib/profile-client'
 import styles from './workspace.module.css'
 
 /**
@@ -58,6 +62,15 @@ export function Workspace({ addrParam }: { addrParam: string | null }) {
     else if (asked === 'agents') setView('building')
   }, [asked])
   const tab = asked ?? (view === 'building' ? 'agents' : 'logbook')
+  const { profile } = useWalletProfile(address)
+  const [editing, setEditing] = useState(false)
+  // The wallet menu's "Edit profile" lands here with ?edit=profile.
+  const editAsked = params.get('edit') === 'profile'
+  useEffect(() => { if (editAsked && own) setEditing(true) }, [editAsked, own])
+  const closeEditor = () => {
+    setEditing(false)
+    if (editAsked) { const p = new URLSearchParams(params.toString()); p.delete('edit'); router.replace(p.size ? `${pathname}?${p.toString()}` : pathname, { scroll: false }) }
+  }
   const setTab = (t: string) => { const p = new URLSearchParams(params.toString()); p.set('view', t); router.replace(`${pathname}?${p.toString()}`, { scroll: false }) }
 
   if (!address) return <Landing onConnect={openConnectModal} />
@@ -70,7 +83,7 @@ export function Workspace({ addrParam }: { addrParam: string | null }) {
     { id: 'watching', label: 'Watching', content: <Watching /> },
   ]
   const buildingTabs = [
-    { id: 'agents', label: 'Agents', content: <Agents address={address} /> },
+    { id: 'agents', label: 'Agents', content: <Agents address={address} own={own} /> },
     { id: 'logbook', label: 'Logbook', content: <Logbook address={address} building /> },
   ]
   const tabs = view === 'building' ? buildingTabs : hiringTabs
@@ -78,18 +91,25 @@ export function Workspace({ addrParam }: { addrParam: string | null }) {
     <div className={styles.wrap}>
       <header className={styles.hero}>
         <div className={styles.heroId}>
-          <span className={styles.orb} style={{ ['--h' as string]: String(hueOf(address)) }} aria-hidden="true" />
+          <span className={styles.portrait}>
+            <ProfileAvatar address={address} profile={profile} size={64} label={profile?.displayName ? `${profile.displayName}'s portrait` : 'Portrait'} />
+            {own ? <button type="button" className={styles.portraitEdit} onClick={() => setEditing(true)} aria-label="Edit your profile" title="Edit your profile"><Pencil aria-hidden="true" /></button> : null}
+          </span>
           <div className={styles.heroText}>
             <span className={styles.kicker}>My Marque{own ? '' : ' · viewing an address'}</span>
+            {profile?.displayName ? <h1 className={styles.displayName}>{profile.displayName}</h1> : null}
             <div className={styles.identity}>
-              <span className={styles.addrText} title={address}>{short(address)}</span>
+              <span className={styles.addrText} data-sub={profile?.displayName ? '' : undefined} title={address}>{short(address)}</span>
               <button type="button" className={styles.iconBtn} onClick={async () => { if (await copyText(address)) toast({ tone: 'success', title: 'Address copied' }) }} aria-label="Copy address" title="Copy address"><Copy aria-hidden="true" /></button>
               <a className={styles.iconBtn} href={`https://bscscan.com/address/${address}`} target="_blank" rel="noreferrer" aria-label="View on BscScan" title="View on BscScan"><ArrowUpRight aria-hidden="true" /></a>
               {isPass ? <span className={styles.tag}>Marque Pass</span> : null}
               {own ? null : <a className={styles.link} href="/me">Back to my wallet</a>}
             </div>
+            {profile?.bio ? <p className={styles.bio}>{profile.bio}</p> : null}
+            {own && profile && !profile.saved ? <button type="button" className={styles.makeIt} onClick={() => setEditing(true)}>Make it yours: a portrait, a name, your preferences</button> : null}
           </div>
         </div>
+        {own && profile ? <ProfileEditor address={address} profile={profile} open={editing} onClose={closeEditor} /> : null}
         <div className={styles.toggle} role="radiogroup" aria-label="View">
           {(['hiring', 'building'] as const).map((v) => <button key={v} type="button" role="radio" aria-checked={view === v} data-on={view === v || undefined} onClick={() => pickView(v)}>{v === 'hiring' ? <ShoppingBag aria-hidden="true" /> : <Hammer aria-hidden="true" />}{v === 'hiring' ? 'Hiring' : 'Building'}</button>)}
         </div>
@@ -113,13 +133,6 @@ export function Workspace({ addrParam }: { addrParam: string | null }) {
       </div>
     </div>
   )
-}
-
-/** A stable hue per address, for the identity orb (decoration only). */
-function hueOf(a: string): number {
-  let h = 0
-  for (let i = 2; i < a.length; i++) h = (h * 31 + a.charCodeAt(i)) % 360
-  return h
 }
 
 /* ---------------------------------------------------------------- summary */
@@ -474,12 +487,14 @@ function Allowances({ address, chainId, own }: { address: string; chainId: Chain
 
 /* ---------------------------------------------------------------- agents (building) */
 
-interface OwnerAgent { agentKey: string; chainId: number; agentId: string; name: string; imageUrl?: string | null; category: string | null; listedOnMarque: boolean; quality: { checks: Array<{ id: string; pass: boolean; fix: string | null }> }; jobsReceived: number; jobsPaid: number }
+interface OwnerAgent { agentKey: string; chainId: number; agentId: string; name: string; imageUrl?: string | null; portraitByOwner?: boolean; category: string | null; listedOnMarque: boolean; quality: { checks: Array<{ id: string; pass: boolean; fix: string | null }> }; jobsReceived: number; jobsPaid: number }
 interface QuestBuild { build: { agents: Array<{ chainId: number; tokenId: string; observed: number; checks: Record<string, { state: string; reason: string; next?: { label: string; href: string } | null }> }> } }
 const CRIT: Array<[string, string]> = [['registered', 'Registered'], ['card', 'Agent card'], ['probes', 'Answers'], ['hires', '3 hirers'], ['actions', 'Actions'], ['category', 'In category']]
 
-export function Agents({ address }: { address: string }) {
+export function Agents({ address, own = false }: { address: string; own?: boolean }) {
   const [owner, setOwner] = useState<OwnerAgent[] | null>(null)
+  // A portrait set here shows at once, ahead of the owner read's next refresh.
+  const [portraits, setPortraits] = useState<Record<string, string | null>>({})
   const [quest, setQuest] = useState<QuestBuild | null>(null)
   useEffect(() => {
     let live = true
@@ -496,7 +511,7 @@ export function Agents({ address }: { address: string }) {
         return (
           <li key={a.agentKey} className={styles.agent}>
             <div className={styles.agentTop}>
-              <AgentAvatar id={a.agentKey} reference={false} imageUrl={a.imageUrl ?? null} size={40} />
+              <AgentAvatar id={a.agentKey} reference={false} imageUrl={a.agentKey in portraits ? portraits[a.agentKey] ?? null : a.imageUrl ?? null} size={40} />
               <a href={`/agents/${a.chainId}/${a.agentId}`}><b>{a.name}</b></a>
               <span className={styles.fine}>#{a.agentId} · {net(a.chainId)}</span>
               <span className={styles.pill} data-tone={a.listedOnMarque ? 'good' : undefined}>{a.listedOnMarque ? 'Hireable on Marque' : 'Not hireable yet'}</span>
@@ -512,6 +527,10 @@ export function Agents({ address }: { address: string }) {
               <a className={styles.link} href={`/builders/check/${a.chainId}/${a.agentId}`}>Fix report</a>
               <a className={styles.link} href={`/builders/progress/${a.chainId}/${a.agentId}`}>Build checklist</a>
             </div>
+            {own ? (
+              <AgentPortraitControl owner={address} agentId={a.agentKey} hasPortrait={a.agentKey in portraits ? portraits[a.agentKey] !== null : Boolean(a.portraitByOwner)}
+                onChanged={(url) => setPortraits((p) => ({ ...p, [a.agentKey]: url }))} />
+            ) : null}
           </li>
         )
       })}

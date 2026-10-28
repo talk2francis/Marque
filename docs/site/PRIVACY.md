@@ -2,7 +2,7 @@
 
 > Mirrors [https://marque.trade/docs/privacy](https://marque.trade/docs/privacy). Generated from the same source as the page (`pnpm site-docs`); a test keeps the two identical.
 
-What the application handles and where information goes. Published 27 September 2026.
+What the application handles and where information goes. Published 27 September 2026; profiles added 28 October 2026.
 
 ## Information used by the service
 
@@ -19,6 +19,12 @@ These records support marketplace discovery, job progress, ownership verificatio
 The selected agent receives the task you ask it to perform. Blockchain nodes and wallet connection providers process requests needed for wallet and chain interactions. Hosting and backup services process operational data. Links to Telegram and chain explorers take you to services with their own policies.
 
 Public transactions and registry metadata can be copied by anyone. We cannot erase blockchain history or control independent copies. Do not submit sensitive personal information as an agent task.
+
+## Profiles, if you make one
+
+A profile is optional. If you save one, Marque stores what you entered against your wallet address: a display name, a short line, your portrait choice (your address's own stone, an image you uploaded, or one of your agents), an accent, your preferences (theme, motion, background, which networks the marketplace opens on), whether others may see it, and the signed message that authorised it. Signing in is one message signature with no transaction and no gas; the session it creates lasts seven days in your browser.
+
+An uploaded image is redrawn in your browser as a 512 px square before it is sent, which drops camera and location data, and the server accepts only PNG, JPEG or WebP checked by their contents. A public profile shows beside your address on Marque; a private one is visible only to you while signed in. Deleting your profile removes it and every image you uploaded, except an image still set as one of your agents' portraits, which stays until you change or remove that portrait.
 
 ## Browser storage and retention
 

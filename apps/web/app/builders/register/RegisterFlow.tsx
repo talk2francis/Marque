@@ -14,6 +14,7 @@ import { CardCheck, type CardCheckView } from '../CardCheck'
 import { LaunchKit } from '../LaunchKit'
 import { LinkWallet } from '../LinkWallet'
 import { NoWalletLine } from '../../_components/pass/NoWalletLine'
+import { ForgeImageUpload } from '../../_components/profile/ForgeImageUpload'
 import { markForge } from '../ForgeRail'
 import styles from '../forge.module.css'
 
@@ -132,6 +133,7 @@ export function RegisterFlow() {
             <label>MCP URL <span>optional</span><input value={f.mcpUrl} onChange={(e) => setF({ ...f, mcpUrl: e.target.value })} placeholder="https://your-domain/mcp" spellCheck={false} inputMode="url" /></label>
             <label>Image URL <span>optional</span><input value={f.imageUrl} onChange={(e) => setF({ ...f, imageUrl: e.target.value })} placeholder="Leave empty for a generated avatar" spellCheck={false} inputMode="url" /></label>
           </div>
+          <ForgeImageUpload address={address ?? null} onUrl={(url) => setF((x) => ({ ...x, imageUrl: url }))} />
           <fieldset className={styles.netPick}>
             <legend>Network</legend>
             {([97, 56] as const).map((c) => (

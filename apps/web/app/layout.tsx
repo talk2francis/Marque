@@ -8,7 +8,7 @@ import { CampaignDock } from './_components/campaign/CampaignDock'
 import { FacetField } from './_components/shell/FacetField'
 import { MarketGlint } from './_components/shell/MarketGlint'
 import { Toaster } from './_components/ui/Toaster'
-import { THEME_BOOTSTRAP } from '../lib/theme'
+import { PREFS_BOOTSTRAP, THEME_BOOTSTRAP } from '../lib/theme'
 import './globals.css'
 
 /**
@@ -85,7 +85,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" data-theme="night" className={`${generalSans.variable} ${instrumentSerif.variable} ${plexMono.variable}`} suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: THEME_BOOTSTRAP }} />
+        <script dangerouslySetInnerHTML={{ __html: THEME_BOOTSTRAP + PREFS_BOOTSTRAP }} />
       </head>
       <body>
         <FacetField />

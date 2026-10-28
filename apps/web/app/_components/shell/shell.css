@@ -164,8 +164,9 @@
   }
   .acct-btn:hover { border-color: color-mix(in srgb, var(--ink) 30%, transparent); }
   .acct-btn[aria-expanded='true'] { border-color: color-mix(in srgb, var(--ink) 34%, transparent); background: var(--panel-2); }
-  .acct-dot { width: 18px; height: 18px; border-radius: 50%; background: conic-gradient(from 140deg, var(--v-gold), var(--v-ember), var(--v-orchid), var(--v-azure), var(--v-gold)); box-shadow: inset 0 0 0 2px var(--canvas); }
   .acct-addr { font-family: var(--font-mono); font-size: 12.5px; font-weight: 500; }
+  .acct-face { display: block; line-height: 0; margin-left: -4px; }
+  .acct-addr[data-name] { font-family: inherit; font-size: 13px; max-width: 14ch; overflow: hidden; text-overflow: ellipsis; }
   .acct-net, .acct-quest { display: inline-flex; align-items: center; gap: 6px; padding-left: 8px; border-left: 1px solid var(--hair-2); color: var(--ink-2); font-weight: 500; font-size: 12.5px; }
   .acct-net i { width: 7px; height: 7px; border-radius: 50%; background: var(--lane-main); box-shadow: 0 0 0 3px color-mix(in srgb, var(--lane-main) 22%, transparent); }
   .acct-btn[data-lane='practice'] .acct-net { color: var(--lane-practice); }
@@ -184,7 +185,11 @@
   .acct-card::before { content: ''; position: absolute; left: 0; top: 10px; bottom: 10px; width: 3px; border-radius: 0 3px 3px 0; background: var(--lane-main); }
   .acct-card[data-lane='practice']::before { background: var(--lane-practice); }
   .acct-card-row { display: flex; align-items: center; gap: 4px; }
-  .acct-card-addr { flex: 1; font-family: var(--font-mono); font-size: 14px; font-weight: 500; color: var(--ink); letter-spacing: -0.01em; }
+  .acct-card-row { gap: 10px; }
+  .acct-card-who { flex: 1; display: grid; gap: 1px; min-width: 0; }
+  .acct-card-name { font-size: 14.5px; font-weight: 500; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .acct-card-addr { font-family: var(--font-mono); font-size: 13px; font-weight: 500; color: var(--ink); letter-spacing: -0.01em; }
+  .acct-card-name + .acct-card-addr { font-size: 12px; color: var(--ink-3); }
   .acct-icon { display: grid; place-items: center; width: 30px; height: 30px; border: 0; border-radius: 8px; background: none; color: var(--ink-2); cursor: pointer; }
   .acct-icon:hover, .acct-icon:focus-visible { background: color-mix(in srgb, var(--ink) 8%, transparent); color: var(--ink); }
   .acct-icon svg { width: 15px; height: 15px; }
@@ -322,6 +327,12 @@
       @keyframes giant-rise { from { opacity: 0; transform: translateY(16%); } to { opacity: 1; transform: none; } }
     }
   }
+  /* Wallet portraits (profiles, 28 Oct): circles, so a person never reads as an agent's rounded square. */
+  .facet-avatar { display: block; flex: none; border-radius: 50%; }
+  .profile-avatar { display: block; flex: none; overflow: hidden; border-radius: 50%; background: var(--panel); box-shadow: inset 0 0 0 1px var(--hair-2); }
+  .profile-avatar img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  /* A profile's Calm preference: nothing moves on its own. Scroll-linked reveals stay tied to the reader's own scroll. */
+  html[data-motion='calm'] *, html[data-motion='calm'] *::before, html[data-motion='calm'] *::after { animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
   /* The Facet field (DESIGN-V4 6): behind everything, never interactive. Lowest layer above the ground (the body is
      its own stacking context), so decorative art at z-index -1 or -2 sits over it rather than under its lines. */
   .facet-field { position: fixed; inset: 0; z-index: -10; pointer-events: none; }

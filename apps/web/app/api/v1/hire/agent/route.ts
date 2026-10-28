@@ -64,8 +64,12 @@ async function twinOf(agentId: string, owner: string | null, name: string): Prom
   const chain = Number(agentId.split(':')[0])
   if (!owner || (chain !== 56 && chain !== 97)) return null
   const other = chain === 56 ? 97 : 56
-  const res = await db().execute(sql`select id from agent where chain_id = ${other} and lower(owner_address) = ${owner.toLowerCase()}
-    and lower(btrim(name)) = ${name.trim().toLowerCase()} order by token_id desc limit 1`)
+  // Offered only when the twin has quoted on its own network in the last day: a twin whose endpoint answers for the
+  // other network (or not at all) would open a sheet that cannot hire there.
+  const res = await db().execute(sql`select a.id from agent a where a.chain_id = ${other} and lower(a.owner_address) = ${owner.toLowerCase()}
+    and lower(btrim(a.name)) = ${name.trim().toLowerCase()}
+    and exists (select 1 from commerce_quote q where q.agent_id = a.id and q.ok and q.chain_id = ${other} and q.created_at > now() - interval '24 hours')
+    order by a.token_id desc limit 1`)
   const row = (((res as unknown as { rows?: unknown[] }).rows ?? (res as unknown as unknown[])) as Array<Record<string, unknown>>)[0]
   return row?.['id'] ? { agentId: String(row['id']), chainId: other } : null
 }

@@ -4,6 +4,7 @@ import { served, bad, ADDRESS } from '../../../../../../lib/phase2-api'
 import { sellerProjection } from '../../../../../../lib/seller'
 import { builderIdentities, builderView } from '../../../../../../lib/builder'
 import { registryImageUrl } from '../../../../../../lib/avatar-source'
+import { agentPortraits } from '../../../../../../lib/agent-portraits'
 
 export const dynamic = 'force-dynamic'
 
@@ -27,8 +28,11 @@ export async function GET(_req: Request, { params }: { params: Promise<{ address
         from commerce_job j join agent a on lower(a.agent_wallet) = j.provider and a.chain_id = j.chain_id and a.id = ${v.identity.agentKey}`).catch(() => []))
       // The owner's own art (CLAIMED), only through the registry indexer's image proxy.
       const [img] = rowsOf(await db().execute(sql`select image_url, raw_metadata #>> '{offchain_content,image}' as meta_image from agent where id = ${v.identity.agentKey} limit 1`).catch(() => []))
+      // A portrait the owner set on Marque comes first (agent-portraits.ts).
+      const portrait = (await agentPortraits([v.identity.agentKey])).get(v.identity.agentKey) ?? null
       return {
-        imageUrl: registryImageUrl(img?.['image_url']) ?? registryImageUrl(img?.['meta_image']),
+        imageUrl: portrait ?? registryImageUrl(img?.['image_url']) ?? registryImageUrl(img?.['meta_image']),
+        portraitByOwner: portrait !== null,
         agentKey: v.identity.agentKey, chainId: v.identity.chainId, agentId: v.identity.tokenId, name: v.identity.name, category: v.category,
         listedOnMarque: v.listed, qualityListing: v.verdict.qualityListing,
         availability: v.availability,
