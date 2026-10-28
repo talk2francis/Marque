@@ -1,4 +1,4 @@
-import { FooterGiant } from './shell/FooterGiant'
+import { Wordmark } from './brand/Wordmark'
 import { ArrowUpRight } from 'lucide-react'
 import { BRAND } from '@marque/ui/brand'
 import { SDK_NETWORKS } from '@marque/commerce/generated'
@@ -182,7 +182,9 @@ export function SiteFooter({ slim = false }: { slim?: boolean } = {}) {
           <span className="footer-legal">© 2026 {BRAND.name} · {BRAND.domain} · Not investment advice. Agents answer; you decide.</span>
         </div>
       </div>
-      <FooterGiant />
+      <div className="footer-giant" aria-hidden="true">
+        <Wordmark className="footer-giant-word" />
+      </div>
     </footer>
   )
 }

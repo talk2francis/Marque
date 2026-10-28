@@ -34,7 +34,7 @@ const decode = (uri: string) => {
 const encode = (j: Record<string, unknown>) => `data:application/json;base64,${Buffer.from(JSON.stringify(j)).toString('base64')}`
 
 for (const a of fp.agents as Array<{ slug: string; testnet?: { chainId: number; tokenId: number } }>) {
-  if (!a.testnet || a.slug === 'tidemark') continue
+  if (!a.testnet) continue
   if (a.testnet.chainId !== 97) throw new Error(`refusing: ${a.slug} testnet chain is ${a.testnet.chainId}`)
   const id = BigInt(a.testnet.tokenId)
   const current = decode(await pub.readContract({ address: REGISTRY, abi, functionName: 'tokenURI', args: [id] }))

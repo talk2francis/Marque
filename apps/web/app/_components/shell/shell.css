@@ -316,16 +316,15 @@
   .footer-pulse-dot[data-state='ok'] { background: var(--moss); box-shadow: 0 0 0 3px color-mix(in srgb, var(--moss) 18%, transparent); }
   .footer-pulse-dot[data-state='warn'] { background: var(--amber); }
   .footer-pulse-dot[data-state='down'] { background: var(--oxide); }
-  /* The footer wordmark: rises and grows from 78% to 100% as the footer scrolls in, tied to the scroll (never on a timer). */
-  .footer-giant-word { transform-origin: 50% 100%; transform: translateY(calc((1 - var(--grow, 1)) * 30%)) scale(var(--grow, 1)); will-change: transform; }
   @media (prefers-reduced-motion: no-preference) {
     @supports (animation-timeline: view()) {
-      .footer-giant-word { animation: giant-grow linear both; animation-timeline: view(); animation-range: entry 0% cover 50%; }
-      @keyframes giant-grow { from { transform: translateY(7%) scale(0.78); opacity: 0.55; } to { transform: none; opacity: 1; } }
+      .footer-giant-word { animation: giant-rise linear both; animation-timeline: view(); animation-range: entry 0% entry 100%; }
+      @keyframes giant-rise { from { opacity: 0; transform: translateY(16%); } to { opacity: 1; transform: none; } }
     }
   }
-  /* The Facet field (DESIGN-V4 6): behind everything, never interactive. */
-  .facet-field { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
+  /* The Facet field (DESIGN-V4 6): behind everything, never interactive. Lowest layer above the ground (the body is
+     its own stacking context), so decorative art at z-index -1 or -2 sits over it rather than under its lines. */
+  .facet-field { position: fixed; inset: 0; z-index: -10; pointer-events: none; }
   @media (max-width: 1100px) { .footer-cols { grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: var(--s-6); } }
   @media (max-width: 640px) { .footer-cols { grid-template-columns: 1fr 1fr; row-gap: var(--s-5); } }
   @media (max-width: 760px) { .footer-top { align-items: flex-start; } .site-footer { margin-top: var(--s-8); } }

@@ -79,8 +79,15 @@ export function AgentCard({ a, compare, base = '', variant = 'default' }: {
             <span className={styles.mark} data-tone={classified ? TONE[a.category!] : 'other'} aria-hidden="true" />
             {cat}
             {a.identityCount > 1 && !classified ? <span className={styles.count}> · {a.identityCount} identities</span> : null}
-            {both ? <span className={styles.nets} title="Hire on BSC mainnet with real money, or on BSC testnet free">Mainnet · Testnet</span>
-              : practice ? <span className={styles.testnet} title="BSC testnet: test tokens, no real value">{a.networks ? 'Testnet only' : 'Testnet'}</span> : null}
+            {both ? (
+              <span className={styles.nets} title="Hire on BSC mainnet with real money, or on BSC testnet free" aria-label="On mainnet and testnet">
+                <span data-net="main">Mainnet</span><span data-net="test">Testnet</span>
+              </span>
+            ) : practice ? (
+              <span className={styles.nets} title="BSC testnet: test tokens, no real value">
+                <span data-net="test">{a.networks ? 'Testnet only' : 'Testnet'}</span>
+              </span>
+            ) : null}
           </span>
           {a.builtOutside ? <span className={styles.outside} title="Listed on Marque by its own builder, a wallet outside the Marque team">Built by an outside builder</span> : null}
         </div>

@@ -109,9 +109,9 @@ const agentApps = REFERENCE_AGENTS.map(({ name, port }) => ({
  * The practice lane's reference sellers (BSC testnet, 97): the same code, engine and wallet
  * as each mainnet seller, run from agents/<name>/.testnet with the config written by
  * scripts/testnet-sellers.mjs (network, testnet U, keystore, escrow only). Caddy routes
- * /agents/<name>/testnet/* here. Tidemark stays withheld while its archive read is down.
+ * /agents/<name>/testnet/* here.
  */
-const testnetApps = REFERENCE_AGENTS.filter(({ name }) => name !== 'tidemark').map(({ name, port }) => ({
+const testnetApps = REFERENCE_AGENTS.map(({ name, port }) => ({
   name: `marque-${name}-testnet`,
   cwd: `${ROOT}/agents/${name}/.testnet`,
   script: `${ROOT}/node_modules/.bin/tsx`,

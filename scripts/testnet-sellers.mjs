@@ -21,15 +21,13 @@ const ROOT = resolve(dirname(new URL(import.meta.url).pathname), '..')
 const TESTNET_U = '0xc70B8741B8B07A6d61E54fd4B20f22Fa648E5565'
 const MAINNET_U = /0xcE24439F2D9C6a2289F741120FE202248B666666/i
 const fp = JSON.parse(readFileSync(join(ROOT, 'config/first-party.json'), 'utf8'))
-// Tidemark stays withheld while its archive read is unavailable (FACTS 12).
-const SKIP = new Set(['tidemark'])
 const check = process.argv.includes('--check')
 // Where the agents' keystores live (the production checkout); defaults to this checkout.
 const KEYS = resolve(process.argv.find((x) => x.startsWith('--keystore-root='))?.split('=')[1] ?? ROOT)
 let failures = 0
 
 for (const a of fp.agents) {
-  if (!a.testnet || SKIP.has(a.slug)) continue
+  if (!a.testnet) continue
   const dir = join(ROOT, 'agents', a.slug)
   const src = readFileSync(join(dir, 'studio.toml'), 'utf8')
   let out = src

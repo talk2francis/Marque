@@ -7,11 +7,13 @@ import { usePathname } from 'next/navigation'
  * on slow sine waves, with one facet catching champagne light every 9 to 14 s (25 Oct: raised so it is seen). Ambient only: it carries no information,
  * except that a real indexed hire or settlement during the visit lights one extra facet near the top right.
  *
- * Budget: 24 fps cap, device pixel ratio at most 1.5, paused when hidden or under a modal, and a single static frame
- * for reduced motion, save-data, or a coarse pointer under 768 px.
+ * Budget: 24 fps cap (12 on a phone, where the drift is just as smooth at its slow speed), device pixel ratio at most
+ * 1.5, paused when hidden or under a modal, and a single static frame for reduced motion or save-data.
+ * It paints above the body's ground and below every element because the body is its own stacking context
+ * (`isolation: isolate` in the UI base styles); without that, the body's background covered it entirely.
  */
 export const PULSE_EVENT = 'marque:pulse-new'
-const COL = 160, ROW = 140, FPS = 24
+const COL = 160, ROW = 140
 
 /** Per-route density (DESIGN-V4 6): full on the editorial pages, half on working pages, none on tables and overlays. */
 function densityFor(path: string): number {
@@ -42,7 +44,8 @@ export function FacetField() {
     const ctx = canvas.getContext('2d', { alpha: true })
     if (!ctx) return
     const nav = navigator as Navigator & { connection?: { saveData?: boolean } }
-    const still = matchMedia('(prefers-reduced-motion: reduce)').matches || nav.connection?.saveData === true || (matchMedia('(pointer: coarse)').matches && innerWidth < 768)
+    const still = matchMedia('(prefers-reduced-motion: reduce)').matches || nav.connection?.saveData === true
+    const fps = matchMedia('(pointer: coarse)').matches && innerWidth < 768 ? 12 : 24
     let w = 0, h = 0, cols = 0, rows = 0
     let verts: Vertex[] = []
     let tris: Array<[number, number, number]> = []
@@ -121,7 +124,7 @@ export function FacetField() {
 
     const loop = (now: number) => {
       raf = requestAnimationFrame(loop)
-      if (!running || now - last < 1000 / FPS) return
+      if (!running || now - last < 1000 / fps) return
       last = now
       if (now > nextLight) { light(now); nextLight = now + rnd(9_000, 14_000) }
       draw(now)

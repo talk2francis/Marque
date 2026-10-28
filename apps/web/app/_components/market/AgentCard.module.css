@@ -36,7 +36,7 @@
 .nameLink { display: inline-block; min-height: 24px; color: var(--ink); text-decoration: none; }
 .nameLink:hover { text-decoration: underline; text-decoration-color: var(--hair-2); text-underline-offset: 3px; }
 .nameLink::after { content: ''; position: absolute; inset: 0; border-radius: inherit; z-index: 0; }
-.where { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ink-2); }
+.where { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; font-size: 13px; color: var(--ink-2); }
 .count { color: var(--ink-3); }
 .mark { flex: none; width: 7px; height: 7px; border-radius: 1.5px; transform: rotate(45deg); background: var(--ink-3); }
 .mark[data-tone='yield'] { background: var(--cat-yield); }
@@ -121,6 +121,13 @@
 
 @media (max-width: 520px) {
   .card { padding: 16px 16px 12px; }
+  /* A narrow card keeps the name whole: the reference badge moves under the name instead of squeezing it. */
+  .card[data-variant='default'] .head { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; column-gap: 14px; row-gap: 0; align-items: start; }
+  .card[data-variant='default'] .portrait { grid-column: 1; grid-row: 1 / span 2; }
+  .card[data-variant='default'] .title { grid-column: 2; grid-row: 1; }
+  .card[data-variant='default'] .ref { grid-column: 2; grid-row: 2; justify-self: start; margin-top: 8px; }
+  .card[data-variant='default'] .head > :global(.savestar) { grid-column: 3; grid-row: 1; }
+  .name { overflow-wrap: break-word; }
   .cover { margin-inline: -16px; height: 180px; }
   .stats dd { font-size: 14px; }
 }
@@ -129,10 +136,15 @@
 /* A figure that does not exist yet reads as a state, not as a number. */
 .none { color: var(--ink-3); font-weight: 400; }
 
-/* Practice lane (BSC testnet): a dashed network badge, nothing else changes. */
-.testnet { margin-left: 8px; padding: 0 6px; border: 1px dashed var(--ink-3); border-radius: 999px; font-size: 11px; line-height: 1.6; color: var(--ink-2); }
 .twin { margin: 10px 0 0; font-size: 12.5px; }
 .twin a { color: var(--ink-2); text-decoration: underline; text-decoration-color: var(--hair-2); text-underline-offset: 3px; }
 .twin a:hover { color: var(--ink); text-decoration-color: currentColor; }
-.nets { margin-left: 2px; padding: 1px 8px; border-radius: var(--r-pill); border: 1px solid var(--hair-2); font-size: 11.5px; color: var(--ink-2); }
+/* Networks: one line, never wrapped inside itself. A segment per network; a filled dot for mainnet (real money),
+   a hollow ring for testnet (test tokens). The tag drops below the category whole when the row is narrow. */
+.nets { display: inline-flex; align-items: stretch; flex: none; white-space: nowrap; margin-left: 2px; border-radius: var(--r-pill); border: 1px solid var(--hair-2); background: color-mix(in srgb, var(--ink) 3%, transparent); font-size: 11px; line-height: 1; letter-spacing: 0.01em; color: var(--ink-2); overflow: hidden; }
+.nets > span { display: inline-flex; align-items: center; gap: 5px; padding: 4px 8px; }
+.nets > span + span { border-left: 1px solid var(--hair-2); }
+.nets > span::before { content: ''; flex: none; width: 6px; height: 6px; border-radius: 50%; box-sizing: border-box; }
+.nets > [data-net='main']::before { background: var(--moss); }
+.nets > [data-net='test']::before { border: 1.25px solid var(--ink-3); }
 .outside { display: inline-block; margin-top: 4px; padding: 1px 8px; border-radius: var(--r-pill); border: 1px solid color-mix(in srgb, var(--brass) 45%, var(--hair-2)); font-size: 11.5px; color: var(--ink-2); width: fit-content; }
