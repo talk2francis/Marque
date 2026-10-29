@@ -77,13 +77,15 @@ export function Workspace({ addrParam }: { addrParam: string | null }) {
   }
   // In place (29 Oct): router.replace re-rendered the whole page on the server behind the loading screen, so the page
     // flashed and jumped to the top. Next keeps useSearchParams in sync with the history API.
-  const setTab = (t: string) => { const p = new URLSearchParams(params.toString()); p.set('view', t); window.history.replaceState(null, '', `${pathname}?${p.toString()}`) }
+  const setTab = (t: string) => { openedOn.current = null; const p = new URLSearchParams(params.toString()); p.set('view', t); window.history.replaceState(null, '', `${pathname}?${p.toString()}`) }
   // A link to a section (the wallet menu's Spending controls is ?view=money) opens at that section, not at the top.
+  // Only the section named when the page opened: a tab click also sets ?view= and must never move the page.
+  const openedOn = useRef(params.get('view'))
   const arrived = useRef(false)
   // The page is still short while its sections load, so one scroll lands nowhere: keep landing on the section as the
   // page grows, for a few seconds, and stop as soon as the reader scrolls themselves.
   useEffect(() => {
-    if (arrived.current || !asked || !address) return
+    if (arrived.current || !openedOn.current || !address) return
     arrived.current = true
     let moved = false
     const stop = () => { moved = true }
@@ -92,7 +94,7 @@ export function Workspace({ addrParam }: { addrParam: string | null }) {
     const timers = [0, 350, 900, 1800, 3000].map((ms) => setTimeout(go, ms))
     const done = setTimeout(() => { removeEventListener('wheel', stop); removeEventListener('touchmove', stop); removeEventListener('keydown', stop) }, 3200)
     return () => { timers.forEach(clearTimeout); clearTimeout(done); removeEventListener('wheel', stop); removeEventListener('touchmove', stop); removeEventListener('keydown', stop) }
-  }, [asked, address])
+  }, [address])
 
   if (!address) return <Landing onConnect={openConnectModal} />
   const isPass = own && connector?.id === MARQUE_PASS_ID
