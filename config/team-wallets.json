@@ -228,6 +228,13 @@
       "chainIds": [
         97
       ]
+    },
+    {
+      "address": "0x97169DC5384020EA6C5097756DD3871FD7273BD7",
+      "role": "Marque team test: 29 Oct 2026 candidate and live Pass confirmation/cancel checks",
+      "chainIds": [
+        97
+      ]
     }
   ]
 }
