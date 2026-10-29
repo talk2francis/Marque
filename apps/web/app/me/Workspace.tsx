@@ -22,6 +22,7 @@ import { savedAgents, watched, saveWatched, hireLimit, setHireLimit, firedAlerts
 import { ProfileAvatar } from '../_components/profile/ProfileAvatar'
 import { ProfileEditor } from '../_components/profile/ProfileEditor'
 import { AgentPortraitControl } from '../_components/profile/AgentPortraitControl'
+import { RegistrationEditor } from '../_components/profile/RegistrationEditor'
 import { useWalletProfile } from '../../lib/profile-client'
 import styles from './workspace.module.css'
 
@@ -518,6 +519,8 @@ export function Agents({ address, own = false }: { address: string; own?: boolea
   const [owner, setOwner] = useState<OwnerAgent[] | null>(null)
   // A portrait set here shows at once, ahead of the owner read's next refresh.
   const [portraits, setPortraits] = useState<Record<string, string | null>>({})
+  // A name changed here on chain shows at once.
+  const [names, setNames] = useState<Record<string, string>>({})
   const [quest, setQuest] = useState<QuestBuild | null>(null)
   useEffect(() => {
     let live = true
@@ -535,7 +538,7 @@ export function Agents({ address, own = false }: { address: string; own?: boolea
           <li key={a.agentKey} className={styles.agent}>
             <div className={styles.agentTop}>
               <AgentAvatar id={a.agentKey} reference={false} imageUrl={a.agentKey in portraits ? portraits[a.agentKey] ?? null : a.imageUrl ?? null} size={40} />
-              <a href={`/agents/${a.chainId}/${a.agentId}`}><b>{a.name}</b></a>
+              <a href={`/agents/${a.chainId}/${a.agentId}`}><b>{names[a.agentKey] ?? a.name}</b></a>
               <span className={styles.fine}>#{a.agentId} · {net(a.chainId)}</span>
               <span className={styles.pill} data-tone={a.listedOnMarque ? 'good' : undefined}>{a.listedOnMarque ? 'Hireable on Marque' : 'Not hireable yet'}</span>
             </div>
@@ -553,6 +556,11 @@ export function Agents({ address, own = false }: { address: string; own?: boolea
             {own ? (
               <AgentPortraitControl owner={address} agentId={a.agentKey} hasPortrait={a.agentKey in portraits ? portraits[a.agentKey] !== null : Boolean(a.portraitByOwner)}
                 onChanged={(url) => setPortraits((p) => ({ ...p, [a.agentKey]: url }))} />
+            ) : null}
+            {own ? (
+              <RegistrationEditor chainId={a.chainId === 97 ? 97 : 56} tokenId={a.agentId}
+                portraitUrl={(() => { const u = a.agentKey in portraits ? portraits[a.agentKey] : a.portraitByOwner ? a.imageUrl : null; return u ? (u.startsWith('/') ? `https://marque.trade${u}` : u) : null })()}
+                onSaved={(n) => setNames((m) => ({ ...m, [a.agentKey]: n }))} />
             ) : null}
           </li>
         )

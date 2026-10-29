@@ -418,6 +418,10 @@ export function HireSheet() {
               {q ? (
                 <section className="hs-block" aria-labelledby="hs-3">
                   <h3 id="hs-3" className="hs-h"><span className="hs-n">3</span>Pay and hire</h3>
+                  {isConnected && address && q.provider && address.toLowerCase() === q.provider.toLowerCase() ? (
+                    // Hiring an agent from its own payout wallet (29 Oct): allowed by the escrow, but it pays yourself.
+                    <p className="hs-lane" role="note">This wallet is {q.agentName}&apos;s own payout wallet, so this hire pays you. Marque shows it as the operator&apos;s own job and it never counts for Set and Earn; to hire it as a buyer, connect a different wallet.</p>
+                  ) : null}
                   {isConnected && address ? (
                     <div className="hs-wallet" data-short={short?.token || short?.gas ? '' : undefined}>
                       <AddressChip value={address} chainId={q.chainId} label="You" />

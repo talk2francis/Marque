@@ -7,6 +7,7 @@ import { WagmiProvider } from 'wagmi'
 import { marqueTheme, wagmiConfig } from './config'
 import { WalletReady } from './ready'
 import { PassHost } from '../pass/PassHost'
+import { watchConnections } from './repair'
 
 /**
  * The wallet layer: wagmi for the connection, RainbowKit for the connect UI (it
@@ -19,6 +20,8 @@ import { PassHost } from '../pass/PassHost'
  * client it needs is the site-wide one in Providers.
  */
 export function WalletProvider({ children }: { children: React.ReactNode }) {
+  // A connection restored from storage with a placeholder connector gets its live one back (repair.ts).
+  useEffect(() => watchConnections(wagmiConfig), [])
   return (
     <WagmiProvider config={wagmiConfig} reconnectOnMount>
       <RainbowKitProvider modalSize="compact" theme={marqueTheme}>
