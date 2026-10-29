@@ -80,11 +80,18 @@ export function Workspace({ addrParam }: { addrParam: string | null }) {
   const setTab = (t: string) => { const p = new URLSearchParams(params.toString()); p.set('view', t); window.history.replaceState(null, '', `${pathname}?${p.toString()}`) }
   // A link to a section (the wallet menu's Spending controls is ?view=money) opens at that section, not at the top.
   const arrived = useRef(false)
+  // The page is still short while its sections load, so one scroll lands nowhere: keep landing on the section as the
+  // page grows, for a few seconds, and stop as soon as the reader scrolls themselves.
   useEffect(() => {
     if (arrived.current || !asked || !address) return
     arrived.current = true
-    const el = document.getElementById('me-sections')
-    if (el) requestAnimationFrame(() => el.scrollIntoView({ block: 'start', behavior: 'smooth' }))
+    let moved = false
+    const stop = () => { moved = true }
+    const go = () => { if (!moved) document.getElementById('me-sections')?.scrollIntoView({ block: 'start' }) }
+    addEventListener('wheel', stop, { passive: true }); addEventListener('touchmove', stop, { passive: true }); addEventListener('keydown', stop)
+    const timers = [0, 350, 900, 1800, 3000].map((ms) => setTimeout(go, ms))
+    const done = setTimeout(() => { removeEventListener('wheel', stop); removeEventListener('touchmove', stop); removeEventListener('keydown', stop) }, 3200)
+    return () => { timers.forEach(clearTimeout); clearTimeout(done); removeEventListener('wheel', stop); removeEventListener('touchmove', stop); removeEventListener('keydown', stop) }
   }, [asked, address])
 
   if (!address) return <Landing onConnect={openConnectModal} />

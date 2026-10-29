@@ -1,0 +1,20 @@
+# Next.js build files (/_next/static/*), served by Caddy from disk, never through Node (29 Oct). They are content-
+# hashed and immutable; a busy or warming Node process once took 7.5 s and answered 502 for one, leaving buttons dead
+# until a reload. scripts/deploy-web.sh copies each release's files into /var/www/marque-next before it switches
+# traffic; a file not there yet falls through to the web upstream as before.
+# Install a copy (Caddy cannot read /root) and import it inside the marque.trade site block, above the web upstream:
+#
+#     install -m 0644 /root/marque/ops/next-static.caddy /etc/caddy/marque-next-static.caddy
+#     import /etc/caddy/marque-next-static.caddy
+@next_static {
+	path /_next/static/*
+	file {
+		root /var/www/marque-next
+	}
+}
+handle @next_static {
+	root * /var/www/marque-next
+	header Cache-Control "public, max-age=31536000, immutable"
+	header X-Content-Type-Options nosniff
+	file_server
+}

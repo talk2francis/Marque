@@ -106,6 +106,7 @@ The film on `/` and `/film` plays from files Caddy serves from disk, outside the
 | Files | `/var/www/marque-media/film/` (content-hashed names, plus `SHA256SUMS`) |
 | URL | `https://marque.trade/media/film/<file>` |
 | Caddy | `ops/media.caddy`, installed as `/etc/caddy/marque-media.caddy` and imported in the marque.trade block above the web upstream |
+| Caddy (build files) | `ops/next-static.caddy`, installed as `/etc/caddy/marque-next-static.caddy` and imported right after the media import; `scripts/deploy-web.sh` copies each release's `/_next/static` files to `/var/www/marque-next` before switching traffic, so Caddy serves them without Node (files untouched for 30 days are pruned) |
 | Manifest | `apps/web/lib/film-media.json` (which file the site plays; never edit by hand) |
 | Check | `node scripts/film-verify.mjs --dir /var/www/marque-media/film --url https://marque.trade` |
 

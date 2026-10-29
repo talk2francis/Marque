@@ -174,6 +174,13 @@ candidate_static=("$REL/$SHA.tmp/apps/web"/.next*/static)
 shopt -u nullglob
 [ "${#previous_static[@]}" = 1 ] && [ "${#candidate_static[@]}" = 1 ] || { say "cannot identify previous/candidate static assets; not activating"; exit 1; }
 cp -a --no-clobber "${previous_static[0]}/." "${candidate_static[0]}/"
+# Caddy serves /_next/static from disk (ops/next-static.caddy): publish this release's files there before any traffic
+# can ask for them. Content-hashed names, so releases sit side by side; files untouched for 30 days are pruned.
+NEXT_STATIC=/var/www/marque-next/_next/static
+mkdir -p "$NEXT_STATIC"
+cp -a --update=none "${candidate_static[0]}/." "$NEXT_STATIC/" && chmod -R a+rX /var/www/marque-next
+find "$NEXT_STATIC" -type f -mtime +30 -delete 2>/dev/null || true
+say "published static files to $NEXT_STATIC"
 if [ -s "$REL/slot-$LIVE/RELEASE_SHA" ]; then
   cat "$REL/slot-$LIVE/RELEASE_SHA" > "$REL/$SHA.tmp/PREVIOUS_STATIC_RELEASE_REF"
 else
