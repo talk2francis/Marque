@@ -1,4 +1,6 @@
-> Current maintenance, 22 October 2026: web/status and the launch-monitor parser use `ebeab12`; probe/quote workers remain `af39ea3` and Lattice remains `f4f65d3`. See the [Telegram/status incident](../operations/TELEGRAM_STATUS_INCIDENT_2026-10-22.md) for deployment, exact-source CI, browser and natural-monitor evidence, plus the still-active archive/provider-job limits. Earlier entries retain their dated scope.
+> 29 October 2026, owner-requested visual adjustment: keep the animated page ground below the six reference-agent mastheads, clearing the hero artwork. Other storefronts and pages keep their existing backgrounds. Validation and release are pending; this entry does not claim production promotion. Earlier dated checkpoints retain their original scope.
+
+> Historical maintenance, 22 October 2026: web/status and the launch-monitor parser use `ebeab12`; probe/quote workers remain `af39ea3` and Lattice remains `f4f65d3`. See the [Telegram/status incident](../operations/TELEGRAM_STATUS_INCIDENT_2026-10-22.md) for deployment, exact-source CI, browser and natural-monitor evidence, plus the still-active archive/provider-job limits. Earlier entries retain their dated scope.
 
 
 # P14/P15 production handoff, 2026-10-19T09:45:18.102462+00:00

@@ -7,7 +7,7 @@ import { buildSurface, drawSurface, type FacetSurface } from './facet-light'
  * The ground behind the pages (DESIGN-V4 6, redrawn 28 Oct as faceted light): a large low-poly surface with no
  * outlines, each facet shaded only by how it meets one slow light (facet-light.ts). It carries no information and
  * stays within a few percent of the ground, fading across the reading column. Not on the landing page, whose hero is
- * its own picture.
+ * its own picture. Reference-agent mastheads clear the field above their lower edge so their artwork stays intact.
  *
  * Budget: 12 fps (the light turns once in four minutes, so more frames add nothing), device pixel ratio at most 1.5,
  * paused when hidden or under a modal, and a single still frame for reduced motion, save-data or a profile's Calm
@@ -54,6 +54,19 @@ export function FacetField() {
     let w = 0, h = 0, raf = 0, last = 0, running = true
     const start = performance.now() - Math.random() * 240_000 // each visit meets the light somewhere else
 
+    // Only the six branded reference storefronts carry this marker. Clip the fixed
+    // field in viewport coordinates: clear above the masthead, visible below it.
+    const clipHero = () => {
+      const hero = document.querySelector('[data-agent-brand-hero]')
+      const bottom = hero ? Math.max(0, Math.ceil(hero.getBoundingClientRect().bottom)) : 0
+      const clip = bottom > 0 ? `inset(${bottom}px 0 0)` : ''
+      if (canvas.style.clipPath !== clip) {
+        canvas.style.clipPath = clip
+        canvas.toggleAttribute('data-hero-clear', bottom > 0)
+        canvas.style.setProperty('--facet-hero-bottom', `${bottom}px`)
+      }
+    }
+
     const build = () => {
       const dpr = Math.min(1.5, devicePixelRatio || 1)
       w = innerWidth; h = innerHeight
@@ -64,6 +77,7 @@ export function FacetField() {
     }
     const draw = (now: number) => {
       if (!surface) return
+      clipHero()
       const css = getComputedStyle(document.documentElement)
       const day = document.documentElement.dataset['theme'] !== 'night'
       ctx.clearRect(0, 0, w, h)
@@ -89,7 +103,16 @@ export function FacetField() {
     draw(performance.now())
     addEventListener('resize', resize)
     addEventListener('marque:theme', retheme)
-    if (still) return () => { removeEventListener('resize', resize); removeEventListener('marque:theme', retheme) }
+    addEventListener('scroll', clipHero, { passive: true })
+    const layout = new ResizeObserver(clipHero)
+    layout.observe(document.body)
+    const cleanup = () => {
+      layout.disconnect()
+      removeEventListener('scroll', clipHero)
+      removeEventListener('resize', resize)
+      removeEventListener('marque:theme', retheme)
+    }
+    if (still) return cleanup
     raf = requestAnimationFrame(loop)
     const mo = new MutationObserver(visibility)
     mo.observe(document.body, { childList: true })
@@ -97,9 +120,9 @@ export function FacetField() {
     return () => {
       cancelAnimationFrame(raf); mo.disconnect()
       document.removeEventListener('visibilitychange', visibility)
-      removeEventListener('resize', resize); removeEventListener('marque:theme', retheme)
+      cleanup()
     }
-  }, [density, ready])
+  }, [density, ready, path])
 
   if (density === 0 || !ready) return null
   return <canvas ref={ref} className="facet-field" aria-hidden="true" />

@@ -24,7 +24,7 @@ export function AgentBrandHero({ brand, agentId, category, children }: { brand: 
     '--hero-position': brand.heroPosition,
   } as CSSProperties
   return (
-    <header className={styles.masthead} data-tone={brand.tone}>
+    <header className={styles.masthead} data-tone={brand.tone} data-agent-brand-hero>
       <div className={styles.stage} style={art} aria-hidden="true">
         <span className={styles.echo} />
         <span className={styles.art} />

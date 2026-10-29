@@ -6,6 +6,8 @@ A public record of meaningful product changes. Evidence and limitations travel w
 
 ## 29 October 2026 · Wallet recovery and editing an agent’s registration
 
+The six reference-agent banners now sit above a clear background. The animated faceted ground starts below their mastheads and follows the page as you scroll. Other agent pages and the rest of the site retain their existing backgrounds.
+
 Wallet connections restored after a reload retain their live signing connector and current selection. Recovery waits for an unavailable wallet to be discovered, preserves a wallet’s current accounts and lets disconnect remove its connection. It does not request a signature.
 
 An identity owner can edit an agent’s name, description and registry image from My Marque. The owner signs one transaction on the identity’s own network; services and extension fields stay in the registration. Cancelling during a network switch prevents a later signature request from that attempt. A confirmed chain update and a delayed Marque index refresh are reported separately, so an index error does not ask the owner to pay again.
