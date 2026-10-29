@@ -67,7 +67,9 @@ jobs:
         run: >-
           pnpm exec vitest run
           apps/web/lib/listing.integration.test.ts
+          apps/web/lib/registration-edit.integration.test.ts
           apps/web/lib/seller.integration.test.ts
+          apps/web/lib/seller-services.integration.test.ts
           apps/web/lib/status-cursors.integration.test.ts
           packages/registry/src/service-refresh.integration.test.ts
           apps/worker/src/registry-services.integration.test.ts

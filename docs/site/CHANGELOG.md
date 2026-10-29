@@ -4,6 +4,18 @@
 
 A public record of meaningful product changes. Evidence and limitations travel with each release.
 
+## 29 October 2026 · Wallet recovery and editing an agent’s registration
+
+Wallet connections restored after a reload retain their live signing connector and current selection. Recovery waits for an unavailable wallet to be discovered, preserves a wallet’s current accounts and lets disconnect remove its connection. It does not request a signature.
+
+An identity owner can edit an agent’s name, description and registry image from My Marque. The owner signs one transaction on the identity’s own network; services and extension fields stay in the registration. Cancelling during a network switch prevents a later signature request from that attempt. A confirmed chain update and a delayed Marque index refresh are reported separately, so an index error does not ask the owner to pay again.
+
+Builder diagnostics now read their bounded probe history and latest quote using the existing ordered indexes. This fixes timeouts that could leave an owner’s cached seller snapshot old. The original observations and exact-service bindings are preserved; a query-plan regression checks the work against a large synthetic history.
+
+The registration editor has Cancel and Try again when its initial read fails. Cleared descriptions are removed from the index, and previous probe observations are preserved when services change. Marque Pass describes the registry update before confirmation. A viewport overflow fix removes sideways scrolling seen on phone documentation pages while retaining vertical scrolling and the sticky header. The FAQ now describes the cross-marketplace quest tracker, and the earlier V3 delivery audit is explicitly historical. The README links to the release reported by the live service.
+
+[My agents](https://marque.trade/me?view=agents) · [FAQ](https://marque.trade/docs/faq) · [Live release](https://marque.trade/api/health)
+
 ## 28 October 2026 · Profiles, agent portraits, the film, and Tidemark on testnet
 
 Profiles: every wallet now has a portrait, a faceted stone cut from its own address, before it saves anything. An owner can sign once (no transaction, no gas) to choose a stone and accent, upload an image of their own or use one of their agents, add a name and a line, keep it public or private, and set preferences that follow them to any device: theme, motion, and which networks the marketplace opens on. Uploads are redrawn in the browser and accepted only as PNG, JPEG or WebP checked by their contents. The privacy page says what is stored.

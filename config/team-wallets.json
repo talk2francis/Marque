@@ -221,6 +221,13 @@
       "chainIds": [
         97
       ]
+    },
+    {
+      "address": "0x09E86c3A64306397fdD576A7d02E6B9A59cbe417",
+      "role": "Marque team test: 29 Oct 2026 Pass reload and pre-confirm cancellation checks",
+      "chainIds": [
+        97
+      ]
     }
   ]
 }

@@ -3,10 +3,13 @@ export interface ArticleSection { id: string; title: string; paragraphs: string[
 export interface Article { label: string; title: string; description: string; sections: ArticleSection[] }
 export const articles: Record<string, Article> = {
   'delivery-status': {
-    label: 'V3 delivery status',
-    title: 'What V3 delivers today.',
-    description: 'Checked 19 October 2026. Implemented components, limited previews and unfinished work are listed separately.',
+    label: 'V3 delivery audit · 19 October',
+    title: 'What V3 delivered on 19 October.',
+    description: 'Historical audit checked 19 October 2026. The capabilities and limitations below describe that date; the changelog records subsequent V4 releases.',
     sections: [
+      { id: 'current', title: 'For the current product', paragraphs: [
+        'V4 shipped after this audit. The current changelog covers the practice lane, the Agent Forge, the hosted MCP server, answer checks, profiles and subsequent fixes. The roadmap distinguishes delivered work from remaining work. This dated audit is kept so earlier claims and corrections remain reviewable.',
+      ], links: [{ label: 'Current changelog', href: '/docs/changelog' }, { label: 'Current roadmap', href: '/docs/whitepaper#roadmap' }, { label: 'Live release', href: '/api/health' }] },
       { id: 'available', title: 'Available in the existing marketplace', paragraphs: [
         'V3 adds exact-service test and quote evidence, seller diagnostics in Builders, a machine-readable catalog, typed read clients, unsigned hire planning, receipt-content checks and buyer-linked review provenance. These extend the existing wallet-signed escrow marketplace; they do not turn analysis agents into autonomous portfolio managers.',
         'The homepage and coverage API use full matching listing counts before pagination. Successful quote observations are scheduled for refresh using their original expiry and a bounded polling floor; old terms are never extended. Category headers distinguish escrow listings from third-party task-compatible supplier groups. The target remains at least three hireable listings in each core category, without a permanent availability guarantee.',
@@ -60,6 +63,12 @@ export const articles: Record<string, Article> = {
     title:'What changed, and why.',
     description:'A public record of meaningful product changes. Evidence and limitations travel with each release.',
     sections:[
+      { id: 'v4-4', title: '29 October 2026 · Wallet recovery and editing an agent’s registration', paragraphs: [
+        'Wallet connections restored after a reload retain their live signing connector and current selection. Recovery waits for an unavailable wallet to be discovered, preserves a wallet’s current accounts and lets disconnect remove its connection. It does not request a signature.',
+        'An identity owner can edit an agent’s name, description and registry image from My Marque. The owner signs one transaction on the identity’s own network; services and extension fields stay in the registration. Cancelling during a network switch prevents a later signature request from that attempt. A confirmed chain update and a delayed Marque index refresh are reported separately, so an index error does not ask the owner to pay again.',
+        'Builder diagnostics now read their bounded probe history and latest quote using the existing ordered indexes. This fixes timeouts that could leave an owner’s cached seller snapshot old. The original observations and exact-service bindings are preserved; a query-plan regression checks the work against a large synthetic history.',
+        'The registration editor has Cancel and Try again when its initial read fails. Cleared descriptions are removed from the index, and previous probe observations are preserved when services change. Marque Pass describes the registry update before confirmation. A viewport overflow fix removes sideways scrolling seen on phone documentation pages while retaining vertical scrolling and the sticky header. The FAQ now describes the cross-marketplace quest tracker, and the earlier V3 delivery audit is explicitly historical. The README links to the release reported by the live service.',
+      ], links: [{ label: 'My agents', href: '/me?view=agents' }, { label: 'FAQ', href: '/docs/faq' }, { label: 'Live release', href: '/api/health' }] },
       { id: 'v4-3', title: '28 October 2026 · Profiles, agent portraits, the film, and Tidemark on testnet', paragraphs: [
         'Profiles: every wallet now has a portrait, a faceted stone cut from its own address, before it saves anything. An owner can sign once (no transaction, no gas) to choose a stone and accent, upload an image of their own or use one of their agents, add a name and a line, keep it public or private, and set preferences that follow them to any device: theme, motion, and which networks the marketplace opens on. Uploads are redrawn in the browser and accepted only as PNG, JPEG or WebP checked by their contents. The privacy page says what is stored.',
         'Agent portraits: an owner can give an agent a portrait from My Marque or the Forge. Ownership is re-read on chain when it is set; the image gets a permanent URL that can go in the registration file to carry it everywhere ERC-8004 is read.',

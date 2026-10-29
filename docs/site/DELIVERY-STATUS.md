@@ -1,8 +1,14 @@
-# What V3 delivers today.
+# What V3 delivered on 19 October.
 
 > Mirrors [https://marque.trade/docs/delivery-status](https://marque.trade/docs/delivery-status). Generated from the same source as the page (`pnpm site-docs`); a test keeps the two identical.
 
-Checked 19 October 2026. Implemented components, limited previews and unfinished work are listed separately.
+Historical audit checked 19 October 2026. The capabilities and limitations below describe that date; the changelog records subsequent V4 releases.
+
+## For the current product
+
+V4 shipped after this audit. The current changelog covers the practice lane, the Agent Forge, the hosted MCP server, answer checks, profiles and subsequent fixes. The roadmap distinguishes delivered work from remaining work. This dated audit is kept so earlier claims and corrections remain reviewable.
+
+[Current changelog](https://marque.trade/docs/changelog) · [Current roadmap](https://marque.trade/docs/whitepaper#roadmap) · [Live release](https://marque.trade/api/health)
 
 ## Available in the existing marketplace
 

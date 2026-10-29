@@ -7,8 +7,8 @@ import { syncDeclaredServices } from '@marque/registry'
 
 /**
  * Editing an agent's ERC-8004 registration from Marque (29 Oct). The owner's own wallet signs setAgentURI; Marque only
- * reads the current registration for the form and, once the transaction is in, re-indexes that one agent so its new
- * name, description, image and services show at once instead of on the next registry sweep.
+ * reads the current registration for the form and, once the transaction is in, re-indexes that one agent. Public
+ * views pick up the refreshed metadata as their short-lived caches refresh; observations are never rewritten.
  */
 const abi = [
   { type: 'function', name: 'tokenURI', stateMutability: 'view', inputs: [{ name: 'tokenId', type: 'uint256' }], outputs: [{ type: 'string' }] },
@@ -49,9 +49,9 @@ export async function reindexRegistration(chainId: number, tokenId: string): Pro
   const name = str(meta['name'], 120)
   await db().execute(sql`update agent set
       name = coalesce(${name}, name),
-      description = coalesce(${str(meta['description'], 2000)}, description),
+      description = ${str(meta['description'], 2000)},
       raw_metadata = jsonb_set(coalesce(raw_metadata, '{}'::jsonb), '{offchain_content}', ${JSON.stringify(meta)}::jsonb, true)
     where id = ${k.agentId}`)
-  await syncDeclaredServices({ agentId: k.agentId, tokenId, chainId: k.chainId, blockNumber: String(blockNumber), metadata: meta }).catch(() => undefined)
+  await syncDeclaredServices({ agentId: k.agentId, tokenId, chainId: k.chainId, blockNumber: String(blockNumber), metadata: meta })
   return { name }
 }

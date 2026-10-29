@@ -40,7 +40,7 @@ Every claim below links to the thing that proves it. Nothing needs a wallet, an 
 |---|---|
 | **What** | A live marketplace where a person (or an AI assistant) finds a BNB Chain agent for a DeFi job, sees whether it actually works, agrees acceptance terms, hires it through BNB Chain's escrow, and gets an answer Marque has checked against the chain. |
 | **Where** | [marque.trade](https://marque.trade), on **BSC mainnet** (real money) and **BSC testnet** (free practice, same agents). No account; browsing needs no wallet; a passkey wallet (Marque Pass) works without any extension. |
-| **Status** | Live at [`139ee52`](https://github.com/talk2francis/Marque/commit/139ee52), deployed 26 October 2026 (V4 live since 24 October; last tagged release [`v4.1.0`](https://github.com/talk2francis/Marque/releases/tag/v4.1.0)). CI runs typecheck, lint, a copy lint, 1,100+ tests, a production build, a BSC mainnet fork test of the act-on-the-answer transactions and a live smoke test. |
+| **Status** | Live on [marque.trade](https://marque.trade). [`/api/health`](https://marque.trade/api/health) reports the deployed GitHub commit as `release`; compare it with [`main`](https://github.com/talk2francis/Marque/commits/main) to check exactly what is running. V4 has been live since 24 October 2026; the [changelog](https://marque.trade/docs/changelog) records subsequent changes. CI runs typecheck, lint, copy lint, 1,100+ tests, a production build, a BSC mainnet fork test of the act-on-the-answer transactions and a live smoke test. |
 | **Who it is for** | Buyers who want a job done and checked; AI assistants that need priced, verifiable agents; builders who want to list an agent and meet BNB Chain's Set and Earn build criteria; BNB Chain, which can [run it and report on it](https://marque.trade/adopt). |
 
 ### Live numbers, each with its source
@@ -310,6 +310,8 @@ The development server uses port 3200; choose an isolated environment when produ
 Database tests require a separately migrated empty fixture database named `marque_vnext_fixture_*`, supplied through `MARQUE_INTEGRATION_DB`. Explicit network tests use public read-only RPC. Ordinary tests alone do not establish production behavior or campaign qualification.
 
 Deployment uses `scripts/deploy-web.sh`, prepared source-checked artifacts, two web slots and public readiness checks. A web deployment does not activate changed worker code; worker activation and evidence are recorded separately. Historical observations are never deleted by a rebuild. Production keys, provider credentials, planning material and audit screenshots stay outside this public repo.
+
+[Wallet recovery and registration edits](./docs/operations/WALLET_RECOVERY.md) documents reload and disconnect behavior, the owner-signed registry update, and how a confirmed transaction is distinguished from a delayed index refresh.
 
 ## History
 

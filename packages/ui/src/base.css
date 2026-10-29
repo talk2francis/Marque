@@ -30,6 +30,8 @@
   html {
     background: var(--canvas);
     color: var(--ink);
+    /* Clip the viewport as well as body: fixed decorative layers can otherwise leave a stray horizontal axis. */
+    overflow-x: clip;
     scroll-padding-top: calc(var(--header-h) + 16px);
   }
   body {
