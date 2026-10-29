@@ -32,12 +32,17 @@ export function Tabs({ tabs, label, value, onChange, initial }: { tabs: TabDef[]
     return () => ro.disconnect()
   }, [measure])
 
+  // Switching a tab never moves the page (29 Oct): focus without scrolling, and hold the reader's position while the
+  // new panel replaces the old one (the browser's scroll anchoring otherwise shifts it when the heights differ).
   const select = (i: number) => {
     const t = tabs[i]
     if (!t) return
+    const y = window.scrollY
     setInner(t.id)
     onChange?.(t.id)
-    refs.current[i]?.focus()
+    refs.current[i]?.focus({ preventScroll: true })
+    const hold = () => { if (Math.abs(window.scrollY - y) > 1) window.scrollTo({ top: y }) }
+    requestAnimationFrame(() => { hold(); requestAnimationFrame(hold) })
   }
 
   return (
