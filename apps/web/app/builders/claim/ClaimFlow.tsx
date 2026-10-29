@@ -7,6 +7,7 @@ import { useAccount, useSignMessage } from 'wagmi'
 import { useConnectModal } from '@rainbow-me/rainbowkit'
 import { Button, LinkButton, Chip, ProvenanceChip } from '@marque/ui'
 import styles from '../builders.module.css'
+import { AgentPortraitControl } from '../../_components/profile/AgentPortraitControl'
 
 
 interface Identity {
@@ -87,14 +88,21 @@ export function ClaimFlow() {
   const [testing, setTesting] = useState(false)
   const [publishedUrl, setPublishedUrl] = useState('')
 
-  async function findIdentity(e?: React.FormEvent, tokenOverride?: string) {
+  // The same token id on the other network, when the connected wallet owns it there (29 Oct): the most common
+  // builder mistake is looking up a testnet agent on mainnet, where the same number is someone else's agent.
+  const [otherNet, setOtherNet] = useState<{ chainId: 56 | 97; tokenId: string; name: string | null } | null>(null)
+  const lookup = (value: string, chain: 56 | 97) => fetch('/api/v1/builders/claim/identity', {
+    method: 'POST', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ input: value.trim(), ...(chain === 97 ? { chainId: 97 } : {}) }),
+  })
+
+  async function findIdentity(e?: React.FormEvent, tokenOverride?: string, chainOverride?: 56 | 97) {
     e?.preventDefault()
-    setBusy(true); setError(null); setCandidates([])
+    const chain = chainOverride ?? chainId
+    if (chainOverride) setChainId(chainOverride)
+    setBusy(true); setError(null); setCandidates([]); setOtherNet(null)
     try {
-      const res = await fetch('/api/v1/builders/claim/identity', {
-        method: 'POST', headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ input: (tokenOverride ?? input).trim(), ...(chainId === 97 ? { chainId: 97 } : {}) }),
-      })
+      const res = await lookup(tokenOverride ?? input, chain)
       const body = await res.json()
       if (res.status === 409 && body.candidates) { setCandidates(body.candidates); setError(body.detail); return }
       if (!res.ok) { setError(body.detail ?? body.error ?? `lookup failed (${res.status})`); return }
@@ -103,6 +111,13 @@ export function ClaimFlow() {
       setNonceToken(body.nonceToken)
       setEndpoint(body.identity.cardUrl ?? '')
       setStep('prove')
+      const owner = String(body.identity.owner ?? '').toLowerCase()
+      if (connected && owner && owner !== connected.toLowerCase() && /^\d+$/.test(String(body.identity.tokenId))) {
+        const other: 56 | 97 = chain === 97 ? 56 : 97
+        void lookup(String(body.identity.tokenId), other).then((r) => (r.ok ? r.json() : null)).then((j: { identity?: Identity } | null) => {
+          if (j?.identity && String(j.identity.owner).toLowerCase() === connected.toLowerCase()) setOtherNet({ chainId: other, tokenId: String(j.identity.tokenId), name: j.identity.name ?? null })
+        }).catch(() => undefined)
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'the lookup failed')
     } finally { setBusy(false) }
@@ -206,6 +221,17 @@ export function ClaimFlow() {
       {step === 'find' && (
         <form onSubmit={findIdentity}>
           <div className={styles.field}>
+            <label id="claim-net">Network your agent is registered on</label>
+            <div className={styles.actions} role="radiogroup" aria-labelledby="claim-net" style={{ marginTop: 0 }}>
+              {([56, 97] as const).map((c) => (
+                <Button key={c} type="button" size="sm" variant={chainId === c ? 'primary' : 'quiet'} role="radio" aria-checked={chainId === c} onClick={() => setChainId(c)}>
+                  {c === 56 ? 'BSC mainnet · 56' : 'BSC testnet · 97'}
+                </Button>
+              ))}
+            </div>
+            <span className={styles.hint}>The same token id is a different agent on each network. Agents made with BNB Agent Studio's testnet trial, or the Forge on testnet, are on BSC testnet.</span>
+          </div>
+          <div className={styles.field}>
             <label htmlFor="claim-input">ERC-8004 token id, or the owner address</label>
             <input
               id="claim-input" value={input} spellCheck={false} autoComplete="off" required
@@ -216,7 +242,6 @@ export function ClaimFlow() {
               {chainId === 97
                 ? 'On BSC testnet (97): give the token id. We read the identity contract directly for the current owner. A testnet listing goes in the practice lane.'
                 : 'On BNB Smart Chain (56). We read the identity contract directly for the current owner: the index is only used to find which contract.'}
-              {' '}<button type="button" className={styles.linkBtn} onClick={() => setChainId(chainId === 97 ? 56 : 97)}>{chainId === 97 ? 'Use BSC mainnet instead' : 'Use BSC testnet instead'}</button>
             </span>
           </div>
           {candidates.length > 0 && (
@@ -246,7 +271,14 @@ export function ClaimFlow() {
           <div className={styles.verdict}>
             <span className={styles.verdictWord}>#{identity.tokenId}</span>
             {identity.name && <Chip tone="chain">{identity.name}</Chip>}
+            <Chip tone="chain">{chainId === 97 ? 'BSC testnet · 97' : 'BSC mainnet · 56'}</Chip>
           </div>
+          {otherNet ? (
+            <p className={styles.muted} role="status">
+              Your connected wallet owns #{otherNet.tokenId}{otherNet.name ? ` (${otherNet.name})` : ''} on {otherNet.chainId === 97 ? 'BSC testnet' : 'BSC mainnet'}, not this one.{' '}
+              <button type="button" className={styles.linkBtn} onClick={() => { setStep('find'); void findIdentity(undefined, otherNet.tokenId, otherNet.chainId) }}>Use #{otherNet.tokenId} on {otherNet.chainId === 97 ? 'BSC testnet' : 'BSC mainnet'}</button>
+            </p>
+          ) : null}
           {identity.description && <p className={styles.muted}>{identity.description}</p>}
           <table className={styles.diffs}>
             <tbody>
@@ -334,7 +366,10 @@ export function ClaimFlow() {
           </div>
           <div className={styles.field}>
             <strong>Agent image · optional</strong>
-            <span className={styles.hint}>To show your own avatar, put an <code>image</code> URL in your ERC-8004 registration file. Marque reads it after the registry index refreshes and uses the same image softly behind your storefront identity. No separate banner or image upload is needed to list.</span>
+            <span className={styles.hint}>Upload a PNG, JPEG or WebP and frame it: it shows on your agent's card and page on Marque at once. To show it on other marketplaces too, put the URL Marque gives you in your ERC-8004 registration file as <code>image</code>.</span>
+            {identity && connected && connected.toLowerCase() === identity.owner.toLowerCase()
+              ? <AgentPortraitControl owner={connected} agentId={identity.agentId} hasPortrait={false} onChanged={() => undefined} />
+              : <span className={styles.hint}>Connect the wallet that owns #{identity?.tokenId} to upload one.</span>}
           </div>
 
           {testCategory?.test ? (

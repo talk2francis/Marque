@@ -1,6 +1,6 @@
 'use client'
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { usePathname, useSearchParams } from 'next/navigation'
 import { useAccount, useBalance, useConfig, useReadContracts } from 'wagmi'
 import { useConnectModal } from '@rainbow-me/rainbowkit'
 import { switchChain, waitForTransactionReceipt, writeContract } from '@wagmi/core'
@@ -49,7 +49,7 @@ const urgency = (iso: string | null) => { if (!iso) return 'calm'; const h = (Da
 export function Workspace({ addrParam }: { addrParam: string | null }) {
   const { address: connected, connector } = useAccount()
   const { openConnectModal } = useConnectModal()
-  const router = useRouter(); const pathname = usePathname(); const params = useSearchParams()
+  const pathname = usePathname(); const params = useSearchParams()
   // The server never knows the wallet: the first client render matches it (no connected address), then the wallet
   // fills in, so a Pass that reconnects instantly does not break hydration (React #418).
   const [mounted, setMounted] = useState(false)
@@ -73,9 +73,19 @@ export function Workspace({ addrParam }: { addrParam: string | null }) {
   useEffect(() => { if (editAsked && own) setEditing(true) }, [editAsked, own])
   const closeEditor = () => {
     setEditing(false)
-    if (editAsked) { const p = new URLSearchParams(params.toString()); p.delete('edit'); router.replace(p.size ? `${pathname}?${p.toString()}` : pathname, { scroll: false }) }
+    if (editAsked) { const p = new URLSearchParams(params.toString()); p.delete('edit'); window.history.replaceState(null, '', p.size ? `${pathname}?${p.toString()}` : pathname) }
   }
-  const setTab = (t: string) => { const p = new URLSearchParams(params.toString()); p.set('view', t); router.replace(`${pathname}?${p.toString()}`, { scroll: false }) }
+  // In place (29 Oct): router.replace re-rendered the whole page on the server behind the loading screen, so the page
+    // flashed and jumped to the top. Next keeps useSearchParams in sync with the history API.
+  const setTab = (t: string) => { const p = new URLSearchParams(params.toString()); p.set('view', t); window.history.replaceState(null, '', `${pathname}?${p.toString()}`) }
+  // A link to a section (the wallet menu's Spending controls is ?view=money) opens at that section, not at the top.
+  const arrived = useRef(false)
+  useEffect(() => {
+    if (arrived.current || !asked || !address) return
+    arrived.current = true
+    const el = document.getElementById('me-sections')
+    if (el) requestAnimationFrame(() => el.scrollIntoView({ block: 'start', behavior: 'smooth' }))
+  }, [asked, address])
 
   if (!address) return <Landing onConnect={openConnectModal} />
   const isPass = own && connector?.id === MARQUE_PASS_ID
@@ -122,7 +132,7 @@ export function Workspace({ addrParam }: { addrParam: string | null }) {
       <div className={styles.body}>
         <div className={styles.main}>
           <Dockets address={address} own={own} view={view} />
-          <Tabs label="My Marque sections" tabs={tabs} value={tabs.some((t) => t.id === tab) ? tab : tabs[0]!.id} onChange={setTab} />
+          <div id="me-sections" style={{ scrollMarginTop: 'calc(var(--header-h) + 16px)' }}><Tabs label="My Marque sections" tabs={tabs} value={tabs.some((t) => t.id === tab) ? tab : tabs[0]!.id} onChange={setTab} /></div>
         </div>
         <aside className={styles.aside} aria-label="Wallet">
           <Balances address={address} own={own} />

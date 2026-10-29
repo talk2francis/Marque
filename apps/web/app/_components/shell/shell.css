@@ -337,8 +337,8 @@
      decorative art; it fades across the reading column so text always sits on the plain ground. */
   .facet-field {
     position: fixed; inset: 0; z-index: -10; pointer-events: none;
-    -webkit-mask-image: radial-gradient(ellipse 46% 62% at 50% 46%, rgba(0, 0, 0, 0.22), #000 100%);
-    mask-image: radial-gradient(ellipse 46% 62% at 50% 46%, rgba(0, 0, 0, 0.22), #000 100%);
+    -webkit-mask-image: radial-gradient(ellipse 46% 62% at 50% 46%, rgba(0, 0, 0, 0.32), #000 100%);
+    mask-image: radial-gradient(ellipse 46% 62% at 50% 46%, rgba(0, 0, 0, 0.32), #000 100%);
   }
   @media (max-width: 1100px) { .footer-cols { grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: var(--s-6); } }
   @media (max-width: 640px) { .footer-cols { grid-template-columns: 1fr 1fr; row-gap: var(--s-5); } }

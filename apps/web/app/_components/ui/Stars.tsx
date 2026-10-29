@@ -4,7 +4,7 @@ import { useId, useState } from 'react'
 
 /** Average and review-record count. A review is not a distinct wallet or person. */
 /** `mine` shows one rating as "4 of 5" instead of an average. */
-export function Stars({ value, count, label = 'buyer-linked reviews', mine }: { value: number | null; count: number; label?: string; mine?: boolean }) {
+export function Stars({ value, count, label = 'buyer-linked ratings', mine }: { value: number | null; count: number; label?: string; mine?: boolean }) {
   if (value === null || count === 0) return <span className="stars">No ratings yet</span>
   const pct = Math.max(0, Math.min(100, (value / 5) * 100))
   const five = [0, 1, 2, 3, 4]

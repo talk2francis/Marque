@@ -1,6 +1,6 @@
 'use client'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { usePathname, useSearchParams } from 'next/navigation'
 import { useAccount, useBalance, useConnect, useReadContract } from 'wagmi'
 import { useConnectModal } from '@rainbow-me/rainbowkit'
 import { erc20Abi } from 'viem'
@@ -37,7 +37,6 @@ const secs = (ms: number) => { const s = Math.round(ms / 1000); return s < 60 ? 
 
 export function PracticeFlow() {
   const params = useSearchParams()
-  const router = useRouter()
   const pathname = usePathname()
   const { address } = useAccount()
   const { connectors, connect, isPending } = useConnect()
@@ -90,7 +89,8 @@ export function PracticeFlow() {
     if (b) saveBrief(b)
     const next = new URLSearchParams(params.toString())
     next.set('hire', p.agentId)
-    router.push(`${pathname}?${next}`, { scroll: false })
+    // In place: a router push re-rendered the page on the server behind the loading screen.
+    window.history.pushState(null, '', `${pathname}?${next}`)
   }
 
   const done = data?.hires ? Math.min(data.hires.agents, 3) : 0

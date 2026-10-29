@@ -93,18 +93,32 @@ export interface CategoryTile {
   thirdPartyOperators: number
   cheapest: string | null
   bestRating: { stars: number; count: number; agent: string } | null
+  /** Distinct agents hireable on BSC mainnet and on BSC testnet, side by side (29 Oct); `hireable` counts each agent once. */
+  onMainnet: number
+  onTestnet: number
 }
 
-/** Per quest category: live hireable count, operators, cheapest live quote, best verified rating. */
-export async function categoryTiles(ready: MarketRow[], supply: Awaited<ReturnType<typeof marketplaceAgents>>['supply'], measuredAt: string): Promise<CategoryTile[]> {
+/**
+ * Per quest category: agents hireable now, cheapest live mainnet quote, best verified rating. With `both` (the Ready
+ * view over both networks, one row per agent), `hireable` counts each agent once whichever network it sells on, the way
+ * the marketplace lists them and Set and Earn counts hires; mainnet and testnet counts are shown beside it, never added.
+ */
+export async function categoryTiles(ready: MarketRow[], supply: Awaited<ReturnType<typeof marketplaceAgents>>['supply'], measuredAt: string, both?: MarketRow[] | null): Promise<CategoryTile[]> {
+  const nets = (r: MarketRow) => r.networks ?? [Number(r.agentId.split(':')[0]) as 56 | 97]
   return QUEST_CATEGORIES.map((category) => {
     const c = supply.find((x) => x.category === category)
+    const inCat = both?.filter((r) => r.category === category) ?? null
     const cheapest = c?.cheapest ? `${formatAmount(c.cheapest.priceRaw, c.cheapest.decimals)} ${c.cheapest.token}` : null
     const rated = ready
       .filter((r) => r.category === category && r.track.verified.averageStars !== null)
       .sort((a, b) => (b.track.verified.averageStars ?? 0) - (a.track.verified.averageStars ?? 0))[0]
     return {
-      measuredAt, category, hireable: c?.hireable ?? 0, operators: c?.operators ?? 0, thirdPartyOperators: c?.thirdPartyOperators ?? 0, cheapest,
+      measuredAt, category, cheapest,
+      hireable: inCat ? inCat.length : c?.hireable ?? 0,
+      operators: inCat ? new Set(inCat.map((r) => (r.owner ?? r.agentId).toLowerCase())).size : c?.operators ?? 0,
+      thirdPartyOperators: c?.thirdPartyOperators ?? 0,
+      onMainnet: inCat ? inCat.filter((r) => nets(r).includes(56)).length : c?.hireable ?? 0,
+      onTestnet: inCat ? inCat.filter((r) => nets(r).includes(97)).length : 0,
       bestRating: rated ? { stars: rated.track.verified.averageStars!, count: rated.track.verified.count, agent: rated.name } : null,
     }
   })

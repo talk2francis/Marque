@@ -70,7 +70,8 @@ export function FacetField() {
       drawSurface(ctx, surface, (now - start) / 1000, {
         ink: rgbOf(css.getPropertyValue('--ink'), day ? [21, 22, 15] : [232, 233, 224]),
         glint: rgbOf(css.getPropertyValue('--brass-lit'), [217, 174, 69]),
-        strength: density * (day ? 1 : 1.6),
+        // Raised 29 Oct (Francis: more visible); the reading column still fades it (shell.css mask).
+        strength: density * (day ? 2 : 3.2),
         day,
       })
     }

@@ -114,7 +114,7 @@ export function Storefront({ d, section = 'overview', evidence = null, lens = nu
       <RailTerms agentId={d.agentId} facts={c} name={d.name} hireHref={hireHref} tryHref={tryHref} answersFree={answersFree} canQuote={Boolean(c?.serviceId && d.endpoint)}>
         <dl className={styles.panelFacts}>
           <div><dt>Delivers in</dt><dd>{delivery ? <span title={`Median of ${t.delivery.samples} escrow-funded ${t.delivery.samples === 1 ? 'job' : 'jobs'}, from escrow funding to delivery.`}>{delivery}</span> : <span className={styles.muted}>{t.available === false ? 'Delivery evidence unavailable' : 'No delivery samples yet'}</span>}</dd></div>
-          <div><dt>Buyer rating</dt><dd>{t.available === false ? 'Rating evidence unavailable' : <Stars value={t.verified.averageStars} count={t.verified.count} label="buyer-linked reviews" />}</dd></div>
+          <div><dt>Buyer rating</dt><dd>{t.available === false ? 'Rating evidence unavailable' : <Stars value={t.verified.averageStars} count={t.verified.count} label="buyer-linked ratings" />}</dd></div>
           <div><dt>Jobs delivered</dt><dd>{t.available === false ? 'Unavailable' : <><span className="num">{t.jobs.delivered}</span> <ProvenanceChip provenance="ONCHAIN" /></>}</dd></div>
         </dl>
       </RailTerms>
@@ -414,9 +414,9 @@ function TrackRecord({ d, net, acted }: { d: Data; net: string; acted: OutcomeVi
         <h2 id="rec-ratings">Ratings</h2>
         <div className={styles.ratings}>
           <div className={styles.ratingBox}>
-            <span className={styles.ratingKind}>Buyer-linked reviews <span>Exact job link</span></span>
-            <Stars value={t.verified.averageStars} count={t.verified.count} label="buyer-linked reviews" />
-            <p>Linked to a paid, delivered job. <ProvenanceChip provenance="ONCHAIN" /> <ProvenanceChip provenance="MEASURED" /></p>
+            <span className={styles.ratingKind}>Buyer-linked ratings <span>Exact job link</span></span>
+            <Stars value={t.verified.averageStars} count={t.verified.count} label="buyer-linked ratings" />
+            <p>Stars from the wallet that paid for a delivered job; a written comment is optional. <ProvenanceChip provenance="ONCHAIN" /> <ProvenanceChip provenance="MEASURED" /></p>
           </div>
           <div className={styles.ratingBox} data-weak>
             <span className={styles.ratingKind}>All registry star ratings <span>Broader context</span></span>
@@ -451,7 +451,7 @@ function TrackRecord({ d, net, acted }: { d: Data; net: string; acted: OutcomeVi
         <p className={styles.note}><a href={`/api/v1/phase2/ratings/${d.tokenId}?format=evidence`}>Review and wallet evidence</a></p>
         <Limits>
           <ul>
-            <li>Buyer-linked reviews match the exact feedback commitment, agent identity and funded delivered {BRAND.name} job. They exclude published team wallets.</li>
+            <li>Buyer-linked ratings match the exact feedback commitment, agent identity and funded delivered {BRAND.name} job. They exclude published team wallets.</li>
             <li>The broader registry score includes these and other ERC-8004 star ratings; do not add their counts.</li>
             <li>Reviews and distinct wallets do not establish independent people or current quality.</li>
             <li>Scope: all observations in this chain index, which may be incomplete. {t.computedAt ? <>Projection observed {t.computedAt}{t.sourceStale ? ' (cached, refresh pending)' : ''}.</> : 'Projection time unavailable.'}</li>

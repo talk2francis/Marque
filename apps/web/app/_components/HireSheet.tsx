@@ -1,6 +1,6 @@
 'use client'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { usePathname, useSearchParams } from 'next/navigation'
 import { useAccount } from 'wagmi'
 import { useConnectModal } from '@rainbow-me/rainbowkit'
 import { formatUnits } from 'viem'
@@ -96,7 +96,6 @@ export function HireSheet() {
   const agentId = params.get('hire')
   const selectedService = params.get('serviceId')
   const tryFirst = params.get('try') === '1'
-  const router = useRouter()
   const pathname = usePathname()
   const { address, isConnected, chainId: walletChain } = useAccount()
   const { openConnectModal } = useConnectModal()
@@ -182,8 +181,10 @@ export function HireSheet() {
     next.delete('hire')
     next.delete('try')
     next.delete('serviceId')
-    router.replace(next.size ? `${pathname}?${next}` : pathname, { scroll: false })
-  }, [params, pathname, router])
+    // In place (29 Oct): router.replace re-rendered the whole page on the server behind the loading screen, so the page
+    // flashed and jumped to the top. Next keeps useSearchParams in sync with the history API.
+    window.history.replaceState(null, '', next.size ? `${pathname}?${next}` : pathname)
+  }, [params, pathname])
 
   const q = state.quote
   // Balances and batch support are read as soon as there is a price and a wallet: before any signature.
@@ -311,7 +312,7 @@ export function HireSheet() {
                     onClick={() => {
                       if (on || !agent.twin) return
                       const next = new URLSearchParams(params.toString()); next.set('hire', agent.twin.agentId); next.delete('serviceId')
-                      router.replace(`${pathname}?${next.toString()}`, { scroll: false })
+                      window.history.replaceState(null, '', `${pathname}?${next.toString()}`)
                     }}>
                     <b>{c === 56 ? 'Mainnet' : 'Testnet'}</b><span>{c === 56 ? 'real money' : 'free practice, counts for Set and Earn'}</span>
                   </button>

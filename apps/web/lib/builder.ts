@@ -170,6 +170,12 @@ export async function probeNow(chainId: ChainId, tokenId: string, endpoint: stri
     agentKey: agentKeyOf(chainId, tokenId), kind: 'probe', chainId, tokenId, endpoint, ok: callable,
     result: { liveness: callable ? 'callable' : notTested ? 'discovered' : out.liveness, latencyMs: out.latencyMs, discoveryOnly, callability: notTested ? 'NOT_TESTED' : callable ? 'ACCEPTED' : 'FAILED', statusCode: out.statusCode, failureClass: callable ? null : out.failureClass, detail: detail.slice(0, 300), executableEndpoint: out.executableEndpoint, skills: out.skills.slice(0, 20), kind, callEvidence: out.callEvidence ?? null },
   })
+  // An answering endpoint goes to the front of the regular probe queue (29 Oct), so the scheduled probe, the quote
+  // and the listing follow within a cycle instead of waiting for the schedule to reach a new service.
+  if (callable || notTested) {
+    // Never allowed to fail the check itself.
+    try { await db().execute(sql`update probe_schedule set next_due_at = now() where agent_id = ${agentKeyOf(chainId, tokenId)}`) } catch { /* the schedule catches up on its own */ }
+  }
   return { discoveryOnly, ok: callable, liveness: callable ? 'callable' : notTested ? 'discovered' : out.liveness, latencyMs: out.latencyMs, detail: detail.slice(0, 300), executableEndpoint: out.executableEndpoint }
 }
 

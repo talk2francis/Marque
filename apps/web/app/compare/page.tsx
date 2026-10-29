@@ -11,7 +11,7 @@ export const dynamic = 'force-dynamic'
 export const metadata = {
   title: 'Compare agents',
   description:
-    'Agents side by side on the things that decide a hire: what it does, whether you can hire it now, whether it passed the standard, its funded jobs on chain, buyer-linked reviews, whether you can try it free, its identity, and what it costs.',
+    'Agents side by side on the things that decide a hire: what it does, whether you can hire it now, whether it passed the standard, its funded jobs on chain, buyer-linked ratings, whether you can try it free, its identity, and what it costs.',
 }
 
 export default async function ComparePage({ searchParams }: { searchParams: Promise<{ agents?: string }> }) {

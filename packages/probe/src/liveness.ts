@@ -116,6 +116,15 @@ export function failureFromFetch(f: SafeFetchFailure): FailureClass {
   }
 }
 
+/**
+ * The words for a non-200 answer. A 401 or 403 is almost always a login in front of the agent (BNB Agent Studio's
+ * testnet hosting trial puts one there): say so, because Marque calls agents with no credentials (29 Oct).
+ */
+export function httpDetail(status: number): string {
+  if (status === 401 || status === 403) return `http ${status}: the host asks for a login. Marque calls agents with no credentials, so the agent card and A2A endpoint must be public (see HOSTING.md in the Forge starter)`
+  return `http ${status}`
+}
+
 export function httpFailure(status: number): FailureClass {
   if (status === 429) return 'rate_limited'
   if (status >= 500) return 'http_5xx'
@@ -173,7 +182,7 @@ export async function probeA2A(url: string): Promise<ProbeOutcome> {
   const res = await safeFetch(url, { timeoutMs: 8_000, maxBytes: 512 * 1024 })
   if (!res.ok) return dead(res.detail, failureFromFetch(res.failure), res.latencyMs, res.status ?? null)
   if (res.status !== 200) {
-    return dead(`http ${res.status}`, httpFailure(res.status), res.latencyMs, res.status)
+    return dead(httpDetail(res.status), httpFailure(res.status), res.latencyMs, res.status)
   }
 
   let parsed: unknown

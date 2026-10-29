@@ -15,6 +15,7 @@ import {
 } from '../lib/home-data'
 import { CATEGORY_SLUG } from './register/market-model'
 import styles from './home.module.css'
+import { marketplaceAgentsCached as marketplaceAgents } from '../lib/market-cache'
 
 // Same for every visitor, so served from Next's cache and re-rendered at most every 30 s
 // (P2-11 load test: rendering per request capped the site near 15 requests a second).
@@ -62,8 +63,10 @@ export default async function Home() {
   ])
   const ready = market?.all ?? []
   const picks = market?.picks ?? []
+  // The same Ready view over both networks, one row per agent (as the marketplace lists them): the category counts.
+  const both = await marketplaceAgents({ tab: 'ready', lane: 'all', limit: 300 }).catch(() => null)
   const [tiles, line] = await Promise.all([
-    market ? categoryTiles(ready, market.supply, market.generatedAt).catch(() => null) : null,
+    market ? categoryTiles(ready, market.supply, market.generatedAt, both?.rows ?? null).catch(() => null) : null,
     market ? funnelLine(market).catch(() => null) : null,
   ])
 
@@ -108,7 +111,7 @@ export default async function Home() {
 
           {line ? (
             <dl className={styles.callouts} aria-label={`Quote snapshot at ${line.measuredAt}`}>
-              <div><dt>Hireable</dt><dd><b className="num">{line.hireable}</b> agents with a live price<SnapshotAge iso={line.measuredAt} /></dd></div>
+              <div><dt>Hireable</dt><dd><b className="num">{line.hireable}</b> agents with a live price on mainnet<SnapshotAge iso={line.measuredAt} /></dd></div>
               {line.warranted !== null ? <div><dt>Test passes</dt><dd><b className="num">{line.warranted}</b> passed the published test</dd></div> : null}
             </dl>
           ) : null}
@@ -132,7 +135,7 @@ export default async function Home() {
             <dl className={styles.kpis}>
               <div><dt>Registered on BNB Chain</dt><dd className={styles.kpiNum}>{fmt(line.registered)}</dd><dd className={styles.kpiNote}>ERC-8004 identities indexed.</dd></div>
               {line.answering !== null ? <div><dt>Answering a live call</dt><dd className={styles.kpiNum}>{fmt(line.answering)}</dd><dd className={styles.kpiNote}>Answered Marque&apos;s own probe.</dd></div> : null}
-              <div><dt>Hireable now</dt><dd className={styles.kpiNum}>{line.hireable}</dd><dd className={styles.kpiNote}>Live price, checked <SnapshotAge iso={line.measuredAt} bare /></dd></div>
+              <div><dt>Hireable now</dt><dd className={styles.kpiNum}>{line.hireable}</dd><dd className={styles.kpiNote}>On mainnet, live price, checked <SnapshotAge iso={line.measuredAt} bare /></dd></div>
               {line.warranted !== null ? <div><dt>Test passes</dt><dd className={styles.kpiNum}>{line.warranted}</dd><dd className={styles.kpiNote}>Passed <a href="/standard">the Standard</a>.</dd></div> : null}
             </dl>
             <p className={styles.kpiFoot}><ProvenanceChip provenance="MEASURED" /> Counted from Marque&apos;s index, not quoted from a provider. <a href="/why">How we count</a></p>
@@ -149,7 +152,7 @@ export default async function Home() {
 
         {/* ---- Four categories ---- */}
         <section className={styles.section} aria-labelledby="cats" data-reveal>
-          <Head label="Categories" note={tiles ? 'Dated quote counts · BSC mainnet' : undefined} id="cats" title="Four jobs agents do on BNB Chain." />
+          <Head label="Categories" note={tiles ? (both ? 'Live quote counts · mainnet and testnet, one per agent' : 'Dated quote counts · BSC mainnet') : undefined} id="cats" title="Four jobs agents do on BNB Chain." />
           {tiles ? (
             <>
             <div className={styles.tiles}>
@@ -158,9 +161,10 @@ export default async function Home() {
             {(() => {
               // The four tiles, Security and Other add up to the headline: every hireable agent is counted somewhere.
               const core = tiles.reduce((n, t) => n + t.hireable, 0)
-              const sec = ready.filter((r) => r.category === 'security').length
-              const other = Math.max(0, (market?.total ?? 0) - core - sec)
-              return <p className={styles.tilesSum}>Plus {sec} security and {other} other {other === 1 ? 'agent' : 'agents'}: {core + sec + other} hireable in all, every one with a live price; each card shows its test result.</p>
+              const pool = both?.rows ?? ready
+              const sec = pool.filter((r) => r.category === 'security').length
+              const other = Math.max(0, (both?.total ?? market?.total ?? 0) - core - sec)
+              return <p className={styles.tilesSum}>Plus {sec} security and {other} other {other === 1 ? 'agent' : 'agents'}: {core + sec + other} hireable in all{both && market ? `, ${market.total} of them on mainnet` : ''}, every one with a live price; each card shows its test result.</p>
             })()}
             </>
           ) : (
@@ -190,7 +194,7 @@ export default async function Home() {
                 <li><RotateCcw aria-hidden="true" />If the agent doesn&apos;t deliver, you reclaim it.</li>
               </ul>
               <a className={`btn ${styles.bandBtn}`} href="/docs#hiring">Read the hire guide</a>
-              <Limits><p>Buyer-linked reviews match an exact funded, delivered job. Review counts do not establish independent people.</p></Limits>
+              <Limits><p>Buyer-linked ratings match an exact funded, delivered job. Rating counts do not establish independent people.</p></Limits>
             </div>
             <ol className={styles.layers}>
               <Layer k="Quote" v="Request a price before connecting a wallet. See its expiry and whether the provider signed it or only its identity was checked." />
@@ -335,11 +339,11 @@ function CategoryTileView({ t, i }: { t: CategoryTile; i: number }) {
         />
       </span>
       <span className={styles.tileFacts}>
-        <span><b className="num">{t.hireable}</b> hireable{t.operators ? ` from ${t.operators} ${t.operators === 1 ? 'operator' : 'operators'}` : ''}.</span>{' '}
-        {t.cheapest ? <span>From <b className="num">{t.cheapest}</b>.</span> : <span>{t.hireable > 0 ? 'Compare individual quote terms.' : 'No valid quote at snapshot.'}</span>}{' '}
+        <span><b className="num">{t.hireable}</b> hireable{t.onTestnet ? `, ${t.onMainnet} on mainnet and ${t.onTestnet} on testnet,` : ''}{t.operators ? ` from ${t.operators} ${t.operators === 1 ? 'operator' : 'operators'}` : ''}.</span>{' '}
+        {t.cheapest ? <span>From <b className="num">{t.cheapest}</b> on mainnet.</span> : <span>{t.hireable > 0 ? 'Compare individual quote terms.' : 'No valid quote at snapshot.'}</span>}{' '}
         <span>Quoted <SnapshotAge iso={t.measuredAt} bare />.</span>{' '}
         <span className={styles.tileRating}>
-          {t.bestRating ? <>Best rated, {t.bestRating.agent}: <Stars value={t.bestRating.stars} count={t.bestRating.count} label="buyer-linked reviews" /></> : 'No buyer-linked reviews yet.'}
+          {t.bestRating ? <>Best rated, {t.bestRating.agent}: <Stars value={t.bestRating.stars} count={t.bestRating.count} label="buyer-linked ratings" /></> : 'No buyer-linked ratings yet.'}
         </span>
       </span>
       <span className={styles.tileGo}>Browse {j.name.toLowerCase()} <ArrowRight aria-hidden="true" /></span>
