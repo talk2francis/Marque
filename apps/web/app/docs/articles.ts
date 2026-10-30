@@ -63,6 +63,9 @@ export const articles: Record<string, Article> = {
     title:'What changed, and why.',
     description:'A public record of meaningful product changes. Evidence and limitations travel with each release.',
     sections:[
+      { id: 'v4-6', title: '30 October 2026 · A balanced home-page film layout', paragraphs: [
+        'The opened film on the home page starts with its chapter timestamps, keeping the evidence notes and full transcript link underneath. The introductory paragraph beside the video is removed. Desktop chapter spacing aligns the column with the player and its rail; phones and tablets keep the chapters below the video.',
+      ] },
       { id: 'v4-5', title: '30 October 2026 · Mobile wallet menu and agent navigation', paragraphs: [
         'The mobile navigation drawer keeps the connected-wallet account card within its width and brings it into view when opened. Its actions scroll with the drawer, including on short phone screens. The header account menu also stays within the phone viewport. Long wallet names yield space to the logo and menu button on narrow phones.',
         'Agent section links stay below the site header while scrolling on phones and tablets. The mobile Hire bar has priority over the floating quest companion, keeping the price and Hire action unobstructed. Set and Earn remains available in navigation; desktop presentation is unchanged.',

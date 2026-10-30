@@ -4,6 +4,10 @@
 
 A public record of meaningful product changes. Evidence and limitations travel with each release.
 
+## 30 October 2026 · A balanced home-page film layout
+
+The opened film on the home page starts with its chapter timestamps, keeping the evidence notes and full transcript link underneath. The introductory paragraph beside the video is removed. Desktop chapter spacing aligns the column with the player and its rail; phones and tablets keep the chapters below the video.
+
 ## 30 October 2026 · Mobile wallet menu and agent navigation
 
 The mobile navigation drawer keeps the connected-wallet account card within its width and brings it into view when opened. Its actions scroll with the drawer, including on short phone screens. The header account menu also stays within the phone viewport. Long wallet names yield space to the logo and menu button on narrow phones.

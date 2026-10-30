@@ -93,7 +93,6 @@ export function FilmSection({ context }: { context: 'home' | 'page' }) {
             <div className={`${styles.inner} ${styles.split}`}>
               <div className={styles.splitMain}><FilmPlayer /></div>
               <aside className={styles.splitSide} aria-label="About the film">
-                <p className={styles.sideLede}>One real hire on BSC mainnet, from the question to an answer checked against the chain. Then an agent you build, an assistant that hires for you, and the quest.</p>
                 <ol className={styles.sideChapters} aria-label="Chapters">
                   {CHAPTERS.map((c) => <li key={c.id}><FilmTime at={c.start} /><span>{c.title}</span></li>)}
                 </ol>

@@ -2,6 +2,8 @@
 
 ## 27 October: the film
 
+Home-page layout, updated 30 October: the opened fold leads with the chapter times beside the player, without an introductory paragraph. At desktop widths, the chapter rows share the available height so the column and its two links underneath align with the player and rail. Chapter targets remain at least 24px high. Below 1024px the chapters stack below the video with their roomier spacing. Opening the evidence disclosure grows naturally; no notes are clipped. The standalone `/film` introduction and transcript retain their reading layout.
+
 The launch film ("On the record", 1:00) sits on the home page between the hero and the record, and on
 `/film`. It is part of the product, not an embed (`app/_components/film/`, `lib/film.ts`).
 
