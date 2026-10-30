@@ -103,8 +103,10 @@
 .bar { display: none; }
 
 @media (max-width: 1023.98px) {
-  .grid { grid-template-columns: 1fr; }
-  .side { position: static; }
+  /* A single flow lets the sticky section links follow the entire agent page, including its terms panel. */
+  .grid { display: block; }
+  .main { display: contents; }
+  .side { position: static; margin-top: clamp(32px, 4vw, 56px); }
   .bar {
     display: flex; align-items: center; justify-content: space-between; gap: 12px;
     position: sticky; bottom: 0; z-index: 30;

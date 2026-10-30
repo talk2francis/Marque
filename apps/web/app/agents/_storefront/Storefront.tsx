@@ -179,7 +179,7 @@ export function Storefront({ d, section = 'overview', evidence = null, lens = nu
       </div>
 
       {/* Under 1024: the purchase panel becomes a bar with price and the one action. */}
-      <div className={styles.bar}>
+      <div className={styles.bar} data-agent-hire-bar>
         <span className={styles.barPrice}>
           {d.terms.priceLabel ? <><b className="num">{d.terms.priceLabel}</b><span>{hireable ? 'live quote' : 'last quote'}</span></> : <span>{d.name}</span>}
         </span>

@@ -242,6 +242,10 @@
     .acct-net { padding-left: 8px; }
   }
   @media (max-width: 1279px) { .hide-lt-xl { display: none !important; } }
+  @media (max-width: 1023.98px) {
+    /* Account for the profile's 44px section strip and border when following heading links. */
+    html:has([data-agent-hire-bar]) { scroll-padding-top: calc(var(--header-h) + 61px); }
+  }
   @media (max-width: 1023px) {
     .hide-lt-lg { display: none !important; }
     .nav-capsule { display: none; }
@@ -249,6 +253,21 @@
     .icon-btn.menu-btn { display: inline-grid; }
   }
   @media (max-width: 759px) { .hide-lt-md { display: none !important; } }
+  @media (max-width: 759px) {
+    .site-header .brand-link, .site-header .menu-btn { flex-shrink: 0; }
+    .header-tools, .header-tools > .show-lt-md, .header-tools .acct { min-width: 0; }
+    .header-tools > .show-lt-md { display: block; }
+    .header-tools .acct-btn[data-compact] { max-width: 100%; }
+    .header-tools .acct-btn[data-compact] > :not(.acct-addr) { flex-shrink: 0; }
+    .header-tools .acct-addr { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+    .site-header .acct-menu {
+      position: fixed; top: calc(var(--header-h) + 8px); left: 12px; right: 12px;
+      width: auto; min-width: 0;
+      max-height: calc(100vh - var(--header-h) - 24px - env(safe-area-inset-bottom));
+      max-height: calc(100dvh - var(--header-h) - 24px - env(safe-area-inset-bottom));
+      overflow-y: auto; overscroll-behavior: contain;
+    }
+  }
   @media (min-width: 760px) { .show-lt-md { display: none !important; } }
 
   /* Mobile drawer contents */
@@ -263,6 +282,9 @@
   .dnav-link[aria-current='page'] { color: var(--ink); box-shadow: inset 2px 0 0 var(--brass); padding-left: 12px; }
   .dsec { margin-top: var(--s-6); display: flex; flex-direction: column; gap: 12px; }
   .dsec-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  /* In a scrolling drawer, the account menu belongs in the flow below its button. */
+  .drawer .acct { width: 100%; }
+  .drawer .acct-menu { position: static; width: 100%; min-width: 0; margin-top: 8px; }
   .dgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
   .dgrid-item { display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 10px; border-radius: var(--r-2); border: 1px solid var(--hair); font-size: 13.5px; color: var(--ink-2); text-decoration: none; }
   .dgrid-item:hover { color: var(--ink); border-color: var(--hair-2); }

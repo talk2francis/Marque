@@ -63,6 +63,10 @@ export const articles: Record<string, Article> = {
     title:'What changed, and why.',
     description:'A public record of meaningful product changes. Evidence and limitations travel with each release.',
     sections:[
+      { id: 'v4-5', title: '30 October 2026 · Mobile wallet menu and agent navigation', paragraphs: [
+        'The mobile navigation drawer keeps the connected-wallet account card within its width and brings it into view when opened. Its actions scroll with the drawer, including on short phone screens. The header account menu also stays within the phone viewport. Long wallet names yield space to the logo and menu button on narrow phones.',
+        'Agent section links stay below the site header while scrolling on phones and tablets. The mobile Hire bar has priority over the floating quest companion, keeping the price and Hire action unobstructed. Set and Earn remains available in navigation; desktop presentation is unchanged.',
+      ] },
       { id: 'v4-4', title: '29 October 2026 · Wallet recovery and editing an agent’s registration', paragraphs: [
         'The six reference-agent banners now sit above a clear background. The animated faceted ground starts below their mastheads and follows the page as you scroll. Other agent pages and the rest of the site retain their existing backgrounds.',
         'Wallet connections restored after a reload retain their live signing connector and current selection. Recovery waits for an unavailable wallet to be discovered, preserves a wallet’s current accounts and lets disconnect remove its connection. It does not request a signature.',

@@ -295,7 +295,7 @@
     overflow-y: auto; overscroll-behavior: contain;
     animation: drawer-in var(--t-panel) var(--ease) both;
   }
-  .drawer-head { position: sticky; top: 0; z-index: 1; display: flex; align-items: center; justify-content: space-between; height: var(--header-h); padding: 0 var(--margin); background: var(--canvas); border-bottom: 1px solid var(--hair); }
+  .drawer-head { position: sticky; top: 0; z-index: 1; display: flex; flex-shrink: 0; align-items: center; justify-content: space-between; height: var(--header-h); padding: 0 var(--margin); background: var(--canvas); border-bottom: 1px solid var(--hair); }
   .drawer-body { padding: var(--s-4) var(--margin) var(--s-6); }
 
   /* Sheet: a bottom sheet on phones, a right-side panel from 1024 up. */

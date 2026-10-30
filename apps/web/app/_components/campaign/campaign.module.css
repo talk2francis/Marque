@@ -84,6 +84,10 @@
 .muted { font-size: 12.5px; color: var(--ink-3); }
 
 /* Phones: a 40 px bar above the safe area, opening into a bottom sheet. */
+@media (max-width: 1023.98px) {
+  /* The profile's primary Hire action owns this edge; the quest remains in navigation. */
+  :global(body:has([data-agent-hire-bar])) .dock { display: none; }
+}
 @media (max-width: 640px) {
   .dock { left: 12px; right: 12px; bottom: calc(10px + env(safe-area-inset-bottom)); max-width: none; display: flex; justify-content: flex-end; }
   .dock[data-tray] { display: none; }

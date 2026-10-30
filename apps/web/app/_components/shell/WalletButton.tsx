@@ -87,6 +87,13 @@ function AccountMenu({ address, display, chainId, compact, openChainModal }: { a
 
   useEffect(() => {
     if (!open) return
+    // Reveal the account card inside the drawer without scrolling the page behind it.
+    const account = ref.current
+    const drawer = account?.closest('.drawer')
+    if (account && drawer) {
+      const head = drawer.querySelector('.drawer-head')
+      drawer.scrollTop += account.getBoundingClientRect().top - drawer.getBoundingClientRect().top - (head?.getBoundingClientRect().height ?? 0) - 8
+    }
     const close = (e: MouseEvent | KeyboardEvent) => {
       if (e instanceof KeyboardEvent ? e.key === 'Escape' : !ref.current?.contains(e.target as Node)) setOpen(false)
     }

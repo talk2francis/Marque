@@ -4,6 +4,12 @@
 
 A public record of meaningful product changes. Evidence and limitations travel with each release.
 
+## 30 October 2026 · Mobile wallet menu and agent navigation
+
+The mobile navigation drawer keeps the connected-wallet account card within its width and brings it into view when opened. Its actions scroll with the drawer, including on short phone screens. The header account menu also stays within the phone viewport. Long wallet names yield space to the logo and menu button on narrow phones.
+
+Agent section links stay below the site header while scrolling on phones and tablets. The mobile Hire bar has priority over the floating quest companion, keeping the price and Hire action unobstructed. Set and Earn remains available in navigation; desktop presentation is unchanged.
+
 ## 29 October 2026 · Wallet recovery and editing an agent’s registration
 
 The six reference-agent banners now sit above a clear background. The animated faceted ground starts below their mastheads and follows the page as you scroll. Other agent pages and the rest of the site retain their existing backgrounds.

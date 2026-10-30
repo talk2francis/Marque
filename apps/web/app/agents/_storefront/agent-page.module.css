@@ -6,6 +6,9 @@
 .tab[aria-current='page'] { color: var(--ink); }
 .tab[aria-current='page']::after { content: ''; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: var(--brass); }
 .tab:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; border-radius: 3px; }
+@media (max-width: 1023.98px) {
+  .tabs { position: sticky; top: var(--header-h); z-index: 40; background: var(--canvas); }
+}
 .proofPrice { font-family: var(--font-mono); font-size: 13px; color: var(--ink); padding: 0 2px; }
 
 .h2 { margin: 0 0 var(--s-3); font-size: var(--fs-h3); font-weight: 500; }

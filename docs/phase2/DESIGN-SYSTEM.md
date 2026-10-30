@@ -516,6 +516,12 @@ with label, sans title, lede and actions; a sticky rail with a scroll-spy
 contents list and the library; one reading column in the normal scroll. The
 FAQ is searchable, grouped and numbered, answers in native `<details>`.
 
+## Mobile account and agent navigation (30 Oct 2026)
+
+Inside the mobile navigation drawer, the account wrapper and account menu use the available width. The menu is in document flow, and opening it brings the wrapper below the drawer's fixed-height sticky header by scrolling only that drawer. In the phone header, long compact wallet names truncate before squeezing the logo or menu button; the account popover uses bounded viewport positioning and scrolls within a short viewport. Desktop account popovers retain their anchored presentation.
+
+Below 1024px, agent-page sections use a single flow so section links stay sticky below `--header-h` throughout the article and its terms panel. The tab strip has an opaque ground and sits below the header and dialogs; its native horizontal scrolling is retained. In-page heading links reserve the tab row in their scroll offset. The mobile Hire bar marks its presence with `data-agent-hire-bar`; the quest companion yields that edge below the same breakpoint. Other pages and desktop retain their companion. Set and Earn remains in navigation.
+
 ## Wallet portraits (28 Oct 2026)
 
 People are circles, agents are rounded squares, so a wallet never reads as an agent. A wallet with no saved profile shows its **stone**: `FacetAvatar`, a cut stone seen from above, drawn from the address and a seed (six to eight sides, table size, turn and the light across the facets), in one of six accents (champagne, graphite, porcelain, moss, oxide, tide) on a dark velvet disc. It is the same family as the Facet field behind the pages. An owner can re-cut it, change its accent, upload an image (512 px square, redrawn in the browser) or use one of their agents' portraits (`ProfileAvatar`). Gradient ids come from the stone's own inputs, so two React roots drawing the same stone never collide.
