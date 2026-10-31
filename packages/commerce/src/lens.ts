@@ -202,7 +202,7 @@ function yieldLens(c: J): YieldLens {
     observedApys: arr(pick(c,['ranked'])).slice(0,64).flatMap(v=>{
       const venue=str(v['symbol'] ?? v['venue'])
       const apyPct=num(v['supply_apy_pct'])
-      return venue !== null && apyPct !== null ? [{venue,apyPct,availableLiquidityUsd:num(v['available_liquidity_usd'])}] : []
+      return venue !== null && apyPct !== null && Number.isFinite(apyPct) ? [{venue,apyPct,availableLiquidityUsd:num(v['available_liquidity_usd'])}] : []
     }),
     excluded: arr(pick(c, ['excluded'])).map((e) => ({ name: str(e['symbol'] ?? e['venue'] ?? e['name']) ?? '?', reason: str(e['detail'] ?? e['reason']) ?? '' })),
   }
@@ -230,10 +230,15 @@ export function normalizeAnswer(category: string | null, content: unknown): Lens
   const error = str(c['error'] ?? (isObj(c['error']) ? (c['error'] as J)['message'] : null))
   const m = meta(c)
   const has = (keys: string[]) => pick(c, keys) !== undefined
+  // Recognise explicitly labelled supply APYs even when an outside job has no linked category.
+  // This chooses a picture of the agent's claim, never its identity or a verification result.
+  const hasSupplyApys = arr(pick(c, ['ranked'])).some((v) =>
+    str(v['symbol'] ?? v['venue']) !== null && num(v['supply_apy_pct']) !== null && Number.isFinite(num(v['supply_apy_pct'])),
+  )
   const cat = category && ['health_factor', 'rebalancing', 'grid', 'yield', 'security'].includes(category) ? category
     // A health factor answer for an account with no borrowing carries healthFactor: null, so its other fields count too.
     : has(['healthFactor', 'health_factor']) || 'healthFactor' in c || has(['repayUsdToReachTarget', 'healthFactorExact', 'distanceToLiquidationPct']) ? 'health_factor' : has(['proposedTickLower', 'positions']) ? 'rebalancing'
-      : has(['levels']) ? 'grid' : has(['netAprPct', 'aprSources']) ? 'yield' : has(['findings', 'severityCounts']) ? 'security' : null
+      : has(['levels']) ? 'grid' : has(['netAprPct', 'aprSources']) || hasSupplyApys ? 'yield' : has(['findings', 'severityCounts']) ? 'security' : null
   switch (cat) {
     case 'health_factor': return { ...healthFactor(c), meta: m, error }
     case 'rebalancing': return { ...rebalancing(c), meta: m, error }

@@ -215,14 +215,14 @@ function missingInput(lens: Lens, task: string | null): string {
     if (!account) return 'neither the answer nor the job names the account to check'
   }
   if (lens.kind === 'rebalancing') return 'the answer names no position Marque can read'
-  if (lens.kind === 'yield') return 'the answer names no Venus rate Marque can compare'
+  if (lens.kind === 'yield') return lens.observedApys?.length ? 'quoted APYs are shown separately; no comparable Venus APR was provided for the rate check' : 'the answer names no Venus rate Marque can compare'
   if (lens.kind === 'grid') return 'the answer states no levels or capital to check'
   return 'Marque has no check for this kind of answer yet'
 }
 
 /** Cached 10 minutes per job: a delivered answer does not change; checks are pinned to its block. */
 export function jobLens(chainId: ChainId, jobId: string) {
-  return cachedProjection(`lens:v7:${chainId}:${jobId}`, () => build(chainId, jobId), { freshMs: 10 * 60_000, timeoutMs: 20_000 })
+  return cachedProjection(`lens:v8:${chainId}:${jobId}`, () => build(chainId, jobId), { freshMs: 10 * 60_000, timeoutMs: 20_000 })
 }
 
 /** Recompute a job's checks and terms from chain now, ignoring and never writing the stored result (the replay command). */

@@ -13,6 +13,19 @@ describe('Result Lens normaliser on real deliveries', () => {
     expect(result.observedApys).toEqual([{venue:'vUSDT',apyPct:4.2,availableLiquidityUsd:1000},{venue:'vUSD',apyPct:0,availableLiquidityUsd:0}])
     expect(result.netAprPct).toBeNull();expect(result.grossAprPct).toBeNull();expect(result.recommend).toBeNull()
   })
+  it('draws labelled supply APYs without a linked job category; does not guess from a service name or malformed ranking', () => {
+    const content={service:'yield_plan',result:{plan:{ranked:[{symbol:'vUSDT',supply_apy_pct:4.2}]}}}
+    const result=normalizeAnswer(null,content)
+    expect(result.kind).toBe('yield')
+    if(result.kind!=='yield')throw Error('wrong picture')
+    expect(result.observedApys).toEqual([{venue:'vUSDT',apyPct:4.2,availableLiquidityUsd:null}])
+    expect(result.netAprPct).toBeNull();expect(result.grossAprPct).toBeNull()
+    expect(normalizeAnswer(null,{service:'yield_plan'}).kind).toBe('generic')
+    expect(normalizeAnswer(null,{ranked:[{symbol:'vUSDT',supply_apy_pct:'unknown'}]}).kind).toBe('generic')
+    expect(normalizeAnswer(null,{ranked:[{symbol:'vUSDT',supply_apy_pct:'1e999'}]}).kind).toBe('generic')
+    expect(normalizeAnswer(null,{ranked:[]}).kind).toBe('generic')
+    expect(normalizeAnswer('health_factor',content).kind).toBe('health_factor')
+  })
   it('health factor: Keel (reference engine shape)', () => {
     const l = lens('Keel')
     expect(l).toMatchObject({ kind: 'health_factor', healthFactor: 1.088, target: 2.5, collateralSymbol: 'BTCB' })

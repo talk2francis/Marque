@@ -21,6 +21,7 @@
 .claimed { margin: 0; font-size: 15.5px; line-height: 1.6; color: var(--ink-2); max-width: 68ch; }
 .note { margin: var(--s-3) 0 0; font-size: 14px; line-height: 1.55; color: var(--ink-2); max-width: 68ch; }
 .note a, .muted a, .facts a { color: var(--ink); }
+.sample a, .note a { min-height: 24px; display: inline-flex; align-items: center; }
 .muted { margin: 0; font-size: 13.5px; line-height: 1.5; color: var(--ink-3); }
 .ok, .bad { display: inline-flex; align-items: center; gap: 5px; }
 .ok { color: var(--moss); }

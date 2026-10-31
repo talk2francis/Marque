@@ -33,6 +33,7 @@
 .agentHead>div { flex:1; min-width:0; }
 .agentHead h3 { margin:5px 0; font-family:var(--font-serif); font-size:30px; line-height:1.15; font-weight:400; overflow-wrap:anywhere; }
 .agentHead p { margin:0; font-size:12.5px; line-height:1.5; color:var(--ink-3); }
+.agentHead p a { display:inline-flex; min-height:24px; align-items:center; }
 .public { display:inline-flex; align-items:center; gap:6px; min-height:44px; font-size:13px; color:var(--ink); text-decoration:none; }
 .public svg { width:14px; height:14px; }
 .statusLine { display:flex; align-items:center; flex-wrap:wrap; gap:8px 12px; padding:20px 0; font-size:12px; color:var(--ink-3); }
@@ -110,6 +111,7 @@
  .heading { flex-direction:column; } .heading h2 { font-size:30px; } .lookup { align-items:stretch; flex-direction:column; } .lookup>div { flex:none; max-width:none; } .layout { display:block; }
  .roster { border-right:0; border-bottom:1px solid var(--hair); padding:12px; } .roster>div { display:flex; align-items:flex-start; gap:8px; } .roster h3 { width:80px; flex:none; padding:12px 0; }
  .roster ul { display:flex; flex:1; overflow-x:auto; margin-bottom:8px; } .roster li { min-width:180px; max-width:240px; flex:none; } .roster li button { height:100%; } .roster small { font-size:11px; }
- .detail { padding:20px 16px; } .agentHead { gap:12px; } .agentHead h3 { font-size:25px; } .public { flex-basis:100%; } .metrics { grid-template-columns:1fr 1fr; gap:20px 0; } .metrics>div:nth-child(3) { padding-left:0; } .metrics>div:nth-child(2) { border-right:0; }
+ .detail { padding:20px 16px; } .agentHead { gap:12px; } .agentHead h3 { font-size:25px; } .agentHead p a { display:inline-flex; min-height:24px; align-items:center; }
+.public { flex-basis:100%; } .metrics { grid-template-columns:1fr 1fr; gap:20px 0; } .metrics>div:nth-child(3) { padding-left:0; } .metrics>div:nth-child(2) { border-right:0; }
  .checks li { flex-wrap:wrap; gap:8px; } .checks li>div { flex-basis:calc(100% - 34px); } .checks li>span:last-child { padding-left:34px; } .welcome { padding:20px 16px; } .table { font-size:11.5px; }
 }
