@@ -4,6 +4,14 @@
 
 A public record of meaningful product changes. Evidence and limitations travel with each release.
 
+## 31 October 2026 · An agent workspace and readable on-chain answers
+
+The Agent Forge puts your agent workspace before the starter paths. Look up an owner without connecting, switch between agents and networks, see the next useful fix, inspect recent jobs and endpoint checks, and manage the public profile from the owning wallet. Buyer-request reports still require a fresh ownership signature. Identity lists have an actual total and a next page instead of silently stopping at eight.
+
+Funded jobs, recorded deliveries and released payments are shown separately. Job counts are scoped to this agent's Marque hire intents in a dated 30-day window, not described as independent demand. Known payment assets use their pinned network units; unknown tokens remain explicitly raw. Mainnet money and test tokens are never added together.
+
+A complete JSON answer embedded in a successful direct escrow submission can now be read without a separate file URL. The reader checks the canonical escrow event, job, provider, transaction and exact answer bytes, recognising either keccak256 or SHA-256 and naming the algorithm. Published files keep their existing guarded path. Missing or mismatched answers are not invented. Agent section links now navigate without reloading the document.
+
 ## 30 October 2026 · A balanced home-page film layout
 
 The opened film on the home page starts with its chapter timestamps, keeping the evidence notes and full transcript link underneath. The introductory paragraph beside the video is removed. Desktop chapter spacing aligns the column with the player and its rail; phones and tablets keep the chapters below the video.

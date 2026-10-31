@@ -6,6 +6,13 @@ const a = fx.answers as Record<string, { category: string; content: unknown }>
 const lens = (name: string) => normalizeAnswer(a[name]!.category, a[name]!.content)
 
 describe('Result Lens normaliser on real deliveries', () => {
+  it('keeps reported supply APYs separate from net APR and preserves valid zero rates',()=>{
+    const result=normalizeAnswer('yield',{result:{plan:{ranked:[{symbol:'vUSDT',supply_apy_pct:4.2,available_liquidity_usd:1000},{symbol:'vUSD',supply_apy_pct:0,available_liquidity_usd:0},{symbol:'malformed',supply_apy_pct:'not a number'}]}}})
+    expect(result.kind).toBe('yield')
+    if(result.kind!=='yield')throw Error('wrong category')
+    expect(result.observedApys).toEqual([{venue:'vUSDT',apyPct:4.2,availableLiquidityUsd:1000},{venue:'vUSD',apyPct:0,availableLiquidityUsd:0}])
+    expect(result.netAprPct).toBeNull();expect(result.grossAprPct).toBeNull();expect(result.recommend).toBeNull()
+  })
   it('health factor: Keel (reference engine shape)', () => {
     const l = lens('Keel')
     expect(l).toMatchObject({ kind: 'health_factor', healthFactor: 1.088, target: 2.5, collateralSymbol: 'BTCB' })

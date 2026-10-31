@@ -3,6 +3,8 @@ import { keccak256, toBytes } from 'viem'
 import { safeFetch } from '@marque/probe'
 import { sql } from 'drizzle-orm'
 import { db } from '@marque/db'
+import { deliveryContent, deliveryDigest, type DeliveryHashAlgorithm } from './delivery-bytes'
+import { readSubmissionManifest } from './submission-manifest'
 
 /**
  * Read an ERC-8183 deliverable manifest and check it against the hash on chain.
@@ -18,6 +20,9 @@ export interface Manifest {
   matches: boolean | null
   content: Record<string, unknown> | null
   pretty: string
+  hashAlgorithm?: DeliveryHashAlgorithm
+  url?: string
+  source?: 'submission_calldata'
   /** A disclosure supplied by the provider, not independent re-hashing of the original. */
   withheld?: { originalContentHash: string }
 }
@@ -48,20 +53,8 @@ async function readOne(url: string, onchainHash: string | null): Promise<Manifes
     }
     if (!r.ok) return null
     const raw = r.body
-    const hash = keccak256(toBytes(raw))
-    const doc = JSON.parse(raw) as { response?: { content?: unknown }; answer?: unknown; subject?: unknown }
-    const asObject = (v: unknown) => (v && typeof v === 'object' && !Array.isArray(v) ? v as Record<string, unknown> : null)
-    let content: Record<string, unknown> | null = null
-    try {
-      // The Studio manifest carries the answer as JSON text in response.content; some sellers put the object there
-      // directly, and others publish { job, agent, subject, answer } with no wrapper (Mandate Range-1).
-      const inner = doc.response?.content
-      const parsed: unknown = typeof inner === 'string' ? JSON.parse(inner) : inner ?? null
-      content = asObject(parsed)
-      if (content && asObject(content['answer']) && !('healthFactor' in content)) content = { ...asObject(content['answer'])!, subject: content['subject'] ?? null }
-      if (!content && asObject(doc.answer)) content = { ...asObject(doc.answer)!, subject: doc.subject ?? null }
-    } catch { content = null }
-    return { raw, hash, matches: onchainHash ? hash.toLowerCase() === onchainHash.toLowerCase() : null, content, pretty: JSON.stringify(doc, null, 2) }
+    const doc: unknown = JSON.parse(raw)
+    return { raw, ...deliveryDigest(raw,onchainHash), content:deliveryContent(doc), pretty:JSON.stringify(doc,null,2), url }
   } catch {
     return null
   }
@@ -74,10 +67,21 @@ async function readOne(url: string, onchainHash: string | null): Promise<Manifes
  * through the SSRF guard and is accepted only when its bytes hash to the deliverable hash on chain, so nothing
  * unverified is ever shown as the agent's answer. Found locations are remembered per process.
  */
-export async function jobManifest(chainId: number, jobId: string, job: { deliverable?: { url?: string | null; hash?: string | null } | null; provider?: string | null } | null, onchainHash?: string | null): Promise<Manifest | null> {
+export async function jobManifest(chainId: number, jobId: string, job: { deliverable?: { url?: string | null; hash?: string | null } | null; provider?: string | null; events?: Array<{name:string; tx:string}> } | null, onchainHash?: string | null): Promise<Manifest | null> {
   const hash = job?.deliverable?.hash ?? onchainHash ?? null
-  if (job?.deliverable?.url) return readManifest(job.deliverable.url, hash)
+  if (job?.deliverable?.url) {
+    const published=await readManifest(job.deliverable.url, hash)
+    if(published && published.matches!==false) return published
+    const submitted=job.events?.find(e=>e.name==='JobSubmitted')
+    const inline=hash && job.provider && submitted ? await readSubmissionManifest(chainId,jobId,hash,job.provider,submitted.tx) : null
+    return inline ?? published
+  }
   if (!hash || !/^0x[0-9a-fA-F]{64}$/.test(hash) || /^0x0+$/.test(hash)) return null
+  const submitted=job?.events?.find(e=>e.name==='JobSubmitted')
+  if(submitted && job?.provider) {
+    const inline=await readSubmissionManifest(chainId,jobId,hash,job.provider,submitted.tx)
+    if(inline) return inline
+  }
   const key = `${chainId}:${jobId}:${hash.toLowerCase()}`
   const known = FOUND.get(key)
   if (known !== undefined) return known ? readManifest(known, hash) : null

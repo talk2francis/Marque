@@ -1,7 +1,7 @@
 import 'server-only'
 import { sql } from 'drizzle-orm'
 import { db } from '@marque/db'
-import { sellerIdentity } from '@marque/commerce'
+import { assetAt, formatAmount, sellerIdentity } from '@marque/commerce'
 import type { BuilderView } from './builder'
 import { sellerServicesQuery } from './seller-services'
 
@@ -47,6 +47,16 @@ export async function sellerProjection(view: BuilderView, diagnosticOwner: strin
       select token, name, sum((args->>'amount')::numeric)::text as amount_raw, count(*)::int as jobs,
         max(block_number)::text as last_block from releases
       where rn = 1 and (args->>'amount') ~ '^[0-9]{1,78}$' group by token, name order by token, name`))
+    const recentJobs = rowsOf(await tx.execute(sql`with cohort as (${cohort})
+      select chain_id, job_id, state, funded_raw is not null as funded,
+        deliverable is not null and deliverable !~ '^0x0+$' as delivery_recorded,
+        created_at from cohort order by created_at desc, job_id::numeric desc limit 12`))
+    const endpoints = view.identity.services.filter(s => s.kind === 'a2a' || s.kind === 'mcp').slice(0,16).map(s => s.endpoint)
+    const observations = endpoints.length ? rowsOf(await tx.execute(sql`select p.checked_at, p.liveness, p.latency_ms
+      from agent_service s join lateral (select p.id,p.checked_at,p.liveness,p.latency_ms from probe p
+        where p.service_id=s.id and p.agent_id=${agentKey} order by p.checked_at desc nulls last limit 20) p on true
+      where s.agent_id=${agentKey} and (s.endpoint in (${sql.join(endpoints.map(e => sql`${e}`), sql`, `)}) or s.resolved_endpoint in (${sql.join(endpoints.map(e => sql`${e}`), sql`, `)}))
+      order by p.checked_at desc nulls last,p.id desc limit 20`)) : []
     let diagnostics = null
     if (diagnosticOwner) {
       const [q] = rowsOf(await tx.execute(sql`select count(*)::int as attempted,
@@ -99,7 +109,14 @@ export async function sellerProjection(view: BuilderView, diagnosticOwner: strin
         }
       }), servicesTruncated: projectedServices.length > 16,
       jobs: { scope: 'Exact Marque-intent jobs created in this 30-day cohort; lifecycle outcomes as indexed at observation. Counts can overlap. No claim of independent buyers.', received: n(counts?.received), funded: n(counts?.funded), submitted: n(counts?.submitted), completed: n(counts?.completed), paid: n(counts?.paid), refunded: n(counts?.refunded), fundingMismatch: n(counts?.mismatch), lastIndexedJobBlock: counts?.last_block == null ? null : String(counts.last_block), headLagBlocks: null },
-      earnings: money.map(m => ({ chainId, token: String(m.token), amountRaw: String(m.amount_raw), kind: m.name === 'PaymentReleased' ? 'PAYMENT_RELEASED' : 'REFUNDED_TO_BUYER', jobs: n(m.jobs), lastBlock: String(m.last_block), decimals: null, scope: 'Indexed event amount, raw token units; no token metadata or USD valuation inferred.' })),
+      recentJobs: recentJobs.map(j => ({ chainId, jobId: String(j.job_id), state: String(j.state), funded: j.funded === true, deliveryRecorded: j.delivery_recorded === true, createdAt: iso(j.created_at) })),
+      observations: observations.map(p => ({ at: iso(p.checked_at), state: String(p.liveness ?? 'unknown'), latencyMs: p.latency_ms == null ? null : n(p.latency_ms) })),
+      earnings: money.map(m => {
+        const asset = assetAt(chainId, String(m.token))
+        return { chainId, token: String(m.token), amountRaw: String(m.amount_raw), kind: m.name === 'PaymentReleased' ? 'PAYMENT_RELEASED' : 'REFUNDED_TO_BUYER', jobs: n(m.jobs), lastBlock: String(m.last_block),
+          decimals: asset?.decimals ?? null, symbol: asset?.symbol ?? null, amountLabel: asset ? `${formatAmount(String(m.amount_raw), asset.decimals)} ${asset.symbol}` : null,
+          scope: 'Indexed event amount. Display units only for this network\'s pinned payment assets; unknown tokens remain raw. No USD valuation inferred.' }
+      }),
       diagnostics,
     }
   })

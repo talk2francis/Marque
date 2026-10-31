@@ -152,6 +152,21 @@ export async function builderIdentities(wallet: string): Promise<Array<{ chainId
   return rows.map((r) => ({ chainId: Number(r['chain_id']) as ChainId, tokenId: String(r['token_id']) })).filter((r) => isSupportedChain(r.chainId))
 }
 
+/** Bounded pages with a real population count, rather than silently omitting identities after eight. */
+export async function builderIdentityPage(wallet: string, offset: number) {
+  const w = wallet.toLowerCase()
+  const identities = sql`select chain_id, token_id, max(src) as src from (
+    select chain_id, token_id, 0 as src from agent where owner_address = ${w} and chain_id in (56,97)
+    union select chain_id, token_id, 1 as src from builder_proof where owner_address = ${w} and chain_id in (56,97)
+    union select chain_id, token_id, 1 as src from builder_listing where owner_address = ${w} and withdrawn_at is null and chain_id in (56,97)
+  ) x group by chain_id, token_id`
+  const items = rowsOf(await db().execute(sql`with identities as (${identities})
+    select chain_id, token_id, count(*) over()::int as total from identities
+    order by src desc, token_id::numeric desc, chain_id asc limit 8 offset ${offset}`))
+  const total = items[0] ? Number(items[0]['total']) : Number(rowsOf(await db().execute(sql`select count(*)::int as total from (${identities}) x`))[0]?.['total'] ?? 0)
+  return { targets: items.map(r => ({ chainId: Number(r['chain_id']) as ChainId, tokenId: String(r['token_id']) })), total }
+}
+
 /** "Probe now": one safeFetch probe of the declared endpoint, stored as a first-party observation. */
 export async function probeNow(chainId: ChainId, tokenId: string, endpoint: string, taskConsent = false): Promise<{ discoveryOnly: boolean; ok: boolean; liveness: string; latencyMs: number; detail: string; executableEndpoint: string | null }> {
   const identity = await readIdentity(chainId, tokenId)

@@ -115,7 +115,7 @@ Captured from the live site on 26 October 2026 ([routes, themes and times](./doc
 <td width="50%"><a href="https://marque.trade/jobs/56/57076"><img src="./docs/evidence/readme/2026-10-26/grid-answer.webp" alt="Job 57076: a third-party grid answer with its ladder, record and fills" width="480"></a><br><b>Any agent's answer.</b> A third-party grid agent's answer, found from the chain hash and verified.</td>
 </tr>
 <tr>
-<td width="50%"><a href="https://marque.trade/builders"><img src="./docs/evidence/readme/2026-10-26/forge.webp" alt="The Agent Forge landing page in the light theme" width="480"></a><br><b>Agent Forge.</b> Register, link, test and list an agent from Marque; a daily testnet action in every kit.</td>
+<td width="50%"><a href="https://marque.trade/builders"><img src="./docs/evidence/readme/2026-10-26/forge.webp" alt="The Agent Forge landing page in the light theme, captured 26 October" width="480"></a><br><b>Agent Forge.</b> Register, link, test and list an agent; a daily testnet action in every kit. The current workspace adds jobs and answers, endpoint history, owner-only request reports and profile tools.</td>
 <td width="50%"><a href="https://marque.trade/quest"><img src="./docs/evidence/readme/2026-10-26/quest.webp" alt="Set and Earn progress read from chain, in the light theme" width="480"></a><br><b>Set and Earn.</b> Campaign progress for any wallet, from chain events only.</td>
 </tr>
 <tr>

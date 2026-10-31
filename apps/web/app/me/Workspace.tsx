@@ -170,15 +170,18 @@ const sumOf = (hs: WalletHire[], states: string[]) => {
 function Summary({ address, view }: { address: string; view: View }) {
   const main = useWalletQuest(address, 56), practice = useWalletQuest(address, 97)
   const official = useOfficialQuest(address)
-  const [owner, setOwner] = useState<{ agents: number; received: number; paid: number } | null>(null)
+  const [owner, setOwner] = useState<{ agents: number; received: number | null; paid: number | null; partial: boolean } | null>(null)
+  const [ownerUnavailable, setOwnerUnavailable] = useState(false)
   useEffect(() => {
     if (view !== 'building') return
     let live = true
-    fetch(`/api/v1/phase2/owner/${address}`).then((r) => (r.ok ? r.json() : null)).then((j: { agents?: OwnerAgent[] } | null) => {
+    setOwner(null); setOwnerUnavailable(false)
+    fetch(`/api/v1/phase2/owner/${address}`).then((r) => (r.ok ? r.json() : null)).then((j: { agents?: OwnerAgent[]; page?: { total: number; nextCursor: string | null } } | null) => {
       if (!live) return
+      if (!j) { setOwnerUnavailable(true); return }
       const a = j?.agents ?? []
-      setOwner({ agents: a.length, received: a.reduce((s, x) => s + x.jobsReceived, 0), paid: a.reduce((s, x) => s + x.jobsPaid, 0) })
-    }).catch(() => { if (live) setOwner({ agents: 0, received: 0, paid: 0 }) })
+      setOwner({ agents: j.page?.total ?? a.length, received: a.every(x=>x.seller!==undefined) ? a.reduce((s,x)=>s+x.seller!.jobs.received,0) : null, paid: a.every(x=>x.seller!==undefined) ? a.reduce((s,x)=>s+x.seller!.jobs.paid,0) : null, partial: Boolean(j.page?.nextCursor) })
+    }).catch(() => { if (live) setOwnerUnavailable(true) })
     return () => { live = false }
   }, [address, view])
   const hm = main.data?.hires ?? [], hp = practice.data?.hires ?? []
@@ -203,9 +206,9 @@ function Summary({ address, view }: { address: string; view: View }) {
         </>
       ) : (
         <>
-          <div className={styles.stat} data-tone="gold"><span>Your agents</span><b>{owner ? owner.agents : <Skeleton w={40} h={22} />}</b><small>registered on ERC-8004</small></div>
-          <div className={styles.stat} data-tone="azure"><span>Jobs received</span><b>{owner ? owner.received : <Skeleton w={40} h={22} />}</b><small>funded by buyers</small></div>
-          <div className={styles.stat} data-tone="jade"><span>Paid out</span><b>{owner ? owner.paid : <Skeleton w={40} h={22} />}</b><small>settled to your agents</small></div>
+          <div className={styles.stat} data-tone="gold"><span>Your agents</span><b>{owner ? owner.agents : ownerUnavailable ? 'Unavailable' : <Skeleton w={40} h={22} />}</b><small>registered or proved identities</small></div>
+          <div className={styles.stat} data-tone="azure"><span>Jobs received</span><b>{owner ? owner.received ?? 'Unavailable' : ownerUnavailable ? 'Unavailable' : <Skeleton w={40} h={22} />}</b><small>{owner?.partial ? '30 days, first 8 loaded agents' : 'Marque hires, last 30 days, including unfunded'}</small></div>
+          <div className={styles.stat} data-tone="jade"><span>Payments released</span><b>{owner ? owner.paid ?? 'Unavailable' : ownerUnavailable ? 'Unavailable' : <Skeleton w={40} h={22} />}</b><small>{owner?.partial ? '30 days, first 8 loaded agents' : 'Marque jobs created in the last 30 days'}</small></div>
         </>
       )}
       <a className={styles.stat} data-tone="aurora" href={`/quest/${address}`}>
@@ -511,12 +514,14 @@ function Allowances({ address, chainId, own }: { address: string; chainId: Chain
 
 /* ---------------------------------------------------------------- agents (building) */
 
-interface OwnerAgent { agentKey: string; chainId: number; agentId: string; name: string; imageUrl?: string | null; portraitByOwner?: boolean; category: string | null; listedOnMarque: boolean; quality: { checks: Array<{ id: string; pass: boolean; fix: string | null }> }; jobsReceived: number; jobsPaid: number }
+interface OwnerAgent { agentKey: string; chainId: number; agentId: string; name: string; imageUrl?: string | null; portraitByOwner?: boolean; category: string | null; listedOnMarque: boolean; quality: { checks: Array<{ id: string; pass: boolean; fix: string | null }> }; jobsReceived: number; jobsPaid: number; jobEvidence?: { funded: number | null; paymentReleased: number | null }; seller?: {jobs:{received:number;funded:number;paid:number}}; listingEvidence?: {ownerListed:boolean} }
 interface QuestBuild { build: { agents: Array<{ chainId: number; tokenId: string; observed: number; checks: Record<string, { state: string; reason: string; next?: { label: string; href: string } | null }> }> } }
 const CRIT: Array<[string, string]> = [['registered', 'Registered'], ['card', 'Agent card'], ['probes', 'Answers'], ['hires', '3 hirers'], ['actions', 'Actions'], ['category', 'In category']]
 
 export function Agents({ address, own = false }: { address: string; own?: boolean }) {
   const [owner, setOwner] = useState<OwnerAgent[] | null>(null)
+  const [ownerError, setOwnerError] = useState(false)
+  const [ownerTotal, setOwnerTotal] = useState<number | null>(null)
   // A portrait set here shows at once, ahead of the owner read's next refresh.
   const [portraits, setPortraits] = useState<Record<string, string | null>>({})
   // A name changed here on chain shows at once.
@@ -524,13 +529,17 @@ export function Agents({ address, own = false }: { address: string; own?: boolea
   const [quest, setQuest] = useState<QuestBuild | null>(null)
   useEffect(() => {
     let live = true
-    fetch(`/api/v1/phase2/owner/${address}`).then((r) => (r.ok ? r.json() : null)).then((j) => { if (live) setOwner(j?.agents ?? []) }).catch(() => { if (live) setOwner([]) })
+    setOwner(null); setQuest(null); setOwnerError(false); setOwnerTotal(null)
+    fetch(`/api/v1/phase2/owner/${address}`).then((r) => (r.ok ? r.json() : null)).then((j) => { if (live) { if (!j) { setOwnerError(true); return }; setOwner(j.agents ?? []); setOwnerTotal(j.page?.total ?? null) } }).catch(() => { if (live) setOwnerError(true) })
     fetch(`/api/v1/quest/${address}`).then((r) => (r.ok ? r.json() : null)).then((j) => { if (live) setQuest(j) }).catch(() => undefined)
     return () => { live = false }
   }, [address])
+  if (ownerError) return <p className={styles.empty}>Agent records could not be read. <a href={`/builders?wallet=${address}#your-agents`}>Open the agent workspace to retry</a>.</p>
   if (owner === null) return <div className={styles.skel}>{[0, 1].map((i) => <Skeleton key={i} h={88} />)}</div>
-  if (!owner.length) return <p className={styles.empty}>You have no agents yet. <a href="/builders">Build one in the Forge</a>.</p>
+  if (!owner.length) return <p className={styles.empty}>No agents indexed for this wallet yet. <a href="/builders">Build one or look up an existing identity</a>.</p>
   return (
+    <>
+    {ownerTotal !== null && ownerTotal > owner.length ? <p className={styles.fine}>Showing {owner.length} of {ownerTotal} identities. <a href={`/builders?wallet=${address}#your-agents`}>See every agent in the workspace</a>.</p> : null}
     <ul className={styles.agents}>
       {owner.map((a) => {
         const q = quest?.build.agents.find((x) => x.chainId === a.chainId && x.tokenId === a.agentId)
@@ -540,7 +549,7 @@ export function Agents({ address, own = false }: { address: string; own?: boolea
               <AgentAvatar id={a.agentKey} reference={false} imageUrl={a.agentKey in portraits ? portraits[a.agentKey] ?? null : a.imageUrl ?? null} size={40} />
               <a href={`/agents/${a.chainId}/${a.agentId}`}><b>{names[a.agentKey] ?? a.name}</b></a>
               <span className={styles.fine}>#{a.agentId} · {net(a.chainId)}</span>
-              <span className={styles.pill} data-tone={a.listedOnMarque ? 'good' : undefined}>{a.listedOnMarque ? 'Hireable on Marque' : 'Not hireable yet'}</span>
+              <span className={styles.pill} data-tone={a.listingEvidence?.ownerListed ? 'good' : undefined}>{a.listingEvidence?.ownerListed ? 'Owner-listed' : 'Owner listing not established'}</span>
             </div>
             {q ? (
               <div className={styles.crit} aria-label={`Set and Earn: ${q.observed} of 6 criteria observed`}>
@@ -549,7 +558,8 @@ export function Agents({ address, own = false }: { address: string; own?: boolea
               </div>
             ) : null}
             <div className={styles.agentFoot}>
-              <span>Jobs received <b>{a.jobsReceived}</b> · paid out <b>{a.jobsPaid}</b></span>
+              <span>Last 30 days: jobs received <b>{a.seller?.jobs.received ?? 'Unavailable'}</b> · funded <b>{a.seller?.jobs.funded ?? 'Unavailable'}</b> · payment released <b>{a.seller?.jobs.paid ?? 'Unavailable'}</b></span>
+              <a className={styles.link} href={`/builders?wallet=${address}&agent=${a.chainId}:${a.agentId}#your-agents`}>Manage agent</a>
               <a className={styles.link} href={`/builders/check/${a.chainId}/${a.agentId}`}>Fix report</a>
               <a className={styles.link} href={`/builders/progress/${a.chainId}/${a.agentId}`}>Build checklist</a>
             </div>
@@ -566,6 +576,7 @@ export function Agents({ address, own = false }: { address: string; own?: boolea
         )
       })}
     </ul>
+    </>
   )
 }
 

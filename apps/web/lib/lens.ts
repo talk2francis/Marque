@@ -33,7 +33,7 @@ export interface JobLens {
   reason: string | null
   attemptedAt: string
   stored: boolean
-  manifest: { matches: boolean | null; hash: string | null; raw: string | null; url: string | null; source: string | null } | null
+  manifest: { matches: boolean | null; hash: string | null; raw: string | null; url: string | null; source: string | null; hashAlgorithm?: 'keccak256' | 'sha256' } | null
   readable: boolean
   /** The acceptance criteria and whether each was met, from the same checks. */
   terms: LensTerms | null
@@ -169,7 +169,7 @@ async function build(chainId: ChainId, jobId: string, opts: { replay?: boolean }
   const category = job?.agent?.category ?? null
   const lens = normalizeAnswer(category, content)
   const block = lens.meta.block && /^\d{6,12}$/.test(lens.meta.block) ? BigInt(lens.meta.block) : null
-  const manifestView = { matches: manifest.matches, hash: manifest.hash, raw: manifest.pretty || manifest.raw, url, source }
+  const manifestView = { matches: manifest.matches, hash: manifest.hash, raw: manifest.source==='submission_calldata' ? manifest.raw : manifest.pretty || manifest.raw, url:manifest.url ?? url, source:manifest.source ?? source, hashAlgorithm:manifest.hashAlgorithm ?? 'keccak256' as const }
   const attemptedAt = new Date().toISOString()
   // The job's terms as recorded: Marque's intent (hires started here) or the escrow's own description.
   const [hi] = (await db().execute(sql`select i.description from commerce_job j join hire_intent i on i.id = j.intent_id where j.chain_id = ${chainId} and j.job_id = ${jobId} limit 1`).catch(() => [])) as unknown as Array<{ description: string | null }>
@@ -222,7 +222,7 @@ function missingInput(lens: Lens, task: string | null): string {
 
 /** Cached 10 minutes per job: a delivered answer does not change; checks are pinned to its block. */
 export function jobLens(chainId: ChainId, jobId: string) {
-  return cachedProjection(`lens:v6:${chainId}:${jobId}`, () => build(chainId, jobId), { freshMs: 10 * 60_000, timeoutMs: 20_000 })
+  return cachedProjection(`lens:v7:${chainId}:${jobId}`, () => build(chainId, jobId), { freshMs: 10 * 60_000, timeoutMs: 20_000 })
 }
 
 /** Recompute a job's checks and terms from chain now, ignoring and never writing the stored result (the replay command). */

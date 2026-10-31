@@ -63,7 +63,7 @@ describe.skipIf(!enabled)('seller projection with isolated real PostgreSQL', () 
   it('public read uses exact cohort, keeps payment strings and omits private diagnostics', async () => {
     const p=await sellerProjection(view)
     expect(p.jobs).toMatchObject({received:1,funded:1,submitted:1,completed:1,paid:1,refunded:0,fundingMismatch:0,headLagBlocks:null})
-    expect(p.earnings).toMatchObject([{amountRaw:amount,chainId:56,decimals:null,kind:'PAYMENT_RELEASED'}])
+    expect(p.earnings).toMatchObject([{amountRaw:amount,chainId:56,decimals:18,symbol:'U',kind:'PAYMENT_RELEASED'}])
     expect(p.diagnostics).toBeNull();expect(p.services[0]?.quote).toMatchObject({state:'EXPIRED',mode:'IDENTITY_MATCHED_UNSIGNED'})
     expect(JSON.stringify(p)).not.toMatch(/PRIVATE_TASK|PRIVATE_FAILURE|private intent/)
   })

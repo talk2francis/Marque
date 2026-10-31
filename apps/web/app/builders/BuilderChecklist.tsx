@@ -82,6 +82,11 @@ export function BuilderChecklist() {
   const [lookNet, setLookNet] = useState<56 | 97>(56)
   const [lookToken, setLookToken] = useState('')
 
+  useEffect(() => {
+    const owner=new URLSearchParams(window.location.search).get('wallet')
+    if(owner && /^0x[0-9a-fA-F]{40}$/.test(owner)) {setWatchWallet(owner);setWalletInput(owner)}
+  }, [])
+
   const load = useCallback(async (extra?: { chainId: number; tokenId: string }) => {
     if (!wallet) return
     const seq = ++loadSequence.current

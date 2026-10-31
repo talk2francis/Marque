@@ -1,0 +1,13 @@
+# Builder workspace and delivery recovery
+
+The workspace at `/builders#your-agents` uses the existing owner, seller, claim and registration rails. Any owner address can be read without a wallet. Public status does not unlock private quote analytics or editing. A connected current identity owner signs the existing proof message to read the private report; no job or payment is created.
+
+`GET /api/v1/phase2/owner/{address}?cursor=8` returns up to eight identities and a `page` with the actual population `total` and `nextCursor`. The cache includes owner and cursor. The quality-listing aggregate describes the returned page, not every identity. Service price samples remain dated and are not reservations for a future buyer task.
+
+Seller projection fields `recentJobs` and `observations` are public, bounded and observational. Jobs are bound to exact Marque hire intents, with up to twelve recent rows from the stated 30-day creation cohort. Up to twenty recent probe samples are read through bounded per-service history at current declared endpoints. These are not independent-buyer, continuous-uptime or transaction-success claims. Released payment amounts use known pinned payment-asset units; an unknown token remains raw with no invented decimals or valuation.
+
+The Job Room continues to prefer a published manifest fetched through safeFetch. When a complete JSON answer is in the `optParams` of a direct `submit(uint256,bytes32,bytes)` call, the fallback verifies the successful receipt, canonical escrow destination and JobSubmitted event, exact job and provider, block/transaction binding and exact answer digest. Only keccak256 or SHA-256 matches are accepted and the displayed algorithm is explicit. Payloads are capped at 512 KiB, UTF-8 decoding is strict, and relayed or multicall payloads are outside this decoder. Missing answers remain missing. A failed URL does not cause an agent task or paid retry.
+
+Historical observations, receipts and stored chain checks are retained. The lens projection version changes to pick up the new reader; decided checks in `lens_result` are not rewritten. No database migration or source-worker restart is needed for this web release. The buyer SDK, approval amounts, quote validation, policy and signer paths are unchanged.
+
+Validate types, lint, copy, ordinary tests, guarded fixture-database regressions and a production candidate. Browser acceptance covers owner changes, unavailable reads, pagination, all workspace tabs, privacy gating, network separation, direct public agent links, client section navigation and actual external/reference deliveries in both themes at 390, 768 and 1440 pixels. Deploy only a tested artifact through the existing blue-green script; retain the previous release.

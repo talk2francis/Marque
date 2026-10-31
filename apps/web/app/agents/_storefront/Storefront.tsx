@@ -1,4 +1,5 @@
 import { ArrowUpRight, Check, KeyRound, ShieldCheck, X } from 'lucide-react'
+import Link from 'next/link'
 import { BRAND, Limits, ProvenanceChip } from '@marque/ui'
 import { AgentAvatar } from '../../_components/AgentAvatar'
 import { AgentBrandHero } from '../../_components/AgentBrandHero'
@@ -139,7 +140,7 @@ export function Storefront({ d, section = 'overview', evidence = null, lens = nu
   const tabs = (
     <nav className={page.tabs} aria-label={`${d.name} sections`}>
       {SECTIONS.map((s) => (
-        <a key={s.id} href={`${base}${s.path}`} aria-current={s.id === section ? 'page' : undefined} className={page.tab}>{s.label}</a>
+        <Link key={s.id} href={`${base}${s.path}`} prefetch={false} scroll={false} aria-current={s.id === section ? 'page' : undefined} className={page.tab}>{s.label}</Link>
       ))}
     </nav>
   )

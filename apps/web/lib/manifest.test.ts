@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { keccak256, toBytes } from 'viem'
+import { keccak256, sha256, toBytes } from 'viem'
 import type { SafeFetchResult } from '@marque/probe'
 import { readManifest } from './manifest'
 const h = vi.hoisted(() => ({ response: { ok: true, status: 200, headers: {}, body: '', bytes: 0, latencyMs: 1, finalUrl: 'https://example.invalid/file', redirects: 0 } as SafeFetchResult }))
@@ -12,6 +12,11 @@ describe('delivery file integrity and withheld observations', () => {
     const hash = keccak256(toBytes(currentHttp().body))
     expect(await readManifest('https://example.invalid/file', hash)).toMatchObject({ hash, matches: true, content: { recommend: false, netAprPct: 0 } })
     expect(await readManifest('https://example.invalid/file', `0x${'0'.repeat(64)}`)).toMatchObject({ matches: false })
+  })
+  it('supports direct JSON answers and identifies a SHA-256 commitment explicitly',async()=>{
+    const body=JSON.stringify({result:{health_factor:2.3}})
+    h.response=http(200,body)
+    expect(await readManifest('https://example.invalid/file',sha256(toBytes(body)))).toMatchObject({hashAlgorithm:'sha256',matches:true,content:{result:{health_factor:2.3}}})
   })
   it('does not turn a claimed original digest into independent verification after withholding', async () => {
     const claimed = `0x${'1'.repeat(64)}`

@@ -53,7 +53,7 @@ export interface GridLens {
   /** Its own executed fills, each with its transaction. */
   fills?: Array<{ at: string | null; side: 'buy' | 'sell' | null; base: number | null; quote: number | null; price: number | null; tx: string | null }>
 }
-export interface YieldLens { kind: 'yield'; recommend: boolean | null; venue: string | null; asset: string | null; netAprPct: number | null; grossAprPct: number | null; sizeUsd: number | null; sources: Array<{ value: number | null; label: string }>; switching: { gasUsd: number | null; swapUsd: number | null; exitUsd: number | null }; breakEvenUsd: number | null; improvementBps: number | null; declineReason: string | null; alternatives: Array<{ venue: string; netAprPct: number | null }>; excluded: Array<{ name: string; reason: string }> }
+export interface YieldLens { kind: 'yield'; recommend: boolean | null; venue: string | null; asset: string | null; netAprPct: number | null; grossAprPct: number | null; sizeUsd: number | null; sources: Array<{ value: number | null; label: string }>; switching: { gasUsd: number | null; swapUsd: number | null; exitUsd: number | null }; breakEvenUsd: number | null; improvementBps: number | null; declineReason: string | null; alternatives: Array<{ venue: string; netAprPct: number | null }>; excluded: Array<{ name: string; reason: string }>; observedApys?: Array<{ venue: string; apyPct: number; availableLiquidityUsd: number | null }> }
 export interface SecurityLens { kind: 'security'; subject: string | null; symbol: string | null; verdict: string | null; findings: Array<{ severity: string; title: string; detail: string | null }>; counts: Record<string, number> | null; proxy: boolean | null; owner: string | null }
 export interface GenericLens { kind: 'generic' }
 export type LensBody = HfLens | RebLens | GridLens | YieldLens | SecurityLens | GenericLens
@@ -198,6 +198,12 @@ function yieldLens(c: J): YieldLens {
     improvementBps: num(pick(c, ['improvementBps'])),
     declineReason: str(pick(c, ['declineReason', 'decline_reason', 'reason'])),
     alternatives: venueList.map((v) => ({ venue: str(v['venue'] ?? v['name'] ?? v['symbol'] ?? v['market']) ?? '?', netAprPct: num(v['netAprPct'] ?? v['apyPct'] ?? v['supplyApyPct'] ?? v['apy'] ?? v['apr']) })).filter((v) => v.venue !== '?'),
+    // A supplied APY is a compounded quoted rate. Never relabel it as net APR or grade it with the APR checker.
+    observedApys: arr(pick(c,['ranked'])).slice(0,64).flatMap(v=>{
+      const venue=str(v['symbol'] ?? v['venue'])
+      const apyPct=num(v['supply_apy_pct'])
+      return venue !== null && apyPct !== null ? [{venue,apyPct,availableLiquidityUsd:num(v['available_liquidity_usd'])}] : []
+    }),
     excluded: arr(pick(c, ['excluded'])).map((e) => ({ name: str(e['symbol'] ?? e['venue'] ?? e['name']) ?? '?', reason: str(e['detail'] ?? e['reason']) ?? '' })),
   }
 }

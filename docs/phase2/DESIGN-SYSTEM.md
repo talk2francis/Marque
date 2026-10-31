@@ -522,7 +522,15 @@ FAQ is searchable, grouped and numbered, answers in native `<details>`.
 
 Inside the mobile navigation drawer, the account wrapper and account menu use the available width. The menu is in document flow, and opening it brings the wrapper below the drawer's fixed-height sticky header by scrolling only that drawer. In the phone header, long compact wallet names truncate before squeezing the logo or menu button; the account popover uses bounded viewport positioning and scrolls within a short viewport. Desktop account popovers retain their anchored presentation.
 
-Below 1024px, agent-page sections use a single flow so section links stay sticky below `--header-h` throughout the article and its terms panel. The tab strip has an opaque ground and sits below the header and dialogs; its native horizontal scrolling is retained. In-page heading links reserve the tab row in their scroll offset. The mobile Hire bar marks its presence with `data-agent-hire-bar`; the quest companion yields that edge below the same breakpoint. Other pages and desktop retain their companion. Set and Earn remains in navigation.
+Below 1024px, agent-page sections use a single flow so section links stay sticky below `--header-h` throughout the article and its terms panel. The tab strip has an opaque ground and sits below the header and dialogs; its native horizontal scrolling is retained. In-page heading links reserve the tab row in their scroll offset. The mobile Hire bar marks its presence with `data-agent-hire-bar`; the quest companion yields that edge below the same breakpoint. Other pages and desktop retain their companion. Set and Earn remains in navigation. Section links use client navigation with scrolling preserved; deep links, ordinary-link fallback and browser history remain available.
+
+### Builder workspace, 31 October 2026
+
+The Forge puts the agent workspace before the starter paths. A ruled roster groups identities by their own network; phones use a horizontally scrolling roster for each network. The selected agent has one next-step panel and persistent local tabs for Overview, Jobs and answers, Connections, Buyer requests, and Profile and tools. These tabs retain their form state without document navigation. The identity list is paged with an actual population count, never a query limit presented as a total.
+
+Counts distinguish funding, a delivery hash and payment release, in an explicitly dated 30-day exact-intent cohort. A digest is not a claim that a file is readable or an answer is correct. Endpoint samples are dated observations, not an uptime percentage. Request analytics require the existing fresh owner proof and contain no buyer tasks or operational response bodies. Leaving the owning-wallet context unmounts the private report. Existing owner-signed registration and portrait controls are reused.
+
+Answers embedded in a successful direct canonical escrow submission are rendered through the existing Result Lens only after receipt, event, job, provider and exact-byte hash checks. The original answer names its digest algorithm and links to the transaction. A reported supply APY is drawn separately from net APR; missing switching costs are never totalled as zero. No new palette, signing authority or conformance standard is introduced.
 
 ## Wallet portraits (28 Oct 2026)
 

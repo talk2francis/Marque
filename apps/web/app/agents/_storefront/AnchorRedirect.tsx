@@ -1,5 +1,6 @@
 'use client'
 import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 
 /** Old one-page anchors (#sf-verify, #evidence, ...) move to their routed section (SPEC-WORKSPACE 3.1). */
 const MAP: Record<string, string> = {
@@ -10,9 +11,10 @@ const MAP: Record<string, string> = {
 }
 
 export function AnchorRedirect({ base }: { base: string }) {
+  const router = useRouter()
   useEffect(() => {
     const to = MAP[window.location.hash.slice(1)]
-    if (to) window.location.replace(`${base}${to}${window.location.search}`)
-  }, [base])
+    if (to) router.replace(`${base}${to}${window.location.search}`, { scroll: false })
+  }, [base, router])
   return null
 }

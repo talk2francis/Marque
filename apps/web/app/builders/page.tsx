@@ -25,7 +25,10 @@ const STAGES = ['Scaffold', 'Strategy', 'Host', 'Register', 'Check', 'Listed'] a
  * few agents could price. Marque does the protocol, paperwork and proof; the builder writes the
  * judgement and runs the server (invariant 39).
  */
-export default async function ForgePage() {
+export default async function ForgePage({ searchParams }: { searchParams: Promise<{ wallet?: string; agent?: string }> }) {
+  const params = await searchParams
+  const wallet = /^0x[0-9a-fA-F]{40}$/.test(params.wallet ?? '') ? params.wallet! : null
+  const agent = /^(56|97):\d{1,12}$/.test(params.agent ?? '') ? params.agent! : null
   const demand = await unmetDemand()
   return (
     <>
@@ -34,10 +37,10 @@ export default async function ForgePage() {
         <header className={styles.forgeHero}>
           <div className={styles.forgeCopy}>
             <p className={styles.forgeKicker}><span className="nav-spark" aria-hidden="true" />Agent Forge</p>
-            <h1 className={styles.title}>Forge an agent BNB Chain buyers can <span className={styles.aurora}>hire</span>.</h1>
-            <p className={styles.lede}>Register it, test it against the Standard, and list it. Your wallet signs, your server runs it.</p>
+            <h1 className={styles.title}>Build it. <span className={styles.aurora}>Keep it working.</span></h1>
+            <p className={styles.lede}>Bring an agent to BNB Chain buyers. Manage its setup, follow its jobs and make every answer easy to inspect.</p>
             <div className={styles.heroCtas}>
-              <a className="btn btn--primary" href="/builders/start">Start from a starter</a>
+              <a className="btn btn--primary" href="#your-agents">Open your workspace</a>
               <a className="btn" href="/builders/run">I already run an agent</a>
             </div>
             <ul className={styles.facts}>
@@ -49,14 +52,13 @@ export default async function ForgePage() {
             <ol className={styles.stages}>
               {STAGES.map((st, i) => <li key={st} style={{ ['--i' as string]: String(i) }}><span className={styles.stageDot}><Check /></span>{st}</li>)}
             </ol>
-            <div className={styles.preview}>
-              <span className={styles.previewOrb} />
-              <span className={styles.previewText}><b>Your agent</b><small>Health factor · BSC testnet</small></span>
-              <span className={styles.previewChip}>Hireable</span>
-            </div>
           </div>
         </header>
 
+        <YourAgents wallet={wallet} agent={agent} />
+
+        <section aria-labelledby="bring-agent">
+        <h2 id="bring-agent">Build or bring an agent</h2>
         <div className={styles.doorCards}>
           {DOORS.map((d) => {
             const Icon = ICONS[d.icon]
@@ -70,7 +72,8 @@ export default async function ForgePage() {
             )
           })}
         </div>
-        <p className={styles.builderNote}>Hires on Marque name your agent&apos;s own wallet in the escrow, and each agent&apos;s build checklist shows every check the campaign asks for. Open it from Your agents below, or at <code>/builders/progress/&#123;chain&#125;/&#123;token id&#125;</code>.</p>
+        </section>
+        <p className={styles.builderNote}>Your agent&apos;s registered payment wallet receives its escrow payments. The workspace keeps listing checks, buyer jobs and campaign progress separate.</p>
         <p className={`${styles.fine} ${styles.afterDoors}`}>Registered from a Marque Pass or another wallet? <a href="/builders/link">Link your seller&apos;s wallet</a> so buyers accept its quotes.</p>
 
         <section className={styles.section} aria-labelledby="demand">
@@ -86,11 +89,6 @@ export default async function ForgePage() {
               ))}
             </ul>
           ) : <p className={styles.fine}>No task shape went under-priced 3 or more times in the last 7 days. This fills from real requests buyers send through Compare; aggregates only, never addresses.</p>}
-        </section>
-
-        <section className={styles.section} aria-labelledby="yours">
-          <h2 id="yours">Your agents</h2>
-          <YourAgents />
         </section>
 
         <section className={styles.section} aria-labelledby="split">

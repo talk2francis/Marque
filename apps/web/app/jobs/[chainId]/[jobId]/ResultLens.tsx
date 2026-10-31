@@ -2,6 +2,7 @@ import type { GridLens, HfLens, Lens, RebLens, RebPosition, SecurityLens, YieldL
 import { Limits } from '@marque/ui'
 import type { JobLens, LensCheck } from '../../../../lib/lens'
 import styles from './lens.module.css'
+import { AnswerDownload } from './AnswerDownload'
 
 /**
  * The Result Lens (SPEC-WORKSPACE 2.1): what the agent delivered, drawn for its category, with
@@ -260,9 +261,19 @@ function GridView({ l }: { l: GridLens }) {
 
 function YieldView({ l }: { l: YieldLens }) {
   const costs = [['Gas', l.switching.gasUsd], ['Swap', l.switching.swapUsd], ['Exit', l.switching.exitUsd]] as const
-  const totalCost = costs.reduce((s, [, v]) => s + (v ?? 0), 0)
+  const totalCost = costs.every(([,v])=>v!==null) ? costs.reduce((s, [, v]) => s + (v ?? 0), 0) : null
   const alts = [...(l.netAprPct !== null && l.venue ? [{ venue: `${l.venue}${l.asset ? ` ${l.asset}` : ''}`, netAprPct: l.netAprPct, chosen: true }] : []), ...l.alternatives.map((a) => ({ ...a, chosen: false }))].filter((a) => a.netAprPct !== null)
   const top = Math.max(...alts.map((a) => a.netAprPct!), l.grossAprPct ?? 0, 0.01)
+  if(l.observedApys?.length && l.netAprPct===null && l.grossAprPct===null && !alts.length) {
+    const largest=Math.max(...l.observedApys.map(r=>r.apyPct),0.01)
+    return <div className={styles.yield}>
+      <div className={styles.yHero}><span className={styles.pill}>Agent-reported supply rates</span><span className={styles.yVenue}>Yield ranking</span></div>
+      <p className={styles.legend}>Quoted supply APY includes compounding. It is not net APR after costs or a forecast. File integrity and independent rate checks are shown separately.</p>
+      <div className={styles.ranking}>{l.observedApys.slice(0,12).map((r,i)=><div className={styles.rankRow} key={`${r.venue}:${i}`}><span className={styles.rankName}>{r.venue}</span><span className={styles.rankBar}><i style={{width:`${Math.max(0,r.apyPct/largest*100)}%`}} /></span><span className={styles.rankVal}>{n(r.apyPct)}% APY</span></div>)}</div>
+      <div className={styles.tableWrap}><table className={styles.table}><thead><tr><th>Market</th><th>Supply APY</th><th>Available liquidity, reported</th></tr></thead><tbody>{l.observedApys.slice(0,12).map((r,i)=><tr key={`${r.venue}:${i}`}><td>{r.venue}</td><td>{n(r.apyPct)}%</td><td>{usd(r.availableLiquidityUsd,0)}</td></tr>)}</tbody></table></div>
+      {l.observedApys.length>12 ? <p className={styles.legend}>The first 12 of {l.observedApys.length} reported markets are shown. Every market remains in the original answer below.</p> : null}
+    </div>
+  }
   return (
     <div className={styles.yield}>
       <div className={styles.yHero}>
@@ -287,7 +298,7 @@ function YieldView({ l }: { l: YieldLens }) {
         <span className={styles.tileLabel}>Cost to switch, once</span>
         <div className={styles.costs}>
           {costs.map(([k, v]) => <span key={k} className={styles.cost}><b>{v === null ? 'n/a' : usd(v, v < 1 ? 4 : 2)}</b>{k}</span>)}
-          <span className={styles.cost} data-total=""><b>{usd(totalCost, totalCost < 1 ? 4 : 2)}</b>total</span>
+          <span className={styles.cost} data-total=""><b>{totalCost===null ? 'Not fully given' : usd(totalCost, totalCost < 1 ? 4 : 2)}</b>total</span>
         </div>
         {l.breakEvenUsd !== null ? <p className={styles.legend}>Pays for itself on deposits above {usd(l.breakEvenUsd)}.</p> : null}
       </div>
@@ -439,7 +450,7 @@ export function ResultLens({ data, agentName, content }: { data: JobLens; agentN
           {verdict ? <span className={styles.badge} data-tone={verdict}><CheckMark state={verdict === 'good' ? 'match' : 'differs'} />Checked against the chain: {data.summary.agreed} of {data.summary.checked} agree</span>
             : data.state === 'unavailable' ? <span className={styles.badge} data-tone="mixed" title="A check exists for this answer; a chain read failed and will be tried again">Chain check could not run just now · last tried {new Date(data.attemptedAt).toISOString().slice(11, 16)} UTC</span>
               : <span className={styles.badge}>Not checked: {data.reason ?? 'Marque has no check for this answer'}</span>}
-          {data.manifest?.matches === true ? <span className={styles.badge} data-tone="good"><CheckMark state="match" />File matches the hash on chain</span> : data.manifest?.matches === false ? <span className={styles.badge} data-tone="mixed"><CheckMark state="differs" />File differs from the hash on chain</span> : null}
+          {data.manifest?.matches === true ? <span className={styles.badge} data-tone="good"><CheckMark state="match" />{data.manifest.source === 'submission_calldata' ? 'Answer matches the hash on chain' : 'File matches the hash on chain'}</span> : data.manifest?.matches === false ? <span className={styles.badge} data-tone="mixed"><CheckMark state="differs" />File differs from the hash on chain</span> : null}
         </div>
       </header>
 
@@ -480,7 +491,8 @@ export function ResultLens({ data, agentName, content }: { data: JobLens; agentN
           <details className={styles.original}>
             <summary>Original answer</summary>
             <pre tabIndex={0}>{data.manifest.raw.length > 40_000 ? `${data.manifest.raw.slice(0, 40_000)}\n…` : data.manifest.raw}</pre>
-            <p className={styles.legend}>{data.manifest.url ? <a href={data.manifest.url} rel="nofollow noreferrer" target="_blank" download>Download the file</a> : null}{data.manifest.hash ? <> · keccak256 <code>{short(data.manifest.hash)}</code></> : null}{data.manifest.source === 'agent_announced' ? ' · published by the agent, location from its answer to Marque' : ''}</p>
+            {data.manifest.source==='submission_calldata' ? <AnswerDownload raw={data.manifest.raw} /> : null}
+            <p className={styles.legend}>{data.manifest.url ? <a href={data.manifest.url} rel="nofollow noreferrer" target="_blank" download={data.manifest.source === 'submission_calldata' ? undefined : true}>{data.manifest.source === 'submission_calldata' ? 'View the submission transaction' : 'Download the file'}</a> : null}{data.manifest.hash ? <> · {data.manifest.hashAlgorithm ?? 'keccak256'} <code>{short(data.manifest.hash)}</code></> : null}{data.manifest.source === 'submission_calldata' ? ' · answer read from the successful on-chain submission; exact bytes checked' : data.manifest.source === 'agent_announced' ? ' · published by the agent, location from its answer to Marque' : ''}</p>
           </details>
         ) : null}
       </div>
