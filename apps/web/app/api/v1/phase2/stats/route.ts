@@ -7,5 +7,5 @@ export const dynamic = 'force-dynamic'
 export async function GET(req: Request) {
   const chainId = chainParam(req.url)
   if (!chainId) return bad('chainId must be 56 or 97.')
-  return served(`phase2:stats:${chainId}`, 'stats', () => questStats(chainId))
+  return served(`phase2:stats:v2:${chainId}`, 'stats', () => questStats(chainId))
 }

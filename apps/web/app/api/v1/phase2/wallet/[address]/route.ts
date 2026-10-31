@@ -9,5 +9,5 @@ export async function GET(req: Request, { params }: { params: Promise<{ address:
   if (!ADDRESS.test(address)) return bad('Send a 0x address of 40 hex characters.')
   const chainId = chainParam(req.url)
   if (!chainId) return bad('chainId must be 56 or 97.')
-  return served(`phase2:wallet:${chainId}:${address.toLowerCase()}`, 'wallet', () => walletQuest(address, chainId))
+  return served(`phase2:wallet:v2:${chainId}:${address.toLowerCase()}`, 'wallet', () => walletQuest(address, chainId))
 }

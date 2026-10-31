@@ -12,7 +12,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ chainId:
   if (!isSupportedChain(c)) return bad('chainId must be 56 or 97.')
   if (!/^\d{1,30}$/.test(jobId)) return bad('jobId must be a number.')
   const portable = new URL(req.url).searchParams.get('format') === 'bundle'
-  const res = await served(`phase2:${portable ? 'job-evidence' : 'job'}:${c}:${jobId}`, 'job', async () => (await questJob(c, jobId, portable ? { portable: true } : {})) ?? { notFound: true })
+  const res = await served(`phase2:${portable ? 'job-evidence:v2' : 'job:v2'}:${c}:${jobId}`, 'job', async () => (await questJob(c, jobId, portable ? { portable: true } : {})) ?? { notFound: true })
   const body = await res.clone().json().catch(() => null) as { notFound?: boolean } | null
   if (body?.notFound) return NextResponse.json({ error: 'not_found', detail: `No indexed job ${jobId} on chain ${c}.` }, { status: 404, headers: HEADERS })
   if (res.ok && portable) {
