@@ -38,6 +38,7 @@ describe('readable delivered results keep rate units and integrity distinct', ()
       {
         result: {
           plan: {
+            best_available: { symbol: 'vUSDT', supply_apy_pct: 4.2 },
             ranked: [
               { symbol: 'vUSDT', supply_apy_pct: 4.2, available_liquidity_usd: 1000 },
               { symbol: 'vUSD', supply_apy_pct: 0, available_liquidity_usd: 0 },

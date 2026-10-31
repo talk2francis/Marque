@@ -86,10 +86,27 @@ export function builderNextStep(
   const fix = agent.quality.checks.find((c) => !c.pass)
   if (fix)
     return {
-      title: fix.label,
+      title:
+        (
+          {
+            identity: 'Check the identity owner',
+            proved: 'Prove ownership',
+            callable: 'Check a task reply',
+            classified: 'Choose a category',
+            tested: 'Run the published test',
+          } as Record<string, string>
+        )[fix.id] ?? 'Review the setup check',
       detail: fix.fix ?? fix.reason,
       href: base,
       action: 'Open this check',
+    }
+  if (agent.seller.jobs.funded === 0)
+    return {
+      title: 'Get ready for the first buyer',
+      detail:
+        'Keep your endpoint online and make sure a funded job produces a readable answer. No funded job is recorded in this window yet.',
+      href: '/docs/sellers',
+      action: 'Check the delivery format',
     }
   if (agent.seller.jobs.submitted === 0)
     return {

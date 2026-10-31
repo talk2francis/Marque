@@ -238,7 +238,7 @@ function Overview({ d, cat, shown, tenderHref, tryHref, delivery, lens, base }: 
           <>
             <p className={styles.note}>
               Delivered for <a href={`/jobs/${d.sample.chainId}/${d.sample.jobId}`}>job {d.sample.jobId}</a>{d.sample.at ? ` on ${utcDay(d.sample.at)}` : ''}, a paid escrow job.{' '}
-              {d.sample.manifest.matches ? <span className={styles.ok}><Check aria-hidden="true" />The file matches the hash it recorded on chain.</span> : d.sample.manifest.matches === false ? <span className={styles.bad}><X aria-hidden="true" />The file does not match the hash on chain.</span> : null}
+              {d.sample.manifest.matches ? <span className={styles.ok}><Check aria-hidden="true" />{d.sample.manifest.source==='submission_calldata' ? 'The answer matches the hash it recorded on chain.' : 'The file matches the hash it recorded on chain.'}</span> : d.sample.manifest.matches === false ? <span className={styles.bad}><X aria-hidden="true" />The file does not match the hash on chain.</span> : null}
             </p>
             <div className={styles.sample}>
               {lens?.manifest?.raw

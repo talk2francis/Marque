@@ -74,7 +74,7 @@ export async function storefront(agentId: string): Promise<Storefront | null> {
   const live = currentTerms(agentId).catch(() => null)
   let value: Storefront | null
   try {
-    value = (await cachedProjection(`storefront:v6:${agentId}`, () => computeStorefront(agentId), { freshMs: 30_000, timeoutMs: 12_000, staleWhileRevalidate: true })).value
+    value = (await cachedProjection(`storefront:v7:${agentId}`, () => computeStorefront(agentId), { freshMs: 30_000, timeoutMs: 12_000, staleWhileRevalidate: true })).value
   } catch {
     value = await computeStorefront(agentId)
   }
@@ -132,7 +132,7 @@ async function computeStorefront(agentId: string): Promise<Storefront | null> {
   const wallet = s(a['agent_wallet'])
   if (wallet) {
     const jobs = rowsOf(await db().execute(sql`
-      select j.job_id, j.deliverable, j.provider, e.block_time from commerce_job j
+      select j.job_id, j.deliverable, j.provider, e.block_time, e.tx_hash from commerce_job j
       left join hire_intent i on i.id = j.intent_id
       left join commerce_event e on e.chain_id = j.chain_id and e.job_id = j.job_id and e.name = 'JobSubmitted'
       where j.chain_id = ${chainId} and j.state in ('SUBMITTED', 'DISPUTED', 'COMPLETED', 'PAID') and j.deliverable is not null
@@ -142,7 +142,7 @@ async function computeStorefront(agentId: string): Promise<Storefront | null> {
       const id = String(j['job_id']), hash = s(j['deliverable'])
       const manifest = fp
         ? await readManifest(`https://marque.trade/agents/${fp.slug}/erc8183/job/${id}/response`, hash)
-        : await jobManifest(chainId, id, { deliverable: { hash }, provider: s(j['provider']) }, hash).catch(() => null)
+        : await jobManifest(chainId, id, { deliverable: { hash }, provider: s(j['provider']), events: s(j['tx_hash']) ? [{name:'JobSubmitted',tx:String(j['tx_hash'])}] : [] }, hash).catch(() => null)
       if (manifest?.content) { sample = { jobId: id, chainId, at: iso(j['block_time']), manifest, hashOnChain: hash }; break }
     }
   }

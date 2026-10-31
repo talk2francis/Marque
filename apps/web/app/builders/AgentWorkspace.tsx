@@ -20,6 +20,13 @@ import type { SellerProjection } from '../../lib/seller'
 import styles from './workspace.module.css'
 
 const ADDRESS = /^0x[0-9a-fA-F]{40}$/
+const CHECK_LABEL: Record<string, string> = {
+  identity: 'Identity owner',
+  proved: 'Ownership proof',
+  callable: 'Task reply',
+  classified: 'Category',
+  tested: 'Published test',
+}
 const category: Record<string, string> = {
   yield: 'Yield',
   rebalancing: 'Rebalancing',
@@ -160,7 +167,12 @@ export function AgentWorkspace({
   }
 
   return (
-    <section id="your-agents" className={styles.workspace} aria-labelledby="your-agents-heading">
+    <section
+      id="your-agents"
+      className={styles.workspace}
+      aria-labelledby="your-agents-heading"
+      data-builder-workspace
+    >
       <div className={styles.heading}>
         <div>
           <p className={styles.kicker}>Your workspace</p>
@@ -455,8 +467,12 @@ function AgentDetail({
                           )}
                         </span>
                         <div>
-                          <strong>{c.label}</strong>
-                          <p>{c.pass ? c.reason : (c.fix ?? c.reason)}</p>
+                          <strong>{CHECK_LABEL[c.id] ?? c.label}</strong>
+                          <details className={styles.checkDetail}>
+                            <summary>{c.pass ? 'View evidence' : 'View the fix'}</summary>
+                            <p>{c.reason}</p>
+                            {c.fix ? <p>{c.fix}</p> : null}
+                          </details>
                         </div>
                         <span>
                           {c.state === 'pass'
@@ -537,7 +553,7 @@ function AgentDetail({
                                 : 'Not funded'}
                           </small>
                           <Link href={`/jobs/${j.chainId}/${j.jobId}`}>
-                            Open answer
+                            {j.deliveryRecorded ? 'Open answer' : 'Open job'}
                             <ArrowUpRight aria-hidden="true" />
                           </Link>
                         </div>

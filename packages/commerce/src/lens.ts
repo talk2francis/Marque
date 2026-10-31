@@ -189,15 +189,15 @@ function yieldLens(c: J): YieldLens {
     recommend: bool(pick(c, ['recommend', 'recommended'])),
     venue: str(pick(c, ['venue', 'recommendedVenue', 'best'])),
     asset: str(pick(c, ['asset', 'token', 'stable'])),
-    netAprPct: num(pick(c, ['netAprPct', 'netApr', 'net_apr_pct', 'netApyPct'])),
-    grossAprPct: num(pick(c, ['grossAprPct', 'grossApr', 'aprPct', 'supplyApyPct', 'apy'])),
+    netAprPct: num(pick(c, ['netAprPct', 'netApr', 'net_apr_pct'])),
+    grossAprPct: num(pick(c, ['grossAprPct', 'grossApr', 'aprPct'])),
     sizeUsd: num(pick(c, ['sizeUsd', 'amountUsd', 'size'])),
     sources: arr(pick(c, ['aprSources', 'sources'])).map((s) => ({ value: num(s['value']), label: str(s['source'] ?? s['label']) ?? 'source not stated' })),
     switching: { gasUsd: num(sw['gasUsd']), swapUsd: num(sw['swapUsd']), exitUsd: num(sw['exitUsd']) },
     breakEvenUsd: num(pick(c, ['breakEvenUsd', 'break_even_usd'])),
     improvementBps: num(pick(c, ['improvementBps'])),
     declineReason: str(pick(c, ['declineReason', 'decline_reason', 'reason'])),
-    alternatives: venueList.map((v) => ({ venue: str(v['venue'] ?? v['name'] ?? v['symbol'] ?? v['market']) ?? '?', netAprPct: num(v['netAprPct'] ?? v['apyPct'] ?? v['supplyApyPct'] ?? v['apy'] ?? v['apr']) })).filter((v) => v.venue !== '?'),
+    alternatives: venueList.map((v) => ({ venue: str(v['venue'] ?? v['name'] ?? v['symbol'] ?? v['market']) ?? '?', netAprPct: num(v['netAprPct'] ?? v['apr']) })).filter((v) => v.venue !== '?'),
     // A supplied APY is a compounded quoted rate. Never relabel it as net APR or grade it with the APR checker.
     observedApys: arr(pick(c,['ranked'])).slice(0,64).flatMap(v=>{
       const venue=str(v['symbol'] ?? v['venue'])

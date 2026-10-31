@@ -7,7 +7,7 @@ const lens = (name: string) => normalizeAnswer(a[name]!.category, a[name]!.conte
 
 describe('Result Lens normaliser on real deliveries', () => {
   it('keeps reported supply APYs separate from net APR and preserves valid zero rates',()=>{
-    const result=normalizeAnswer('yield',{result:{plan:{ranked:[{symbol:'vUSDT',supply_apy_pct:4.2,available_liquidity_usd:1000},{symbol:'vUSD',supply_apy_pct:0,available_liquidity_usd:0},{symbol:'malformed',supply_apy_pct:'not a number'}]}}})
+    const result=normalizeAnswer('yield',{result:{plan:{best_available:{symbol:'vUSDT',supply_apy_pct:4.2},ranked:[{symbol:'vUSDT',supply_apy_pct:4.2,available_liquidity_usd:1000},{symbol:'vUSD',supply_apy_pct:0,available_liquidity_usd:0},{symbol:'malformed',supply_apy_pct:'not a number'}]}}})
     expect(result.kind).toBe('yield')
     if(result.kind!=='yield')throw Error('wrong category')
     expect(result.observedApys).toEqual([{venue:'vUSDT',apyPct:4.2,availableLiquidityUsd:1000},{venue:'vUSD',apyPct:0,availableLiquidityUsd:0}])

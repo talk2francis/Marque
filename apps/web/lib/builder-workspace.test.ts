@@ -74,6 +74,11 @@ describe('builder status keeps listing, current price and paid delivery separate
     a.seller.jobs.submitted = 1
     expect(builderNextStep(a, now).title).toBe('Keep the delivery path working')
   })
+  it('does not ask an agent with no funded jobs to deliver a nonexistent job', () => {
+    const a = agent()
+    a.seller.jobs.funded = 0
+    expect(builderNextStep(a, now).title).toBe('Get ready for the first buyer')
+  })
   it.each([
     [null, 0],
     ['0', 0],
