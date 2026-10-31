@@ -248,7 +248,8 @@ function Overview({ d, cat, shown, tenderHref, tryHref, delivery, lens, base }: 
           </>
         ) : (
           <div className={styles.emptyBox}>
-            <p>No delivered answer is readable in this record yet.{d.isReference ? ' Run your own task free and see its real answer before you pay.' : ''}</p>
+            <p>No readable answer is linked to this agent yet.{d.isReference ? ' Run your own task free and see its real answer before you pay.' : ''}</p>
+            {!d.isReference ? <details><summary>Why a wallet's job may not appear here</summary><p>Hires through Marque identify the agent directly. A job opened elsewhere is associated here only when its payment wallet matches one indexed identity on the same network. A shared wallet alone cannot identify which agent delivered; its public Job Room remains available.</p></details> : null}
             {d.isReference ? <a className="btn btn--sm" href={tryHref}>Try free</a> : null}
           </div>
         )}

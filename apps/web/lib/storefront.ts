@@ -9,6 +9,7 @@ import { jobManifest, readManifest, type Manifest } from './manifest'
 import { referenceAgent } from './reference-agents'
 import { registrationTx } from './registration'
 import { registryImageUrl } from './avatar-source'
+import { agentSampleJobs } from './agent-job-scope'
 
 /**
  * Everything one storefront shows (DESIGN-SYSTEM.md 8.4), for a reference agent or a
@@ -74,7 +75,7 @@ export async function storefront(agentId: string): Promise<Storefront | null> {
   const live = currentTerms(agentId).catch(() => null)
   let value: Storefront | null
   try {
-    value = (await cachedProjection(`storefront:v7:${agentId}`, () => computeStorefront(agentId), { freshMs: 30_000, timeoutMs: 12_000, staleWhileRevalidate: true })).value
+    value = (await cachedProjection(`storefront:v8:${agentId}`, () => computeStorefront(agentId), { freshMs: 30_000, timeoutMs: 12_000, staleWhileRevalidate: true })).value
   } catch {
     value = await computeStorefront(agentId)
   }
@@ -126,25 +127,17 @@ async function computeStorefront(agentId: string): Promise<Storefront | null> {
 
   // The sample: the agent's newest delivered job whose published answer verifies against the hash on chain. Marque's
   // own agents serve it at a known path; any other agent's is found the way the Job Room finds it (jobManifest:
-  // the operator's per-job path, or the content-addressed file on its hosts). Until 28 Oct only Marque's agents had
+  // a published path or verified canonical submission). Shared provider wallets alone do not identify an agent. Until 28 Oct only Marque's agents had
   // one, so every third-party agent page showed no latest answer.
   let sample: StoreSample | null = null
   const wallet = s(a['agent_wallet'])
-  if (wallet) {
-    const jobs = rowsOf(await db().execute(sql`
-      select j.job_id, j.deliverable, j.provider, e.block_time, e.tx_hash from commerce_job j
-      left join hire_intent i on i.id = j.intent_id
-      left join commerce_event e on e.chain_id = j.chain_id and e.job_id = j.job_id and e.name = 'JobSubmitted'
-      where j.chain_id = ${chainId} and j.state in ('SUBMITTED', 'DISPUTED', 'COMPLETED', 'PAID') and j.deliverable is not null
-        and (i.agent_id = ${agentId} or (i.agent_id is null and lower(j.provider) = ${wallet.toLowerCase()}))
-      order by j.updated_block desc nulls last limit 3`).catch(() => []))
-    for (const j of jobs) {
-      const id = String(j['job_id']), hash = s(j['deliverable'])
-      const manifest = fp
-        ? await readManifest(`https://marque.trade/agents/${fp.slug}/erc8183/job/${id}/response`, hash)
-        : await jobManifest(chainId, id, { deliverable: { hash }, provider: s(j['provider']), events: s(j['tx_hash']) ? [{name:'JobSubmitted',tx:String(j['tx_hash'])}] : [] }, hash).catch(() => null)
-      if (manifest?.content) { sample = { jobId: id, chainId, at: iso(j['block_time']), manifest, hashOnChain: hash }; break }
-    }
+  const sampleRows = await agentSampleJobs(agentId, chainId, wallet).catch(() => [])
+  for (const j of sampleRows) {
+    const id = String(j['job_id']), hash = s(j['deliverable'])
+    const manifest = fp
+      ? await readManifest(`https://marque.trade/agents/${fp.slug}/erc8183/job/${id}/response`, hash)
+      : await jobManifest(chainId, id, { deliverable: { hash }, provider: s(j['provider']), events: s(j['tx_hash']) ? [{name:'JobSubmitted',tx:String(j['tx_hash'])}] : [] }, hash).catch(() => null)
+    if (manifest?.content) { sample = { jobId: id, chainId, at: iso(j['block_time']), manifest, hashOnChain: hash }; break }
   }
 
   const lp = probe[0]

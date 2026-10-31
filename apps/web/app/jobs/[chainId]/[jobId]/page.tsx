@@ -136,7 +136,7 @@ export default async function JobRoom({ params }: { params: Promise<{ chainId: s
               </div>
             </div>
             <dl className={styles.facts}>
-              <div><dt>Agent</dt><dd>{agentName}{job?.agent?.firstParty ? <Badge kind="reference" /> : null}</dd></div>
+              <div><dt>Agent</dt><dd>{job?.agent?.agentKey ? agentName : 'Identity not linked'}{job?.agent?.firstParty ? <Badge kind="reference" /> : null}</dd></div>
               <div><dt>Category</dt><dd>{CAT[category ?? ''] ?? 'Unclassified'}</dd></div>
               <div><dt>{originalQuote ? 'Original quote' : 'Amount'}</dt><dd className={styles.num}>{priceLabel ?? 'unknown'} <ProvenanceChip provenance={originalQuote ? 'MEASURED' : 'ONCHAIN'} /></dd></div>
               <div><dt>Job</dt><dd className={styles.num}>#{jobId}</dd></div>

@@ -135,3 +135,5 @@
 
 /* Evidence links remain readable and operable without precise tapping. */
 .crumbs a, .note a, .muted a, .ratingBox a, .revMeta a, .verdictTitle a, .table a, .facts a { display: inline-block; min-height: 28px; padding-block: 3px; }
+
+.emptyBox summary { min-height:36px; padding-block:8px; cursor:pointer; }

@@ -104,11 +104,16 @@ async function hiresFor(where: ReturnType<typeof sql>): Promise<QuestHire[]> {
            (select json_object_agg(e.name, json_build_object('tx', e.tx_hash, 'at', e.block_time))
               from commerce_event e where e.chain_id = j.chain_id and e.job_id = j.job_id) as ev
     from commerce_job j
-    left join hire_intent i on i.id = j.intent_id
+    left join hire_intent i on i.id = j.intent_id and i.chain_id = j.chain_id and i.job_id = j.job_id
     left join lateral (
       select * from agent a
-      where (i.agent_id is not null and a.id = i.agent_id)
-         or (i.agent_id is null and a.agent_wallet = j.provider and a.chain_id = 56)
+      where a.chain_id = j.chain_id and (
+        (i.agent_id is not null and a.id = i.agent_id)
+        or (j.intent_id is null and lower(a.agent_wallet) = lower(j.provider) and not exists (
+          select 1 from agent sibling where sibling.chain_id = a.chain_id
+            and lower(sibling.agent_wallet) = lower(a.agent_wallet) and sibling.id <> a.id
+        ))
+      )
       order by (a.id = i.agent_id) desc nulls last limit 1
     ) a on true
     where ${where}
@@ -122,7 +127,7 @@ async function hiresFor(where: ReturnType<typeof sql>): Promise<QuestHire[]> {
     const tok = s(r['token'])
     const asset = tok ? assetAt(chainId, tok) : null
     const tokenId = s(r['a_token'])
-    const first = tokenId ? fp.find((f) => String(f.tokenId) === tokenId) ?? null : null
+    const first = tokenId ? fp.find((f) => chainId === 56 ? String(f.tokenId) === tokenId : f.testnet?.chainId === chainId && String(f.testnet.tokenId) === tokenId) ?? null : null
     const category = s(r['i_category']) ?? first?.category ?? null
     const client = String(r['client'])
     const provider = String(r['provider'])
@@ -132,14 +137,14 @@ async function hiresFor(where: ReturnType<typeof sql>): Promise<QuestHire[]> {
     if (team.has(client)) reasons.push('team_wallet')
     if (client === provider || (owner && client === owner)) reasons.push('self_hire')
     if (!r['funded_raw'] || String(r['funded_raw']) === '0') reasons.push('zero_deposit')
-    if (!r['intent_id']) reasons.push('not_marque')
+    if (!r['i_id']) reasons.push('not_marque')
     if (!DELIVERED.has(state) && ['REFUNDED', 'REJECTED', 'CANCELLED', 'EXPIRED'].includes(state)) reasons.push('not_delivered')
     out.push({
       jobKey: `${chainId}:${r['job_id']}`, chainId, jobId: String(r['job_id']),
       agent: { agentKey: s(r['a_id']), agentId: tokenId, name: s(r['a_name']), owner, provider, category, firstParty: first !== null },
       amount: s(r['funded_raw']) ?? s(r['budget_raw']),
       token: { address: tok, symbol: asset?.symbol ?? null, decimals: asset?.decimals ?? null },
-      state, marque: Boolean(r['intent_id']), intentId: s(r['intent_id']),
+      state, marque: Boolean(r['i_id']), intentId: s(r['i_id']),
       tx: {
         created: ev['JobCreated']?.tx ?? null, registered: ev['JobRegistered']?.tx ?? null, budgetSet: ev['BudgetSet']?.tx ?? null,
         funded: ev['JobFunded']?.tx ?? null, submitted: ev['JobSubmitted']?.tx ?? null, completed: ev['JobCompleted']?.tx ?? null,
@@ -158,6 +163,7 @@ async function hiresFor(where: ReturnType<typeof sql>): Promise<QuestHire[]> {
 /** The ERC-8004 token id an agent has on a given chain's registry (first-party agents carry both). */
 function tokenOnChain(h: QuestHire): string | null {
   if (h.chainId === 56) return h.agent.agentId
+  if (h.agent.agentKey?.startsWith(`${h.chainId}:`)) return h.agent.agentId
   const first = firstPartyAgents().find((f) => String(f.tokenId) === h.agent.agentId)
   return first?.testnet?.chainId === h.chainId ? String(first.testnet.tokenId) : null
 }

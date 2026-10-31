@@ -4,6 +4,7 @@ import { cachedProjection } from '@marque/db'
 import { boundedCommerceRead } from '@marque/commerce/reads'
 import { teamWallets } from '@marque/commerce'
 import { buyerFeedbackBinding } from '@marque/commerce/feedback'
+import { exclusiveProviderIdentity } from './agent-job-scope'
 
 /**
  * An agent's record as a seller, read from the chain index (DESIGN-SYSTEM.md 8.3 and
@@ -42,7 +43,7 @@ export const EMPTY_TRACK = (chainId: number): AgentTrack => ({
 })
 
 /** Every agent with any rating or any job on this chain, keyed by ERC-8004 token id. */
-async function computeTracks(chainId: number): Promise<Record<string, AgentTrack>> {
+export async function computeTracks(chainId: number): Promise<Record<string, AgentTrack>> {
   const team = teamWallets()
   const teamList = team.length ? sql.join(team.map((w) => sql`${w}`), sql`, `) : sql`''`
   const [ratings, jobs] = await Promise.all([
@@ -64,7 +65,7 @@ async function computeTracks(chainId: number): Promise<Record<string, AgentTrack
       from r group by tid`),
     boundedCommerceRead(sql`
       -- A Marque hire names the exact identity it hired; a job opened elsewhere counts for
-      -- every identity that registered the provider wallet (the chain cannot say which).
+      -- an indexed identity only if the provider wallet is unique on this network.
       select coalesce(nullif(split_part(i.agent_id, ':', 3), ''), a.token_id) as tid,
              count(*) filter (where j.funded_raw is not null and j.funded_raw <> '0')::int as funded,
              count(*) filter (where j.state in ('SUBMITTED', 'DISPUTED', 'COMPLETED', 'PAID'))::int as delivered,
@@ -78,8 +79,9 @@ async function computeTracks(chainId: number): Promise<Record<string, AgentTrack
                filter (where s.block_time is not null and f.block_time is not null) as median_s,
              count(*) filter (where s.block_time is not null and f.block_time is not null)::int as samples
       from commerce_job j
-      left join hire_intent i on i.id = j.intent_id
-      left join agent a on i.agent_id is null and a.chain_id = 56 and lower(a.agent_wallet) = j.provider
+      left join hire_intent i on i.id = j.intent_id and i.chain_id = j.chain_id and i.job_id = j.job_id
+      left join agent a on j.intent_id is null and a.chain_id = j.chain_id and lower(a.agent_wallet) = lower(j.provider)
+        and ${exclusiveProviderIdentity(sql`a.id`, sql`a.agent_wallet`, sql`a.chain_id`)}
       left join agent ag on ag.id = coalesce(i.agent_id, a.id)
       left join commerce_event f on f.chain_id = j.chain_id and f.job_id = j.job_id and f.name = 'JobFunded'
       left join commerce_event s on s.chain_id = j.chain_id and s.job_id = j.job_id and s.name = 'JobSubmitted'
@@ -108,7 +110,7 @@ async function computeTracks(chainId: number): Promise<Record<string, AgentTrack
 /** Cached for a minute: ratings and jobs change on the indexer's pace, not per page view. */
 export async function agentTracks(chainId = 56): Promise<{ tracks: Record<string, AgentTrack>; computedAt: string; stale: boolean } | null> {
   try {
-    const p = await cachedProjection(`agent:tracks:v3:${chainId}`, () => computeTracks(chainId), { freshMs: 60_000, timeoutMs: 8_000, staleWhileRevalidate: true })
+    const p = await cachedProjection(`agent:tracks:v4:${chainId}`, () => computeTracks(chainId), { freshMs: 60_000, timeoutMs: 8_000, staleWhileRevalidate: true })
     return { tracks: p.value, computedAt: p.computedAt, stale: p.stale }
   } catch {
     return null

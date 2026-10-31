@@ -222,7 +222,7 @@ function missingInput(lens: Lens, task: string | null): string {
 
 /** Cached 10 minutes per job: a delivered answer does not change; checks are pinned to its block. */
 export function jobLens(chainId: ChainId, jobId: string) {
-  return cachedProjection(`lens:v8:${chainId}:${jobId}`, () => build(chainId, jobId), { freshMs: 10 * 60_000, timeoutMs: 20_000 })
+  return cachedProjection(`lens:v9:${chainId}:${jobId}`, () => build(chainId, jobId), { freshMs: 10 * 60_000, timeoutMs: 20_000 })
 }
 
 /** Recompute a job's checks and terms from chain now, ignoring and never writing the stored result (the replay command). */
