@@ -1,12 +1,13 @@
-import { describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { PgDialect } from 'drizzle-orm/pg-core'
 const mocks = vi.hoisted(() => ({ states: vi.fn(), read: vi.fn(), capabilities: vi.fn(), tracks: vi.fn().mockResolvedValue(null) }))
 vi.mock('@marque/commerce', async original => ({ ...await original<object>(), commercialStates: mocks.states }))
 vi.mock('@marque/commerce/reads', () => ({ boundedCommerceRead: mocks.read, coalescedCatalogRead: mocks.read }))
 vi.mock('./agent-state', async original => ({ ...await original<object>(), agentStates: mocks.capabilities }))
 vi.mock('./agent-track', async original => ({ ...await original<object>(), agentTracks: mocks.tracks }))
-import { marketplaceAgents, marketPageAgentStates } from './marketplace'
+import { marketplaceAgents, marketPageAgentStates, resetSharedMarketReads } from './marketplace'
 describe('ready selection before the broad catalog read', () => {
+  beforeEach(() => resetSharedMarketReads())
   it('returns measured empty supply for no stored quotes without scanning the registry', async () => {
     mocks.read.mockClear(); mocks.states.mockResolvedValueOnce(new Map())
     expect(await marketplaceAgents({ tab: 'ready' })).toMatchObject({ rows: [], total: 0, offset: 0, hasMore: false })
@@ -48,8 +49,24 @@ describe('ready selection before the broad catalog read', () => {
       .mockResolvedValueOnce([{ agent_id: id, owner_address: id, category: 'yield', name: 'Synthetic renewal fixture' }])
     mocks.tracks.mockResolvedValue(null); mocks.capabilities.mockResolvedValue(new Map())
     expect((await marketplaceAgents({ tab: 'ready' })).rows[0]?.commerce.priceRaw).toBe('1')
+    // The shared quote read lasts seconds, not the catalog's minutes: once it lapses the renewed terms show.
+    resetSharedMarketReads()
     expect((await marketplaceAgents({ tab: 'ready' })).rows[0]?.commerce.priceRaw).toBe('2')
     expect(mocks.read).toHaveBeenCalledTimes(2) // metadata is still reused; no new catalog scan
+  })
+
+  it('shares one quote read across consecutive searches', async () => {
+    const id = '56:synthetic-search-boundary'
+    mocks.states.mockReset().mockResolvedValue(new Map([[989, { agentId: id, serviceId: 989, state: 'hireable', priceRaw: '1',
+      token: { address: '0x0000000000000000000000000000000000000001', symbol: 'U', decimals: 18 },
+      chainId: 56, quoteExpiresAt: new Date(Date.now() + 600_000).toISOString() }]]))
+    mocks.read.mockReset().mockResolvedValueOnce([{ id, owner_address: id }])
+      .mockResolvedValueOnce([{ agent_id: id, owner_address: id, category: 'yield', name: 'Synthetic search fixture' }])
+    mocks.tracks.mockResolvedValue(null); mocks.capabilities.mockResolvedValue(new Map())
+    expect((await marketplaceAgents({ tab: 'ready', search: 'synthetic' })).total).toBe(1)
+    expect((await marketplaceAgents({ tab: 'ready', search: 'synthetic s' })).total).toBe(1)
+    expect((await marketplaceAgents({ tab: 'ready', search: 'nothing like it' })).total).toBe(0)
+    expect(mocks.states).toHaveBeenCalledTimes(1)
   })
 
   it('retains the full null-owner partition instead of narrowing unknown ownership', async () => {

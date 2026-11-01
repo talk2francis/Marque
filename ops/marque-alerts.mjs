@@ -10,7 +10,8 @@
  *   node ops/marque-alerts.mjs --test     send one test message per signal, then exit
  *
  * Telegram: MARQUE_TELEGRAM_BOT_TOKEN and MARQUE_TELEGRAM_CHAT_ID in secrets.env. Without
- * them every alert is written to stdout (PM2 log) and nothing is paged.
+ * them every alert is written to stdout (PM2 log) and nothing is paged. MARQUE_TELEGRAM_THREAD_ID
+ * posts into one forum topic of that chat (the community group's health topic), never General.
  */
 import { readFileSync, writeFileSync, existsSync, statfsSync } from 'node:fs'
 import { execFileSync } from 'node:child_process'
@@ -22,6 +23,7 @@ const env = Object.fromEntries(readFileSync(SECRETS, 'utf8').split('\n').filter(
 const BASE = env.MARQUE_PUBLIC_URL || 'https://marque.trade'
 const TOKEN = env.MARQUE_TELEGRAM_BOT_TOKEN || ''
 const CHAT = env.MARQUE_TELEGRAM_CHAT_ID || ''
+const THREAD = /^\d+$/.test(env.MARQUE_TELEGRAM_THREAD_ID || '') ? Number(env.MARQUE_TELEGRAM_THREAD_ID) : null
 const STATE = '/root/.marque/alerts-state.json'
 const ACCESS_LOG = '/var/log/caddy/marque-access.log'
 const KEEPER = '0x781ee69bf9f9C14E2BC496181714f4DF5348556a'
@@ -35,7 +37,7 @@ async function telegram(text) {
   if (!TOKEN || !CHAT) { log('[telegram off]', text.replace(/\n/g, ' | ')); return false }
   const r = await fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
     method: 'POST', headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ chat_id: CHAT, text, disable_web_page_preview: true }),
+    body: JSON.stringify({ chat_id: CHAT, ...(THREAD ? { message_thread_id: THREAD } : {}), text, disable_web_page_preview: true }),
     signal: AbortSignal.timeout(10_000),
   }).catch((e) => ({ ok: false, statusText: e.message }))
   if (!r.ok) log('[telegram failed]', r.status ?? '', r.statusText ?? '')

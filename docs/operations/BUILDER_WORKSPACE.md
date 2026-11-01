@@ -1,6 +1,6 @@
 # Builder workspace and delivery recovery
 
-The workspace at `/builders/my-agents` uses the existing owner, seller, claim and registration rails. Any owner address can be read without a wallet. Public status does not unlock private quote analytics or editing. A connected current identity owner signs the existing proof message to read the private report; no job or payment is created.
+The workspace at `/builders/my-agents` uses the existing owner, seller, claim and registration rails. Any owner address can be read without a wallet. Public status does not unlock editing. The workspace has four tabs: Overview, Jobs and answers, Connections, and Profile and tools. The owner-signed private quote report lives in the build checklist, not in the workspace.
 
 `GET /api/v1/phase2/owner/{address}?cursor=8` returns up to eight identities and a `page` with the actual population `total` and `nextCursor`. The cache includes owner and cursor. The quality-listing aggregate describes the returned page, not every identity. Service price samples remain dated and are not reservations for a future buyer task.
 
@@ -46,3 +46,9 @@ Bound's former primary and two fallback LP positions all had zero liquidity at b
 The nightly encrypted Google Drive backup was verified at 02:40:58 UTC on 1 November; local/remote receipts both identify `20261101T021701Z`. The runbook now states the actual Europe/Berlin cron timezone. No backup configuration or schedule was changed.
 
 The exact hire flow takes priority over background section prefetch. Task examples reuse the shared sized button and disclosure controls. The Forge workspace link meets the minimum target height and its starter recommendation has contrasting text in both themes.
+
+## Release follow-up, 1 November 2026 (evening)
+
+- The workspace's private quote-report tab was removed. Its label read as a buyer request board, which Marque does not have; the same owner-signed quote diagnostics stay in the build checklist. The workspace now has four tabs.
+- Marketplace search no longer re-reads every stored quote for each new search term. The catalog-wide quote read (about 2 s over the quote history) and the category id reads are shared for a few seconds across marketplace and ladder reads, so a new term costs an in-memory filter. Quote expiry is still applied on every response.
+- Pager messages from `marque-health`, `marque-alerts` and the unpriced alarm in `marque-quotes` post into the community group's "Marque's health status" topic instead of its General chat.

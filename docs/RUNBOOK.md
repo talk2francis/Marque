@@ -178,9 +178,16 @@ recovery message when the check clears.
 ```
 TELEGRAM_BOT_TOKEN=<from @BotFather>
 TELEGRAM_CHAT_ID=<your numeric chat id; message @userinfobot to get it>
+MARQUE_TELEGRAM_THREAD_ID=<forum topic id; optional>
 ```
 then `pm2 restart marque-health`. Without them it still logs failures to
 `/root/.pm2/logs/marque-health-out.log`; it just can't page anyone.
+
+Since 1 November every pager (`marque-health`, `marque-alerts` and the unpriced alarm in
+`marque-quotes`) posts into the community group's "Marque's health status" topic
+(`MARQUE_TELEGRAM_THREAD_ID=252`), never its General chat, which is for people asking
+questions. A topic's id is the message id of its "topic created" service message: open the
+topic's first message link (`t.me/<group>/<id>`). Restart all three processes after changing it.
 
 ### What each alert means
 

@@ -6,6 +6,7 @@
 # Needs, in /root/.marque/secrets.env:
 #   TELEGRAM_BOT_TOKEN=...      (from @BotFather)
 #   TELEGRAM_CHAT_ID=...        (your chat/user id)
+#   MARQUE_TELEGRAM_THREAD_ID=  (optional: post into this forum topic, not General)
 # Without them it still logs failures to stdout (PM2 captures it); it just can't
 # page anyone.
 set -uo pipefail
@@ -39,6 +40,7 @@ tg() {
   curl -sS -m 10 -o /dev/null \
     "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
     --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
+    ${MARQUE_TELEGRAM_THREAD_ID:+--data-urlencode "message_thread_id=${MARQUE_TELEGRAM_THREAD_ID}"} \
     --data-urlencode "text=$1" --data-urlencode "disable_web_page_preview=true" || true
 }
 

@@ -31,9 +31,11 @@ async function checkUnpriced(): Promise<void> {
   for (const a of fresh) alerted.set(a.agentId, Date.now())
   log('unpriced_alarm', { agents: fresh.map((a) => ({ id: a.agentId, name: a.name, lastOkAt: a.lastOkAt })) })
   const token = process.env.MARQUE_TELEGRAM_BOT_TOKEN, chat = process.env.MARQUE_TELEGRAM_CHAT_ID
+  // The community group's health topic, never its General chat (1 Nov).
+  const thread = /^\d+$/.test(process.env.MARQUE_TELEGRAM_THREAD_ID ?? '') ? Number(process.env.MARQUE_TELEGRAM_THREAD_ID) : null
   if (!token || !chat) return
   const text = `Unpriced for 2 hours (priced in the last day):\n${fresh.slice(0, 12).map((a) => `- ${a.name ?? a.agentId} (last price ${a.lastOkAt.slice(11, 16)} UTC)`).join('\n')}`
-  await fetch(`https://api.telegram.org/bot${token}/sendMessage`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ chat_id: chat, text }) }).catch(() => undefined)
+  await fetch(`https://api.telegram.org/bot${token}/sendMessage`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ chat_id: chat, ...(thread ? { message_thread_id: thread } : {}), text }) }).catch(() => undefined)
 }
 
 function log(event: string, data: Record<string, unknown>): void {

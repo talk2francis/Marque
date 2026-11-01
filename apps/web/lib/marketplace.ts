@@ -259,6 +259,54 @@ async function marketplaceBase(chainId: 56 | 97 = 56): Promise<MarketRow[]> {
   return memo ? memo.rows : run
 }
 
+/**
+ * Reads every marketplace computation repeats, shared for a few seconds (1 Nov). A search asks for a new result on
+ * almost every key typed, and each one read the newest quote of every service again (about 2 s over the whole quote
+ * history) plus each network's category ids. Now a new term reuses them and costs only the in-memory filter. Quote
+ * expiry is still applied to every response, and the reported quote time is when the quotes were read. A failed read
+ * is never kept.
+ */
+const STATES_FRESH_MS = 10_000
+const STATES_STALE_MS = 30_000
+let statesMemo: { at: number; value: Awaited<ReturnType<typeof commercialStates>> } | null = null
+let statesInflight: Promise<{ at: number; value: Awaited<ReturnType<typeof commercialStates>> }> | null = null
+
+async function sharedCommercialStates(): Promise<{ at: number; value: Awaited<ReturnType<typeof commercialStates>> }> {
+  const age = statesMemo ? Date.now() - statesMemo.at : Infinity
+  if (statesMemo && age < STATES_FRESH_MS) return statesMemo
+  if (!statesInflight) {
+    const at = Date.now()
+    statesInflight = commercialStates()
+      .then((value) => (statesMemo = { at, value }))
+      .finally(() => { statesInflight = null })
+    // A background refresh that fails keeps serving the last good read until it is too old.
+    if (statesMemo) statesInflight.catch(() => undefined)
+  }
+  return statesMemo && age < STATES_STALE_MS ? statesMemo : statesInflight
+}
+
+/** Tests (and only tests) start each case from a cold process. */
+export function resetSharedMarketReads(): void {
+  statesMemo = null
+  statesInflight = null
+  categoryIdsMemo.clear()
+}
+
+const CATEGORY_IDS_TTL_MS = 60_000
+const categoryIdsMemo = new Map<string, { at: number; ids: Promise<string[]> }>()
+
+function categoryIds(category: string | null | undefined, chainId: 56 | 97): Promise<string[]> {
+  const key = `${chainId}|${category ?? ''}`
+  const hit = categoryIdsMemo.get(key)
+  if (hit && Date.now() - hit.at < CATEGORY_IDS_TTL_MS) return hit.ids
+  const ids = boundedCommerceRead(marketplaceCategoryQuery(category, chainId), 'exact')
+    .then((m) => Array.from(m as unknown as Array<{ agent_id: string }>, (row) => row.agent_id))
+  const entry = { at: Date.now(), ids }
+  categoryIdsMemo.set(key, entry)
+  ids.catch(() => { if (categoryIdsMemo.get(key) === entry) categoryIdsMemo.delete(key) })
+  return ids
+}
+
 /** Same eligibility and owner/host counts; scope only whole owner partitions. */
 export function marketplaceSourceQuery(owners?: readonly string[], chainId: 56 | 97 = 56) {
   return sql`
@@ -698,18 +746,18 @@ export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: Ma
   const chains: Array<56 | 97> = both ? [56, 97] : [chainId]
   const inLane = (agentId: string) => chains.some((c) => agentId.startsWith(`${c}:`))
   const hireable = q.tab === 'ready' || q.hireableOnly === true
-  const states = hireable ? await commercialStates() : undefined
+  const shared = hireable ? await sharedCommercialStates() : null
+  const states = shared?.value
   const readyIds = states ? [...new Set([...states.values()].filter(c => (c.state === 'hireable' || c.state === 'settleable') && inLane(c.agentId)).map(c => c.agentId))] : null
   let ids = q.agentIds ? (readyIds ? q.agentIds.filter(id => readyIds.includes(id)) : q.agentIds.filter(inLane)) : readyIds
   if (ids === null && (q.category || !q.includeUnclassified)) {
-    const matches = (await Promise.all(chains.map((c) => boundedCommerceRead(marketplaceCategoryQuery(q.category, c), 'exact')))).flatMap((m) => Array.from(m as unknown as Array<{ agent_id: string }>))
-    ids = matches.map(row => row.agent_id)
+    ids = (await Promise.all(chains.map((c) => categoryIds(q.category, c)))).flat()
   }
   // A read served from the memoised catalog (no selection, or more than SCOPE_MAX_IDS ids) carries quotes that may
   // have lapsed: overlay current ones, read alongside it, so the evidence ladder's Live price rung and every card's
   // price are current. Small scoped reads already read their own.
   const memoised = ids === null || ids.length > SCOPE_MAX_IDS
-  const overlay = !states && memoised ? commercialStates().catch(() => undefined) : Promise.resolve(undefined)
+  const overlay = !states && memoised ? sharedCommercialStates().then((r) => r.value).catch(() => undefined) : Promise.resolve(undefined)
   const bases = await Promise.all(chains.map(async (c) => ids
     ? scopedBase(ids.filter((id) => id.startsWith(`${c}:`)), states, c)
     : { rows: await marketplaceBase(c), at: baseMemo.get(c)?.at ?? Date.now() }))
@@ -897,7 +945,7 @@ export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: Ma
   })
   return { rows, total: all.length, offset, supply, facets, ladder, lane: both ? 'all' : lane,
     failedGroup: failedGroup.slice(0, 60).map((r) => ({ agentId: r.agentId, name: r.name, category: r.category, testId: r.warrant.testId, failedField: r.warrant.failedField, date: r.warrant.date, networks: r.networks })),
-    quoteObservedAt: states ? new Date(observedAt).toISOString() : null,
+    quoteObservedAt: shared ? new Date(shared.at).toISOString() : null,
     hasMore: offset + limit < all.length, generatedAt: new Date(base.at).toISOString() }
 }
 
