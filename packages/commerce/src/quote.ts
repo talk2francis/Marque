@@ -211,7 +211,14 @@ export async function verifyNegotiation(neg: Negotiation, ctx: QuoteVerifyContex
     return fail('bad_signature', 'provider_sig does not recover to an address', { chainId })
   }
   const allowed = [ctx.agentWallet, ctx.agentOwner].filter((a): a is string => typeof a === 'string' && /^0x[0-9a-fA-F]{40}$/.test(a) && !/^0x0{40}$/i.test(a))
-  if (!allowed.some((a) => a.toLowerCase() === signer.toLowerCase())) {
+  const isAllowed = (a: string) => allowed.some((w) => w.toLowerCase() === a.toLowerCase())
+  // The SDK signs EIP-191 over the hash's 0x text. Some sellers sign the same EIP-191 message over the hash's
+  // 32 bytes instead; that proves the same commitment, so it is accepted only when it recovers to this identity.
+  if (!isAllowed(signer) && /^0x[0-9a-fA-F]{64}$/.test(neg.negotiation_hash)) {
+    const overBytes = await recoverMessageAddress({ message: { raw: neg.negotiation_hash as `0x${string}` }, signature: neg.provider_sig as `0x${string}` }).catch(() => null)
+    if (overBytes && isAllowed(overBytes)) signer = overBytes
+  }
+  if (!isAllowed(signer)) {
     return fail('provider_mismatch', `quote is signed by ${signer}, which is not this agent's registered wallet`, { chainId, provider: signer })
   }
   return {

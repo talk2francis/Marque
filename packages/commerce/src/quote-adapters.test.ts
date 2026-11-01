@@ -40,12 +40,15 @@ describe('adapter bnb-sdk-negotiate (signed NegotiationResult)', () => {
   it('wrong provider: the registered wallet is someone else', async () => {
     expect(await requestQuote('https://agent.example/a2a', task, { agentWallet: OTHER, agentOwner: OTHER, now: now() })).toMatchObject({ ok: false, reason: 'provider_mismatch' })
   })
-  it('wrong provider, recorded: an envelope without request/response hashes, signed by a key that is neither the registered wallet nor the owner', async () => {
+  it('recorded: an envelope without request/response hashes, signed over the hash\'s 32 bytes, binds only to its registered wallet', async () => {
     const w = fixtures.sdkWrongSigner as any
-    respond(w.response)
     const n = w.response.result.parts[0].data
+    respond(w.response)
     const q = await requestQuote('https://agent.example/a2a', fixtures.task, { agentWallet: w.agentWallet, agentOwner: w.agentWallet, now: n.negotiated_at + 5 })
-    expect(q).toMatchObject({ ok: false, reason: 'provider_mismatch', protocol: 'bnb-sdk-negotiate' })
+    expect(q).toMatchObject({ ok: true, signed: true, protocol: 'bnb-sdk-negotiate' })
+    expect(q.ok && q.provider.toLowerCase()).toBe(w.agentWallet)
+    respond(w.response)
+    expect(await requestQuote('https://agent.example/a2a', fixtures.task, { agentWallet: OTHER, agentOwner: OTHER, now: n.negotiated_at + 5 })).toMatchObject({ ok: false, reason: 'provider_mismatch', protocol: 'bnb-sdk-negotiate' })
   })
   it('wrong token: a currency outside the catalog', async () => {
     const r = clone(base.response) as any; r.result.parts[0].data.response.terms.currency = OTHER

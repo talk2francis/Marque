@@ -41,6 +41,20 @@ describe('quote authority and expiry', () => {
     expect(await verifyNegotiation(n, ctx)).toMatchObject({ ok: true, signed: true, expiresAt: now + 300 })
     expect(await verifyNegotiation(n, { agentOwner: other.address, now })).toMatchObject({ ok: false, reason: 'provider_mismatch' })
   })
+  it('accepts the hash signed as 32 bytes only from the registered identity', async () => {
+    const n = await signed()
+    n.provider_sig = await account.signMessage({ message: { raw: n.negotiation_hash as `0x${string}` } })
+    expect(await verifyNegotiation(n, ctx)).toMatchObject({ ok: true, signed: true, signatureEvidence: 'provider_signed', provider: account.address })
+    expect(await verifyNegotiation(n, { agentOwner: other.address, now })).toMatchObject({ ok: false, reason: 'provider_mismatch' })
+    n.provider_sig = await other.signMessage({ message: { raw: n.negotiation_hash as `0x${string}` } })
+    expect(await verifyNegotiation(n, ctx)).toMatchObject({ ok: false, reason: 'provider_mismatch' })
+  })
+  it('still rejects mutated terms under a 32-byte signature', async () => {
+    const n = await signed()
+    n.provider_sig = await account.signMessage({ message: { raw: n.negotiation_hash as `0x${string}` } })
+    n.response.terms!.price = '11'
+    expect(await verifyNegotiation(n, ctx)).toMatchObject({ ok: false, reason: 'bad_signature' })
+  })
   it('rejects a conflicting top-level signed expiry', async () => {
     const n = await signed({ quote_expires_at: now - 1 })
     expect(await verifyNegotiation(n, ctx)).toMatchObject({ ok: false })
