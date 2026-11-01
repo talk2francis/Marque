@@ -14,7 +14,7 @@ import { rememberQuestAddress } from '../../_components/campaign/store'
 import styles from './practice.module.css'
 
 /**
- * A free practice hire for Set and Earn, built for a phone: a wallet (a Marque Pass in ten seconds, or any wallet),
+ * A free practice hire for Set and Earn, built for a phone: the wallet the buyer already uses (or a new Marque Pass),
  * test tokens from BNB Chain's own faucet (Marque sends nothing), one agent this wallet has not hired yet, and the hire
  * sheet with a ready task. The deposit is timed from the moment this page opened, so the two-minute promise is measured.
  */
@@ -121,10 +121,10 @@ export function PracticeFlow() {
               <p className={styles.p}>Hiring from <span className="mono">{wallet.slice(0, 6)}…{wallet.slice(-4)}</span>. Use the wallet you registered with BNB Chain for Set and Earn.</p>
             ) : (
               <>
-                <p className={styles.p}>Hires count for the wallet that pays. A Marque Pass is a wallet made from your fingerprint or face: nothing to install, about ten seconds.</p>
+                <p className={styles.p}>Hires count for the wallet that pays, and Set and Earn asks you to use one wallet for the whole campaign. Connect the wallet you already use. No wallet yet? A Marque Pass is a new wallet made from your fingerprint or face: nothing to install, about ten seconds.</p>
                 <div className={styles.actions}>
-                  {capable !== false ? <button type="button" className="btn btn--primary" disabled={isPending || !pass} onClick={() => { if (pass) connect({ connector: pass, chainId: 97 }) }}>{isPending ? 'Waiting for your passkey…' : 'Create a Marque Pass'}</button> : null}
-                  <button type="button" className="btn" onClick={openConnectModal}>Use my own wallet</button>
+                  <button type="button" className="btn btn--primary" onClick={openConnectModal}>Connect the wallet you already use</button>
+                  {capable !== false ? <button type="button" className="btn" disabled={isPending || !pass} onClick={() => { if (pass) connect({ connector: pass, chainId: 97 }) }}>{isPending ? 'Waiting for your passkey…' : 'Create a Marque Pass (new wallet)'}</button> : null}
                 </div>
               </>
             )}

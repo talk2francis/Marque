@@ -28,7 +28,7 @@ export default function AdvantagePage() {
           <dl>
             <div><dt>Specification</dt><dd><a href="https://github.com/talk2francis/Marque/blob/main/docs/advantage/v2/spec.json">docs/advantage/v2/spec.json</a></dd></div>
             <div><dt>keccak256</dt><dd className="mono">{short(R.specKeccak256)}</dd></div>
-            <div><dt>Locked on chain</dt><dd><a href={`https://testnet.bscscan.com/tx/${R.lockTx}`} target="_blank" rel="noreferrer">BSC testnet tx {short(R.lockTx)}</a>, block {Number(R.lockBlock).toLocaleString('en-US')}, before the first hire</dd></div>
+            <div><dt>Locked on chain</dt><dd><a href={`https://testnet.bscscan.com/tx/${R.lockTx}`} target="_blank" rel="noreferrer">BSC testnet tx {short(R.lockTx)}</a>, block {Number(R.lockBlock).toLocaleString('en-US')}, before the first hire. The lock is a timestamped hash commitment: the chain records that this exact file existed at that block. Which network carries it does not change that; the jobs themselves ran on mainnet.</dd></div>
             <div><dt>Paid by</dt><dd>{R.funder}: a published Marque team wallet. These jobs are never counted as independent use.</dd></div>
           </dl>
         </section>
@@ -53,6 +53,7 @@ export default function AdvantagePage() {
                 <div><dt>Terms met</dt><dd>{t.terms.met} of {t.terms.of}, {t.terms.source}{t.terms.unchecked ? `; ${t.terms.unchecked} could not be decided` : ''}</dd></div>
                 <div><dt>Cost</dt><dd>{t.price} into escrow, plus {Number(t.feesBnb).toFixed(6)} BNB in network fees over 5 transactions</dd></div>
                 <div><dt>Against the baseline</dt><dd>{t.versusBaseline}</dd></div>
+                {t.baseline ? <div><dt>Baseline used</dt><dd>{({ 'do-nothing': 'Doing nothing', manual: 'A person doing it by hand' } as Record<string, string>)[String(t.baseline.arm)] ?? String(t.baseline.arm)}, as the locked specification names it: {t.baseline.status}{'value' in t.baseline && t.baseline.value ? `, ${t.baseline.value}` : ''}{'reason' in t.baseline && t.baseline.reason ? `. ${t.baseline.reason}` : ''}</dd></div> : null}
               </dl>
               <p className={styles.replay}>Replay with a Marque database: <code>pnpm marque verify-terms {t.chainId}:{t.jobId}</code></p>
             </li>
