@@ -19,7 +19,7 @@ it('preserves the default job API and cached headers without modifying public da
     expect(res.headers.get('Cache-Control')).toBe('no-store')
   }
   expect(JSON.stringify(body)).toBe(before)
-  expect(served.mock.calls[0]![0]).toBe('phase2:job:56:1')
+  expect(served.mock.calls[0]![0]).toBe('phase2:job:v2:56:1')
 })
 it('exports an opt-in container with source time separate from export time and unknown private bindings', async () => {
   served.mockResolvedValue(NextResponse.json(body, { headers }))
@@ -31,7 +31,7 @@ it('exports an opt-in container with source time separate from export time and u
   expect(data.payload.bindings).toMatchObject({ serviceId: null, quoteHash: null, quoteMode: 'UNAVAILABLE_NOT_PRESERVED_IN_PUBLIC_PROJECTION' })
   expect(res.headers.get('Access-Control-Allow-Origin')).toBe('*')
   expect(res.headers.get('X-Marque-Projection-Age-Ms')).toBe('60000')
-  expect(served.mock.calls[0]![0]).toBe('phase2:job-evidence:56:1')
+  expect(served.mock.calls[0]![0]).toBe('phase2:job-evidence:v2:56:1')
 })
 it('retains unavailable/not-found behavior and fails missing bundle metadata safely', async () => {
   served.mockResolvedValueOnce(NextResponse.json({ error: 'job_unavailable' }, { status: 503, headers }))
