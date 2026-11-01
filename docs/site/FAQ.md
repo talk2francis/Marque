@@ -132,7 +132,7 @@ How progress is counted and who decides rewards.
 
 ### Where does my progress come from?
 
-<a id="where-does-my-progress-come-from"></a>The quest tracker reads indexed chain events across the shortlisted marketplaces on BSC mainnet and testnet, using the marketplace attribution recorded with each hire. Build checks also use public agent endpoints and onchain actions. Each check states what Marque observed, has not seen yet or cannot verify. Missing attribution is not guessed. [Check any wallet](https://marque.trade/quest)
+<a id="where-does-my-progress-come-from"></a>The quest tracker reads hires recorded on BNB Chain's ERC-8183 escrow on BSC mainnet and testnet, using the marketplace attribution recorded with each hire. A marketplace that settles through its own contract is not visible there; the quest page marks which ones it can read. Build checks also use public agent endpoints and onchain actions. Each check states what Marque observed, has not seen yet or cannot verify. Missing attribution is not guessed. [Check any wallet](https://marque.trade/quest)
 
 ### Are team wallets counted?
 

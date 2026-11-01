@@ -1,17 +1,27 @@
-import { marketplaceAgents } from '../../../../../lib/marketplace'
+import { marketplaceAgentsCached } from '../../../../../lib/market-cache'
+import { marketSupply } from '../../../../../lib/market-supply'
+import { countSupply, SUPPLY_DEFINITIONS } from '../../../../../lib/supply-truth'
 import { served, chainParam, bad } from '../../../../../lib/phase2-api'
 import type { Lane } from '@marque/commerce'
 
 export const dynamic = 'force-dynamic'
 
 async function laneCoverage(lane: Lane) {
-  const result = await marketplaceAgents({ tab: 'ready', lane, limit: 1 })
+  const chainId = lane === 'mainnet' ? 56 : 97
+  const result = await marketplaceAgentsCached({ tab: 'ready', lane, limit: 300 })
+  const supply = countSupply(result.rows, chainId, result.quoteObservedAt ?? result.generatedAt)
+  // Category counts are of hireable agents (passed, with a live price), the same set as totalHireable.
+  const categories = marketSupply(result.rows.filter((r) => r.warrant.status === 'warranted'))
+    .map((c) => ({ ...c, priced: supply.byCategory[c.category]?.priced ?? 0 }))
   return {
-    lane, chainId: lane === 'mainnet' ? 56 : 97, measuredAt: result.quoteObservedAt ?? result.generatedAt, provenance: 'MEASURED' as const,
+    lane, chainId, measuredAt: supply.measuredAt, provenance: 'MEASURED' as const,
     countingUnit: 'deduplicated_marketplace_listing',
     operatorCounting: 'Recorded owner addresses; unknown owners count per identity. Independence is not verified.',
-    totalHireable: result.total, categories: result.supply,
-    unclassifiedHireableCount: Math.max(0, result.total - result.supply.reduce((n, c) => n + c.hireable, 0)),
+    totalHireable: supply.passed,
+    priced: supply.priced, passed: supply.passed, failed: supply.failed, notYetTested: supply.notYetTested,
+    definitions: { ...SUPPLY_DEFINITIONS, totalHireable: 'the same as passed' },
+    categories,
+    unclassifiedHireableCount: Math.max(0, supply.passed - categories.reduce((n, c) => n + c.hireable, 0)),
   }
 }
 
@@ -25,8 +35,8 @@ export async function GET(req: Request) {
   const asked = new URL(req.url).searchParams.has('chainId')
   const chainId = chainParam(req.url)
   if (!chainId) return bad('chainId must be 56 or 97.')
-  if (asked) return served(`phase2:marketplace-coverage:v2:${chainId}`, 'coverage', () => laneCoverage(chainId === 97 ? 'practice' : 'mainnet'))
-  return served('phase2:marketplace-coverage:v2:lanes', 'coverage', async () => {
+  if (asked) return served(`phase2:marketplace-coverage:v3:${chainId}`, 'coverage', () => laneCoverage(chainId === 97 ? 'practice' : 'mainnet'))
+  return served('phase2:marketplace-coverage:v3:lanes', 'coverage', async () => {
     const [mainnet, practice] = await Promise.all([laneCoverage('mainnet'), laneCoverage('practice')])
     return {
       ...mainnet,

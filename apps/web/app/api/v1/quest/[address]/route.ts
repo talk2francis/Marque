@@ -20,7 +20,8 @@ export function OPTIONS() {
 
 /**
  * GET /api/v1/quest/{address}?chains=56,97 (SPEC-ADOPTION 2.5). Set and Earn progress for any
- * address, across every shortlisted marketplace, from chain data. Open to everyone (CORS *),
+ * address, from hires recorded on BNB Chain's ERC-8183 escrow (a marketplace with its own contract is not visible),
+ * with each shortlisted marketplace marked seenOnEscrow. Open to everyone (CORS *),
  * cached 60 s per address, 60 requests a minute per client.
  */
 export async function GET(req: Request, { params }: { params: Promise<{ address: string }> }) {

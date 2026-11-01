@@ -10,19 +10,27 @@ beforeEach(() => {
     value: await build(), ageMs: 0, computedAt: '2026-01-01T00:00:00Z', stale: false,
   }))
 })
-it('returns full listing counts rather than the one-row display page', async () => {
-  const categories = [{ category: 'yield', hireable: 350 }, { category: 'grid', hireable: 2 }]
-  mocks.market.mockResolvedValue({ rows: [{ agentId: 'synthetic' }], total: 355, supply: categories, generatedAt: '2026-01-01T00:00:00Z' })
+// A priced agent in the Ready view, with its latest test result in its category.
+const row = (n: number, category: string | null, warrant: 'warranted' | 'failed' | 'untested', owner = `0x${String(n).padStart(40, '0')}`) => ({
+  agentId: `56:0x8004:${n}`, category, owner, isReference: false, warrant: { status: warrant },
+  commerce: { state: 'hireable', priceRaw: '10', token: { address: '0x1', symbol: 'U', decimals: 18 }, chainId: 56, quoteExpiresAt: '2999-01-01T00:00:00Z' },
+})
+it('counts hireable as passed with a live price, over the full Ready listing, with priced, failed and untested beside it', async () => {
+  const rows = [row(1, 'yield', 'warranted'), row(2, 'yield', 'warranted'), row(3, 'yield', 'failed'), row(4, 'grid', 'untested'), row(5, null, 'warranted')]
+  mocks.market.mockResolvedValue({ rows, total: rows.length, supply: [], generatedAt: '2026-01-01T00:00:00Z' })
   const response = await GET(new Request('https://fixture.invalid/api/v1/phase2/coverage?chainId=56'))
   expect(response.status).toBe(200)
   expect(response.headers.get('Access-Control-Allow-Origin')).toBe('*')
-  expect(await response.json()).toMatchObject({ chainId: 56, totalHireable: 355, categories, unclassifiedHireableCount: 3, countingUnit: 'deduplicated_marketplace_listing' })
-  expect(mocks.market).toHaveBeenCalledWith({ tab: 'ready', lane: 'mainnet', limit: 1 })
+  const body = await response.json()
+  expect(body).toMatchObject({ chainId: 56, totalHireable: 3, passed: 3, priced: 5, failed: 1, notYetTested: 1, unclassifiedHireableCount: 1, countingUnit: 'deduplicated_marketplace_listing' })
+  expect(body.categories.find((c: { category: string }) => c.category === 'yield')).toMatchObject({ hireable: 2, priced: 3, operators: 2 })
+  expect(body.categories.find((c: { category: string }) => c.category === 'grid')).toMatchObject({ hireable: 0, priced: 1 })
+  expect(mocks.market).toHaveBeenCalledWith({ tab: 'ready', lane: 'mainnet', limit: 300 })
 })
 it('reports both lanes side by side without summing them, mainnet repeated at top level for one release', async () => {
-  mocks.market.mockImplementation(async (q: { lane: string }) => ({ rows: [], total: q.lane === 'mainnet' ? 22 : 12, supply: [], generatedAt: '2026-01-01T00:00:00Z' }))
+  mocks.market.mockImplementation(async (q: { lane: string }) => ({ rows: q.lane === 'mainnet' ? [row(1, 'yield', 'warranted'), row(2, 'grid', 'warranted')] : [row(3, 'yield', 'warranted')], total: 0, supply: [], generatedAt: '2026-01-01T00:00:00Z' }))
   const body = await (await GET(new Request('https://fixture.invalid/api/v1/phase2/coverage'))).json()
-  expect(body).toMatchObject({ chainId: 56, totalHireable: 22, mainnet: { chainId: 56, totalHireable: 22 }, practice: { chainId: 97, totalHireable: 12 } })
+  expect(body).toMatchObject({ chainId: 56, totalHireable: 2, mainnet: { chainId: 56, totalHireable: 2 }, practice: { chainId: 97, totalHireable: 1 } })
   expect(body.deprecation).toMatch(/one release/)
 })
 it('rejects unsupported chains without reading marketplace state', async () => {

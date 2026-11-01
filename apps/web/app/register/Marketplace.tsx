@@ -1,13 +1,13 @@
 'use client'
 
-import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
+import { Fragment, useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { EmptyState, Limits } from '@marque/ui'
 import type { FailedGroupRow, InitialMarket, MarketFacetCounts } from './initial'
 import { track } from '../../lib/track'
 import { MarketToolbar } from './MarketToolbar'
 import { LaneSwitch } from './LaneSwitch'
-import { MarketList } from './MarketList'
+import { MarketList, UntestedHead } from './MarketList'
 import { RegisterTable } from './RegisterTable'
 import { AgentCard } from '../_components/market/AgentCard'
 import { AgentAvatar } from '../_components/AgentAvatar'
@@ -296,6 +296,9 @@ export function Marketplace({ category: fixedCategory, initial }: { category?: s
   const pickTab = (t: MarketTab) => patchFilter({ tab: t, stage: null })
   const pickRung = (stage: MarketStageKey | null) => patchFilter({ tab: 'listed', stage })
 
+  // Ready, in the recommended order, lists agents that passed first; the untested start under their own heading (2 Nov).
+  const untestedFrom = state.tab === 'ready' && state.sort === 'best' ? rows.findIndex((r) => r.warrant.status === 'untested') : -1
+
   return (
     <>
       <LaneSwitch lane={state.lane} onPick={(l) => patchFilter({ lane: l })} />
@@ -339,7 +342,8 @@ export function Marketplace({ category: fixedCategory, initial }: { category?: s
       <UNote className={styles.uNote} />
       <div className={styles.utility}>
         <p className={styles.utilityCount} role="status" aria-live="polite">
-          {!ready || total === null ? (
+          {/* The server render already holds the default view's count, so a reader without scripts sees it too (2 Nov). */}
+          {total === null ? (
             loading || !ready ? 'Counting agents…' : 'Result count unavailable'
           ) : (
             <>
@@ -348,7 +352,7 @@ export function Marketplace({ category: fixedCategory, initial }: { category?: s
           )}
           {ready && ago && <span className={styles.utilityDot}> · Measured {ago}</span>}
           <span className={styles.utilityDot}> · Operator-deduplicated</span>
-          {state.tab === 'ready' ? <span className={styles.utilityDot}> · Passed their test first, then untested, then failed; each result on its card</span> : null}
+          {state.tab === 'ready' ? <span className={styles.utilityDot}> · Passed their test first, then not yet tested; agents that failed are listed apart below</span> : null}
         </p>
         <button
           type="button"
@@ -437,12 +441,15 @@ export function Marketplace({ category: fixedCategory, initial }: { category?: s
         {!loading && !error && rows.length > 0 &&
           (state.view === 'grid' ? (
             <div className={styles.cardGrid}>
-              {rows.map((a) => (
-                <AgentCard key={a.agentId} a={a} compare={{ picked: selectedIds.has(a.agentId), atLimit: selected.length >= 3, onToggle: toggleSelect }} />
+              {rows.map((a, i) => (
+                <Fragment key={a.agentId}>
+                  {untestedFrom === i ? <UntestedHead className={styles.untestedHead} /> : null}
+                  <AgentCard a={a} compare={{ picked: selectedIds.has(a.agentId), atLimit: selected.length >= 3, onToggle: toggleSelect }} />
+                </Fragment>
               ))}
             </div>
           ) : (
-            <MarketList rows={rows} selectedIds={selectedIds} atLimit={selected.length >= 3} onToggle={toggleSelect} />
+            <MarketList rows={rows} selectedIds={selectedIds} atLimit={selected.length >= 3} onToggle={toggleSelect} untestedFrom={untestedFrom} />
           ))}
       </div>
 

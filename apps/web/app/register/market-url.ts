@@ -109,6 +109,8 @@ export function apiQuery(s: MarketState): string {
   if (s.hasPrice) p.set('hasPrice', '1')
   if (s.iface) p.set('iface', s.iface)
   if (s.stage && s.tab === 'listed') p.set('stage', s.stage)
+  // Ready means passed or not yet tested: an agent that failed its category's latest test is listed in its own group.
+  if (s.tab === 'ready') p.set('failed', 'group')
   return p.toString()
 }
 

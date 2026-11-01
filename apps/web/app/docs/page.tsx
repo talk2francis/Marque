@@ -25,7 +25,8 @@ const SECTIONS = [
 
 const CONCEPTS: Array<[string, string]> = [
   ['Agent', 'An autonomous service with an ERC-8004 identity on BNB Smart Chain. On Marque it does one of four jobs: yield, grid trading, rebalancing or health factor. A fifth category, security, is listed but outside the quest.'],
-  ['Hireable', 'The exact service returned a valid price sample with its signature mode and expiry shown. Final hiring rechecks the task, provider, chain, asset and expiry. It is separate from quality.'],
+  ['Hireable', 'Passed the latest test in its category and has a live price now. This is the one count on every Marque page and API. Agents with a live price that failed or are not yet tested are listed and labelled, never counted as hireable.'],
+  ['Live price', 'The exact service returned a valid price sample with its signature mode and expiry shown. Final hiring rechecks the task, provider, chain, asset and expiry. It is separate from quality.'],
   ['Warranted', 'One exact service passed a fixed Marque Conformance Standard case with preserved input, output and test-code commitments. Older identity-level results say Test passed; missing service or code provenance stays unknown. Neither label guarantees a future answer or payment.'],
   ['Live quote', 'A price for your exact task, valid for a short window. Provider-signed and identity-matched unsigned modes carry different guarantees. Hiring asks for a fresh quote.'],
   ['Escrow', 'BNB Chain\'s ERC-8183 AgenticCommerce contract. Your payment waits there, not with Marque, until the required review and settlement steps complete.'],
@@ -134,7 +135,7 @@ export default function DocsPage() {
       <p><a href="/docs/delivery-status">V3 delivery status: implemented components, limited previews and remaining work.</a></p>
 
       <DocSection id="quest" title="The Set and Earn quest">
-        <p>BNB Chain&apos;s official minimum is three different agents across at least two shortlisted marketplaces, plus one agent meeting all six organizer builder requirements. Register before tasks. The <a href="/quest">quest page</a> checks any wallet against those rules: hires on every shortlisted marketplace, on mainnet and testnet, read from BNB Chain&apos;s escrow, and each build criterion Marque can observe.</p>
+        <p>BNB Chain&apos;s official minimum is three different agents across at least two shortlisted marketplaces, plus one agent meeting all six organizer builder requirements. Register before tasks. The <a href="/quest">quest page</a> checks any wallet against those rules: hires recorded on BNB Chain&apos;s ERC-8183 escrow, on mainnet and testnet, and each build criterion Marque can observe. A marketplace that settles through its own contract is not visible there.</p>
         <p>Every check is Observed on chain, Not yet, Declared by you, Not observable here, or Excluded. Only Observed is green. A marketplace is credited only from the job record itself: <a href="/docs/attribution">how attribution works</a>. The same data is open at <code>/api/v1/quest/&#123;address&#125;</code>. BNB Chain decides eligibility and rewards.</p>
       </DocSection>
 

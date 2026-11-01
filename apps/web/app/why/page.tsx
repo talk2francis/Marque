@@ -2,6 +2,7 @@ import { Statement, DataCell, EmptyState, LinkButton, Chip, MeasureRule, Provena
 import { sql } from 'drizzle-orm'
 import { db, firstPartyIdListSql, oneAgentIdSql } from '@marque/db'
 import { funnel, categoryFunnel } from '@marque/registry'
+import { supplyNow } from '../../lib/supply-truth'
 import { CountUp } from '../_components/CountUp'
 import { GlossaryStrip } from '../_components/Glossary'
 import { SiteHeader, SiteFooter } from '../_components/SiteHeader'
@@ -86,9 +87,10 @@ export default async function WhyMarque() {
   `).then((r) => (((r as { rows?: unknown[] }).rows ?? (r as unknown[])) as Array<Record<string, unknown>>)[0] ?? null)
     .catch(() => null)
 
-  const [stages, categories] = await Promise.all([
+  const [stages, categories, supply] = await Promise.all([
     funnel(56).catch(() => null),
     categoryFunnel(56).catch(() => null),
+    supplyNow(56).catch(() => null),
   ])
 
   // The registry's own headline total, from the ingest cursor's last sweep.
@@ -110,7 +112,8 @@ export default async function WhyMarque() {
   const callable = stage('callable')
   const compatible = stage('compatible')
   const qualified = stage('qualified')
-  const hireableCount = stage('hireable')
+  const charterReady = stage('task_matched')
+  const hireableNow = supply?.passed ?? null
 
   const fmt = (n: number | null) => (n === null ? 'not measured' : n.toLocaleString('en-US'))
 
@@ -137,8 +140,8 @@ export default async function WhyMarque() {
         <section className={styles.stats} data-reveal>
           {([
             ['Registered on BNB Chain', registered, 'from the ERC-8004 registry'],
-            ['Charter-ready', hireableCount, 'a callable service matches its charter task (testnet sandbox)'],
-            ['Test passes', homeCounts['warranted'] == null ? null : Number(homeCounts['warranted']), 'passed a published MCS case'],
+            ['Charter-ready', charterReady, 'a callable service matches its charter task (testnet sandbox)'],
+            ['Hireable now', hireableNow, 'passed its test, with a live price on mainnet'],
             ['Public receipts', homeCounts['receipts'] == null ? null : Number(homeCounts['receipts']), 'execution and quality recorded separately'],
           ] as Array<[string, number | null, string]>).map(([label, n, sub]) => (
             <div className={styles.stat} key={label}>
@@ -226,8 +229,9 @@ export default async function WhyMarque() {
                   ['Reachable', reachable, 'an exact service returned protocol-shaped evidence within 24 hours'],
                   ['Callable', callable, 'a fresh protocol interaction proves an executable interface'],
                   ['Task compatible', compatible, 'a callable service accepts a Marque task schema'],
-                  ['Qualified', qualified, 'has passed a published MCS case'],
-                  ['Charter-ready', hireableCount, 'a callable service matches its category and charter task'],
+                  ['Charter-ready', charterReady, 'a callable service matches its category and charter task'],
+                  ['Qualified', qualified, 'its latest published MCS case passed'],
+                  ['Hireable now', hireableNow, 'qualified, with a live price on mainnet: the count on every Marque page'],
                 ]
                 const top = rows[0]?.[1] ?? 1
                 return (

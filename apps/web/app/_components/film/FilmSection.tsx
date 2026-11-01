@@ -18,7 +18,7 @@ export function FilmSection({ context }: { context: 'home' | 'page' }) {
   const limits = (
     <Limits label="What is real in this film">
       <ul className={styles.limitsList}>
-        <li>The hire is <a href="/jobs/56/56903">job 56903</a>: Keel, a Marque reference agent, paid by an outside buyer on BSC mainnet. Its answer, checks and transactions are the real ones, and the frame links to them while it plays.</li>
+        <li>The hire is <a href="/jobs/56/56903">job 56903</a>: Keel, a Marque reference agent, paid by an outside wallet on BSC mainnet: a builder whose agents are also listed here. Its answer, checks and transactions are the real ones, and the frame links to them while it plays.</li>
         <li>The registry figures at the start were measured on {FILM.measured}. {context === 'home' ? 'The live record is just below.' : <>The live record is on the <a href="/#record">home page</a>.</>}</li>
         <li>The build and assistant chapters show an illustrative agent and chat. The steps, tools and checks are the real ones, on BSC testnet.</li>
         <li>{archived

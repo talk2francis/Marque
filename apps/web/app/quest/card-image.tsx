@@ -60,7 +60,7 @@ export async function questCard(q: QuestResult | null, who: string | null) {
               {stat('Build', `${build} of 6`, build === 6 && !q.excluded.team)}
             </div>
           ) : (
-            <div style={{ display: 'flex', fontSize: 34, color: SOFT }}>Hires on every shortlisted marketplace, and the six build criteria, read from chain.</div>
+            <div style={{ display: 'flex', fontSize: 34, color: SOFT }}>Hires on BNB Chain's ERC-8183 escrow, and the six build criteria, read from chain.</div>
           )}
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: `1px solid ${HAIR}`, paddingTop: 22, fontSize: 24, color: SOFT }}>

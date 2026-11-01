@@ -226,11 +226,13 @@ export function QuestBoard({ q, shareable = true }: { q: QuestResult; shareable?
 
       <section className={styles.section} id="marketplaces" aria-labelledby="mk-title">
         <h2 id="mk-title" className={styles.h2}>The nine shortlisted marketplaces</h2>
+        <p className={styles.mkNote}>Marque reads hires recorded on BNB Chain&apos;s ERC-8183 escrow, on mainnet and testnet. A marketplace that settles through its own contract is not visible here; check its own page.</p>
         <ul className={styles.mkList}>
           {q.marketplaces.map((m) => (
-            <li key={m.domain}><a href={m.url} target="_blank" rel="noreferrer">{m.name}<span>{m.domain}</span><ArrowUpRight aria-hidden="true" /></a></li>
+            <li key={m.domain}><a href={m.url} target="_blank" rel="noreferrer">{m.name}<span>{m.domain}</span>{m.seenOnEscrow === false ? <em className={styles.mkUnseen}>Not visible here</em> : m.seenOnEscrow ? <em className={styles.mkSeen}>Read here</em> : null}<ArrowUpRight aria-hidden="true" /></a></li>
           ))}
         </ul>
+        <p className={styles.mkNote}><b>Read here</b>: at least one hire on BNB Chain&apos;s escrow names this marketplace. <b>Not visible here</b>: none does yet, so its hires may use another contract and will read as not yet on this page.</p>
       </section>
 
       <details className={styles.tryFour}>

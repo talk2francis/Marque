@@ -16,7 +16,7 @@ export async function generateMetadata({ params }: { params: Promise<{ address: 
   if (!QUEST_ADDRESS.test(address)) return { title: `Set and Earn · ${BRAND.name}` }
   return {
     title: `Set and Earn progress for ${short(address)} · ${BRAND.name}`,
-    description: 'Hires across every shortlisted marketplace and the six build criteria, read from BNB Chain.',
+    description: 'Hires recorded on BNB Chain\'s ERC-8183 escrow and the six build criteria, read from chain. Marketplaces that use their own escrow contracts are not visible here.',
   }
 }
 

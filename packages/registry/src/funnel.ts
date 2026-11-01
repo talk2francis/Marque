@@ -105,7 +105,10 @@ async function funnelUncached(chainId = 56): Promise<FunnelRow[]> {
       from agent_category order by agent_id, (category <> 'unclassified') desc, confidence desc, assigned_at desc
     ),
     qualified as (
-      select distinct agent_id from conformance_result where pass = true
+      -- The latest stored result passes: a test the agent has since failed does not qualify it.
+      select agent_id from (
+        select distinct on (agent_id) agent_id, pass from conformance_result order by agent_id, ran_at desc
+      ) latest where pass
     ),
     hireable as (
       select distinct s.agent_id
@@ -141,8 +144,8 @@ async function funnelUncached(chainId = 56): Promise<FunnelRow[]> {
     { stage: 'reachable', label: 'Reachable', count: n('reachable'), method: 'at least one exact service returned protocol-shaped evidence within 24 hours' },
     { stage: 'callable', label: 'Callable', count: n('callable'), method: 'fresh exact A2A/MCP service declares an executable endpoint' },
     { stage: 'compatible', label: 'Task compatible', count: n('compatible'), method: 'fresh callable service exposes at least one schema-addressable Marque task kind' },
-    { stage: 'qualified', label: 'Qualified', count: n('qualified'), method: 'identity has at least one stored passing MCS result' },
-    { stage: 'hireable', label: 'Hireable', count: n('hireable'), method: 'fresh compatible service matches the identity current category and Charter task' },
+    { stage: 'task_matched', label: 'Charter-ready', count: n('hireable'), method: 'fresh compatible service matches the identity current category and Charter task' },
+    { stage: 'qualified', label: 'Qualified', count: n('qualified'), method: 'the identity\'s latest stored MCS result passes' },
   ]
 }
 

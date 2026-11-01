@@ -1045,3 +1045,7 @@ a.introBack:hover { color: var(--fg); }
   .ladderRungs { grid-template-columns: repeat(5, minmax(108px, 1fr)); overflow-x: auto; scrollbar-width: none; margin-right: calc(-1 * var(--margin)); padding-right: var(--margin); }
   .ladderRungs::-webkit-scrollbar { display: none; }
 }
+
+/* Ready view (2 Nov): agents with no test result start under their own heading, after those that passed. */
+.untestedHead { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; margin-top: var(--s4); padding: 14px 2px 10px; border-top: 1px solid var(--line); font-size: 15px; }
+.untestedHead span { font-size: 13px; color: var(--fg-faint); }

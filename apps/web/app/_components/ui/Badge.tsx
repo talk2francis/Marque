@@ -22,7 +22,7 @@ export function Badge(props: BadgeKind & { className?: string }) {
   const c = props.className
   switch (props.kind) {
     case 'hireable':
-      return <span className={cx('pill pill--hireable', c)}><span className="pill-dot" aria-hidden="true" />Hireable</span>
+      return <span className={cx('pill pill--hireable', c)}><span className="pill-dot" aria-hidden="true" />Live price</span>
     case 'preview':
       return <span className={cx('pill pill--preview', c)}>Preview only</span>
     case 'warranted':

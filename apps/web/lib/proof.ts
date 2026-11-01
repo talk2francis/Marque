@@ -3,6 +3,7 @@ import { sql } from 'drizzle-orm'
 import { cachedProjection, db, firstPartyAgentsAllLanes } from '@marque/db'
 import { marqueWallets, network, statsFrom, type ChainId, type QuestHire, type WalletQuest } from '@marque/commerce'
 import { jobLens } from './lens'
+import { operatorWalletsHere } from './operators-here'
 
 /**
  * The independent-commerce scorecard (/proof, /api/v1/proof): one row per job hired through Marque on BSC mainnet and
@@ -18,6 +19,8 @@ export interface ProofRow {
   agent: { name: string | null; agentKey: string | null; tokenId: string | null; category: string | null }
   operatorClass: 'reference' | 'third_party'
   funderClass: FunderClass
+  /** An outside payer that also owns or runs an agent listed on Marque (operators-here.ts). */
+  alsoOperator: boolean
   client: string
   /** Counted by /api/v1/phase2/stats (outside, Marque-bound, funded, first hire of its category). */
   counted: boolean
@@ -83,7 +86,7 @@ export function rowsFrom(chainId: ChainId, per: readonly WalletQuest[]): ProofRo
     chainId, jobId: h.jobId, escrow,
     agent: { name: h.agent.name, agentKey: h.agent.agentKey, tokenId: h.agent.agentId, category: h.agent.category },
     operatorClass: h.agent.firstParty || isReferenceTwin(chainId, h.agent.agentId) ? 'reference' : 'third_party',
-    funderClass: funderOf(h), client: w.wallet, counted: h.eligible && w.quest.eligible,
+    funderClass: funderOf(h), alsoOperator: false, client: w.wallet, counted: h.eligible && w.quest.eligible,
     state: h.state, funded: Boolean(h.tx['funded']), delivered: DELIVERED.has(h.state), settled: Boolean(h.tx['completed']),
     refunded: h.state === 'REFUNDED' || Boolean(h.tx['refunded']), rated: Boolean(h.rating && !h.reasons.includes('rating_unbound')),
     createdAt: h.timestamps['created'] ?? h.timestamps['funded'] ?? null,
@@ -102,6 +105,8 @@ async function build(): Promise<Proof> {
     stats[String(chainId)] = statsFrom(per)
     rows.push(...rowsFrom(chainId, per))
   }
+  const operators = await operatorWalletsHere().catch(() => new Set<string>())
+  for (const r of rows) r.alsoOperator = r.funderClass === 'outside' && operators.has(r.client.toLowerCase())
   // Chain checks and terms: the same cached Result Lens as each Job Room, a few at a time.
   const delivered = rows.filter((r) => r.delivered)
   for (let i = 0; i < delivered.length; i += 6) {
@@ -144,7 +149,7 @@ export function weeklyOutside(rows: readonly ProofRow[]): Array<{ week: string; 
 export function proofProjection() {
   // Fresh for 90 s (was 10 min, so a new hire could take 20 minutes to appear); still one rebuild at a time, however
   // many visitors, and a stale copy answers at once while it runs. v4: rows carry createdAt.
-  return cachedProjection('proof:v4', build, { freshMs: 90_000, timeoutMs: 180_000, staleWhileRevalidate: true })
+  return cachedProjection('proof:v5', build, { freshMs: 90_000, timeoutMs: 180_000, staleWhileRevalidate: true })
 }
 
 const CSV_COLS = ['chain', 'job_id', 'escrow', 'agent', 'agent_key', 'operator_class', 'funder_class', 'client', 'counted', 'state', 'funded', 'delivered', 'settled', 'refunded', 'rated', 'checks_decided', 'checks_agreed', 'terms_met', 'terms_of', 'terms_source', 'act', 'act_tx', 'hire_tx', 'verify_url'] as const

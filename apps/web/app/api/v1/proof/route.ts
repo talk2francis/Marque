@@ -16,7 +16,8 @@ export async function GET(req: Request) {
     }
     return NextResponse.json({
       ...p.value, provenance: 'ONCHAIN',
-      note: "Outside means not in Marque's published team list (config/team-wallets.json). It does not prove the buyer is unrelated.",
+      scope: 'Every job hired through Marque on BNB Chain\'s ERC-8183 escrow, on mainnet and testnet, team jobs included and labelled. /api/v1/phase2/stats counts a narrower set: jobs that count under Set and Earn rules.',
+      note: "Outside means not in Marque's published team list (config/team-wallets.json). It does not prove the buyer is unrelated. alsoOperator marks an outside wallet that owns or runs an agent listed on Marque.",
     }, { headers: { 'cache-control': 'public, max-age=60', 'access-control-allow-origin': '*' } })
   } catch {
     return NextResponse.json({ error: 'unavailable', detail: 'The proof table could not be read just now. Try again in a minute.' }, { status: 503 })

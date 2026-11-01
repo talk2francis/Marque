@@ -41,13 +41,15 @@ export function AgentCard({ a, compare, base = '', variant = 'default' }: {
   const hireable = terms.state === 'fresh'
   const quoted = terms.state !== 'none'
   const declared = !quoted && a.priceProvenance === 'CLAIMED' ? a.price : null
-  const free = answersFree(a)
+  const w = a.warrant
+  // Try free only when the agent answered Marque's probe recently; an untested agent shows no stars (2 Nov).
+  const free = answersFree(a) && (w.status !== 'untested' || a.liveness === 'live')
+  const untested = w.status === 'untested'
   const classified = a.category && a.category !== 'unclassified'
   const cat = classified ? CATEGORY_LABEL[a.category!] ?? a.category! : 'Other'
   const blurb = describe(a)
   const verified = a.track.verified
   const delivery = deliveryWords(a.track.delivery.medianSeconds)
-  const w = a.warrant
   const stale = w.status === 'warranted' && warrantIsStale(w.date)
   // The practice lane (BSC testnet) uses the same card; only a dashed network badge differs.
   const practice = a.agentId.startsWith('97:')
@@ -99,7 +101,7 @@ export function AgentCard({ a, compare, base = '', variant = 'default' }: {
 
       <p className={styles.status}>
         {hireable
-          ? <span className={styles.ok}><span className={styles.dot} aria-hidden="true" />Hireable</span>
+          ? <span className={styles.ok}><span className={styles.dot} aria-hidden="true" />Live price</span>
           : terms.state === 'dated'
             ? <span className={styles.off}>Quote lapsed</span>
             : <span className={styles.off}>{a.commerce.state === 'preview_only' || free ? 'Preview only' : 'Not hireable'}</span>}
@@ -108,7 +110,7 @@ export function AgentCard({ a, compare, base = '', variant = 'default' }: {
           ? stale ? <span className={styles.retest}>Retest due</span> : <span className={styles.warrant}><Check aria-hidden="true" />Test passed {utcDay(w.date)}</span>
           : w.status === 'failed'
             ? <span className={styles.failed} title={`Failed ${w.testId ?? 'MCS'}${w.failedField ? ` on ${w.failedField}` : ''}${w.date ? `, ${utcDay(w.date)}` : ''}. The record is on its page.`}>Failed {w.testId ?? 'the test'}</span>
-            : <span className={styles.untested}>Untested</span>}
+            : <span className={styles.untested}>{a.category === 'security' || !a.category || a.category === 'unclassified' ? 'No test for its category yet' : 'Not yet tested'}</span>}
       </p>
 
       <dl className={styles.stats} title={a.track.computedAt ? `Job and review index observed ${a.track.computedAt}${a.track.sourceStale ? ' (cached, refresh pending)' : ''}` : 'Index observation time unavailable'}>
@@ -124,8 +126,8 @@ export function AgentCard({ a, compare, base = '', variant = 'default' }: {
         </div>
         <div>
           <dt>Rating</dt>
-          <dd>{verified.averageStars !== null && verified.count > 0 ? <>{verified.averageStars.toFixed(1)}<span className={styles.star} aria-hidden="true">★</span></> : <span className={styles.none}>{a.track.available === false ? 'Unavailable' : 'Not yet'}</span>}</dd>
-          <dd className={styles.src}>{verified.count > 0 ? `${verified.count} linked ${verified.count === 1 ? 'review' : 'reviews'}` : a.track.available === false ? 'rating evidence unavailable' : 'no linked reviews'}</dd>
+          <dd>{untested ? <span className={styles.none}>Not shown</span> : verified.averageStars !== null && verified.count > 0 ? <>{verified.averageStars.toFixed(1)}<span className={styles.star} aria-hidden="true">★</span></> : <span className={styles.none}>{a.track.available === false ? 'Unavailable' : 'Not yet'}</span>}</dd>
+          <dd className={styles.src}>{untested ? 'shown once it is tested' : verified.count > 0 ? `${verified.count} linked ${verified.count === 1 ? 'review' : 'reviews'}` : a.track.available === false ? 'rating evidence unavailable' : 'no linked reviews'}</dd>
         </div>
       </dl>
 

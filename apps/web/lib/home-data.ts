@@ -7,6 +7,8 @@ import { type MarketRow } from './marketplace'
 import { marketplaceAgentsCached as marketplaceAgents } from './market-cache'
 import { pickShowcase } from './ready-picks'
 import { readLedger } from './ledger'
+import type { SupplyCount, SupplyNow } from './supply-truth'
+import { operatorWalletsHere } from './operators-here'
 import { referenceAgent } from './reference-agents'
 import { registryImageUrl } from './avatar-source'
 import type { TapeItem } from '../app/_components/ui'
@@ -49,9 +51,15 @@ export async function tapeItems(limit = 14): Promise<TapeItem[]> {
              (select category from agent_category c where c.agent_id = a.id order by (category <> 'unclassified') desc, confidence desc limit 1) as category
       from rating r left join agent a on a.chain_id = r.chain_id and a.token_id = r.agent_token_id
       where r.chain_id = 56 and not r.revoked and r.tag1 = 'starred' and r.block_time is not null
+        -- On Marque: only a rating from a wallet that hired this agent through Marque (2 Nov). Any other rating on chain
+        -- is not Marque activity.
+        and exists (select 1 from commerce_job j join hire_intent i on i.id = j.intent_id join agent ha on ha.id = i.agent_id
+          where j.chain_id = 56 and j.client = r.client and ha.token_id = r.agent_token_id)
       order by r.block_time desc limit ${limit}`),
   ])
   const items: Array<TapeItem & { at: number }> = []
+  // One entry per transaction: a batch of ratings in one transaction is one event, not several (2 Nov).
+  const seenTx = new Set<string>()
   for (const h of rowsOf(hires)) {
     const tok = h['token'] ? assetAt(56 as ChainId, String(h['token'])) : null
     const at = new Date(String(h['block_time'])).toISOString()
@@ -64,6 +72,8 @@ export async function tapeItems(limit = 14): Promise<TapeItem[]> {
     })
   }
   for (const r of rowsOf(ratings)) {
+    if (seenTx.has(String(r['tx_hash']))) continue
+    seenTx.add(String(r['tx_hash']))
     const at = new Date(String(r['block_time'])).toISOString()
     const stars = Math.round(Number(r['value']) / 10 ** Number(r['value_decimals'] ?? 0) / 20)
     items.push({
@@ -88,37 +98,35 @@ export async function tapeItems(limit = 14): Promise<TapeItem[]> {
 export interface CategoryTile {
   measuredAt: string
   category: string
+  /** Agents that passed their category's test and have a live price on BSC mainnet (supplyNow): the tile's number. */
   hireable: number
+  /** Distinct recorded owners of those agents. */
   operators: number
-  thirdPartyOperators: number
   cheapest: string | null
   bestRating: { stars: number; count: number; agent: string } | null
-  /** Distinct agents hireable on BSC mainnet and on BSC testnet, side by side (29 Oct); `hireable` counts each agent once. */
-  onMainnet: number
-  onTestnet: number
+  /** Agents with a live price on each network, tested or not; never added together. */
+  pricedMainnet: number
+  pricedTestnet: number
 }
 
 /**
- * Per quest category: agents hireable now, cheapest live mainnet quote, best verified rating. With `both` (the Ready
- * view over both networks, one row per agent), `hireable` counts each agent once whichever network it sells on, the way
- * the marketplace lists them and Set and Earn counts hires; mainnet and testnet counts are shown beside it, never added.
+ * Per quest category, from the one supply count (supplyNow): agents that passed and have a live price on mainnet,
+ * the agents priced on each network beside it, the cheapest live mainnet quote and the best verified rating.
  */
-export async function categoryTiles(ready: MarketRow[], supply: Awaited<ReturnType<typeof marketplaceAgents>>['supply'], measuredAt: string, both?: MarketRow[] | null): Promise<CategoryTile[]> {
-  const nets = (r: MarketRow) => r.networks ?? [Number(r.agentId.split(':')[0]) as 56 | 97]
+export async function categoryTiles(ready: MarketRow[], supply: Awaited<ReturnType<typeof marketplaceAgents>>['supply'], measuredAt: string, mainnet: SupplyNow, testnet: SupplyNow | null): Promise<CategoryTile[]> {
   return QUEST_CATEGORIES.map((category) => {
     const c = supply.find((x) => x.category === category)
-    const inCat = both?.filter((r) => r.category === category) ?? null
+    const m = mainnet.byCategory[category]
     const cheapest = c?.cheapest ? `${formatAmount(c.cheapest.priceRaw, c.cheapest.decimals)} ${c.cheapest.token}` : null
     const rated = ready
-      .filter((r) => r.category === category && r.track.verified.averageStars !== null)
+      .filter((r) => r.category === category && r.warrant.status === 'warranted' && r.track.verified.averageStars !== null)
       .sort((a, b) => (b.track.verified.averageStars ?? 0) - (a.track.verified.averageStars ?? 0))[0]
     return {
       measuredAt, category, cheapest,
-      hireable: inCat ? inCat.length : c?.hireable ?? 0,
-      operators: inCat ? new Set(inCat.map((r) => (r.owner ?? r.agentId).toLowerCase())).size : c?.operators ?? 0,
-      thirdPartyOperators: c?.thirdPartyOperators ?? 0,
-      onMainnet: inCat ? inCat.filter((r) => nets(r).includes(56)).length : c?.hireable ?? 0,
-      onTestnet: inCat ? inCat.filter((r) => nets(r).includes(97)).length : 0,
+      hireable: m?.passed ?? 0,
+      operators: m?.passedOperators ?? 0,
+      pricedMainnet: m?.priced ?? 0,
+      pricedTestnet: testnet?.byCategory[category]?.priced ?? 0,
       bestRating: rated ? { stars: rated.track.verified.averageStars!, count: rated.track.verified.count, agent: rated.name } : null,
     }
   })
@@ -126,20 +134,18 @@ export async function categoryTiles(ready: MarketRow[], supply: Awaited<ReturnTy
 
 /** Six hireable agents for "Ready to hire now": Marque's six reference agents, outside agents only where one has no live price (pickShowcase). */
 export async function readyToHire(): Promise<{ all: MarketRow[]; picks: MarketRow[]; supply: Awaited<ReturnType<typeof marketplaceAgents>>['supply']; generatedAt: string; total: number }> {
-  const { rows, supply, generatedAt, quoteObservedAt, total } = await marketplaceAgents({ tab: 'ready', lane: 'mainnet', sort: 'best', limit: 60 })
+  const { rows, supply, generatedAt, quoteObservedAt, total } = await marketplaceAgents({ tab: 'ready', lane: 'mainnet', sort: 'best', limit: 60, failed: 'group' })
   return { all: rows, picks: pickShowcase(rows), supply, generatedAt: quoteObservedAt ?? generatedAt, total }
 }
 
-export interface FunnelLine { registered: number | null; answering: number | null; hireable: number; warranted: number | null; measuredAt: string }
+export interface FunnelLine extends SupplyCount { registered: number | null; answering: number | null; measuredAt: string }
 
-/** The Phase 1 funnel reduced to one line (the full one lives on /why). */
-export async function funnelLine(ready: { total: number; generatedAt: string }): Promise<FunnelLine> {
+/** The Phase 1 funnel reduced to one line (the full one lives on /why); the supply numbers are supplyNow's. */
+export async function funnelLine(supply: SupplyNow): Promise<FunnelLine> {
   const stages = await funnel(56).catch(() => null)
   const stage = (k: string) => stages?.find((s) => s.stage === k)?.count ?? null
-  const warranted = await db().execute(sql`
-    select count(distinct ${oneAgentIdSql(sql`agent_id`)})::int as n from conformance_result where pass = true and agent_id not like 'stub:%'`)
-    .then((r) => Number(rowsOf(r)[0]?.['n'] ?? 0)).catch(() => null)
-  return { registered: stage('registered_bsc'), answering: stage('reachable'), hireable: ready.total, warranted, measuredAt: ready.generatedAt }
+  const { priced, passed, failed, notYetTested, measuredAt } = supply
+  return { registered: stage('registered_bsc'), answering: stage('reachable'), priced, passed, failed, notYetTested, measuredAt }
 }
 
 export interface PassFail {
@@ -204,6 +210,8 @@ export interface RecentHire {
   fundedAt: string
   price: string | null
   team: boolean
+  /** An outside payer that also owns or runs an agent listed on Marque (operators-here.ts). */
+  alsoOperator: boolean
   steps: Array<{ label: string; tx: string | null; at: string | null }>
   deliveredSeconds: number | null
   stars: number | null
@@ -217,6 +225,7 @@ export interface RecentHire {
  * No raw buyer task is put on Home; the Job Room carries the full evidence.
  */
 export async function recentHires(): Promise<RecentHire[]> {
+  const operators = await operatorWalletsHere().catch(() => new Set<string>())
   const jobs = rowsOf(await db().execute(sql`
     select j.job_id, j.client, j.provider, j.funded_raw, j.token, j.state,
            i.category, i.agent_id, a.name, a.token_id, a.image_url,
@@ -262,6 +271,7 @@ export async function recentHires(): Promise<RecentHire[]> {
       fundedAt: iso(String(j['funded_at']))!,
       price: tok && j['funded_raw'] ? `${formatAmount(String(j['funded_raw']), tok.decimals)} ${tok.symbol}` : null,
       team: teamWallets().includes(String(j['client'])),
+      alsoOperator: !teamWallets().includes(String(j['client'])) && operators.has(String(j['client']).toLowerCase()),
       steps: [
         { label: 'Quote evidence, with signature mode shown', tx: null, at: null },
         { label: 'Paid into escrow', tx: ev['JobFunded']?.tx ?? null, at: iso(ev['JobFunded']?.at) },

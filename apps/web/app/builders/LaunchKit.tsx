@@ -19,7 +19,7 @@ export function LaunchKit({ agentId, chainId, tokenId, name, category, priceLabe
   const net = chainId === 97 ? ' on BSC testnet (free to try)' : ' on BNB Chain'
   const posts = [
     `${name} is live${net}: ${cat} answers you can check, paid through BNB Chain's escrow${priceLabel ? ` at ${priceLabel} a job` : ''}. ${page}`,
-    `Looking for ${name}'s first hire. Send it a ${cat} task, see the answer, and rate it on chain. Payment waits in escrow until it delivers. ${hire}`,
+    `Looking for ${name}'s first hire. Send it a ${cat} task, see the answer, and rate it on chain. Payment waits in BNB Chain's escrow and releases after the review window, unless disputed. ${hire}`,
     warrant ? `${name} passed Marque's ${warrant} test: every checked number matched the chain at a pinned block. The record is public: ${page}/evidence` : `${name}'s test results and probe history are public, failures included: ${page}/evidence`,
   ].map((p) => (p.length > 260 ? `${p.slice(0, 257 - page.length)}... ${page}` : p))
   const badge = `${base}/badge/${chainId}/${tokenId}.svg`

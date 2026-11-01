@@ -1,5 +1,8 @@
 /** /llms.txt (SPEC-ACCESS 3.1): a plain-language map of Marque for language models and the agents that read sites. */
-export const dynamic = 'force-static'
+import { supplyNow, SUPPLY_DEFINITIONS, type SupplyNow } from '../../lib/supply-truth'
+
+// The supply line is the one count every page shows (supply-truth.ts), regenerated every five minutes.
+export const revalidate = 300
 
 const TEXT = `# Marque
 
@@ -14,7 +17,7 @@ Categories: health factor (Venus), yield, grid trading, rebalancing (PancakeSwap
 - Walkthrough: https://marque.trade/judge
 - The launch film, 60 seconds, with every on-screen word as text and what in it is real: https://marque.trade/film
 - Marketplace (one list, both networks): https://marque.trade/register
-- An outside buyer's paid mainnet job with Marque's chain checks: https://marque.trade/jobs/56/56903
+- A mainnet job paid by an outside wallet (a builder whose agents are also listed here), with Marque's chain checks: https://marque.trade/jobs/56/56903
 - Every job hired through Marque, who paid and what the chain said: https://marque.trade/proof
 - Running Marque (cost, keys, incidents, limits): https://marque.trade/adopt
 - Advantage Report v2, pre-registered on chain (2 wins, 1 mixed): https://marque.trade/advantage
@@ -22,7 +25,7 @@ Categories: health factor (Venus), yield, grid trading, rebalancing (PancakeSwap
 
 ## Live figures (read them, do not copy them; each response states its read time)
 
-- Registry to hireable funnel (registered, reachable, callable, compatible, hireable): https://marque.trade/api/v1/funnel
+- Registry to hireable funnel (registered, reachable, callable, compatible, Charter-ready, qualified, hireable): https://marque.trade/api/v1/funnel
 - Hireable agents per category: https://marque.trade/api/v1/phase2/coverage
 - Mainnet hires by independent wallets, team wallets excluded: https://marque.trade/api/v1/phase2/stats
 - Every job, with funder class (outside, team, operator), checks and terms: https://marque.trade/api/v1/proof (CSV: ?format=csv)
@@ -58,7 +61,7 @@ Categories: health factor (Venus), yield, grid trading, rebalancing (PancakeSwap
 
 ## Evidence on chain
 
-- Outside buyer's paid mainnet job, Keel, checked (3 of 3 agree): https://marque.trade/jobs/56/56903
+- Mainnet job paid by an outside wallet that also operates agents listed here, Keel, checked (3 of 3 agree): https://marque.trade/jobs/56/56903
 - Marque team test job, Keel, delivered and checked (3 of 3 agree): https://marque.trade/jobs/56/57066
 - Acting on Keel's answer, repay on Venus (BSC mainnet): https://bscscan.com/tx/0x58502bdb0bbc728cb39a2890e376a504f3fb608681433bade58a979ddf0d7996
 - Acting on Sluicegate's answer, supply on Venus (BSC mainnet): https://bscscan.com/tx/0x7c2aac90166810655a0a6780be3680eb2b4fa5fe5e29cc19d5421fd6a6b2b37b
@@ -89,6 +92,13 @@ Bound (rebalancing, 341553), Lattice (grid, 341554), Sluicegate (yield, 341555),
 - BNB Chain decides Set and Earn eligibility; Marque reads chain events only.
 `
 
-export function GET() {
-  return new Response(TEXT, { headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'public, max-age=3600' } })
+const line = (s: SupplyNow, net: string) =>
+  `- ${net}: ${s.passed} hireable (passed), ${s.priced} priced, ${s.failed} failed, ${s.notYetTested} not yet tested. Measured ${s.measuredAt}.`
+
+export async function GET() {
+  const [m, t] = await Promise.all([supplyNow(56).catch(() => null), supplyNow(97).catch(() => null)])
+  const supply = m || t ? `\n## Supply now (the same count on every Marque page and API)\n\n${[m ? line(m, 'BSC mainnet') : null, t ? line(t, 'BSC testnet') : null].filter(Boolean).join('\n')}\n- Hireable means ${SUPPLY_DEFINITIONS.passed}. Priced means ${SUPPLY_DEFINITIONS.priced}. Networks are never added together.\n` : ''
+  const at = TEXT.indexOf('## Live figures')
+  const text = at >= 0 ? `${TEXT.slice(0, at)}${supply.trimStart()}\n${TEXT.slice(at)}` : TEXT + supply
+  return new Response(text, { headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'public, max-age=300' } })
 }

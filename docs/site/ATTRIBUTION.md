@@ -6,7 +6,7 @@ An open convention for Set and Earn: any marketplace can be credited for a hire 
 
 ## Why this exists
 
-Set and Earn counts a hire on a shortlisted marketplace, and every shortlisted marketplace uses the same ERC-8183 escrow contracts on BSC mainnet and testnet. A job on chain records the client, the provider, the budget and a free-text description. It does not record which website the buyer used.
+Set and Earn counts a hire on a shortlisted marketplace. Marque reads the hires recorded on BNB Chain's ERC-8183 escrow contracts on BSC mainnet and testnet; a marketplace that settles through its own contract is not visible to it. A job on chain records the client, the provider, the budget and a free-text description. It does not record which website the buyer used.
 
 So a tracker can only credit a marketplace if the job record says so. This page states the two signals Marque writes into every hire it makes, the order in which it reads them for every marketplace, and invites every marketplace to write the same two. The more marketplaces that do, the more accurate every tracker becomes, including Marque’s.
 

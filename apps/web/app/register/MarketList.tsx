@@ -1,6 +1,6 @@
 'use client'
 
-import type { KeyboardEvent } from 'react'
+import { Fragment, type KeyboardEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   AgentBlurb,
@@ -33,11 +33,14 @@ export function MarketList({
   selectedIds,
   atLimit,
   onToggle,
+  untestedFrom = -1,
 }: {
   rows: MarketRow[]
   selectedIds: Set<string>
   atLimit: boolean
   onToggle: (a: MarketRow) => void
+  /** Index of the first agent with no test result, in the Ready view's recommended order; -1 for none. */
+  untestedFrom?: number
 }) {
   // Keyboard (SPEC-WORKSPACE 3.4): arrow keys move between rows, Enter opens the agent, h hires.
   const router = useRouter()
@@ -64,12 +67,13 @@ export function MarketList({
         <span className={styles.headAct}>Try or hire</span>
       </div>
 
-      {rows.map((a) => {
+      {rows.map((a, i) => {
         const picked = selectedIds.has(a.agentId)
         const linked = profileHref(a) !== null
         return (
+          <Fragment key={a.agentId}>
+          {untestedFrom === i ? <UntestedHead className={styles.untestedHead} /> : null}
           <article
-            key={a.agentId}
             data-agent={a.agentId}
             data-row=""
             tabIndex={0}
@@ -109,8 +113,19 @@ export function MarketList({
               <RowActions a={a} />
             </div>
           </article>
+          </Fragment>
         )
       })}
+    </div>
+  )
+}
+
+/** The heading where the Ready view moves from agents that passed their test to agents with no result yet. */
+export function UntestedHead({ className }: { className?: string }) {
+  return (
+    <div className={className} role="presentation">
+      <b>Not yet tested</b>
+      <span>A live price, but no test result yet, or no published test for its category. Not counted as hireable.</span>
     </div>
   )
 }

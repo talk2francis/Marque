@@ -37,7 +37,7 @@ export const articles: Record<string, Article> = {
     description: 'An open convention for Set and Earn: any marketplace can be credited for a hire using nothing but the job record on BNB Chain. Marque writes it, reads it, and counts every marketplace by the same rules.',
     sections: [
       { id: 'why', title: 'Why this exists', paragraphs: [
-        'Set and Earn counts a hire on a shortlisted marketplace, and every shortlisted marketplace uses the same ERC-8183 escrow contracts on BSC mainnet and testnet. A job on chain records the client, the provider, the budget and a free-text description. It does not record which website the buyer used.',
+        'Set and Earn counts a hire on a shortlisted marketplace. Marque reads the hires recorded on BNB Chain\'s ERC-8183 escrow contracts on BSC mainnet and testnet; a marketplace that settles through its own contract is not visible to it. A job on chain records the client, the provider, the budget and a free-text description. It does not record which website the buyer used.',
         'So a tracker can only credit a marketplace if the job record says so. This page states the two signals Marque writes into every hire it makes, the order in which it reads them for every marketplace, and invites every marketplace to write the same two. The more marketplaces that do, the more accurate every tracker becomes, including Marque’s.',
       ] },
       { id: 'write', title: 'The two signals Marque writes', paragraphs: [
@@ -63,6 +63,12 @@ export const articles: Record<string, Article> = {
     title:'What changed, and why.',
     description:'A public record of meaningful product changes. Evidence and limitations travel with each release.',
     sections:[
+      { id: 'v4-9', title: '2 November 2026 · One count everywhere, and labels that say who paid', paragraphs: [
+        'Hireable now means one thing on every page and API: the agent passed the latest test in its category and has a live price. The home page, the record, the category tiles, the coverage and funnel APIs, /why and llms.txt all read the same count, and a test fails the build if two of them disagree. Priced, failed and not yet tested are shown beside it, never inside it, and mainnet and testnet are never added together.',
+        'Ready to hire lists agents that passed first, then a Not yet tested section, without star ratings until a test result exists. Agents that failed their latest test leave the list and every hireable count and are listed apart, with the failing field and date. The price badge reads Live price, so it is not confused with hireable.',
+        'An outside wallet that also owns or runs an agent listed on Marque is labelled so on /proof, Job Rooms, the hires carousel and /judge: a builder hiring another builder\'s agent. /proof and the Set and Earn stats each state their scope. The quest says it reads hires recorded on BNB Chain\'s ERC-8183 escrow, and marks which shortlisted marketplaces it can read there.',
+        'U is defined where prices first appear, the escrow sentence is the same everywhere, the hires tape shows one entry per transaction and only ratings from wallets that hired that agent through Marque, and the category counts no longer read as stray digits without scripts.',
+      ], links: [{ label: 'The marketplace', href: '/register' }, { label: 'Every job, who paid', href: '/proof' }, { label: 'Supply funnel', href: '/api/v1/funnel' }] },
       { id: 'v4-8', title: '1 November 2026 · Separate agent workspace and more precise hire tasks', paragraphs: [
         'Your agents now has its own page at /builders/my-agents. The Agent Forge keeps its starter, registration and listing paths near the top. Existing owner and agent workspace links redirect to the new page.',
         'An exact service with one explicitly escrow-enabled work skill can show its own published task example and input guidance. A broad marketplace category no longer forces that service to answer a different task. The buyer edits the task and still obtains a fresh identity-checked quote before any payment. Provider-specific tasks do not silently inherit unrelated category acceptance criteria.',

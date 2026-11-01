@@ -7,7 +7,7 @@ import styles from './quest.module.css'
 
 export const metadata = {
   title: `Set and Earn checker · ${BRAND.name}`,
-  description: 'Check any wallet against BNB Chain Set and Earn: hires across all nine shortlisted marketplaces and the six build criteria, read from chain on mainnet and testnet.',
+  description: 'Check any wallet against BNB Chain Set and Earn: hires recorded on BNB Chain\'s ERC-8183 escrow on mainnet and testnet, and the six build criteria. Marketplaces that use their own escrow contracts are not visible here.',
 }
 export const revalidate = 300
 
@@ -21,7 +21,7 @@ export default function QuestPage() {
           <span className={styles.art} aria-hidden="true"><span className={styles.artImg} /></span>
           <QuestStrip />
           <h1 className="t-display">Set and Earn, <em>checked on chain.</em></h1>
-          <p className={styles.lede}>Hires on every shortlisted marketplace and your build&apos;s six criteria, for any wallet.</p>
+          <p className={styles.lede}>Hires recorded on BNB Chain&apos;s ERC-8183 escrow, on mainnet and testnet, and your build&apos;s six criteria, for any wallet. Marketplaces that use their own escrow contracts are not visible here.</p>
           <QuestChecker />
         </header>
         <QuestHome />

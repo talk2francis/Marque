@@ -12,6 +12,7 @@ import { marketplaceAgentsCached as marketplaceAgents } from '../../lib/market-c
 import { referenceAgent } from '../../lib/reference-agents'
 import { RepayPlanButton } from './RepayPlanButton'
 import styles from './judge.module.css'
+import { operatorWalletsHere } from '../../lib/operators-here'
 
 // Rendered at request time (never at build: the build has no archive RPC); the reads are cached for a minute below.
 export const dynamic = 'force-dynamic'
@@ -52,6 +53,7 @@ export default async function JudgePage() {
       hf, keelTest: keelPage?.tests.find((t) => t.testId === 'MCS-HF-1') ?? null,
       lens: lens ? { summary: lens.summary, matches: lens.manifest?.matches ?? null, state: lens.state } : null, acted,
       funder: featured?.funderClass ?? null,
+      funderOperates: featured?.client ? (await operatorWalletsHere().catch(() => null))?.has(featured.client.toLowerCase()) ?? false : false,
       earlier: (earlier[0] ? { ...earlier[0], funder: funderClass(earlier[0].user) } : null),
       // What Marque computes for step 1's own position, at the current block: the repay that reaches the target.
       need: pos && pos.ok ? (() => {
@@ -62,7 +64,7 @@ export default async function JudgePage() {
       planNote: live && !live.ok ? live.reason : live && live.ok ? 'Built and simulated at the current block.' : null,
     }
   }
-  const d = await cachedProjection('judge:v2', load, { freshMs: 60_000, timeoutMs: 20_000, staleWhileRevalidate: true }).then((p) => p.value).catch(load)
+  const d = await cachedProjection('judge:v3', load, { freshMs: 60_000, timeoutMs: 20_000, staleWhileRevalidate: true }).then((p) => p.value).catch(load)
   const { hf, keelTest, acted } = d
   const pos = d.pos
   const lens = d.lens
@@ -71,7 +73,7 @@ export default async function JudgePage() {
   const o = acted.find((x) => (x.before.healthFactor ?? 99) < 2) ?? null
   const e = d.earlier
   const blk = (n: string | number | bigint | null | undefined) => (n == null ? 'not read' : Number(n).toLocaleString('en-US'))
-  const funderWords = d.funder === 'outside' ? 'paid by an outside buyer' : d.funder === 'team' ? 'paid by a Marque team test wallet' : d.funder === 'operator' ? "paid by the agent's own operator" : 'payer not classified'
+  const funderWords = d.funder === 'outside' ? (d.funderOperates ? 'paid by an outside wallet that also operates agents listed here' : 'paid by an outside wallet') : d.funder === 'team' ? 'paid by a Marque team test wallet' : d.funder === 'operator' ? "paid by the agent's own operator" : 'payer not classified'
   const steps: Array<{ title: string; body: React.ReactNode; action: React.ReactNode }> = [
     {
       title: 'A position that needs work',

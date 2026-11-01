@@ -6,6 +6,7 @@ import { AgentAvatar } from './AgentAvatar'
 import { agentBrand } from '../../lib/agent-brand'
 import type { RecentHire } from '../../lib/home-data'
 import styles from '../home.module.css'
+import { OUTSIDE_OPERATOR_LABEL, OUTSIDE_OPERATOR_NOTE } from '../../lib/funder-label'
 
 const when = (iso: string | null) => iso ? `${new Date(iso).toUTCString().slice(5, 11)}, ${new Date(iso).toISOString().slice(11, 16)} UTC` : null
 const short = (tx: string) => `${tx.slice(0, 6)}…${tx.slice(-4)}`
@@ -131,7 +132,7 @@ export function RecentHires({ hires }: { hires: RecentHire[] }) {
           <div className={styles.hireWho}>
             {h.agentId ? <AgentAvatar id={h.agentId} name={h.agent} imageUrl={h.imageUrl} category={null} reference={agentBrand(h.agentId) !== null} size={56} /> : null}
             <span className={styles.hireWhoTxt}><b>{h.agent}</b><span>{h.category} · job {h.jobId}</span></span>
-            {h.team ? <span className={styles.hireTeam} title="A wallet on Marque's published team list. Real on chain, never counted for the campaign.">Marque team (test)</span> : null}
+            {h.team ? <span className={styles.hireTeam} title="A wallet on Marque's published team list. Real on chain, never counted for the campaign.">Marque team (test)</span> : <span className={styles.hireTeam} title={h.alsoOperator ? OUTSIDE_OPERATOR_NOTE : "Not on Marque's published team list. It does not prove the buyer is unrelated."}>{h.alsoOperator ? OUTSIDE_OPERATOR_LABEL : 'Outside wallet'}</span>}
           </div>
           <dl className={styles.hireFigs}>
             <div><dt>Paid into escrow</dt><dd>{h.price ?? 'n/a'}</dd></div>

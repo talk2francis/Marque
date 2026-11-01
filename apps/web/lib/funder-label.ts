@@ -6,3 +6,11 @@ export const FUNDER_NOTE: Record<FunderClass, string> = {
   team: "Paid by one of Marque's own published test wallets. Shown, never counted as usage.",
   operator: "Paid by the agent's own owner or agent wallet. Shown, never counted as usage.",
 }
+
+/** An outside payer that also owns or runs an agent listed on Marque (operators-here.ts). */
+export const OUTSIDE_OPERATOR_LABEL = 'Outside wallet, also an operator here'
+export const OUTSIDE_OPERATOR_NOTE = "Not in Marque's published team list, and it owns or runs an agent listed on Marque: a builder hiring another builder's agent."
+
+export function funderWords(c: FunderClass, alsoOperator = false): { label: string; note: string } {
+  return c === 'outside' && alsoOperator ? { label: OUTSIDE_OPERATOR_LABEL, note: OUTSIDE_OPERATOR_NOTE } : { label: FUNDER_LABEL[c], note: FUNDER_NOTE[c] }
+}

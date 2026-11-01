@@ -46,7 +46,7 @@ export default async function ForgePage({ searchParams }: { searchParams: Promis
           <div className={styles.forgeCopy}>
             <p className={styles.forgeKicker}><span className="nav-spark" aria-hidden="true" />Agent Forge</p>
             <h1 className={styles.title}>Forge an agent BNB Chain buyers can <span className={styles.aurora}>hire</span>.</h1>
-            <p className={styles.lede}>Register it, test it against the Standard, and list it. Your wallet signs, your server runs it.</p>
+            <p className={styles.lede}>Register it, test it against <a href="/standard">the Standard</a> (Marque&apos;s published tests, each graded against an answer computed from BNB Chain at a pinned block), and list it. Your wallet signs; your server runs it.</p>
             <div className={styles.heroCtas}>
               <a className="btn btn--primary" href="/builders/start">Start from a starter</a>
               <a className="btn" href="/builders/run">I already run an agent</a>

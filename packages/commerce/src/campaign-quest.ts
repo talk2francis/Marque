@@ -429,6 +429,21 @@ async function suggestedHire(exclude: string[]) {
 
 const TRY_FOUR = ['yield', 'grid', 'rebalancing', 'health_factor'] as const
 
+/**
+ * Shortlisted marketplaces that any hire on BNB Chain's ERC-8183 escrow names (its intent, client_ref or task), read
+ * every ten minutes. Marque reads only that escrow, so a marketplace no hire names may settle through its own contract
+ * and its hires are not visible here (2 Nov).
+ */
+let seenMemo: { at: number; v: Promise<Set<string>> } | null = null
+export function marketplacesSeenOnEscrow(): Promise<Set<string>> {
+  if (seenMemo && Date.now() - seenMemo.at < 600_000) return seenMemo.v
+  const v = db().execute(sql`select distinct marketplace from campaign_job where marketplace is not null`)
+    .then((r) => new Set((((r as { rows?: unknown[] }).rows ?? (r as unknown as unknown[])) as Array<Record<string, unknown>>).map((x) => String(x['marketplace']))))
+  seenMemo = { at: Date.now(), v }
+  v.catch(() => { seenMemo = null })
+  return v
+}
+
 export async function questFor(address: string, chains: ChainId[] = [56, 97]) {
   const wallet = getAddress(address)
   const lower = wallet.toLowerCase()
@@ -473,7 +488,7 @@ export async function questFor(address: string, chains: ChainId[] = [56, 97]) {
       const h = hire.hires.find((x) => x.marketplace === 'marque.trade' && x.agent.category === category && !x.reason?.startsWith('Recorded') && !x.reason?.startsWith('Closed'))
       return { category, done: Boolean(h), job: h ? { chainId: h.chainId, jobId: h.jobId } : null }
     }),
-    marketplaces: SHORTLIST.map((m) => ({ name: m.name, domain: m.domain, url: m.url })),
+    marketplaces: await marketplacesSeenOnEscrow().catch(() => null).then((seen) => SHORTLIST.map((m) => ({ name: m.name, domain: m.domain, url: m.url, seenOnEscrow: seen ? seen.has(m.domain) : null }))),
     method: {
       attribution: 'marque_intent > client_ref > via <domain> in the task > known envelope > not recorded (https://marque.trade/docs/attribution)',
       funded: 'A hire counts from its JobFunded event in the window. Created-but-unfunded jobs are listed and never counted.',

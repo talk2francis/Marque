@@ -18,10 +18,12 @@ import { ResultLens } from './ResultLens'
 import { jobLens } from '../../../../lib/lens'
 import { jobManifest } from '../../../../lib/manifest'
 import { onchainJobTask } from '../../../../lib/job-description'
-import { FUNDER_LABEL, FUNDER_NOTE } from '../../../../lib/funder-label'
+import { funderWords } from '../../../../lib/funder-label'
+import { operatorWalletsHere } from '../../../../lib/operators-here'
 import { registryImageUrl } from '../../../../lib/avatar-source'
 import { JobActions } from './JobActions'
 import styles from './job.module.css'
+import { UNote } from '../../../_components/ui/UNote'
 
 export const dynamic = 'force-dynamic'
 
@@ -47,7 +49,8 @@ export default async function JobRoom({ params }: { params: Promise<{ chainId: s
   const chainId = Number(c)
   if (!isSupportedChain(chainId) || !/^\d{1,20}$/.test(jobId)) notFound()
   const cid = chainId as ChainId
-  const [job, windowS] = await Promise.all([questJob(cid, jobId).catch(() => null), disputeWindowSeconds(cid).catch(() => null)])
+  const [job, windowS, operators] = await Promise.all([questJob(cid, jobId).catch(() => null), disputeWindowSeconds(cid).catch(() => null), operatorWalletsHere().catch(() => null)])
+  const funder = job?.funderClass ? funderWords(job.funderClass, Boolean(job.client && operators?.has(job.client.toLowerCase()))) : null
 
   // A job Marque has not indexed (opened elsewhere) still gets the chain's own view.
   const onchain = job ? null : await chainClient(cid).readContract({ address: network(cid).commerce, abi: agenticCommerceAbi, functionName: 'getJob', args: [BigInt(jobId)] })
@@ -124,7 +127,7 @@ export default async function JobRoom({ params }: { params: Promise<{ chainId: s
             <div className={styles.headTop}>
               <span className="t-label">Job room · {net(chainId).short}</span>
               <span className={styles.tags}>
-                {job?.funderClass ? <span className={styles.funder} data-funder={job.funderClass} title={FUNDER_NOTE[job.funderClass]}>{FUNDER_LABEL[job.funderClass]}</span> : null}
+                {job?.funderClass && funder ? <span className={styles.funder} data-funder={job.funderClass} title={funder.note}>{funder.label}</span> : null}
                 <span className={styles.stateTag} data-state={state}>{state === 'SUBMITTED' ? 'Delivered' : state === 'FUNDED' ? 'Escrow funded' : state.charAt(0) + state.slice(1).toLowerCase()}</span>
               </span>
             </div>
@@ -138,7 +141,7 @@ export default async function JobRoom({ params }: { params: Promise<{ chainId: s
             <dl className={styles.facts}>
               <div><dt>Agent</dt><dd>{job?.agent?.agentKey ? agentName : 'Identity not linked'}{job?.agent?.firstParty ? <Badge kind="reference" /> : null}</dd></div>
               <div><dt>Category</dt><dd>{CAT[category ?? ''] ?? 'Unclassified'}</dd></div>
-              <div><dt>{originalQuote ? 'Original quote' : 'Amount'}</dt><dd className={styles.num}>{priceLabel ?? 'unknown'} <ProvenanceChip provenance={originalQuote ? 'MEASURED' : 'ONCHAIN'} /></dd></div>
+              <div><dt>{originalQuote ? 'Original quote' : 'Amount'}</dt><dd className={styles.num}>{priceLabel ?? 'unknown'} <ProvenanceChip provenance={originalQuote ? 'MEASURED' : 'ONCHAIN'} /></dd>{priceLabel && / U$/.test(priceLabel) ? <dd><UNote /></dd> : null}</div>
               <div><dt>Job</dt><dd className={styles.num}>#{jobId}</dd></div>
             </dl>
             <JobActions

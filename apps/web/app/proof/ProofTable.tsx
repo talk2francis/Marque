@@ -1,9 +1,10 @@
 'use client'
 import { useEffect, useMemo, useState } from 'react'
 import type { ProofRow } from '../../lib/proof'
+import { OUTSIDE_OPERATOR_LABEL, OUTSIDE_OPERATOR_NOTE } from '../../lib/funder-label'
 import styles from './proof.module.css'
 
-const FUNDER = { outside: 'Outside buyer', team: 'Marque team (test)', operator: "The agent's own operator" } as const
+const FUNDER = { outside: 'Outside wallet', team: 'Marque team (test)', operator: "The agent's own operator" } as const
 const STATE: Record<string, string> = { OPEN: 'Open', FUNDED: 'Awaiting delivery', SUBMITTED: 'Delivered', COMPLETED: 'Settled', PAID: 'Paid out', REFUNDED: 'Refunded', DISPUTED: 'Disputed', REJECTED: 'Rejected', CANCELLED: 'Cancelled', EXPIRED: 'Expired' }
 const short = (a: string) => `${a.slice(0, 6)}…${a.slice(-4)}`
 
@@ -47,7 +48,7 @@ export function ProofTable({ rows }: { rows: ProofRow[] }) {
               <tr key={`${r.chainId}:${r.jobId}`} data-funder={r.funderClass}>
                 <td data-label="Job"><a href={`/jobs/${r.chainId}/${r.jobId}`}>#{r.jobId}</a> <span className={styles.net97}>{r.chainId === 97 ? 'testnet' : 'mainnet'}</span></td>
                 <td data-label="Agent">{r.agent.name ?? 'Identity not linked'}<span className={styles.sub}>{r.agent.agentKey ? r.operatorClass === 'reference' ? 'Marque reference' : 'Third party' : 'On-chain job; agent identity not established'}</span></td>
-                <td data-label="Paid by"><span className={styles.funder} data-funder={r.funderClass}>{FUNDER[r.funderClass]}</span><span className={styles.sub}>{short(r.client)}</span></td>
+                <td data-label="Paid by"><span className={styles.funder} data-funder={r.funderClass} title={r.alsoOperator ? OUTSIDE_OPERATOR_NOTE : undefined}>{r.alsoOperator ? OUTSIDE_OPERATOR_LABEL : FUNDER[r.funderClass]}</span><span className={styles.sub}>{short(r.client)}</span></td>
                 <td data-label="State">{STATE[r.state] ?? r.state}{r.counted ? <span className={styles.sub}>counted</span> : null}</td>
                 <td data-label="Chain checks">{r.checks && r.checks.decided ? `${r.checks.agreed} of ${r.checks.decided} agree` : '·'}</td>
                 <td data-label="Terms">{r.terms ? `${r.terms.met} of ${r.terms.of}${r.terms.source === 'standard' ? ' (Standard)' : r.terms.source === 'buyer' ? ' (buyer set)' : ' (signed)'}` : '·'}</td>

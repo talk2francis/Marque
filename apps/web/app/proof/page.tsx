@@ -24,6 +24,7 @@ export default async function ProofPage() {
           <span className={styles.kicker}>Proof</span>
           <h1 className="t-display">Every job, <em>who paid.</em></h1>
           <p className={styles.lede}>Each hire made through Marque on BNB Chain&apos;s ERC-8183 escrow: who paid, what was delivered, what Marque&apos;s chain checks said, and whether the buyer acted on it. Team test jobs are listed and labelled, never counted.</p>
+          <p className={styles.lede}><b>Scope:</b> every job through Marque, on both networks. The <a href="/api/v1/phase2/stats">Set and Earn count</a> is narrower: outside, Marque-bound, funded, one hire per category per wallet. An outside wallet that also owns or runs an agent listed here is labelled so.</p>
           <p className={styles.note}>Outside means not in Marque&apos;s published team list. It does not prove the buyer is unrelated.</p>
         </header>
         {!d ? <p className={styles.note} role="status">The table could not be read just now. Try again in a minute.</p> : (
