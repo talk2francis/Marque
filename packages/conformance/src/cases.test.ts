@@ -6,12 +6,16 @@ describe('published rebalancing subjects', () => {
   it('has distinct on-chain identities and a fallback roster', () => {
     const primary = CASES.find((item) => item.testId === 'MCS-REB-1')!.subject
     const subjects = [primary, ...REB_FALLBACK_SUBJECTS]
-    expect(subjects).toHaveLength(3)
-    expect(new Set(subjects.map((item) => item.tokenId)).size).toBe(3)
+    expect(subjects).toHaveLength(5)
+    expect(new Set(subjects.map((item) => item.tokenId)).size).toBe(subjects.length)
+    expect(new Set(subjects.map((item) => item.owner.toLowerCase())).size).toBe(subjects.length)
+    expect(primary).toMatchObject({ tokenId: '7683201', pair: 'TWT/WBNB' })
+    expect(REB_FALLBACK_SUBJECTS.map(item => item.tokenId)).toEqual(expect.arrayContaining(['7741848', '7742719', '7654391', '7654396']))
+    expect(new Set(subjects.map(item => item.pair)).size).toBeGreaterThan(1)
     for (const item of subjects) {
       expect(item.owner).toMatch(/^0x[a-fA-F0-9]{40}$/)
       expect(item.tokenId).toMatch(/^\d+$/)
-      expect(item.pair).toBe('BNCB/WBNB')
+      expect(item.pair).toMatch(/^[^/]+\/[^/]+$/)
     }
   })
 

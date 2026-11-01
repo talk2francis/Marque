@@ -347,7 +347,7 @@ export function HireSheet() {
           ) : (
             <>
               <section className="hs-block" aria-labelledby="hs-1">
-                <h3 id="hs-1" className="hs-h"><span className="hs-n">1</span>What should {agent.name} {verb}?</h3>
+                <h3 id="hs-1" className="hs-h"><span className="hs-n">1</span>{agent.taskGuide ? 'Your task' : <>What should {agent.name} {verb}?</>}</h3>
                 {q ? (
                   <p className="hs-task">{task.task || 'Your task'}</p>
                 ) : (

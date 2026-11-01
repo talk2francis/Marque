@@ -12,7 +12,7 @@ An exact service with one explicitly escrow-enabled work skill can show its own 
 
 My Marque keeps jobs with unlinked agent identities readable instead of passing a missing identity to the avatar renderer. This repairs the application error for affected wallet histories, including Marque Pass accounts. Unknown payment-asset units remain explicit. The Every job table explains why a shared payment wallet cannot identify an individual agent.
 
-Health-factor answer layouts adapt to their available column width and keep long market addresses clear of the value bars. Agent section links prepare nearby sections when visible or approached, keep document navigation local and announce a pending section. Outcome history is read only for the track-record section.
+Health-factor answer layouts adapt to their available column width and keep long market addresses clear of the value bars, with legend markers beside their labels. Agent section links prepare nearby sections when visible or approached, keep document navigation local and announce a pending section. Outcome history is read only for the track-record section.
 
 The rebalancing test subject roster was refreshed after all three former positions were withdrawn. The replacement TWT/WBNB position was observed on chain before the agent was tested. Its arithmetic policy and tolerances are unchanged; previous cases, results and answers remain stored.
 

@@ -2,7 +2,7 @@ import 'server-only'
 import { sql } from 'drizzle-orm'
 import { cachedProjection, canonicalAgentIdSql, db, firstPartyAgentsAllLanes } from '@marque/db'
 import { agentPortraits } from './agent-portraits'
-import { currentTerms, disputeWindowSeconds, sellerFor, teamWallets, termsOf, type LastQuote, type ServiceCommerce, type Terms } from '@marque/commerce'
+import { currentTerms, disputeWindowSeconds, sellerFor, teamWallets, termsOf, type LastQuote, type ServiceCommerce, type Terms, type PaidTaskGuide } from '@marque/commerce'
 import { buyerFeedbackBinding } from '@marque/commerce/feedback'
 import { agentTrack, type AgentTrack } from './agent-track'
 import { jobManifest, readManifest, type Manifest } from './manifest'
@@ -51,6 +51,7 @@ export interface Storefront {
   registerTx: string | null
   testnetTokenId: number | null
   endpoint: string | null
+  taskGuide?: PaidTaskGuide | null
   services: Array<{ kind: string; endpoint: string }>
   commerce: (ServiceCommerce & { priceLabel: string | null; lastQuote?: LastQuote | null }) | null
   /** Current terms, read per request from the newest quote observations (invariant 41). */
@@ -75,7 +76,7 @@ export async function storefront(agentId: string): Promise<Storefront | null> {
   const live = currentTerms(agentId).catch(() => null)
   let value: Storefront | null
   try {
-    value = (await cachedProjection(`storefront:v8:${agentId}`, () => computeStorefront(agentId), { freshMs: 30_000, timeoutMs: 12_000, staleWhileRevalidate: true })).value
+    value = (await cachedProjection(`storefront:v9:${agentId}`, () => computeStorefront(agentId), { freshMs: 30_000, timeoutMs: 12_000, staleWhileRevalidate: true })).value
   } catch {
     value = await computeStorefront(agentId)
   }
@@ -162,6 +163,7 @@ async function computeStorefront(agentId: string): Promise<Storefront | null> {
     registerTx: mintTx,
     testnetTokenId: fp?.testnet?.tokenId ?? null,
     endpoint: seller?.endpoint ?? null,
+    taskGuide: fp ? null : seller?.taskGuide ?? null,
     services: services.map((x) => ({ kind: String(x['kind']), endpoint: String(x['endpoint']) })),
     commerce: best ? { ...best, priceLabel: states?.terms.priceLabel ?? null } : null,
     terms: states?.terms ?? termsOf(null),

@@ -68,6 +68,9 @@
 .bars i, .legend i.barSupply, .legend i.barBorrow { height: 6px; border-radius: 3px; display: block; min-width: 3px; }
 .barSupply { background: color-mix(in srgb, var(--moss) 70%, transparent); }
 .barBorrow { background: color-mix(in srgb, var(--oxide) 65%, transparent); }
+.hfLegend { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; }
+.hfLegend span { display: inline-flex; align-items: center; gap: 6px; }
+.hfLegend i.barSupply, .hfLegend i.barBorrow { flex: none; width: 10px; margin: 0; }
 .marketVals { font-size: 12px; color: var(--ink-2); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
 .calm { display: flex; gap: 14px; align-items: center; padding: 16px; border-radius: 14px; border: 1px dashed var(--hair-2); }
 .calmRing { fill: none; stroke: color-mix(in srgb, var(--moss) 55%, transparent); stroke-width: 2; }

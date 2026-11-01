@@ -191,7 +191,7 @@ function Overview({ d, cat, shown, tenderHref, tryHref, delivery, lens, base }: 
           <p className={page.clamp}>{d.description} <ProvenanceChip provenance="CLAIMED" title={`Written by the operator in the ERC-8004 registry. ${BRAND.name} does not verify it.`} /></p>
         ) : <p className={styles.muted}>This agent published no description. <ProvenanceChip provenance="CLAIMED" /></p>}
         <dl className={page.sendGet}>
-          <div><dt>You send</dt><dd>{send ?? `Whatever its agent card asks for. ${BRAND.name} has no task form for ${cat.toLowerCase()} yet.`}</dd></div>
+          <div><dt>You send</dt><dd>{d.taskGuide ? <>{d.taskGuide.inputs[0]?.hint ?? 'The task described in its published example.'} <ProvenanceChip provenance="CLAIMED" title="Inputs declared by the operator for this service's paid work skill. The hire form shows its full guidance." /></> : send ?? `Whatever its agent card asks for. ${BRAND.name} has no task form for ${cat.toLowerCase()} yet.`}</dd></div>
           <div><dt>You get</dt><dd>An answer file, recorded by hash on chain when it delivers, and read here as a picture{testOf(d) ? ' with Marque’s own checks beside it' : ''}.</dd></div>
         </dl>
       </section>
