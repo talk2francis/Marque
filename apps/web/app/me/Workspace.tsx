@@ -306,30 +306,87 @@ function Dockets({ address, own, view }: { address: string; own: boolean; view: 
       load()
     } catch (err) { toast({ tone: 'error', title: friendlyError(err).title }) } finally { setBusy(null) }
   }
+  const lanes = toLanes(list)
+  const total = lanes.reduce((n, l) => n + l.rows.length, 0)
   return (
     <section className={styles.needs} aria-labelledby="needs-title">
-      <h2 id="needs-title" className={styles.h2}>Needs you{items ? <span className={styles.count}>{list.length}</span> : null}</h2>
+      <h2 id="needs-title" className={styles.h2}>Needs you{items ? <span className={styles.count}>{total}</span> : null}</h2>
       {team ? <p className={styles.fine}>A published Marque team wallet: its activity is shown, never counted for Set and Earn.</p> : null}
       {items === null ? <div className={styles.skel}><Skeleton h={56} /></div>
-        : list.length === 0 ? <p className={styles.calm}><Check aria-hidden="true" />Nothing needs you right now.</p>
+        : total === 0 ? <p className={styles.calm}><Check aria-hidden="true" />Nothing needs you right now.</p>
           : (
-            <ul className={styles.dockets}>
-              {list.map((n, i) => (
-                <li key={`${n.kind}-${n.chainId}-${n.jobId}-${i}`} className={styles.docket} data-urgency={urgency(n.deadline)}>
-                  <span className={styles.docketMark} aria-hidden="true" />
-                  <div className={styles.docketText}>
-                    <h3>{n.title}</h3>
-                    <p>{n.sentence}</p>
-                  </div>
-                  <span className={styles.docketMeta}><span className={styles.docketNet}>{n.chainId ? net(n.chainId) : 'This device'}</span>{n.deadline ? <span className={styles.deadline}>{until(n.deadline)}</span> : null}</span>
-                  <span className={styles.docketAct}>
-                    {n.action.do === 'revoke' ? (own ? <Button size="sm" variant="danger" loading={busy === n.title} onClick={() => revoke(n)}>{n.action.label}</Button> : null)
-                      : n.action.href ? <ButtonLink size="sm" href={n.action.href}>{n.action.label}</ButtonLink> : null}
-                  </span>
-                </li>
-              ))}
-            </ul>
+            <div className={styles.docketBoard}>
+              {lanes.map((l) => <Lane key={l.id} lane={l} own={own} busy={busy} onRevoke={revoke} />)}
+            </div>
           )}
+    </section>
+  )
+}
+
+// Lanes keep a long list readable: what has a clock first, then leftovers, ratings and allowances. Ratings are one
+// row per agent (the rating is per agent, not per job), each lane shows its first rows and opens the rest in place.
+type LaneData = { id: string; label: string; rows: Array<Need & { jobs: number }> }
+const LANES: Array<{ id: string; label: string; kinds: string[] }> = [
+  { id: 'now', label: 'Act on these', kinds: ['watch', 'reclaim', 'review', 'deliver', 'criterion'] },
+  { id: 'open', label: 'Unfinished hires', kinds: ['unfinished'] },
+  { id: 'rate', label: 'Rate your agents', kinds: ['rate'] },
+  { id: 'tidy', label: 'Allowances', kinds: ['approval'] },
+]
+const LANE_ROWS = 3
+function toLanes(list: Need[]): LaneData[] {
+  return LANES.map(({ id, label, kinds }) => {
+    const rows: LaneData['rows'] = []
+    for (const n of list.filter((x) => kinds.includes(x.kind))) {
+      const same = n.kind === 'rate' ? rows.find((r) => r.title === n.title && r.chainId === n.chainId) : undefined
+      if (same) same.jobs += 1
+      else rows.push({ ...n, jobs: 1 })
+    }
+    // Something ready now (a reclaim, a watched position) before anything with a clock; then the nearest clock.
+    if (id === 'now') rows.sort((a, b) => (a.deadline ? 1 : 0) - (b.deadline ? 1 : 0) || (a.deadline ?? '').localeCompare(b.deadline ?? ''))
+    return { id, label, rows }
+  }).filter((l) => l.rows.length)
+}
+const CLOCK: Record<string, [string, string]> = {
+  review: ['Closes', 'Closed'], reclaim: ['Reclaimable', 'Reclaimable'], unfinished: ['Expires', 'Expired'], deliver: ['Due', 'Overdue since'], criterion: ['Closes', 'Closed'],
+}
+function clock(n: Need) {
+  if (!n.deadline) return null
+  const [ahead, past] = CLOCK[n.kind] ?? ['Due', 'Since']
+  const left = until(n.deadline)
+  const day = new Date(n.deadline).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' })
+  return left === 'now' ? `${past} ${day}` : `${ahead} ${left}`
+}
+
+function Lane({ lane, own, busy, onRevoke }: { lane: LaneData; own: boolean; busy: string | null; onRevoke: (n: Need) => void }) {
+  const [all, setAll] = useState(false)
+  const rows = all ? lane.rows : lane.rows.slice(0, LANE_ROWS)
+  const more = lane.rows.length - LANE_ROWS
+  return (
+    <section className={styles.lane} data-lane={lane.id} aria-label={lane.label}>
+      <h3 className={styles.laneHead}>{lane.label}<span>{lane.rows.length}</span></h3>
+      <ul className={styles.dockets}>
+        {rows.map((n, i) => {
+          const due = clock(n)
+          return (
+            <li key={`${n.kind}-${n.chainId}-${n.jobId}-${i}`} className={styles.docket} data-urgency={n.kind === 'unfinished' && due?.startsWith('Expired') ? 'calm' : urgency(n.deadline)}>
+              <span className={styles.docketMark} aria-hidden="true" />
+              <div className={styles.docketText}>
+                <h4>{n.title}</h4>
+                <p>{n.jobs > 1 ? `${n.jobs} delivered jobs. One rating covers the agent and goes on its public record from your wallet.` : n.sentence}</p>
+              </div>
+              <span className={styles.docketMeta}>
+                <span className={styles.docketNet} data-net={n.chainId ?? undefined}>{n.chainId ? net(n.chainId) : 'This device'}</span>
+                {due ? <time className={styles.deadline} dateTime={n.deadline!} title={new Date(n.deadline!).toUTCString()}>{due}</time> : null}
+              </span>
+              <span className={styles.docketAct}>
+                {n.action.do === 'revoke' ? (own ? <Button size="sm" variant="danger" loading={busy === n.title} onClick={() => onRevoke(n)}>{n.action.label}</Button> : null)
+                  : n.action.href ? <ButtonLink size="sm" href={n.action.href}>{n.action.label}</ButtonLink> : null}
+              </span>
+            </li>
+          )
+        })}
+      </ul>
+      {more > 0 ? <button type="button" className={styles.laneMore} aria-expanded={all} onClick={() => setAll((v) => !v)}>{all ? 'Show fewer' : `Show ${more} more`}</button> : null}
     </section>
   )
 }

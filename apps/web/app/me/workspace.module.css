@@ -84,22 +84,38 @@ a.stat:hover { border-color: var(--hair-2); }
 .asideLink b { font-size: 14px; font-weight: 500; }
 .asideLink small { font-size: 12.5px; color: var(--ink-3); line-height: 1.4; }
 
-/* ---- needs you: compact rows */
+/* ---- needs you: one board, lanes inside it, ruled rows with a colour edge for the clock */
 .needs { min-width: 0; }
 .calm { display: flex; align-items: center; gap: 10px; margin: 0; padding: 14px 16px; border-radius: 12px; border: 1px solid var(--hair); color: var(--ink-2); font-size: 14px; }
 .calm svg { width: 16px; height: 16px; color: var(--v-jade); }
-.dockets { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
-.docket { display: grid; grid-template-columns: 4px minmax(0, 1fr) auto auto; align-items: center; gap: 14px; padding: 12px 14px 12px 0; border-radius: 12px; border: 1px solid var(--hair); background: var(--panel); overflow: hidden; }
-.docketMark { align-self: stretch; background: var(--v-gold); }
-.docket[data-urgency='urgent'] .docketMark { background: var(--oxide); }
+.docketBoard { display: grid; border: 1px solid var(--hair); border-radius: 16px; background: var(--panel); overflow: hidden; }
+.lane { display: grid; min-width: 0; padding: 14px 0 6px; }
+.lane + .lane { border-top: 1px solid var(--hair); }
+.laneHead { display: flex; align-items: center; gap: 8px; margin: 0 18px 4px; font-size: var(--fs-label); font-weight: 500; letter-spacing: var(--tracking-eyebrow); text-transform: uppercase; color: var(--ink-3); }
+.laneHead span { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0; color: var(--ink-2); padding: 0 6px; border-radius: var(--r-pill); background: color-mix(in srgb, var(--ink) 6%, transparent); }
+.lane[data-lane='now'] .laneHead { color: var(--v-gold); }
+.dockets { list-style: none; margin: 0; padding: 0; display: grid; }
+.docket { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto auto; grid-template-areas: 'text meta act'; align-items: center; gap: 6px 18px; min-height: 64px; padding: 12px 18px; }
+.docket + .docket { border-top: 1px solid var(--hair); }
+.docketMark { position: absolute; left: 0; top: 14px; bottom: 14px; width: 3px; border-radius: 0 3px 3px 0; background: var(--hair-2); }
+.lane[data-lane='now'] .docketMark { background: var(--v-gold); }
 .docket[data-urgency='soon'] .docketMark { background: var(--v-ember); }
-.docketText { display: grid; gap: 2px; min-width: 0; }
-.docket h3 { margin: 0; font-size: 14.5px; font-weight: 500; line-height: 1.3; }
-.docket p { margin: 0; font-size: 13px; line-height: 1.45; color: var(--ink-2); }
-.docketMeta { display: grid; justify-items: end; gap: 2px; }
-.docketNet { font-size: 11.5px; color: var(--ink-3); }
+.docket[data-urgency='urgent'] .docketMark { background: var(--oxide); }
+.docketText { grid-area: text; display: grid; gap: 3px; min-width: 0; }
+.docket h4 { margin: 0; font-size: 14.5px; font-weight: 500; line-height: 1.35; overflow-wrap: anywhere; }
+.docket p { margin: 0; max-width: 62ch; font-size: 13px; line-height: 1.45; color: var(--ink-2); }
+.docketMeta { grid-area: meta; display: grid; justify-items: end; gap: 3px; white-space: nowrap; }
+.docketNet { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; color: var(--ink-3); }
+.docketNet::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: 0.8; }
+.docketNet[data-net='56'] { color: var(--lane-main); }
+.docketNet[data-net='97'] { color: var(--lane-practice); }
 .deadline { font-family: var(--font-mono); font-size: 12px; color: var(--ink-2); }
 .docket[data-urgency='urgent'] .deadline { color: var(--oxide); }
+.docketAct { grid-area: act; display: flex; justify-content: flex-end; min-width: 96px; }
+.docketAct > * { white-space: nowrap; }
+.laneMore { appearance: none; justify-self: start; margin: 2px 18px 6px; padding: 6px 0; border: 0; background: none; font: inherit; font-size: 13px; color: var(--chain); cursor: pointer; }
+.laneMore:hover { text-decoration: underline; text-underline-offset: 3px; }
+.laneMore:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 4px; }
 
 @media (max-width: 1100px) {
   .body { grid-template-columns: minmax(0, 1fr); }
@@ -113,9 +129,13 @@ a.stat:hover { border-color: var(--hair-2); }
   .summary { gap: 8px; }
   .stat { padding: 13px 14px; border-radius: 14px; }
   .stat > b, .questLine b { font-size: 21px; }
-  .docket { grid-template-columns: 4px minmax(0, 1fr); row-gap: 8px; }
-  .docketMeta { grid-column: 2; justify-items: start; grid-auto-flow: column; gap: 10px; }
-  .docketAct { grid-column: 2; }
+  .docketBoard { border-radius: 14px; }
+  .laneHead { margin-inline: 14px; }
+  .docket { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: 'text text' 'meta act'; gap: 10px 12px; padding: 12px 14px; }
+  .docketMark { top: 12px; bottom: 12px; }
+  .docketMeta { justify-items: start; justify-content: start; grid-auto-flow: column; align-items: center; gap: 12px; }
+  .docketAct { min-width: 0; }
+  .laneMore { margin-inline: 14px; }
 }
 
 /* ---- chips and tools */

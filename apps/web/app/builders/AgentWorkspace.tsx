@@ -1,7 +1,7 @@
 'use client'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import { useAccount } from 'wagmi'
+import { useAccount, useSignMessage } from 'wagmi'
 import { useConnectModal } from '@rainbow-me/rainbowkit'
 import { ArrowUpRight, Check, ChevronRight, RefreshCw, Search, ShieldCheck } from 'lucide-react'
 import { ProvenanceChip } from '@marque/ui'
@@ -587,6 +587,18 @@ function AgentDetail({
           },
           { id: 'services', label: 'Connections', content: <Connections seller={s} /> },
           {
+            id: 'quotes',
+            label: 'Quote outcomes',
+            content: (
+              <OwnerReport
+                key={`${a.agentKey}:${ownsIdentity}`}
+                agent={a}
+                own={ownsIdentity}
+                wallet={wallet}
+              />
+            ),
+          },
+          {
             id: 'profile',
             label: 'Profile and tools',
             content: (
@@ -724,6 +736,155 @@ function Connections({ seller: s }: { seller: SellerProjection }) {
       ) : (
         <p className={styles.empty}>No scheduled samples for the current endpoints yet.</p>
       )}
+    </section>
+  )
+}
+
+function OwnerReport({
+  agent,
+  own,
+  wallet,
+}: {
+  agent: BuilderAgent
+  own: boolean
+  wallet: string
+}) {
+  const { signMessageAsync } = useSignMessage()
+  const [report, setReport] = useState<SellerProjection['diagnostics']>(null)
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const mounted = useRef(true)
+  useEffect(() => {
+    mounted.current = true
+    return () => {
+      mounted.current = false
+    }
+  }, [])
+  const open = async () => {
+    setBusy(true)
+    setError(null)
+    try {
+      const read = async (url: string, body: object) => {
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(body),
+        })
+        if (!res.ok)
+          throw new Error('The ownership proof could not be prepared. Retry from the owner wallet.')
+        return res.json()
+      }
+      const identity = (await read('/api/v1/builders/claim/identity', {
+        input: agent.agentId,
+        chainId: agent.chainId,
+      })) as { message: string; nonceToken: string; identity: { agentId: string } }
+      if (!mounted.current) return
+      const signature = await signMessageAsync({ message: identity.message })
+      if (!mounted.current) return
+      const proof = (await read('/api/v1/builders/claim/verify', {
+        agentId: identity.identity.agentId,
+        nonceToken: identity.nonceToken,
+        message: identity.message,
+        signature,
+      })) as { claimToken: string }
+      const res = await fetch(
+        `/api/v1/builders/checks?wallet=${wallet}&chainId=${agent.chainId}&tokenId=${agent.agentId}`,
+        { headers: { Authorization: `Bearer ${proof.claimToken}` }, cache: 'no-store' },
+      )
+      if (!res.ok)
+        throw new Error(
+          'The private report could not be read. Ownership may have changed; no job or payment was created.',
+        )
+      const body = (await res.json()) as { identities: Array<{ seller: SellerProjection }> }
+      if (mounted.current) setReport(body.identities[0]?.seller.diagnostics ?? null)
+    } catch (e) {
+      if (mounted.current)
+        setError(
+          /reject|denied|cancel|4001/i.test(String(e))
+            ? 'You cancelled the signature. No report was opened.'
+            : "The private report could not be opened. Retry from the current identity owner's wallet.",
+        )
+    } finally {
+      if (mounted.current) setBusy(false)
+    }
+  }
+  return (
+    <section className={styles.block}>
+      <h4>Understand where a hire stopped</h4>
+      <p>
+        A price, its acceptance and the funding of a job are separate events. The private report
+        counts recorded price attempts for this agent in the last 30 days and gives a next step for
+        each failure.
+      </p>
+      {!report ? (
+        <div className={styles.welcome}>
+          <div>
+            <h4>Only the identity owner can open this report.</h4>
+            <p>
+              A signed ownership message unlocks aggregate counts. It creates no job, sends no agent
+              task and spends no tokens. Buyer task text and operational responses stay private.
+            </p>
+            {own ? (
+              <button
+                type="button"
+                className="btn btn--sm"
+                disabled={busy}
+                onClick={() => void open()}
+              >
+                {busy ? 'Checking ownership…' : 'Sign to open my report'}
+              </button>
+            ) : (
+              <p>Connect the identity owner&apos;s wallet to continue.</p>
+            )}
+          </div>
+        </div>
+      ) : (
+        <>
+          <dl className={styles.metrics}>
+            {[
+              ['Price attempts', report.quotes.attempted],
+              ['Accepted', report.quotes.accepted],
+              ['Rejected', report.quotes.rejected],
+              ['Accepted quotes funded', report.conversion.fundedQuotes],
+            ].map(([label, value]) => (
+              <div key={label}>
+                <dt>{label}</dt>
+                <dd>{value}</dd>
+              </div>
+            ))}
+          </dl>
+          <p className={styles.fine}>
+            Recorded attempts, not unique people or independent demand. Background price probes are
+            excluded; these counts can include operator or team activity. Funding may follow a quote
+            later.
+          </p>
+          {report.failures.length ? (
+            <ul className={styles.failures}>
+              {report.failures.map((f) => (
+                <li key={f.code}>
+                  <strong>
+                    {f.count} {f.count === 1 ? 'attempt' : 'attempts'}:{' '}
+                    {f.code.replaceAll('_', ' ')}
+                  </strong>
+                  <p>{f.nextStep}</p>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>No failed user quote attempts recorded in this window.</p>
+          )}
+          <p>
+            Agent-signed prices: {report.quotes.providerSigned}. Identity-matched unsigned prices:{' '}
+            {report.quotes.identityMatchedUnsigned}. Signing status unknown:{' '}
+            {report.quotes.signatureUnknown}.
+          </p>
+        </>
+      )}
+      {error ? (
+        <p role="alert" className={styles.error}>
+          {error}
+        </p>
+      ) : null}
     </section>
   )
 }

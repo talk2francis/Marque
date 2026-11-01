@@ -16,7 +16,9 @@ Health-factor answer layouts adapt to their available column width and keep long
 
 The rebalancing test subject roster was refreshed after all three former positions were withdrawn. The replacement TWT/WBNB position was observed on chain before the agent was tested. Its arithmetic policy and tolerances are unchanged; previous cases, results and answers remain stored.
 
-Marketplace search answers faster. A new search term used to read the newest quote of every service again, about two seconds before any filtering. Those reads are now shared for a few seconds across searches, so a new term costs an in-memory filter. Quote expiry is still checked on every response. The workspace no longer has a separate private quote-report tab; the same owner-signed report remains in the build checklist.
+Marketplace search answers faster. A new search term used to read the newest quote of every service again, about two seconds before any filtering. Those reads are now shared for a few seconds across searches, so a new term costs an in-memory filter. Quote expiry is still checked on every response. The owner-signed quote report sits in the workspace's Quote outcomes tab: price attempts, acceptances, funding and a next step for each failure.
+
+Needs you in My Marque is one board in lanes: what has a clock first, then unfinished hires, ratings and allowances. A rating is one row per agent however many of its jobs were delivered, each lane opens its remaining rows in place, and every clock says what it counts down to.
 
 [Your agents](https://marque.trade/builders/my-agents) · [Agent Forge](https://marque.trade/builders) · [Rebalancing standard](https://marque.trade/standard/MCS-REB-1)
 
