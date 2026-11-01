@@ -13,7 +13,7 @@ const ROOT = join(__dirname, '../../..')
 const LANE_TABLE: Record<string, Record<string, string>> = {
   'apps/web/lib/marketplace.ts': { marketplaceAgents: 'q', marketplaceSourceQuery: 'chainId', marketplaceCategoryQuery: 'chainId', marketPageAgentStates: 'page' },
   'apps/web/lib/register-counts.ts': { getRegisterCounts: 'lane' },
-  'apps/web/lib/agent-track.ts': { agentTracks: 'chainId' },
+  'apps/web/lib/agent-track.ts': { agentTracks: 'chainId', computeTracks: 'chainId' },
   'packages/commerce/src/supply.ts': { coverage: 'lane', commercialStates: 'serviceId' },
   'packages/commerce/src/quest.ts': { questStats: 'chainId', statsFrom: 'per', marqueWallets: 'chainId' },
 }

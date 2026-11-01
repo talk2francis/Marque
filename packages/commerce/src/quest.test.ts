@@ -45,10 +45,22 @@ describe('local quest protections and economic states', () => {
   it.each(['self_hire', 'zero_deposit', 'not_marque'])('retains excluded %s jobs without counting them as eligible', async reason => {
     if (reason === 'self_hire') jobs[0]!.a_owner = wallet
     if (reason === 'zero_deposit') jobs[0]!.funded_raw = '0'
-    if (reason === 'not_marque') jobs[0]!.intent_id = null
+    if (reason === 'not_marque') {
+      jobs[0]!.intent_id = null
+      // A LEFT JOIN cannot retain intent fields after its source link is removed.
+      jobs[0]!.i_id = null
+      jobs[0]!.i_category = null
+    }
     const view = await walletQuest(wallet, 56)
     expect(view.hires[0]).toMatchObject({ eligible: false, reasons: expect.arrayContaining([reason]) })
     if (reason !== 'self_hire') expect(view.quest.categories.yield.done).toBe(false)
+  })
+  it('keeps an unmatched intent marker visible but ineligible', async () => {
+    jobs[0]!.i_id = null
+    jobs[0]!.i_category = null
+    const view = await walletQuest(wallet, 56)
+    expect(view.hires[0]).toMatchObject({ marque: false, intentId: null, eligible: false, reasons: expect.arrayContaining(['not_marque']) })
+    expect(view.quest.categories.yield.done).toBe(false)
   })
   it('does not treat unrelated feedback or a pre-submission rating as verified progress', async () => {
     ratings = [
