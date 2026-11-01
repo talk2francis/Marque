@@ -26,7 +26,7 @@ export function AgentTabs({ base, name, active }: { base: string; name: string; 
       observer.disconnect()
       // Only the visible agent's sections, staggered, and never tasks or quotes.
       SECTIONS.filter(s => s.id !== active).forEach((s, i) => timers.push(setTimeout(() => {
-        if (document.visibilityState === 'visible') prepare(`${base}${s.path}`)
+        if (document.visibilityState === 'visible' && !new URLSearchParams(location.search).has('hire') && !document.querySelector('[aria-modal="true"], dialog[open]')) prepare(`${base}${s.path}`)
       }, 500 + i * 600)))
     })
     observer.observe(nav.current)

@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useAccount } from 'wagmi'
 import { Field, SelectField } from '../ui/Field'
+import { Button, Disclosure } from '../ui'
 import { taskSentence, type StructuredTask, type PaidTaskGuide } from '@marque/commerce/client'
 import { readBrief } from '../../../lib/brief'
 
@@ -70,9 +71,9 @@ function SellerTask({ guide, agentName, onChange, disabled }: { guide: PaidTaskG
     <p className="fld-help">This agent offers: <strong>{guide.title}</strong>. Its published task guidance is shown below.</p>
     <label className="fld-label" htmlFor="seller-task">Your task for {agentName}</label>
     <textarea id="seller-task" className="taskform-text" rows={5} maxLength={1200} value={text} disabled={disabled} onChange={e => setText(e.target.value)} placeholder={guide.example} />
-    <button type="button" className="taskform-link" disabled={disabled} onClick={() => setText(guide.example)}>Use the agent&apos;s example</button>
+    <Button size="sm" disabled={disabled} onClick={() => setText(guide.example)}>Use the agent&apos;s example</Button>
     <p className="fld-help">Replace example wallets, tokens or positions with the ones you want checked before asking for a price.</p>
-    {guide.inputs.length ? <details><summary>What this task accepts</summary><dl>{guide.inputs.map(input => <div key={input.name}><dt>{input.name}</dt><dd>{input.hint}</dd></div>)}</dl></details> : null}
+    {guide.inputs.length ? <Disclosure summary="What this task accepts"><dl>{guide.inputs.map(input => <div key={input.name}><dt>{input.name}</dt><dd>{input.hint}</dd></div>)}</dl></Disclosure> : null}
   </div>
 }
 const structured = (category: string, fields: Record<string, unknown>): StructuredTask => ({ category, fields })

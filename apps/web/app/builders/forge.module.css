@@ -226,7 +226,7 @@
 .doorIcon { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 12px; background: var(--panel-2); border: 1px solid var(--hair-2); }
 .doorIcon svg { width: 19px; height: 19px; color: var(--ink); }
 .doorCard[data-recommended] .doorIcon svg { color: var(--v-gold); }
-.doorBadge { font-size: 11.5px; font-weight: 600; letter-spacing: 0.02em; padding: 4px 10px; border-radius: var(--r-pill); color: var(--ink-inverse); background: var(--aurora); }
+.doorBadge { font-size: 11.5px; font-weight: 600; letter-spacing: 0.02em; padding: 4px 10px; border-radius: var(--r-pill); color: var(--canvas); background: var(--ink); }
 .doorEffort { font-size: 12px; color: var(--ink-3); }
 .doorCard h2 { margin: 0; font-size: 19px; font-weight: 500; letter-spacing: -0.01em; }
 .doorCard p { margin: 0; font-size: 14px; line-height: 1.55; color: var(--ink-2); }
@@ -256,3 +256,4 @@
 .afterDoors { margin-top: 14px; }
 .builderNote { margin: 18px 0 0; padding: 12px 16px; border-left: 2px solid var(--brass); color: var(--ink); font-size: 15px; line-height: 1.55; max-width: 72ch; }
 .builderNote code { font-size: 13px; color: var(--ink-2); }
+.builderNote a, .afterDoors a { display: inline-flex; align-items: center; min-height: 24px; }
