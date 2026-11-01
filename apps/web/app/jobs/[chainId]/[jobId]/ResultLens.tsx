@@ -108,7 +108,7 @@ function HfView({ l }: { l: HfLens }) {
                 {m.suppliedUsd ? <i className={styles.barSupply} style={{ width: `${(m.suppliedUsd / scale) * 100}%` }} title={`supplied ${usd(m.suppliedUsd)}`} /> : null}
                 {m.borrowedUsd ? <i className={styles.barBorrow} style={{ width: `${(m.borrowedUsd / scale) * 100}%` }} title={`borrowed ${usd(m.borrowedUsd)}`} /> : null}
               </span>
-              <span className={styles.marketVals}>{m.suppliedUsd ? `${usd(m.suppliedUsd, 0)} in` : ''}{m.borrowedUsd ? ` · ${usd(m.borrowedUsd, 0)} out` : ''}</span>
+              <span className={styles.marketVals}>{[m.suppliedUsd ? `${usd(m.suppliedUsd, 0)} in` : '', m.borrowedUsd ? `${usd(m.borrowedUsd, 0)} out` : ''].filter(Boolean).join(' · ')}</span>
             </div>
           ))}
           <p className={`${styles.legend} ${styles.hfLegend}`}><span><i className={styles.barSupply} />supplied</span><span><i className={styles.barBorrow} />borrowed</span></p>
