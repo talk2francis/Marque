@@ -15,9 +15,9 @@ export interface WalletHire {
   jobKey: string
   chainId: number
   jobId: string
-  agent: { agentKey: string; agentId: string; name: string; category: string | null; firstParty: boolean }
+  agent: { agentKey: string | null; agentId: string | null; name: string | null; provider: string; category: string | null; firstParty: boolean }
   amount: string | null
-  token: { symbol: string; decimals: number } | null
+  token: { address?: string | null; symbol: string | null; decimals: number | null } | null
   state: string
   tx: Record<string, string | null>
   timestamps: Record<string, string | null>

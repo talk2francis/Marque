@@ -29,18 +29,20 @@ export interface CaseSpec {
 
 /** Public, chain-verified backup NFTs. A withdrawn position is skipped, never fabricated. */
 export const REB_FALLBACK_SUBJECTS: readonly Record<string, string>[] = [
+  { owner: '0x0A5881b4ce42aD2C5C5E4a4089C7eEBe62755ebd', tokenId: '7741848', pair: 'USDT/MarsCoin' },
+  { owner: '0xEE87ffe3b6Db8eae6f2b51Fe0C8509d8BaCBF949', tokenId: '7742719', pair: 'USDT/ANTFUN' },
   { owner: '0xa9621227DF65696fB2B45b94644b65eA452b9724', tokenId: '7654391', pair: 'BNCB/WBNB' },
   { owner: '0xf5d23924E63718bAaBE4ea4c9f295104DcB02397', tokenId: '7654396', pair: 'BNCB/WBNB' },
 ]
 
 export const CASES: readonly CaseSpec[] = [
   {
-    id: 'REB-1-bncb-wbnb-2500',
+    id: 'REB-1-twt-wbnb-2500',
     testId: 'MCS-REB-1',
     subject: {
-      owner: '0x2cfD930f4Ca936CAD72a13b62df095D8BA17874f',
-      tokenId: '7650656',
-      pair: 'BNCB/WBNB',
+      owner: '0x7f2f4173d9A6EFA1F987d48983b3244bBcCa67D5',
+      tokenId: '7683201',
+      pair: 'TWT/WBNB',
     },
     policy: {
       rangePct: 6,
@@ -49,7 +51,7 @@ export const CASES: readonly CaseSpec[] = [
         're-centre the position symmetrically at ±6% around the current spot price, on the 0.25% fee tier, keeping the same liquidity',
     } satisfies RebPolicy,
     why:
-      'A live third-party BNCB/WBNB position on PancakeSwap V3’s 0.25% tier, minted about 240,000 blocks before its 11 October 2026 selection and still carrying liquidity. The owner held three enumerable positions, below the reader’s 40-position cap. The previous BTCB/USDC (#7395979) and US/WBNB (#7654242) subjects were withdrawn. Two separately chain-verified BNCB/WBNB positions are published as fallback subjects. Every capture still reads current ownership and liquidity at a fresh block; if none survives, the test is skipped rather than inventing a position. This fixture tests V3 arithmetic, not the investment merits of either token.',
+      'A third-party TWT/WBNB position on PancakeSwap V3’s 0.25% tier, observed with nonzero liquidity at BSC block 131043602 on 1 November 2026. Its owner and NFT were selected from chain liquidity events before testing the agent. The former BNCB/WBNB primary (#7650656) and both old fallback positions had zero liquidity at block 131042505; their historical cases and results remain stored. Two newly observed positions with different owners are added ahead of the retained old fallback roster. Ownership and liquidity are read again at every fresh capture; if none survives, no passing result is invented. The policy, arithmetic assertions and tolerances are unchanged. The fixture measures V3 arithmetic, not the investment merits of its tokens.',
   },
   {
     id: 'HF-1-venus-at-risk',

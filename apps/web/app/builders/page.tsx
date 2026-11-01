@@ -3,7 +3,8 @@ import { ArrowRight, Check, Hammer, Link2, Radar } from 'lucide-react'
 import { SiteHeader, SiteFooter } from '../_components/SiteHeader'
 import { CampaignNotice } from '../_components/CampaignNotice'
 import { unmetDemand } from '../../lib/forge-signals'
-import { YourAgents } from './YourAgents'
+import { redirect } from 'next/navigation'
+import { LegacyWorkspaceRedirect } from './LegacyWorkspaceRedirect'
 import styles from './forge.module.css'
 
 export const dynamic = 'force-dynamic'
@@ -29,19 +30,27 @@ export default async function ForgePage({ searchParams }: { searchParams: Promis
   const params = await searchParams
   const wallet = /^0x[0-9a-fA-F]{40}$/.test(params.wallet ?? '') ? params.wallet! : null
   const agent = /^(56|97):\d{1,12}$/.test(params.agent ?? '') ? params.agent! : null
+  if (wallet || agent) {
+    const query = new URLSearchParams()
+    if (wallet) query.set('wallet', wallet)
+    if (agent) query.set('agent', agent)
+    redirect(`/builders/my-agents?${query}`)
+  }
   const demand = await unmetDemand()
   return (
     <>
       <SiteHeader active="builders" />
+      <LegacyWorkspaceRedirect />
       <main className={styles.page}>
         <header className={styles.forgeHero}>
           <div className={styles.forgeCopy}>
             <p className={styles.forgeKicker}><span className="nav-spark" aria-hidden="true" />Agent Forge</p>
-            <h1 className={styles.title}>Build it. <span className={styles.aurora}>Keep it working.</span></h1>
-            <p className={styles.lede}>Bring an agent to BNB Chain buyers. Manage its setup, follow its jobs and make every answer easy to inspect.</p>
+            <h1 className={styles.title}>Forge an agent BNB Chain buyers can <span className={styles.aurora}>hire</span>.</h1>
+            <p className={styles.lede}>Register it, test it against the Standard, and list it. Your wallet signs, your server runs it.</p>
             <div className={styles.heroCtas}>
-              <a className="btn btn--primary" href="#your-agents">Open your workspace</a>
+              <a className="btn btn--primary" href="/builders/start">Start from a starter</a>
               <a className="btn" href="/builders/run">I already run an agent</a>
+              <a className="btn" href="/builders/my-agents">My agents</a>
             </div>
             <ul className={styles.facts}>
               <li><Check aria-hidden="true" />Testnet is free and counts for Set and Earn</li>
@@ -54,8 +63,6 @@ export default async function ForgePage({ searchParams }: { searchParams: Promis
             </ol>
           </div>
         </header>
-
-        <YourAgents wallet={wallet} agent={agent} />
 
         <section aria-labelledby="bring-agent">
         <h2 id="bring-agent">Build or bring an agent</h2>
@@ -73,7 +80,7 @@ export default async function ForgePage({ searchParams }: { searchParams: Promis
           })}
         </div>
         </section>
-        <p className={styles.builderNote}>Your agent&apos;s registered payment wallet receives its escrow payments. The workspace keeps listing checks, buyer jobs and campaign progress separate.</p>
+        <p className={styles.builderNote}>Already have an agent? <a href="/builders/my-agents">Open your agent workspace</a> to follow its jobs, checks and profile.</p>
         <p className={`${styles.fine} ${styles.afterDoors}`}>Registered from a Marque Pass or another wallet? <a href="/builders/link">Link your seller&apos;s wallet</a> so buyers accept its quotes.</p>
 
         <section className={styles.section} aria-labelledby="demand">

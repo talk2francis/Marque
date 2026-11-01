@@ -1,5 +1,6 @@
 import { ArrowUpRight, Check, KeyRound, ShieldCheck, X } from 'lucide-react'
-import Link from 'next/link'
+import { AgentTabs } from './AgentTabs'
+import { SECTIONS, type SectionId } from './sections'
 import { BRAND, Limits, ProvenanceChip } from '@marque/ui'
 import { AgentAvatar } from '../../_components/AgentAvatar'
 import { AgentBrandHero } from '../../_components/AgentBrandHero'
@@ -32,15 +33,8 @@ import { AnchorRedirect } from './AnchorRedirect'
  * CLAIMED and styled weaker; what Marque measured, tested or read from chain says so.
  */
 
-export const SECTIONS = [
-  { id: 'overview', label: 'Overview', path: '' },
-  { id: 'evidence', label: 'Evidence', path: '/evidence' },
-  { id: 'record', label: 'Track record', path: '/record' },
-  { id: 'terms', label: 'Terms', path: '/terms' },
-  { id: 'technical', label: 'Technical', path: '/technical' },
-] as const
-export type SectionId = (typeof SECTIONS)[number]['id']
-export const isSection = (s: string): s is Exclude<SectionId, 'overview'> => SECTIONS.some((x) => x.id === s && x.id !== 'overview')
+export { SECTIONS, isSection } from './sections'
+export type { SectionId } from './sections'
 
 const CAT: Record<string, string> = { yield: 'Yield', grid: 'Grid trading', rebalancing: 'Rebalancing', health_factor: 'Health factor', security: 'Security' }
 const NET: Record<number, string> = { 56: 'BSC mainnet', 97: 'BSC testnet' }
@@ -137,13 +131,7 @@ export function Storefront({ d, section = 'overview', evidence = null, lens = nu
     </div>
   )
 
-  const tabs = (
-    <nav className={page.tabs} aria-label={`${d.name} sections`}>
-      {SECTIONS.map((s) => (
-        <Link key={s.id} href={`${base}${s.path}`} prefetch={false} scroll={false} aria-current={s.id === section ? 'page' : undefined} className={page.tab}>{s.label}</Link>
-      ))}
-    </nav>
-  )
+  const tabs = <AgentTabs base={base} name={d.name} active={section} />
 
   return (
     <div className={styles.shell}>

@@ -370,6 +370,7 @@ export interface SheetAgent {
   lastQuote: { chainId: number | null; priceLabel: string | null; signed: boolean | null; quotedAt: string | null } | null
   /** The seller's own example task when it works from a JSON object (see SellerCandidate). */
   taskExample: string | null
+  taskGuide: import('./task-guide.js').PaidTaskGuide | null
   preflight: { version: 1; observationalOnly: true; sellerRequests: 0; freePreview: 'reference_engine' | 'unsupported'; quoteMode: string; lastFailure: string | null; quotedAt: string | null; nextStep: string }
 }
 
@@ -382,6 +383,7 @@ export async function agentForSheet(agentId: string, serviceId?: number | null):
     agentId: seller.agentId, serviceId: seller.serviceId, tokenId: seller.tokenId, registryChainId: seller.chainId, name: seller.name,
     category: seller.category, owner: seller.owner, firstParty: seller.firstParty !== null, state: s?.state ?? 'unavailable',
     taskExample: seller.taskExample,
+    taskGuide: seller.firstParty ? null : seller.taskGuide ?? null,
     preflight: { version: 1, observationalOnly: true, sellerRequests: 0, freePreview: seller.firstParty ? 'reference_engine' : 'unsupported', quoteMode: s?.signed === true ? 'provider_signed' : s?.signed === false ? 'identity_matched_unsigned' : 'unknown', lastFailure: s?.failure ?? null, quotedAt: s?.quotedAt ?? null, nextStep: 'Request a fresh price for this exact service and task. Inspect the returned signature mode before hiring.' },
     lastQuote: s ? {
       chainId: s.chainId,

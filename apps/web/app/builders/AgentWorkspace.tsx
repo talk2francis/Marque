@@ -176,7 +176,7 @@ export function AgentWorkspace({
       <div className={styles.heading}>
         <div>
           <p className={styles.kicker}>Your workspace</p>
-          <h2 id="your-agents-heading">Your agents</h2>
+          <h1 id="your-agents-heading">Your agents</h1>
           <p>From the first price to the answer a buyer receives.</p>
         </div>
         <div className={styles.actions}>
@@ -249,7 +249,7 @@ export function AgentWorkspace({
         <div className={styles.welcome}>
           <ShieldCheck aria-hidden="true" />
           <div>
-            <h3>See the whole picture for each agent.</h3>
+            <h2>See the whole picture for each agent.</h2>
             <p>
               Connect to manage your agents, or paste any owner wallet to inspect its public
               records. Looking never needs a signature.
@@ -275,7 +275,7 @@ export function AgentWorkspace({
       {data && !agents.length ? (
         <div className={styles.welcome}>
           <div>
-            <h3>No agents found for this wallet.</h3>
+            <h2>No agents found for this wallet.</h2>
             <p>
               Use the wallet that owns the ERC-8004 identity. An agent can also be looked up by its
               registry ID if indexing has not caught up.
@@ -291,7 +291,7 @@ export function AgentWorkspace({
               const lane = agents.filter((a) => a.chainId === chainId)
               return lane.length ? (
                 <div key={chainId}>
-                  <h3>{net(chainId)}</h3>
+                  <h2>{net(chainId)}</h2>
                   <ul>
                     {lane.map((a) => {
                       const chosen = a.agentKey === active?.agentKey
@@ -393,7 +393,7 @@ function AgentDetail({
           <p>
             {net(a.chainId)} · #{a.agentId}
           </p>
-          <h3>{name}</h3>
+          <h2>{name}</h2>
           <p>
             {category[a.category ?? ''] ?? 'Category not established'}
             {a.firstParty ? (

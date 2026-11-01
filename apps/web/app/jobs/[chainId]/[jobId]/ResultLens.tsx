@@ -103,7 +103,7 @@ function HfView({ l }: { l: HfLens }) {
         <div className={styles.markets}>
           {l.markets.slice(0, 6).map((m) => (
             <div key={m.symbol} className={styles.market}>
-              <span className={styles.marketName}>{m.symbol}</span>
+              <span className={styles.marketName} title={m.symbol} aria-label={m.symbol}>{short(m.symbol)}</span>
               <span className={styles.bars}>
                 {m.suppliedUsd ? <i className={styles.barSupply} style={{ width: `${(m.suppliedUsd / scale) * 100}%` }} title={`supplied ${usd(m.suppliedUsd)}`} /> : null}
                 {m.borrowedUsd ? <i className={styles.barBorrow} style={{ width: `${(m.borrowedUsd / scale) * 100}%` }} title={`borrowed ${usd(m.borrowedUsd)}`} /> : null}

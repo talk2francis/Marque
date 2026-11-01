@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useAccount } from 'wagmi'
 import { Field, SelectField } from '../ui/Field'
-import { taskSentence, type StructuredTask } from '@marque/commerce/client'
+import { taskSentence, type StructuredTask, type PaidTaskGuide } from '@marque/commerce/client'
 import { readBrief } from '../../../lib/brief'
 
 /**
@@ -27,15 +27,16 @@ export const EXAMPLE_POSITION_OWNER = '0x2e010AaDFdFEbC2AdFCAFA5F83e9687ffA47C57
 const num = (v: string) => (v.trim() === '' ? null : Number(v))
 const fmt = (n: number) => (Number.isInteger(n) ? String(n) : String(Number(n.toFixed(4))))
 
-export function TaskForm({ category, agentName, onChange, disabled, taskExample }: {
+export function TaskForm({ category, agentName, onChange, disabled, taskExample, taskGuide }: {
   category: string | null; agentName: string; onChange: (v: TaskValue) => void; disabled?: boolean
   /** The seller's own example task when it works from a JSON object instead of a sentence. */
   taskExample?: string | null
+  taskGuide?: PaidTaskGuide | null
 }) {
   const [note, setNote] = useState('')
   const [inner, setInner] = useState<TaskValue>({ task: '', ready: false, missing: null })
   const shape = jsonShape(taskExample)
-  const hasForm = !shape && category !== null && FORM_CATEGORIES.has(category)
+  const hasForm = !shape && !taskGuide && category !== null && FORM_CATEGORIES.has(category)
   // Free text is added on top of the structured task, never instead of it (SPEC-SUPPLY 4).
   useEffect(() => {
     const extra = note.trim()
@@ -46,7 +47,8 @@ export function TaskForm({ category, agentName, onChange, disabled, taskExample 
     <div className="taskform">
       {shape
         ? <Structured shape={shape} category={category} agentName={agentName} onChange={setInner} disabled={disabled} />
-        : <Inner category={category} agentName={agentName} onChange={setInner} disabled={disabled} />}
+        : taskGuide ? <SellerTask guide={taskGuide} agentName={agentName} onChange={setInner} disabled={disabled} />
+          : <Inner category={category} agentName={agentName} onChange={setInner} disabled={disabled} />}
       {hasForm ? (
         <div className="fld">
           <label className="fld-label" htmlFor="task-note"><span>Anything else {agentName} should know</span><span className="fld-opt">optional</span></label>
@@ -59,6 +61,20 @@ export function TaskForm({ category, agentName, onChange, disabled, taskExample 
 }
 
 const FORM_CATEGORIES = new Set(['health_factor', 'grid', 'rebalancing', 'yield', 'security'])
+
+function SellerTask({ guide, agentName, onChange, disabled }: { guide: PaidTaskGuide; agentName: string; onChange: (v: TaskValue) => void; disabled?: boolean }) {
+  const [text, setText] = useState('')
+  const v = useMemo<TaskValue>(() => ({ task: text.trim(), ready: text.trim().length >= 12, missing: text.trim().length >= 12 ? null : 'Describe the task, or adapt the agent\'s example.', structured: null }), [text])
+  useEmit(onChange, v)
+  return <div className="fld">
+    <p className="fld-help">This agent offers: <strong>{guide.title}</strong>. Its published task guidance is shown below.</p>
+    <label className="fld-label" htmlFor="seller-task">Your task for {agentName}</label>
+    <textarea id="seller-task" className="taskform-text" rows={5} maxLength={1200} value={text} disabled={disabled} onChange={e => setText(e.target.value)} placeholder={guide.example} />
+    <button type="button" className="taskform-link" disabled={disabled} onClick={() => setText(guide.example)}>Use the agent&apos;s example</button>
+    <p className="fld-help">Replace example wallets, tokens or positions with the ones you want checked before asking for a price.</p>
+    {guide.inputs.length ? <details><summary>What this task accepts</summary><dl>{guide.inputs.map(input => <div key={input.name}><dt>{input.name}</dt><dd>{input.hint}</dd></div>)}</dl></details> : null}
+  </div>
+}
 const structured = (category: string, fields: Record<string, unknown>): StructuredTask => ({ category, fields })
 
 function Inner({ category, agentName, onChange, disabled }: { category: string | null; agentName: string; onChange: (v: TaskValue) => void; disabled?: boolean }) {

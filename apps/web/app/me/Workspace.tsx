@@ -161,10 +161,14 @@ export function Workspace({ addrParam }: { addrParam: string | null }) {
 
 /* ---------------------------------------------------------------- summary */
 
-const sumOf = (hs: WalletHire[], states: string[]) => {
+const sumOf = (hs: WalletHire[], states: string[], digits = 2) => {
   const by = new Map<string, number>()
-  for (const h of hs) if (states.includes(h.state) && h.amount && h.token) by.set(h.token.symbol, (by.get(h.token.symbol) ?? 0) + Number(formatUnits(BigInt(h.amount), h.token.decimals)))
-  return [...by].map(([sym, v]) => `${v.toLocaleString('en-US', { maximumFractionDigits: 2 })} ${sym}`).join(' · ') || '0'
+  let unknown = false
+  for (const h of hs) if (states.includes(h.state) && h.amount) {
+    if (!h.token?.symbol || h.token.decimals === null) { unknown = true; continue }
+    by.set(h.token.symbol, (by.get(h.token.symbol) ?? 0) + Number(formatUnits(BigInt(h.amount), h.token.decimals)))
+  }
+  return [...[...by].map(([sym, v]) => `${v.toLocaleString('en-US', { maximumFractionDigits: digits })} ${sym}`), ...(unknown ? ['Other token units unavailable'] : [])].join(' · ') || '0'
 }
 
 function Summary({ address, view }: { address: string; view: View }) {
@@ -190,7 +194,7 @@ function Summary({ address, view }: { address: string; view: View }) {
   const running = all.filter((h) => ['OPEN', 'FUNDED', 'SUBMITTED'].includes(h.state)).length
   const hired = Math.min(official?.hire.distinctAgents ?? 0, 3)
   const built = official?.build.agents[0]?.observed ?? 0
-  const agents = [...new Map(all.map((h) => [h.agent.agentKey, h.agent])).values()].slice(0, 5)
+  const agents = [...new Map(all.flatMap((h) => h.agent.agentKey ? [[h.agent.agentKey, { ...h.agent, agentKey: h.agent.agentKey }] as const] : [])).values()].slice(0, 5)
   const v = (x: string | number) => (pending ? <Skeleton w={56} h={22} /> : x)
   return (
     <section className={styles.summary} aria-label="At a glance">
@@ -389,14 +393,14 @@ function Logbook({ address, building = false }: { address: string; building?: bo
 
 const PLAIN: Record<string, (h: WalletHire) => string> = {
   OPEN: () => 'Opened, not paid', FUNDED: () => 'Paid, waiting for delivery', SUBMITTED: () => 'Delivered, review window open',
-  DISPUTED: () => 'Problem reported, being decided', COMPLETED: (h) => `Settled to ${h.agent.name}`, PAID: (h) => `Settled, released to ${h.agent.name}`,
+  DISPUTED: () => 'Problem reported, being decided', COMPLETED: (h) => `Settled to ${h.agent.name ?? 'the provider'}`, PAID: (h) => `Settled, released to ${h.agent.name ?? 'the provider'}`,
   REFUNDED: () => 'Refunded', CANCELLED: () => 'Cancelled', REJECTED: () => 'Rejected', EXPIRED: () => 'Deadline passed',
 }
 const JOB_FILTERS: Array<{ id: string; label: string; states: string[] | null }> = [
   { id: 'all', label: 'All', states: null }, { id: 'running', label: 'Running', states: ['OPEN', 'FUNDED'] }, { id: 'review', label: 'In review', states: ['SUBMITTED'] },
   { id: 'done', label: 'Completed', states: ['COMPLETED', 'PAID'] }, { id: 'refunds', label: 'Refunds', states: ['REFUNDED', 'EXPIRED', 'CANCELLED'] }, { id: 'disputed', label: 'Disputed', states: ['DISPUTED', 'REJECTED'] },
 ]
-const amt = (h: WalletHire) => (h.amount && h.token ? `${Number(formatUnits(BigInt(h.amount), h.token.decimals)).toLocaleString('en-US', { maximumFractionDigits: 4 })} ${h.chainId === 97 ? 'test ' : ''}${h.token.symbol}` : 'unpaid')
+const amt = (h: WalletHire) => (h.amount ? h.token?.symbol && h.token.decimals !== null ? `${Number(formatUnits(BigInt(h.amount), h.token.decimals)).toLocaleString('en-US', { maximumFractionDigits: 4 })} ${h.chainId === 97 ? 'test ' : ''}${h.token.symbol}` : `${h.amount} raw token units` : 'unpaid')
 
 function Jobs({ address }: { address: string }) {
   const main = useWalletQuest(address, 56), practice = useWalletQuest(address, 97)
@@ -420,7 +424,7 @@ function Jobs({ address }: { address: string }) {
               {g.hires.map((h) => (
                 <li key={h.jobKey}>
                   <a href={`/jobs/${h.chainId}/${h.jobId}`} className={styles.jobRow}>
-                    <span className={styles.jobAgent}><b>{h.agent.name}</b><span>job {h.jobId}</span></span>
+                    <span className={styles.jobAgent}><b>{h.agent.name ?? 'Identity not linked'}</b><span>job {h.jobId}</span>{!h.agent.agentKey ? <span>The job is on chain; its agent identity is not established.</span> : null}</span>
                     <span className={styles.jobState} data-state={h.state}>{(PLAIN[h.state] ?? (() => h.state))(h)}{h.reasons.includes('team_wallet') ? <span className={styles.funderTag}>{FUNDER_LABEL.team}</span> : h.reasons.includes('self_hire') ? <span className={styles.funderTag}>{FUNDER_LABEL.operator}</span> : null}</span>
                     <span className={styles.amount}>{amt(h)}</span>
                   </a>
@@ -440,11 +444,7 @@ function Money({ address, own }: { address: string; own: boolean }) {
   const main = useWalletQuest(address, 56), practice = useWalletQuest(address, 97)
   const [limit, setLimit] = useState<string>('')
   useEffect(() => { const l = hireLimit(); setLimit(l === null ? '' : String(l)) }, [])
-  const sum = (hs: WalletHire[], states: string[]) => {
-    const by = new Map<string, number>()
-    for (const h of hs) if (states.includes(h.state) && h.amount && h.token) by.set(h.token.symbol, (by.get(h.token.symbol) ?? 0) + Number(formatUnits(BigInt(h.amount), h.token.decimals)))
-    return [...by].map(([sym, v]) => `${v.toLocaleString('en-US', { maximumFractionDigits: 4 })} ${sym}`).join(' · ') || '0'
-  }
+  const sum = (hires: WalletHire[], states: string[]) => sumOf(hires, states, 4)
   return (
     <div className={styles.money}>
       <div className={styles.moneyCols}>
@@ -534,12 +534,12 @@ export function Agents({ address, own = false }: { address: string; own?: boolea
     fetch(`/api/v1/quest/${address}`).then((r) => (r.ok ? r.json() : null)).then((j) => { if (live) setQuest(j) }).catch(() => undefined)
     return () => { live = false }
   }, [address])
-  if (ownerError) return <p className={styles.empty}>Agent records could not be read. <a href={`/builders?wallet=${address}#your-agents`}>Open the agent workspace to retry</a>.</p>
+  if (ownerError) return <p className={styles.empty}>Agent records could not be read. <a href={`/builders/my-agents?wallet=${address}#your-agents`}>Open the agent workspace to retry</a>.</p>
   if (owner === null) return <div className={styles.skel}>{[0, 1].map((i) => <Skeleton key={i} h={88} />)}</div>
   if (!owner.length) return <p className={styles.empty}>No agents indexed for this wallet yet. <a href="/builders">Build one or look up an existing identity</a>.</p>
   return (
     <>
-    {ownerTotal !== null && ownerTotal > owner.length ? <p className={styles.fine}>Showing {owner.length} of {ownerTotal} identities. <a href={`/builders?wallet=${address}#your-agents`}>See every agent in the workspace</a>.</p> : null}
+    {ownerTotal !== null && ownerTotal > owner.length ? <p className={styles.fine}>Showing {owner.length} of {ownerTotal} identities. <a href={`/builders/my-agents?wallet=${address}#your-agents`}>See every agent in the workspace</a>.</p> : null}
     <ul className={styles.agents}>
       {owner.map((a) => {
         const q = quest?.build.agents.find((x) => x.chainId === a.chainId && x.tokenId === a.agentId)
@@ -559,7 +559,7 @@ export function Agents({ address, own = false }: { address: string; own?: boolea
             ) : null}
             <div className={styles.agentFoot}>
               <span>Last 30 days: jobs received <b>{a.seller?.jobs.received ?? 'Unavailable'}</b> · funded <b>{a.seller?.jobs.funded ?? 'Unavailable'}</b> · payment released <b>{a.seller?.jobs.paid ?? 'Unavailable'}</b></span>
-              <a className={styles.link} href={`/builders?wallet=${address}&agent=${a.chainId}:${a.agentId}#your-agents`}>Manage agent</a>
+              <a className={styles.link} href={`/builders/my-agents?wallet=${address}&agent=${a.chainId}:${a.agentId}#your-agents`}>Manage agent</a>
               <a className={styles.link} href={`/builders/check/${a.chainId}/${a.agentId}`}>Fix report</a>
               <a className={styles.link} href={`/builders/progress/${a.chainId}/${a.agentId}`}>Build checklist</a>
             </div>

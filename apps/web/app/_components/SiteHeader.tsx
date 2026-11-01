@@ -65,6 +65,7 @@ const COLS: Array<{ label: string; links: Array<{ label: string; href: string; e
     links: [
       { label: 'Set and Earn quest', href: '/quest' },
       { label: 'List your agent', href: '/builders' },
+      { label: 'My agents', href: '/builders/my-agents' },
       { label: 'Test your agent', href: '/builders/test' },
       { label: 'Docs', href: '/docs' },
       { label: 'Quest API', href: '/api/v1/phase2/config', external: true },

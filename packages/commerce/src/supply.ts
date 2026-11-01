@@ -1,4 +1,5 @@
 import { sql, type SQL } from 'drizzle-orm'
+import { paidTaskGuide, type PaidTaskGuide } from './task-guide.js'
 import { db, commerceQuote, firstPartyAgentsAllLanes, canonicalAgentId, type FirstPartyAgent } from '@marque/db'
 import { requestQuote, probeTask, type QuoteResult, type NegotiateTask } from './quote.js'
 import { exampleSentence } from './tasks.js'
@@ -55,6 +56,7 @@ export interface SellerCandidate {
    * the seller's example and the hire sheet composes that shape.
    */
   taskExample: string | null
+  taskGuide?: PaidTaskGuide | null
 }
 
 /**
@@ -130,7 +132,7 @@ export async function sellerCandidates(scope?: { agentId: string; serviceId?: nu
       )
     )
     )
-    select lp.service_id, a.id as agent_id, a.chain_id, a.token_id, a.name, a.agent_wallet, a.owner_address,
+    select lp.service_id, a.id as agent_id, a.chain_id, a.token_id, a.name, a.agent_wallet, a.owner_address, lp.manifest as task_manifest,
            coalesce(lp.manifest->>'url', lp.executable_endpoint, lp.resolved_endpoint, lp.endpoint) as endpoint,
            case when lp.category = 'unclassified' then null else lp.category end as category,
            exists (
@@ -164,7 +166,8 @@ export async function sellerCandidates(scope?: { agentId: string; serviceId?: nu
       owner: r['owner_address'] ? String(r['owner_address']) : null,
       firstParty: first,
       advertisesCommerce: r['advertises'] === true,
-      taskExample: jsonTaskExample(r['task_example']),
+      taskExample: jsonTaskExample(paidTaskGuide(r['task_manifest'])?.example ?? r['task_example']),
+      taskGuide: paidTaskGuide(r['task_manifest']),
     }
   })
 }

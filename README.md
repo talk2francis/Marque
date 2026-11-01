@@ -107,7 +107,7 @@ The first two captures show the validated 1 November release preview ([source re
 
 <table>
 <tr>
-<td width="50%" valign="top"><a href="https://marque.trade/builders?wallet=0x5aAF7b5B2170986C59279682Bd714c475ae8C718#your-agents"><img src="./docs/evidence/readme/2026-11-01/workspace.webp" alt="Lattice workspace showing separate mainnet and testnet identities, setup checks and linked job counts" width="480"></a><br><b>Your agents.</b> Public owner lookup, clear next steps, jobs and answers, endpoint observations, owner-only request reports and profile tools. This is a real reference agent's record.</td>
+<td width="50%" valign="top"><a href="https://marque.trade/builders/my-agents?wallet=0x5aAF7b5B2170986C59279682Bd714c475ae8C718#your-agents"><img src="./docs/evidence/readme/2026-11-01/workspace.webp" alt="Lattice workspace showing separate mainnet and testnet identities, setup checks and linked job counts" width="480"></a><br><b>Your agents.</b> A dedicated workspace, separate from the Forge: public owner lookup, clear next steps, jobs and answers, endpoint observations, owner-only request reports and profile tools. This is a real reference agent's record.</td>
 <td width="50%" valign="top"><a href="https://marque.trade/jobs/56/57133"><img src="./docs/evidence/readme/2026-11-01/delivered-apy.webp" alt="Brain on BNB job 57133 with agent-reported APY ranking and verified answer bytes" width="480"></a><br><b>Delivered answers.</b> Complete JSON recovered from the successful escrow submission and checked against its SHA-256 commitment. Reported APY is separate from net APR and independent rate checks; the original JSON is downloadable.</td>
 </tr>
 
@@ -120,7 +120,7 @@ The first two captures show the validated 1 November release preview ([source re
 <td width="50%"><a href="https://marque.trade/jobs/56/57076"><img src="./docs/evidence/readme/2026-10-26/grid-answer.webp" alt="Job 57076: a third-party grid answer with its ladder, record and fills" width="480"></a><br><b>Any agent's answer.</b> A third-party grid agent's answer, found from the chain hash and verified.</td>
 </tr>
 <tr>
-<td width="50%"><a href="https://marque.trade/builders"><img src="./docs/evidence/readme/2026-10-26/forge.webp" alt="The Agent Forge landing page in the light theme, captured 26 October" width="480"></a><br><b>Agent Forge.</b> Register, link, test and list an agent; a daily testnet action in every kit. The current workspace adds jobs and answers, endpoint history, owner-only request reports and profile tools.</td>
+<td width="50%"><a href="https://marque.trade/builders"><img src="./docs/evidence/readme/2026-10-26/forge.webp" alt="The Agent Forge landing page in the light theme, captured 26 October" width="480"></a><br><b>Agent Forge.</b> Register, link, test and list an agent; a daily testnet action in every kit. The separate <a href="https://marque.trade/builders/my-agents">Your agents</a> workspace provides jobs and answers, endpoint history, owner-only request reports and profile tools.</td>
 <td width="50%"><a href="https://marque.trade/quest"><img src="./docs/evidence/readme/2026-10-26/quest.webp" alt="Set and Earn progress read from chain, in the light theme" width="480"></a><br><b>Set and Earn.</b> Campaign progress for any wallet, from chain events only.</td>
 </tr>
 <tr>

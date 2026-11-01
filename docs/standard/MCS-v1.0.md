@@ -1,6 +1,6 @@
 # Marque Conformance Standard: MCS v1.0.0
 
-> Generated 2026-10-26T11:34:57.241Z from `packages/conformance/src/tolerances.ts`.
+> Generated 2026-11-01T11:54:56.248Z from `packages/conformance/src/tolerances.ts`.
 > Do not edit by hand: regenerate with `pnpm standard`.
 > Tolerance revision 1.
 
@@ -54,16 +54,16 @@ conformance outcome and belongs in the public record.
 **Reader:** PancakeSwap V3 NonfungiblePositionManager + pool slot0
 **Category:** `rebalancing`
 
-**Live case:** `REB-1-bncb-wbnb-2500`
+**Live case:** `REB-1-twt-wbnb-2500`
 
-*Subject:* owner `0x2cfD930f4Ca936CAD72a13b62df095D8BA17874f` · tokenId `7650656` · pair `BNCB/WBNB`
+*Subject:* owner `0x7f2f4173d9A6EFA1F987d48983b3244bBcCa67D5` · tokenId `7683201` · pair `TWT/WBNB`
 
-*Why this subject:* A live third-party BNCB/WBNB position on PancakeSwap V3’s 0.25% tier, minted about 240,000 blocks before its 11 October 2026 selection and still carrying liquidity. The owner held three enumerable positions, below the reader’s 40-position cap. The previous BTCB/USDC (#7395979) and US/WBNB (#7654242) subjects were withdrawn. Two separately chain-verified BNCB/WBNB positions are published as fallback subjects. Every capture still reads current ownership and liquidity at a fresh block; if none survives, the test is skipped rather than inventing a position. This fixture tests V3 arithmetic, not the investment merits of either token.
+*Why this subject:* A third-party TWT/WBNB position on PancakeSwap V3’s 0.25% tier, observed with nonzero liquidity at BSC block 131043602 on 1 November 2026. Its owner and NFT were selected from chain liquidity events before testing the agent. The former BNCB/WBNB primary (#7650656) and both old fallback positions had zero liquidity at block 131042505; their historical cases and results remain stored. Two newly observed positions with different owners are added ahead of the retained old fallback roster. Ownership and liquidity are read again at every fresh capture; if none survives, no passing result is invented. The policy, arithmetic assertions and tolerances are unchanged. The fixture measures V3 arithmetic, not the investment merits of its tokens.
 
 *Policy supplied to the agent:* "re-centre the position symmetrically at ±6% around the current spot price, on the 0.25% fee tier, keeping the same liquidity"
 
-*Latest captured example:* case `REB-1-bncb-wbnb-2500-bound-20261026083250503-c266ce6b` · block `129866199` · ground-truth hash `0xf8ddbf3b810e9f1640c6a9fcd8883c7c6d546e5bfeb8ff58fe6c522b831fdfd1`
-*Actual subject in that snapshot:* pair `BNCB/WBNB` · owner `0xa9621227DF65696fB2B45b94644b65eA452b9724` · tokenId `7654391`
+*Latest captured example:* case `REB-1-twt-wbnb-2500-bound-1793533742004` · block `131043753` · ground-truth hash `0x856d2deca7f34679483689b355e9f135bfaea3227723dbd3818e74e0cf7ca368`
+*Actual subject in that snapshot:* pair `TWT/WBNB` · owner `0x7f2f4173d9A6EFA1F987d48983b3244bBcCa67D5` · tokenId `7683201`
 
 | Check | Bound | What is asserted |
 |---|---|---|
@@ -98,7 +98,7 @@ conformance outcome and belongs in the public record.
 
 *Policy supplied to the agent:* "build a 12-level grid for BNB/USDT between 600 and 850 using 2,000 USD of capital, with a stop at 580, and disclose the fee drag at 25 bps per trade"
 
-*Latest captured example:* case `GRID-1-bnb-usdt-lattice-20261026083250503-c266ce6b` · block `129866223` · ground-truth hash `0x9bf1ae916dd58b1d75a46c8a69d3161bc83b032fd5111a852b17e530c12ba4b2`
+*Latest captured example:* case `GRID-1-bnb-usdt-lattice-20261101002844666-6723fa3e` · block `130953075` · ground-truth hash `0x404c8232066ccd4a40d735f99d68c8823583e71ea460c3715302fa98d0d1a5e3`
 *Actual subject in that snapshot:* pair `BNB/USDT` · address `0x60AA3AEE06E2345A17E4d4B12c53E046F4F63CAf`
 
 | Check | Bound | What is asserted |
@@ -130,7 +130,7 @@ conformance outcome and belongs in the public record.
 
 *Policy supplied to the agent:* "find the best net-of-cost route for 1,000 USD of USDT across the allowed protocols, only recommending a move that beats the current 0% by at least 50 bps, and excluding leveraged strategies"
 
-*Latest captured example:* case `YIELD-1-usdt-1000-sluicegate-20261026083250503-c266ce6b` · block `129866236` · ground-truth hash `0xf8628e1f597c0240a085f3e11d9f8b264ec16b034d75e45a893039b674075ce7`
+*Latest captured example:* case `YIELD-1-usdt-1000-sluicegate-20261101002844666-6723fa3e` · block `130953082` · ground-truth hash `0x4f07f3c1495b9a4defa5d0021e329908785b8c940e9196cd72c3a299f07e3bd1`
 *Actual subject in that snapshot:* asset `USDT`
 
 | Check | Bound | What is asserted |
@@ -162,7 +162,7 @@ conformance outcome and belongs in the public record.
 
 *Policy supplied to the agent:* "report the account’s current health factor and the exact USD of debt that must be repaid to restore a health factor of 2.5"
 
-*Latest captured example:* case `HF-1-venus-at-risk-keel-20261026083250503-c266ce6b` · block `129866251` · ground-truth hash `0xabb049a5ff474ce6d066219fc257788f3794cee12076fcb653a148c2c8efd538`
+*Latest captured example:* case `HF-1-venus-at-risk-keel-20261101002844666-6723fa3e` · block `130953090` · ground-truth hash `0x0750ad460cfe16a9532efc56b0337fce800266dab7041991f1afa5b408f66ab9`
 *Actual subject in that snapshot:* address `0x60AA3AEE06E2345A17E4d4B12c53E046F4F63CAf`
 
 | Check | Bound | What is asserted |
@@ -191,6 +191,9 @@ conformance outcome and belongs in the public record.
 *Why this subject:* A quoted rate is a promise about the next block; a realised rate is a fact about the last week. Seven days of Venus USDT supply is the most common question a stablecoin holder asks, and two archived exchange-rate reads at supplied blocks give it exactly one right answer.
 
 *Policy supplied to the agent:* "measure what each Venus USDT supply market actually paid between the two supplied blocks, from its exchange-rate growth, and recommend a venue only if the numbers in your own ranking support it"
+
+*Latest captured example:* case `RYIELD-1-usdt-7d-tidemark-20261101002844666-6723fa3e` · block `130953096` · ground-truth hash `0xfde67ceb29ac06d2c98fdacc05d5716f4cf3310e8f8f9f38921634a1c3105626`
+*Actual subject in that snapshot:* asset `USDT`
 
 | Check | Bound | What is asserted |
 |---|---|---|

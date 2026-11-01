@@ -3,6 +3,7 @@
 export { useHire, type HireState, type HireStep, type HireQuote, type StepStatus, type StructuredTask } from './useHire.js'
 export { friendlyError, type FriendlyError } from '../errors.js'
 export { NETWORKS, network, explorerTx, explorerAddress, formatAmount, campaignChainId, type ChainId } from '../config.js'
+export type { PaidTaskGuide } from '../task-guide.js'
 export { projectJob, timeline, DELIVERED, TERMINAL, type JobState, type JobProjection } from '../state.js'
 export { claimRefundCall, disputeCall, revokeAllowanceCall, cancelCall, settleCall, registerJobCall, setBudgetCall, approveCall, fundCall, approvalNeeded, remainingPaymentCalls, type Call, type HireTerms } from '../calls.js'
 export { agenticCommerceAbi, evaluatorRouterAbi } from '../generated.js'

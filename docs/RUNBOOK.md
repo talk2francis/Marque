@@ -120,16 +120,23 @@ The files are not first-party observations; the pack they came from is the backu
 
 ## 3. Backups and restore
 
-**Nightly** (cron, 03:17 UTC): `ops/pg-backup.sh` → `pg_dump | gzip` to both
-backup dirs, 7-day rotation. If `MARQUE_BACKUP_REMOTE` (an rclone `remote:path`)
-is set and `rclone` is installed, it also pushes offsite; **do this**: a
-single-disk VPS has no real offsite by itself. `rclone config` a Backblaze B2 or
-S3 bucket, put `MARQUE_BACKUP_REMOTE=b2:marque-backups` in `secrets.env`.
+**Nightly** (cron, 03:17 server local time, Europe/Berlin): `ops/pg-backup.sh`
+writes `pg_dump | gzip` to both backup directories with local seven-day rotation.
+The configured offsite destination is Google Drive through rclone. The dump is
+encrypted with age before upload, checked against the remote, and only then
+advances `OFFSITE_LATEST`. This is separate from the local `LATEST` receipt.
+It is a Drive backup, not a Google Cloud Storage bucket. Cron follows the server
+timezone, so its UTC time changes with daylight saving.
 
-**Restore-test** (cron, Mondays 04:42 UTC): `ops/pg-restore-test.sh` restores
+Observed 1 November 2026: the `20261101T021701Z` dump exists in both local
+directories; the encrypted offsite copy was verified at `02:40:58Z` and both
+receipts name that dump. Check current logs and receipts before reporting a later
+backup successful. Keep remote configuration and encryption material private.
+
+**Restore-test** (cron, Mondays 04:42 server local time): `ops/pg-restore-test.sh` restores
 the newest dump into a throwaway database, compares row counts against
 production, checks every first-party table came back non-empty, drops the
-scratch db. Last run: PASS (2026-09-08, 45 MB dump, all tables match).
+scratch db. Last observed run: PASS for `marque-20261026T021702Z.sql.gz`.
 
 **To actually restore production** (only if the database is lost):
 ```

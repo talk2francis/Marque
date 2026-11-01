@@ -5,7 +5,7 @@ import { useAccount } from 'wagmi'
 import { useConnectModal } from '@rainbow-me/rainbowkit'
 import { formatUnits } from 'viem'
 import { ArrowUpRight, Check, Clock, ShieldCheck } from 'lucide-react'
-import { useHire, NETWORKS, type HireStep, type HireQuote, type StructuredTask } from '@marque/commerce/client'
+import { useHire, NETWORKS, type HireStep, type HireQuote, type StructuredTask, type PaidTaskGuide } from '@marque/commerce/client'
 import { AgentAvatar } from './AgentAvatar'
 import { TaskForm, type TaskValue } from './hire/TaskForm'
 import { NoWalletLine } from './pass/NoWalletLine'
@@ -38,6 +38,7 @@ interface SheetAgent {
   sellsJobs?: boolean
   /** The seller's example task when it works from a JSON object (chainhelix). */
   taskExample?: string | null
+  taskGuide?: PaidTaskGuide | null
   /** The same agent on the other network, offered as a network choice. */
   twin?: { agentId: string; chainId: 56 | 97 } | null
 }
@@ -350,7 +351,7 @@ export function HireSheet() {
                 {q ? (
                   <p className="hs-task">{task.task || 'Your task'}</p>
                 ) : (
-                  <TaskForm category={agent.category} agentName={agent.name} onChange={setTask} disabled={state.phase === 'quoting'} taskExample={agent.taskExample} />
+                  <TaskForm category={agent.category} agentName={agent.name} onChange={setTask} disabled={state.phase === 'quoting'} taskExample={agent.taskExample} taskGuide={agent.taskGuide} />
                 )}
               </section>
 

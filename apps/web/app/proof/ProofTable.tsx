@@ -28,6 +28,7 @@ export function ProofTable({ rows }: { rows: ProofRow[] }) {
   }
   return (
     <section id="jobs" className={styles.jobs} aria-label="Every job">
+      {rows.some(r => !r.agent.agentKey) ? <details className={styles.note}><summary>Why some agent identities are not linked</summary><p>The job and its answer remain available on chain. A hire through Marque names the agent directly; a shared payment wallet alone cannot identify which agent delivered an outside job.</p></details> : null}
       <div className={styles.chips} role="group" aria-label="Filter">
         {(['all', 'outside', 'team', 'operator'] as const).map((f) => (
           <button key={f} type="button" className={styles.chip} aria-pressed={funder === f} onClick={() => set(f, chain)}>{f === 'all' ? 'Everyone' : FUNDER[f]} <span>{rows.filter((r) => (f === 'all' || r.funderClass === f) && (chain === 'all' || String(r.chainId) === chain)).length}</span></button>
@@ -45,7 +46,7 @@ export function ProofTable({ rows }: { rows: ProofRow[] }) {
             {shown.map((r) => (
               <tr key={`${r.chainId}:${r.jobId}`} data-funder={r.funderClass}>
                 <td data-label="Job"><a href={`/jobs/${r.chainId}/${r.jobId}`}>#{r.jobId}</a> <span className={styles.net97}>{r.chainId === 97 ? 'testnet' : 'mainnet'}</span></td>
-                <td data-label="Agent">{r.agent.name ?? 'Unidentified'}<span className={styles.sub}>{r.operatorClass === 'reference' ? 'Marque reference' : 'Third party'}</span></td>
+                <td data-label="Agent">{r.agent.name ?? 'Identity not linked'}<span className={styles.sub}>{r.agent.agentKey ? r.operatorClass === 'reference' ? 'Marque reference' : 'Third party' : 'On-chain job; agent identity not established'}</span></td>
                 <td data-label="Paid by"><span className={styles.funder} data-funder={r.funderClass}>{FUNDER[r.funderClass]}</span><span className={styles.sub}>{short(r.client)}</span></td>
                 <td data-label="State">{STATE[r.state] ?? r.state}{r.counted ? <span className={styles.sub}>counted</span> : null}</td>
                 <td data-label="Chain checks">{r.checks && r.checks.decided ? `${r.checks.agreed} of ${r.checks.decided} agree` : '·'}</td>

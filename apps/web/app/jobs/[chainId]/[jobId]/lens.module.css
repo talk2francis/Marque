@@ -1,6 +1,6 @@
 /* ---- Result Lens: the delivered answer, drawn (SPEC-WORKSPACE 2.1) ---- */
 .lens { display: grid; gap: 18px; padding: 22px; border-radius: 18px; border: 1px solid var(--hair-2); background: color-mix(in srgb, var(--panel) 92%, transparent); }
-.lensHead { display: grid; gap: 10px; }
+.lensHead { display: grid; gap: 10px; min-width: 0; }
 .lensTitle { margin: 0; font-size: 19px; font-weight: 600; letter-spacing: -0.01em; color: var(--ink); }
 .badges { display: flex; flex-wrap: wrap; gap: 8px; }
 .badge { display: inline-flex; align-items: center; gap: 7px; padding: 5px 11px 5px 7px; border-radius: 999px; border: 1px solid var(--hair-2); font-size: 12.5px; color: var(--ink-2); }
@@ -25,7 +25,7 @@
 .mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
 
 .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; }
-.tile { display: grid; gap: 3px; align-content: start; padding: 14px 16px; border-radius: 14px; border: 1px solid var(--hair); background: var(--canvas-2); }
+.tile { display: grid; gap: 3px; min-width: 0; overflow-wrap: anywhere; align-content: start; padding: 14px 16px; border-radius: 14px; border: 1px solid var(--hair); background: var(--canvas-2); }
 .tile[data-tone='primary'] { border-color: color-mix(in srgb, var(--brass) 40%, var(--hair)); background: color-mix(in srgb, var(--brass) 6%, var(--canvas-2)); }
 .tileLabel { font-size: 11.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); }
 .tileValue { font-size: 22px; font-weight: 600; letter-spacing: -0.015em; color: var(--ink); font-variant-numeric: tabular-nums; }
@@ -36,7 +36,7 @@
 .facts dd { margin: 0; font-size: 13.5px; color: var(--ink); font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
 
 /* health factor */
-.hf { display: grid; grid-template-columns: minmax(220px, 300px) 1fr; gap: 18px 24px; align-items: center; }
+.hf { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 18px 24px; align-items: center; min-width: 0; }
 .hfDial { position: relative; display: grid; justify-items: center; }
 .gauge { width: 100%; max-width: 280px; height: auto; display: block; }
 .gTrack { fill: none; stroke: var(--hair-2); stroke-width: 10; stroke-linecap: round; }
@@ -62,13 +62,13 @@
 .hfValue[data-state='holds'] { color: var(--v-jade); }
 .hfWord { font-size: 13px; color: var(--ink-2); }
 .markets { grid-column: 1 / -1; display: grid; gap: 8px; }
-.market { display: grid; grid-template-columns: 70px 1fr auto; gap: 12px; align-items: center; font-size: 13px; }
-.marketName { font-weight: 600; color: var(--ink); }
-.bars { display: grid; gap: 3px; }
+.market { display: grid; grid-template-columns: minmax(0, 90px) minmax(0, 1fr) auto; gap: 12px; align-items: center; font-size: 13px; min-width: 0; }
+.marketName { font-weight: 600; color: var(--ink); min-width: 0; overflow-wrap: anywhere; }
+.bars { display: grid; gap: 3px; min-width: 0; }
 .bars i, .legend i.barSupply, .legend i.barBorrow { height: 6px; border-radius: 3px; display: block; min-width: 3px; }
 .barSupply { background: color-mix(in srgb, var(--moss) 70%, transparent); }
 .barBorrow { background: color-mix(in srgb, var(--oxide) 65%, transparent); }
-.marketVals { font-size: 12px; color: var(--ink-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.marketVals { font-size: 12px; color: var(--ink-2); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
 .calm { display: flex; gap: 14px; align-items: center; padding: 16px; border-radius: 14px; border: 1px dashed var(--hair-2); }
 .calmRing { fill: none; stroke: color-mix(in srgb, var(--moss) 55%, transparent); stroke-width: 2; }
 .calmTick { fill: none; stroke: var(--moss); stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
@@ -178,7 +178,7 @@
   .hf { grid-template-columns: 1fr; }
   .gridBody { grid-template-columns: 1fr; }
   .ladder { height: 240px; }
-  .market { grid-template-columns: 56px 1fr; }
+  .market { grid-template-columns: minmax(0, 90px) minmax(0, 1fr); }
   .marketVals { grid-column: 2; }
   .checks li { grid-template-columns: 16px 1fr; }
   .how { grid-column: 2; justify-self: start; }

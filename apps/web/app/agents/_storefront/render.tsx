@@ -14,7 +14,7 @@ export async function AgentSection({ d, section }: { d: Data; section: SectionId
       ? jobLens(d.sample.chainId as 56 | 97, d.sample.jobId).then((p) => p.value).catch(() => null)
       : Promise.resolve(null),
     section === 'technical' ? originality(d.agentId) : Promise.resolve([]),
-    outcomesForAgent(d.agentId),
+    section === 'record' ? outcomesForAgent(d.agentId) : Promise.resolve([]),
   ])
   return (
     <>

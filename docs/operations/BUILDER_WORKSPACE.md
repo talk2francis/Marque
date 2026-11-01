@@ -1,6 +1,6 @@
 # Builder workspace and delivery recovery
 
-The workspace at `/builders#your-agents` uses the existing owner, seller, claim and registration rails. Any owner address can be read without a wallet. Public status does not unlock private quote analytics or editing. A connected current identity owner signs the existing proof message to read the private report; no job or payment is created.
+The workspace at `/builders/my-agents` uses the existing owner, seller, claim and registration rails. Any owner address can be read without a wallet. Public status does not unlock private quote analytics or editing. A connected current identity owner signs the existing proof message to read the private report; no job or payment is created.
 
 `GET /api/v1/phase2/owner/{address}?cursor=8` returns up to eight identities and a `page` with the actual population `total` and `nextCursor`. The cache includes owner and cursor. The quality-listing aggregate describes the returned page, not every identity. Service price samples remain dated and are not reservations for a future buyer task.
 
@@ -29,3 +29,18 @@ Browser acceptance covered the workspace, actual third-party and reference answe
 The existing audit ran on the affected views at four widths in both themes. Captures were visually reviewed. No page errors, console errors, missing image descriptions or horizontal overflow were found in the final affected-view audit. Existing small support/footer/terms links and the older starter-card contrast advisory are recorded baseline issues, outside this change; no new advisory was added. Owner-report success data was tested with fixture authorization, while production-layout checks used a wallet emulator that rejected signatures and transactions.
 
 The prepared artifact is promoted only through `scripts/deploy-web.sh`, whose unchanged verifier checks health, previous-release static assets, public routes, populated wallet views and wallet-modal behavior before traffic switches. CI status remains available in the repository badge; `/api/health` reports the currently deployed revision. Historical evidence is not rewritten by this release.
+
+
+## Follow-up maintenance, 1 November 2026
+
+The Forge landing keeps its three build paths. Its owner/agent query links and the old workspace hash resolve to the separate workspace. My Marque agent-management links point there directly. Public lookup and connected-owner privacy boundaries are unchanged.
+
+Wallet hire identities and payment-asset units are nullable in the public API. My Marque keeps those jobs visible, omits unlinked avatar identities and labels unknown units explicitly. The Every job table explains identity ambiguity rather than calling the job lost. This repairs a reproduced null-ID avatar exception that affected wallets with outside shared-provider jobs, including Marque Pass accounts.
+
+An exact service can carry bounded provider-declared task guidance from one explicit escrow-enabled work skill in its current card. That guidance is not executable schema or independently verified capability. The buyer applies and edits an example before obtaining the ordinary identity-checked quote. Unrelated category acceptance criteria are not silently added to those service-specific tasks. First-party category forms and exact payment/signature checks remain in place.
+
+The HF view fits its actual column and compacts long market addresses while retaining original values. Agent sections prepare read-only routes on visibility or interaction intent, with no prefetch under save-data. Only Track record reads outcome history. First navigation can still require fresh server evidence; local navigation does not promise zero network latency.
+
+Bound's former primary and two fallback LP positions all had zero liquidity at block 131042505. Replacement subjects were selected from chain observations before grading. Bound passed the unchanged MCS-REB-1 policy against TWT/WBNB position 7683201 at block 131043753, case `REB-1-twt-wbnb-2500-bound-1793533742004`, ground-truth hash `0x856d2deca7f34679483689b355e9f135bfaea3227723dbd3818e74e0cf7ca368`. Historical cases/results remain stored. Restart only the conformance worker after the completed build and accepted release so its later sweeps use the refreshed roster.
+
+The nightly encrypted Google Drive backup was verified at 02:40:58 UTC on 1 November; local/remote receipts both identify `20261101T021701Z`. The runbook now states the actual Europe/Berlin cron timezone. No backup configuration or schedule was changed.

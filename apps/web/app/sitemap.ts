@@ -24,6 +24,7 @@ const ROUTES: Array<{ path: string; priority: number; changeFrequency: MetadataR
   { path: '/ledger/methodology', priority: 0.5, changeFrequency: 'weekly' },
   { path: '/pancakeswap', priority: 0.7, changeFrequency: 'daily' },
   { path: '/builders/test', priority: 0.7, changeFrequency: 'weekly' },
+  { path: '/builders/my-agents', priority: 0.7, changeFrequency: 'weekly' },
   { path: '/builders/claim', priority: 0.7, changeFrequency: 'weekly' },
   { path: '/app/charter', priority: 0.6, changeFrequency: 'weekly' },
   { path: '/status', priority: 0.4, changeFrequency: 'hourly' },
