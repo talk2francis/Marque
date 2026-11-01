@@ -236,9 +236,6 @@ a.stat:hover { border-color: var(--hair-2); }
 
 @media (max-width: 720px) {
   .balances, .moneyCols, .watching { grid-template-columns: 1fr; gap: var(--s-5); }
-  .dockets { flex-wrap: nowrap; overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding: 0 var(--margin); margin: 0 calc(-1 * var(--margin)); padding: 4px var(--margin) 12px; scrollbar-width: none; }
-  .dockets::-webkit-scrollbar { display: none; }
-  .docket { scroll-snap-align: start; flex-basis: 78vw; width: 78vw; max-width: 260px; }
   .log li { grid-template-columns: 44px minmax(0, 1fr) 28px; gap: 10px; }
   .logNet { display: none; }
   .jobRow { grid-template-columns: minmax(0, 1fr) auto; }

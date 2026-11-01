@@ -132,7 +132,7 @@ export async function needsYou(address: string): Promise<{ address: string; item
         ? { kind: 'reclaim', title: `Reclaim your payment for job ${jobId}`, sentence: `${agent} did not deliver before the deadline. The full amount comes back to the wallet that paid.`, deadline: null, chainId, jobId, action: { label: 'Reclaim', href }, side: 'hiring' }
         : { kind: 'reclaim', title: `Job ${jobId} is waiting on ${agent}`, sentence: 'Paid and not delivered yet. If it never delivers, you can reclaim the payment from the deadline.', deadline: new Date(expires).toISOString(), chainId, jobId, action: { label: 'Open the job', href }, side: 'hiring' })
     }
-    if (['SUBMITTED', 'COMPLETED', 'PAID'].includes(state) && !j['rated']) items.push({ kind: 'rate', title: `Rate ${agent}`, sentence: `Job ${jobId} was delivered. Your rating goes on its public record from your wallet.`, deadline: null, chainId, jobId, action: { label: 'Rate', href: `${href}#rate` }, side: 'hiring' })
+    if (['SUBMITTED', 'COMPLETED', 'PAID'].includes(state) && !j['rated']) items.push({ kind: 'rate', title: j['agent_name'] ? `Rate ${agent}` : `Rate the agent of job ${jobId}`, sentence: `Job ${jobId} was delivered. Your rating goes on its public record from your wallet.`, deadline: null, chainId, jobId, action: { label: 'Rate', href: `${href}#rate` }, side: 'hiring' })
     const w = windows[chainId]
     if (state === 'SUBMITTED' && submitted && w) {
       const ends = submitted + w * 1000
