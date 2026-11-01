@@ -1,6 +1,6 @@
 # Interactive pages, captured
 
-Pages on marque.trade built as interactive views, captured as Markdown with their capture time. The generated documentation (FAQ, whitepaper, changelog and the rest) is one folder up and always identical to the site.
+Interactive pages captured as Markdown. Each capture header identifies its live page or validated release-preview source, revision where applicable, and time. The generated documentation (FAQ, whitepaper, changelog and the rest) is one folder up and always identical to the site.
 
 | File | Page |
 |---|---|

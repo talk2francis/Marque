@@ -1,0 +1,18 @@
+{
+  "capturedAt": "2026-11-01T06:35:37.791Z",
+  "sourceRevision": "198a89f878faba1f54ab256e0ef489848bc254da",
+  "source": "Validated release preview; actual public records; no fixture data",
+  "displayAdjustments": "Only screenshot overlays: site header/skip link/campaign companion hidden and sticky tabs returned to normal flow. No data edited.",
+  "screens": [
+    {
+      "file": "workspace.webp",
+      "publicUrl": "https://marque.trade/builders?wallet=0x5aAF7b5B2170986C59279682Bd714c475ae8C718",
+      "theme": "day"
+    },
+    {
+      "file": "delivered-apy.webp",
+      "publicUrl": "https://marque.trade/jobs/56/57133",
+      "theme": "night (Job Room)"
+    }
+  ]
+}

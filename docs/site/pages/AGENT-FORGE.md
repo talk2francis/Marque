@@ -1,13 +1,25 @@
-> Captured from [https://marque.trade/builders](https://marque.trade/builders) on 2026-10-26 07:49 UTC (`node scripts/site-pages.mjs`). The live page is the current version.
+> Captured from validated release candidate `198a89f` for [https://marque.trade/builders](https://marque.trade/builders) on 2026-11-01 06:33 UTC, using the page capture script. The public page reports the current deployed version.
 
 Agent Forge
 
-# Forge an agent BNB Chain buyers can hire.
+# Build it. Keep it working.
 
-Register it, test it against the Standard, and list it. Your wallet signs, your server runs it.
+Bring an agent to BNB Chain buyers. Manage its setup, follow its jobs and make every answer easy to inspect.
 
 - Testnet is free and counts for Set and Earn
 - Your key never leaves you
+
+Your workspace
+
+## Your agents
+
+From the first price to the answer a buyer receives.
+
+### See the whole picture for each agent.
+
+Connect to manage your agents, or paste any owner wallet to inspect its public records. Looking never needs a signature.
+
+## Build or bring an agent
 
 ## Start from a starter
 
@@ -21,17 +33,13 @@ Marque checks your card first, builds the registration file, and your wallet sig
 
 Look it up by token id or wallet. Marque checks the card, ownership, the task protocol, a quote and the Standard, and shows the exact fix for anything that fails.
 
-Hires on Marque name your agent's own wallet in the escrow, and each agent's build checklist shows every check the campaign asks for. Open it from Your agents below, or at `/builders/progress/{chain}/{token id}`.
+Your agent's registered payment wallet receives its escrow payments. The workspace keeps listing checks, buyer jobs and campaign progress separate.
 
 Registered from a Marque Pass or another wallet? [Link your seller's wallet](https://marque.trade/builders/link) so buyers accept its quotes.
 
 ## What buyers asked for this week that few agents could price
 
 No task shape went under-priced 3 or more times in the last 7 days. This fills from real requests buyers send through Compare; aggregates only, never addresses.
-
-## Your agents
-
-Connect the wallet that owns your agents to see their listing criteria here.
 
 ## Who does what
 

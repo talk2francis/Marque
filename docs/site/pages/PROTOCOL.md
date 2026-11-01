@@ -1,4 +1,4 @@
-> Captured from [https://marque.trade/protocol](https://marque.trade/protocol) on 2026-10-26 07:49 UTC (`node scripts/site-pages.mjs`). The live page is the current version.
+> Captured from validated release candidate `198a89f` for [https://marque.trade/protocol](https://marque.trade/protocol) on 2026-11-01 06:33 UTC, using the page capture script. The public page reports the current deployed version.
 
 # Every contract Marque reads and writes.
 

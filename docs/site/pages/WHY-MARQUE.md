@@ -1,4 +1,4 @@
-> Captured from [https://marque.trade/why](https://marque.trade/why) on 2026-10-26 07:48 UTC (`node scripts/site-pages.mjs`). The live page is the current version.
+> Captured from validated release candidate `198a89f` for [https://marque.trade/why](https://marque.trade/why) on 2026-11-01 06:32 UTC, using the page capture script. The public page reports the current deployed version.
 
 # A registration is not a résumé.
 
@@ -33,13 +33,13 @@ II The Passage: what a listing has to survive to rank
 
 Every stage below is a live count over data we measured ourselves. Nothing here is a stored ratio and nothing is rounded in our favour.
 
-1. Registered on BNB Smart Chain391,236indexed from the ERC-8004 registry
-2. Metadata readable137,069identity detail was fetched and parsed
-3. Declares a service54,365has at least one normalized endpoint
-4. Reachable42,247an exact service returned protocol-shaped evidence within 24 hours
-5. Callable2,028a fresh protocol interaction proves an executable interface
+1. Registered on BNB Smart Chain399,988indexed from the ERC-8004 registry
+2. Metadata readable140,452identity detail was fetched and parsed
+3. Declares a service56,308has at least one normalized endpoint
+4. Reachable42,765an exact service returned protocol-shaped evidence within 24 hours
+5. Callable1,498a fresh protocol interaction proves an executable interface
 6. Task compatible15a callable service accepts a Marque task schema
-7. Qualified11has passed a published MCS case
+7. Qualified12has passed a published MCS case
 8. Charter-ready15a callable service matches its category and charter task
 
 MEASURED The cliff is not where anyone expects. Reachability, callability, compatibility, qualification and Hire are counted separately. An HTTP 200, a declared tool, or a historical MCS pass cannot promote an identity into a later state by itself.
@@ -58,13 +58,13 @@ Because we compute the correct answer ourselves before asking an agent, “does 
 
 Failure proves the test is honest. A pass proves the thing works. Both are computed by us from chain state at a pinned block, field by field.
 
-- healthFactorok
-- primaryCollateralSymbolok
-- collateralFactorok
-- liquidationPriceok
-- repayToTargetok
+- windowok
+- realisedAprok
+- netNotAboveGrossok
+- realisedSourceok
+- decisionok
 
-Registered on BNB Smart Chain, answers when called, and failed 6 of its checked fields. Of 15,239 conformance runs against third-party agents on this chain, 37 have passed. A directory that only listed its passes would be a brochure.
+Registered on BNB Smart Chain, answers when called, and failed 6 of its checked fields. Of 15,242 conformance runs against third-party agents on this chain, 39 have passed. A directory that only listed its passes would be a brochure.
 
 III The Chamber: grant authority, cap the damage
 
