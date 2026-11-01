@@ -1,6 +1,6 @@
 # Marque Conformance Standard: MCS v1.0.0
 
-> Generated 2026-11-01T11:54:56.248Z from `packages/conformance/src/tolerances.ts`.
+> Generated 2026-11-01T12:02:58.290Z from `packages/conformance/src/tolerances.ts`.
 > Do not edit by hand: regenerate with `pnpm standard`.
 > Tolerance revision 1.
 
@@ -62,7 +62,7 @@ conformance outcome and belongs in the public record.
 
 *Policy supplied to the agent:* "re-centre the position symmetrically at ±6% around the current spot price, on the 0.25% fee tier, keeping the same liquidity"
 
-*Latest captured example:* case `REB-1-twt-wbnb-2500-bound-1793533742004` · block `131043753` · ground-truth hash `0x856d2deca7f34679483689b355e9f135bfaea3227723dbd3818e74e0cf7ca368`
+*Latest captured example:* case `REB-1-twt-wbnb-2500-bound-1793534539707` · block `131045525` · ground-truth hash `0xa27db9a6d39db86cedc74b913b8917d22ae3a31c0319a9e15c1e60084ced5d83`
 *Actual subject in that snapshot:* pair `TWT/WBNB` · owner `0x7f2f4173d9A6EFA1F987d48983b3244bBcCa67D5` · tokenId `7683201`
 
 | Check | Bound | What is asserted |

@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
   "toleranceRevision": 1,
-  "generatedAt": "2026-11-01T11:54:56.248Z",
+  "generatedAt": "2026-11-01T12:02:58.290Z",
   "generatedFrom": "packages/conformance/src/tolerances.ts",
   "tests": {
     "MCS-REB-1": {
@@ -21,14 +21,14 @@
           "statement": "re-centre the position symmetrically at ±6% around the current spot price, on the 0.25% fee tier, keeping the same liquidity"
         },
         "why": "A third-party TWT/WBNB position on PancakeSwap V3’s 0.25% tier, observed with nonzero liquidity at BSC block 131043602 on 1 November 2026. Its owner and NFT were selected from chain liquidity events before testing the agent. The former BNCB/WBNB primary (#7650656) and both old fallback positions had zero liquidity at block 131042505; their historical cases and results remain stored. Two newly observed positions with different owners are added ahead of the retained old fallback roster. Ownership and liquidity are read again at every fresh capture; if none survives, no passing result is invented. The policy, arithmetic assertions and tolerances are unchanged. The fixture measures V3 arithmetic, not the investment merits of its tokens.",
-        "capturedCaseId": "REB-1-twt-wbnb-2500-bound-1793533742004",
+        "capturedCaseId": "REB-1-twt-wbnb-2500-bound-1793534539707",
         "capturedSubject": {
           "pair": "TWT/WBNB",
           "owner": "0x7f2f4173d9A6EFA1F987d48983b3244bBcCa67D5",
           "tokenId": "7683201"
         },
-        "blockNumber": "131043753",
-        "groundTruthHash": "0x856d2deca7f34679483689b355e9f135bfaea3227723dbd3818e74e0cf7ca368"
+        "blockNumber": "131045525",
+        "groundTruthHash": "0xa27db9a6d39db86cedc74b913b8917d22ae3a31c0319a9e15c1e60084ced5d83"
       },
       "checks": [
         {

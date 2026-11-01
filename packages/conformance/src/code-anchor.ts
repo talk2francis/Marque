@@ -2,7 +2,7 @@
 export const MCS_CODE_ANCHOR = {
   "version": 1,
   "algorithm": "SHA-256",
-  "sha256": "0xabf72e0a478ba2d0093ef9bd1a516e0d05f7970e0c3fb3964ae397a006c8612c",
+  "sha256": "0x7f315d9ae44df12d5f0823de5ab3d81bc9a2f842da8c851525cce49c0bdfa55e",
   "scope": "local MCS implementation and imported workspace source; lockfile pins external dependencies; not deployed-bytecode or issuer attestation",
   "files": [
     {
@@ -23,11 +23,15 @@ export const MCS_CODE_ANCHOR = {
     },
     {
       "path": "packages/conformance/src/cases.ts",
-      "sha256": "0x9e4cd68d19b5170abf8222b059c3dea7b92afeea00a2ba529ff963594b56db68"
+      "sha256": "0xe471d3608884eb6f325b46d6750c3beb187a6c3ebfd5260104c76201941af31a"
+    },
+    {
+      "path": "packages/conformance/src/criteria.ts",
+      "sha256": "0x3ee6c4d7a519b3b229ebe5e412ec22dd624ca05cb95f94863b0d8eced5c72087"
     },
     {
       "path": "packages/conformance/src/harness.ts",
-      "sha256": "0x0b3479e706e54179af5cf188a8dfb5296cf4f9171061c74e06c010a7509b7f36"
+      "sha256": "0x445a8dd1ebd69a42ce30eed249c1560396f6d01c08b924528806318525ee4ae9"
     },
     {
       "path": "packages/conformance/src/hash.ts",
@@ -35,15 +39,15 @@ export const MCS_CODE_ANCHOR = {
     },
     {
       "path": "packages/conformance/src/index.ts",
-      "sha256": "0x30a43fea87d08701fa0a1157cb52dcd4b2357b1d230599a0f6f83a0ae6464320"
+      "sha256": "0xacbd9bd6254f339ca1d319c645fa2411e73aacff110bd913173e5566a4cd2444"
     },
     {
       "path": "packages/conformance/src/portable.ts",
-      "sha256": "0xad2b38bc3898c17aecd473bd142d3416955990ea5a6b3de7be08cd99781789aa"
+      "sha256": "0x0854b737e48ed5f0b53e8faae9e1956d483fbc9a416f26f65f4b6033573fe4c3"
     },
     {
       "path": "packages/conformance/src/stubs.ts",
-      "sha256": "0x714dd7a56cbf9cc67d17643a291cfaa68bc754894ea70f4bc3727e8163771a12"
+      "sha256": "0xb13e13d286f028cf19f4aee9efded5bee8ddae6fcdabcccef4a041959a1c7ac2"
     },
     {
       "path": "packages/conformance/src/tests/mcs-grid-1.ts",
@@ -58,12 +62,16 @@ export const MCS_CODE_ANCHOR = {
       "sha256": "0x66474bb1ccdd5aac30a20bc5adb05f266065f2c85c653c9d0dedc31f12aa593c"
     },
     {
+      "path": "packages/conformance/src/tests/mcs-ryield-1.ts",
+      "sha256": "0x2090476f593c55f9d53de99bab122f83c295f6708d819e2c5e48d819377a8465"
+    },
+    {
       "path": "packages/conformance/src/tests/mcs-yield-1.ts",
       "sha256": "0x75f584b09343507e3acd7fec2c6adcb0f3f8624ab9bdbf60e8e9c502bcb5da95"
     },
     {
       "path": "packages/conformance/src/tolerances.ts",
-      "sha256": "0xe3e15835782ee0d709bc7b56e76bfafb88e3b0b5f90b1821e3a9f02e885a9bcb"
+      "sha256": "0x574a97cda9a5152d347fba079c9b968f20f159a0a80b1a020f874d8f413cf282"
     },
     {
       "path": "packages/conformance/src/types.ts",
@@ -75,7 +83,7 @@ export const MCS_CODE_ANCHOR = {
     },
     {
       "path": "packages/db/src/cache.ts",
-      "sha256": "0x011ad40c0d62fccb84cd6c172f7540ca0c32e25f55b58e9b14be44fd5e21036c"
+      "sha256": "0x45c51585a44584834a17f23a73aa7ff9ffb16e00b4c070a486c236b1ebc0350e"
     },
     {
       "path": "packages/db/src/client.ts",
@@ -87,11 +95,11 @@ export const MCS_CODE_ANCHOR = {
     },
     {
       "path": "packages/db/src/first-party.ts",
-      "sha256": "0x134ad315757027d0a70ffd04db53e7bd56a496a13c1991fab5ef17cfe774f72a"
+      "sha256": "0xc32e1f32587071e7b0df9872a778519416a0683b242aa2150741c3c801268c1c"
     },
     {
       "path": "packages/db/src/index.ts",
-      "sha256": "0xa345e2b9e97d330db5bb5bf868c50c1faa020a3c530009633223abdfe5555de4"
+      "sha256": "0x3cd4861274e0ff03ee9260b98d9f8fb28234b1510121d3e985e3c51c3ecc671a"
     },
     {
       "path": "packages/db/src/migrate.ts",
@@ -99,7 +107,7 @@ export const MCS_CODE_ANCHOR = {
     },
     {
       "path": "packages/db/src/schema.ts",
-      "sha256": "0xc6964d71cb27f1e0883b35352889df0f524e3936a9b6d77d380d8f50a9ea765f"
+      "sha256": "0xf00599e073bde6efab8feb7a1f61983b19c2907646cf75028c7b207352a0caec"
     },
     {
       "path": "packages/positions/src/abis.ts",
@@ -155,7 +163,7 @@ export const MCS_CODE_ANCHOR = {
     },
     {
       "path": "packages/probe/src/liveness.ts",
-      "sha256": "0x30da5f81dcdc4b547b75de84d5504c6408ae6759218392ba5eff91822fb34696"
+      "sha256": "0xecebfe9a9db69998696eab8f54477c5e0fb72136caa19da609c0cc117536f106"
     },
     {
       "path": "packages/probe/src/payment-challenge.ts",
@@ -171,15 +179,15 @@ export const MCS_CODE_ANCHOR = {
     },
     {
       "path": "packages/probe/src/schedule.ts",
-      "sha256": "0x524d68bfa6de82211e19a17c02438e515e0196985766c5a2c94a3d8f0b9b14fc"
+      "sha256": "0xe7045646fbcdd0c64383a4389f198970441b33d8d5efeca9cd34dfb1c80b9c44"
     },
     {
       "path": "packages/probe/src/worker.ts",
-      "sha256": "0x685e6d243018e82e0df6d46c8a23a7c105844a677709647d800ad4072deb6fb2"
+      "sha256": "0x9d766a7ee06619fefe5814fa47b791e71661db5d767659497a2a176343fc486e"
     },
     {
       "path": "pnpm-lock.yaml",
-      "sha256": "0x292ce855b1a9215315bac3afa5cdb8f27416f5f97a0439261a7fb227785a218b"
+      "sha256": "0x780af0b7f07619c5ebd80a93523f067b60e20837e179e4e14a6c5bfdd1d37186"
     }
   ]
 } as const
