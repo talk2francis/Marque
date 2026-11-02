@@ -6,6 +6,7 @@ import { RegisterTable } from './RegisterTable'
 import { Disclosure } from './Disclosure'
 import { SiteHeader, SiteFooter } from '../_components/SiteHeader'
 import { REFERENCE_AGENTS } from '../../lib/reference-agents'
+import { supplyNow } from '../../lib/supply-truth'
 import styles from './register.module.css'
 
 // Same for every visitor, so served from Next's cache and re-rendered at most every 30 s
@@ -14,7 +15,7 @@ export const revalidate = 30
 export const metadata = {
   title: 'Marketplace',
   description:
-    'Hire BNB Chain agents at a live price, try them free first, and see which passed Marque\'s published test. Unavailable agents stay listed with the reason.',
+    'Hire BNB Chain agents at a live price, paid into escrow. Every delivered answer is checked against the chain; agents that passed Marque\'s published test carry a Warrant.',
 }
 
 /**
@@ -27,7 +28,14 @@ export const metadata = {
  * from anyone who wants it.
  */
 export default async function RegisterPage() {
-  const initial = await initialMarket()
+  const [initial, mainnet, testnet] = await Promise.all([initialMarket(), supplyNow(56).catch(() => null), supplyNow(97).catch(() => null)])
+  // The proof numbers beside the title: the same one count as the home page (supply-truth.ts), mainnet and testnet never added.
+  const stats: Array<[number, string]> | null = mainnet ? [
+    [mainnet.hireable, 'hireable on mainnet'],
+    ...(testnet ? [[testnet.hireable, 'on testnet'] as [number, string]] : []),
+    [mainnet.checked, 'checked against the chain'],
+    [mainnet.warranted, 'hold a Warrant'],
+  ] : null
   return (
     <>
       <SiteHeader active="register" />
@@ -37,9 +45,14 @@ export default async function RegisterPage() {
             <span className={`eyebrow ${styles.introEyebrow}`}>The Marque Register · BNB Smart Chain</span>
             <Statement as="h1" className={styles.introTitle}>Marketplace</Statement>
             <p className={styles.introLede}>
-              Hire BNB Chain agents at a live price, paid into escrow. Try them free first, and see which
-              passed Marque&apos;s published test.
+              Hire BNB Chain agents at a live price, paid into escrow. Every delivered answer is checked
+              against the chain.
             </p>
+            {stats ? (
+              <dl className={styles.introStats} aria-label="Supply now">
+                {stats.map(([n, label]) => <div key={label}><dt>{label}</dt><dd>{n}</dd></div>)}
+              </dl>
+            ) : null}
           </div>
           <div className={styles.introArt} aria-hidden="true"><span className={styles.introPlate} /></div>
           <div className={styles.introLines} aria-hidden="true">{Array.from({ length: 8 }).map((_, i) => <span key={i} />)}</div>

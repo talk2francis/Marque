@@ -33,15 +33,15 @@ const KEY_ADDRESSES: Record<string, Array<[string, string]>> = {
   'Mainnet deployer key': [['Deployer', '0x2e010AaDFdFEbC2AdFCAFA5F83e9687ffA47C573']],
 }
 
-// The monthly cost, item by item (2 Nov). Amounts Marque cannot measure stay "not provided" until the operator adds
-// them from the invoice; a zero is shown only where the service is free by its own terms.
+// The monthly cost, item by item, in US dollars (2 Nov): the operator's own figures from its invoices and plans; a
+// zero is shown only where the service is free by its own terms or on a free plan.
 const COSTS: Array<[string, string, string]> = [
-  ['Server: one VPS (6 vCPU, 11 GiB RAM, 193 GB disk) running everything', 'not provided', "The operator's hosting invoice"],
-  ['Domain marque.trade', 'not provided', "The operator's registrar invoice"],
+  ['Server: one VPS (6 vCPU, 11 GiB RAM, 193 GB disk) running everything', '12.00', "The operator's hosting invoice"],
+  ['Domain marque.trade (about $6 a year)', '0.50', "The operator's registrar invoice, spread over 12 months"],
   ['Public BSC RPC endpoints (reads and writes)', '0', 'Public endpoints, no key or plan'],
-  ['NodeReal key (transfer history; MegaFuel gas sponsorship for settles)', 'not provided', "The plan on the operator's account"],
-  ['Archive RPC (replaying historical benchmarks only)', 'not provided', "The plan on the operator's account"],
-  ['Encrypted offsite backup (Google Drive)', 'not provided', "The operator's storage plan"],
+  ['NodeReal key (transfer history; MegaFuel gas sponsorship for settles)', '31.00', "The plan on the operator's account"],
+  ['Archive RPC (replaying historical benchmarks only)', '0', "A free plan on the operator's account"],
+  ['Encrypted offsite backup (Google Drive)', '1.99', "The operator's storage plan"],
   ['Source and CI (public GitHub repository, Actions)', '0', 'Free for public repositories'],
   ['Health alerts (Telegram bot)', '0', 'The Telegram Bot API is free'],
 ]
@@ -81,8 +81,8 @@ export default async function AdoptPage() {
           <div className={styles.tableWrap}>
             <table className={styles.table}>
               <thead><tr><th>Item</th><th>Per month</th><th>Source</th></tr></thead>
-              <tbody>{COSTS.map(([item, amount, source]) => <tr key={item}><td>{item}</td><td>{amount === '0' ? '$0' : amount}</td><td>{source}</td></tr>)}</tbody>
-              <tfoot><tr><td>Total</td><td>{COSTS.some(([, a]) => a === 'not provided') ? 'not provided' : 'see items'}</td><td>Not totalled until every amount is provided; a partial sum would read as the whole.</td></tr></tfoot>
+              <tbody>{COSTS.map(([item, amount, source]) => <tr key={item}><td>{item}</td><td>{amount === '0' ? '$0' : `$${amount}`}</td><td>{source}</td></tr>)}</tbody>
+              <tfoot><tr><td>Total</td><td>${COSTS.reduce((n, [, a]) => n + Number(a), 0).toFixed(2)}</td><td>About ${(COSTS.reduce((n, [, a]) => n + Number(a), 0) * 12).toFixed(0)} a year, before any change of plan or traffic.</td></tr></tfoot>
             </table>
           </div>
           <dl className={styles.facts}>

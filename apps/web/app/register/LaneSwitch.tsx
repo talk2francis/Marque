@@ -14,7 +14,7 @@ const OPTIONS: Array<{ lane: Lane; title: string; note: string }> = [
  * once and the hire sheet picks mainnet (real money) or testnet (test tokens); the two single-network options list one
  * network only, each with its own count of agents hireable now. Amounts are never blended.
  */
-export function LaneSwitch({ lane, onPick }: { lane: Lane; onPick: (l: Lane) => void }) {
+export function LaneSwitch({ lane, onPick, compact = false }: { lane: Lane; onPick: (l: Lane) => void; compact?: boolean }) {
   const [counts, setCounts] = useState<Record<Lane, number | null>>({ all: null, mainnet: null, practice: null })
   useEffect(() => {
     fetch('/api/v1/phase2/coverage', { cache: 'no-store' })
@@ -26,7 +26,7 @@ export function LaneSwitch({ lane, onPick }: { lane: Lane; onPick: (l: Lane) => 
       .catch(() => { /* the switch still works without counts */ })
   }, [])
   return (
-    <div className={styles.laneSwitch} role="radiogroup" aria-label="Network">
+    <div className={`${styles.laneSwitch} ${compact ? styles.laneCompact : ''}`} role="radiogroup" aria-label="Network">
       {OPTIONS.map((o) => (
         <button
           key={o.lane}
@@ -35,10 +35,11 @@ export function LaneSwitch({ lane, onPick }: { lane: Lane; onPick: (l: Lane) => 
           aria-checked={lane === o.lane}
           data-lane={o.lane}
           className={styles.laneOpt}
+          title={compact ? `${o.title}: ${o.note}` : undefined}
           onClick={() => onPick(o.lane)}
         >
-          <span className={styles.laneTitle}>{o.title}</span>
-          <span className={styles.laneNote}>{o.note}</span>
+          <span className={styles.laneTitle}>{compact && o.lane === 'all' ? 'All' : o.title}</span>
+          {compact ? null : <span className={styles.laneNote}>{o.note}</span>}
           {counts[o.lane] !== null ? <span className={styles.laneCount} aria-label={`${counts[o.lane]} hireable now`}>{counts[o.lane]}</span> : null}
         </button>
       ))}

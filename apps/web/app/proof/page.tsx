@@ -21,30 +21,40 @@ export default async function ProofPage() {
       <SiteHeader active="proof" />
       <main className={styles.page}>
         <header className={styles.head}>
-          <span className={styles.kicker}>Proof</span>
-          <h1 className="t-display">Every job, <em>who paid.</em></h1>
-          <p className={styles.lede}>Each hire made through Marque on BNB Chain&apos;s ERC-8183 escrow: who paid, what was delivered, what Marque&apos;s chain checks said, and whether the buyer acted on it. Team test jobs are listed and labelled, never counted.</p>
-          <p className={styles.lede}><b>Scope:</b> every job through Marque, on both networks. The <a href="/api/v1/phase2/stats">Set and Earn count</a> is narrower: outside, Marque-bound, funded, one hire per category per wallet. An outside wallet that also owns or runs an agent listed here is labelled so.</p>
-          <p className={styles.note}>Outside means not in Marque&apos;s published team list. It does not prove the buyer is unrelated.</p>
+          <span className={styles.kicker}>Proof · every job</span>
+          <h1 className={`t-display ${styles.title}`}>Every job, <em>who paid.</em></h1>
+          <p className={styles.lede}>Each hire made through Marque on BNB Chain&apos;s ERC-8183 escrow: who paid, what was delivered and what Marque&apos;s chain checks said. Team test jobs are listed and labelled, never counted.</p>
         </header>
         {!d ? <p className={styles.note} role="status">The table could not be read just now. Try again in a minute.</p> : (
           <>
-            <section className={styles.nets} aria-label="Per network">
-              {(['56', '97'] as const).map((c) => {
-                const t = d.totals[c]!
-                const decided = t.outside.checksDecided
-                return (
-                  <div key={c} className={styles.net}>
-                    <h2 className={styles.netTitle}>{NET[c]} <span>· {c}</span></h2>
-                    <dl className={styles.nums}>
-                      <div><dt><a href={`?chain=${c}&funder=outside#jobs`}>Outside wallets</a></dt><dd>{t.outside.wallets}</dd></div>
-                      <div><dt><a href={`?chain=${c}&funder=outside&state=settled#jobs`}>Outside jobs completed</a></dt><dd>{t.outside.settled}</dd></div>
-                      <div><dt><a href={`?chain=${c}&funder=outside&checked=1#jobs`}>Checks agreeing, outside jobs</a></dt><dd>{decided ? `${t.outside.checksAgreed} of ${decided}` : '0'}</dd></div>
-                      <div data-quiet=""><dt><a href={`?chain=${c}&funder=team#jobs`}>Team jobs (shown, not counted)</a></dt><dd>{t.team.jobs}</dd></div>
-                    </dl>
-                  </div>
-                )
-              })}
+            {/* The scorecard (2 Nov): one row per network, one column per measure, every figure a filter of the table. */}
+            <section className={styles.score} aria-label="Scorecard per network">
+              <table className={styles.scoreTable}>
+                <thead><tr><th scope="col"><span className="sr-only">Network</span></th><th scope="col">Outside wallets</th><th scope="col">Outside jobs completed</th><th scope="col">Chain checks agreeing</th><th scope="col">Team jobs <span>shown, not counted</span></th></tr></thead>
+                <tbody>
+                  {(['56', '97'] as const).map((c) => {
+                    const t = d.totals[c]!
+                    const decided = t.outside.checksDecided
+                    return (
+                      <tr key={c}>
+                        <th scope="row">{NET[c]}<span>chain {c}</span></th>
+                        <td><a href={`?chain=${c}&funder=outside#jobs`}>{t.outside.wallets}</a></td>
+                        <td><a href={`?chain=${c}&funder=outside&state=settled#jobs`}>{t.outside.settled}</a></td>
+                        <td>
+                          <a href={`?chain=${c}&funder=outside&checked=1#jobs`}>{decided ? <>{t.outside.checksAgreed}<small> of {decided}</small></> : '0'}</a>
+                          {decided ? <span className={styles.meter} aria-hidden="true"><i style={{ width: `${Math.round((t.outside.checksAgreed / decided) * 100)}%` }} /></span> : null}
+                        </td>
+                        <td data-quiet=""><a href={`?chain=${c}&funder=team#jobs`}>{t.team.jobs}</a></td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+              <details className={styles.scope}>
+                <summary>How this is counted</summary>
+                <p><b>Scope:</b> every job through Marque, on both networks. The <a href="/api/v1/phase2/stats">Set and Earn count</a> is narrower: outside, Marque-bound, funded, one hire per category per wallet. An outside wallet that also owns or runs an agent listed here is labelled so.</p>
+                <p>Outside means not in Marque&apos;s published team list. It does not prove the buyer is unrelated.</p>
+              </details>
             </section>
             <ProofTable rows={d.rows} />
             <p className={styles.note}>Read {new Date(d.measuredAt).toISOString().slice(0, 16).replace('T', ' ')} UTC. The same rows: <a href="/api/v1/proof">/api/v1/proof</a> · <a href="/api/v1/proof?format=csv" download>CSV</a>. Counted figures equal <a href="/api/v1/phase2/stats">/api/v1/phase2/stats</a>. Each row&apos;s escrow link opens the contract on BscScan, where getJob(job id) returns the record.</p>

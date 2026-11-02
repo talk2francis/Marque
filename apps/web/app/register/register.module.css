@@ -1049,3 +1049,42 @@ a.introBack:hover { color: var(--fg); }
 /* Ready view (2 Nov): agents with no test result start under their own heading, after those that passed. */
 .untestedHead { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; margin-top: var(--s4); padding: 14px 2px 10px; border-top: 1px solid var(--line); font-size: 15px; }
 .untestedHead span { font-size: 13px; color: var(--fg-faint); }
+
+/* ---------- The top deck (2 Nov): one command bar, the categories, one quiet results line ---------- */
+/* The network control rides in the command bar: three short segments at the bar's height, counts beside them. */
+.laneCompact { margin: 0; padding: 3px; gap: 2px; border-radius: var(--r-sm); background: var(--ground-sunk); border-color: var(--line); min-height: 46px; align-items: stretch; }
+.laneCompact .laneOpt { align-items: center; padding: 0 12px; border-radius: var(--r-xs); font-size: var(--size-control); }
+.laneCompact .laneOpt[aria-checked='true'] { background: var(--ground-raised); border-color: transparent; box-shadow: var(--elev-1); }
+.laneCompact .laneOpt[data-lane='practice'][aria-checked='true'] { border-style: solid; }
+.laneCompact .laneTitle { font-weight: 500; }
+.laneCompact .laneCount { background: transparent; padding: 0; color: var(--fg-faint); font-size: 12px; }
+@media (max-width: 520px) {
+  .laneCompact { display: flex; width: 100%; }
+  .laneCompact .laneOpt { flex: 1 1 0; flex-direction: row; justify-content: center; gap: 6px; }
+}
+.utility { border-bottom: 1px solid var(--line); margin-top: var(--s3); }
+.utilityRight { display: inline-flex; align-items: center; gap: var(--s3); }
+.showWrap { display: inline-flex; align-items: center; gap: var(--s2); }
+.showSelect {
+  font: inherit; font-size: var(--size-control); font-weight: 500; color: var(--fg);
+  min-height: 34px; padding: 0 28px 0 10px;
+  background: transparent; border: 1px solid var(--line); border-radius: var(--r-sm); cursor: pointer;
+}
+.showSelect:hover { border-color: var(--fg-faint); }
+.showSelect:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
+.marketNotes { margin: var(--s5) 0 0; padding-top: var(--s3); border-top: 1px solid var(--line); display: grid; gap: 4px; }
+.marketNotes a { color: var(--fg-soft); }
+.ladderRungs { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+@media (max-width: 720px) { .ladderRungs { grid-template-columns: repeat(6, minmax(108px, 1fr)); } }
+/* The hero's proof numbers: figure over label, hairline between, so the title block carries the market's size. */
+.introStats { display: flex; flex-wrap: wrap; gap: 0; margin: var(--s3) 0 0; }
+.introStats div { display: flex; flex-direction: column-reverse; gap: 2px; padding: 0 var(--s4); border-left: 1px solid var(--line); }
+.introStats div:first-child { padding-left: 0; border-left: 0; }
+.introStats dd { margin: 0; font-size: clamp(22px, 2.2vw, 28px); font-weight: 500; letter-spacing: -0.02em; line-height: 1.1; color: var(--fg); font-variant-numeric: tabular-nums; }
+.introStats dt { font-size: var(--size-caption); color: var(--fg-faint); white-space: nowrap; }
+@media (max-width: 560px) {
+  .introStats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s3) 0; }
+  .introStats div:nth-child(odd) { padding-left: 0; border-left: 0; }
+}
+/* Phones (2 Nov top-deck pass): the strip is a band, not a second hero, so the search sits near the first screen. */
+@media (max-width: 760px) { .introArt { aspect-ratio: 3.4 / 1; max-height: 22svh; } }

@@ -191,6 +191,10 @@ export async function dueByTier(limit: number, deadCap: number, fpIds: readonly 
         -- probed services used to rank after every 12-hour re-probe and got no slot at all (T2: 0 of 500 per cycle),
         -- so a new agent was never checked, never quoted and never listed.
         when ps.last_checked_at is null and s.first_seen > now() - interval '48 hours' then 2
+        -- Never probed, on the practice lane or classified into a category (2 Nov): 1,565 of 1,630 testnet services had
+        -- never been probed, so testnet builds were never quoted and never listed. A small, finite backlog.
+        when ps.last_checked_at is null and (ps.agent_id like '97:%'
+          or exists (select 1 from agent_category c where c.agent_id = ps.agent_id and c.category <> 'unclassified')) then 2
         when ps.last_liveness in ('live', 'discovered', 'unbound', 'bad_schema') then 3
         when ps.last_checked_at is null then 4
         else 5

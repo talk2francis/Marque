@@ -2,11 +2,10 @@
 
 import { Fragment, useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
-import { EmptyState, Limits } from '@marque/ui'
+import { EmptyState } from '@marque/ui'
 import type { FailedGroupRow, InitialMarket, MarketFacetCounts } from './initial'
 import { track } from '../../lib/track'
 import { MarketToolbar } from './MarketToolbar'
-import { LaneSwitch } from './LaneSwitch'
 import { MarketList, UntestedHead } from './MarketList'
 import { RegisterTable } from './RegisterTable'
 import { AgentCard } from '../_components/market/AgentCard'
@@ -302,26 +301,63 @@ export function Marketplace({ category: fixedCategory, initial }: { category?: s
 
   return (
     <>
-      <LaneSwitch lane={state.lane} onPick={(l) => patchFilter({ lane: l })} />
+      {/* The top deck (2 Nov): one command bar (search, network, filters, sort, view), the categories, then one quiet
+          results line with the view picker. Methodology and notes sit below the results, not above them. */}
+      {state.tab !== 'registry' ? (
+        <MarketToolbar
+          state={state}
+          patch={patch}
+          patchFilter={patchFilter}
+          fixedCategory={fixedCategory}
+          resultsId={resultsId}
+          facets={facets}
+          total={total}
+        />
+      ) : null}
       {state.lane === 'practice' ? <p className={styles.laneBanner}>BSC testnet · test tokens, no real value. Practice hires count for Set and Earn.</p> : null}
-      <EvidenceLadder counts={ladder} active={state.tab === 'listed' ? state.stage ?? 'listed' : null} onPick={pickRung}
-        network={state.lane === 'practice' ? 'BSC testnet' : state.lane === 'mainnet' ? 'BSC mainnet' : 'BNB Chain'} />
-      <div className={styles.marketTabs} role="tablist" aria-label="What to show">
-        {TABS.map((t) => (
-          <button
-            key={t.value}
-            type="button"
-            role="tab"
-            aria-selected={state.tab === t.value}
-            aria-controls={resultsId}
-            className={styles.marketTab}
-            onClick={() => pickTab(t.value)}
-          >
-            {t.label}
-          </button>
-        ))}
+
+      <div className={styles.utility}>
+        <p className={styles.utilityCount} role="status" aria-live="polite">
+          {state.tab === 'registry' ? <>Registered agents that do not answer, with the measured reason</> : total === null ? (
+            loading || !ready ? 'Counting agents…' : 'Result count unavailable'
+          ) : (
+            <>
+              {/* The server render already holds the default view's count, so a reader without scripts sees it too (2 Nov). */}
+              <strong>{total.toLocaleString()}</strong> {total === 1 ? 'agent' : 'agents'}
+              {state.tab === 'ready' ? ' ready to hire' : ''}
+              {ready && ago ? <span className={styles.utilityDot}> · measured {ago}</span> : null}
+            </>
+          )}
+        </p>
+        <div className={styles.utilityRight}>
+          <label className={styles.showWrap}>
+            <span className={styles.sortLabel}>Show</span>
+            <select className={styles.showSelect} value={state.tab} onChange={(e) => pickTab(e.target.value as MarketTab)} aria-controls={resultsId} aria-label="What to show">
+              {TABS.map((t) => <option key={t.value} value={t.value} title={t.hint}>{t.label}</option>)}
+            </select>
+          </label>
+          {state.tab !== 'registry' ? (
+            <button type="button" className={styles.utilityInfo} aria-expanded={rankInfo} onClick={() => setRankInfo((v) => !v)}>
+              Ranked by proof
+              <span className={styles.utilityInfoMark} aria-hidden="true">i</span>
+            </button>
+          ) : null}
+        </div>
       </div>
-      {tabHint ? <p className={styles.marketTabHint}>{tabHint}.</p> : null}
+
+      {rankInfo && state.tab !== 'registry' && (
+        <p className={styles.utilityNote}>
+          Agents holding a Marque Warrant (passed the published test in the last 14 days) rank first, then agents whose
+          answers agreed with BNB Chain, then agents that delivered paid work, then agents that answer. Agents pulled
+          for safety are listed apart with the reason. Identities one operator registered against one endpoint are
+          grouped into one row; that grouping is an inference, and distinct addresses do not prove independent people.
+        </p>
+      )}
+      {tabHint && state.tab !== 'ready' && state.tab !== 'registry' ? <p className={styles.marketTabHint}>{tabHint}.</p> : null}
+      {state.tab === 'listed' ? (
+        <EvidenceLadder counts={ladder} active={state.stage ?? 'listed'} onPick={pickRung}
+          network={state.lane === 'practice' ? 'BSC testnet' : state.lane === 'mainnet' ? 'BSC mainnet' : 'BNB Chain'} />
+      ) : null}
 
       {state.tab === 'registry' ? (
         <div id={resultsId} className={styles.results}>
@@ -329,64 +365,6 @@ export function Marketplace({ category: fixedCategory, initial }: { category?: s
         </div>
       ) : (
       <>
-      <MarketToolbar
-        state={state}
-        patch={patch}
-        patchFilter={patchFilter}
-        fixedCategory={fixedCategory}
-        resultsId={resultsId}
-        facets={facets}
-        total={total}
-      />
-
-      {/* Result utility bar: what this set is, and how it was ranked. */}
-      <UNote className={styles.uNote} />
-      <div className={styles.utility}>
-        <p className={styles.utilityCount} role="status" aria-live="polite">
-          {/* The server render already holds the default view's count, so a reader without scripts sees it too (2 Nov). */}
-          {total === null ? (
-            loading || !ready ? 'Counting agents…' : 'Result count unavailable'
-          ) : (
-            <>
-              <strong>{total.toLocaleString()}</strong> {total === 1 ? 'agent' : 'agents'}
-            </>
-          )}
-          {ready && ago && <span className={styles.utilityDot}> · Measured {ago}</span>}
-          <span className={styles.utilityDot}> · Operator-deduplicated</span>
-          {state.tab === 'ready' ? <span className={styles.utilityDot}> · Passed their test first, then not yet tested; agents that failed are listed apart below</span> : null}
-        </p>
-        <button
-          type="button"
-          className={styles.utilityInfo}
-          aria-expanded={rankInfo}
-          onClick={() => setRankInfo((v) => !v)}
-        >
-          Qualification-first ranking
-          <span className={styles.utilityInfoMark} aria-hidden="true">i</span>
-        </button>
-      </div>
-
-      {rankInfo && (
-        <p className={styles.utilityNote}>
-          Qualified agents rank first, then agents that were tested and did not qualify, then agents that are
-          merely callable. Duplicate identities registered by the same operator against the same endpoint are
-          grouped into one row. This owner/endpoint grouping is an inference; distinct addresses do not prove independent people or funding.
-        </p>
-      )}
-
-      <p className={styles.trust}>
-        <span className={styles.trustDot} aria-hidden="true" />
-        <span>
-          <b>Try free</b> runs Marque reference agents with no wallet.
-        </span>
-        <Link className={styles.trustLink} href="/standard">
-          How Marque tests agents
-        </Link>
-      </p>
-      <Limits className={styles.trustLimits}>
-        <p>Try free is available for supported Marque reference services. Outside-agent task calls are not assumed free. No wallet or signature is needed for a supported preview.</p>
-      </Limits>
-
       {error && (
         <div className={styles.error} role="alert">
           <span>{error}</span>
@@ -496,6 +474,11 @@ export function Marketplace({ category: fixedCategory, initial }: { category?: s
           </button>
         </div>
       </nav>
+
+      <div className={styles.marketNotes}>
+        <UNote className={styles.uNote} />
+        <p className={styles.uNote}><b>Try free</b> runs Marque reference agents with no wallet; outside agents&apos; task calls are not assumed free. <Link href="/standard">How Marque tests agents</Link></p>
+      </div>
 
       {state.tab === 'ready' && failedGroup.length ? (
         <details className={styles.failedGroup}>

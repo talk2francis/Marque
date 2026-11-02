@@ -12,6 +12,7 @@ import {
 } from './market-model'
 import { activeFilters, CLEARED_FILTERS, type MarketState } from './market-url'
 import { MarketFilters } from './MarketFilters'
+import { LaneSwitch } from './LaneSwitch'
 import type { MarketFacetCounts } from './initial'
 import styles from './register.module.css'
 
@@ -113,6 +114,8 @@ export function MarketToolbar({
             />
           </div>
 
+          {/* The network sits in the bar itself, beside search (2 Nov top-deck pass). */}
+          <LaneSwitch compact lane={state.lane} onPick={(l) => patchFilter({ lane: l })} />
           <MarketFilters state={state} patch={patchFilter} activeCount={chips.length} facets={facets ?? null} total={total} />
 
           <label className={styles.sortWrap}>
