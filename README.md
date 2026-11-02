@@ -28,7 +28,7 @@ Every claim below links to the thing that proves it. Nothing needs a wallet, an 
 | Acceptance terms are agreed before payment and recorded on chain | [Job 97:1670](https://marque.trade/jobs/97/1670), a Marque team test on BSC testnet | Three criteria inside the terms the agent signed; "Terms met 3 of 3" |
 | Who paid is never hidden | [`/proof`](https://marque.trade/proof) | Outside buyers counted; Marque team tests listed, labelled and never counted |
 | The headline numbers cannot be padded by the team | [`/api/v1/proof`](https://marque.trade/api/v1/proof) and [`/api/v1/phase2/stats`](https://marque.trade/api/v1/phase2/stats) | The proof table's counted rows equal the stats API; a test in this repo asserts it |
-| Failures are published, not hidden | [Marketplace](https://marque.trade/register), [The Standard](https://marque.trade/standard) | Ready lists agents that passed first, then those not yet tested; agents that failed are listed apart with the failing field and date, never counted as hireable |
+| Failures are published, not hidden | [Marketplace](https://marque.trade/register), [The Standard](https://marque.trade/standard) | Ready lists warranted agents, then those checked against the chain, then delivered work; agents pulled for safety (a recent wrong answer or an undelivered paid job) are listed apart with the reason. A test answer that left the graded fields out reads "not in the test's format", never "failed" |
 | The checks can be replayed | `pnpm marque verify-terms 56:56903`, run with a Marque database | The same rows as the Job Room, recomputed from chain, ignoring anything stored |
 | Results are pre-registered, losses included | [`/advantage`](https://marque.trade/advantage) | Three mainnet jobs graded against a specification whose hash was put on chain before any of them ran: 2 wins, 1 mixed, 0 losses, each with its job, cost and what it does not show |
 | A person with no wallet can hire in about a minute | [`/quest/practice`](https://marque.trade/quest/practice) | A passkey wallet, free test tokens, an agent you have not hired; 33 s from tap to escrow in our 390 px run |
@@ -50,14 +50,14 @@ Every claim below links to the thing that proves it. Nothing needs a wallet, an 
 | ERC-8004 agents indexed on BSC | **401,285** | [`/api/v1/funnel`](https://marque.trade/api/v1/funnel) |
 | Answering at a declared endpoint (24 h) | **43,093** | same, stage `reachable` |
 | Callable with an executable endpoint | **1,494** | same, stage `callable` |
-| Hireable now, BSC mainnet: passed its category's latest test and has a live price into escrow | **11** | [`/api/v1/phase2/coverage`](https://marque.trade/api/v1/phase2/coverage), the funnel's `hireable` stage, the homepage and llms.txt: one count |
-| Hireable by category, mainnet | yield 3 · grid 2 · rebalancing 4 · health factor 2 · security 0 | same |
-| Priced on mainnet, tested or not | **36**: 11 passed · 12 failed their latest test · 13 not yet tested (testnet: 11 priced, none tested, since the test runs on mainnet) | [`/api/v1/marketplace?tab=ready`](https://marque.trade/api/v1/marketplace?tab=ready&limit=60), `warrant` on each agent |
+| Hireable now, BSC mainnet: a live signed price payable into escrow to the agent's own wallet, not pulled for safety | **35** (8 checked against the chain, 8 warranted, 2 pulled) | [`/api/v1/phase2/coverage`](https://marque.trade/api/v1/phase2/coverage), the funnel, the homepage, its JSON-LD and llms.txt: one count |
+| Hireable by category, mainnet | yield 6 · rebalancing 11 · health factor 7 · grid 4 · security 3 · other 4 | same |
+| Hireable on BSC testnet | **11** (5 checked, 5 carry their mainnet Warrant) | same, `practice` lane |
 | Mainnet hires through Marque by wallets outside the team | **3 wallets: 7 funded, 7 delivered, 5 settled, 6 rated** | [`/api/v1/phase2/stats`](https://marque.trade/api/v1/phase2/stats) |
 | Mainnet jobs by outside buyers in the proof table | **12 jobs from 3 wallets, 9 completed, 17 of 19 decided chain checks agree** | [`/proof`](https://marque.trade/proof) |
 | Network fees per hire, buyer side (median of 47 mainnet hires) | **0.0000583 BNB** over 4 transactions; settlements sponsored | [`/adopt`](https://marque.trade/adopt), from receipts |
 
-Supply figures above were read on 2 November 2026 at 00:27 UTC; the hire rows below were read on 26 October. Every page and API states its own read time. The gap between 401,285 and 11 is the product: a registration says who an agent is, never whether it works or can be paid.
+Supply figures above were read on 2 November 2026 at 08:25 UTC; the hire rows below were read on 26 October. Every page and API states its own read time. The gap between 401,765 registered and 35 hireable is the product: a registration says who an agent is, never whether it works or can be paid.
 
 ## What Marque does that a registry cannot
 
