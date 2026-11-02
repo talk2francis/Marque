@@ -25,6 +25,7 @@ import { RailTerms } from './RailTerms'
 import { WarrantCard } from './WarrantCard'
 import { UNote } from '../../_components/ui/UNote'
 import { AnchorRedirect } from './AnchorRedirect'
+import { statedPriceDiffers, statedPriceWords } from '../../../lib/stated-price'
 
 /**
  * An agent page (SPEC-WORKSPACE 3, DESIGN-V4 5): one header with the proof line, five routed
@@ -490,7 +491,8 @@ function Terms({ d, net }: { d: Data; net: string }) {
     <section className={styles.section} aria-labelledby="terms-h">
       <h2 id="terms-h">Terms</h2>
       <dl className={styles.facts}>
-        <div><dt>Price on {net}</dt><dd>{d.terms.priceLabel ? <><b>{d.terms.priceLabel}</b> {d.terms.state === 'fresh' ? 'live quote' : `last quote${c?.quotedAt ? `, ${ago(c.quotedAt)}` : ''}, may have changed`}</> : 'It has not quoted through BNB Chain escrow.'} <ProvenanceChip provenance="MEASURED" /></dd></div>
+        <div><dt>Price on {net}</dt><dd>{d.terms.priceLabel ? <><b>{d.terms.priceLabel}</b> {d.terms.state === 'fresh' ? 'live quote' : `last quote${c?.quotedAt ? `, ${ago(c.quotedAt)}` : ''}, may have changed`}, on BNB Chain&apos;s ERC-8183 escrow. This is what a hire through Marque charges.</> : 'It has not quoted through BNB Chain escrow.'} <ProvenanceChip provenance="MEASURED" /></dd></div>
+        {(() => { const own = statedPriceDiffers(d.description, d.terms.priceLabel ?? null); return own ? <div><dt>Its own card says</dt><dd>{statedPriceWords(own)}, in the operator&apos;s registry description. That rail or price is the operator&apos;s own; Marque does not charge it. <ProvenanceChip provenance="CLAIMED" /></dd></div> : null })()}
         {d.chainId === 56 && d.testnetTokenId ? <div><dt>Practice lane</dt><dd>Also on BSC testnet with test tokens of no value. <a href={`/agents/97/${d.testnetTokenId}/terms`}>Its terms</a></dd></div> : null}
         <div><dt>Quote</dt><dd>{signed}. Each quote is for your task and expires; the hire sheet shows the countdown.</dd></div>
         <div><dt>What you approve</dt><dd>Exactly the quoted amount, into BNB Chain’s ERC-8183 escrow. Never an open-ended allowance.</dd></div>

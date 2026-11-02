@@ -13,6 +13,7 @@ import {
   profileHref, tryHref, warrantIsStale, type MarketRow,
 } from '../../register/market-model'
 import styles from './AgentCard.module.css'
+import { statedPriceDiffers, statedPriceWords } from '../../../lib/stated-price'
 
 /**
  * The marketplace card (DESIGN-SYSTEM.md 8.3, simplified 28 Sep). Two axes, never
@@ -48,6 +49,8 @@ export function AgentCard({ a, compare, base = '', variant = 'default' }: {
   const classified = a.category && a.category !== 'unclassified'
   const cat = classified ? CATEGORY_LABEL[a.category!] ?? a.category! : 'Other'
   const blurb = describe(a)
+  // Price truth (2 Nov): the agent's own stated price or rail, when it differs from the quote the hire will charge.
+  const own = statedPriceDiffers(a.identity.description, terms.priceLabel ?? null)
   const verified = a.track.verified
   const delivery = deliveryWords(a.track.delivery.medianSeconds)
   const stale = w.status === 'warranted' && warrantIsStale(w.date)
@@ -118,6 +121,7 @@ export function AgentCard({ a, compare, base = '', variant = 'default' }: {
           <dt>Price</dt>
           <dd className={terms.state === 'fresh' ? styles.live : styles.claimed} data-terms={terms.state}>{terms.priceLabel ?? declared ?? 'No current price'}</dd>
           <dd className={styles.src}>{quoted ? <TermsLine terms={terms} now={now} refresh={refresh} refreshing={refreshing} short /> : declared ? 'declared, not quoted' : 'not quoted yet'}</dd>
+          {own ? <dd className={styles.src} title="What the agent's own registry description says. The hire charges the live quote on BNB Chain's ERC-8183 escrow.">Its own card: {statedPriceWords(own)}</dd> : null}
         </div>
         <div>
           <dt>Delivers</dt>

@@ -3,6 +3,7 @@ import { SiteHeader, SiteFooter } from '../_components/SiteHeader'
 import { QuestChecker } from './QuestIslands'
 import { QuestStrip } from './QuestStrip'
 import { QuestHome } from './QuestHome'
+import { SetAndEarnShelf } from '../_components/SetAndEarnShelf'
 import styles from './quest.module.css'
 
 export const metadata = {
@@ -25,6 +26,7 @@ export default function QuestPage() {
           <QuestChecker />
         </header>
         <QuestHome />
+        <SetAndEarnShelf />
       </main>
       <SiteFooter />
     </>

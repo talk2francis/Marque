@@ -6,6 +6,7 @@ import { unmetDemand } from '../../lib/forge-signals'
 import { redirect } from 'next/navigation'
 import { LegacyWorkspaceRedirect } from './LegacyWorkspaceRedirect'
 import styles from './forge.module.css'
+import { SetAndEarnShelf } from '../_components/SetAndEarnShelf'
 
 export const dynamic = 'force-dynamic'
 export const metadata = {
@@ -82,6 +83,8 @@ export default async function ForgePage({ searchParams }: { searchParams: Promis
         </section>
         <p className={styles.builderNote}>Already have an agent? <a href="/builders/my-agents">Open your agent workspace</a> to follow its jobs, checks and profile.</p>
         <p className={`${styles.fine} ${styles.afterDoors}`}>Registered from a Marque Pass or another wallet? <a href="/builders/link">Link your seller&apos;s wallet</a> so buyers accept its quotes.</p>
+
+        <div className={styles.section}><SetAndEarnShelf id="built-during-forge" /></div>
 
         <section className={styles.section} aria-labelledby="demand">
           <h2 id="demand">What buyers asked for this week that few agents could price</h2>
