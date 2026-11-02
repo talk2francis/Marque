@@ -98,20 +98,23 @@ export async function tapeItems(limit = 14): Promise<TapeItem[]> {
 export interface CategoryTile {
   measuredAt: string
   category: string
-  /** Agents that passed their category's test and have a live price on BSC mainnet (supplyNow): the tile's number. */
+  /** Hireable on BSC mainnet (supplyNow): a live signed price, not pulled. The tile's number. */
   hireable: number
-  /** Distinct recorded owners of those agents. */
+  /** Of those: checked against the chain in the last 30 days, and holding a Marque Warrant (a test pass in 14 days). */
+  checked: number
+  warranted: number
+  /** Distinct recorded owners of the hireable agents. */
   operators: number
   cheapest: string | null
   bestRating: { stars: number; count: number; agent: string } | null
-  /** Agents with a live price on each network, tested or not; never added together. */
+  /** Priced on mainnet (hireable plus pulled), and hireable on testnet; never added together. */
   pricedMainnet: number
   pricedTestnet: number
 }
 
 /**
- * Per quest category, from the one supply count (supplyNow): agents that passed and have a live price on mainnet,
- * the agents priced on each network beside it, the cheapest live mainnet quote and the best verified rating.
+ * Per quest category, from the one supply count (supplyNow): hireable, checked and warranted on mainnet, the agents
+ * hireable on testnet beside it (never added), the cheapest live mainnet quote and the best verified rating.
  */
 export async function categoryTiles(ready: MarketRow[], supply: Awaited<ReturnType<typeof marketplaceAgents>>['supply'], measuredAt: string, mainnet: SupplyNow, testnet: SupplyNow | null): Promise<CategoryTile[]> {
   return QUEST_CATEGORIES.map((category) => {
@@ -119,14 +122,16 @@ export async function categoryTiles(ready: MarketRow[], supply: Awaited<ReturnTy
     const m = mainnet.byCategory[category]
     const cheapest = c?.cheapest ? `${formatAmount(c.cheapest.priceRaw, c.cheapest.decimals)} ${c.cheapest.token}` : null
     const rated = ready
-      .filter((r) => r.category === category && r.warrant.status === 'warranted' && r.track.verified.averageStars !== null)
+      .filter((r) => r.category === category && r.track.verified.averageStars !== null)
       .sort((a, b) => (b.track.verified.averageStars ?? 0) - (a.track.verified.averageStars ?? 0))[0]
     return {
       measuredAt, category, cheapest,
-      hireable: m?.passed ?? 0,
-      operators: m?.passedOperators ?? 0,
+      hireable: m?.hireable ?? 0,
+      checked: m?.checked ?? 0,
+      warranted: m?.warranted ?? 0,
+      operators: m?.operators ?? 0,
       pricedMainnet: m?.priced ?? 0,
-      pricedTestnet: testnet?.byCategory[category]?.priced ?? 0,
+      pricedTestnet: testnet?.byCategory[category]?.hireable ?? 0,
       bestRating: rated ? { stars: rated.track.verified.averageStars!, count: rated.track.verified.count, agent: rated.name } : null,
     }
   })
@@ -144,8 +149,8 @@ export interface FunnelLine extends SupplyCount { registered: number | null; ans
 export async function funnelLine(supply: SupplyNow): Promise<FunnelLine> {
   const stages = await funnel(56).catch(() => null)
   const stage = (k: string) => stages?.find((s) => s.stage === k)?.count ?? null
-  const { priced, passed, failed, notYetTested, measuredAt } = supply
-  return { registered: stage('registered_bsc'), answering: stage('reachable'), priced, passed, failed, notYetTested, measuredAt }
+  const { priced, hireable, pulled, checked, warranted, delivered, measuredAt } = supply
+  return { registered: stage('registered_bsc'), answering: stage('reachable'), priced, hireable, pulled, checked, warranted, delivered, measuredAt }
 }
 
 export interface PassFail {

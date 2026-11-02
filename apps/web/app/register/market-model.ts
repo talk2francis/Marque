@@ -67,6 +67,16 @@ export interface MarketRow {
     testId: string | null
     date: string | null
     failedField: string | null
+    /** The latest run answered without the test's fields: counts as untested, never as failed. */
+    format?: boolean
+    /** Its category's test asks about a different job than the one it describes. */
+    noFit?: boolean
+  }
+  /** V4.4 standing (lib/standing.ts): pulled for safety, checked against the chain, warranted in the last 14 days. */
+  standing?: {
+    pulled: { reason: 'undelivered' | 'wrong_answer'; text: string; at: string; ref: string | null } | null
+    checked: { at: string; via: 'job' | 'check'; ref: string; onMainnet: boolean } | null
+    warranted: { at: string; testId: string; onMainnet: boolean } | null
   }
   qual: 'warranted' | 'failed' | 'callable' | 'unbound' | 'dead'
   previewable: boolean
@@ -232,7 +242,7 @@ export function quotedPriceOf(a: MarketRow): { value: number; unit: string } | n
 
 /** Can a buyer's wallet hire this exact agent through ERC-8183 escrow right now? */
 export function isHireable(a: MarketRow): boolean {
-  return a.commerce.state === 'hireable' || a.commerce.state === 'settleable'
+  return (a.commerce.state === 'hireable' || a.commerce.state === 'settleable') && !a.standing?.pulled
 }
 
 /** Why Hire is not offered, in plain words. */
@@ -297,6 +307,16 @@ export interface QualView {
 export function qualView(a: MarketRow): QualView {
   const day = isoDay(a.warrant.date)
   const cat = a.category && a.category !== 'unclassified' ? (CATEGORY_LABEL[a.category] ?? a.category) : null
+  const s = a.standing
+
+  if (s?.pulled) return {
+    tone: 'failed', label: 'Pulled for safety', evidence: s.pulled.text, date: isoDay(s.pulled.at), flag: null, detail: s.pulled.ref,
+    title: 'Taken out of the hireable count: a paid job left undelivered, or a chain fact stated wrongly, in the last 14 days. It returns when a later check agrees.',
+  }
+  if (s?.warranted && a.warrant.status !== 'warranted') return {
+    tone: 'qualified', label: 'Warranted', evidence: `Test passed on mainnet · ${s.warranted.testId}`, date: isoDay(s.warranted.at), flag: null, detail: s.warranted.testId,
+    title: 'Its mainnet identity (same owner, same endpoint) passed Marque’s published test; this testnet copy carries that result.',
+  }
 
   if (a.warrant.status === 'warranted') {
     const stale = warrantIsStale(a.warrant.date)
@@ -329,6 +349,23 @@ export function qualView(a: MarketRow): QualView {
         a.warrant.failedField ? `, failed field: ${a.warrant.failedField}` : ''
       }. The result is kept, not hidden.`,
     }
+  }
+
+  if (s?.checked) return {
+    tone: 'qualified', label: 'Checked against the chain',
+    evidence: `${s.checked.via === 'job' ? 'A paid answer' : 'Its answer to Marque’s check'} agreed with BNB Chain${s.checked.onMainnet ? ' (on mainnet)' : ''}`,
+    date: isoDay(s.checked.at), flag: null, detail: s.checked.via === 'job' ? `job ${s.checked.ref}` : null,
+    title: 'The chain facts in one of its answers, from a paid job or Marque’s daily read-only check call, agreed with BNB Chain in the last 30 days. Not a test pass.',
+  }
+
+  if (a.warrant.noFit) return {
+    tone: 'callable', label: 'Not yet proven', evidence: 'No Marque test fits this agent yet', date: null, flag: null, detail: null,
+    title: `Its category’s published test${a.warrant.testId ? ` (${a.warrant.testId})` : ''} asks about a different job than the one this agent describes, so its result says nothing about it.`,
+  }
+
+  if (a.warrant.format) return {
+    tone: 'callable', label: 'Not yet proven', evidence: 'Answer not in the test’s format', date: day, flag: null, detail: a.warrant.testId,
+    title: `Its answer to Marque’s published test${a.warrant.testId ? ` ${a.warrant.testId}` : ''} did not use the test’s fields, so nothing could be graded. That counts as untested, not as a wrong answer.`,
   }
 
   if (a.liveness === 'discovered' || a.liveness === 'reachable') return {

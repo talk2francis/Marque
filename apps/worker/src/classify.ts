@@ -1,5 +1,5 @@
 /** The classifier worker. Deterministic pass, then an optional semantic pass. */
-import { classifyKeywordPass, classifySemanticPass, reclassifyUnclassified } from '@marque/registry'
+import { applyStatedCategories, classifyKeywordPass, classifySemanticPass, reclassifyUnclassified } from '@marque/registry'
 import { closeDb } from '@marque/db'
 
 const ONCE = process.argv.includes('--once')
@@ -46,6 +46,9 @@ async function main(): Promise<void> {
       // Labels written before an agent's metadata arrived are looked at again.
       const rl = await reclassifyUnclassified(LIMIT, { staleOnly: true })
       if (rl.classified) log('relabel', { ...rl })
+      // A category the agent states about itself replaces a keyword guess.
+      const st = await applyStatedCategories()
+      if (st.applied) log('stated_category', { ...st })
       if (r.examined === 0 && !ONCE) await sleep(CYCLE_MS)
     } catch (err) {
       log('pass_error', { error: err instanceof Error ? err.message : String(err) })

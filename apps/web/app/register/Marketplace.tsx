@@ -297,7 +297,8 @@ export function Marketplace({ category: fixedCategory, initial }: { category?: s
   const pickRung = (stage: MarketStageKey | null) => patchFilter({ tab: 'listed', stage })
 
   // Ready, in the recommended order, lists agents that passed first; the untested start under their own heading (2 Nov).
-  const untestedFrom = state.tab === 'ready' && state.sort === 'best' ? rows.findIndex((r) => r.warrant.status === 'untested') : -1
+  // The divider sits where the proven agents (a Warrant, or an answer checked against the chain) end.
+  const untestedFrom = state.tab === 'ready' && state.sort === 'best' ? rows.findIndex((r) => !r.standing?.warranted && !r.standing?.checked && r.warrant.status !== 'warranted') : -1
 
   return (
     <>
@@ -498,13 +499,13 @@ export function Marketplace({ category: fixedCategory, initial }: { category?: s
 
       {state.tab === 'ready' && failedGroup.length ? (
         <details className={styles.failedGroup}>
-          <summary><b>Listed, failed its latest test</b> <span>{failedGroup.length} {failedGroup.length === 1 ? 'agent' : 'agents'}, hireable but not counted above</span></summary>
-          <p className={styles.failedNote}>These agents take paid jobs, but their answers did not pass Marque&apos;s published test for their category. They are listed so nothing is hidden; the Ready count above leaves them out.</p>
+          <summary><b>Pulled for safety</b> <span>{failedGroup.length} {failedGroup.length === 1 ? 'agent' : 'agents'}, priced but not counted above</span></summary>
+          <p className={styles.failedNote}>Only safety takes a priced agent out of the hireable count: its latest paid job closed without a delivery, or it stated a chain fact outside tolerance, in the last 14 days. An agent returns as soon as a later check agrees. A missing field or an answer in its own format never pulls an agent.</p>
           <ul>
             {failedGroup.map((f) => (
               <li key={f.agentId}>
                 <a href={f.agentId.startsWith('97:') ? `/agents/97/${f.agentId.split(':').pop()}` : `/agents/56/${f.agentId.split(':').pop()}`}>{f.name}</a>
-                <span>{f.testId ? `Failed ${f.testId}` : 'Failed its test'}{f.failedField ? `: ${f.failedField.replace(/([a-z])([A-Z])/g, '$1 $2').toLowerCase()} did not match` : ''}{f.date ? `, ${new Date(f.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' })}` : ''}</span>
+                <span>{f.reason ?? 'Pulled for safety'}{f.identities && f.identities > 1 ? ` (${f.identities} identities, one operator and endpoint)` : ''}</span>
               </li>
             ))}
           </ul>

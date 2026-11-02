@@ -8,6 +8,11 @@ import styles from './agent-page.module.css'
 const RETEST_MS = 72 * 3_600_000
 const n = (v: string) => (/^-?\d+(\.\d+)?$/.test(v) && Math.abs(Number(v)) >= 1000 ? Number(v).toLocaleString('en-US') : v)
 
+/** A failed run that stated no wrong value (V4.4): every failing field left out, or no gradable answer. */
+export function isFormatMiss(test: Pick<StoreTest, 'pass' | 'diffs'>): boolean {
+  return !test.pass && !test.diffs.some((a) => !a.pass && a.actual !== '' && !/^\((not |no )/.test(a.actual))
+}
+
 /**
  * The Warrant card (SPEC-WORKSPACE 3.3, DESIGN-V4 5): a certificate for a passed MCS test, the one
  * ceremonial surface on an agent page. A failed run renders the same frame as a plain Test report
@@ -48,6 +53,27 @@ export function WarrantCard({ test, category, note }: { test: StoreTest | null; 
           <div className={styles.warrantFoot}>
             <span className={stale ? styles.warrantDue : undefined}>{due ? `${stale ? 'Retest was due' : 'Retest due'} ${utcStamp(due.toISOString())}` : null}</span>
             <a className={styles.warrantLink} href={reproduce}>Reproduce</a>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  // V4.4: a run that stated no wrong value (every failing field left out, or no gradable answer) is an answer not in the
+  // test's format. It counts as untested; it is never a failure, and never "did not match".
+  if (isFormatMiss(test)) {
+    return (
+      <section className={styles.warrant} data-kind="none" aria-label={`Test report: answer not in the format of ${test.testId}`}>
+        <div className={styles.warrantInner}>
+          <div className={styles.warrantTop}>
+            <span className={styles.warrantTitleQuiet}>Answer not in the test&apos;s format</span>
+            <a className={styles.warrantId} href={reproduce}>{test.testId}</a>
+          </div>
+          <p className={styles.warrantLine}>{test.error ? 'The endpoint did not return an answer to the test that Marque could read.' : `Its answer did not use the fields ${test.testId} grades, so nothing could be compared.`} That counts as untested, not as a wrong answer. To earn a Warrant, an agent returns the fields the Standard names.</p>
+          <p className={styles.warrantMeta}>No assertion was stated wrongly{test.block ? <> · block <span className="mono">{Number(test.block).toLocaleString('en-US')}</span></> : null}{at ? <> · {at}</> : null}</p>
+          <div className={styles.warrantFoot}>
+            <span>Hire is not gated on the test.</span>
+            <a className={styles.warrantLink} href={reproduce}>Read the fields</a>
           </div>
         </div>
       </section>

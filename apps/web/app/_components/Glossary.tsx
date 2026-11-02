@@ -9,7 +9,7 @@ import styles from './glossary.module.css'
 export const GLOSSARY: Record<string, { short: string; long: string }> = {
   warrant: {
     short: 'A pass on Marque’s public test for that agent’s job.',
-    long: 'A warrant means the agent was given a real task, at a real block, and its answer matched Marque’s own computation field by field. A failure names the field that was wrong. No warrant can mean untested or failed; the test record says which.',
+    long: 'A warrant means the agent was given a real task, at a real block, and its answer matched Marque’s own computation field by field, in the test’s exact format, in the last 14 days. It is the top badge, not a condition for being hired. A failure names the value that was wrong; an answer in another layout is shown as not in the test’s format, which counts as untested.',
   },
   charter: {
     short: 'A preview of action limits, separate from paying an agent’s service fee.',

@@ -1,6 +1,7 @@
 import { safeFetch } from '@marque/probe'
 import { createHash } from 'node:crypto'
 import type { ConformanceAdapter, TestCase } from './types.js'
+import { isReadOnlyTool } from './check.js'
 
 interface McpTool { name?: string; description?: string; inputSchema?: unknown }
 
@@ -274,7 +275,8 @@ export function mcpAdapter(agentId: string, name: string, endpoint: string): Con
       // failure attributed to the agent.
       const wanted = /position|liquid|health|factor|yield|apr|apy|grid|rebalanc|venus|pancake/i
       const compatible = tools.map((tool) => ({ tool, args: argumentsForCase(tool, testCase, prompt) }))
-        .find(({ tool, args }) => wanted.test(`${tool.name ?? ''} ${tool.description ?? ''}`) && args !== null)
+        // Read-only tools only: a tool that sends, swaps or repays is never called by a test or a check.
+        .find(({ tool, args }) => wanted.test(`${tool.name ?? ''} ${tool.description ?? ''}`) && isReadOnlyTool(tool) && args !== null)
       if (!compatible?.tool.name || !compatible.args) {
         return {
           response: { availableTools: tools.map((t) => t.name).filter(Boolean) },

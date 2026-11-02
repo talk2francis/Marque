@@ -171,8 +171,10 @@ export function CompareToggle({
 export function RowActions({ a }: { a: MarketRow }) {
   const href = profileHref(a)
   const { terms } = useAgentTerms(a.agentId, a.commerce)
-  // Fresh: hire at this price. Dated: the hire sheet asks for a fresh price for the task.
-  const hireable = terms.state !== 'none' && (isHireable(a) || terms.state === 'dated')
+  // Fresh: hire at this price. Dated, or a stored quote that lapsed: the hire sheet asks for a fresh price for the task,
+  // so an expired stored quote never disables Hire (V4.4 P3). The row's price text and the button read the same terms.
+  const lapsed = a.commerce.failure === 'expired' || a.commerce.failure === 'expired_or_unproven'
+  const hireable = !a.standing?.pulled && (terms.state === 'fresh' || terms.state === 'dated' || isHireable(a) || lapsed)
   return (
     <span className={styles.actions}>
       {a.previewable && href && (

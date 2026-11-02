@@ -204,6 +204,13 @@
       "when": 1793180000000,
       "tag": "0028_profiles",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1793600000000,
+      "tag": "0029_agent_check",
+      "breakpoints": true
     }
   ]
 }

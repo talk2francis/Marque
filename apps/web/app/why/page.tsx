@@ -113,7 +113,7 @@ export default async function WhyMarque() {
   const compatible = stage('compatible')
   const qualified = stage('qualified')
   const charterReady = stage('task_matched')
-  const hireableNow = supply?.passed ?? null
+  const hireableNow = supply?.hireable ?? null
 
   const fmt = (n: number | null) => (n === null ? 'not measured' : n.toLocaleString('en-US'))
 
@@ -141,7 +141,7 @@ export default async function WhyMarque() {
           {([
             ['Registered on BNB Chain', registered, 'from the ERC-8004 registry'],
             ['Charter-ready', charterReady, 'a callable service matches its charter task (testnet sandbox)'],
-            ['Hireable now', hireableNow, 'passed its test, with a live price on mainnet'],
+            ['Hireable now', hireableNow, `a live signed price on mainnet, not pulled; ${supply?.checked ?? 0} checked against the chain, ${supply?.warranted ?? 0} warranted`],
             ['Public receipts', homeCounts['receipts'] == null ? null : Number(homeCounts['receipts']), 'execution and quality recorded separately'],
           ] as Array<[string, number | null, string]>).map(([label, n, sub]) => (
             <div className={styles.stat} key={label}>

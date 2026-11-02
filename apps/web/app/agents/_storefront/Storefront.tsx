@@ -22,7 +22,9 @@ import page from './agent-page.module.css'
 import { AgentActivity } from './AgentActivity'
 import { AgentTerms } from './AgentTerms'
 import { RailTerms } from './RailTerms'
-import { WarrantCard } from './WarrantCard'
+import { WarrantCard, isFormatMiss } from './WarrantCard'
+import type { StandingEvidence } from '../../../lib/agent-standing'
+import { testFits } from '../../../lib/test-fit'
 import { UNote } from '../../_components/ui/UNote'
 import { AnchorRedirect } from './AnchorRedirect'
 import { statedPriceDiffers, statedPriceWords } from '../../../lib/stated-price'
@@ -74,7 +76,7 @@ export function agentBase(d: Pick<Data, 'slug' | 'chainId' | 'tokenId'>): string
   return d.slug && d.chainId === 56 ? `/agents/${d.slug}` : `/agents/${d.chainId}/${d.tokenId}`
 }
 
-export function Storefront({ d, section = 'overview', evidence = null, lens = null, twins = [], acted = [] }: { d: Data; section?: SectionId; evidence?: AgentEvidence | null; lens?: JobLens | null; twins?: Twin[]; acted?: OutcomeView[] }) {
+export function Storefront({ d, section = 'overview', evidence = null, lens = null, twins = [], acted = [], standing = null }: { d: Data; section?: SectionId; evidence?: AgentEvidence | null; lens?: JobLens | null; twins?: Twin[]; acted?: OutcomeView[]; standing?: StandingEvidence | null }) {
   const c = d.commerce
   // Badges follow the same terms as the rail (invariant 41); the rail island re-reads them live.
   const hireable = d.terms.state === 'fresh'
@@ -125,7 +127,7 @@ export function Storefront({ d, section = 'overview', evidence = null, lens = nu
       <Badge kind="network" label={net} />
       {hireable ? <Badge kind="hireable" /> : answersFree ? <Badge kind="preview" /> : null}
       {/* The price lives in the hire panel and "not tested yet" in Evidence: the header keeps only what identifies and proves. */}
-      {d.noStandard ? <Badge kind="untested" /> : passed && passed === latest && passed.ranAt ? (Date.now() - Date.parse(passed.ranAt) > 72 * 3_600_000 ? <Badge kind="retest" /> : <Badge kind="warranted" date={passed.ranAt} />) : latest && !latest.pass ? <Badge kind="failed" test={latest.testId} field={latest.failedFields[0]} date={latest.ranAt ?? undefined} /> : null}
+      {d.noStandard ? <Badge kind="untested" /> : passed && passed === latest && passed.ranAt ? (Date.now() - Date.parse(passed.ranAt) > 72 * 3_600_000 ? <Badge kind="retest" /> : <Badge kind="warranted" date={passed.ranAt} />) : latest && !latest.pass && !isFormatMiss(latest) ? <Badge kind="failed" test={latest.testId} field={latest.failedFields[0]} date={latest.ranAt ?? undefined} /> : null}
       {acted.length ? <a href={`${agentBase(d)}/record#rec-acted`} className={page.actedChip}>Acted on {acted.length}</a> : null}
       {d.isReference ? <a href="/register#reference-agents" className={styles.refLink}><Badge kind="reference" /></a> : null}
       <SaveStar agentId={d.agentId} name={d.name} chainId={d.chainId} tokenId={d.tokenId} />
@@ -158,7 +160,7 @@ export function Storefront({ d, section = 'overview', evidence = null, lens = nu
           {tabs}
           {section === 'overview' ? <AnchorRedirect base={base} /> : null}
 
-          {section === 'overview' ? <Overview d={d} cat={cat} shown={shown} tenderHref={tenderHref} tryHref={tryHref} delivery={delivery} lens={lens} base={base} /> : null}
+          {section === 'overview' ? <Overview d={d} cat={cat} shown={shown} tenderHref={tenderHref} tryHref={tryHref} delivery={delivery} lens={lens} base={base} standing={standing} /> : null}
           {section === 'evidence' ? <Evidence d={d} tests={d.tests} own={own} evidence={evidence} cat={cat} /> : null}
           {section === 'record' ? <TrackRecord d={d} net={net} acted={acted} /> : null}
           {section === 'terms' ? <Terms d={d} net={net} /> : null}
@@ -181,7 +183,7 @@ export function Storefront({ d, section = 'overview', evidence = null, lens = nu
 
 /* ------------------------------------------------------------------ Overview */
 
-function Overview({ d, cat, shown, tenderHref, tryHref, delivery, lens, base }: { d: Data; cat: string; shown: StoreTest | null; tenderHref: string | null; tryHref: string; delivery: string | null; lens: JobLens | null; base: string }) {
+function Overview({ d, cat, shown, tenderHref, tryHref, delivery, lens, base, standing }: { d: Data; cat: string; shown: StoreTest | null; tenderHref: string | null; tryHref: string; delivery: string | null; lens: JobLens | null; base: string; standing: StandingEvidence | null }) {
   const t = d.track
   const send = d.category ? SEND[d.category] : undefined
   return (
@@ -192,12 +194,15 @@ function Overview({ d, cat, shown, tenderHref, tryHref, delivery, lens, base }: 
           <p className={page.clamp}>{d.description} <ProvenanceChip provenance="CLAIMED" title={`Written by the operator in the ERC-8004 registry. ${BRAND.name} does not verify it.`} /></p>
         ) : <p className={styles.muted}>This agent published no description. <ProvenanceChip provenance="CLAIMED" /></p>}
         <dl className={page.sendGet}>
-          <div><dt>You send</dt><dd>{d.taskGuide ? <>{d.taskGuide.inputs[0]?.hint ?? 'The task described in its published example.'} <ProvenanceChip provenance="CLAIMED" title="Inputs declared by the operator for this service's paid work skill. The hire form shows its full guidance." /></> : send ?? `Whatever its agent card asks for. ${BRAND.name} has no task form for ${cat.toLowerCase()} yet.`}</dd></div>
+          <div><dt>You send</dt><dd>{d.taskGuide ? <>{d.taskGuide.inputs[0]?.hint ?? 'The task described in its published example.'} <ProvenanceChip provenance="CLAIMED" title="Inputs declared by the operator for this service's paid work skill. The hire form shows its full guidance." /></> : send ?? `Whatever its agent card asks for: the hire form takes the job described in your own words.`}</dd></div>
           <div><dt>You get</dt><dd>An answer file, recorded by hash on chain when it delivers, and read here as a picture{testOf(d) ? ' with Marque’s own checks beside it' : ''}.</dd></div>
         </dl>
       </section>
 
-      <WarrantCard test={shown} category={d.category} note={d.noStandard} />
+      {shown && !shown.pass && !d.isReference && !testFits(shown.testId, d.description)
+        ? <WarrantCard test={null} category={d.category} note={`No Marque test fits this agent yet: ${shown.testId} asks about a different job than the one it describes.`} />
+        : <WarrantCard test={shown} category={d.category} note={d.noStandard} />}
+      <StandingLine s={standing} />
 
       <dl className={page.three}>
         <div><dt>Delivered jobs</dt><dd>{t.available === false ? <span className={styles.muted}>unavailable</span> : <span className="num">{t.jobs.delivered}</span>}<ProvenanceChip provenance="ONCHAIN" /></dd></div>
@@ -260,10 +265,10 @@ function Evidence({ d, tests, own, evidence, cat }: { d: Data; tests: StoreTest[
             <p className={styles.note}>Every run of {own[0]!.testId} against this agent, oldest first. Each dot is one run at a pinned block. <ProvenanceChip provenance="TESTED" /></p>
             <ol className={page.timeline} aria-label="Test runs, oldest first" tabIndex={0}>
               {runs.map((r, i) => (
-                <li key={i} data-pass={r.pass || undefined} data-error={r.error ? true : undefined} title={`${r.pass ? 'Passed' : r.error ? 'No answer' : `Failed on ${r.failedFields[0] ?? 'a field'}`}${r.ranAt ? `, ${utcStamp(r.ranAt)}` : ''}`}>
+                <li key={i} data-pass={r.pass || undefined} data-error={r.error || isFormatMiss(r) ? true : undefined} title={`${r.pass ? 'Passed' : r.error ? 'No answer' : isFormatMiss(r) ? 'Answer not in the test\'s format' : `Failed on ${r.failedFields[0] ?? 'a field'}`}${r.ranAt ? `, ${utcStamp(r.ranAt)}` : ''}`}>
                   <span className={page.tlDot} aria-hidden="true" />
                   <span className={page.tlDate}>{r.ranAt && (i === 0 || utcDay(r.ranAt) !== (runs[i - 1]?.ranAt ? utcDay(runs[i - 1]!.ranAt!) : null)) ? utcDay(r.ranAt) : ''}</span>
-                  <span className="sr-only">{r.pass ? 'passed' : r.error ? 'no answer' : `failed on ${r.failedFields[0] ?? 'a field'}`}</span>
+                  <span className="sr-only">{r.pass ? 'passed' : r.error ? 'no answer' : isFormatMiss(r) ? 'answer not in the test\'s format' : `failed on ${r.failedFields[0] ?? 'a field'}`}</span>
                 </li>
               ))}
             </ol>
@@ -278,7 +283,7 @@ function Evidence({ d, tests, own, evidence, cat }: { d: Data; tests: StoreTest[
                 {tests.slice(0, 10).map((x, i) => (
                   <tr key={i}>
                     <td className="mono"><a href={`/standard/${x.testId}`}>{x.testId}</a></td>
-                    <td>{x.error ? 'no answer' : x.pass ? 'pass' : `fail: ${x.failedFields[0] ?? ''}`}</td>
+                    <td>{x.error ? 'no answer' : x.pass ? 'pass' : isFormatMiss(x) ? 'not in the test\'s format' : `fail: ${x.failedFields[0] ?? ''}`}</td>
                     <td className="mono">{x.diffs.length ? `${x.diffs.filter((y) => y.pass).length} of ${x.diffs.length}` : 'n/a'}</td>
                     <td className="mono">{x.block ?? 'not recorded'}</td>
                     <td className="mono">{x.ranAt ? utcStamp(x.ranAt) : 'not recorded'}</td>
@@ -553,5 +558,22 @@ function Technical({ d, net, twins }: { d: Data; net: string; twins: Twin[] }) {
         <pre className={page.code} tabIndex={0} role="region" aria-label="Example requests">{`${machine ? `curl -s https://marque.trade${machine}\n` : ''}curl -s "https://marque.trade/api/v1/terms?agents=${d.agentId}"`}</pre>
       </section>
     </>
+  )
+}
+
+/**
+ * Checked against the chain (V4.4): the latest answer, from a paid job or Marque's daily read-only check call, whose stated
+ * chain facts agreed with BNB Chain, with its source; or why the agent is out of the hireable count. Separate from the
+ * Warrant above, which is the published test.
+ */
+function StandingLine({ s }: { s: StandingEvidence | null }) {
+  if (!s || (!s.checked && !s.wrong && !s.undelivered)) return null
+  const jobLink = (ref: string) => { const [c, j] = ref.split('/'); return <a href={`/jobs/${c}/${j}`}>job {j}</a> }
+  return (
+    <p className={styles.note} data-standing="">
+      {s.wrong ? <>Pulled for safety: it stated {s.wrong.detail ? s.wrong.detail.toLowerCase() : 'a chain fact'} outside tolerance on {utcDay(s.wrong.at)} ({s.wrong.via === 'job' ? jobLink(s.wrong.ref) : 'Marque\'s check call'}). It returns to the hireable count when a later check agrees.</>
+        : s.undelivered ? <>Pulled for safety: its latest paid job, {jobLink(s.undelivered.jobId)}, was {s.undelivered.state === 'EXPIRED' ? 'left to expire' : 'refunded'} without a delivery on {utcDay(s.undelivered.at)}.</>
+          : s.checked ? <>Checked against the chain {utcDay(s.checked.at)}: {s.checked.via === 'job' ? <>the answer in {jobLink(s.checked.ref)} agreed with BNB Chain</> : <>its answer to Marque&apos;s daily read-only check call agreed with BNB Chain</>}. Not a test pass. <ProvenanceChip provenance="MEASURED" /></> : null}
+    </p>
   )
 }

@@ -146,6 +146,22 @@ export interface ClassificationResult {
   scores: Record<string, number>
 }
 
+const STATED: Array<[RegExp, Category]> = [
+  [/^health[ _-]?factor/, 'health_factor'], [/^rebalanc/, 'rebalancing'], [/^grid/, 'grid'], [/^yield/, 'yield'], [/^security/, 'security' as Category],
+]
+
+/** "category: yield", "Category = health factor": a category the agent names for itself, if it is one of Marque's. */
+export function statedCategory(input: ClassificationInput): { category: Category; text: string } | null {
+  for (const field of [input.description ?? '', ...(input.tags ?? []), ...(input.skills ?? [])]) {
+    const m = /\bcategor(?:y|ies)\s*[:=]\s*["']?([a-z][a-z _-]{1,30})/i.exec(field)
+    const value = m?.[1]?.trim().toLowerCase()
+    if (!value) continue
+    const hit = STATED.find(([re]) => re.test(value))
+    if (hit) return { category: hit[1], text: m![0].trim() }
+  }
+  return null
+}
+
 /** Everything we know about an agent, lowercased into one haystack. */
 function haystack(input: ClassificationInput): string {
   return [
@@ -161,6 +177,9 @@ function haystack(input: ClassificationInput): string {
  * back with the exact terms that produced it.
  */
 export function classifyByKeyword(input: ClassificationInput): ClassificationResult {
+  // A category the agent states about itself ("category: yield" in its description, tags or skills) wins (V4.4 P2).
+  const stated = statedCategory(input)
+  if (stated) return { category: stated.category, confidence: 1, method: 'owner_declared', rationale: `the agent states "${stated.text}"`, scores: { [stated.category]: 1 } }
   const text = haystack(input)
   const scores: Record<string, number> = {}
   const hits: Record<string, string[]> = {}

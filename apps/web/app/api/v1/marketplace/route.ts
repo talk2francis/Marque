@@ -42,7 +42,8 @@ export async function GET(req: NextRequest) {
     hasPrice: bool('hasPrice'),
     iface: p.get('iface'),
     tab: (['ready', 'free', 'tested', 'all'] as const).find((t) => t === p.get('tab')) ?? null,
-    stage: (['answering', 'priced', 'passed', 'delivered'] as const satisfies readonly MarketStage[]).find((x) => x === p.get('stage')) ?? null,
+    // "passed" is the rung's name before 2 Nov (V4.4): the Warrant rung.
+    stage: (['answering', 'priced', 'hireable', 'checked', 'warranted', 'delivered'] as const satisfies readonly MarketStage[]).find((x) => x === (p.get('stage') === 'passed' ? 'warranted' : p.get('stage'))) ?? null,
     firstPartyOnly: bool('firstParty'),
     failed: p.get('failed') === 'group' ? 'group' : 'include',
     lane: p.get('lane') === 'all' ? 'all' : p.get('lane') ? parseLane(p.get('lane')) : null,

@@ -87,17 +87,18 @@ Bound (rebalancing, 341553), Lattice (grid, 341554), Sluicegate (yield, 341555),
 ## Rules worth knowing
 
 - A price is either a live quote from the agent (measured, with expiry) or the agent's declared price (claimed).
-- A Warrant means the agent passed Marque's published test at a pinned block within the last 72 hours; registration alone proves nothing.
+- A Warrant means the agent passed Marque's published test at a pinned block within the last 14 days (a retest is due after 72 hours); registration alone proves nothing.
+- Hireable does not require a test pass. Every hireable agent is asked one read-only question a day and every delivered answer is checked against the chain; only a recent wrong answer or an undelivered paid job takes an agent out.
 - Failures are published, not hidden. A number Marque cannot measure is not shown.
 - BNB Chain decides Set and Earn eligibility; Marque reads chain events only.
 `
 
 const line = (s: SupplyNow, net: string) =>
-  `- ${net}: ${s.passed} hireable (passed), ${s.priced} priced, ${s.failed} failed, ${s.notYetTested} not yet tested. Measured ${s.measuredAt}.`
+  `- ${net}: ${s.hireable} hireable, ${s.checked} checked against the chain, ${s.warranted} warranted, ${s.pulled} pulled. Measured ${s.measuredAt}.`
 
 export async function GET() {
   const [m, t] = await Promise.all([supplyNow(56).catch(() => null), supplyNow(97).catch(() => null)])
-  const supply = m || t ? `\n## Supply now (the same count on every Marque page and API)\n\n${[m ? line(m, 'BSC mainnet') : null, t ? line(t, 'BSC testnet') : null].filter(Boolean).join('\n')}\n- Hireable means ${SUPPLY_DEFINITIONS.passed}. Priced means ${SUPPLY_DEFINITIONS.priced}. Networks are never added together.\n` : ''
+  const supply = m || t ? `\n## Supply now (the same count on every Marque page and API)\n\n${[m ? line(m, 'BSC mainnet') : null, t ? line(t, 'BSC testnet') : null].filter(Boolean).join('\n')}\n- Hireable means ${SUPPLY_DEFINITIONS.hireable}. Checked means ${SUPPLY_DEFINITIONS.checked}. Warranted means ${SUPPLY_DEFINITIONS.warranted}. Pulled means ${SUPPLY_DEFINITIONS.pulled}. Networks are never added together.\n` : ''
   const at = TEXT.indexOf('## Live figures')
   const text = at >= 0 ? `${TEXT.slice(0, at)}${supply.trimStart()}\n${TEXT.slice(at)}` : TEXT + supply
   return new Response(text, { headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'public, max-age=300' } })

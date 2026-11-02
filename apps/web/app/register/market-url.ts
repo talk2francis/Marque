@@ -50,10 +50,10 @@ export interface MarketState {
 }
 
 /** The evidence ladder's rungs above "listed", in order (the server's MarketStage). */
-export type MarketStageKey = 'answering' | 'priced' | 'passed' | 'delivered'
-export const STAGE_VALUES: readonly MarketStageKey[] = ['answering', 'priced', 'passed', 'delivered']
+export type MarketStageKey = 'answering' | 'priced' | 'hireable' | 'checked' | 'warranted' | 'delivered'
+export const STAGE_VALUES: readonly MarketStageKey[] = ['answering', 'priced', 'hireable', 'checked', 'warranted', 'delivered']
 export const STAGE_LABEL: Record<MarketStageKey, string> = {
-  answering: 'Answering', priced: 'Live price', passed: 'Passed the test', delivered: 'Delivered to an outside buyer',
+  answering: 'Answering', priced: 'Live price', hireable: 'Hireable', checked: 'Checked against the chain', warranted: 'Warranted', delivered: 'Delivered to an outside buyer',
 }
 
 export const DEFAULT_STATE: MarketState = {
@@ -186,7 +186,8 @@ export function paramsToState(
     thirdParty: isOn(p.get('thirdParty')),
     hasPrice: isOn(p.get('hasPrice')),
     iface: rawIface && IFACE_VALUES.includes(rawIface) ? rawIface : null,
-    stage: STAGE_VALUES.find((x) => x === p.get('stage')) ?? null,
+    // "passed" was the Warrant rung's name before 2 Nov.
+    stage: STAGE_VALUES.find((x) => x === (p.get('stage') === 'passed' ? 'warranted' : p.get('stage'))) ?? null,
     // A view in the URL wins; otherwise keep whatever the caller had (which is
     // the remembered preference on first mount).
     view: rawView === 'grid' || rawView === 'list' ? rawView : has('view') ? DEFAULT_STATE.view : base.view,

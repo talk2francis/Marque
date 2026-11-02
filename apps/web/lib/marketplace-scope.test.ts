@@ -5,6 +5,7 @@ vi.mock('@marque/commerce', async original => ({ ...await original<object>(), co
 vi.mock('@marque/commerce/reads', () => ({ boundedCommerceRead: mocks.read, coalescedCatalogRead: mocks.read }))
 vi.mock('./agent-state', async original => ({ ...await original<object>(), agentStates: mocks.capabilities }))
 vi.mock('./agent-track', async original => ({ ...await original<object>(), agentTracks: mocks.tracks }))
+vi.mock('./agent-standing', () => ({ standingEvidence: async () => ({}) }))
 import { marketplaceAgents, marketPageAgentStates, resetSharedMarketReads } from './marketplace'
 describe('ready selection before the broad catalog read', () => {
   beforeEach(() => resetSharedMarketReads())

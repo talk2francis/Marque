@@ -20,17 +20,29 @@ export async function GET() {
       failureHistogram(),
       supplyNow(56),
     ])
-    // The last stage is the one supply count (supply-truth.ts), the same number as the home page and coverage API.
-    const stages = [...registryStages, { stage: 'hireable', label: 'Hireable', count: supply.passed, method: SUPPLY_DEFINITIONS.passed }]
+    // V4.4: Listed, Answering, Priced, Hireable, Checked, Warranted. The last four are the one supply count
+    // (supply-truth.ts), the same numbers as the home page and coverage API. The Charter sandbox stages (task compatible,
+    // Charter-ready, qualified) measure a different thing and are returned apart, as `charter`.
+    const upTo = registryStages.findIndex((s) => s.stage === 'callable')
+    const listed = upTo >= 0 ? registryStages.slice(0, upTo + 1) : registryStages
+    const stages = [...listed,
+      { stage: 'priced', label: 'Priced', count: supply.priced, method: SUPPLY_DEFINITIONS.priced },
+      { stage: 'hireable', label: 'Hireable', count: supply.hireable, method: SUPPLY_DEFINITIONS.hireable },
+      { stage: 'checked', label: 'Checked against the chain', count: supply.checked, method: SUPPLY_DEFINITIONS.checked },
+      { stage: 'warranted', label: 'Warranted', count: supply.warranted, method: SUPPLY_DEFINITIONS.warranted },
+    ]
+    const charter = upTo >= 0 ? registryStages.slice(upTo + 1).filter((s) => s.stage !== 'hireable') : []
     return NextResponse.json({
       chainId: 56,
       takenAt: new Date().toISOString(),
       provenance: 'MEASURED',
       stages,
-      supply: { measuredAt: supply.measuredAt, priced: supply.priced, passed: supply.passed, failed: supply.failed, notYetTested: supply.notYetTested, definitions: SUPPLY_DEFINITIONS },
+      supply: { measuredAt: supply.measuredAt, priced: supply.priced, hireable: supply.hireable, pulled: supply.pulled, checked: supply.checked, warranted: supply.warranted, definitions: SUPPLY_DEFINITIONS },
+      deliveredPaidWork: { agents: supply.delivered, method: SUPPLY_DEFINITIONS.delivered, note: 'Its own line, not a step of the funnel.' },
+      charter,
       categories,
       failures,
-      note: 'Counts are live and state-specific. Reachable, callable, compatible, Charter-ready, qualified and hireable are never treated as synonyms. Hireable means passed its test with a live price now.',
+      note: 'Counts are live and state-specific. Reachable, callable, priced, hireable, checked and warranted are never treated as synonyms. Hireable means a live signed price and not pulled for safety; the test is a badge (warranted), not a gate.',
     })
   } catch (err) {
     return NextResponse.json(

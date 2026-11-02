@@ -22,7 +22,7 @@ async function compute(q: LadderQuery): Promise<LadderValue> {
 }
 
 export async function marketLadder(q: LadderQuery): Promise<LadderValue> {
-  const p = await cachedProjection(`market:ladder:v1:${JSON.stringify(q)}`, () => compute(q), {
+  const p = await cachedProjection(`market:ladder:v2:${JSON.stringify(q)}`, () => compute(q), {
     freshMs: 60_000, timeoutMs: 20_000, keepMs: 60 * 60_000, staleWhileRevalidate: true,
   })
   return p.value

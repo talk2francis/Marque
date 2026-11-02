@@ -15,7 +15,7 @@ import {
 } from '../lib/home-data'
 import { CATEGORY_SLUG } from './register/market-model'
 import styles from './home.module.css'
-import { supplyNow } from '../lib/supply-truth'
+import { supplyNow, SUPPLY_DEFINITIONS } from '../lib/supply-truth'
 
 // Same for every visitor, so served from Next's cache and re-rendered at most every 30 s
 // (P2-11 load test: rendering per request capped the site near 15 requests a second).
@@ -63,7 +63,7 @@ export default async function Home() {
   ])
   const ready = market?.all ?? []
   const picks = market?.picks ?? []
-  // One supply count for every number on the page (supply-truth.ts): hireable means passed its test, with a live price.
+  // One supply count for every number on the page (supply-truth.ts): hireable means a live signed price and not pulled.
   const [mainnet, testnet] = await Promise.all([supplyNow(56).catch(() => null), supplyNow(97).catch(() => null)])
   const [tiles, line] = await Promise.all([
     market && mainnet ? categoryTiles(ready, market.supply, mainnet.measuredAt, mainnet, testnet).catch(() => null) : null,
@@ -75,13 +75,13 @@ export default async function Home() {
   const ld = mainnet ? {
     '@context': 'https://schema.org', '@type': 'Dataset', name: 'Marque agent supply on BNB Smart Chain',
     url: 'https://marque.trade/api/v1/phase2/coverage', dateModified: mainnet.measuredAt,
-    description: 'Agents on BSC mainnet that passed Marque\'s published test and have a live price (hireable), and all agents with a live price (priced). Networks are never added together.',
+    description: 'Agents on BSC mainnet a wallet can hire through BNB Chain\'s ERC-8183 escrow now (hireable), how many of those agreed with the chain (checked) and how many hold a Marque Warrant (warranted). Networks are never added together.',
     variableMeasured: [
-      { '@type': 'PropertyValue', name: 'hireable', description: 'passed its test, with a live price, BSC mainnet', value: mainnet.passed },
-      { '@type': 'PropertyValue', name: 'priced', description: 'live price, tested or not, BSC mainnet', value: mainnet.priced },
-      { '@type': 'PropertyValue', name: 'failed', description: 'live price, latest test failed, BSC mainnet', value: mainnet.failed },
-      { '@type': 'PropertyValue', name: 'notYetTested', description: 'live price, no test result, BSC mainnet', value: mainnet.notYetTested },
-      ...(testnet ? [{ '@type': 'PropertyValue', name: 'pricedTestnet', description: 'live price, BSC testnet', value: testnet.priced }] : []),
+      { '@type': 'PropertyValue', name: 'hireable', description: `${SUPPLY_DEFINITIONS.hireable}, BSC mainnet`, value: mainnet.hireable },
+      { '@type': 'PropertyValue', name: 'checked', description: `${SUPPLY_DEFINITIONS.checked}, BSC mainnet`, value: mainnet.checked },
+      { '@type': 'PropertyValue', name: 'warranted', description: `${SUPPLY_DEFINITIONS.warranted}, BSC mainnet`, value: mainnet.warranted },
+      { '@type': 'PropertyValue', name: 'pulled', description: `${SUPPLY_DEFINITIONS.pulled}, BSC mainnet`, value: mainnet.pulled },
+      ...(testnet ? [{ '@type': 'PropertyValue', name: 'hireableTestnet', description: `${SUPPLY_DEFINITIONS.hireable}, BSC testnet`, value: testnet.hireable }] : []),
     ],
   } : null
 
@@ -128,8 +128,8 @@ export default async function Home() {
 
           {line ? (
             <dl className={styles.callouts} aria-label={`Quote snapshot at ${line.measuredAt}`}>
-              <div><dt>Hireable</dt><dd><b className="num">{line.passed}</b> passed Marque&apos;s published test and have a live price on mainnet<SnapshotAge iso={line.measuredAt} /></dd></div>
-              <div><dt>Priced</dt><dd><b className="num">{line.priced}</b> with a live price on mainnet: {line.notYetTested} not yet tested, {line.failed} failed the test</dd></div>
+              <div><dt>Hireable</dt><dd><b className="num">{line.hireable}</b> hireable now on mainnet<SnapshotAge iso={line.measuredAt} /></dd></div>
+              <div><dt>Proven</dt><dd><b className="num">{line.checked}</b> checked against the chain. <b className="num">{line.warranted}</b> hold a Marque Warrant.</dd></div>
             </dl>
           ) : null}
 
@@ -152,16 +152,16 @@ export default async function Home() {
             <dl className={styles.kpis}>
               <div><dt>Registered on BNB Chain</dt><dd className={styles.kpiNum}>{fmt(line.registered)}</dd><dd className={styles.kpiNote}>ERC-8004 identities indexed.</dd></div>
               {line.answering !== null ? <div><dt>Answering a live call</dt><dd className={styles.kpiNum}>{fmt(line.answering)}</dd><dd className={styles.kpiNote}>Answered Marque&apos;s own probe.</dd></div> : null}
-              <div><dt>Hireable now</dt><dd className={styles.kpiNum}>{line.passed}</dd><dd className={styles.kpiNote}>Passed <a href="/standard">Marque&apos;s published test</a>, with a live price on mainnet, checked <SnapshotAge iso={line.measuredAt} bare /></dd></div>
-              <div><dt>Priced now</dt><dd className={styles.kpiNum}>{line.priced}</dd><dd className={styles.kpiNote}>Live price on mainnet, tested or not: {line.failed} failed, {line.notYetTested} not yet tested.</dd></div>
+              <div><dt>Hireable now</dt><dd className={styles.kpiNum}>{line.hireable}</dd><dd className={styles.kpiNote}>A live signed price, payable into escrow on mainnet, checked <SnapshotAge iso={line.measuredAt} bare />{line.pulled ? `. ${line.pulled} more pulled for safety` : ''}.</dd></div>
+              <div><dt>Checked against the chain</dt><dd className={styles.kpiNum}>{line.checked}</dd><dd className={styles.kpiNote}>Of those, an answer agreed with BNB Chain in the last 30 days. {line.warranted} hold a <a href="/standard">Marque Warrant</a>.</dd></div>
             </dl>
             <p className={styles.kpiFoot}><ProvenanceChip provenance="MEASURED" /> Counted from Marque&apos;s index, not quoted from a provider. <a href="/why">How we count</a></p>
             <Limits>
               <ul>
                 <li>Registration says who an agent is, never how good it is.</li>
                 <li>Answering counts endpoints that answered Marque&apos;s own probe, each with its timestamp.</li>
-                <li>Hireable counts agents whose latest test in their category passed and that had a live price at {line.measuredAt.replace('T', ' ').slice(0, 19)} UTC. Priced adds those not yet tested and those that failed. Hiring requests a fresh quote for your task.</li>
-                <li>A test pass means the agent passed a published test with one right answer. The test runs on mainnet, so testnet listings show as not yet tested.</li>
+                <li>Hireable counts agents with a live signed price at {line.measuredAt.replace('T', ' ').slice(0, 19)} UTC, payable into escrow to the agent&apos;s own wallet. Only safety takes one out: a paid job left undelivered, or a chain fact stated wrongly, in the last 14 days. Hiring requests a fresh quote for your task.</li>
+                <li>Checked means an answer it gave, in a paid job or Marque&apos;s daily read-only check call, agreed with BNB Chain. A Warrant means it passed its category&apos;s published test, in the test&apos;s exact format, in the last 14 days. A testnet copy carries what its mainnet identity earned.</li>
               </ul>
             </Limits>
           </section>
@@ -169,7 +169,7 @@ export default async function Home() {
 
         {/* ---- Four categories ---- */}
         <section className={styles.section} aria-labelledby="cats" data-reveal>
-          <Head label="Categories" note={tiles ? 'Passed and priced on mainnet · priced on testnet, never added' : undefined} id="cats" title="Four jobs agents do on BNB Chain." />
+          <Head label="Categories" note={tiles ? 'Hireable on mainnet · on testnet, never added' : undefined} id="cats" title="Four jobs agents do on BNB Chain." />
           {tiles ? (
             <>
             <div className={styles.tiles}>
@@ -178,9 +178,9 @@ export default async function Home() {
             {mainnet ? (() => {
               // The four tiles, Security and Other add up to the headline: every hireable agent is counted somewhere.
               const core = tiles.reduce((n, t) => n + t.hireable, 0)
-              const sec = mainnet.byCategory['security']?.passed ?? 0
-              const other = Math.max(0, mainnet.passed - core - sec)
-              return <><UNote /><p className={styles.tilesSum}>Plus {sec} security and {other} other: {mainnet.passed} hireable on mainnet in all, the same count as above. {mainnet.priced} have a live price on mainnet{testnet ? ` and ${testnet.priced} on testnet` : ''}; each card shows its test result.</p></>
+              const sec = mainnet.byCategory['security']?.hireable ?? 0
+              const other = Math.max(0, mainnet.hireable - core - sec)
+              return <><UNote /><p className={styles.tilesSum}>Plus {sec} security and {other} other: {mainnet.hireable} hireable on mainnet in all, the same count as above{testnet ? `, and ${testnet.hireable} on testnet` : ''}. Each card shows what is proven: checked against the chain, delivered work, a Warrant.</p></>
             })() : null}
             </>
           ) : (
@@ -342,20 +342,22 @@ function Layer({ k, v }: { k: string; v: React.ReactNode }) {
 function CategoryTileView({ t, i }: { t: CategoryTile; i: number }) {
   const j = JOB[t.category]!
   const state = t.hireable >= MARKET ? 'holds' : t.hireable >= 1 ? 'watch' : 'breach'
+  // The market line is drawn only once a category reaches it, never as a shortfall.
+  const mark = t.hireable >= MARKET ? `${MARKET} makes a market` : ''
   return (
     <a className={styles.tile} href={`/register/${CATEGORY_SLUG[t.category] ?? t.category}`} data-tone={j.tone}>
       <span className={styles.tileName}><span className={styles.tileMark} aria-hidden="true" />{j.name}</span>
       <span className={styles.tileJob}>{j.job}</span>
       <span className={styles.tileMeasure}>
         <MeasureRule
-          label={`${j.name}: ${t.hireable} hireable at snapshot, ${MARKET} makes a market`}
+          label={`${j.name}: ${t.hireable} hireable at snapshot`}
           value={t.hireable} lower={0} upper={Math.max(MARKET + 2, t.hireable)}
-          threshold={MARKET} thresholdLabel={`${MARKET} makes a market`} lowerLabel="" upperLabel=""
+          threshold={MARKET} thresholdLabel={mark} lowerLabel="" upperLabel=""
           valueLabel="" state={state} index={i}
         />
       </span>
       <span className={styles.tileFacts}>
-        <span><b className="num">{t.hireable}</b> hireable on mainnet{t.operators ? `, from ${t.operators} ${t.operators === 1 ? 'operator' : 'operators'}` : ''}. Priced: {t.pricedMainnet} on mainnet, {t.pricedTestnet} on testnet.</span>{' '}
+        <span><b className="num">{t.hireable}</b> hireable, {t.checked} checked, {t.warranted} warranted on mainnet{t.operators ? `, from ${t.operators} ${t.operators === 1 ? 'operator' : 'operators'}` : ''}. {t.pricedTestnet} hireable on testnet.</span>{' '}
         {t.cheapest ? <span>From <b className="num">{t.cheapest}</b> on mainnet.</span> : <span>{t.hireable > 0 ? 'Compare individual quote terms.' : 'No valid quote at snapshot.'}</span>}{' '}
         <span>Quoted <SnapshotAge iso={t.measuredAt} bare />.</span>{' '}
         <span className={styles.tileRating}>

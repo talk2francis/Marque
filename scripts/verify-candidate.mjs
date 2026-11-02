@@ -213,7 +213,7 @@ for (const line of body.split('\n')) {
     const html = await fetch(`${BASE}/`).then((r) => r.text()).catch(() => '')
     const ld = html.match(/<script type="application\/ld\+json" id="supply-ld">(.*?)<\/script>/s)
     const values = ld ? Object.fromEntries(JSON.parse(ld[1]).variableMeasured.map((v) => [v.name, v.value])) : null
-    const hero = html.replace(/<[^>]+>/g, ' ').match(/Hireable\s+(\d+)\s+passed Marque/)
+    const hero = html.replace(/<[^>]+>/g, ' ').match(/Hireable\s+(\d+)\s+hireable now on mainnet/)
     if (!values) problem = 'home has no supply JSON-LD'
     else if (!hero) problem = 'home HTML has no hireable count'
     else if (Number(hero[1]) !== values.hireable) problem = `home hero says ${hero[1]} hireable, JSON-LD says ${values.hireable}`

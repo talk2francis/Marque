@@ -11,6 +11,9 @@ import { agentTracks, trackFromSource, type AgentTrack } from './agent-track'
 import { selectedAgentRows } from './compare-selection'
 import { expireMarketQuote } from './quote-expiry'
 import { marketSupply, type MarketSupplyCategory } from './market-supply'
+import { withStanding, dedupePulled, isHireable, isChecked, isWarrantedNow, hasDelivered, type Standing } from './standing'
+import { standingEvidence } from './agent-standing'
+import { testFits } from './test-fit'
 export { expireMarketQuote } from './quote-expiry'
 
 /**
@@ -90,7 +93,13 @@ export interface MarketRow {
     /** The newest successful quote, kept after it lapses so it shows dated, never current. */
     lastQuote?: { priceRaw: string; token: { address: string; symbol: string; decimals: number }; chainId: number | null; quotedAt: string; signed: boolean | null } | null
   }
-  warrant: { status: 'warranted' | 'failed' | 'untested'; testId: string | null; date: string | null; failedField: string | null }
+  /**
+   * The latest result of its category's published test. failed: a stated value was wrong. format: it answered (or the
+   * call failed) without the test's fields, so the result counts as untested ("Answer not in the test's format").
+   */
+  warrant: { status: 'warranted' | 'failed' | 'untested'; testId: string | null; date: string | null; failedField: string | null; format?: boolean; noFit?: boolean }
+  /** Hireable, pulled, checked, warranted (standing.ts), set on every response. */
+  standing?: Standing
   qual: Qual
   /** Whether a free read-only preview is possible (adapter + read method). */
   previewable: boolean
@@ -104,14 +113,16 @@ export interface MarketRow {
 }
 
 /**
- * The evidence ladder (28 Oct): how far an agent has proved itself, each rung a subset of the one before in practice.
- * answering: called its endpoint and got an answer in the last 24 h. priced: a live signed price (hireable now).
- * passed: passed its category's published test. delivered: delivered at least one paid job to an outside buyer
- * (a wallet that is not a Marque team wallet, the agent's owner or its own wallet; that does not prove independence).
+ * The evidence ladder (V4.4): how far an agent has proved itself, each rung a subset of the one before.
+ * answering: called its endpoint and got an answer in the last 24 h. priced: a live signed price. hireable: priced and
+ * not pulled (standing.ts). checked: hireable, and an answer agreed with the chain in 30 days. warranted: hireable, and
+ * passed its category's published test in 14 days. delivered is its own line, not a rung: delivered at least one paid
+ * job to an outside buyer (a wallet that is not a Marque team wallet, the agent's owner or its own wallet; that does not
+ * prove independence).
  */
-export type MarketStage = 'answering' | 'priced' | 'passed' | 'delivered'
-export const MARKET_STAGES: readonly MarketStage[] = ['answering', 'priced', 'passed', 'delivered']
-export interface MarketLadder { listed: number; answering: number; priced: number; passed: number; delivered: number }
+export type MarketStage = 'answering' | 'priced' | 'hireable' | 'checked' | 'warranted' | 'delivered'
+export const MARKET_STAGES: readonly MarketStage[] = ['answering', 'priced', 'hireable', 'checked', 'warranted', 'delivered']
+export interface MarketLadder { listed: number; answering: number; priced: number; hireable: number; checked: number; warranted: number; delivered: number }
 
 export interface MarketQuery {
   /** One rung of the evidence ladder, over the whole listed set (the Registry view). */
@@ -218,7 +229,7 @@ const gunzipAsync = promisify(gunzip)
 const BLOB_KEEP_MS = 24 * 3600_000
 const BLOB_EVERY_MS = 10 * 60_000
 // v2 (28 Oct): rows carry track.jobs.outsideDelivered; a v1 copy would read every agent as 0.
-const blobKey = (chainId: 56 | 97) => `market:base:v2:${chainId}`
+const blobKey = (chainId: 56 | 97) => `market:base:v3:${chainId}`
 const lastStored = new Map<number, number>()
 const storeLoads = new Map<number, Promise<{ at: number; rows: MarketRow[] } | null>>()
 
@@ -355,9 +366,13 @@ export function marketplaceSourceQuery(owners?: readonly string[], chainId: 56 |
       -- One row per agent and test; the row shown is chosen below, preferring the test
       -- for the agent's own category (the conformance worker runs all four on a third
       -- party, and a grid agent failing the yield test says nothing about it).
-      select distinct on (cid, test_id) cid as agent_id, test_id, pass, failed_fields, ran_at
+      -- stated_wrong: a field the agent stated with a value outside tolerance. A run where every failing field was left
+      -- out (or the call errored) is an answer not in the test's format, never a wrong answer (V4.4).
+      select distinct on (cid, test_id) cid as agent_id, test_id, pass, failed_fields, ran_at, stated_wrong
       from (
-        select ${canonicalAgentIdSql(sql`agent_id`)} as cid, test_id, pass, failed_fields, ran_at
+        select ${canonicalAgentIdSql(sql`agent_id`)} as cid, test_id, pass, failed_fields, ran_at,
+               (not pass and exists (select 1 from jsonb_array_elements(diffs) d
+                  where d->>'pass' = 'false' and coalesce(d->>'actual', '') <> '' and coalesce(d->>'actual', '') !~ '^\\((not |no )')) as stated_wrong
         from conformance_result where agent_id like ${`${chainId}:%`} or agent_id like 'marque:%'
       ) cr
       -- The latest run wins. A failed retest cannot leave an older pass looking current.
@@ -405,7 +420,7 @@ export function marketplaceSourceQuery(owners?: readonly string[], chainId: 56 |
              coalesce(s.latency_ms, s.reach_latency_ms) as latency_ms,
              s.kinds, s.live_kinds, s.live_task_kinds, s.price,
              regexp_replace(coalesce(s.endpoint, ''), '^(https?://[^/]+).*', '\\1') as host,
-             c.test_id as conf_test, c.pass as conf_pass, c.failed_fields as conf_failed, c.ran_at as conf_at,
+             c.test_id as conf_test, c.pass as conf_pass, c.failed_fields as conf_failed, c.ran_at as conf_at, c.stated_wrong as conf_wrong,
              cat.category
       from cand
       join agent a on a.id = cand.id
@@ -442,6 +457,7 @@ export function marketplaceSourceQuery(owners?: readonly string[], chainId: 56 |
       conf_test,
       conf_failed,
       conf_at,
+      coalesce(conf_wrong, false) as conf_wrong,
       category
     from qualifying
     order by identities desc, agent_id
@@ -562,13 +578,18 @@ async function queryAgents(owners?: readonly string[], states?: Awaited<ReturnTy
     // A reference agent with its own declared standard is judged on that test only, never on another's older result.
     const declared = declaredStandards.get(lane)
     const offStandard = Boolean(declared && confTest && confTest !== declared)
-    const warrantStatus: 'warranted' | 'failed' | 'untested' = noStandard || offStandard ? 'untested' : confTest ? (confPass ? 'warranted' : 'failed') : 'untested'
+    // A test that asks about a different job than the one the agent describes says nothing about it (V4.4 P2).
+    const noFit = !fp.has(String(r['agent_id'])) && !testFits(confTest, r['description'] ? String(r['description']) : null)
+    // Failed means a stated value was wrong. An answer not in the test's format counts as untested, with its date kept.
+    const confWrong = r['conf_wrong'] === true
+    const format = !noStandard && !offStandard && !noFit && Boolean(confTest) && !confPass && !confWrong
+    const warrantStatus: 'warranted' | 'failed' | 'untested' = noStandard || offStandard || (noFit && !confPass) ? 'untested' : confTest ? (confPass ? 'warranted' : confWrong ? 'failed' : 'untested') : 'untested'
     const kinds = Array.isArray(r['kinds']) ? (r['kinds'] as string[]).filter(Boolean) : []
     const liveKinds = Array.isArray(r['live_kinds']) ? (r['live_kinds'] as string[]).filter(Boolean) : []
     const taskKinds = (Array.isArray(r['live_task_kinds']) ? r['live_task_kinds'] as unknown[] : [])
       .flatMap((value) => Array.isArray(value) ? value : [])
       .filter((value): value is string => typeof value === 'string')
-    const qual: Qual = confPass ? 'warranted' : confTest ? 'failed' : live ? 'callable' : 'unbound'
+    const qual: Qual = warrantStatus === 'warranted' ? 'warranted' : warrantStatus === 'failed' ? 'failed' : live ? 'callable' : 'unbound'
     const name = String(r['name'] ?? 'Unnamed agent') || 'Unnamed agent'
     const owner = r['owner_address'] ? String(r['owner_address']) : null
     const taskForCategory: Record<string, string | undefined> = {
@@ -609,7 +630,9 @@ async function queryAgents(owners?: readonly string[], states?: Awaited<ReturnTy
         status: warrantStatus,
         testId: confTest,
         date: r['conf_at'] instanceof Date ? (r['conf_at'] as Date).toISOString() : (r['conf_at'] ? String(r['conf_at']) : null),
-        failedField: failed[0] ?? null,
+        failedField: format || noFit ? null : failed[0] ?? null,
+        ...(format ? { format: true } : {}),
+        ...(noFit && !confPass ? { noFit: true } : {}),
       },
       qual,
       previewable: false,
@@ -739,7 +762,7 @@ export interface MarketFacets {
   price: { min: number | null; max: number | null; quoted: number; unit: string | null }
 }
 
-export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: MarketRow[]; generatedAt: string; total: number; offset: number; hasMore: boolean; supply: MarketSupplyCategory[]; quoteObservedAt: string | null; facets: MarketFacets; ladder: MarketLadder | null; lane: Lane | 'all'; failedGroup: Array<{ agentId: string; name: string; category: string | null; testId: string | null; failedField: string | null; date: string | null; networks?: Array<56 | 97> }> }> {
+export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: MarketRow[]; generatedAt: string; total: number; offset: number; hasMore: boolean; supply: MarketSupplyCategory[]; quoteObservedAt: string | null; facets: MarketFacets; ladder: MarketLadder | null; lane: Lane | 'all'; failedGroup: Array<{ agentId: string; name: string; category: string | null; testId: string | null; failedField: string | null; date: string | null; networks?: Array<56 | 97>; reason: string | null; identities: number }> }> {
   const both = q.lane === 'all'
   const lane: Lane = q.lane === 'all' ? 'mainnet' : q.lane ?? (q.network === 97 ? 'practice' : 'mainnet')
   const chainId = chainOf(lane)
@@ -766,13 +789,23 @@ export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: Ma
   const observedAt = Date.now()
   const quoteStates = states ?? await overlay
   const freshCommerce = quoteStates ? bestCommerceByAgent(quoteStates) : null
-  let all = base.rows.map(row => {
+  // Standing (V4.4): pulled, checked and warranted, from the evidence on both networks; a testnet twin reads its mainnet
+  // identity's, so the mainnet listing (memoised) is read alongside a testnet one.
+  // A Ready read takes the mainnet agents priced now (a small scoped read); any other read, the memoised mainnet catalog.
+  const mainnetReady = states ? [...new Set([...states.values()].filter((c) => (c.state === 'hireable' || c.state === 'settleable') && c.agentId.startsWith('56:')).map((c) => c.agentId))] : null
+  const [evidence, mainnetRows] = await Promise.all([
+    standingEvidence(),
+    chains.includes(56) ? Promise.resolve(base.rows)
+      : mainnetReady ? scopedBase(mainnetReady, states, 56).then((b) => b.rows).catch(() => [] as MarketRow[])
+        : marketplaceBase(56).catch(() => [] as MarketRow[]),
+  ])
+  let all = withStanding(base.rows.map(row => {
     // Ready reads already loaded current exact-agent terms. Reuse metadata,
     // but do not hide a renewed quote behind the three-minute catalog memo.
     const current = freshCommerce ? { ...row, ...priceAndCommerce(freshCommerce.get(row.agentId),
       row.liveness === 'live', row.priceProvenance === 'CLAIMED' ? row.price : null) } : row
     return expireMarketQuote(current, observedAt)
-  })
+  }), evidence, mainnetRows)
   if (q.agentIds) all = selectedAgentRows(all, q.agentIds)
   if (both) all = foldNetworks(all)
   // Ready to hire, all categories: every agent a wallet can pay into escrow right now,
@@ -807,17 +840,17 @@ export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: Ma
   // The ladder counts the whole listed set (the Registry view) under the same category, network and search.
   const universe = scope(all, null)
   all = scope(all)
-  // The same view's agents whose latest test in their category failed: out of the list and the counts, in their own
-  // group ("Listed, failed its latest test"), filtered exactly like the list they left.
-  const failedGroup = q.failed === 'group' ? all.filter((r) => r.warrant.status === 'failed') : []
-  if (q.failed === 'group') all = all.filter((r) => r.warrant.status !== 'failed')
+  // The same view's pulled agents (a recent wrong answer, or a paid job left undelivered): out of the list and the counts,
+  // in their own group with the reason, filtered exactly like the list they left. Only safety takes an agent out (V4.4).
+  const pulledRows = q.failed === 'group' ? all.filter((r) => r.standing?.pulled) : []
+  if (q.failed === 'group') all = all.filter((r) => !r.standing?.pulled)
 
   // Faceted filters (D6, SPEC-WORKSPACE 3.4). Each dimension is one predicate; an option's count
   // is the result size with every OTHER dimension applied and that option chosen, after clone
   // grouping, so the number on an option is exactly the number of rows it leads to.
   const quoteToken = (r: MarketRow) => (r.commerce.token ?? r.commerce.lastQuote?.token)?.symbol.toLowerCase() ?? null
   const isTested = (r: MarketRow) => r.warrant.status !== 'untested'
-  const isWarranted = (r: MarketRow) => r.warrant.status === 'warranted'
+  const isWarranted = (r: MarketRow) => isWarrantedNow(r)
   const isLive = (r: MarketRow) => r.liveness === 'live'
   const hasIface = (v: string) => (r: MarketRow) => r.interfaces.includes(v) || (v === 'erc8183' && r.protocols.some((p) => /8183/.test(p)))
   const atMost = (max: number) => (r: MarketRow) => { const p = quotedPrice(r); return p !== null && p <= max }
@@ -825,7 +858,9 @@ export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: Ma
   const atStage: Record<MarketStage, (r: MarketRow) => boolean> = {
     answering: isLive,
     priced: (r) => r.commerce.state === 'hireable' || r.commerce.state === 'settleable',
-    passed: isWarranted,
+    hireable: (r) => isHireable(r),
+    checked: (r) => isHireable(r) && isChecked(r),
+    warranted: (r) => isHireable(r) && isWarrantedNow(r),
     delivered: (r) => (r.track.jobs.outsideDelivered ?? 0) > 0,
   }
   const dims: Record<string, ((r: MarketRow) => boolean) | null> = {
@@ -866,7 +901,9 @@ export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: Ma
     listed: inUniverse.length,
     answering: inUniverse.filter(atStage.answering).length,
     priced: inUniverse.filter(atStage.priced).length,
-    passed: inUniverse.filter(atStage.passed).length,
+    hireable: inUniverse.filter(atStage.hireable).length,
+    checked: inUniverse.filter(atStage.checked).length,
+    warranted: inUniverse.filter(atStage.warranted).length,
     delivered: inUniverse.filter(atStage.delivered).length,
   }
   all = finish(except(null))
@@ -882,8 +919,9 @@ export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: Ma
     COMMERCE_RANK[a.commerce.state] - COMMERCE_RANK[b.commerce.state]
     || Number(b.commerce.signedQuote === true) - Number(a.commerce.signedQuote === true)
   const byQual = (a: MarketRow, b: MarketRow) => QUAL_RANK[a.qual] - QUAL_RANK[b.qual]
-  const tested = (r: MarketRow) => (r.warrant.status === 'warranted' ? 0 : r.warrant.status === 'untested' ? 1 : 2)
-  const byTested = (a: MarketRow, b: MarketRow) => tested(a) - tested(b)
+  // The evidence order (V4.4): warranted, then checked against the chain, then delivered paid work, then answering.
+  const proven = (r: MarketRow) => (isWarrantedNow(r) ? 0 : isChecked(r) ? 1 : hasDelivered(r) ? 2 : r.standing?.pulled ? 4 : 3)
+  const byTested = (a: MarketRow, b: MarketRow) => proven(a) - proven(b)
   const byWarrantDate = (a: MarketRow, b: MarketRow) => (b.warrant.date ?? '').localeCompare(a.warrant.date ?? '')
   const priceNum = (r: MarketRow) => {
     const m = r.price?.match(/[\d.]+/)
@@ -903,8 +941,8 @@ export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: Ma
       case 'recent': return (b.warrant.date ?? '').localeCompare(a.warrant.date ?? '') || byQual(a, b) || tie
       case 'rated': return byRating(a, b) || byCommerce(a, b) || byQual(a, b) || tie
       default:
-        // Recommended (V4.2 L0): agents that passed their category's test first, untested after them; then hireable
-        // first, quality, verified rating, price. The home headline promises agents that work; the order keeps it.
+        // Recommended (V4.4): warranted, checked against the chain, delivered paid work, answering; then hireable first,
+        // quality, verified rating, price. The home headline promises agents that work; the order keeps it.
         return byTested(a, b) || byCommerce(a, b) || byQual(a, b) || byRating(a, b) || priceNum(a) - priceNum(b)
           || byWarrantDate(a, b) || b.identityCount - a.identityCount || (a.latencyMs ?? 1e9) - (b.latencyMs ?? 1e9) || tie
     }
@@ -944,7 +982,7 @@ export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: Ma
     } satisfies MarketRow
   })
   return { rows, total: all.length, offset, supply, facets, ladder, lane: both ? 'all' : lane,
-    failedGroup: failedGroup.slice(0, 60).map((r) => ({ agentId: r.agentId, name: r.name, category: r.category, testId: r.warrant.testId, failedField: r.warrant.failedField, date: r.warrant.date, networks: r.networks })),
+    failedGroup: dedupePulled(pulledRows).slice(0, 60).map((r) => ({ agentId: r.agentId, name: r.name, category: r.category, testId: r.warrant.testId, failedField: r.warrant.failedField, date: r.standing?.pulled?.at ?? r.warrant.date, networks: r.networks, reason: r.standing?.pulled?.text ?? null, identities: r.identities })),
     quoteObservedAt: shared ? new Date(shared.at).toISOString() : null,
     hasMore: offset + limit < all.length, generatedAt: new Date(base.at).toISOString() }
 }

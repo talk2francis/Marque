@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useAccount } from 'wagmi'
 import { Field, SelectField } from '../ui/Field'
 import { Button, Disclosure } from '../ui'
@@ -155,14 +155,17 @@ function Grid({ onChange, disabled }: { onChange: (v: TaskValue) => void; disabl
   }), [pair, lo, hi, cap, stop, N, S, bandOk, capOk, stopOk, lvOk])
   useEmit(onChange, v)
   const band = (pct: number) => { if (!spot) return; setLo(fmt(spot.price * (1 - pct))); setHi(fmt(spot.price * (1 + pct))) }
-  // A brief that asks for a band (the practice hire) sets it around the live price once that price is read.
-  useEffect(() => { if (bandAsked && spot && !lo && !hi) { band(bandAsked); setBandAsked(null) } }, [bandAsked, spot])
+  // The band starts at ±10% around the live price once it is read (or the band a practice brief asks for), and follows
+  // the pair until the buyer types a bound of their own (V4.4 P3).
+  const autoBand = useRef(true)
+  useEffect(() => { if (spot && (autoBand.current || (!lo && !hi))) { band(bandAsked ?? 0.1); setBandAsked(null); autoBand.current = true } }, [bandAsked, spot])
+  const own = (set: (v: string) => void) => (v: string) => { autoBand.current = false; set(v) }
   return (
     <div className="taskform-grid">
       <SelectField label="Pair" value={pair} onChange={setPair} options={PAIRS} help={spot ? <span className="taskform-help">{pair} now {fmt(spot.price)} USDT on PancakeSwap, block {Number(spot.block).toLocaleString('en-US')}. <button type="button" className="taskform-link" onClick={() => band(0.1)}>Band ±10%</button> · <button type="button" className="taskform-link" onClick={() => band(0.05)}>±5%</button></span> : 'Reading the current price…'} />
       <Field label="Capital" value={cap} onChange={setCap} unit="USDT" disabled={disabled} error={cap && !capOk ? 'Enter an amount above 0.' : null} />
-      <Field label="Lower price" value={lo} onChange={setLo} unit="USDT" disabled={disabled} error={lo && hi && !bandOk ? 'Lower must be below upper.' : null} />
-      <Field label="Upper price" value={hi} onChange={setHi} unit="USDT" disabled={disabled} />
+      <Field label="Lower price" value={lo} onChange={own(setLo)} unit="USDT" disabled={disabled} error={lo && hi && !bandOk ? 'Lower must be below upper.' : null} />
+      <Field label="Upper price" value={hi} onChange={own(setHi)} unit="USDT" disabled={disabled} />
       <Field label="Stop (optional)" value={stop} onChange={setStop} unit="USDT" disabled={disabled} error={!stopOk ? 'Below the lower price.' : null} help="No level is placed at or below it." />
       <Field label="Levels" value={levels} onChange={setLevels} disabled={disabled} error={!lvOk ? 'From 2 to 50.' : null} />
     </div>
@@ -266,7 +269,7 @@ function Free({ agentName, onChange, disabled }: { agentName: string; onChange: 
   useEmit(onChange, v)
   return (
     <div className="fld">
-      <label className="fld-label" htmlFor="free-task"><span>Your task for {agentName}</span></label>
+      <label className="fld-label" htmlFor="free-task"><span>Describe the job for {agentName}</span></label>
       <textarea id="free-task" className="taskform-text" rows={4} maxLength={1200} value={text} disabled={disabled} onChange={(e) => setText(e.target.value)} placeholder={`Say what ${agentName} should work on, with the numbers it needs.`} />
     </div>
   )

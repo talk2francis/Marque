@@ -1,6 +1,6 @@
 import { sql } from 'drizzle-orm'
 import { db, agentCategory, type Category } from '@marque/db'
-import { classifyByKeyword, type ClassificationInput } from './taxonomy.js'
+import { classifyByKeyword, statedCategory, type ClassificationInput } from './taxonomy.js'
 import { mapLimit } from './concurrency.js'
 
 /**
@@ -270,7 +270,7 @@ export async function reclassifyUnclassified(limit = 20000, opts: { staleOnly?: 
     if (c.category === 'unclassified') { result.unclassified++; return }
     const id = String(r['id'])
     await db().execute(sql`delete from agent_category where agent_id = ${id} and category = 'unclassified'`)
-    await writeLabel(id, c.category, c.confidence, 'keyword', c.rationale)
+    await writeLabel(id, c.category, c.confidence, c.method, c.rationale)
     result.classified++
     result.byCategory[c.category] = (result.byCategory[c.category] ?? 0) + 1
   })
@@ -289,11 +289,37 @@ export async function classifyKeywordPass(limit = 5000): Promise<ClassifyResult>
       name: row.name, description: row.description, tags: row.tags, skills: row.skills,
     }
     const c = classifyByKeyword(input)
-    await writeLabel(row.id, c.category, c.confidence, 'keyword', c.rationale)
+    await writeLabel(row.id, c.category, c.confidence, c.method, c.rationale)
     if (c.category === 'unclassified') result.unclassified++
     else result.classified++
     result.byCategory[c.category] = (result.byCategory[c.category] ?? 0) + 1
   })
 
   return result
+}
+
+/**
+ * A category the agent states about itself ("category: yield") replaces any keyword guess (V4.4 P2): the stated label is
+ * written with confidence 1 and the keyword labels it overrides are removed. Run every cycle; only agents whose own
+ * text names a category are read.
+ */
+export async function applyStatedCategories(): Promise<{ examined: number; applied: number }> {
+  const rows = await db().execute(sql`
+    select a.id, a.name, a.description, a.tags
+    from agent a
+    where a.chain_id in (56, 97) and (a.description ~* 'categor(y|ies)\s*[:=]' or a.tags::text ~* 'categor(y|ies)\s*[:=]')
+      and not exists (select 1 from agent_category c where c.agent_id = a.id and c.method = 'owner_declared')
+    limit 2000
+  `)
+  const list = ((rows as unknown as { rows?: unknown[] }).rows ?? (rows as unknown as unknown[])) as Array<Record<string, unknown>>
+  let applied = 0
+  for (const r of list) {
+    const stated = statedCategory({ description: (r['description'] as string | null) ?? null, tags: Array.isArray(r['tags']) ? (r['tags'] as string[]) : [] })
+    if (!stated) continue
+    const id = String(r['id'])
+    await db().execute(sql`delete from agent_category where agent_id = ${id} and method = 'keyword' and category <> ${stated.category}`)
+    await writeLabel(id, stated.category, 1, 'owner_declared', `the agent states "${stated.text}"`)
+    applied++
+  }
+  return { examined: list.length, applied }
 }

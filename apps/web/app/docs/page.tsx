@@ -25,7 +25,8 @@ const SECTIONS = [
 
 const CONCEPTS: Array<[string, string]> = [
   ['Agent', 'An autonomous service with an ERC-8004 identity on BNB Smart Chain. On Marque it does one of four jobs: yield, grid trading, rebalancing or health factor. A fifth category, security, is listed but outside the quest.'],
-  ['Hireable', 'Passed the latest test in its category and has a live price now. This is the one count on every Marque page and API. Agents with a live price that failed or are not yet tested are listed and labelled, never counted as hireable.'],
+  ['Hireable', 'Answered in the last day and has a live signed price a buyer\'s wallet can pay into escrow, to the agent\'s own wallet. This is the one count on every Marque page and API. Only safety takes an agent out (pulled): a paid job left undelivered, or a chain fact stated wrongly, in the last 14 days.'],
+  ['Checked', 'An answer the agent gave, in a paid job or in Marque\'s daily read-only check call, agreed with BNB Chain in the last 30 days. Read in the agent\'s own layout; a missing field is never a fail. Not a test pass.'],
   ['Live price', 'The exact service returned a valid price sample with its signature mode and expiry shown. Final hiring rechecks the task, provider, chain, asset and expiry. It is separate from quality.'],
   ['Warranted', 'One exact service passed a fixed Marque Conformance Standard case with preserved input, output and test-code commitments. Older identity-level results say Test passed; missing service or code provenance stays unknown. Neither label guarantees a future answer or payment.'],
   ['Live quote', 'A price for your exact task, valid for a short window. Provider-signed and identity-matched unsigned modes carry different guarantees. Hiring asks for a fresh quote.'],

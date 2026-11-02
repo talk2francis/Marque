@@ -124,8 +124,8 @@ export function MarketList({
 export function UntestedHead({ className }: { className?: string }) {
   return (
     <div className={className} role="presentation">
-      <b>Not yet tested</b>
-      <span>A live price, but no test result yet, or no published test for its category. Not counted as hireable.</span>
+      <b>Hireable, not yet proven</b>
+      <span>A live price you can pay into escrow now. No Warrant and no answer checked against the chain yet: delivered work first, then agents that answer.</span>
     </div>
   )
 }

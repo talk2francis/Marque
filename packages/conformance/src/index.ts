@@ -11,3 +11,5 @@ export { rebGroundTruth, rebPrompt, gradeReb, type RebPolicy, type RebGroundTrut
 export { hfGroundTruth, hfPrompt, gradeHf, type HfPolicy, type HfGroundTruth } from './tests/mcs-hf-1.js'
 export { gridGroundTruth, gridPrompt, gradeGrid, type GridPolicy, type GridGroundTruth } from './tests/mcs-grid-1.js'
 export { yieldGroundTruth, yieldPrompt, gradeYield, type YieldPolicy, type YieldGroundTruth } from './tests/mcs-yield-1.js'
+export { checksFor, hfChecks, rebChecks, gridChecks, yieldChecks, type CheckState, type LensCheck, type CheckableAnswer } from './lens-checks.js'
+export { checkVerdict, isReadOnlyTool, observeCheckCase, CHECK_TEST, type CheckVerdict } from './check.js'

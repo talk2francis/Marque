@@ -5,7 +5,8 @@ import type { MarketRow } from './market-model'
 
 /** The first page of the default view, rendered on the server so cards are in the first paint. */
 export type MarketFacetCounts = MarketFacets
-export type FailedGroupRow = { agentId: string; name: string; category: string | null; testId: string | null; failedField: string | null; date: string | null; networks?: Array<56 | 97> }
+/** A pulled agent (V4.4): out of the list and every hireable count for safety, with the reason. One per operator and endpoint. */
+export type FailedGroupRow = { agentId: string; name: string; category: string | null; testId: string | null; failedField: string | null; date: string | null; networks?: Array<56 | 97>; reason?: string | null; identities?: number }
 export interface InitialMarket { key: string; agents: MarketRow[]; total: number | null; hasMore: boolean; generatedAt: string | null; facets: MarketFacetCounts | null; failedGroup: FailedGroupRow[] }
 
 export async function initialMarket(category?: string): Promise<InitialMarket | null> {

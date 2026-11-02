@@ -14,6 +14,7 @@ import { randomUUID } from 'node:crypto'
 import { firstPartyAgentIds, safeFetch } from '@marque/probe'
 import { closeDb, firstPartyAgents } from '@marque/db'
 import { declaredReferenceTest } from './reference-standard.js'
+import { checkDeliveredJobs, checkSweep } from './checks.js'
 
 const ONCE = process.argv.includes('--once')
 const CYCLE_MS = Number(process.env.CONFORM_CYCLE_MS ?? 24 * 60 * 60_000)
@@ -43,10 +44,30 @@ function errorKind(error: unknown): string | null {
   return error instanceof Error ? error.name : 'request_failed'
 }
 
-/** Endpoint liveness does not establish consent for a task or its side effects. */
+/**
+ * Outside agents are not sent the Standard's test tasks without their operator (the builder test flow). They are asked one
+ * read-only check question a day instead (checks.ts), which never grades layout and never counts as a hire.
+ */
 async function sweep(): Promise<void> {
-  log('outside_sweep_skipped', { reason: 'Outside task tests require explicit provider control/permission and side-effect consent through the existing builder test flow.' })
+  log('outside_sweep_skipped', { reason: 'Outside Standard runs go through the builder test flow; the daily read-only check call covers every hireable agent.' })
   if (ONCE) throw new Error('outside_conformance_requires_provider_consent')
+}
+
+/** The next 02:00 UTC after `from`. */
+function nextCheckAt(from = Date.now()): number {
+  const d = new Date(from)
+  d.setUTCHours(2, 0, 0, 0)
+  if (d.getTime() <= from) d.setUTCDate(d.getUTCDate() + 1)
+  return d.getTime()
+}
+
+async function checksNow(force: boolean): Promise<void> {
+  const only = process.argv.filter((a) => /^\d+:0x[0-9a-fA-F]{40}:\d+$/.test(a))
+  if (!only.length) await checkDeliveredJobs(log).catch((err) => log('delivered_jobs_error', { error: errorKind(err) }))
+  const rows = await checkSweep({ force, only, log })
+  const tally: Record<string, number> = {}
+  for (const r of rows) tally[r.verdict] = (tally[r.verdict] ?? 0) + 1
+  log('check_sweep_done', { asked: rows.length, ...tally })
 }
 
 /**
@@ -118,9 +139,11 @@ async function referenceSweep(): Promise<void> {
 
 async function main(): Promise<void> {
   const referenceOnly = process.argv.includes('--reference')
-  log('start', { once: ONCE, cycleMs: CYCLE_MS, referenceCycleMs: REFERENCE_CYCLE_MS, referenceOnly })
+  const checksOnly = process.argv.includes('--checks')
+  log('start', { once: ONCE, cycleMs: CYCLE_MS, referenceCycleMs: REFERENCE_CYCLE_MS, referenceOnly, checksOnly })
   if (ONCE) {
-    if (referenceOnly) await referenceSweep()
+    if (checksOnly) await checksNow(process.argv.includes('--force'))
+    else if (referenceOnly) await referenceSweep()
     else await sweep()
     await closeDb()
     log('stop', {})
@@ -130,6 +153,7 @@ async function main(): Promise<void> {
   const defer = process.env.CONFORM_DEFER_ON_START === '1'
   let nextFull = Date.now() + (defer ? CYCLE_MS : 0)
   let nextReference = Date.now() + (defer ? REFERENCE_CYCLE_MS : 0)
+  let nextChecks = nextCheckAt()
   log('next_sweeps', { nextFull: new Date(nextFull).toISOString(), nextReference: new Date(nextReference).toISOString(), deferred: defer })
   while (!stopping) {
     if (Date.now() >= nextReference) {
@@ -138,13 +162,19 @@ async function main(): Promise<void> {
       }
       nextReference = Date.now() + REFERENCE_CYCLE_MS
     }
+    if (Date.now() >= nextChecks) {
+      try { await checksNow(false) } catch (err) {
+        log('check_sweep_error', { error: errorKind(err) })
+      }
+      nextChecks = nextCheckAt()
+    }
     if (Date.now() >= nextFull) {
       try { await sweep() } catch (err) {
         log('sweep_error', { error: errorKind(err) })
       }
       nextFull = Date.now() + CYCLE_MS
     }
-    await sleep(Math.max(60_000, Math.min(nextReference, nextFull) - Date.now()))
+    await sleep(Math.max(60_000, Math.min(nextReference, nextFull, nextChecks) - Date.now()))
   }
   await closeDb()
   log('stop', {})

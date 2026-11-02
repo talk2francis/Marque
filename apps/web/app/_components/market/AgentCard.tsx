@@ -43,6 +43,7 @@ export function AgentCard({ a, compare, base = '', variant = 'default' }: {
   const quoted = terms.state !== 'none'
   const declared = !quoted && a.priceProvenance === 'CLAIMED' ? a.price : null
   const w = a.warrant
+  const st = a.standing
   // Try free only when the agent answered Marque's probe recently (2 Nov). Buyer-linked ratings stay on untested agents:
   // they come from wallets that paid for a delivered job, and the card says beside them that they are not a test result.
   const free = answersFree(a) && (w.status !== 'untested' || a.liveness === 'live')
@@ -110,11 +111,21 @@ export function AgentCard({ a, compare, base = '', variant = 'default' }: {
             ? <span className={styles.off}>Quote lapsed</span>
             : <span className={styles.off}>{a.commerce.state === 'preview_only' || free ? 'Preview only' : 'Not hireable'}</span>}
         <span className={styles.sep} aria-hidden="true" />
-        {w.status === 'warranted' && w.date
+        {st?.pulled
+          ? <span className={styles.failed} title={`${st.pulled.text}. Out of the hireable count until a later check agrees.`}>Pulled: {st.pulled.reason === 'undelivered' ? 'paid job undelivered' : 'wrong answer'}</span>
+          : w.status === 'warranted' && w.date
           ? stale ? <span className={styles.retest}>Retest due</span> : <span className={styles.warrant}><Check aria-hidden="true" />Test passed {utcDay(w.date)}</span>
+          : st?.warranted
+            ? <span className={styles.warrant} title="Its mainnet identity, same owner and endpoint, passed Marque's published test"><Check aria-hidden="true" />Test passed on mainnet {utcDay(st.warranted.at)}</span>
+          : st?.checked
+            ? <span className={styles.warrant} title={`An answer${st.checked.via === 'job' ? ' in a paid job' : ' to Marque\'s daily check call'} agreed with BNB Chain${st.checked.onMainnet ? ' (its mainnet identity)' : ''}. Not a test pass.`}><Check aria-hidden="true" />Checked {utcDay(st.checked.at)}</span>
           : w.status === 'failed'
             ? <span className={styles.failed} title={`Failed ${w.testId ?? 'MCS'}${w.failedField ? ` on ${w.failedField}` : ''}${w.date ? `, ${utcDay(w.date)}` : ''}. The record is on its page.`}>Failed {w.testId ?? 'the test'}</span>
-            : <span className={styles.untested}>{a.category === 'security' || !a.category || a.category === 'unclassified' ? 'No test for its category yet' : 'Not yet tested'}</span>}
+            : w.noFit
+              ? <span className={styles.untested} title={`Its category's published test${w.testId ? ` (${w.testId})` : ''} asks about a different job than the one this agent describes.`}>No Marque test fits this agent yet</span>
+            : w.format
+              ? <span className={styles.untested} title={`Its answer to ${w.testId ?? 'the test'}${w.date ? ` on ${utcDay(w.date)}` : ''} did not use the test's fields. Counts as untested, not as a wrong answer.`}>Answer not in the test&apos;s format</span>
+              : <span className={styles.untested}>{a.category === 'security' || !a.category || a.category === 'unclassified' ? 'No test for its category yet' : 'Not yet tested'}</span>}
       </p>
 
       <dl className={styles.stats} title={a.track.computedAt ? `Job and review index observed ${a.track.computedAt}${a.track.sourceStale ? ' (cached, refresh pending)' : ''}` : 'Index observation time unavailable'}>
