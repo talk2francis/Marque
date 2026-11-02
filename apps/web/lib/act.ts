@@ -105,3 +105,8 @@ export async function outcomesForAgent(agentKey: string): Promise<OutcomeView[]>
   const rows = (await db().execute(sql`select * from outcome where agent_key = ${agentKey} order by created_at desc limit 50`).catch(() => [])) as unknown as Array<Record<string, unknown>>
   return rows.map(view)
 }
+/** Every recorded action on a network, newest first (2 Nov): /judge lists them with their transactions. */
+export async function recordedOutcomes(chainId: 56 | 97, limit = 10): Promise<OutcomeView[]> {
+  const rows = (await db().execute(sql`select * from outcome where chain_id = ${chainId} order by created_at desc limit ${limit}`).catch(() => [])) as unknown as Array<Record<string, unknown>>
+  return rows.map(view)
+}

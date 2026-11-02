@@ -43,7 +43,8 @@ export function AgentCard({ a, compare, base = '', variant = 'default' }: {
   const quoted = terms.state !== 'none'
   const declared = !quoted && a.priceProvenance === 'CLAIMED' ? a.price : null
   const w = a.warrant
-  // Try free only when the agent answered Marque's probe recently; an untested agent shows no stars (2 Nov).
+  // Try free only when the agent answered Marque's probe recently (2 Nov). Buyer-linked ratings stay on untested agents:
+  // they come from wallets that paid for a delivered job, and the card says beside them that they are not a test result.
   const free = answersFree(a) && (w.status !== 'untested' || a.liveness === 'live')
   const untested = w.status === 'untested'
   const classified = a.category && a.category !== 'unclassified'
@@ -130,8 +131,8 @@ export function AgentCard({ a, compare, base = '', variant = 'default' }: {
         </div>
         <div>
           <dt>Rating</dt>
-          <dd>{untested ? <span className={styles.none}>Not shown</span> : verified.averageStars !== null && verified.count > 0 ? <>{verified.averageStars.toFixed(1)}<span className={styles.star} aria-hidden="true">★</span></> : <span className={styles.none}>{a.track.available === false ? 'Unavailable' : 'Not yet'}</span>}</dd>
-          <dd className={styles.src}>{untested ? 'shown once it is tested' : verified.count > 0 ? `${verified.count} linked ${verified.count === 1 ? 'review' : 'reviews'}` : a.track.available === false ? 'rating evidence unavailable' : 'no linked reviews'}</dd>
+          <dd>{verified.averageStars !== null && verified.count > 0 ? <>{verified.averageStars.toFixed(1)}<span className={styles.star} aria-hidden="true">★</span></> : <span className={styles.none}>{a.track.available === false ? 'Unavailable' : 'Not yet'}</span>}</dd>
+          <dd className={styles.src}>{verified.count > 0 ? `${verified.count} linked ${verified.count === 1 ? 'review' : 'reviews'}${untested ? ', not a test result' : ''}` : a.track.available === false ? 'rating evidence unavailable' : 'no linked reviews'}</dd>
         </div>
       </dl>
 

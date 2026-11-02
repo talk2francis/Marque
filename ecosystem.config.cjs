@@ -232,8 +232,9 @@ module.exports = {
       // spawns a child and PM2 saw only the 19 MB wrapper; P2-11 memory budget).
       interpreter: 'node',
       node_args: '--import tsx',
-      // Mainnet only (G-M1, G-M2). Settles are MegaFuel-sponsored; own gas only above the floor.
-      env: { ...env, NODE_ENV: 'production', KEEPER_CHAINS: '56', KEEPER_MAX_PER_HOUR: '50', KEEPER_MIN_BNB: '0.0003' },
+      // Mainnet (G-M1, G-M2) and, from 2 Nov, testnet: a practice hire also settles once its 15-minute window
+      // closes, so builders' testnet hires complete. Settles are MegaFuel-sponsored; own gas only above the floor.
+      env: { ...env, NODE_ENV: 'production', KEEPER_CHAINS: '56,97', KEEPER_MAX_PER_HOUR: '50', KEEPER_MIN_BNB: '0.0003' },
       autorestart: true,
       max_restarts: 20,
       restart_delay: 30000,

@@ -115,7 +115,7 @@ export default async function JobRoom({ params }: { params: Promise<{ chainId: s
   const upcoming: Array<{ label: string; when: string | null }> = []
   if (state === 'OPEN') upcoming.push({ label: 'Paid into escrow', when: null }, { label: 'Delivered', when: null })
   if (state === 'FUNDED') upcoming.push({ label: 'Delivered', when: t?.submitDeadline ? `by ${utcStamp(t.submitDeadline * 1000)}` : null })
-  if (state === 'OPEN' || state === 'FUNDED' || state === 'SUBMITTED') upcoming.push({ label: 'Review window ends', when: t?.reviewEndsAt ? utcStamp(t.reviewEndsAt * 1000) : windowS ? `${Math.round(windowS / 86400) || Math.round(windowS / 60)} ${windowS >= 86400 ? 'days' : 'minutes'} after delivery` : null }, { label: 'Paid to the agent', when: null })
+  if (state === 'OPEN' || state === 'FUNDED' || state === 'SUBMITTED') upcoming.push({ label: 'Review window ends', when: t?.reviewEndsAt ? utcStamp(t.reviewEndsAt * 1000) : windowS ? `${Math.round(windowS / 86400) || Math.round(windowS / 60)} ${windowS >= 86400 ? 'days' : 'minutes'} after delivery` : null }, { label: 'Paid to the agent', when: t?.reviewEndsAt ? `Releases on ${utcStamp(t.reviewEndsAt * 1000)} unless disputed; Marque's keeper settles it, and anyone may` : null })
   if (state === 'COMPLETED') upcoming.push({ label: 'Paid to the agent', when: null })
 
   return (

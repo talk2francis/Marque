@@ -5,7 +5,7 @@ import type { PublicClient } from 'viem'
 import { SiteHeader, SiteFooter } from '../_components/SiteHeader'
 import { storefrontByToken } from '../../lib/storefront'
 import { jobLens } from '../../lib/lens'
-import { outcomesForJob } from '../../lib/act'
+import { outcomesForJob, recordedOutcomes } from '../../lib/act'
 import { funderClass, questJob } from '@marque/commerce'
 import { plan } from '@marque/act'
 import { marketplaceAgentsCached as marketplaceAgents } from '../../lib/market-cache'
@@ -37,6 +37,7 @@ const short = (a: string) => `${a.slice(0, 6)}…${a.slice(-4)}`
 export default async function JudgePage() {
   const keel = referenceAgent('keel')
   const load = async () => {
+    const recorded = await recordedOutcomes(56).catch(() => [])
     const [pos, hf, keelPage, lens, acted, featured, earlier, live] = await Promise.all([
       venusReader(DEMO as `0x${string}`, { client: (archiveClient() ?? publicClient()) as PublicClient }).catch(() => null),
       marketplaceAgents({ tab: 'ready', category: 'health_factor', limit: 1 }).then((r) => ({ total: r.total })).catch(() => null),
@@ -52,6 +53,7 @@ export default async function JudgePage() {
       pos: pos ? { ok: pos.ok, blockNumber: pos.blockNumber.toString(), hf: pos.ok ? pos.data.healthFactor?.value ?? null : null } : null,
       hf, keelTest: keelPage?.tests.find((t) => t.testId === 'MCS-HF-1') ?? null,
       lens: lens ? { summary: lens.summary, matches: lens.manifest?.matches ?? null, state: lens.state } : null, acted,
+      recorded: recorded.map((r) => ({ jobKey: r.jobKey, action: r.action, category: r.category, amount: r.amount, symbol: r.symbol, tx: r.txHashes.at(-1) ?? null, block: r.after.block, hfBefore: r.before.healthFactor, hfAfter: r.after.healthFactor, funder: funderClass(r.user) })),
       funder: featured?.funderClass ?? null,
       funderOperates: featured?.client ? (await operatorWalletsHere().catch(() => null))?.has(featured.client.toLowerCase()) ?? false : false,
       earlier: (earlier[0] ? { ...earlier[0], funder: funderClass(earlier[0].user) } : null),
@@ -64,7 +66,7 @@ export default async function JudgePage() {
       planNote: live && !live.ok ? live.reason : live && live.ok ? 'Built and simulated at the current block.' : null,
     }
   }
-  const d = await cachedProjection('judge:v3', load, { freshMs: 60_000, timeoutMs: 20_000, staleWhileRevalidate: true }).then((p) => p.value).catch(load)
+  const d = await cachedProjection('judge:v4', load, { freshMs: 60_000, timeoutMs: 20_000, staleWhileRevalidate: true }).then((p) => p.value).catch(load)
   const { hf, keelTest, acted } = d
   const pos = d.pos
   const lens = d.lens
@@ -74,7 +76,7 @@ export default async function JudgePage() {
   const e = d.earlier
   const blk = (n: string | number | bigint | null | undefined) => (n == null ? 'not read' : Number(n).toLocaleString('en-US'))
   const funderWords = d.funder === 'outside' ? (d.funderOperates ? 'paid by an outside wallet that also operates agents listed here' : 'paid by an outside wallet') : d.funder === 'team' ? 'paid by a Marque team test wallet' : d.funder === 'operator' ? "paid by the agent's own operator" : 'payer not classified'
-  const steps: Array<{ title: string; body: React.ReactNode; action: React.ReactNode }> = [
+  const steps: Array<{ title: string; body: React.ReactNode; action: React.ReactNode; after?: React.ReactNode }> = [
     {
       title: 'A position that needs work',
       body: <>Venus borrower <span className="mono">{short(DEMO)}</span>: health factor <b className="mono">{hfVal !== null ? hfVal.toFixed(3) : 'n/a'}</b>{hfVal !== null && hfVal < 1.2 ? ', needs attention' : ''} (block {blk(pos?.blockNumber)}).</>,
@@ -104,6 +106,16 @@ export default async function JudgePage() {
         </>
       ),
       action: <>{e ? <a className="btn btn--sm" href={`/jobs/${EARLIER.replace(':', '/')}`}>The earlier test</a> : null}<a className="btn btn--sm" href="/docs/changelog#v4">How acting works</a></>,
+      after: d.recorded?.length ? (
+        <ul className={styles.acts} aria-label="Every recorded action on BSC mainnet">
+          {d.recorded.map((r) => (
+            <li key={`${r.jobKey}-${r.block}`}>
+              <span>{r.action === 'repay' ? 'Repay' : 'Supply'} {r.amount.toLocaleString('en-US', { maximumFractionDigits: 4 })} {r.symbol} on Venus, from the answer in <a href={`/jobs/${r.jobKey.replace(':', '/')}`}>job {r.jobKey.split(':')[1]}</a>{r.hfBefore !== null ? `: health factor ${r.hfBefore.toFixed(3)} to ${r.hfAfter?.toFixed(3) ?? 'no debt'}` : ''}. Block {blk(r.block)}. {r.funder === 'team' ? 'A Marque team test wallet, small position.' : null}</span>
+              {r.tx ? <a href={`https://bscscan.com/tx/${r.tx}`} target="_blank" rel="noreferrer">Transaction</a> : null}
+            </li>
+          ))}
+        </ul>
+      ) : null,
     },
     {
       title: 'Check it yourself',
@@ -128,6 +140,7 @@ export default async function JudgePage() {
                 <span className={styles.stepTitle}>{s.title}</span>
                 <div className={styles.stepWhy}>{s.body}</div>
                 <div className={styles.stepActions}>{s.action}</div>
+                {s.after ?? null}
               </div>
             </li>
           ))}

@@ -196,6 +196,28 @@ for (const line of body.split('\n')) {
   await page.close()
 }
 
+// Readable without scripts (T7, 2 Nov): the home page's plain HTML carries the hireable and priced counts, its
+// JSON-LD carries the same numbers, and the marketplace's plain HTML carries a count and agent cards. A reader that
+// runs no JavaScript (most AI assistants) sees what a person sees.
+{
+  let problem = null
+  for (let attempt = 0; attempt < 3; attempt++) {
+    problem = null
+    const html = await fetch(`${BASE}/`).then((r) => r.text()).catch(() => '')
+    const ld = html.match(/<script type="application\/ld\+json" id="supply-ld">(.*?)<\/script>/s)
+    const values = ld ? Object.fromEntries(JSON.parse(ld[1]).variableMeasured.map((v) => [v.name, v.value])) : null
+    const hero = html.replace(/<[^>]+>/g, ' ').match(/Hireable\s+(\d+)\s+passed Marque/)
+    if (!values) problem = 'home has no supply JSON-LD'
+    else if (!hero) problem = 'home HTML has no hireable count'
+    else if (Number(hero[1]) !== values.hireable) problem = `home hero says ${hero[1]} hireable, JSON-LD says ${values.hireable}`
+    const reg = await fetch(`${BASE}/register`).then((r) => r.text()).catch(() => '')
+    if (!problem && /Counting agents/.test(reg.replace(/<script[\s\S]*?<\/script>/g, ''))) problem = '/register HTML says Counting agents'
+    if (!problem && !/data-agent="\d+:/.test(reg)) problem = '/register HTML has no agent card'
+    if (!problem) break
+  }
+  if (problem) { failures++; console.log(`FAIL no-script read: ${problem}`) } else console.log('ok   no-script read: home counts, JSON-LD and marketplace cards are in the HTML')
+}
+
 await browser.close()
 failures += blockedWrites.length
 console.log(`Read-only verification: ${telemetryIntercepted} telemetry attempts intercepted locally; ${blockedWrites.length} unexpected writes blocked.`)

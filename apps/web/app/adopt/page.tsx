@@ -21,6 +21,31 @@ const bnbUsd = () => cachedProjection('adopt:bnb', async () => {
 
 const n = (v: number | null, dp = 0) => (v === null ? 'not measured' : v.toLocaleString('en-US', { maximumFractionDigits: dp }))
 
+// Public addresses only (2 Nov). Every one is also in config/team-wallets.json, which keeps team activity out of every count.
+const KEY_ADDRESSES: Record<string, Array<[string, string]>> = {
+  'Six reference seller keys (Bound, Lattice, Sluicegate, Keel, Redcell, Tidemark)': [
+    ['Bound', '0x5B1c9fBc684a1722Bb5C66C0B22F149dA69768d6'], ['Lattice', '0x5aAF7b5B2170986C59279682Bd714c475ae8C718'],
+    ['Sluicegate', '0x253F7Ad5D52099C4a2293418a661e9974DfB5e84'], ['Keel', '0xdF1074a272C53A1a10b96Fa0201Eb58bbbaaFe00'],
+    ['Redcell', '0x1F0D0eF5a279888E3b86c8a99A8A99F19fCEc587'], ['Tidemark', '0x8122991297DC98Dc5c735fDE90a501528922aFdC'],
+  ],
+  'Keeper key': [['Keeper', '0x781ee69bf9f9C14E2BC496181714f4DF5348556a']],
+  'Testnet operator key': [['Operator', '0x9598AB46aAB33389C2e9Ffe0511effD330f67F9B']],
+  'Mainnet deployer key': [['Deployer', '0x2e010AaDFdFEbC2AdFCAFA5F83e9687ffA47C573']],
+}
+
+// The monthly cost, item by item (2 Nov). Amounts Marque cannot measure stay "not provided" until the operator adds
+// them from the invoice; a zero is shown only where the service is free by its own terms.
+const COSTS: Array<[string, string, string]> = [
+  ['Server: one VPS (6 vCPU, 11 GiB RAM, 193 GB disk) running everything', 'not provided', "The operator's hosting invoice"],
+  ['Domain marque.trade', 'not provided', "The operator's registrar invoice"],
+  ['Public BSC RPC endpoints (reads and writes)', '0', 'Public endpoints, no key or plan'],
+  ['NodeReal key (transfer history; MegaFuel gas sponsorship for settles)', 'not provided', "The plan on the operator's account"],
+  ['Archive RPC (replaying historical benchmarks only)', 'not provided', "The plan on the operator's account"],
+  ['Encrypted offsite backup (Google Drive)', 'not provided', "The operator's storage plan"],
+  ['Source and CI (public GitHub repository, Actions)', '0', 'Free for public repositories'],
+  ['Health alerts (Telegram bot)', '0', 'The Telegram Bot API is free'],
+]
+
 const KEYS: Array<[string, string, string, string]> = [
   ['Buyers’ keys', 'In the buyer’s own wallet, or made on the buyer’s device from a passkey (Marque Pass)', 'Sign the buyer’s own hires and ratings', 'Marque never receives, stores or uses one. No server route accepts a user key.'],
   ['Six reference seller keys (Bound, Lattice, Sluicegate, Keel, Redcell, Tidemark)', 'An encrypted BNB Agent Studio keystore per agent on the server, unlocked by a password in a 0600 file', 'Sign each agent’s own price quotes and submit its own deliveries; receive its own payments', 'Cannot touch buyers’ funds, approvals or escrowed payments; cannot act for any other agent.'],
@@ -53,8 +78,15 @@ export default async function AdoptPage() {
 
         <section className={styles.sec} aria-labelledby="cost">
           <h2 id="cost">1. Monthly running cost</h2>
+          <div className={styles.tableWrap}>
+            <table className={styles.table}>
+              <thead><tr><th>Item</th><th>Per month</th><th>Source</th></tr></thead>
+              <tbody>{COSTS.map(([item, amount, source]) => <tr key={item}><td>{item}</td><td>{amount === '0' ? '$0' : amount}</td><td>{source}</td></tr>)}</tbody>
+              <tfoot><tr><td>Total</td><td>{COSTS.some(([, a]) => a === 'not provided') ? 'not provided' : 'see items'}</td><td>Not totalled until every amount is provided; a partial sum would read as the whole.</td></tr></tfoot>
+            </table>
+          </div>
           <dl className={styles.facts}>
-            <div><dt>Server</dt><dd>One VPS: 6 vCPU, 11 GiB RAM, 193 GB disk (75% used), measured 26 Oct 2026. It runs the site, the indexer, probes, quotes, the keeper, the six reference sellers, the MCP server, Postgres and Redis. The plan&apos;s price is on the operator&apos;s invoice, not measured here.</dd></div>
+            <div><dt>Server</dt><dd>One VPS: 6 vCPU, 11 GiB RAM, 193 GB disk (75% used), measured 26 Oct 2026. It runs the site, the indexer, probes, quotes, the keeper, the six reference sellers, the MCP server, Postgres and Redis.</dd></div>
             <div><dt>RPC</dt><dd>Pooled public BSC endpoints for reads and writes; a NodeReal key for transfer history; an archive endpoint used only to replay historical benchmarks.</dd></div>
             <div><dt>Storage</dt><dd>Database 6.6 GB; a nightly dump (124 MB of backups on disk, kept 7 days) with an encrypted offsite copy.</dd></div>
             <div><dt>Network fees per hire</dt><dd>{gas && gas.hireBnbMedian !== null ? <>Median {n(gas.hireBnbMedian, 7)} BNB{usd ? ` (about $${(gas.hireBnbMedian * usd).toFixed(3)})` : ''}, {n(gas.hireGasMedian)} gas over {n(gas.hireTxsMedian)} buyer transactions, paid by the buyer. Measured from {gas.hires} mainnet hires&apos; receipts.</> : 'Not measured just now.'}</dd></div>
@@ -84,8 +116,8 @@ export default async function AdoptPage() {
           <p>User keys held by Marque: none.</p>
           <div className={styles.tableWrap}>
             <table className={styles.table}>
-              <thead><tr><th>Key</th><th>Where it lives</th><th>What it can do</th><th>What it cannot</th></tr></thead>
-              <tbody>{KEYS.map(([k, w, can, cannot]) => <tr key={k}><td>{k}</td><td>{w}</td><td>{can}</td><td>{cannot}</td></tr>)}</tbody>
+              <thead><tr><th>Key</th><th>Where it lives</th><th>What it can do</th><th>What it cannot</th><th>Public address</th></tr></thead>
+              <tbody>{KEYS.map(([k, w, can, cannot]) => <tr key={k}><td>{k}</td><td>{w}</td><td>{can}</td><td>{cannot}</td><td>{KEY_ADDRESSES[k]?.map(([label, a]) => <span key={a} className={styles.addr}>{label}: <a className="mono" href={`https://bscscan.com/address/${a}`} target="_blank" rel="noreferrer">{a.slice(0, 6)}…{a.slice(-4)}</a></span>) ?? 'none'}</td></tr>)}</tbody>
             </table>
           </div>
         </section>

@@ -70,8 +70,24 @@ export default async function Home() {
     mainnet ? funnelLine(mainnet).catch(() => null) : null,
   ])
 
+  // Readable without scripts (T7, 2 Nov): the same supply numbers as the hero, as structured data for crawlers and
+  // AI assistants that do not run JavaScript. Read from the one count (supply-truth.ts), never typed in.
+  const ld = mainnet ? {
+    '@context': 'https://schema.org', '@type': 'Dataset', name: 'Marque agent supply on BNB Smart Chain',
+    url: 'https://marque.trade/api/v1/phase2/coverage', dateModified: mainnet.measuredAt,
+    description: 'Agents on BSC mainnet that passed Marque\'s published test and have a live price (hireable), and all agents with a live price (priced). Networks are never added together.',
+    variableMeasured: [
+      { '@type': 'PropertyValue', name: 'hireable', description: 'passed its test, with a live price, BSC mainnet', value: mainnet.passed },
+      { '@type': 'PropertyValue', name: 'priced', description: 'live price, tested or not, BSC mainnet', value: mainnet.priced },
+      { '@type': 'PropertyValue', name: 'failed', description: 'live price, latest test failed, BSC mainnet', value: mainnet.failed },
+      { '@type': 'PropertyValue', name: 'notYetTested', description: 'live price, no test result, BSC mainnet', value: mainnet.notYetTested },
+      ...(testnet ? [{ '@type': 'PropertyValue', name: 'pricedTestnet', description: 'live price, BSC testnet', value: testnet.priced }] : []),
+    ],
+  } : null
+
   return (
     <>
+      {ld ? <script type="application/ld+json" id="supply-ld" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld).replace(/</g, '\\u003c') }} /> : null}
       <SiteHeader />
       <main className={styles.main}>
         {/* ---- Hero: the arch plate and the promise ---- */}
