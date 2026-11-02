@@ -57,14 +57,18 @@ export default async function TestPage({ params }: { params: Promise<{ testId: s
   const cases = CASES.filter((c) => c.testId === id)
 
   const results = await db().execute(sql`
-    select agent_id, pass, failed_fields, error, block_number, latency_ms, ran_at
+    select agent_id, pass, failed_fields, error, block_number, latency_ms, ran_at,
+           -- A run that stated no wrong value is an answer not in the test's format (V4.4), not a failure.
+           (not pass and exists (select 1 from jsonb_array_elements(diffs) d
+              where d->>'pass' = 'false' and coalesce(d->>'actual', '') <> '' and coalesce(d->>'actual', '') !~ '^\\((not |no )')) as stated_wrong
     from conformance_result
     where test_id = ${id} and agent_id not like 'stub:%'
     order by ran_at desc limit 100
   `).then(unwrap).catch(() => [])
 
   const passes = results.filter((r) => r['pass'] === true)
-  const failures = results.filter((r) => r['pass'] !== true)
+  const failures = results.filter((r) => r['pass'] !== true && r['stated_wrong'] === true)
+  const formatMisses = results.filter((r) => r['pass'] !== true && r['stated_wrong'] !== true)
 
   return (
     <>
@@ -166,15 +170,16 @@ export default async function TestPage({ params }: { params: Promise<{ testId: s
             <>
               <p className={styles.note}>
                 <ProvenanceChip provenance="TESTED" />
-                {passes.length} pass, {failures.length} fail, across {results.length} recorded runs.
-                Failures are listed first because they are the more useful half.
+                {passes.length} pass, {failures.length} fail, {formatMisses.length} not in the test&apos;s format,
+                across {results.length} recorded runs. A fail is a value stated outside tolerance; an answer that left
+                the graded fields out, or no answer, counts as untested. Failures are listed first.
               </p>
               <table className={styles.table}>
                 <thead>
-                  <tr><th>Agent</th><th>Verdict</th><th>Failed on</th><th>Block</th><th>Latency</th><th>When</th></tr>
+                  <tr><th>Agent</th><th>Verdict</th><th>Fields not met</th><th>Block</th><th>Latency</th><th>When</th></tr>
                 </thead>
                 <tbody>
-                  {[...failures, ...passes].map((r, i) => {
+                  {[...failures, ...formatMisses, ...passes].map((r, i) => {
                     const fields = Array.isArray(r['failed_fields']) ? (r['failed_fields'] as string[]) : []
                     return (
                       <tr key={`${String(r['agent_id'])}-${i}`}>
@@ -182,7 +187,8 @@ export default async function TestPage({ params }: { params: Promise<{ testId: s
                         <td>
                           {r['pass'] === true
                             ? <Chip tone="holds">pass</Chip>
-                            : <Chip tone="breach">{r['error'] ? 'no answer' : 'fail'}</Chip>}
+                            : r['stated_wrong'] === true ? <Chip tone="breach">fail</Chip>
+                              : <Chip tone="neutral">{r['error'] ? 'no answer' : 'not in format'}</Chip>}
                         </td>
                         <td style={{ whiteSpace: 'normal', minWidth: '24ch' }}>
                           {r['error']
