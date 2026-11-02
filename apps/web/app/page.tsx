@@ -16,6 +16,7 @@ import {
 import { CATEGORY_SLUG } from './register/market-model'
 import styles from './home.module.css'
 import { supplyNow, SUPPLY_DEFINITIONS } from '../lib/supply-truth'
+import { proofProjection } from '../lib/proof'
 
 // Same for every visitor, so served from Next's cache and re-rendered at most every 30 s
 // (P2-11 load test: rendering per request capped the site near 15 requests a second).
@@ -64,7 +65,8 @@ export default async function Home() {
   const ready = market?.all ?? []
   const picks = market?.picks ?? []
   // One supply count for every number on the page (supply-truth.ts): hireable means a live signed price and not pulled.
-  const [mainnet, testnet] = await Promise.all([supplyNow(56).catch(() => null), supplyNow(97).catch(() => null)])
+  const [mainnet, testnet, proof] = await Promise.all([supplyNow(56).catch(() => null), supplyNow(97).catch(() => null), // The jobs section waits at most 3 s on a cold cache: the home page never hangs on the job table.
+    Promise.race([proofProjection().then((p) => p.value), new Promise<null>((r) => setTimeout(() => r(null), 3000))]).catch(() => null)])
   const [tiles, line] = await Promise.all([
     market && mainnet ? categoryTiles(ready, market.supply, mainnet.measuredAt, mainnet, testnet).catch(() => null) : null,
     mainnet ? funnelLine(mainnet).catch(() => null) : null,
@@ -130,6 +132,7 @@ export default async function Home() {
             <dl className={styles.callouts} aria-label={`Quote snapshot at ${line.measuredAt}`}>
               <div><dt>Hireable</dt><dd><b className="num">{line.hireable}</b> hireable now on mainnet<SnapshotAge iso={line.measuredAt} /></dd></div>
               <div><dt>Proven</dt><dd><b className="num">{line.checked}</b> checked against the chain. <b className="num">{line.warranted}</b> hold a Marque Warrant.</dd></div>
+              {proof ? <div><dt>Every job</dt><dd><a href="/proof"><b className="num">{proof.rows.length}</b> hires in the open, who paid and what the chain said</a></dd></div> : null}
             </dl>
           ) : null}
 
@@ -166,6 +169,23 @@ export default async function Home() {
             </Limits>
           </section>
         ) : null}
+
+        {/* ---- Every job, in the open (2 Nov): the hires themselves, one click from the record ---- */}
+        {proof ? (() => {
+          const m = proof.totals['56']!.outside, t = proof.totals['97']!.outside
+          return (
+            <section className={styles.section} aria-labelledby="every-job" data-reveal>
+              <Head label="Every job" note="BNB Chain's ERC-8183 escrow · both networks, never added" id="every-job" title="Every hire, in the open." action={<a className={styles.more} href="/proof">See every job <ArrowRight aria-hidden="true" /></a>} />
+              <dl className={styles.kpis}>
+                <div><dt>Jobs through Marque</dt><dd className={styles.kpiNum}>{proof.rows.length}</dd><dd className={styles.kpiNote}>Each with who paid, what was delivered and the escrow record. Team test jobs listed, never counted.</dd></div>
+                <div><dt>Completed for outside wallets</dt><dd className={styles.kpiNum}>{m.settled}</dd><dd className={styles.kpiNote}>On mainnet, from {m.wallets} outside {m.wallets === 1 ? 'wallet' : 'wallets'}. {t.settled} more on testnet.</dd></div>
+                <div><dt>Chain checks agreeing</dt><dd className={styles.kpiNum}>{m.checksDecided ? `${m.checksAgreed}/${m.checksDecided}` : '0'}</dd><dd className={styles.kpiNote}>Facts in delivered answers that Marque re-read from BNB Chain and found right, outside mainnet jobs.</dd></div>
+                <div><dt>Rated by the buyer</dt><dd className={styles.kpiNum}>{m.rated}</dd><dd className={styles.kpiNote}>Ratings on chain from outside wallets that paid for the job, on mainnet.</dd></div>
+              </dl>
+              <p className={styles.kpiFoot}><a className="btn btn--sm" href="/proof">See every job</a> Filter by agent, wallet, network or state; every row links to its Job Room and to getJob on BscScan.</p>
+            </section>
+          )
+        })() : null}
 
         {/* ---- Four categories ---- */}
         <section className={styles.section} aria-labelledby="cats" data-reveal>

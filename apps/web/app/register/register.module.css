@@ -1088,3 +1088,27 @@ a.introBack:hover { color: var(--fg); }
 }
 /* Phones (2 Nov top-deck pass): the strip is a band, not a second hero, so the search sits near the first screen. */
 @media (max-width: 760px) { .introArt { aspect-ratio: 3.4 / 1; max-height: 22svh; } }
+/* ---------- The depth of the market (2 Nov): registered to proven, one row, each step opens its list ---------- */
+.depth { margin: var(--s4) 0 0; display: grid; gap: var(--s2); max-width: 860px; }
+.depthHead { margin: 0; font-size: 11.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--fg-faint); }
+.depthSteps { position: relative; list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); }
+.depthSteps::before { content: ''; position: absolute; left: 0; right: 0; top: 4px; height: 1px; background: linear-gradient(90deg, var(--line), var(--line-strong) 60%, var(--brass) 66%, var(--line) 100%); pointer-events: none; }
+.depthSteps li { position: relative; padding-top: 18px; min-width: 0; }
+.depthSteps li::before { content: ''; position: absolute; top: 0; left: 0; width: 9px; height: 9px; border-radius: 50%; background: var(--canvas); box-shadow: inset 0 0 0 1px var(--line-strong); }
+.depthSteps li[data-key]::before { background: var(--brass); box-shadow: 0 0 0 4px color-mix(in srgb, var(--brass) 20%, transparent); }
+.depthSteps a, .depthSteps li > span { display: grid; gap: 2px; padding-right: var(--s2); color: inherit; text-decoration: none; }
+.depthN { font-size: clamp(19px, 2vw, 26px); font-weight: 500; letter-spacing: -0.02em; line-height: 1.1; color: var(--fg); font-variant-numeric: tabular-nums; }
+.depthL { font-size: 12.5px; color: var(--fg-faint); white-space: nowrap; }
+.depthSteps li[data-key] .depthL { color: var(--fg-soft); }
+.depthSteps a:hover .depthL { color: var(--fg); }
+.depthSteps a:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; border-radius: var(--r-xs); }
+.depthFoot { margin: 0; font-size: 13px; color: var(--fg-faint); }
+.depthFoot a { color: var(--fg-soft); text-decoration: none; border-bottom: 1px solid var(--line-strong); }
+.depthFoot a:hover { color: var(--fg); }
+.marketAnchor { scroll-margin-top: calc(var(--header-h) + 8px); }
+/* Phones: one row that scrolls sideways, so the funnel stays a line and the search stays near the top. */
+@media (max-width: 760px) {
+  .depthSteps { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: minmax(88px, max-content); overflow-x: auto; scrollbar-width: none; margin-right: calc(-1 * var(--s4)); padding-right: var(--s4); }
+  .depthSteps::-webkit-scrollbar { display: none; }
+  .depthSteps::before { right: auto; width: 100%; min-width: 640px; }
+}

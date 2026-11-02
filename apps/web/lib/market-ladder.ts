@@ -21,8 +21,13 @@ async function compute(q: LadderQuery): Promise<LadderValue> {
   return { ...r.ladder, registered, measuredAt: r.generatedAt }
 }
 
+/** A network's ladder with no filters, keyed exactly as /api/v1/marketplace/ladder keys it, so both share one cached value. */
+export function plainLadderQuery(lane: 'mainnet' | 'practice' | 'all'): LadderQuery {
+  return { lane, category: null, search: null, liveNow: false, warranted: false, tested: false, thirdPartyOnly: false, firstPartyOnly: false, hasPrice: false, iface: null, token: null, maxPrice: null, minRating: null }
+}
+
 export async function marketLadder(q: LadderQuery): Promise<LadderValue> {
-  const p = await cachedProjection(`market:ladder:v2:${JSON.stringify(q)}`, () => compute(q), {
+  const p = await cachedProjection(`market:ladder:v3:${JSON.stringify(q)}`, () => compute(q), {
     freshMs: 60_000, timeoutMs: 20_000, keepMs: 60 * 60_000, staleWhileRevalidate: true,
   })
   return p.value

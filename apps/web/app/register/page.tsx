@@ -6,7 +6,7 @@ import { RegisterTable } from './RegisterTable'
 import { Disclosure } from './Disclosure'
 import { SiteHeader, SiteFooter } from '../_components/SiteHeader'
 import { REFERENCE_AGENTS } from '../../lib/reference-agents'
-import { supplyNow } from '../../lib/supply-truth'
+import { marketLadder, plainLadderQuery } from '../../lib/market-ladder'
 import styles from './register.module.css'
 
 // Same for every visitor, so served from Next's cache and re-rendered at most every 30 s
@@ -28,13 +28,22 @@ export const metadata = {
  * from anyone who wants it.
  */
 export default async function RegisterPage() {
-  const [initial, mainnet, testnet] = await Promise.all([initialMarket(), supplyNow(56).catch(() => null), supplyNow(97).catch(() => null)])
-  // The proof numbers beside the title: the same one count as the home page (supply-truth.ts), mainnet and testnet never added.
-  const stats: Array<[number, string]> | null = mainnet ? [
-    [mainnet.hireable, 'hireable on mainnet'],
-    ...(testnet ? [[testnet.hireable, 'on testnet'] as [number, string]] : []),
-    [mainnet.checked, 'checked against the chain'],
-    [mainnet.warranted, 'hold a Warrant'],
+  const [initial, mainnet, testnet] = await Promise.all([
+    initialMarket(),
+    marketLadder(plainLadderQuery('mainnet')).catch(() => null),
+    marketLadder(plainLadderQuery('practice')).catch(() => null),
+  ])
+  // The depth of the market, registered to proven, on BSC mainnet (2 Nov). Server-rendered, so a reader without
+  // scripts sees it; its priced, hireable, checked and warranted equal the one supply count on every page.
+  const rung = (stage: string | null, lane = 'mainnet') => `/register?tab=listed&lane=${lane}${stage ? `&stage=${stage}` : ''}#market`
+  const steps: Array<{ n: number | null; label: string; href: string | null; key?: boolean }> | null = mainnet ? [
+    { n: mainnet.registered, label: 'Registered', href: null },
+    { n: mainnet.listed, label: 'Listed', href: rung(null) },
+    { n: mainnet.answering, label: 'Answering', href: rung('answering') },
+    { n: mainnet.priced, label: 'Live price', href: rung('priced') },
+    { n: mainnet.hireable, label: 'Hireable', href: rung('hireable'), key: true },
+    { n: mainnet.checked, label: 'Checked on chain', href: rung('checked') },
+    { n: mainnet.warranted, label: 'Warranted', href: rung('warranted') },
   ] : null
   return (
     <>
@@ -48,17 +57,28 @@ export default async function RegisterPage() {
               Hire BNB Chain agents at a live price, paid into escrow. Every delivered answer is checked
               against the chain.
             </p>
-            {stats ? (
-              <dl className={styles.introStats} aria-label="Supply now">
-                {stats.map(([n, label]) => <div key={label}><dt>{label}</dt><dd>{n}</dd></div>)}
-              </dl>
+            {steps ? (
+              <div className={styles.depth}>
+                <p className={styles.depthHead}>From registered to proven · BSC mainnet</p>
+                <ol className={styles.depthSteps}>
+                  {steps.map((x) => {
+                    const body = <><span className={styles.depthN}>{x.n === null ? 'n/a' : x.n.toLocaleString('en-US')}</span><span className={styles.depthL}>{x.label}</span></>
+                    return <li key={x.label} data-key={x.key || undefined}>{x.href ? <a href={x.href}>{body}</a> : <span>{body}</span>}</li>
+                  })}
+                </ol>
+                <p className={styles.depthFoot}>
+                  <a href={rung('delivered')}>{mainnet!.delivered.toLocaleString('en-US')} delivered paid work to an outside buyer</a>
+                  {testnet ? <> · <a href={rung('hireable', 'practice')}>Testnet: {testnet.hireable} hireable for free practice</a></> : null}
+                  {' · '}<a href="/proof">Every job, who paid</a>
+                </p>
+              </div>
             ) : null}
           </div>
           <div className={styles.introArt} aria-hidden="true"><span className={styles.introPlate} /></div>
           <div className={styles.introLines} aria-hidden="true">{Array.from({ length: 8 }).map((_, i) => <span key={i} />)}</div>
         </header>
 
-        <Marketplace initial={initial} />
+        <div id="market" className={styles.marketAnchor}><Marketplace initial={initial} /></div>
 
         <div className={styles.appendix}>
           <Disclosure

@@ -775,6 +775,11 @@ export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: Ma
   let ids = q.agentIds ? (readyIds ? q.agentIds.filter(id => readyIds.includes(id)) : q.agentIds.filter(inLane)) : readyIds
   if (ids === null && (q.category || !q.includeUnclassified)) {
     ids = (await Promise.all(chains.map((c) => categoryIds(q.category, c)))).flat()
+    // Listed includes any agent with a live price (see scope below): a small network's scoped read must load those too.
+    if (!q.category) {
+      const priced = await sharedCommercialStates().then((r) => [...r.value.values()].filter((c) => (c.state === 'hireable' || c.state === 'settleable') && inLane(c.agentId)).map((c) => c.agentId)).catch(() => [] as string[])
+      ids = [...new Set([...ids, ...priced])]
+    }
   }
   // A read served from the memoised catalog (no selection, or more than SCOPE_MAX_IDS ids) carries quotes that may
   // have lapsed: overlay current ones, read alongside it, so the evidence ladder's Live price rung and every card's
@@ -815,7 +820,9 @@ export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: Ma
     const allReady = tab === 'ready' && !q.category
     let out = rows
     if (q.category) out = out.filter((r) => r.category === q.category)
-    else if (!q.includeUnclassified && !allReady) out = out.filter((r) => r.category !== null && r.category !== 'unclassified')
+    // Listed (2 Nov): in a category, or with a live price (Ready lists "Other" too), so the ladder's priced and
+    // hireable rungs equal the one supply count on every page.
+    else if (!q.includeUnclassified && !allReady) out = out.filter((r) => (r.category !== null && r.category !== 'unclassified') || r.commerce.state === 'hireable' || r.commerce.state === 'settleable')
     if (q.hireableOnly && tab === q.tab) out = out.filter((r) => r.commerce.state === 'hireable' || r.commerce.state === 'settleable')
     if (tab === 'ready') out = out.filter((r) => r.commerce.state === 'hireable' || r.commerce.state === 'settleable')
     if (tab === 'free') out = out.filter(answersFree)
@@ -875,7 +882,8 @@ export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: Ma
     stage: q.stage ? atStage[q.stage] : null,
   }
   // Clone groups collapse after filtering, so facet counts and the total agree.
-  const finish = (rows: MarketRow[]) => (readyAll ? groupClones(rows) : rows)
+  const listedAll = (q.tab === 'all' || !q.tab) && !q.category
+  const finish = (rows: MarketRow[]) => (readyAll || listedAll ? groupClones(rows) : rows)
   const except = (dim: string | null) => all.filter((r) => Object.entries(dims).every(([k, p]) => k === dim || !p || p(r)))
   const any = () => true
   const count = (dim: string, pred: (r: MarketRow) => boolean) => finish(except(dim).filter(pred)).length
@@ -895,7 +903,8 @@ export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: Ma
   }
   // Each rung: the listed set with every other filter applied and that rung chosen, so a rung's number is exactly
   // the number of agents it leads to (the Registry view with that stage).
-  const inUniverse = universe.filter((r) => Object.entries(dims).every(([k, p]) => k === 'stage' || !p || p(r)))
+  // A template deployed many times outside the categories counts once, as in Ready and the supply count.
+  const inUniverse = groupClones(universe.filter((r) => Object.entries(dims).every(([k, p]) => k === 'stage' || !p || p(r))))
   // Only a read over the whole listed set can count it: a Ready read starts from the hireable agents alone.
   const ladder: MarketLadder | null = q.tab && q.tab !== 'all' || q.agentIds || q.hireableOnly ? null : {
     listed: inUniverse.length,

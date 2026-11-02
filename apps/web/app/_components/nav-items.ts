@@ -21,6 +21,8 @@ export const NAV: NavLink[] = [
   // an agent called what it is, marked so it is found.
   { label: 'Agent Forge', href: '/builders', key: 'builders', spark: true },
   { label: 'Set and Earn', href: '/quest', key: 'quest' },
+  // Every hire, who paid and what the chain checks said: the evidence a judge asks for first, one click from anywhere.
+  { label: 'Every job', href: '/proof', key: 'proof' },
   { label: 'Positions', href: '/positions', key: 'positions' },
   { label: 'Docs', href: '/docs', key: 'docs' },
 ]
