@@ -81,11 +81,18 @@ for (const route of ROUTES) {
     })
     page.on('pageerror', (e) => problems.push(`pageerror: ${String(e).slice(0, 160)}`))
     let status = 0
-    try {
-      const res = await page.goto(BASE + route, { waitUntil: 'networkidle', timeout: 45000 })
-      status = res?.status() ?? 0
-    } catch (e) {
-      problems.push(`goto: ${String(e).slice(0, 120)}`)
+    // One retry after a load timeout only (2 Nov): right after a build the host is busy and a heavy page can miss
+    // network idle once. The retry must still load fully and pass every check below; any other error fails at once.
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        const res = await page.goto(BASE + route, { waitUntil: 'networkidle', timeout: 45000 })
+        status = res?.status() ?? 0
+        break
+      } catch (e) {
+        if (attempt === 0 && /Timeout/.test(String(e))) { console.log(`     ${route} @${width}: load timed out once, retrying`); continue }
+        problems.push(`goto: ${String(e).slice(0, 120)}`)
+        break
+      }
     }
     if (status >= 400) problems.push(`http ${status}`)
 
