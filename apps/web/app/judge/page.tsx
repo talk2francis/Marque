@@ -110,7 +110,7 @@ export default async function JudgePage() {
         <ul className={styles.acts} aria-label="Every recorded action on BSC mainnet">
           {d.recorded.map((r) => (
             <li key={`${r.jobKey}-${r.block}`}>
-              <span>{r.action === 'repay' ? 'Repay' : 'Supply'} {r.amount.toLocaleString('en-US', { maximumFractionDigits: 4 })} {r.symbol} on Venus, from the answer in <a href={`/jobs/${r.jobKey.replace(':', '/')}`}>job {r.jobKey.split(':')[1]}</a>{r.hfBefore !== null ? `: health factor ${r.hfBefore.toFixed(3)} to ${r.hfAfter?.toFixed(3) ?? 'no debt'}` : ''}. Block {blk(r.block)}. {r.funder === 'team' ? 'A Marque team test wallet, small position.' : null}</span>
+              <span>{r.action === 'repay' ? 'Repay' : 'Supply'} {r.amount.toLocaleString('en-US', { maximumFractionDigits: 4 })} {r.symbol} on Venus, from the answer in <a href={`/jobs/${r.jobKey.replace(':', '/')}`}>job {r.jobKey.split(':')[1]}</a>{r.hfBefore !== null && r.hfBefore < 100 ? `: health factor ${r.hfBefore.toFixed(3)} to ${r.hfAfter !== null && r.hfAfter < 100 ? r.hfAfter.toFixed(3) : 'above 100'}` : r.hfBefore !== null ? ': the wallet had almost no debt, so its health factor stayed above 100' : ''}. Block {blk(r.block)}. {r.funder === 'team' ? 'A Marque team test wallet, small position.' : null}</span>
               {r.tx ? <a href={`https://bscscan.com/tx/${r.tx}`} target="_blank" rel="noreferrer">Transaction</a> : null}
             </li>
           ))}
