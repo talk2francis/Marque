@@ -13,6 +13,7 @@ import { referenceAgent } from '../../lib/reference-agents'
 import { RepayPlanButton } from './RepayPlanButton'
 import styles from './judge.module.css'
 import { operatorWalletsHere } from '../../lib/operators-here'
+import { proofProjection } from '../../lib/proof'
 
 // Rendered at request time (never at build: the build has no archive RPC); the reads are cached for a minute below.
 export const dynamic = 'force-dynamic'
@@ -67,6 +68,8 @@ export default async function JudgePage() {
     }
   }
   const d = await cachedProjection('judge:v4', load, { freshMs: 60_000, timeoutMs: 20_000, staleWhileRevalidate: true }).then((p) => p.value).catch(load)
+  // Every job (2 Nov): the record behind the walkthrough, here rather than in the site's navigation. At most 3 s on a cold cache.
+  const proof = await Promise.race([proofProjection().then((p) => p.value), new Promise<null>((r) => setTimeout(() => r(null), 3000))]).catch(() => null)
   const { hf, keelTest, acted } = d
   const pos = d.pos
   const lens = d.lens
@@ -132,6 +135,26 @@ export default async function JudgePage() {
           <h1 className="t-display">Marque in six steps.</h1>
           <p className={styles.lede}>From a position that needs work to the action its owner would sign.</p>
         </header>
+        {proof ? (() => {
+          const m = proof.totals['56']!.outside, t = proof.totals['97']!.outside
+          return (
+            <section className={styles.jobs} aria-labelledby="every-job">
+              <div className={styles.jobsHead}>
+                <div>
+                  <h2 id="every-job" className={styles.jobsTitle}>Every job, who paid</h2>
+                  <p>Each hire through Marque on BNB Chain&apos;s ERC-8183 escrow, with who paid, what was delivered and what the chain checks said. Team test jobs are listed and labelled, never counted.</p>
+                </div>
+                <a className="btn btn--sm" href="/proof">See every job</a>
+              </div>
+              <dl className={styles.jobsNums}>
+                <div><dt>Jobs through Marque</dt><dd>{proof.rows.length}</dd></div>
+                <div><dt>Completed for {m.wallets} outside {m.wallets === 1 ? 'wallet' : 'wallets'}, mainnet</dt><dd>{m.settled}</dd></div>
+                <div><dt>Completed for outside wallets, testnet</dt><dd>{t.settled}</dd></div>
+                <div><dt>Chain checks agreeing, mainnet</dt><dd>{m.checksDecided ? <>{m.checksAgreed}<small> of {m.checksDecided}</small></> : '0'}</dd></div>
+              </dl>
+            </section>
+          )
+        })() : null}
         <ol className={styles.steps}>
           {steps.map((s, i) => (
             <li key={s.title} className={styles.step}>
@@ -145,7 +168,7 @@ export default async function JudgePage() {
             </li>
           ))}
         </ol>
-        <p className={styles.note}>Every job and who paid for it: <a href="/proof">/proof</a>. What it takes to run Marque, every key and what is not true yet: <a href="/adopt">/adopt</a>.</p>
+        <p className={styles.note}>Every job and who paid for it: <a href="/proof">Every job</a>. What it takes to run Marque, every key and what is not true yet: <a href="/adopt">/adopt</a>.</p>
         <p className={styles.note}>Release {SHA}{BUILT ? `, built ${BUILT}` : ''}. Nothing on this page needs a wallet.</p>
       </main>
       <SiteFooter />

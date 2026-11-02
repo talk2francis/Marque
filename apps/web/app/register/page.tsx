@@ -33,16 +33,14 @@ export default async function RegisterPage() {
     marketLadder(plainLadderQuery('mainnet')).catch(() => null),
     marketLadder(plainLadderQuery('practice')).catch(() => null),
   ])
-  // The depth of the market, registered to proven, on BSC mainnet (2 Nov). Server-rendered, so a reader without
-  // scripts sees it; its priced, hireable, checked and warranted equal the one supply count on every page.
+  // The depth of the market, listed to warranted, on BSC mainnet (2 Nov). Server-rendered, so a reader without
+  // scripts sees it; its priced, hireable and warranted equal the one supply count on every page.
   const rung = (stage: string | null, lane = 'mainnet') => `/register?tab=listed&lane=${lane}${stage ? `&stage=${stage}` : ''}#market`
   const steps: Array<{ n: number | null; label: string; href: string | null; key?: boolean }> | null = mainnet ? [
-    { n: mainnet.registered, label: 'Registered', href: null },
     { n: mainnet.listed, label: 'Listed', href: rung(null) },
     { n: mainnet.answering, label: 'Answering', href: rung('answering') },
     { n: mainnet.priced, label: 'Live price', href: rung('priced') },
     { n: mainnet.hireable, label: 'Hireable', href: rung('hireable'), key: true },
-    { n: mainnet.checked, label: 'Checked on chain', href: rung('checked') },
     { n: mainnet.warranted, label: 'Warranted', href: rung('warranted') },
   ] : null
   return (
@@ -59,7 +57,7 @@ export default async function RegisterPage() {
             </p>
             {steps ? (
               <div className={styles.depth}>
-                <p className={styles.depthHead}>From registered to proven · BSC mainnet</p>
+                <p className={styles.depthHead}>From listed to warranted · BSC mainnet</p>
                 <ol className={styles.depthSteps}>
                   {steps.map((x) => {
                     const body = <><span className={styles.depthN}>{x.n === null ? 'n/a' : x.n.toLocaleString('en-US')}</span><span className={styles.depthL}>{x.label}</span></>
@@ -69,7 +67,6 @@ export default async function RegisterPage() {
                 <p className={styles.depthFoot}>
                   <a href={rung('delivered')}>{mainnet!.delivered.toLocaleString('en-US')} delivered paid work to an outside buyer</a>
                   {testnet ? <> · <a href={rung('hireable', 'practice')}>Testnet: {testnet.hireable} hireable for free practice</a></> : null}
-                  {' · '}<a href="/proof">Every job, who paid</a>
                 </p>
               </div>
             ) : null}

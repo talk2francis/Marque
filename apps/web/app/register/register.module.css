@@ -1074,8 +1074,8 @@ a.introBack:hover { color: var(--fg); }
 .showSelect:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
 .marketNotes { margin: var(--s5) 0 0; padding-top: var(--s3); border-top: 1px solid var(--line); display: grid; gap: 4px; }
 .marketNotes a { color: var(--fg-soft); }
-.ladderRungs { grid-template-columns: repeat(6, minmax(0, 1fr)); }
-@media (max-width: 720px) { .ladderRungs { grid-template-columns: repeat(6, minmax(108px, 1fr)); } }
+.ladderRungs { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+@media (max-width: 720px) { .ladderRungs { grid-template-columns: repeat(5, minmax(108px, 1fr)); } }
 /* The hero's proof numbers: figure over label, hairline between, so the title block carries the market's size. */
 .introStats { display: flex; flex-wrap: wrap; gap: 0; margin: var(--s3) 0 0; }
 .introStats div { display: flex; flex-direction: column-reverse; gap: 2px; padding: 0 var(--s4); border-left: 1px solid var(--line); }
@@ -1089,10 +1089,10 @@ a.introBack:hover { color: var(--fg); }
 /* Phones (2 Nov top-deck pass): the strip is a band, not a second hero, so the search sits near the first screen. */
 @media (max-width: 760px) { .introArt { aspect-ratio: 3.4 / 1; max-height: 22svh; } }
 /* ---------- The depth of the market (2 Nov): registered to proven, one row, each step opens its list ---------- */
-.depth { margin: var(--s4) 0 0; display: grid; gap: var(--s2); max-width: 860px; }
+.depth { margin: var(--s4) 0 0; display: grid; gap: var(--s2); max-width: 560px; }
 .depthHead { margin: 0; font-size: 11.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--fg-faint); }
-.depthSteps { position: relative; list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); }
-.depthSteps::before { content: ''; position: absolute; left: 0; right: 0; top: 4px; height: 1px; background: linear-gradient(90deg, var(--line), var(--line-strong) 60%, var(--brass) 66%, var(--line) 100%); pointer-events: none; }
+.depthSteps { position: relative; list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.depthSteps::before { content: ''; position: absolute; left: 0; right: 0; top: 4px; height: 1px; background: linear-gradient(90deg, var(--line), var(--line-strong) 55%, var(--brass) 65%, var(--line) 100%); pointer-events: none; }
 .depthSteps li { position: relative; padding-top: 18px; min-width: 0; }
 .depthSteps li::before { content: ''; position: absolute; top: 0; left: 0; width: 9px; height: 9px; border-radius: 50%; background: var(--canvas); box-shadow: inset 0 0 0 1px var(--line-strong); }
 .depthSteps li[data-key]::before { background: var(--brass); box-shadow: 0 0 0 4px color-mix(in srgb, var(--brass) 20%, transparent); }
@@ -1110,5 +1110,5 @@ a.introBack:hover { color: var(--fg); }
 @media (max-width: 760px) {
   .depthSteps { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: minmax(88px, max-content); overflow-x: auto; scrollbar-width: none; margin-right: calc(-1 * var(--s4)); padding-right: var(--s4); }
   .depthSteps::-webkit-scrollbar { display: none; }
-  .depthSteps::before { right: auto; width: 100%; min-width: 640px; }
+  .depthSteps::before { right: auto; width: 100%; min-width: 460px; }
 }

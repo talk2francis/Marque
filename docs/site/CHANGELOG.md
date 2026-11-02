@@ -18,7 +18,7 @@ A testnet copy with the same owner and endpoint carries what its mainnet identit
 
 The marketplace opens with one command bar (search, network with its counts, filters, sort, layout), the categories and one results line with a Show picker; the evidence ladder appears in the All listed view, where its rungs filter. Every job (/proof) has one scorecard row per network and filters by agent, job number or wallet, network, where the job stands, chain checks and who paid. Agents built during Set and Earn that Marque can reach but cannot price right now are listed with the reason. Testnet services that had never been probed are now probed ahead of routine re-probes, so practice-lane builds get checked, priced and listed.
 
-The marketplace opens with the depth of the market on BSC mainnet in one line, registered to listed, answering, live price, hireable, checked on chain and warranted, each step opening its list. Listed now also counts any agent with a live price, and a template deployed many times counts once, so its hireable, checked and warranted equal the count on every other page. Every job has its own place in the main navigation and on the home page.
+The marketplace opens with the depth of the market on BSC mainnet in one line, listed, answering, live price, hireable and warranted, each step opening its list. Listed now also counts any agent with a live price, and a template deployed many times counts once, so its hireable and warranted equal the count on every other page. Judge mode opens with every job and who paid.
 
 ## 2 November 2026 · One count everywhere, and labels that say who paid
 

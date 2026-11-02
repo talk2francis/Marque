@@ -47,3 +47,20 @@
 .acts { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 6px; border-top: 1px solid var(--hair); }
 .acts li { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 14px; padding: 8px 0; border-bottom: 1px solid var(--hair); font-size: 13.5px; line-height: 1.45; color: var(--ink-2); }
 .acts a { color: var(--chain); }
+
+/* Every job (2 Nov): the record behind the six steps, one band under the header. */
+.jobs { display: grid; gap: 18px; margin: 0 0 28px; padding: 20px 22px; border: 1px solid var(--hair-2); border-radius: 16px; background: color-mix(in srgb, var(--panel) 92%, transparent); }
+.jobsHead { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.jobsHead > div { display: grid; gap: 6px; }
+.jobsHead .btn { flex: none; }
+.jobsTitle { margin: 0; font-size: 18px; font-weight: 600; color: var(--ink); }
+.jobsHead p { margin: 0; max-width: 72ch; font-size: 14px; line-height: 1.5; color: var(--ink-2); }
+.jobsNums { margin: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px 20px; }
+.jobsNums div { display: flex; flex-direction: column-reverse; justify-content: flex-end; gap: 4px; }
+.jobsNums dd { margin: 0; font-size: 26px; font-weight: 600; line-height: 1.1; color: var(--ink); font-variant-numeric: tabular-nums; }
+.jobsNums dd small { font-size: 13px; font-weight: 400; color: var(--ink-3); }
+.jobsNums dt { font-size: 12.5px; color: var(--ink-3); }
+@media (max-width: 720px) {
+  .jobsHead { flex-direction: column; }
+  .jobsNums { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}

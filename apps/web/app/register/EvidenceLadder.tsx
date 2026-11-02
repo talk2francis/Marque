@@ -15,7 +15,6 @@ const RUNGS: Array<{ stage: MarketStageKey | null; key: keyof LadderCounts; labe
   { stage: 'answering', key: 'answering', label: STAGE_LABEL.answering, note: 'Marque called it in the last 24 hours and it answered.' },
   { stage: 'priced', key: 'priced', label: STAGE_LABEL.priced, note: 'A live signed price, payable into escrow to the agent\'s own wallet.' },
   { stage: 'hireable', key: 'hireable', label: STAGE_LABEL.hireable, note: 'Priced, and not pulled for safety (a paid job left undelivered, or a chain fact stated wrongly, in the last 14 days). Ready to hire also lists hireable agents outside the categories.' },
-  { stage: 'checked', key: 'checked', label: STAGE_LABEL.checked, note: 'Hireable, and an answer it gave agreed with BNB Chain in the last 30 days: a paid job, or Marque\'s daily read-only check call.' },
   { stage: 'warranted', key: 'warranted', label: STAGE_LABEL.warranted, note: "Hireable, and passed its category's published Marque test, in the test's exact format, in the last 14 days." },
 ]
 
