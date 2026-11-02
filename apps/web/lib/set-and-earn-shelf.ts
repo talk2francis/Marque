@@ -1,7 +1,7 @@
 import 'server-only'
 import { sql } from 'drizzle-orm'
 import { cachedProjection, db, isFirstParty } from '@marque/db'
-import { CAMPAIGN } from '@marque/commerce'
+import { CAMPAIGN, teamWallets } from '@marque/commerce'
 
 /**
  * "Built during Set and Earn" (2 Nov): outside agents registered since the campaign was announced, listed on Marque
@@ -35,7 +35,7 @@ async function build(): Promise<{ agents: ShelfAgent[]; measuredAt: string; sinc
       select distinct on (agent_id) agent_id, category from agent_category
       order by agent_id, (category <> 'unclassified') desc, confidence desc, assigned_at desc
     )
-    select a.id, a.chain_id, a.token_id, a.name, c.category, l2.pass,
+    select a.id, a.chain_id, a.token_id, a.name, c.category, l2.pass, lower(a.owner_address) as owner, lower(a.agent_wallet) as wallet,
       coalesce(a.registry_created_at, a.first_seen) as registered_at,
       (select count(distinct j.client)::int from campaign_job j
         where j.chain_id = a.chain_id and j.status = 3
@@ -50,8 +50,10 @@ async function build(): Promise<{ agents: ShelfAgent[]; measuredAt: string; sinc
       and l2.pass is distinct from false
     order by coalesce(a.registry_created_at, a.first_seen) desc
     limit 60`))
+  // Marque's own agents and agents owned by a published team wallet (test fixtures) are not outside builds.
+  const team = new Set(teamWallets().map((w) => w.toLowerCase()))
   const agents = rows
-    .filter((r) => !isFirstParty(Number(r['chain_id']), String(r['token_id'])))
+    .filter((r) => !isFirstParty(Number(r['chain_id']), String(r['token_id'])) && !team.has(String(r['owner'])) && !team.has(String(r['wallet'])))
     .map((r): ShelfAgent => {
       const hirers = Number(r['hirers'] ?? 0)
       return {
@@ -65,5 +67,5 @@ async function build(): Promise<{ agents: ShelfAgent[]; measuredAt: string; sinc
 }
 
 export async function setAndEarnShelf() {
-  return (await cachedProjection('shelf:set-and-earn:v1', build, { freshMs: 5 * 60_000, timeoutMs: 20_000, staleWhileRevalidate: true })).value
+  return (await cachedProjection('shelf:set-and-earn:v2', build, { freshMs: 5 * 60_000, timeoutMs: 20_000, staleWhileRevalidate: true })).value
 }
