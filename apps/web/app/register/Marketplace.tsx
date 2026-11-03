@@ -181,10 +181,18 @@ export function Marketplace({ category: fixedCategory, initial }: { category?: s
     const t = setTimeout(() => {
       void (async () => {
         try {
-          const res = await fetch(`/api/v1/marketplace?${qs}&limit=${pageSize}&offset=${page * pageSize}`, {
-            cache: 'no-store',
-            signal: controller.signal,
+          const url = `/api/v1/marketplace?${qs}&limit=${pageSize}&offset=${page * pageSize}`
+          // One quiet retry (3 Nov): the first read of a new search on a freshly started worker can pass the server's
+          // deadline while its caches warm; the second almost always answers, so the buyer never has to press Try again.
+          let res = await fetch(url, { cache: 'no-store', signal: controller.signal }).catch((e: unknown) => {
+            if ((e as Error)?.name === 'AbortError') throw e
+            return null
           })
+          if (!res || res.status === 503 || res.status === 504) {
+            await new Promise((r) => setTimeout(r, 1200))
+            if (cancelled) return
+            res = await fetch(url, { cache: 'no-store', signal: controller.signal })
+          }
           const j = await res.json()
           if (cancelled) return
           if (!res.ok) {

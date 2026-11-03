@@ -318,7 +318,10 @@ module.exports = {
       autorestart: true,
       max_restarts: 50,
       restart_delay: 3000,
-      max_memory_restart: '800M',
+      // 1200M (3 Nov 2026): the catalog memo, ladders and standing evidence sit at 720 to 770 MB per worker, so the
+      // former 800M cap restarted a live worker every hour or two (brief timeouts and restart-loop alerts). The
+      // server keeps over 5 GB available with both slots at this cap.
+      max_memory_restart: '1200M',
       time: true,
       out_file: `/root/.pm2/logs/${name}-out.log`,
       error_file: `/root/.pm2/logs/${name}-err.log`,

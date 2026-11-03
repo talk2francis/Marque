@@ -175,6 +175,25 @@ One rule, stated three ways because it is the one that would matter to a review:
 
 ---
 
+## 5a. Host hardening (3 November 2026)
+
+A review of the server after disk and restart alerts found ordinary internet background noise, not a targeted attack.
+
+**What the review found:**
+
+- **Web traffic.** About 39,000 requests in 15 hours, most of them Marque's own health checks and workers. 343 automated probes for `/.env`, `/.git/config`, `/wp-admin` and PHP files all received 404 or 400; none reached anything. Zero server errors appeared in the alert window.
+- **SSH.** 7,439 failed password guesses in the current log. fail2ban had banned 2,943 addresses in total, 106 at the time of the review.
+
+**The firewall** (ufw, default deny) admits only 22, 80 and 443.
+
+**Changes made:**
+
+- **Scanner probes are refused at the edge.** Paths for secrets and other software stacks (`/.env`, `/.git`, `*.php`, `/wp-*` and similar) are answered with 404 by Caddy, never rendered by Next.js. `/.well-known` is untouched.
+- **fail2ban is stricter.** It bans for 24 hours after 3 failures, and a `recidive` jail bans an address that is banned three times in a day for 7 days, on every port.
+- **SSH allows fewer attempts.** `MaxAuthTries 3`, `LoginGraceTime 20`, a `MaxStartups` throttle and no X11 forwarding (`/etc/ssh/sshd_config.d/40-marque-hardening.conf`). Password login remains for the operator; a key is the recommended next step.
+- **The unused printing service (CUPS, a snap) is stopped and disabled.**
+- **Web workers have more room.** The memory cap is 1200M, up from 800M, which ends the hourly restarts that showed up as timeouts and restart-loop alerts.
+
 ## Reporting
 
 Security contact: the address in `README.md`. First-party observations (probe

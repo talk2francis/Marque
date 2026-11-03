@@ -9,6 +9,7 @@ import { pickShowcase } from './ready-picks'
 import { readLedger } from './ledger'
 import type { SupplyCount, SupplyNow } from './supply-truth'
 import { operatorWalletsHere } from './operators-here'
+import { standingEvidence, type StandingEvidence } from './agent-standing'
 import { referenceAgent } from './reference-agents'
 import { registryImageUrl } from './avatar-source'
 import type { TapeItem } from '../app/_components/ui'
@@ -226,8 +227,10 @@ export interface RecentHire {
 }
 
 /**
- * A short, state-diverse selection of real paid Marque jobs on BSC mainnet.
- * No raw buyer task is put on Home; the Job Room carries the full evidence.
+ * A short selection of real paid Marque jobs on BSC mainnet, from agents that deliver (3 Nov): delivered jobs only,
+ * each delivered within 15 minutes of payment, by agents that delivered at least 9 in 10 of their paid jobs (two or more)
+ * and are not pulled for safety; one job per agent, outside buyers first. A job still waiting for its agent is never
+ * shown here. No raw buyer task is put on Home; the Job Room carries the full evidence.
  */
 export async function recentHires(): Promise<RecentHire[]> {
   const operators = await operatorWalletsHere().catch(() => new Set<string>())
@@ -241,19 +244,35 @@ export async function recentHires(): Promise<RecentHire[]> {
     join hire_intent i on i.id = j.intent_id
     left join agent a on a.id = i.agent_id
     join commerce_event funded on funded.chain_id = j.chain_id and funded.job_id = j.job_id and funded.name = 'JobFunded'
-    where j.chain_id = 56 and j.state in ('FUNDED', 'SUBMITTED', 'COMPLETED', 'PAID')
-    order by funded.block_time desc nulls last limit 60`).catch(() => []))
-  // D11: outside wallets first. Within each lifecycle stage an outside job beats a team test,
-  // and the carousel leads with outside jobs; team tests follow with their own caption.
+    where j.chain_id = 56 and j.state in ('SUBMITTED', 'COMPLETED', 'PAID')
+    order by funded.block_time desc nulls last limit 120`).catch(() => []))
+  // Each agent's record on Marque hires: paid jobs and how many it delivered.
+  const records = new Map(rowsOf(await db().execute(sql`
+    select i.agent_id, count(*) filter (where j.funded_raw is not null and j.funded_raw <> '0')::int as funded,
+           count(*) filter (where j.state in ('SUBMITTED', 'DISPUTED', 'COMPLETED', 'PAID'))::int as delivered
+    from commerce_job j join hire_intent i on i.id = j.intent_id and i.chain_id = j.chain_id and i.job_id = j.job_id
+    where j.chain_id = 56 group by 1`).catch(() => [])).map((r) => [String(r['agent_id']), { funded: Number(r['funded']), delivered: Number(r['delivered']) }]))
+  const standing = await standingEvidence().catch(() => ({} as Record<string, StandingEvidence>))
+  const quick = (j: Record<string, unknown>) => {
+    const ev = (j['ev'] ?? {}) as Record<string, { at: string | null }>
+    const f = ev['JobFunded']?.at ? Date.parse(ev['JobFunded'].at) : NaN, d = ev['JobSubmitted']?.at ? Date.parse(ev['JobSubmitted'].at) : NaN
+    return Number.isFinite(f) && Number.isFinite(d) && d - f >= 0 && d - f <= 15 * 60_000
+  }
+  const reliable = (j: Record<string, unknown>) => {
+    const id = String(j['agent_id'] ?? '')
+    const rec = records.get(id)
+    const s = standing[id]
+    return Boolean(rec && rec.delivered >= 2 && rec.funded > 0 && rec.delivered / rec.funded >= 0.9 && !s?.undelivered && !s?.wrong)
+  }
   const team = new Set(teamWallets())
   const isTeam = (j: Record<string, unknown>) => team.has(String(j['client']))
-  const stage = (pred: (j: Record<string, unknown>) => boolean, n: number) =>
-    [...jobs.filter((j) => pred(j) && !isTeam(j)), ...jobs.filter((j) => pred(j) && isTeam(j))].slice(0, n)
-  const selected = [
-    ...stage((j) => j['state'] === 'FUNDED', 1),
-    ...stage((j) => j['state'] === 'SUBMITTED', 2),
-    ...stage((j) => j['state'] === 'COMPLETED' || j['state'] === 'PAID', 2),
-  ].sort((a, b) => Number(isTeam(a)) - Number(isTeam(b)) || Date.parse(String(b['funded_at'])) - Date.parse(String(a['funded_at']))).slice(0, 5)
+  const done = (j: Record<string, unknown>) => j['state'] === 'COMPLETED' || j['state'] === 'PAID'
+  // Outside buyers first, settled before in review, newest first; then one job per agent.
+  const seen = new Set<string>()
+  const selected = jobs.filter((j) => quick(j) && reliable(j))
+    .sort((a, b) => Number(isTeam(a)) - Number(isTeam(b)) || Number(done(b)) - Number(done(a)) || Date.parse(String(b['funded_at'])) - Date.parse(String(a['funded_at'])))
+    .filter((j) => { const id = String(j['agent_id']); if (seen.has(id)) return false; seen.add(id); return true })
+    .slice(0, 5)
   return Promise.all(selected.map(async (j): Promise<RecentHire> => {
     const ev = (j['ev'] ?? {}) as Record<string, { tx: string; at: string | null; block?: number }>
     const [r] = rowsOf(await db().execute(sql`
