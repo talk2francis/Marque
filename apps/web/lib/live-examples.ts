@@ -28,7 +28,7 @@ const BORROW = parseAbiItem('event Borrow(address borrower, uint256 borrowAmount
 async function recentBorrowers(client: PublicClient): Promise<string[]> {
   const head = await client.getBlockNumber()
   const out: string[] = []
-  for (let i = 0; i < 6 && out.length < 24; i++) {
+  for (let i = 0; i < 16 && out.length < 60; i++) {
     const toBlock = head - BigInt(i * 2000)
     const logs = await client.getLogs({ address: [...VTOKENS], event: BORROW, fromBlock: toBlock - 1999n, toBlock }).catch(() => [])
     for (const l of [...logs].reverse()) { const b = (l.args as { borrower?: string }).borrower; if (b) out.push(b.toLowerCase()) }
@@ -48,13 +48,14 @@ async function build(): Promise<LiveExamples> {
   const borrowers = await recentBorrowers(client).catch(() => [] as string[])
   const accounts = [...new Set([caseAccount, ...asked.map((r) => String(r['address'])), ...borrowers].filter((a): a is string => Boolean(a)).map((a) => a.toLowerCase()))]
   const loans: LoanExample[] = []
-  for (const address of accounts.slice(0, 30)) {
+  for (const address of accounts.slice(0, 60)) {
     if (loans.length >= 5) break
     const read = await venusReader(address as `0x${string}`, { client }).catch(() => null)
     if (!read || !read.ok) continue
     const borrowed = read.data.totalBorrowedUsd.value
-    // A loan worth acting on: at least $100 borrowed.
-    if (!(borrowed >= 100)) continue
+    // A loan worth acting on: at least $1,000 borrowed, with a health factor a repay plan can matter to (below 3).
+    const hf = read.data.healthFactor?.value ?? null
+    if (!(borrowed >= 1000) || hf === null || hf >= 3) continue
     loans.push({ address, healthFactor: read.data.healthFactor?.value ?? null, borrowedUsd: Math.round(borrowed), block: read.blockNumber.toString() })
   }
   // PancakeSwap V3 positions: Marque's own, then the published case subjects.
@@ -80,5 +81,5 @@ async function build(): Promise<LiveExamples> {
 
 /** Fresh for ten minutes: positions move slowly next to a hire, and each read is several chain calls. */
 export async function liveExamples(): Promise<LiveExamples> {
-  return (await cachedProjection('hire:examples:v2', build, { freshMs: 10 * 60_000, timeoutMs: 25_000, staleWhileRevalidate: true })).value
+  return (await cachedProjection('hire:examples:v3', build, { freshMs: 10 * 60_000, timeoutMs: 25_000, staleWhileRevalidate: true })).value
 }

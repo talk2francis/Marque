@@ -111,3 +111,12 @@
 .hs-terms p { margin: 0 0 6px; }
 .hs-terms b { color: var(--ink); font-weight: 600; }
 .hs-terms ul { margin: 0; padding-left: 18px; display: grid; gap: 3px; }
+
+/* Examples, opened on request (3 Nov): a short quiet list under the field, one line each. */
+@layer components {
+  .taskform-ex { display: inline; }
+  .taskform-ex-list { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; margin: 6px 0 2px; padding-left: 10px; border-left: 1px solid var(--hair-2); }
+  .taskform-ex-item { border: 0; background: none; padding: 2px 0; font: inherit; font-size: 12.5px; color: var(--ink-2); cursor: pointer; text-align: left; font-variant-numeric: tabular-nums; }
+  .taskform-ex-item:hover { color: var(--ink); }
+  .taskform-ex-item:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 3px; }
+}
