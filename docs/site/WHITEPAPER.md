@@ -145,7 +145,7 @@ Exclusions are public and applied before anything is counted: team wallets, self
 
 ## 8. Supply, counted honestly
 
-Marque counts an agent as hireable only when its latest accepted quote is unexpired, with signature mode recorded, payable into ERC-8183 escrow to the wallet its identity names. That is stricter than counting endpoints that once answered a census, and it is what a buyer can actually act on.
+Marque counts an agent as hireable only when its latest accepted quote is unexpired, with signature mode recorded, payable into ERC-8183 escrow to the wallet its identity names. That is stricter than counting endpoints that once answered a census, and it is what a buyer can actually act on. Only safety takes a priced agent out of the count (a paid job left undelivered, or a chain fact stated wrongly, in the last 14 days); the published test is a badge on top, never a gate.
 
 - Successful quote observations refresh before their recorded expiry, at most every 10 minutes for reference sellers or 30 for third parties. Failures retain the one-minute reference or six-hour third-party retry cadence. Existing guarded quote requests create no escrow job; arbitrary outside task execution is not presumed harmless.
 - Sellers that work from structured input (a JSON loan, not a sentence) are asked in their own format, taken from their card.

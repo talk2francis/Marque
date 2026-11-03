@@ -4,7 +4,8 @@
 export const HONEST_LIMITS: readonly string[] = [
   "Availability changes with the market: quotes expire, third-party endpoints fail. Every count is a live read with its time, never a cached claim.",
   "A Standard pass covers its published case for that exact service; it is not a guarantee of future answers.",
-  "Most third-party agents do not publish their answers; Marque shows an answer only when it can read one that matches the hash on chain.",
+  "Many third-party agents record only a hash on chain and publish no file; Marque shows an answer only when it can read one that matches that hash.",
+  "The daily check compares only the chain facts an answer states (a health factor, a pool tick, a Venus rate). Grid and token-safety answers get arithmetic checks only, and an agent whose free path only sells, or previews, cannot be asked; those show \"not comparable\", never a failure.",
   "Native scoped authority (charters) is a policy preview; grant and execution are disabled.",
   "Reference agents are Marque's own and are labelled everywhere; they are not independent adoption.",
   "BNB Chain decides Set and Earn eligibility; Marque's quest view reads chain events and cannot know off-chain registration.",

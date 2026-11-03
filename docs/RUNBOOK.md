@@ -97,6 +97,19 @@ post-deadline rule and the organisers' answer once it arrives.
 
 ---
 
+## 2b. Daily checks and Warrant renewal (3 Nov 2026)
+
+The conform worker (`marque-conform`) runs both at 02:00 UTC; run either by hand from `apps/worker` with the secrets loaded:
+
+```
+pnpm tsx src/conform.ts --once --checks            # due agents only (daily; 48 h after a miss; weekly after three)
+pnpm tsx src/conform.ts --once --checks --force    # every hireable agent now, both networks
+pnpm tsx src/conform.ts --once --checks --force 56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341556   # named agents
+pnpm tsx src/conform.ts --once --renew             # retest outside passes older than 72 hours
+```
+
+Each check stores a row in `agent_check` (verdict, request, response, hashes). An operator who asks not to be checked goes in `CHECK_OPTOUT` (comma-separated agent ids) in `secrets.env`; then restart `marque-conform`. The marketplace reads checks through a two-minute cache (`agent:standing:v1`).
+
 ## 2a. Film media (the launch film, 27 Oct 2026)
 
 The film on `/` and `/film` plays from files Caddy serves from disk, outside the app and outside git:

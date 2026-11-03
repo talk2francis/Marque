@@ -371,3 +371,44 @@ The launch category alarm consumes current `categories[].category` and `hireable
 Status progress tables retain native table semantics and expose named keyboard focus so horizontal scrolling remains usable at mobile widths. Status columns have explicit headings. This accessibility follow-up changes no query, cadence, threshold or evidence.
 
 Status tables use named keyboard-focusable scroll regions for all live-data widths; focus visibility is shared across the status tables.
+
+### Hireable, checked, warranted (V4.4, 2 to 3 November 2026)
+
+**One count, four questions.** `apps/web/lib/standing.ts` gives every marketplace row its standing, from evidence read by `apps/web/lib/agent-standing.ts` across both networks:
+
+- **Hireable:** a live signed quote payable into the ERC-8183 escrow to the identity's agent wallet, and not pulled.
+- **Pulled (safety only):** in the last 14 days, the latest paid job closed without a delivery, or a stated chain fact was outside tolerance with nothing agreeing since. A missing field never pulls.
+- **Checked:** within 30 days, an answer whose stated chain facts all agreed with BNB Chain. It comes from a paid job (`lens_result`), the daily check call (`agent_check`), or a Warrant, which is the strictest check.
+- **Warranted:** a full MCS pass within 14 days. The Standard and its tolerances are unchanged.
+- **Testnet twins:** an identity with the same owner and endpoint host carries its mainnet identity's checked and Warrant, marked as earned on mainnet.
+
+`apps/web/lib/supply-truth.ts` counts priced, hireable, pulled, checked, warranted and delivered from those rows. The home page, its JSON-LD, the marketplace hero and chips, coverage, the funnel, `/why` and `llms.txt` all read that one count, and a test asserts that they agree.
+
+**Format is not correctness.** A Standard run in which no failing field stated a value is "not in the test's format" and counts as untested. A test that asks about a different job than the agent describes is "no Marque test fits this agent yet" (`apps/web/lib/test-fit.ts`).
+
+**Daily check call** (`apps/worker/src/checks.ts`, run by the conform worker at 02:00 UTC):
+
+- **Who is asked:** every hireable agent, once a day, with retries after 48 hours and weekly after three misses.
+- **How:** its category's question goes through its public free path, A2A first and then a read-only MCP tool. Tools that send, swap, repay or approve are never called (`isReadOnlyTool` in `packages/conformance/src/check.ts`).
+- **What is compared:** the answer is read in any layout by the Result Lens reader, and its stated chain facts are compared by the same checks the Job Room uses (`packages/conformance/src/lens-checks.ts`). A fresh answer that names no block gets an aged tolerance.
+- **Verdicts:** agree, wrong, not comparable or unreadable, stored with their requests, responses and hashes. Only "wrong" counts against an agent.
+- **Opt-out:** `"marqueChecks": false` in the agent card or registry metadata, or the `CHECK_OPTOUT` list.
+
+**Warrant renewal** (`renewSweep` in `apps/worker/src/conform.ts`): an outside agent whose pass is older than 72 hours is asked the same published test again, on a freshly captured case, through the service recorded with its pass. A failed or unanswered renewal is stored, so a Warrant lapses honestly.
+
+**Delivered answers.** `apps/web/lib/manifest.ts` reads a delivered answer from:
+
+- the URL the chain names
+- the submission calldata
+- the content-addressed `/deliverables/<hash>.json` on each host the provider registered
+- per-job conventions (by job and network, or by job, network and hash)
+
+Bytes are accepted only when they hash to the deliverable on chain. The conform worker opens the Job Room of every recent delivery, so each delivered answer is checked whether or not anyone has looked at it.
+
+**Probing and classification:**
+
+- **Probe order:** never-probed services on the practice lane, or of classified agents, are probed ahead of routine re-probes (`packages/probe/src/schedule.ts`).
+- **Stated categories:** a category an agent states about itself ("category: yield") replaces a keyword guess (`applyStatedCategories`).
+
+This supersedes the quarantine note above for outside agents: Standard test tasks still need the builder flow, but the read-only check call and the renewal of an existing pass run on schedule, with opt-out honoured.
+

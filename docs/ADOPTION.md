@@ -1,12 +1,17 @@
 # Running Marque
 
-For BNB Chain: what Marque costs to run, how to run it from nothing, every key and what it can do, what happens when it breaks, the figure you can report, and what is not true yet. The live version, with figures recomputed from chain, is at [marque.trade/adopt](https://marque.trade/adopt). Figures below were measured on 26 October 2026.
+For BNB Chain: what Marque costs to run, how to run it from nothing, every key and what it can do, what happens when it breaks, the figure you can report, and what is not true yet. The live version, with figures recomputed from chain, is at [marque.trade/adopt](https://marque.trade/adopt). Figures below were measured on 26 October 2026; costs are the operator's figures from 2 November 2026.
 
 ## 1. Monthly running cost
 
 | Item | Measured | Source |
 |---|---|---|
-| Server | One VPS: 6 vCPU, 11 GiB RAM, 193 GB disk (75% used). It runs the site, indexer, probes, quotes, keeper, six reference sellers, the MCP server, Postgres and Redis. The plan's price is on the operator's invoice and is not measured here. | `nproc`, `free -g`, `df -h /` on the server |
+| Server | One VPS: 6 vCPU, 11 GiB RAM, 193 GB disk (75% used). It runs the site, indexer, probes, quotes, keeper, six reference sellers, the MCP server, Postgres and Redis. **$12.00 a month.** | `nproc`, `free -g`, `df -h /` on the server; the operator's hosting invoice |
+| Domain | marque.trade, about $6 a year: **$0.50 a month.** | The operator's registrar invoice |
+| NodeReal | Transfer history, and MegaFuel gas sponsorship for settlements: **$31.00 a month.** | The plan on the operator's account |
+| Archive RPC | Replaying historical benchmarks only, on a free plan: **$0.** | The plan on the operator's account |
+| Offsite backup | Encrypted nightly copy on Google Drive: **$1.99 a month.** | The operator's storage plan |
+| **Total** | **$45.49 a month, about $546 a year**, before any change of plan or traffic. Public BSC RPC, GitHub (public repository and Actions) and the Telegram Bot API cost nothing. | Sum of the rows above |
 | RPC | Pooled public BSC endpoints for reads and writes; a NodeReal key for transfer history; an archive endpoint used only to replay historical benchmarks. | `BSC_RPC_URLS` and the env registry in `AGENTS.md` |
 | Storage | Database 6.6 GB. A nightly dump (124 MB of backups on disk, kept 7 days) with an encrypted offsite copy. | `pg_database_size`, `ops/pg-backup.sh` |
 | Network fees per hire | Median 0.0000583 BNB (about $0.043 at 741.70 USDT), 1,140,790 gas over 4 buyer transactions, paid by the buyer. 47 mainnet hires measured. | Transaction receipts of Marque-bound mainnet jobs (`apps/web/lib/gas-costs.ts`) |
