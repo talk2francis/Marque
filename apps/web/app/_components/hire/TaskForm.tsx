@@ -44,16 +44,21 @@ function useLiveExamples(): LiveExamples | null {
 const usd = (n: number) => (n >= 1000 ? `$${(n / 1000).toFixed(1)}k` : `$${n}`)
 const fmt = (n: number) => (Number.isInteger(n) ? String(n) : String(Number(n.toFixed(4))))
 
-export function TaskForm({ category, agentName, onChange, disabled, taskExample, taskGuide }: {
+export function TaskForm({ category, agentName, onChange, disabled, taskExample, taskGuide, allowBrief = true }: {
   category: string | null; agentName: string; onChange: (v: TaskValue) => void; disabled?: boolean
   /** The seller's own example task when it works from a JSON object instead of a sentence. */
   taskExample?: string | null
   taskGuide?: PaidTaskGuide | null
+  /** Offer the plain-English brief. Off where every agent must get the same structured task (the tender). */
+  allowBrief?: boolean
 }) {
   const [note, setNote] = useState('')
   const [inner, setInner] = useState<TaskValue>({ task: '', ready: false, missing: null })
+  // A plain-English brief (3 Nov): any category form can switch to the buyer's own words, and back.
+  const [own, setOwn] = useState(false)
   const shape = jsonShape(taskExample)
-  const hasForm = !shape && !taskGuide && category !== null && FORM_CATEGORIES.has(category)
+  const typed = !shape && !taskGuide && category !== null && FORM_CATEGORIES.has(category)
+  const hasForm = typed && !own
   // Free text is added on top of the structured task, never instead of it (SPEC-SUPPLY 4).
   useEffect(() => {
     const extra = note.trim()
@@ -65,7 +70,11 @@ export function TaskForm({ category, agentName, onChange, disabled, taskExample,
       {shape
         ? <Structured shape={shape} category={category} agentName={agentName} onChange={setInner} disabled={disabled} />
         : taskGuide ? <SellerTask guide={taskGuide} agentName={agentName} onChange={setInner} disabled={disabled} />
-          : <Inner category={category} agentName={agentName} onChange={setInner} disabled={disabled} />}
+          : typed && own ? <Free agentName={agentName} onChange={setInner} disabled={disabled} example={BRIEF_EXAMPLE[category!]} />
+            : <Inner category={category} agentName={agentName} onChange={setInner} disabled={disabled} />}
+      {typed && allowBrief ? (
+        <p className="fld-help"><button type="button" className="taskform-link" disabled={disabled} onClick={() => setOwn((v) => !v)}>{own ? 'Use the form instead' : 'Or describe it in your own words'}</button></p>
+      ) : null}
       {hasForm ? (
         <div className="fld">
           <label className="fld-label" htmlFor="task-note"><span>Anything else {agentName} should know</span><span className="fld-opt">optional</span></label>
@@ -296,14 +305,24 @@ function Security({ onChange, disabled }: { onChange: (v: TaskValue) => void; di
     help={<span className="taskform-help">Try a BNB Chain token: {SECURITY_EXAMPLES.map(([sym, a], i) => <span key={a}>{i ? ' · ' : ''}<button type="button" className="taskform-link" onClick={() => setToken(a)} title={a}>{sym}</button></span>)}</span>} />
 }
 
-function Free({ agentName, onChange, disabled }: { agentName: string; onChange: (v: TaskValue) => void; disabled?: boolean }) {
+/** One sentence per category, shown as the brief's example: what a buyer would say in their own words. */
+const BRIEF_EXAMPLE: Record<string, string> = {
+  health_factor: 'Check the Venus loan of 0x60AA3AEE06E2345A17E4d4B12c53E046F4F63CAf and tell me how much to repay to get back to a health factor of 1.5.',
+  rebalancing: 'My PancakeSwap V3 position 7367728 (owner 0x2e010AaDFdFEbC2AdFCAFA5F83e9687ffA47C573) drifted out of range. Propose a new range about 5% each side of the price.',
+  yield: 'Where should 5,000 USDT earn the most on BNB Chain over the next 60 days, after switching costs?',
+  grid: 'Plan a 12-level grid for BNB/USDT about 10% either side of the current price with 1,000 USDT and a stop 15% below.',
+  security: 'Is the token at 0x0E09FaBB73Bd3Ade0a17ECC321fD13a19e81cE82 safe to buy? Check taxes, owner powers and liquidity.',
+}
+
+function Free({ agentName, onChange, disabled, example }: { agentName: string; onChange: (v: TaskValue) => void; disabled?: boolean; example?: string }) {
   const [text, setText] = useState('')
   const v = useMemo<TaskValue>(() => ({ task: text.trim(), ready: text.trim().length >= 12, missing: text.trim().length >= 12 ? null : 'Describe the task in a sentence.' }), [text])
   useEmit(onChange, v)
   return (
     <div className="fld">
       <label className="fld-label" htmlFor="free-task"><span>Describe the job for {agentName}</span></label>
-      <textarea id="free-task" className="taskform-text" rows={4} maxLength={1200} value={text} disabled={disabled} onChange={(e) => setText(e.target.value)} placeholder={`Say what ${agentName} should work on, with the numbers it needs.`} />
+      <textarea id="free-task" className="taskform-text" rows={4} maxLength={1200} value={text} disabled={disabled} onChange={(e) => setText(e.target.value)} placeholder={example ?? `Say what ${agentName} should work on, with the numbers it needs.`} />
+      {example ? <p className="fld-help"><button type="button" className="taskform-link" disabled={disabled} onClick={() => setText(example)}>Start from this example</button>. Name the account, position or token you mean; the agent prices exactly what you write.</p> : null}
     </div>
   )
 }

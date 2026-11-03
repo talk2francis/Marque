@@ -6,7 +6,7 @@ A public record of meaningful product changes. Evidence and limitations travel w
 
 ## 3 November 2026 · Answers read from more sellers, live examples in every hire form, a sharper tender
 
-Delivered answers: Marque now reads answers where more sellers publish them, always verified against the hash on chain. Pokter Studio sellers serve each job's answer by job, network and hash; Mandate serves its mainnet answers by job and network. A grid stated as separate buy and sell order lists is now read and checked. On the first pass this turned unreadable deliveries into checked ones, such as a health factor answer agreeing with Venus 2 of 2.
+Delivered answers: Marque now reads answers where more sellers publish them, always verified against the hash on chain. Besides the content-addressed path, it now tries the per-job paths sellers use (by job and network, or by job, network and hash). A grid stated as separate buy and sell order lists is now read and checked. On the first pass this turned unreadable deliveries into checked ones, such as a health factor answer agreeing with Venus 2 of 2.
 
 Checked includes warranted: a Warrant is the strictest chain check there is, so warranted agents are now part of the checked count, and the page shows one proven group with the Warrant as its top part.
 

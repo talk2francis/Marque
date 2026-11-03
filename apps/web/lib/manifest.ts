@@ -62,8 +62,8 @@ async function readOne(url: string, onchainHash: string | null): Promise<Manifes
 
 /**
  * The answer for any job (25 Oct): the published URL when the chain record names one, otherwise found from the on-chain
- * hash alone. Candidates, in order: an operator's known per-job path (Mandate), then the content-addressed path that BNB
- * Agent Studio sellers serve (`/deliverables/<hash>.json`) on each host the provider registered. Every candidate goes
+ * hash alone. Candidates, on each host the provider registered: the content-addressed path that BNB Agent Studio sellers
+ * serve (`/deliverables/<hash>.json`), then the per-job paths other sellers use. Every candidate goes
  * through the SSRF guard and is accepted only when its bytes hash to the deliverable hash on chain, so nothing
  * unverified is ever shown as the agent's answer. Found locations are remembered per process.
  */
@@ -96,12 +96,13 @@ export async function jobManifest(chainId: number, jobId: string, job: { deliver
 
 const FOUND = new Map<string, string | null>()
 /**
- * Operators that publish each job's answer at their own fixed path (found 3 Nov by probing every unreadable delivery and
- * accepting only bytes that hash to the deliverable on chain). Pokter Studio sellers serve it by job, chain and hash.
+ * Per-job answer paths sellers use beyond the content-addressed one (found 3 Nov by probing every unreadable delivery):
+ * by job and network, or by job, network and hash. Tried on each host the provider registered, and accepted only when
+ * the bytes hash to the deliverable on chain.
  */
-const OPERATOR_PATHS: Array<{ host: RegExp; path: (jobId: string, chainId: number, hash: string) => string }> = [
-  { host: /(^|\.)mandatemarkets\.com$/i, path: (j, c) => `https://www.mandatemarkets.com/api/escrow/jobs/${j}/deliverable?chainId=${c}` },
-  { host: /(^|\.)pokter\.xyz$/i, path: (j, c, h) => `https://pokter.xyz/api/seller/deliverables/${j}?chain=${c}&hash=${h}` },
+const PER_JOB_PATHS: Array<(origin: string, jobId: string, chainId: number, hash: string) => string> = [
+  (o, j, c) => `${o}/api/escrow/jobs/${j}/deliverable?chainId=${c}`,
+  (o, j, c, h) => `${o}/api/seller/deliverables/${j}?chain=${c}&hash=${h}`,
 ]
 
 async function candidates(chainId: number, jobId: string, provider: string | null, hash: string): Promise<string[]> {
@@ -114,11 +115,11 @@ async function candidates(chainId: number, jobId: string, provider: string | nul
   for (const r of rows) {
     let u: URL
     try { u = new URL(String(r['endpoint'])) } catch { continue }
-    for (const o of OPERATOR_PATHS) if (o.host.test(u.hostname)) add(o.path(jobId, chainId, hash))
     // The service's base path: everything before a well-known suffix (/a2a, /mcp, /.well-known/...).
     const base = u.pathname.replace(/\/(\.well-known\/.*|a2a|mcp|api\/.*|answer)?$/i, '').replace(/\/$/, '')
     add(`${u.origin}${base}/deliverables/${hash}.json`)
     if (base) add(`${u.origin}/deliverables/${hash}.json`)
+    for (const p of PER_JOB_PATHS) add(p(u.origin, jobId, chainId, hash))
   }
-  return out.slice(0, 6)
+  return out.slice(0, 8)
 }

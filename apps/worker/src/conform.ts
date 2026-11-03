@@ -9,7 +9,9 @@
  * retains only ~64 blocks of state and a stale case grades agents against a
  * position that may no longer resemble the chain.
  */
-import { CASES, capturePublishedCase, runConformance, a2aAdapter, type TestId } from '@marque/conformance'
+import { CASES, capturePublishedCase, runConformance, a2aAdapter, adapterFor, type TestId } from '@marque/conformance'
+import { sql } from 'drizzle-orm'
+import { db } from '@marque/db'
 import { randomUUID } from 'node:crypto'
 import { firstPartyAgentIds, safeFetch } from '@marque/probe'
 import { closeDb, firstPartyAgents } from '@marque/db'
@@ -64,6 +66,7 @@ function nextCheckAt(from = Date.now()): number {
 async function checksNow(force: boolean): Promise<void> {
   const only = process.argv.filter((a) => /^\d+:0x[0-9a-fA-F]{40}:\d+$/.test(a))
   if (!only.length) await checkDeliveredJobs(log).catch((err) => log('delivered_jobs_error', { error: errorKind(err) }))
+  if (!only.length) await renewSweep().catch((err) => log('renew_sweep_error', { error: errorKind(err) }))
   const rows = await checkSweep({ force, only, log })
   const tally: Record<string, number> = {}
   for (const r of rows) tally[r.verdict] = (tally[r.verdict] ?? 0) + 1
@@ -137,12 +140,55 @@ async function referenceSweep(): Promise<void> {
   log('reference_sweep_done', { pass, fail })
 }
 
+/**
+ * Warrant renewal (3 Nov): an outside agent that passed a published test keeps its Warrant only by passing again. Its
+ * pass is older than 72 hours: ask the same test again, on a freshly captured case, through the exact service it passed
+ * through (recorded with the pass). The same read-only question it already answered; under Francis's 2 Nov decision every
+ * listed agent may be asked one a day, and an operator opts out the same way as for the check call. A failed or
+ * unanswered renewal is stored as it is, so the Warrant lapses honestly instead of silently.
+ */
+async function renewSweep(): Promise<void> {
+  const optOut = new Set((process.env.CHECK_OPTOUT ?? '').split(',').map((x) => x.trim()).filter(Boolean))
+  const fp = new Set(await firstPartyAgentIds())
+  const due = ((await db().execute(sql`
+    with latest as (
+      select distinct on (agent_id, test_id) agent_id, test_id, pass, ran_at, request
+      from conformance_result where agent_id like '56:%' or agent_id like '97:%'
+      order by agent_id, test_id, ran_at desc
+    )
+    -- Older passes did not record their service: fall back to the agent's declared A2A card.
+    select agent_id, test_id, coalesce(request #>> '{evidence,service,kind}', 'a2a') as kind,
+           coalesce(request #>> '{evidence,service,discoveryEndpoint}', (
+             select coalesce(s.resolved_endpoint, s.endpoint) from agent_service s
+             where s.agent_id = latest.agent_id and s.kind = 'a2a' and s.currently_declared is distinct from false order by s.id limit 1)) as endpoint
+    from latest where pass and ran_at < now() - interval '72 hours' and ran_at > now() - interval '30 days'`)) as unknown as Array<Record<string, unknown>>)
+  let pass = 0, fail = 0
+  for (const r of due) {
+    const agentId = String(r['agent_id']), testId = String(r['test_id']) as TestId
+    if (fp.has(agentId) || optOut.has(agentId) || !r['endpoint']) continue
+    const adapter = adapterFor(String(r['kind'] ?? 'a2a'), agentId, agentId, String(r['endpoint']))
+    const spec = CASES.find((c) => c.testId === testId)
+    if (!adapter || !spec) continue
+    try {
+      const captured = await capturePublishedCase({ id: `${spec.id}-renew-${agentId.split(':').pop()}-${Date.now()}`, testId, subject: spec.subject, policy: spec.policy })
+      const outcome = await runConformance({ adapter, testId, caseId: captured.testCase.id, selectionSource: 'indexed_service' })
+      if (outcome.pass) pass++; else fail++
+      log('renew_result', { agentId, test: testId, pass: outcome.pass, failed: outcome.failedFields, error: errorKind(outcome.error) })
+    } catch (err) {
+      fail++
+      log('renew_error', { agentId, test: testId, error: errorKind(err) })
+    }
+  }
+  log('renew_sweep_done', { due: due.length, pass, fail })
+}
+
 async function main(): Promise<void> {
   const referenceOnly = process.argv.includes('--reference')
   const checksOnly = process.argv.includes('--checks')
   log('start', { once: ONCE, cycleMs: CYCLE_MS, referenceCycleMs: REFERENCE_CYCLE_MS, referenceOnly, checksOnly })
   if (ONCE) {
-    if (checksOnly) await checksNow(process.argv.includes('--force'))
+    if (process.argv.includes('--renew')) await renewSweep()
+    else if (checksOnly) await checksNow(process.argv.includes('--force'))
     else if (referenceOnly) await referenceSweep()
     else await sweep()
     await closeDb()

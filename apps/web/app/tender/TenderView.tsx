@@ -142,7 +142,7 @@ export function TenderView({ initialCategory, initialLane }: { initialCategory: 
             ))}
           </div>
         </div>
-        <TaskForm key={category} category={category} agentName="the agent" onChange={setTask} disabled={running} />
+        <TaskForm key={category} category={category} agentName="the agent" onChange={setTask} disabled={running} allowBrief={false} />
         <div className={styles.go}>
           <button type="button" className="btn btn--primary" disabled={!task.ready || running} onClick={run}>{running ? 'Asking every agent…' : 'Get quotes from every agent'}</button>
           <span className={styles.muted}>{task.ready ? 'Free. No wallet needed until you hire.' : task.missing}</span>

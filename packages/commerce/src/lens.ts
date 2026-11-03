@@ -149,7 +149,7 @@ function grid(c: J): GridLens {
     allocationUsd: num(l['allocationUsd'] ?? l['sizeUsd'] ?? l['usd'] ?? l['amountUsd']),
     side: ((): 'buy' | 'sell' | null => { const s = str(l['side'])?.toLowerCase(); return s === 'buy' || s === 'sell' ? s : null })(),
   })).filter((l) => Number.isFinite(l.price))
-  // Levels stated as separate buy and sell order lists (Pokter Studio's grid answer, 3 Nov): the buy side's quote amount
+  // Levels stated as separate buy and sell order lists (3 Nov): the buy side's quote amount
   // is its allocation; a sell's is its base amount at its own price. Stated values only, nothing inferred.
   if (!levels.length) {
     for (const [key, side] of [['buy_orders', 'buy'], ['sell_orders', 'sell'], ['buyOrders', 'buy'], ['sellOrders', 'sell']] as const) {
