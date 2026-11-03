@@ -149,6 +149,19 @@ function grid(c: J): GridLens {
     allocationUsd: num(l['allocationUsd'] ?? l['sizeUsd'] ?? l['usd'] ?? l['amountUsd']),
     side: ((): 'buy' | 'sell' | null => { const s = str(l['side'])?.toLowerCase(); return s === 'buy' || s === 'sell' ? s : null })(),
   })).filter((l) => Number.isFinite(l.price))
+  // Levels stated as separate buy and sell order lists (Pokter Studio's grid answer, 3 Nov): the buy side's quote amount
+  // is its allocation; a sell's is its base amount at its own price. Stated values only, nothing inferred.
+  if (!levels.length) {
+    for (const [key, side] of [['buy_orders', 'buy'], ['sell_orders', 'sell'], ['buyOrders', 'buy'], ['sellOrders', 'sell']] as const) {
+      for (const o of arr(pick(c, [key]))) {
+        const price = num(o['price'])
+        if (price === null) continue
+        const quote = num(o['usdt'] ?? o['usd'] ?? o['quote'])
+        const base = Object.entries(o).find(([k, v]) => k !== 'price' && k.toLowerCase() !== 'usdt' && num(v) !== null)
+        levels.push({ price, allocationUsd: quote ?? (base ? num(base[1])! * price : null), side })
+      }
+    }
+  }
   const win = isObj(pick(c, ['window'])) ? (pick(c, ['window']) as J) : null
   const pol = isObj(pick(c, ['policy'])) ? (pick(c, ['policy']) as J) : null
   // A policy-stated grid (anchor, step in bps, N levels each side) gives its levels by arithmetic; stated, not invented.
@@ -159,7 +172,7 @@ function grid(c: J): GridLens {
   return {
     kind: 'grid',
     pair: str(pick(c, ['pair', 'symbol', 'market'])),
-    price: num(pick(c, ['currentPrice', 'price', 'priceUsdtPerBnb', 'spot', 'mid'])),
+    price: num(pick(c, ['currentPrice', 'price', 'price_now', 'priceUsdtPerBnb', 'spot', 'mid'])),
     spacing: str(pick(c, ['spacingType', 'spacing'])),
     levels: levels.sort((a, b) => a.price - b.price),
     lower: num(pick(c, ['lowerBound', 'lower', 'lowerPrice', 'lowerUsd'])),

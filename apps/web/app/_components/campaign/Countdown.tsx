@@ -1,6 +1,12 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { campaignClock, clockShort, clockWords, type CampaignClock } from '@marque/commerce/rules'
+import { campaignClock, clockShort, clockWords, CAMPAIGN, type CampaignClock } from '@marque/commerce/rules'
+
+/** "Thu 5 Nov, 12:00 UTC", from the campaign's absolute end. */
+const CLOSE_WORDS = (() => {
+  const d = new Date(CAMPAIGN.end)
+  return `${d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' })}, ${d.toISOString().slice(11, 16)} UTC`
+})()
 
 /**
  * The time left, from the absolute UTC end. Renders nothing on the server (the first client
@@ -28,8 +34,9 @@ export function Countdown({ words = false, className }: { words?: boolean; class
   }, [c, hourly])
   return (
     <span className={className} suppressHydrationWarning>
-      {/* Before the clock is known, an invisible placeholder holds the width so the line does not reflow (layout shift). */}
-      <span aria-hidden="true">{c ? (words ? clockWords(c) : clockShort(c)) : <span style={{ visibility: 'hidden' }}>{words ? '12 days 23 hours' : '12d 23h 59m'}</span>}</span>
+      {/* Before the clock is known (the server HTML, read by link previews and AI assistants that run no scripts), the
+          absolute close stands in: true at any hour, so it never reads as a wrong countdown (3 Nov). */}
+      <span aria-hidden={c ? 'true' : undefined}>{c ? (words ? clockWords(c) : clockShort(c)) : `until ${CLOSE_WORDS}`}</span>
       <span className="sr-only" aria-live="polite">{hourly}</span>
     </span>
   )

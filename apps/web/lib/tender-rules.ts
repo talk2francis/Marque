@@ -3,14 +3,23 @@ import type { MarketRow } from '../app/register/market-model'
 /** Tender candidate rules (SPEC-SUPPLY 5), pure so they are tested directly. */
 export const TENDER_MAX = 8
 
-/** Best evidence first: Warranted, then more delivered jobs, then tested (pass or fail), then rating. */
-export function evidenceRank(a: Pick<MarketRow, 'warrant' | 'track'>): number {
-  const w = a.warrant.status === 'warranted' ? 3 : a.warrant.status === 'failed' ? 1 : 0
+/**
+ * Best evidence first (V4.4): a Warrant in the last 14 days, then an answer checked against the chain, then more delivered
+ * jobs, then rating. An old test result alone ranks nothing: a format miss is not evidence either way.
+ */
+export function evidenceRank(a: Pick<MarketRow, 'warrant' | 'track' | 'standing'>): number {
+  const s = a.standing
+  const w = s ? (s.warranted ? 3 : s.checked ? 2 : 0) : a.warrant.status === 'warranted' ? 3 : 0
   return w * 1_000_000 + Math.min(a.track.jobs.delivered, 9_999) * 100 + Math.round((a.track.verified.averageStars ?? 0) * 10)
 }
 
+/** What a tender row shows as its proof: the strongest the agent holds. */
+export function proofOf(a: Pick<MarketRow, 'warrant' | 'standing'>): 'warranted' | 'checked' | null {
+  return a.standing?.warranted || (!a.standing && a.warrant.status === 'warranted') ? 'warranted' : a.standing?.checked ? 'checked' : null
+}
+
 /** At most one per operator, at most two reference agents, TENDER_MAX in all. */
-export function pickCandidates<T extends Pick<MarketRow, 'isReference' | 'owner' | 'warrant' | 'track'>>(rows: readonly T[]): T[] {
+export function pickCandidates<T extends Pick<MarketRow, 'isReference' | 'owner' | 'warrant' | 'track' | 'standing'>>(rows: readonly T[]): T[] {
   const out: T[] = []
   const operators = new Set<string>()
   let reference = 0

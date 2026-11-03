@@ -75,7 +75,7 @@ export interface MarketRow {
   /** V4.4 standing (lib/standing.ts): pulled for safety, checked against the chain, warranted in the last 14 days. */
   standing?: {
     pulled: { reason: 'undelivered' | 'wrong_answer'; text: string; at: string; ref: string | null } | null
-    checked: { at: string; via: 'job' | 'check'; ref: string; onMainnet: boolean } | null
+    checked: { at: string; via: 'job' | 'check' | 'test'; ref: string; onMainnet: boolean } | null
     warranted: { at: string; testId: string; onMainnet: boolean } | null
   }
   qual: 'warranted' | 'failed' | 'callable' | 'unbound' | 'dead'
@@ -353,7 +353,7 @@ export function qualView(a: MarketRow): QualView {
 
   if (s?.checked) return {
     tone: 'qualified', label: 'Checked against the chain',
-    evidence: `${s.checked.via === 'job' ? 'A paid answer' : 'Its answer to Marque’s check'} agreed with BNB Chain${s.checked.onMainnet ? ' (on mainnet)' : ''}`,
+    evidence: `${s.checked.via === 'job' ? 'A paid answer' : s.checked.via === 'test' ? 'Its test answer' : 'Its answer to Marque’s check'} agreed with BNB Chain${s.checked.onMainnet ? ' (on mainnet)' : ''}`,
     date: isoDay(s.checked.at), flag: null, detail: s.checked.via === 'job' ? `job ${s.checked.ref}` : null,
     title: 'The chain facts in one of its answers, from a paid job or Marque’s daily read-only check call, agreed with BNB Chain in the last 30 days. Not a test pass.',
   }

@@ -7,7 +7,7 @@ import { quoteForBuyer, sellerFor, validateTask, HireError, LANE_CHAIN, type Lan
 import { engineFor } from '@marque/agent-engines'
 import { marketplaceAgents } from './marketplace'
 import type { MarketRow } from '../app/register/market-model'
-import { pickCandidates, taskShape } from './tender-rules'
+import { pickCandidates, proofOf, taskShape } from './tender-rules'
 export { pickCandidates, taskShape, evidenceRank, TENDER_MAX } from './tender-rules'
 
 /**
@@ -31,6 +31,8 @@ export interface TenderAgent {
   operator: string | null
   isReference: boolean
   warrant: MarketRow['warrant']
+  /** The strongest proof it holds now (V4.4): a Warrant, an answer checked against the chain, or neither. */
+  proof: 'warranted' | 'checked' | null
   delivered: number
   medianSeconds: number | null
   rating: { stars: number | null; count: number }
@@ -51,11 +53,12 @@ export async function* runTender(input: { category: string; fields: unknown; lan
   if (!check.ok) throw new HireError('task_incomplete', `This task needs ${check.missing.join(' and ')}.`, 422)
   const chainId = LANE_CHAIN[input.lane]
   const { rows } = await marketplaceAgents({ category: input.category, lane: input.lane, limit: 60, sort: 'best' })
-  const live = rows.filter((r) => r.commerce.serviceId !== null && r.commerce.state !== 'unavailable' && r.commerce.state !== 'preview_only' && r.liveness !== 'down' && !r.hireBlockedReason)
+  // Never ask an agent pulled for safety (a paid job left undelivered, or a wrong answer, in the last 14 days).
+  const live = rows.filter((r) => r.commerce.serviceId !== null && r.commerce.state !== 'unavailable' && r.commerce.state !== 'preview_only' && r.liveness !== 'down' && !r.hireBlockedReason && !r.standing?.pulled)
   const picked = pickCandidates(live)
   const asked: TenderAgent[] = picked.map((r) => ({
     agentId: r.agentId, tokenId: r.tokenId, chainId, name: r.name, operator: r.ownerLabel, isReference: r.isReference,
-    warrant: r.warrant, delivered: r.track.jobs.delivered, medianSeconds: r.track.delivery.medianSeconds,
+    warrant: r.warrant, proof: proofOf(r), delivered: r.track.jobs.delivered, medianSeconds: r.track.delivery.medianSeconds,
     rating: { stars: r.track.verified.averageStars, count: r.track.verified.count },
   }))
   const [row] = await db().insert(tenderTable).values({

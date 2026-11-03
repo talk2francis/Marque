@@ -1,12 +1,12 @@
 'use client'
 
-import { Fragment, useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { EmptyState } from '@marque/ui'
 import type { FailedGroupRow, InitialMarket, MarketFacetCounts } from './initial'
 import { track } from '../../lib/track'
 import { MarketToolbar } from './MarketToolbar'
-import { MarketList, UntestedHead } from './MarketList'
+import { MarketList } from './MarketList'
 import { RegisterTable } from './RegisterTable'
 import { AgentCard } from '../_components/market/AgentCard'
 import { AgentAvatar } from '../_components/AgentAvatar'
@@ -295,9 +295,8 @@ export function Marketplace({ category: fixedCategory, initial }: { category?: s
   const pickTab = (t: MarketTab) => patchFilter({ tab: t, stage: null })
   const pickRung = (stage: MarketStageKey | null) => patchFilter({ tab: 'listed', stage })
 
-  // Ready, in the recommended order, lists agents that passed first; the untested start under their own heading (2 Nov).
-  // The divider sits where the proven agents (a Warrant, or an answer checked against the chain) end.
-  const untestedFrom = state.tab === 'ready' && state.sort === 'best' ? rows.findIndex((r) => !r.standing?.warranted && !r.standing?.checked && r.warrant.status !== 'warranted') : -1
+  // One list (3 Nov): the order already puts warranted and checked agents first; each card says what is proven, so no
+  // divider splits agents that are just as hireable.
 
   return (
     <>
@@ -420,15 +419,12 @@ export function Marketplace({ category: fixedCategory, initial }: { category?: s
         {!loading && !error && rows.length > 0 &&
           (state.view === 'grid' ? (
             <div className={styles.cardGrid}>
-              {rows.map((a, i) => (
-                <Fragment key={a.agentId}>
-                  {untestedFrom === i ? <UntestedHead className={styles.untestedHead} /> : null}
-                  <AgentCard a={a} compare={{ picked: selectedIds.has(a.agentId), atLimit: selected.length >= 3, onToggle: toggleSelect }} />
-                </Fragment>
+              {rows.map((a) => (
+                <AgentCard key={a.agentId} a={a} compare={{ picked: selectedIds.has(a.agentId), atLimit: selected.length >= 3, onToggle: toggleSelect }} />
               ))}
             </div>
           ) : (
-            <MarketList rows={rows} selectedIds={selectedIds} atLimit={selected.length >= 3} onToggle={toggleSelect} untestedFrom={untestedFrom} />
+            <MarketList rows={rows} selectedIds={selectedIds} atLimit={selected.length >= 3} onToggle={toggleSelect} />
           ))}
       </div>
 

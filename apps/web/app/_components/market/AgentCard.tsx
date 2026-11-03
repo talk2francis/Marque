@@ -118,7 +118,7 @@ export function AgentCard({ a, compare, base = '', variant = 'default' }: {
           : st?.warranted
             ? <span className={styles.warrant} title="Its mainnet identity, same owner and endpoint, passed Marque's published test"><Check aria-hidden="true" />Test passed on mainnet {utcDay(st.warranted.at)}</span>
           : st?.checked
-            ? <span className={styles.warrant} title={`An answer${st.checked.via === 'job' ? ' in a paid job' : ' to Marque\'s daily check call'} agreed with BNB Chain${st.checked.onMainnet ? ' (its mainnet identity)' : ''}. Not a test pass.`}><Check aria-hidden="true" />Checked {utcDay(st.checked.at)}</span>
+            ? <span className={styles.warrant} title={`An answer${st.checked.via === 'job' ? ' in a paid job' : st.checked.via === 'test' ? ' to its published test' : ' to Marque\'s daily check call'} agreed with BNB Chain${st.checked.onMainnet ? ' (its mainnet identity)' : ''}. Not a test pass.`}><Check aria-hidden="true" />Checked {utcDay(st.checked.at)}</span>
           : w.status === 'failed'
             ? <span className={styles.failed} title={`Failed ${w.testId ?? 'MCS'}${w.failedField ? ` on ${w.failedField}` : ''}${w.date ? `, ${utcDay(w.date)}` : ''}. The record is on its page.`}>Failed {w.testId ?? 'the test'}</span>
             : w.noFit

@@ -129,7 +129,7 @@ export default async function Home() {
           {line ? (
             <dl className={styles.callouts} aria-label={`Quote snapshot at ${line.measuredAt}`}>
               <div><dt>Hireable</dt><dd><b className="num">{line.hireable}</b> hireable now on mainnet<SnapshotAge iso={line.measuredAt} /></dd></div>
-              <div><dt>Proven</dt><dd><b className="num">{line.checked}</b> checked against the chain. <b className="num">{line.warranted}</b> hold a Marque Warrant.</dd></div>
+              <div><dt>Proven</dt><dd><b className="num">{line.checked}</b> checked against the chain, <b className="num">{line.warranted}</b> of them holding a Marque Warrant.</dd></div>
             </dl>
           ) : null}
 
@@ -153,7 +153,7 @@ export default async function Home() {
               <div><dt>Registered on BNB Chain</dt><dd className={styles.kpiNum}>{fmt(line.registered)}</dd><dd className={styles.kpiNote}>ERC-8004 identities indexed.</dd></div>
               {line.answering !== null ? <div><dt>Answering a live call</dt><dd className={styles.kpiNum}>{fmt(line.answering)}</dd><dd className={styles.kpiNote}>Answered Marque&apos;s own probe.</dd></div> : null}
               <div><dt>Hireable now</dt><dd className={styles.kpiNum}>{line.hireable}</dd><dd className={styles.kpiNote}>A live signed price, payable into escrow on mainnet, checked <SnapshotAge iso={line.measuredAt} bare />{line.pulled ? `. ${line.pulled} more pulled for safety` : ''}.</dd></div>
-              <div><dt>Checked against the chain</dt><dd className={styles.kpiNum}>{line.checked}</dd><dd className={styles.kpiNote}>Of those, an answer agreed with BNB Chain in the last 30 days. {line.warranted} hold a <a href="/standard">Marque Warrant</a>.</dd></div>
+              <div><dt>Checked against the chain</dt><dd className={styles.kpiNum}>{line.checked}</dd><dd className={styles.kpiNote}>Of those, an answer agreed with BNB Chain in the last 30 days, or a Warrant proved it. {line.warranted} of them hold a <a href="/standard">Marque Warrant</a>.</dd></div>
             </dl>
             <p className={styles.kpiFoot}><ProvenanceChip provenance="MEASURED" /> Counted from Marque&apos;s index, not quoted from a provider. <a href="/why">How we count</a></p>
             <Limits>

@@ -16,6 +16,7 @@ type Lane = 'mainnet' | 'practice'
 interface Asked {
   agentId: string; tokenId: string | null; chainId: number; name: string; operator: string | null; isReference: boolean
   warrant: { status: 'warranted' | 'failed' | 'untested'; testId: string | null; date: string | null; failedField: string | null }
+  proof?: 'warranted' | 'checked' | null
   delivered: number; medianSeconds: number | null; rating: { stars: number | null; count: number }
 }
 type Answer = { state: 'asking' } | { state: 'priced'; quote: HireQuote; ms: number } | { state: 'declined' | 'failed'; reason: string; ms: number }
@@ -109,6 +110,17 @@ export function TenderView({ initialCategory, initialLane }: { initialCategory: 
     })
   }, [asked, answers, sort])
   const pricedCount = Object.values(answers).filter((a) => a.state === 'priced').length
+  // The sensible pick at a glance: the lowest live price among agents holding a Warrant or a chain-checked answer.
+  const bestProven = useMemo(() => {
+    let best: { id: string; p: number } | null = null
+    for (const a of asked) {
+      const ans = answers[a.agentId]
+      if (!a.proof || ans?.state !== 'priced') continue
+      const p = units(ans.quote)
+      if (!best || p < best.p) best = { id: a.agentId, p }
+    }
+    return best?.id ?? null
+  }, [asked, answers])
   const declinedCount = Object.values(answers).filter((a) => a.state === 'declined').length
   const elapsed = done ? done.ms : running ? Date.now() - startedAt.current : 0
 
@@ -153,6 +165,7 @@ export function TenderView({ initialCategory, initialLane }: { initialCategory: 
               {(Object.keys(SORT_LABEL) as Sort[]).map((k) => <button key={k} type="button" role="radio" aria-checked={sort === k} data-on={sort === k || undefined} onClick={() => setSort(k)}>{SORT_LABEL[k]}</button>)}
             </div>
           </header>
+          {done && done.priced < done.asked ? <p className={styles.note}>Building an agent? An agent is asked when it has a live signed price in this category on this network; one that declines or does not answer in 10 seconds is shown as such, never hidden. <Link href="/builders">Make yours answer tenders</Link></p> : null}
           {asked.length === 0 ? <p className={styles.empty}>No agent on this network can price this category right now. <Link href="/builders">Build one</Link>, or try the other network.</p> : (
             <div className={styles.tableWrap}>
               <table className={styles.table}>
@@ -163,7 +176,7 @@ export function TenderView({ initialCategory, initialLane }: { initialCategory: 
                     const left = ans.state === 'priced' ? ans.quote.expiresAt - now / 1000 : 0
                     return (
                       <tr key={a.agentId} data-state={ans.state}>
-                        <td data-label="Agent"><span className={styles.agent}><Link href={href}>{a.name}</Link>{a.isReference ? <Badge kind="reference" /> : <span className={styles.op}>{a.operator}</span>}</span></td>
+                        <td data-label="Agent"><span className={styles.agent}><Link href={href}>{a.name}</Link>{a.isReference ? <Badge kind="reference" /> : <span className={styles.op}>{a.operator}</span>}{bestProven === a.agentId && !running ? <span className={styles.best} title="The lowest live price among agents that hold a Warrant or whose answers agreed with BNB Chain">Best proven price</span> : null}</span></td>
                         {ans.state === 'priced' ? (
                           <>
                             <td data-label="Price" className={styles.price}>{ans.quote.priceLabel}</td>
@@ -174,7 +187,7 @@ export function TenderView({ initialCategory, initialLane }: { initialCategory: 
                             {ans.state === 'asking' ? <span className={styles.asking}>{running ? 'asking…' : 'no answer in 10 s'}</span> : <span className={styles.muted}>{ans.state === 'declined' ? 'declined: ' : ''}{ans.reason}</span>}
                           </td>
                         )}
-                        <td data-label="Proof">{a.warrant.status === 'warranted' ? <span className={styles.warranted}>Warranted {a.warrant.testId ?? ''}</span> : a.warrant.status === 'failed' ? <span>Tested{a.warrant.failedField ? `, ${a.warrant.failedField} wrong` : ''}</span> : <span className={styles.muted}>Untested</span>}</td>
+                        <td data-label="Proof">{(a.proof ?? (a.warrant.status === 'warranted' ? 'warranted' : null)) === 'warranted' ? <span className={styles.warranted}>Warranted {a.warrant.testId ?? ''}</span> : a.proof === 'checked' ? <span className={styles.warranted}>Checked against the chain</span> : <span className={styles.muted}>Not yet proven</span>}</td>
                         <td data-label="Delivers">{a.delivered ? <>{a.medianSeconds !== null ? `${Math.round(a.medianSeconds)} s median, ` : ''}{a.delivered} job{a.delivered === 1 ? '' : 's'}</> : <span className={styles.muted}>new</span>}</td>
                         <td className={styles.act}>{ans.state === 'priced' && left > 60 ? <Link className="btn btn--sm btn--primary" href={`?hire=${encodeURIComponent(a.agentId)}&serviceId=${ans.quote.serviceId ?? ''}&tender=${tenderId}`} scroll={false}>Hire</Link> : null}</td>
                       </tr>
@@ -185,7 +198,7 @@ export function TenderView({ initialCategory, initialLane }: { initialCategory: 
             </div>
           )}
           <p className={styles.note}>
-            Sorted by {SORT_LABEL[sort].toLowerCase()}{sort === 'evidence' ? ': Warranted first, then delivered jobs, then tested' : ''}. At most one agent per operator and two Marque reference agents are asked. Each price is for exactly the task above; Hire uses that quote while it is valid. <Link href="/docs/attribution">How Marque names itself in the job</Link> <ArrowUpRight aria-hidden="true" className={styles.ico} />
+            Sorted by {SORT_LABEL[sort].toLowerCase()}{sort === 'evidence' ? ': Warranted first, then checked against the chain, then delivered jobs' : ''}. At most one agent per operator and two Marque reference agents are asked; agents pulled for safety never are. Each price is for exactly the task above; Hire uses that quote while it is valid. <Link href="/docs/attribution">How Marque names itself in the job</Link> <ArrowUpRight aria-hidden="true" className={styles.ico} />
           </p>
         </section>
       ) : null}

@@ -26,6 +26,22 @@ export const EXAMPLE_POSITION = '7367728'
 export const EXAMPLE_POSITION_OWNER = '0x2e010AaDFdFEbC2AdFCAFA5F83e9687ffA47C573'
 
 const num = (v: string) => (v.trim() === '' ? null : Number(v))
+const shortAddr = (a: string) => `${a.slice(0, 6)}…${a.slice(-4)}`
+
+/** Live examples for the form (/api/v1/hire/examples): real Venus loans and PancakeSwap V3 positions, read from chain. */
+interface LiveExamples { loans: Array<{ address: string; healthFactor: number | null; borrowedUsd: number }>; positions: Array<{ tokenId: string; owner: string; pair: string; inRange: boolean }> }
+let examplesOnce: Promise<LiveExamples | null> | null = null
+function useLiveExamples(): LiveExamples | null {
+  const [x, setX] = useState<LiveExamples | null>(null)
+  useEffect(() => {
+    examplesOnce ??= fetch('/api/v1/hire/examples').then((r) => (r.ok ? r.json() : null)).catch(() => null)
+    let live = true
+    void examplesOnce.then((v) => { if (live) setX(v) })
+    return () => { live = false }
+  }, [])
+  return x
+}
+const usd = (n: number) => (n >= 1000 ? `$${(n / 1000).toFixed(1)}k` : `$${n}`)
 const fmt = (n: number) => (Number.isInteger(n) ? String(n) : String(Number(n.toFixed(4))))
 
 export function TaskForm({ category, agentName, onChange, disabled, taskExample, taskGuide }: {
@@ -101,6 +117,7 @@ function HealthFactor({ agentName, onChange, disabled }: { agentName: string; on
   useEffect(() => { const b = readBrief('health_factor'); if (b?.category === 'health_factor') { setAddr(b.address); setTarget(String(b.targetHf)) } }, [])
   // The connected wallet fills an empty field; a brief's own account (same mount) is never replaced.
   useEffect(() => { if (!addr && address && !readBrief('health_factor')) setAddr(address) }, [address])
+  const examples = useLiveExamples()
   const t = num(target)
   const addrOk = ADDR.test(addr)
   const targetOk = t !== null && t > 1 && t <= 10
@@ -115,7 +132,9 @@ function HealthFactor({ agentName, onChange, disabled }: { agentName: string; on
     <div className="taskform-grid">
       <Field label="Venus account to check" kind="mono" value={addr} onChange={setAddr} placeholder="0x…" disabled={disabled}
         error={addr && !addrOk ? 'A BNB Smart Chain address starts 0x and has 40 more characters.' : null}
-        help={<span className="taskform-help">{address && addr.toLowerCase() === address.toLowerCase() ? 'Your connected wallet. ' : ''}No Venus loan? <button type="button" className="taskform-link" onClick={() => setAddr(EXAMPLE_LOAN)}>Use a real account with a live loan</button></span>} />
+        help={<span className="taskform-help">{address && addr.toLowerCase() === address.toLowerCase() ? 'Your connected wallet. ' : ''}{examples?.loans.length
+          ? <>Or a live Venus loan, read just now: {examples.loans.map((l, i) => <span key={l.address}>{i ? ' · ' : ''}<button type="button" className="taskform-link" onClick={() => setAddr(l.address)} title={l.address}>{shortAddr(l.address)} HF {l.healthFactor !== null && l.healthFactor < 100 ? l.healthFactor.toFixed(2) : 'n/a'}, {usd(l.borrowedUsd)} borrowed</button></span>)}</>
+          : <>No Venus loan? <button type="button" className="taskform-link" onClick={() => setAddr(EXAMPLE_LOAN)}>Use a real account with a live loan</button></>}</span>} />
       <Field label="Restore it to" value={target} onChange={setTarget} unit="health factor" disabled={disabled}
         error={target && !targetOk ? 'Choose a target between 1 and 10.' : null} help={`${agentName} works out the exact repay to reach this.`} />
     </div>
@@ -176,6 +195,7 @@ function Rebalance({ onChange, disabled }: { onChange: (v: TaskValue) => void; d
   const { address } = useAccount()
   const [id, setId] = useState('')
   const [owner, setOwner] = useState('')
+  const examples = useLiveExamples()
   const [pct, setPct] = useState('5')
   useEffect(() => { const b = readBrief('rebalancing'); if (b?.category === 'rebalancing') { setId(b.positionId); if (b.address) setOwner(b.address) } }, [])
   useEffect(() => { if (!owner && address && !(readBrief('rebalancing') as { address?: string } | null)?.address) setOwner(address) }, [address])
@@ -208,7 +228,9 @@ function Rebalance({ onChange, disabled }: { onChange: (v: TaskValue) => void; d
       <Field label="PancakeSwap V3 position" value={id} onChange={(x) => setId(x.replace(/[^0-9]/g, ''))} kind="mono" placeholder="Position number" disabled={disabled}
         help={<span className="taskform-help">
           {mine && mine.length ? <>Yours: {mine.map((p, i) => <span key={p.tokenId}>{i ? ', ' : ''}<button type="button" className="taskform-link" onClick={() => setId(p.tokenId)}>#{p.tokenId} {p.pair}{p.inRange ? '' : ' (out of range)'}</button></span>)}. </> : address && mine ? 'No V3 positions in your wallet. ' : ''}
-          <button type="button" className="taskform-link" onClick={() => { setId(EXAMPLE_POSITION); setOwner(EXAMPLE_POSITION_OWNER) }}>Use Marque&apos;s own live position #{EXAMPLE_POSITION}</button>
+          {examples?.positions.length
+            ? <>Or a live position, read just now: {examples.positions.map((p, i) => <span key={p.tokenId}>{i ? ' · ' : ''}<button type="button" className="taskform-link" onClick={() => { setId(p.tokenId); setOwner(p.owner) }}>#{p.tokenId} {p.pair}, {p.inRange ? 'in range' : 'out of range'}</button></span>)}</>
+            : <button type="button" className="taskform-link" onClick={() => { setId(EXAMPLE_POSITION); setOwner(EXAMPLE_POSITION_OWNER) }}>Use Marque&apos;s own live position #{EXAMPLE_POSITION}</button>}
         </span>} />
       <Field label="Owner wallet" kind="mono" value={owner} onChange={setOwner} placeholder="0x…" disabled={disabled}
         error={owner && !ownerOk ? 'A BNB Smart Chain address starts 0x and has 40 more characters.' : null}
@@ -219,6 +241,9 @@ function Rebalance({ onChange, disabled }: { onChange: (v: TaskValue) => void; d
 }
 
 const YIELD_ASSET_OPTIONS = [{ value: 'USDT', label: 'USDT' }, { value: 'USDC', label: 'USDC' }, { value: 'FDUSD', label: 'FDUSD' }, { value: 'U', label: 'U' }]
+
+/** Typical placements: a small, a mid and a treasury-sized amount, each with a holding period. */
+const YIELD_PRESETS: Array<[number, string, number]> = [[1000, 'USDT', 30], [25000, 'USDC', 90], [250000, 'USDT', 180], [500, 'U', 7], [10000, 'FDUSD', 60]]
 
 function Yield({ onChange, disabled }: { onChange: (v: TaskValue) => void; disabled?: boolean }) {
   const [asset, setAsset] = useState('USDT')
@@ -242,12 +267,19 @@ function Yield({ onChange, disabled }: { onChange: (v: TaskValue) => void; disab
   return (
     <div className="taskform-grid">
       <SelectField label="Asset" value={asset} onChange={setAsset} options={YIELD_ASSET_OPTIONS} />
-      <Field label="Amount" value={amount} onChange={setAmount} unit={asset} disabled={disabled} error={amount && !amountOk ? 'Enter an amount above 0.' : null} help="Routes are ranked net of switching costs at this size." />
+      <Field label="Amount" value={amount} onChange={setAmount} unit={asset} disabled={disabled} error={amount && !amountOk ? 'Enter an amount above 0.' : null}
+        help={<span className="taskform-help">Routes are ranked net of switching costs at this size. Try: {YIELD_PRESETS.map(([a, s, d], i) => <span key={`${a}${s}`}>{i ? ' · ' : ''}<button type="button" className="taskform-link" onClick={() => { setAmount(String(a)); setAsset(s); setDays(String(d)) }}>{a.toLocaleString('en-US')} {s} for {d} days</button></span>)}</span>} />
       <Field label="Holding period" value={days} onChange={setDays} unit="days" disabled={disabled} error={days && !daysOk ? 'Whole days, 1 or more.' : null} />
       <Field label="Earning now (optional)" value={current} onChange={setCurrent} unit="% a year" disabled={disabled} error={!currentOk ? 'A percentage from 0.' : null} help="Leave empty if it sits idle." />
     </div>
   )
 }
+
+/** Well-known BNB Smart Chain token contracts, by symbol: a quick way to see what a token check returns. */
+const SECURITY_EXAMPLES: Array<[string, string]> = [
+  ['CAKE', '0x0E09FaBB73Bd3Ade0a17ECC321fD13a19e81cE82'], ['USDT', '0x55d398326f99059fF775485246999027B3197955'],
+  ['BTCB', '0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c'], ['TWT', '0x4B0F1812e5Df2A09796481Ff14017e6005508003'], ['WBNB', '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c'],
+]
 
 function Security({ onChange, disabled }: { onChange: (v: TaskValue) => void; disabled?: boolean }) {
   const [token, setToken] = useState('')
@@ -260,7 +292,8 @@ function Security({ onChange, disabled }: { onChange: (v: TaskValue) => void; di
     structured: ok ? structured('security', { token }) : null,
   }), [token, ok])
   useEmit(onChange, v)
-  return <Field label="Token contract" kind="mono" value={token} onChange={setToken} placeholder="0x…" disabled={disabled} error={token && !ok ? 'A contract address starts 0x and has 40 more characters.' : null} />
+  return <Field label="Token contract" kind="mono" value={token} onChange={setToken} placeholder="0x…" disabled={disabled} error={token && !ok ? 'A contract address starts 0x and has 40 more characters.' : null}
+    help={<span className="taskform-help">Try a BNB Chain token: {SECURITY_EXAMPLES.map(([sym, a], i) => <span key={a}>{i ? ' · ' : ''}<button type="button" className="taskform-link" onClick={() => setToken(a)} title={a}>{sym}</button></span>)}</span>} />
 }
 
 function Free({ agentName, onChange, disabled }: { agentName: string; onChange: (v: TaskValue) => void; disabled?: boolean }) {

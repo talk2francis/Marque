@@ -8,10 +8,12 @@ const row = (o: { id: string; owner?: string; ref?: boolean; warrant?: 'warrante
 }) as never as Parameters<typeof pickCandidates>[0][number] & { id: string }
 
 describe('tender candidates', () => {
-  it('ranks Warranted, then delivered jobs, then tested, then rating', () => {
-    const ranked = [row({ id: 'tested', warrant: 'failed' }), row({ id: 'busy', delivered: 40 }), row({ id: 'warranted', warrant: 'warranted' }), row({ id: 'rated', stars: 5 })]
+  it('ranks Warranted, then checked, then delivered jobs, then rating; an old test result alone ranks nothing', () => {
+    const base = row({ id: 'tested', warrant: 'failed' })
+    const checked = { ...row({ id: 'checked' }), standing: { pulled: null, checked: { at: '', via: 'job', ref: '56/1', onMainnet: false }, warranted: null } } as never as ReturnType<typeof row>
+    const ranked = [base, row({ id: 'busy', delivered: 40 }), row({ id: 'warranted', warrant: 'warranted' }), row({ id: 'rated', stars: 5 }), checked]
       .sort((a, b) => evidenceRank(b) - evidenceRank(a)).map((r) => (r as { id: string }).id)
-    expect(ranked).toEqual(['warranted', 'tested', 'busy', 'rated'])
+    expect(ranked).toEqual(['warranted', 'checked', 'busy', 'rated', 'tested'])
   })
   it('one per operator, at most two reference agents, eight in all', () => {
     const rows = [

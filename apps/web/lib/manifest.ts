@@ -95,9 +95,13 @@ export async function jobManifest(chainId: number, jobId: string, job: { deliver
 }
 
 const FOUND = new Map<string, string | null>()
-/** Operators that publish each job's answer at their own fixed path. */
-const OPERATOR_PATHS: Array<{ host: RegExp; path: (jobId: string) => string }> = [
-  { host: /(^|\.)mandatemarkets\.com$/i, path: (j) => `https://www.mandatemarkets.com/api/escrow/jobs/${j}/deliverable` },
+/**
+ * Operators that publish each job's answer at their own fixed path (found 3 Nov by probing every unreadable delivery and
+ * accepting only bytes that hash to the deliverable on chain). Pokter Studio sellers serve it by job, chain and hash.
+ */
+const OPERATOR_PATHS: Array<{ host: RegExp; path: (jobId: string, chainId: number, hash: string) => string }> = [
+  { host: /(^|\.)mandatemarkets\.com$/i, path: (j, c) => `https://www.mandatemarkets.com/api/escrow/jobs/${j}/deliverable?chainId=${c}` },
+  { host: /(^|\.)pokter\.xyz$/i, path: (j, c, h) => `https://pokter.xyz/api/seller/deliverables/${j}?chain=${c}&hash=${h}` },
 ]
 
 async function candidates(chainId: number, jobId: string, provider: string | null, hash: string): Promise<string[]> {
@@ -110,7 +114,7 @@ async function candidates(chainId: number, jobId: string, provider: string | nul
   for (const r of rows) {
     let u: URL
     try { u = new URL(String(r['endpoint'])) } catch { continue }
-    for (const o of OPERATOR_PATHS) if (o.host.test(u.hostname)) add(o.path(jobId))
+    for (const o of OPERATOR_PATHS) if (o.host.test(u.hostname)) add(o.path(jobId, chainId, hash))
     // The service's base path: everything before a well-known suffix (/a2a, /mcp, /.well-known/...).
     const base = u.pathname.replace(/\/(\.well-known\/.*|a2a|mcp|api\/.*|answer)?$/i, '').replace(/\/$/, '')
     add(`${u.origin}${base}/deliverables/${hash}.json`)

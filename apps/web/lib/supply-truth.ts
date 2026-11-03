@@ -29,7 +29,7 @@ export const SUPPLY_DEFINITIONS = {
   priced: 'listed with a live signed price now, payable into BNB Chain\'s ERC-8183 escrow to the agent\'s own wallet',
   hireable: 'priced and not pulled: a buyer\'s wallet can hire it through escrow right now',
   pulled: 'priced, but taken out of the count for safety: a paid job left undelivered, or a chain fact stated wrongly, in the last 14 days',
-  checked: 'hireable, and an answer it gave agreed with BNB Chain in the last 30 days (a paid job or Marque\'s daily check call)',
+  checked: 'hireable, and an answer it gave agreed with BNB Chain in the last 30 days (a paid job, Marque\'s daily check call, or a Warrant, which is the strictest check); warranted agents are a part of it',
   warranted: 'hireable, and passed its category\'s published Marque test in the last 14 days',
   delivered: 'hireable, and has delivered at least one paid job',
 } as const

@@ -55,3 +55,5 @@
   .table td.act { text-align: left; display: block; padding-top: 8px; }
   .table td.act::before { content: none; }
 }
+/* The lowest live price among proven agents (3 Nov): a quiet champagne tag, not a banner. */
+.best { font-size: 11.5px; padding: 1px 8px; border-radius: 999px; border: 1px solid color-mix(in srgb, var(--brass) 55%, var(--hair-2)); color: var(--ink); white-space: nowrap; }

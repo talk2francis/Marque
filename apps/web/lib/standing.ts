@@ -9,14 +9,14 @@ import type { StandingEvidence } from './agent-standing'
  * pulled: its latest paid job closed in the last 14 days without a delivery, or in the last 14 days it stated a chain fact
  * outside tolerance (a check call, a paid job's Lens check pinned to its block, or the Standard's test) and nothing has
  * agreed since. A missing field never pulls.
- * checked: within 30 days, an answer whose stated chain facts all agreed with the chain.
+ * checked: within 30 days, an answer whose stated chain facts all agreed with the chain; a Warrant counts, as the strictest check.
  * warranted: a full pass of its category's published test (the Standard, unchanged) within 14 days.
  * A testnet identity with the same owner and endpoint host as a mainnet one carries that one's checked and warranted,
  * marked as earned on mainnet.
  */
 export interface Standing {
   pulled: { reason: 'undelivered' | 'wrong_answer'; text: string; at: string; ref: string | null } | null
-  checked: { at: string; via: 'job' | 'check'; ref: string; onMainnet: boolean } | null
+  checked: { at: string; via: 'job' | 'check' | 'test'; ref: string; onMainnet: boolean } | null
   warranted: { at: string; testId: string; onMainnet: boolean } | null
 }
 
@@ -39,7 +39,7 @@ function own(r: MarketRow, ev: StandingEvidence | undefined, now: number): Stand
   const w = r.warrant
   const warranted = w.status === 'warranted' && w.date && w.testId && now - Date.parse(w.date) <= WARRANT_DAYS * DAY
     ? { at: w.date, testId: w.testId, onMainnet: false } : null
-  let checked = ev?.checked ? { ...ev.checked, onMainnet: false } : null
+  let checked: Standing['checked'] = ev?.checked ? { ...ev.checked, onMainnet: false } : null
   let pulled: Standing['pulled'] = null
   // The Standard's test found a stated value wrong (warrant 'failed' is only that now), recently, with no agreement since.
   const testWrong = w.status === 'failed' && w.date && now - Date.parse(w.date) <= WARRANT_DAYS * DAY && !(checked && checked.at > w.date)
@@ -47,6 +47,9 @@ function own(r: MarketRow, ev: StandingEvidence | undefined, now: number): Stand
   else if (testWrong) pulled = { reason: 'wrong_answer', text: `Stated a wrong ${w.failedField ? w.failedField.replace(/([a-z])([A-Z])/g, '$1 $2').toLowerCase() : 'value'} in ${w.testId}, ${day(w.date!)}`, at: w.date!, ref: w.testId }
   else if (ev?.undelivered) pulled = { reason: 'undelivered', text: `Its latest paid job was ${ev.undelivered.state === 'EXPIRED' ? 'left to expire' : 'refunded'} without a delivery, ${day(ev.undelivered.at)}`, at: ev.undelivered.at, ref: ev.undelivered.jobId }
   if (pulled?.reason === 'wrong_answer') checked = null
+  // A Warrant is the strictest chain check there is: every field recomputed from BNB Chain at a pinned block. A warranted
+  // agent is therefore checked too, so "checked" is the whole proven set and "warranted" the top part of it (3 Nov).
+  if (!checked && warranted && !pulled) checked = { at: warranted.at, via: 'test', ref: warranted.testId, onMainnet: warranted.onMainnet }
   return { pulled, checked, warranted }
 }
 
