@@ -32,7 +32,10 @@ describe.skipIf(!RPC)('act on a BSC mainnet fork', () => {
   }
 
   beforeAll(async () => {
-    anvil = spawn('anvil', ['--fork-url', RPC!, '--fork-block-number', PINNED.toString(), '--port', String(PORT), '--chain-id', '56', '--silent'], { stdio: 'ignore' })
+    // Paced and retried (3 Nov): a rate-limited archive plan dropped some of the burst of reads a Venus plan makes, and
+    // the repay case failed intermittently with the same code and block.
+    anvil = spawn('anvil', ['--fork-url', RPC!, '--fork-block-number', PINNED.toString(), '--port', String(PORT), '--chain-id', '56', '--silent',
+      '--compute-units-per-second', '150', '--retries', '10', '--fork-retry-backoff', '1500', '--timeout', '60000'], { stdio: 'ignore' })
     client = createPublicClient({ chain: bsc, transport: http(url) }) as PublicClient
     for (let i = 0; i < 60; i++) { try { await client.getBlockNumber(); break } catch { await new Promise((r) => setTimeout(r, 1000)) } }
     await test.setBalance({ address: BORROWER, value: parseUnits('1', 18) })
