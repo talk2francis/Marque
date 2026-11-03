@@ -44,7 +44,8 @@ describe.skipIf(!RPC)('act on a BSC mainnet fork', () => {
   it('repays to the target: the measured health factor lands within 0.002 of the prediction', async () => {
     const intent: Intent = { action: 'repay', targetHf: 1.5, market: 'USDT', agentHf: null, agentRepayUsd: null, account: BORROWER, atBlock: PINNED }
     const p = await plan({ client, user: BORROWER, intent, positionAccount: BORROWER })
-    expect(p.ok).toBe(true)
+    // The whole result on failure, so a refusal names its reason in CI.
+    expect(p).toMatchObject({ ok: true })
     if (!p.ok) return
     expect(p.calls.map((c) => c.kind)).toEqual(['approval', 'repay'])
     // Exact approval: the approve amount equals the repay amount, never max.

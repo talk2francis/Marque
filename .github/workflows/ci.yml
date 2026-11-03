@@ -122,6 +122,9 @@ jobs:
           node-version: 22
           cache: pnpm
       - uses: foundry-rs/foundry-toolchain@v1
+        # Pinned (3 Nov): the fork test replays a fixed mainnet block; a moving "stable" anvil changed its result.
+        with:
+          version: v1.8.1
       - run: pnpm install --frozen-lockfile
       # An archive RPC secret is required to fork at the pinned block; without it the suite reports skipped.
       - run: pnpm exec vitest run packages/act
