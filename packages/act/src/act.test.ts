@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { intentFromLens } from './act.js'
+import { intentFromLens, taskTarget } from './act.js'
 
 const hf = (extra: Record<string, unknown> = {}) => ({
   kind: 'health_factor', meta: { block: '129203995' }, account: '0x60AA3AEE06E2345A17E4d4B12c53E046F4F63CAf', hasPosition: true,
@@ -30,5 +30,21 @@ describe('decision fields only (invariant 34)', () => {
   })
   it('reads a supply decision from a yield answer', () => {
     expect(intentFromLens({ kind: 'yield', recommend: true, asset: 'usdt', venue: 'Venus Core Pool', sizeUsd: 1000, meta: { block: null } })).toEqual({ action: 'supply', asset: 'USDT', sizeUsd: 1000, atBlock: null })
+  })
+})
+
+describe("the buyer's target when the answer leaves it out (4 Nov)", () => {
+  it('reads the target from the task in plain words', () => {
+    expect(taskTarget('What is the health factor of Venus account 0x60AA and what repay restores it to 2.5? (via marque.trade)')).toBe(2.5)
+    expect(taskTarget('Keep my loan above 1.8')).toBe(1.8)
+    expect(taskTarget('target health factor of 2')).toBe(2)
+    expect(taskTarget('restore it to 0.9')).toBeNull()
+    expect(taskTarget('What is my health factor?')).toBeNull()
+    expect(taskTarget(null)).toBeNull()
+  })
+  it("uses it only when the agent read a health factor; the agent's own target comes first", () => {
+    expect(intentFromLens(hf({ target: null }), { taskTarget: 2.5 })).toMatchObject({ action: 'repay', targetHf: 2.5 })
+    expect(intentFromLens(hf({ target: null, healthFactor: null }), { taskTarget: 2.5 })).toBeNull()
+    expect(intentFromLens(hf(), { taskTarget: 2.5 })).toMatchObject({ targetHf: 1.5 })
   })
 })

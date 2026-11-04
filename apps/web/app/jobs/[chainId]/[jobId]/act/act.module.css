@@ -39,4 +39,15 @@
 .outcome dd span { font-family: inherit; font-size: 12px; color: var(--ink-3); }
 .outcome a { color: var(--chain); display: inline-flex; align-items: center; gap: 3px; }
 .outcome svg { width: 12px; height: 12px; }
+.panel[data-view] { border-top-color: var(--hair-2); }
+.viewNote { margin: 0; padding: 10px 12px; border-left: 2px solid var(--brass); background: color-mix(in srgb, var(--brass) 7%, transparent); font-size: 14px; line-height: 1.55; color: var(--ink-2); }
+.handoff { display: grid; gap: 10px; }
+.raw { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.raw li { display: grid; gap: 4px; padding: 10px 12px; border: 1px solid var(--hair); border-radius: var(--r-sm); min-width: 0; }
+.rawHead { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 13px; color: var(--ink-2); text-transform: capitalize; }
+.raw code { font-family: var(--font-mono); font-size: 12px; color: var(--ink-2); overflow-wrap: anywhere; word-break: break-all; }
+.raw .data { color: var(--ink-3); max-height: 4.6em; overflow: auto; }
+.copy { display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px; border: 1px solid var(--hair-2); border-radius: var(--r-pill); background: transparent; color: var(--ink-2); font: inherit; font-size: 12px; cursor: pointer; text-transform: none; }
+.copy:hover { color: var(--ink); border-color: var(--ink-3); }
+.copy svg, .handoff :global(.btn) svg { width: 13px; height: 13px; }
 @media (max-width: 600px) { .panel { padding: 20px 16px; } .outcome { grid-template-columns: 1fr; } .outcome dd { border-top: 0; padding-top: 0; } }

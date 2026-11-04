@@ -27,11 +27,21 @@ export type Intent =
 
 interface LensLike { kind: string; meta?: { block?: string | null } | null; [k: string]: unknown }
 
+/** The target health factor the buyer set in the task ("restores it to 2.5", "target 2", "above 1.8"), between 1 and 10. */
+export function taskTarget(task: string | null): number | null {
+  const m = task?.match(/\b(?:restores? it to|restore to|target(?: health factor| hf)?(?: of)?|back to|above|to a health factor of)\s*(\d+(?:\.\d+)?)/i)
+  const v = m ? Number(m[1]) : NaN
+  return v > 1 && v <= 10 ? v : null
+}
+
 /** Decision fields only (invariant 34). Returns null when the answer is not actionable in V4. */
-export function intentFromLens(lens: LensLike, hints: { taskAsset?: string | null } = {}): Intent | null {
+export function intentFromLens(lens: LensLike, hints: { taskAsset?: string | null; taskTarget?: number | null } = {}): Intent | null {
   const atBlock = lens.meta?.block && /^\d{6,12}$/.test(lens.meta.block) ? BigInt(lens.meta.block) : null
   if (lens.kind === 'health_factor') {
-    const target = typeof lens['target'] === 'number' ? (lens['target'] as number) : null
+    // The target is the buyer's decision: the answer's own, else the one the buyer set in the task (4 Nov), and only
+    // when the agent read a health factor, so an empty answer is never acted on.
+    const own = typeof lens['target'] === 'number' ? (lens['target'] as number) : null
+    const target = own ?? (typeof lens['healthFactor'] === 'number' && typeof hints.taskTarget === 'number' ? hints.taskTarget : null)
     if (!target || target <= 1 || target > 10 || lens['hasPosition'] === false) return null
     const markets = Array.isArray(lens['markets']) ? (lens['markets'] as Array<{ symbol?: string; borrowedUsd?: number | null }>) : []
     const borrowed = markets.filter((m) => (m.borrowedUsd ?? 0) > 0).sort((a, b) => (b.borrowedUsd ?? 0) - (a.borrowedUsd ?? 0))[0]
@@ -85,6 +95,8 @@ export type Plan =
     amountRaw: string; amount: number; amountUsd: number; bounds: { min: number; max: number }
     calls: PlanCall[]; before: PlanState; predicted: PlanState & { simulated: boolean }
     gas: string[]; readAt: string
+    /** A plan for a wallet that is not the signer's (4 Nov): shown with its calls, never signed or recorded here. */
+    viewOnly: boolean
     agent: { atBlock: string | null; healthFactor: number | null; repayUsd: number | null; target: number | null }
     stale: { reason: string; agentSays: string; nowNeeds: string } | null
     capped: string | null
@@ -97,10 +109,15 @@ const STALE_BLOCKS = 4000n // about 30 minutes of BSC blocks
 /**
  * Build, simulate and predict one action for `user` at the current block. `amount` (in token units)
  * lets the user adjust within bounds; the default is what the decision needs now.
+ *
+ * `viewOnly` builds the same plan for a wallet nobody here can sign for (4 Nov): the answer's own account, which may be
+ * a smart account or a wallet another product runs. The calls are that wallet's own, simulated as that wallet when it
+ * holds the funds and worked out from the same reads when it does not yet; whoever controls it can send them.
  */
-export async function plan(opts: { client: PublicClient; user: Address; intent: Intent; amount?: number | null; positionAccount?: string | null }): Promise<Plan> {
+export async function plan(opts: { client: PublicClient; user: Address; intent: Intent; amount?: number | null; positionAccount?: string | null; viewOnly?: boolean }): Promise<Plan> {
   const { client, intent } = opts
   const user = getAddress(opts.user)
+  const viewOnly = opts.viewOnly === true
   // The beneficiary is the signer's own position: never someone else's.
   if (opts.positionAccount && opts.positionAccount.toLowerCase() !== user.toLowerCase()) {
     return { ok: false, code: 'not_owner', reason: `The answer is about ${opts.positionAccount.slice(0, 8)}…, not the connected wallet. Only the position's owner can act on it.` }
@@ -148,41 +165,52 @@ export async function plan(opts: { client: PublicClient; user: Address; intent: 
   if (intent.action === 'repay') {
     const needUsd = Math.max(0, debt - weighted / intent.targetHf)
     need = Math.min(needUsd / priceUsd, borrowedUnits)
-    max = Math.min(borrowedUnits, walletBalance)
+    // A plan for someone else's wallet is not limited by what it holds now: it says what has to be there first.
+    max = viewOnly ? borrowedUnits : Math.min(borrowedUnits, walletBalance)
   } else {
     need = intent.sizeUsd ? intent.sizeUsd / priceUsd : walletBalance
     max = walletBalance
   }
   if (max <= 0) return { ok: false, code: 'no_balance', reason: `The wallet holds no ${m.symbol} to ${intent.action === 'repay' ? 'repay with' : 'supply'}.` }
   const chosen = opts.amount != null && Number.isFinite(opts.amount) && opts.amount > 0 ? Math.min(opts.amount, max) : Math.min(need, max)
-  const capped = chosen < need - 1e-9 ? `The wallet holds ${fmt(walletBalance, 4)} ${m.symbol}; the plan uses ${opts.amount != null ? 'the amount you chose' : 'all of it'}, short of the ${fmt(need, 4)} the decision needs.` : null
+  let capped = chosen < need - 1e-9 ? `The wallet holds ${fmt(walletBalance, 4)} ${m.symbol}; the plan uses ${opts.amount != null ? 'the amount you chose' : 'all of it'}, short of the ${fmt(need, 4)} the decision needs.` : null
   // Exact units: round down to the token's precision (never more than the wallet holds or the debt).
   const amountRaw = parseUnits(chosen.toFixed(Math.min(m.decimals, 8)), m.decimals)
   const amount = Number(formatUnits(amountRaw, m.decimals))
   if (amountRaw <= 0n) return { ok: false, code: 'no_balance', reason: 'The amount rounds to zero.' }
 
+  const short = viewOnly && walletBalance < amount
+  if (short) capped = `The wallet holds ${fmt(walletBalance, 4)} ${m.symbol}; it needs ${fmt(amount, 4)} there before step 2 can run, so this plan is worked out from the current reads rather than simulated.`
   const verb = intent.action === 'repay' ? 'Repay' : 'Supply'
+  const whose = viewOnly ? "this wallet's" : 'your'
   const calls: PlanCall[] = [
     { to: m.underlying, data: encodeFunctionData({ abi: erc20Abi, functionName: 'approve', args: [m.vToken, amountRaw] }), kind: 'approval', words: `Allow Venus ${await client.readContract({ address: m.vToken, abi: vTokenAbi, functionName: 'symbol', blockNumber: head }).catch(() => 'market')} to take exactly ${fmt(amount, 4)} ${m.symbol}` },
     intent.action === 'repay'
-      ? { to: m.vToken, data: encodeFunctionData({ abi: vTokenAbi, functionName: 'repayBorrow', args: [amountRaw] }), kind: 'repay', words: `${verb} ${fmt(amount, 4)} ${m.symbol} of your own borrow on Venus` }
-      : { to: m.vToken, data: encodeFunctionData({ abi: vTokenAbi, functionName: 'mint', args: [amountRaw] }), kind: 'supply', words: `${verb} ${fmt(amount, 4)} ${m.symbol} to Venus, credited to your wallet` },
+      ? { to: m.vToken, data: encodeFunctionData({ abi: vTokenAbi, functionName: 'repayBorrow', args: [amountRaw] }), kind: 'repay', words: `${verb} ${fmt(amount, 4)} ${m.symbol} of ${whose} own borrow on Venus` }
+      : { to: m.vToken, data: encodeFunctionData({ abi: vTokenAbi, functionName: 'mint', args: [amountRaw] }), kind: 'supply', words: `${verb} ${fmt(amount, 4)} ${m.symbol} to Venus, credited to ${viewOnly ? 'this' : 'your'} wallet` },
   ]
 
-  // Simulate the exact sequence at the current block, then read the account back inside the simulation.
-  const snapshotCall = { to: m.vToken, data: encodeFunctionData({ abi: vTokenAbi, functionName: 'getAccountSnapshot', args: [user] }) }
-  let sim
-  try { sim = await client.simulateCalls({ account: user, calls: [...calls.map((c) => ({ to: c.to, data: c.data })), snapshotCall] }) } catch (e) {
-    return { ok: false, code: 'sim_failed', reason: `The simulation at the current block failed: ${(e as Error).message.split('\n')[0]!.slice(0, 160)}` }
+  // Simulate the exact sequence at the current block, then read the account back inside the simulation. A wallet that
+  // does not yet hold the amount cannot be simulated; its result is the same arithmetic on the same reads.
+  let borrowedAfter = Math.max(0, borrowedUnits - (intent.action === 'repay' ? amount : 0))
+  let suppliedAfter = suppliedUnits + (intent.action === 'supply' ? amount : 0)
+  let gas: string[] = []
+  if (!short) {
+    const snapshotCall = { to: m.vToken, data: encodeFunctionData({ abi: vTokenAbi, functionName: 'getAccountSnapshot', args: [user] }) }
+    let sim
+    try { sim = await client.simulateCalls({ account: user, calls: [...calls.map((c) => ({ to: c.to, data: c.data })), snapshotCall] }) } catch (e) {
+      return { ok: false, code: 'sim_failed', reason: `The simulation at the current block failed: ${(e as Error).message.split('\n')[0]!.slice(0, 160)}` }
+    }
+    const failed = sim.results.findIndex((r) => r.status !== 'success')
+    if (failed >= 0 && failed < calls.length) return { ok: false, code: 'sim_failed', reason: `Step ${failed + 1} (${calls[failed]!.kind}) reverted in the simulation at the current block.` }
+    // Compound-style markets return an error code instead of reverting: 0 is success.
+    const code = decodeFunctionResult({ abi: vTokenAbi, functionName: intent.action === 'repay' ? 'repayBorrow' : 'mint', data: sim.results[1]!.data })
+    if (code !== 0n) return { ok: false, code: 'sim_failed', reason: `Venus returned error code ${code} for the ${intent.action} in the simulation.` }
+    const after = decodeFunctionResult({ abi: vTokenAbi, functionName: 'getAccountSnapshot', data: sim.results[2]!.data })
+    borrowedAfter = Number(formatUnits(after[2], m.decimals))
+    suppliedAfter = Number(formatUnits((after[1] * after[3]) / 10n ** 18n, m.decimals))
+    gas = sim.results.slice(0, calls.length).map((r) => r.gasUsed.toString())
   }
-  const failed = sim.results.findIndex((r) => r.status !== 'success')
-  if (failed >= 0 && failed < calls.length) return { ok: false, code: 'sim_failed', reason: `Step ${failed + 1} (${calls[failed]!.kind}) reverted in the simulation at the current block.` }
-  // Compound-style markets return an error code instead of reverting: 0 is success.
-  const code = decodeFunctionResult({ abi: vTokenAbi, functionName: intent.action === 'repay' ? 'repayBorrow' : 'mint', data: sim.results[1]!.data })
-  if (code !== 0n) return { ok: false, code: 'sim_failed', reason: `Venus returned error code ${code} for the ${intent.action} in the simulation.` }
-  const after = decodeFunctionResult({ abi: vTokenAbi, functionName: 'getAccountSnapshot', data: sim.results[2]!.data })
-  const borrowedAfter = Number(formatUnits(after[2], m.decimals))
-  const suppliedAfter = Number(formatUnits((after[1] * after[3]) / 10n ** 18n, m.decimals))
 
   const cf = inPosition ? inPosition.collateralFactor : 0 // collateral counts only in an entered market
   const debtAfter = Math.max(0, debt - (borrowedUnits - borrowedAfter) * priceUsd)
@@ -210,8 +238,8 @@ export async function plan(opts: { client: PublicClient; user: Address; intent: 
     market: { vToken: m.vToken, underlying: m.underlying, symbol: m.symbol, decimals: m.decimals, priceUsd },
     amountRaw: amountRaw.toString(), amount, amountUsd: amount * priceUsd, bounds: { min: 0, max }, calls,
     before: { block: head.toString(), healthFactor: hf, debtUsd: debt, weightedUsd: weighted, market: { borrowed: borrowedUnits, supplied: suppliedUnits, walletBalance } },
-    predicted: { block: head.toString(), healthFactor: hfAfter, debtUsd: debtAfter, weightedUsd: weightedAfter, market: { borrowed: borrowedAfter, supplied: suppliedAfter, walletBalance: walletBalance - amount }, simulated: true },
-    gas: sim.results.slice(0, calls.length).map((r) => r.gasUsed.toString()), readAt: new Date().toISOString(),
+    predicted: { block: head.toString(), healthFactor: hfAfter, debtUsd: debtAfter, weightedUsd: weightedAfter, market: { borrowed: borrowedAfter, supplied: suppliedAfter, walletBalance: Math.max(0, walletBalance - amount) }, simulated: !short },
+    gas, readAt: new Date().toISOString(), viewOnly,
     agent: { atBlock: intent.atBlock?.toString() ?? null, healthFactor: intent.action === 'repay' ? intent.agentHf : null, repayUsd: intent.action === 'repay' ? intent.agentRepayUsd : null, target: intent.action === 'repay' ? intent.targetHf : null },
     stale, capped,
   }

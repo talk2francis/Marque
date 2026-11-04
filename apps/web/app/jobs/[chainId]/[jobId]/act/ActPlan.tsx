@@ -4,7 +4,7 @@ import { useAccount, useConfig } from 'wagmi'
 import { useConnectModal } from '@rainbow-me/rainbowkit'
 import { getPublicClient, sendTransaction, switchChain, waitForTransactionReceipt } from '@wagmi/core'
 import { formatEther } from 'viem'
-import { ArrowUpRight, RefreshCw } from 'lucide-react'
+import { ArrowUpRight, Check, Copy, Download, RefreshCw } from 'lucide-react'
 import { friendlyError, type FriendlyError } from '@marque/commerce/client'
 import { Button, ButtonLink, ErrorNote, Skeleton } from '../../../../_components/ui'
 import { explorerTx } from '../../../../../lib/network'
@@ -21,7 +21,7 @@ type PlanOk = {
   market: { vToken: string; symbol: string; decimals: number; priceUsd: number }
   amount: number; amountUsd: number; bounds: { min: number; max: number }
   calls: Array<{ to: `0x${string}`; data: `0x${string}`; kind: string; words: string }>
-  before: PlanState; predicted: PlanState; gas: string[]; readAt: string
+  before: PlanState; predicted: PlanState & { simulated?: boolean }; gas: string[]; readAt: string; viewOnly?: boolean
   agent: { atBlock: string | null; healthFactor: number | null; repayUsd: number | null; target: number | null }
   stale: { reason: string; agentSays: string; nowNeeds: string } | null; capped: string | null
 }
@@ -30,6 +30,44 @@ type PlanResp = { plan: PlanOk | { ok: false; code: string; reason: string }; to
 const n = (v: number, dp = 2) => (v !== 0 && Math.abs(v) < 10 ** -dp ? v.toLocaleString('en-US', { maximumSignificantDigits: 4 }) : v.toLocaleString('en-US', { minimumFractionDigits: dp, maximumFractionDigits: dp }))
 // Above 100 a health factor carries no information (a dust remainder of interest makes it huge).
 const hf = (v: number | null) => (v === null ? 'no debt' : v > 100 ? 'over 100' : v.toFixed(3))
+const shortAddr = (a: string) => `${a.slice(0, 6)}…${a.slice(-4)}`
+
+/**
+ * The calls of a view-only plan (4 Nov), for whoever controls the wallet: each target and calldata to copy, and the
+ * whole sequence as a Safe Transaction Builder file, the batch format smart accounts and multisigs import.
+ */
+function HandOff({ p, chainId, jobId, agentName }: { p: PlanOk; chainId: number; jobId: string; agentName: string }) {
+  const [copied, setCopied] = useState<number | null>(null)
+  const copy = (i: number, text: string) => { void navigator.clipboard?.writeText(text).then(() => { setCopied(i); setTimeout(() => setCopied(null), 1500) }) }
+  const batch = JSON.stringify({
+    version: '1.0', chainId: '56', createdAt: Date.parse(p.readAt),
+    meta: { name: `${p.action === 'repay' ? 'Repay' : 'Supply'} ${p.market.symbol} on Venus`, description: `Built by Marque from ${agentName}'s answer to job ${jobId} (chain ${chainId}), read at block ${p.before.block}. Check the amount at the block you send it.`, createdFromSafeAddress: p.user },
+    transactions: p.calls.map((c) => ({ to: c.to, value: '0', data: c.data })),
+  }, null, 2)
+  const download = () => {
+    const url = URL.createObjectURL(new Blob([batch], { type: 'application/json' }))
+    const a = document.createElement('a'); a.href = url; a.download = `marque-plan-${chainId}-${jobId}.json`; a.click(); URL.revokeObjectURL(url)
+  }
+  return (
+    <div className={styles.handoff}>
+      <p className={styles.sub}>The calls, to send from {shortAddr(p.user)} in this order:</p>
+      <ol className={styles.raw}>
+        {p.calls.map((c, i) => (
+          <li key={i}>
+            <span className={styles.rawHead}><span>{i + 1}. {c.kind}</span><button type="button" className={styles.copy} onClick={() => copy(i, JSON.stringify({ to: c.to, value: '0', data: c.data }))} aria-label={`Copy call ${i + 1}`}>{copied === i ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}{copied === i ? 'Copied' : 'Copy'}</button></span>
+            <code>to {c.to}</code>
+            <code className={styles.data}>{c.data}</code>
+          </li>
+        ))}
+      </ol>
+      <div className={styles.actions}>
+        <Button size="sm" onClick={download}><Download aria-hidden="true" />Safe batch file</Button>
+        <Button size="sm" onClick={() => copy(-1, batch)}>{copied === -1 ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}{copied === -1 ? 'Copied' : 'Copy all as JSON'}</Button>
+      </div>
+      <p className={styles.fine}>The file opens in Safe&apos;s Transaction Builder; any wallet or product that sends raw calls can use the same targets and data. Amounts are exact for this block: re-check before sending.</p>
+    </div>
+  )
+}
 
 export function ActPlan({ chainId, jobId, agentName }: { chainId: 56 | 97; jobId: string; agentName: string }) {
   const config = useConfig()
@@ -47,11 +85,11 @@ export function ActPlan({ chainId, jobId, agentName }: { chainId: 56 | 97; jobId
   const [now, setNow] = useState(Date.now())
   useEffect(() => { const t = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(t) }, [])
 
+  // With no wallet connected, the plan is built for the account the answer is about, view only.
   const load = useCallback(async (amt: number | null) => {
-    if (!address) return
     setLoading(true); setError(null)
     try {
-      const r = await fetch('/api/v1/act/plan', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ chainId, jobId, user: address, amount: amt }) })
+      const r = await fetch('/api/v1/act/plan', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ chainId, jobId, user: address ?? null, amount: amt }) })
       const j = (await r.json()) as PlanResp & { detail?: string }
       if (!r.ok) setResp({ plan: { ok: false, code: 'unavailable', reason: j.detail ?? 'The plan could not be built just now.' }, token: null, agentName })
       else { setResp(j); if (j.plan.ok) setAmount(String(Number(j.plan.amount.toPrecision(10)))) }
@@ -62,7 +100,7 @@ export function ActPlan({ chainId, jobId, agentName }: { chainId: 56 | 97; jobId
   // Network fee: the simulated gas at the current gas price, on BSC mainnet.
   useEffect(() => {
     const p = resp?.plan
-    if (!p || !p.ok) return
+    if (!p || !p.ok || !p.gas.length) return
     let live = true
     ;(async () => {
       const pc = getPublicClient(config, { chainId: 56 })
@@ -72,14 +110,6 @@ export function ActPlan({ chainId, jobId, agentName }: { chainId: 56 | 97; jobId
     return () => { live = false }
   }, [resp, config])
 
-  if (!address) {
-    return (
-      <div className={styles.panel}>
-        <p className={styles.lede}>Connect the wallet that holds the position. You sign every step; Marque holds no authority over it.</p>
-        <Button variant="primary" onClick={openConnectModal}>Connect a wallet</Button>
-      </div>
-    )
-  }
   if (!resp || (loading && !resp.plan.ok)) return <div className={styles.panel}><Skeleton h={28} w="60%" /><Skeleton h={18} w="80%" /><Skeleton h={120} /></div>
   const p = resp.plan
   if (!p.ok) {
@@ -87,7 +117,10 @@ export function ActPlan({ chainId, jobId, agentName }: { chainId: 56 | 97; jobId
       <div className={styles.panel} data-refused="">
         <h2 className={styles.headline}>Nothing to sign</h2>
         <p className={styles.lede}>{p.reason}</p>
-        <ButtonLink href={`/jobs/${chainId}/${jobId}`}>Back to the job</ButtonLink>
+        <div className={styles.actions}>
+          {!address && p.code === 'not_owner' ? <Button variant="primary" onClick={openConnectModal}>Connect a wallet</Button> : null}
+          <ButtonLink href={`/jobs/${chainId}/${jobId}`}>Back to the job</ButtonLink>
+        </div>
       </div>
     )
   }
@@ -136,15 +169,22 @@ export function ActPlan({ chainId, jobId, agentName }: { chainId: 56 | 97; jobId
   }
 
   const verb = p.action === 'repay' ? 'Repay' : 'Supply'
+  const view = p.viewOnly === true
+  const your = view ? 'Its' : 'Your'
   return (
-    <div className={styles.panel}>
-      <div className={styles.top}><span className="t-label">Act on {agentName}&apos;s answer</span><span className={styles.net}>BSC mainnet</span></div>
-      <h2 className={styles.headline}>{verb} {n(p.amount, 4)} {p.market.symbol} {p.action === 'repay' ? `of your Venus ${p.market.symbol} borrow` : `to Venus`}</h2>
+    <div className={styles.panel} data-view={view || undefined}>
+      <div className={styles.top}><span className="t-label">{view ? `A plan for ${shortAddr(p.user)}` : `Act on ${agentName}'s answer`}</span><span className={styles.net}>BSC mainnet</span></div>
+      <h2 className={styles.headline}>{verb} {n(p.amount, 4)} {p.market.symbol} {p.action === 'repay' ? `of ${view ? "this wallet's" : 'your'} Venus ${p.market.symbol} borrow` : `to Venus`}</h2>
       <p className={styles.result}>
         {p.action === 'repay'
-          ? <>Your health factor goes from <b>{hf(p.before.healthFactor)}</b> to <b>{hf(p.predicted.healthFactor)}</b>.</>
-          : <>Your Venus {p.market.symbol} supply goes from <b>{n(p.before.market.supplied, 4)}</b> to <b>{n(p.predicted.market.supplied, 4)}</b>.</>}
+          ? <>{your} health factor goes from <b>{hf(p.before.healthFactor)}</b> to <b>{hf(p.predicted.healthFactor)}</b>{p.predicted.simulated === false ? ' (worked out, not simulated)' : ''}.</>
+          : <>{your} Venus {p.market.symbol} supply goes from <b>{n(p.before.market.supplied, 4)}</b> to <b>{n(p.predicted.market.supplied, 4)}</b>.</>}
       </p>
+      {view ? (
+        <p className={styles.viewNote}>
+          {agentName}&apos;s answer is about {shortAddr(p.user)}{address ? <>, not the connected wallet {shortAddr(address)}</> : null}. Marque cannot sign for it, so this is the plan for whoever controls it: its owner, or the product that runs it. They can send the calls below exactly as built.
+        </p>
+      ) : null}
       <p className={styles.checked}>Checked against block {Number(p.before.block).toLocaleString('en-US')}, {ago < 90 ? `${ago} seconds` : `${Math.round(ago / 60)} minutes`} ago.{p.agent.target ? <> {agentName} recommended a target of {p.agent.target}{p.agent.atBlock ? <> at block {Number(p.agent.atBlock).toLocaleString('en-US')}</> : null}.</> : null}</p>
       {p.stale ? <p className={styles.stale}>{p.stale.reason} At the current block it needs {p.stale.nowNeeds} ({agentName} said {p.stale.agentSays}).</p> : null}
       {p.capped ? <p className={styles.stale}>{p.capped}</p> : null}
@@ -166,12 +206,15 @@ export function ActPlan({ chainId, jobId, agentName }: { chainId: 56 | 97; jobId
         <span id="act-bounds" className={styles.fine}>up to {n(p.bounds.max, 4)}</span>
         <Button size="sm" loading={loading} onClick={() => void load(Number(amount) > 0 ? Number(amount) : null)}><RefreshCw aria-hidden="true" />Re-check</Button>
       </div>
-      <p className={styles.own}>{p.action === 'repay' ? 'This repays your own debt only.' : 'This supplies from your wallet to your own Venus balance only.'} Nothing is sent to {agentName}, Marque or anyone else.</p>
+      <p className={styles.own}>{p.action === 'repay' ? `This repays ${view ? "the wallet's" : 'your'} own debt only.` : `This supplies from ${view ? 'the' : 'your'} wallet to ${view ? 'its' : 'your'} own Venus balance only.`} Nothing is sent to {agentName}, Marque or anyone else.</p>
+      {view ? <HandOff p={p} chainId={chainId} jobId={jobId} agentName={agentName} /> : null}
       {error ? <ErrorNote error={error} /> : null}
       {recordError ? <p className={styles.stale}>{recordError}</p> : null}
       <div className={styles.actions}>
-        <Button variant="primary" loading={busy !== null} disabled={loading || !resp.token} onClick={sign}>{busy === 'record' ? 'Measuring the result' : `${verb} and sign`}</Button>
-        <ButtonLink href={`/jobs/${chainId}/${jobId}`}>Not now</ButtonLink>
+        {view
+          ? (!address ? <Button variant="primary" onClick={openConnectModal}>Connect this wallet to sign</Button> : null)
+          : <Button variant="primary" loading={busy !== null} disabled={loading || !resp.token} onClick={sign}>{busy === 'record' ? 'Measuring the result' : `${verb} and sign`}</Button>}
+        <ButtonLink href={`/jobs/${chainId}/${jobId}`}>{view ? 'Back to the job' : 'Not now'}</ButtonLink>
       </div>
       <details className={styles.limits}>
         <summary>Limits</summary>

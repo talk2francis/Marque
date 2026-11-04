@@ -4,7 +4,8 @@ import { sql } from 'drizzle-orm'
 import { getAddress, type Address, type Hex, type PublicClient } from 'viem'
 import { db } from '@marque/db'
 import { archiveClient, publicClient } from '@marque/chain'
-import { intentFromLens, measure, plan, type Plan } from '@marque/act'
+import { intentFromLens, measure, plan, taskTarget, type Plan } from '@marque/act'
+export { taskTarget }
 import { questJob, type ChainId } from '@marque/commerce'
 import { jobLens } from './lens'
 
@@ -22,7 +23,12 @@ const mac = (body: string) => createHmac('sha256', SECRET).update(`act-plan-v1\n
 const client = (): PublicClient => (archiveClient() ?? publicClient()) as PublicClient
 const json = (v: unknown) => JSON.stringify(v, (_k, x) => (typeof x === 'bigint' ? x.toString() : x))
 
-export async function makePlan(chainId: ChainId, jobId: string, user: string, amount: number | null): Promise<{ plan: Plan; token: string | null; agentName: string | null }> {
+/**
+ * `user` is the connected wallet, or null when none is. When the answer is about another wallet (or none is connected),
+ * the plan is built for the answer's own account, view only (4 Nov): the same calls and prediction, for whoever controls
+ * that wallet to send. No token is issued for it, so nothing is signed or recorded through Marque.
+ */
+export async function makePlan(chainId: ChainId, jobId: string, user: string | null, amount: number | null): Promise<{ plan: Plan; token: string | null; agentName: string | null }> {
   if (!SECRET) throw new Error('MARQUE_CLAIM_SECRET is not set')
   const [lensP, job] = await Promise.all([jobLens(chainId, jobId), questJob(chainId, jobId).catch(() => null)])
   const lens = lensP.value.lens
@@ -32,15 +38,20 @@ export async function makePlan(chainId: ChainId, jobId: string, user: string, am
   const [hi] = (await db().execute(sql`select i.description from commerce_job j join hire_intent i on i.id = j.intent_id where j.chain_id = ${chainId} and j.job_id = ${jobId} limit 1`).catch(() => [])) as unknown as Array<{ description: string | null }>
   const desc = hi?.description ?? null
   const task = desc ? (() => { try { const j = JSON.parse(desc) as { task?: unknown }; return typeof j.task === 'string' ? j.task : null } catch { return desc } })() : null
-  const intent = intentFromLens(lens as never, { taskAsset: task?.match(/\b(USDT|USDC|FDUSD)\b/i)?.[1] ?? null })
+  const intent = intentFromLens(lens as never, { taskAsset: task?.match(/\b(USDT|USDC|FDUSD)\b/i)?.[1] ?? null, taskTarget: taskTarget(task) })
   if (!intent) return { plan: { ok: false, code: 'not_actionable', reason: lens.kind === 'grid' ? 'A grid is many orders over time: Marque shows the plan and builds nothing.' : lens.kind === 'rebalancing' ? 'Re-centring a PancakeSwap position is not offered yet.' : 'This answer carries no decision Marque can act on (a repay to a target, or a supply on Venus).' }, token: null, agentName }
   // Whose position the answer is about: the answer's own account field, else the address in the buyer's task.
   let account = intent.action === 'repay' ? intent.account : null
   // The description is the signed JSON (currency and provider addresses come first): only its task text is read.
   if (intent.action === 'repay' && !account) account = task?.match(/0x[0-9a-fA-F]{40}/)?.[0] ?? null
   if (intent.action === 'repay' && !account) return { plan: { ok: false, code: 'not_owner', reason: 'The answer does not say whose position it is about, so Marque cannot check that it is yours.' }, token: null, agentName }
-  const p = await plan({ client: client(), user: getAddress(user) as Address, intent, amount, positionAccount: account })
-  if (!p.ok) return { plan: p, token: null, agentName }
+  const signer = user ? getAddress(user) : null
+  if (intent.action === 'supply' && !signer) return { plan: { ok: false, code: 'not_owner', reason: 'Connect the wallet you would supply from: the plan is built for that wallet.' }, token: null, agentName }
+  let subject: Address
+  try { subject = getAddress(intent.action === 'repay' ? account! : signer!) } catch { return { plan: { ok: false, code: 'not_owner', reason: 'The answer names an account that is not a valid address.' }, token: null, agentName } }
+  const viewOnly = !signer || subject.toLowerCase() !== signer.toLowerCase()
+  const p = await plan({ client: client(), user: subject, intent, amount, positionAccount: account, viewOnly })
+  if (!p.ok || viewOnly) return { plan: p, token: null, agentName }
   const sealed: SealedPlan = { plan: p, jobKey: `${chainId}:${jobId}`, agentKey: job?.agent?.agentKey ?? 'unknown', agentName: agentName ?? 'the agent', category: lens.kind, exp: Date.now() + TTL_MS }
   const body = Buffer.from(json(sealed)).toString('base64url')
   return { plan: p, token: `${body}.${mac(body)}`, agentName }

@@ -12,7 +12,7 @@ import { AddressChip, Badge, HashChip } from '../../../_components/ui'
 import { network as net } from '../../../../lib/network'
 import { utcStamp } from '../../../../lib/time'
 import { jobHeadline } from '../../../../lib/job-copy'
-import { outcomesForJob } from '../../../../lib/act'
+import { outcomesForJob, taskTarget } from '../../../../lib/act'
 import { intentFromLens } from '@marque/act'
 import { ResultLens } from './ResultLens'
 import { jobLens } from '../../../../lib/lens'
@@ -86,7 +86,6 @@ export default async function JobRoom({ params }: { params: Promise<{ chainId: s
   const manifest = await jobManifest(cid, jobId, job as never, onchainHash)
   // The Result Lens reads the same file and checks it against the chain (cached per job).
   const lensData = manifest && !manifest.withheld ? await jobLens(cid, jobId).then((p) => p.value).catch(() => null) : null
-  const actIntent = lensData?.lens ? intentFromLens(lensData.lens as never) : null
   const acted = await outcomesForJob(`${cid}:${jobId}`)
   const lensContent: unknown = manifest?.content ?? (() => { try { return manifest?.raw ? JSON.parse(manifest.raw) : null } catch { return null } })()
   // The description can be signed or identity-matched unsigned; the buyer's words are its `task`.
@@ -97,6 +96,7 @@ export default async function JobRoom({ params }: { params: Promise<{ chainId: s
     if (!d) return chainTask?.task ?? null
     try { const j = JSON.parse(d) as { task?: unknown }; return typeof j.task === 'string' ? j.task : null } catch { return d.split('\n')[0] ?? null }
   })()
+  const actIntent = lensData?.lens ? intentFromLens(lensData.lens as never, { taskTarget: taskTarget(asked) }) : null
 
   // A seller that refused the funded job (it answered notify_funded with an error and never
   // delivered): say so in its words, with the date the buyer can reclaim the full amount.
@@ -180,7 +180,7 @@ export default async function JobRoom({ params }: { params: Promise<{ chainId: s
                     <div className={styles.actEntry}>
                       <div>
                         <strong>Act on the answer</strong>
-                        <span>{actIntent.action === 'repay' ? `Repay toward a health factor of ${actIntent.targetHf} from the wallet that holds the position.` : `Supply ${actIntent.asset} to Venus from your own wallet.`} Marque rebuilds it, checks it against the current block and simulates it; you sign.</span>
+                        <span>{actIntent.action === 'repay' ? `Repay toward a health factor of ${actIntent.targetHf} from the wallet that holds the position.` : `Supply ${actIntent.asset} to Venus from your own wallet.`} Marque rebuilds it, checks it against the current block and simulates it; you sign. {actIntent.action === 'repay' ? 'For a wallet you do not hold, the plan shows the exact calls for whoever runs it.' : ''}</span>
                       </div>
                       <a className="btn" href={`/jobs/${cid}/${jobId}/act`}>See the plan</a>
                     </div>

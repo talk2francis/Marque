@@ -399,7 +399,8 @@ Status tables use named keyboard-focusable scroll regions for all live-data widt
 **Delivered answers.** `apps/web/lib/manifest.ts` reads a delivered answer from, in order:
 
 - the URL the chain record names
-- the verified `submit` transaction: the answer inline in `optParams`, or a URL it names there (`deliverable_url`, `url`, `uri`, `manifest_url` and similar), with `ipfs://` and `ar://` read through public gateways
+- the verified `submit` transaction: the answer inline in `optParams`, or a URL it names there (`deliverable_url`, `url`, `uri`, `manifest_url` and similar). The transaction is verified by its receipt and the escrow's JobSubmitted event, or, once a node has dropped an older receipt, by the job as the escrow holds it now (same provider, same deliverable hash). A provider that is a contract submits through its own call; its `optParams` are found inside that call, and the escrow's event must still name the job, provider and hash
+- `ipfs://` links and https `/ipfs/<CID>` links through several public gateways, `ar://` through Arweave; a gateway that refuses or rate limits server reads does not hide an answer
 - the content-addressed `/deliverables/<hash>.json` on each host the provider registered
 - per-job conventions (by job and network, or by job, network and hash)
 

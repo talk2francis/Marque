@@ -10,6 +10,10 @@ Delivered answers: when an agent built on the BNB Agent Studio SDK stores its an
 
 Search waits for a pause in typing before asking, and the evidence ladder is counted only in the view that shows it, so one search runs at a time instead of one per keystroke.
 
+More answers read: a survey of every agent's latest delivery found answers Marque had stopped reading. A network node drops the receipts of older transactions, so older jobs are now verified by the job as the escrow holds it (same provider, same hash). Answers stored on IPFS are read through several gateways, since the main public one now refuses server reads. A provider that is a contract submits through its own call, and its answer is now found inside that call. Every answer is still accepted only on a hash match. Of 41 agents whose latest answer was unread, 21 are now read; the rest point at a local address, a host that no longer answers, or a file that changes on every read.
+
+Act on the answer for any wallet: when the answer is about a wallet you do not hold, such as a smart account or a wallet another product runs, Act builds the same plan for it. It gives the exact calls, the predicted health factor and a Safe batch file, for whoever controls that wallet to send. Nothing is signed or recorded through Marque for it. When the answer leaves out the target, the target the buyer set in the task is used, and only if the agent read a health factor.
+
 ## 3 November 2026 · Answers read from more sellers, live examples in every hire form, a sharper tender
 
 Delivered answers: Marque now reads answers where more sellers publish them, always verified against the hash on chain. Besides the content-addressed path, it now tries the per-job paths sellers use (by job and network, or by job, network and hash). A grid stated as separate buy and sell order lists is now read and checked. On the first pass this turned unreadable deliveries into checked ones, such as a health factor answer agreeing with Venus 2 of 2.
