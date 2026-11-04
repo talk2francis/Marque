@@ -13,12 +13,15 @@ import {
 const h = vi.hoisted(() => ({
   tx: {} as Record<string, unknown>,
   receipt: {} as Record<string, unknown>,
+  noReceipt: false,
+  job: null as Record<string, unknown> | null,
 }))
 vi.mock('@marque/commerce', async (original) => ({
   ...(await original<object>()),
   chainClient: () => ({
     getTransaction: async () => h.tx,
-    getTransactionReceipt: async () => h.receipt,
+    getTransactionReceipt: async () => { if (h.noReceipt) throw new Error('receipt not found'); return h.receipt },
+    readContract: async () => h.job,
   }),
 }))
 import { network } from '@marque/commerce'
@@ -38,6 +41,7 @@ let serial = 0
 const input = (value = raw, digest = hash, id = 123n) =>
   encodeFunctionData({ abi, functionName: 'submit', args: [id, digest, stringToHex(value)] })
 beforeEach(() => {
+  h.noReceipt = false
   txHash = `0x${(++serial).toString(16).padStart(64, '0')}`
   hash = sha256(toBytes(raw))
   const blockHash = `0x${'a'.repeat(64)}`
@@ -69,6 +73,20 @@ beforeEach(() => {
 })
 const read = () => readSubmissionManifest(56, jobId, hash, provider, txHash)
 describe('public answers in kernel submissions are bound to the transaction and exact bytes', () => {
+  it('when the node no longer has the receipt, trusts the job as the escrow holds it, and nothing less', async () => {
+    h.noReceipt = true
+    h.job = { provider, deliverable: hash, submittedAt: 1n }
+    expect(await read()).toMatchObject({ matches: true, source: 'submission_calldata' })
+    h.job = { provider, deliverable: keccak256(toBytes('another answer')), submittedAt: 1n }
+    txHash = `0x${(++serial).toString(16).padStart(64, '0')}`; h.tx = { ...h.tx, hash: txHash }
+    expect(await read()).toBeNull()
+    h.job = { provider: other, deliverable: hash, submittedAt: 1n }
+    txHash = `0x${(++serial).toString(16).padStart(64, '0')}`; h.tx = { ...h.tx, hash: txHash }
+    expect(await read()).toBeNull()
+    h.job = null
+    txHash = `0x${(++serial).toString(16).padStart(64, '0')}`; h.tx = { ...h.tx, hash: txHash }
+    expect(await read()).toBeNull()
+  })
   it('accepts SHA-256 without silently labelling it keccak256', async () => {
     expect(await read()).toMatchObject({
       raw,
@@ -92,9 +110,19 @@ describe('public answers in kernel submissions are bound to the transaction and 
     expect(submissionPayload(input(raw, hash, 124n), jobId, hash)).toBeNull()
     expect(submissionPayload(input(raw, keccak256(toBytes(raw))), jobId, hash)).toBeNull()
   })
+  it('a call through another contract counts only with the kernel event for this job, provider and hash', async () => {
+    h.tx.to = other
+    expect(await read()).toMatchObject({ matches: true })
+    txHash = `0x${(++serial).toString(16).padStart(64, '0')}`; h.tx = { ...h.tx, hash: txHash }; h.receipt.transactionHash = txHash
+    h.receipt.logs = []
+    expect(await read()).toBeNull()
+  })
+  it('a kernel call from anyone but the provider is refused', async () => {
+    h.tx.from = other
+    expect(await read()).toBeNull()
+  })
   it.each([
     'status',
-    'destination',
     'sender',
     'transaction hash',
     'block',
@@ -106,7 +134,6 @@ describe('public answers in kernel submissions are bound to the transaction and 
     'event digest',
   ])('rejects mismatched %s', async (what) => {
     if (what === 'status') h.receipt.status = 'reverted'
-    if (what === 'destination') h.tx.to = other
     if (what === 'sender') h.tx.from = other
     if (what === 'transaction hash') h.receipt.transactionHash = `0x${'b'.repeat(64)}`
     if (what === 'block') h.tx.blockHash = `0x${'b'.repeat(64)}`

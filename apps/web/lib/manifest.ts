@@ -27,15 +27,33 @@ export interface Manifest {
   withheld?: { originalContentHash: string }
 }
 
-/** ipfs://CID/path and ar://ID read through public gateways, still through the SSRF guard and the hash check. */
-export function gatewayUrl(url: string): string {
-  if (/^ipfs:\/\//i.test(url)) return `https://ipfs.io/ipfs/${url.replace(/^ipfs:\/\/(ipfs\/)?/i, '')}`
-  if (/^ar:\/\//i.test(url)) return `https://arweave.net/${url.replace(/^ar:\/\//i, '')}`
-  return url
+/**
+ * Where a published answer can be read (4 Nov): ipfs://CID/path and ar://ID through public gateways, and an https
+ * gateway link (any host serving /ipfs/<CID>) also through the others, because a single gateway refusing or rate
+ * limiting server reads (ipfs.io now answers 429) must not hide an answer. Every gateway goes through the SSRF guard
+ * and the bytes still have to hash to the deliverable on chain, so no gateway is trusted for content.
+ */
+const IPFS_GATEWAYS = ['https://ipfs.filebase.io/ipfs/', 'https://ipfs.io/ipfs/', 'https://dweb.link/ipfs/']
+export function gatewayUrls(url: string): string[] {
+  if (/^ar:\/\//i.test(url)) return [`https://arweave.net/${url.replace(/^ar:\/\//i, '')}`]
+  const path = /^ipfs:\/\//i.test(url) ? url.replace(/^ipfs:\/\/(ipfs\/)?/i, '')
+    : /^https:\/\/[^/]+\/ipfs\/((Qm[1-9A-HJ-NP-Za-km-z]{44}|baf[a-z2-7]{20,})(\/[^?#]*)?)$/.exec(url)?.[1] ?? null
+  if (path === null) return [url]
+  const gateways = IPFS_GATEWAYS.map((g) => g + path)
+  return /^https:/i.test(url) ? [url, ...gateways.filter((g) => g !== url)] : gateways
 }
+export const gatewayUrl = (url: string): string => gatewayUrls(url)[0]!
 
 export async function readManifest(url: string, onchainHash: string | null): Promise<Manifest | null> {
-  url = gatewayUrl(url)
+  const urls = gatewayUrls(url)
+  if (urls.length > 1) {
+    for (const u of urls) {
+      const m = await readOne(u, onchainHash)
+      if (m !== MISSING && m && (m.matches === true || !onchainHash)) return m
+    }
+    return null
+  }
+  url = urls[0]!
   const m = await readOne(url, onchainHash)
   // Practice jobs from before a reference agent had its own testnet seller were answered by its
   // mainnet process, so the file lives without /testnet. Accepted only when it matches the chain hash.
