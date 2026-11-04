@@ -1,4 +1,4 @@
-// P2-11 load test: the read mix a launch-day visitor produces (k6).
+// Load test: the read mix a visitor produces (k6). First written for P2-11 (27 Sep).
 //   k6 run -e BASE=https://marque.trade -e VUS=100 -e HOLD=90s scripts/load/read-mix.js
 // Pages are the server-rendered routes; APIs are the quest's public reads.
 import http from 'k6/http'
@@ -26,14 +26,22 @@ export const options = {
   summaryTrendStats: ['avg', 'med', 'p(90)', 'p(95)', 'p(99)', 'max'],
 }
 
-const PAGES = ['/', '/register', '/register/yield', '/agents/keel', '/quest']
-const APIS = ['/api/v1/phase2/coverage', `/api/v1/phase2/wallet/${WALLET}`]
+// The read mix as of 4 Nov: the marketplace and its search, agent pages, and job rooms across many job ids, so first
+// reads of an unviewed job (chain and IPFS reads) are part of the load, not only warm cached pages.
+const PAGES = ['/', '/judge', '/agents/keel', '/agents/56/341554', '/agents/97/2718', '/quest', '/builders']
+const JOBS = [...Array.from({ length: 60 }, (_, i) => `/jobs/97/${1640 + i}`), ...Array.from({ length: 60 }, (_, i) => `/jobs/56/${57040 + i * 2}`)]
+const SEARCH = ['venus', 'yield', 'health factor', 'grid', 'pancakeswap', 'risk', 'rebalance', 'liquidation']
+const APIS = ['/api/v1/phase2/coverage', `/api/v1/phase2/wallet/${WALLET}`, '/api/v1/marketplace?limit=24&offset=0', '/api/v1/phase2/ratings/341554']
+const pick = (xs) => xs[Math.floor(Math.random() * xs.length)]
 
 export default function () {
-  const isApi = Math.random() < 0.35
-  const path = isApi ? APIS[Math.floor(Math.random() * APIS.length)] : PAGES[Math.floor(Math.random() * PAGES.length)]
-  const r = http.get(`${BASE}${path}`, { tags: { name: path, kind: isApi ? 'api' : 'page' }, timeout: '30s' })
-  ;(isApi ? apiDur : pageDur).add(r.timings.duration, { name: path })
+  const roll = Math.random()
+  const isApi = roll < 0.35
+  const path = roll < 0.2 ? pick(APIS) : roll < 0.35 ? `/api/v1/marketplace?limit=24&offset=0&q=${encodeURIComponent(pick(SEARCH))}`
+    : roll < 0.6 ? pick(JOBS) : pick(PAGES)
+  const name = path.startsWith('/jobs/') ? '/jobs/:id' : path.includes('q=') ? '/api/v1/marketplace?q' : path
+  const r = http.get(`${BASE}${path}`, { tags: { name, kind: isApi ? 'api' : 'page' }, timeout: '30s' })
+  ;(isApi ? apiDur : pageDur).add(r.timings.duration, { name })
   err5xx.add(r.status >= 500 || r.status === 0)
   sleep(0.5 + Math.random())
 }
