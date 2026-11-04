@@ -27,7 +27,15 @@ export interface Manifest {
   withheld?: { originalContentHash: string }
 }
 
+/** ipfs://CID/path and ar://ID read through public gateways, still through the SSRF guard and the hash check. */
+export function gatewayUrl(url: string): string {
+  if (/^ipfs:\/\//i.test(url)) return `https://ipfs.io/ipfs/${url.replace(/^ipfs:\/\/(ipfs\/)?/i, '')}`
+  if (/^ar:\/\//i.test(url)) return `https://arweave.net/${url.replace(/^ar:\/\//i, '')}`
+  return url
+}
+
 export async function readManifest(url: string, onchainHash: string | null): Promise<Manifest | null> {
+  url = gatewayUrl(url)
   const m = await readOne(url, onchainHash)
   // Practice jobs from before a reference agent had its own testnet seller were answered by its
   // mainnet process, so the file lives without /testnet. Accepted only when it matches the chain hash.
@@ -53,7 +61,9 @@ async function readOne(url: string, onchainHash: string | null): Promise<Manifes
     }
     if (!r.ok) return null
     const raw = r.body
-    const doc: unknown = JSON.parse(raw)
+    // A deliverable that is not JSON (plain text, markdown) is shown as text; it is still checked against the hash.
+    let doc: unknown
+    try { doc = JSON.parse(raw) } catch { return { raw, ...deliveryDigest(raw, onchainHash), content: { text: raw }, pretty: raw, url } }
     return { raw, ...deliveryDigest(raw,onchainHash), content:deliveryContent(doc), pretty:JSON.stringify(doc,null,2), url }
   } catch {
     return null
@@ -73,13 +83,13 @@ export async function jobManifest(chainId: number, jobId: string, job: { deliver
     const published=await readManifest(job.deliverable.url, hash)
     if(published && published.matches!==false) return published
     const submitted=job.events?.find(e=>e.name==='JobSubmitted')
-    const inline=hash && job.provider && submitted ? await readSubmissionManifest(chainId,jobId,hash,job.provider,submitted.tx) : null
+    const inline=hash && job.provider && submitted ? await readSubmissionManifest(chainId,jobId,hash,job.provider,submitted.tx,(u)=>readManifest(u,hash)) : null
     return inline ?? published
   }
   if (!hash || !/^0x[0-9a-fA-F]{64}$/.test(hash) || /^0x0+$/.test(hash)) return null
   const submitted=job?.events?.find(e=>e.name==='JobSubmitted')
   if(submitted && job?.provider) {
-    const inline=await readSubmissionManifest(chainId,jobId,hash,job.provider,submitted.tx)
+    const inline=await readSubmissionManifest(chainId,jobId,hash,job.provider,submitted.tx,(u)=>readManifest(u,hash))
     if(inline) return inline
   }
   const key = `${chainId}:${jobId}:${hash.toLowerCase()}`

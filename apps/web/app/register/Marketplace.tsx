@@ -219,7 +219,9 @@ export function Marketplace({ category: fixedCategory, initial }: { category?: s
           if (!cancelled) setLoading(false)
         }
       })()
-    }, 180)
+    // While a search term is typed, wait for a pause (4 Nov): each keystroke used to start its own catalog read, and five
+    // reads at once took 2.5 to 4 s each against 0.4 to 0.7 s for one. Clicks on filters keep the short delay.
+    }, state.search.trim() ? 450 : 180)
     return () => {
       cancelled = true
       controller.abort()
@@ -289,7 +291,9 @@ export function Marketplace({ category: fixedCategory, initial }: { category?: s
   const tabHint = TABS.find((t) => t.value === state.tab)?.hint
   // The ladder counts the whole listed set (All listed, no rung) under this view's network, category, search and
   // filters, whatever tab is open: its own memoised read (/api/v1/marketplace/ladder), refreshed when one changes.
-  const ladderQs = ready ? apiQuery({ ...state, tab: 'listed', stage: null, page: 0 }) : null
+  // Counted only where it is shown (4 Nov): the ladder lives in the All listed view; reading the whole catalog on every
+  // keystroke of a Ready search doubled the load of typing.
+  const ladderQs = ready && state.tab === 'listed' ? apiQuery({ ...state, tab: 'listed', stage: null, page: 0 }) : null
   useEffect(() => {
     if (!ladderQs) return
     const controller = new AbortController()

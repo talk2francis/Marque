@@ -11,6 +11,23 @@ const SUBMIT = parseAbi([
 ])
 
 /** Decode a direct kernel submission only. A matching digest is necessary but not sufficient; the receipt is checked too. */
+/** The deliverable_url an SDK seller writes into optParams when the answer itself is stored elsewhere (4 Nov). */
+export function submissionUrl(input: Hex, jobId: string, expectedHash: string): string | null {
+  try {
+    const decoded = decodeFunctionData({ abi: SUBMIT, data: input })
+    const [id, hash, data] = decoded.args
+    if (decoded.functionName !== 'submit' || id.toString() !== jobId || hash.toLowerCase() !== expectedHash.toLowerCase()) return null
+    const bytes = hexToBytes(data)
+    if (!bytes.length || bytes.length > 8 * 1024) return null
+    const doc = JSON.parse(new TextDecoder('utf-8', { fatal: true, ignoreBOM: true }).decode(bytes)) as Record<string, unknown>
+    const fields = ['deliverable_url', 'deliverableUrl', 'url', 'uri', 'manifest_url', 'manifestUrl', 'result_url', 'resultUrl', 'location']
+    const url = doc && typeof doc === 'object' ? fields.map((f) => doc[f]).find((v) => typeof v === 'string') : null
+    return typeof url === 'string' && /^(https|ipfs|ar):\/\//i.test(url) && url.length < 2048 ? url : null
+  } catch {
+    return null
+  }
+}
+
 export function submissionPayload(
   input: Hex,
   jobId: string,
@@ -49,6 +66,8 @@ export async function readSubmissionManifest(
   hash: string,
   provider: string,
   txHash: string,
+  /** Reads a URL the submission names (manifest.ts readManifest); the result must still match the hash on chain. */
+  follow?: (url: string) => Promise<Manifest | null>,
 ): Promise<Manifest | null> {
   if (
     !isSupportedChain(chainId) ||
@@ -101,10 +120,17 @@ export async function readSubmissionManifest(
         same(e.args.deliverable, hash),
     )
     if (!submitted) return null
-    const manifest = submissionPayload(tx.input, jobId, hash)
-    if (!manifest) return null
-    manifest.url = `${network(chainId).explorer}/tx/${txHash}`
-    manifest.source = 'submission_calldata'
+    let manifest = submissionPayload(tx.input, jobId, hash)
+    if (manifest) {
+      manifest.url = `${network(chainId).explorer}/tx/${txHash}`
+      manifest.source = 'submission_calldata'
+    } else {
+      // The verified submission names where its answer is stored: read it there, accepted only on a matching hash.
+      const url = follow ? submissionUrl(tx.input, jobId, hash) : null
+      const read = url ? await follow!(url) : null
+      if (!read || read.matches !== true) return null
+      manifest = read
+    }
     FOUND.set(key, { until: Date.now() + 5 * 60_000, manifest })
     if (FOUND.size > 64) FOUND.delete(FOUND.keys().next().value!)
     return manifest

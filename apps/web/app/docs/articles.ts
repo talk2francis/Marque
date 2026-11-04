@@ -63,6 +63,10 @@ export const articles: Record<string, Article> = {
     title:'What changed, and why.',
     description:'A public record of meaningful product changes. Evidence and limitations travel with each release.',
     sections:[
+      { id: 'v4-12', title: '4 November 2026 · Every delivered answer read, whatever its form; faster search', paragraphs: [
+        'Delivered answers: when an agent built on the BNB Agent Studio SDK stores its answer off chain, its submission names the file\'s address and commits to the manifest\'s canonical JSON. Marque now follows that address and recomputes that hash, as the SDK defines it; before, such answers showed as not yet published. It also reads an answer linked by IPFS or Arweave, a hash of the answer content alone, and plain-text or markdown answers, each accepted only when it matches the hash on chain.',
+        'Search waits for a pause in typing before asking, and the evidence ladder is counted only in the view that shows it, so one search runs at a time instead of one per keystroke.',
+      ] },
       { id: 'v4-11', title: '3 November 2026 · Answers read from more sellers, live examples in every hire form, a sharper tender', paragraphs: [
         'Delivered answers: Marque now reads answers where more sellers publish them, always verified against the hash on chain. Besides the content-addressed path, it now tries the per-job paths sellers use (by job and network, or by job, network and hash). A grid stated as separate buy and sell order lists is now read and checked. On the first pass this turned unreadable deliveries into checked ones, such as a health factor answer agreeing with Venus 2 of 2.',
         'Checked includes warranted: a Warrant is the strictest chain check there is, so warranted agents are now part of the checked count, and the page shows one proven group with the Warrant as its top part.',

@@ -396,14 +396,21 @@ Status tables use named keyboard-focusable scroll regions for all live-data widt
 
 **Warrant renewal** (`renewSweep` in `apps/worker/src/conform.ts`): an outside agent whose pass is older than 72 hours is asked the same published test again, on a freshly captured case, through the service recorded with its pass. A failed or unanswered renewal is stored, so a Warrant lapses honestly.
 
-**Delivered answers.** `apps/web/lib/manifest.ts` reads a delivered answer from:
+**Delivered answers.** `apps/web/lib/manifest.ts` reads a delivered answer from, in order:
 
-- the URL the chain names
-- the submission calldata
+- the URL the chain record names
+- the verified `submit` transaction: the answer inline in `optParams`, or a URL it names there (`deliverable_url`, `url`, `uri`, `manifest_url` and similar), with `ipfs://` and `ar://` read through public gateways
 - the content-addressed `/deliverables/<hash>.json` on each host the provider registered
 - per-job conventions (by job and network, or by job, network and hash)
 
-Bytes are accepted only when they hash to the deliverable on chain. The conform worker opens the Job Room of every recent delivery, so each delivered answer is checked whether or not anyone has looked at it.
+**What a file must match.** `apps/web/lib/delivery-bytes.ts` accepts a file only when one of these equals the deliverable hash on chain:
+
+- the file's exact bytes, by keccak256 or sha256
+- the BNB Agent Studio SDK's canonical manifest hash: its fields, keys sorted, no whitespace, characters from U+007F up escaped
+- the whole document's canonical JSON
+- the answer content alone
+
+A plain-text or markdown answer is kept as text. `apps/web/lib/delivery-formats.test.ts` pins every form against a real SDK delivery. The conform worker opens the Job Room of every recent delivery, so each delivered answer is checked whether or not anyone has looked at it.
 
 **Probing and classification:**
 
