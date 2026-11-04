@@ -110,7 +110,7 @@ export async function computeTracks(chainId: number): Promise<Record<string, Age
 /** Cached for a minute: ratings and jobs change on the indexer's pace, not per page view. */
 export async function agentTracks(chainId = 56): Promise<{ tracks: Record<string, AgentTrack>; computedAt: string; stale: boolean } | null> {
   try {
-    const p = await cachedProjection(`agent:tracks:v4:${chainId}`, () => computeTracks(chainId), { freshMs: 60_000, timeoutMs: 8_000, staleWhileRevalidate: true })
+    const p = await cachedProjection(`agent:tracks:v5:${chainId}`, () => computeTracks(chainId), { freshMs: 60_000, timeoutMs: 8_000, staleWhileRevalidate: true })
     return { tracks: p.value, computedAt: p.computedAt, stale: p.stale }
   } catch {
     return null

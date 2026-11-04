@@ -9,7 +9,7 @@ import { HireError } from './hire.js'
 import type { Call } from './calls.js'
 import { teamWallets } from './quest.js'
 import { boundedCommerceRead } from './read-budget.js'
-import { buyerFeedbackBinding, feedbackIdentity, feedbackEvidence } from './feedback-proof.js'
+import { buyerFeedbackBinding, feedbackEvidence } from './feedback-proof.js'
 
 /**
  * Ratings (SPEC-TRACKING 8, P2-04). The server never signs: it checks the guards, stores
@@ -106,7 +106,9 @@ export async function prepareRating(input: { chainId: ChainId; jobId: string; wa
  * delivered job for this agent) and every ERC-8004 rating, kept apart, never mixed.
  */
 export async function agentRatings(chainId: ChainId, agentTokenId: string, providerWallet: string, options: { evidence?: boolean } = {}) {
-  const identity = feedbackIdentity(chainId, agentTokenId)
+  // The identity on this chain's own registry; its configured mainnet twin is accepted inside the binding (4 Nov: mapping
+  // a practice identity to its twin dropped every practice-lane hire made under the testnet identity itself).
+  const identity = /^\d{1,30}$/.test(agentTokenId) ? `${chainId}:${network(chainId).identityRegistry.toLowerCase()}:${agentTokenId}` : null
   const rows = rowsOf(await boundedCommerceRead(sql`
     select r.client, r.value, r.value_decimals, r.tag1, r.feedback_index, r.block_number::text, r.block_time, r.tx_hash, c.job_id,
       ${buyerFeedbackBinding(sql`${providerWallet.toLowerCase()}`, sql`${identity}`)} as verified

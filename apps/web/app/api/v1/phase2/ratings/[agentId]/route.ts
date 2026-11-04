@@ -14,7 +14,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ agentId:
   const { agentId } = await params
   if (!/^\d{1,12}$/.test(agentId)) return bad('agentId is the numeric ERC-8004 token id on BSC mainnet.')
   const evidence = new URL(req.url).searchParams.get('format') === 'evidence'
-  return served(`phase2:ratings-v2:${evidence ? 'evidence:' : ''}${agentId}`, 'ratings', async () => {
+  return served(`phase2:ratings-v3:${evidence ? 'evidence:' : ''}${agentId}`, 'ratings', async () => {
     const [a] = (await db().execute(sql`select id, name, agent_wallet from agent where chain_id = 56 and token_id = ${agentId} limit 1`)) as unknown as Array<Record<string, unknown>>
     const wallet = String(a?.['agent_wallet'] ?? '')
     const first = firstPartyAgents().find((f) => String(f.tokenId) === agentId)

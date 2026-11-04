@@ -2,22 +2,40 @@ import { sql, type SQL } from 'drizzle-orm'
 import { firstPartyAgents } from '@marque/db'
 import { network, type ChainId } from './config.js'
 
+/** A first-party agent's older practice hires named its mainnet identity (before it had its own testnet seller);
+ * their feedback is on the testnet identity. Configured aliases only, never a guess across unrelated identities. */
+function testnetTwinOf(intentAgent: SQL): SQL {
+  const twins = firstPartyAgents().filter((f) => f.testnet).map((f) =>
+    sql`(${f.testnet!.chainId}::int, ${String(f.testnet!.tokenId)}::text, ${`56:${network(56).identityRegistry.toLowerCase()}:${f.tokenId}`}::text)`)
+  return twins.length ? sql`exists (select 1 from (values ${sql.join(twins, sql`, `)}) twin(chain_id, token_id, mainnet)
+    where twin.chain_id = r.chain_id and twin.token_id = r.agent_token_id and twin.mainnet = ${intentAgent})` : sql`false`
+}
+
 /** Feedback must name the exact prepared job, identity and amount of stars.
- * Caller alias r is indexed ERC-8004 feedback. A shared provider wallet alone
- * never binds feedback to an identity. Reads only; no historical row rewrite. */
+ * Caller alias r is indexed ERC-8004 feedback. A Marque hire binds through its intent; a job opened elsewhere (4 Nov:
+ * buyers hiring on chain, then rating through Marque) binds only when the provider wallet is this identity's alone on
+ * the network, the rule job counts use. A shared provider wallet never binds feedback to an identity. Reads only. */
 export function buyerFeedbackBinding(provider: SQL, identity: SQL): SQL {
   return sql`exists (
     select 1 from rating_comment proof
     join commerce_job j on j.chain_id = proof.chain_id and j.job_id = proof.job_id
-    join hire_intent i on i.id = j.intent_id
+    left join hire_intent i on i.id = j.intent_id
     where lower(proof.feedback_hash) = lower(r.feedback_hash)
       and proof.chain_id = r.chain_id and proof.agent_token_id = r.agent_token_id
       and lower(proof.client) = lower(r.client)
       and proof.stars between 1 and 5 and r.value_decimals = 0
       and r.value = (proof.stars * 20)::text and r.tag1 = 'starred' and not r.revoked
-      and i.agent_id = ${identity} and i.chain_id = j.chain_id and i.job_id = j.job_id
-      and lower(i.wallet) = lower(j.client) and lower(i.provider) = lower(j.provider)
-      and lower(i.token) = lower(j.token) and i.price_raw = j.funded_raw
+      and (
+        (i.id is not null and (i.agent_id = ${identity} or ${testnetTwinOf(sql`i.agent_id`)})
+          and i.chain_id = j.chain_id and i.job_id = j.job_id
+          and lower(i.wallet) = lower(j.client) and lower(i.provider) = lower(j.provider)
+          and lower(i.token) = lower(j.token) and i.price_raw = j.funded_raw)
+        or (j.intent_id is null
+          and exists (select 1 from agent me where me.id = ${identity} and me.chain_id = r.chain_id
+            and me.token_id = r.agent_token_id and lower(me.agent_wallet) = lower(j.provider))
+          and not exists (select 1 from agent sibling where sibling.chain_id = r.chain_id
+            and lower(sibling.agent_wallet) = lower(j.provider) and sibling.id <> ${identity}))
+      )
       and lower(j.client) = lower(r.client) and lower(j.provider) = lower(${provider})
       and lower(r.client) <> lower(j.provider)
       and j.funded_raw ~ '^[0-9]+$' and j.funded_raw::numeric > 0
