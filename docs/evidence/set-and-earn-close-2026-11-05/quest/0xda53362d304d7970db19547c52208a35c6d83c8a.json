@@ -1,0 +1,128 @@
+{
+  "address": "0xDa53362d304D7970Db19547C52208a35C6D83C8a",
+  "observedAt": "2026-11-05T15:49:25.893Z",
+  "window": {
+    "start": "2026-10-01T12:00:00Z",
+    "end": "2026-11-05T12:00:00Z"
+  },
+  "closed": true,
+  "chains": [
+    56,
+    97
+  ],
+  "blocks": {
+    "56": 131843594,
+    "97": 140984186
+  },
+  "excluded": {
+    "team": true,
+    "reason": "A published Marque team wallet. Its activity is shown, never counted."
+  },
+  "hire": {
+    "status": "excluded",
+    "distinctAgents": 0,
+    "required": {
+      "agents": 3,
+      "marketplaces": 2
+    },
+    "marketplaces": {
+      "named": [],
+      "notRecorded": 0
+    },
+    "hires": []
+  },
+  "build": {
+    "agents": [],
+    "more": 0
+  },
+  "registration": {
+    "state": "not_observable",
+    "reason": "BNB keeps the registration form. Marque cannot see it.",
+    "formUrl": "https://www.bnbchain.org/en/hackathons/smart-money-era-set-and-earn"
+  },
+  "suggestion": null,
+  "next": [],
+  "tryAllFour": [
+    {
+      "category": "yield",
+      "done": false,
+      "job": null
+    },
+    {
+      "category": "grid",
+      "done": false,
+      "job": null
+    },
+    {
+      "category": "rebalancing",
+      "done": false,
+      "job": null
+    },
+    {
+      "category": "health_factor",
+      "done": false,
+      "job": null
+    }
+  ],
+  "marketplaces": [
+    {
+      "name": "Marque",
+      "domain": "marque.trade",
+      "url": "https://marque.trade/",
+      "seenOnEscrow": true
+    },
+    {
+      "name": "TermiX",
+      "domain": "termix.ai",
+      "url": "https://app.termix.ai/",
+      "seenOnEscrow": false
+    },
+    {
+      "name": "Agent Souk",
+      "domain": "agentsouk.xyz",
+      "url": "https://agentsouk.xyz",
+      "seenOnEscrow": false
+    },
+    {
+      "name": "Dolphin",
+      "domain": "dolphinamp.xyz",
+      "url": "https://www.dolphinamp.xyz/",
+      "seenOnEscrow": false
+    },
+    {
+      "name": "HelloFugu",
+      "domain": "hellofugu.xyz",
+      "url": "https://app.hellofugu.xyz/",
+      "seenOnEscrow": false
+    },
+    {
+      "name": "KATTEGAT",
+      "domain": "kattegat.xyz",
+      "url": "https://kattegat.xyz/",
+      "seenOnEscrow": false
+    },
+    {
+      "name": "Pokter",
+      "domain": "pokter.xyz",
+      "url": "https://pokter.xyz/",
+      "seenOnEscrow": true
+    },
+    {
+      "name": "Agent Atlas",
+      "domain": "agent-atlas.xyz",
+      "url": "https://www.agent-atlas.xyz/",
+      "seenOnEscrow": false
+    },
+    {
+      "name": "Mandate",
+      "domain": "mandatemarkets.com",
+      "url": "https://www.mandatemarkets.com/",
+      "seenOnEscrow": true
+    }
+  ],
+  "method": {
+    "attribution": "marque_intent > client_ref > via <domain> in the task > known envelope > not recorded (https://marque.trade/docs/attribution)",
+    "funded": "A hire counts from its JobFunded event in the window. Created-but-unfunded jobs are listed and never counted.",
+    "independence": "Direct BNB and token transfers from the builder wallets to each hirer are checked. Transfers through other wallets or contracts are not."
+  }
+}

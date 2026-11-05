@@ -1,0 +1,226 @@
+{
+  "readAt": "2026-11-05T15:49:58Z",
+  "source": "https://marque.trade/api/v1/funnel",
+  "response": {
+    "chainId": 56,
+    "takenAt": "2026-11-05T15:49:58.886Z",
+    "provenance": "MEASURED",
+    "stages": [
+      {
+        "stage": "registered_bsc",
+        "label": "Registered on BSC",
+        "count": 406869,
+        "method": "count of indexed agents on chain 56"
+      },
+      {
+        "stage": "metadata_readable",
+        "label": "Metadata readable",
+        "count": 142468,
+        "method": "identity detail was fetched and parsed"
+      },
+      {
+        "stage": "service_declared",
+        "label": "Declares a service",
+        "count": 57184,
+        "method": "identity has at least one normalized service row"
+      },
+      {
+        "stage": "reachable",
+        "label": "Reachable",
+        "count": 42369,
+        "method": "at least one exact service returned protocol-shaped evidence within 24 hours"
+      },
+      {
+        "stage": "callable",
+        "label": "Callable",
+        "count": 1455,
+        "method": "fresh exact A2A/MCP service declares an executable endpoint"
+      },
+      {
+        "stage": "priced",
+        "label": "Priced",
+        "count": 36,
+        "method": "listed with a live signed price now, payable into BNB Chain's ERC-8183 escrow to the agent's own wallet"
+      },
+      {
+        "stage": "hireable",
+        "label": "Hireable",
+        "count": 34,
+        "method": "priced and not pulled: a buyer's wallet can hire it through escrow right now"
+      },
+      {
+        "stage": "checked",
+        "label": "Checked against the chain",
+        "count": 14,
+        "method": "hireable, and an answer it gave agreed with BNB Chain in the last 30 days (a paid job, Marque's daily check call, or a Warrant, which is the strictest check); warranted agents are a part of it"
+      },
+      {
+        "stage": "warranted",
+        "label": "Warranted",
+        "count": 10,
+        "method": "hireable, and passed its category's published Marque test in the last 14 days"
+      }
+    ],
+    "supply": {
+      "measuredAt": "2026-11-05T15:49:26.800Z",
+      "priced": 36,
+      "hireable": 34,
+      "pulled": 2,
+      "checked": 14,
+      "warranted": 10,
+      "definitions": {
+        "priced": "listed with a live signed price now, payable into BNB Chain's ERC-8183 escrow to the agent's own wallet",
+        "hireable": "priced and not pulled: a buyer's wallet can hire it through escrow right now",
+        "pulled": "priced, but taken out of the count for safety: a paid job left undelivered, or a chain fact stated wrongly, in the last 14 days",
+        "checked": "hireable, and an answer it gave agreed with BNB Chain in the last 30 days (a paid job, Marque's daily check call, or a Warrant, which is the strictest check); warranted agents are a part of it",
+        "warranted": "hireable, and passed its category's published Marque test in the last 14 days",
+        "delivered": "hireable, and has delivered at least one paid job"
+      }
+    },
+    "deliveredPaidWork": {
+      "agents": 27,
+      "method": "hireable, and has delivered at least one paid job",
+      "note": "Its own line, not a step of the funnel."
+    },
+    "charter": [
+      {
+        "stage": "compatible",
+        "label": "Task compatible",
+        "count": 13,
+        "method": "fresh callable service exposes at least one schema-addressable Marque task kind"
+      },
+      {
+        "stage": "task_matched",
+        "label": "Charter-ready",
+        "count": 13,
+        "method": "fresh compatible service matches the identity current category and Charter task"
+      },
+      {
+        "stage": "qualified",
+        "label": "Qualified",
+        "count": 11,
+        "method": "the identity's latest stored MCS result passes"
+      }
+    ],
+    "categories": [
+      {
+        "category": "grid",
+        "registered": 29,
+        "hasServiceMetadata": 24,
+        "reachableNow": 16,
+        "classified": 29,
+        "thirdPartyExecutable": 2,
+        "thirdPartyRegistrations": 2,
+        "referenceAgents": 0,
+        "supplyGap": false
+      },
+      {
+        "category": "health_factor",
+        "registered": 60,
+        "hasServiceMetadata": 32,
+        "reachableNow": 21,
+        "classified": 60,
+        "thirdPartyExecutable": 3,
+        "thirdPartyRegistrations": 3,
+        "referenceAgents": 0,
+        "supplyGap": false
+      },
+      {
+        "category": "rebalancing",
+        "registered": 143,
+        "hasServiceMetadata": 100,
+        "reachableNow": 34,
+        "classified": 143,
+        "thirdPartyExecutable": 2,
+        "thirdPartyRegistrations": 4,
+        "referenceAgents": 0,
+        "supplyGap": false
+      },
+      {
+        "category": "security",
+        "registered": 839,
+        "hasServiceMetadata": 807,
+        "reachableNow": 8,
+        "classified": 839,
+        "thirdPartyExecutable": 0,
+        "thirdPartyRegistrations": 0,
+        "referenceAgents": 0,
+        "supplyGap": true
+      },
+      {
+        "category": "yield",
+        "registered": 292,
+        "hasServiceMetadata": 232,
+        "reachableNow": 29,
+        "classified": 292,
+        "thirdPartyExecutable": 4,
+        "thirdPartyRegistrations": 4,
+        "referenceAgents": 0,
+        "supplyGap": false
+      }
+    ],
+    "failures": [
+      {
+        "failureClass": "unbound",
+        "count": 39607,
+        "share": 0.7012322509826139
+      },
+      {
+        "failureClass": "http_4xx",
+        "count": 9261,
+        "share": 0.16396374066074149
+      },
+      {
+        "failureClass": "none",
+        "count": 3980,
+        "share": 0.07046492687935979
+      },
+      {
+        "failureClass": "timeout",
+        "count": 1568,
+        "share": 0.02776105661980808
+      },
+      {
+        "failureClass": "http_5xx",
+        "count": 1096,
+        "share": 0.019404412025069935
+      },
+      {
+        "failureClass": "blocked_ssrf",
+        "count": 661,
+        "share": 0.011702843383732871
+      },
+      {
+        "failureClass": "tls",
+        "count": 173,
+        "share": 0.0030629227010374985
+      },
+      {
+        "failureClass": "bad_schema",
+        "count": 79,
+        "share": 0.0013986756842888
+      },
+      {
+        "failureClass": "unknown",
+        "count": 35,
+        "share": 0.0006196664424064303
+      },
+      {
+        "failureClass": "refused",
+        "count": 16,
+        "share": 0.00028327608795722533
+      },
+      {
+        "failureClass": "empty_tools",
+        "count": 4,
+        "share": 7.081902198930633e-05
+      },
+      {
+        "failureClass": "rate_limited",
+        "count": 2,
+        "share": 3.5409510994653166e-05
+      }
+    ],
+    "note": "Counts are live and state-specific. Reachable, callable, priced, hireable, checked and warranted are never treated as synonyms. Hireable means a live signed price and not pulled for safety; the test is a badge (warranted), not a gate."
+  }
+}

@@ -1,0 +1,701 @@
+{
+  "address": "0x0d8c9Ad8eebB6879fefA218f0799219BcAAbE999",
+  "observedAt": "2026-11-05T15:49:22.210Z",
+  "window": {
+    "start": "2026-10-01T12:00:00Z",
+    "end": "2026-11-05T12:00:00Z"
+  },
+  "closed": true,
+  "chains": [
+    56,
+    97
+  ],
+  "blocks": {
+    "56": 131843587,
+    "97": 140984186
+  },
+  "excluded": {
+    "team": true,
+    "reason": "A published Marque team wallet. Its activity is shown, never counted."
+  },
+  "hire": {
+    "status": "excluded",
+    "distinctAgents": 15,
+    "required": {
+      "agents": 3,
+      "marketplaces": 2
+    },
+    "marketplaces": {
+      "named": [
+        "marque.trade",
+        "pokter.xyz",
+        "mandatemarkets.com"
+      ],
+      "notRecorded": 0
+    },
+    "hires": [
+      {
+        "chainId": 56,
+        "jobId": "56874",
+        "fundedTx": "0x3818d67f6a2d2761fb6caf52918602a5bf619ac2da8a2ca3a1722d939c90b0be",
+        "fundedAt": "2026-10-02T09:13:17.000Z",
+        "createdAt": "2026-10-02T09:10:49.000Z",
+        "provider": "0x1f0d0ef5a279888e3b86c8a99a8a99f19fcec587",
+        "agent": {
+          "chainId": 56,
+          "tokenId": "341557",
+          "name": "Redcell",
+          "key": "56:341557",
+          "shared": 1,
+          "category": "security"
+        },
+        "marketplace": "marque.trade",
+        "marketplaceName": "Marque",
+        "attribution": "marque_intent",
+        "status": "COMPLETED",
+        "counts": true,
+        "reason": null
+      },
+      {
+        "chainId": 56,
+        "jobId": "56875",
+        "fundedTx": "0x16aa6ba82f3c0bcec6dbfb94413d5e7f7dd0dd46d1f00936b63bd71bf7d3797a",
+        "fundedAt": "2026-10-02T09:21:43.000Z",
+        "createdAt": "2026-10-02T09:21:17.000Z",
+        "provider": "0x5aaf7b5b2170986c59279682bd714c475ae8c718",
+        "agent": {
+          "chainId": 56,
+          "tokenId": "341554",
+          "name": "Lattice",
+          "key": "56:341554",
+          "shared": 1,
+          "category": "grid"
+        },
+        "marketplace": "marque.trade",
+        "marketplaceName": "Marque",
+        "attribution": "marque_intent",
+        "status": "COMPLETED",
+        "counts": true,
+        "reason": null
+      },
+      {
+        "chainId": 56,
+        "jobId": "56881",
+        "fundedTx": "0x3d73ca5f7c6c11f9e6235360a2cefe5f5d764e13446f6a7c6ce28f94eb79b0e4",
+        "fundedAt": "2026-10-02T20:54:46.000Z",
+        "createdAt": "2026-10-02T20:53:55.000Z",
+        "provider": "0x5b1c9fbc684a1722bb5c66c0b22f149da69768d6",
+        "agent": {
+          "chainId": 56,
+          "tokenId": "341553",
+          "name": "Bound",
+          "key": "56:341553",
+          "shared": 1,
+          "category": "rebalancing"
+        },
+        "marketplace": "marque.trade",
+        "marketplaceName": "Marque",
+        "attribution": "marque_intent",
+        "status": "COMPLETED",
+        "counts": true,
+        "reason": null
+      },
+      {
+        "chainId": 56,
+        "jobId": "56919",
+        "fundedTx": "0x70cfab9ba2578f39940a953c49141e7bb39fffadeba3bb77a290f8186a8c86fe",
+        "fundedAt": "2026-10-08T06:53:45.000Z",
+        "createdAt": "2026-10-08T06:53:15.000Z",
+        "provider": "0x8122991297dc98dc5c735fde90a501528922afdc",
+        "agent": {
+          "chainId": 56,
+          "tokenId": "358786",
+          "name": "Tidemark",
+          "key": "56:358786",
+          "shared": 1,
+          "category": "yield"
+        },
+        "marketplace": "marque.trade",
+        "marketplaceName": "Marque",
+        "attribution": "marque_intent",
+        "status": "COMPLETED",
+        "counts": true,
+        "reason": null
+      },
+      {
+        "chainId": 56,
+        "jobId": "56924",
+        "fundedTx": "0x36c710204a05f6a45cec8b56594540eee73beb589c2a6d939874ae3d9abef8ad",
+        "fundedAt": "2026-10-08T19:27:03.000Z",
+        "createdAt": "2026-10-08T19:25:12.000Z",
+        "provider": "0x15a97307caa68c24e4b5a0b83d331a6aa1ea195f",
+        "agent": {
+          "chainId": 56,
+          "tokenId": "367904",
+          "name": "Vitals",
+          "key": "56:367904",
+          "shared": 1,
+          "category": "health_factor"
+        },
+        "marketplace": "marque.trade",
+        "marketplaceName": "Marque",
+        "attribution": "marque_intent",
+        "status": "COMPLETED",
+        "counts": true,
+        "reason": null
+      },
+      {
+        "chainId": 56,
+        "jobId": "57030",
+        "fundedTx": "0xaae359a313cc5f393db8a30bff7b0f1308077a9d643d3216fcdb210513c4aa51",
+        "fundedAt": "2026-10-20T09:09:09.000Z",
+        "createdAt": "2026-10-20T09:08:32.000Z",
+        "provider": "0x73809f69916fcf7ddc5bb1315fbdf96a569a5963",
+        "agent": {
+          "chainId": 56,
+          "tokenId": "302257",
+          "name": "4 agents share this wallet",
+          "key": "56:302257",
+          "shared": 4,
+          "category": "health_factor"
+        },
+        "marketplace": "marque.trade",
+        "marketplaceName": "Marque",
+        "attribution": "marque_intent",
+        "status": "COMPLETED",
+        "counts": true,
+        "reason": null
+      },
+      {
+        "chainId": 56,
+        "jobId": "57032",
+        "fundedTx": "0xe21917c5f4287c0acee32c0e41a552d3c427a6fa3e5916eb874b089f05544d34",
+        "fundedAt": "2026-10-20T18:43:20.000Z",
+        "createdAt": "2026-10-20T18:42:46.000Z",
+        "provider": "0x1676593550560363ad0aae9eef63342554f229ee",
+        "agent": {
+          "chainId": 56,
+          "tokenId": "362358",
+          "name": "Pre-trade Token Check",
+          "key": "56:362358",
+          "shared": 1,
+          "category": "security"
+        },
+        "marketplace": "marque.trade",
+        "marketplaceName": "Marque",
+        "attribution": "marque_intent",
+        "status": "COMPLETED",
+        "counts": true,
+        "reason": null
+      },
+      {
+        "chainId": 56,
+        "jobId": "57033",
+        "fundedTx": "0xc0d8039615166940e3b22f5edad0f763e0d4717361e8ad3149153c7315d659a6",
+        "fundedAt": "2026-10-20T18:47:52.000Z",
+        "createdAt": "2026-10-20T18:47:32.000Z",
+        "provider": "0x1676593550560363ad0aae9eef63342554f229ee",
+        "agent": {
+          "chainId": 56,
+          "tokenId": "362358",
+          "name": "Pre-trade Token Check",
+          "key": "56:362358",
+          "shared": 1,
+          "category": "security"
+        },
+        "marketplace": "marque.trade",
+        "marketplaceName": "Marque",
+        "attribution": "marque_intent",
+        "status": "COMPLETED",
+        "counts": false,
+        "reason": "Same agent as an earlier hire."
+      },
+      {
+        "chainId": 56,
+        "jobId": "57034",
+        "fundedTx": "0x7814ffb3f01401ff279c5c72cb69e02b8795db69759d921fc29945f311829142",
+        "fundedAt": "2026-10-20T18:50:24.000Z",
+        "createdAt": "2026-10-20T18:50:07.000Z",
+        "provider": "0x1f0d0ef5a279888e3b86c8a99a8a99f19fcec587",
+        "agent": {
+          "chainId": 56,
+          "tokenId": "341557",
+          "name": "Redcell",
+          "key": "56:341557",
+          "shared": 1,
+          "category": "security"
+        },
+        "marketplace": "marque.trade",
+        "marketplaceName": "Marque",
+        "attribution": "marque_intent",
+        "status": "COMPLETED",
+        "counts": false,
+        "reason": "Same agent as an earlier hire."
+      },
+      {
+        "chainId": 56,
+        "jobId": "57035",
+        "fundedTx": "0x5d03f608550fa236dafd12651e3098da5a6d702ebfe7543d5726216457232490",
+        "fundedAt": "2026-10-20T18:52:01.000Z",
+        "createdAt": "2026-10-20T18:51:43.000Z",
+        "provider": "0x5aaf7b5b2170986c59279682bd714c475ae8c718",
+        "agent": {
+          "chainId": 56,
+          "tokenId": "341554",
+          "name": "Lattice",
+          "key": "56:341554",
+          "shared": 1,
+          "category": "grid"
+        },
+        "marketplace": "marque.trade",
+        "marketplaceName": "Marque",
+        "attribution": "marque_intent",
+        "status": "COMPLETED",
+        "counts": false,
+        "reason": "Same agent as an earlier hire."
+      },
+      {
+        "chainId": 56,
+        "jobId": "57036",
+        "fundedTx": "0x9277570ccf9637e3c5e02dea184754edaf96f3bdea56ee5f6d987dc22f0bea92",
+        "fundedAt": "2026-10-20T18:54:26.000Z",
+        "createdAt": "2026-10-20T18:54:09.000Z",
+        "provider": "0xfaf0ffd121947b9ee3920fa0cfbf9eeeb0acbf7f",
+        "agent": {
+          "chainId": 56,
+          "tokenId": "269233",
+          "name": "BNB Grid Trader (test)",
+          "key": "56:269233",
+          "shared": 2,
+          "category": "grid"
+        },
+        "marketplace": "marque.trade",
+        "marketplaceName": "Marque",
+        "attribution": "marque_intent",
+        "status": "EXPIRED",
+        "counts": true,
+        "reason": null
+      },
+      {
+        "chainId": 56,
+        "jobId": "57037",
+        "fundedTx": "0x57188a9fbc35412cebf12464cf1ce4c19a1e4f5f4f0a314daa69f28347d19987",
+        "fundedAt": "2026-10-20T20:23:06.000Z",
+        "createdAt": "2026-10-20T20:21:58.000Z",
+        "provider": "0x73809f69916fcf7ddc5bb1315fbdf96a569a5963",
+        "agent": {
+          "chainId": 56,
+          "tokenId": "302258",
+          "name": "Brain on BNB — BSC Grid Planner",
+          "key": "56:302258",
+          "shared": 4,
+          "category": "grid"
+        },
+        "marketplace": "marque.trade",
+        "marketplaceName": "Marque",
+        "attribution": "marque_intent",
+        "status": "EXPIRED",
+        "counts": true,
+        "reason": null
+      },
+      {
+        "chainId": 97,
+        "jobId": "1586",
+        "fundedTx": "0x1ed473f0661cade839bb8491ab5a3a2c31acaa8c42b5906f52df9c33288fa223",
+        "fundedAt": "2026-10-21T11:18:17.000Z",
+        "createdAt": "2026-10-21T11:17:57.000Z",
+        "provider": "0x93847647d7eb72a69e162117df6a8697df53edda",
+        "agent": {
+          "chainId": 97,
+          "tokenId": "2599",
+          "name": "Pokter Evidence",
+          "key": "97:2599",
+          "shared": 1,
+          "category": "unclassified"
+        },
+        "marketplace": "pokter.xyz",
+        "marketplaceName": "Pokter",
+        "attribution": "envelope",
+        "status": "COMPLETED",
+        "counts": true,
+        "reason": null
+      },
+      {
+        "chainId": 97,
+        "jobId": "1587",
+        "fundedTx": "0x39bcd6361b55e0c26913cdc91b96950b66506c46775e945297b9e1f563a025fc",
+        "fundedAt": "2026-10-21T11:45:49.000Z",
+        "createdAt": "2026-10-21T11:45:32.000Z",
+        "provider": "0x93847647d7eb72a69e162117df6a8697df53edda",
+        "agent": {
+          "chainId": 97,
+          "tokenId": "2599",
+          "name": "Pokter Evidence",
+          "key": "97:2599",
+          "shared": 1,
+          "category": "unclassified"
+        },
+        "marketplace": "pokter.xyz",
+        "marketplaceName": "Pokter",
+        "attribution": "envelope",
+        "status": "COMPLETED",
+        "counts": false,
+        "reason": "Same agent as an earlier hire."
+      },
+      {
+        "chainId": 56,
+        "jobId": "57040",
+        "fundedTx": "0x93feb6a4e18e2ff0afa2e0a48f956ba526a5b463884cb363006dbaf5d48d975e",
+        "fundedAt": "2026-10-21T20:06:36.000Z",
+        "createdAt": "2026-10-21T20:05:02.000Z",
+        "provider": "0xb12a1e4e0e22a97e266ed7a6bfc4133f699b1a1b",
+        "agent": {
+          "chainId": 56,
+          "tokenId": "363619",
+          "name": "Plinth keeper",
+          "key": "56:363619",
+          "shared": 1,
+          "category": "rebalancing"
+        },
+        "marketplace": "mandatemarkets.com",
+        "marketplaceName": "Mandate",
+        "attribution": "via_suffix",
+        "status": "COMPLETED",
+        "counts": true,
+        "reason": null
+      },
+      {
+        "chainId": 56,
+        "jobId": "57076",
+        "fundedTx": "0x90779eb1a5c36448ad403a51268ab6c7eb96629754f4b8c53f5308c88f180d09",
+        "fundedAt": "2026-10-25T01:45:52.000Z",
+        "createdAt": "2026-10-25T01:44:09.000Z",
+        "provider": "0xbebf6b026e1ffc06a3c8d3c1b57b8142bf027454",
+        "agent": {
+          "chainId": 56,
+          "tokenId": "344121",
+          "name": "Mandate Grid-1",
+          "key": "56:344121",
+          "shared": 1,
+          "category": "grid"
+        },
+        "marketplace": "marque.trade",
+        "marketplaceName": "Marque",
+        "attribution": "marque_intent",
+        "status": "COMPLETED",
+        "counts": true,
+        "reason": null
+      },
+      {
+        "chainId": 56,
+        "jobId": "57082",
+        "fundedTx": "0xb5f2b00cc65feaf0043c3de3121dfd04ab0fae03c440987f8290eb40697705a0",
+        "fundedAt": "2026-10-25T16:43:23.000Z",
+        "createdAt": "2026-10-25T16:42:07.000Z",
+        "provider": "0x81762d5214fcb6fb3b102bef9d69d13a56c1a2d0",
+        "agent": {
+          "chainId": 56,
+          "tokenId": "344123",
+          "name": "Mandate Guard-1",
+          "key": "56:344123",
+          "shared": 1,
+          "category": "health_factor"
+        },
+        "marketplace": "mandatemarkets.com",
+        "marketplaceName": "Mandate",
+        "attribution": "via_suffix",
+        "status": "COMPLETED",
+        "counts": true,
+        "reason": null
+      },
+      {
+        "chainId": 56,
+        "jobId": "57150",
+        "fundedTx": "0x64e691f13bcc214452e96039afaca5c9915bad35d8cc22e70b4ee9df31a74e5d",
+        "fundedAt": "2026-11-01T10:47:44.000Z",
+        "createdAt": "2026-11-01T10:47:09.000Z",
+        "provider": "0x73809f69916fcf7ddc5bb1315fbdf96a569a5963",
+        "agent": {
+          "chainId": 56,
+          "tokenId": "363709",
+          "name": "Brain on BNB — DeFi Agent",
+          "key": "56:363709",
+          "shared": 4,
+          "category": "rebalancing"
+        },
+        "marketplace": "marque.trade",
+        "marketplaceName": "Marque",
+        "attribution": "marque_intent",
+        "status": "SUBMITTED",
+        "counts": true,
+        "reason": null
+      },
+      {
+        "chainId": 56,
+        "jobId": "57151",
+        "fundedTx": "0xbacf809c54788e91ae5e22bfb30ee32c9ef6bae27d928334ff30580cabbf8a7a",
+        "fundedAt": "2026-11-01T10:51:01.000Z",
+        "createdAt": "2026-11-01T10:50:24.000Z",
+        "provider": "0x73809f69916fcf7ddc5bb1315fbdf96a569a5963",
+        "agent": {
+          "chainId": 56,
+          "tokenId": "304494",
+          "name": "Brain on BNB — Portfolio Rebalance Pricer",
+          "key": "56:304494",
+          "shared": 4,
+          "category": "rebalancing"
+        },
+        "marketplace": "marque.trade",
+        "marketplaceName": "Marque",
+        "attribution": "marque_intent",
+        "status": "SUBMITTED",
+        "counts": true,
+        "reason": null
+      },
+      {
+        "chainId": 56,
+        "jobId": "56879",
+        "fundedTx": null,
+        "fundedAt": null,
+        "createdAt": "2026-10-02T20:18:27.000Z",
+        "provider": "0x5b1c9fbc684a1722bb5c66c0b22f149da69768d6",
+        "agent": {
+          "chainId": 56,
+          "tokenId": "341553",
+          "name": "Bound",
+          "key": "56:341553",
+          "shared": 1,
+          "category": "rebalancing"
+        },
+        "marketplace": "marque.trade",
+        "marketplaceName": "Marque",
+        "attribution": "marque_intent",
+        "status": "REJECTED",
+        "counts": false,
+        "reason": "Closed without a deposit. It does not count."
+      },
+      {
+        "chainId": 56,
+        "jobId": "56918",
+        "fundedTx": null,
+        "fundedAt": null,
+        "createdAt": "2026-10-08T06:46:12.000Z",
+        "provider": "0x8122991297dc98dc5c735fde90a501528922afdc",
+        "agent": {
+          "chainId": 56,
+          "tokenId": "358786",
+          "name": "Tidemark",
+          "key": "56:358786",
+          "shared": 1,
+          "category": "yield"
+        },
+        "marketplace": "marque.trade",
+        "marketplaceName": "Marque",
+        "attribution": "marque_intent",
+        "status": "OPEN",
+        "counts": false,
+        "reason": "Recorded, not funded. It does not count."
+      },
+      {
+        "chainId": 56,
+        "jobId": "57087",
+        "fundedTx": null,
+        "fundedAt": null,
+        "createdAt": "2026-10-26T00:27:03.000Z",
+        "provider": "0xeac21928de023677a25eb925d1cb1b0786faf946",
+        "agent": {
+          "chainId": 56,
+          "tokenId": "302257",
+          "name": "Brain on BNB — Venus Health Factor Monitor",
+          "key": "56:302257",
+          "shared": 1,
+          "category": "health_factor"
+        },
+        "marketplace": "marque.trade",
+        "marketplaceName": "Marque",
+        "attribution": "marque_intent",
+        "status": "OPEN",
+        "counts": false,
+        "reason": "Recorded, not funded. It does not count."
+      }
+    ]
+  },
+  "build": {
+    "agents": [
+      {
+        "chainId": 56,
+        "tokenId": "377436",
+        "name": "majesticfranc.agent",
+        "agentWallet": "0x0d8c9ad8eebb6879fefa218f0799219bcaabe999",
+        "checks": {
+          "registered": {
+            "state": "observed",
+            "reason": "ERC-8004 #377436 on BSC mainnet, owned by this wallet (ownerOf read now)."
+          },
+          "listed": {
+            "state": "not_observable",
+            "reason": "Not hireable on Marque yet. A listing on another marketplace is not visible here.",
+            "next": {
+              "label": "List it on Marque",
+              "href": "/builders?agent=56:377436"
+            }
+          },
+          "card": {
+            "state": "not_yet",
+            "reason": "Returned JSON, but not a valid A2A card: it says status UNBOUND, it says it is offline, it names no endpoint to call, it lists no skills.",
+            "url": "https://platform-backend.prod.termix.live/api/v1/a2a/agents/377436/card",
+            "next": {
+              "label": "Fix the agent card in the Forge",
+              "href": "/builders?agent=56:377436"
+            }
+          },
+          "probes": {
+            "state": "not_yet",
+            "reason": "Answered 0 of 48 probes in the last 24 hours.",
+            "answered": 0,
+            "total": 48,
+            "next": {
+              "label": "Check why it does not answer",
+              "href": "/builders?agent=56:377436"
+            }
+          },
+          "hires": {
+            "state": "not_yet",
+            "reason": "0 of 3 independent hirers.",
+            "independent": 0,
+            "required": 3,
+            "method": "token_and_bnb_transfers_checked",
+            "next": {
+              "label": "Share your listing",
+              "href": "/agents/377436"
+            }
+          },
+          "actions": {
+            "state": "observed",
+            "reason": "105 transactions from the owner wallet on 8 separate days since 1 Oct.",
+            "count": 105,
+            "days": 8,
+            "required": {
+              "count": 5,
+              "days": 3
+            }
+          },
+          "category": {
+            "state": "not_observable",
+            "reason": "Marque has no contract list for security actions."
+          },
+          "timing": {
+            "state": "observed",
+            "reason": "Registered 2026-10-21, after the 1 Oct announcement. Public repository: declared.",
+            "registeredAt": "2026-10-21T06:32:31.000Z"
+          }
+        },
+        "observed": 1,
+        "of": 6
+      }
+    ],
+    "more": 0
+  },
+  "registration": {
+    "state": "not_observable",
+    "reason": "BNB keeps the registration form. Marque cannot see it.",
+    "formUrl": "https://www.bnbchain.org/en/hackathons/smart-money-era-set-and-earn"
+  },
+  "suggestion": null,
+  "next": [],
+  "tryAllFour": [
+    {
+      "category": "yield",
+      "done": true,
+      "job": {
+        "chainId": 56,
+        "jobId": "56919"
+      }
+    },
+    {
+      "category": "grid",
+      "done": true,
+      "job": {
+        "chainId": 56,
+        "jobId": "56875"
+      }
+    },
+    {
+      "category": "rebalancing",
+      "done": true,
+      "job": {
+        "chainId": 56,
+        "jobId": "56881"
+      }
+    },
+    {
+      "category": "health_factor",
+      "done": true,
+      "job": {
+        "chainId": 56,
+        "jobId": "56924"
+      }
+    }
+  ],
+  "marketplaces": [
+    {
+      "name": "Marque",
+      "domain": "marque.trade",
+      "url": "https://marque.trade/",
+      "seenOnEscrow": true
+    },
+    {
+      "name": "TermiX",
+      "domain": "termix.ai",
+      "url": "https://app.termix.ai/",
+      "seenOnEscrow": false
+    },
+    {
+      "name": "Agent Souk",
+      "domain": "agentsouk.xyz",
+      "url": "https://agentsouk.xyz",
+      "seenOnEscrow": false
+    },
+    {
+      "name": "Dolphin",
+      "domain": "dolphinamp.xyz",
+      "url": "https://www.dolphinamp.xyz/",
+      "seenOnEscrow": false
+    },
+    {
+      "name": "HelloFugu",
+      "domain": "hellofugu.xyz",
+      "url": "https://app.hellofugu.xyz/",
+      "seenOnEscrow": false
+    },
+    {
+      "name": "KATTEGAT",
+      "domain": "kattegat.xyz",
+      "url": "https://kattegat.xyz/",
+      "seenOnEscrow": false
+    },
+    {
+      "name": "Pokter",
+      "domain": "pokter.xyz",
+      "url": "https://pokter.xyz/",
+      "seenOnEscrow": true
+    },
+    {
+      "name": "Agent Atlas",
+      "domain": "agent-atlas.xyz",
+      "url": "https://www.agent-atlas.xyz/",
+      "seenOnEscrow": false
+    },
+    {
+      "name": "Mandate",
+      "domain": "mandatemarkets.com",
+      "url": "https://www.mandatemarkets.com/",
+      "seenOnEscrow": true
+    }
+  ],
+  "method": {
+    "attribution": "marque_intent > client_ref > via <domain> in the task > known envelope > not recorded (https://marque.trade/docs/attribution)",
+    "funded": "A hire counts from its JobFunded event in the window. Created-but-unfunded jobs are listed and never counted.",
+    "independence": "Direct BNB and token transfers from the builder wallets to each hirer are checked. Transfers through other wallets or contracts are not."
+  }
+}

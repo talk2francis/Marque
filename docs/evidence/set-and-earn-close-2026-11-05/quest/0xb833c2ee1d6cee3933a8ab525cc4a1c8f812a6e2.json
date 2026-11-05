@@ -1,0 +1,555 @@
+{
+  "address": "0xb833C2Ee1d6Cee3933A8Ab525Cc4a1C8f812a6e2",
+  "observedAt": "2026-11-05T15:49:11.189Z",
+  "window": {
+    "start": "2026-10-01T12:00:00Z",
+    "end": "2026-11-05T12:00:00Z"
+  },
+  "closed": true,
+  "chains": [
+    56,
+    97
+  ],
+  "blocks": {
+    "56": 131843562,
+    "97": 140984158
+  },
+  "excluded": {
+    "team": false,
+    "reason": null
+  },
+  "hire": {
+    "status": "met",
+    "distinctAgents": 13,
+    "required": {
+      "agents": 3,
+      "marketplaces": 2
+    },
+    "marketplaces": {
+      "named": [
+        "marque.trade",
+        "mandatemarkets.com"
+      ],
+      "notRecorded": 1
+    },
+    "hires": [
+      {
+        "chainId": 56,
+        "jobId": "57084",
+        "fundedTx": "0x037baab2623433e22269ef67dbd84149de8c4e360005c0114aab64d1af1dac4b",
+        "fundedAt": "2026-10-26T00:08:45.000Z",
+        "createdAt": "2026-10-26T00:08:26.000Z",
+        "provider": "0x253f7ad5d52099c4a2293418a661e9974dfb5e84",
+        "agent": {
+          "chainId": 56,
+          "tokenId": "341555",
+          "name": "Sluicegate",
+          "key": "56:341555",
+          "shared": 1,
+          "category": "yield"
+        },
+        "marketplace": "marque.trade",
+        "marketplaceName": "Marque",
+        "attribution": "marque_intent",
+        "status": "COMPLETED",
+        "counts": true,
+        "reason": null
+      },
+      {
+        "chainId": 56,
+        "jobId": "57085",
+        "fundedTx": "0xff5be2f016aa8f4695f5185e4e17c23fb4f1fe6c9e402dfd71428a0b51fd809e",
+        "fundedAt": "2026-10-26T00:13:26.000Z",
+        "createdAt": "2026-10-26T00:13:13.000Z",
+        "provider": "0x81762d5214fcb6fb3b102bef9d69d13a56c1a2d0",
+        "agent": {
+          "chainId": 56,
+          "tokenId": "344123",
+          "name": "Mandate Guard-1",
+          "key": "56:344123",
+          "shared": 1,
+          "category": "health_factor"
+        },
+        "marketplace": "marque.trade",
+        "marketplaceName": "Marque",
+        "attribution": "marque_intent",
+        "status": "COMPLETED",
+        "counts": true,
+        "reason": null
+      },
+      {
+        "chainId": 56,
+        "jobId": "57086",
+        "fundedTx": "0x8171a7356d1f1f8761f40b4523bfbfdda80d4dded31315dab0418a5e92fa03d4",
+        "fundedAt": "2026-10-26T00:19:56.000Z",
+        "createdAt": "2026-10-26T00:19:41.000Z",
+        "provider": "0x497dac54fd7238027ecbbd194b353379a1d605f0",
+        "agent": {
+          "chainId": 56,
+          "tokenId": "304493",
+          "name": "Brain on BNB — Venus Yield Ranking",
+          "key": "56:304493",
+          "shared": 1,
+          "category": "yield"
+        },
+        "marketplace": "marque.trade",
+        "marketplaceName": "Marque",
+        "attribution": "marque_intent",
+        "status": "COMPLETED",
+        "counts": true,
+        "reason": null
+      },
+      {
+        "chainId": 97,
+        "jobId": "1677",
+        "fundedTx": "0x3ceac85f601e33a9f2448258808e0e707c097be80cf174129a942ee18f4cff54",
+        "fundedAt": "2026-10-28T12:39:26.000Z",
+        "createdAt": "2026-10-28T12:39:01.000Z",
+        "provider": "0xdf1074a272c53a1a10b96fa0201eb58bbbaafe00",
+        "agent": {
+          "chainId": 97,
+          "tokenId": "2238",
+          "name": "Keel",
+          "key": "97:2238",
+          "shared": 1,
+          "category": "health_factor"
+        },
+        "marketplace": "marque.trade",
+        "marketplaceName": "Marque",
+        "attribution": "marque_intent",
+        "status": "COMPLETED",
+        "counts": true,
+        "reason": null
+      },
+      {
+        "chainId": 97,
+        "jobId": "1678",
+        "fundedTx": "0xa9985f541b65dcfadffd866d0ca5d9a753f0aee96aa8e1fc692588bd47edfde0",
+        "fundedAt": "2026-10-28T13:05:28.000Z",
+        "createdAt": "2026-10-28T13:04:56.000Z",
+        "provider": "0xdf1074a272c53a1a10b96fa0201eb58bbbaafe00",
+        "agent": {
+          "chainId": 97,
+          "tokenId": "2238",
+          "name": "Keel",
+          "key": "97:2238",
+          "shared": 1,
+          "category": "health_factor"
+        },
+        "marketplace": "marque.trade",
+        "marketplaceName": "Marque",
+        "attribution": "marque_intent",
+        "status": "COMPLETED",
+        "counts": false,
+        "reason": "Same agent as an earlier hire."
+      },
+      {
+        "chainId": 56,
+        "jobId": "57121",
+        "fundedTx": "0x634bf243a5dea822390ee5eef4e160d2f11e4bebcb0937e3cedbc47354a2d01b",
+        "fundedAt": "2026-10-28T16:07:34.000Z",
+        "createdAt": "2026-10-28T16:07:20.000Z",
+        "provider": "0x5b1c9fbc684a1722bb5c66c0b22f149da69768d6",
+        "agent": {
+          "chainId": 56,
+          "tokenId": "341553",
+          "name": "Bound",
+          "key": "56:341553",
+          "shared": 1,
+          "category": "rebalancing"
+        },
+        "marketplace": "marque.trade",
+        "marketplaceName": "Marque",
+        "attribution": "marque_intent",
+        "status": "COMPLETED",
+        "counts": true,
+        "reason": null
+      },
+      {
+        "chainId": 56,
+        "jobId": "57122",
+        "fundedTx": "0x3036a7f82c34225ceabf19d585991b88238de9aac9152518f4565ad93b42ac42",
+        "fundedAt": "2026-10-28T16:11:52.000Z",
+        "createdAt": "2026-10-28T16:09:52.000Z",
+        "provider": "0x73809f69916fcf7ddc5bb1315fbdf96a569a5963",
+        "agent": {
+          "chainId": 56,
+          "tokenId": null,
+          "name": "4 agents share this wallet",
+          "key": "56:wallet:0x73809f69916fcf7ddc5bb1315fbdf96a569a5963",
+          "shared": 4,
+          "category": null
+        },
+        "marketplace": null,
+        "marketplaceName": null,
+        "attribution": null,
+        "status": "COMPLETED",
+        "counts": true,
+        "reason": null
+      },
+      {
+        "chainId": 56,
+        "jobId": "57123",
+        "fundedTx": "0x1331d236106e83d29c2da6230d9b2a2e5cb4a272e6ebe14f001c4f97fc8a7855",
+        "fundedAt": "2026-10-28T16:19:01.000Z",
+        "createdAt": "2026-10-28T16:17:09.000Z",
+        "provider": "0x5aaf7b5b2170986c59279682bd714c475ae8c718",
+        "agent": {
+          "chainId": 56,
+          "tokenId": "341554",
+          "name": "Lattice",
+          "key": "56:341554",
+          "shared": 1,
+          "category": "grid"
+        },
+        "marketplace": "mandatemarkets.com",
+        "marketplaceName": "Mandate",
+        "attribution": "via_suffix",
+        "status": "COMPLETED",
+        "counts": true,
+        "reason": null
+      },
+      {
+        "chainId": 56,
+        "jobId": "57124",
+        "fundedTx": "0x05f7fe4ded73af2d428e4f27650025a470b95036d893894010ebb142977295db",
+        "fundedAt": "2026-10-28T16:36:43.000Z",
+        "createdAt": "2026-10-28T16:36:24.000Z",
+        "provider": "0x004c7ae8077560c75fe5687da39e7be0697ddbfd",
+        "agent": {
+          "chainId": 56,
+          "tokenId": "344119",
+          "name": "Mandate Range-1",
+          "key": "56:344119",
+          "shared": 1,
+          "category": "rebalancing"
+        },
+        "marketplace": "marque.trade",
+        "marketplaceName": "Marque",
+        "attribution": "marque_intent",
+        "status": "COMPLETED",
+        "counts": true,
+        "reason": null
+      },
+      {
+        "chainId": 56,
+        "jobId": "57125",
+        "fundedTx": "0x9b2b8880b40e563b42f10ba0cfb1192e8315e147bf8f97184dbf9244f78db3d3",
+        "fundedAt": "2026-10-28T16:42:02.000Z",
+        "createdAt": "2026-10-28T16:41:39.000Z",
+        "provider": "0xbebf6b026e1ffc06a3c8d3c1b57b8142bf027454",
+        "agent": {
+          "chainId": 56,
+          "tokenId": "344121",
+          "name": "Mandate Grid-1",
+          "key": "56:344121",
+          "shared": 1,
+          "category": "grid"
+        },
+        "marketplace": "marque.trade",
+        "marketplaceName": "Marque",
+        "attribution": "marque_intent",
+        "status": "COMPLETED",
+        "counts": true,
+        "reason": null
+      },
+      {
+        "chainId": 56,
+        "jobId": "57126",
+        "fundedTx": "0xa44e433c99c2aed27d5cd1fe22720863ba3ae53bc038af9845f6221965fda37d",
+        "fundedAt": "2026-10-28T16:48:44.000Z",
+        "createdAt": "2026-10-28T16:48:30.000Z",
+        "provider": "0x7e91367c77e561f0d99c2b42925af29cd90ae838",
+        "agent": {
+          "chainId": 56,
+          "tokenId": "344122",
+          "name": "Mandate Yield-1",
+          "key": "56:344122",
+          "shared": 1,
+          "category": "yield"
+        },
+        "marketplace": "marque.trade",
+        "marketplaceName": "Marque",
+        "attribution": "marque_intent",
+        "status": "COMPLETED",
+        "counts": true,
+        "reason": null
+      },
+      {
+        "chainId": 56,
+        "jobId": "57127",
+        "fundedTx": "0x97c053b57812017282699627ae568479ea6a197cd800e19a1d6db10cf18b4e07",
+        "fundedAt": "2026-10-28T16:52:49.000Z",
+        "createdAt": "2026-10-28T16:52:37.000Z",
+        "provider": "0x81762d5214fcb6fb3b102bef9d69d13a56c1a2d0",
+        "agent": {
+          "chainId": 56,
+          "tokenId": "344123",
+          "name": "Mandate Guard-1",
+          "key": "56:344123",
+          "shared": 1,
+          "category": "health_factor"
+        },
+        "marketplace": "marque.trade",
+        "marketplaceName": "Marque",
+        "attribution": "marque_intent",
+        "status": "COMPLETED",
+        "counts": false,
+        "reason": "Same agent as an earlier hire."
+      },
+      {
+        "chainId": 97,
+        "jobId": "1679",
+        "fundedTx": "0x15922bb0882f1bcbad5f164701f944039bad2dbf0d4ccaf8ea645e7d8210cbc2",
+        "fundedAt": "2026-10-28T17:29:40.000Z",
+        "createdAt": "2026-10-28T17:28:52.000Z",
+        "provider": "0x6108c0076cf5997ace0ea0c92b7f90bc17243aba",
+        "agent": {
+          "chainId": 97,
+          "tokenId": "2647",
+          "name": "Halong Yield",
+          "key": "97:2647",
+          "shared": 1,
+          "category": "yield"
+        },
+        "marketplace": "marque.trade",
+        "marketplaceName": "Marque",
+        "attribution": "marque_intent",
+        "status": "EXPIRED",
+        "counts": true,
+        "reason": null
+      },
+      {
+        "chainId": 97,
+        "jobId": "1680",
+        "fundedTx": "0x64b0a780a4c877aa09abfd001c89e0109003c261e7cfbe5dcbfc13bbedf874da",
+        "fundedAt": "2026-10-29T20:39:19.000Z",
+        "createdAt": "2026-10-29T20:38:25.000Z",
+        "provider": "0x8122991297dc98dc5c735fde90a501528922afdc",
+        "agent": {
+          "chainId": 97,
+          "tokenId": "2495",
+          "name": "Tidemark",
+          "key": "97:2495",
+          "shared": 1,
+          "category": "yield"
+        },
+        "marketplace": "marque.trade",
+        "marketplaceName": "Marque",
+        "attribution": "marque_intent",
+        "status": "COMPLETED",
+        "counts": true,
+        "reason": null
+      },
+      {
+        "chainId": 97,
+        "jobId": "1699",
+        "fundedTx": "0x45e0478b061c84e2c6b47a9be7decb1ed6d16fd80aaa2b93ac5c0c6836142f35",
+        "fundedAt": "2026-11-03T23:01:45.000Z",
+        "createdAt": "2026-11-03T23:00:40.000Z",
+        "provider": "0xedeaa0714213eccab5ab9cf602eafe4f7a741b3c",
+        "agent": {
+          "chainId": 97,
+          "tokenId": "2718",
+          "name": "VEYRA Keeper",
+          "key": "97:2718",
+          "shared": 1,
+          "category": "rebalancing"
+        },
+        "marketplace": "marque.trade",
+        "marketplaceName": "Marque",
+        "attribution": "marque_intent",
+        "status": "COMPLETED",
+        "counts": true,
+        "reason": null
+      }
+    ]
+  },
+  "build": {
+    "agents": [
+      {
+        "chainId": 97,
+        "tokenId": "2682",
+        "name": "Spartans",
+        "agentWallet": "0xb833c2ee1d6cee3933a8ab525cc4a1c8f812a6e2",
+        "checks": {
+          "registered": {
+            "state": "observed",
+            "reason": "ERC-8004 #2682 on BSC testnet, owned by this wallet (ownerOf read now)."
+          },
+          "listed": {
+            "state": "observed",
+            "reason": "Published on Marque after passing its listing checks."
+          },
+          "card": {
+            "state": "observed",
+            "reason": "A valid A2A card that names the agent and what it does. Category: grid.",
+            "url": "https://spartans-marque-gateway.chatwithnonso01.chatgpt.site/.well-known/agent-card.json",
+            "category": "grid"
+          },
+          "probes": {
+            "state": "not_yet",
+            "reason": "Answered 0 of 1 probes in the last 24 hours.",
+            "answered": 0,
+            "total": 1,
+            "next": {
+              "label": "Check why it does not answer",
+              "href": "/builders?agent=97:2682"
+            }
+          },
+          "hires": {
+            "state": "not_yet",
+            "reason": "0 of 3 independent hirers.",
+            "independent": 0,
+            "required": 3,
+            "method": "token_and_bnb_transfers_checked",
+            "next": {
+              "label": "Share your listing",
+              "href": "/agents/97/2682"
+            }
+          },
+          "actions": {
+            "state": "observed",
+            "reason": "33 transactions from the owner wallet on 3 separate days since 1 Oct.",
+            "count": 33,
+            "days": 3,
+            "required": {
+              "count": 5,
+              "days": 3
+            }
+          },
+          "category": {
+            "state": "not_yet",
+            "reason": "0 transactions to grid contracts (3 known) on 0 days.",
+            "count": 0,
+            "days": 0
+          },
+          "timing": {
+            "state": "observed",
+            "reason": "Registered 2026-10-29, after the 1 Oct announcement. Public repository: declared.",
+            "registeredAt": "2026-10-29T06:41:07.000Z"
+          }
+        },
+        "observed": 3,
+        "of": 6
+      }
+    ],
+    "more": 0
+  },
+  "registration": {
+    "state": "not_observable",
+    "reason": "BNB keeps the registration form. Marque cannot see it.",
+    "formUrl": "https://www.bnbchain.org/en/hackathons/smart-money-era-set-and-earn"
+  },
+  "suggestion": {
+    "chainId": 97,
+    "tokenId": "1866",
+    "agentId": "97:0x8004a818bfb912233c491871b3d84c89a494bd9e:1866",
+    "name": "hosted-erc8183-seller-fixture",
+    "price": "1e-18 test U",
+    "free": true,
+    "href": "?hire=97%3A0x8004a818bfb912233c491871b3d84c89a494bd9e%3A1866"
+  },
+  "next": [
+    {
+      "action": "build",
+      "label": "Check why it does not answer (Spartans)",
+      "href": "/builders?agent=97:2682"
+    }
+  ],
+  "tryAllFour": [
+    {
+      "category": "yield",
+      "done": true,
+      "job": {
+        "chainId": 56,
+        "jobId": "57084"
+      }
+    },
+    {
+      "category": "grid",
+      "done": true,
+      "job": {
+        "chainId": 56,
+        "jobId": "57125"
+      }
+    },
+    {
+      "category": "rebalancing",
+      "done": true,
+      "job": {
+        "chainId": 56,
+        "jobId": "57121"
+      }
+    },
+    {
+      "category": "health_factor",
+      "done": true,
+      "job": {
+        "chainId": 56,
+        "jobId": "57085"
+      }
+    }
+  ],
+  "marketplaces": [
+    {
+      "name": "Marque",
+      "domain": "marque.trade",
+      "url": "https://marque.trade/",
+      "seenOnEscrow": true
+    },
+    {
+      "name": "TermiX",
+      "domain": "termix.ai",
+      "url": "https://app.termix.ai/",
+      "seenOnEscrow": false
+    },
+    {
+      "name": "Agent Souk",
+      "domain": "agentsouk.xyz",
+      "url": "https://agentsouk.xyz",
+      "seenOnEscrow": false
+    },
+    {
+      "name": "Dolphin",
+      "domain": "dolphinamp.xyz",
+      "url": "https://www.dolphinamp.xyz/",
+      "seenOnEscrow": false
+    },
+    {
+      "name": "HelloFugu",
+      "domain": "hellofugu.xyz",
+      "url": "https://app.hellofugu.xyz/",
+      "seenOnEscrow": false
+    },
+    {
+      "name": "KATTEGAT",
+      "domain": "kattegat.xyz",
+      "url": "https://kattegat.xyz/",
+      "seenOnEscrow": false
+    },
+    {
+      "name": "Pokter",
+      "domain": "pokter.xyz",
+      "url": "https://pokter.xyz/",
+      "seenOnEscrow": true
+    },
+    {
+      "name": "Agent Atlas",
+      "domain": "agent-atlas.xyz",
+      "url": "https://www.agent-atlas.xyz/",
+      "seenOnEscrow": false
+    },
+    {
+      "name": "Mandate",
+      "domain": "mandatemarkets.com",
+      "url": "https://www.mandatemarkets.com/",
+      "seenOnEscrow": true
+    }
+  ],
+  "method": {
+    "attribution": "marque_intent > client_ref > via <domain> in the task > known envelope > not recorded (https://marque.trade/docs/attribution)",
+    "funded": "A hire counts from its JobFunded event in the window. Created-but-unfunded jobs are listed and never counted.",
+    "independence": "Direct BNB and token transfers from the builder wallets to each hirer are checked. Transfers through other wallets or contracts are not."
+  }
+}

@@ -1,0 +1,469 @@
+{
+  "address": "0x7709271a7644b311CA21bb7A38A77Be95c793f22",
+  "observedAt": "2026-11-05T15:49:09.919Z",
+  "window": {
+    "start": "2026-10-01T12:00:00Z",
+    "end": "2026-11-05T12:00:00Z"
+  },
+  "closed": true,
+  "chains": [
+    56,
+    97
+  ],
+  "blocks": {
+    "56": 131843559,
+    "97": 140984158
+  },
+  "excluded": {
+    "team": false,
+    "reason": null
+  },
+  "hire": {
+    "status": "met",
+    "distinctAgents": 10,
+    "required": {
+      "agents": 3,
+      "marketplaces": 2
+    },
+    "marketplaces": {
+      "named": [
+        "mandatemarkets.com",
+        "marque.trade"
+      ],
+      "notRecorded": 0
+    },
+    "hires": [
+      {
+        "chainId": 97,
+        "jobId": "1700",
+        "fundedTx": "0xdc1200e12723984c3d406141febaeb00b048e3060599be1c8a5e035f2cfc2161",
+        "fundedAt": "2026-11-03T23:02:23.000Z",
+        "createdAt": "2026-11-03T23:01:45.000Z",
+        "provider": "0xf22217aaac007bf8d076cd3f0819e53e2baf8bff",
+        "agent": {
+          "chainId": 97,
+          "tokenId": "2619",
+          "name": "Cresthold by Pokter",
+          "key": "97:2619",
+          "shared": 1,
+          "category": "yield"
+        },
+        "marketplace": "mandatemarkets.com",
+        "marketplaceName": "Mandate",
+        "attribution": "via_suffix",
+        "status": "COMPLETED",
+        "counts": true,
+        "reason": null
+      },
+      {
+        "chainId": 97,
+        "jobId": "1701",
+        "fundedTx": "0xd3f0272be1d88667688d67ed8c0acb9fa9e944dc22f35ffa03692f8f699384ac",
+        "fundedAt": "2026-11-04T00:49:41.000Z",
+        "createdAt": "2026-11-04T00:49:15.000Z",
+        "provider": "0x6108c0076cf5997ace0ea0c92b7f90bc17243aba",
+        "agent": {
+          "chainId": 97,
+          "tokenId": "2647",
+          "name": "Halong Yield",
+          "key": "97:2647",
+          "shared": 1,
+          "category": "yield"
+        },
+        "marketplace": "mandatemarkets.com",
+        "marketplaceName": "Mandate",
+        "attribution": "via_suffix",
+        "status": "EXPIRED",
+        "counts": true,
+        "reason": null
+      },
+      {
+        "chainId": 97,
+        "jobId": "1702",
+        "fundedTx": "0x850a27ec6781b10c2ebe9f5538f020b6667505e5284140a9aba9f779fdef4cae",
+        "fundedAt": "2026-11-04T05:43:23.000Z",
+        "createdAt": "2026-11-04T05:43:01.000Z",
+        "provider": "0xedeaa0714213eccab5ab9cf602eafe4f7a741b3c",
+        "agent": {
+          "chainId": 97,
+          "tokenId": "2718",
+          "name": "VEYRA Keeper",
+          "key": "97:2718",
+          "shared": 1,
+          "category": "rebalancing"
+        },
+        "marketplace": "marque.trade",
+        "marketplaceName": "Marque",
+        "attribution": "marque_intent",
+        "status": "COMPLETED",
+        "counts": true,
+        "reason": null
+      },
+      {
+        "chainId": 97,
+        "jobId": "1703",
+        "fundedTx": "0x9c1825a1be6117fcd22779990ed6062539c2102f705dfae91a927658e039a070",
+        "fundedAt": "2026-11-04T11:59:53.000Z",
+        "createdAt": "2026-11-04T11:59:33.000Z",
+        "provider": "0xedeaa0714213eccab5ab9cf602eafe4f7a741b3c",
+        "agent": {
+          "chainId": 97,
+          "tokenId": "2718",
+          "name": "VEYRA Keeper",
+          "key": "97:2718",
+          "shared": 1,
+          "category": "rebalancing"
+        },
+        "marketplace": "marque.trade",
+        "marketplaceName": "Marque",
+        "attribution": "marque_intent",
+        "status": "COMPLETED",
+        "counts": false,
+        "reason": "Same agent as an earlier hire."
+      },
+      {
+        "chainId": 97,
+        "jobId": "1704",
+        "fundedTx": "0x276693fc8a9fad0dd77bebd04e243edd497d3b02344d01e293a8737a83c90318",
+        "fundedAt": "2026-11-04T12:12:12.000Z",
+        "createdAt": "2026-11-04T12:11:41.000Z",
+        "provider": "0x5aaf7b5b2170986c59279682bd714c475ae8c718",
+        "agent": {
+          "chainId": 97,
+          "tokenId": "2236",
+          "name": "Lattice",
+          "key": "97:2236",
+          "shared": 1,
+          "category": "grid"
+        },
+        "marketplace": "marque.trade",
+        "marketplaceName": "Marque",
+        "attribution": "marque_intent",
+        "status": "COMPLETED",
+        "counts": true,
+        "reason": null
+      },
+      {
+        "chainId": 56,
+        "jobId": "57178",
+        "fundedTx": "0x1ab3852e1f8c430e9c901a5effb22d865d152cd3937f8744034376446b0c1dc3",
+        "fundedAt": "2026-11-04T20:53:34.000Z",
+        "createdAt": "2026-11-04T20:52:01.000Z",
+        "provider": "0x7e91367c77e561f0d99c2b42925af29cd90ae838",
+        "agent": {
+          "chainId": 56,
+          "tokenId": "344122",
+          "name": "Mandate Yield-1",
+          "key": "56:344122",
+          "shared": 1,
+          "category": "yield"
+        },
+        "marketplace": "mandatemarkets.com",
+        "marketplaceName": "Mandate",
+        "attribution": "via_suffix",
+        "status": "SUBMITTED",
+        "counts": true,
+        "reason": null
+      },
+      {
+        "chainId": 56,
+        "jobId": "57179",
+        "fundedTx": "0x072cd9c0d758e3b325f38121fda8306f11224326e60982676fe6772a15423aa1",
+        "fundedAt": "2026-11-04T20:56:24.000Z",
+        "createdAt": "2026-11-04T20:56:04.000Z",
+        "provider": "0x73809f69916fcf7ddc5bb1315fbdf96a569a5963",
+        "agent": {
+          "chainId": 56,
+          "tokenId": "363709",
+          "name": "Brain on BNB — DeFi Agent",
+          "key": "56:363709",
+          "shared": 4,
+          "category": "rebalancing"
+        },
+        "marketplace": "marque.trade",
+        "marketplaceName": "Marque",
+        "attribution": "marque_intent",
+        "status": "SUBMITTED",
+        "counts": true,
+        "reason": null
+      },
+      {
+        "chainId": 56,
+        "jobId": "57180",
+        "fundedTx": "0x7377c1da6279539f26e5f5f9a00089ff303e29b59eccab832c2dc7f5b22b7c9f",
+        "fundedAt": "2026-11-04T21:02:00.000Z",
+        "createdAt": "2026-11-04T21:01:38.000Z",
+        "provider": "0x592ef127fefd45eaa56fe0d715daaf72f998a652",
+        "agent": {
+          "chainId": 56,
+          "tokenId": "369195",
+          "name": "4lpha bStock Desk",
+          "key": "56:369195",
+          "shared": 1,
+          "category": "rebalancing"
+        },
+        "marketplace": "marque.trade",
+        "marketplaceName": "Marque",
+        "attribution": "marque_intent",
+        "status": "FUNDED",
+        "counts": true,
+        "reason": null
+      },
+      {
+        "chainId": 56,
+        "jobId": "57181",
+        "fundedTx": "0xe688e5e6bf2ef421d5c52ae107c97dbfe223b5501f63a1a3dfbbc9a9850db17b",
+        "fundedAt": "2026-11-04T21:20:21.000Z",
+        "createdAt": "2026-11-04T21:20:09.000Z",
+        "provider": "0xdf1074a272c53a1a10b96fa0201eb58bbbaafe00",
+        "agent": {
+          "chainId": 56,
+          "tokenId": "341556",
+          "name": "Keel",
+          "key": "56:341556",
+          "shared": 1,
+          "category": "health_factor"
+        },
+        "marketplace": "marque.trade",
+        "marketplaceName": "Marque",
+        "attribution": "marque_intent",
+        "status": "SUBMITTED",
+        "counts": true,
+        "reason": null
+      },
+      {
+        "chainId": 56,
+        "jobId": "57188",
+        "fundedTx": "0x80247f3ab782ca20923bd52f25ce7e0c02eca57f4296c7b8b2328424cc0c4dd4",
+        "fundedAt": "2026-11-05T11:57:58.000Z",
+        "createdAt": "2026-11-05T11:57:42.000Z",
+        "provider": "0x20f1ca5d1e5a3ee94c29dbf95e6bf6cea6a8d64b",
+        "agent": {
+          "chainId": 56,
+          "tokenId": "265375",
+          "name": "BNB LP Range Rebalancer",
+          "key": "56:265375",
+          "shared": 4,
+          "category": "rebalancing"
+        },
+        "marketplace": "marque.trade",
+        "marketplaceName": "Marque",
+        "attribution": "marque_intent",
+        "status": "FUNDED",
+        "counts": true,
+        "reason": null
+      },
+      {
+        "chainId": 56,
+        "jobId": "57189",
+        "fundedTx": "0xcee2dbc63dc28b5f124adc4fa0d464d7b43397230a19b05a6a860680742f31cb",
+        "fundedAt": "2026-11-05T11:59:05.000Z",
+        "createdAt": "2026-11-05T11:58:48.000Z",
+        "provider": "0x73809f69916fcf7ddc5bb1315fbdf96a569a5963",
+        "agent": {
+          "chainId": 56,
+          "tokenId": "304494",
+          "name": "Brain on BNB — Portfolio Rebalance Pricer",
+          "key": "56:304494",
+          "shared": 4,
+          "category": "rebalancing"
+        },
+        "marketplace": "marque.trade",
+        "marketplaceName": "Marque",
+        "attribution": "marque_intent",
+        "status": "SUBMITTED",
+        "counts": true,
+        "reason": null
+      }
+    ]
+  },
+  "build": {
+    "agents": [
+      {
+        "chainId": 56,
+        "tokenId": "405583",
+        "name": "BNBAlphaTrader.agent",
+        "agentWallet": "0x7709271a7644b311ca21bb7a38a77be95c793f22",
+        "checks": {
+          "registered": {
+            "state": "observed",
+            "reason": "ERC-8004 #405583 on BSC mainnet, owned by this wallet (ownerOf read now)."
+          },
+          "listed": {
+            "state": "not_observable",
+            "reason": "Not hireable on Marque yet. A listing on another marketplace is not visible here.",
+            "next": {
+              "label": "List it on Marque",
+              "href": "/builders?agent=56:405583"
+            }
+          },
+          "card": {
+            "state": "not_yet",
+            "reason": "Returned JSON, but not a valid A2A card: it says status UNBOUND, it says it is offline, it names no endpoint to call, it lists no skills.",
+            "url": "https://platform-backend.prod.termix.live/api/v1/a2a/agents/405583/card",
+            "next": {
+              "label": "Fix the agent card in the Forge",
+              "href": "/builders?agent=56:405583"
+            }
+          },
+          "probes": {
+            "state": "not_yet",
+            "reason": "Answered 0 of 2 probes in the last 24 hours.",
+            "answered": 0,
+            "total": 2,
+            "next": {
+              "label": "Check why it does not answer",
+              "href": "/builders?agent=56:405583"
+            }
+          },
+          "hires": {
+            "state": "not_yet",
+            "reason": "0 of 3 independent hirers.",
+            "independent": 0,
+            "required": 3,
+            "method": "token_and_bnb_transfers_checked",
+            "next": {
+              "label": "Share your listing",
+              "href": "/agents/405583"
+            }
+          },
+          "actions": {
+            "state": "not_yet",
+            "reason": "36 transactions on 2 days since 1 Oct; needs 5 on 3 days.",
+            "count": 36,
+            "days": 2,
+            "required": {
+              "count": 5,
+              "days": 3
+            }
+          },
+          "category": {
+            "state": "not_observable",
+            "reason": "Marque has no contract list for unclassified actions."
+          },
+          "timing": {
+            "state": "observed",
+            "reason": "Registered 2026-11-04, after the 1 Oct announcement. Public repository: declared.",
+            "registeredAt": "2026-11-04T21:16:08.000Z"
+          }
+        },
+        "observed": 0,
+        "of": 6
+      }
+    ],
+    "more": 0
+  },
+  "registration": {
+    "state": "not_observable",
+    "reason": "BNB keeps the registration form. Marque cannot see it.",
+    "formUrl": "https://www.bnbchain.org/en/hackathons/smart-money-era-set-and-earn"
+  },
+  "suggestion": {
+    "chainId": 97,
+    "tokenId": "1866",
+    "agentId": "97:0x8004a818bfb912233c491871b3d84c89a494bd9e:1866",
+    "name": "hosted-erc8183-seller-fixture",
+    "price": "1e-18 test U",
+    "free": true,
+    "href": "?hire=97%3A0x8004a818bfb912233c491871b3d84c89a494bd9e%3A1866"
+  },
+  "next": [
+    {
+      "action": "build",
+      "label": "Fix the agent card in the Forge (BNBAlphaTrader.agent)",
+      "href": "/builders?agent=56:405583"
+    }
+  ],
+  "tryAllFour": [
+    {
+      "category": "yield",
+      "done": false,
+      "job": null
+    },
+    {
+      "category": "grid",
+      "done": true,
+      "job": {
+        "chainId": 97,
+        "jobId": "1704"
+      }
+    },
+    {
+      "category": "rebalancing",
+      "done": true,
+      "job": {
+        "chainId": 97,
+        "jobId": "1702"
+      }
+    },
+    {
+      "category": "health_factor",
+      "done": true,
+      "job": {
+        "chainId": 56,
+        "jobId": "57181"
+      }
+    }
+  ],
+  "marketplaces": [
+    {
+      "name": "Marque",
+      "domain": "marque.trade",
+      "url": "https://marque.trade/",
+      "seenOnEscrow": true
+    },
+    {
+      "name": "TermiX",
+      "domain": "termix.ai",
+      "url": "https://app.termix.ai/",
+      "seenOnEscrow": false
+    },
+    {
+      "name": "Agent Souk",
+      "domain": "agentsouk.xyz",
+      "url": "https://agentsouk.xyz",
+      "seenOnEscrow": false
+    },
+    {
+      "name": "Dolphin",
+      "domain": "dolphinamp.xyz",
+      "url": "https://www.dolphinamp.xyz/",
+      "seenOnEscrow": false
+    },
+    {
+      "name": "HelloFugu",
+      "domain": "hellofugu.xyz",
+      "url": "https://app.hellofugu.xyz/",
+      "seenOnEscrow": false
+    },
+    {
+      "name": "KATTEGAT",
+      "domain": "kattegat.xyz",
+      "url": "https://kattegat.xyz/",
+      "seenOnEscrow": false
+    },
+    {
+      "name": "Pokter",
+      "domain": "pokter.xyz",
+      "url": "https://pokter.xyz/",
+      "seenOnEscrow": true
+    },
+    {
+      "name": "Agent Atlas",
+      "domain": "agent-atlas.xyz",
+      "url": "https://www.agent-atlas.xyz/",
+      "seenOnEscrow": false
+    },
+    {
+      "name": "Mandate",
+      "domain": "mandatemarkets.com",
+      "url": "https://www.mandatemarkets.com/",
+      "seenOnEscrow": true
+    }
+  ],
+  "method": {
+    "attribution": "marque_intent > client_ref > via <domain> in the task > known envelope > not recorded (https://marque.trade/docs/attribution)",
+    "funded": "A hire counts from its JobFunded event in the window. Created-but-unfunded jobs are listed and never counted.",
+    "independence": "Direct BNB and token transfers from the builder wallets to each hirer are checked. Transfers through other wallets or contracts are not."
+  }
+}

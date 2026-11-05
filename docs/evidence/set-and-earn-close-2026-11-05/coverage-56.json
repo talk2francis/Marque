@@ -1,0 +1,110 @@
+{
+  "readAt": "2026-11-05T15:49:58Z",
+  "source": "https://marque.trade/api/v1/phase2/coverage?chainId=56",
+  "response": {
+    "lane": "mainnet",
+    "chainId": 56,
+    "measuredAt": "2026-11-05T15:49:26.800Z",
+    "provenance": "MEASURED",
+    "countingUnit": "deduplicated_marketplace_listing",
+    "operatorCounting": "Recorded owner addresses; unknown owners count per identity. Independence is not verified.",
+    "totalHireable": 34,
+    "priced": 36,
+    "hireable": 34,
+    "pulled": 2,
+    "checked": 14,
+    "warranted": 10,
+    "delivered": 27,
+    "definitions": {
+      "priced": "listed with a live signed price now, payable into BNB Chain's ERC-8183 escrow to the agent's own wallet",
+      "hireable": "priced and not pulled: a buyer's wallet can hire it through escrow right now",
+      "pulled": "priced, but taken out of the count for safety: a paid job left undelivered, or a chain fact stated wrongly, in the last 14 days",
+      "checked": "hireable, and an answer it gave agreed with BNB Chain in the last 30 days (a paid job, Marque's daily check call, or a Warrant, which is the strictest check); warranted agents are a part of it",
+      "warranted": "hireable, and passed its category's published Marque test in the last 14 days",
+      "delivered": "hireable, and has delivered at least one paid job",
+      "totalHireable": "the same as hireable"
+    },
+    "categories": [
+      {
+        "category": "yield",
+        "hireable": 6,
+        "operators": 6,
+        "thirdPartyOperators": 4,
+        "firstParty": 2,
+        "cheapest": {
+          "priceRaw": "10000000000000000",
+          "token": "U",
+          "decimals": 18,
+          "chainId": 56,
+          "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:344122"
+        },
+        "priced": 6,
+        "checked": 3,
+        "warranted": 3
+      },
+      {
+        "category": "grid",
+        "hireable": 4,
+        "operators": 4,
+        "thirdPartyOperators": 3,
+        "firstParty": 1,
+        "cheapest": {
+          "priceRaw": "10000000000000000",
+          "token": "U",
+          "decimals": 18,
+          "chainId": 56,
+          "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:344121"
+        },
+        "priced": 6,
+        "checked": 1,
+        "warranted": 1
+      },
+      {
+        "category": "rebalancing",
+        "hireable": 11,
+        "operators": 9,
+        "thirdPartyOperators": 8,
+        "firstParty": 1,
+        "cheapest": null,
+        "priced": 11,
+        "checked": 4,
+        "warranted": 4
+      },
+      {
+        "category": "health_factor",
+        "hireable": 7,
+        "operators": 7,
+        "thirdPartyOperators": 6,
+        "firstParty": 1,
+        "cheapest": {
+          "priceRaw": "10000000000000000",
+          "token": "U",
+          "decimals": 18,
+          "chainId": 56,
+          "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:344123"
+        },
+        "priced": 7,
+        "checked": 6,
+        "warranted": 2
+      },
+      {
+        "category": "security",
+        "hireable": 3,
+        "operators": 3,
+        "thirdPartyOperators": 2,
+        "firstParty": 1,
+        "cheapest": {
+          "priceRaw": "30000000000000000",
+          "token": "U",
+          "decimals": 18,
+          "chainId": 56,
+          "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:362358"
+        },
+        "priced": 3,
+        "checked": 0,
+        "warranted": 0
+      }
+    ],
+    "unclassifiedHireableCount": 3
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "readAt": "2026-11-05T15:49:59Z",
+  "source": "https://marque.trade/api/v1/phase2/stats",
+  "response": {
+    "chainId": 56,
+    "walletsWithHire": 6,
+    "hiresPerCategory": {
+      "yield": 4,
+      "grid": 2,
+      "rebalancing": 5,
+      "health_factor": 5
+    },
+    "deposits": 16,
+    "delivered": 16,
+    "settled": 9,
+    "ratings": 12,
+    "excluded": {
+      "wallets": 6,
+      "hires": 85
+    },
+    "agentsListed": 10,
+    "scope": "Jobs that count under Set and Earn rules on this network: outside, Marque-bound, funded, first hire of its category per wallet. /api/v1/proof lists every job through Marque, team jobs included, so its totals are larger."
+  }
+}

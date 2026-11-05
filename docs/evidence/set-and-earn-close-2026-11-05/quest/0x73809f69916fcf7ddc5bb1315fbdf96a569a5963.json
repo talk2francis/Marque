@@ -1,0 +1,464 @@
+{
+  "address": "0x73809F69916FcF7Ddc5BB1315fBdf96A569a5963",
+  "observedAt": "2026-11-05T15:49:09.729Z",
+  "window": {
+    "start": "2026-10-01T12:00:00Z",
+    "end": "2026-11-05T12:00:00Z"
+  },
+  "closed": true,
+  "chains": [
+    56,
+    97
+  ],
+  "blocks": {
+    "56": 131843559,
+    "97": 140984158
+  },
+  "excluded": {
+    "team": false,
+    "reason": null
+  },
+  "hire": {
+    "status": "likely",
+    "distinctAgents": 4,
+    "required": {
+      "agents": 3,
+      "marketplaces": 2
+    },
+    "marketplaces": {
+      "named": [
+        "marque.trade"
+      ],
+      "notRecorded": 2
+    },
+    "hires": [
+      {
+        "chainId": 56,
+        "jobId": "57045",
+        "fundedTx": "0x7663c52c7fea53b7bcb875fc31ad24b4f4695f81d77f2050fe61821aeaf71db9",
+        "fundedAt": "2026-10-22T09:04:36.000Z",
+        "createdAt": "2026-10-22T09:04:32.000Z",
+        "provider": "0xb12a1e4e0e22a97e266ed7a6bfc4133f699b1a1b",
+        "agent": {
+          "chainId": 56,
+          "tokenId": "363619",
+          "name": "Plinth keeper",
+          "key": "56:363619",
+          "shared": 1,
+          "category": "rebalancing"
+        },
+        "marketplace": null,
+        "marketplaceName": null,
+        "attribution": null,
+        "status": "COMPLETED",
+        "counts": true,
+        "reason": null
+      },
+      {
+        "chainId": 56,
+        "jobId": "57056",
+        "fundedTx": "0x602c735bc2b57fda040d76978a79ba893771fbcb169ea6dd5023499e8bae2601",
+        "fundedAt": "2026-10-23T05:31:22.000Z",
+        "createdAt": "2026-10-23T05:31:18.000Z",
+        "provider": "0x5b1c9fbc684a1722bb5c66c0b22f149da69768d6",
+        "agent": {
+          "chainId": 56,
+          "tokenId": "341553",
+          "name": "Bound",
+          "key": "56:341553",
+          "shared": 1,
+          "category": "rebalancing"
+        },
+        "marketplace": null,
+        "marketplaceName": null,
+        "attribution": null,
+        "status": "COMPLETED",
+        "counts": true,
+        "reason": null
+      },
+      {
+        "chainId": 56,
+        "jobId": "57065",
+        "fundedTx": "0x61144999d79be76d86c071b18dd78cddeb0dd73e8dad59ea3adf136c0b9de805",
+        "fundedAt": "2026-10-24T05:31:12.000Z",
+        "createdAt": "2026-10-24T05:31:06.000Z",
+        "provider": "0x5b1c9fbc684a1722bb5c66c0b22f149da69768d6",
+        "agent": {
+          "chainId": 56,
+          "tokenId": "341553",
+          "name": "Bound",
+          "key": "56:341553",
+          "shared": 1,
+          "category": "rebalancing"
+        },
+        "marketplace": null,
+        "marketplaceName": null,
+        "attribution": null,
+        "status": "COMPLETED",
+        "counts": false,
+        "reason": "Same agent as an earlier hire."
+      },
+      {
+        "chainId": 56,
+        "jobId": "57079",
+        "fundedTx": "0x6f9ed2e6a4402092478b693abed28c5a4cba022ae17f036950ae3c9d359e4345",
+        "fundedAt": "2026-10-25T05:30:56.000Z",
+        "createdAt": "2026-10-25T05:30:52.000Z",
+        "provider": "0x5b1c9fbc684a1722bb5c66c0b22f149da69768d6",
+        "agent": {
+          "chainId": 56,
+          "tokenId": "341553",
+          "name": "Bound",
+          "key": "56:341553",
+          "shared": 1,
+          "category": "rebalancing"
+        },
+        "marketplace": null,
+        "marketplaceName": null,
+        "attribution": null,
+        "status": "COMPLETED",
+        "counts": false,
+        "reason": "Same agent as an earlier hire."
+      },
+      {
+        "chainId": 56,
+        "jobId": "57090",
+        "fundedTx": "0x1436365e2056f70c92b51de469e83f0f011ced440cd53e3b4cbfbc0c79f68664",
+        "fundedAt": "2026-10-26T05:31:00.000Z",
+        "createdAt": "2026-10-26T05:30:55.000Z",
+        "provider": "0x5b1c9fbc684a1722bb5c66c0b22f149da69768d6",
+        "agent": {
+          "chainId": 56,
+          "tokenId": "341553",
+          "name": "Bound",
+          "key": "56:341553",
+          "shared": 1,
+          "category": "rebalancing"
+        },
+        "marketplace": null,
+        "marketplaceName": null,
+        "attribution": null,
+        "status": "COMPLETED",
+        "counts": false,
+        "reason": "Same agent as an earlier hire."
+      },
+      {
+        "chainId": 56,
+        "jobId": "57112",
+        "fundedTx": "0x48a1064759ef5087c83602039f0f7e36d00fd186aa82001f3461a596bfd02a3f",
+        "fundedAt": "2026-10-27T05:31:05.000Z",
+        "createdAt": "2026-10-27T05:30:57.000Z",
+        "provider": "0x5b1c9fbc684a1722bb5c66c0b22f149da69768d6",
+        "agent": {
+          "chainId": 56,
+          "tokenId": "341553",
+          "name": "Bound",
+          "key": "56:341553",
+          "shared": 1,
+          "category": "rebalancing"
+        },
+        "marketplace": null,
+        "marketplaceName": null,
+        "attribution": null,
+        "status": "COMPLETED",
+        "counts": false,
+        "reason": "Same agent as an earlier hire."
+      },
+      {
+        "chainId": 56,
+        "jobId": "57115",
+        "fundedTx": "0xd7e4fe4f7bb02aef039f56775f522cb9aba313d2e3a5b6bc9ceb92054b54ccc0",
+        "fundedAt": "2026-10-28T05:30:51.000Z",
+        "createdAt": "2026-10-28T05:30:46.000Z",
+        "provider": "0x5b1c9fbc684a1722bb5c66c0b22f149da69768d6",
+        "agent": {
+          "chainId": 56,
+          "tokenId": "341553",
+          "name": "Bound",
+          "key": "56:341553",
+          "shared": 1,
+          "category": "rebalancing"
+        },
+        "marketplace": null,
+        "marketplaceName": null,
+        "attribution": null,
+        "status": "COMPLETED",
+        "counts": false,
+        "reason": "Same agent as an earlier hire."
+      },
+      {
+        "chainId": 56,
+        "jobId": "57132",
+        "fundedTx": "0xb10348cf5d96002c7ae75c16ca11274649b4d756e0db64764b2b70b442d8f40c",
+        "fundedAt": "2026-10-30T13:34:48.000Z",
+        "createdAt": "2026-10-30T13:34:43.000Z",
+        "provider": "0xeac21928de023677a25eb925d1cb1b0786faf946",
+        "agent": {
+          "chainId": 56,
+          "tokenId": "302257",
+          "name": "Brain on BNB — Venus Health Factor Monitor",
+          "key": "56:302257",
+          "shared": 1,
+          "category": "health_factor"
+        },
+        "marketplace": "marque.trade",
+        "marketplaceName": "Marque",
+        "attribution": "marque_intent",
+        "status": "SUBMITTED",
+        "counts": true,
+        "reason": null
+      },
+      {
+        "chainId": 56,
+        "jobId": "57133",
+        "fundedTx": "0xd45d248910ef8a016b7be8be0c2febc4cc6466a7a8b008d50fce419e2f56e694",
+        "fundedAt": "2026-10-30T13:37:26.000Z",
+        "createdAt": "2026-10-30T13:37:21.000Z",
+        "provider": "0x497dac54fd7238027ecbbd194b353379a1d605f0",
+        "agent": {
+          "chainId": 56,
+          "tokenId": "304493",
+          "name": "Brain on BNB — Venus Yield Ranking",
+          "key": "56:304493",
+          "shared": 1,
+          "category": "yield"
+        },
+        "marketplace": "marque.trade",
+        "marketplaceName": "Marque",
+        "attribution": "marque_intent",
+        "status": "SUBMITTED",
+        "counts": true,
+        "reason": null
+      },
+      {
+        "chainId": 56,
+        "jobId": "57134",
+        "fundedTx": "0xfe42abc812fcf7e3e213a7a1e4b9fb53e8ad1b058c633ff61e2531d8ea948035",
+        "fundedAt": "2026-10-30T13:49:08.000Z",
+        "createdAt": "2026-10-30T13:48:54.000Z",
+        "provider": "0x497dac54fd7238027ecbbd194b353379a1d605f0",
+        "agent": {
+          "chainId": 56,
+          "tokenId": "304493",
+          "name": "Brain on BNB — Venus Yield Ranking",
+          "key": "56:304493",
+          "shared": 1,
+          "category": "yield"
+        },
+        "marketplace": null,
+        "marketplaceName": null,
+        "attribution": null,
+        "status": "SUBMITTED",
+        "counts": false,
+        "reason": "Same agent as an earlier hire."
+      },
+      {
+        "chainId": 56,
+        "jobId": "57160",
+        "fundedTx": "0x6afa3af2dec105340b40e40a00587567c3931c69584cf38b0c801877ee2e8725",
+        "fundedAt": "2026-11-02T05:30:56.000Z",
+        "createdAt": "2026-11-02T05:30:52.000Z",
+        "provider": "0x5b1c9fbc684a1722bb5c66c0b22f149da69768d6",
+        "agent": {
+          "chainId": 56,
+          "tokenId": "341553",
+          "name": "Bound",
+          "key": "56:341553",
+          "shared": 1,
+          "category": "rebalancing"
+        },
+        "marketplace": null,
+        "marketplaceName": null,
+        "attribution": null,
+        "status": "SUBMITTED",
+        "counts": false,
+        "reason": "Same agent as an earlier hire."
+      },
+      {
+        "chainId": 56,
+        "jobId": "57171",
+        "fundedTx": "0x17c428898841d31a1f9463c8e38cf507ea6b6da01d73ead8db2acc011abf80b5",
+        "fundedAt": "2026-11-03T05:30:59.000Z",
+        "createdAt": "2026-11-03T05:30:54.000Z",
+        "provider": "0x5b1c9fbc684a1722bb5c66c0b22f149da69768d6",
+        "agent": {
+          "chainId": 56,
+          "tokenId": "341553",
+          "name": "Bound",
+          "key": "56:341553",
+          "shared": 1,
+          "category": "rebalancing"
+        },
+        "marketplace": null,
+        "marketplaceName": null,
+        "attribution": null,
+        "status": "SUBMITTED",
+        "counts": false,
+        "reason": "Same agent as an earlier hire."
+      },
+      {
+        "chainId": 56,
+        "jobId": "57177",
+        "fundedTx": "0xb728a87323621dc2c2f93af108e00e528a6c35e185caeb3077a273d69796ecd7",
+        "fundedAt": "2026-11-04T05:30:51.000Z",
+        "createdAt": "2026-11-04T05:30:46.000Z",
+        "provider": "0x5b1c9fbc684a1722bb5c66c0b22f149da69768d6",
+        "agent": {
+          "chainId": 56,
+          "tokenId": "341553",
+          "name": "Bound",
+          "key": "56:341553",
+          "shared": 1,
+          "category": "rebalancing"
+        },
+        "marketplace": null,
+        "marketplaceName": null,
+        "attribution": null,
+        "status": "SUBMITTED",
+        "counts": false,
+        "reason": "Same agent as an earlier hire."
+      },
+      {
+        "chainId": 56,
+        "jobId": "57184",
+        "fundedTx": "0x97d6dfb2f6bb5065b7861edecb9d071e2a55fa4045977af8a0d789217b0af6ce",
+        "fundedAt": "2026-11-05T05:30:57.000Z",
+        "createdAt": "2026-11-05T05:30:53.000Z",
+        "provider": "0x5b1c9fbc684a1722bb5c66c0b22f149da69768d6",
+        "agent": {
+          "chainId": 56,
+          "tokenId": "341553",
+          "name": "Bound",
+          "key": "56:341553",
+          "shared": 1,
+          "category": "rebalancing"
+        },
+        "marketplace": null,
+        "marketplaceName": null,
+        "attribution": null,
+        "status": "SUBMITTED",
+        "counts": false,
+        "reason": "Same agent as an earlier hire."
+      }
+    ]
+  },
+  "build": {
+    "agents": [],
+    "more": 0
+  },
+  "registration": {
+    "state": "not_observable",
+    "reason": "BNB keeps the registration form. Marque cannot see it.",
+    "formUrl": "https://www.bnbchain.org/en/hackathons/smart-money-era-set-and-earn"
+  },
+  "suggestion": {
+    "chainId": 97,
+    "tokenId": "1866",
+    "agentId": "97:0x8004a818bfb912233c491871b3d84c89a494bd9e:1866",
+    "name": "hosted-erc8183-seller-fixture",
+    "price": "1e-18 test U",
+    "free": true,
+    "href": "?hire=97%3A0x8004a818bfb912233c491871b3d84c89a494bd9e%3A1866"
+  },
+  "next": [
+    {
+      "action": "hire",
+      "label": "Hire 1 more agent on another marketplace",
+      "href": "#marketplaces"
+    },
+    {
+      "action": "build",
+      "label": "Register an agent of your own",
+      "href": "/builders"
+    }
+  ],
+  "tryAllFour": [
+    {
+      "category": "yield",
+      "done": true,
+      "job": {
+        "chainId": 56,
+        "jobId": "57133"
+      }
+    },
+    {
+      "category": "grid",
+      "done": false,
+      "job": null
+    },
+    {
+      "category": "rebalancing",
+      "done": false,
+      "job": null
+    },
+    {
+      "category": "health_factor",
+      "done": true,
+      "job": {
+        "chainId": 56,
+        "jobId": "57132"
+      }
+    }
+  ],
+  "marketplaces": [
+    {
+      "name": "Marque",
+      "domain": "marque.trade",
+      "url": "https://marque.trade/",
+      "seenOnEscrow": true
+    },
+    {
+      "name": "TermiX",
+      "domain": "termix.ai",
+      "url": "https://app.termix.ai/",
+      "seenOnEscrow": false
+    },
+    {
+      "name": "Agent Souk",
+      "domain": "agentsouk.xyz",
+      "url": "https://agentsouk.xyz",
+      "seenOnEscrow": false
+    },
+    {
+      "name": "Dolphin",
+      "domain": "dolphinamp.xyz",
+      "url": "https://www.dolphinamp.xyz/",
+      "seenOnEscrow": false
+    },
+    {
+      "name": "HelloFugu",
+      "domain": "hellofugu.xyz",
+      "url": "https://app.hellofugu.xyz/",
+      "seenOnEscrow": false
+    },
+    {
+      "name": "KATTEGAT",
+      "domain": "kattegat.xyz",
+      "url": "https://kattegat.xyz/",
+      "seenOnEscrow": false
+    },
+    {
+      "name": "Pokter",
+      "domain": "pokter.xyz",
+      "url": "https://pokter.xyz/",
+      "seenOnEscrow": true
+    },
+    {
+      "name": "Agent Atlas",
+      "domain": "agent-atlas.xyz",
+      "url": "https://www.agent-atlas.xyz/",
+      "seenOnEscrow": false
+    },
+    {
+      "name": "Mandate",
+      "domain": "mandatemarkets.com",
+      "url": "https://www.mandatemarkets.com/",
+      "seenOnEscrow": true
+    }
+  ],
+  "method": {
+    "attribution": "marque_intent > client_ref > via <domain> in the task > known envelope > not recorded (https://marque.trade/docs/attribution)",
+    "funded": "A hire counts from its JobFunded event in the window. Created-but-unfunded jobs are listed and never counted.",
+    "independence": "Direct BNB and token transfers from the builder wallets to each hirer are checked. Transfers through other wallets or contracts are not."
+  }
+}

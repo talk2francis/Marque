@@ -1,0 +1,228 @@
+{
+  "address": "0x5aC2448FC79Ef8d33710b1Bced5AEff90138b452",
+  "observedAt": "2026-11-05T15:49:25.608Z",
+  "window": {
+    "start": "2026-10-01T12:00:00Z",
+    "end": "2026-11-05T12:00:00Z"
+  },
+  "closed": true,
+  "chains": [
+    56,
+    97
+  ],
+  "blocks": {
+    "56": 131843594,
+    "97": 140984186
+  },
+  "excluded": {
+    "team": true,
+    "reason": "A published Marque team wallet. Its activity is shown, never counted."
+  },
+  "hire": {
+    "status": "excluded",
+    "distinctAgents": 3,
+    "required": {
+      "agents": 3,
+      "marketplaces": 2
+    },
+    "marketplaces": {
+      "named": [
+        "marque.trade"
+      ],
+      "notRecorded": 0
+    },
+    "hires": [
+      {
+        "chainId": 56,
+        "jobId": "57066",
+        "fundedTx": "0xd8ee00cb145098f0da4bec7aad87961d435b91ed9b490c2e17a8390d9fcdbcc9",
+        "fundedAt": "2026-10-24T09:40:51.000Z",
+        "createdAt": "2026-10-24T09:40:43.000Z",
+        "provider": "0xdf1074a272c53a1a10b96fa0201eb58bbbaafe00",
+        "agent": {
+          "chainId": 56,
+          "tokenId": "341556",
+          "name": "Keel",
+          "key": "56:341556",
+          "shared": 1,
+          "category": "health_factor"
+        },
+        "marketplace": "marque.trade",
+        "marketplaceName": "Marque",
+        "attribution": "via_suffix",
+        "status": "COMPLETED",
+        "counts": true,
+        "reason": null
+      },
+      {
+        "chainId": 56,
+        "jobId": "57093",
+        "fundedTx": "0x25a88642a774d7790254bbe65dd6450a52600226b3df401e3dc69aac756cd78a",
+        "fundedAt": "2026-10-26T09:19:47.000Z",
+        "createdAt": "2026-10-26T09:19:42.000Z",
+        "provider": "0xdf1074a272c53a1a10b96fa0201eb58bbbaafe00",
+        "agent": {
+          "chainId": 56,
+          "tokenId": "341556",
+          "name": "Keel",
+          "key": "56:341556",
+          "shared": 1,
+          "category": "health_factor"
+        },
+        "marketplace": "marque.trade",
+        "marketplaceName": "Marque",
+        "attribution": "marque_intent",
+        "status": "COMPLETED",
+        "counts": false,
+        "reason": "Same agent as an earlier hire."
+      },
+      {
+        "chainId": 56,
+        "jobId": "57094",
+        "fundedTx": "0x2df97b3cc9c0019b27b4f277f58b0203f060836460fd2ecff607b394950db27a",
+        "fundedAt": "2026-10-26T09:20:33.000Z",
+        "createdAt": "2026-10-26T09:20:26.000Z",
+        "provider": "0x253f7ad5d52099c4a2293418a661e9974dfb5e84",
+        "agent": {
+          "chainId": 56,
+          "tokenId": "341555",
+          "name": "Sluicegate",
+          "key": "56:341555",
+          "shared": 1,
+          "category": "yield"
+        },
+        "marketplace": "marque.trade",
+        "marketplaceName": "Marque",
+        "attribution": "marque_intent",
+        "status": "COMPLETED",
+        "counts": true,
+        "reason": null
+      },
+      {
+        "chainId": 56,
+        "jobId": "57095",
+        "fundedTx": "0x71495abeea6c6660a0cc54a6231495a7dbaad374e4b7b136eee059b22de8410a",
+        "fundedAt": "2026-10-26T09:21:21.000Z",
+        "createdAt": "2026-10-26T09:21:15.000Z",
+        "provider": "0x5b1c9fbc684a1722bb5c66c0b22f149da69768d6",
+        "agent": {
+          "chainId": 56,
+          "tokenId": "341553",
+          "name": "Bound",
+          "key": "56:341553",
+          "shared": 1,
+          "category": "rebalancing"
+        },
+        "marketplace": "marque.trade",
+        "marketplaceName": "Marque",
+        "attribution": "marque_intent",
+        "status": "COMPLETED",
+        "counts": true,
+        "reason": null
+      }
+    ]
+  },
+  "build": {
+    "agents": [],
+    "more": 0
+  },
+  "registration": {
+    "state": "not_observable",
+    "reason": "BNB keeps the registration form. Marque cannot see it.",
+    "formUrl": "https://www.bnbchain.org/en/hackathons/smart-money-era-set-and-earn"
+  },
+  "suggestion": null,
+  "next": [],
+  "tryAllFour": [
+    {
+      "category": "yield",
+      "done": true,
+      "job": {
+        "chainId": 56,
+        "jobId": "57094"
+      }
+    },
+    {
+      "category": "grid",
+      "done": false,
+      "job": null
+    },
+    {
+      "category": "rebalancing",
+      "done": true,
+      "job": {
+        "chainId": 56,
+        "jobId": "57095"
+      }
+    },
+    {
+      "category": "health_factor",
+      "done": true,
+      "job": {
+        "chainId": 56,
+        "jobId": "57066"
+      }
+    }
+  ],
+  "marketplaces": [
+    {
+      "name": "Marque",
+      "domain": "marque.trade",
+      "url": "https://marque.trade/",
+      "seenOnEscrow": true
+    },
+    {
+      "name": "TermiX",
+      "domain": "termix.ai",
+      "url": "https://app.termix.ai/",
+      "seenOnEscrow": false
+    },
+    {
+      "name": "Agent Souk",
+      "domain": "agentsouk.xyz",
+      "url": "https://agentsouk.xyz",
+      "seenOnEscrow": false
+    },
+    {
+      "name": "Dolphin",
+      "domain": "dolphinamp.xyz",
+      "url": "https://www.dolphinamp.xyz/",
+      "seenOnEscrow": false
+    },
+    {
+      "name": "HelloFugu",
+      "domain": "hellofugu.xyz",
+      "url": "https://app.hellofugu.xyz/",
+      "seenOnEscrow": false
+    },
+    {
+      "name": "KATTEGAT",
+      "domain": "kattegat.xyz",
+      "url": "https://kattegat.xyz/",
+      "seenOnEscrow": false
+    },
+    {
+      "name": "Pokter",
+      "domain": "pokter.xyz",
+      "url": "https://pokter.xyz/",
+      "seenOnEscrow": true
+    },
+    {
+      "name": "Agent Atlas",
+      "domain": "agent-atlas.xyz",
+      "url": "https://www.agent-atlas.xyz/",
+      "seenOnEscrow": false
+    },
+    {
+      "name": "Mandate",
+      "domain": "mandatemarkets.com",
+      "url": "https://www.mandatemarkets.com/",
+      "seenOnEscrow": true
+    }
+  ],
+  "method": {
+    "attribution": "marque_intent > client_ref > via <domain> in the task > known envelope > not recorded (https://marque.trade/docs/attribution)",
+    "funded": "A hire counts from its JobFunded event in the window. Created-but-unfunded jobs are listed and never counted.",
+    "independence": "Direct BNB and token transfers from the builder wallets to each hirer are checked. Transfers through other wallets or contracts are not."
+  }
+}

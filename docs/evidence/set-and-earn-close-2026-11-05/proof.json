@@ -1,0 +1,4911 @@
+{
+  "readAt": "2026-11-05T15:49:58Z",
+  "source": "https://marque.trade/api/v1/proof",
+  "filter": "rows with createdAt before 2026-11-05T12:00:00Z, state as read at readAt",
+  "window": {
+    "start": "2026-10-01T12:00:00Z",
+    "end": "2026-11-05T12:00:00Z"
+  },
+  "rowCount": 142,
+  "measuredAt": "2026-11-05T15:47:42.454Z",
+  "provenance": "ONCHAIN",
+  "scope": "Every job hired through Marque on BNB Chain's ERC-8183 escrow, on mainnet and testnet, team jobs included and labelled. /api/v1/phase2/stats counts a narrower set: jobs that count under Set and Earn rules.",
+  "rows": [
+    {
+      "chainId": 56,
+      "jobId": "57189",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Brain on BNB — Portfolio Rebalance Pricer",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:304494",
+        "tokenId": "304494",
+        "category": "rebalancing"
+      },
+      "operatorClass": "third_party",
+      "funderClass": "outside",
+      "alsoOperator": false,
+      "client": "0x7709271a7644b311ca21bb7a38a77be95c793f22",
+      "counted": false,
+      "state": "SUBMITTED",
+      "funded": true,
+      "delivered": true,
+      "settled": false,
+      "refunded": false,
+      "rated": true,
+      "createdAt": "2026-11-05T11:58:48.000Z",
+      "completedAt": null,
+      "checks": {
+        "decided": 0,
+        "agreed": 0
+      },
+      "terms": {
+        "met": 0,
+        "of": 4,
+        "source": "standard"
+      },
+      "act": null,
+      "hireTx": "0xcee2dbc63dc28b5f124adc4fa0d464d7b43397230a19b05a6a860680742f31cb",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "57188",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "BNB LP Range Rebalancer",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:265375",
+        "tokenId": "265375",
+        "category": "rebalancing"
+      },
+      "operatorClass": "third_party",
+      "funderClass": "outside",
+      "alsoOperator": false,
+      "client": "0x7709271a7644b311ca21bb7a38a77be95c793f22",
+      "counted": false,
+      "state": "FUNDED",
+      "funded": true,
+      "delivered": false,
+      "settled": false,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-11-05T11:57:42.000Z",
+      "completedAt": null,
+      "checks": null,
+      "terms": null,
+      "act": null,
+      "hireTx": "0x80247f3ab782ca20923bd52f25ce7e0c02eca57f4296c7b8b2328424cc0c4dd4",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "57186",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Sluicegate",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341555",
+        "tokenId": "341555",
+        "category": "yield"
+      },
+      "operatorClass": "reference",
+      "funderClass": "outside",
+      "alsoOperator": false,
+      "client": "0x34d9bfa696b4775341f1b9167af578f5be292766",
+      "counted": false,
+      "state": "SUBMITTED",
+      "funded": true,
+      "delivered": true,
+      "settled": false,
+      "refunded": false,
+      "rated": true,
+      "createdAt": "2026-11-05T06:50:32.000Z",
+      "completedAt": null,
+      "checks": {
+        "decided": 0,
+        "agreed": 0
+      },
+      "terms": {
+        "met": 0,
+        "of": 3,
+        "source": "signed"
+      },
+      "act": null,
+      "hireTx": "0x2d292dd3e0c346e316cdc96c9cbca537c8b1d159f193895d339f3651f302d35e",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "57185",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Keel",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341556",
+        "tokenId": "341556",
+        "category": "health_factor"
+      },
+      "operatorClass": "reference",
+      "funderClass": "outside",
+      "alsoOperator": false,
+      "client": "0x34d9bfa696b4775341f1b9167af578f5be292766",
+      "counted": false,
+      "state": "SUBMITTED",
+      "funded": true,
+      "delivered": true,
+      "settled": false,
+      "refunded": false,
+      "rated": true,
+      "createdAt": "2026-11-05T06:46:18.000Z",
+      "completedAt": null,
+      "checks": {
+        "decided": 3,
+        "agreed": 3
+      },
+      "terms": {
+        "met": 3,
+        "of": 3,
+        "source": "signed"
+      },
+      "act": null,
+      "hireTx": "0xb93d4d02ce3a8d4a8d524c5c3d016a7f520935c686f2685b26e98cc5f086d8a7",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "57184",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Bound",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341553",
+        "tokenId": "341553",
+        "category": "rebalancing"
+      },
+      "operatorClass": "reference",
+      "funderClass": "outside",
+      "alsoOperator": true,
+      "client": "0x73809f69916fcf7ddc5bb1315fbdf96a569a5963",
+      "counted": false,
+      "state": "SUBMITTED",
+      "funded": true,
+      "delivered": true,
+      "settled": false,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-11-05T05:30:53.000Z",
+      "completedAt": null,
+      "checks": {
+        "decided": 3,
+        "agreed": 3
+      },
+      "terms": {
+        "met": 3,
+        "of": 4,
+        "source": "standard"
+      },
+      "act": null,
+      "hireTx": "0x97d6dfb2f6bb5065b7861edecb9d071e2a55fa4045977af8a0d789217b0af6ce",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "57181",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Keel",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341556",
+        "tokenId": "341556",
+        "category": "health_factor"
+      },
+      "operatorClass": "reference",
+      "funderClass": "outside",
+      "alsoOperator": false,
+      "client": "0x7709271a7644b311ca21bb7a38a77be95c793f22",
+      "counted": true,
+      "state": "SUBMITTED",
+      "funded": true,
+      "delivered": true,
+      "settled": false,
+      "refunded": false,
+      "rated": true,
+      "createdAt": "2026-11-04T21:20:09.000Z",
+      "completedAt": null,
+      "checks": {
+        "decided": 3,
+        "agreed": 3
+      },
+      "terms": {
+        "met": 3,
+        "of": 3,
+        "source": "signed"
+      },
+      "act": null,
+      "hireTx": "0xe688e5e6bf2ef421d5c52ae107c97dbfe223b5501f63a1a3dfbbc9a9850db17b",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "57180",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "4lpha bStock Desk",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:369195",
+        "tokenId": "369195",
+        "category": "rebalancing"
+      },
+      "operatorClass": "third_party",
+      "funderClass": "outside",
+      "alsoOperator": false,
+      "client": "0x7709271a7644b311ca21bb7a38a77be95c793f22",
+      "counted": false,
+      "state": "FUNDED",
+      "funded": true,
+      "delivered": false,
+      "settled": false,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-11-04T21:01:38.000Z",
+      "completedAt": null,
+      "checks": null,
+      "terms": null,
+      "act": null,
+      "hireTx": "0x7377c1da6279539f26e5f5f9a00089ff303e29b59eccab832c2dc7f5b22b7c9f",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "57179",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Brain on BNB — DeFi Agent",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:363709",
+        "tokenId": "363709",
+        "category": "rebalancing"
+      },
+      "operatorClass": "third_party",
+      "funderClass": "outside",
+      "alsoOperator": false,
+      "client": "0x7709271a7644b311ca21bb7a38a77be95c793f22",
+      "counted": true,
+      "state": "SUBMITTED",
+      "funded": true,
+      "delivered": true,
+      "settled": false,
+      "refunded": false,
+      "rated": true,
+      "createdAt": "2026-11-04T20:56:04.000Z",
+      "completedAt": null,
+      "checks": {
+        "decided": 0,
+        "agreed": 0
+      },
+      "terms": {
+        "met": 0,
+        "of": 4,
+        "source": "standard"
+      },
+      "act": null,
+      "hireTx": "0x072cd9c0d758e3b325f38121fda8306f11224326e60982676fe6772a15423aa1",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "57178",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Mandate Yield-1",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:344122",
+        "tokenId": "344122",
+        "category": null
+      },
+      "operatorClass": "third_party",
+      "funderClass": "outside",
+      "alsoOperator": false,
+      "client": "0x7709271a7644b311ca21bb7a38a77be95c793f22",
+      "counted": false,
+      "state": "SUBMITTED",
+      "funded": true,
+      "delivered": true,
+      "settled": false,
+      "refunded": false,
+      "rated": true,
+      "createdAt": "2026-11-04T20:52:01.000Z",
+      "completedAt": null,
+      "checks": {
+        "decided": 0,
+        "agreed": 0
+      },
+      "terms": null,
+      "act": null,
+      "hireTx": "0x1ab3852e1f8c430e9c901a5effb22d865d152cd3937f8744034376446b0c1dc3",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 97,
+      "jobId": "1706",
+      "escrow": "0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de",
+      "agent": {
+        "name": "VEYRA Keeper",
+        "agentKey": "97:0x8004a818bfb912233c491871b3d84c89a494bd9e:2718",
+        "tokenId": "2718",
+        "category": "rebalancing"
+      },
+      "operatorClass": "third_party",
+      "funderClass": "outside",
+      "alsoOperator": false,
+      "client": "0x863bd9c15d28e7e2f1acdeb1fcd778f64d0e0a51",
+      "counted": true,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-11-04T14:44:16.000Z",
+      "completedAt": "2026-11-04T15:03:17.000Z",
+      "checks": {
+        "decided": 1,
+        "agreed": 1
+      },
+      "terms": {
+        "met": 1,
+        "of": 4,
+        "source": "signed"
+      },
+      "act": null,
+      "hireTx": "0x54c173e9c888f69ffd1107a5c4cc23fa4af5a9d36576b526d5a00d7513b0c130",
+      "verifyUrl": "https://testnet.bscscan.com/address/0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de#readContract"
+    },
+    {
+      "chainId": 97,
+      "jobId": "1705",
+      "escrow": "0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de",
+      "agent": {
+        "name": "VEYRA Keeper",
+        "agentKey": "97:0x8004a818bfb912233c491871b3d84c89a494bd9e:2718",
+        "tokenId": "2718",
+        "category": "rebalancing"
+      },
+      "operatorClass": "third_party",
+      "funderClass": "outside",
+      "alsoOperator": false,
+      "client": "0x863bd9c15d28e7e2f1acdeb1fcd778f64d0e0a51",
+      "counted": false,
+      "state": "OPEN",
+      "funded": false,
+      "delivered": false,
+      "settled": false,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-11-04T14:22:18.000Z",
+      "completedAt": null,
+      "checks": null,
+      "terms": null,
+      "act": null,
+      "hireTx": "0xd694fe447c28f4bcdfeb0251c45960acb2cec81a7443d2b3dd6e0c56c8836ee3",
+      "verifyUrl": "https://testnet.bscscan.com/address/0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de#readContract"
+    },
+    {
+      "chainId": 97,
+      "jobId": "1704",
+      "escrow": "0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de",
+      "agent": {
+        "name": "Lattice",
+        "agentKey": "97:0x8004a818bfb912233c491871b3d84c89a494bd9e:2236",
+        "tokenId": "2236",
+        "category": "grid"
+      },
+      "operatorClass": "reference",
+      "funderClass": "outside",
+      "alsoOperator": false,
+      "client": "0x7709271a7644b311ca21bb7a38a77be95c793f22",
+      "counted": true,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": true,
+      "createdAt": "2026-11-04T12:11:41.000Z",
+      "completedAt": "2026-11-04T12:32:21.000Z",
+      "checks": {
+        "decided": 2,
+        "agreed": 2
+      },
+      "terms": {
+        "met": 2,
+        "of": 4,
+        "source": "signed"
+      },
+      "act": null,
+      "hireTx": "0x276693fc8a9fad0dd77bebd04e243edd497d3b02344d01e293a8737a83c90318",
+      "verifyUrl": "https://testnet.bscscan.com/address/0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de#readContract"
+    },
+    {
+      "chainId": 97,
+      "jobId": "1703",
+      "escrow": "0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de",
+      "agent": {
+        "name": "VEYRA Keeper",
+        "agentKey": "97:0x8004a818bfb912233c491871b3d84c89a494bd9e:2718",
+        "tokenId": "2718",
+        "category": "rebalancing"
+      },
+      "operatorClass": "third_party",
+      "funderClass": "outside",
+      "alsoOperator": false,
+      "client": "0x7709271a7644b311ca21bb7a38a77be95c793f22",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": true,
+      "createdAt": "2026-11-04T11:59:33.000Z",
+      "completedAt": "2026-11-04T12:17:13.000Z",
+      "checks": {
+        "decided": 1,
+        "agreed": 1
+      },
+      "terms": {
+        "met": 1,
+        "of": 4,
+        "source": "signed"
+      },
+      "act": null,
+      "hireTx": "0x9c1825a1be6117fcd22779990ed6062539c2102f705dfae91a927658e039a070",
+      "verifyUrl": "https://testnet.bscscan.com/address/0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de#readContract"
+    },
+    {
+      "chainId": 97,
+      "jobId": "1702",
+      "escrow": "0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de",
+      "agent": {
+        "name": "VEYRA Keeper",
+        "agentKey": "97:0x8004a818bfb912233c491871b3d84c89a494bd9e:2718",
+        "tokenId": "2718",
+        "category": "rebalancing"
+      },
+      "operatorClass": "third_party",
+      "funderClass": "outside",
+      "alsoOperator": false,
+      "client": "0x7709271a7644b311ca21bb7a38a77be95c793f22",
+      "counted": true,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": true,
+      "createdAt": "2026-11-04T05:43:01.000Z",
+      "completedAt": "2026-11-04T05:59:50.000Z",
+      "checks": {
+        "decided": 1,
+        "agreed": 1
+      },
+      "terms": {
+        "met": 1,
+        "of": 4,
+        "source": "signed"
+      },
+      "act": null,
+      "hireTx": "0x850a27ec6781b10c2ebe9f5538f020b6667505e5284140a9aba9f779fdef4cae",
+      "verifyUrl": "https://testnet.bscscan.com/address/0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "57177",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Bound",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341553",
+        "tokenId": "341553",
+        "category": "rebalancing"
+      },
+      "operatorClass": "reference",
+      "funderClass": "outside",
+      "alsoOperator": true,
+      "client": "0x73809f69916fcf7ddc5bb1315fbdf96a569a5963",
+      "counted": false,
+      "state": "SUBMITTED",
+      "funded": true,
+      "delivered": true,
+      "settled": false,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-11-04T05:30:46.000Z",
+      "completedAt": null,
+      "checks": {
+        "decided": 3,
+        "agreed": 3
+      },
+      "terms": {
+        "met": 3,
+        "of": 4,
+        "source": "standard"
+      },
+      "act": null,
+      "hireTx": "0xb728a87323621dc2c2f93af108e00e528a6c35e185caeb3077a273d69796ecd7",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 97,
+      "jobId": "1701",
+      "escrow": "0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de",
+      "agent": {
+        "name": "Halong Yield",
+        "agentKey": "97:0x8004a818bfb912233c491871b3d84c89a494bd9e:2647",
+        "tokenId": "2647",
+        "category": null
+      },
+      "operatorClass": "third_party",
+      "funderClass": "outside",
+      "alsoOperator": false,
+      "client": "0x7709271a7644b311ca21bb7a38a77be95c793f22",
+      "counted": false,
+      "state": "REFUNDED",
+      "funded": true,
+      "delivered": false,
+      "settled": false,
+      "refunded": true,
+      "rated": false,
+      "createdAt": "2026-11-04T00:49:15.000Z",
+      "completedAt": null,
+      "checks": null,
+      "terms": null,
+      "act": null,
+      "hireTx": "0xd3f0272be1d88667688d67ed8c0acb9fa9e944dc22f35ffa03692f8f699384ac",
+      "verifyUrl": "https://testnet.bscscan.com/address/0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de#readContract"
+    },
+    {
+      "chainId": 97,
+      "jobId": "1700",
+      "escrow": "0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de",
+      "agent": {
+        "name": "Cresthold by Pokter",
+        "agentKey": "97:0x8004a818bfb912233c491871b3d84c89a494bd9e:2619",
+        "tokenId": "2619",
+        "category": null
+      },
+      "operatorClass": "third_party",
+      "funderClass": "outside",
+      "alsoOperator": false,
+      "client": "0x7709271a7644b311ca21bb7a38a77be95c793f22",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-11-03T23:01:45.000Z",
+      "completedAt": "2026-11-03T23:25:47.000Z",
+      "checks": {
+        "decided": 0,
+        "agreed": 0
+      },
+      "terms": null,
+      "act": null,
+      "hireTx": "0xdc1200e12723984c3d406141febaeb00b048e3060599be1c8a5e035f2cfc2161",
+      "verifyUrl": "https://testnet.bscscan.com/address/0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de#readContract"
+    },
+    {
+      "chainId": 97,
+      "jobId": "1699",
+      "escrow": "0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de",
+      "agent": {
+        "name": "VEYRA Keeper",
+        "agentKey": "97:0x8004a818bfb912233c491871b3d84c89a494bd9e:2718",
+        "tokenId": "2718",
+        "category": "rebalancing"
+      },
+      "operatorClass": "third_party",
+      "funderClass": "outside",
+      "alsoOperator": true,
+      "client": "0xb833c2ee1d6cee3933a8ab525cc4a1c8f812a6e2",
+      "counted": true,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-11-03T23:00:40.000Z",
+      "completedAt": "2026-11-04T00:08:17.000Z",
+      "checks": {
+        "decided": 1,
+        "agreed": 1
+      },
+      "terms": {
+        "met": 1,
+        "of": 4,
+        "source": "signed"
+      },
+      "act": null,
+      "hireTx": "0x45e0478b061c84e2c6b47a9be7decb1ed6d16fd80aaa2b93ac5c0c6836142f35",
+      "verifyUrl": "https://testnet.bscscan.com/address/0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de#readContract"
+    },
+    {
+      "chainId": 97,
+      "jobId": "1697",
+      "escrow": "0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de",
+      "agent": {
+        "name": "Halong Yield",
+        "agentKey": "97:0x8004a818bfb912233c491871b3d84c89a494bd9e:2647",
+        "tokenId": "2647",
+        "category": null
+      },
+      "operatorClass": "third_party",
+      "funderClass": "outside",
+      "alsoOperator": true,
+      "client": "0xedeaa0714213eccab5ab9cf602eafe4f7a741b3c",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-11-03T17:56:25.000Z",
+      "completedAt": "2026-11-03T19:10:09.000Z",
+      "checks": {
+        "decided": 0,
+        "agreed": 0
+      },
+      "terms": {
+        "met": 0,
+        "of": 6,
+        "source": "signed"
+      },
+      "act": null,
+      "hireTx": "0x300520cbc87d2fede90c52eb00c85aefc957c0c972dfbf0fa44282ad95beb822",
+      "verifyUrl": "https://testnet.bscscan.com/address/0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de#readContract"
+    },
+    {
+      "chainId": 97,
+      "jobId": "1696",
+      "escrow": "0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de",
+      "agent": {
+        "name": "Sluicegate",
+        "agentKey": "97:0x8004a818bfb912233c491871b3d84c89a494bd9e:2237",
+        "tokenId": "2237",
+        "category": "yield"
+      },
+      "operatorClass": "reference",
+      "funderClass": "outside",
+      "alsoOperator": true,
+      "client": "0xedeaa0714213eccab5ab9cf602eafe4f7a741b3c",
+      "counted": true,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-11-03T17:33:38.000Z",
+      "completedAt": "2026-11-03T17:51:10.000Z",
+      "checks": {
+        "decided": 3,
+        "agreed": 3
+      },
+      "terms": {
+        "met": 3,
+        "of": 3,
+        "source": "signed"
+      },
+      "act": null,
+      "hireTx": "0x503fa0ee145016b602ae1a57006c3962dabdde478b8b5d26e20b13c292df9929",
+      "verifyUrl": "https://testnet.bscscan.com/address/0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de#readContract"
+    },
+    {
+      "chainId": 97,
+      "jobId": "1695",
+      "escrow": "0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de",
+      "agent": {
+        "name": "Keel",
+        "agentKey": "97:0x8004a818bfb912233c491871b3d84c89a494bd9e:2238",
+        "tokenId": "2238",
+        "category": "health_factor"
+      },
+      "operatorClass": "reference",
+      "funderClass": "outside",
+      "alsoOperator": true,
+      "client": "0xedeaa0714213eccab5ab9cf602eafe4f7a741b3c",
+      "counted": true,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-11-03T17:31:38.000Z",
+      "completedAt": "2026-11-03T17:51:02.000Z",
+      "checks": {
+        "decided": 0,
+        "agreed": 0
+      },
+      "terms": {
+        "met": 0,
+        "of": 3,
+        "source": "signed"
+      },
+      "act": null,
+      "hireTx": "0x3c98cc5deb53cc1ebd3c30d4a1f3920e2111d1b84064bf9e00b60db63bc75fb5",
+      "verifyUrl": "https://testnet.bscscan.com/address/0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "57173",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "4lpha bStock Desk",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:369195",
+        "tokenId": "369195",
+        "category": "rebalancing"
+      },
+      "operatorClass": "third_party",
+      "funderClass": "outside",
+      "alsoOperator": false,
+      "client": "0x34d9bfa696b4775341f1b9167af578f5be292766",
+      "counted": false,
+      "state": "FUNDED",
+      "funded": true,
+      "delivered": false,
+      "settled": false,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-11-03T16:19:51.000Z",
+      "completedAt": null,
+      "checks": null,
+      "terms": null,
+      "act": null,
+      "hireTx": "0xa21c591a4b9f9990a0bc0c046bed9dcc5b726c7b7ebf5290a28ab3a1958a838d",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 97,
+      "jobId": "1694",
+      "escrow": "0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de",
+      "agent": {
+        "name": "Mandate Range-1",
+        "agentKey": "97:0x8004a818bfb912233c491871b3d84c89a494bd9e:2588",
+        "tokenId": "2588",
+        "category": "rebalancing"
+      },
+      "operatorClass": "third_party",
+      "funderClass": "outside",
+      "alsoOperator": false,
+      "client": "0x34d9bfa696b4775341f1b9167af578f5be292766",
+      "counted": true,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-11-03T16:13:34.000Z",
+      "completedAt": "2026-11-03T16:30:36.000Z",
+      "checks": {
+        "decided": 4,
+        "agreed": 4
+      },
+      "terms": {
+        "met": 4,
+        "of": 4,
+        "source": "signed"
+      },
+      "act": null,
+      "hireTx": "0x73833d3ed7e7d0117d3a7b299bea4c981b2860844d6c6fb9c335fb9d4bf88a77",
+      "verifyUrl": "https://testnet.bscscan.com/address/0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "57171",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Bound",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341553",
+        "tokenId": "341553",
+        "category": "rebalancing"
+      },
+      "operatorClass": "reference",
+      "funderClass": "outside",
+      "alsoOperator": true,
+      "client": "0x73809f69916fcf7ddc5bb1315fbdf96a569a5963",
+      "counted": false,
+      "state": "SUBMITTED",
+      "funded": true,
+      "delivered": true,
+      "settled": false,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-11-03T05:30:54.000Z",
+      "completedAt": null,
+      "checks": {
+        "decided": 3,
+        "agreed": 3
+      },
+      "terms": {
+        "met": 3,
+        "of": 4,
+        "source": "standard"
+      },
+      "act": null,
+      "hireTx": "0x17c428898841d31a1f9463c8e38cf507ea6b6da01d73ead8db2acc011abf80b5",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 97,
+      "jobId": "1693",
+      "escrow": "0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de",
+      "agent": {
+        "name": "Brinkwatch by Pokter",
+        "agentKey": "97:0x8004a818bfb912233c491871b3d84c89a494bd9e:2618",
+        "tokenId": "2618",
+        "category": "health_factor"
+      },
+      "operatorClass": "third_party",
+      "funderClass": "outside",
+      "alsoOperator": false,
+      "client": "0x34d9bfa696b4775341f1b9167af578f5be292766",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-11-02T19:30:04.000Z",
+      "completedAt": "2026-11-02T19:48:58.000Z",
+      "checks": {
+        "decided": 2,
+        "agreed": 2
+      },
+      "terms": {
+        "met": 2,
+        "of": 3,
+        "source": "signed"
+      },
+      "act": null,
+      "hireTx": "0x8d4154185ecdcfabd3d606dcae87de9d392d1c34aecc3195bd6ef525316ce755",
+      "verifyUrl": "https://testnet.bscscan.com/address/0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "57161",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "blacktoshi",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:401324",
+        "tokenId": "401324",
+        "category": "health_factor"
+      },
+      "operatorClass": "third_party",
+      "funderClass": "outside",
+      "alsoOperator": false,
+      "client": "0x34d9bfa696b4775341f1b9167af578f5be292766",
+      "counted": false,
+      "state": "FUNDED",
+      "funded": true,
+      "delivered": false,
+      "settled": false,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-11-02T07:17:24.000Z",
+      "completedAt": null,
+      "checks": null,
+      "terms": null,
+      "act": null,
+      "hireTx": "0x93fc0dbd2cc729add1b8d7819b773be9dfd05d510fbc46afad9c749b8c88979a",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "57160",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Bound",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341553",
+        "tokenId": "341553",
+        "category": "rebalancing"
+      },
+      "operatorClass": "reference",
+      "funderClass": "outside",
+      "alsoOperator": true,
+      "client": "0x73809f69916fcf7ddc5bb1315fbdf96a569a5963",
+      "counted": false,
+      "state": "SUBMITTED",
+      "funded": true,
+      "delivered": true,
+      "settled": false,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-11-02T05:30:52.000Z",
+      "completedAt": null,
+      "checks": {
+        "decided": 3,
+        "agreed": 3
+      },
+      "terms": {
+        "met": 3,
+        "of": 4,
+        "source": "standard"
+      },
+      "act": null,
+      "hireTx": "0x6afa3af2dec105340b40e40a00587567c3931c69584cf38b0c801877ee2e8725",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "57157",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Mandate Yield-1",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:344122",
+        "tokenId": "344122",
+        "category": "yield"
+      },
+      "operatorClass": "third_party",
+      "funderClass": "outside",
+      "alsoOperator": false,
+      "client": "0x34d9bfa696b4775341f1b9167af578f5be292766",
+      "counted": false,
+      "state": "SUBMITTED",
+      "funded": true,
+      "delivered": true,
+      "settled": false,
+      "refunded": false,
+      "rated": true,
+      "createdAt": "2026-11-02T01:14:12.000Z",
+      "completedAt": null,
+      "checks": {
+        "decided": 0,
+        "agreed": 0
+      },
+      "terms": {
+        "met": 0,
+        "of": 3,
+        "source": "signed"
+      },
+      "act": null,
+      "hireTx": "0xe2512483a2708926bce77c657a3fad7dbb831b45374e4a575a57c2020c480b77",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "57156",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Brain on BNB — Venus Health Factor Monitor",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:302257",
+        "tokenId": "302257",
+        "category": "health_factor"
+      },
+      "operatorClass": "third_party",
+      "funderClass": "outside",
+      "alsoOperator": false,
+      "client": "0x34d9bfa696b4775341f1b9167af578f5be292766",
+      "counted": true,
+      "state": "SUBMITTED",
+      "funded": true,
+      "delivered": true,
+      "settled": false,
+      "refunded": false,
+      "rated": true,
+      "createdAt": "2026-11-02T01:09:56.000Z",
+      "completedAt": null,
+      "checks": {
+        "decided": 1,
+        "agreed": 1
+      },
+      "terms": {
+        "met": 1,
+        "of": 3,
+        "source": "standard"
+      },
+      "act": null,
+      "hireTx": "0x5c220bd3afca5d113de1b98b2b01c670348e785b5c0b7b582e8f477500832100",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "57155",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Brain on BNB — PancakeSwap Fee Tier Placement",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:310460",
+        "tokenId": "310460",
+        "category": "rebalancing"
+      },
+      "operatorClass": "third_party",
+      "funderClass": "outside",
+      "alsoOperator": false,
+      "client": "0x34d9bfa696b4775341f1b9167af578f5be292766",
+      "counted": true,
+      "state": "SUBMITTED",
+      "funded": true,
+      "delivered": true,
+      "settled": false,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-11-02T01:07:40.000Z",
+      "completedAt": null,
+      "checks": {
+        "decided": 0,
+        "agreed": 0
+      },
+      "terms": {
+        "met": 0,
+        "of": 4,
+        "source": "standard"
+      },
+      "act": null,
+      "hireTx": "0x3f423a9992d17c88c0344f2914dcb076220360e93ddfe543855511e646e1ae5e",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "57154",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Brain on BNB — Venus Yield Ranking",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:304493",
+        "tokenId": "304493",
+        "category": "yield"
+      },
+      "operatorClass": "third_party",
+      "funderClass": "outside",
+      "alsoOperator": false,
+      "client": "0x34d9bfa696b4775341f1b9167af578f5be292766",
+      "counted": false,
+      "state": "SUBMITTED",
+      "funded": true,
+      "delivered": true,
+      "settled": false,
+      "refunded": false,
+      "rated": true,
+      "createdAt": "2026-11-02T01:05:51.000Z",
+      "completedAt": null,
+      "checks": {
+        "decided": 0,
+        "agreed": 0
+      },
+      "terms": {
+        "met": 0,
+        "of": 3,
+        "source": "standard"
+      },
+      "act": null,
+      "hireTx": "0xb287126d9bf73eb5f4183dfe2d127361e7f3e654223382863e947b10bde3da64",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "57153",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Tidemark",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:358786",
+        "tokenId": "358786",
+        "category": "yield"
+      },
+      "operatorClass": "reference",
+      "funderClass": "outside",
+      "alsoOperator": false,
+      "client": "0x34d9bfa696b4775341f1b9167af578f5be292766",
+      "counted": true,
+      "state": "SUBMITTED",
+      "funded": true,
+      "delivered": true,
+      "settled": false,
+      "refunded": false,
+      "rated": true,
+      "createdAt": "2026-11-02T01:00:29.000Z",
+      "completedAt": null,
+      "checks": {
+        "decided": 0,
+        "agreed": 0
+      },
+      "terms": {
+        "met": 0,
+        "of": 3,
+        "source": "signed"
+      },
+      "act": null,
+      "hireTx": "0x5f8fd9e94075e5de4869cd0de7e42b1ed82c9d13ef454ba8fc6dca7cfdd4037d",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "57152",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Lattice",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341554",
+        "tokenId": "341554",
+        "category": "grid"
+      },
+      "operatorClass": "reference",
+      "funderClass": "outside",
+      "alsoOperator": false,
+      "client": "0x34d9bfa696b4775341f1b9167af578f5be292766",
+      "counted": false,
+      "state": "SUBMITTED",
+      "funded": true,
+      "delivered": true,
+      "settled": false,
+      "refunded": false,
+      "rated": true,
+      "createdAt": "2026-11-02T00:53:35.000Z",
+      "completedAt": null,
+      "checks": {
+        "decided": 2,
+        "agreed": 2
+      },
+      "terms": {
+        "met": 2,
+        "of": 4,
+        "source": "standard"
+      },
+      "act": null,
+      "hireTx": "0xa92257ee5b4fec0da70f6566d18fb1ce997ad5316ec16ad65f4d150dfa7cebf0",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 97,
+      "jobId": "1691",
+      "escrow": "0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de",
+      "agent": {
+        "name": "Brinkwatch by Pokter",
+        "agentKey": "97:0x8004a818bfb912233c491871b3d84c89a494bd9e:2618",
+        "tokenId": "2618",
+        "category": "health_factor"
+      },
+      "operatorClass": "third_party",
+      "funderClass": "outside",
+      "alsoOperator": false,
+      "client": "0x34d9bfa696b4775341f1b9167af578f5be292766",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": true,
+      "createdAt": "2026-11-02T00:24:24.000Z",
+      "completedAt": "2026-11-02T01:13:22.000Z",
+      "checks": {
+        "decided": 2,
+        "agreed": 2
+      },
+      "terms": {
+        "met": 2,
+        "of": 3,
+        "source": "signed"
+      },
+      "act": null,
+      "hireTx": "0x3fb4e7e6b66587a8afe4f0a69b95ec5d7b2df051b1bce48e69eda9cf57303b4c",
+      "verifyUrl": "https://testnet.bscscan.com/address/0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de#readContract"
+    },
+    {
+      "chainId": 97,
+      "jobId": "1690",
+      "escrow": "0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de",
+      "agent": {
+        "name": "Cresthold by Pokter",
+        "agentKey": "97:0x8004a818bfb912233c491871b3d84c89a494bd9e:2619",
+        "tokenId": "2619",
+        "category": "yield"
+      },
+      "operatorClass": "third_party",
+      "funderClass": "outside",
+      "alsoOperator": false,
+      "client": "0x34d9bfa696b4775341f1b9167af578f5be292766",
+      "counted": true,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": true,
+      "createdAt": "2026-11-02T00:15:48.000Z",
+      "completedAt": "2026-11-02T01:13:28.000Z",
+      "checks": {
+        "decided": 0,
+        "agreed": 0
+      },
+      "terms": {
+        "met": 0,
+        "of": 3,
+        "source": "signed"
+      },
+      "act": null,
+      "hireTx": "0x1d71f8f77a670e6a3dbd097203fa22f9f894bd6bcab30a8fb07ad71a84106028",
+      "verifyUrl": "https://testnet.bscscan.com/address/0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de#readContract"
+    },
+    {
+      "chainId": 97,
+      "jobId": "1689",
+      "escrow": "0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de",
+      "agent": {
+        "name": "Mandate Guard-1",
+        "agentKey": "97:0x8004a818bfb912233c491871b3d84c89a494bd9e:2591",
+        "tokenId": "2591",
+        "category": "health_factor"
+      },
+      "operatorClass": "third_party",
+      "funderClass": "outside",
+      "alsoOperator": false,
+      "client": "0x34d9bfa696b4775341f1b9167af578f5be292766",
+      "counted": true,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": true,
+      "createdAt": "2026-11-02T00:13:00.000Z",
+      "completedAt": "2026-11-02T00:35:46.000Z",
+      "checks": {
+        "decided": 1,
+        "agreed": 1
+      },
+      "terms": {
+        "met": 1,
+        "of": 3,
+        "source": "signed"
+      },
+      "act": null,
+      "hireTx": "0x1420881ca1fa9d9d2c30d134d5288b87676c8fe7f5a3101e58304f68f43f9715",
+      "verifyUrl": "https://testnet.bscscan.com/address/0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de#readContract"
+    },
+    {
+      "chainId": 97,
+      "jobId": "1688",
+      "escrow": "0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de",
+      "agent": {
+        "name": "Sluicegate",
+        "agentKey": "97:0x8004a818bfb912233c491871b3d84c89a494bd9e:2237",
+        "tokenId": "2237",
+        "category": "yield"
+      },
+      "operatorClass": "reference",
+      "funderClass": "outside",
+      "alsoOperator": false,
+      "client": "0x3e8f9346cb2c142d7184e8d08a20934b1d477067",
+      "counted": false,
+      "state": "OPEN",
+      "funded": false,
+      "delivered": false,
+      "settled": false,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-11-02T00:08:09.000Z",
+      "completedAt": null,
+      "checks": null,
+      "terms": null,
+      "act": null,
+      "hireTx": "0x13103b25a2ee15e5a1f026899f8c828acce0fdf4eaa6a256034a7e0c29de0069",
+      "verifyUrl": "https://testnet.bscscan.com/address/0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "57151",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Brain on BNB — Portfolio Rebalance Pricer",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:304494",
+        "tokenId": "304494",
+        "category": "rebalancing"
+      },
+      "operatorClass": "third_party",
+      "funderClass": "team",
+      "alsoOperator": false,
+      "client": "0x0d8c9ad8eebb6879fefa218f0799219bcaabe999",
+      "counted": false,
+      "state": "SUBMITTED",
+      "funded": true,
+      "delivered": true,
+      "settled": false,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-11-01T10:50:24.000Z",
+      "completedAt": null,
+      "checks": {
+        "decided": 0,
+        "agreed": 0
+      },
+      "terms": {
+        "met": 0,
+        "of": 4,
+        "source": "signed"
+      },
+      "act": null,
+      "hireTx": "0xbacf809c54788e91ae5e22bfb30ee32c9ef6bae27d928334ff30580cabbf8a7a",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "57150",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Brain on BNB — DeFi Agent",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:363709",
+        "tokenId": "363709",
+        "category": "rebalancing"
+      },
+      "operatorClass": "third_party",
+      "funderClass": "team",
+      "alsoOperator": false,
+      "client": "0x0d8c9ad8eebb6879fefa218f0799219bcaabe999",
+      "counted": false,
+      "state": "SUBMITTED",
+      "funded": true,
+      "delivered": true,
+      "settled": false,
+      "refunded": false,
+      "rated": true,
+      "createdAt": "2026-11-01T10:47:09.000Z",
+      "completedAt": null,
+      "checks": {
+        "decided": 0,
+        "agreed": 0
+      },
+      "terms": {
+        "met": 0,
+        "of": 4,
+        "source": "signed"
+      },
+      "act": null,
+      "hireTx": "0x64e691f13bcc214452e96039afaca5c9915bad35d8cc22e70b4ee9df31a74e5d",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "57134",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Brain on BNB — Venus Yield Ranking",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:304493",
+        "tokenId": "304493",
+        "category": null
+      },
+      "operatorClass": "third_party",
+      "funderClass": "outside",
+      "alsoOperator": true,
+      "client": "0x73809f69916fcf7ddc5bb1315fbdf96a569a5963",
+      "counted": false,
+      "state": "SUBMITTED",
+      "funded": true,
+      "delivered": true,
+      "settled": false,
+      "refunded": false,
+      "rated": true,
+      "createdAt": "2026-10-30T13:48:54.000Z",
+      "completedAt": null,
+      "checks": {
+        "decided": 0,
+        "agreed": 0
+      },
+      "terms": null,
+      "act": null,
+      "hireTx": "0xfe42abc812fcf7e3e213a7a1e4b9fb53e8ad1b058c633ff61e2531d8ea948035",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "57133",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Brain on BNB — Venus Yield Ranking",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:304493",
+        "tokenId": "304493",
+        "category": "yield"
+      },
+      "operatorClass": "third_party",
+      "funderClass": "outside",
+      "alsoOperator": true,
+      "client": "0x73809f69916fcf7ddc5bb1315fbdf96a569a5963",
+      "counted": true,
+      "state": "SUBMITTED",
+      "funded": true,
+      "delivered": true,
+      "settled": false,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-10-30T13:37:21.000Z",
+      "completedAt": null,
+      "checks": {
+        "decided": 0,
+        "agreed": 0
+      },
+      "terms": {
+        "met": 0,
+        "of": 3,
+        "source": "signed"
+      },
+      "act": null,
+      "hireTx": "0xd45d248910ef8a016b7be8be0c2febc4cc6466a7a8b008d50fce419e2f56e694",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "57132",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Brain on BNB — Venus Health Factor Monitor",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:302257",
+        "tokenId": "302257",
+        "category": "health_factor"
+      },
+      "operatorClass": "third_party",
+      "funderClass": "outside",
+      "alsoOperator": true,
+      "client": "0x73809f69916fcf7ddc5bb1315fbdf96a569a5963",
+      "counted": true,
+      "state": "SUBMITTED",
+      "funded": true,
+      "delivered": true,
+      "settled": false,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-10-30T13:34:43.000Z",
+      "completedAt": null,
+      "checks": {
+        "decided": 1,
+        "agreed": 1
+      },
+      "terms": {
+        "met": 1,
+        "of": 3,
+        "source": "signed"
+      },
+      "act": null,
+      "hireTx": "0xb10348cf5d96002c7ae75c16ca11274649b4d756e0db64764b2b70b442d8f40c",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 97,
+      "jobId": "1680",
+      "escrow": "0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de",
+      "agent": {
+        "name": "Tidemark",
+        "agentKey": "97:0x8004a818bfb912233c491871b3d84c89a494bd9e:2495",
+        "tokenId": "2495",
+        "category": "yield"
+      },
+      "operatorClass": "reference",
+      "funderClass": "outside",
+      "alsoOperator": true,
+      "client": "0xb833c2ee1d6cee3933a8ab525cc4a1c8f812a6e2",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": true,
+      "createdAt": "2026-10-29T20:38:25.000Z",
+      "completedAt": "2026-10-29T20:55:25.000Z",
+      "checks": {
+        "decided": 0,
+        "agreed": 0
+      },
+      "terms": {
+        "met": 0,
+        "of": 3,
+        "source": "signed"
+      },
+      "act": null,
+      "hireTx": "0x64b0a780a4c877aa09abfd001c89e0109003c261e7cfbe5dcbfc13bbedf874da",
+      "verifyUrl": "https://testnet.bscscan.com/address/0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de#readContract"
+    },
+    {
+      "chainId": 97,
+      "jobId": "1679",
+      "escrow": "0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de",
+      "agent": {
+        "name": "Halong Yield",
+        "agentKey": "97:0x8004a818bfb912233c491871b3d84c89a494bd9e:2647",
+        "tokenId": "2647",
+        "category": "yield"
+      },
+      "operatorClass": "third_party",
+      "funderClass": "outside",
+      "alsoOperator": true,
+      "client": "0xb833c2ee1d6cee3933a8ab525cc4a1c8f812a6e2",
+      "counted": false,
+      "state": "REFUNDED",
+      "funded": true,
+      "delivered": false,
+      "settled": false,
+      "refunded": true,
+      "rated": false,
+      "createdAt": "2026-10-28T17:28:52.000Z",
+      "completedAt": null,
+      "checks": null,
+      "terms": null,
+      "act": null,
+      "hireTx": "0x15922bb0882f1bcbad5f164701f944039bad2dbf0d4ccaf8ea645e7d8210cbc2",
+      "verifyUrl": "https://testnet.bscscan.com/address/0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "57127",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Mandate Guard-1",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:344123",
+        "tokenId": "344123",
+        "category": "health_factor"
+      },
+      "operatorClass": "third_party",
+      "funderClass": "outside",
+      "alsoOperator": true,
+      "client": "0xb833c2ee1d6cee3933a8ab525cc4a1c8f812a6e2",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-10-28T16:52:37.000Z",
+      "completedAt": "2026-11-04T16:54:09.000Z",
+      "checks": {
+        "decided": 1,
+        "agreed": 1
+      },
+      "terms": {
+        "met": 1,
+        "of": 3,
+        "source": "signed"
+      },
+      "act": null,
+      "hireTx": "0x97c053b57812017282699627ae568479ea6a197cd800e19a1d6db10cf18b4e07",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "57126",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Mandate Yield-1",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:344122",
+        "tokenId": "344122",
+        "category": "yield"
+      },
+      "operatorClass": "third_party",
+      "funderClass": "outside",
+      "alsoOperator": true,
+      "client": "0xb833c2ee1d6cee3933a8ab525cc4a1c8f812a6e2",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": true,
+      "createdAt": "2026-10-28T16:48:30.000Z",
+      "completedAt": "2026-11-04T16:49:03.000Z",
+      "checks": {
+        "decided": 0,
+        "agreed": 0
+      },
+      "terms": {
+        "met": 0,
+        "of": 3,
+        "source": "signed"
+      },
+      "act": null,
+      "hireTx": "0xa44e433c99c2aed27d5cd1fe22720863ba3ae53bc038af9845f6221965fda37d",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "57125",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Mandate Grid-1",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:344121",
+        "tokenId": "344121",
+        "category": "grid"
+      },
+      "operatorClass": "third_party",
+      "funderClass": "outside",
+      "alsoOperator": true,
+      "client": "0xb833c2ee1d6cee3933a8ab525cc4a1c8f812a6e2",
+      "counted": true,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": true,
+      "createdAt": "2026-10-28T16:41:39.000Z",
+      "completedAt": "2026-11-04T16:45:52.000Z",
+      "checks": {
+        "decided": 1,
+        "agreed": 0
+      },
+      "terms": {
+        "met": 0,
+        "of": 4,
+        "source": "signed"
+      },
+      "act": null,
+      "hireTx": "0x9b2b8880b40e563b42f10ba0cfb1192e8315e147bf8f97184dbf9244f78db3d3",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "57124",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Mandate Range-1",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:344119",
+        "tokenId": "344119",
+        "category": "rebalancing"
+      },
+      "operatorClass": "third_party",
+      "funderClass": "outside",
+      "alsoOperator": true,
+      "client": "0xb833c2ee1d6cee3933a8ab525cc4a1c8f812a6e2",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": true,
+      "createdAt": "2026-10-28T16:36:24.000Z",
+      "completedAt": "2026-11-04T16:43:57.000Z",
+      "checks": {
+        "decided": 15,
+        "agreed": 15
+      },
+      "terms": {
+        "met": 3,
+        "of": 4,
+        "source": "signed"
+      },
+      "act": null,
+      "hireTx": "0x05f7fe4ded73af2d428e4f27650025a470b95036d893894010ebb142977295db",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "57123",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Lattice",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341554",
+        "tokenId": "341554",
+        "category": "grid"
+      },
+      "operatorClass": "reference",
+      "funderClass": "outside",
+      "alsoOperator": true,
+      "client": "0xb833c2ee1d6cee3933a8ab525cc4a1c8f812a6e2",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": true,
+      "createdAt": "2026-10-28T16:17:09.000Z",
+      "completedAt": "2026-11-04T16:25:47.000Z",
+      "checks": {
+        "decided": 2,
+        "agreed": 2
+      },
+      "terms": {
+        "met": 2,
+        "of": 4,
+        "source": "standard"
+      },
+      "act": null,
+      "hireTx": "0x1331d236106e83d29c2da6230d9b2a2e5cb4a272e6ebe14f001c4f97fc8a7855",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "57122",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": null,
+        "agentKey": null,
+        "tokenId": null,
+        "category": null
+      },
+      "operatorClass": "third_party",
+      "funderClass": "outside",
+      "alsoOperator": true,
+      "client": "0xb833c2ee1d6cee3933a8ab525cc4a1c8f812a6e2",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-10-28T16:09:52.000Z",
+      "completedAt": "2026-11-04T16:16:00.000Z",
+      "checks": {
+        "decided": 0,
+        "agreed": 0
+      },
+      "terms": null,
+      "act": null,
+      "hireTx": "0x3036a7f82c34225ceabf19d585991b88238de9aac9152518f4565ad93b42ac42",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "57121",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Bound",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341553",
+        "tokenId": "341553",
+        "category": "rebalancing"
+      },
+      "operatorClass": "reference",
+      "funderClass": "outside",
+      "alsoOperator": true,
+      "client": "0xb833c2ee1d6cee3933a8ab525cc4a1c8f812a6e2",
+      "counted": true,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": true,
+      "createdAt": "2026-10-28T16:07:20.000Z",
+      "completedAt": "2026-11-04T16:08:40.000Z",
+      "checks": {
+        "decided": 3,
+        "agreed": 3
+      },
+      "terms": {
+        "met": 3,
+        "of": 4,
+        "source": "signed"
+      },
+      "act": null,
+      "hireTx": "0x634bf243a5dea822390ee5eef4e160d2f11e4bebcb0937e3cedbc47354a2d01b",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "57120",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Keel",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341556",
+        "tokenId": "341556",
+        "category": "health_factor"
+      },
+      "operatorClass": "reference",
+      "funderClass": "team",
+      "alsoOperator": false,
+      "client": "0x2e010aadfdfebc2adfcafa5f83e9687ffa47c573",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-10-28T13:19:31.000Z",
+      "completedAt": "2026-11-04T13:22:38.000Z",
+      "checks": {
+        "decided": 0,
+        "agreed": 0
+      },
+      "terms": {
+        "met": 0,
+        "of": 3,
+        "source": "signed"
+      },
+      "act": null,
+      "hireTx": "0xaa248c65e39c07d471a4f22c44a49c565c02122972c999c68b0627c24ad3e2a3",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 97,
+      "jobId": "1678",
+      "escrow": "0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de",
+      "agent": {
+        "name": "Keel",
+        "agentKey": "97:0x8004a818bfb912233c491871b3d84c89a494bd9e:2238",
+        "tokenId": "2238",
+        "category": "health_factor"
+      },
+      "operatorClass": "reference",
+      "funderClass": "outside",
+      "alsoOperator": true,
+      "client": "0xb833c2ee1d6cee3933a8ab525cc4a1c8f812a6e2",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": true,
+      "createdAt": "2026-10-28T13:04:56.000Z",
+      "completedAt": "2026-10-28T14:13:34.000Z",
+      "checks": {
+        "decided": 3,
+        "agreed": 3
+      },
+      "terms": {
+        "met": 3,
+        "of": 3,
+        "source": "signed"
+      },
+      "act": null,
+      "hireTx": "0xa9985f541b65dcfadffd866d0ca5d9a753f0aee96aa8e1fc692588bd47edfde0",
+      "verifyUrl": "https://testnet.bscscan.com/address/0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de#readContract"
+    },
+    {
+      "chainId": 97,
+      "jobId": "1677",
+      "escrow": "0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de",
+      "agent": {
+        "name": "Keel",
+        "agentKey": "97:0x8004a818bfb912233c491871b3d84c89a494bd9e:2238",
+        "tokenId": "2238",
+        "category": "health_factor"
+      },
+      "operatorClass": "reference",
+      "funderClass": "outside",
+      "alsoOperator": true,
+      "client": "0xb833c2ee1d6cee3933a8ab525cc4a1c8f812a6e2",
+      "counted": true,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-10-28T12:39:01.000Z",
+      "completedAt": "2026-10-28T13:13:14.000Z",
+      "checks": {
+        "decided": 0,
+        "agreed": 0
+      },
+      "terms": {
+        "met": 0,
+        "of": 3,
+        "source": "signed"
+      },
+      "act": null,
+      "hireTx": "0x3ceac85f601e33a9f2448258808e0e707c097be80cf174129a942ee18f4cff54",
+      "verifyUrl": "https://testnet.bscscan.com/address/0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "57115",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Bound",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341553",
+        "tokenId": "341553",
+        "category": "rebalancing"
+      },
+      "operatorClass": "reference",
+      "funderClass": "outside",
+      "alsoOperator": true,
+      "client": "0x73809f69916fcf7ddc5bb1315fbdf96a569a5963",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-10-28T05:30:46.000Z",
+      "completedAt": "2026-11-04T21:15:41.000Z",
+      "checks": {
+        "decided": 3,
+        "agreed": 3
+      },
+      "terms": {
+        "met": 3,
+        "of": 4,
+        "source": "standard"
+      },
+      "act": null,
+      "hireTx": "0xd7e4fe4f7bb02aef039f56775f522cb9aba313d2e3a5b6bc9ceb92054b54ccc0",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "57112",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Bound",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341553",
+        "tokenId": "341553",
+        "category": "rebalancing"
+      },
+      "operatorClass": "reference",
+      "funderClass": "outside",
+      "alsoOperator": true,
+      "client": "0x73809f69916fcf7ddc5bb1315fbdf96a569a5963",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-10-27T05:30:57.000Z",
+      "completedAt": "2026-11-03T21:15:40.000Z",
+      "checks": {
+        "decided": 3,
+        "agreed": 3
+      },
+      "terms": {
+        "met": 3,
+        "of": 4,
+        "source": "standard"
+      },
+      "act": null,
+      "hireTx": "0x48a1064759ef5087c83602039f0f7e36d00fd186aa82001f3461a596bfd02a3f",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "57095",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Bound",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341553",
+        "tokenId": "341553",
+        "category": "rebalancing"
+      },
+      "operatorClass": "reference",
+      "funderClass": "team",
+      "alsoOperator": false,
+      "client": "0x5ac2448fc79ef8d33710b1bced5aeff90138b452",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-10-26T09:21:15.000Z",
+      "completedAt": "2026-11-02T09:25:07.000Z",
+      "checks": {
+        "decided": 3,
+        "agreed": 3
+      },
+      "terms": {
+        "met": 3,
+        "of": 4,
+        "source": "signed"
+      },
+      "act": null,
+      "hireTx": "0x71495abeea6c6660a0cc54a6231495a7dbaad374e4b7b136eee059b22de8410a",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "57094",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Sluicegate",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341555",
+        "tokenId": "341555",
+        "category": "yield"
+      },
+      "operatorClass": "reference",
+      "funderClass": "team",
+      "alsoOperator": false,
+      "client": "0x5ac2448fc79ef8d33710b1bced5aeff90138b452",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-10-26T09:20:26.000Z",
+      "completedAt": "2026-11-02T09:25:05.000Z",
+      "checks": {
+        "decided": 3,
+        "agreed": 3
+      },
+      "terms": {
+        "met": 3,
+        "of": 3,
+        "source": "signed"
+      },
+      "act": null,
+      "hireTx": "0x2df97b3cc9c0019b27b4f277f58b0203f060836460fd2ecff607b394950db27a",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "57093",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Keel",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341556",
+        "tokenId": "341556",
+        "category": "health_factor"
+      },
+      "operatorClass": "reference",
+      "funderClass": "team",
+      "alsoOperator": false,
+      "client": "0x5ac2448fc79ef8d33710b1bced5aeff90138b452",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-10-26T09:19:42.000Z",
+      "completedAt": "2026-11-02T09:25:03.000Z",
+      "checks": {
+        "decided": 3,
+        "agreed": 3
+      },
+      "terms": {
+        "met": 3,
+        "of": 3,
+        "source": "signed"
+      },
+      "act": null,
+      "hireTx": "0x25a88642a774d7790254bbe65dd6450a52600226b3df401e3dc69aac756cd78a",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 97,
+      "jobId": "1670",
+      "escrow": "0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de",
+      "agent": {
+        "name": "Keel",
+        "agentKey": "97:0x8004a818bfb912233c491871b3d84c89a494bd9e:2238",
+        "tokenId": "2238",
+        "category": "health_factor"
+      },
+      "operatorClass": "reference",
+      "funderClass": "team",
+      "alsoOperator": false,
+      "client": "0xe1d0a3e55970199505fae30c2ee073c95e987683",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": true,
+      "createdAt": "2026-10-26T07:06:27.000Z",
+      "completedAt": "2026-10-26T08:13:12.000Z",
+      "checks": {
+        "decided": 3,
+        "agreed": 3
+      },
+      "terms": {
+        "met": 3,
+        "of": 3,
+        "source": "signed"
+      },
+      "act": null,
+      "hireTx": "0xb92f991bda3cf0df8094c773e9b37930f874328a1dcd549c5105b3294d91efe1",
+      "verifyUrl": "https://testnet.bscscan.com/address/0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de#readContract"
+    },
+    {
+      "chainId": 97,
+      "jobId": "1669",
+      "escrow": "0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de",
+      "agent": {
+        "name": "Redcell",
+        "agentKey": "97:0x8004a818bfb912233c491871b3d84c89a494bd9e:2239",
+        "tokenId": "2239",
+        "category": "security"
+      },
+      "operatorClass": "reference",
+      "funderClass": "team",
+      "alsoOperator": false,
+      "client": "0x156286f893de9c4ca189ff8c57696e182a9d90df",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": true,
+      "createdAt": "2026-10-26T07:02:29.000Z",
+      "completedAt": "2026-10-26T08:13:17.000Z",
+      "checks": {
+        "decided": 0,
+        "agreed": 0
+      },
+      "terms": null,
+      "act": null,
+      "hireTx": "0x6531c1847a2914f6275295d1f8241e56653ca887563b304dd3520aaf046ff1a4",
+      "verifyUrl": "https://testnet.bscscan.com/address/0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de#readContract"
+    },
+    {
+      "chainId": 97,
+      "jobId": "1668",
+      "escrow": "0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de",
+      "agent": {
+        "name": "Redcell",
+        "agentKey": "97:0x8004a818bfb912233c491871b3d84c89a494bd9e:2239",
+        "tokenId": "2239",
+        "category": "security"
+      },
+      "operatorClass": "reference",
+      "funderClass": "team",
+      "alsoOperator": false,
+      "client": "0x93dba9edfe0769e8748b97d323b466ff60502ad4",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-10-26T06:54:06.000Z",
+      "completedAt": "2026-10-26T07:13:07.000Z",
+      "checks": {
+        "decided": 0,
+        "agreed": 0
+      },
+      "terms": null,
+      "act": null,
+      "hireTx": "0xfc3b4361baecdf7d1b9189e9e86ebc4350df409a10217d9789a11cc0f72004cd",
+      "verifyUrl": "https://testnet.bscscan.com/address/0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "57090",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Bound",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341553",
+        "tokenId": "341553",
+        "category": "rebalancing"
+      },
+      "operatorClass": "reference",
+      "funderClass": "outside",
+      "alsoOperator": true,
+      "client": "0x73809f69916fcf7ddc5bb1315fbdf96a569a5963",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-10-26T05:30:55.000Z",
+      "completedAt": "2026-11-02T21:15:39.000Z",
+      "checks": {
+        "decided": 3,
+        "agreed": 3
+      },
+      "terms": {
+        "met": 3,
+        "of": 4,
+        "source": "standard"
+      },
+      "act": null,
+      "hireTx": "0x1436365e2056f70c92b51de469e83f0f011ced440cd53e3b4cbfbc0c79f68664",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "57087",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Brain on BNB — Venus Health Factor Monitor",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:302257",
+        "tokenId": "302257",
+        "category": "health_factor"
+      },
+      "operatorClass": "third_party",
+      "funderClass": "team",
+      "alsoOperator": false,
+      "client": "0x0d8c9ad8eebb6879fefa218f0799219bcaabe999",
+      "counted": false,
+      "state": "OPEN",
+      "funded": false,
+      "delivered": false,
+      "settled": false,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-10-26T00:27:03.000Z",
+      "completedAt": null,
+      "checks": null,
+      "terms": null,
+      "act": null,
+      "hireTx": "0x4204019fc2969caab99d16f792dccb5eb5ddffcbf32127dd5a77d3a2579b4d3c",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "57086",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Brain on BNB — Venus Yield Ranking",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:304493",
+        "tokenId": "304493",
+        "category": "yield"
+      },
+      "operatorClass": "third_party",
+      "funderClass": "outside",
+      "alsoOperator": true,
+      "client": "0xb833c2ee1d6cee3933a8ab525cc4a1c8f812a6e2",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-10-26T00:19:41.000Z",
+      "completedAt": "2026-11-02T04:23:51.000Z",
+      "checks": {
+        "decided": 0,
+        "agreed": 0
+      },
+      "terms": {
+        "met": 0,
+        "of": 3,
+        "source": "standard"
+      },
+      "act": null,
+      "hireTx": "0x8171a7356d1f1f8761f40b4523bfbfdda80d4dded31315dab0418a5e92fa03d4",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "57085",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Mandate Guard-1",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:344123",
+        "tokenId": "344123",
+        "category": "health_factor"
+      },
+      "operatorClass": "third_party",
+      "funderClass": "outside",
+      "alsoOperator": true,
+      "client": "0xb833c2ee1d6cee3933a8ab525cc4a1c8f812a6e2",
+      "counted": true,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": true,
+      "createdAt": "2026-10-26T00:13:13.000Z",
+      "completedAt": "2026-11-02T00:15:54.000Z",
+      "checks": {
+        "decided": 0,
+        "agreed": 0
+      },
+      "terms": {
+        "met": 0,
+        "of": 3,
+        "source": "standard"
+      },
+      "act": null,
+      "hireTx": "0xff5be2f016aa8f4695f5185e4e17c23fb4f1fe6c9e402dfd71428a0b51fd809e",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "57084",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Sluicegate",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341555",
+        "tokenId": "341555",
+        "category": "yield"
+      },
+      "operatorClass": "reference",
+      "funderClass": "outside",
+      "alsoOperator": true,
+      "client": "0xb833c2ee1d6cee3933a8ab525cc4a1c8f812a6e2",
+      "counted": true,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": true,
+      "createdAt": "2026-10-26T00:08:26.000Z",
+      "completedAt": "2026-11-02T00:12:58.000Z",
+      "checks": {
+        "decided": 3,
+        "agreed": 3
+      },
+      "terms": {
+        "met": 3,
+        "of": 3,
+        "source": "standard"
+      },
+      "act": null,
+      "hireTx": "0x037baab2623433e22269ef67dbd84149de8c4e360005c0114aab64d1af1dac4b",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "57082",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Mandate Guard-1",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:344123",
+        "tokenId": "344123",
+        "category": null
+      },
+      "operatorClass": "third_party",
+      "funderClass": "team",
+      "alsoOperator": false,
+      "client": "0x0d8c9ad8eebb6879fefa218f0799219bcaabe999",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-10-25T16:42:07.000Z",
+      "completedAt": "2026-11-01T16:45:59.000Z",
+      "checks": {
+        "decided": 0,
+        "agreed": 0
+      },
+      "terms": null,
+      "act": null,
+      "hireTx": "0xb5f2b00cc65feaf0043c3de3121dfd04ab0fae03c440987f8290eb40697705a0",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "57079",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Bound",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341553",
+        "tokenId": "341553",
+        "category": "rebalancing"
+      },
+      "operatorClass": "reference",
+      "funderClass": "outside",
+      "alsoOperator": true,
+      "client": "0x73809f69916fcf7ddc5bb1315fbdf96a569a5963",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-10-25T05:30:52.000Z",
+      "completedAt": "2026-11-01T21:15:40.000Z",
+      "checks": {
+        "decided": 3,
+        "agreed": 3
+      },
+      "terms": {
+        "met": 3,
+        "of": 4,
+        "source": "standard"
+      },
+      "act": null,
+      "hireTx": "0x6f9ed2e6a4402092478b693abed28c5a4cba022ae17f036950ae3c9d359e4345",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "57076",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Mandate Grid-1",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:344121",
+        "tokenId": "344121",
+        "category": "grid"
+      },
+      "operatorClass": "third_party",
+      "funderClass": "team",
+      "alsoOperator": false,
+      "client": "0x0d8c9ad8eebb6879fefa218f0799219bcaabe999",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-10-25T01:44:09.000Z",
+      "completedAt": "2026-11-01T01:47:25.000Z",
+      "checks": {
+        "decided": 1,
+        "agreed": 0
+      },
+      "terms": {
+        "met": 0,
+        "of": 4,
+        "source": "standard"
+      },
+      "act": null,
+      "hireTx": "0x90779eb1a5c36448ad403a51268ab6c7eb96629754f4b8c53f5308c88f180d09",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "57066",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Keel",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341556",
+        "tokenId": "341556",
+        "category": "health_factor"
+      },
+      "operatorClass": "reference",
+      "funderClass": "team",
+      "alsoOperator": false,
+      "client": "0x5ac2448fc79ef8d33710b1bced5aeff90138b452",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-10-24T09:40:43.000Z",
+      "completedAt": "2026-10-31T21:15:43.000Z",
+      "checks": {
+        "decided": 3,
+        "agreed": 3
+      },
+      "terms": {
+        "met": 3,
+        "of": 3,
+        "source": "standard"
+      },
+      "act": {
+        "action": "repay",
+        "tx": "0x58502bdb0bbc728cb39a2890e376a504f3fb608681433bade58a979ddf0d7996"
+      },
+      "hireTx": "0xd8ee00cb145098f0da4bec7aad87961d435b91ed9b490c2e17a8390d9fcdbcc9",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "57065",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Bound",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341553",
+        "tokenId": "341553",
+        "category": "rebalancing"
+      },
+      "operatorClass": "reference",
+      "funderClass": "outside",
+      "alsoOperator": true,
+      "client": "0x73809f69916fcf7ddc5bb1315fbdf96a569a5963",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-10-24T05:31:06.000Z",
+      "completedAt": "2026-10-31T21:15:39.000Z",
+      "checks": {
+        "decided": 3,
+        "agreed": 3
+      },
+      "terms": {
+        "met": 3,
+        "of": 4,
+        "source": "standard"
+      },
+      "act": null,
+      "hireTx": "0x61144999d79be76d86c071b18dd78cddeb0dd73e8dad59ea3adf136c0b9de805",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 97,
+      "jobId": "1645",
+      "escrow": "0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de",
+      "agent": {
+        "name": "Mandate Grid-1",
+        "agentKey": "97:0x8004a818bfb912233c491871b3d84c89a494bd9e:2589",
+        "tokenId": "2589",
+        "category": null
+      },
+      "operatorClass": "third_party",
+      "funderClass": "outside",
+      "alsoOperator": false,
+      "client": "0x3e8f9346cb2c142d7184e8d08a20934b1d477067",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": true,
+      "createdAt": "2026-10-23T18:39:23.000Z",
+      "completedAt": "2026-10-23T19:01:01.000Z",
+      "checks": {
+        "decided": 1,
+        "agreed": 0
+      },
+      "terms": null,
+      "act": null,
+      "hireTx": "0x137a780ddee8eeeaac37c9171da7f6352a5c3c9b4f0a64f76eb3380f97561568",
+      "verifyUrl": "https://testnet.bscscan.com/address/0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de#readContract"
+    },
+    {
+      "chainId": 97,
+      "jobId": "1644",
+      "escrow": "0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de",
+      "agent": {
+        "name": "Mandate Range-1",
+        "agentKey": "97:0x8004a818bfb912233c491871b3d84c89a494bd9e:2588",
+        "tokenId": "2588",
+        "category": null
+      },
+      "operatorClass": "third_party",
+      "funderClass": "outside",
+      "alsoOperator": false,
+      "client": "0x3e8f9346cb2c142d7184e8d08a20934b1d477067",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": true,
+      "createdAt": "2026-10-23T18:37:27.000Z",
+      "completedAt": "2026-10-23T19:00:57.000Z",
+      "checks": {
+        "decided": 15,
+        "agreed": 15
+      },
+      "terms": null,
+      "act": null,
+      "hireTx": "0xfd4c47664431ca2600e44172038578949f45c4d3bf7c93d8a3b50ea53119066a",
+      "verifyUrl": "https://testnet.bscscan.com/address/0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de#readContract"
+    },
+    {
+      "chainId": 97,
+      "jobId": "1640",
+      "escrow": "0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de",
+      "agent": {
+        "name": "hosted-erc8183-seller-fixture",
+        "agentKey": "97:0x8004a818bfb912233c491871b3d84c89a494bd9e:1866",
+        "tokenId": "1866",
+        "category": null
+      },
+      "operatorClass": "third_party",
+      "funderClass": "outside",
+      "alsoOperator": false,
+      "client": "0x3e8f9346cb2c142d7184e8d08a20934b1d477067",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": true,
+      "createdAt": "2026-10-23T18:14:28.000Z",
+      "completedAt": "2026-10-23T19:10:16.000Z",
+      "checks": {
+        "decided": 0,
+        "agreed": 0
+      },
+      "terms": null,
+      "act": null,
+      "hireTx": "0xfea44b2b48530ff4bb7c372bca0bea2a2a6b9dc6258918385122e9a2a1112024",
+      "verifyUrl": "https://testnet.bscscan.com/address/0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "57056",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Bound",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341553",
+        "tokenId": "341553",
+        "category": "rebalancing"
+      },
+      "operatorClass": "reference",
+      "funderClass": "outside",
+      "alsoOperator": true,
+      "client": "0x73809f69916fcf7ddc5bb1315fbdf96a569a5963",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": true,
+      "createdAt": "2026-10-23T05:31:18.000Z",
+      "completedAt": "2026-10-30T21:15:38.000Z",
+      "checks": {
+        "decided": 3,
+        "agreed": 3
+      },
+      "terms": {
+        "met": 3,
+        "of": 4,
+        "source": "standard"
+      },
+      "act": null,
+      "hireTx": "0x602c735bc2b57fda040d76978a79ba893771fbcb169ea6dd5023499e8bae2601",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "57045",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Plinth keeper",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:363619",
+        "tokenId": "363619",
+        "category": null
+      },
+      "operatorClass": "third_party",
+      "funderClass": "outside",
+      "alsoOperator": true,
+      "client": "0x73809f69916fcf7ddc5bb1315fbdf96a569a5963",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-10-22T09:04:32.000Z",
+      "completedAt": "2026-10-29T21:15:43.000Z",
+      "checks": {
+        "decided": 0,
+        "agreed": 0
+      },
+      "terms": null,
+      "act": null,
+      "hireTx": "0x7663c52c7fea53b7bcb875fc31ad24b4f4695f81d77f2050fe61821aeaf71db9",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "57040",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Plinth keeper",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:363619",
+        "tokenId": "363619",
+        "category": null
+      },
+      "operatorClass": "third_party",
+      "funderClass": "team",
+      "alsoOperator": false,
+      "client": "0x0d8c9ad8eebb6879fefa218f0799219bcaabe999",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-10-21T20:05:02.000Z",
+      "completedAt": "2026-10-28T20:10:48.000Z",
+      "checks": {
+        "decided": 0,
+        "agreed": 0
+      },
+      "terms": null,
+      "act": null,
+      "hireTx": "0x93feb6a4e18e2ff0afa2e0a48f956ba526a5b463884cb363006dbaf5d48d975e",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "57037",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Brain on BNB — BSC Grid Planner",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:302258",
+        "tokenId": "302258",
+        "category": "grid"
+      },
+      "operatorClass": "third_party",
+      "funderClass": "team",
+      "alsoOperator": false,
+      "client": "0x0d8c9ad8eebb6879fefa218f0799219bcaabe999",
+      "counted": false,
+      "state": "REFUNDED",
+      "funded": true,
+      "delivered": false,
+      "settled": false,
+      "refunded": true,
+      "rated": false,
+      "createdAt": "2026-10-20T20:21:58.000Z",
+      "completedAt": null,
+      "checks": null,
+      "terms": null,
+      "act": null,
+      "hireTx": "0x57188a9fbc35412cebf12464cf1ce4c19a1e4f5f4f0a314daa69f28347d19987",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "57036",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "BNB Grid Trader (test)",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:269233",
+        "tokenId": "269233",
+        "category": "grid"
+      },
+      "operatorClass": "third_party",
+      "funderClass": "team",
+      "alsoOperator": false,
+      "client": "0x0d8c9ad8eebb6879fefa218f0799219bcaabe999",
+      "counted": false,
+      "state": "REFUNDED",
+      "funded": true,
+      "delivered": false,
+      "settled": false,
+      "refunded": true,
+      "rated": false,
+      "createdAt": "2026-10-20T18:54:09.000Z",
+      "completedAt": null,
+      "checks": null,
+      "terms": null,
+      "act": null,
+      "hireTx": "0x9277570ccf9637e3c5e02dea184754edaf96f3bdea56ee5f6d987dc22f0bea92",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "57035",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Lattice",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341554",
+        "tokenId": "341554",
+        "category": "grid"
+      },
+      "operatorClass": "reference",
+      "funderClass": "team",
+      "alsoOperator": false,
+      "client": "0x0d8c9ad8eebb6879fefa218f0799219bcaabe999",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-10-20T18:51:43.000Z",
+      "completedAt": "2026-10-27T18:52:46.000Z",
+      "checks": {
+        "decided": 2,
+        "agreed": 2
+      },
+      "terms": {
+        "met": 2,
+        "of": 4,
+        "source": "standard"
+      },
+      "act": null,
+      "hireTx": "0x5d03f608550fa236dafd12651e3098da5a6d702ebfe7543d5726216457232490",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "57034",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Redcell",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341557",
+        "tokenId": "341557",
+        "category": "security"
+      },
+      "operatorClass": "reference",
+      "funderClass": "team",
+      "alsoOperator": false,
+      "client": "0x0d8c9ad8eebb6879fefa218f0799219bcaabe999",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-10-20T18:50:07.000Z",
+      "completedAt": "2026-10-27T18:52:44.000Z",
+      "checks": {
+        "decided": 0,
+        "agreed": 0
+      },
+      "terms": null,
+      "act": null,
+      "hireTx": "0x7814ffb3f01401ff279c5c72cb69e02b8795db69759d921fc29945f311829142",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "57033",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Pre-trade Token Check",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:362358",
+        "tokenId": "362358",
+        "category": "security"
+      },
+      "operatorClass": "third_party",
+      "funderClass": "team",
+      "alsoOperator": false,
+      "client": "0x0d8c9ad8eebb6879fefa218f0799219bcaabe999",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-10-20T18:47:32.000Z",
+      "completedAt": "2026-10-27T18:52:41.000Z",
+      "checks": {
+        "decided": 0,
+        "agreed": 0
+      },
+      "terms": null,
+      "act": null,
+      "hireTx": "0xc0d8039615166940e3b22f5edad0f763e0d4717361e8ad3149153c7315d659a6",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "57032",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Pre-trade Token Check",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:362358",
+        "tokenId": "362358",
+        "category": "security"
+      },
+      "operatorClass": "third_party",
+      "funderClass": "team",
+      "alsoOperator": false,
+      "client": "0x0d8c9ad8eebb6879fefa218f0799219bcaabe999",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-10-20T18:42:46.000Z",
+      "completedAt": "2026-10-27T18:45:00.000Z",
+      "checks": {
+        "decided": 0,
+        "agreed": 0
+      },
+      "terms": null,
+      "act": null,
+      "hireTx": "0xe21917c5f4287c0acee32c0e41a552d3c427a6fa3e5916eb874b089f05544d34",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "57030",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Brain on BNB — Venus Health Factor Monitor",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:302257",
+        "tokenId": "302257",
+        "category": "health_factor"
+      },
+      "operatorClass": "third_party",
+      "funderClass": "team",
+      "alsoOperator": false,
+      "client": "0x0d8c9ad8eebb6879fefa218f0799219bcaabe999",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": true,
+      "createdAt": "2026-10-20T09:08:32.000Z",
+      "completedAt": "2026-10-27T09:11:02.000Z",
+      "checks": {
+        "decided": 0,
+        "agreed": 0
+      },
+      "terms": {
+        "met": 0,
+        "of": 3,
+        "source": "standard"
+      },
+      "act": null,
+      "hireTx": "0xaae359a313cc5f393db8a30bff7b0f1308077a9d643d3216fcdb210513c4aa51",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "56984",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Bound",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341553",
+        "tokenId": "341553",
+        "category": "rebalancing"
+      },
+      "operatorClass": "reference",
+      "funderClass": "outside",
+      "alsoOperator": true,
+      "client": "0xbfaa69233741924ed5b9d5daa9b4bf7b84567f0a",
+      "counted": true,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": true,
+      "createdAt": "2026-10-13T11:55:37.000Z",
+      "completedAt": "2026-10-20T11:57:51.000Z",
+      "checks": {
+        "decided": 3,
+        "agreed": 3
+      },
+      "terms": {
+        "met": 3,
+        "of": 4,
+        "source": "standard"
+      },
+      "act": null,
+      "hireTx": "0x3f3753b83dc209f3fd834df872d6548a33d038442d45f23f7e227d6a535a4094",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "56983",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Lattice",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341554",
+        "tokenId": "341554",
+        "category": "grid"
+      },
+      "operatorClass": "reference",
+      "funderClass": "outside",
+      "alsoOperator": true,
+      "client": "0xbfaa69233741924ed5b9d5daa9b4bf7b84567f0a",
+      "counted": true,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": true,
+      "createdAt": "2026-10-13T11:54:59.000Z",
+      "completedAt": "2026-10-20T11:57:48.000Z",
+      "checks": {
+        "decided": 2,
+        "agreed": 2
+      },
+      "terms": {
+        "met": 2,
+        "of": 4,
+        "source": "standard"
+      },
+      "act": null,
+      "hireTx": "0x5eef0924abf49fce5379f3515264e126d882be004b36c9e989566cbc3bd26716",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "56982",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Sluicegate",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341555",
+        "tokenId": "341555",
+        "category": "yield"
+      },
+      "operatorClass": "reference",
+      "funderClass": "outside",
+      "alsoOperator": true,
+      "client": "0xbfaa69233741924ed5b9d5daa9b4bf7b84567f0a",
+      "counted": true,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": true,
+      "createdAt": "2026-10-13T11:54:15.000Z",
+      "completedAt": "2026-10-20T11:57:47.000Z",
+      "checks": {
+        "decided": 3,
+        "agreed": 3
+      },
+      "terms": {
+        "met": 3,
+        "of": 3,
+        "source": "standard"
+      },
+      "act": {
+        "action": "supply",
+        "tx": "0x7c2aac90166810655a0a6780be3680eb2b4fa5fe5e29cc19d5421fd6a6b2b37b"
+      },
+      "hireTx": "0x38dbc4aa3fff614ca25118c7fa3dbbf44594114f14f04ab4aef02c5cd425459a",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "56924",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Vitals",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:367904",
+        "tokenId": "367904",
+        "category": "health_factor"
+      },
+      "operatorClass": "third_party",
+      "funderClass": "team",
+      "alsoOperator": false,
+      "client": "0x0d8c9ad8eebb6879fefa218f0799219bcaabe999",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": true,
+      "createdAt": "2026-10-08T19:25:12.000Z",
+      "completedAt": "2026-10-15T19:27:11.000Z",
+      "checks": {
+        "decided": 3,
+        "agreed": 3
+      },
+      "terms": {
+        "met": 3,
+        "of": 3,
+        "source": "standard"
+      },
+      "act": null,
+      "hireTx": "0x36c710204a05f6a45cec8b56594540eee73beb589c2a6d939874ae3d9abef8ad",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "56919",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Tidemark",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:358786",
+        "tokenId": "358786",
+        "category": "yield"
+      },
+      "operatorClass": "reference",
+      "funderClass": "team",
+      "alsoOperator": false,
+      "client": "0x0d8c9ad8eebb6879fefa218f0799219bcaabe999",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": true,
+      "createdAt": "2026-10-08T06:53:15.000Z",
+      "completedAt": "2026-10-15T06:54:18.000Z",
+      "checks": {
+        "decided": 0,
+        "agreed": 0
+      },
+      "terms": {
+        "met": 0,
+        "of": 3,
+        "source": "standard"
+      },
+      "act": null,
+      "hireTx": "0x70cfab9ba2578f39940a953c49141e7bb39fffadeba3bb77a290f8186a8c86fe",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "56918",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Tidemark",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:358786",
+        "tokenId": "358786",
+        "category": "yield"
+      },
+      "operatorClass": "reference",
+      "funderClass": "team",
+      "alsoOperator": false,
+      "client": "0x0d8c9ad8eebb6879fefa218f0799219bcaabe999",
+      "counted": false,
+      "state": "OPEN",
+      "funded": false,
+      "delivered": false,
+      "settled": false,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-10-08T06:46:12.000Z",
+      "completedAt": null,
+      "checks": null,
+      "terms": null,
+      "act": null,
+      "hireTx": "0xa05f4da2c901be67261ef1920d2abc63d7b58a5179117aea4f437d5a098157af",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "56916",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Plinth keeper",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:363619",
+        "tokenId": "363619",
+        "category": "rebalancing"
+      },
+      "operatorClass": "third_party",
+      "funderClass": "outside",
+      "alsoOperator": true,
+      "client": "0x15a97307caa68c24e4b5a0b83d331a6aa1ea195f",
+      "counted": true,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-10-08T04:01:28.000Z",
+      "completedAt": "2026-10-15T04:03:54.000Z",
+      "checks": {
+        "decided": 0,
+        "agreed": 0
+      },
+      "terms": {
+        "met": 0,
+        "of": 4,
+        "source": "standard"
+      },
+      "act": null,
+      "hireTx": "0xdf180aa639c5744ff649ad1fba36ebfd22e8a4f15df5d1041ee187bb37a380aa",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "56915",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Mandate Yield-1",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:344122",
+        "tokenId": "344122",
+        "category": null
+      },
+      "operatorClass": "third_party",
+      "funderClass": "outside",
+      "alsoOperator": true,
+      "client": "0x15a97307caa68c24e4b5a0b83d331a6aa1ea195f",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-10-08T04:00:58.000Z",
+      "completedAt": "2026-10-15T04:10:15.000Z",
+      "checks": {
+        "decided": 0,
+        "agreed": 0
+      },
+      "terms": null,
+      "act": null,
+      "hireTx": "0x525bd9a3bbe6edc9c0d570f688d8eed5cd7ed131ef93cc4fb07cbc67082c1e9b",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "56914",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Mandate Guard-1",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:344123",
+        "tokenId": "344123",
+        "category": null
+      },
+      "operatorClass": "third_party",
+      "funderClass": "outside",
+      "alsoOperator": true,
+      "client": "0x15a97307caa68c24e4b5a0b83d331a6aa1ea195f",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-10-08T04:00:39.000Z",
+      "completedAt": "2026-10-15T04:10:12.000Z",
+      "checks": {
+        "decided": 1,
+        "agreed": 0
+      },
+      "terms": null,
+      "act": null,
+      "hireTx": "0xc5ba752e75a96bae4792c70bd14c3ec803e45fdfb7164dcb963994c29d0d5f73",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "56905",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": null,
+        "agentKey": null,
+        "tokenId": null,
+        "category": null
+      },
+      "operatorClass": "third_party",
+      "funderClass": "outside",
+      "alsoOperator": true,
+      "client": "0xbfaa69233741924ed5b9d5daa9b4bf7b84567f0a",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-10-04T16:53:31.000Z",
+      "completedAt": "2026-10-12T04:32:43.000Z",
+      "checks": {
+        "decided": 0,
+        "agreed": 0
+      },
+      "terms": null,
+      "act": null,
+      "hireTx": "0x509ef220f02c00bb3fd8b121787bcfc7115b41658332a7d48878a03b7ab5db86",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "56903",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Keel",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341556",
+        "tokenId": "341556",
+        "category": "health_factor"
+      },
+      "operatorClass": "reference",
+      "funderClass": "outside",
+      "alsoOperator": true,
+      "client": "0xbfaa69233741924ed5b9d5daa9b4bf7b84567f0a",
+      "counted": true,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": true,
+      "createdAt": "2026-10-04T14:58:33.000Z",
+      "completedAt": "2026-10-11T14:59:51.000Z",
+      "checks": {
+        "decided": 3,
+        "agreed": 3
+      },
+      "terms": {
+        "met": 3,
+        "of": 3,
+        "source": "standard"
+      },
+      "act": null,
+      "hireTx": "0xb704b51b3d5c847e5880ca34079352118bb4947b8414beb538ad90230f76d14f",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "56902",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Mandate Grid-1",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:344121",
+        "tokenId": "344121",
+        "category": null
+      },
+      "operatorClass": "third_party",
+      "funderClass": "outside",
+      "alsoOperator": true,
+      "client": "0xbfaa69233741924ed5b9d5daa9b4bf7b84567f0a",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-10-04T14:54:48.000Z",
+      "completedAt": "2026-10-11T14:55:53.000Z",
+      "checks": {
+        "decided": 1,
+        "agreed": 0
+      },
+      "terms": null,
+      "act": null,
+      "hireTx": "0x3bffcb74d19c220d0c1ee8bf04cc92686392240c6040d32a395c3acb3d0c5dd9",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "56901",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Mandate Range-1",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:344119",
+        "tokenId": "344119",
+        "category": null
+      },
+      "operatorClass": "third_party",
+      "funderClass": "outside",
+      "alsoOperator": true,
+      "client": "0xbfaa69233741924ed5b9d5daa9b4bf7b84567f0a",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-10-04T14:53:32.000Z",
+      "completedAt": "2026-10-11T14:55:52.000Z",
+      "checks": {
+        "decided": 3,
+        "agreed": 3
+      },
+      "terms": null,
+      "act": null,
+      "hireTx": "0xc213291f4c98d33accf0408d03f95ac4b480c7beaf110837a59a329fe7267b83",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "56881",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Bound",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341553",
+        "tokenId": "341553",
+        "category": "rebalancing"
+      },
+      "operatorClass": "reference",
+      "funderClass": "team",
+      "alsoOperator": false,
+      "client": "0x0d8c9ad8eebb6879fefa218f0799219bcaabe999",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": true,
+      "createdAt": "2026-10-02T20:53:55.000Z",
+      "completedAt": "2026-10-09T20:58:34.000Z",
+      "checks": {
+        "decided": 3,
+        "agreed": 3
+      },
+      "terms": {
+        "met": 3,
+        "of": 4,
+        "source": "standard"
+      },
+      "act": null,
+      "hireTx": "0x3d73ca5f7c6c11f9e6235360a2cefe5f5d764e13446f6a7c6ce28f94eb79b0e4",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "56879",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Bound",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341553",
+        "tokenId": "341553",
+        "category": "rebalancing"
+      },
+      "operatorClass": "reference",
+      "funderClass": "team",
+      "alsoOperator": false,
+      "client": "0x0d8c9ad8eebb6879fefa218f0799219bcaabe999",
+      "counted": false,
+      "state": "CANCELLED",
+      "funded": false,
+      "delivered": false,
+      "settled": false,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-10-02T20:18:27.000Z",
+      "completedAt": null,
+      "checks": null,
+      "terms": null,
+      "act": null,
+      "hireTx": "0x7a17ba121784beec60b03d8bdd2294049729bbe512533e46791c104febe0a0e8",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "56875",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Lattice",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341554",
+        "tokenId": "341554",
+        "category": "grid"
+      },
+      "operatorClass": "reference",
+      "funderClass": "team",
+      "alsoOperator": false,
+      "client": "0x0d8c9ad8eebb6879fefa218f0799219bcaabe999",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": true,
+      "createdAt": "2026-10-02T09:21:17.000Z",
+      "completedAt": "2026-10-09T09:25:59.000Z",
+      "checks": {
+        "decided": 2,
+        "agreed": 2
+      },
+      "terms": {
+        "met": 2,
+        "of": 4,
+        "source": "standard"
+      },
+      "act": null,
+      "hireTx": "0x16aa6ba82f3c0bcec6dbfb94413d5e7f7dd0dd46d1f00936b63bd71bf7d3797a",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "56874",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Redcell",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341557",
+        "tokenId": "341557",
+        "category": "security"
+      },
+      "operatorClass": "reference",
+      "funderClass": "team",
+      "alsoOperator": false,
+      "client": "0x0d8c9ad8eebb6879fefa218f0799219bcaabe999",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": true,
+      "createdAt": "2026-10-02T09:10:49.000Z",
+      "completedAt": "2026-10-09T09:15:50.000Z",
+      "checks": {
+        "decided": 0,
+        "agreed": 0
+      },
+      "terms": null,
+      "act": null,
+      "hireTx": "0x3818d67f6a2d2761fb6caf52918602a5bf619ac2da8a2ca3a1722d939c90b0be",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "56843",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Keel",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341556",
+        "tokenId": "341556",
+        "category": "health_factor"
+      },
+      "operatorClass": "reference",
+      "funderClass": "team",
+      "alsoOperator": false,
+      "client": "0xda53362d304d7970db19547c52208a35c6d83c8a",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-09-28T13:16:18.000Z",
+      "completedAt": "2026-10-05T13:19:57.000Z",
+      "checks": {
+        "decided": 3,
+        "agreed": 3
+      },
+      "terms": {
+        "met": 3,
+        "of": 3,
+        "source": "standard"
+      },
+      "act": null,
+      "hireTx": "0xcc8b6f57d6c2b78ae64c78cf1852a52224a50dffad40053aef596b3935d7e5fb",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "56842",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Keel",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341556",
+        "tokenId": "341556",
+        "category": "health_factor"
+      },
+      "operatorClass": "reference",
+      "funderClass": "team",
+      "alsoOperator": false,
+      "client": "0xda53362d304d7970db19547c52208a35c6d83c8a",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": true,
+      "createdAt": "2026-09-28T12:24:19.000Z",
+      "completedAt": "2026-10-05T12:39:50.000Z",
+      "checks": {
+        "decided": 3,
+        "agreed": 3
+      },
+      "terms": {
+        "met": 3,
+        "of": 3,
+        "source": "standard"
+      },
+      "act": null,
+      "hireTx": "0xdadcb8bf5e43cbabf4f6a61488a3adda4c4ea4ee0c8cb1dbee256a2ac426b07c",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "56841",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Bound",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341553",
+        "tokenId": "341553",
+        "category": "rebalancing"
+      },
+      "operatorClass": "reference",
+      "funderClass": "team",
+      "alsoOperator": false,
+      "client": "0xda53362d304d7970db19547c52208a35c6d83c8a",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": true,
+      "createdAt": "2026-09-28T12:23:35.000Z",
+      "completedAt": "2026-10-05T12:24:44.000Z",
+      "checks": {
+        "decided": 3,
+        "agreed": 3
+      },
+      "terms": {
+        "met": 3,
+        "of": 4,
+        "source": "standard"
+      },
+      "act": null,
+      "hireTx": "0x6790ea5811c293cc48256d6cd6a189e5c92e1c8555560ff6c895890ddf69ccd2",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "56840",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Lattice",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341554",
+        "tokenId": "341554",
+        "category": "grid"
+      },
+      "operatorClass": "reference",
+      "funderClass": "team",
+      "alsoOperator": false,
+      "client": "0xda53362d304d7970db19547c52208a35c6d83c8a",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": true,
+      "createdAt": "2026-09-28T12:22:39.000Z",
+      "completedAt": "2026-10-05T12:24:42.000Z",
+      "checks": {
+        "decided": 2,
+        "agreed": 2
+      },
+      "terms": {
+        "met": 2,
+        "of": 4,
+        "source": "standard"
+      },
+      "act": null,
+      "hireTx": "0xf6cda7a92096e5e6b5b942cd9af011e42bebb73eeec161352f473366b69d0e9f",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "56839",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Sluicegate",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341555",
+        "tokenId": "341555",
+        "category": "yield"
+      },
+      "operatorClass": "reference",
+      "funderClass": "team",
+      "alsoOperator": false,
+      "client": "0xda53362d304d7970db19547c52208a35c6d83c8a",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": true,
+      "createdAt": "2026-09-28T11:59:50.000Z",
+      "completedAt": "2026-10-05T12:19:39.000Z",
+      "checks": {
+        "decided": 3,
+        "agreed": 3
+      },
+      "terms": {
+        "met": 3,
+        "of": 3,
+        "source": "standard"
+      },
+      "act": null,
+      "hireTx": "0x0ec4a63cc08fe2ba5925c9e3b7a172837eb1abb062d318c29a8682031165935c",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "56838",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Redcell",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341557",
+        "tokenId": "341557",
+        "category": "security"
+      },
+      "operatorClass": "reference",
+      "funderClass": "team",
+      "alsoOperator": false,
+      "client": "0x0d8c9ad8eebb6879fefa218f0799219bcaabe999",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": true,
+      "createdAt": "2026-09-28T07:37:38.000Z",
+      "completedAt": "2026-10-05T07:43:52.000Z",
+      "checks": {
+        "decided": 0,
+        "agreed": 0
+      },
+      "terms": null,
+      "act": null,
+      "hireTx": "0x33f6f733503d293de10ce8b1d6f06adf4ef167a258125740735d9e71b528295f",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "56837",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Lattice",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341554",
+        "tokenId": "341554",
+        "category": "grid"
+      },
+      "operatorClass": "reference",
+      "funderClass": "team",
+      "alsoOperator": false,
+      "client": "0x0d8c9ad8eebb6879fefa218f0799219bcaabe999",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-09-28T07:29:38.000Z",
+      "completedAt": "2026-10-05T07:33:48.000Z",
+      "checks": {
+        "decided": 2,
+        "agreed": 2
+      },
+      "terms": {
+        "met": 2,
+        "of": 4,
+        "source": "standard"
+      },
+      "act": null,
+      "hireTx": "0x88a2e23b6c37fdb4bc6ad4cc2535e61cbd5972eeb14225d053f5667d58fb62fa",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "56836",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Keel",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341556",
+        "tokenId": "341556",
+        "category": "health_factor"
+      },
+      "operatorClass": "reference",
+      "funderClass": "team",
+      "alsoOperator": false,
+      "client": "0x0d8c9ad8eebb6879fefa218f0799219bcaabe999",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": true,
+      "createdAt": "2026-09-28T06:34:23.000Z",
+      "completedAt": "2026-10-05T06:38:36.000Z",
+      "checks": {
+        "decided": 0,
+        "agreed": 0
+      },
+      "terms": {
+        "met": 0,
+        "of": 3,
+        "source": "standard"
+      },
+      "act": null,
+      "hireTx": "0x6da7e7353539914b5ca5c6c6aa926e1bd6fdeb923fe447a45077f629c046fe2b",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "56835",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Bound",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341553",
+        "tokenId": "341553",
+        "category": "rebalancing"
+      },
+      "operatorClass": "reference",
+      "funderClass": "team",
+      "alsoOperator": false,
+      "client": "0x0d8c9ad8eebb6879fefa218f0799219bcaabe999",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": true,
+      "createdAt": "2026-09-28T06:31:33.000Z",
+      "completedAt": "2026-10-05T06:33:33.000Z",
+      "checks": {
+        "decided": 0,
+        "agreed": 0
+      },
+      "terms": {
+        "met": 0,
+        "of": 4,
+        "source": "standard"
+      },
+      "act": null,
+      "hireTx": "0x06550343497fa587bb4a063c7fecf0ee99b42e539bc9ca7915a733b2f3bd6dc1",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "56834",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Lattice",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341554",
+        "tokenId": "341554",
+        "category": "grid"
+      },
+      "operatorClass": "reference",
+      "funderClass": "team",
+      "alsoOperator": false,
+      "client": "0x0d8c9ad8eebb6879fefa218f0799219bcaabe999",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": true,
+      "createdAt": "2026-09-28T06:23:41.000Z",
+      "completedAt": "2026-10-05T06:28:30.000Z",
+      "checks": {
+        "decided": 2,
+        "agreed": 2
+      },
+      "terms": {
+        "met": 2,
+        "of": 4,
+        "source": "standard"
+      },
+      "act": null,
+      "hireTx": "0x8c54c58fcb2a9d0673a198558d3e46c351964e3dc395c1e2fe753da41e9d6d35",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "56833",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Sluicegate",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341555",
+        "tokenId": "341555",
+        "category": "yield"
+      },
+      "operatorClass": "reference",
+      "funderClass": "team",
+      "alsoOperator": false,
+      "client": "0x0d8c9ad8eebb6879fefa218f0799219bcaabe999",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": true,
+      "createdAt": "2026-09-28T06:01:51.000Z",
+      "completedAt": "2026-10-05T06:03:21.000Z",
+      "checks": {
+        "decided": 3,
+        "agreed": 3
+      },
+      "terms": {
+        "met": 3,
+        "of": 3,
+        "source": "standard"
+      },
+      "act": null,
+      "hireTx": "0xccf8974addbb034073fdf6495758fea0499f1e60d13a04153333ec7cb4ccd6f2",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "56820",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Keel",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341556",
+        "tokenId": "341556",
+        "category": "health_factor"
+      },
+      "operatorClass": "reference",
+      "funderClass": "team",
+      "alsoOperator": false,
+      "client": "0x317c5dddfe27d7d9baaf41f2ad38e9b83b40f99d",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": true,
+      "createdAt": "2026-09-26T22:03:13.000Z",
+      "completedAt": "2026-10-03T22:06:37.000Z",
+      "checks": {
+        "decided": 3,
+        "agreed": 3
+      },
+      "terms": {
+        "met": 3,
+        "of": 3,
+        "source": "standard"
+      },
+      "act": null,
+      "hireTx": "0x0f9e4181d1e14607e8e9abbad43d96f1e3551501c174a99ae02ad501d8ba3050",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "56819",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Bound",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341553",
+        "tokenId": "341553",
+        "category": "rebalancing"
+      },
+      "operatorClass": "reference",
+      "funderClass": "team",
+      "alsoOperator": false,
+      "client": "0x317c5dddfe27d7d9baaf41f2ad38e9b83b40f99d",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": true,
+      "createdAt": "2026-09-26T22:01:52.000Z",
+      "completedAt": "2026-10-03T22:06:34.000Z",
+      "checks": {
+        "decided": 3,
+        "agreed": 3
+      },
+      "terms": {
+        "met": 3,
+        "of": 4,
+        "source": "standard"
+      },
+      "act": null,
+      "hireTx": "0xfacb4c7ee721f510977a5eb2d4d74f4749d0b4144899e05ca0d0b2670c918b66",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "56818",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Lattice",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341554",
+        "tokenId": "341554",
+        "category": "grid"
+      },
+      "operatorClass": "reference",
+      "funderClass": "team",
+      "alsoOperator": false,
+      "client": "0x317c5dddfe27d7d9baaf41f2ad38e9b83b40f99d",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": true,
+      "createdAt": "2026-09-26T22:00:34.000Z",
+      "completedAt": "2026-10-03T22:01:31.000Z",
+      "checks": {
+        "decided": 2,
+        "agreed": 2
+      },
+      "terms": {
+        "met": 2,
+        "of": 4,
+        "source": "standard"
+      },
+      "act": null,
+      "hireTx": "0x55dee97b7911ee1d0c63d9bd7e49f1dc3d8692c54a6e026e8da64327297fe516",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "56817",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Sluicegate",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341555",
+        "tokenId": "341555",
+        "category": "yield"
+      },
+      "operatorClass": "reference",
+      "funderClass": "team",
+      "alsoOperator": false,
+      "client": "0x317c5dddfe27d7d9baaf41f2ad38e9b83b40f99d",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": true,
+      "createdAt": "2026-09-26T21:59:27.000Z",
+      "completedAt": "2026-10-03T22:01:28.000Z",
+      "checks": {
+        "decided": 3,
+        "agreed": 3
+      },
+      "terms": {
+        "met": 3,
+        "of": 3,
+        "source": "standard"
+      },
+      "act": null,
+      "hireTx": "0x360926e0c50b76c2112ebfad6c83c776c79c87642de8546e9a46f6ea6ac35927",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "56816",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Keel",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341556",
+        "tokenId": "341556",
+        "category": "health_factor"
+      },
+      "operatorClass": "reference",
+      "funderClass": "team",
+      "alsoOperator": false,
+      "client": "0x4bfd3f9c81a743f852fb424fd487a1c53d7786d5",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": true,
+      "createdAt": "2026-09-26T21:57:23.000Z",
+      "completedAt": "2026-10-03T22:01:26.000Z",
+      "checks": {
+        "decided": 3,
+        "agreed": 3
+      },
+      "terms": {
+        "met": 3,
+        "of": 3,
+        "source": "standard"
+      },
+      "act": null,
+      "hireTx": "0x8860de4088a749e4a4d0c2a6c3fd9e59cf1d3c253199778d88434b8721453e80",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "56815",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Bound",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341553",
+        "tokenId": "341553",
+        "category": "rebalancing"
+      },
+      "operatorClass": "reference",
+      "funderClass": "team",
+      "alsoOperator": false,
+      "client": "0x4bfd3f9c81a743f852fb424fd487a1c53d7786d5",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": true,
+      "createdAt": "2026-09-26T21:56:34.000Z",
+      "completedAt": "2026-10-03T22:01:23.000Z",
+      "checks": {
+        "decided": 3,
+        "agreed": 3
+      },
+      "terms": {
+        "met": 3,
+        "of": 4,
+        "source": "standard"
+      },
+      "act": null,
+      "hireTx": "0xe6ae9b83e16154585dd0195c9f2762c47cf5feb88ffe5e20998efe4ccc192aa3",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "56814",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Lattice",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341554",
+        "tokenId": "341554",
+        "category": "grid"
+      },
+      "operatorClass": "reference",
+      "funderClass": "team",
+      "alsoOperator": false,
+      "client": "0x4bfd3f9c81a743f852fb424fd487a1c53d7786d5",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": true,
+      "createdAt": "2026-09-26T21:55:24.000Z",
+      "completedAt": "2026-10-03T21:56:19.000Z",
+      "checks": {
+        "decided": 2,
+        "agreed": 2
+      },
+      "terms": {
+        "met": 2,
+        "of": 4,
+        "source": "standard"
+      },
+      "act": null,
+      "hireTx": "0x43290637e8a7a85056463f1a47d595180a4fcf5d81729ca66e8a48ddf5fed4c7",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "56813",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Sluicegate",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341555",
+        "tokenId": "341555",
+        "category": "yield"
+      },
+      "operatorClass": "reference",
+      "funderClass": "team",
+      "alsoOperator": false,
+      "client": "0x4bfd3f9c81a743f852fb424fd487a1c53d7786d5",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": true,
+      "createdAt": "2026-09-26T21:42:49.000Z",
+      "completedAt": "2026-10-03T21:46:14.000Z",
+      "checks": {
+        "decided": 3,
+        "agreed": 3
+      },
+      "terms": {
+        "met": 3,
+        "of": 3,
+        "source": "standard"
+      },
+      "act": null,
+      "hireTx": "0x43e0a9c6c6c665aa5d6fe557d44bbb0f62b71c8d78676c32b28d12806bd1939e",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "56811",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Tidemark",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:358786",
+        "tokenId": "358786",
+        "category": "yield"
+      },
+      "operatorClass": "reference",
+      "funderClass": "team",
+      "alsoOperator": false,
+      "client": "0x5ac2448fc79ef8d33710b1bced5aeff90138b452",
+      "counted": false,
+      "state": "CANCELLED",
+      "funded": false,
+      "delivered": false,
+      "settled": false,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-09-26T17:11:48.000Z",
+      "completedAt": null,
+      "checks": null,
+      "terms": null,
+      "act": null,
+      "hireTx": "0xb1e53c4714ac4333181afeb8688c55a58679dcfca09058aa733cd6922da4ec43",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "56810",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Keel",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341556",
+        "tokenId": "341556",
+        "category": "health_factor"
+      },
+      "operatorClass": "reference",
+      "funderClass": "team",
+      "alsoOperator": false,
+      "client": "0x5ac2448fc79ef8d33710b1bced5aeff90138b452",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": true,
+      "createdAt": "2026-09-26T17:11:24.000Z",
+      "completedAt": "2026-10-03T17:14:51.000Z",
+      "checks": {
+        "decided": 3,
+        "agreed": 3
+      },
+      "terms": {
+        "met": 3,
+        "of": 3,
+        "source": "standard"
+      },
+      "act": null,
+      "hireTx": "0x767be68f1e6c4c4e678679d68dcf0f703d5d6a30e8fb351fda7b47b71814f046",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "56809",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Bound",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341553",
+        "tokenId": "341553",
+        "category": "rebalancing"
+      },
+      "operatorClass": "reference",
+      "funderClass": "team",
+      "alsoOperator": false,
+      "client": "0x5ac2448fc79ef8d33710b1bced5aeff90138b452",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": true,
+      "createdAt": "2026-09-26T17:10:50.000Z",
+      "completedAt": "2026-10-03T17:14:49.000Z",
+      "checks": {
+        "decided": 3,
+        "agreed": 3
+      },
+      "terms": {
+        "met": 3,
+        "of": 4,
+        "source": "standard"
+      },
+      "act": null,
+      "hireTx": "0x6feee514ded3e57ca37414f6624e5e24e88d8cb803356ff91a254aabb496dc7e",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "56808",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Lattice",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341554",
+        "tokenId": "341554",
+        "category": "grid"
+      },
+      "operatorClass": "reference",
+      "funderClass": "team",
+      "alsoOperator": false,
+      "client": "0x5ac2448fc79ef8d33710b1bced5aeff90138b452",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": true,
+      "createdAt": "2026-09-26T17:10:23.000Z",
+      "completedAt": "2026-10-03T17:14:46.000Z",
+      "checks": {
+        "decided": 2,
+        "agreed": 2
+      },
+      "terms": {
+        "met": 2,
+        "of": 4,
+        "source": "standard"
+      },
+      "act": null,
+      "hireTx": "0x046832487aad390b059110a9abaafebdc36ac835a6444005a271728c52154412",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "56807",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Tidemark",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:358786",
+        "tokenId": "358786",
+        "category": "yield"
+      },
+      "operatorClass": "reference",
+      "funderClass": "team",
+      "alsoOperator": false,
+      "client": "0x5ac2448fc79ef8d33710b1bced5aeff90138b452",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-09-26T17:09:53.000Z",
+      "completedAt": "2026-10-03T17:14:44.000Z",
+      "checks": {
+        "decided": 0,
+        "agreed": 0
+      },
+      "terms": {
+        "met": 0,
+        "of": 3,
+        "source": "standard"
+      },
+      "act": null,
+      "hireTx": "0x5dc97243f34d4d2ebe8d7f64574e986f02f40ea7bc526c237fae64f3074247de",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "56806",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Sluicegate",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341555",
+        "tokenId": "341555",
+        "category": "yield"
+      },
+      "operatorClass": "reference",
+      "funderClass": "team",
+      "alsoOperator": false,
+      "client": "0x5ac2448fc79ef8d33710b1bced5aeff90138b452",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": true,
+      "createdAt": "2026-09-26T17:08:22.000Z",
+      "completedAt": "2026-10-03T17:09:39.000Z",
+      "checks": {
+        "decided": 3,
+        "agreed": 3
+      },
+      "terms": {
+        "met": 3,
+        "of": 3,
+        "source": "standard"
+      },
+      "act": null,
+      "hireTx": "0x34f1567abb26b7bf2497809489ffbc801f68dc6917b1313def6485092b4958b1",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 56,
+      "jobId": "56805",
+      "escrow": "0xea4daa3100a767e86fded867729ae7446476eba6",
+      "agent": {
+        "name": "Sluicegate",
+        "agentKey": "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341555",
+        "tokenId": "341555",
+        "category": "yield"
+      },
+      "operatorClass": "reference",
+      "funderClass": "team",
+      "alsoOperator": false,
+      "client": "0x5ac2448fc79ef8d33710b1bced5aeff90138b452",
+      "counted": false,
+      "state": "CANCELLED",
+      "funded": false,
+      "delivered": false,
+      "settled": false,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-09-26T17:06:11.000Z",
+      "completedAt": null,
+      "checks": null,
+      "terms": null,
+      "act": null,
+      "hireTx": "0x4e40d1b460b3c65ac0cb746ca0209e378595d9cb778a7d0cb7191296939fe26f",
+      "verifyUrl": "https://bscscan.com/address/0xea4daa3100a767e86fded867729ae7446476eba6#readContract"
+    },
+    {
+      "chainId": 97,
+      "jobId": "1350",
+      "escrow": "0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de",
+      "agent": {
+        "name": null,
+        "agentKey": null,
+        "tokenId": null,
+        "category": null
+      },
+      "operatorClass": "third_party",
+      "funderClass": "team",
+      "alsoOperator": false,
+      "client": "0xc83d716523c1958bcc48d19854ef1eb360bef878",
+      "counted": false,
+      "state": "REFUNDED",
+      "funded": true,
+      "delivered": false,
+      "settled": false,
+      "refunded": true,
+      "rated": false,
+      "createdAt": "2026-09-26T15:34:30.000Z",
+      "completedAt": null,
+      "checks": null,
+      "terms": null,
+      "act": null,
+      "hireTx": "0x2722158c22485db13562e00b1e350d38fb6bf696b7c931018d031fb7f014ef55",
+      "verifyUrl": "https://testnet.bscscan.com/address/0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de#readContract"
+    },
+    {
+      "chainId": 97,
+      "jobId": "1349",
+      "escrow": "0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de",
+      "agent": {
+        "name": null,
+        "agentKey": null,
+        "tokenId": null,
+        "category": "health_factor"
+      },
+      "operatorClass": "third_party",
+      "funderClass": "team",
+      "alsoOperator": false,
+      "client": "0xc83d716523c1958bcc48d19854ef1eb360bef878",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-09-26T15:34:05.000Z",
+      "completedAt": "2026-09-26T16:12:42.000Z",
+      "checks": {
+        "decided": 3,
+        "agreed": 3
+      },
+      "terms": {
+        "met": 3,
+        "of": 3,
+        "source": "standard"
+      },
+      "act": null,
+      "hireTx": "0x1356856aaff1f22c754297361353d2529270f322f8d6834a9a22871e4e9705f2",
+      "verifyUrl": "https://testnet.bscscan.com/address/0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de#readContract"
+    },
+    {
+      "chainId": 97,
+      "jobId": "1348",
+      "escrow": "0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de",
+      "agent": {
+        "name": null,
+        "agentKey": null,
+        "tokenId": null,
+        "category": "grid"
+      },
+      "operatorClass": "third_party",
+      "funderClass": "team",
+      "alsoOperator": false,
+      "client": "0xc83d716523c1958bcc48d19854ef1eb360bef878",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-09-26T15:05:20.000Z",
+      "completedAt": "2026-09-26T16:12:46.000Z",
+      "checks": {
+        "decided": 2,
+        "agreed": 2
+      },
+      "terms": {
+        "met": 2,
+        "of": 4,
+        "source": "standard"
+      },
+      "act": null,
+      "hireTx": "0x020efe828a2a7faadde17a8456179af6d50850628931fc573eddc66f95610ab4",
+      "verifyUrl": "https://testnet.bscscan.com/address/0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de#readContract"
+    },
+    {
+      "chainId": 97,
+      "jobId": "1347",
+      "escrow": "0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de",
+      "agent": {
+        "name": null,
+        "agentKey": null,
+        "tokenId": null,
+        "category": "yield"
+      },
+      "operatorClass": "third_party",
+      "funderClass": "team",
+      "alsoOperator": false,
+      "client": "0xc83d716523c1958bcc48d19854ef1eb360bef878",
+      "counted": false,
+      "state": "CANCELLED",
+      "funded": false,
+      "delivered": false,
+      "settled": false,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-09-26T14:04:10.000Z",
+      "completedAt": null,
+      "checks": null,
+      "terms": null,
+      "act": null,
+      "hireTx": "0x865a46938f62ee170ad2d18062d85da42970221bdfca2ec49c38515bc5805457",
+      "verifyUrl": "https://testnet.bscscan.com/address/0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de#readContract"
+    },
+    {
+      "chainId": 97,
+      "jobId": "1346",
+      "escrow": "0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de",
+      "agent": {
+        "name": null,
+        "agentKey": null,
+        "tokenId": null,
+        "category": "health_factor"
+      },
+      "operatorClass": "third_party",
+      "funderClass": "team",
+      "alsoOperator": false,
+      "client": "0xc83d716523c1958bcc48d19854ef1eb360bef878",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-09-26T14:03:26.000Z",
+      "completedAt": "2026-09-26T15:16:32.000Z",
+      "checks": {
+        "decided": 3,
+        "agreed": 3
+      },
+      "terms": {
+        "met": 3,
+        "of": 3,
+        "source": "standard"
+      },
+      "act": null,
+      "hireTx": "0xea7aba146847cdd3199dcba37be985352c501c934194b4301205bd69e86f1798",
+      "verifyUrl": "https://testnet.bscscan.com/address/0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de#readContract"
+    },
+    {
+      "chainId": 97,
+      "jobId": "1345",
+      "escrow": "0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de",
+      "agent": {
+        "name": null,
+        "agentKey": null,
+        "tokenId": null,
+        "category": "rebalancing"
+      },
+      "operatorClass": "third_party",
+      "funderClass": "team",
+      "alsoOperator": false,
+      "client": "0xc83d716523c1958bcc48d19854ef1eb360bef878",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-09-26T14:02:40.000Z",
+      "completedAt": "2026-09-26T15:16:37.000Z",
+      "checks": {
+        "decided": 3,
+        "agreed": 3
+      },
+      "terms": {
+        "met": 3,
+        "of": 4,
+        "source": "standard"
+      },
+      "act": null,
+      "hireTx": "0xc489c30f3d8f0525f4772f889559e9fb4be24ccbad89b4e2433c6f67647d5362",
+      "verifyUrl": "https://testnet.bscscan.com/address/0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de#readContract"
+    },
+    {
+      "chainId": 97,
+      "jobId": "1344",
+      "escrow": "0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de",
+      "agent": {
+        "name": null,
+        "agentKey": null,
+        "tokenId": null,
+        "category": "grid"
+      },
+      "operatorClass": "third_party",
+      "funderClass": "team",
+      "alsoOperator": false,
+      "client": "0xc83d716523c1958bcc48d19854ef1eb360bef878",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-09-26T14:02:02.000Z",
+      "completedAt": "2026-09-26T15:16:42.000Z",
+      "checks": {
+        "decided": 2,
+        "agreed": 2
+      },
+      "terms": {
+        "met": 2,
+        "of": 4,
+        "source": "standard"
+      },
+      "act": null,
+      "hireTx": "0x715b9009f231ae7c9a0d3eb0e36781f92b44f9707760a53b1b7bf9972bf35368",
+      "verifyUrl": "https://testnet.bscscan.com/address/0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de#readContract"
+    },
+    {
+      "chainId": 97,
+      "jobId": "1343",
+      "escrow": "0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de",
+      "agent": {
+        "name": null,
+        "agentKey": null,
+        "tokenId": null,
+        "category": "yield"
+      },
+      "operatorClass": "third_party",
+      "funderClass": "team",
+      "alsoOperator": false,
+      "client": "0xc83d716523c1958bcc48d19854ef1eb360bef878",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-09-26T14:01:23.000Z",
+      "completedAt": "2026-09-26T15:16:44.000Z",
+      "checks": {
+        "decided": 3,
+        "agreed": 3
+      },
+      "terms": {
+        "met": 3,
+        "of": 3,
+        "source": "standard"
+      },
+      "act": null,
+      "hireTx": "0xcc17a2b4eca85728a03be4ddf77ff82db09c7bc167d6760bbef75ac37257627c",
+      "verifyUrl": "https://testnet.bscscan.com/address/0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de#readContract"
+    },
+    {
+      "chainId": 97,
+      "jobId": "1342",
+      "escrow": "0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de",
+      "agent": {
+        "name": null,
+        "agentKey": null,
+        "tokenId": null,
+        "category": "yield"
+      },
+      "operatorClass": "third_party",
+      "funderClass": "team",
+      "alsoOperator": false,
+      "client": "0xc83d716523c1958bcc48d19854ef1eb360bef878",
+      "counted": false,
+      "state": "CANCELLED",
+      "funded": false,
+      "delivered": false,
+      "settled": false,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-09-26T13:57:28.000Z",
+      "completedAt": null,
+      "checks": null,
+      "terms": null,
+      "act": null,
+      "hireTx": "0x0e8dc9376d70179b0239207a6dd8425942241a2f91f11bbda2b01881ffce1652",
+      "verifyUrl": "https://testnet.bscscan.com/address/0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de#readContract"
+    },
+    {
+      "chainId": 97,
+      "jobId": "1341",
+      "escrow": "0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de",
+      "agent": {
+        "name": null,
+        "agentKey": null,
+        "tokenId": null,
+        "category": "health_factor"
+      },
+      "operatorClass": "third_party",
+      "funderClass": "team",
+      "alsoOperator": false,
+      "client": "0xc83d716523c1958bcc48d19854ef1eb360bef878",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-09-26T13:56:26.000Z",
+      "completedAt": "2026-09-26T15:16:46.000Z",
+      "checks": {
+        "decided": 0,
+        "agreed": 0
+      },
+      "terms": null,
+      "act": null,
+      "hireTx": "0x994f6dc64a9ea52bb5eadeed181fe48dd27a4d1697b8558305c59b71c770f2b7",
+      "verifyUrl": "https://testnet.bscscan.com/address/0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de#readContract"
+    },
+    {
+      "chainId": 97,
+      "jobId": "1340",
+      "escrow": "0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de",
+      "agent": {
+        "name": null,
+        "agentKey": null,
+        "tokenId": null,
+        "category": "rebalancing"
+      },
+      "operatorClass": "third_party",
+      "funderClass": "team",
+      "alsoOperator": false,
+      "client": "0xc83d716523c1958bcc48d19854ef1eb360bef878",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-09-26T13:55:43.000Z",
+      "completedAt": "2026-09-26T16:12:52.000Z",
+      "checks": {
+        "decided": 3,
+        "agreed": 3
+      },
+      "terms": {
+        "met": 3,
+        "of": 4,
+        "source": "standard"
+      },
+      "act": null,
+      "hireTx": "0xf2707d7082766fa128e33e155664d528033fdc8f2977fae3c16bf1d85d7dcc0e",
+      "verifyUrl": "https://testnet.bscscan.com/address/0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de#readContract"
+    },
+    {
+      "chainId": 97,
+      "jobId": "1339",
+      "escrow": "0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de",
+      "agent": {
+        "name": null,
+        "agentKey": null,
+        "tokenId": null,
+        "category": "grid"
+      },
+      "operatorClass": "third_party",
+      "funderClass": "team",
+      "alsoOperator": false,
+      "client": "0xc83d716523c1958bcc48d19854ef1eb360bef878",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-09-26T13:55:01.000Z",
+      "completedAt": "2026-09-26T14:10:49.000Z",
+      "checks": {
+        "decided": 2,
+        "agreed": 2
+      },
+      "terms": {
+        "met": 2,
+        "of": 4,
+        "source": "standard"
+      },
+      "act": null,
+      "hireTx": "0x0c4b107c9328c88dda6897b079e1dc31c310fdd6e1dc5e5323c1ddc9fb4ddcf1",
+      "verifyUrl": "https://testnet.bscscan.com/address/0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de#readContract"
+    },
+    {
+      "chainId": 97,
+      "jobId": "1338",
+      "escrow": "0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de",
+      "agent": {
+        "name": null,
+        "agentKey": null,
+        "tokenId": null,
+        "category": "yield"
+      },
+      "operatorClass": "third_party",
+      "funderClass": "team",
+      "alsoOperator": false,
+      "client": "0xc83d716523c1958bcc48d19854ef1eb360bef878",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-09-26T13:54:27.000Z",
+      "completedAt": "2026-09-26T14:10:55.000Z",
+      "checks": {
+        "decided": 3,
+        "agreed": 3
+      },
+      "terms": {
+        "met": 3,
+        "of": 3,
+        "source": "standard"
+      },
+      "act": null,
+      "hireTx": "0xe98005cbf1ed0b0b5cb5cb7c5afc03150d2a25b503e4cc72456155c634cfd0fb",
+      "verifyUrl": "https://testnet.bscscan.com/address/0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de#readContract"
+    },
+    {
+      "chainId": 97,
+      "jobId": "1337",
+      "escrow": "0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de",
+      "agent": {
+        "name": null,
+        "agentKey": null,
+        "tokenId": null,
+        "category": "health_factor"
+      },
+      "operatorClass": "third_party",
+      "funderClass": "team",
+      "alsoOperator": false,
+      "client": "0xc83d716523c1958bcc48d19854ef1eb360bef878",
+      "counted": false,
+      "state": "PAID",
+      "funded": true,
+      "delivered": true,
+      "settled": true,
+      "refunded": false,
+      "rated": false,
+      "createdAt": "2026-09-26T12:54:47.000Z",
+      "completedAt": "2026-09-26T14:11:00.000Z",
+      "checks": {
+        "decided": 0,
+        "agreed": 0
+      },
+      "terms": null,
+      "act": null,
+      "hireTx": "0xd4d6bf52904f2047e7447b5c3dcc3d3946186e3b086ab9087a1eef0a203accd8",
+      "verifyUrl": "https://testnet.bscscan.com/address/0xa206c0517b6371c6638cd9e4a42cc9f02a33b0de#readContract"
+    }
+  ]
+}

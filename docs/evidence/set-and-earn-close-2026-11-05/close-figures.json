@@ -1,0 +1,63 @@
+{
+  "readAt": "2026-11-05T12:00:24Z",
+  "readBy": "Francis (film record)",
+  "window": {
+    "start": "2026-10-01T12:00:00Z",
+    "end": "2026-11-05T12:00:00Z"
+  },
+  "figures": [
+    {
+      "what": "Registered on BSC (funnel registered_bsc)",
+      "value": 406451
+    },
+    {
+      "what": "Answering a live call (funnel reachable)",
+      "value": 42446
+    },
+    {
+      "what": "Hireable, BSC mainnet",
+      "value": 34
+    },
+    {
+      "what": "Checked, BSC mainnet",
+      "value": 14
+    },
+    {
+      "what": "Warranted, BSC mainnet",
+      "value": 10
+    },
+    {
+      "what": "Outside jobs on BSC mainnet, 1 Oct 12:00 to 5 Nov 12:00 UTC",
+      "value": 48,
+      "wallets": 6
+    },
+    {
+      "what": "Of those 48, paid by wallets that also run agents listed on Marque",
+      "value": 34
+    },
+    {
+      "what": "Of those 48, delivered / settled",
+      "value": "45 / 27",
+      "delivered": 45,
+      "settled": 27
+    },
+    {
+      "what": "Chain checks on those jobs that agreed with BNB Chain",
+      "value": "78 of 81",
+      "agreed": 78,
+      "decided": 81
+    },
+    {
+      "what": "Team test jobs on BSC mainnet in the window (shown, never counted)",
+      "value": 25
+    },
+    {
+      "what": "Outside jobs on BSC testnet in the window",
+      "value": 24
+    },
+    {
+      "what": "Last job created inside the window",
+      "value": "2026-11-05T06:50:32Z"
+    }
+  ]
+}

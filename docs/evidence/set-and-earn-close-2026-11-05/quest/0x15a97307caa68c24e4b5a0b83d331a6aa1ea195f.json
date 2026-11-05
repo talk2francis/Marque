@@ -1,0 +1,281 @@
+{
+  "address": "0x15A97307cAA68C24E4b5a0b83D331A6AA1EA195F",
+  "observedAt": "2026-11-05T15:48:16.711Z",
+  "window": {
+    "start": "2026-10-01T12:00:00Z",
+    "end": "2026-11-05T12:00:00Z"
+  },
+  "closed": true,
+  "chains": [
+    56,
+    97
+  ],
+  "blocks": {
+    "56": 131843443,
+    "97": 140984042
+  },
+  "excluded": {
+    "team": false,
+    "reason": null
+  },
+  "hire": {
+    "status": "met",
+    "distinctAgents": 3,
+    "required": {
+      "agents": 3,
+      "marketplaces": 2
+    },
+    "marketplaces": {
+      "named": [
+        "mandatemarkets.com",
+        "marque.trade"
+      ],
+      "notRecorded": 0
+    },
+    "hires": [
+      {
+        "chainId": 56,
+        "jobId": "56914",
+        "fundedTx": "0xc5ba752e75a96bae4792c70bd14c3ec803e45fdfb7164dcb963994c29d0d5f73",
+        "fundedAt": "2026-10-08T04:00:52.000Z",
+        "createdAt": "2026-10-08T04:00:39.000Z",
+        "provider": "0x81762d5214fcb6fb3b102bef9d69d13a56c1a2d0",
+        "agent": {
+          "chainId": 56,
+          "tokenId": "344123",
+          "name": "Mandate Guard-1",
+          "key": "56:344123",
+          "shared": 1,
+          "category": "health_factor"
+        },
+        "marketplace": "mandatemarkets.com",
+        "marketplaceName": "Mandate",
+        "attribution": "via_suffix",
+        "status": "COMPLETED",
+        "counts": true,
+        "reason": null
+      },
+      {
+        "chainId": 56,
+        "jobId": "56915",
+        "fundedTx": "0x525bd9a3bbe6edc9c0d570f688d8eed5cd7ed131ef93cc4fb07cbc67082c1e9b",
+        "fundedAt": "2026-10-08T04:01:10.000Z",
+        "createdAt": "2026-10-08T04:00:58.000Z",
+        "provider": "0x7e91367c77e561f0d99c2b42925af29cd90ae838",
+        "agent": {
+          "chainId": 56,
+          "tokenId": "344122",
+          "name": "Mandate Yield-1",
+          "key": "56:344122",
+          "shared": 1,
+          "category": "yield"
+        },
+        "marketplace": "mandatemarkets.com",
+        "marketplaceName": "Mandate",
+        "attribution": "via_suffix",
+        "status": "COMPLETED",
+        "counts": true,
+        "reason": null
+      },
+      {
+        "chainId": 56,
+        "jobId": "56916",
+        "fundedTx": "0xdf180aa639c5744ff649ad1fba36ebfd22e8a4f15df5d1041ee187bb37a380aa",
+        "fundedAt": "2026-10-08T04:01:43.000Z",
+        "createdAt": "2026-10-08T04:01:28.000Z",
+        "provider": "0xb12a1e4e0e22a97e266ed7a6bfc4133f699b1a1b",
+        "agent": {
+          "chainId": 56,
+          "tokenId": "363619",
+          "name": "Plinth keeper",
+          "key": "56:363619",
+          "shared": 1,
+          "category": "rebalancing"
+        },
+        "marketplace": "marque.trade",
+        "marketplaceName": "Marque",
+        "attribution": "marque_intent",
+        "status": "COMPLETED",
+        "counts": true,
+        "reason": null
+      }
+    ]
+  },
+  "build": {
+    "agents": [
+      {
+        "chainId": 56,
+        "tokenId": "367904",
+        "name": "Vitals",
+        "agentWallet": "0x15a97307caa68c24e4b5a0b83d331a6aa1ea195f",
+        "checks": {
+          "registered": {
+            "state": "observed",
+            "reason": "ERC-8004 #367904 on BSC mainnet, owned by this wallet (ownerOf read now)."
+          },
+          "listed": {
+            "state": "observed",
+            "reason": "Listed and hireable on Marque now (a live quote in the last 2 hours)."
+          },
+          "card": {
+            "state": "not_yet",
+            "reason": "The card is served from sslip.io, which turns an IP address into a name. It is not the agent's own domain.",
+            "url": "https://vitals.62-171-148-149.sslip.io/.well-known/agent-card.json",
+            "next": {
+              "label": "Fix the agent card in the Forge",
+              "href": "/builders?agent=56:367904"
+            }
+          },
+          "probes": {
+            "state": "not_yet",
+            "reason": "Answered 96 of 137 probes in the last 24 hours.",
+            "answered": 96,
+            "total": 137,
+            "next": {
+              "label": "Check why it does not answer",
+              "href": "/builders?agent=56:367904"
+            }
+          },
+          "hires": {
+            "state": "observed",
+            "reason": "3 completed hires from different wallets that this wallet did not fund.",
+            "independent": 3,
+            "required": 3,
+            "method": "token_and_bnb_transfers_checked"
+          },
+          "actions": {
+            "state": "observed",
+            "reason": "87 transactions from the owner wallet on 29 separate days since 1 Oct.",
+            "count": 87,
+            "days": 29,
+            "required": {
+              "count": 5,
+              "days": 3
+            }
+          },
+          "category": {
+            "state": "observed",
+            "reason": "31 of those went to health factor contracts, on 29 days.",
+            "count": 31,
+            "days": 29
+          },
+          "timing": {
+            "state": "observed",
+            "reason": "Registered 2026-10-08, after the 1 Oct announcement. Public repository: declared.",
+            "registeredAt": "2026-10-08T12:42:00.000Z"
+          }
+        },
+        "observed": 4,
+        "of": 6
+      }
+    ],
+    "more": 0
+  },
+  "registration": {
+    "state": "not_observable",
+    "reason": "BNB keeps the registration form. Marque cannot see it.",
+    "formUrl": "https://www.bnbchain.org/en/hackathons/smart-money-era-set-and-earn"
+  },
+  "suggestion": {
+    "chainId": 97,
+    "tokenId": "1866",
+    "agentId": "97:0x8004a818bfb912233c491871b3d84c89a494bd9e:1866",
+    "name": "hosted-erc8183-seller-fixture",
+    "price": "1e-18 test U",
+    "free": true,
+    "href": "?hire=97%3A0x8004a818bfb912233c491871b3d84c89a494bd9e%3A1866"
+  },
+  "next": [
+    {
+      "action": "build",
+      "label": "Fix the agent card in the Forge (Vitals)",
+      "href": "/builders?agent=56:367904"
+    }
+  ],
+  "tryAllFour": [
+    {
+      "category": "yield",
+      "done": false,
+      "job": null
+    },
+    {
+      "category": "grid",
+      "done": false,
+      "job": null
+    },
+    {
+      "category": "rebalancing",
+      "done": true,
+      "job": {
+        "chainId": 56,
+        "jobId": "56916"
+      }
+    },
+    {
+      "category": "health_factor",
+      "done": false,
+      "job": null
+    }
+  ],
+  "marketplaces": [
+    {
+      "name": "Marque",
+      "domain": "marque.trade",
+      "url": "https://marque.trade/",
+      "seenOnEscrow": true
+    },
+    {
+      "name": "TermiX",
+      "domain": "termix.ai",
+      "url": "https://app.termix.ai/",
+      "seenOnEscrow": false
+    },
+    {
+      "name": "Agent Souk",
+      "domain": "agentsouk.xyz",
+      "url": "https://agentsouk.xyz",
+      "seenOnEscrow": false
+    },
+    {
+      "name": "Dolphin",
+      "domain": "dolphinamp.xyz",
+      "url": "https://www.dolphinamp.xyz/",
+      "seenOnEscrow": false
+    },
+    {
+      "name": "HelloFugu",
+      "domain": "hellofugu.xyz",
+      "url": "https://app.hellofugu.xyz/",
+      "seenOnEscrow": false
+    },
+    {
+      "name": "KATTEGAT",
+      "domain": "kattegat.xyz",
+      "url": "https://kattegat.xyz/",
+      "seenOnEscrow": false
+    },
+    {
+      "name": "Pokter",
+      "domain": "pokter.xyz",
+      "url": "https://pokter.xyz/",
+      "seenOnEscrow": true
+    },
+    {
+      "name": "Agent Atlas",
+      "domain": "agent-atlas.xyz",
+      "url": "https://www.agent-atlas.xyz/",
+      "seenOnEscrow": false
+    },
+    {
+      "name": "Mandate",
+      "domain": "mandatemarkets.com",
+      "url": "https://www.mandatemarkets.com/",
+      "seenOnEscrow": true
+    }
+  ],
+  "method": {
+    "attribution": "marque_intent > client_ref > via <domain> in the task > known envelope > not recorded (https://marque.trade/docs/attribution)",
+    "funded": "A hire counts from its JobFunded event in the window. Created-but-unfunded jobs are listed and never counted.",
+    "independence": "Direct BNB and token transfers from the builder wallets to each hirer are checked. Transfers through other wallets or contracts are not."
+  }
+}
