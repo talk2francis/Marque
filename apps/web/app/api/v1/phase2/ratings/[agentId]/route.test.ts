@@ -14,12 +14,12 @@ const call=(suffix='',agentId='999999999999')=>GET(new Request('https://candidat
 it('default ratings preserve their existing shape and explicitly invalidate old loose-binding cache',async()=>{
   const r=await (await call()).json()
   expect(Object.keys(r)).toEqual(['agentKey','name','mainnet','testnet']);expect(r.mainnet.evidence).toBeUndefined()
-  expect(mocks.served.mock.calls[0]![0]).toBe('phase2:ratings-v2:999999999999')
+  expect(mocks.served.mock.calls[0]![0]).toBe('phase2:ratings-v3:999999999999')
 })
 it('evidence opt-in cannot reuse the default projection cache',async()=>{
   const r=await (await call('?format=evidence')).json()
   expect(r.mainnet.evidence.schema).toBe('marque.rating-evidence.v1')
-  expect(mocks.served.mock.calls[0]![0]).toBe('phase2:ratings-v2:evidence:999999999999')
+  expect(mocks.served.mock.calls[0]![0]).toBe('phase2:ratings-v3:evidence:999999999999')
 })
 it('rejects malformed identity before SQL or projection work',async()=>{
   expect((await call('','../56')).status).toBe(400);expect(mocks.execute).not.toHaveBeenCalled();expect(mocks.served).not.toHaveBeenCalled()
