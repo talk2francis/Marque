@@ -1,9 +1,15 @@
 import { CAMPAIGN_RULES } from '../../lib/campaign-rules'
 import { BRAND, Limits } from '@marque/ui'
 import styles from './CampaignNotice.module.css'
+import { CHECK_WALLET, CLOSED_LINE, isClosed } from '../../lib/post-close'
 
 /** Guidance only: Marque cannot observe registration or activity at other marketplaces. */
 export function CampaignNotice({ builders = false }: { builders?: boolean }) {
+  if (isClosed(Date.now())) return (
+    <aside className={styles.notice} aria-label="Set and Earn has closed">
+      <p>{CLOSED_LINE} <a href={CHECK_WALLET.href}>{CHECK_WALLET.label}</a></p>
+    </aside>
+  )
   return (
     <aside className={styles.notice} aria-label="Official campaign and local checks">
       <p>

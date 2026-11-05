@@ -79,7 +79,7 @@ export const HOME_FAQ: readonly HomeFaqItem[] = [
     id: 'what-if-it-goes-wrong',
     q: 'What if the answer is wrong, or nothing arrives?',
     a: () => [
-      'Wrong: open the job’s Job Room from the wallet that paid and press Report a problem inside the review window. That opens a dispute on the escrow, and the payment stays locked until it is decided.',
+      'Wrong: open the job’s Job Room from the wallet that paid and press Open a dispute inside the review window. That opens the dispute on the escrow, and the payment stays locked until it is decided.',
       'Nothing delivered: once the job’s deadline passes, reclaim your payment from the Job Room. The escrow is BNB Chain’s contract, so you can also do either directly on BscScan, without Marque.',
     ],
     proof: { label: 'Something wrong with a hire?', href: '/docs#problems' },

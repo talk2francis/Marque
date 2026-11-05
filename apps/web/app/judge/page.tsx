@@ -14,6 +14,7 @@ import { RepayPlanButton } from './RepayPlanButton'
 import styles from './judge.module.css'
 import { operatorWalletsHere } from '../../lib/operators-here'
 import { proofProjection } from '../../lib/proof'
+import { isClosed, JUDGE_AFTER_CLOSE } from '../../lib/post-close'
 
 // Rendered at request time (never at build: the build has no archive RPC); the reads are cached for a minute below.
 export const dynamic = 'force-dynamic'
@@ -135,6 +136,23 @@ export default async function JudgePage() {
           <h1 className="t-display">Marque in six steps.</h1>
           <p className={styles.lede}>From a position that needs work to the action its owner would sign.</p>
         </header>
+        {isClosed(Date.now()) ? (
+          <section aria-labelledby="after-close">
+            <h2 id="after-close" className={styles.jobsTitle}>Since Set and Earn closed, start here</h2>
+            <ol className={styles.steps}>
+              {JUDGE_AFTER_CLOSE.map((s, i) => (
+                <li key={s.href} className={styles.step}>
+                  <span className={styles.stepIndex}>{i + 1}</span>
+                  <div className={styles.stepBody}>
+                    <span className={styles.stepTitle}>{s.label}</span>
+                    <div className={styles.stepWhy}>{s.note}</div>
+                    <div className={styles.stepActions}><a className="btn btn--sm" href={s.href}>{s.label}</a></div>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </section>
+        ) : null}
         {proof ? (() => {
           const m = proof.totals['56']!.outside, t = proof.totals['97']!.outside
           return (

@@ -9,6 +9,7 @@ import { useCampaignClock } from './Countdown'
 import { RemindMenu, useInPageReminders } from './Reminders'
 import { ADDRESS_EVENT, dockPrefs, questAddress, saveDockPrefs, type DockPrefs } from './store'
 import styles from './campaign.module.css'
+import { CHECK_WALLET, CLOSED_LINE } from '../../../lib/post-close'
 
 /** What the Dock needs from /api/v1/quest/{address}; the rest of the payload is ignored. */
 interface DockQuest {
@@ -138,7 +139,7 @@ export function CampaignDock() {
             </div>
             <button type="button" className={styles.iconBtn} onClick={collapse} aria-label="Collapse"><ChevronDown aria-hidden="true" /></button>
           </div>
-          {clock.closed ? <p className={styles.clock}>Closed. BNB Chain announces winners after 13 November.</p> : (
+          {clock.closed ? <p className={styles.clock}>{CLOSED_LINE} <Link href={CHECK_WALLET.href}>{CHECK_WALLET.label}</Link></p> : (
             <div className={styles.face} data-warn={warn || undefined} role="timer" aria-label={`${clockWords(clock)} left. Closes Thursday 5 November, 12:00 UTC`}>
               {([[clock.days, 'days'], [clock.hours, 'hours'], [clock.minutes, 'min']] as const).map(([v, u]) => (
                 <span key={u} className={styles.unit}><b>{String(v).padStart(2, '0')}</b><small>{u}</small></span>

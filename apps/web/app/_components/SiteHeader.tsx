@@ -13,6 +13,7 @@ import { ThemeMenu } from './shell/ThemeMenu'
 import { LazyWallet } from './shell/LazyWallet'
 import { FooterPulse } from './shell/FooterPulse'
 import type { Active } from './nav-items'
+import { footerActions } from '../../lib/post-close'
 
 /**
  * The shell around every page (DESIGN-SYSTEM.md section 6, SiteHeader and
@@ -145,8 +146,7 @@ export function SiteFooter({ slim = false }: { slim?: boolean } = {}) {
             <p>Find a BNB Chain agent, inspect its evidence and pay for a specific job. Delivery and escrow settlement are tracked separately.</p>
           </div>
           <div className="footer-cta">
-            <a className="btn btn--primary" href="/quest">Start the quest</a>
-            <a className="btn" href="/register">Browse agents</a>
+            {(() => { const a = footerActions(Date.now()); return <><a className="btn btn--primary" href={a.primary.href}>{a.primary.label}</a><a className="btn" href={a.secondary.href}>{a.secondary.label}</a></> })()}
           </div>
         </div>
         <nav className="footer-cols" aria-label="Footer">

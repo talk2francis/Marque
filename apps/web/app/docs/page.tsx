@@ -3,6 +3,7 @@ import { NETWORKS, REPUTATION_REGISTRY } from '@marque/commerce'
 import { explorerAddress } from '../../lib/network'
 import { DocSection, DocShell } from './_ui/DocShell'
 import styles from './docs.module.css'
+import { docsPrimary } from '../../lib/post-close'
 
 export const metadata = {
   title: 'How to use Marque',
@@ -62,7 +63,7 @@ export default function DocsPage() {
       label="Docs · hiring, building, verifying"
       title="How to use Marque."
       lede="Marque is a marketplace on BNB Smart Chain where you hire AI agents for on-chain jobs, see which ones passed a published test, and pay through BNB Chain's escrow from your own wallet. Here is how it works end to end: as a buyer, as a quest player, as a builder, and as someone who wants to check every number."
-      actions={<><a className="btn btn--primary" href="/quest">Start the Set and Earn quest</a><a className="btn" href="/docs/faq">Questions, answered</a></>}
+      actions={<><a className="btn btn--primary" href={docsPrimary(Date.now()).href}>{docsPrimary(Date.now()).label}</a><a className="btn" href="/docs/faq">Questions, answered</a></>}
       sections={SECTIONS}
     >
       <DocSection id="overview" title="Overview">
@@ -113,7 +114,7 @@ export default function DocsPage() {
             <colgroup><col style={{ width: '26%' }} /><col style={{ width: '24%' }} /><col style={{ width: '50%' }} /></colgroup>
             <thead><tr><th scope="col">What happened</th><th scope="col">What to press</th><th scope="col">What follows</th></tr></thead>
             <tbody>
-              <tr><th scope="row">The answer is wrong, incomplete or not what you paid for</th><td><b>Report a problem</b>, inside the review window shown for that job</td><td>A dispute opens on BNB Chain&apos;s escrow. The payment stays locked until it is decided: if the delivery is rejected you are refunded, otherwise the agent is paid. It costs only the network fee.</td></tr>
+              <tr><th scope="row">The answer is wrong, incomplete or not what you paid for</th><td><b>Open a dispute</b>, inside the review window shown for that job</td><td>A dispute opens on BNB Chain&apos;s escrow. The payment stays locked until it is decided: if the delivery is rejected you are refunded, otherwise the agent is paid. It costs only the network fee.</td></tr>
               <tr><th scope="row">The agent never delivered</th><td><b>Reclaim your payment</b>, from the date shown once the deadline passes</td><td>Your wallet requests the refund allowed by the current contract state. Undelivered jobs follow their onchain expiry; disputed or rejected jobs may follow a different path.</td></tr>
               <tr><th scope="row">You opened a job but did not pay</th><td><b>Cancel job</b></td><td>The unpaid job closes. Earlier approvals or network fees may still apply.</td></tr>
               <tr><th scope="row">It worked, or it did not</th><td><b>Rate</b> 1 to 5 stars, with a comment</td><td>Written to the ERC-8004 registry from your wallet, tied to the job, shown as a verified buyer&apos;s rating.</td></tr>

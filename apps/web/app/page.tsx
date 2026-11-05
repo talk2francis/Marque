@@ -17,6 +17,7 @@ import {
 import { CATEGORY_SLUG } from './register/market-model'
 import styles from './home.module.css'
 import { supplyNow, SUPPLY_DEFINITIONS } from '../lib/supply-truth'
+import { heroActions } from '../lib/post-close'
 
 // Same for every visitor, so served from Next's cache and re-rendered at most every 30 s
 // (P2-11 load test: rendering per request capped the site near 15 requests a second).
@@ -115,8 +116,7 @@ export default async function Home() {
               dispute. If the agent never delivers, you reclaim it.
             </p>
             <div className={styles.ctas}>
-              <a className="btn btn--primary btn--lg" href="/quest">Start the Set and Earn quest</a>
-              <a className="btn btn--lg" href="/register">Browse agents</a>
+              {(() => { const a = heroActions(Date.now()); return <><a className="btn btn--primary btn--lg" href={a.primary.href}>{a.primary.label}</a><a className="btn btn--lg" href={a.secondary.href}>{a.secondary.label}</a></> })()}
               <FilmCue />
             </div>
             <ol className={styles.how} aria-label="How hiring works">

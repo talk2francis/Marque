@@ -36,7 +36,7 @@ export function Countdown({ words = false, className }: { words?: boolean; class
     <span className={className} suppressHydrationWarning>
       {/* Before the clock is known (the server HTML, read by link previews and AI assistants that run no scripts), the
           absolute close stands in: true at any hour, so it never reads as a wrong countdown (3 Nov). */}
-      <span aria-hidden={c ? 'true' : undefined}>{c ? (words ? clockWords(c) : clockShort(c)) : `until ${CLOSE_WORDS}`}</span>
+      <span aria-hidden={c ? 'true' : undefined}>{c ? (words ? clockWords(c) : clockShort(c)) : campaignClock(Date.now()).closed ? `Closed ${CLOSE_WORDS}` : `until ${CLOSE_WORDS}`}</span>
       <span className="sr-only" aria-live="polite">{hourly}</span>
     </span>
   )
