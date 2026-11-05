@@ -77,11 +77,13 @@ export function ProofTable({ rows }: { rows: ProofRow[] }) {
         </label>
       </div>
       <div className={styles.paidBy} role="radiogroup" aria-label="Paid by">
-        {(['all', 'outside', 'team', 'operator'] as const).map((f) => (
-          <button key={f} type="button" role="radio" aria-checked={funder === f} className={styles.tabBtn} onClick={() => pickFunder(f)}>
-            {f === 'all' ? 'Everyone' : FUNDER_SHORT[f]}<span>{count(f)}</span>
-          </button>
-        ))}
+        <div className={styles.tabs}>
+          {(['all', 'outside', 'team', 'operator'] as const).map((f) => (
+            <button key={f} type="button" role="radio" aria-checked={funder === f} className={styles.tabBtn} onClick={() => pickFunder(f)}>
+              {f === 'all' ? 'Everyone' : FUNDER_SHORT[f]}<span>{count(f)}</span>
+            </button>
+          ))}
+        </div>
         <span className={styles.resultCount} role="status" aria-live="polite">
           {shown.length} {shown.length === 1 ? 'job' : 'jobs'}{filtered ? <> · <button type="button" className={styles.linkBtn} onClick={clear}>Clear filters</button></> : null}
         </span>

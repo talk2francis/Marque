@@ -23,11 +23,38 @@
 .funder { font-size: 12px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--hair-2); white-space: nowrap; }
 .funder[data-funder='outside'] { border-color: color-mix(in srgb, var(--moss) 55%, var(--hair-2)); color: var(--ink); }
 .funder[data-funder='team'] { border-style: dashed; }
-@media (max-width: 640px) {
+/* Phones and tablets (5 Nov): the nine columns do not fit under about 1000 px, so each job becomes a compact card:
+   the job and its state, the agent, who paid, the four facts in a labelled two-by-two grid, then the escrow links.
+   Two cards a row on a tablet. Column order in the markup: job, agent, paid by, state, checks, terms, rated, acted,
+   escrow. */
+@media (max-width: 1000px) {
+  .tableWrap { overflow: visible; }
+  .table, .table tbody { display: block; }
   .table thead { display: none; }
-  .table tr { display: grid; gap: 4px; padding: 12px 0; border-bottom: 1px solid var(--hair); }
-  .table td { border: 0; padding: 0; }
-  .table td::before { content: attr(data-label) ': '; color: var(--ink-3); font-size: 12px; }
+  .table tr {
+    display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 16px; row-gap: 10px;
+    grid-template-areas: 'job state' 'agent agent' 'paid paid' 'checks terms' 'rated acted' 'escrow escrow';
+    padding: 16px 0; border-bottom: 1px solid var(--hair);
+  }
+  .table td { border: 0; padding: 0; min-width: 0; overflow-wrap: anywhere; }
+  .table td:nth-child(1) { grid-area: job; }
+  .table td:nth-child(1) a { font-size: 15px; font-weight: 600; }
+  .table td:nth-child(2) { grid-area: agent; color: var(--ink); font-size: 15px; line-height: 1.35; }
+  .table td:nth-child(3) { grid-area: paid; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
+  .table td:nth-child(3) .sub { display: inline; font-family: var(--font-mono, ui-monospace, monospace); }
+  .table td:nth-child(4) { grid-area: state; justify-self: end; text-align: right; }
+  .table td:nth-child(5) { grid-area: checks; }
+  .table td:nth-child(6) { grid-area: terms; }
+  .table td:nth-child(7) { grid-area: rated; }
+  .table td:nth-child(8) { grid-area: acted; }
+  .table td:nth-child(n+5):nth-child(-n+8) { font-size: 13.5px; }
+  .table td:nth-child(n+5):nth-child(-n+8)::before { content: attr(data-label); display: block; margin-bottom: 1px; font-size: 11.5px; color: var(--ink-3); }
+  .table td:nth-child(9) { grid-area: escrow; font-size: 12.5px; color: var(--ink-3); }
+  .table td:nth-child(9)::before { content: 'Escrow '; color: var(--ink-3); }
+  .table tr[data-funder='team'] td:nth-child(2) { color: var(--ink-2); }
+}
+@media (min-width: 700px) and (max-width: 1000px) {
+  .table tbody { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 32px; }
 }
 
 /* ---------- The scorecard (2 Nov): one row per network, aligned figures, each a filter ---------- */
@@ -75,6 +102,7 @@
 .toggle { display: inline-flex; align-items: center; gap: 8px; min-height: 42px; padding: 0 12px; font-size: 13.5px; color: var(--ink-2); border: 1px solid var(--hair); border-radius: 10px; cursor: pointer; }
 .toggle input { accent-color: var(--brass); }
 .paidBy { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 2px 18px; border-bottom: 1px solid var(--hair-2); }
+.tabs { display: flex; gap: 18px; min-width: 0; }
 .tabBtn { font: inherit; font-size: 14px; padding: 10px 0; margin-bottom: -1px; border: 0; border-bottom: 2px solid transparent; background: none; color: var(--ink-3); cursor: pointer; }
 .tabBtn span { margin-left: 6px; font-size: 12.5px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
 .tabBtn[aria-checked='true'] { color: var(--ink); border-bottom-color: var(--brass); }
@@ -92,4 +120,9 @@
   .seg button { flex: 1 1 0; }
   .select, .toggle { flex: 1 1 auto; }
   .resultCount { width: 100%; margin-left: 0; padding-top: 0; }
+  /* The four tabs stay on one line and scroll sideways rather than wrap one under the rest. */
+  .paidBy { border-bottom: 0; }
+  .tabs { width: 100%; overflow-x: auto; scrollbar-width: none; border-bottom: 1px solid var(--hair-2); }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tabBtn { white-space: nowrap; flex: 0 0 auto; }
 }
