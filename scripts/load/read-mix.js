@@ -19,9 +19,11 @@ export const options = {
     reads: { executor: 'ramping-vus', startVUs: 0, stages: [{ duration: '20s', target: VUS }, { duration: HOLD, target: VUS }, { duration: '5s', target: 0 }] },
   },
   thresholds: {
-    page_duration: ['p(95)<800'],
+    // Targets (reported, not stopping) and the stop rule: more than 0.5% 5xx, or page p95 over 2 s, ends the run at once
+    // so a load test never becomes an outage (5 Nov brief, B1).
+    page_duration: ['p(95)<800', { threshold: 'p(95)<2000', abortOnFail: true, delayAbortEval: '20s' }],
     api_duration: ['p(95)<1500'],
-    http_5xx: ['rate<0.005'],
+    http_5xx: [{ threshold: 'rate<0.005', abortOnFail: true, delayAbortEval: '10s' }],
   },
   summaryTrendStats: ['avg', 'med', 'p(90)', 'p(95)', 'p(99)', 'max'],
 }
