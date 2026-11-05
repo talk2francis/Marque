@@ -20,8 +20,6 @@ export const NAV: NavLink[] = [
   // Plain names for a first visit (five-second test, 24 Oct): the campaign by its own name, and the place to make
   // an agent called what it is, marked so it is found.
   { label: 'Agent Forge', href: '/builders', key: 'builders', spark: true },
-  // Every job (5 Nov, after the close): the page where the record is, back on the bar where a reviewer looks first.
-  { label: 'Every job', href: '/proof', key: 'proof' },
   { label: 'Set and Earn', href: '/quest', key: 'quest' },
   { label: 'Positions', href: '/positions', key: 'positions' },
   { label: 'Docs', href: '/docs', key: 'docs' },
