@@ -1,23 +1,14 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { sql } from 'drizzle-orm'
 import { db } from '@marque/db'
-import { agentForSheet, disputeWindowSeconds, freeTarget, HireError, isSupportedChain, campaignChainId, chainClient, network, type ChainId } from '@marque/commerce'
+import { agentForSheet, disputeWindowSeconds, freeTarget, HireError, isSupportedChain, campaignChainId } from '@marque/commerce'
 import { hireError } from '../../../../../lib/hire-api'
 import { withDeadline } from '../../../../../lib/deadline'
 import { registryImageUrl } from '../../../../../lib/avatar-source'
+import { platformFeeBp } from '../../../../../lib/escrow-fee'
 
 export const dynamic = 'force-dynamic'
 
-const feeAbi = [{ type: 'function', name: 'platformFeeBP', stateMutability: 'view', inputs: [], outputs: [{ type: 'uint256' }] }] as const
-const feeCache = new Map<ChainId, { at: number; bp: number }>()
-/** AgenticCommerce.platformFeeBP(), read live and cached for an hour. */
-async function platformFeeBp(chainId: ChainId): Promise<number | null> {
-  const hit = feeCache.get(chainId)
-  if (hit && Date.now() - hit.at < 3600_000) return hit.bp
-  const bp = Number(await chainClient(chainId).readContract({ address: network(chainId).commerce, abi: feeAbi, functionName: 'platformFeeBP' }))
-  feeCache.set(chainId, { at: Date.now(), bp })
-  return bp
-}
 
 /** GET /api/v1/hire/agent?agentId=: the agent the hire sheet is about, with its last live quote. */
 export async function GET(req: NextRequest) {

@@ -1,6 +1,6 @@
 import { Limits } from '@marque/ui'
 import { BRAND } from '@marque/ui/brand'
-import { CHAPTERS, FILM, filmArchived, filmJsonLd, mediaUrl } from '../../../lib/film'
+import { CHAPTERS, FILM, filmAfter, filmJsonLd, mediaUrl } from '../../../lib/film'
 import { FILM_MEDIA } from '../../../lib/film-media'
 import { FilmPlayer } from './FilmPlayer'
 import { FilmTime } from './FilmCue'
@@ -13,16 +13,19 @@ import styles from './film.module.css'
  * offers the file.
  */
 export function FilmSection({ context }: { context: 'home' | 'page' }) {
-  const archived = filmArchived(Date.now())
+  const after = filmAfter(Date.now())
   const Heading = context === 'page' ? 'h1' : 'h2'
   const limits = (
     <Limits label="What is real in this film">
       <ul className={styles.limitsList}>
         <li>The hire is <a href="/jobs/56/56903">job 56903</a>: Keel, a Marque reference agent, paid by an outside wallet on BSC mainnet: a builder whose agents are also listed here. Its answer, checks and transactions are the real ones, and the frame links to them while it plays.</li>
-        <li>The registry figures at the start were measured on {FILM.measured}. {context === 'home' ? 'The live record is just below.' : <>The live record is on the <a href="/#record">home page</a>.</>}</li>
+        <li>{after
+          ? <>Every figure in it was read from Marque&apos;s public record at {FILM.after.measured}: the registry count, the agents answering and checked, and every job on BSC mainnet from 1 Oct to the close.</>
+          : <>The registry figures at the start were measured on {FILM.measured}.</>} {context === 'home' ? 'The live record is just below.' : <>The live record is on the <a href="/#record">home page</a>.</>}</li>
+        {after ? <li>&ldquo;Outside hires&rdquo; are BSC mainnet jobs paid by wallets that are not in Marque&apos;s published team list: {FILM.after.record.outsideMainnet} from {FILM.after.record.outsideWallets} wallets, {FILM.after.record.outsideAlsoOperator} of them from wallets that also run agents listed here. Team test jobs are shown, hollow, and never counted. <a href="/proof">Every job, who paid</a>.</li> : null}
         <li>The build and assistant chapters show an illustrative agent and chat. The steps, tools and checks are the real ones, on BSC testnet.</li>
-        <li>{archived
-          ? <>This is the film as posted on 27 Oct 2026. Set and Earn closed on Thu 5 Nov, 12:00 UTC.</>
+        <li>{after
+          ? <>The launch film, with the Set and Earn countdown, was posted on 27 Oct 2026{context === 'page' ? '; it is still below to download' : ''}. This cut has played since Set and Earn closed on Thu 5 Nov, 12:00 UTC.</>
           : <>The countdown is today&apos;s. Each day has its own cut, timed to the close on Thu 5 Nov, 12:00 UTC, so the film and the Set and Earn clock always agree.</>}</li>
       </ul>
     </Limits>
@@ -33,7 +36,7 @@ export function FilmSection({ context }: { context: 'home' | 'page' }) {
         <div className={styles.head}>
           <div className={styles.headRule}>
             <span className={styles.headCross} aria-hidden="true" />
-            <span className="t-label">{archived ? 'The launch film' : 'The film'}</span>
+            <span className="t-label">The film</span>
             <span className={styles.headNote}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" /><path d="M15.5 9a4.2 4.2 0 0 1 0 6" /></svg>
               1:00, sound on
@@ -41,7 +44,7 @@ export function FilmSection({ context }: { context: 'home' | 'page' }) {
           </div>
           <Heading id="film-title" className={styles.title}>Sixty seconds, <em>on the record.</em></Heading>
           <p className={styles.lede}>
-            One real hire on BSC mainnet, from the question to an answer checked against the chain. Then an agent you build, an assistant that hires for you, and the quest.
+            One real hire on BSC mainnet, from the question to an answer checked against the chain. Then an agent you build, an assistant that hires for you, and {after ? 'the record Set and Earn left' : 'the quest'}.
           </p>
         </div>
 
@@ -73,7 +76,9 @@ export function FilmSection({ context }: { context: 'home' | 'page' }) {
           </details>
           {context === 'page' ? (
             <p className={`${styles.download} ${styles.wide}`}>
-              <a href={mediaUrl(FILM_MEDIA.variants.d9.h264.file)} download="marque-on-the-record.mp4">Download the film as posted on 27 Oct 2026</a>
+              {after ? <><a href={mediaUrl(FILM_MEDIA.variants.after.h264.file)} download="marque-on-the-record.mp4">Download the film</a>
+              <span>(MP4, 1080p, {Math.round(FILM_MEDIA.variants.after.h264.bytes / 1e6)} MB)</span>{' · '}</> : null}
+              <a href={mediaUrl(FILM_MEDIA.variants.d9.h264.file)} download="marque-on-the-record-launch.mp4">Download the launch film as posted on 27 Oct 2026</a>
               <span>(MP4, 1080p, {Math.round(FILM_MEDIA.variants.d9.h264.bytes / 1e6)} MB)</span>
             </p>
           ) : null}

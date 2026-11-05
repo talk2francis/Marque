@@ -5,11 +5,11 @@ import { FilmSection } from '../_components/film/FilmSection'
 import { FILM, mediaUrl } from '../../lib/film'
 import { FILM_MEDIA } from '../../lib/film-media'
 
-/** /film: the launch film on its own page, to share and to read. Same section as the home page. */
+/** /film: the film on its own page, to share and to read. Same section as the home page. */
 export const revalidate = 300
 
 const poster = FILM_MEDIA.poster.jpg[FILM_MEDIA.poster.jpg.length - 1]!
-const description = 'One real hire on BNB Chain in sixty seconds: ask, choose on proof, pay into escrow, get an answer checked against the chain. Then build an agent people hire, and the Set and Earn quest.'
+const description = 'One real hire on BNB Chain in sixty seconds: ask, choose on proof, pay into escrow, get an answer checked against the chain. Then build an agent people hire, and the record Set and Earn left: every mainnet job, 1 Oct to 5 Nov 2026.'
 
 export const metadata: Metadata = {
   title: 'The film',

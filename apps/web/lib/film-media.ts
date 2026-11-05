@@ -6,7 +6,8 @@ import media from './film-media.json'
  * byte ranges and a year of immutable caching (docs/RUNBOOK.md, "Film media").
  * `node scripts/film-verify.mjs` checks the files on disk and over HTTP against this manifest.
  */
-export type FilmVariantKey = 'd9' | 'd8' | 'd7' | 'd6' | 'd5' | 'd4' | 'd3' | 'd2' | 'd1' | 'd0'
+/** d9 to d0: the campaign countdown cuts (d9 is the launch film as posted on 27 Oct). after: the cut from the close. */
+export type FilmVariantKey = 'd9' | 'd8' | 'd7' | 'd6' | 'd5' | 'd4' | 'd3' | 'd2' | 'd1' | 'd0' | 'after'
 export type FilmCodec = 'av1' | 'h264'
 export interface FilmFile { file: string; bytes: number; sha256: string }
 export interface FilmVariant { av1: FilmFile; h264: FilmFile; storyboard: FilmFile }

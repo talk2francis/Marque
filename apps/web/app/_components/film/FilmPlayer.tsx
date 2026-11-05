@@ -1,7 +1,7 @@
 'use client'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { CHAPTERS, FILM, chapterAt, clock, filmArchived, filmVariant, mediaUrl, posterSources, type FilmChapter } from '../../../lib/film'
+import { CHAPTERS, FILM, chapterAt, clock, filmCta, filmVariant, mediaUrl, posterSources, type FilmChapter } from '../../../lib/film'
 import { FILM_MEDIA, type FilmCodec, type FilmVariantKey } from '../../../lib/film-media'
 import { track } from '../../../lib/track'
 import styles from './film.module.css'
@@ -61,7 +61,7 @@ export function FilmPlayer() {
   const [full, setFull] = useState(false)
   const [theater, setTheater] = useState(false)
   const [idle, setIdle] = useState(false)
-  const [archived, setArchived] = useState(false)
+  const [cta, setCta] = useState<ReturnType<typeof filmCta> | null>(null)
   const [startAt, setStartAt] = useState(0)
   const [pip, setPip] = useState(false)
   const [hover, setHover] = useState<{ x: number; t: number } | null>(null)
@@ -78,7 +78,7 @@ export function FilmPlayer() {
   // ---- mount: codec, deep link (?t=30), archive state, readiness for the hero cue
   useEffect(() => {
     setMounted(true)
-    setArchived(filmArchived(Date.now()))
+    setCta(filmCta(Date.now()))
     setPip(typeof document !== 'undefined' && 'pictureInPictureEnabled' in document && document.pictureInPictureEnabled)
     const q = Number(new URL(window.location.href).searchParams.get('t'))
     if (Number.isFinite(q) && q > 0 && q < FILM.duration) { setStartAt(Math.floor(q)); setT(Math.floor(q)) }
@@ -179,7 +179,7 @@ export function FilmPlayer() {
     // Lock screens and media keys name the film.
     if ('mediaSession' in navigator && typeof MediaMetadata !== 'undefined') {
       const art = FILM_MEDIA.poster.jpg[0]
-      navigator.mediaSession.metadata = new MediaMetadata({ title: FILM.title, artist: 'Marque', album: 'The launch film', artwork: art ? [{ src: mediaUrl(art.file), sizes: `${art.w}x${Math.round((art.w * 9) / 16)}`, type: 'image/jpeg' }] : [] })
+      navigator.mediaSession.metadata = new MediaMetadata({ title: FILM.title, artist: 'Marque', album: 'Marque', artwork: art ? [{ src: mediaUrl(art.file), sizes: `${art.w}x${Math.round((art.w * 9) / 16)}`, type: 'image/jpeg' }] : [] })
     }
     const p = v.play()
     setPhase((ph) => (ph === 'poster' || ph === 'ended' ? 'loading' : ph))
@@ -361,7 +361,7 @@ export function FilmPlayer() {
   const sb = FILM_MEDIA.storyboard
   const sprite = mounted ? mediaUrl(FILM_MEDIA.variants[filmVariant(Date.now())].storyboard.file) : null
   const thumbIdx = hover ? Math.min(Math.floor(hover.t / sb.every), Math.floor(FILM.duration / sb.every) - 1) : 0
-  const ctaLive = !archived && (phase === 'playing' || phase === 'paused' || phase === 'ended') && t >= FILM.cta.from
+  const ctaLive = cta !== null && (phase === 'playing' || phase === 'paused' || phase === 'ended') && t >= cta.from
   const ev = chapter.evidence
   const label = failed ? 'The film did not load. Try again' : phase === 'ended' ? 'Watch again' : startAt ? `Play from ${clock(startAt)}` : 'Play the film'
 
@@ -434,15 +434,15 @@ export function FilmPlayer() {
             <a className={styles.evidence} key={chapter.id} href={ev.href ?? undefined} target={ev.href ? '_blank' : undefined} rel="noopener" data-prov={ev.provenance ?? 'none'}
               onClick={() => track('film_evidence', { c: chapter.id })} aria-label={`${ev.label}${ev.href ? ', opens in a new tab' : ''}`}>
               {ev.provenance ? <span className={`prov prov--${ev.provenance === 'ILLUSTRATIVE' ? 'claimed' : ev.provenance.toLowerCase()}`}>{ev.provenance}</span> : null}
-              <span className={styles.evText}>{archived && chapter.id === 'quest' ? 'Set and Earn closed Thu 5 Nov, 12:00 UTC' : ev.label}</span>
+              <span className={styles.evText}>{ev.label}</span>
               {ev.href ? <IconOut /> : null}
             </a>
           ) : null}
 
-          {ctaLive ? (
-            <a className={styles.cta} href="/quest" onClick={() => track('film_cta', { to: 'quest', at: Math.round(t) })}
-              style={{ left: `${FILM.cta.left}%`, top: `${FILM.cta.top}%`, width: `${FILM.cta.width}%`, height: `${FILM.cta.height}%` }}>
-              <span className="sr-only">Start the Set and Earn quest</span>
+          {ctaLive && cta ? (
+            <a className={styles.cta} href={cta.href} onClick={() => track('film_cta', { to: cta.href.slice(1), at: Math.round(t) })}
+              style={{ left: `${cta.left}%`, top: `${cta.top}%`, width: `${cta.width}%`, height: `${cta.height}%` }}>
+              <span className="sr-only">{cta.label}</span>
             </a>
           ) : null}
 

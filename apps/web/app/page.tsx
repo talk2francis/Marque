@@ -6,6 +6,7 @@ import { RecentHires } from './_components/RecentHires'
 import { ReadyNow } from './_components/home/ReadyNow'
 import { UNote } from './_components/ui/UNote'
 import { SnapshotAge } from './_components/home/SnapshotAge'
+import { HomeFaq } from './_components/home/HomeFaq'
 import { FilmSection } from './_components/film/FilmSection'
 import { FilmCue } from './_components/film/FilmCue'
 import { ROADMAP, ROADMAP_CHECKED } from './docs/whitepaper'
@@ -312,6 +313,9 @@ export default async function Home() {
           </ol>
           <p className={styles.rmFoot}>Checked {ROADMAP_CHECKED}. <a href="/marque-whitepaper.pdf" download>Whitepaper (PDF)</a></p>
         </section>
+
+        {/* ---- Questions, answered: the eight a first visit asks, each ending at the page that shows it ---- */}
+        <HomeFaq supply={line ? { hireable: line.hireable, checked: line.checked, warranted: line.warranted, measuredAt: line.measuredAt } : null} />
       </main>
       <SiteFooter />
     </>
