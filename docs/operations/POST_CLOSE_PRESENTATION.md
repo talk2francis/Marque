@@ -12,7 +12,7 @@ The display now imports the existing `WARRANT_DAYS` constant. A scheduled refres
 
 Set and Earn retains the complete existing agent shelf. Forge shows three examples from that same read and links to the full directory, without repeating hire totals and the campaign checklist. Three is a presentation limit, never a claimed population count. No identity is removed from the backing projection or marketplace.
 
-The campaign shelf now labels its timestamps and current observations separately from frozen eligibility. After the close it reports recorded completed hires without asking builders to obtain more qualifying hires. It states that new hires do not change campaign eligibility. The Forge no longer promises a still-open campaign. The underlying shelf query and all campaign/quest definitions remain unchanged.
+The campaign shelf now labels its timestamps and current observations separately from frozen eligibility. The existing query counts distinct payer wallets, so labels say wallets with completed hires. After the close it reports those recorded wallets without asking builders to obtain more qualifying hires. It states that new hires do not change campaign eligibility. The Forge no longer promises a still-open campaign. The underlying shelf query and all campaign/quest definitions remain unchanged.
 
 ## Questions and page rhythm
 

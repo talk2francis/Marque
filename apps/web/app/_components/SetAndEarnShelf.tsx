@@ -47,7 +47,7 @@ export async function SetAndEarnShelf({ id = 'built-during', compact = false }: 
               <a className={styles.name} href={page}>{a.name}</a>
               {!a.live && a.reason ? <p className={styles.fine}>{a.reason}</p> : null}
               <p className={styles.need} data-met={a.needs === 0 || undefined}>
-                {closed || a.needs === 0 ? `${a.hirers} completed hires from other wallets` : `Needs ${a.needs} more ${a.needs === 1 ? 'hire' : 'hires'} from other wallets (${a.hirers} of ${shelf.required})`}
+                {closed || a.needs === 0 ? `${a.hirers} other ${a.hirers === 1 ? 'wallet' : 'wallets'} with completed hires` : `Needs ${a.needs} more ${a.needs === 1 ? 'wallet' : 'wallets'} with completed hires (${a.hirers} of ${shelf.required})`}
               </p>
               <span className={styles.foot}>
                 <span>Registered {day(a.registeredAt)}</span>
@@ -57,7 +57,7 @@ export async function SetAndEarnShelf({ id = 'built-during', compact = false }: 
           )
         })}
       </ul>
-      <p className={styles.fine}>Hires counted from BNB Chain&apos;s escrow: completed jobs paid by a wallet that is not the agent&apos;s owner or agent wallet. The builder&apos;s own checklist also leaves out wallets the builder funded, which this list does not check. {closed ? 'Testnet hires use test tokens, not mainnet money. New hires after the close do not change campaign eligibility; BNB Chain determines qualification.' : 'Testnet hires use free test tokens and count for Set and Earn.'}</p>
+      <p className={styles.fine}>Wallets counted from completed jobs in BNB Chain&apos;s escrow: a payer that is not the agent&apos;s owner or agent wallet. The builder&apos;s own checklist also leaves out wallets the builder funded, which this list does not check. {closed ? 'Testnet hires use test tokens, not mainnet money. New hires after the close do not change campaign eligibility; BNB Chain determines qualification.' : 'Testnet hires use free test tokens and count for Set and Earn.'}</p>
     </section>
   )
 }

@@ -8,7 +8,7 @@ import styles from './recheck.module.css'
 const shown = (value: RecheckField['now']['value']) => value === null ? 'Unavailable' : typeof value === 'boolean' ? value ? 'Yes' : 'No' : typeof value === 'number' ? value.toLocaleString('en-US', { maximumFractionDigits: 6 }) : value
 const utc = (value: string) => Number.isFinite(Date.parse(value)) ? new Date(value).toISOString().replace('T', ' ').slice(0, 19) + ' UTC' : null
 
-export function Recheck({ chainId, jobId, answerBlock = null, answerAt = null }: { chainId: 56 | 97; jobId: string; answerBlock?: string | null; answerAt?: string | null }) {
+export function Recheck({ chainId, jobId, category = null, answerBlock = null, answerAt = null }: { chainId: 56 | 97; jobId: string; category?: string | null; answerBlock?: string | null; answerAt?: string | null }) {
   const [result, setResult] = useState<RecheckResult | null>(null)
   const [busy, setBusy] = useState(false), [error, setError] = useState<string | null>(null)
   const [now, setNow] = useState<number | null>(null)
@@ -24,6 +24,7 @@ export function Recheck({ chainId, jobId, answerBlock = null, answerAt = null }:
     } catch { setError('The current comparison could not be read or validated. The original answer and checks are unchanged. Try again in a minute.') }
     finally { setBusy(false) }
   }
+  if (category === 'security') return <section className={styles.recheck}><h3>Security review</h3><p>Security reviews have no live recheck. Read the original findings and their sources above.</p></section>
   const comparable = result?.rows.filter(r => r.stillHolds !== null) ?? []
   const held = comparable.filter(r => r.stillHolds).length
   const age = now && answerAt && Number.isFinite(Date.parse(answerAt)) ? Math.max(0, Math.floor((now - Date.parse(answerAt)) / 3_600_000)) : null

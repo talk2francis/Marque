@@ -21,7 +21,7 @@
 .fine { margin: 0; max-width: 78ch; font-size: 12.5px; line-height: 1.5; color: var(--ink-3); }
 
 .showcase { display: grid; gap: 18px; min-width: 0; }
-.showcaseHead { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 14px 24px; }
+.showcaseHead { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 14px 24px; }
 .showcaseHead h2 { margin: 0 0 6px; font-size: 19px; font-weight: 600; color: var(--ink); }
 .showcaseHead p { margin: 0; max-width: 58ch; font-size: 13.5px; line-height: 1.5; color: var(--ink-2); }
 .directoryLink { display: inline-flex; align-items: center; gap: 8px; min-height: 36px; font-size: 13px; color: var(--ink); text-decoration: underline; text-underline-offset: 4px; }

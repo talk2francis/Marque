@@ -11,7 +11,7 @@ afterEach(()=>vi.unstubAllGlobals())
 it('keeps the complete directory on the campaign page and stops asking for hires after the close',async()=>{
  const html=renderToStaticMarkup(await SetAndEarnShelf({}))
  for(const a of agents)expect(html).toContain(a.name)
- expect(html).not.toContain('Needs 2 more');expect(html).toContain('frozen eligibility record');expect(html).toContain('New hires after the close do not change campaign eligibility')
+ expect(html).not.toContain('Needs 2 more');expect(html).toContain('1 other wallet with completed hires');expect(html).toContain('frozen eligibility record');expect(html).toContain('New hires after the close do not change campaign eligibility')
 })
 it('gives Forge a bounded set of examples with the full-directory link and no repeated hire checklist',async()=>{
  const html=renderToStaticMarkup(await SetAndEarnShelf({compact:true,id:'forge-examples'}))

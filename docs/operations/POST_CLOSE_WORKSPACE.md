@@ -16,7 +16,9 @@ Positions reads the existing mainnet endpoint, checks its address and block, and
 
 HF uses the existing HF, repay-target and liquidation-price tolerances. V3 compares the same NFT's tick, range and price distance. Yield compares identifiable Venus APRs and only computes a net rate when the original size and holding period are recorded; APY, missing protocols and absent historical context stay unavailable. Grid reads a supported USDT pair against the original bounds; its original price remains CLAIMED. Security has no live recheck. An originally disagreeing field cannot become a newly passing original result. A changed current reading is a comparison, not a replacement grade or a promise.
 
-Today and Jobs show a paginated index of answers with kept checks. The public Job Room has the same explicit recheck control. No automatic recheck runs on page load. Ask again carries only validated editable original fields, dropping the old block. New Redis projection keys are additive.
+Today and Jobs show a paginated index of answers with kept checks. The public Job Room has the same explicit recheck control, or a clear unsupported note for security reviews. No automatic recheck runs on page load. Ask again carries only validated editable original fields, dropping the old block. New Redis projection keys are additive.
+
+Cold comparisons read the indexed job, current head and recorded task in parallel; grid token metadata and price also share that same head. Only immutable answer bytes already verified against the job's content commitment are retained in a bounded process cache (16 answers, 512 KiB each, ten minutes), keyed by chain, job, provider and commitment. Missing, mismatched and unverified answers are never cached. This does not extend the one-minute current-state cache: a comparison whose actual head read is older than one minute is rejected. The four-second route deadline stays unchanged. In a source-level mainnet read on 6 November, grid, HF, V3 and yield comparisons returned HTTP 200 in 2.602, 3.383, 0.899 and 0.990 seconds respectively; these are individual checks on this host, not a capacity claim.
 
 ## Building
 

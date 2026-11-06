@@ -7,6 +7,7 @@ import { venusReader, pancakeV3Reader, yieldReader, priceInUsdt, netAprAtSize, t
 import type { LensCheck } from '@marque/conformance'
 import { erc20Abi } from 'viem'
 import { jobManifest } from './manifest'
+import { recheckOriginalAnswer } from './recheck-original'
 import { onchainJobTask } from './job-description'
 import { fieldsFromText } from './task-parse'
 import { compareRecheck, gridAssetForRecheck, validRecheckBlocks, type FreshReading } from './recheck-compare'
@@ -35,21 +36,22 @@ async function build(chainId: ChainId, jobId: string) {
       left join hire_intent i on i.id = j.intent_id where l.chain_id = ${chainId} and l.job_id = ${jobId} limit 1`)
     return ((r as unknown as { rows?: Array<{ block: string | null; checks: LensCheck[]; category: string | null }> }).rows ?? r as unknown as Array<{ block: string | null; checks: LensCheck[]; category: string | null }>)[0]
   })
+  if (kept?.category === 'security') { base.category = 'security'; return empty('Security reviews have no live recheck. Read the original findings and their sources.', 'unsupported') }
   if (!kept?.block || !Array.isArray(kept.checks) || !kept.checks.length) return empty('No original checks pinned to a block are recorded for this job.')
   base.answerBlock = kept.block
-  const job = await questJob(chainId, jobId)
+  const c = publicClient()
+  const [job, headRead, task] = await Promise.all([questJob(chainId, jobId), c.getBlockNumber().then(block => ({ block, at: new Date().toISOString() })), onchainJobTask(chainId, jobId)])
+  const head = headRead.block
   if (!job) return empty('This indexed job could not be read.')
   base.category = job.agent?.category ?? kept.category
   if (base.category === 'security') return empty('Security reviews have no live recheck. Read the original findings and their sources.', 'unsupported')
-  const manifest = await jobManifest(chainId, jobId, { deliverable: job.deliverable, provider: job.provider, events: job.events.flatMap(e => typeof e.name === 'string' && typeof e.tx === 'string' && /^0x[0-9a-fA-F]{64}$/.test(e.tx) ? [{ name: e.name, tx: e.tx }] : []) })
+  const manifest = await recheckOriginalAnswer(`${chainId}:${jobId}:${job.provider ?? ''}:${job.deliverable?.hash ?? ''}`, job.deliverable?.hash ?? null, () => jobManifest(chainId, jobId, { deliverable: job.deliverable, provider: job.provider, events: job.events.flatMap(e => typeof e.name === 'string' && typeof e.tx === 'string' && /^0x[0-9a-fA-F]{64}$/.test(e.tx) ? [{ name: e.name, tx: e.tx }] : []) }))
   if (!manifest || manifest.matches !== true) return empty('The original answer could not be read with a matching on-chain content commitment.')
   const lens = normalizeAnswer(base.category, manifest.content ?? (() => { try { return JSON.parse(manifest.raw) } catch { return null } })())
   if (lens.kind === 'generic' || lens.kind === 'security') return empty('This answer has no supported live comparison.', 'unsupported')
   base.answerAt = lens.meta.readAt
-  const c = publicClient(), head = await c.getBlockNumber()
   base.currentBlock = head.toString()
   if (!validRecheckBlocks(kept.block, lens.meta.block, head.toString())) return empty('The original and current block bindings are inconsistent or the current read is older. No comparison is shown.')
-  const task = await onchainJobTask(chainId, jobId)
   const parsed = task?.task ? validateTask(lens.kind, fieldsFromText(lens.kind, task.task)) : null
   const resume = parsed?.ok ? encodeURIComponent(JSON.stringify(Object.fromEntries(Object.entries(parsed.fields).filter(([key]) => key !== 'block')))) : null
   base.askAgain = `/tender?category=${lens.kind}${resume && resume.length < 380 ? `&resume=${resume}` : ''}`
@@ -79,12 +81,13 @@ async function build(chainId: ChainId, jobId: string) {
     const key = gridAssetForRecheck(lens.pair, parsed?.ok ? parsed.fields.pair : null)
     const asset = key && key in GRID_ASSETS ? GRID_ASSETS[key as keyof typeof GRID_ASSETS] : null
     if (!asset) return empty('The original grid does not identify a supported USDT pair. A different quote currency is not substituted.', 'unsupported')
-    const [symbol, decimals] = await Promise.all([
+    const [symbol, decimals, price] = await Promise.all([
       c.readContract({ address: asset.address, abi: erc20Abi, functionName: 'symbol', blockNumber: head }),
       c.readContract({ address: asset.address, abi: erc20Abi, functionName: 'decimals', blockNumber: head }),
+      priceInUsdt(c, asset.address, 18, head),
     ])
     if (symbol.toUpperCase() !== asset.symbol.toUpperCase() || decimals !== 18) return empty('The current token metadata does not match the pinned pair.', 'unsupported')
-    fresh = { kind: lens.kind, priceUsd: await priceInUsdt(c, asset.address, decimals, head) }
+    fresh = { kind: lens.kind, priceUsd: price }
   }
   // Older grid answers sometimes omitted the requested bounds in their JSON. Use only the
   // validated task's recorded bounds as fallback, never a new band or an inferred price range.
@@ -93,7 +96,7 @@ async function build(chainId: ChainId, jobId: string) {
     upper: lens.upper ?? (typeof parsed.fields.upper === 'number' ? parsed.fields.upper : null),
   } : lens
   const rows = compareRecheck(comparisonLens, kept.checks, fresh, kept.block, head.toString())
-  return RecheckResult.parse({ ...base, observedAt: new Date().toISOString(), state: rows.length ? 'compared' : 'nothing_to_recheck', reason: rows.length ? null : 'No comparable field was supplied in the original answer.', rows })
+  return RecheckResult.parse({ ...base, observedAt: headRead.at, state: rows.length ? 'compared' : 'nothing_to_recheck', reason: rows.length ? null : 'No comparable field was supplied in the original answer.', rows })
 }
 
 /** Shared 60-second ephemeral projection. At most two new RPC comparisons run in this process at a time. */
@@ -108,6 +111,8 @@ export function recheckJob(chainId: ChainId, jobId: string) {
     return work
   }, { freshMs: 60_000, timeoutMs: 3800 }).then(p => {
     if (p.ageMs > 60_000) throw new Error('recheck_stale')
-    return { ...p, value: RecheckResult.parse(p.value) }
+    const value = RecheckResult.parse(p.value)
+    if (value.state === 'compared' && Date.now() - Date.parse(value.observedAt) > 60_000) throw new Error('recheck_stale_head')
+    return { ...p, value }
   })
 }
