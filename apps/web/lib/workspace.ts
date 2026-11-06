@@ -36,7 +36,7 @@ const EVENT: Record<string, { kind: LogKind; title: (who: string) => string; amo
 }
 
 function tokenLabel(chainId: number, token: string | null, raw: unknown): string | null {
-  if (raw == null || !token) return null
+  if (raw == null || !token || !/^\d{1,78}$/.test(String(raw))) return null
   const asset = NETWORKS[chainId as ChainId]?.assets.find((a) => a.address.toLowerCase() === token.toLowerCase())
   if (!asset) return null
   const v = Number(formatUnits(BigInt(String(raw)), asset.decimals))
@@ -98,6 +98,7 @@ export async function logbook(address: string, opts: { chains?: ChainId[]; curso
 export type NeedKind = 'rate' | 'review' | 'reclaim' | 'unfinished' | 'approval' | 'deliver' | 'criterion'
 export interface NeedItem {
   kind: NeedKind; title: string; sentence: string; deadline: string | null; chainId: number | null; jobId: string | null
+  amount?: string | null
   action: { label: string; href?: string; do?: 'revoke' | 'reclaim' | 'rate'; token?: string }
   side: 'hiring' | 'building'
 }
@@ -105,12 +106,13 @@ export interface NeedItem {
 const ALLOWANCE_TOKENS: Record<ChainId, string[]> = { 56: [], 97: [] }
 for (const c of [56, 97] as const) ALLOWANCE_TOKENS[c] = NETWORKS[c].assets.map((a) => a.address)
 
-export async function needsYou(address: string): Promise<{ address: string; items: NeedItem[]; team: boolean; observedAt: string }> {
+export async function needsYou(address: string): Promise<{ address: string; items: NeedItem[]; team: boolean; observedAt: string; partial: boolean }> {
   const wallet = address.toLowerCase()
   const now = Date.now()
   const items: NeedItem[] = []
+  let partial = false
   const jobs = rowsOf(await db().execute(sql`
-    select j.chain_id, j.job_id, j.state, j.expired_at, j.provider, coalesce(a.name, ap.name) as agent_name, coalesce(a.token_id, ap.token_id) as token_id,
+    select j.chain_id, j.job_id, j.state, j.expired_at, j.provider, j.token, j.funded_raw, coalesce(a.name, ap.name) as agent_name, coalesce(a.token_id, ap.token_id) as token_id,
            (select min(block_time) from commerce_event e where e.chain_id = j.chain_id and e.job_id = j.job_id and e.name = 'JobSubmitted') as submitted_at,
            exists (select 1 from rating r where r.client = j.client and r.chain_id = j.chain_id and r.agent_token_id = coalesce(a.token_id, ap.token_id) and not r.revoked) as rated
     from commerce_job j
@@ -118,7 +120,7 @@ export async function needsYou(address: string): Promise<{ address: string; item
     left join lateral (select name, token_id from agent x where x.chain_id = j.chain_id and x.agent_wallet = j.provider limit 1) ap on a.id is null
     where j.client = ${wallet} order by j.updated_at desc limit 200`))
   const windows: Record<number, number | null> = {}
-  for (const c of [56, 97] as const) windows[c] = await disputeWindowSeconds(c).catch(() => null)
+  for (const c of [56, 97] as const) { windows[c] = await disputeWindowSeconds(c).catch(() => null); if (windows[c] === null) partial = true }
   const openJobs = new Set<number>()
   for (const j of jobs) {
     const chainId = Number(j['chain_id']), jobId = String(j['job_id']), state = String(j['state'])
@@ -144,6 +146,7 @@ export async function needsYou(address: string): Promise<{ address: string; item
     if (openJobs.has(c)) continue
     const commerce = network(c).commerce
     const reads = await chainClient(c).multicall({ contracts: ALLOWANCE_TOKENS[c].map((t) => ({ address: t as `0x${string}`, abi: erc20Abi, functionName: 'allowance' as const, args: [wallet as `0x${string}`, commerce] as const })), allowFailure: true }).catch(() => [])
+    if (reads.length !== ALLOWANCE_TOKENS[c].length || reads.some(r => r.status !== 'success')) partial = true
     reads.forEach((r, i) => {
       if (r.status !== 'success' || !r.result || (r.result as bigint) === 0n) return
       const token = ALLOWANCE_TOKENS[c][i]!
@@ -164,5 +167,9 @@ export async function needsYou(address: string): Promise<{ address: string; item
     }
   }
   items.sort((a, b) => (a.deadline ?? '9999').localeCompare(b.deadline ?? '9999'))
-  return { address: wallet, items, team: teamWallets().includes(wallet), observedAt: new Date(now).toISOString() }
+  for (const item of items) {
+    const job = jobs.find(j => Number(j.chain_id) === item.chainId && String(j.job_id) === item.jobId)
+    item.amount = job && job.funded_raw !== null && (item.chainId === 56 || item.chainId === 97) ? tokenLabel(item.chainId, s(job.token), job.funded_raw) : null
+  }
+  return { address: wallet, items, team: teamWallets().includes(wallet), observedAt: new Date(now).toISOString(), partial }
 }

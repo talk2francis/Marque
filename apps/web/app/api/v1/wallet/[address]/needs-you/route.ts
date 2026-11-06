@@ -10,7 +10,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ address
   const { address } = await params
   if (!/^0x[0-9a-fA-F]{40}$/.test(address)) return NextResponse.json({ error: 'bad_request', detail: 'Send a 0x address.' }, { status: 400, headers: H })
   try {
-    const p = await cachedProjection(`needs:v1:${address.toLowerCase()}`, () => needsYou(address), { freshMs: 30_000, timeoutMs: 15_000 })
+    const p = await cachedProjection(`needs:v2:${address.toLowerCase()}`, () => needsYou(address), { freshMs: 30_000, timeoutMs: 15_000 })
     return NextResponse.json(p.value, { headers: { ...H, 'Cache-Control': 'no-store' } })
   } catch (e) {
     console.error('[api/v1/wallet/needs-you]', e instanceof Error ? e.message.slice(0, 200) : e)

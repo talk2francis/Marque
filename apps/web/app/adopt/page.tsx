@@ -89,7 +89,7 @@ export default async function AdoptPage() {
           <dl className={styles.facts}>
             <div><dt>Server</dt><dd>One VPS: 6 vCPU, 11 GiB RAM, 193 GB disk (75% used), measured 26 Oct 2026. It runs the site, the indexer, probes, quotes, the keeper, the six reference sellers, the MCP server, Postgres and Redis.</dd></div>
             <div><dt>RPC</dt><dd>Pooled public BSC endpoints for reads and writes; a NodeReal key for transfer history; an archive endpoint used only to replay historical benchmarks.</dd></div>
-            <div><dt>Storage</dt><dd>Database 6.6 GB; a nightly dump (124 MB of backups on disk, kept 7 days) with an encrypted offsite copy.</dd></div>
+            <div><dt>Storage</dt><dd>Read 6 Nov 2026, 05:58 UTC: PostgreSQL reported 8,736,054,295 bytes for the database; local backups occupied 10,912,378,397 bytes. Nightly dumps also have an encrypted offsite copy.</dd></div>
             <div><dt>Network fees per hire</dt><dd>{gas && gas.hireBnbMedian !== null ? <>Median {n(gas.hireBnbMedian, 7)} BNB{usd ? ` (about $${(gas.hireBnbMedian * usd).toFixed(3)})` : ''}, {n(gas.hireGasMedian)} gas over {n(gas.hireTxsMedian)} buyer transactions, paid by the buyer. Measured from {gas.hires} mainnet hires&apos; receipts.</> : 'Not measured just now.'}</dd></div>
             <div><dt>Network fees per settlement</dt><dd>{gas && gas.settleGasMedian !== null ? <>Median {n(gas.settleGasMedian)} gas; {gas.sponsoredSettlements} of {gas.settlements} settlements paid 0 BNB (a sponsored gas price). Measured from receipts.</> : 'Not measured just now.'}</dd></div>
           </dl>

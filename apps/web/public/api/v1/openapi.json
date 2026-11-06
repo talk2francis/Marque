@@ -220,6 +220,16 @@
           }
         ],
         "responses": {
+          "200": {
+            "description": "Versioned filtered/deduplicated entries, one selected commercial service per entry, UTC provenance and UNKNOWN limits. Cache at most 15 seconds and never past observed quote expiry; stale projection no-store.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "./schemas/catalog.v1.json"
+                }
+              }
+            }
+          },
           "400": {
             "description": "Invalid controlled query; no catalog read"
           },
@@ -235,16 +245,6 @@
           },
           "503": {
             "description": "Read unavailable or HTTP deadline; no SQL details"
-          },
-          "200": {
-            "description": "Versioned filtered/deduplicated entries, one selected commercial service per entry, UTC provenance and UNKNOWN limits. Cache at most 15 seconds and never past observed quote expiry; stale projection no-store.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "./schemas/catalog.v1.json"
-                }
-              }
-            }
           }
         },
         "tags": [
@@ -679,6 +679,527 @@
           }
         }
       }
+    },
+    "/api/v1/builders/lifecycle": {
+      "get": {
+        "operationId": "readBuilderLifecycle",
+        "summary": "Read six agent lifecycle observations",
+        "description": "Answering, Priced, Checked, Hired, Paid and Rated. Missing, expired and unavailable observations remain explicit; this does not change marketplace standing.",
+        "tags": [
+          "Workspace"
+        ],
+        "security": [],
+        "parameters": [
+          {
+            "name": "agentId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(56|97):0x[0-9a-fA-F]{40}:[0-9]{1,12}$"
+            },
+            "description": "Canonical ERC-8004 identity. This does not authenticate an owner."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Timestamped read-only observations.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No matching indexed record.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Request limit reached.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The observations could not be read. No successful result is assumed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/builders/bench/history": {
+      "get": {
+        "operationId": "readBenchHistory",
+        "summary": "Read published tests and exact-identity delivery disagreements",
+        "description": "Latest 20 published tests and 20 chain-check disagreements. Private device-only Bench history is not on this route.",
+        "tags": [
+          "Workspace"
+        ],
+        "security": [],
+        "parameters": [
+          {
+            "name": "agentId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(56|97):0x[0-9a-fA-F]{40}:[0-9]{1,12}$"
+            },
+            "description": "Canonical ERC-8004 identity. This does not authenticate an owner."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Timestamped read-only observations.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No matching indexed record.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Request limit reached.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The observations could not be read. No successful result is assumed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/wallet/{address}/recheckable": {
+      "get": {
+        "operationId": "readRecheckableAnswers",
+        "summary": "List answers with recorded block-pinned checks",
+        "description": "Indexed lens_result rows for delivered jobs. Reading this list does not recheck or rewrite any answer.",
+        "tags": [
+          "Workspace"
+        ],
+        "security": [],
+        "parameters": [
+          {
+            "name": "address",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^0x[0-9a-fA-F]{40}$"
+            },
+            "description": "Public buyer address."
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9]+$"
+            },
+            "description": "Offset from the prior response; 20 rows per page."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Timestamped read-only observations.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No matching indexed record.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Request limit reached.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The observations could not be read. No successful result is assumed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/recheck": {
+      "post": {
+        "operationId": "recheckAnswer",
+        "summary": "Compare a recorded answer with current chain state",
+        "description": "Read-only. Maximum 512 bytes; 20 requests per client per minute; four-second deadline; cached up to 60 seconds. Uses existing category readers and tolerances. Never writes lens_result. Security reviews have no live recheck. The observation network is explicitly returned (BSC mainnet even for a practice job).",
+        "tags": [
+          "Workspace"
+        ],
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "chainId",
+                  "jobId"
+                ],
+                "properties": {
+                  "chainId": {
+                    "type": "integer",
+                    "enum": [
+                      56,
+                      97
+                    ]
+                  },
+                  "jobId": {
+                    "type": "string",
+                    "pattern": "^[1-9][0-9]{0,11}$"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Validated read-only result with source block and observation time.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid JSON or request shape.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body exceeds the byte limit.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Supplied answer declares a different block.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "428": {
+            "description": "Replay consent required.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Request or concurrency limit reached.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "A required record, archive read or deadline was unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/builders/bench/replay": {
+      "post": {
+        "operationId": "replaySuppliedAnswer",
+        "summary": "Replay supplied JSON at an original recorded block",
+        "description": "Requires consent=true. Maximum 32 KiB; six requests per client per minute; eight-second deadline. No endpoint is contacted, no payment is made and no published result is changed. A case must remain active; a job must have an original block.",
+        "tags": [
+          "Workspace"
+        ],
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "consent",
+                  "target",
+                  "answer"
+                ],
+                "properties": {
+                  "consent": {
+                    "type": "boolean",
+                    "const": true
+                  },
+                  "target": {
+                    "oneOf": [
+                      {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                          "caseId"
+                        ],
+                        "properties": {
+                          "caseId": {
+                            "type": "string",
+                            "maxLength": 200
+                          }
+                        }
+                      },
+                      {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                          "chainId",
+                          "jobId"
+                        ],
+                        "properties": {
+                          "chainId": {
+                            "type": "integer",
+                            "enum": [
+                              56,
+                              97
+                            ]
+                          },
+                          "jobId": {
+                            "type": "string",
+                            "pattern": "^[1-9][0-9]{0,11}$"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "answer": {
+                    "description": "The builder-supplied JSON answer, not executable code."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Validated read-only result with source block and observation time.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid JSON or request shape.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body exceeds the byte limit.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Supplied answer declares a different block.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "428": {
+            "description": "Replay consent required.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Request or concurrency limit reached.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "A required record, archive read or deadline was unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "x-local-hire-plan": {
@@ -716,6 +1237,10 @@
     {
       "name": "MCP",
       "description": "Streamable HTTP MCP read-and-plan interface; it never signs."
+    },
+    {
+      "name": "Workspace",
+      "description": "Read-only workspace observations, comparisons and consented supplied-answer replay."
     }
   ]
 }

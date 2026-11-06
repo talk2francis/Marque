@@ -1,0 +1,33 @@
+# My Marque candidate, 6 November 2026
+
+This B/C/D batch is local. The owner explicitly prohibited pushing main or deploying. The live baseline is `0e9f5c5`. Phase E and F are outside this batch. Validation receipts will be added after production-format candidate acceptance.
+
+## Daily work
+
+Hiring has Today, Positions, Jobs and Money. Today groups the existing needs into Money at risk, Clocks running and Tidy up; future reclaim deadlines stay with clocks. Ratings for the same named agent and network share a row. The amount is the indexed funded amount where available, never an inferred position value or a sum across networks. Combined ratings do not pretend that one job's amount covers all jobs. Jobs contains the former Logbook under History; Positions contains saved agents and watched-address controls. Old view and tab links are mapped and tested.
+
+Today distinguishes unavailable wallet reads, pending watched reads and an actual all-clear. Device data is validated before use; malformed saved entries cannot crash the page and reads never rewrite local storage. Existing revoke, claim, dispute, settlement and rating actions keep their signing code.
+
+Positions reads the existing mainnet endpoint, checks its address and block, and uses MeasureRule for Venus health factor and each V3 range. The displayed read time is the source time. Watched addresses open on demand to avoid starting every chain reader for every saved address. Ask agents about this opens Tender with editable account or NFT fields, without requesting a price or signing. Tender's new field form is separate from the frozen Hire Sheet.
+
+## Recheck a recorded answer
+
+`POST /api/v1/recheck` accepts only chainId and jobId. It reads the kept lens row in a read-only transaction, verifies the answer's content commitment and block binding, then uses the existing category readers at one current mainnet block. Twenty requests per client per minute, a four-second response deadline, two active fresh comparisons per process and a 60-second cache bound apply. The observation chain is explicit even for practice jobs. No lens_result is inserted, updated or replayed through the old persistence helper.
+
+HF uses the existing HF, repay-target and liquidation-price tolerances. V3 compares the same NFT's tick, range and price distance. Yield compares identifiable Venus APRs and only computes a net rate when the original size and holding period are recorded; APY, missing protocols and absent historical context stay unavailable. Grid reads a supported USDT pair against the original bounds; its original price remains CLAIMED. Security has no live recheck. An originally disagreeing field cannot become a newly passing original result. A changed current reading is a comparison, not a replacement grade or a promise.
+
+Today and Jobs show a paginated index of answers with kept checks. The public Job Room has the same explicit recheck control. No automatic recheck runs on page load. Ask again carries only validated editable original fields, dropping the old block. New Redis projection keys are additive.
+
+## Building
+
+Agents, Bench and Demand form the Building rail. Each agent has Answering, Priced, Checked, Hired, Paid and Rated observations, their timestamps and proof links. Latest failures supersede older successes. Price expiry is checked again on response; the provider must match the indexed registered wallet. Checked reuses marketplace standing. Hired and Paid require exact identity, network, provider, token and amount binding. Rated reuses buyerFeedbackBinding and published team exclusions. It is a history of recorded evidence, not a new marketplace badge definition. Lifecycle reads begin near the viewport, and visible price expiry advances without network polling. A failed refresh never makes old live standing look current. The latest probe is read through the existing ordered service index instead of sorting all retained probes. Agent history stays inside the agent.
+
+Demand requires the existing signed owner claim, plus a fresh current-owner check before any private comparison query. Responses are no-store and vary by Authorization. It shows the last 30 days, 20 rows per page, with the actual total. Won requires this exact quote's funded job; Lost requires another funded quote in the same recorded Tender comparison. A cheaper quote alone is not a loss. Failure details use known remedies; no raw task, endpoint response or buyer address is selected. Prices retain raw units, token decimals and quote times. Historical badges were not stored, so the report explicitly leaves them unknown.
+
+Bench embeds the existing consented endpoint test form and adds published history and exact-identity delivery disagreements. RYIELD is available for identities that declare that standard; it does not weaken or bypass the five-minute fresh-case rule for endpoint tests. Supplied-answer replay is separate: pasted JSON, consent, original recorded block, no agent endpoint and no payment. The endpoint rejects alternate blocks and accepts no endpoint or transaction instructions. Published observations are never overwritten. New private Bench attempts are saved only on this device, with export; no older private history is invented. Unreadable existing device history is not cleared or overwritten.
+
+## Integrity and rollout
+
+The source fingerprint was already behind four imported files and omitted two newly reachable files on baseline `0e9f5c5`. The local fingerprint now describes the actual 48-file implementation closure and current lockfile. No arithmetic, tolerance, stale-case gate or historical observation changed. Published standard documents were regenerated from the same constants and recorded cases. Existing result bundles keep their original fingerprints.
+
+No production worker, database schema, proxy route or service was activated. The outside workflow needs a later reviewed publication. Mainnet anchoring still lacks a verified existing registry destination and an exact gas simulation; only the testnet anchor was sent. Current capacity observations failed their latency target; this batch does not claim a supported visitor count.

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { ArrowUpRight } from 'lucide-react'
 import type { HireQuote } from '@marque/commerce/client'
 import { TaskForm, type TaskValue } from '../_components/hire/TaskForm'
+import { PositionTask } from './PositionTask'
 import { Badge } from '../_components/ui'
 import styles from './tender.module.css'
 
@@ -35,9 +36,10 @@ function useNow(active: boolean): number {
 const mmss = (s: number) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`
 const units = (q: HireQuote) => Number(q.price) / 10 ** q.token.decimals
 
-export function TenderView({ initialCategory, initialLane }: { initialCategory: string; initialLane: Lane }) {
+export function TenderView({ initialCategory, initialLane, initialFields = null }: { initialCategory: string; initialLane: Lane; initialFields?: Record<string, string> | null }) {
   const [category, setCategory] = useState(initialCategory)
   const [lane, setLane] = useState<Lane>(initialLane)
+  const [prefilled, setPrefilled] = useState(Boolean(initialFields))
   const [task, setTask] = useState<TaskValue>({ task: '', ready: false, missing: null })
   const [running, setRunning] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -142,7 +144,8 @@ export function TenderView({ initialCategory, initialLane }: { initialCategory: 
             ))}
           </div>
         </div>
-        <TaskForm key={category} category={category} agentName="the agent" onChange={setTask} disabled={running} allowBrief={false} />
+        {prefilled && initialFields && category === initialCategory ? <PositionTask key={category} category={category} initialFields={initialFields} onChange={setTask} disabled={running} onReset={() => setPrefilled(false)} />
+          : <TaskForm key={category} category={category} agentName="the agent" onChange={setTask} disabled={running} allowBrief={false} />}
         <div className={styles.go}>
           <button type="button" className="btn btn--primary" disabled={!task.ready || running} onClick={run}>{running ? 'Asking every agent…' : 'Get quotes from every agent'}</button>
           <span className={styles.muted}>{task.ready ? 'Free. No wallet needed until you hire.' : task.missing}</span>

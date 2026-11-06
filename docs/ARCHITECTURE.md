@@ -424,3 +424,7 @@ This supersedes the quarantine note above for outside agents: Standard test task
 
 The immutable Set and Earn snapshot under `docs/evidence/set-and-earn-close-2026-11-05/` is served through a fixed allowlist at `/api/v1/record-at-close/<file>`. The standalone bundle traces only that evidence directory for this route. Request paths cannot address other repository or server files. The proof page renders the original timestamped read separately from the later indexed snapshot. Its checksum manifest's exact bytes are Keccak-256 anchored on BSC testnet; the independent receipt sits outside the original manifest. No historical snapshot or observation row is rewritten. Mainnet anchoring is not configured or submitted. This candidate is local, not a deployment record.
 
+
+## Post-close workspace candidate (6 November 2026, local)
+
+[Workspace implementation and limits](operations/POST_CLOSE_WORKSPACE.md) documents the new read-only projections. Recheck SELECTs the immutable lens_result and verifies its answer commitment before comparing a single current block. A new ephemeral cache never rewrites the old grade. Lifecycle uses indexed latest-per-service probes and existing marketplace standing and feedback binding. Demand is called only after signed claim and current-owner verification; its SQL never selects tasks, raw responses or buyer addresses. Supplied-answer Bench replay uses the original case or job block and has no endpoint or payment parameter. All keys are additive; there is no schema migration or production worker activation.

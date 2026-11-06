@@ -18,13 +18,19 @@ import { MARQUE_PASS_ID } from '../_components/pass/connector'
 import { toast } from '../../lib/toast'
 import { copyText } from '../../lib/clipboard'
 import { explorerTx } from '../../lib/network'
-import { savedAgents, watched, saveWatched, hireLimit, setHireLimit, firedAlerts, markFired, SAVED_EVENT, type SavedAgent, type WatchedPosition } from '../../lib/local-watch'
+import { savedAgents, watched, saveWatched, hireLimit, setHireLimit, firedAlerts, markFired, SAVED_EVENT, WATCH_EVENT, type SavedAgent, type WatchedPosition } from '../../lib/local-watch'
 import { ProfileAvatar } from '../_components/profile/ProfileAvatar'
 import { ProfileEditor } from '../_components/profile/ProfileEditor'
 import { AgentPortraitControl } from '../_components/profile/AgentPortraitControl'
 import { RegistrationEditor } from '../_components/profile/RegistrationEditor'
 import { useWalletProfile } from '../../lib/profile-client'
 import styles from './workspace.module.css'
+import { WorkspacePositions } from './Positions'
+import { RecheckList } from './RecheckList'
+import { AgentLoop } from '../builders/AgentLoop'
+import { AgentWorkspace } from '../builders/AgentWorkspace'
+import { WorkspaceBench } from './Bench'
+import { workspaceNavigation, todayLanes, type TodayLane, type WorkspaceNeed } from '../../lib/workspace-nav'
 
 /**
  * My Marque (SPEC-WORKSPACE 1, DESIGN-V4 3): where a buyer or a builder comes back to. Any address
@@ -33,7 +39,7 @@ import styles from './workspace.module.css'
  */
 const ADDR = /^0x[0-9a-fA-F]{40}$/
 type View = 'hiring' | 'building'
-type Need = { kind: string; title: string; sentence: string; deadline: string | null; chainId: number | null; jobId: string | null; action: { label: string; href?: string; do?: 'revoke' | 'reclaim' | 'rate'; token?: string }; side: View }
+type Need = WorkspaceNeed
 type LogEntry = { at: string | null; chainId: number; kind: string; title: string; jobId: string | null; agent: string | null; amount: string | null; tx: string; key: string }
 
 const short = (a: string) => `${a.slice(0, 6)}…${a.slice(-4)}`
@@ -59,14 +65,14 @@ export function Workspace({ addrParam }: { addrParam: string | null }) {
   const own = Boolean(address && connected && address.toLowerCase() === connected.toLowerCase())
   const [view, setView] = useState<View>('hiring')
   useEffect(() => { try { const v = localStorage.getItem('marque:me-view'); if (v === 'building' || v === 'hiring') setView(v) } catch { /* default */ } }, [])
-  const pickView = (v: View) => { setView(v); try { localStorage.setItem('marque:me-view', v) } catch { /* fine */ } }
+  const pickView = (v: View) => { setView(v); const p = new URLSearchParams(params.toString()); p.set('view', v === 'building' ? 'agents' : 'today'); p.delete('tab'); window.history.replaceState(null, '', `${pathname}?${p.toString()}`); try { localStorage.setItem('marque:me-view', v) } catch { /* fine */ } }
   // A link to a tab of the other view (the wallet menu's "Spending controls" is ?view=money) switches the view too.
   const asked = params.get('view')
+  const nav = workspaceNavigation(asked, params.get('tab'), view)
   useEffect(() => {
-    if (asked === 'money' || asked === 'jobs' || asked === 'watching') setView('hiring')
-    else if (asked === 'agents') setView('building')
-  }, [asked])
-  const tab = asked ?? (view === 'building' ? 'agents' : 'logbook')
+    if (nav.view !== view) setView(nav.view)
+  }, [nav.view, view])
+  const tab = nav.tab
   const { profile } = useWalletProfile(address)
   const [editing, setEditing] = useState(false)
   // The wallet menu's "Edit profile" lands here with ?edit=profile.
@@ -78,10 +84,10 @@ export function Workspace({ addrParam }: { addrParam: string | null }) {
   }
   // In place (29 Oct): router.replace re-rendered the whole page on the server behind the loading screen, so the page
     // flashed and jumped to the top. Next keeps useSearchParams in sync with the history API.
-  const setTab = (t: string) => { openedOn.current = null; const p = new URLSearchParams(params.toString()); p.set('view', t); window.history.replaceState(null, '', `${pathname}?${p.toString()}`) }
+  const setTab = (t: string) => { openedOn.current = null; const p = new URLSearchParams(params.toString()); p.set('view', t); p.delete('tab'); window.history.replaceState(null, '', `${pathname}?${p.toString()}`) }
   // A link to a section (the wallet menu's Spending controls is ?view=money) opens at that section, not at the top.
   // Only the section named when the page opened: a tab click also sets ?view= and must never move the page.
-  const openedOn = useRef(params.get('view'))
+  const openedOn = useRef(params.get('tab') ?? params.get('view'))
   const arrived = useRef(false)
   // The page is still short while its sections load, so one scroll lands nowhere: keep landing on the section as the
   // page grows, for a few seconds, and stop as soon as the reader scrolls themselves.
@@ -101,14 +107,15 @@ export function Workspace({ addrParam }: { addrParam: string | null }) {
   const isPass = own && connector?.id === MARQUE_PASS_ID
 
   const hiringTabs = [
-    { id: 'logbook', label: 'Logbook', content: <Logbook address={address} /> },
-    { id: 'jobs', label: 'Jobs', content: <Jobs address={address} /> },
+    { id: 'today', label: 'Today', content: <><Dockets address={address} own={own} view="hiring" /><RecheckList address={address} compact /></> },
+    { id: 'positions', label: 'Positions', content: <><WorkspacePositions address={address} /><Watching /></> },
+    { id: 'jobs', label: 'Jobs', content: <Jobs address={address} historyInitially={nav.history} /> },
     { id: 'money', label: 'Money', content: <Money address={address} own={own} /> },
-    { id: 'watching', label: 'Watching', content: <Watching /> },
   ]
   const buildingTabs = [
-    { id: 'agents', label: 'Agents', content: <Agents address={address} own={own} /> },
-    { id: 'logbook', label: 'Logbook', content: <Logbook address={address} building /> },
+    { id: 'agents', label: 'Agents', content: <>{nav.history ? <details open><summary>Wallet event history</summary><Logbook address={address} building /></details> : null}<Agents address={address} own={own} /></> },
+    { id: 'bench', label: 'Bench', content: <WorkspaceBench address={address} /> },
+    { id: 'demand', label: 'Demand', content: <AgentWorkspace key={address} initialWallet={address} embedded reportOnly /> },
   ]
   const tabs = view === 'building' ? buildingTabs : hiringTabs
   return (
@@ -141,7 +148,6 @@ export function Workspace({ addrParam }: { addrParam: string | null }) {
       <Summary address={address} view={view} />
       <div className={styles.body}>
         <div className={styles.main}>
-          <Dockets address={address} own={own} view={view} />
           <div id="me-sections" style={{ scrollMarginTop: 'calc(var(--header-h) + 16px)' }}><Tabs label="My Marque sections" tabs={tabs} value={tabs.some((t) => t.id === tab) ? tab : tabs[0]!.id} onChange={setTab} /></div>
         </div>
         <aside className={styles.aside} aria-label="Wallet">
@@ -283,15 +289,25 @@ function Balances({ address, own }: { address: string; own: boolean }) {
 function Dockets({ address, own, view }: { address: string; own: boolean; view: View }) {
   const [items, setItems] = useState<Need[] | null>(null)
   const [team, setTeam] = useState(false)
+  const [unavailable, setUnavailable] = useState(false)
+  const [checkedAt, setCheckedAt] = useState<string | null>(null)
+  const request = useRef<AbortController | null>(null)
   const [busy, setBusy] = useState<string | null>(null)
   const config = useConfig()
   const { chainId: walletChain } = useAccount()
   const load = useCallback(() => {
-    fetch(`/api/v1/wallet/${address}/needs-you`).then((r) => (r.ok ? r.json() : null)).then((j: { items: Need[]; team: boolean } | null) => { setItems(j?.items ?? []); setTeam(Boolean(j?.team)) }).catch(() => setItems([]))
+    request.current?.abort()
+    const controller = new AbortController(); request.current = controller
+    setItems(null); setUnavailable(false); setCheckedAt(null)
+    fetch(`/api/v1/wallet/${address}/needs-you`, { signal: controller.signal }).then((r) => (r.ok ? r.json() : null)).then((j: { items: Need[]; team: boolean; observedAt: string; partial?: boolean } | null) => {
+      if (controller.signal.aborted) return
+      if (!j || !Array.isArray(j.items)) { setUnavailable(true); return }
+      setItems(j.items); setTeam(Boolean(j.team)); setCheckedAt(Number.isFinite(Date.parse(j.observedAt)) ? j.observedAt : null); setUnavailable(j.partial === true)
+    }).catch(() => { if (!controller.signal.aborted) setUnavailable(true) })
   }, [address])
-  useEffect(() => { load() }, [load])
+  useEffect(() => { load(); return () => request.current?.abort() }, [load])
   const local = useWatchAlerts()
-  const list = [...(view === 'hiring' ? local : []), ...(items ?? []).filter((x) => x.side === view)]
+  const list = [...(view === 'hiring' ? local.alerts : []), ...(items ?? []).filter((x) => x.side === view)]
   const revoke = async (n: Need) => {
     const chainId = n.chainId as ChainId
     const asset = NETWORKS[chainId].assets.find((a) => a.address.toLowerCase() === n.action.token?.toLowerCase())
@@ -306,14 +322,18 @@ function Dockets({ address, own, view }: { address: string; own: boolean; view: 
       load()
     } catch (err) { toast({ tone: 'error', title: friendlyError(err).title }) } finally { setBusy(null) }
   }
-  const lanes = toLanes(list)
+  const lanes = todayLanes(list)
   const total = lanes.reduce((n, l) => n + l.rows.length, 0)
   return (
     <section className={styles.needs} aria-labelledby="needs-title">
-      <h2 id="needs-title" className={styles.h2}>Needs you{items ? <span className={styles.count}>{total}</span> : null}</h2>
+      <h2 id="needs-title" className={styles.h2}>Today{items ? <span className={styles.count}>{total}</span> : null}</h2>
+      {checkedAt && total > 0 ? <p className={styles.fine}>Indexed job amounts and live allowance reads, checked {new Date(checkedAt).toISOString().replace('T', ' ').slice(0, 19)} UTC. Networks stay separate.</p> : null}
       {team ? <p className={styles.fine}>A published Marque team wallet: its activity is shown, never counted for Set and Earn.</p> : null}
-      {items === null ? <div className={styles.skel}><Skeleton h={56} /></div>
-        : total === 0 ? <p className={styles.calm}><Check aria-hidden="true" />Nothing needs you right now.</p>
+      {unavailable ? <p className={styles.fine} role="status">Some of today&apos;s wallet checks could not be read. No all-clear is assumed. <button type="button" className={styles.textBtn} onClick={load}>Try again</button></p> : items === null ? <div className={styles.skel}><Skeleton h={56} /></div> : null}
+      {total === 0 && (unavailable || items === null) ? null
+        : total === 0 && local.pending ? <p className={styles.fine}>Reading the watched positions before showing an all-clear.</p>
+        : total === 0 && local.unavailable ? <p className={styles.fine}>No wallet action is waiting, but some watched positions could not be read. Open Positions to inspect them.</p>
+        : total === 0 ? <p className={styles.calm}><Check aria-hidden="true" />Nothing needs you.{checkedAt ? ` Checked ${new Date(checkedAt).toISOString().slice(11, 16)} UTC.` : ''}</p>
           : (
             <div className={styles.docketBoard}>
               {lanes.map((l) => <Lane key={l.id} lane={l} own={own} busy={busy} onRevoke={revoke} />)}
@@ -325,27 +345,8 @@ function Dockets({ address, own, view }: { address: string; own: boolean; view: 
 
 // Lanes keep a long list readable: what has a clock first, then leftovers, ratings and allowances. Ratings are one
 // row per agent (the rating is per agent, not per job), each lane shows its first rows and opens the rest in place.
-type LaneData = { id: string; label: string; rows: Array<Need & { jobs: number }> }
-const LANES: Array<{ id: string; label: string; kinds: string[] }> = [
-  { id: 'now', label: 'Act on these', kinds: ['watch', 'reclaim', 'review', 'deliver', 'criterion'] },
-  { id: 'open', label: 'Unfinished hires', kinds: ['unfinished'] },
-  { id: 'rate', label: 'Rate your agents', kinds: ['rate'] },
-  { id: 'tidy', label: 'Allowances', kinds: ['approval'] },
-]
+type LaneData = TodayLane
 const LANE_ROWS = 3
-function toLanes(list: Need[]): LaneData[] {
-  return LANES.map(({ id, label, kinds }) => {
-    const rows: LaneData['rows'] = []
-    for (const n of list.filter((x) => kinds.includes(x.kind))) {
-      const same = n.kind === 'rate' ? rows.find((r) => r.title === n.title && r.chainId === n.chainId) : undefined
-      if (same) same.jobs += 1
-      else rows.push({ ...n, jobs: 1 })
-    }
-    // Something ready now (a reclaim, a watched position) before anything with a clock; then the nearest clock.
-    if (id === 'now') rows.sort((a, b) => (a.deadline ? 1 : 0) - (b.deadline ? 1 : 0) || (a.deadline ?? '').localeCompare(b.deadline ?? ''))
-    return { id, label, rows }
-  }).filter((l) => l.rows.length)
-}
 const CLOCK: Record<string, [string, string]> = {
   review: ['Closes', 'Closed'], reclaim: ['Reclaimable', 'Reclaimable'], unfinished: ['Expires', 'Expired'], deliver: ['Due', 'Overdue since'], criterion: ['Closes', 'Closed'],
 }
@@ -375,6 +376,7 @@ function Lane({ lane, own, busy, onRevoke }: { lane: LaneData; own: boolean; bus
                 <p>{n.jobs > 1 ? `${n.jobs} delivered jobs. One rating covers the agent and goes on its public record from your wallet.` : n.sentence}</p>
               </div>
               <span className={styles.docketMeta}>
+                {n.amount ? <span title="Indexed funded amount">{n.amount}</span> : null}
                 <span className={styles.docketNet} data-net={n.chainId ?? undefined}>{n.chainId ? net(n.chainId) : 'This device'}</span>
                 {due ? <time className={styles.deadline} dateTime={n.deadline!} title={new Date(n.deadline!).toUTCString()}>{due}</time> : null}
               </span>
@@ -459,14 +461,19 @@ const JOB_FILTERS: Array<{ id: string; label: string; states: string[] | null }>
 ]
 const amt = (h: WalletHire) => (h.amount ? h.token?.symbol && h.token.decimals !== null ? `${Number(formatUnits(BigInt(h.amount), h.token.decimals)).toLocaleString('en-US', { maximumFractionDigits: 4 })} ${h.chainId === 97 ? 'test ' : ''}${h.token.symbol}` : `${h.amount} raw token units` : 'unpaid')
 
-function Jobs({ address }: { address: string }) {
+function Jobs({ address, historyInitially = false }: { address: string; historyInitially?: boolean }) {
   const main = useWalletQuest(address, 56), practice = useWalletQuest(address, 97)
   const [f, setF] = useState('all')
   const [find, setFind] = useState('')
+  const [history, setHistory] = useState(historyInitially)
+  useEffect(() => { setHistory(historyInitially) }, [historyInitially])
   const states = JOB_FILTERS.find((x) => x.id === f)?.states
   const groups = ([[56, main], [97, practice]] as const).map(([c, q]) => ({ c, pending: q.isPending, hires: [...(q.data?.hires ?? [])].reverse().filter((h) => !states || states.includes(h.state)) }))
   return (
     <div className={styles.jobsTab}>
+      <div><button type="button" className={styles.textBtn} aria-expanded={history} onClick={() => setHistory(v => !v)}>History</button></div>
+      {history ? <Logbook address={address} /> : null}
+      <RecheckList address={address} />
       <div className={styles.logTools}>
         <div className={styles.chips} role="radiogroup" aria-label="Job state">{JOB_FILTERS.map((x) => <button key={x.id} type="button" role="radio" aria-checked={f === x.id} data-on={f === x.id || undefined} onClick={() => setF(x.id)}>{x.label}</button>)}</div>
         <form className={styles.find} onSubmit={(e) => { e.preventDefault(); const m = find.trim().match(/^(\d{3,9})$/); if (m) window.location.href = `/jobs/${Number(m[1]) < 10_000 ? 97 : 56}/${m[1]}` }}>
@@ -571,7 +578,7 @@ function Allowances({ address, chainId, own }: { address: string; chainId: Chain
 
 /* ---------------------------------------------------------------- agents (building) */
 
-interface OwnerAgent { agentKey: string; chainId: number; agentId: string; name: string; imageUrl?: string | null; portraitByOwner?: boolean; category: string | null; listedOnMarque: boolean; quality: { checks: Array<{ id: string; pass: boolean; fix: string | null }> }; jobsReceived: number; jobsPaid: number; jobEvidence?: { funded: number | null; paymentReleased: number | null }; seller?: {jobs:{received:number;funded:number;paid:number}}; listingEvidence?: {ownerListed:boolean} }
+interface OwnerAgent { agentKey: string; chainId: number; agentId: string; name: string; imageUrl?: string | null; portraitByOwner?: boolean; category: string | null; listedOnMarque: boolean; quality: { checks: Array<{ id: string; pass: boolean; fix: string | null }> }; jobsReceived: number; jobsPaid: number; jobEvidence?: { funded: number | null; paymentReleased: number | null }; seller?: {jobs:{received:number;funded:number;paid:number}; recentJobs?: Array<{chainId:number;jobId:string;state:string;createdAt:string|null}>}; listingEvidence?: {ownerListed:boolean} }
 interface QuestBuild { build: { agents: Array<{ chainId: number; tokenId: string; observed: number; checks: Record<string, { state: string; reason: string; next?: { label: string; href: string } | null }> }> } }
 const CRIT: Array<[string, string]> = [['registered', 'Registered'], ['card', 'Agent card'], ['probes', 'Answers'], ['hires', '3 hirers'], ['actions', 'Actions'], ['category', 'In category']]
 
@@ -620,6 +627,8 @@ export function Agents({ address, own = false }: { address: string; own?: boolea
               <a className={styles.link} href={`/builders/check/${a.chainId}/${a.agentId}`}>Fix report</a>
               <a className={styles.link} href={`/builders/progress/${a.chainId}/${a.agentId}`}>Build checklist</a>
             </div>
+            <AgentLoop agentId={a.agentKey} />
+            <details><summary className={styles.textBtn}>Agent job history</summary>{a.seller?.recentJobs ? <ul>{a.seller.recentJobs.map(j => <li key={`${j.chainId}:${j.jobId}`}><a href={`/jobs/${j.chainId}/${j.jobId}`}>Job {j.jobId} · {net(j.chainId)}</a> · {j.state.replaceAll('_', ' ').toLowerCase()}{j.createdAt ? ` · ${j.createdAt.slice(0, 10)}` : ''}</li>)}</ul> : <p className={styles.fine}>This agent&apos;s recorded jobs could not be read.</p>}<a href={`/builders/my-agents?wallet=${address}&agent=${a.chainId}:${a.agentId}#your-agents`}>Full job and answer workspace</a></details>
             {own ? (
               <AgentPortraitControl owner={address} agentId={a.agentKey} hasPortrait={a.agentKey in portraits ? portraits[a.agentKey] !== null : Boolean(a.portraitByOwner)}
                 onChanged={(url) => setPortraits((p) => ({ ...p, [a.agentKey]: url }))} />
@@ -639,29 +648,40 @@ export function Agents({ address, own = false }: { address: string; own?: boolea
 
 /* ---------------------------------------------------------------- watching */
 
-function useWatchAlerts(): Need[] {
+function useWatchAlerts() {
   const [alerts, setAlerts] = useState<Need[]>([])
+  const [pending, setPending] = useState(true), [unavailable, setUnavailable] = useState(false)
   useEffect(() => {
     let live = true
+    let request: AbortController | null = null
     const run = async () => {
+      request?.abort(); const controller = new AbortController(); request = controller
+      setPending(true); setUnavailable(false)
       const list = watched()
       const out: Need[] = []
+      setAlerts([])
+      let failed = false
       for (const w of list) {
-        const j = await fetch(`/api/v1/positions/${w.address}`).then((r) => (r.ok ? r.json() : null)).catch(() => null) as { venus?: { healthFactor?: number | null } } | null
+        const j = await fetch(`/api/v1/positions/${w.address}`, { signal: AbortSignal.any([controller.signal, AbortSignal.timeout(25000)]) }).then((r) => (r.ok ? r.json() : null)).catch(() => null) as { venus?: { ok?: boolean; healthFactor?: number | null } } | null
+        if (controller.signal.aborted) return
+        if (!j?.venus?.ok) failed = true
         const hf = j?.venus?.healthFactor ?? null
-        if (w.hfBelow !== null && hf !== null && hf < w.hfBelow) {
-          out.push({ kind: 'watch', title: `${short(w.address)} health factor ${hf.toFixed(2)}`, sentence: `Below your ${w.hfBelow} line. Ask every health factor agent for a repay plan.`, deadline: null, chainId: null, jobId: null, action: { label: 'Get a repay plan', href: '/tender?category=health_factor' }, side: 'hiring' })
+        if (j?.venus?.ok && w.hfBelow !== null && typeof hf === 'number' && Number.isFinite(hf) && hf < w.hfBelow) {
+          out.push({ kind: 'watch', title: `${short(w.address)} health factor ${hf.toFixed(2)}`, sentence: `Below your ${w.hfBelow} line. Ask every health factor agent for a repay plan.`, deadline: null, chainId: 56, jobId: null, action: { label: 'Get a repay plan', href: `/tender?category=health_factor&account=${w.address}` }, side: 'hiring' })
           const key = `${w.address}:hf:${new Date().toISOString().slice(0, 13)}`
           if (!firedAlerts().includes(key)) { markFired(key); try { if ('Notification' in window && Notification.permission === 'granted') new Notification('Marque', { body: `${short(w.address)} health factor ${hf.toFixed(2)}, below ${w.hfBelow}` }) } catch { /* no notifications */ } }
         }
+        if (live && !controller.signal.aborted) setAlerts([...out])
       }
-      if (live) setAlerts(out)
+      if (live && !controller.signal.aborted) { setAlerts(out); setPending(false); setUnavailable(failed) }
     }
     void run()
+    window.addEventListener(WATCH_EVENT, run)
+    window.addEventListener('storage', run)
     const t = setInterval(() => { if (document.visibilityState === 'visible') void run() }, 5 * 60_000)
-    return () => { live = false; clearInterval(t) }
+    return () => { live = false; request?.abort(); clearInterval(t); window.removeEventListener(WATCH_EVENT, run); window.removeEventListener('storage', run) }
   }, [])
-  return alerts
+  return { alerts, pending, unavailable }
 }
 
 function Watching() {

@@ -4,6 +4,14 @@
 
 A public record of meaningful product changes. Evidence and limitations travel with each release.
 
+## 6 November 2026 · Prepared locally: daily work and builder evidence
+
+My Marque now puts Today, Positions, Jobs and Money under Hiring, and Agents, Bench and Demand under Building. Old links remain valid. Today groups existing actions by risk and deadline, and Positions opens Tender with editable fields without asking for a price or signing.
+
+Recorded answers can be explicitly compared with current chain state without changing their original grades. The public Job Room has the same read-only control. Each builder identity has a six-step evidence strip. Owner-proved Demand uses exact funded quote matches; historical badges that were never stored remain unknown. Bench requires permission and can replay supplied JSON at the original block without contacting an agent or paying.
+
+Malformed saved browser entries are ignored without rewriting them. The implementation fingerprint was refreshed after detecting earlier source drift; grading arithmetic, tolerances and historical observations remain unchanged. This is a local candidate, not a deployment. Current capacity still has no passing November visitor level.
+
 ## 6 November 2026 · Prepared locally: the preserved close record
 
 The original close snapshot remains byte-for-byte unchanged. The Keccak-256 digest of its checksum manifest is anchored on BSC testnet at block 141098389, with the successful transaction and Anchored event recorded in the repository. The proof page and judge path now include the preserved figures, every file for download and instructions for checking them offline. The original 48-job read remains separate from the later 50-job snapshot.
