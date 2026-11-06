@@ -7,6 +7,7 @@ const sections = [{ id: 'read', label: 'Read client' }, { id: 'proof', label: 'E
 export default function DeveloperGuide() {
   return <DocShell current="developers" label="Docs · developers" title="Read the evidence before acting." lede={`Use ${BRAND.name}'s existing typed read contracts without a signer, custody or automatic payment.`} sections={sections}>
     <DocSection id="read" title="One bounded read">
+      <p><a href="/api/v1/openapi.json">OpenAPI 3.1, validated 6 November 2026</a> describes the public catalog, campaign reads, explicit unsigned hiring operations and the MCP endpoint. The repository validates it with its pinned Redocly CLI; response observations retain their own timestamps.</p>
       <p>The local TypeScript example project is <code>examples/read-client</code>. It consumes reviewed checkout packages; there is no public npm SDK release. Use a reviewed deployment that exposes the versioned API; a legacy response fails validation. Browser code imports <code>@marque/commerce/read-only</code>. Node receipt checks use the separate <code>@marque/execution/evidence</code> entry.</p>
       <pre className={styles.code} tabIndex={0} role="region" aria-label="Browser read client example"><code>{`import { readMachineCatalog, CatalogReadError } from '@marque/commerce/read-only'
 const catalog = await readMachineCatalog(location.origin, { limit: 10 }, { timeoutMs: 15000 })`}</code></pre>

@@ -1,0 +1,102 @@
+{
+  "runs": [
+    {
+      "date": "2026-09-27T01:50:00Z",
+      "release": "a448e4a",
+      "method": "September launch mix",
+      "stages": [
+        {
+          "visitors": 25,
+          "requests": 2392,
+          "requestsPerSecond": 20.66521596006855,
+          "pageP95Ms": 93.38080099999996,
+          "apiP95Ms": 141.72322429999994,
+          "error5xxRate": 0,
+          "restarts": 0,
+          "completed": true
+        },
+        {
+          "visitors": 50,
+          "requests": 4922,
+          "requestsPerSecond": 42.497733585701056,
+          "pageP95Ms": 116.0098005,
+          "apiP95Ms": 96.5388295,
+          "error5xxRate": 0,
+          "restarts": 0,
+          "completed": true
+        },
+        {
+          "visitors": 100,
+          "requests": 8672,
+          "requestsPerSecond": 74.59264457563265,
+          "pageP95Ms": 462.30968444999945,
+          "apiP95Ms": 488.59907839999704,
+          "error5xxRate": 0,
+          "restarts": 0,
+          "completed": true
+        },
+        {
+          "visitors": 250,
+          "requests": 19043,
+          "requestsPerSecond": 163.63191924117334,
+          "pageP95Ms": 1123.0431509999999,
+          "apiP95Ms": 1803.8328654999991,
+          "error5xxRate": 0,
+          "restarts": 0,
+          "completed": true
+        }
+      ],
+      "processRestarts": 0,
+      "betweenStageRestarts": 0
+    },
+    {
+      "date": "2026-11-06T02:30:15Z",
+      "release": "0e9f5c5",
+      "method": "November mix with search and cold job rooms",
+      "stages": [
+        {
+          "visitors": 25,
+          "requests": 32,
+          "requestsPerSecond": 1.4616204474553025,
+          "pageP95Ms": 9361.108131899993,
+          "apiP95Ms": 8089.843152299999,
+          "error5xxRate": 0,
+          "restarts": 0,
+          "completed": false
+        },
+        {
+          "visitors": 50,
+          "requests": 52,
+          "requestsPerSecond": 2.3761501750295593,
+          "pageP95Ms": 4802.111929399999,
+          "apiP95Ms": 6370.2762991999925,
+          "error5xxRate": 0,
+          "restarts": 0,
+          "completed": false
+        },
+        {
+          "visitors": 100,
+          "requests": 88,
+          "requestsPerSecond": 4.017455641882469,
+          "pageP95Ms": 6525.696544749994,
+          "apiP95Ms": 10536.655108999996,
+          "error5xxRate": 0,
+          "restarts": 0,
+          "completed": false
+        },
+        {
+          "visitors": 250,
+          "requests": 147,
+          "requestsPerSecond": 7.577506989141536,
+          "pageP95Ms": 9667.046209799999,
+          "apiP95Ms": 12227.39941104998,
+          "error5xxRate": 0.013605442176870748,
+          "restarts": 0,
+          "completed": false
+        }
+      ],
+      "processRestarts": 1,
+      "betweenStageRestarts": 1
+    }
+  ]
+}

@@ -7,6 +7,7 @@ import { gasCosts } from '../../lib/gas-costs'
 import { proofProjection, weeklyOutside } from '../../lib/proof'
 import { HONEST_LIMITS } from '../../lib/honest-limits'
 import styles from './adopt.module.css'
+import { Capacity } from '../_components/Capacity'
 
 export const dynamic = 'force-dynamic'
 export const metadata = {
@@ -163,6 +164,7 @@ export default async function AdoptPage() {
           <h2 id="limits">8. What is not true yet</h2>
           <ul>{HONEST_LIMITS.map((l) => <li key={l}>{l}</li>)}</ul>
         </section>
+        <Capacity />
       </main>
       <SiteFooter />
     </>

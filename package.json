@@ -42,6 +42,7 @@
     "@marque/probe": "workspace:*",
     "@marque/registry": "workspace:*",
     "@playwright/test": "^1.62.1",
+    "@redocly/cli": "2.76.0",
     "@types/node": "^22.10.2",
     "drizzle-orm": "^0.38.2",
     "eslint": "^9.17.0",

@@ -49,6 +49,9 @@ jobs:
           node --test scripts/lib/previous-assets.check.mjs
           node --test scripts/lib/verification-rpc.check.mjs
           node scripts/lib/warm-projections.check.mjs
+          node --test scripts/load/run.check.mjs
+          node --test scripts/uptime-check.check.mjs
+          pnpm exec redocly lint apps/web/public/api/v1/openapi.json
       - run: pnpm test
       - name: Create the guarded integration fixture database
         env:

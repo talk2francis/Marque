@@ -1,0 +1,51 @@
+name: Outside uptime checks
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: outside-status-log
+  cancel-in-progress: false
+jobs:
+  observe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+          fetch-depth: 1
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Read public pages and APIs
+        run: node scripts/uptime-check.mjs "$RUNNER_TEMP/observation.json"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: outside-observation-${{ github.run_id }}
+          path: ${{ runner.temp }}/observation.json
+          retention-days: 90
+      - name: Append only on status-log
+        env:
+          OBSERVATION: ${{ runner.temp }}/observation.json
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git ls-remote --exit-code --heads origin status-log >/dev/null; then
+            git fetch origin status-log
+            git switch --detach FETCH_HEAD
+          else
+            git switch --orphan status-log
+            git rm -rf --ignore-unmatch .
+          fi
+          month="$(node -e 'const fs=require("fs"); console.log(JSON.parse(fs.readFileSync(process.env.OBSERVATION,"utf8")).at.slice(0,7))')"
+          mkdir -p status-log
+          cat "$OBSERVATION" >> "status-log/$month.jsonl"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- "status-log/$month.jsonl"
+          git commit -m 'chore(status): append outside observation'
+          git push origin HEAD:refs/heads/status-log

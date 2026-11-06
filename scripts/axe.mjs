@@ -22,7 +22,15 @@ for (const theme of THEMES) {
   await ctx.addInitScript((t) => { try { localStorage.setItem('marque-theme', t) } catch { /* storage refused in this context */ } }, theme)
   const page = await ctx.newPage()
   for (const r of ROUTES) {
-    await page.goto(BASE + r, { waitUntil: 'networkidle', timeout: 60000 }).catch(() => {})
+    try {
+      const response = await page.goto(BASE + r, { waitUntil: 'networkidle', timeout: 60000 })
+      if (response?.status() !== 200) throw new Error(`HTTP ${response?.status() ?? 'unavailable'}`)
+    } catch (e) {
+      blocking++
+      report.push({ route: r, theme, loadFailure: e instanceof Error ? e.message : String(e), passes: 0, violations: [] })
+      console.error(`${theme} ${r}: page could not be audited`)
+      continue
+    }
     await page.waitForTimeout(1200)
     const res = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze()
     const v = res.violations.map((x) => ({ id: x.id, impact: x.impact, nodes: x.nodes.length, help: x.help, targets: x.nodes.slice(0, 4).map((n) => n.target.join(' ')) }))

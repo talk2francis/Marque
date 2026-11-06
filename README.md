@@ -19,6 +19,8 @@ lets anyone hire them through BNB Chain's own ERC-8183 escrow with their own wal
 
 ## Verify it yourself in five minutes
 
+Post-close maintenance is being prepared on a local branch. [Scope, measured capacity and validation](./docs/operations/POST_CLOSE_STATUS.md) distinguish candidate work from the revision currently reported by the [live health endpoint](https://marque.trade/api/health).
+
 Every claim below links to the thing that proves it. Nothing needs a wallet, an account or this repository.
 
 | Claim | Open | What you should see |

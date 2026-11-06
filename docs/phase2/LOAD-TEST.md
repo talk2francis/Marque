@@ -1,5 +1,24 @@
 # LOAD-TEST.md
 
+## 6 November 2026: current workload, aborted at every attempted level
+
+Release `0e9f5c59444a0036a05f0f9e0d0bf742864abdbf`, production through Caddy, 02:30:15 to 02:33:15 UTC. The November mix includes marketplace search and previously unviewed mainnet and testnet job rooms, with receipt, chain and IPFS reads. It is different from the September mix below. These brief aborted attempts do not establish a supported visitor count or a comparable throughput improvement.
+
+| Attempted visitors | Requests | Requests/s | Page p95 | API p95 | 5xx | Completed hold |
+|---|---|---|---|---|---|---|
+| 25 | 32 | 1.46 | 9.36 s | 8.09 s | 0% | No |
+| 50 | 52 | 2.38 | 4.80 s | 6.37 s | 0% | No |
+| 100 | 88 | 4.02 | 6.53 s | 10.54 s | 0% | No |
+| 250 | 147 | 7.58 | 9.67 s | 12.23 s | 1.36% (2 requests) | No |
+
+Every stage aborted after about 20 seconds on the page latency stop rule. The installed k6 returned exit code 69. The wrapper only recognized 108, so it continued to the next stage. It now stops on every nonzero exit, including threshold misses, generator failures and interrupts, and cleans up its monitors. Regression tests exercise 69, 99, 108 and 1 without generating traffic. No new production load was run to write this report.
+
+Marque restart counters were 69 through the end of the 100 stage and 70 before the 250 stage. This is one restart between stages, with zero inside each sampled stage; the counters alone do not prove its cause. The host began with a one-minute load average of 5.16; Postgres and the two web processes were active. Kerb's processes were stopped. The generator ran on the same VPS, so its CPU and memory are included. The close guard still passed for all nine wallets afterward.
+
+Original files: `/root/.marque/load/20261106T023015Z-0e9f5c5/`. Public, unchanged metric exports from both runs: [capacity evidence](../evidence/capacity-2026-11-06/). `/status` and `/adopt` display both dated runs and state that the current capacity target was missed.
+
+The September measurements below remain historical observations. Neither their route mix nor their process ceilings describe the current release.
+
 P2-11 load test, Sun 27 Sep 2026, 01:50 to 02:32 UTC, against production (`https://marque.trade`, through Caddy).
 
 ## Method

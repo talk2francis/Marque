@@ -8,6 +8,8 @@ import { indexerStatus, questStats, campaignChainId } from '@marque/commerce'
 import { Statement, Chip, ProvenanceChip } from '@marque/ui'
 import { SiteHeader, SiteFooter } from '../_components/SiteHeader'
 import styles from './status.module.css'
+import { Capacity } from '../_components/Capacity'
+import { OutsideChecks } from '../_components/OutsideChecks'
 import { withDeadline } from '../../lib/deadline'
 import { cursorReading, serviceReconciliationQuery, statusCursorsQuery } from '../../lib/status-cursors'
 
@@ -478,6 +480,8 @@ export default async function StatusPage() {
             </>
           )}
         </section>
+        <Capacity />
+        <OutsideChecks />
       </main>
       <SiteFooter />
     </>

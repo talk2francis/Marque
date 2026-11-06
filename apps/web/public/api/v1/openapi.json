@@ -1,9 +1,17 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Marque existing marketplace and unsigned procurement contract",
+    "title": "Marque public reads and unsigned hiring contract",
     "version": "1.0.0",
-    "description": "Candidate contract; availability is deployment-dependent. Catalog GET and local pure plan builder do not authorize signing. Quote and intent are explicit offchain side effects; bind and notify require an already-created job. Never preflight arbitrary A2A message/send, invoke a task, accept metadata prices, upload keys, or auto-sign/spend. Runtime checks exceed structural JSON Schema."
+    "description": "Candidate contract; availability is deployment-dependent. Catalog GET and local pure plan builder do not authorize signing. Quote and intent are explicit offchain side effects; bind and notify require an already-created job. Never preflight arbitrary A2A message/send, invoke a task, accept metadata prices, upload keys, or auto-sign/spend. Runtime checks exceed structural JSON Schema.",
+    "license": {
+      "name": "MIT",
+      "url": "https://github.com/talk2francis/Marque/blob/main/LICENSE"
+    },
+    "contact": {
+      "name": "Marque support",
+      "url": "https://t.me/marque_marketplace"
+    }
   },
   "servers": [
     {
@@ -238,7 +246,11 @@
               }
             }
           }
-        }
+        },
+        "tags": [
+          "Public reads"
+        ],
+        "summary": "readMachineCatalogV1"
       }
     },
     "/api/v1/hire/agent": {
@@ -269,7 +281,11 @@
           "404": {
             "description": "Not an available seller"
           }
-        }
+        },
+        "tags": [
+          "Unsigned hiring"
+        ],
+        "summary": "readExactHireMetadata"
       }
     },
     "/api/v1/hire/quote": {
@@ -315,7 +331,11 @@
           "422": {
             "description": "Declined, invalid, unsupported or expired; no substitution"
           }
-        }
+        },
+        "tags": [
+          "Unsigned hiring"
+        ],
+        "summary": "explicitExactTaskQuote"
       }
     },
     "/api/v1/hire/intent": {
@@ -360,6 +380,303 @@
           "409": {
             "description": "Already bound; recover existing transaction instead of creating again"
           }
+        },
+        "tags": [
+          "Unsigned hiring"
+        ],
+        "summary": "explicitIdempotentIntent"
+      }
+    },
+    "/api/v1/phase2/coverage": {
+      "get": {
+        "tags": [
+          "Public reads"
+        ],
+        "operationId": "readCoverage",
+        "summary": "Read mainnet and practice coverage",
+        "description": "Returns separate mainnet and practice lanes. Hireable, checked and warranted retain their separate definitions.",
+        "responses": {
+          "200": {
+            "description": "The public projection, including its original read time and evidence scope.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request parameters."
+          },
+          "429": {
+            "description": "Client request limit reached. Retry-After states the wait when provided."
+          },
+          "503": {
+            "description": "The projection is unavailable; this is not an empty successful result."
+          }
+        }
+      }
+    },
+    "/api/v1/funnel": {
+      "get": {
+        "tags": [
+          "Public reads"
+        ],
+        "operationId": "readFunnel",
+        "summary": "Read the measured BSC supply funnel",
+        "description": "Registry stages, supply definitions and timestamps. Registered is not verified or hireable.",
+        "responses": {
+          "200": {
+            "description": "The public projection, including its original read time and evidence scope.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request parameters."
+          },
+          "429": {
+            "description": "Client request limit reached. Retry-After states the wait when provided."
+          },
+          "503": {
+            "description": "The projection is unavailable; this is not an empty successful result."
+          }
+        }
+      }
+    },
+    "/api/v1/proof": {
+      "get": {
+        "tags": [
+          "Public reads"
+        ],
+        "operationId": "readProof",
+        "summary": "Read every observed hire and who paid",
+        "description": "Mainnet and testnet jobs, funder classes, the reporting window and chain-check record. Team activity is shown and excluded where stated.",
+        "responses": {
+          "200": {
+            "description": "The public projection, including its original read time and evidence scope.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request parameters."
+          },
+          "429": {
+            "description": "Client request limit reached. Retry-After states the wait when provided."
+          },
+          "503": {
+            "description": "The projection is unavailable; this is not an empty successful result."
+          }
+        }
+      }
+    },
+    "/api/v1/phase2/stats": {
+      "get": {
+        "tags": [
+          "Public reads"
+        ],
+        "operationId": "readCampaignStats",
+        "summary": "Read campaign statistics",
+        "description": "The recorded Set and Earn reporting rules are unchanged after the close.",
+        "responses": {
+          "200": {
+            "description": "The public projection, including its original read time and evidence scope.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request parameters."
+          },
+          "429": {
+            "description": "Client request limit reached. Retry-After states the wait when provided."
+          },
+          "503": {
+            "description": "The projection is unavailable; this is not an empty successful result."
+          }
+        }
+      }
+    },
+    "/api/v1/quest/{address}": {
+      "get": {
+        "tags": [
+          "Public reads"
+        ],
+        "operationId": "readQuest",
+        "summary": "Read a wallet campaign record",
+        "description": "A wallet-free progress record; BNB Chain determines campaign eligibility. Accepts optional chains=56,97.",
+        "responses": {
+          "200": {
+            "description": "The public projection, including its original read time and evidence scope.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request parameters."
+          },
+          "429": {
+            "description": "Client request limit reached. Retry-After states the wait when provided."
+          },
+          "503": {
+            "description": "The projection is unavailable; this is not an empty successful result."
+          }
+        },
+        "parameters": [
+          {
+            "name": "address",
+            "in": "path",
+            "required": true,
+            "description": "A public BNB Chain wallet address.",
+            "schema": {
+              "type": "string",
+              "pattern": "^0x[0-9a-fA-F]{40}$"
+            }
+          },
+          {
+            "name": "chains",
+            "in": "query",
+            "description": "Comma-separated supported chain IDs.",
+            "schema": {
+              "type": "string",
+              "example": "56,97"
+            }
+          }
+        ]
+      }
+    },
+    "/api/v1/practice": {
+      "get": {
+        "tags": [
+          "Public reads"
+        ],
+        "operationId": "readPractice",
+        "summary": "Read practice suggestions",
+        "description": "BSC testnet suggestions, optionally excluding agents already hired by the public address query parameter. No token or job is sent.",
+        "responses": {
+          "200": {
+            "description": "The public projection, including its original read time and evidence scope.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request parameters."
+          },
+          "429": {
+            "description": "Client request limit reached. Retry-After states the wait when provided."
+          },
+          "503": {
+            "description": "The projection is unavailable; this is not an empty successful result."
+          }
+        },
+        "parameters": [
+          {
+            "name": "address",
+            "in": "query",
+            "required": false,
+            "description": "A public BNB Chain wallet address.",
+            "schema": {
+              "type": "string",
+              "pattern": "^0x[0-9a-fA-F]{40}$"
+            }
+          }
+        ]
+      }
+    },
+    "/api/mcp": {
+      "post": {
+        "tags": [
+          "MCP"
+        ],
+        "operationId": "mcpRequest",
+        "summary": "Use the public MCP read-and-plan server",
+        "description": "JSON-RPC 2.0 initialize, ping, tools/list and explicit tools/call. Tools may request offchain quotes; never signing, funding or automatic paid calls. Tool failures use a JSON-RPC error or isError result. Notifications can return 202.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "jsonrpc",
+                  "method"
+                ],
+                "properties": {
+                  "jsonrpc": {
+                    "const": "2.0"
+                  },
+                  "id": {
+                    "type": [
+                      "string",
+                      "number",
+                      "null"
+                    ]
+                  },
+                  "method": {
+                    "type": "string"
+                  },
+                  "params": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "JSON-RPC result or error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "Notification accepted."
+          },
+          "400": {
+            "description": "Invalid JSON-RPC request."
+          },
+          "429": {
+            "description": "Rate limited."
+          },
+          "503": {
+            "description": "Read-and-plan service unavailable."
+          }
         }
       }
     }
@@ -385,5 +702,20 @@
   "x-existing-writers-not-in-client": [
     "POST /api/v1/hire/bind records and verifies original user transaction; never creates one",
     "POST /api/v1/hire/notify can trigger paid seller delivery and chain submission; never call as preflight"
+  ],
+  "security": [],
+  "tags": [
+    {
+      "name": "Public reads",
+      "description": "Wallet-free observations. Counts carry their own source and read time."
+    },
+    {
+      "name": "Unsigned hiring",
+      "description": "Explicit offchain quote and intent operations. No wallet key or signature is accepted."
+    },
+    {
+      "name": "MCP",
+      "description": "Streamable HTTP MCP read-and-plan interface; it never signs."
+    }
   ]
 }

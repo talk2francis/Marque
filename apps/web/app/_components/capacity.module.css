@@ -1,0 +1,26 @@
+.section { margin-top: 36px; padding-top: 28px; border-top: 1px solid var(--hair-2); display: grid; gap: 16px; min-width: 0; }
+.heading { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.section h2 { margin: 0; font-size: 24px; color: var(--ink); }
+.section h3 { margin: 0; font-size: 17px; color: var(--ink); }
+.section p { margin: 0; font-size: 14px; line-height: 1.6; color: var(--ink-2); max-width: 76ch; }
+.section a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+.run { display: grid; gap: 10px; padding-top: 16px; border-top: 1px solid var(--hair); min-width: 0; }
+.run code { font-size: 12px; margin-left: 8px; }
+.tableWrap { overflow-x: auto; max-width: 100%; }
+.tableWrap table { border-collapse: collapse; width: 100%; font-size: 13px; font-variant-numeric: tabular-nums; }
+.tableWrap caption { text-align: left; font-size: 12px; color: var(--ink-2); padding: 0 0 10px; }
+.tableWrap th, .tableWrap td { padding: 10px 12px 10px 0; text-align: left; border-bottom: 1px solid var(--hair); white-space: nowrap; color: var(--ink); }
+@media (max-width: 600px) {
+  .tableWrap thead { display: none; }
+  .tableWrap table, .tableWrap tbody { display: block; }
+  .tableWrap tr { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 16px; padding: 12px 0; border-top: 1px solid var(--hair); }
+  .tableWrap td, .tableWrap th { padding: 0; border: 0; white-space: normal; }
+  .tableWrap th { grid-column: 1 / -1; }
+  .tableWrap th::after { content: ' attempted visitors'; font-weight: 400; }
+  .tableWrap td::before { display: block; font-size: 11px; color: var(--ink-2); }
+  .tableWrap td:nth-child(2)::before { content: 'Requests/s'; }
+  .tableWrap td:nth-child(3)::before { content: 'Page p95'; }
+  .tableWrap td:nth-child(4)::before { content: 'API p95'; }
+  .tableWrap td:nth-child(5)::before { content: '5xx'; }
+  .tableWrap td:nth-child(6)::before { content: 'Restarts within stage'; }
+}

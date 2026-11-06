@@ -1,0 +1,102 @@
+{
+  "base": "https://marque.trade",
+  "at": "2026-11-06T06:04:38.125Z",
+  "report": [
+    {
+      "route": "/",
+      "theme": "night",
+      "passes": 28,
+      "violations": []
+    },
+    {
+      "route": "/register",
+      "theme": "night",
+      "passes": 31,
+      "violations": []
+    },
+    {
+      "route": "/agents/keel",
+      "theme": "night",
+      "passes": 30,
+      "violations": []
+    },
+    {
+      "route": "/jobs/56/56903",
+      "theme": "night",
+      "passes": 30,
+      "violations": []
+    },
+    {
+      "route": "/proof",
+      "theme": "night",
+      "passes": 28,
+      "violations": []
+    },
+    {
+      "route": "/quest",
+      "theme": "night",
+      "passes": 26,
+      "violations": []
+    },
+    {
+      "route": "/builders",
+      "theme": "night",
+      "passes": 26,
+      "violations": []
+    },
+    {
+      "route": "/me",
+      "theme": "night",
+      "passes": 23,
+      "violations": []
+    },
+    {
+      "route": "/",
+      "theme": "day",
+      "passes": 28,
+      "violations": []
+    },
+    {
+      "route": "/register",
+      "theme": "day",
+      "passes": 31,
+      "violations": []
+    },
+    {
+      "route": "/agents/keel",
+      "theme": "day",
+      "passes": 30,
+      "violations": []
+    },
+    {
+      "route": "/jobs/56/56903",
+      "theme": "day",
+      "passes": 30,
+      "violations": []
+    },
+    {
+      "route": "/proof",
+      "theme": "day",
+      "passes": 28,
+      "violations": []
+    },
+    {
+      "route": "/quest",
+      "theme": "day",
+      "passes": 26,
+      "violations": []
+    },
+    {
+      "route": "/builders",
+      "theme": "day",
+      "passes": 26,
+      "violations": []
+    },
+    {
+      "route": "/me",
+      "theme": "day",
+      "passes": 23,
+      "violations": []
+    }
+  ]
+}

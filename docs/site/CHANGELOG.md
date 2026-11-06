@@ -4,6 +4,12 @@
 
 A public record of meaningful product changes. Evidence and limitations travel with each release.
 
+## 6 November 2026 · Prepared locally: capacity evidence and outside checks
+
+The overnight November load run missed its latency stop rule at every attempted visitor level. Its wrapper incorrectly advanced after an aborted stage; it now stops on any unsuccessful stage and cleans up its monitors. The capacity blocks on Status and Running Marque preserve the September and November measurements with their different workloads, dates and raw exports. No supported current visitor count is inferred from the aborted run.
+
+A scheduled outside observer is prepared to record six public routes on a separate status-log branch. Until real logs exist, Status shows that observations are unavailable. Security contact information and an OpenAPI 3.1 description validated on 6 November are included. The eight-route accessibility baseline passed both themes with no serious or critical issues. This batch is being validated locally; it has not been pushed or deployed.
+
 ## 5 November 2026 · Set and Earn closed; the record at the close, the film for after, questions answered
 
 Set and Earn closed on Thursday 5 November at 12:00 UTC. The release live at that moment is tagged set-and-earn-close-2026-11-05 in the repository, so anyone can compare later changes against it. The record at the close is saved with the code: every job hired through Marque before the close, the funnel, both coverage lanes and the campaign stats, each with the time it was read, and a checksum file over all of them. After every deploy until 20 November, a guard re-reads the Set and Earn record of six outside and three team wallets and fails if anything that decides eligibility has moved.
