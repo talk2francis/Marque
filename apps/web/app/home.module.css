@@ -111,7 +111,7 @@
 @media (prefers-reduced-motion: reduce) { .tapeRun :global(.tp) { height: auto; min-height: 52px; } }
 
 /* ---------- Sections ---------- */
-.section { padding-top: clamp(64px, 7.5vw, 104px); }
+.section { padding-top: clamp(44px, 5.5vw, 72px); }
 /* Below the fold: skip rendering until near the viewport (less style and layout at load). */
 .section, .band { content-visibility: auto; contain-intrinsic-size: auto 720px; }
 /* Containment clips paint to the box: room for the heading crosshair that sits 6 px outside. */
@@ -178,9 +178,9 @@
 
 /* ---------- The band: How a hire is made ---------- */
 .band {
-  margin-top: clamp(64px, 7.5vw, 104px);
+  margin-top: clamp(44px, 5.5vw, 72px);
   margin-inline: calc(50% - 50vw);
-  padding-block: clamp(56px, 7vw, 88px);
+  padding-block: clamp(40px, 5vw, 64px);
   /* The one field of colour, lit like the ground: grain, and a soft key light from the
      upper left so the band reads as a lit surface rather than a flat slab. */
   background:
@@ -251,7 +251,7 @@
    up to the step the chain has reached. */
 .hireBand {
   position: relative;
-  margin-top: clamp(64px, 7.5vw, 104px);
+  margin-top: clamp(44px, 5.5vw, 72px);
   margin-inline: calc(50% - 50vw);
   padding-block: clamp(56px, 7vw, 96px);
   background:

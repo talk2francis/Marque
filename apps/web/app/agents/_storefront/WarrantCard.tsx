@@ -2,10 +2,9 @@ import { MeasureRule } from '@marque/ui'
 import { Badge } from '../../_components/ui'
 import { utcStamp } from '../../../lib/time'
 import type { StoreTest } from '../../../lib/storefront'
+import { warrantDueAt } from '../../../lib/warrant-freshness'
 import styles from './agent-page.module.css'
 
-/** A warrant is re-earned after this long (the marketplace's WARRANT_TTL_MS). */
-const RETEST_MS = 72 * 3_600_000
 const n = (v: string) => (/^-?\d+(\.\d+)?$/.test(v) && Math.abs(Number(v)) >= 1000 ? Number(v).toLocaleString('en-US') : v)
 
 /** A failed run that stated no wrong value (V4.4): every failing field left out, or no gradable answer. */
@@ -34,16 +33,17 @@ export function WarrantCard({ test, category, note }: { test: StoreTest | null; 
   const passed = asserts.filter((a) => a.pass).length
   const total = asserts.length
   const at = test.ranAt ? utcStamp(test.ranAt) : null
-  const due = test.ranAt ? new Date(Date.parse(test.ranAt) + RETEST_MS) : null
+  const dueAt = warrantDueAt(test.ranAt)
+  const due = dueAt === null ? null : new Date(dueAt)
   const stale = due ? due.getTime() < Date.now() : false
   const reproduce = `/standard/${test.testId}`
 
   if (test.pass) {
     return (
-      <section className={styles.warrant} data-kind="pass" aria-label={`Warranted: passed ${test.testId}`}>
+      <section className={styles.warrant} data-kind="pass" aria-label={`Test report: passed ${test.testId}`}>
         <div className={styles.warrantInner}>
           <div className={styles.warrantTop}>
-            <span className={styles.warrantTitle}>Warranted</span>
+            <span className={styles.warrantTitle}>{stale ? 'Past test pass' : 'Test passed'}</span>
             <a className={styles.warrantId} href={reproduce}>{test.testId}</a>
           </div>
           <p className={styles.warrantLine}>Passed {passed} of {total} assertions</p>

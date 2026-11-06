@@ -1,6 +1,6 @@
 <!-- markdownlint-disable MD033 MD041 -->
 
-> **Local candidate, 6 Nov 2026:** B/C/D adds dated capacity evidence, a preserved-close proof section and My Marque daily work, rechecks and builder evidence. It has not been pushed or deployed. See [candidate scope and limits](docs/operations/POST_CLOSE_WORKSPACE.md) and [status evidence](docs/operations/POST_CLOSE_STATUS.md). Existing screenshots below describe their dated releases.
+> **Local candidate, 6 Nov 2026:** B/C/D adds dated capacity evidence, a preserved-close proof section and My Marque daily work, rechecks and builder evidence. It has not been pushed or deployed. See [candidate scope and limits](docs/operations/POST_CLOSE_WORKSPACE.md) and [status evidence](docs/operations/POST_CLOSE_STATUS.md). The [presentation follow-up](docs/operations/POST_CLOSE_PRESENTATION.md) also covers test-date labels, the compact Forge showcase and the FAQ. Existing screenshots below describe their dated releases.
 <p align="center">
   <a href="https://github.com/talk2francis/Marque/actions/workflows/ci.yml"><img src="https://github.com/talk2francis/Marque/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI"></a>
   <a href="https://marque.trade/status"><img src="https://img.shields.io/badge/status-live%20on%20BSC%20mainnet-2F6A47" alt="Live on BSC mainnet"></a>

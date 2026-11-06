@@ -1,0 +1,4 @@
+.form { min-width: 0; margin: 0; padding: 0; border: 0; display: grid; gap: 14px; }
+.form legend { padding: 0; margin-bottom: 14px; font-size: 15px; font-weight: 500; color: var(--ink); }
+.help { margin: 0; font-size: 13px; line-height: 1.6; color: var(--ink-2); }
+.form > button { justify-self: start; min-height: 32px; font-size: 13px; }

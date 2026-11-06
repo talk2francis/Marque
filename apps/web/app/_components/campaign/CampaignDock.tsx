@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { ChevronDown, X } from 'lucide-react'
-import { CAMPAIGN, clockShort, clockWords } from '@marque/commerce/rules'
+import { CAMPAIGN, campaignClock, clockShort, clockWords } from '@marque/commerce/rules'
 import { Emblem } from './Emblem'
 import { useCampaignClock } from './Countdown'
 import { RemindMenu, useInPageReminders } from './Reminders'
@@ -50,7 +50,7 @@ export function CampaignDock() {
     // Desktop opens itself on the first visit and at most once a day; a phone keeps the 40 px bar
     // until it is tapped, so a bottom sheet never covers the page uninvited.
     const wide = window.matchMedia('(min-width: 641px)').matches
-    const autoOpen = wide && p.hiddenUntil < now && (first || now - p.autoExpandedAt > 86_400_000)
+    const autoOpen = !campaignClock(now).closed && wide && p.hiddenUntil < now && (first || now - p.autoExpandedAt > 86_400_000)
     const next = autoOpen ? { ...p, autoExpandedAt: now } : p
     if (autoOpen) saveDockPrefs(next)
     setPrefs(next)

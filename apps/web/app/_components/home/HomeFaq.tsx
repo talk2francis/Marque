@@ -31,20 +31,13 @@ export async function HomeFaq({ supply }: { supply: FaqSupply | null }) {
     <section className={styles.faq} aria-labelledby="questions" data-reveal>
       <script type="application/ld+json" id="faq-ld" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd(ctx)).replace(/</g, '\\u003c') }} />
       <div className={styles.headRule}>
-        <span className={styles.headCross} aria-hidden="true" />
         <span className="t-label">Questions</span>
         <span className={styles.headNote}>{items.length} of {ALL} answers</span>
       </div>
       <div className={styles.grid}>
         <div className={styles.intro}>
           <h2 id="questions" className={styles.title}>Questions, <em>answered.</em></h2>
-          <p className={styles.lede}>What a hire costs, where your money waits, and how you know an agent works. Each answer ends at the page that shows it.</p>
-          {supply ? (
-            <p className={styles.live}>
-              <ProvenanceChip provenance="MEASURED" />
-              <span>Right now on BSC mainnet: <b className="num">{supply.hireable}</b> hireable, <b className="num">{supply.checked}</b> checked against the chain, <b className="num">{supply.warranted}</b> warranted. Read <SnapshotAge iso={supply.measuredAt} bare />.</span>
-            </p>
-          ) : null}
+          <p className={styles.lede}>What a hire costs, where your money waits, and how to check the work.</p>
           <div className={styles.more}>
             <a href="/docs/faq">All {ALL} answers, searchable <ArrowRight aria-hidden="true" /></a>
             <a href="https://t.me/marque_marketplace" target="_blank" rel="noreferrer">Ask in the Marque Telegram <ArrowRight aria-hidden="true" /></a>
@@ -52,8 +45,8 @@ export async function HomeFaq({ supply }: { supply: FaqSupply | null }) {
         </div>
 
         <div className={styles.list}>
-          {items.map((f, i) => (
-            <details key={f.id} id={f.id} className={styles.item} {...{ name: 'home-faq' }} open={i === 0 || undefined}>
+          {items.map((f) => (
+            <details key={f.id} id={f.id} className={styles.item} {...{ name: 'home-faq' }}>
               <summary>
                 <span className={styles.q}>{f.q}</span>
                 <span className={styles.sign} aria-hidden="true" />
@@ -63,7 +56,7 @@ export async function HomeFaq({ supply }: { supply: FaqSupply | null }) {
                 {f.live === 'supply' && supply ? (
                   <p className={styles.aLive}>
                     <ProvenanceChip provenance="MEASURED" />
-                    <span>Now: <b className="num">{supply.hireable}</b> hireable, <b className="num">{supply.checked}</b> checked, <b className="num">{supply.warranted}</b> warranted on BSC mainnet.</span>
+                    <span>Now: <b className="num">{supply.hireable}</b> hireable, <b className="num">{supply.checked}</b> checked, <b className="num">{supply.warranted}</b> warranted on BSC mainnet. Read <SnapshotAge iso={supply.measuredAt} bare />.</span>
                   </p>
                 ) : null}
                 <a className={styles.proof} href={f.proof.href}>{f.proof.label} <ArrowRight aria-hidden="true" /></a>

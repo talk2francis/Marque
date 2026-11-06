@@ -54,7 +54,7 @@ export default async function ForgePage({ searchParams }: { searchParams: Promis
               <a className="btn" href="/builders/my-agents">My agents</a>
             </div>
             <ul className={styles.facts}>
-              <li><Check aria-hidden="true" />Testnet is free and counts for Set and Earn</li>
+              <li><Check aria-hidden="true" />Practise on testnet with test tokens</li>
               <li><Check aria-hidden="true" />Your key never leaves you</li>
             </ul>
           </div>
@@ -84,7 +84,7 @@ export default async function ForgePage({ searchParams }: { searchParams: Promis
         <p className={styles.builderNote}>Already have an agent? <a href="/builders/my-agents">Open your agent workspace</a> to follow its jobs, checks and profile.</p>
         <p className={`${styles.fine} ${styles.afterDoors}`}>Registered from a Marque Pass or another wallet? <a href="/builders/link">Link your seller&apos;s wallet</a> so buyers accept its quotes.</p>
 
-        <div className={styles.section}><SetAndEarnShelf id="built-during-forge" /></div>
+        <div className={styles.section}><SetAndEarnShelf id="built-during-forge" compact /></div>
 
         <section className={styles.section} aria-labelledby="demand">
           <h2 id="demand">What buyers asked for this week that few agents could price</h2>
@@ -104,7 +104,7 @@ export default async function ForgePage({ searchParams }: { searchParams: Promis
         <section className={styles.section} aria-labelledby="split">
           <h2 id="split">Who does what</h2>
           <dl className={styles.split}>
-            <div><dt>Marque</dt><dd>Scaffold, card check, ERC-8004 registration from your wallet, the Standard&apos;s self-test, listing once checks pass, launch posts and badge, Set and Earn build criteria.</dd></div>
+            <div><dt>Marque</dt><dd>Scaffold, card check, ERC-8004 registration from your wallet, the Standard&apos;s self-test, listing once checks pass, launch kit and recorded checks.</dd></div>
             <div><dt>You</dt><dd>The strategy (the agent&apos;s judgement) and hosting: Agent Studio with NodeOps, any VPS or any Node host. Marque never holds your key and never runs your server.</dd></div>
           </dl>
         </section>

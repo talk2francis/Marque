@@ -63,6 +63,11 @@ export const articles: Record<string, Article> = {
     title:'What changed, and why.',
     description:'A public record of meaningful product changes. Evidence and limitations travel with each release.',
     sections:[
+      { id: 'post-close-presentation', title: '6 November 2026 · Prepared locally: clearer test dates and calmer pages', paragraphs: [
+        'Retest labels now follow the same existing 14-day window as marketplace standing. A refresh scheduled after 72 hours is a separate cadence. The six Brain on BNB agents had passing records from 3 November; those original observations, grading rules and count definitions are unchanged.',
+        'Agent Forge shows a few campaign-era examples and links to the full Set and Earn directory. The complete shelf stays on the campaign page, with current reads clearly separate from frozen eligibility and no request for new qualifying hires after the close.',
+        'Questions on the home page now sit in a compact sage panel with native collapsed answers, their original proof links and matching structured data. Section spacing is tighter, hash links settle below the header and the closed-campaign companion stays compact until opened. These changes remain local, with no push or deployment.',
+      ] },
       { id: 'post-close-d', title: '6 November 2026 · Prepared locally: daily work and builder evidence', paragraphs: [
         'My Marque now puts Today, Positions, Jobs and Money under Hiring, and Agents, Bench and Demand under Building. Old links remain valid. Today groups existing actions by risk and deadline, and Positions opens Tender with editable fields without asking for a price or signing.',
         'Recorded answers can be explicitly compared with current chain state without changing their original grades. The public Job Room has the same read-only control. Each builder identity has a six-step evidence strip. Owner-proved Demand uses exact funded quote matches; historical badges that were never stored remain unknown. Bench requires permission and can replay supplied JSON at the original block without contacting an agent or paying.',

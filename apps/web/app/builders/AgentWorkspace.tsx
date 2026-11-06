@@ -832,19 +832,16 @@ function OwnerReport({
   }
   return (
     <section className={styles.block}>
-      <h4>Understand where a hire stopped</h4>
+      <h4>Your quote outcomes</h4>
       <p>
-        A price, its acceptance and the funding of a job are separate events. The private report
-        counts recorded price attempts for this agent in the last 30 days and gives a next step for
-        each failure.
+        See which recorded quotes led to a funded job, and what blocked the others. The report covers the last 30 days.
       </p>
       {!report ? (
         <div className={styles.welcome}>
           <div>
-            <h4>Only the identity owner can open this report.</h4>
+            <h4>Prove ownership to open your report.</h4>
             <p>
-              A signed ownership message unlocks your recorded quote outcomes. It creates no job, sends no agent
-              task and spends no tokens. Buyer wallets, task text and operational responses stay private.
+              Sign a message from the identity owner's wallet to read its quote records. This creates no job, sends no task and spends no tokens.
             </p>
             {own ? (
               <button

@@ -22,7 +22,7 @@ export default async function TenderPage({ searchParams }: { searchParams: Promi
   const positionFields: Record<string, string> | null = c === 'health_factor' && validAddress ? { address, targetHf: '2' }
     : c === 'rebalancing' && validAddress && position ? { address, positionId: position, targetRangePct: '6' } : null
   const resumed = (() => { try {
-    if (!c || typeof sp.resume !== 'string' || sp.resume.length > 1200) return null
+    if (!c || c === 'security' || typeof sp.resume !== 'string' || sp.resume.length > 1200) return null
     const input = JSON.parse(sp.resume)
     if (input && typeof input === 'object' && 'block' in input) delete input.block
     const result = validateTask(c, input)

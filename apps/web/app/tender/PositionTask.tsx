@@ -2,6 +2,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { validateTask, YIELD_ASSETS, GRID_PAIRS } from '@marque/commerce/client'
 import type { TaskValue } from '../_components/hire/TaskForm'
+import { Field, SelectField } from '../_components/ui/Field'
+import styles from './position-task.module.css'
 const NUMERIC = new Set(['targetHf', 'targetRangePct', 'amount', 'holdingDays', 'currentAprPct', 'thresholdPp', 'lower', 'upper', 'capitalUsd', 'levels', 'stop'])
 
 /** Position links fill only this quote-comparison form. The frozen Hire Sheet is unchanged. */
@@ -13,14 +15,13 @@ export function PositionTask({ category, initialFields, disabled, onChange, onRe
         : [[fields.pool && !fields.pair ? 'pool' : 'pair', fields.pool && !fields.pair ? 'PancakeSwap pool' : 'Pair against USDT'], ['lower', 'Lower price'], ['upper', 'Upper price'], ['capitalUsd', 'Capital, USDT'], ...(fields.levels ? [['levels', 'Number of levels'] as [string, string]] : []), ...(fields.spacing ? [['spacing', 'Spacing'] as [string, string]] : []), ...(fields.stop ? [['stop', 'Stop price'] as [string, string]] : [])]
   const result = useMemo(() => validateTask(category, Object.fromEntries(Object.entries(fields).map(([key, value]) => [key, NUMERIC.has(key) ? Number(value) : value]))), [category, fields])
   useEffect(() => { onChange(result.ok ? { task: result.sentence, ready: true, missing: null, structured: { category, fields: result.fields } } : { task: '', ready: false, missing: `Add ${result.missing.join(' and ')}.`, structured: null }) }, [result, onChange, category])
-  return <fieldset className="taskform" disabled={disabled}>
+  return <fieldset className={styles.form} disabled={disabled}>
     <legend>Review this task</legend>
-    <p className="taskform-help">These inputs came from the position or answer you opened. Review them before asking for fresh prices. An old pinned block is not copied into this new request.</p>
-    <div className="taskform-grid">{definitions.map(([key, label]) => <label className="taskform-field" key={key}>
-      <span className="taskform-label">{label}</span>
-      {key === 'asset' || key === 'pair' || key === 'spacing' ? <select value={fields[key] ?? ''} onChange={e => setFields(v => ({ ...v, [key]: e.target.value }))}>{(key === 'asset' ? YIELD_ASSETS : key === 'pair' ? GRID_PAIRS : ['arithmetic', 'geometric']).map(value => <option key={value} value={value}>{value}</option>)}</select>
-        : <input value={fields[key] ?? ''} onChange={e => setFields(v => ({ ...v, [key]: e.target.value }))} spellCheck={false} autoComplete="off" inputMode={NUMERIC.has(key) ? 'decimal' : 'text'} />}
-    </label>)}</div>
+    <p className={styles.help}>These inputs came from the position or answer you opened. Review them before asking for fresh prices. An old pinned block is not copied into this new request.</p>
+    <div className="taskform-grid">{definitions.map(([key, label]) => key === 'asset' || key === 'pair' || key === 'spacing'
+      ? <SelectField key={key} label={label} value={fields[key] ?? ''} onChange={value => setFields(v => ({ ...v, [key]: value }))} options={(key === 'asset' ? YIELD_ASSETS : key === 'pair' ? GRID_PAIRS : ['arithmetic', 'geometric']).map(value => ({ value, label: value }))} />
+      : <Field key={key} label={label} value={fields[key] ?? ''} onChange={value => setFields(v => ({ ...v, [key]: value }))} disabled={disabled} kind={NUMERIC.has(key) ? 'number' : key === 'address' || key === 'pool' ? 'mono' : 'text'} />
+    )}</div>
     <button type="button" className="taskform-link" onClick={onReset}>Choose a different task</button>
   </fieldset>
 }

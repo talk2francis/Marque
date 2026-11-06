@@ -12,6 +12,8 @@
  */
 import { referenceAgent } from '../../lib/reference-agents'
 import type { AgentTrack } from '../../lib/agent-track'
+import { WARRANT_DAYS, warrantIsStale } from '../../lib/warrant-freshness'
+export { WARRANT_TTL_MS, warrantIsStale } from '../../lib/warrant-freshness'
 
 /** Mirrors the `/api/v1/marketplace` row exactly. Nothing added, nothing renamed. */
 export interface MarketRow {
@@ -264,14 +266,6 @@ export function isoDay(iso: string | null): string | null {
   return Number.isNaN(t) ? null : new Date(t).toISOString().slice(0, 10)
 }
 
-/** The same 72h window the shared WarrantBadge uses. A pass is a claim about now. */
-export const WARRANT_TTL_MS = 72 * 3_600_000
-export function warrantIsStale(date: string | null): boolean {
-  if (!date) return false
-  const t = Date.parse(date)
-  return Number.isNaN(t) ? false : Date.now() - t > WARRANT_TTL_MS
-}
-
 /** `improvementThreshold` -> `improvement threshold`. Display only. */
 function humanField(f: string): string {
   return f
@@ -331,7 +325,7 @@ export function qualView(a: MarketRow): QualView {
       flag: stale ? 'Retest due' : null,
       detail: a.warrant.testId,
       title: stale
-        ? 'Passed Marque’s published category-specific conformance test. The pass is more than 72 hours old, so a retest is due and it is not shown as current.'
+        ? `Passed Marque’s published category-specific conformance test. The pass is more than ${WARRANT_DAYS} days old, so a retest is due and it is not shown as current.`
         : 'Passed Marque’s published category-specific conformance test.',
     }
   }

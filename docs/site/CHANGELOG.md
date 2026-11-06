@@ -4,6 +4,14 @@
 
 A public record of meaningful product changes. Evidence and limitations travel with each release.
 
+## 6 November 2026 · Prepared locally: clearer test dates and calmer pages
+
+Retest labels now follow the same existing 14-day window as marketplace standing. A refresh scheduled after 72 hours is a separate cadence. The six Brain on BNB agents had passing records from 3 November; those original observations, grading rules and count definitions are unchanged.
+
+Agent Forge shows a few campaign-era examples and links to the full Set and Earn directory. The complete shelf stays on the campaign page, with current reads clearly separate from frozen eligibility and no request for new qualifying hires after the close.
+
+Questions on the home page now sit in a compact sage panel with native collapsed answers, their original proof links and matching structured data. Section spacing is tighter, hash links settle below the header and the closed-campaign companion stays compact until opened. These changes remain local, with no push or deployment.
+
 ## 6 November 2026 · Prepared locally: daily work and builder evidence
 
 My Marque now puts Today, Positions, Jobs and Money under Hiring, and Agents, Bench and Demand under Building. Old links remain valid. Today groups existing actions by risk and deadline, and Positions opens Tender with editable fields without asking for a price or signing.
