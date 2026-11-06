@@ -48,6 +48,7 @@ jobs:
           node --test ops/alert-readings.check.mjs
           node --test scripts/lib/previous-assets.check.mjs
           node --test scripts/lib/verification-rpc.check.mjs
+          node --test scripts/lib/readiness.check.mjs
           node scripts/lib/warm-projections.check.mjs
           node --test scripts/load/run.check.mjs
           node --test scripts/uptime-check.check.mjs

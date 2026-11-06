@@ -9,6 +9,23 @@ vi.mock('./agent-standing', () => ({ standingEvidence: async () => ({}) }))
 import { marketplaceAgents, marketPageAgentStates, resetSharedMarketReads } from './marketplace'
 describe('ready selection before the broad catalog read', () => {
   beforeEach(() => resetSharedMarketReads())
+  it('retains independent owner selections when views alternate', async () => {
+    const ids = ['56:alternating-a', '56:alternating-b']
+    mocks.states.mockReset().mockResolvedValue(new Map())
+    mocks.read.mockReset()
+    for (const id of ids) {
+      mocks.read.mockResolvedValueOnce([{ id, owner_address: id }])
+        .mockResolvedValueOnce([{ agent_id: id, owner_address: id, category: 'yield', name: id }])
+    }
+    mocks.tracks.mockResolvedValue(null); mocks.capabilities.mockResolvedValue(new Map())
+    const a = await marketplaceAgents({ agentIds: [ids[0]!] })
+    const b = await marketplaceAgents({ agentIds: [ids[1]!] })
+    const again = await marketplaceAgents({ agentIds: [ids[0]!] })
+    expect(a.rows.map(r => r.agentId)).toEqual([ids[0]])
+    expect(b.rows.map(r => r.agentId)).toEqual([ids[1]])
+    expect(again.rows.map(r => r.agentId)).toEqual([ids[0]])
+    expect(mocks.read).toHaveBeenCalledTimes(4)
+  })
   it('returns measured empty supply for no stored quotes without scanning the registry', async () => {
     mocks.read.mockClear(); mocks.states.mockResolvedValueOnce(new Map())
     expect(await marketplaceAgents({ tab: 'ready' })).toMatchObject({ rows: [], total: 0, offset: 0, hasMore: false })

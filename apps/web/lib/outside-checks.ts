@@ -15,7 +15,9 @@ async function readLog(month: string, signal: AbortSignal): Promise<string> {
       const part = await reader.read()
       if (part.done) break
       bytes += part.value.byteLength
-      if (bytes > 2 * 1024 * 1024) throw new Error('log_limit')
+      // A full month contains up to 4,464 six-route observations. Retain the
+      // append-only monthly format with a bounded budget that fits that log.
+      if (bytes > 8 * 1024 * 1024) throw new Error('log_limit')
       text += decoder.decode(part.value, { stream: true })
     }
     return text + decoder.decode()

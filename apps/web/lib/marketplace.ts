@@ -488,11 +488,11 @@ export async function marketPageAgentStates(page: readonly Pick<MarketRow, 'agen
   return new Map(results.flatMap(result => [...result]))
 }
 
-// One bounded memo for requested owner groups. The full catalog memo remains
+// Bounded memos for requested owner groups. The full catalog memo remains
 // separate. Fresh quote selection happens before this cache, and expiry is still
 // checked on every response. Never turn a failed commerce read into zero supply.
-let scopeMemo: { key: string; at: number; rows: MarketRow[] } | null = null
-let scopeInflight: { key: string; promise: Promise<{ rows: MarketRow[]; at: number }> } | null = null
+const scopeMemos = new Map<string, { at: number; rows: MarketRow[] }>()
+const scopeInflight = new Map<string, Promise<{ rows: MarketRow[]; at: number }>>()
 /** Above this many ids a scoped read costs more than the memoised whole catalog, which the later filters narrow the same way. */
 const SCOPE_MAX_IDS = 300
 
@@ -506,8 +506,10 @@ async function scopedBase(ids: readonly string[], states?: Awaited<ReturnType<ty
     return { rows, at: baseMemo.get(chainId)?.at ?? Date.now() }
   }
   const key = `${chainId}|${[...new Set(ids)].sort().join(',')}`
-  if (scopeMemo?.key === key && Date.now() - scopeMemo.at < BASE_TTL_MS) return scopeMemo
-  if (scopeInflight?.key === key) return scopeInflight.promise
+  const memo = scopeMemos.get(key)
+  if (memo && Date.now() - memo.at < BASE_TTL_MS) return memo
+  const pending = scopeInflight.get(key)
+  if (pending) return pending
   const promise = (async () => {
     const result = await boundedCommerceRead(sql`select id, owner_address from agent where id in (${sql.join([...new Set(ids)].map(id => sql`${id}`), sql`, `)})`, 'exact')
     const owners = Array.from(result as unknown as Array<{ owner_address: string | null }>)
@@ -519,13 +521,14 @@ async function scopedBase(ids: readonly string[], states?: Awaited<ReturnType<ty
     }
     const addresses = [...new Set(owners.map(row => row.owner_address!))]
     const rows = addresses.length ? await queryAgents(addresses, states, chainId) : []
-    const value = { key, rows, at: Date.now() }
-    scopeMemo = value
+    const value = { rows, at: Date.now() }
+    scopeMemos.delete(key)
+    scopeMemos.set(key, value)
+    while (scopeMemos.size > 16) scopeMemos.delete(scopeMemos.keys().next().value!)
     return value
   })()
-  const current = { key, promise }
-  scopeInflight = current
-  try { return await promise } finally { if (scopeInflight === current) scopeInflight = null }
+  scopeInflight.set(key, promise)
+  try { return await promise } finally { if (scopeInflight.get(key) === promise) scopeInflight.delete(key) }
 }
 
 /** The same exact-agent service selection is used for materialization and quote renewal. */

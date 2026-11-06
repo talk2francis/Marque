@@ -62,8 +62,9 @@ export function termsOf(description: string | null, category: string | null, che
   return { source, rows, met: rows.filter((r) => r.state === 'met').length, of: rows.length }
 }
 
-async function build(chainId: ChainId, jobId: string, opts: { replay?: boolean } = {}): Promise<JobLens> {
-  const job = await questJob(chainId, jobId).catch(() => null)
+type ReadJob = Awaited<ReturnType<typeof questJob>>
+async function build(chainId: ChainId, jobId: string, opts: { replay?: boolean; job?: ReadJob } = {}): Promise<JobLens> {
+  const job = opts.job === undefined ? await questJob(chainId, jobId).catch(() => null) : opts.job
   const url = job?.deliverable?.url ?? null
   const manifest: Manifest | null = await jobManifest(chainId, jobId, job as never)
   const source = (job?.deliverable as { source?: string | null } | undefined)?.source ?? null
@@ -124,8 +125,8 @@ function missingInput(lens: Lens, task: string | null): string {
 }
 
 /** Cached 10 minutes per job: a delivered answer does not change; checks are pinned to its block. */
-export function jobLens(chainId: ChainId, jobId: string) {
-  return cachedProjection(`lens:v9:${chainId}:${jobId}`, () => build(chainId, jobId), { freshMs: 10 * 60_000, timeoutMs: 20_000 })
+export function jobLens(chainId: ChainId, jobId: string, job?: ReadJob) {
+  return cachedProjection(`lens:v9:${chainId}:${jobId}`, () => build(chainId, jobId, { job }), { freshMs: 10 * 60_000, timeoutMs: 20_000 })
 }
 
 /** Recompute a job's checks and terms from chain now, ignoring and never writing the stored result (the replay command). */

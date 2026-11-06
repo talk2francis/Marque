@@ -18,6 +18,7 @@ import { chromium } from 'playwright'
 import { warmCandidateProjections } from './lib/warm-projections.mjs'
 import { verifyPreviousAssets } from './lib/previous-assets.mjs'
 import { isVerificationRpcRead } from './lib/verification-rpc.mjs'
+import { verifyReadiness } from './lib/readiness.mjs'
 
 const BASE = process.argv[2] ?? 'http://127.0.0.1:3299'
 // Deployment metadata from the slot, checked before Chromium or a traffic switch.
@@ -33,6 +34,7 @@ if (process.env.PREVIOUS_BASE_URL) {
   const count = await verifyPreviousAssets(BASE, process.env.PREVIOUS_BASE_URL)
   console.log(`ok   ${count} previous-release static assets remain available`)
 }
+console.log('ok   public read readiness: ' + JSON.stringify(await verifyReadiness(BASE, { instances: Number(process.env.WEB_INSTANCES ?? 2) })))
 const projections = await warmCandidateProjections(BASE)
 console.log('ok   runtime projections refreshed before browser acceptance: ' + JSON.stringify(projections))
 // An address with real first-party history — charters, hires, receipts, seals —

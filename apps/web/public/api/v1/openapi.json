@@ -1200,6 +1200,24 @@
           }
         }
       }
+    },
+    "/api/ready": {
+      "get": {
+        "operationId": "readWorkerReadiness",
+        "summary": "Read per-worker public-read initialization",
+        "description": "Separate from liveness. Initializes catalog and comparison modules without sending a task or transaction. A cluster deployment must sample every configured worker.",
+        "responses": {
+          "200": {
+            "description": "This worker initialized its read modules; body includes its opaque instance ID and release."
+          },
+          "503": {
+            "description": "Public read initialization has not completed successfully."
+          },
+          "400": {
+            "description": "Readiness takes no query parameters."
+          }
+        }
+      }
     }
   },
   "x-local-hire-plan": {

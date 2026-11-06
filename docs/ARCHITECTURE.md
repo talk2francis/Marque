@@ -1,5 +1,7 @@
 # Architecture
 
+Release preparation on 6 November adds a separate `/api/ready` check: it initializes the public catalog and comparison modules without invoking an agent task. Blue-green deployment requires two distinct initialized cluster workers before promotion; `/api/health` remains liveness. Startup warm reads are sequential. Exact owner selections keep sixteen bounded catalog memos with independent in-flight coalescing, so concurrent network views do not replace each other's only cached selection. A job room passes its existing job read into the answer view. Money handlers and campaign predicates are unchanged.
+
 Reference conformance scheduling reads each first-party card's explicit
 `x-marque.standard` and verifies its category before capturing a case. A Yield
 category label does not make Tidemark's trailing realised-yield task compatible

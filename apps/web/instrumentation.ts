@@ -8,17 +8,17 @@ export async function register() {
   const port = process.env['PORT']
   if (!port) return
   setTimeout(() => {
-    for (const lane of ['mainnet', 'practice']) {
-      void fetch(`http://127.0.0.1:${port}/api/v1/marketplace?lane=${lane}&limit=1`, { signal: AbortSignal.timeout(90_000) }).catch(() => undefined)
-    }
-    // The marketplace's own first read (Ready, both networks), so the first visitor and the first search after a
-    // restart find the quote, category and standing reads already warm.
-    void fetch(`http://127.0.0.1:${port}/api/v1/marketplace?tab=ready&lane=all&failed=group&limit=15&offset=0`, { signal: AbortSignal.timeout(90_000) }).catch(() => undefined)
-    // The evidence ladders the Marketplace shows (its hero reads mainnet and testnet), so no visitor counts them cold.
-    // The hire form's live examples (Venus loans and V3 positions, about 20 s of chain reads).
-    void fetch(`http://127.0.0.1:${port}/api/v1/hire/examples`, { signal: AbortSignal.timeout(90_000) }).catch(() => undefined)
-    for (const lane of ['all', 'mainnet', 'practice']) {
-      void fetch(`http://127.0.0.1:${port}/api/v1/marketplace/ladder?lane=${lane}`, { signal: AbortSignal.timeout(90_000) }).catch(() => undefined)
-    }
+    // Sequential warm reads avoid a burst of duplicate cold catalog work across
+    // cluster workers. Deployment separately verifies every worker's readiness.
+    void (async () => {
+      const paths = ['/api/ready',
+        '/api/v1/marketplace?lane=mainnet&limit=1', '/api/v1/marketplace?lane=practice&limit=1',
+        '/api/v1/marketplace?tab=ready&lane=all&failed=group&limit=15&offset=0',
+        ...['all', 'mainnet', 'practice'].map(lane => `/api/v1/marketplace/ladder?lane=${lane}`),
+        '/api/v1/hire/examples']
+      for (const path of paths) {
+        try { const r = await fetch(`http://127.0.0.1:${port}${path}`, { signal: AbortSignal.timeout(90_000) }); await r.arrayBuffer() } catch { /* deploy readiness remains fail-closed */ }
+      }
+    })()
   }, 1500)
 }

@@ -14,6 +14,10 @@ Focused security, reader, answer-integrity and queue tests passed. Four source-l
 
 ## Boundaries and prerequisites
 
+The first guarded candidate load stopped at 25 virtual users: page p95 was 3.18 s, API p95 11.14 s, and one of twelve recorded error samples was a 5xx. Higher stages were not run. A separate fully cold comparison exceeded the client's twelve-second transport deadline. These failures remain in the private acceptance receipts; they are not a capacity claim.
+
+Follow-up changes retain sixteen exact owner-selection memos instead of one competing slot, coalesce each selection independently, and pass the job already read by the page into its answer view. A separate `/api/ready` initializes the read modules without sending a task. The deploy guard requires two distinct initialized workers; `/api/health` keeps its liveness meaning. Startup warm reads run sequentially. The outside log reader retains the monthly append-only format with an eight-MiB cap, sufficient for the scheduled six-route observations through a full month.
+
 Buyer payment/signing handlers, campaign count definitions and original results remain frozen. The original 15-file close checksum still verifies. The actual testnet anchor is retained and is never resent. A mainnet anchor still lacks an existing verified destination and exact simulation; website release authorization does not authorize that transaction. An address question is pending while the website work proceeds.
 
 Historical badges or private Bench attempts that were never recorded cannot be reconstructed reliably. Existing missing history stays explicitly unknown. No historical observation is fabricated to remove that limit.

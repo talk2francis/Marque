@@ -58,6 +58,11 @@ healthy() {
     [ "$code" = "200 0" ] && break; sleep 2
   done
   [ "$code" = "200 0" ] || { say "  :$port /api/health never answered 200"; return 1; }
+  # A ready socket does not prove the public read graph is initialized. Both
+  # configured cluster workers must pass before the candidate receives traffic.
+  if [ "${2:-candidate}" != legacy ]; then
+    node "$ROOT/scripts/check-web-ready.mjs" "http://127.0.0.1:$port" >>"$LOG" 2>&1 || return 1
+  fi
   for u in / /register /quest /builders "/api/v1/marketplace?limit=3&offset=0" /api/v1/phase2/config; do
     # A fresh process answers 503 quickly while it warms the catalog (instrumentation.ts) rather than holding the
     # request: give a 503 up to two minutes to become a 200. Anything else, or a 503 that persists, still fails.
@@ -125,7 +130,8 @@ if [ "${1:-}" = "--rollback" ]; then
     systemctl stop "$t" && say "cancelled $t"
   done
   if [ "$(http_health "http://127.0.0.1:$PREV/api/health" 3)" != "200 0" ]; then start_slot "$PREV"; fi
-  healthy "$PREV" || { say "previous slot is not healthy; not switching"; exit 1; }
+  # A retained release from before /api/ready must remain a usable rollback.
+  healthy "$PREV" legacy || { say "previous slot is not healthy; not switching"; exit 1; }
   start_mcp "$(basename -- "$(readlink -f "$REL/slot-$PREV")")"
   persist_processes
   switch_to "$PREV"

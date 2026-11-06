@@ -93,7 +93,7 @@ export default async function JobRoom({ params }: { params: Promise<{ chainId: s
     intent?.['description'] ? null : onchainJobTask(cid, jobId),
   ])
   // The Result Lens reads the same file and checks it against the chain (cached per job).
-  const lensData = manifest && !manifest.withheld ? await jobLens(cid, jobId).then((p) => p.value).catch(() => null) : null
+  const lensData = manifest && !manifest.withheld ? await jobLens(cid, jobId, job).then((p) => p.value).catch(() => null) : null
   const lensContent: unknown = manifest?.content ?? (() => { try { return manifest?.raw ? JSON.parse(manifest.raw) : null } catch { return null } })()
   // The description can be signed or identity-matched unsigned; the buyer's words are its `task`.
   // Hires started elsewhere (or on another Marque stack) have no intent here: the job's own description on chain says it.
