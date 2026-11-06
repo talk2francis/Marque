@@ -1057,7 +1057,7 @@ a.introBack:hover { color: var(--fg); }
 .laneCompact .laneOpt[aria-checked='true'] { background: var(--ground-raised); border-color: transparent; box-shadow: var(--elev-1); }
 .laneCompact .laneOpt[data-lane='practice'][aria-checked='true'] { border-style: solid; }
 .laneCompact .laneTitle { font-weight: 500; }
-.laneCompact .laneCount { background: transparent; padding: 0; color: var(--fg-faint); font-size: 12px; }
+.laneCompact .laneCount { background: transparent; padding: 0; color: var(--ink-2); font-size: 12px; }
 @media (max-width: 520px) {
   .laneCompact { display: flex; width: 100%; }
   .laneCompact .laneOpt { flex: 1 1 0; flex-direction: row; justify-content: center; gap: 6px; }

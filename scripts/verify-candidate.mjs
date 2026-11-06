@@ -156,17 +156,23 @@ for (const line of body.split('\n')) {
   })).catch(() => ({ status: 0, hires: 0 }))
   await page.goto(`${BASE}/me?addr=${HIRER_ADDR}`, { waitUntil: 'networkidle' })
   const wallet = await walletReply
-  if (wallet.status === 200 && wallet.hires > 0) {
-    await page.locator('a[href^="/jobs/"]').first().waitFor({ timeout: 5000 }).catch(() => {})
-  }
+  // Post-close My Marque: Today is the default; the history lives under Jobs.
+  // Check the actual tabs and populated history, without accepting a document reload.
+  const documentKey = await page.evaluate(() => { window.__verificationDocument = window.crypto.randomUUID(); return window.__verificationDocument })
+  const initialText = await page.evaluate(() => document.body.innerText)
+  const hasSummary = ['Set and Earn', 'In escrow now', 'Paid to agents', 'Spending controls'].every(h => new RegExp(h, 'i').test(initialText))
+  const tabNames = await page.getByRole('tab').allTextContents()
+  const hasSections = hasSummary && ['Today', 'Positions', 'Jobs', 'Money'].every(name => tabNames.some(text => text.trim() === name))
+    && await page.getByRole('heading', { name: /^Today/ }).count() > 0
+  await page.getByRole('tab', { name: 'Jobs', exact: true }).click()
+  await page.locator('a[href^="/jobs/"]').first().waitFor({ timeout: 15000 }).catch(() => {})
   const text = await page.evaluate(() => document.body.innerText)
-  // V4 My Marque: at-a-glance tiles, Needs you, the four hiring sections and the wallet rail.
-  const hasSections = ['Set and Earn', 'Jobs', 'In escrow now', 'Paid to agents', 'Needs you', 'Logbook', 'Money', 'Watching', 'Spending controls'].every((h) => new RegExp(h, 'i').test(text))
-  const hasJobs = /job \d{3,}/i.test(text)
-  const historyOk = wallet.status === 200 && wallet.hires > 0 && hasSections && hasJobs
+  const hasJobs = /job \d{3,}/i.test(text) && await page.getByRole('button', { name: 'History', exact: true }).count() === 1
+  const sameDocument = await page.evaluate(() => window.__verificationDocument) === documentKey
+  const historyOk = wallet.status === 200 && wallet.hires > 0 && hasSections && hasJobs && sameDocument
   console.log(historyOk
-    ? 'ok   /me?addr= renders every My Marque section with a populated job history'
-    : `FAIL /me?addr= incomplete (wallet=${wallet.status} hires=${wallet.hires} sections=${hasSections} jobs=${hasJobs})`)
+    ? 'ok   /me?addr= renders Today and the four hiring tabs, then opens populated Jobs without reloading'
+    : `FAIL /me?addr= incomplete (wallet=${wallet.status} hires=${wallet.hires} sections=${hasSections} jobs=${hasJobs} sameDocument=${sameDocument})`)
   if (!historyOk) {
     failures++
   }

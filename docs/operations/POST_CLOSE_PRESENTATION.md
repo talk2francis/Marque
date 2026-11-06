@@ -23,3 +23,7 @@ Hash links open the requested answer and briefly follow layout/font settlement. 
 The position-prefill form found during the broader B/C/D visual pass now reuses the shared Field and SelectField components, with a local fieldset reset. The frozen Hire Sheet and its TaskForm remain unchanged. Browser checks wait for hydration before expecting a prefilled submit button to be ready; no quotes or paid work are submitted.
 
 Final screenshots, accessibility results and exact source/artifact revisions belong in the candidate acceptance report. Styling-injection drafts are private review aids and are not production evidence.
+
+The final browser review also tested JavaScript-disabled navigation. Both the live baseline and candidate hide the main page in a Next.js streamed container until scripts run. Native details markup alone does not establish end-to-end no-script usability. This existing app-shell limitation is documented in [candidate acceptance](POST_CLOSE_ACCEPTANCE_2026-11-06.md); the scoped FAQ styling does not change the shared shell.
+
+Final Day accessibility scanning found insufficient contrast in the compact marketplace's two network-count badges. The correction uses the existing secondary ink color for those small numbers. No count value, filtering logic, label or design token changes.

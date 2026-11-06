@@ -546,6 +546,8 @@ Reference-agent mastheads (29 Oct): `AgentBrandHero` marks the six branded store
 
 ## Post-close My Marque candidate (6 November 2026, local)
 
+Compact marketplace network counts use secondary ink (`--ink-2`) at their existing 12px size. Faint ink is insufficient for those small numbers in Day. This changes the foreground only; the filter, count source, semantics and palette tokens stay the same.
+
 Hiring is Today, Positions, Jobs, Money; Building is Agents, Bench, Demand. History lives inside Jobs, saved and watched controls inside Positions, and agent history inside the agent. Today orders existing actions by risk, clocks, then tidy-up and keeps unknown reads distinct from an all-clear. Indexed amounts retain their network; aggregated ratings show no invented combined amount. Position cards use the existing MeasureRule and their source block/time. Recheck differences show both blocks, original agreement, provenance and unavailable values. The lifecycle is a six-node text strip with proof links, not six new badges. Demand stays behind the existing signed owner proof. Bench keeps explicit permission before endpoint tests and pasted-answer replay. Screenshots and validation are recorded in the candidate acceptance report before release; the live site is unchanged in this batch.
 
 ## Post-close presentation follow-up (6 November 2026, local)
