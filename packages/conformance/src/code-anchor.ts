@@ -2,7 +2,7 @@
 export const MCS_CODE_ANCHOR = {
   "version": 1,
   "algorithm": "SHA-256",
-  "sha256": "0x7f315d9ae44df12d5f0823de5ab3d81bc9a2f842da8c851525cce49c0bdfa55e",
+  "sha256": "0x3eadaa5da5d5a381d23bd2e80f6af1b67c4af56af9c7dbd997551951171dbd0d",
   "scope": "local MCS implementation and imported workspace source; lockfile pins external dependencies; not deployed-bytecode or issuer attestation",
   "files": [
     {
@@ -19,11 +19,15 @@ export const MCS_CODE_ANCHOR = {
     },
     {
       "path": "packages/conformance/src/adapters.ts",
-      "sha256": "0xb58493dd0d86c687f599065ce0dcbeafe15c18ee26ad8fdad7128a1f5c80bca0"
+      "sha256": "0x9cb6dedba71e9622a3ede75a258a23fb5c416a1e65aae175609d6079f470eadd"
     },
     {
       "path": "packages/conformance/src/cases.ts",
       "sha256": "0xe471d3608884eb6f325b46d6750c3beb187a6c3ebfd5260104c76201941af31a"
+    },
+    {
+      "path": "packages/conformance/src/check.ts",
+      "sha256": "0xc055f47d711cd53de4ff9a73d28613d92efe52bf3f736cd13d28d79f46dfdc28"
     },
     {
       "path": "packages/conformance/src/criteria.ts",
@@ -39,7 +43,11 @@ export const MCS_CODE_ANCHOR = {
     },
     {
       "path": "packages/conformance/src/index.ts",
-      "sha256": "0xacbd9bd6254f339ca1d319c645fa2411e73aacff110bd913173e5566a4cd2444"
+      "sha256": "0xc17da184a5f5c334dca5550d2c94f7dbebd893073e56dfebb7db7a861ae7f09b"
+    },
+    {
+      "path": "packages/conformance/src/lens-checks.ts",
+      "sha256": "0xd93dd3bd8761f99f721bf9328fed4974c1352290e632c830bb09abe5d54fc2ac"
     },
     {
       "path": "packages/conformance/src/portable.ts",
@@ -107,7 +115,7 @@ export const MCS_CODE_ANCHOR = {
     },
     {
       "path": "packages/db/src/schema.ts",
-      "sha256": "0xf00599e073bde6efab8feb7a1f61983b19c2907646cf75028c7b207352a0caec"
+      "sha256": "0xb881e84218fd7b7aae926932a40ad6328b659fc439b564188dde70977f57b582"
     },
     {
       "path": "packages/positions/src/abis.ts",
@@ -179,7 +187,7 @@ export const MCS_CODE_ANCHOR = {
     },
     {
       "path": "packages/probe/src/schedule.ts",
-      "sha256": "0xe7045646fbcdd0c64383a4389f198970441b33d8d5efeca9cd34dfb1c80b9c44"
+      "sha256": "0x894e941df0c0e5e3a7b502fe94a75129021028387a13e678bcf5971fd84d67e5"
     },
     {
       "path": "packages/probe/src/worker.ts",
@@ -187,7 +195,7 @@ export const MCS_CODE_ANCHOR = {
     },
     {
       "path": "pnpm-lock.yaml",
-      "sha256": "0x780af0b7f07619c5ebd80a93523f067b60e20837e179e4e14a6c5bfdd1d37186"
+      "sha256": "0x8fb2595478d738384d36f56cb0f8380102f68eee15aeaa2fcd3b6eba7658fdd1"
     }
   ]
 } as const

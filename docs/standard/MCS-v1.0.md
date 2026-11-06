@@ -1,6 +1,6 @@
 # Marque Conformance Standard: MCS v1.0.0
 
-> Generated 2026-11-01T12:02:58.290Z from `packages/conformance/src/tolerances.ts`.
+> Generated 2026-11-06T07:44:08.516Z from `packages/conformance/src/tolerances.ts`.
 > Do not edit by hand: regenerate with `pnpm standard`.
 > Tolerance revision 1.
 
@@ -62,7 +62,7 @@ conformance outcome and belongs in the public record.
 
 *Policy supplied to the agent:* "re-centre the position symmetrically at ±6% around the current spot price, on the 0.25% fee tier, keeping the same liquidity"
 
-*Latest captured example:* case `REB-1-twt-wbnb-2500-bound-1793534539707` · block `131045525` · ground-truth hash `0xa27db9a6d39db86cedc74b913b8917d22ae3a31c0319a9e15c1e60084ced5d83`
+*Latest captured example:* case `REB-1-twt-wbnb-2500-bound-20261105195925070-269560cf` · block `131876922` · ground-truth hash `0x02e1050aed0cb4646ca2aaf20aa69500180364abefbfefdfaa5c7e028f4acbbb`
 *Actual subject in that snapshot:* pair `TWT/WBNB` · owner `0x7f2f4173d9A6EFA1F987d48983b3244bBcCa67D5` · tokenId `7683201`
 
 | Check | Bound | What is asserted |
@@ -98,7 +98,7 @@ conformance outcome and belongs in the public record.
 
 *Policy supplied to the agent:* "build a 12-level grid for BNB/USDT between 600 and 850 using 2,000 USD of capital, with a stop at 580, and disclose the fee drag at 25 bps per trade"
 
-*Latest captured example:* case `GRID-1-bnb-usdt-lattice-20261101002844666-6723fa3e` · block `130953075` · ground-truth hash `0x404c8232066ccd4a40d735f99d68c8823583e71ea460c3715302fa98d0d1a5e3`
+*Latest captured example:* case `GRID-1-bnb-usdt-lattice-20261105195925070-269560cf` · block `131876929` · ground-truth hash `0x1f6ae5e1e722542d6a20d0e80fb3666ed6e1bccf217200f7c2d7d93bf08946b8`
 *Actual subject in that snapshot:* pair `BNB/USDT` · address `0x60AA3AEE06E2345A17E4d4B12c53E046F4F63CAf`
 
 | Check | Bound | What is asserted |
@@ -130,7 +130,7 @@ conformance outcome and belongs in the public record.
 
 *Policy supplied to the agent:* "find the best net-of-cost route for 1,000 USD of USDT across the allowed protocols, only recommending a move that beats the current 0% by at least 50 bps, and excluding leveraged strategies"
 
-*Latest captured example:* case `YIELD-1-usdt-1000-sluicegate-20261101002844666-6723fa3e` · block `130953082` · ground-truth hash `0x4f07f3c1495b9a4defa5d0021e329908785b8c940e9196cd72c3a299f07e3bd1`
+*Latest captured example:* case `YIELD-1-usdt-1000-sluicegate-20261105195925070-269560cf` · block `131876931` · ground-truth hash `0x761e4ef538f8bfe98700c8dfbc303ec9869fa234b485bb3105da72121ab52509`
 *Actual subject in that snapshot:* asset `USDT`
 
 | Check | Bound | What is asserted |
@@ -162,7 +162,7 @@ conformance outcome and belongs in the public record.
 
 *Policy supplied to the agent:* "report the account’s current health factor and the exact USD of debt that must be repaid to restore a health factor of 2.5"
 
-*Latest captured example:* case `HF-1-venus-at-risk-keel-20261101002844666-6723fa3e` · block `130953090` · ground-truth hash `0x0750ad460cfe16a9532efc56b0337fce800266dab7041991f1afa5b408f66ab9`
+*Latest captured example:* case `HF-1-venus-at-risk-keel-20261105195925070-269560cf` · block `131876946` · ground-truth hash `0xce8716a9651d0b53789b3b12db9ddf75e2629b05784a65370afc5166e069e53e`
 *Actual subject in that snapshot:* address `0x60AA3AEE06E2345A17E4d4B12c53E046F4F63CAf`
 
 | Check | Bound | What is asserted |
@@ -192,7 +192,7 @@ conformance outcome and belongs in the public record.
 
 *Policy supplied to the agent:* "measure what each Venus USDT supply market actually paid between the two supplied blocks, from its exchange-rate growth, and recommend a venue only if the numbers in your own ranking support it"
 
-*Latest captured example:* case `RYIELD-1-usdt-7d-tidemark-20261101002844666-6723fa3e` · block `130953096` · ground-truth hash `0xfde67ceb29ac06d2c98fdacc05d5716f4cf3310e8f8f9f38921634a1c3105626`
+*Latest captured example:* case `RYIELD-1-usdt-7d-tidemark-20261105195925070-269560cf` · block `131876957` · ground-truth hash `0xcdc876c127cc5d7c36ff68ecc68d993636a5dbd7104bc6478a1b1084551c821f`
 *Actual subject in that snapshot:* asset `USDT`
 
 | Check | Bound | What is asserted |
