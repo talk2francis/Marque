@@ -2,7 +2,7 @@
 export const MCS_CODE_ANCHOR = {
   "version": 1,
   "algorithm": "SHA-256",
-  "sha256": "0x3eadaa5da5d5a381d23bd2e80f6af1b67c4af56af9c7dbd997551951171dbd0d",
+  "sha256": "0x17a8eaecfd0e18ecd511dd30b53780b9db676665049cf082ee02f1ac74942aed",
   "scope": "local MCS implementation and imported workspace source; lockfile pins external dependencies; not deployed-bytecode or issuer attestation",
   "files": [
     {
@@ -151,7 +151,7 @@ export const MCS_CODE_ANCHOR = {
     },
     {
       "path": "packages/positions/src/venus.ts",
-      "sha256": "0x296f27a205cfe36c84be305d0b703d6a2e9d9f720a838de1b6247cb4cf2febb1"
+      "sha256": "0xd4e6bf74cfcdb0c5ae9b0bd626c499e3f9f722cb7a8e4a7c1e6b662c33cd6f95"
     },
     {
       "path": "packages/positions/src/yield.ts",
@@ -183,7 +183,7 @@ export const MCS_CODE_ANCHOR = {
     },
     {
       "path": "packages/probe/src/safe-fetch.ts",
-      "sha256": "0xb6275c1c418a4a4cfa296c8c915ed0bcf23b70e1b148bb0e7438659c730d94b4"
+      "sha256": "0xcb5cec61154f552d0e48f0c2f51d1bb88064e7e0a423643e28325afe11093738"
     },
     {
       "path": "packages/probe/src/schedule.ts",
@@ -195,7 +195,7 @@ export const MCS_CODE_ANCHOR = {
     },
     {
       "path": "pnpm-lock.yaml",
-      "sha256": "0x8fb2595478d738384d36f56cb0f8380102f68eee15aeaa2fcd3b6eba7658fdd1"
+      "sha256": "0xf029dd3b4b7b0545284d49ed51092840c5b9b75af2e674f1b28b1438040e06ad"
     }
   ]
 } as const

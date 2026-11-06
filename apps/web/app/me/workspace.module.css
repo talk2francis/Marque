@@ -231,7 +231,7 @@ a.stat:hover { border-color: var(--hair-2); }
 .landing h1 { margin: 0; max-width: 20ch; }
 .landing p { margin: 0; color: var(--ink-2); font-size: var(--fs-body-l); }
 .lookup { display: flex; gap: 8px; }
-.lookup input { flex: 1; font-family: var(--font-mono); height: 40px; }
+.lookup input { flex: 1 1 auto; font-family: var(--font-mono); min-height: 44px; }
 .landingActions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 18px; }
 
 @media (max-width: 720px) {

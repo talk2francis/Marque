@@ -50,19 +50,23 @@ export default async function JobRoom({ params }: { params: Promise<{ chainId: s
   const chainId = Number(c)
   if (!isSupportedChain(chainId) || !/^\d{1,20}$/.test(jobId)) notFound()
   const cid = chainId as ChainId
-  const [job, windowS, operators] = await Promise.all([questJob(cid, jobId).catch(() => null), disputeWindowSeconds(cid).catch(() => null), operatorWalletsHere().catch(() => null)])
+  const [job, windowS, operators, intents, acted] = await Promise.all([
+    questJob(cid, jobId).catch(() => null),
+    disputeWindowSeconds(cid).catch(() => null),
+    operatorWalletsHere().catch(() => null),
+    db().execute(sql`select i.description, i.price_raw, i.token, i.category, i.provider, i.expired_at, a.image_url,
+      a.raw_metadata #>> '{offchain_content,image}' as meta_image
+      from hire_intent i left join agent a on a.id = i.agent_id
+      where i.chain_id = ${chainId} and i.job_id = ${jobId} limit 1`),
+    outcomesForJob(`${cid}:${jobId}`),
+  ])
+  const [intent] = intents as unknown as Array<Record<string, unknown>>
   const funder = job?.funderClass ? funderWords(job.funderClass, Boolean(job.client && operators?.has(job.client.toLowerCase()))) : null
 
   // A job Marque has not indexed (opened elsewhere) still gets the chain's own view.
   const onchain = job ? null : await chainClient(cid).readContract({ address: network(cid).commerce, abi: agenticCommerceAbi, functionName: 'getJob', args: [BigInt(jobId)] })
     .catch(() => null) as null | { id: bigint; client: string; provider: string; budget: bigint; expiredAt: bigint; status: number; submittedAt: bigint; deliverable: string }
   if (!job && (!onchain || onchain.id === 0n)) notFound()
-
-  const [intent] = (await db().execute(sql`
-    select i.description, i.price_raw, i.token, i.category, i.provider, i.expired_at, a.image_url,
-           a.raw_metadata #>> '{offchain_content,image}' as meta_image
-    from hire_intent i left join agent a on a.id = i.agent_id
-    where i.chain_id = ${chainId} and i.job_id = ${jobId} limit 1`)) as unknown as Array<Record<string, unknown>>
 
   const state = job?.state ?? (['OPEN', 'FUNDED', 'SUBMITTED', 'COMPLETED', 'REJECTED', 'EXPIRED'] as const)[onchain!.status] ?? 'OPEN'
   const events: Ev[] = (job?.events ?? []) as Ev[]
@@ -84,14 +88,15 @@ export default async function JobRoom({ params }: { params: Promise<{ chainId: s
   const head = jobHeadline(state, agentName, priceLabel ?? 'payment', t?.reviewEndsAt ?? null, t?.refundFrom ?? null, Boolean(t?.awaitingExpiry), fundingDeadline !== null && now >= fundingDeadline)
   const onchainHash = job?.deliverable?.hash ?? (onchain && onchain.submittedAt > 0n ? onchain.deliverable : null)
   // The published URL when there is one, otherwise found from the chain hash and accepted only on a hash match.
-  const manifest = await jobManifest(cid, jobId, job as never, onchainHash)
+  const [manifest, chainTask] = await Promise.all([
+    jobManifest(cid, jobId, job as never, onchainHash),
+    intent?.['description'] ? null : onchainJobTask(cid, jobId),
+  ])
   // The Result Lens reads the same file and checks it against the chain (cached per job).
   const lensData = manifest && !manifest.withheld ? await jobLens(cid, jobId).then((p) => p.value).catch(() => null) : null
-  const acted = await outcomesForJob(`${cid}:${jobId}`)
   const lensContent: unknown = manifest?.content ?? (() => { try { return manifest?.raw ? JSON.parse(manifest.raw) : null } catch { return null } })()
   // The description can be signed or identity-matched unsigned; the buyer's words are its `task`.
   // Hires started elsewhere (or on another Marque stack) have no intent here: the job's own description on chain says it.
-  const chainTask = intent?.['description'] ? null : await onchainJobTask(cid, jobId)
   const asked = (() => {
     const d = intent?.['description'] ? String(intent['description']) : null
     if (!d) return chainTask?.task ?? null

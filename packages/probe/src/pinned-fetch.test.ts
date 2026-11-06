@@ -11,11 +11,11 @@ import { safeFetch, isBlockedAddress } from './safe-fetch.js'
 
 afterEach(() => vi.resetAllMocks())
 
-function reply(status = 200, headers: Record<string, string> = {}, text = '{}') {
+function reply(status = 200, headers: Record<string, string> = {}, text: string | Uint8Array = '{}') {
   return (_url: URL, _options: RequestOptions, callback: (response: Readable) => void) => {
     const req = new EventEmitter() as EventEmitter & { end: () => void }
     req.end = () => {
-      const response = Object.assign(Readable.from([Buffer.from(text)]), { statusCode: status, headers })
+      const response = Object.assign(Readable.from([typeof text === 'string' ? Buffer.from(text) : Buffer.from(text)]), { statusCode: status, headers })
       callback(response)
     }
     return req
@@ -23,6 +23,17 @@ function reply(status = 200, headers: Record<string, string> = {}, text = '{}') 
 }
 
 describe('pinned agent requests', () => {
+  it('preserves binary bytes behind the same DNS, redirect and response-size guards', async () => {
+    const body = new Uint8Array([0, 255, 128, 13, 10])
+    mocks.lookup.mockResolvedValue([{ address: '8.8.8.8', family: 4 }])
+    mocks.request.mockImplementation(reply(200, {}, body))
+    expect(await safeFetch('https://agent.example/image', { responseType: 'bytes', maxBytes: 5 }))
+      .toMatchObject({ ok: true, body: '', bodyBytes: body, bytes: 5 })
+    expect(await safeFetch('https://agent.example/image', { responseType: 'bytes', maxBytes: 4 }))
+      .toMatchObject({ ok: false, failure: 'too_large' })
+    const options = mocks.request.mock.calls[0]![1] as RequestOptions
+    expect(options.lookup).toBeTypeOf('function')
+  })
   it('pins the checked address without a second attacker-controlled DNS resolution', async () => {
     mocks.lookup.mockResolvedValueOnce([{ address: '8.8.8.8', family: 4 }])
       .mockResolvedValue([{ address: '127.0.0.1', family: 4 }])

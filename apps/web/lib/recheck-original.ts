@@ -2,7 +2,7 @@ import 'server-only'
 import type { Manifest } from './manifest'
 
 /** Bounded cache of immutable, already verified answer bytes. Fresh chain comparisons retain their own 60s cache. */
-export function originalAnswerCache() {
+export function originalAnswerCache(maxEntries = 16, returnUnverified = false) {
   const kept = new Map<string, { at: number; value: Manifest }>()
   const pending = new Map<string, Promise<Manifest | null>>()
   return async (key: string, expectedHash: string | null, load: () => Promise<Manifest | null>, now = Date.now): Promise<Manifest | null> => {
@@ -14,9 +14,9 @@ export function originalAnswerCache() {
     const running = pending.get(boundKey)
     if (running) return running.then(value => value ? structuredClone(value) : null)
     const work = load().then(value => {
-      if (!value || value.matches !== true || value.hash.toLowerCase() !== expectedHash.toLowerCase() || new TextEncoder().encode(value.raw).length > 512 * 1024) return null
+      if (!value || value.matches !== true || value.hash.toLowerCase() !== expectedHash.toLowerCase() || new TextEncoder().encode(value.raw).length > 512 * 1024) return returnUnverified ? value : null
       kept.set(boundKey, { at: now(), value: structuredClone(value) })
-      if (kept.size > 16) { const oldest = kept.keys().next().value; if (oldest !== undefined) kept.delete(oldest) }
+      if (kept.size > maxEntries) { const oldest = kept.keys().next().value; if (oldest !== undefined) kept.delete(oldest) }
       return value
     }).finally(() => { pending.delete(boundKey) })
     pending.set(boundKey, work)

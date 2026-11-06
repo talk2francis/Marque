@@ -1,5 +1,48 @@
-import { describe, it, expect } from 'vitest'
-import { exactRepayToReachTargetHf, healthFactorOf } from './venus.js'
+import { describe, it, expect, vi } from 'vitest'
+import type { PublicClient } from 'viem'
+import { exactRepayToReachTargetHf, healthFactorOf, venusReader } from './venus.js'
+
+describe('pinned Venus reads', () => {
+  it('starts the five independent batches together and preserves all account math at the supplied block', async () => {
+    const account = `0x${'1'.repeat(40)}` as const
+    const market = `0x${'2'.repeat(40)}` as const
+    const underlying = `0x${'3'.repeat(40)}` as const
+    const oracle = `0x${'4'.repeat(40)}` as const
+    const wad = 10n ** 18n, blockNumber = 123456789n
+    let started = 0
+    let release!: () => void
+    const barrier = new Promise<void>(resolve => { release = resolve })
+    const readContract = vi.fn(async (args: { functionName: string; blockNumber: bigint }) => {
+      expect(args.blockNumber).toBe(blockNumber)
+      if (args.functionName === 'getAssetsIn') return [market]
+      if (args.functionName === 'oracle') return oracle
+      if (args.functionName === 'decimals') return 18
+      if (args.functionName === 'symbol') return 'USDT'
+      throw Error('Unexpected contract read')
+    })
+    const multicall = vi.fn(async (args: { contracts: Array<{ functionName: string }>; blockNumber: bigint; allowFailure: boolean }) => {
+      expect(args.blockNumber).toBe(blockNumber)
+      expect(args.allowFailure).toBe(true)
+      started++
+      if (started === 5) release()
+      await barrier
+      const results: Record<string, unknown> = {
+        getAccountSnapshot: [0n, 1000n * wad, 400n * wad, wad],
+        markets: [true, 8n * wad / 10n, false], getUnderlyingPrice: 2n * wad,
+        symbol: 'vUSDT', underlying,
+      }
+      return [{ status: 'success', result: results[args.contracts[0]!.functionName] }]
+    })
+    const result = await venusReader(account, { blockNumber, client: { readContract, multicall } as unknown as PublicClient })
+    expect(multicall).toHaveBeenCalledTimes(5)
+    expect(result.ok).toBe(true)
+    if (!result.ok) throw Error(result.error)
+    expect(result.data.weightedCollateralUsd.value).toBe(1600)
+    expect(result.data.totalBorrowedUsd.value).toBe(800)
+    expect(result.data.healthFactor?.value).toBe(2)
+    expect(result.data.markets[0]).toMatchObject({ supplied: 1000, borrowed: 400, collateralFactor: 0.8, priceUsd: 2, liquidationPriceUsd: 1 })
+  })
+})
 
 /**
  * MCS-HF-1's tolerance is 0.005. The round trip below is held to 0.002, so the

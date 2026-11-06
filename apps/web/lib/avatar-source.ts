@@ -44,6 +44,10 @@ export function avatarSource({ id, reference, imageUrl, size }: { id: string; re
     }
   }
   const registry = registryImageUrl(imageUrl)
-  if (registry) return { kind: 'registry', src: registry }
+  if (registry) {
+    const identity = /^(56|97):(?:0x[0-9a-fA-F]{40}:)?([1-9]\d{0,19})$/.exec(id)
+    const indexed = /^https:\/\/[^/]*8004scan\.(io|app)\//i.test(registry)
+    return { kind: 'registry', src: identity && indexed ? `/img/agent/${identity[1]}/${identity[2]}` : registry }
+  }
   return { kind: 'fallback' }
 }

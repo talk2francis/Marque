@@ -12,7 +12,7 @@ describe('avatarSource', () => {
   })
 
   it('a third party keeps its registry image', () => {
-    expect(avatarSource({ id: '56:304493', reference: false, imageUrl: 'https://api.8004scan.io/a.png', size: 40 })).toEqual({ kind: 'registry', src: 'https://api.8004scan.io/a.png' })
+    expect(avatarSource({ id: '56:304493', reference: false, imageUrl: 'https://api.8004scan.io/a.png', size: 40 })).toEqual({ kind: 'registry', src: '/img/agent/56/304493' })
   })
 
   it('a third party that claims a reference token still gets no Marque art', () => {

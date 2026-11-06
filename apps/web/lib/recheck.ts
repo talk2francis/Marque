@@ -12,6 +12,7 @@ import { onchainJobTask } from './job-description'
 import { fieldsFromText } from './task-parse'
 import { compareRecheck, gridAssetForRecheck, validRecheckBlocks, type FreshReading } from './recheck-compare'
 import { RecheckResult } from './recheck-schema'
+import { boundedWork } from './bounded-work'
 
 const ADDRESS = /^0x[0-9a-fA-F]{40}$/
 // Official PancakeSwap token list, read 6 Nov 2026. Addresses are used only for the new read-only comparison.
@@ -23,6 +24,7 @@ const GRID_ASSETS = {
   CAKE: { address: '0x0E09FaBB73Bd3Ade0a17ECC321fD13a19e81cE82', symbol: 'CAKE' },
 } as const
 const active = new Map<string, Promise<unknown>>()
+const freshRead = boundedWork(2, 8, 2500)
 
 async function build(chainId: ChainId, jobId: string) {
   const base = { version: 1 as const, chainId, jobId, observationChainId: 56 as const, observedAt: new Date().toISOString(), category: null as string | null, answerBlock: null as string | null, currentBlock: null as string | null, answerAt: null as string | null, askAgain: null as string | null }
@@ -105,8 +107,7 @@ export function recheckJob(chainId: ChainId, jobId: string) {
     const key = `${chainId}:${jobId}`
     const existing = active.get(key)
     if (existing) return RecheckResult.parse(await existing)
-    if (active.size >= 2) throw new Error('recheck_busy')
-    const work = build(chainId, jobId).finally(() => { active.delete(key) })
+    const work = freshRead(() => build(chainId, jobId)).finally(() => { active.delete(key) })
     active.set(key, work)
     return work
   }, { freshMs: 60_000, timeoutMs: 3800 }).then(p => {

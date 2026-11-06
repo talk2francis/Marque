@@ -1,12 +1,37 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { keccak256, sha256, toBytes } from 'viem'
 import type { SafeFetchResult } from '@marque/probe'
-import { readManifest } from './manifest'
-const h = vi.hoisted(() => ({ response: { ok: true, status: 200, headers: {}, body: '', bytes: 0, latencyMs: 1, finalUrl: 'https://example.invalid/file', redirects: 0 } as SafeFetchResult }))
-vi.mock('@marque/probe', () => ({ safeFetch: async () => h.response }))
+import { jobManifest, readManifest } from './manifest'
+const h = vi.hoisted(() => ({ reads: 0, response: { ok: true, status: 200, headers: {}, body: '', bytes: 0, latencyMs: 1, finalUrl: 'https://example.invalid/file', redirects: 0 } as SafeFetchResult }))
+vi.mock('@marque/probe', () => ({ safeFetch: async () => { h.reads++; return h.response } }))
 const http = (status: number, body: string): Extract<SafeFetchResult, { ok: true }> => ({ ok: true, status, body, headers: {}, bytes: body.length, latencyMs: 1, finalUrl: 'https://example.invalid/file', redirects: 0 })
 const currentHttp = () => { if (!h.response.ok) throw Error('Expected the HTTP fixture'); return h.response }
-beforeEach(() => { h.response = http(200, JSON.stringify({ response: { content: JSON.stringify({ recommend: false, netAprPct: 0 }) } })) })
+beforeEach(() => { h.reads = 0; h.response = http(200, JSON.stringify({ response: { content: JSON.stringify({ recommend: false, netAprPct: 0 }) } })) })
+describe('shared verified job answers', () => {
+  it('deduplicates concurrent page/lens reads, binds inputs and returns isolated values', async () => {
+    const hash = keccak256(toBytes(currentHttp().body))
+    const job = { provider: `0x${'1'.repeat(40)}`, deliverable: { hash, url: 'https://example.invalid/deduplicated' } }
+    const [a, b] = await Promise.all([jobManifest(56, '900001', job), jobManifest(56, '900001', job)])
+    expect(h.reads).toBe(1)
+    expect(a?.matches).toBe(true)
+    expect(b).toEqual(a)
+    a!.content = { tampered: true }
+    expect((await jobManifest(56, '900001', job))?.content).not.toEqual(a!.content)
+    await jobManifest(97, '900001', job)
+    await jobManifest(56, '900001', { ...job, provider: `0x${'2'.repeat(40)}` })
+    expect(h.reads).toBe(3)
+  })
+  it('returns legacy unmatched reads without storing them as verified answers', async () => {
+    const good = currentHttp().body
+    const hash = keccak256(toBytes(good))
+    const job = { deliverable: { hash, url: 'https://example.invalid/unmatched' } }
+    h.response = http(200, '{"different":true}')
+    expect(await jobManifest(56, '900002', job)).toMatchObject({ matches: false })
+    h.response = http(200, good)
+    expect(await jobManifest(56, '900002', job)).toMatchObject({ matches: true })
+    expect(h.reads).toBe(2)
+  })
+})
 describe('delivery file integrity and withheld observations', () => {
   it('verifies the actual complete original bytes and preserves valid zero values', async () => {
     const hash = keccak256(toBytes(currentHttp().body))

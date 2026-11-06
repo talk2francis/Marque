@@ -29,6 +29,8 @@ import { createGunzip, createInflate, createBrotliDecompress } from 'node:zlib'
  */
 
 export interface SafeFetchOptions {
+  /** Preserve binary response bytes instead of decoding them as UTF-8. All guards still apply. */
+  responseType?: 'bytes'
   timeoutMs?: number
   maxBytes?: number
   maxRedirects?: number
@@ -54,6 +56,7 @@ export type SafeFetchResult =
       status: number
       headers: Record<string, string>
       body: string
+      bodyBytes?: Uint8Array
       bytes: number
       latencyMs: number
       finalUrl: string
@@ -218,7 +221,7 @@ export async function checkUrl(rawUrl: string): Promise<UrlCheck> {
 }
 
 /** Read a response body with a hard byte cap, aborting mid-stream if exceeded. */
-async function readCapped(res: Response, maxBytes: number): Promise<{ body: string; bytes: number; truncated: boolean }> {
+async function readCapped(res: Response, maxBytes: number, binary = false): Promise<{ body: string; bodyBytes?: Uint8Array; bytes: number; truncated: boolean }> {
   const declared = Number(res.headers.get('content-length') ?? '0')
   if (declared > maxBytes) {
     // Do not download something we already know is too big.
@@ -250,7 +253,7 @@ async function readCapped(res: Response, maxBytes: number): Promise<{ body: stri
     merged.set(c, offset)
     offset += c.byteLength
   }
-  return { body: new TextDecoder().decode(merged), bytes: total, truncated: false }
+  return { body: binary ? '' : new TextDecoder().decode(merged), ...(binary ? { bodyBytes: merged } : {}), bytes: total, truncated: false }
 }
 
 /** Connect only to the DNS addresses we validated. A second DNS lookup permits rebinding. */
@@ -383,7 +386,7 @@ export async function safeFetch(rawUrl: string, opts: SafeFetchOptions = {}): Pr
         continue
       }
 
-      const { body, bytes, truncated } = await readCapped(res, maxBytes)
+      const { body, bodyBytes, bytes, truncated } = await readCapped(res, maxBytes, opts.responseType === 'bytes')
       if (truncated) {
         return {
           ok: false, failure: 'too_large', status: res.status,
@@ -401,6 +404,7 @@ export async function safeFetch(rawUrl: string, opts: SafeFetchOptions = {}): Pr
         status: res.status,
         headers,
         body,
+        ...(bodyBytes ? { bodyBytes } : {}),
         bytes,
         latencyMs: Date.now() - started,
         finalUrl: currentUrl,

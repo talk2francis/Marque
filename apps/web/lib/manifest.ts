@@ -5,6 +5,7 @@ import { sql } from 'drizzle-orm'
 import { db } from '@marque/db'
 import { deliveryContent, deliveryDigest, type DeliveryHashAlgorithm } from './delivery-bytes'
 import { readSubmissionManifest } from './submission-manifest'
+import { originalAnswerCache } from './recheck-original'
 
 /**
  * Read an ERC-8183 deliverable manifest and check it against the hash on chain.
@@ -95,7 +96,21 @@ async function readOne(url: string, onchainHash: string | null): Promise<Manifes
  * through the SSRF guard and is accepted only when its bytes hash to the deliverable hash on chain, so nothing
  * unverified is ever shown as the agent's answer. Found locations are remembered per process.
  */
-export async function jobManifest(chainId: number, jobId: string, job: { deliverable?: { url?: string | null; hash?: string | null } | null; provider?: string | null; events?: Array<{name:string; tx:string}> } | null, onchainHash?: string | null): Promise<Manifest | null> {
+type ManifestJob = { deliverable?: { url?: string | null; hash?: string | null } | null; provider?: string | null; events?: Array<{name:string; tx:string}> } | null
+const verifiedAnswers = originalAnswerCache(64, true)
+
+export function jobManifest(chainId: number, jobId: string, job: ManifestJob, onchainHash?: string | null): Promise<Manifest | null> {
+  const hash = job?.deliverable?.hash ?? onchainHash ?? null
+  const load = () => loadJobManifest(chainId, jobId, job, onchainHash)
+  if (!hash || !/^0x[0-9a-fA-F]{64}$/.test(hash)) return load()
+  const submitted = job?.events?.find(e => e.name === 'JobSubmitted')?.tx ?? ''
+  // Bind the cache to every input of receipt/byte validation. Never cache missing,
+  // unverified, mismatched or withheld answers. Concurrent page/lens reads share it.
+  const key = JSON.stringify([chainId, jobId, job?.provider?.toLowerCase() ?? '', hash.toLowerCase(), submitted, job?.deliverable?.url ?? ''])
+  return verifiedAnswers(key, hash, load)
+}
+
+async function loadJobManifest(chainId: number, jobId: string, job: ManifestJob, onchainHash?: string | null): Promise<Manifest | null> {
   const hash = job?.deliverable?.hash ?? onchainHash ?? null
   if (job?.deliverable?.url) {
     const published=await readManifest(job.deliverable.url, hash)

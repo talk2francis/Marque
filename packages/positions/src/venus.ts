@@ -141,59 +141,33 @@ export async function venusReader(
     .readContract({ address: comptroller, abi: venusComptrollerAbi, functionName: 'oracle', blockNumber })
     .catch(() => BSC_ADDRESSES.venusOracle as Address)
 
-  const snapshots = (await client.multicall({
-    contracts: assetsIn.map((v) => ({
-      address: v, abi: vTokenAbi, functionName: 'getAccountSnapshot', args: [account],
-    })),
-    allowFailure: true, blockNumber,
-  })) as unknown as Array<MulticallResult<readonly [bigint, bigint, bigint, bigint]>>
+  // These calls share the same pinned block and do not depend on one another.
+  // Starting them together avoids five network round trips without changing a value.
+  const [snapshots, marketInfos, prices, vSymbols, underlyings] = await Promise.all([
+    client.multicall({ contracts: assetsIn.map(v => ({ address: v, abi: vTokenAbi, functionName: 'getAccountSnapshot', args: [account] })), allowFailure: true, blockNumber }),
+    client.multicall({ contracts: assetsIn.map(v => ({ address: comptroller, abi: venusComptrollerAbi, functionName: 'markets', args: [v] })), allowFailure: true, blockNumber }),
+    client.multicall({ contracts: assetsIn.map(v => ({ address: oracle, abi: venusOracleAbi, functionName: 'getUnderlyingPrice', args: [v] })), allowFailure: true, blockNumber }),
+    client.multicall({ contracts: assetsIn.map(v => ({ address: v, abi: vTokenAbi, functionName: 'symbol' })), allowFailure: true, blockNumber }),
+    client.multicall({ contracts: assetsIn.map(v => ({ address: v, abi: vTokenAbi, functionName: 'underlying' })), allowFailure: true, blockNumber }),
+  ]) as unknown as [
+    Array<MulticallResult<readonly [bigint, bigint, bigint, bigint]>>,
+    Array<MulticallResult<readonly [boolean, bigint, boolean]>>,
+    Array<MulticallResult<bigint>>, Array<MulticallResult<string>>, Array<MulticallResult<Address>>,
+  ]
 
-  const marketInfos = (await client.multicall({
-    contracts: assetsIn.map((v) => ({
-      address: comptroller, abi: venusComptrollerAbi, functionName: 'markets', args: [v],
-    })),
-    allowFailure: true, blockNumber,
-  })) as unknown as Array<MulticallResult<readonly [boolean, bigint, boolean]>>
-
-  const prices = (await client.multicall({
-    contracts: assetsIn.map((v) => ({
-      address: oracle, abi: venusOracleAbi, functionName: 'getUnderlyingPrice', args: [v],
-    })),
-    allowFailure: true, blockNumber,
-  })) as unknown as Array<MulticallResult<bigint>>
-
-  const vSymbols = (await client.multicall({
-    contracts: assetsIn.map((v) => ({ address: v, abi: vTokenAbi, functionName: 'symbol' })),
-    allowFailure: true, blockNumber,
-  })) as unknown as Array<MulticallResult<string>>
-
-  const underlyings = (await client.multicall({
-    contracts: assetsIn.map((v) => ({ address: v, abi: vTokenAbi, functionName: 'underlying' })),
-    allowFailure: true, blockNumber,
-  })) as unknown as Array<MulticallResult<Address>>
-
-  // vBNB has no `underlying()`; it is the native asset with 18 decimals.
-  const underlyingDecimals = await Promise.all(
-    assetsIn.map(async (_, i) => {
+  // vBNB has no underlying(). Metadata for all other markets is independent too.
+  const [underlyingDecimals, underlyingSymbols] = await Promise.all([
+    Promise.all(assetsIn.map(async (_, i) => {
       const u = underlyings[i]
       if (!u || u.status !== 'success' || !u.result) return 18
-      return client
-        .readContract({ address: u.result, abi: erc20MetaAbi, functionName: 'decimals', blockNumber })
-        .then((d) => Number(d))
-        .catch(() => 18)
-    }),
-  )
-
-  const underlyingSymbols = await Promise.all(
-    assetsIn.map(async (_, i) => {
+      return client.readContract({ address: u.result, abi: erc20MetaAbi, functionName: 'decimals', blockNumber }).then(Number).catch(() => 18)
+    })),
+    Promise.all(assetsIn.map(async (_, i) => {
       const u = underlyings[i]
       if (!u || u.status !== 'success' || !u.result) return 'BNB'
-      return client
-        .readContract({ address: u.result, abi: erc20MetaAbi, functionName: 'symbol', blockNumber })
-        .then((sym) => String(sym))
-        .catch(() => '???')
-    }),
-  )
+      return client.readContract({ address: u.result, abi: erc20MetaAbi, functionName: 'symbol', blockNumber }).then(String).catch(() => '???')
+    })),
+  ])
 
   const markets: VenusMarket[] = []
   let weightedCollateralUsd = 0

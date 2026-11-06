@@ -109,6 +109,13 @@ async function auditRoute(browser, route, viewport, theme) {
       lowContrast: [],
       tinyTapTargets: [],
       allCapsLabels: [],
+      labelledInputTargets: [],
+    }
+
+    const visible = el => {
+      if (!el.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true })) return false
+      const closed = el.closest('details:not([open])')
+      return !closed || !!closed.querySelector(':scope > summary')?.contains(el)
     }
 
     const de = document.documentElement
@@ -171,6 +178,7 @@ async function auditRoute(browser, route, viewport, theme) {
       const text = (el.textContent ?? '').trim()
       if (!text || text.length < 2) continue
       if (el.children.length > 0) continue
+      if (!visible(el)) continue
       const cs = getComputedStyle(el)
       if (cs.visibility === 'hidden' || cs.display === 'none' || cs.opacity === '0') continue
       const fg = parse(cs.color)
@@ -219,6 +227,14 @@ async function auditRoute(browser, route, viewport, theme) {
     }
 
     for (const el of document.querySelectorAll('a, button, [role="button"], input, select')) {
+      // A hidden native checkbox is operated through its visible associated label,
+      // which must itself provide a full-size target. Do not count its 1px backing input.
+      if (el instanceof globalThis.HTMLInputElement && ['checkbox', 'radio'].includes(el.type)) {
+        const labels = [...(el.labels ?? [])].filter(visible)
+        const target = labels.find(label => { const r = label.getBoundingClientRect(); return r.width >= 24 && r.height >= 24 })
+        if (target) { out.labelledInputTargets.push(target.textContent?.trim().slice(0, 40) ?? el.type); continue }
+      }
+      if (!visible(el)) continue
       const r = el.getBoundingClientRect()
       if (r.width === 0 || r.height === 0) continue
       if (r.height < 24 || r.width < 24) {

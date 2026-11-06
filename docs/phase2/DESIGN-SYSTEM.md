@@ -1,5 +1,13 @@
 # DESIGN-SYSTEM.md
 
+## 6 November 2026: readable documents and usable small controls
+
+Public content no longer sits behind a whole-page streamed loading fallback. While a route resolves, client navigation keeps the current document instead of replacing it with the global mark. Native questions and evidence disclosures remain readable and operable without JavaScript.
+
+Links and ordinary controls have a 24px minimum box, with existing larger component dimensions preserved. Wallet lookup fields use an automatic flex basis and a 44px minimum height so they cannot collapse in the phone's column layout. Proof's native checkbox is 24px inside a 40px label. The visual audit measures an invisible native checkbox through its associated visible label and requires that label to meet the same target size; it still flags undersized exposed targets. Closed disclosures are excluded from visible-text contrast inspection and are checked again when opened.
+
+Registry portraits are served as bounded, checked WebP from the same origin. The indexer's missing file can fall back to the owner's declared inert artwork, rasterized on the server. Unavailable artwork retains the existing labelled platform mark; it is never represented as a restored owner image. Reference portraits and design tokens are unchanged.
+
 ## 27 October: the film
 
 Home-page layout, updated 30 October: the opened fold leads with the chapter times beside the player, without an introductory paragraph. At desktop widths, the chapter rows share the available height so the column and its two links underneath align with the player and rail. Chapter targets remain at least 24px high. Below 1024px the chapters stack below the video with their roomier spacing. Opening the evidence disclosure grows naturally; no notes are clipped. The standalone `/film` introduction and transcript retain their reading layout.

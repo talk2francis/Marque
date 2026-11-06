@@ -66,7 +66,17 @@
 
   ::selection { background: color-mix(in srgb, var(--accent) 32%, transparent); color: var(--ink); }
 
-  a { color: inherit; }
+  a {
+    color: inherit;
+    display: inline-block;
+    min-inline-size: 24px;
+    min-block-size: 24px;
+  }
+  button, select, input:not([type='hidden']):not([type='checkbox']):not([type='radio']) {
+    min-block-size: 24px;
+    min-inline-size: 24px;
+  }
+  input[type='checkbox'], input[type='radio'] { accent-color: var(--brass); }
   :focus-visible {
     outline: 2px solid var(--focus);
     outline-offset: 2px;
