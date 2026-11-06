@@ -2,7 +2,7 @@
 export const MCS_CODE_ANCHOR = {
   "version": 1,
   "algorithm": "SHA-256",
-  "sha256": "0x17a8eaecfd0e18ecd511dd30b53780b9db676665049cf082ee02f1ac74942aed",
+  "sha256": "0xee74a1285f3e7d6400dc910c43df40c8c03c878d51edd9a1b3590d1a2b4152ad",
   "scope": "local MCS implementation and imported workspace source; lockfile pins external dependencies; not deployed-bytecode or issuer attestation",
   "files": [
     {
@@ -151,7 +151,7 @@ export const MCS_CODE_ANCHOR = {
     },
     {
       "path": "packages/positions/src/venus.ts",
-      "sha256": "0xd4e6bf74cfcdb0c5ae9b0bd626c499e3f9f722cb7a8e4a7c1e6b662c33cd6f95"
+      "sha256": "0x713af521e4a7b5e622422c2dd6de1bf2e99c1ae0afe9494f9130d9c11d880329"
     },
     {
       "path": "packages/positions/src/yield.ts",

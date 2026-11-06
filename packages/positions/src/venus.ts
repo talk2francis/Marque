@@ -115,11 +115,14 @@ export async function venusReader(
   const comptroller = BSC_ADDRESSES.venusComptroller as Address
 
   let assetsIn: readonly Address[]
+  let oracle: Address
   try {
-    assetsIn = await client.readContract({
-      address: comptroller, abi: venusComptrollerAbi,
-      functionName: 'getAssetsIn', args: [account], blockNumber,
-    })
+    // Both reads use the supplied block and can share one transport batch.
+    ;[assetsIn, oracle] = await Promise.all([
+      client.readContract({ address: comptroller, abi: venusComptrollerAbi, functionName: 'getAssetsIn', args: [account], blockNumber }),
+      client.readContract({ address: comptroller, abi: venusComptrollerAbi, functionName: 'oracle', blockNumber })
+        .catch(() => BSC_ADDRESSES.venusOracle as Address),
+    ])
   } catch (err) {
     return fail('comptroller_unreadable', ctx, err instanceof Error ? err.message : String(err))
   }
@@ -134,12 +137,6 @@ export async function venusReader(
       hasPosition: false,
     }, ctx)
   }
-
-  // The oracle is read from the comptroller rather than hardcoded, so a Venus
-  // oracle migration does not silently leave us pricing against a dead feed.
-  const oracle = await client
-    .readContract({ address: comptroller, abi: venusComptrollerAbi, functionName: 'oracle', blockNumber })
-    .catch(() => BSC_ADDRESSES.venusOracle as Address)
 
   // These calls share the same pinned block and do not depend on one another.
   // Starting them together avoids five network round trips without changing a value.

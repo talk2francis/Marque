@@ -4,33 +4,41 @@
 
 A public record of meaningful product changes. Evidence and limitations travel with each release.
 
-## 6 November 2026 · Prepared locally: clearer test dates and calmer pages
+## 6 November 2026 · Clearer public pages and stronger read performance
+
+Public pages render without scripts, including the native questions and answers. Links and controls have larger usable targets, address fields retain their height on phones, and missing registry portraits can be recovered from the identity's own declaration through checked image handling. Unavailable artwork keeps a labelled fallback.
+
+Answer comparisons read only the original job's bindings, without loading the buyer's full hiring and rating history. Independent chain reads share the same supplied block. Original grades, payment handlers and campaign eligibility rules are unchanged. Deployment checks both web workers before promotion and keeps the existing rollback path.
+
+Capacity remains a measured question: failed November load attempts are retained, with no supported visitor count inferred from them. The release report separates individual read checks, browser acceptance and actual rollout evidence.
+
+## 6 November 2026 · Clearer test dates and calmer pages
 
 Retest labels now follow the same existing 14-day window as marketplace standing. A refresh scheduled after 72 hours is a separate cadence. The six Brain on BNB agents had passing records from 3 November; those original observations, grading rules and count definitions are unchanged.
 
 Agent Forge shows a few campaign-era examples and links to the full Set and Earn directory. The complete shelf stays on the campaign page, with current reads clearly separate from frozen eligibility and no request for new qualifying hires after the close.
 
-Questions on the home page now sit in a compact sage panel with native collapsed answers, their original proof links and matching structured data. Section spacing is tighter, hash links settle below the header and the closed-campaign companion stays compact until opened. These changes remain local, with no push or deployment.
+Questions on the home page now sit in a compact sage panel with native collapsed answers, their original proof links and matching structured data. Section spacing is tighter, hash links settle below the header and the closed-campaign companion stays compact until opened.
 
-## 6 November 2026 · Prepared locally: daily work and builder evidence
+## 6 November 2026 · Daily work and builder evidence
 
 My Marque now puts Today, Positions, Jobs and Money under Hiring, and Agents, Bench and Demand under Building. Old links remain valid. Today groups existing actions by risk and deadline, and Positions opens Tender with editable fields without asking for a price or signing.
 
 Recorded answers can be explicitly compared with current chain state without changing their original grades. The public Job Room has the same read-only control. Each builder identity has a six-step evidence strip. Owner-proved Demand uses exact funded quote matches; historical badges that were never stored remain unknown. Bench requires permission and can replay supplied JSON at the original block without contacting an agent or paying.
 
-Malformed saved browser entries are ignored without rewriting them. The implementation fingerprint was refreshed after detecting earlier source drift; grading arithmetic, tolerances and historical observations remain unchanged. This is a local candidate, not a deployment. Current capacity still has no passing November visitor level.
+Malformed saved browser entries are ignored without rewriting them. The implementation fingerprint was refreshed after detecting earlier source drift; grading arithmetic, tolerances and historical observations remain unchanged. Current capacity still has no passing November visitor level.
 
-## 6 November 2026 · Prepared locally: the preserved close record
+## 6 November 2026 · The preserved close record
 
 The original close snapshot remains byte-for-byte unchanged. The Keccak-256 digest of its checksum manifest is anchored on BSC testnet at block 141098389, with the successful transaction and Anchored event recorded in the repository. The proof page and judge path now include the preserved figures, every file for download and instructions for checking them offline. The original 48-job read remains separate from the later 50-job snapshot.
 
-The testnet timestamp proves when the checksum bytes existed, not the truth of the figures or official eligibility. No mainnet anchor was sent: no existing mainnet registry address is configured. Its unsigned calldata and missing prerequisites are documented. The website changes remain local and await complete candidate validation.
+The testnet timestamp proves when the checksum bytes existed, not the truth of the figures or official eligibility. No mainnet anchor was sent: no existing mainnet registry address is configured. Its unsigned calldata and missing prerequisites are documented.
 
-## 6 November 2026 · Prepared locally: capacity evidence and outside checks
+## 6 November 2026 · Capacity evidence and outside checks
 
 The overnight November load run missed its latency stop rule at every attempted visitor level. Its wrapper incorrectly advanced after an aborted stage; it now stops on any unsuccessful stage and cleans up its monitors. The capacity blocks on Status and Running Marque preserve the September and November measurements with their different workloads, dates and raw exports. No supported current visitor count is inferred from the aborted run.
 
-A scheduled outside observer is prepared to record six public routes on a separate status-log branch. Until real logs exist, Status shows that observations are unavailable. Security contact information and an OpenAPI 3.1 description validated on 6 November are included. The eight-route accessibility baseline passed both themes with no serious or critical issues. This batch is being validated locally; it has not been pushed or deployed.
+The release includes a scheduled outside observer for six public routes on a separate status-log branch. Until real logs exist, Status shows that observations are unavailable. Security contact information and an OpenAPI 3.1 description validated on 6 November are included. The eight-route accessibility baseline passed both themes with no serious or critical issues.
 
 ## 5 November 2026 · Set and Earn closed; the record at the close, the film for after, questions answered
 

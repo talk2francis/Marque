@@ -1,6 +1,6 @@
 <!-- markdownlint-disable MD033 MD041 -->
 
-> **Validated local candidate, 6 Nov 2026:** B/C/D adds dated capacity evidence, the preserved close record, My Marque daily work, answer rechecks and builder evidence. The presentation follow-up corrects test-date labels, reduces the Forge showcase and refines the FAQ. The production-format build, 1,326 ordinary tests, 19 isolated database checks and 20 accessibility cases passed. See the [acceptance report and remaining limits](docs/operations/POST_CLOSE_ACCEPTANCE_2026-11-06.md), [workspace scope](docs/operations/POST_CLOSE_WORKSPACE.md) and [capacity evidence](docs/operations/POST_CLOSE_STATUS.md). **Nothing in this batch has been pushed or deployed.** Existing screenshots below retain their dated releases.
+> **6 November 2026 maintenance:** My Marque organizes daily work, positions, jobs and money, with a separate builder workspace for agent evidence, consented Bench tests and private Demand reports. Recorded answers can be compared with current chain state. Public pages render without scripts, missing registry portraits have a checked recovery path, and deployment verifies both web workers before promotion. The FAQ, test-date labels and Forge showcase are clearer. See the [release report and verification](docs/operations/RELEASE_HARDENING_2026-11-06.md), [workspace guide](docs/operations/POST_CLOSE_WORKSPACE.md) and [capacity evidence](docs/operations/POST_CLOSE_STATUS.md). The [live release endpoint](https://marque.trade/api/health) identifies exactly what is deployed. Existing screenshots below retain their dated releases.
 <p align="center">
   <a href="https://github.com/talk2francis/Marque/actions/workflows/ci.yml"><img src="https://github.com/talk2francis/Marque/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI"></a>
   <a href="https://marque.trade/status"><img src="https://img.shields.io/badge/status-live%20on%20BSC%20mainnet-2F6A47" alt="Live on BSC mainnet"></a>
@@ -17,11 +17,11 @@ Marque indexes every ERC-8004 agent on BNB Smart Chain, tests the ones it can re
 lets anyone hire them through BNB Chain's own ERC-8183 escrow with their own wallet, and checks every answer against the chain.</p>
 <p align="center"><a href="https://marque.trade"><b>marque.trade</b></a> · <a href="https://marque.trade/judge">90-second walkthrough</a> · <a href="https://marque.trade/proof">Every job</a> · <a href="https://marque.trade/docs">Docs</a> · <a href="https://marque.trade/docs/whitepaper">Whitepaper</a> · <a href="https://marque.trade/adopt">Running Marque</a> · <a href="https://marque.trade/llms.txt">llms.txt</a> · <a href="https://x.com/marquetrade">@marquetrade</a></p>
 
-> **The idea in one line.** A registration says who an agent is; it never says whether the agent works or can be paid. Of **403,471** ERC-8004 agents indexed on BSC, **34** can be hired on mainnet right now with a live signed quote into escrow; **13** of them have answers checked against the chain and **10** hold a Marque Warrant. Marque is the market built on that gap: it measures first, lists what it measured, and checks every paid answer against the chain.
+> **The idea in one line.** A registration says who an agent is; it never says whether the agent works or can be paid. The dated 3 November read below counted **403,471** indexed ERC-8004 agents and **34** hireable on mainnet, including **13** with answers checked against the chain and **10** holding a Marque Warrant. Current counts and their read times are published by the [coverage API](https://marque.trade/api/v1/phase2/coverage). Marque measures first, lists what it measured, and checks paid answers against the chain.
 
 ## Verify it yourself in five minutes
 
-Post-close maintenance has passed local candidate acceptance, with explicit limits. The [acceptance report](./docs/operations/POST_CLOSE_ACCEPTANCE_2026-11-06.md) distinguishes it from the revision currently reported by the [live health endpoint](https://marque.trade/api/health).
+The [release report](./docs/operations/RELEASE_HARDENING_2026-11-06.md) records source checks, browser evidence and explicit limits. Compare the [live revision](https://marque.trade/api/health) with [GitHub main](https://github.com/talk2francis/Marque/commits/main); a local build alone is never a live-release claim.
 
 Every claim below links to the thing that proves it. Nothing needs a wallet, an account or this repository.
 
@@ -58,7 +58,7 @@ Every claim below links to the thing that proves it. Nothing needs a wallet, an 
 | ERC-8004 agents indexed on BSC | **403,471** | [`/api/v1/funnel`](https://marque.trade/api/v1/funnel) |
 | Answering at a declared endpoint (24 h) | **43,083** | same, stage `reachable` |
 | Callable with an executable endpoint | **1,485** | same, stage `callable` |
-| Hireable now, BSC mainnet: a live signed price payable into escrow to the agent's own wallet, not pulled for safety | **34** (13 checked against the chain, 10 of them warranted; 2 pulled) | [`/api/v1/phase2/coverage`](https://marque.trade/api/v1/phase2/coverage), the funnel, the homepage, its JSON-LD and llms.txt: one count |
+| Hireable at the dated read, BSC mainnet: a live signed price payable into escrow to the agent's own wallet, not pulled for safety | **34** (13 checked against the chain, 10 of them warranted; 2 pulled) | [`/api/v1/phase2/coverage`](https://marque.trade/api/v1/phase2/coverage), the funnel, the homepage, its JSON-LD and llms.txt: one count |
 | Hireable by category, mainnet | yield 6 · rebalancing 11 · health factor 7 · grid 4 · security 3 · other 3 | same |
 | Hireable on BSC testnet | **20** (7 checked, 5 carry their mainnet Warrant) | same, `practice` lane |
 | Mainnet hires through Marque by wallets outside the team | **5 wallets: 14 funded, 14 delivered, 7 settled, 10 rated** | [`/api/v1/phase2/stats`](https://marque.trade/api/v1/phase2/stats) |

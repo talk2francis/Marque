@@ -10,12 +10,18 @@ describe('pinned Venus reads', () => {
     const oracle = `0x${'4'.repeat(40)}` as const
     const wad = 10n ** 18n, blockNumber = 123456789n
     let started = 0
+    let initial = 0
+    let releaseInitial!: () => void
+    const initialBarrier = new Promise<void>(resolve => { releaseInitial = resolve })
     let release!: () => void
     const barrier = new Promise<void>(resolve => { release = resolve })
     const readContract = vi.fn(async (args: { functionName: string; blockNumber: bigint }) => {
       expect(args.blockNumber).toBe(blockNumber)
-      if (args.functionName === 'getAssetsIn') return [market]
-      if (args.functionName === 'oracle') return oracle
+      if (args.functionName === 'getAssetsIn' || args.functionName === 'oracle') {
+        initial++; if (initial === 2) releaseInitial()
+        await initialBarrier
+        return args.functionName === 'getAssetsIn' ? [market] : oracle
+      }
       if (args.functionName === 'decimals') return 18
       if (args.functionName === 'symbol') return 'USDT'
       throw Error('Unexpected contract read')

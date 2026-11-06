@@ -1,6 +1,6 @@
 # My Marque candidate, 6 November 2026
 
-This B/C/D batch is local. The owner explicitly prohibited pushing main or deploying. The live baseline is `0e9f5c5`. Phase E and F are outside this batch. Production-format acceptance is complete, with the remaining limits recorded in the [acceptance report](POST_CLOSE_ACCEPTANCE_2026-11-06.md).
+This B/C/D batch is included in the owner's 6 November release authorization. Phase E and F remain outside this batch. The [release report](RELEASE_HARDENING_2026-11-06.md) records the current verification and rollout; the [earlier local acceptance](POST_CLOSE_ACCEPTANCE_2026-11-06.md) remains a dated checkpoint. `/api/health` identifies the live revision.
 
 ## Daily work
 
@@ -32,4 +32,4 @@ Bench embeds the existing consented endpoint test form and adds published histor
 
 The source fingerprint was already behind four imported files and omitted two newly reachable files on baseline `0e9f5c5`. The local fingerprint now describes the actual 48-file implementation closure and current lockfile. No arithmetic, tolerance, stale-case gate or historical observation changed. Published standard documents were regenerated from the same constants and recorded cases. Existing result bundles keep their original fingerprints.
 
-No production worker, database schema, proxy route or service was activated. The outside workflow needs a later reviewed publication. Mainnet anchoring still lacks a verified existing registry destination and an exact gas simulation; only the testnet anchor was sent. Current capacity observations failed their latency target; this batch does not claim a supported visitor count.
+At the earlier local checkpoint no production service had been activated. Publication and web rollout are now authorized and recorded in the release report. The money workers and database schema remain unchanged. Mainnet anchoring still lacks a verified existing registry destination and an exact gas simulation; only the testnet anchor was sent. Current capacity observations failed their latency target; this batch does not claim a supported visitor count.

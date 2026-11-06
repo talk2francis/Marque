@@ -1,10 +1,8 @@
 import 'server-only'
-import { sql } from 'drizzle-orm'
-import { db, cachedProjection } from '@marque/db'
+import { cachedProjection } from '@marque/db'
 import { publicClient } from '@marque/chain'
-import { normalizeAnswer, questJob, validateTask, type ChainId } from '@marque/commerce'
+import { normalizeAnswer, validateTask, type ChainId } from '@marque/commerce'
 import { venusReader, pancakeV3Reader, yieldReader, priceInUsdt, netAprAtSize, type YieldVenue } from '@marque/positions'
-import type { LensCheck } from '@marque/conformance'
 import { erc20Abi } from 'viem'
 import { jobManifest } from './manifest'
 import { recheckOriginalAnswer } from './recheck-original'
@@ -13,6 +11,7 @@ import { fieldsFromText } from './task-parse'
 import { compareRecheck, gridAssetForRecheck, validRecheckBlocks, type FreshReading } from './recheck-compare'
 import { RecheckResult } from './recheck-schema'
 import { boundedWork } from './bounded-work'
+import { recheckRecord } from './recheck-record'
 
 const ADDRESS = /^0x[0-9a-fA-F]{40}$/
 // Official PancakeSwap token list, read 6 Nov 2026. Addresses are used only for the new read-only comparison.
@@ -30,24 +29,20 @@ async function build(chainId: ChainId, jobId: string) {
   const base = { version: 1 as const, chainId, jobId, observationChainId: 56 as const, observedAt: new Date().toISOString(), category: null as string | null, answerBlock: null as string | null, currentBlock: null as string | null, answerAt: null as string | null, askAgain: null as string | null }
   const empty = (reason: string, state: 'nothing_to_recheck' | 'unsupported' = 'nothing_to_recheck') => RecheckResult.parse({ ...base, state, reason, rows: [] })
   // This is deliberately a SELECT. jobLens/replayLens are not invoked and lens_result is never updated or inserted.
-  const kept = await db().transaction(async tx => {
-    await tx.execute(sql`set transaction read only`)
-    await tx.execute(sql`set local statement_timeout = '1500ms'`)
-    const r = await tx.execute(sql`select l.block, l.checks, i.category
-      from lens_result l left join commerce_job j on j.chain_id = l.chain_id and j.job_id = l.job_id
-      left join hire_intent i on i.id = j.intent_id where l.chain_id = ${chainId} and l.job_id = ${jobId} limit 1`)
-    return ((r as unknown as { rows?: Array<{ block: string | null; checks: LensCheck[]; category: string | null }> }).rows ?? r as unknown as Array<{ block: string | null; checks: LensCheck[]; category: string | null }>)[0]
-  })
+  const kept = await recheckRecord(chainId, jobId)
   if (kept?.category === 'security') { base.category = 'security'; return empty('Security reviews have no live recheck. Read the original findings and their sources.', 'unsupported') }
   if (!kept?.block || !Array.isArray(kept.checks) || !kept.checks.length) return empty('No original checks pinned to a block are recorded for this job.')
   base.answerBlock = kept.block
   const c = publicClient()
-  const [job, headRead, task] = await Promise.all([questJob(chainId, jobId), c.getBlockNumber().then(block => ({ block, at: new Date().toISOString() })), onchainJobTask(chainId, jobId)])
-  const head = headRead.block
+  const job = kept.job
   if (!job) return empty('This indexed job could not be read.')
-  base.category = job.agent?.category ?? kept.category
+  base.category = kept.category
   if (base.category === 'security') return empty('Security reviews have no live recheck. Read the original findings and their sources.', 'unsupported')
-  const manifest = await recheckOriginalAnswer(`${chainId}:${jobId}:${job.provider ?? ''}:${job.deliverable?.hash ?? ''}`, job.deliverable?.hash ?? null, () => jobManifest(chainId, jobId, { deliverable: job.deliverable, provider: job.provider, events: job.events.flatMap(e => typeof e.name === 'string' && typeof e.tx === 'string' && /^0x[0-9a-fA-F]{64}$/.test(e.tx) ? [{ name: e.name, tx: e.tx }] : []) }))
+  const [manifest, headRead, task] = await Promise.all([
+    recheckOriginalAnswer(`${chainId}:${jobId}:${job.provider ?? ''}:${job.deliverable?.hash ?? ''}`, job.deliverable?.hash ?? null, () => jobManifest(chainId, jobId, job)),
+    c.getBlockNumber().then(block => ({ block, at: new Date().toISOString() })), onchainJobTask(chainId, jobId),
+  ])
+  const head = headRead.block
   if (!manifest || manifest.matches !== true) return empty('The original answer could not be read with a matching on-chain content commitment.')
   const lens = normalizeAnswer(base.category, manifest.content ?? (() => { try { return JSON.parse(manifest.raw) } catch { return null } })())
   if (lens.kind === 'generic' || lens.kind === 'security') return empty('This answer has no supported live comparison.', 'unsupported')

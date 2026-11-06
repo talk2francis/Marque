@@ -6,6 +6,11 @@ degradation ladder. One entry each: **planned · shipped · why · cost · resto
 This file is the phase report's appendix. If something in the plan is not in the
 product, it is written down here.
 
+## 6 November 2026: release hardening follow-up
+
+- Planned resolution of the earlier acceptance limits; shipped scope includes public server rendering without scripts, usable controls, guarded declared-artwork recovery, per-worker readiness and bounded read work. Current capacity remains unestablished after retained failed candidate and production observations; only an actual guarded passing run can establish it. The inaccessible declared portrait retains its labelled fallback. Mainnet anchoring still needs a verified existing destination and exact transaction approval. Historical facts that were never recorded remain unknown. These boundaries are explicit in the release report and are not presented as completed fixes.
+- A first post-readiness comparison still hit the unchanged four-second guard. Safe traces identified unnecessary whole-wallet rating reads; the follow-up reads exact original-answer bindings instead, preserves identity ambiguity, and verifies parity against four recorded jobs. No count predicate, grade, money handler or provider configuration changes. The source sample is an individual latency observation; compiled and concurrent acceptance remain separate.
+
 ---
 
 ## REC — Rebuild after VPS compromise (2026-09-07)

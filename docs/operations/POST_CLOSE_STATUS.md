@@ -1,6 +1,6 @@
 # Post-close status evidence, 6 November 2026
 
-This is local candidate work. The owner's current instruction prohibits pushing main and deploying. The website remains release `0e9f5c5`. Earlier dated records retain their original scope.
+The owner authorized publication and production release on 6 November, after the earlier local checkpoint. The [release report](RELEASE_HARDENING_2026-11-06.md) records follow-up verification and rollout. The live revision is reported by `/api/health`; earlier dated measurements below retain their original scope.
 
 ## Capacity
 
@@ -12,7 +12,7 @@ The [method and results](../phase2/LOAD-TEST.md) and [original exports](../evide
 
 The prepared `uptime.yml` schedules six public GETs every ten minutes from GitHub Actions. Each run records status, TTFB and complete-response time with a 15-second transport deadline. It appends only to `status-log/status-log/YYYY-MM.jsonl` on branch `status-log`, never main. A workflow artifact also retains the original observation if persistence fails.
 
-The Status reader has a two-second fetch deadline, a 2 MiB per-file limit, strict record validation and a 60-second cache. It reads both calendar months when needed for the seven-day window. A missing, malformed or unavailable log cannot become a perfect uptime percentage. Late schedules are not classified as outages. Activation requires publication of the workflow to the default branch; no workflow has been published or manually triggered in this batch.
+The Status reader has a two-second fetch deadline, an 8 MiB per-file limit, strict record validation and a 60-second cache. The bounded file budget accommodates the scheduled monthly observations. It reads both calendar months when needed for the seven-day window. A missing, malformed or unavailable log cannot become a perfect uptime percentage. Late schedules are not classified as outages. Publication to the default branch activates the workflow; the release report records the actual first run separately.
 
 ## Security and API care
 
