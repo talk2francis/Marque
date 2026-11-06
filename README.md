@@ -1,6 +1,6 @@
 <!-- markdownlint-disable MD033 MD041 -->
 
-> **Local candidate, 6 Nov 2026:** B/C/D adds dated capacity evidence, a preserved-close proof section and My Marque daily work, rechecks and builder evidence. It has not been pushed or deployed. See [candidate scope and limits](docs/operations/POST_CLOSE_WORKSPACE.md) and [status evidence](docs/operations/POST_CLOSE_STATUS.md). The [presentation follow-up](docs/operations/POST_CLOSE_PRESENTATION.md) also covers test-date labels, the compact Forge showcase and the FAQ. Existing screenshots below describe their dated releases.
+> **Validated local candidate, 6 Nov 2026:** B/C/D adds dated capacity evidence, the preserved close record, My Marque daily work, answer rechecks and builder evidence. The presentation follow-up corrects test-date labels, reduces the Forge showcase and refines the FAQ. The production-format build, 1,326 ordinary tests, 19 isolated database checks and 20 accessibility cases passed. See the [acceptance report and remaining limits](docs/operations/POST_CLOSE_ACCEPTANCE_2026-11-06.md), [workspace scope](docs/operations/POST_CLOSE_WORKSPACE.md) and [capacity evidence](docs/operations/POST_CLOSE_STATUS.md). **Nothing in this batch has been pushed or deployed.** Existing screenshots below retain their dated releases.
 <p align="center">
   <a href="https://github.com/talk2francis/Marque/actions/workflows/ci.yml"><img src="https://github.com/talk2francis/Marque/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI"></a>
   <a href="https://marque.trade/status"><img src="https://img.shields.io/badge/status-live%20on%20BSC%20mainnet-2F6A47" alt="Live on BSC mainnet"></a>
@@ -21,7 +21,7 @@ lets anyone hire them through BNB Chain's own ERC-8183 escrow with their own wal
 
 ## Verify it yourself in five minutes
 
-Post-close maintenance is being prepared on a local branch. [Scope, measured capacity and validation](./docs/operations/POST_CLOSE_STATUS.md) distinguish candidate work from the revision currently reported by the [live health endpoint](https://marque.trade/api/health).
+Post-close maintenance has passed local candidate acceptance, with explicit limits. The [acceptance report](./docs/operations/POST_CLOSE_ACCEPTANCE_2026-11-06.md) distinguishes it from the revision currently reported by the [live health endpoint](https://marque.trade/api/health).
 
 Every claim below links to the thing that proves it. Nothing needs a wallet, an account or this repository.
 

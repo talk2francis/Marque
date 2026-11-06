@@ -1,6 +1,6 @@
 # My Marque candidate, 6 November 2026
 
-This B/C/D batch is local. The owner explicitly prohibited pushing main or deploying. The live baseline is `0e9f5c5`. Phase E and F are outside this batch. Validation receipts will be added after production-format candidate acceptance.
+This B/C/D batch is local. The owner explicitly prohibited pushing main or deploying. The live baseline is `0e9f5c5`. Phase E and F are outside this batch. Production-format acceptance is complete, with the remaining limits recorded in the [acceptance report](POST_CLOSE_ACCEPTANCE_2026-11-06.md).
 
 ## Daily work
 

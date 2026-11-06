@@ -1,0 +1,870 @@
+{
+  "version": 1,
+  "recordedAt": "2026-11-06T17:42:45.496Z",
+  "runtimeArtifact": "db6b6ca111d96ade02bf488b04fa5dc8f805272f",
+  "functionalArtifact": "4fad0b183a0302c295c0e8fab0ffe1e8002e60cc",
+  "notPushed": true,
+  "notDeployed": true,
+  "tests": {
+    "filesPassed": 167,
+    "filesSkipped": 18,
+    "passed": 1326,
+    "skipped": 117
+  },
+  "isolatedPostgresTestsPassed": 19,
+  "browser": {
+    "workspaceCases": 6,
+    "presentationCases": 6,
+    "recheckCases": 6,
+    "watchedPositionCases": 6,
+    "passCredentialRequests": 0,
+    "contrastCases": 6
+  },
+  "api": [
+    {
+      "category": "grid",
+      "jobId": "57125",
+      "status": 200,
+      "ms": 594,
+      "fields": 1
+    },
+    {
+      "category": "health_factor",
+      "jobId": "57185",
+      "status": 200,
+      "ms": 884,
+      "fields": 3
+    },
+    {
+      "category": "rebalancing",
+      "jobId": "57121",
+      "status": 200,
+      "ms": 450,
+      "fields": 3
+    },
+    {
+      "category": "yield",
+      "jobId": "56982",
+      "status": 200,
+      "ms": 793,
+      "fields": 2
+    }
+  ],
+  "replay": {
+    "status": 200,
+    "block": "131771231",
+    "rows": 3
+  },
+  "downloads": [
+    {
+      "file": "README.md",
+      "bytes": 3647,
+      "sha256": "2fbfdb5bb49e365c9ba68c57e4e584ba9552f8ba33a23c073a8f3b18290af4f0"
+    },
+    {
+      "file": "SHA256SUMS",
+      "bytes": 1563,
+      "sha256": "04dae958b2e511c42293cabad46e1ec70f922130bb8af3b1fc6bbec0604e1604"
+    },
+    {
+      "file": "close-figures.json",
+      "bytes": 1415,
+      "sha256": "314063711dba1653690fc569591752442cb313c49cac5f510108679d4d6c3624"
+    },
+    {
+      "file": "coverage-56.json",
+      "bytes": 3497,
+      "sha256": "67e554b4630029e803630d6665a117782093c878ce7cb85378036fcd0b8027a0"
+    },
+    {
+      "file": "coverage-97.json",
+      "bytes": 3686,
+      "sha256": "5d7d1401a3222fcd854be3e6acef2c07429546634f06198e627cfc73eee74327"
+    },
+    {
+      "file": "funnel.json",
+      "bytes": 6939,
+      "sha256": "4d047be577aeeed49a16b14cebbf208523459897aa71a17b3c560a3de1e17e38"
+    },
+    {
+      "file": "proof.json",
+      "bytes": 151925,
+      "sha256": "90a3221367bcc5163eb0cf8b34ba1ce88f9d20e26d564684999550c79eb2fdc0"
+    },
+    {
+      "file": "quest/0x0d8c9ad8eebb6879fefa218f0799219bcaabe999.json",
+      "bytes": 21793,
+      "sha256": "087f50fdae6ce03a22daf68782f2a6d82a0914db99d26d05c48212bb5338f4ad"
+    },
+    {
+      "file": "quest/0x15a97307caa68c24e4b5a0b83d331a6aa1ea195f.json",
+      "bytes": 8033,
+      "sha256": "98d5f875e486d8716f073d0b747a1455be9a7433c212840bed09105fd222ad8f"
+    },
+    {
+      "file": "quest/0x34d9bfa696b4775341f1b9167af578f5be292766.json",
+      "bytes": 14501,
+      "sha256": "70e06a8ba44f552cb1d27879ec54f2d3281caf89371460e1bf4e17d5a61d1a33"
+    },
+    {
+      "file": "quest/0x5ac2448fc79ef8d33710b1bced5aeff90138b452.json",
+      "bytes": 6123,
+      "sha256": "53ee17277a0db151770cc91e5967142c4316f60d326b623373418422f20b0ed5"
+    },
+    {
+      "file": "quest/0x73809f69916fcf7ddc5bb1315fbdf96a569a5963.json",
+      "bytes": 13734,
+      "sha256": "bc73e8ebe4248a9b0719e0871e3ccf137fea3ebd6f1cd2163dd7363ec88f6d81"
+    },
+    {
+      "file": "quest/0x7709271a7644b311ca21bb7a38a77be95c793f22.json",
+      "bytes": 14166,
+      "sha256": "43195a55cf43f7281eab672364eb5276a1dbc6a5ca39e3bed39df97e2567bbbd"
+    },
+    {
+      "file": "quest/0xb833c2ee1d6cee3933a8ab525cc4a1c8f812a6e2.json",
+      "bytes": 16779,
+      "sha256": "04fd134c9a69d6ae6aa03c988fdf30bcedc339c0cf473fe2085991e8b854b57e"
+    },
+    {
+      "file": "quest/0xbfaa69233741924ed5b9d5daa9b4bf7b84567f0a.json",
+      "bytes": 22627,
+      "sha256": "e9e54a94bd3d8f47e7cee911e2a0e78575fdd6c93f5950a538369363451d9530"
+    },
+    {
+      "file": "quest/0xda53362d304d7970db19547c52208a35c6d83c8a.json",
+      "bytes": 3046,
+      "sha256": "ab951f23e87fa8f6e33bf16ee8031e8d0d72a19757dc7c6ce8a4499f8c3da122"
+    },
+    {
+      "file": "stats.json",
+      "bytes": 678,
+      "sha256": "b8924fd41471abb98291457c7c665bd47bee873a3f1c7ba37849fb26377c2e15"
+    }
+  ],
+  "brainProfiles": [
+    {
+      "tokenId": "302257",
+      "status": 200,
+      "incorrectRetestBadge": false,
+      "recordedPassShown": true
+    },
+    {
+      "tokenId": "302258",
+      "status": 200,
+      "incorrectRetestBadge": false,
+      "recordedPassShown": true
+    },
+    {
+      "tokenId": "304493",
+      "status": 200,
+      "incorrectRetestBadge": false,
+      "recordedPassShown": true
+    },
+    {
+      "tokenId": "304494",
+      "status": 200,
+      "incorrectRetestBadge": false,
+      "recordedPassShown": true
+    },
+    {
+      "tokenId": "310460",
+      "status": 200,
+      "incorrectRetestBadge": false,
+      "recordedPassShown": true
+    },
+    {
+      "tokenId": "363709",
+      "status": 200,
+      "incorrectRetestBadge": false,
+      "recordedPassShown": true
+    }
+  ],
+  "sharedResponses": 24,
+  "accessibility": {
+    "cases": 20,
+    "seriousOrCritical": 0,
+    "reportSha256": "31fdee859f82daae5405d2322d5e59c7fc7a5384f4e6d4ac03c7db0fd3e52c9f"
+  },
+  "audit": {
+    "cases": 80,
+    "casesWithHeuristicFindings": 80,
+    "findings": [
+      {
+        "route": "/",
+        "width": "1440",
+        "theme": "night",
+        "issues": [
+          "11 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/",
+        "width": "1440",
+        "theme": "day",
+        "issues": [
+          "40 low-contrast text run(s)",
+          "11 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/",
+        "width": "1024",
+        "theme": "night",
+        "issues": [
+          "10 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/",
+        "width": "1024",
+        "theme": "day",
+        "issues": [
+          "40 low-contrast text run(s)",
+          "10 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/",
+        "width": "768",
+        "theme": "night",
+        "issues": [
+          "23 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/",
+        "width": "768",
+        "theme": "day",
+        "issues": [
+          "40 low-contrast text run(s)",
+          "23 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/",
+        "width": "390",
+        "theme": "night",
+        "issues": [
+          "22 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/",
+        "width": "390",
+        "theme": "day",
+        "issues": [
+          "40 low-contrast text run(s)",
+          "22 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/register",
+        "width": "1440",
+        "theme": "night",
+        "issues": [
+          "20 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/register",
+        "width": "1440",
+        "theme": "day",
+        "issues": [
+          "20 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/register",
+        "width": "1024",
+        "theme": "night",
+        "issues": [
+          "20 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/register",
+        "width": "1024",
+        "theme": "day",
+        "issues": [
+          "20 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/register",
+        "width": "768",
+        "theme": "night",
+        "issues": [
+          "19 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/register",
+        "width": "768",
+        "theme": "day",
+        "issues": [
+          "19 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/register",
+        "width": "390",
+        "theme": "night",
+        "issues": [
+          "18 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/register",
+        "width": "390",
+        "theme": "day",
+        "issues": [
+          "18 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/builders",
+        "width": "1440",
+        "theme": "night",
+        "issues": [
+          "2 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/builders",
+        "width": "1440",
+        "theme": "day",
+        "issues": [
+          "2 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/builders",
+        "width": "1024",
+        "theme": "night",
+        "issues": [
+          "2 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/builders",
+        "width": "1024",
+        "theme": "day",
+        "issues": [
+          "2 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/builders",
+        "width": "768",
+        "theme": "night",
+        "issues": [
+          "2 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/builders",
+        "width": "768",
+        "theme": "day",
+        "issues": [
+          "2 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/builders",
+        "width": "390",
+        "theme": "night",
+        "issues": [
+          "2 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/builders",
+        "width": "390",
+        "theme": "day",
+        "issues": [
+          "2 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/quest",
+        "width": "1440",
+        "theme": "night",
+        "issues": [
+          "35 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/quest",
+        "width": "1440",
+        "theme": "day",
+        "issues": [
+          "35 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/quest",
+        "width": "1024",
+        "theme": "night",
+        "issues": [
+          "35 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/quest",
+        "width": "1024",
+        "theme": "day",
+        "issues": [
+          "35 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/quest",
+        "width": "768",
+        "theme": "night",
+        "issues": [
+          "35 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/quest",
+        "width": "768",
+        "theme": "day",
+        "issues": [
+          "35 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/quest",
+        "width": "390",
+        "theme": "night",
+        "issues": [
+          "36 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/quest",
+        "width": "390",
+        "theme": "day",
+        "issues": [
+          "36 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/me",
+        "width": "1440",
+        "theme": "night",
+        "issues": [
+          "1 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/me",
+        "width": "1440",
+        "theme": "day",
+        "issues": [
+          "1 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/me",
+        "width": "1024",
+        "theme": "night",
+        "issues": [
+          "1 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/me",
+        "width": "1024",
+        "theme": "day",
+        "issues": [
+          "1 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/me",
+        "width": "768",
+        "theme": "night",
+        "issues": [
+          "1 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/me",
+        "width": "768",
+        "theme": "day",
+        "issues": [
+          "1 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/me",
+        "width": "390",
+        "theme": "night",
+        "issues": [
+          "2 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/me",
+        "width": "390",
+        "theme": "day",
+        "issues": [
+          "2 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/status",
+        "width": "1440",
+        "theme": "night",
+        "issues": [
+          "4 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/status",
+        "width": "1440",
+        "theme": "day",
+        "issues": [
+          "4 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/status",
+        "width": "1024",
+        "theme": "night",
+        "issues": [
+          "4 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/status",
+        "width": "1024",
+        "theme": "day",
+        "issues": [
+          "4 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/status",
+        "width": "768",
+        "theme": "night",
+        "issues": [
+          "4 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/status",
+        "width": "768",
+        "theme": "day",
+        "issues": [
+          "4 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/status",
+        "width": "390",
+        "theme": "night",
+        "issues": [
+          "4 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/status",
+        "width": "390",
+        "theme": "day",
+        "issues": [
+          "4 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/adopt",
+        "width": "1440",
+        "theme": "night",
+        "issues": [
+          "19 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/adopt",
+        "width": "1440",
+        "theme": "day",
+        "issues": [
+          "19 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/adopt",
+        "width": "1024",
+        "theme": "night",
+        "issues": [
+          "19 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/adopt",
+        "width": "1024",
+        "theme": "day",
+        "issues": [
+          "19 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/adopt",
+        "width": "768",
+        "theme": "night",
+        "issues": [
+          "19 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/adopt",
+        "width": "768",
+        "theme": "day",
+        "issues": [
+          "19 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/adopt",
+        "width": "390",
+        "theme": "night",
+        "issues": [
+          "19 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/adopt",
+        "width": "390",
+        "theme": "day",
+        "issues": [
+          "19 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/proof",
+        "width": "1440",
+        "theme": "night",
+        "issues": [
+          "145 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/proof",
+        "width": "1440",
+        "theme": "day",
+        "issues": [
+          "145 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/proof",
+        "width": "1024",
+        "theme": "night",
+        "issues": [
+          "145 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/proof",
+        "width": "1024",
+        "theme": "day",
+        "issues": [
+          "145 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/proof",
+        "width": "768",
+        "theme": "night",
+        "issues": [
+          "145 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/proof",
+        "width": "768",
+        "theme": "day",
+        "issues": [
+          "145 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/proof",
+        "width": "390",
+        "theme": "night",
+        "issues": [
+          "135 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/proof",
+        "width": "390",
+        "theme": "day",
+        "issues": [
+          "135 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/jobs/56/57185",
+        "width": "1440",
+        "theme": "night",
+        "issues": [
+          "3 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/jobs/56/57185",
+        "width": "1440",
+        "theme": "day",
+        "issues": [
+          "3 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/jobs/56/57185",
+        "width": "1024",
+        "theme": "night",
+        "issues": [
+          "3 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/jobs/56/57185",
+        "width": "1024",
+        "theme": "day",
+        "issues": [
+          "3 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/jobs/56/57185",
+        "width": "768",
+        "theme": "night",
+        "issues": [
+          "3 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/jobs/56/57185",
+        "width": "768",
+        "theme": "day",
+        "issues": [
+          "3 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/jobs/56/57185",
+        "width": "390",
+        "theme": "night",
+        "issues": [
+          "3 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/jobs/56/57185",
+        "width": "390",
+        "theme": "day",
+        "issues": [
+          "3 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/agents/56/310460",
+        "width": "1440",
+        "theme": "night",
+        "issues": [
+          "4 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/agents/56/310460",
+        "width": "1440",
+        "theme": "day",
+        "issues": [
+          "4 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/agents/56/310460",
+        "width": "1024",
+        "theme": "night",
+        "issues": [
+          "4 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/agents/56/310460",
+        "width": "1024",
+        "theme": "day",
+        "issues": [
+          "4 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/agents/56/310460",
+        "width": "768",
+        "theme": "night",
+        "issues": [
+          "4 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/agents/56/310460",
+        "width": "768",
+        "theme": "day",
+        "issues": [
+          "4 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/agents/56/310460",
+        "width": "390",
+        "theme": "night",
+        "issues": [
+          "4 tap target(s) under 24px"
+        ]
+      },
+      {
+        "route": "/agents/56/310460",
+        "width": "390",
+        "theme": "day",
+        "issues": [
+          "4 tap target(s) under 24px"
+        ]
+      }
+    ]
+  },
+  "screens": 201,
+  "originalLensRowsUnchanged": 4,
+  "protectedPathsChanged": [],
+  "limits": [
+    "Current capacity is not established; November load failed.",
+    "A cold-start request and a concurrent read timeout are retained in the acceptance report.",
+    "Both live baseline and candidate require JavaScript to reveal the streamed application shell.",
+    "No mainnet anchor: a verified existing destination and exact gas simulation remain unavailable.",
+    "Outside monitoring workflow is prepared, not published or activated."
+  ],
+  "hostClosure": {
+    "at": "2026-11-06T17:45:14.295Z",
+    "public": {
+      "home": 200,
+      "health": 200,
+      "release": "0e9f5c59444a0036a05f0f9e0d0bf742864abdbf"
+    },
+    "processesBefore": 46,
+    "processesAfter": 46,
+    "processMetadataUnchanged": true,
+    "ownPreviews": [
+      {
+        "port": 3311,
+        "stillListening": false
+      },
+      {
+        "port": 3312,
+        "stillListening": false
+      }
+    ]
+  }
+}

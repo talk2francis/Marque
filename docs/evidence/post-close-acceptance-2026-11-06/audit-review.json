@@ -1,0 +1,298 @@
+{
+  "recordedAt": "2026-11-06T17:42:45.492Z",
+  "runtimeArtifact": "db6b6ca111d96ade02bf488b04fa5dc8f805272f",
+  "auditAt": "2026-11-06T17:24:23.720Z",
+  "diagnosticAt": "2026-11-06T17:35:45.612Z",
+  "cases": 80,
+  "smallTargetWarningCases": 80,
+  "homeDayContrastWarningCases": 4,
+  "externalImageFailures": [
+    {
+      "route": "/register",
+      "width": "1440",
+      "theme": "night",
+      "requests": [
+        {
+          "url": "https://api.8004scan.io/api/v1/media/agents/97/2718/image",
+          "error": "net::ERR_BLOCKED_BY_ORB"
+        },
+        {
+          "url": "https://api.8004scan.io/api/v1/media/agents/56/367904/image",
+          "error": "net::ERR_BLOCKED_BY_ORB"
+        },
+        {
+          "url": "https://api.8004scan.io/api/v1/media/agents/56/374107/image",
+          "error": "net::ERR_BLOCKED_BY_ORB"
+        },
+        {
+          "url": "https://api.8004scan.io/api/v1/media/agents/97/2718/image",
+          "error": "net::ERR_BLOCKED_BY_ORB"
+        },
+        {
+          "url": "https://api.8004scan.io/api/v1/media/agents/56/367904/image",
+          "error": "net::ERR_BLOCKED_BY_ORB"
+        },
+        {
+          "url": "https://api.8004scan.io/api/v1/media/agents/56/374107/image",
+          "error": "net::ERR_BLOCKED_BY_ORB"
+        }
+      ]
+    },
+    {
+      "route": "/register",
+      "width": "1440",
+      "theme": "day",
+      "requests": [
+        {
+          "url": "https://api.8004scan.io/api/v1/media/agents/56/374107/image",
+          "error": "net::ERR_BLOCKED_BY_ORB"
+        },
+        {
+          "url": "https://api.8004scan.io/api/v1/media/agents/97/2718/image",
+          "error": "net::ERR_BLOCKED_BY_ORB"
+        },
+        {
+          "url": "https://api.8004scan.io/api/v1/media/agents/56/367904/image",
+          "error": "net::ERR_BLOCKED_BY_ORB"
+        },
+        {
+          "url": "https://api.8004scan.io/api/v1/media/agents/97/2718/image",
+          "error": "net::ERR_BLOCKED_BY_ORB"
+        },
+        {
+          "url": "https://api.8004scan.io/api/v1/media/agents/56/367904/image",
+          "error": "net::ERR_BLOCKED_BY_ORB"
+        },
+        {
+          "url": "https://api.8004scan.io/api/v1/media/agents/56/374107/image",
+          "error": "net::ERR_BLOCKED_BY_ORB"
+        }
+      ]
+    },
+    {
+      "route": "/register",
+      "width": "1024",
+      "theme": "night",
+      "requests": [
+        {
+          "url": "https://api.8004scan.io/api/v1/media/agents/97/2718/image",
+          "error": "net::ERR_BLOCKED_BY_ORB"
+        },
+        {
+          "url": "https://api.8004scan.io/api/v1/media/agents/56/374107/image",
+          "error": "net::ERR_BLOCKED_BY_ORB"
+        },
+        {
+          "url": "https://api.8004scan.io/api/v1/media/agents/56/367904/image",
+          "error": "net::ERR_BLOCKED_BY_ORB"
+        },
+        {
+          "url": "https://api.8004scan.io/api/v1/media/agents/97/2718/image",
+          "error": "net::ERR_BLOCKED_BY_ORB"
+        },
+        {
+          "url": "https://api.8004scan.io/api/v1/media/agents/56/367904/image",
+          "error": "net::ERR_BLOCKED_BY_ORB"
+        },
+        {
+          "url": "https://api.8004scan.io/api/v1/media/agents/56/374107/image",
+          "error": "net::ERR_BLOCKED_BY_ORB"
+        }
+      ]
+    },
+    {
+      "route": "/register",
+      "width": "1024",
+      "theme": "day",
+      "requests": [
+        {
+          "url": "https://api.8004scan.io/api/v1/media/agents/97/2718/image",
+          "error": "net::ERR_BLOCKED_BY_ORB"
+        },
+        {
+          "url": "https://api.8004scan.io/api/v1/media/agents/56/374107/image",
+          "error": "net::ERR_BLOCKED_BY_ORB"
+        },
+        {
+          "url": "https://api.8004scan.io/api/v1/media/agents/56/367904/image",
+          "error": "net::ERR_BLOCKED_BY_ORB"
+        },
+        {
+          "url": "https://api.8004scan.io/api/v1/media/agents/56/367904/image",
+          "error": "net::ERR_BLOCKED_BY_ORB"
+        },
+        {
+          "url": "https://api.8004scan.io/api/v1/media/agents/56/374107/image",
+          "error": "net::ERR_BLOCKED_BY_ORB"
+        },
+        {
+          "url": "https://api.8004scan.io/api/v1/media/agents/97/2718/image",
+          "error": "net::ERR_BLOCKED_BY_ORB"
+        }
+      ]
+    },
+    {
+      "route": "/register",
+      "width": "768",
+      "theme": "night",
+      "requests": [
+        {
+          "url": "https://api.8004scan.io/api/v1/media/agents/56/367904/image",
+          "error": "net::ERR_BLOCKED_BY_ORB"
+        },
+        {
+          "url": "https://api.8004scan.io/api/v1/media/agents/56/374107/image",
+          "error": "net::ERR_BLOCKED_BY_ORB"
+        },
+        {
+          "url": "https://api.8004scan.io/api/v1/media/agents/97/2718/image",
+          "error": "net::ERR_BLOCKED_BY_ORB"
+        },
+        {
+          "url": "https://api.8004scan.io/api/v1/media/agents/97/2718/image",
+          "error": "net::ERR_BLOCKED_BY_ORB"
+        },
+        {
+          "url": "https://api.8004scan.io/api/v1/media/agents/56/367904/image",
+          "error": "net::ERR_BLOCKED_BY_ORB"
+        },
+        {
+          "url": "https://api.8004scan.io/api/v1/media/agents/56/374107/image",
+          "error": "net::ERR_BLOCKED_BY_ORB"
+        }
+      ]
+    },
+    {
+      "route": "/register",
+      "width": "768",
+      "theme": "day",
+      "requests": [
+        {
+          "url": "https://api.8004scan.io/api/v1/media/agents/97/2718/image",
+          "error": "net::ERR_BLOCKED_BY_ORB"
+        },
+        {
+          "url": "https://api.8004scan.io/api/v1/media/agents/56/367904/image",
+          "error": "net::ERR_BLOCKED_BY_ORB"
+        },
+        {
+          "url": "https://api.8004scan.io/api/v1/media/agents/56/374107/image",
+          "error": "net::ERR_BLOCKED_BY_ORB"
+        },
+        {
+          "url": "https://api.8004scan.io/api/v1/media/agents/97/2718/image",
+          "error": "net::ERR_BLOCKED_BY_ORB"
+        },
+        {
+          "url": "https://api.8004scan.io/api/v1/media/agents/56/367904/image",
+          "error": "net::ERR_BLOCKED_BY_ORB"
+        },
+        {
+          "url": "https://api.8004scan.io/api/v1/media/agents/56/374107/image",
+          "error": "net::ERR_BLOCKED_BY_ORB"
+        }
+      ]
+    },
+    {
+      "route": "/register",
+      "width": "390",
+      "theme": "night",
+      "requests": [
+        {
+          "url": "https://api.8004scan.io/api/v1/media/agents/97/2718/image",
+          "error": "net::ERR_BLOCKED_BY_ORB"
+        },
+        {
+          "url": "https://api.8004scan.io/api/v1/media/agents/97/2718/image",
+          "error": "net::ERR_BLOCKED_BY_ORB"
+        }
+      ]
+    },
+    {
+      "route": "/register",
+      "width": "390",
+      "theme": "day",
+      "requests": [
+        {
+          "url": "https://api.8004scan.io/api/v1/media/agents/97/2718/image",
+          "error": "net::ERR_BLOCKED_BY_ORB"
+        },
+        {
+          "url": "https://api.8004scan.io/api/v1/media/agents/97/2718/image",
+          "error": "net::ERR_BLOCKED_BY_ORB"
+        }
+      ]
+    }
+  ],
+  "diagnostic": {
+    "sampledTheme": "day",
+    "sampledWidth": 1440,
+    "textAndColorMatches": 40,
+    "allInClosedFilmDetails": true,
+    "openedFilmViolations": [
+      {
+        "violations": []
+      }
+    ],
+    "openedFaqAnswers": [
+      {
+        "id": "what-is-marque",
+        "violations": []
+      },
+      {
+        "id": "do-i-need-a-wallet",
+        "violations": []
+      },
+      {
+        "id": "where-does-my-money-go",
+        "violations": []
+      },
+      {
+        "id": "how-do-i-know-an-agent-works",
+        "violations": []
+      },
+      {
+        "id": "what-if-it-goes-wrong",
+        "violations": []
+      },
+      {
+        "id": "is-marque-safe",
+        "violations": []
+      },
+      {
+        "id": "can-my-ai-assistant-use-marque",
+        "violations": []
+      },
+      {
+        "id": "how-do-i-list-my-agent",
+        "violations": []
+      },
+      {
+        "id": "set-and-earn-has-closed",
+        "violations": []
+      }
+    ]
+  },
+  "reviewedCaptures": 201,
+  "limits": "Small-target warnings and blocked external images are retained; this record does not claim complete accessibility compliance.",
+  "externalImageHttpReads": {
+    "at": "2026-11-06T17:40:21.294Z",
+    "rows": [
+      {
+        "url": "https://api.8004scan.io/api/v1/media/agents/97/2718/image",
+        "status": 404,
+        "contentType": "application/json"
+      },
+      {
+        "url": "https://api.8004scan.io/api/v1/media/agents/56/367904/image",
+        "status": 404,
+        "contentType": "application/json"
+      },
+      {
+        "url": "https://api.8004scan.io/api/v1/media/agents/56/374107/image",
+        "status": 404,
+        "contentType": "application/json"
+      }
+    ]
+  }
+}
