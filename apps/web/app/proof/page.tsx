@@ -2,6 +2,7 @@ import { BRAND } from '@marque/ui'
 import { SiteHeader, SiteFooter } from '../_components/SiteHeader'
 import { proofProjection } from '../../lib/proof'
 import { ProofTable } from './ProofTable'
+import { CloseRecord } from './CloseRecord'
 import styles from './proof.module.css'
 
 export const dynamic = 'force-dynamic'
@@ -60,6 +61,7 @@ export default async function ProofPage() {
             <p className={styles.note}>Read {new Date(d.measuredAt).toISOString().slice(0, 16).replace('T', ' ')} UTC. The same rows: <a href="/api/v1/proof">/api/v1/proof</a> · <a href="/api/v1/proof?format=csv" download>CSV</a>. Counted figures equal <a href="/api/v1/phase2/stats">/api/v1/phase2/stats</a>. Each row&apos;s escrow link opens the contract on BscScan, where getJob(job id) returns the record.</p>
           </>
         )}
+        <CloseRecord />
       </main>
       <SiteFooter />
     </>

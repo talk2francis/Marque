@@ -24,3 +24,11 @@ Each file carries its own `readAt` (or `observedAt`) and the API it came from.
 ## How to check it
 
 Download the files, run `sha256sum -c SHA256SUMS`, and compare any row in `proof.json` with the job on BscScan through its `hireTx` and `verifyUrl`.
+
+## Testnet timestamp anchor, 6 November 2026
+
+Keccak-256 of the original `SHA256SUMS` file's exact bytes: `0x7ee2aa98522bb14615bd9b494ab9d08552734de4f8d21a483b7ec63ede58aa76`. The manifest and every file it covers are unchanged. This README is excluded from that manifest.
+
+Anchored on BSC testnet (97) at block 141098389, 2026-11-06T06:05:53.000Z: [transaction](https://testnet.bscscan.com/tx/0x86a8bafbca9824e872d3bf5754a51dac9e2d7204425389b0c0b70c06c4c5a24d). Registry `0x01D584f3a07Ba07D114386A78CA7fa3103db7AE7`, anchoring wallet `0x9598AB46aAB33389C2e9Ffe0511effD330f67F9B`. The receipt succeeded and its `Anchored` event, leaf and first anchored block were checked against the chain. [Receipt](../close-anchor-2026-11-06.json).
+
+This proves these checksum bytes existed by that testnet block. It does not prove the figures, independence, quality, payment or official eligibility, and it does not backdate the later API read to the close. No mainnet anchor has been submitted. Run `node scripts/verify-close-record.mjs` from the repository to check the files and digest offline.

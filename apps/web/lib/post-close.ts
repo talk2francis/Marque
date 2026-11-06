@@ -39,4 +39,5 @@ export const JUDGE_AFTER_CLOSE: ReadonlyArray<Action & { note: string }> = [
   { href: '/film', label: 'Watch the film', note: '60 seconds, every figure read at the close.' },
   { href: '/proof?chain=56&funder=outside#jobs', label: 'Open Every job, outside wallets', note: 'Each mainnet hire paid by a wallet outside the team list, with what the chain checks said.' },
   { href: '/jobs/56/56903', label: 'Open job 56903 and its checks', note: 'One paid job end to end: the quote, the escrow, the answer and each check against BNB Chain.' },
+  { href: '/proof#record-at-close', label: 'Read the preserved close record', note: 'The original read, the later job snapshot, file checksums and the testnet timestamp anchor.' },
 ]

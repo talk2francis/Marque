@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "checksumFileKeccak256": "0x7ee2aa98522bb14615bd9b494ab9d08552734de4f8d21a483b7ec63ede58aa76",
+  "chainId": 97,
+  "network": "BSC testnet",
+  "registry": "0x01D584f3a07Ba07D114386A78CA7fa3103db7AE7",
+  "wallet": "0x9598AB46aAB33389C2e9Ffe0511effD330f67F9B",
+  "transactionHash": "0x86a8bafbca9824e872d3bf5754a51dac9e2d7204425389b0c0b70c06c4c5a24d",
+  "blockNumber": "141098389",
+  "blockTimestamp": "1793945153",
+  "anchoredAt": "2026-11-06T06:05:53.000Z",
+  "gasUsed": "51007",
+  "event": {
+    "name": "Anchored",
+    "anchorer": "0x9598AB46aAB33389C2e9Ffe0511effD330f67F9B",
+    "leaf": "0x7ee2aa98522bb14615bd9b494ab9d08552734de4f8d21a483b7ec63ede58aa76",
+    "blockTime": "1793945153"
+  },
+  "scope": "Proves this checksum manifest existed by this testnet block. It does not prove the figures are true, independent, paid or officially eligible."
+}

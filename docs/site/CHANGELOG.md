@@ -4,6 +4,12 @@
 
 A public record of meaningful product changes. Evidence and limitations travel with each release.
 
+## 6 November 2026 · Prepared locally: the preserved close record
+
+The original close snapshot remains byte-for-byte unchanged. The Keccak-256 digest of its checksum manifest is anchored on BSC testnet at block 141098389, with the successful transaction and Anchored event recorded in the repository. The proof page and judge path now include the preserved figures, every file for download and instructions for checking them offline. The original 48-job read remains separate from the later 50-job snapshot.
+
+The testnet timestamp proves when the checksum bytes existed, not the truth of the figures or official eligibility. No mainnet anchor was sent: no existing mainnet registry address is configured. Its unsigned calldata and missing prerequisites are documented. The website changes remain local and await complete candidate validation.
+
 ## 6 November 2026 · Prepared locally: capacity evidence and outside checks
 
 The overnight November load run missed its latency stop rule at every attempted visitor level. Its wrapper incorrectly advanced after an aborted stage; it now stops on any unsuccessful stage and cleans up its monitors. The capacity blocks on Status and Running Marque preserve the September and November measurements with their different workloads, dates and raw exports. No supported current visitor count is inferred from the aborted run.

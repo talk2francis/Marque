@@ -26,6 +26,6 @@ describe('post-close gates', () => {
     expect(CLOSED_LINE).not.toMatch(/left|closes|\d+d /i)
   })
   it('gives a reviewer only steps that exist, each without a wallet', () => {
-    expect(JUDGE_AFTER_CLOSE.map((s) => s.href)).toEqual(['/film', '/proof?chain=56&funder=outside#jobs', '/jobs/56/56903'])
+    expect(JUDGE_AFTER_CLOSE.map((s) => s.href)).toEqual(['/film', '/proof?chain=56&funder=outside#jobs', '/jobs/56/56903', '/proof#record-at-close'])
   })
 })

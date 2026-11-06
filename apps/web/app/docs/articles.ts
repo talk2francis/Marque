@@ -63,6 +63,10 @@ export const articles: Record<string, Article> = {
     title:'What changed, and why.',
     description:'A public record of meaningful product changes. Evidence and limitations travel with each release.',
     sections:[
+      { id: 'post-close-c', title: '6 November 2026 · Prepared locally: the preserved close record', paragraphs: [
+        'The original close snapshot remains byte-for-byte unchanged. The Keccak-256 digest of its checksum manifest is anchored on BSC testnet at block 141098389, with the successful transaction and Anchored event recorded in the repository. The proof page and judge path now include the preserved figures, every file for download and instructions for checking them offline. The original 48-job read remains separate from the later 50-job snapshot.',
+        'The testnet timestamp proves when the checksum bytes existed, not the truth of the figures or official eligibility. No mainnet anchor was sent: no existing mainnet registry address is configured. Its unsigned calldata and missing prerequisites are documented. The website changes remain local and await complete candidate validation.',
+      ] },
       { id: 'post-close-b', title: '6 November 2026 · Prepared locally: capacity evidence and outside checks', paragraphs: [
         'The overnight November load run missed its latency stop rule at every attempted visitor level. Its wrapper incorrectly advanced after an aborted stage; it now stops on any unsuccessful stage and cleans up its monitors. The capacity blocks on Status and Running Marque preserve the September and November measurements with their different workloads, dates and raw exports. No supported current visitor count is inferred from the aborted run.',
         'A scheduled outside observer is prepared to record six public routes on a separate status-log branch. Until real logs exist, Status shows that observations are unavailable. Security contact information and an OpenAPI 3.1 description validated on 6 November are included. The eight-route accessibility baseline passed both themes with no serious or critical issues. This batch is being validated locally; it has not been pushed or deployed.',
