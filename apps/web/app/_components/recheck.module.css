@@ -1,0 +1,20 @@
+.recheck { display: grid; gap: 12px; min-width: 0; padding: 20px 0; border-top: 1px solid var(--hair-2); }
+.heading { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
+.heading > div { min-width: 0; flex: 1 1 240px; }
+.heading h3 { margin: 0 0 6px; font-size: 17px; color: var(--ink); }
+.recheck p { margin: 0; color: var(--ink-2); font-size: 12.5px; line-height: 1.6; overflow-wrap: anywhere; }
+.error { color: var(--breach-ink) !important; }
+.result { display: grid; gap: 12px; margin-top: 12px; }
+.result > a { justify-self: start; }
+.rows { display: grid; gap: 0; min-width: 0; }
+.row { border-top: 1px solid var(--hair); padding: 14px 0; display: grid; gap: 10px; min-width: 0; }
+.rowTitle { display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: baseline; }
+.rowTitle h4 { font-size: 13px; font-weight: 600; margin: 0; color: var(--ink); }
+.rowTitle > span { font-size: 11px; color: var(--ink-2); }
+.rowTitle > span[data-state=holds] { color: var(--holds-ink); }
+.rowTitle > span[data-state=changed] { color: var(--watch-ink); }
+.row dl { margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.row dl > div { min-width: 0; }
+.row dt { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 11px; color: var(--ink-2); margin-bottom: 6px; }
+.row dd { margin: 0; font-size: 15px; color: var(--ink); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+@media (max-width: 420px) { .row dl { gap: 10px; } }

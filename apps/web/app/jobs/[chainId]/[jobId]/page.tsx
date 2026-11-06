@@ -24,6 +24,7 @@ import { registryImageUrl } from '../../../../lib/avatar-source'
 import { JobActions } from './JobActions'
 import styles from './job.module.css'
 import { UNote } from '../../../_components/ui/UNote'
+import { Recheck } from '../../../_components/Recheck'
 
 export const dynamic = 'force-dynamic'
 
@@ -170,6 +171,7 @@ export default async function JobRoom({ params }: { params: Promise<{ chainId: s
               {lensData && lensData.manifest?.raw ? (
                 <>
                   <ResultLens data={lensData} agentName={agentName} content={lensContent} />
+                  {lensData.checks.length ? <Recheck chainId={cid} jobId={jobId} answerBlock={lensData.checkedAtBlock} answerAt={lensData.lens?.meta.readAt ?? null} /> : null}
                   {acted.map((o) => (
                     <p key={o.id} className={styles.acted}>
                       <strong>Acted on:</strong> {o.action === 'repay' ? <>HF {o.before.healthFactor === null ? 'n/a' : o.before.healthFactor > 100 ? 'over 100' : o.before.healthFactor.toFixed(3)} → {o.after.healthFactor === null ? 'no debt' : o.after.healthFactor > 100 ? 'over 100' : o.after.healthFactor.toFixed(3)}</> : <>{o.symbol} supply {o.before.market.supplied.toFixed(4)} → {o.after.market.supplied.toFixed(4)}</>} at block {Number(o.after.block).toLocaleString('en-US')}. {o.action === 'repay' ? 'Repay' : 'Supply'} {o.amount.toLocaleString('en-US', { maximumFractionDigits: 4 })} {o.symbol}.{' '}
