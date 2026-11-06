@@ -18,6 +18,9 @@ import {
 } from '../../lib/builder-workspace'
 import type { SellerProjection } from '../../lib/seller'
 import styles from './workspace.module.css'
+import { AgentLoop } from './AgentLoop'
+import { DemandReport } from '../../lib/builder-demand'
+import { DemandRows } from './DemandRows'
 
 const ADDRESS = /^0x[0-9a-fA-F]{40}$/
 const CHECK_LABEL: Record<string, string> = {
@@ -45,9 +48,13 @@ const stamp = (s: string | null) =>
 export function AgentWorkspace({
   initialWallet = null,
   initialAgent = null,
+  embedded = false,
+  reportOnly = false,
 }: {
   initialWallet?: string | null
   initialAgent?: string | null
+  embedded?: boolean
+  reportOnly?: boolean
 }) {
   const { address } = useAccount()
   const { openConnectModal } = useConnectModal()
@@ -172,12 +179,13 @@ export function AgentWorkspace({
       className={styles.workspace}
       aria-labelledby="your-agents-heading"
       data-builder-workspace
+      data-embedded={embedded || undefined}
     >
       <div className={styles.heading}>
         <div>
           <p className={styles.kicker}>Your workspace</p>
-          <h1 id="your-agents-heading">Your agents</h1>
-          <p>From the first price to the answer a buyer receives.</p>
+          {embedded ? <h2 id="your-agents-heading">{reportOnly ? 'Demand for your agents' : 'Your agents'}</h2> : <h1 id="your-agents-heading">Your agents</h1>}
+          <p>{reportOnly ? 'Recorded prices and funded outcomes for each identity you own.' : 'From the first price to the answer a buyer receives.'}</p>
         </div>
         <div className={styles.actions}>
           <Link className="btn btn--sm" href="/builders/start">
@@ -344,6 +352,7 @@ export function AgentWorkspace({
               own={own}
               wallet={wallet!}
               now={now}
+              reportOnly={reportOnly}
             />
           ) : (
             <p className={styles.empty} role="status">
@@ -365,11 +374,13 @@ function AgentDetail({
   own,
   wallet,
   now,
+  reportOnly = false,
 }: {
   agent: BuilderAgent
   own: boolean
   wallet: string
   now: number
+  reportOnly?: boolean
 }) {
   const [name, setName] = useState(a.name)
   const [portrait, setPortrait] = useState<string | null | undefined>(undefined)
@@ -385,6 +396,7 @@ function AgentDetail({
   const next = builderNextStep(a, now)
   const ready = agentPriceState(a, now) === 'ready'
   const image = portrait === undefined ? (a.imageUrl ?? null) : portrait
+  if (reportOnly) return <article className={styles.detail} aria-label={`${name} quote comparison workspace`}><h3>{name}</h3><p>{net(a.chainId)} · #{a.agentId}</p><OwnerReport key={`${a.agentKey}:${ownsIdentity}`} agent={a} own={ownsIdentity} wallet={wallet} /></article>
   return (
     <article className={styles.detail} aria-label={`${name} builder workspace`}>
       <header className={styles.agentHead}>
@@ -433,6 +445,7 @@ function AgentDetail({
             label: 'Overview',
             content: (
               <>
+                <AgentLoop agentId={a.agentKey} />
                 <dl className={styles.metrics}>
                   {[
                     ['Funded jobs', s.jobs.funded],
@@ -751,6 +764,8 @@ function OwnerReport({
 }) {
   const { signMessageAsync } = useSignMessage()
   const [report, setReport] = useState<SellerProjection['diagnostics']>(null)
+  const [demand, setDemand] = useState<DemandReport | null>(null)
+  const token = useRef<string | null>(null)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const mounted = useRef(true)
@@ -760,7 +775,7 @@ function OwnerReport({
       mounted.current = false
     }
   }, [])
-  const open = async () => {
+  const open = async (cursor = '0') => {
     setBusy(true)
     setError(null)
     try {
@@ -774,6 +789,7 @@ function OwnerReport({
           throw new Error('The ownership proof could not be prepared. Retry from the owner wallet.')
         return res.json()
       }
+      if (!token.current) {
       const identity = (await read('/api/v1/builders/claim/identity', {
         input: agent.agentId,
         chainId: agent.chainId,
@@ -787,17 +803,23 @@ function OwnerReport({
         message: identity.message,
         signature,
       })) as { claimToken: string }
+      token.current = proof.claimToken
+      }
       const res = await fetch(
-        `/api/v1/builders/checks?wallet=${wallet}&chainId=${agent.chainId}&tokenId=${agent.agentId}`,
-        { headers: { Authorization: `Bearer ${proof.claimToken}` }, cache: 'no-store' },
+        `/api/v1/builders/checks?wallet=${wallet}&chainId=${agent.chainId}&tokenId=${agent.agentId}&report=demand&cursor=${cursor}`,
+        { headers: { Authorization: `Bearer ${token.current}` }, cache: 'no-store' },
       )
       if (!res.ok)
         throw new Error(
           'The private report could not be read. Ownership may have changed; no job or payment was created.',
         )
-      const body = (await res.json()) as { identities: Array<{ seller: SellerProjection }> }
-      if (mounted.current) setReport(body.identities[0]?.seller.diagnostics ?? null)
+      const body = (await res.json()) as { identities: Array<{ seller: SellerProjection; demand?: unknown }> }
+      const parsed = DemandReport.safeParse(body.identities[0]?.demand)
+      if (parsed.success && parsed.data.agentId !== agent.agentKey) throw new Error('wrong_identity')
+      if (mounted.current) { setReport(body.identities[0]?.seller.diagnostics ?? null); setDemand(parsed.success ? parsed.data : null) }
     } catch (e) {
+      token.current = null
+      if (mounted.current) { setReport(null); setDemand(null) }
       if (mounted.current)
         setError(
           /reject|denied|cancel|4001/i.test(String(e))
@@ -821,8 +843,8 @@ function OwnerReport({
           <div>
             <h4>Only the identity owner can open this report.</h4>
             <p>
-              A signed ownership message unlocks aggregate counts. It creates no job, sends no agent
-              task and spends no tokens. Buyer task text and operational responses stay private.
+              A signed ownership message unlocks your recorded quote outcomes. It creates no job, sends no agent
+              task and spends no tokens. Buyer wallets, task text and operational responses stay private.
             </p>
             {own ? (
               <button
@@ -878,6 +900,7 @@ function OwnerReport({
             {report.quotes.identityMatchedUnsigned}. Signing status unknown:{' '}
             {report.quotes.signatureUnknown}.
           </p>
+          {demand ? <DemandRows report={demand} busy={busy} onPage={cursor => void open(cursor)} /> : <p className={styles.fine}>The recorded comparison report is unavailable. No empty-demand count is assumed.</p>}
         </>
       )}
       {error ? (

@@ -1,0 +1,18 @@
+.bench { display: grid; gap: 24px; min-width: 0; }
+.bench p { margin: 0; font-size: 13px; line-height: 1.65; color: var(--ink-2); }
+.bench h3, .bench h4 { margin: 0; color: var(--ink); }
+.bench select { width: 100%; max-width: 100%; padding: 10px; color: var(--ink); background: var(--panel); border: 1px solid var(--hair-2); border-radius: 8px; }
+.history { display: grid; gap: 10px; margin: 0; padding-left: 18px; }
+.history li { font-size: 12px; line-height: 1.6; color: var(--ink-2); overflow-wrap: anywhere; }
+.bench a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+.replay { border-top: 1px solid var(--hair-2); padding-top: 18px; display: grid; gap: 14px; min-width: 0; }
+.replay h4 { margin: 0; font-size: 16px; color: var(--ink); }
+.replay p { font-size: 12px; color: var(--ink-2); line-height: 1.6; margin: 0; }
+.replay label { display: grid; gap: 8px; font-size: 13px; color: var(--ink); }
+.replay textarea { resize: vertical; width: 100%; min-width: 0; padding: 12px; border: 1px solid var(--hair-2); border-radius: 8px; background: var(--panel); color: var(--ink); font-family: var(--font-mono), monospace; font-size: 12px; }
+.replay .consent { display: flex; align-items: flex-start; gap: 10px; font-size: 12px; line-height: 1.6; }
+.consent input { flex: 0 0 auto; margin-top: 4px; }
+.diffs { margin: 0; display: grid; gap: 12px; }
+.diffs > div { padding: 12px 0; border-top: 1px solid var(--hair); min-width: 0; }
+.diffs dt { color: var(--ink); font-size: 13px; font-weight: 600; }
+.diffs dd { margin: 7px 0 0; color: var(--ink-2); font-size: 12px; line-height: 1.6; overflow-wrap: anywhere; }

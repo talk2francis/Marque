@@ -3,6 +3,7 @@ import { isSupportedChain, type ChainId } from '@marque/commerce'
 import { readClaimToken } from '../../../../../lib/claim'
 import { sellerProjection } from '../../../../../lib/seller'
 import { builderIdentities, builderView } from '../../../../../lib/builder'
+import { builderDemand } from '../../../../../lib/builder-demand-data'
 
 export const dynamic = 'force-dynamic'
 
@@ -27,6 +28,9 @@ export async function GET(req: NextRequest) {
   try { claim = auth?.startsWith('Bearer ') ? readClaimToken(auth.slice(7)) : null }
   catch { return NextResponse.json({ error: 'diagnostics_unavailable', detail: 'Private owner diagnostics are unavailable. Public status can still be read without authorization.' }, { status: 503, headers: PRIVATE_HEADERS }) }
   if (auth && !claim) return NextResponse.json({ error: 'claim_expired', detail: 'Sign the ownership proof again to read private diagnostics.' }, { status: 401, headers: PRIVATE_HEADERS })
+  const demand = p.get('report') === 'demand', cursor = p.get('cursor') ?? '0'
+  if (demand && !claim) return NextResponse.json({ error: 'owner_proof_required', detail: 'Prove ownership before opening recorded quote comparisons.' }, { status: 403, headers: PRIVATE_HEADERS })
+  if (demand && !/^(0|[1-9]\d{0,4})$/.test(cursor)) return NextResponse.json({ error: 'bad_request' }, { status: 400, headers: PRIVATE_HEADERS })
   try {
     const targets = tokenId
       ? (isSupportedChain(chain) && /^\d{1,12}$/.test(tokenId) ? [{ chainId: chain as ChainId, tokenId }] : null)
@@ -35,12 +39,13 @@ export async function GET(req: NextRequest) {
     if (claim && (targets.length !== 1 || targets[0]?.chainId !== claim.chainId || targets[0]?.tokenId !== claim.tokenId || wallet.toLowerCase() !== claim.owner.toLowerCase())) return NextResponse.json({ error: 'claim_mismatch', detail: 'This proof belongs to a different owner or identity.' }, { status: 403, headers: PRIVATE_HEADERS })
     const views = await Promise.all(targets.slice(0, 8).map(async (t) => {
       const v = await builderView(wallet, t.chainId, t.tokenId)
-      return { ...v, seller: await sellerProjection(v, claim?.owner ?? null) }
+      const seller = await sellerProjection(v, claim?.owner ?? null)
+      return { ...v, seller, ...(demand && claim ? { demand: await builderDemand(v.identity.agentKey, Number(cursor)) } : {}) }
     }))
     return NextResponse.json({ wallet: wallet.toLowerCase(), identities: views }, { headers: PRIVATE_HEADERS })
   } catch (err) {
     if (err instanceof Error && err.message === 'seller_owner_unverified') return NextResponse.json({ error: 'owner_unverified', detail: 'Ownership changed or current chain proof is unavailable. Private diagnostics were not read.' }, { status: 403, headers: PRIVATE_HEADERS })
     console.error('[api/v1/builders/checks]', err instanceof Error ? err.message : String(err))
-    return NextResponse.json({ error: 'checks_unavailable', detail: 'The checks could not be read just now. Try again in a minute.' }, { status: 503 })
+    return NextResponse.json({ error: 'checks_unavailable', detail: 'The checks could not be read just now. Try again in a minute.' }, { status: 503, headers: PRIVATE_HEADERS })
   }
 }

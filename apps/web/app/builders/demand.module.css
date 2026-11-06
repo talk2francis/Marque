@@ -1,0 +1,15 @@
+.demand { display: grid; gap: 14px; min-width: 0; margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--hair-2); }
+.demand h4 { margin: 0; font-size: 17px; color: var(--ink); }
+.demand p { margin: 0; font-size: 12px; line-height: 1.65; color: var(--ink-2); }
+.rows { list-style: none; display: grid; gap: 0; margin: 0; padding: 0; }
+.rows li { min-width: 0; border-top: 1px solid var(--hair); padding: 16px 0; display: grid; gap: 12px; }
+.head { display: flex; flex-wrap: wrap; gap: 8px 14px; font-size: 12px; color: var(--ink-2); }
+.head strong { color: var(--ink); }
+.head time { margin-left: auto; }
+.rows dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin: 0; }
+.rows dl > div { min-width: 0; }
+.rows dt { font-size: 11px; color: var(--ink-2); }
+.rows dd { margin: 6px 0 0; color: var(--ink); font-size: 14px; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.rows a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; min-height: 28px; }
+.pages { display: flex; flex-wrap: wrap; gap: 10px; }
+@media (max-width: 600px) { .head time { margin-left: 0; flex-basis: 100%; } }

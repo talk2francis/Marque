@@ -14,7 +14,7 @@ interface Diff {
   detail?: string
 }
 
-interface Result {
+export interface BenchResult {
   testId: string
   pass: boolean
   error: string | null
@@ -56,6 +56,7 @@ const TESTS = [
   { id: 'MCS-GRID-1', label: 'Grid trading: spacing, allocation, fee drag' },
   { id: 'MCS-YIELD-1', label: 'Yield: net APR at size, sourced' },
   { id: 'MCS-HF-1', label: 'Health factor: Venus, exact repay' },
+  { id: 'MCS-RYIELD-1', label: 'Realised yield: Venus rates between archived blocks' },
 ] as const
 
 /**
@@ -68,16 +69,17 @@ const REFERENCE_ENDPOINTS = [
   { slug: 'lattice', name: 'Lattice', cat: 'grid trading', testId: 'MCS-GRID-1' },
   { slug: 'sluicegate', name: 'Sluicegate', cat: 'yield', testId: 'MCS-YIELD-1' },
   { slug: 'keel', name: 'Keel', cat: 'health factor', testId: 'MCS-HF-1' },
+  { slug: 'tidemark', name: 'Tidemark', cat: 'realised yield', testId: 'MCS-RYIELD-1' },
 ] as const
 const refUrl = (slug: string) => `https://marque.trade/agents/${slug}/.well-known/agent-card.json`
 
-export function TestForm() {
-  const [endpoint, setEndpoint] = useState('')
-  const [testId, setTestId] = useState<string>('MCS-REB-1')
-  const [kind, setKind] = useState<'a2a' | 'mcp'>('a2a')
+export function TestForm({ initialEndpoint = '', initialTestId = 'MCS-REB-1', initialKind = 'a2a', onResult }: { initialEndpoint?: string; initialTestId?: string; initialKind?: 'a2a' | 'mcp'; onResult?: (result: BenchResult) => void }) {
+  const [endpoint, setEndpoint] = useState(initialEndpoint)
+  const [testId, setTestId] = useState<string>(initialTestId)
+  const [kind, setKind] = useState<'a2a' | 'mcp'>(initialKind)
   const [taskConsent, setTaskConsent] = useState(false)
   const [running, setRunning] = useState(false)
-  const [result, setResult] = useState<Result | null>(null)
+  const [result, setResult] = useState<BenchResult | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   async function run(e: React.FormEvent) {
@@ -89,9 +91,10 @@ export function TestForm() {
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ endpoint: endpoint.trim(), testId, kind, taskConsent }),
       })
-      const body = (await res.json()) as Result & { error?: string; detail?: string }
+      const body = (await res.json()) as BenchResult & { error?: string; detail?: string }
       if (!res.ok) { setError(body.detail ?? body.error ?? `run failed (${res.status})`); return }
       setResult(body)
+      onResult?.(body)
       track('builder_test_run', { test: testId })
       track('preflight_run', { via: 'builders' })
     } catch (err) {
@@ -136,7 +139,7 @@ export function TestForm() {
 
         <div className={styles.field}>
           <label htmlFor="kind">Interface</label>
-          <select id="kind" value={kind} onChange={(e) => setKind(e.target.value as 'a2a' | 'mcp')}>
+          <select id="kind" value={kind} onChange={(e) => { setTaskConsent(false); setKind(e.target.value as 'a2a' | 'mcp') }}>
             <option value="a2a">A2A: agent card and message/send</option>
             <option value="mcp">MCP: streamable HTTP</option>
           </select>
@@ -144,7 +147,7 @@ export function TestForm() {
 
         <div className={styles.field}>
           <label htmlFor="test">Category</label>
-          <select id="test" value={testId} onChange={(e) => setTestId(e.target.value)}>
+          <select id="test" value={testId} onChange={(e) => { setTaskConsent(false); setTestId(e.target.value) }}>
             {TESTS.map((t) => <option key={t.id} value={t.id}>{t.id} · {t.label}</option>)}
           </select>
         </div>

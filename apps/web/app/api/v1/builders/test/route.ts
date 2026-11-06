@@ -28,7 +28,7 @@ export const revalidate = 0
 const body = z.object({
   endpoint: z.string().url().max(500),
   taskConsent: z.boolean().optional(),
-  testId: z.enum(['MCS-REB-1', 'MCS-GRID-1', 'MCS-YIELD-1', 'MCS-HF-1']),
+  testId: z.enum(['MCS-REB-1', 'MCS-GRID-1', 'MCS-YIELD-1', 'MCS-HF-1', 'MCS-RYIELD-1']),
   kind: z.enum(['a2a', 'mcp']).default('a2a'),
 })
 
