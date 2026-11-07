@@ -1,5 +1,7 @@
 # Local candidate acceptance, 6 November 2026
 
+> Historical checkpoint; superseded by the [7 November release verification](RELEASE_HARDENING_2026-11-06.md). The source, live-state statements and measurements below describe the earlier local candidate.
+
 This batch is validated locally and has not been pushed or deployed. The final production-format runtime artifact is `db6b6ca111d96ade02bf488b04fa5dc8f805272f`; later documentation changes do not alter that compiled application. Functional browser suites were completed on `4fad0b183a0302c295c0e8fab0ffe1e8002e60cc`. The sole application change between those builds is the compact network-count foreground correction. Final accessibility, route, artifact and control checks ran on `db6b6ca`. The live release remains `0e9f5c59444a0036a05f0f9e0d0bf742864abdbf`. Capacity, mainnet preparation and the other limits below remain AMBER.
 
 ## Product changes

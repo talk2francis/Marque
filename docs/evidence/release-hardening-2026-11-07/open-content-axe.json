@@ -1,0 +1,124 @@
+{
+  "release": "8e5bbdc5eacaa2cf9c8ac23b95afd871206298bf",
+  "at": "2026-11-07T05:22:15.408Z",
+  "rows": [
+    {
+      "theme": "night",
+      "kind": "faq",
+      "id": "what-is-marque",
+      "violations": []
+    },
+    {
+      "theme": "night",
+      "kind": "faq",
+      "id": "do-i-need-a-wallet",
+      "violations": []
+    },
+    {
+      "theme": "night",
+      "kind": "faq",
+      "id": "where-does-my-money-go",
+      "violations": []
+    },
+    {
+      "theme": "night",
+      "kind": "faq",
+      "id": "how-do-i-know-an-agent-works",
+      "violations": []
+    },
+    {
+      "theme": "night",
+      "kind": "faq",
+      "id": "what-if-it-goes-wrong",
+      "violations": []
+    },
+    {
+      "theme": "night",
+      "kind": "faq",
+      "id": "is-marque-safe",
+      "violations": []
+    },
+    {
+      "theme": "night",
+      "kind": "faq",
+      "id": "can-my-ai-assistant-use-marque",
+      "violations": []
+    },
+    {
+      "theme": "night",
+      "kind": "faq",
+      "id": "how-do-i-list-my-agent",
+      "violations": []
+    },
+    {
+      "theme": "night",
+      "kind": "faq",
+      "id": "set-and-earn-has-closed",
+      "violations": []
+    },
+    {
+      "theme": "night",
+      "kind": "film",
+      "violations": []
+    },
+    {
+      "theme": "day",
+      "kind": "faq",
+      "id": "what-is-marque",
+      "violations": []
+    },
+    {
+      "theme": "day",
+      "kind": "faq",
+      "id": "do-i-need-a-wallet",
+      "violations": []
+    },
+    {
+      "theme": "day",
+      "kind": "faq",
+      "id": "where-does-my-money-go",
+      "violations": []
+    },
+    {
+      "theme": "day",
+      "kind": "faq",
+      "id": "how-do-i-know-an-agent-works",
+      "violations": []
+    },
+    {
+      "theme": "day",
+      "kind": "faq",
+      "id": "what-if-it-goes-wrong",
+      "violations": []
+    },
+    {
+      "theme": "day",
+      "kind": "faq",
+      "id": "is-marque-safe",
+      "violations": []
+    },
+    {
+      "theme": "day",
+      "kind": "faq",
+      "id": "can-my-ai-assistant-use-marque",
+      "violations": []
+    },
+    {
+      "theme": "day",
+      "kind": "faq",
+      "id": "how-do-i-list-my-agent",
+      "violations": []
+    },
+    {
+      "theme": "day",
+      "kind": "faq",
+      "id": "set-and-earn-has-closed",
+      "violations": []
+    },
+    {
+      "theme": "day",
+      "kind": "film",
+      "violations": []
+    }
+  ]
+}

@@ -31,6 +31,8 @@ Start with the [repository overview](../README.md) for the product tour, archite
 | Document | Responsibility |
 |---|---|
 | [Runbook](RUNBOOK.md) | Operational procedures; confirm the current release before applying older examples |
+| [7 November release verification](operations/RELEASE_HARDENING_2026-11-06.md) | B/C/D changes, original Ledger context repair, source-attributed checks, actual rollout receipts and retained capacity limits |
+| [VEYRA test review](operations/VEYRA_TEST_REVIEW_2026-11-07.md) | Platform DataPart parsing correction, unchanged historical records and original-case replay evidence |
 | [V3 release audit](vnext/V3_RELEASE_AUDIT.md) | Dated validation and deployment provenance, with the later maintenance pointer |
 | [Telegram/status incident](operations/TELEGRAM_STATUS_INCIDENT_2026-10-22.md) | Bounded status projection, current category alarms, deployment proof and genuine remaining alerts |
 | [Builder/service incident](operations/BUILDER_SERVICE_INCIDENT_2026-10-20.md) | Current declaration repair, live protocol checks and remaining provider/listing limits |

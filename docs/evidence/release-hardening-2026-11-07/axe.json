@@ -1,0 +1,140 @@
+{
+  "base": "http://127.0.0.1:3312",
+  "at": "2026-11-06T23:50:34.500Z",
+  "report": [
+    {
+      "route": "/",
+      "theme": "night",
+      "passes": 27,
+      "violations": []
+    },
+    {
+      "route": "/register",
+      "theme": "night",
+      "passes": 30,
+      "violations": [],
+      "retake": {
+        "at": "2026-11-06T23:50:28.509Z",
+        "base": "http://127.0.0.1:3312",
+        "networkIdleDeadlineMs": 60000,
+        "status": 200,
+        "ms": 38164,
+        "errors": []
+      }
+    },
+    {
+      "route": "/agents/keel",
+      "theme": "night",
+      "passes": 30,
+      "violations": []
+    },
+    {
+      "route": "/jobs/56/56903",
+      "theme": "night",
+      "passes": 29,
+      "violations": []
+    },
+    {
+      "route": "/proof",
+      "theme": "night",
+      "passes": 29,
+      "violations": []
+    },
+    {
+      "route": "/quest",
+      "theme": "night",
+      "passes": 26,
+      "violations": []
+    },
+    {
+      "route": "/builders",
+      "theme": "night",
+      "passes": 25,
+      "violations": []
+    },
+    {
+      "route": "/me",
+      "theme": "night",
+      "passes": 23,
+      "violations": []
+    },
+    {
+      "route": "/status",
+      "theme": "night",
+      "passes": 23,
+      "violations": []
+    },
+    {
+      "route": "/adopt",
+      "theme": "night",
+      "passes": 27,
+      "violations": []
+    },
+    {
+      "route": "/",
+      "theme": "day",
+      "passes": 27,
+      "violations": []
+    },
+    {
+      "route": "/register",
+      "theme": "day",
+      "passes": 30,
+      "violations": []
+    },
+    {
+      "route": "/agents/keel",
+      "theme": "day",
+      "passes": 30,
+      "violations": []
+    },
+    {
+      "route": "/jobs/56/56903",
+      "theme": "day",
+      "passes": 29,
+      "violations": []
+    },
+    {
+      "route": "/proof",
+      "theme": "day",
+      "passes": 29,
+      "violations": []
+    },
+    {
+      "route": "/quest",
+      "theme": "day",
+      "passes": 26,
+      "violations": []
+    },
+    {
+      "route": "/builders",
+      "theme": "day",
+      "passes": 25,
+      "violations": []
+    },
+    {
+      "route": "/me",
+      "theme": "day",
+      "passes": 23,
+      "violations": []
+    },
+    {
+      "route": "/status",
+      "theme": "day",
+      "passes": 23,
+      "violations": []
+    },
+    {
+      "route": "/adopt",
+      "theme": "day",
+      "passes": 27,
+      "violations": []
+    }
+  ],
+  "retainedFailure": {
+    "file": "dc1-first-axe-failure/final-axe.json",
+    "casesPassed": 19,
+    "casesWithLoadFailure": 1,
+    "violations": 0
+  }
+}

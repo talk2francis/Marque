@@ -1,0 +1,363 @@
+{
+  "version": 1,
+  "recordedAt": "2026-11-07T07:32:29.934Z",
+  "ordinarySuiteArtifact": "124b3004543feae31ed8a9b4f4c7a772daad9d4d",
+  "suiteCopyEquivalence": {
+    "at": "2026-11-07T05:59:54.701Z",
+    "suiteSource": "124b3004543feae31ed8a9b4f4c7a772daad9d4d",
+    "runtimeSource": "0fb0ecaf0e2ab2db2853757f86d413581daf5288",
+    "statusFile": "apps/web/app/status/page.tsx",
+    "syntaxUnchangedExceptCommentsAndDisplayedText": true,
+    "syntaxSha256": "6376a78db95e249bce489e2b32d735595ecfa80fbd852d49a37af59f7d27ca21",
+    "note": "The ordinary suite ran on the Ledger source. The only subsequent runtime change is Status explanatory text; final build/types/lint/browser checks and exact-source GitHub CI remain required."
+  },
+  "runtimeArtifact": "0fb0ecaf0e2ab2db2853757f86d413581daf5288",
+  "readPathArtifact": "8e5bbdc5eacaa2cf9c8ac23b95afd871206298bf",
+  "ledger": {
+    "comparisons": [
+      {
+        "id": "ADV-01",
+        "complete": true,
+        "taskHash": "0xfb984f660bd387cae77e9805404f4b8ef52b8aadddc72cbfc08af6991156ac81",
+        "rawRunsUnchanged": true,
+        "recovered": true
+      },
+      {
+        "id": "ADV-02",
+        "complete": true,
+        "taskHash": "0xdb4c04f567dbc931752207a3cc110d916beb0a102223711cdd9397d6088eb124",
+        "rawRunsUnchanged": true,
+        "recovered": false
+      },
+      {
+        "id": "ADV-03",
+        "complete": true,
+        "taskHash": "0x32ad000407240725872dba90945ba42087d59b376d80d93153edbe73984889ed",
+        "rawRunsUnchanged": true,
+        "recovered": true
+      },
+      {
+        "id": "ADV-04",
+        "complete": true,
+        "taskHash": "0x695b260fc986b33ad354427d5254d2a3ceadd66d3e27351f220a848906941206",
+        "rawRunsUnchanged": true,
+        "recovered": false
+      }
+    ],
+    "routeThemeAccessibilityCases": 18,
+    "visualAuditCases": 72,
+    "rawBenchmarksUnchanged": 4,
+    "rawRunsUnchanged": 41,
+    "rawProvenanceUnchanged": 8
+  },
+  "functionalArtifact": "a586a814f30e744edbd24878a9120eaa8c3c7ae2",
+  "visualArtifact": "dc1ce78803ff70070ef865ba7dc7ccfaaeb6fb21",
+  "uiSourceEquivalence": {
+    "at": "2026-11-07T06:33:38.403Z",
+    "visualArtifact": "dc1ce78803ff70070ef865ba7dc7ccfaaeb6fb21",
+    "runtimeArtifact": "0fb0ecaf0e2ab2db2853757f86d413581daf5288",
+    "changed": [
+      "apps/web/app/docs/articles.ts",
+      "apps/web/app/ledger/[id]/page.tsx",
+      "apps/web/app/ledger/page.tsx",
+      "apps/web/app/status/page.tsx",
+      "apps/web/lib/bench-replay.test.ts",
+      "apps/web/lib/bench-replay.ts",
+      "apps/web/lib/comparison-client.test.ts",
+      "apps/web/lib/comparison-client.ts",
+      "apps/web/lib/ledger.ts",
+      "apps/web/lib/recheck.ts",
+      "packages/ledger/src/comparison-context.test.ts",
+      "packages/ledger/src/comparison-context.ts",
+      "packages/ledger/src/index.ts",
+      "packages/ledger/src/reproduction-context.test.ts",
+      "packages/ledger/src/runner.ts"
+    ],
+    "unchanged": "Workspace/profile/client/style/layout inputs are unchanged. Ledger pages, their shared home headline and documentation are separately audited on the final artifact. Comparison/replay helpers are checked on their actual compiled artifact.",
+    "retained": {
+      "visualAuditCases": 80,
+      "accessibilityCases": 20,
+      "mobileCases": 4,
+      "noScriptDocuments": 9
+    },
+    "retainedFailures": [
+      "dc1-first-axe-failure",
+      "dc1-first-audit-failure"
+    ],
+    "source": "dc1-acceptance"
+  },
+  "phase": "pre-promotion acceptance; actual current GitHub main and public /api/health identify publication and deployment",
+  "tests": {
+    "filesPassed": 173,
+    "filesSkipped": 18,
+    "passed": 1365,
+    "skipped": 117
+  },
+  "backup": {
+    "checkedAt": "2026-11-07T05:39:00Z",
+    "scheduler": "Existing root cron at 03:17 Europe/Berlin; unchanged",
+    "lastDumpStartedAt": "2026-11-07T02:17:03Z",
+    "lastLocalDumpCompletedAt": "2026-11-07T02:28:00Z",
+    "lastOffsiteVerifiedAt": "2026-11-07T02:30:45Z",
+    "localAndOffsiteLatestMatch": true,
+    "offsite": "Encrypted Google Drive copy; existing log records zero differences and one matching file",
+    "newRestoreTest": false
+  },
+  "isolatedPostgresTestsPassed": 31,
+  "operationsTestsPassed": 29,
+  "browser": {
+    "workspaceCases": 6,
+    "presentationCases": 6,
+    "recheckCases": 6,
+    "watchedPositionCases": 6,
+    "mobileCases": 4,
+    "referenceHeroAndStickyChecks": 24,
+    "agentDocumentPreservedSwitches": 8,
+    "passCredentialRequests": 0,
+    "noScriptDocuments": 9
+  },
+  "api": [
+    {
+      "category": "health_factor",
+      "jobId": "57185",
+      "status": 200,
+      "ms": 1624,
+      "fields": 3
+    },
+    {
+      "category": "grid",
+      "jobId": "57125",
+      "status": 200,
+      "ms": 496,
+      "fields": 1
+    },
+    {
+      "category": "rebalancing",
+      "jobId": "57121",
+      "status": 200,
+      "ms": 597,
+      "fields": 3
+    },
+    {
+      "category": "yield",
+      "jobId": "56982",
+      "status": 200,
+      "ms": 805,
+      "fields": 2
+    }
+  ],
+  "replay": {
+    "status": 200,
+    "block": "131771231",
+    "rows": 3
+  },
+  "downloads": [
+    {
+      "file": "README.md",
+      "bytes": 3647,
+      "sha256": "2fbfdb5bb49e365c9ba68c57e4e584ba9552f8ba33a23c073a8f3b18290af4f0"
+    },
+    {
+      "file": "SHA256SUMS",
+      "bytes": 1563,
+      "sha256": "04dae958b2e511c42293cabad46e1ec70f922130bb8af3b1fc6bbec0604e1604"
+    },
+    {
+      "file": "close-figures.json",
+      "bytes": 1415,
+      "sha256": "314063711dba1653690fc569591752442cb313c49cac5f510108679d4d6c3624"
+    },
+    {
+      "file": "coverage-56.json",
+      "bytes": 3497,
+      "sha256": "67e554b4630029e803630d6665a117782093c878ce7cb85378036fcd0b8027a0"
+    },
+    {
+      "file": "coverage-97.json",
+      "bytes": 3686,
+      "sha256": "5d7d1401a3222fcd854be3e6acef2c07429546634f06198e627cfc73eee74327"
+    },
+    {
+      "file": "funnel.json",
+      "bytes": 6939,
+      "sha256": "4d047be577aeeed49a16b14cebbf208523459897aa71a17b3c560a3de1e17e38"
+    },
+    {
+      "file": "proof.json",
+      "bytes": 151925,
+      "sha256": "90a3221367bcc5163eb0cf8b34ba1ce88f9d20e26d564684999550c79eb2fdc0"
+    },
+    {
+      "file": "quest/0x0d8c9ad8eebb6879fefa218f0799219bcaabe999.json",
+      "bytes": 21793,
+      "sha256": "087f50fdae6ce03a22daf68782f2a6d82a0914db99d26d05c48212bb5338f4ad"
+    },
+    {
+      "file": "quest/0x15a97307caa68c24e4b5a0b83d331a6aa1ea195f.json",
+      "bytes": 8033,
+      "sha256": "98d5f875e486d8716f073d0b747a1455be9a7433c212840bed09105fd222ad8f"
+    },
+    {
+      "file": "quest/0x34d9bfa696b4775341f1b9167af578f5be292766.json",
+      "bytes": 14501,
+      "sha256": "70e06a8ba44f552cb1d27879ec54f2d3281caf89371460e1bf4e17d5a61d1a33"
+    },
+    {
+      "file": "quest/0x5ac2448fc79ef8d33710b1bced5aeff90138b452.json",
+      "bytes": 6123,
+      "sha256": "53ee17277a0db151770cc91e5967142c4316f60d326b623373418422f20b0ed5"
+    },
+    {
+      "file": "quest/0x73809f69916fcf7ddc5bb1315fbdf96a569a5963.json",
+      "bytes": 13734,
+      "sha256": "bc73e8ebe4248a9b0719e0871e3ccf137fea3ebd6f1cd2163dd7363ec88f6d81"
+    },
+    {
+      "file": "quest/0x7709271a7644b311ca21bb7a38a77be95c793f22.json",
+      "bytes": 14166,
+      "sha256": "43195a55cf43f7281eab672364eb5276a1dbc6a5ca39e3bed39df97e2567bbbd"
+    },
+    {
+      "file": "quest/0xb833c2ee1d6cee3933a8ab525cc4a1c8f812a6e2.json",
+      "bytes": 16779,
+      "sha256": "04fd134c9a69d6ae6aa03c988fdf30bcedc339c0cf473fe2085991e8b854b57e"
+    },
+    {
+      "file": "quest/0xbfaa69233741924ed5b9d5daa9b4bf7b84567f0a.json",
+      "bytes": 22627,
+      "sha256": "e9e54a94bd3d8f47e7cee911e2a0e78575fdd6c93f5950a538369363451d9530"
+    },
+    {
+      "file": "quest/0xda53362d304d7970db19547c52208a35c6d83c8a.json",
+      "bytes": 3046,
+      "sha256": "ab951f23e87fa8f6e33bf16ee8031e8d0d72a19757dc7c6ce8a4499f8c3da122"
+    },
+    {
+      "file": "stats.json",
+      "bytes": 678,
+      "sha256": "b8924fd41471abb98291457c7c665bd47bee873a3f1c7ba37849fb26377c2e15"
+    }
+  ],
+  "brainProfiles": [
+    {
+      "tokenId": "302257",
+      "status": 200,
+      "incorrectRetestBadge": false,
+      "recordedPassShown": true
+    },
+    {
+      "tokenId": "302258",
+      "status": 200,
+      "incorrectRetestBadge": false,
+      "recordedPassShown": true
+    },
+    {
+      "tokenId": "304493",
+      "status": 200,
+      "incorrectRetestBadge": false,
+      "recordedPassShown": true
+    },
+    {
+      "tokenId": "304494",
+      "status": 200,
+      "incorrectRetestBadge": false,
+      "recordedPassShown": true
+    },
+    {
+      "tokenId": "310460",
+      "status": 200,
+      "incorrectRetestBadge": false,
+      "recordedPassShown": true
+    },
+    {
+      "tokenId": "363709",
+      "status": 200,
+      "incorrectRetestBadge": false,
+      "recordedPassShown": true
+    }
+  ],
+  "sharedResponses": 26,
+  "accessibility": {
+    "routeThemeCases": 20,
+    "firstPassCases": 19,
+    "scopedRetakeCases": 1,
+    "seriousOrCritical": 0,
+    "otherViolations": [],
+    "openContentCases": 20,
+    "openContentViolations": 0
+  },
+  "audit": {
+    "cases": 80,
+    "firstPassCases": 77,
+    "scopedRetakeCases": 3,
+    "issues": [],
+    "failedRequests": []
+  },
+  "images": [
+    {
+      "path": "/img/agent/97/2718",
+      "status": 200,
+      "type": "image/webp",
+      "bytes": 886,
+      "ms": 2213
+    },
+    {
+      "path": "/img/agent/56/374107",
+      "status": 200,
+      "type": "image/webp",
+      "bytes": 2756,
+      "ms": 1916
+    },
+    {
+      "path": "/img/agent/56/367904",
+      "status": 204,
+      "type": null,
+      "bytes": 0,
+      "ms": 3459
+    }
+  ],
+  "load": {
+    "context": "Serialized two-worker candidate on the same host, November search/cold-job read mix, 60-second intended hold, unchanged targets and abort guards; not a production capacity guarantee. Aborted before a stage reaches its target does not prove that target capacity.",
+    "stages": [
+      {
+        "vus": 25,
+        "observedPeakVUs": 25,
+        "targetReached": true,
+        "statusCounts": {
+          "200": 34,
+          "308": 6
+        },
+        "exit": 99,
+        "requests": 40,
+        "pageP95Ms": 11870.703712,
+        "apiP95Ms": 6872.2480907,
+        "error5xxRate": 0
+      }
+    ]
+  },
+  "originalLensRowsUnchanged": 4,
+  "closeFilesVerified": 15,
+  "liveAndCandidateCloseWalletsUnchanged": 9,
+  "protectedPathsChanged": [],
+  "captures": 355,
+  "retainedFailures": [
+    "ea69910 cold and guarded-25 read failures",
+    "8e5 first compiled batch: yield returned 503 after 6800 ms; preserved unchanged",
+    "8e5 repeated API acceptance passed but HF took 7343 ms and grid 4990 ms total HTTP; no four-second end-to-end guarantee",
+    "8e5 guarded load stopped at 25 target VUs after 14 requests and a search 503; observed peak 22 VUs, page p95 6656 ms and API p95 11662 ms, not a supported capacity",
+    "a586a81 first comparison guard failure",
+    "dc1 first supplied-answer replay returned 503; two diagnostics subsequently passed",
+    "dc1 serialized HF comparison reached its four-second guard at 3903 ms; a separate read-budget patch followed",
+    "Two desktop Day automation scroll timeouts; isolated stable-geometry and full route retest passed with source unchanged",
+    "Initial AXE marketplace network-idle timeout; same-deadline case retake passed",
+    "Initial visual audit had marketplace navigation/503 errors and a Forge chunk-load error from two 502 script responses; production-style static transport verified and all three scoped retakes passed",
+    "Earlier live guard transport timeout; final nine-wallet guard passed with no differences"
+  ],
+  "limits": [
+    "Current supported visitor capacity depends on actual guarded load results, never inferred from individual API samples.",
+    "Historical observations not originally recorded remain unknown.",
+    "One declared artwork host remains unavailable and uses a labelled fallback.",
+    "No mainnet anchor without a verified destination, exact simulation and separate explicit transaction authorization.",
+    "Pass checks cover public metadata reconnection, not a real credential signature or payment."
+  ]
+}

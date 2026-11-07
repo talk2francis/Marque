@@ -176,3 +176,7 @@ be higher. Recorded figures are a dated snapshot, not a claim about today's tota
 
 The film's archived Ledger capture also predates this audit. The live Ledger and
 Agent Advantage Report disclose current completion and provenance gaps.
+
+## Ledger integrity follow-up, 7 November 2026
+
+All four original comparisons verify complete again. Reproduction runs on 9 October changed the registration block for ADV-01 and ADV-03; the read view now verifies and discloses their original task contexts against unchanged saved manifests. The four registrations, 41 runs, eight provenance supplements and original blind grades were preserved. This repairs evidence comparability; it does not change benchmark scores or promise an external judging result. See the [integrity repair and acceptance evidence](operations/RELEASE_HARDENING_2026-11-06.md).

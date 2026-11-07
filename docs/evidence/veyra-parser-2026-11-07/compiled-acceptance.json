@@ -1,0 +1,545 @@
+{
+  "at": "2026-11-07T11:34:08.827Z",
+  "release": "361d1ee5b82d40374654dd854b16575db0920b82",
+  "foundation": "0fb0ecaf0e2ab2db2853757f86d413581daf5288",
+  "accepted": true,
+  "scope": "Compiled parser/homepage correction and repeat integrity/API checks; earlier full workspace evidence retains its original source attribution.",
+  "changesSinceFoundation": [
+    "apps/web/app/docs/articles.ts",
+    "apps/web/app/home.module.css",
+    "apps/web/app/page.tsx",
+    "apps/web/lib/home-data.ts",
+    "apps/web/lib/home-test-proof.integration.test.ts",
+    "packages/conformance/src/adapters.test.ts",
+    "packages/conformance/src/adapters.ts",
+    "packages/conformance/src/code-anchor.ts"
+  ],
+  "focusedTestsPassed": 76,
+  "newIsolatedDatabaseTestsPassed": 3,
+  "affectedTypechecksPassed": [
+    "web",
+    "conformance"
+  ],
+  "build": "44 static pages and standalone assembly; clean committed inputs",
+  "sourceReplay": [
+    {
+      "id": 15989,
+      "checks": 8,
+      "passed": 8,
+      "hashesVerified": true,
+      "originalUnchanged": true
+    },
+    {
+      "id": 15988,
+      "checks": 8,
+      "passed": 8,
+      "hashesVerified": true,
+      "originalUnchanged": true
+    },
+    {
+      "id": 15987,
+      "checks": 8,
+      "passed": 8,
+      "hashesVerified": true,
+      "originalUnchanged": true
+    }
+  ],
+  "originalVeyraRecordsUnchanged": 6,
+  "noThirdPartyAgentCalled": true,
+  "numericCriteriaAndTolerancesUnchanged": true,
+  "retainedHarnessFailure": "The first browser assertion read an offscreen content-visibility section before scrolling; actual reference disclosure was present. Harness now scrolls and waits for visible evidence before asserting. Failed log retained; no application change.",
+  "codeHash": "0x66057d145adf50c8c2a54c682bdaccc1940f9ed9363bc62c0e3d650718032418",
+  "browser": {
+    "routeThemeAccessibilityCases": 10,
+    "violations": [],
+    "viewportAudits": 40,
+    "heuristicWarnings": [],
+    "captureCount": 78,
+    "review": {
+      "at": "2026-11-07T11:34:03.794441+00:00",
+      "release": "361d1ee5b82d40374654dd854b16575db0920b82",
+      "auditCapturesReviewed": 40,
+      "browserCapturesReviewed": 11,
+      "publicationContextCapturesReviewed": 2,
+      "sheets": [
+        {
+          "file": "review/audit-agents_97_2718.jpg",
+          "sources": [
+            "audit/screens/agents_97_2718/day-1024.png",
+            "audit/screens/agents_97_2718/day-1440.png",
+            "audit/screens/agents_97_2718/day-390.png",
+            "audit/screens/agents_97_2718/day-768.png",
+            "audit/screens/agents_97_2718/night-1024.png",
+            "audit/screens/agents_97_2718/night-1440.png",
+            "audit/screens/agents_97_2718/night-390.png",
+            "audit/screens/agents_97_2718/night-768.png"
+          ]
+        },
+        {
+          "file": "review/audit-docs_changelog.jpg",
+          "sources": [
+            "audit/screens/docs_changelog/day-1024.png",
+            "audit/screens/docs_changelog/day-1440.png",
+            "audit/screens/docs_changelog/day-390.png",
+            "audit/screens/docs_changelog/day-768.png",
+            "audit/screens/docs_changelog/night-1024.png",
+            "audit/screens/docs_changelog/night-1440.png",
+            "audit/screens/docs_changelog/night-390.png",
+            "audit/screens/docs_changelog/night-768.png"
+          ]
+        },
+        {
+          "file": "review/audit-root.jpg",
+          "sources": [
+            "audit/screens/root/day-1024.png",
+            "audit/screens/root/day-1440.png",
+            "audit/screens/root/day-390.png",
+            "audit/screens/root/day-768.png",
+            "audit/screens/root/night-1024.png",
+            "audit/screens/root/night-1440.png",
+            "audit/screens/root/night-390.png",
+            "audit/screens/root/night-768.png"
+          ]
+        },
+        {
+          "file": "review/audit-standard.jpg",
+          "sources": [
+            "audit/screens/standard/day-1024.png",
+            "audit/screens/standard/day-1440.png",
+            "audit/screens/standard/day-390.png",
+            "audit/screens/standard/day-768.png",
+            "audit/screens/standard/night-1024.png",
+            "audit/screens/standard/night-1440.png",
+            "audit/screens/standard/night-390.png",
+            "audit/screens/standard/night-768.png"
+          ]
+        },
+        {
+          "file": "review/audit-standard_MCS-REB-1.jpg",
+          "sources": [
+            "audit/screens/standard_MCS-REB-1/day-1024.png",
+            "audit/screens/standard_MCS-REB-1/day-1440.png",
+            "audit/screens/standard_MCS-REB-1/day-390.png",
+            "audit/screens/standard_MCS-REB-1/day-768.png",
+            "audit/screens/standard_MCS-REB-1/night-1024.png",
+            "audit/screens/standard_MCS-REB-1/night-1440.png",
+            "audit/screens/standard_MCS-REB-1/night-390.png",
+            "audit/screens/standard_MCS-REB-1/night-768.png"
+          ]
+        },
+        {
+          "file": "review/browser-no-js-home-390.png.jpg",
+          "sources": [
+            "browser/no-js-home-390.png"
+          ]
+        },
+        {
+          "file": "review/browser-veyra.jpg",
+          "sources": [
+            "browser/veyra-1440-day.png",
+            "browser/veyra-1440-night.png",
+            "browser/veyra-390-day.png",
+            "browser/veyra-390-night.png"
+          ]
+        },
+        {
+          "file": "review/browser-why.jpg",
+          "sources": [
+            "browser/why-1440-day.png",
+            "browser/why-1440-night.png",
+            "browser/why-390-day.png",
+            "browser/why-390-night.png",
+            "browser/why-768-day.png",
+            "browser/why-768-night.png"
+          ]
+        }
+      ],
+      "method": "Viewed all eight contact sheets (40 audit captures, six homepage evidence layouts, four VEYRA Evidence layouts and one no-script home). Also viewed both ordinary viewport Ledger context captures, with no UI hidden. Selected phone and desktop captures were additionally viewed at native resolution. This is not a claim of inspecting every scrolled portion of every page.",
+      "findings": "No new text collisions or document overflow observed. Date and reference disclosures are readable, the lone passing example fills the available panel, and the latest VEYRA result is 8/8. The profile history table scrolls within its container on phones. Focused skip links in audit captures are deliberate. The existing fixed close-status bubble is preserved."
+    }
+  },
+  "ledger": {
+    "routeThemeAccessibilityCases": 18,
+    "comparisons": [
+      {
+        "id": "ADV-01",
+        "complete": true,
+        "taskHash": "0xfb984f660bd387cae77e9805404f4b8ef52b8aadddc72cbfc08af6991156ac81",
+        "rawRunsUnchanged": true,
+        "recovered": true
+      },
+      {
+        "id": "ADV-02",
+        "complete": true,
+        "taskHash": "0xdb4c04f567dbc931752207a3cc110d916beb0a102223711cdd9397d6088eb124",
+        "rawRunsUnchanged": true,
+        "recovered": false
+      },
+      {
+        "id": "ADV-03",
+        "complete": true,
+        "taskHash": "0x32ad000407240725872dba90945ba42087d59b376d80d93153edbe73984889ed",
+        "rawRunsUnchanged": true,
+        "recovered": true
+      },
+      {
+        "id": "ADV-04",
+        "complete": true,
+        "taskHash": "0x695b260fc986b33ad354427d5254d2a3ceadd66d3e27351f220a848906941206",
+        "rawRunsUnchanged": true,
+        "recovered": false
+      }
+    ]
+  },
+  "api": [
+    {
+      "category": "health_factor",
+      "status": 200,
+      "ms": 2518,
+      "fields": 3
+    },
+    {
+      "category": "grid",
+      "status": 200,
+      "ms": 1899,
+      "fields": 1
+    },
+    {
+      "category": "rebalancing",
+      "status": 200,
+      "ms": 1406,
+      "fields": 3
+    },
+    {
+      "category": "yield",
+      "status": 200,
+      "ms": 2112,
+      "fields": 2
+    }
+  ],
+  "replay": {
+    "status": 200,
+    "block": "131771231",
+    "rows": 3
+  },
+  "closeGuardWallets": 9,
+  "publicSmokeRoutes": 4,
+  "candidateRouteWidthCases": 36,
+  "protectedPathsUnchanged": true,
+  "originalLensRowsUnchanged": 4,
+  "capacity": "No new capacity claim. Foundation guarded-25 latency failure is preserved; higher levels were not run.",
+  "captures": [
+    {
+      "file": "audit/screens/agents_97_2718/day-1024.png",
+      "sha256": "8d7fe40256a0d63aa937cd7bed48c0ac8af396f4dd4323a6126e3ee5eb2578a2"
+    },
+    {
+      "file": "audit/screens/agents_97_2718/day-1440.png",
+      "sha256": "ce40b554972d20424f4bbb65619b453f7b44d6006eaab9044eb86778062b1f80"
+    },
+    {
+      "file": "audit/screens/agents_97_2718/day-390.png",
+      "sha256": "53341d0807e28c3234ded2fe41771f9e746aa0dbcd1baaa96181059565c6c99b"
+    },
+    {
+      "file": "audit/screens/agents_97_2718/day-768.png",
+      "sha256": "32fbd2cd3c4e75569a5eb774e920d60d3a8a40b6ee56c80ab69ef7f3d2b0ae64"
+    },
+    {
+      "file": "audit/screens/agents_97_2718/night-1024.png",
+      "sha256": "d063f71d2611190e9c3fff4c2d12404831e0e7394eadb3a2846088cdb916f701"
+    },
+    {
+      "file": "audit/screens/agents_97_2718/night-1440.png",
+      "sha256": "291c182baa048315b707942c7eb2915177f6f4fd6af4185303dfb68acf59c680"
+    },
+    {
+      "file": "audit/screens/agents_97_2718/night-390.png",
+      "sha256": "e971ececf17ce5910153c69e30f9a46ee71363c37cccc0d5ba4c9663bcafd6a3"
+    },
+    {
+      "file": "audit/screens/agents_97_2718/night-768.png",
+      "sha256": "f6ceca7767d00638abfd33273b071118f0e3897c1331de8ce956ba38e48aefd5"
+    },
+    {
+      "file": "audit/screens/docs_changelog/day-1024.png",
+      "sha256": "d39ee0d42e6e9ce8dfe8a00863ca924a2b601e9ce30ce82ac0de71a0c8e9c91a"
+    },
+    {
+      "file": "audit/screens/docs_changelog/day-1440.png",
+      "sha256": "c4c06b6eb50f2497ae171bd08dfa7b60b269c7681a255afcc1161634e630ab0f"
+    },
+    {
+      "file": "audit/screens/docs_changelog/day-390.png",
+      "sha256": "31f912bd4ebaadf831811426c1b7009cefee25fb75fd3c5681056605a5987ec9"
+    },
+    {
+      "file": "audit/screens/docs_changelog/day-768.png",
+      "sha256": "9d6dc2eb0fc6843d7197933e2047d1f667f513b478ef67e6732889abce8b98b5"
+    },
+    {
+      "file": "audit/screens/docs_changelog/night-1024.png",
+      "sha256": "51c4a631560f9a4c60f54be6db88ebb355f951e7f5a2a3def033e7d5d5885c33"
+    },
+    {
+      "file": "audit/screens/docs_changelog/night-1440.png",
+      "sha256": "8ca994f30736acef1c5f778014164fcdb930db20907369cc8f9be4d754095cf1"
+    },
+    {
+      "file": "audit/screens/docs_changelog/night-390.png",
+      "sha256": "40fddbc36cba5610f82d2ecab265b134cfdc7a37eca45bd699d94a2aad4304a2"
+    },
+    {
+      "file": "audit/screens/docs_changelog/night-768.png",
+      "sha256": "9d40aa8508c701775e9feb6e422f911a0604ed7a389b38a3e876c4b35e7396ef"
+    },
+    {
+      "file": "audit/screens/root/day-1024.png",
+      "sha256": "218f7527be308d6cefcc448d3c338878559deb01dd8f7c70e14523d06cd245a7"
+    },
+    {
+      "file": "audit/screens/root/day-1440.png",
+      "sha256": "356cb0f0846925ad07fa0bedd1717ed8841d67962a7f787ab30cc9dc83594baf"
+    },
+    {
+      "file": "audit/screens/root/day-390.png",
+      "sha256": "daf55a6466370095dc9130f7ab9e3325490bc67d02c8769ff0c9acb242266104"
+    },
+    {
+      "file": "audit/screens/root/day-768.png",
+      "sha256": "e7d95619d122ff22395a71bf7c06d94ca59177e3226082549fbff5dd5e5ddb73"
+    },
+    {
+      "file": "audit/screens/root/night-1024.png",
+      "sha256": "42984ac0f37a8fcc88f08c79795b6b48afe8aab601136358c915988186146546"
+    },
+    {
+      "file": "audit/screens/root/night-1440.png",
+      "sha256": "970ecc3268cdbbfa992dc84905556cd3ac0bebd12fa5e338e21d9ac2ab67d52d"
+    },
+    {
+      "file": "audit/screens/root/night-390.png",
+      "sha256": "956225cf5e17cb604483e2c73c717bfe6f669addcb57497b0dbb42e1746da2cc"
+    },
+    {
+      "file": "audit/screens/root/night-768.png",
+      "sha256": "603f23390c0c15ea2b49581a18eb637af49a421a923f1f7d5b65670f0ee14119"
+    },
+    {
+      "file": "audit/screens/standard/day-1024.png",
+      "sha256": "c3c95b917aa83debf56e670a770ae6d5ccf32a69800b0f5c0452f147ffe5a57e"
+    },
+    {
+      "file": "audit/screens/standard/day-1440.png",
+      "sha256": "249e45406d32ff28e3c3fbaaafb1639bedfef89391ba55b09f88fe10716a0ec2"
+    },
+    {
+      "file": "audit/screens/standard/day-390.png",
+      "sha256": "e3c86d0decb5cf3980bb32d97859fd782d1d13ab7732f94476bba7af9cb50f39"
+    },
+    {
+      "file": "audit/screens/standard/day-768.png",
+      "sha256": "91458190e82f2ff23ed38d987cf6fd25280f413c67728835859161f23c461735"
+    },
+    {
+      "file": "audit/screens/standard/night-1024.png",
+      "sha256": "c0505d61944337ec4afc8924bd84fe05d408923835e8a7b366bf6c158236a639"
+    },
+    {
+      "file": "audit/screens/standard/night-1440.png",
+      "sha256": "95747e935ccc69928b37bd45589322602b7d85025e2f0909c9ceceacfd46e0aa"
+    },
+    {
+      "file": "audit/screens/standard/night-390.png",
+      "sha256": "be13d34a3f0c7c427b6e5cbae4d8f8c46bf777ca3a82ef79b6519df0cc2b07c8"
+    },
+    {
+      "file": "audit/screens/standard/night-768.png",
+      "sha256": "20b859f3d146645c215a347066371c01f91b33c2b391bc6b61c3233c5478ff41"
+    },
+    {
+      "file": "audit/screens/standard_MCS-REB-1/day-1024.png",
+      "sha256": "e903ed1398ec387ac55307a406f9c7a79fdc271737bdd4601e6763920b60dbe3"
+    },
+    {
+      "file": "audit/screens/standard_MCS-REB-1/day-1440.png",
+      "sha256": "930b62ad4261752907e2ce75085a9179af80ae3c3e9ba00507679a2717a3322b"
+    },
+    {
+      "file": "audit/screens/standard_MCS-REB-1/day-390.png",
+      "sha256": "6f08ce673e0faa93a9f782b64e47c5d05d278db81e4bee3886eefbd96a62c173"
+    },
+    {
+      "file": "audit/screens/standard_MCS-REB-1/day-768.png",
+      "sha256": "1bd099c306549fc8be512899ebb8f50fea96b26b4c07c8125bc6fdef0e09667d"
+    },
+    {
+      "file": "audit/screens/standard_MCS-REB-1/night-1024.png",
+      "sha256": "a95a09ec207deba1e8257fed98d5ab6af645da48fdb3821433ce6f5db90a2e56"
+    },
+    {
+      "file": "audit/screens/standard_MCS-REB-1/night-1440.png",
+      "sha256": "cfd53c1229e232ad1098597d33f5f97daf058c08824ad92a42e7f38e6776ef15"
+    },
+    {
+      "file": "audit/screens/standard_MCS-REB-1/night-390.png",
+      "sha256": "3d59ab2ca24d0131f08989d8deb64a6d3f35ba0fab202c09b929ff3d33765f85"
+    },
+    {
+      "file": "audit/screens/standard_MCS-REB-1/night-768.png",
+      "sha256": "2b7c69a7b0cf8e36a21d27d054acd83921e42c73972c57c959c2a27e5f74981f"
+    },
+    {
+      "file": "browser/why-1440-night.png",
+      "sha256": "1726c2965b24cff61ced958e452c9d769a5c2d8e5d4ec777d9b2f8b45b1bf1b1"
+    },
+    {
+      "file": "browser/why-768-night.png",
+      "sha256": "2f64ad0a9fbc987737eb618a5f7fe3dba09158b1d4b808f7c38dc4d607bedcea"
+    },
+    {
+      "file": "browser/why-390-night.png",
+      "sha256": "1b8077ad4ec4a760820e7bf68b9f90b5ffc3305984bf10eca2701076fdf51b52"
+    },
+    {
+      "file": "browser/veyra-1440-night.png",
+      "sha256": "a5f53c3c39f19f678ea209b60646cf90d8c73afb7e901a7bdcaf72f125c60717"
+    },
+    {
+      "file": "browser/veyra-390-night.png",
+      "sha256": "14c64349a80d3fa10affa8549af6a3d8d34ed8eb6edc114e07eacb4e6281fa66"
+    },
+    {
+      "file": "browser/why-1440-day.png",
+      "sha256": "5bd3d300e25f0783254cb053a7f35ebf50a5e7102675883c2cc65c2c4996912d"
+    },
+    {
+      "file": "browser/why-768-day.png",
+      "sha256": "5962c77d7bce7f75d1e1411a3f6b9963858bb450e14b53525478fdc461df3de7"
+    },
+    {
+      "file": "browser/why-390-day.png",
+      "sha256": "e6a60ab4b18a00c64908175ab82821dde81b594894fb4465e3b3e49ac132befe"
+    },
+    {
+      "file": "browser/veyra-1440-day.png",
+      "sha256": "f6a5bbbf25592050d9710b10bfef3b5a287c527a1d25c3fa96521ffc28c486c3"
+    },
+    {
+      "file": "browser/veyra-390-day.png",
+      "sha256": "758a6ea4eb79fdabca6c0c62346e37b22f7e7dfae90a6579b036602edb731877"
+    },
+    {
+      "file": "browser/no-js-home-390.png",
+      "sha256": "58f7753267326beab848e0f34bdc47f2ec55474262f5b349f4594bd15704a6ba"
+    },
+    {
+      "file": "ledger-browser/first-comparison-1440-day.png",
+      "sha256": "3983b7228c627a936f0adea8b35a4547df9b69b593299dd5767e9e0b72dd8566"
+    },
+    {
+      "file": "ledger-browser/first-comparison-1440-night.png",
+      "sha256": "0a4338bc0bcfa428863f276a47c50c1c72825e240a7c2691221a51c8b49aa491"
+    },
+    {
+      "file": "ledger-browser/first-comparison-390-day.png",
+      "sha256": "52d4b05be5740ebaa8ca415e12f583f781a475f05801a2106d9a759776729071"
+    },
+    {
+      "file": "ledger-browser/first-comparison-390-night.png",
+      "sha256": "c0c47a3b7fdf8251d9ff2558622e0edd8d4e4b1f835264833e00ce7fbe7a0eb6"
+    },
+    {
+      "file": "ledger-browser/ledger-1440-day.png",
+      "sha256": "f9c34c5381c8f979285a92f32ccc570079f3017edc916bbec150c865a7043980"
+    },
+    {
+      "file": "ledger-browser/ledger-1440-night.png",
+      "sha256": "cf77d02e8da3003262e03f7cdcfe1cf9cfac709aa78ad98a9f29660532c14abb"
+    },
+    {
+      "file": "ledger-browser/ledger-390-day.png",
+      "sha256": "b10a93c442d111508bb8c66e1620affc3b6327a9247bc7488075afc7faae7598"
+    },
+    {
+      "file": "ledger-browser/ledger-390-night.png",
+      "sha256": "1f7eca2343616f74f875345557c3c34d25262389be1322d75afe5db12b463fb1"
+    },
+    {
+      "file": "ledger-browser/ledger-ADV-01-1440-day.png",
+      "sha256": "a013ab3deaeb63410a86e70b6bb75b541a98df551879f46a7cdacee9b23d0897"
+    },
+    {
+      "file": "ledger-browser/ledger-ADV-01-1440-night.png",
+      "sha256": "3d91f7b879fe9d935a3a69769567f829dd3ca5ca40ac9a84353f967c305f0490"
+    },
+    {
+      "file": "ledger-browser/ledger-ADV-01-390-day.png",
+      "sha256": "55ed73fef6eb547980a4f52f13f8e4194b90ac0739f5edd9bbef95a136884ba9"
+    },
+    {
+      "file": "ledger-browser/ledger-ADV-01-390-night.png",
+      "sha256": "7955f578aa72591b6faf9422be5f2bab586a4a061dd7d647acc80fd289ebb3be"
+    },
+    {
+      "file": "ledger-browser/ledger-ADV-01-context-1440-day.png",
+      "sha256": "1103dd59848a93225e1ba693aa4427fcca6f5f20996a631ae69f68902c0f3453"
+    },
+    {
+      "file": "ledger-browser/ledger-ADV-01-context-1440-night.png",
+      "sha256": "caf6e0ac31fd6bbfcbeb106ebf527ecb970f65adfbe30189058cb636dc1fd71a"
+    },
+    {
+      "file": "ledger-browser/ledger-ADV-01-context-390-day.png",
+      "sha256": "f0b66be0ae72e61151cad1cd32a2e4571952e83dafbe21e2aea957bb6f3718c9"
+    },
+    {
+      "file": "ledger-browser/ledger-ADV-01-context-390-night.png",
+      "sha256": "2abef80dbec2693f05f32d915857280668acbdd277e6b0209e6f2e1e1a4853f5"
+    },
+    {
+      "file": "ledger-browser/ledger-ADV-03-1440-day.png",
+      "sha256": "a9647663440ec62bc4a79dce8b3be8356c7fed1a92813144660855284dee2306"
+    },
+    {
+      "file": "ledger-browser/ledger-ADV-03-1440-night.png",
+      "sha256": "0ec6d49674b0a8bf83b26325d6970e4b6a42756de1c0773cf02e1f845bbb9136"
+    },
+    {
+      "file": "ledger-browser/ledger-ADV-03-390-day.png",
+      "sha256": "c24eee56d6b6441c653077a4891fed9b3ee3881052ca0074b9f4c657a3eda659"
+    },
+    {
+      "file": "ledger-browser/ledger-ADV-03-390-night.png",
+      "sha256": "0d39348860f28f2d7c9204c75508f22b3e1ad9b0ef8ae9d42e4a32258493d849"
+    },
+    {
+      "file": "ledger-browser/ledger-ADV-03-context-1440-day.png",
+      "sha256": "43ec71801eff134e00915022d010fcc616e1034fff4d5cc1ba5bce94343e880d"
+    },
+    {
+      "file": "ledger-browser/ledger-ADV-03-context-1440-night.png",
+      "sha256": "8cf1992ca7a7d73f8b6f497876af35f0e8bebfb39d17419179bf62935934a71d"
+    },
+    {
+      "file": "ledger-browser/ledger-ADV-03-context-390-day.png",
+      "sha256": "933cd54b0b826aca55616823dc1edf7b781da271d33d4ca364b4c3c9cdd8a3a8"
+    },
+    {
+      "file": "ledger-browser/ledger-ADV-03-context-390-night.png",
+      "sha256": "d8c6f77c9f79a758004800825946734c7bbb33b919ca5806a4350a062b4ece9c"
+    },
+    {
+      "file": "ledger-browser/ledger-no-js-390.png",
+      "sha256": "d9e2a511ea8fbe29e13a843728c292c77bbf21af93a1a49e7d431af9147c3503"
+    },
+    {
+      "file": "public-context/ledger-context-desktop.png",
+      "sha256": "e1e8203d69b2af5f6c2fcd08b48d590a93ce1ee2a563232a8bba366f8920cccb"
+    },
+    {
+      "file": "public-context/ledger-context-phone.png",
+      "sha256": "92ee49f7313bf43d68dd0c789fb33784666901b54fffc0d3d5c3f4a327bd1c80"
+    }
+  ]
+}

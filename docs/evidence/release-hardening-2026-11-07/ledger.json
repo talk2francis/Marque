@@ -1,0 +1,179 @@
+{
+  "at": "2026-11-07T05:34:00.603Z",
+  "rows": [
+    {
+      "id": "ADV-01",
+      "complete": true,
+      "taskHash": "0xfb984f660bd387cae77e9805404f4b8ef52b8aadddc72cbfc08af6991156ac81",
+      "block": "120123441",
+      "recovery": {
+        "method": "verified-original-task",
+        "task": "Triage the BNB Smart Chain contract 0x55d398326f99059fF775485246999027B3197955 for the risks that would affect someone holding or approving this token.\nChain: BNB Smart Chain (56). Block: 120123441.\n\nCover, at minimum: whether the contract is upgradeable and by whom; whether a privileged party can mint, pause, blacklist or change fees; and what a holder is exposed to if that party is compromised.\nFor every claim, say how you established it. State explicitly what your method cannot see.",
+        "taskHash": "0xfb984f660bd387cae77e9805404f4b8ef52b8aadddc72cbfc08af6991156ac81",
+        "block": "120123441",
+        "registrationTask": "Triage the BNB Smart Chain contract 0x55d398326f99059fF775485246999027B3197955 for the risks that would affect someone holding or approving this token.\nChain: BNB Smart Chain (56). Block: 126580730.\n\nCover, at minimum: whether the contract is upgradeable and by whom; whether a privileged party can mint, pause, blacklist or change fees; and what a holder is exposed to if that party is compromised.\nFor every claim, say how you established it. State explicitly what your method cannot see.",
+        "registrationTaskHash": "0x6dd085cdb7a9ce82cabf9d89d9f0da6bf13ea876be5f2248bde733e1490141d5",
+        "registrationBlock": "126580730",
+        "runIds": [
+          18,
+          23,
+          27,
+          28
+        ]
+      },
+      "runIds": [
+        27,
+        28,
+        18,
+        23
+      ],
+      "scores": [
+        {
+          "id": 27,
+          "total": 10,
+          "outOf": 100
+        },
+        {
+          "id": 28,
+          "total": 35,
+          "outOf": 100
+        },
+        {
+          "id": 18,
+          "total": 100,
+          "outOf": 100
+        },
+        {
+          "id": 23,
+          "total": 0,
+          "outOf": 100
+        }
+      ],
+      "rawRunsEqual": true
+    },
+    {
+      "id": "ADV-02",
+      "complete": true,
+      "taskHash": "0xdb4c04f567dbc931752207a3cc110d916beb0a102223711cdd9397d6088eb124",
+      "block": "120077706",
+      "recovery": null,
+      "runIds": [
+        35,
+        36,
+        19,
+        24
+      ],
+      "scores": [
+        {
+          "id": 35,
+          "total": 60,
+          "outOf": 100
+        },
+        {
+          "id": 36,
+          "total": 60,
+          "outOf": 100
+        },
+        {
+          "id": 19,
+          "total": 60,
+          "outOf": 100
+        },
+        {
+          "id": 24,
+          "total": 45,
+          "outOf": 100
+        }
+      ],
+      "rawRunsEqual": true
+    },
+    {
+      "id": "ADV-03",
+      "complete": true,
+      "taskHash": "0x32ad000407240725872dba90945ba42087d59b376d80d93153edbe73984889ed",
+      "block": "120077706",
+      "recovery": {
+        "method": "verified-original-task",
+        "task": "Find the best net-of-cost route for 1,000 USD of USDT on BNB Smart Chain (chain 56).\nBlock: 120077706 — answer for this block.\n\nConstraints: only Venus; the holder currently earns 0% APR; recommend a move only if it beats that by at least 50 bps net of every cost at this size; leverage is NOT allowed.\n\nReport: whether you recommend a move, the venue, the NET APR at this size, the source and timestamp of every rate you quote, the switching cost itemized into gas, swap and exit, and whether the plan uses leverage.",
+        "taskHash": "0x32ad000407240725872dba90945ba42087d59b376d80d93153edbe73984889ed",
+        "block": "120077706",
+        "registrationTask": "Find the best net-of-cost route for 1,000 USD of USDT on BNB Smart Chain (chain 56).\nBlock: 126570170 — answer for this block.\n\nConstraints: only Venus; the holder currently earns 0% APR; recommend a move only if it beats that by at least 50 bps net of every cost at this size; leverage is NOT allowed.\n\nReport: whether you recommend a move, the venue, the NET APR at this size, the source and timestamp of every rate you quote, the switching cost itemized into gas, swap and exit, and whether the plan uses leverage.",
+        "registrationTaskHash": "0x855b11e81577141fe951d8218d47691638f9aab217aefa8ade037ca6fa22f648",
+        "registrationBlock": "126570170",
+        "runIds": [
+          20,
+          25,
+          37,
+          38
+        ]
+      },
+      "runIds": [
+        37,
+        38,
+        20,
+        25
+      ],
+      "scores": [
+        {
+          "id": 37,
+          "total": 60,
+          "outOf": 100
+        },
+        {
+          "id": 38,
+          "total": 60,
+          "outOf": 100
+        },
+        {
+          "id": 20,
+          "total": 60,
+          "outOf": 100
+        },
+        {
+          "id": 25,
+          "total": 0,
+          "outOf": 100
+        }
+      ],
+      "rawRunsEqual": true
+    },
+    {
+      "id": "ADV-04",
+      "complete": true,
+      "taskHash": "0x695b260fc986b33ad354427d5254d2a3ceadd66d3e27351f220a848906941206",
+      "block": "120707631",
+      "recovery": null,
+      "runIds": [
+        33,
+        34,
+        22,
+        26
+      ],
+      "scores": [
+        {
+          "id": 33,
+          "total": 60,
+          "outOf": 100
+        },
+        {
+          "id": 34,
+          "total": 30,
+          "outOf": 100
+        },
+        {
+          "id": 22,
+          "total": 60,
+          "outOf": 100
+        },
+        {
+          "id": 26,
+          "total": 15,
+          "outOf": 100
+        }
+      ],
+      "rawRunsEqual": true
+    }
+  ],
+  "rawRecordsUnchanged": true,
+  "rawFingerprint": "447e95bac7c76848cd4d479305cbae8eb64c00b2db3a3472ceb6367cf02171d5"
+}

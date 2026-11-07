@@ -1,0 +1,147 @@
+{
+  "at": "2026-11-07T06:39:54.856Z",
+  "release": "0fb0ecaf0e2ab2db2853757f86d413581daf5288",
+  "base": "http://127.0.0.1:3312",
+  "rows": [
+    {
+      "route": "/ledger",
+      "theme": "night",
+      "status": 200,
+      "violations": []
+    },
+    {
+      "route": "/ledger/ADV-01",
+      "theme": "night",
+      "status": 200,
+      "violations": []
+    },
+    {
+      "route": "/ledger/ADV-02",
+      "theme": "night",
+      "status": 200,
+      "violations": []
+    },
+    {
+      "route": "/ledger/ADV-03",
+      "theme": "night",
+      "status": 200,
+      "violations": []
+    },
+    {
+      "route": "/ledger/ADV-04",
+      "theme": "night",
+      "status": 200,
+      "violations": []
+    },
+    {
+      "route": "/ledger/intake",
+      "theme": "night",
+      "status": 200,
+      "violations": []
+    },
+    {
+      "route": "/docs/changelog",
+      "theme": "night",
+      "status": 200,
+      "violations": []
+    },
+    {
+      "route": "/status",
+      "theme": "night",
+      "status": 200,
+      "violations": []
+    },
+    {
+      "route": "/",
+      "theme": "night",
+      "status": 200,
+      "violations": []
+    },
+    {
+      "route": "/ledger",
+      "theme": "day",
+      "status": 200,
+      "violations": []
+    },
+    {
+      "route": "/ledger/ADV-01",
+      "theme": "day",
+      "status": 200,
+      "violations": []
+    },
+    {
+      "route": "/ledger/ADV-02",
+      "theme": "day",
+      "status": 200,
+      "violations": []
+    },
+    {
+      "route": "/ledger/ADV-03",
+      "theme": "day",
+      "status": 200,
+      "violations": []
+    },
+    {
+      "route": "/ledger/ADV-04",
+      "theme": "day",
+      "status": 200,
+      "violations": []
+    },
+    {
+      "route": "/ledger/intake",
+      "theme": "day",
+      "status": 200,
+      "violations": []
+    },
+    {
+      "route": "/docs/changelog",
+      "theme": "day",
+      "status": 200,
+      "violations": []
+    },
+    {
+      "route": "/status",
+      "theme": "day",
+      "status": 200,
+      "violations": []
+    },
+    {
+      "route": "/",
+      "theme": "day",
+      "status": 200,
+      "violations": []
+    }
+  ],
+  "api": [
+    {
+      "id": "ADV-01",
+      "complete": true,
+      "taskHash": "0xfb984f660bd387cae77e9805404f4b8ef52b8aadddc72cbfc08af6991156ac81",
+      "rawRunsUnchanged": true,
+      "recovered": true
+    },
+    {
+      "id": "ADV-02",
+      "complete": true,
+      "taskHash": "0xdb4c04f567dbc931752207a3cc110d916beb0a102223711cdd9397d6088eb124",
+      "rawRunsUnchanged": true,
+      "recovered": false
+    },
+    {
+      "id": "ADV-03",
+      "complete": true,
+      "taskHash": "0x32ad000407240725872dba90945ba42087d59b376d80d93153edbe73984889ed",
+      "rawRunsUnchanged": true,
+      "recovered": true
+    },
+    {
+      "id": "ADV-04",
+      "complete": true,
+      "taskHash": "0x695b260fc986b33ad354427d5254d2a3ceadd66d3e27351f220a848906941206",
+      "rawRunsUnchanged": true,
+      "recovered": false
+    }
+  ],
+  "noScriptCompleteComparisons": 4,
+  "failures": []
+}

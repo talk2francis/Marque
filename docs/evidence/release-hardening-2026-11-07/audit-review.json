@@ -1,0 +1,291 @@
+{
+  "at": "2026-11-07T05:38:00Z",
+  "method": "Viewed each contact sheet and inspected one mobile comparison at native width; these are viewport/element captures, not a review of every scrolled page.",
+  "auditCapturesReviewed": 80,
+  "mobileCapturesReviewed": 52,
+  "controlsCapturesReviewed": 13,
+  "totalReviewedInThisPass": 145,
+  "sourceArtifacts": {
+    "audit": "dc1ce78803ff70070ef865ba7dc7ccfaaeb6fb21",
+    "mobile": "dc1ce78803ff70070ef865ba7dc7ccfaaeb6fb21",
+    "controls": "8e5bbdc5eacaa2cf9c8ac23b95afd871206298bf"
+  },
+  "sheets": [
+    {
+      "file": "review-final/audit-adopt.jpg",
+      "sources": [
+        "final-audit/screens/adopt/day-1024.png",
+        "final-audit/screens/adopt/day-1440.png",
+        "final-audit/screens/adopt/day-390.png",
+        "final-audit/screens/adopt/day-768.png",
+        "final-audit/screens/adopt/night-1024.png",
+        "final-audit/screens/adopt/night-1440.png",
+        "final-audit/screens/adopt/night-390.png",
+        "final-audit/screens/adopt/night-768.png"
+      ]
+    },
+    {
+      "file": "review-final/audit-agents_56_310460.jpg",
+      "sources": [
+        "final-audit/screens/agents_56_310460/day-1024.png",
+        "final-audit/screens/agents_56_310460/day-1440.png",
+        "final-audit/screens/agents_56_310460/day-390.png",
+        "final-audit/screens/agents_56_310460/day-768.png",
+        "final-audit/screens/agents_56_310460/night-1024.png",
+        "final-audit/screens/agents_56_310460/night-1440.png",
+        "final-audit/screens/agents_56_310460/night-390.png",
+        "final-audit/screens/agents_56_310460/night-768.png"
+      ]
+    },
+    {
+      "file": "review-final/audit-builders.jpg",
+      "sources": [
+        "final-audit/screens/builders/day-1024.png",
+        "final-audit/screens/builders/day-1440.png",
+        "final-audit/screens/builders/day-390.png",
+        "final-audit/screens/builders/day-768.png",
+        "final-audit/screens/builders/night-1024.png",
+        "final-audit/screens/builders/night-1440.png",
+        "final-audit/screens/builders/night-390.png",
+        "final-audit/screens/builders/night-768.png"
+      ]
+    },
+    {
+      "file": "review-final/audit-jobs_56_57185.jpg",
+      "sources": [
+        "final-audit/screens/jobs_56_57185/day-1024.png",
+        "final-audit/screens/jobs_56_57185/day-1440.png",
+        "final-audit/screens/jobs_56_57185/day-390.png",
+        "final-audit/screens/jobs_56_57185/day-768.png",
+        "final-audit/screens/jobs_56_57185/night-1024.png",
+        "final-audit/screens/jobs_56_57185/night-1440.png",
+        "final-audit/screens/jobs_56_57185/night-390.png",
+        "final-audit/screens/jobs_56_57185/night-768.png"
+      ]
+    },
+    {
+      "file": "review-final/audit-me.jpg",
+      "sources": [
+        "final-audit/screens/me/day-1024.png",
+        "final-audit/screens/me/day-1440.png",
+        "final-audit/screens/me/day-390.png",
+        "final-audit/screens/me/day-768.png",
+        "final-audit/screens/me/night-1024.png",
+        "final-audit/screens/me/night-1440.png",
+        "final-audit/screens/me/night-390.png",
+        "final-audit/screens/me/night-768.png"
+      ]
+    },
+    {
+      "file": "review-final/audit-proof.jpg",
+      "sources": [
+        "final-audit/screens/proof/day-1024.png",
+        "final-audit/screens/proof/day-1440.png",
+        "final-audit/screens/proof/day-390.png",
+        "final-audit/screens/proof/day-768.png",
+        "final-audit/screens/proof/night-1024.png",
+        "final-audit/screens/proof/night-1440.png",
+        "final-audit/screens/proof/night-390.png",
+        "final-audit/screens/proof/night-768.png"
+      ]
+    },
+    {
+      "file": "review-final/audit-quest.jpg",
+      "sources": [
+        "final-audit/screens/quest/day-1024.png",
+        "final-audit/screens/quest/day-1440.png",
+        "final-audit/screens/quest/day-390.png",
+        "final-audit/screens/quest/day-768.png",
+        "final-audit/screens/quest/night-1024.png",
+        "final-audit/screens/quest/night-1440.png",
+        "final-audit/screens/quest/night-390.png",
+        "final-audit/screens/quest/night-768.png"
+      ]
+    },
+    {
+      "file": "review-final/audit-register.jpg",
+      "sources": [
+        "final-audit/screens/register/day-1024.png",
+        "final-audit/screens/register/day-1440.png",
+        "final-audit/screens/register/day-390.png",
+        "final-audit/screens/register/day-768.png",
+        "final-audit/screens/register/night-1024.png",
+        "final-audit/screens/register/night-1440.png",
+        "final-audit/screens/register/night-390.png",
+        "final-audit/screens/register/night-768.png"
+      ]
+    },
+    {
+      "file": "review-final/audit-root.jpg",
+      "sources": [
+        "final-audit/screens/root/day-1024.png",
+        "final-audit/screens/root/day-1440.png",
+        "final-audit/screens/root/day-390.png",
+        "final-audit/screens/root/day-768.png",
+        "final-audit/screens/root/night-1024.png",
+        "final-audit/screens/root/night-1440.png",
+        "final-audit/screens/root/night-390.png",
+        "final-audit/screens/root/night-768.png"
+      ]
+    },
+    {
+      "file": "review-final/audit-status.jpg",
+      "sources": [
+        "final-audit/screens/status/day-1024.png",
+        "final-audit/screens/status/day-1440.png",
+        "final-audit/screens/status/day-390.png",
+        "final-audit/screens/status/day-768.png",
+        "final-audit/screens/status/night-1024.png",
+        "final-audit/screens/status/night-1440.png",
+        "final-audit/screens/status/night-390.png",
+        "final-audit/screens/status/night-768.png"
+      ]
+    },
+    {
+      "file": "review-final/mobile-hero-bound.jpg",
+      "sources": [
+        "mobile/hero-bound-390-day.png",
+        "mobile/hero-bound-390-night.png",
+        "mobile/hero-bound-768-day.png",
+        "mobile/hero-bound-768-night.png"
+      ]
+    },
+    {
+      "file": "review-final/mobile-hero-keel.jpg",
+      "sources": [
+        "mobile/hero-keel-390-day.png",
+        "mobile/hero-keel-390-night.png",
+        "mobile/hero-keel-768-day.png",
+        "mobile/hero-keel-768-night.png"
+      ]
+    },
+    {
+      "file": "review-final/mobile-hero-lattice.jpg",
+      "sources": [
+        "mobile/hero-lattice-390-day.png",
+        "mobile/hero-lattice-390-night.png",
+        "mobile/hero-lattice-768-day.png",
+        "mobile/hero-lattice-768-night.png"
+      ]
+    },
+    {
+      "file": "review-final/mobile-hero-redcell.jpg",
+      "sources": [
+        "mobile/hero-redcell-390-day.png",
+        "mobile/hero-redcell-390-night.png",
+        "mobile/hero-redcell-768-day.png",
+        "mobile/hero-redcell-768-night.png"
+      ]
+    },
+    {
+      "file": "review-final/mobile-hero-sluicegate.jpg",
+      "sources": [
+        "mobile/hero-sluicegate-390-day.png",
+        "mobile/hero-sluicegate-390-night.png",
+        "mobile/hero-sluicegate-768-day.png",
+        "mobile/hero-sluicegate-768-night.png"
+      ]
+    },
+    {
+      "file": "review-final/mobile-hero-tidemark.jpg",
+      "sources": [
+        "mobile/hero-tidemark-390-day.png",
+        "mobile/hero-tidemark-390-night.png",
+        "mobile/hero-tidemark-768-day.png",
+        "mobile/hero-tidemark-768-night.png"
+      ]
+    },
+    {
+      "file": "review-final/mobile-sticky-bound.jpg",
+      "sources": [
+        "mobile/sticky-bound-390-day.png",
+        "mobile/sticky-bound-390-night.png",
+        "mobile/sticky-bound-768-day.png",
+        "mobile/sticky-bound-768-night.png"
+      ]
+    },
+    {
+      "file": "review-final/mobile-sticky-keel.jpg",
+      "sources": [
+        "mobile/sticky-keel-390-day.png",
+        "mobile/sticky-keel-390-night.png",
+        "mobile/sticky-keel-768-day.png",
+        "mobile/sticky-keel-768-night.png"
+      ]
+    },
+    {
+      "file": "review-final/mobile-sticky-lattice.jpg",
+      "sources": [
+        "mobile/sticky-lattice-390-day.png",
+        "mobile/sticky-lattice-390-night.png",
+        "mobile/sticky-lattice-768-day.png",
+        "mobile/sticky-lattice-768-night.png"
+      ]
+    },
+    {
+      "file": "review-final/mobile-sticky-redcell.jpg",
+      "sources": [
+        "mobile/sticky-redcell-390-day.png",
+        "mobile/sticky-redcell-390-night.png",
+        "mobile/sticky-redcell-768-day.png",
+        "mobile/sticky-redcell-768-night.png"
+      ]
+    },
+    {
+      "file": "review-final/mobile-sticky-sluicegate.jpg",
+      "sources": [
+        "mobile/sticky-sluicegate-390-day.png",
+        "mobile/sticky-sluicegate-390-night.png",
+        "mobile/sticky-sluicegate-768-day.png",
+        "mobile/sticky-sluicegate-768-night.png"
+      ]
+    },
+    {
+      "file": "review-final/mobile-sticky-tidemark.jpg",
+      "sources": [
+        "mobile/sticky-tidemark-390-day.png",
+        "mobile/sticky-tidemark-390-night.png",
+        "mobile/sticky-tidemark-768-day.png",
+        "mobile/sticky-tidemark-768-night.png"
+      ]
+    },
+    {
+      "file": "review-final/mobile-wallet.jpg",
+      "sources": [
+        "mobile/wallet-390-day.png",
+        "mobile/wallet-390-night.png",
+        "mobile/wallet-768-day.png",
+        "mobile/wallet-768-night.png"
+      ]
+    },
+    {
+      "file": "review-final/controls-pass-read-only.png.jpg",
+      "sources": [
+        "controls/pass-read-only.png"
+      ]
+    },
+    {
+      "file": "review-final/controls-recheck.jpg",
+      "sources": [
+        "controls/recheck-1440-day.png",
+        "controls/recheck-1440-night.png",
+        "controls/recheck-390-day.png",
+        "controls/recheck-390-night.png",
+        "controls/recheck-768-day.png",
+        "controls/recheck-768-night.png"
+      ]
+    },
+    {
+      "file": "review-final/controls-watched.jpg",
+      "sources": [
+        "controls/watched-1440-day.png",
+        "controls/watched-1440-night.png",
+        "controls/watched-390-day.png",
+        "controls/watched-390-night.png",
+        "controls/watched-768-day.png",
+        "controls/watched-768-night.png"
+      ]
+    }
+  ],
+  "findings": "No additional overflow or colliding content observed. The large skip link is focused deliberately by the audit. New Ledger/home/docs captures require their own final-artifact review."
+}

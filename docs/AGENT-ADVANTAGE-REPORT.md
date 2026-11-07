@@ -143,3 +143,7 @@ Rubric registration dates are preserved. The benchmark registration row can chan
 - [Methodology](https://marque.trade/ledger/methodology).
 
 No historical output, timing, score, hash or run was changed by this audit. Prior report wording remains in Git history.
+
+## Integrity repair, 7 November 2026
+
+Two reproduction runs on 9 October changed the registration block for ADV-01 and ADV-03 after the original comparisons. This caused an incorrect incomplete status, despite their original manifests and blind grades remaining intact. The published read view now reconstructs and verifies the original task at its original block, discloses both task hashes and leaves the raw records unchanged. ADV-02 and ADV-04 already matched. Future reproductions cannot update registration. All four comparisons verify complete; the split quality results above, including the security loss, are unchanged. See [verification and exact evidence](operations/RELEASE_HARDENING_2026-11-06.md).

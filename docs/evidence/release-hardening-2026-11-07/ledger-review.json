@@ -1,0 +1,129 @@
+{
+  "at": "2026-11-07T07:17:14.328490+00:00",
+  "release": "0fb0ecaf0e2ab2db2853757f86d413581daf5288",
+  "auditCapturesReviewed": 72,
+  "method": "Viewed all nine contact sheets covering all 72 viewport audits in both themes at 390, 768, 1024 and 1440. Separately inspected the eight original-context clips, two phone comparison cards and the no-JavaScript full Ledger capture. This does not claim review of every scrolled part of every full-page file.",
+  "sheets": [
+    {
+      "file": "review-ledger/audit-docs_changelog.jpg",
+      "sources": [
+        "ledger-audit/screens/docs_changelog/day-1024.png",
+        "ledger-audit/screens/docs_changelog/day-1440.png",
+        "ledger-audit/screens/docs_changelog/day-390.png",
+        "ledger-audit/screens/docs_changelog/day-768.png",
+        "ledger-audit/screens/docs_changelog/night-1024.png",
+        "ledger-audit/screens/docs_changelog/night-1440.png",
+        "ledger-audit/screens/docs_changelog/night-390.png",
+        "ledger-audit/screens/docs_changelog/night-768.png"
+      ]
+    },
+    {
+      "file": "review-ledger/audit-ledger.jpg",
+      "sources": [
+        "ledger-audit/screens/ledger/day-1024.png",
+        "ledger-audit/screens/ledger/day-1440.png",
+        "ledger-audit/screens/ledger/day-390.png",
+        "ledger-audit/screens/ledger/day-768.png",
+        "ledger-audit/screens/ledger/night-1024.png",
+        "ledger-audit/screens/ledger/night-1440.png",
+        "ledger-audit/screens/ledger/night-390.png",
+        "ledger-audit/screens/ledger/night-768.png"
+      ]
+    },
+    {
+      "file": "review-ledger/audit-ledger_ADV-01.jpg",
+      "sources": [
+        "ledger-audit/screens/ledger_ADV-01/day-1024.png",
+        "ledger-audit/screens/ledger_ADV-01/day-1440.png",
+        "ledger-audit/screens/ledger_ADV-01/day-390.png",
+        "ledger-audit/screens/ledger_ADV-01/day-768.png",
+        "ledger-audit/screens/ledger_ADV-01/night-1024.png",
+        "ledger-audit/screens/ledger_ADV-01/night-1440.png",
+        "ledger-audit/screens/ledger_ADV-01/night-390.png",
+        "ledger-audit/screens/ledger_ADV-01/night-768.png"
+      ]
+    },
+    {
+      "file": "review-ledger/audit-ledger_ADV-02.jpg",
+      "sources": [
+        "ledger-audit/screens/ledger_ADV-02/day-1024.png",
+        "ledger-audit/screens/ledger_ADV-02/day-1440.png",
+        "ledger-audit/screens/ledger_ADV-02/day-390.png",
+        "ledger-audit/screens/ledger_ADV-02/day-768.png",
+        "ledger-audit/screens/ledger_ADV-02/night-1024.png",
+        "ledger-audit/screens/ledger_ADV-02/night-1440.png",
+        "ledger-audit/screens/ledger_ADV-02/night-390.png",
+        "ledger-audit/screens/ledger_ADV-02/night-768.png"
+      ]
+    },
+    {
+      "file": "review-ledger/audit-ledger_ADV-03.jpg",
+      "sources": [
+        "ledger-audit/screens/ledger_ADV-03/day-1024.png",
+        "ledger-audit/screens/ledger_ADV-03/day-1440.png",
+        "ledger-audit/screens/ledger_ADV-03/day-390.png",
+        "ledger-audit/screens/ledger_ADV-03/day-768.png",
+        "ledger-audit/screens/ledger_ADV-03/night-1024.png",
+        "ledger-audit/screens/ledger_ADV-03/night-1440.png",
+        "ledger-audit/screens/ledger_ADV-03/night-390.png",
+        "ledger-audit/screens/ledger_ADV-03/night-768.png"
+      ]
+    },
+    {
+      "file": "review-ledger/audit-ledger_ADV-04.jpg",
+      "sources": [
+        "ledger-audit/screens/ledger_ADV-04/day-1024.png",
+        "ledger-audit/screens/ledger_ADV-04/day-1440.png",
+        "ledger-audit/screens/ledger_ADV-04/day-390.png",
+        "ledger-audit/screens/ledger_ADV-04/day-768.png",
+        "ledger-audit/screens/ledger_ADV-04/night-1024.png",
+        "ledger-audit/screens/ledger_ADV-04/night-1440.png",
+        "ledger-audit/screens/ledger_ADV-04/night-390.png",
+        "ledger-audit/screens/ledger_ADV-04/night-768.png"
+      ]
+    },
+    {
+      "file": "review-ledger/audit-ledger_intake.jpg",
+      "sources": [
+        "ledger-audit/screens/ledger_intake/day-1024.png",
+        "ledger-audit/screens/ledger_intake/day-1440.png",
+        "ledger-audit/screens/ledger_intake/day-390.png",
+        "ledger-audit/screens/ledger_intake/day-768.png",
+        "ledger-audit/screens/ledger_intake/night-1024.png",
+        "ledger-audit/screens/ledger_intake/night-1440.png",
+        "ledger-audit/screens/ledger_intake/night-390.png",
+        "ledger-audit/screens/ledger_intake/night-768.png"
+      ]
+    },
+    {
+      "file": "review-ledger/audit-root.jpg",
+      "sources": [
+        "ledger-audit/screens/root/day-1024.png",
+        "ledger-audit/screens/root/day-1440.png",
+        "ledger-audit/screens/root/day-390.png",
+        "ledger-audit/screens/root/day-768.png",
+        "ledger-audit/screens/root/night-1024.png",
+        "ledger-audit/screens/root/night-1440.png",
+        "ledger-audit/screens/root/night-390.png",
+        "ledger-audit/screens/root/night-768.png"
+      ]
+    },
+    {
+      "file": "review-ledger/audit-status.jpg",
+      "sources": [
+        "ledger-audit/screens/status/day-1024.png",
+        "ledger-audit/screens/status/day-1440.png",
+        "ledger-audit/screens/status/day-390.png",
+        "ledger-audit/screens/status/day-768.png",
+        "ledger-audit/screens/status/night-1024.png",
+        "ledger-audit/screens/status/night-1440.png",
+        "ledger-audit/screens/status/night-390.png",
+        "ledger-audit/screens/status/night-768.png"
+      ]
+    }
+  ],
+  "contextClipsReviewed": 8,
+  "phoneComparisonCardsReviewed": 2,
+  "noScriptCaptureReviewed": true,
+  "findings": "No additional overflow or text collision observed. Focused Skip to content is deliberately activated by the audit. Four Day thumbnail-caption heuristic warnings are contradicted by native white-on-dark thumbnail captures and passing AXE. Some target element/full-page captures include a sticky header or clipped edge of a fixed close bubble because the harness scrolled the capture target; fresh ordinary viewport evidence will be captured without hiding any UI."
+}
