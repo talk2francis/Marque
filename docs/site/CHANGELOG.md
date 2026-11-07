@@ -10,7 +10,7 @@ An outside browser check found an agent-price read returning 503 during a rollou
 
 Price-history reads select the winning observations before loading their full payloads and share only overlapping database work. Expiry, network binding, newer failures and stored records keep their existing rules. The keyless MCP service also reports its actual release, with a memory budget checked against its observed footprint. The release verification keeps the failed run and the subsequent checks.
 
-A subsequent candidate check still hit the price-read deadline. Matching history indexes were added concurrently, covering both the catalogue winners and each agent's latest successful price. The failed check remains in the verification record; read deadlines, prices, payment actions and campaign rules are unchanged.
+A subsequent candidate check still hit the price-read deadline. Matching history indexes were added concurrently, covering both the catalogue winners and each agent's latest successful price. The catalogue seeks each service's winning observation without scanning its whole history. The failed check remains in the verification record; read deadlines, prices, payment actions and campaign rules are unchanged.
 
 ## 7 November 2026 · Test evidence with the right context
 

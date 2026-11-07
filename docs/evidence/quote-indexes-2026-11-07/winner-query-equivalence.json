@@ -1,0 +1,25 @@
+{
+  "at": "2026-11-07T17:05:21.754Z",
+  "readOnlySnapshot": true,
+  "recordsWritten": 0,
+  "rows": 2534,
+  "equal": true,
+  "plans": [
+    {
+      "wallMs": 196,
+      "executionMs": 189.156,
+      "rows": 2534,
+      "hits": 64289,
+      "reads": 0
+    },
+    {
+      "wallMs": 41,
+      "executionMs": 38.239,
+      "rows": 2534,
+      "hits": 19238,
+      "reads": 0
+    }
+  ],
+  "baselineSource": "13f54af78448c1ef3b73b2ce537ce60f73a24731",
+  "proposedScope": "One ordered winner per non-null service; all decoded output rows equal in one read-only repeatable snapshot"
+}

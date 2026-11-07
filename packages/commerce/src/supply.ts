@@ -387,13 +387,29 @@ export interface ServiceCommerce {
 /** Select the newest observation before reading large historical quote payloads. */
 export function latestCommerceQuoteQuery(serviceId?: number) {
   const scoped = serviceId !== undefined
-  return sql`
+  const winners = scoped ? sql`
     with latest_ids as materialized (
       select distinct on (service_id) id
       from commerce_quote where service_id is not null
-      ${scoped ? sql`and service_id = ${serviceId}` : sql``}
+      and service_id = ${serviceId}
       order by service_id, created_at desc, id desc
     )
+  ` : sql`
+    with recursive latest_ids as (
+      (select service_id, id from commerce_quote where service_id is not null
+       order by service_id, created_at desc, id desc limit 1)
+      union all
+      select next.service_id, next.id from latest_ids previous
+      cross join lateral (
+        select service_id, id from commerce_quote where service_id > previous.service_id
+        order by service_id, created_at desc, id desc limit 1
+      ) next
+    )
+  `
+  // Move to the next service's winner instead of reading every historical key.
+  // One statement snapshot retains orphan services, old observations and ID ties.
+  return sql`
+    ${winners}
     select q.service_id, q.agent_id, q.ok, q.failure, q.detail, q.chain_id, q.provider, q.price_raw, q.token,
            q.token_symbol, q.token_decimals, q.created_at, q.quote_expires_at, q.negotiation_hash, q.provider_sig, q.signed, q.latency_ms,
            q.raw->'quote_expires_at' as provider_expiry, q.raw#>'{response,quote_expires_at}' as response_expiry
