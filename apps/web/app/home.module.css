@@ -80,7 +80,6 @@
 .display em { font-style: italic; color: var(--accent); }
 .lede { margin: 0; font-size: var(--fs-body-l); line-height: 1.6; color: var(--ink-2); max-width: 42ch; }
 .ctas { display: flex; flex-wrap: wrap; gap: 12px; }
-.noWallet { margin: 0; font-size: 13.5px; color: var(--ink-3); }
 
 /* Two live figures on the plate, like annotations on a drawing. */
 .callouts {
@@ -163,18 +162,33 @@
 .tile[data-tone='rebalancing'] { --tone: var(--cat-rebalancing); }
 .tile[data-tone='health'] { --tone: var(--cat-health); }
 .tile::before { content: ''; position: absolute; left: 18px; right: 18px; top: -1px; height: 1px; background: linear-gradient(90deg, var(--tone), transparent 70%); opacity: 0.8; }
-.tile:hover { border-color: var(--hair-2); background: var(--panel); }
-.tileName { display: inline-flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 500; letter-spacing: -0.01em; }
+.tile:focus-within { border-color: var(--hair-2); }
+.tileName { margin: 0; display: inline-flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 500; letter-spacing: -0.01em; }
 .tileMark { width: 8px; height: 8px; border-radius: 2px; background: var(--tone); transform: rotate(45deg); }
-.tileJob { font-size: 14px; line-height: 1.5; color: var(--ink-2); min-height: calc(1.5em * 3); }
+.tileJob { margin: 0; font-size: 14px; line-height: 1.5; color: var(--ink-2); min-height: calc(1.5em * 2); }
 .tileMeasure { display: block; }
-.tileFacts { display: flex; flex-direction: column; gap: 6px; font-size: 13.5px; color: var(--ink-2); }
+.tileAvailable { margin: 0; font-size: 13px; color: var(--ink-2); }
+.tileAvailable b { margin-right: 4px; font-size: 27px; font-weight: 400; line-height: 1; letter-spacing: -.02em; color: var(--ink); }
+.tilePrice { margin: -4px 0 0; font-size: 13px; color: var(--ink-2); }
+.tilePrice b { color: var(--ink); font-weight: 500; }
+.tileGo { display: inline-flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: auto; width: 100%; min-height: 44px; font-size: 13px; }
+.tileGo svg { width: 14px; height: 14px; flex: none; }
+.tileDetails { margin-top: -2px; border-top: 1px solid var(--hair); }
+.tileDetails > summary { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 44px; padding-top: 4px; list-style: none; cursor: pointer; color: var(--ink-2); font-size: 12px; }
+.tileDetails > summary::-webkit-details-marker { display: none; }
+.tileDetails > summary svg { width: 14px; height: 14px; flex: none; }
+.tileDetails[open] > summary svg { transform: rotate(180deg); }
+.tileDetails > summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; border-radius: 3px; }
+.tileFacts { display: flex; flex-direction: column; gap: 12px; padding-block: 8px 2px; font-size: 12px; color: var(--ink-2); }
 .tileFacts b { color: var(--ink); font-weight: 500; }
-.tileRating { color: var(--ink-3); font-size: 13px; }
-.tileGo { display: inline-flex; align-items: center; gap: 6px; margin-top: auto; padding-top: 12px; border-top: 1px solid var(--hair); font-size: 13.5px; color: var(--ink-2); }
-.tileGo svg { width: 14px; height: 14px; transition: transform var(--t-fast) var(--ease); }
-.tile:hover .tileGo { color: var(--ink); }
-.tile:hover .tileGo svg { transform: translateX(2px); }
+.tileFacts dl { display: grid; gap: 8px; margin: 0; }
+.tileFacts dl > div { display: flex; justify-content: space-between; gap: 12px; }
+.tileFacts dd { margin: 0; color: var(--ink); font-variant-numeric: tabular-nums; }
+.tileFacts p { margin: 0; }
+.tileRating { display: grid; gap: 6px; font-size: 12px; overflow-wrap: anywhere; }
+.tileRating b { font-weight: 500; }
+.tilesSum { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; font-size: 12px; color: var(--ink-2); }
+.tilesSum a { color: var(--ink); text-underline-offset: 3px; }
 
 /* ---------- The band: How a hire is made ---------- */
 .band {
@@ -444,11 +458,8 @@
 .how { list-style: none; display: flex; flex-wrap: wrap; gap: 8px 18px; margin: 18px 0 0; padding: 0; font-size: 13.5px; color: var(--ink-2); }
 .how li { display: inline-flex; align-items: center; gap: 8px; }
 .how b { display: grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; font-size: 11px; font-weight: 600; color: var(--ink-inverse); background: var(--aurora); }
-.noWallet a { color: var(--ink); text-decoration: none; white-space: nowrap; }
-.noWallet a:hover { text-decoration: underline; text-underline-offset: 3px; }
-.how + .noWallet { margin-top: 12px; }
 .rmMeter { display: grid; gap: 4px; margin-top: 6px; }
 .rmTrack { display: block; height: 3px; border-radius: 3px; background: var(--hair); overflow: hidden; max-width: 220px; }
 .rmTrack i { display: block; height: 100%; border-radius: inherit; background: var(--aurora); }
 .rmMeter small { font-size: 12px; color: var(--ink-3); }
-.tilesSum { margin: 12px 0 0; font-size: 13px; color: var(--ink-3); }
+.tilesSum { margin: 12px 0 0; }

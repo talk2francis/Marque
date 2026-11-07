@@ -30,6 +30,7 @@ export async function HomeFaq({ supply }: { supply: FaqSupply | null }) {
   return (
     <section className={styles.faq} aria-labelledby="questions" data-reveal>
       <script type="application/ld+json" id="faq-ld" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd(ctx)).replace(/</g, '\\u003c') }} />
+      <div className={styles.inner}>
       <div className={styles.headRule}>
         <span className="t-label">Questions</span>
         <span className={styles.headNote}>{items.length} of {ALL} answers</span>
@@ -64,6 +65,12 @@ export async function HomeFaq({ supply }: { supply: FaqSupply | null }) {
             </details>
           ))}
         </div>
+      </div>
+      <div className={styles.start}>
+        <p>No wallet needed to explore.</p>
+        <a className={styles.startLink} href="/docs/faq#what-is-marque-pass"><span><b>Marque Pass</b><small>A wallet with your face or fingerprint</small></span><ArrowRight aria-hidden="true" /></a>
+        <a className={styles.startLink} href="/builders"><span><b>Agent Forge</b><small>Build an agent or bring your own</small></span><ArrowRight aria-hidden="true" /></a>
+      </div>
       </div>
       <FaqOpen ids={items.map((f) => f.id)} />
     </section>

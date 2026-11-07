@@ -4,6 +4,12 @@
 
 A public record of meaningful product changes. Evidence and limitations travel with each release.
 
+## 7 November 2026 · More room to browse and manage agents
+
+The homepage FAQ uses the same full-width textured surface as the hire explanation. Category cards show a short description, availability, price and a clear Browse button; ratings, checks and network details remain available on expansion. Marque Pass and Agent Forge help now sit below the questions instead of crowding the hero.
+
+My Marque groups agent activity, management actions, campaign checks, delivery records and job history. Today gives tasks and answer checks their own space, with a prominent button to choose an answer. Existing prices, evidence, wallet permissions and signed actions keep their rules.
+
 ## 7 November 2026 · A guarded rollback and faster price reads
 
 An outside browser check found an agent-price read returning 503 during a rollout. Traffic was rolled back to the retained release while the failure was investigated; the marketplace document itself had returned 200.

@@ -6,12 +6,18 @@
   --hair: var(--on-forest-hair);
   --hair-2: var(--on-forest-hair);
   margin-top: clamp(44px, 5.5vw, 72px);
-  padding: clamp(24px, 3.5vw, 44px);
-  background: var(--forest);
+  margin-inline: calc(50% - 50vw);
+  padding-block: clamp(40px, 5vw, 64px);
+  background:
+    var(--grain),
+    radial-gradient(60rem 30rem at 10% -20%, color-mix(in srgb, var(--on-forest) 7%, transparent), transparent 70%),
+    radial-gradient(50rem 26rem at 95% 120%, color-mix(in srgb, var(--accent) 6%, transparent), transparent 70%),
+    var(--forest);
+  background-size: 160px 160px, auto, auto, auto;
   color: var(--on-forest);
-  border: 1px solid var(--on-forest-hair);
-  border-radius: var(--r-3);
+
 }
+.inner { max-width: var(--maxw); margin: 0 auto; padding-inline: var(--margin); }
 .headRule { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; }
 .headRule :global(.t-label) { color: var(--on-forest-2); text-transform: none; letter-spacing: 0; font-size: 12px; }
 .headNote { margin-left: auto; font-size: 12px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
@@ -60,8 +66,17 @@
   .a { padding-right: 0; }
 }
 @media (max-width: 480px) {
-  .faq { padding: 22px 18px; }
   .headRule { margin-bottom: 22px; }
   .more { flex-direction: column; gap: 0; }
   .item summary { padding-block: 16px; gap: 12px; }
 }
+
+.start { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 24px; margin-top: 28px; padding-top: 24px; border-top: 1px solid var(--hair); }
+.start > p { margin: 0 auto 0 0; color: var(--ink-2); font-size: 13px; }
+.startLink { display: flex; align-items: center; justify-content: space-between; gap: 22px; min-height: 56px; padding: 10px 14px; border: 1px solid var(--hair-2); border-radius: var(--r-2); color: var(--ink); text-decoration: none; }
+.startLink > span { display: grid; gap: 2px; }
+.startLink b { font-size: 13px; font-weight: 500; }
+.startLink small { color: var(--ink-2); font-size: 12px; }
+.startLink svg { width: 15px; height: 15px; flex: none; }
+.startLink:hover, .startLink:focus-visible { border-color: var(--ink-3); }
+@media (max-width: 640px) { .start { align-items: stretch; gap: 12px; } .start > p { width: 100%; } .startLink { flex: 1 1 240px; } }

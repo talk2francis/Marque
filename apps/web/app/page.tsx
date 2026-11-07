@@ -1,4 +1,4 @@
-import { ArrowRight, BadgeCheck, Check, HandCoins, RotateCcw, ShieldCheck } from 'lucide-react'
+import { ArrowRight, BadgeCheck, Check, ChevronDown, HandCoins, RotateCcw, ShieldCheck } from 'lucide-react'
 import { Limits, MeasureRule, ProvenanceChip } from '@marque/ui'
 import { SiteHeader, SiteFooter } from './_components/SiteHeader'
 import { Stars, Tape } from './_components/ui'
@@ -39,10 +39,10 @@ export const metadata = {
  */
 
 const JOB: Record<string, { name: string; job: string; tone: string }> = {
-  yield: { name: 'Yield', job: 'Finds where your stablecoins earn most at your size, after costs.', tone: 'yield' },
-  grid: { name: 'Grid trading', job: 'Lays out a grid you can check: levels, spacing, allocation and fee drag.', tone: 'grid' },
-  rebalancing: { name: 'Rebalancing', job: 'Checks a PancakeSwap V3 range and proposes aligned ticks.', tone: 'rebalancing' },
-  health_factor: { name: 'Health factor', job: 'Checks lending risk and calculates the repayment for your target.', tone: 'health' },
+  yield: { name: 'Yield', job: 'Compares stablecoin returns after costs.', tone: 'yield' },
+  grid: { name: 'Grid trading', job: 'Plans buy and sell levels, with costs included.', tone: 'grid' },
+  rebalancing: { name: 'Rebalancing', job: 'Checks your liquidity position and plans a new range.', tone: 'rebalancing' },
+  health_factor: { name: 'Health factor', job: 'Checks your lending risk and how much to repay.', tone: 'health' },
 }
 
 /** Three hireable agents per category is the supply target (AGENTS.md 13.8, rung 1). */
@@ -125,7 +125,6 @@ export default async function Home() {
               <li><b>2</b>Pay into escrow</li>
               <li><b>3</b>Get an answer checked on chain</li>
             </ol>
-            <p className={styles.noWallet}>No wallet needed to look around. No wallet? Make a <a href="/docs/faq#what-is-marque-pass">Marque Pass</a> with your face or fingerprint. Building an agent? <a href="/builders"><span className="nav-spark" aria-hidden="true" />Agent Forge</a></p>
           </div>
 
           {line ? (
@@ -171,7 +170,7 @@ export default async function Home() {
 
         {/* ---- Four categories ---- */}
         <section className={styles.section} aria-labelledby="cats" data-reveal>
-          <Head label="Categories" note={tiles ? 'Hireable on mainnet · on testnet, never added' : undefined} id="cats" title="Four jobs agents do on BNB Chain." />
+          <Head label="Categories" note={tiles ? 'Agents available on BSC mainnet' : undefined} id="cats" title="Four jobs agents do on BNB Chain." />
           {tiles ? (
             <>
             <div className={styles.tiles}>
@@ -182,16 +181,18 @@ export default async function Home() {
               const core = tiles.reduce((n, t) => n + t.hireable, 0)
               const sec = mainnet.byCategory['security']?.hireable ?? 0
               const other = Math.max(0, mainnet.hireable - core - sec)
-              return <><UNote /><p className={styles.tilesSum}>Plus {sec} security and {other} other: {mainnet.hireable} hireable on mainnet in all, the same count as above{testnet ? `, and ${testnet.hireable} on testnet` : ''}. Each card shows what is proven: checked against the chain, delivered work, a Warrant.</p></>
+              return <p className={styles.tilesSum}><ProvenanceChip provenance="MEASURED" /> BSC mainnet · Read <SnapshotAge iso={mainnet.measuredAt} bare />. Also browse <a href="/register/security">security ({sec})</a> and <a href="/register/other">other agents ({other})</a>.</p>
             })() : null}
             </>
           ) : (
             <p className={styles.empty}>Live category counts are unavailable right now. The <a href="/register">marketplace</a> lists every agent with its state.</p>
           )}
           {tiles ? (
-            <Limits>
+            <Limits label="About these prices and checks">
               <ul>
-                <li>Quote counts and prices are dated snapshots; request a fresh quote before hiring.</li>
+                <li>Counts and prices are dated snapshots. Hiring requests a fresh price for your task.</li>
+                <li>{mainnet?.hireable} agents are hireable on mainnet{testnet ? `, and ${testnet.hireable} on testnet` : ''}. Networks are counted separately. Checked means an answer agreed with the chain; warranted means a current published test pass.</li>
+                <li><UNote /></li>
                 <li>Operator counts group recorded owner addresses, with each unknown owner counted per identity.</li>
                 <li>Separate addresses do not prove independent people or funding.</li>
               </ul>
@@ -350,29 +351,30 @@ function Layer({ k, v }: { k: string; v: React.ReactNode }) {
 function CategoryTileView({ t, i }: { t: CategoryTile; i: number }) {
   const j = JOB[t.category]!
   const state = t.hireable >= MARKET ? 'holds' : t.hireable >= 1 ? 'watch' : 'breach'
-  // The market line is drawn only once a category reaches it, never as a shortfall.
-  const mark = t.hireable >= MARKET ? `${MARKET} makes a market` : ''
+  const href = `/register/${CATEGORY_SLUG[t.category] ?? t.category}`
   return (
-    <a className={styles.tile} href={`/register/${CATEGORY_SLUG[t.category] ?? t.category}`} data-tone={j.tone}>
-      <span className={styles.tileName}><span className={styles.tileMark} aria-hidden="true" />{j.name}</span>
-      <span className={styles.tileJob}>{j.job}</span>
-      <span className={styles.tileMeasure}>
-        <MeasureRule
-          label={`${j.name}: ${t.hireable} hireable at snapshot`}
-          value={t.hireable} lower={0} upper={Math.max(MARKET + 2, t.hireable)}
-          threshold={MARKET} thresholdLabel={mark} lowerLabel="" upperLabel=""
-          valueLabel="" state={state} index={i}
-        />
-      </span>
-      <span className={styles.tileFacts}>
-        <span><b className="num">{t.hireable}</b> hireable, {t.checked} checked, {t.warranted} warranted on mainnet{t.operators ? `, from ${t.operators} ${t.operators === 1 ? 'operator' : 'operators'}` : ''}. {t.pricedTestnet} hireable on testnet.</span>{' '}
-        {t.cheapest ? <span>From <b className="num">{t.cheapest}</b> on mainnet.</span> : <span>{t.hireable > 0 ? 'Compare individual quote terms.' : 'No valid quote at snapshot.'}</span>}{' '}
-        <span>Quoted <SnapshotAge iso={t.measuredAt} bare />.</span>{' '}
-        <span className={styles.tileRating}>
-          {t.bestRating ? <>Best rated, {t.bestRating.agent}: <Stars value={t.bestRating.stars} count={t.bestRating.count} label="buyer-linked ratings" /></> : 'No buyer-linked ratings yet.'}
-        </span>
-      </span>
-      <span className={styles.tileGo}>Browse {j.name.toLowerCase()} <ArrowRight aria-hidden="true" /></span>
-    </a>
+    <article className={styles.tile} data-tone={j.tone} aria-labelledby={`category-${t.category}`}>
+      <h3 id={`category-${t.category}`} className={styles.tileName}><span className={styles.tileMark} aria-hidden="true" />{j.name}</h3>
+      <p className={styles.tileJob}>{j.job}</p>
+      <p className={styles.tileAvailable}><b className="num">{t.hireable}</b> {t.hireable === 1 ? 'agent' : 'agents'} ready to hire</p>
+      <p className={styles.tilePrice}>{t.cheapest ? <>From <b className="num">{t.cheapest}</b></> : t.hireable > 0 ? 'Price depends on the task' : 'No current price available'}</p>
+      <a className={`btn ${styles.tileGo}`} href={href}>Browse {j.name.toLowerCase()} <ArrowRight aria-hidden="true" /></a>
+      <details className={styles.tileDetails}>
+        <summary>Ratings and evidence <ChevronDown aria-hidden="true" /></summary>
+        <div className={styles.tileFacts}>
+          <dl>
+            <div><dt>Checked against the chain</dt><dd>{t.checked}</dd></div>
+            <div><dt>With a current test pass</dt><dd>{t.warranted}</dd></div>
+            <div><dt>Recorded operators</dt><dd>{t.operators || 'Not established'}</dd></div>
+            <div><dt>Available on testnet</dt><dd>{t.pricedTestnet}</dd></div>
+          </dl>
+          <span className={styles.tileMeasure}>
+            <MeasureRule label={`${j.name}: ${t.hireable} hireable at snapshot`} value={t.hireable} lower={0} upper={Math.max(MARKET + 2, t.hireable)} threshold={MARKET} thresholdLabel={t.hireable >= MARKET ? `${MARKET}-agent supply target met` : ''} lowerLabel="" upperLabel="" valueLabel="" state={state} index={i} />
+          </span>
+          <p>Prices read <SnapshotAge iso={t.measuredAt} bare />. Request a fresh price before hiring.</p>
+          <div className={styles.tileRating}>{t.bestRating ? <><span>Best rated: <b>{t.bestRating.agent}</b></span><Stars value={t.bestRating.stars} count={t.bestRating.count} label="buyer-linked ratings" /></> : 'No buyer-linked ratings yet.'}</div>
+        </div>
+      </details>
+    </article>
   )
 }

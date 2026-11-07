@@ -5,7 +5,7 @@ import { useAccount, useBalance, useConfig, useReadContracts } from 'wagmi'
 import { useConnectModal } from '@rainbow-me/rainbowkit'
 import { switchChain, waitForTransactionReceipt, writeContract } from '@wagmi/core'
 import { erc20Abi, formatUnits } from 'viem'
-import { ArrowUpRight, Check, Copy, Download, Hammer, Pencil, ShieldCheck, ShoppingBag } from 'lucide-react'
+import { ArrowUpRight, Check, ChevronDown, Copy, Download, Hammer, Pencil, ShieldCheck, ShoppingBag } from 'lucide-react'
 import { AgentAvatar } from '../_components/AgentAvatar'
 import { FUNDER_LABEL } from '../../lib/funder-label'
 import { Emblem } from '../_components/campaign/Emblem'
@@ -107,7 +107,7 @@ export function Workspace({ addrParam }: { addrParam: string | null }) {
   const isPass = own && connector?.id === MARQUE_PASS_ID
 
   const hiringTabs = [
-    { id: 'today', label: 'Today', content: <><Dockets address={address} own={own} view="hiring" /><RecheckList address={address} compact /></> },
+    { id: 'today', label: 'Today', content: <div className={styles.todayContent}><Dockets address={address} own={own} view="hiring" /><RecheckList address={address} compact /></div> },
     { id: 'positions', label: 'Positions', content: <><WorkspacePositions address={address} /><Watching /></> },
     { id: 'jobs', label: 'Jobs', content: <Jobs address={address} historyInitially={nav.history} /> },
     { id: 'money', label: 'Money', content: <Money address={address} own={own} /> },
@@ -327,7 +327,7 @@ function Dockets({ address, own, view }: { address: string; own: boolean; view: 
   return (
     <section className={styles.needs} aria-labelledby="needs-title">
       <h2 id="needs-title" className={styles.h2}>Today{items ? <span className={styles.count}>{total}</span> : null}</h2>
-      {checkedAt && total > 0 ? <p className={styles.fine}>Indexed job amounts and live allowance reads, checked {new Date(checkedAt).toISOString().replace('T', ' ').slice(0, 19)} UTC. Networks stay separate.</p> : null}
+      {checkedAt && total > 0 ? <p className={styles.fine}>Job and spending checks read {new Date(checkedAt).toISOString().replace('T', ' ').slice(0, 19)} UTC. Mainnet and testnet stay separate.</p> : null}
       {team ? <p className={styles.fine}>A published Marque team wallet: its activity is shown, never counted for Set and Earn.</p> : null}
       {unavailable ? <p className={styles.fine} role="status">Some of today&apos;s wallet checks could not be read. No all-clear is assumed. <button type="button" className={styles.textBtn} onClick={load}>Try again</button></p> : items === null ? <div className={styles.skel}><Skeleton h={56} /></div> : null}
       {total === 0 && (unavailable || items === null) ? null
@@ -615,20 +615,34 @@ export function Agents({ address, own = false }: { address: string; own?: boolea
               <span className={styles.fine}>#{a.agentId} · {net(a.chainId)}</span>
               <span className={styles.pill} data-tone={a.listingEvidence?.ownerListed ? 'good' : undefined}>{a.listingEvidence?.ownerListed ? 'Owner-listed' : 'Owner listing not established'}</span>
             </div>
-            {q ? (
-              <div className={styles.crit} aria-label={`Set and Earn: ${q.observed} of 6 criteria observed`}>
-                {CRIT.map(([k, label]) => { const c = k === 'registered' ? (q.checks['registered']?.state === 'observed' && q.checks['listed']?.state === 'observed' ? 'observed' : q.checks['listed']?.state ?? 'not_yet') : q.checks[k]?.state ?? 'not_yet'; return <span key={k} className={styles.critChip} data-state={c} title={q.checks[k]?.reason ?? ''}>{label}</span> })}
-                <span className={styles.fine}>{q.observed} of 6 observed</span>
-              </div>
-            ) : null}
-            <div className={styles.agentFoot}>
-              <span>Last 30 days: jobs received <b>{a.seller?.jobs.received ?? 'Unavailable'}</b> · funded <b>{a.seller?.jobs.funded ?? 'Unavailable'}</b> · payment released <b>{a.seller?.jobs.paid ?? 'Unavailable'}</b></span>
-              <a className={styles.link} href={`/builders/my-agents?wallet=${address}&agent=${a.chainId}:${a.agentId}#your-agents`}>Manage agent</a>
-              <a className={styles.link} href={`/builders/check/${a.chainId}/${a.agentId}`}>Fix report</a>
-              <a className={styles.link} href={`/builders/progress/${a.chainId}/${a.agentId}`}>Build checklist</a>
+            <div className={styles.agentActivity}>
+              <p>Last 30 days</p>
+              <dl>
+                <div><dt>Jobs received</dt><dd>{a.seller?.jobs.received ?? 'Unavailable'}</dd></div>
+                <div><dt>Funded</dt><dd>{a.seller?.jobs.funded ?? 'Unavailable'}</dd></div>
+                <div><dt>Payment released</dt><dd>{a.seller?.jobs.paid ?? 'Unavailable'}</dd></div>
+              </dl>
             </div>
+            <div className={styles.agentActions}>
+              <a className="btn btn--primary" href={`/builders/my-agents?wallet=${address}&agent=${a.chainId}:${a.agentId}#your-agents`}>Manage agent <ArrowUpRight aria-hidden="true" /></a>
+              <a className="btn" href={`/builders/check/${a.chainId}/${a.agentId}`}>Fix report <ArrowUpRight aria-hidden="true" /></a>
+            </div>
+            {q ? (
+              <details className={styles.agentDisclosure}>
+                <summary><span>Campaign checklist <small>{q.observed} of 6 observed</small></span><ChevronDown aria-hidden="true" /></summary>
+                <div className={styles.crit} aria-label={`Set and Earn: ${q.observed} of 6 criteria observed`}>
+                  {CRIT.map(([k, label]) => { const c = k === 'registered' ? (q.checks['registered']?.state === 'observed' && q.checks['listed']?.state === 'observed' ? 'observed' : q.checks['listed']?.state ?? 'not_yet') : q.checks[k]?.state ?? 'not_yet'; return <span key={k} className={styles.critChip} data-state={c} title={q.checks[k]?.reason ?? ''}>{label}</span> })}
+                </div>
+                <a className={styles.agentMinorLink} href={`/builders/progress/${a.chainId}/${a.agentId}`}>Open the build checklist <ArrowUpRight aria-hidden="true" /></a>
+              </details>
+            ) : null}
             <AgentLoop agentId={a.agentKey} />
-            <details><summary className={styles.textBtn}>Agent job history</summary>{a.seller?.recentJobs ? <ul>{a.seller.recentJobs.map(j => <li key={`${j.chainId}:${j.jobId}`}><a href={`/jobs/${j.chainId}/${j.jobId}`}>Job {j.jobId} · {net(j.chainId)}</a> · {j.state.replaceAll('_', ' ').toLowerCase()}{j.createdAt ? ` · ${j.createdAt.slice(0, 10)}` : ''}</li>)}</ul> : <p className={styles.fine}>This agent&apos;s recorded jobs could not be read.</p>}<a href={`/builders/my-agents?wallet=${address}&agent=${a.chainId}:${a.agentId}#your-agents`}>Full job and answer workspace</a></details>
+            <details className={styles.agentDisclosure}>
+              <summary><span>Agent job history</span><ChevronDown aria-hidden="true" /></summary>
+              {a.seller?.recentJobs ? a.seller.recentJobs.length ? <ul className={styles.agentHistory}>{a.seller.recentJobs.map(j => <li key={`${j.chainId}:${j.jobId}`}><a href={`/jobs/${j.chainId}/${j.jobId}`}>Job {j.jobId} · {net(j.chainId)}</a><span>{j.state.replaceAll('_', ' ').toLowerCase()}{j.createdAt ? ` · ${j.createdAt.slice(0, 10)}` : ''}</span></li>)}</ul> : <p className={styles.fine}>No recent jobs in this view.</p> : <p className={styles.fine}>This agent&apos;s recorded jobs could not be read.</p>}
+              <a className={styles.agentMinorLink} href={`/builders/my-agents?wallet=${address}&agent=${a.chainId}:${a.agentId}#your-agents`}>Full job and answer workspace <ArrowUpRight aria-hidden="true" /></a>
+            </details>
+            <div className={styles.agentSettings} role="group" aria-label="Agent profile settings">
             {own ? (
               <AgentPortraitControl owner={address} agentId={a.agentKey} hasPortrait={a.agentKey in portraits ? portraits[a.agentKey] !== null : Boolean(a.portraitByOwner)}
                 onChanged={(url) => setPortraits((p) => ({ ...p, [a.agentKey]: url }))} />
@@ -638,6 +652,7 @@ export function Agents({ address, own = false }: { address: string; own?: boolea
                 portraitUrl={(() => { const u = a.agentKey in portraits ? portraits[a.agentKey] : a.portraitByOwner ? a.imageUrl : null; return u ? (u.startsWith('/') ? `https://marque.trade${u}` : u) : null })()}
                 onSaved={(n) => setNames((m) => ({ ...m, [a.agentKey]: n }))} />
             ) : null}
+            </div>
           </li>
         )
       })}

@@ -561,3 +561,12 @@ Hiring is Today, Positions, Jobs, Money; Building is Agents, Bench, Demand. Hist
 ## Post-close presentation follow-up (6 November 2026, local)
 
 The FAQ is a contained sage surface using the existing forest/on-forest tokens, with a 32 to 44px serif heading, compact native question rows and all answers initially closed. The complete answer words and proof links remain. Its live counters appear only within their relevant answer, with source age. Landing section gaps use a 44 to 72px rhythm. Deep-link settlement stops on reader input; the closed campaign companion no longer auto-expands over content. Forge uses a three-example ruled showcase linking to the complete campaign directory rather than repeating all cards. Test display freshness imports the existing 14-day standing constant; the worker's 72-hour refresh schedule is a different fact. No grading or campaign definition changes.
+
+
+### 7 November 2026: homepage and personal-workspace clarity
+
+The FAQ is a viewport-wide band using the existing hire band's forest material, grain, lighting and inner content width. It has no inset card border or separate radius. Its native question controls and answers retain their behavior; wallet and builder help sits in a footer below the questions.
+
+The four category doors use a short description, measured mainnet availability, snapshot price and a bordered Browse link. Ratings, checked/warranted agent counts, operators, testnet availability and the existing supply-target measure are in native disclosures. One shared source/read-time line replaces repeated paragraphs. Expanded price/count notes retain token and evidence definitions. No count, source or freshness rule changes.
+
+My Marque agent entries separate identity, recent activity, management links and expandable records. Campaign checks and delivery milestones are distinct. The shared delivery record expands to every original milestone, timestamp, expiry and evidence link. Profile-edit actions retain the original owner gates and signed handlers. Today uses consistent section gaps, bordered answer groups and a primary 44px answer-selector button. Rating links have visible borders and focus states. These refinements are local to the requested surfaces; global tokens and unrelated layouts are unchanged.

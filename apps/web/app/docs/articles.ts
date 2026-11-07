@@ -63,6 +63,10 @@ export const articles: Record<string, Article> = {
     title:'What changed, and why.',
     description:'A public record of meaningful product changes. Evidence and limitations travel with each release.',
     sections:[
+      { id: 'interface-clarity', title: '7 November 2026 · More room to browse and manage agents', paragraphs: [
+        'The homepage FAQ uses the same full-width textured surface as the hire explanation. Category cards show a short description, availability, price and a clear Browse button; ratings, checks and network details remain available on expansion. Marque Pass and Agent Forge help now sit below the questions instead of crowding the hero.',
+        'My Marque groups agent activity, management actions, campaign checks, delivery records and job history. Today gives tasks and answer checks their own space, with a prominent button to choose an answer. Existing prices, evidence, wallet permissions and signed actions keep their rules.',
+      ] },
       { id: 'terms-rollout-repair', title: '7 November 2026 · A guarded rollback and faster price reads', paragraphs: [
         'An outside browser check found an agent-price read returning 503 during a rollout. Traffic was rolled back to the retained release while the failure was investigated; the marketplace document itself had returned 200.',
         'Price-history reads select the winning observations before loading their full payloads and share only overlapping database work. Expiry, network binding, newer failures and stored records keep their existing rules. The keyless MCP service also reports its actual release, with a memory budget checked against its observed footprint. The release verification keeps the failed run and the subsequent checks.',
