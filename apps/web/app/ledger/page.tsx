@@ -85,6 +85,14 @@ function Benchmark({ b }: { b: LedgerBenchmark }) {
         either arm ran.
       </p>
 
+      {b.taskContextRecovery && (
+        <p className={styles.note}>
+          The original task matches all saved comparison runs. A later reproduction changed the registration&apos;s block;
+          this page uses the verified original context.{' '}
+          <Link href={`/ledger/${b.id}#comparison-context`}>See the context and hashes</Link>.
+        </p>
+      )}
+
       {(isReplay || recovered) && pinnedBlock && (
         <p className={styles.note}>
           <Chip tone="chain">

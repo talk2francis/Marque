@@ -1,4 +1,5 @@
 import { comparisonMissing } from './completion.js'
+import { recoverComparisonTask, type ComparisonTaskRecovery } from './comparison-context.js'
 import { performance } from 'node:perf_hooks'
 import { eq, and, inArray } from 'drizzle-orm'
 import { db, benchmark as benchmarkTable, benchmarkRun, benchmarkRunProvenance as benchmarkRunProvenanceTable } from '@marque/db'
@@ -129,17 +130,19 @@ export async function loadFrozenBenchmark(
 ): Promise<{ id: string; task: string; taskHash: string; inputHash: string; rubricVersion: string; rubricHash: string; block: string | null }> {
   const [row] = await db().select().from(benchmarkTable).where(eq(benchmarkTable.id, id)).limit(1)
   if (!row) throw new Error(`benchmark ${id} is not registered`)
-  if (expect?.taskHash && expect.taskHash !== row.taskHash) {
-    throw new Error(`benchmark ${id} frozen task hash ${row.taskHash} does not match expected ${expect.taskHash}`)
+  const status = await benchmarkStatus(id)
+  const context = status.taskContextRecovery ?? row
+  if (expect?.taskHash && expect.taskHash !== context.taskHash) {
+    throw new Error(`benchmark ${id} frozen task hash ${context.taskHash} does not match expected ${expect.taskHash}`)
   }
   return {
     id: row.id,
-    task: row.task,
-    taskHash: row.taskHash,
+    task: context.task,
+    taskHash: context.taskHash,
     inputHash: row.inputHash,
     rubricVersion: row.rubricVersion,
     rubricHash: row.rubricHash,
-    block: pinnedBlockOf(row.task),
+    block: pinnedBlockOf(context.task),
   }
 }
 
@@ -207,9 +210,15 @@ async function resolveContext(
   }
 
   const block = (await publicClient().getBlockNumber()).toString()
-  await registerBenchmark(spec, block)
+  // Public reproductions are new observations, never a new registration of the
+  // published comparison. Re-registering here used to invalidate its task hash.
+  if (opts.batchKind !== 'reproduction') await registerBenchmark(spec, block)
   const [row] = await db().select().from(benchmarkTable).where(eq(benchmarkTable.id, spec.id)).limit(1)
   if (!row) throw new Error(`benchmark ${spec.id} was not registered`)
+  if (opts.batchKind === 'reproduction' && (hashContent(spec.input) !== row.inputHash || rubricHash(buildRubric(spec.category)) !== row.rubricHash)) {
+    throw new Error(`benchmark ${spec.id} reproduction inputs or rubric differ from its registration`)
+  }
+  const task = opts.batchKind === 'reproduction' ? spec.task({ block }) : row.task
   const blockHash = await publicClient().getBlock({ blockNumber: BigInt(block) }).then((b) => b.hash).catch(() => null)
   return {
     benchmarkId: spec.id,
@@ -217,8 +226,8 @@ async function resolveContext(
     blockHash,
     batch: opts.batch,
     batchKind: opts.batchKind,
-    task: row.task,
-    taskHash: row.taskHash,
+    task,
+    taskHash: opts.batchKind === 'reproduction' ? hashContent(task) : row.taskHash,
     inputHash: row.inputHash,
     rubricVersion: row.rubricVersion,
     rubricHash: row.rubricHash,
@@ -469,6 +478,7 @@ export async function benchmarkStatus(id: string): Promise<{
   scored: number
   complete: boolean
   missing: string[]
+  taskContextRecovery: ComparisonTaskRecovery | null
 }> {
   const runs = await db().select().from(benchmarkRun).where(eq(benchmarkRun.benchmarkId, id))
   const agentBatch = await latestBatch(id, 'agent')
@@ -493,14 +503,16 @@ export async function benchmarkStatus(id: string): Promise<{
     const fix = prov.find((p) => p.runId === r.id && p.field === 'block_number')
     const effectiveBlock = isBlk(r.blockNumber) ? r.blockNumber
       : fix && isBlk(fix.effectiveValue) ? fix.effectiveValue : r.blockNumber
-    return { ...r, effectiveBlock, blockRecovered: Boolean(fix) && !isBlk(r.blockNumber) }
+    return { ...r, effectiveBlock, blockRecovered: Boolean(fix) && !isBlk(r.blockNumber), blockRecoveryTaskHash: fix?.sourceTaskHash ?? null }
   })
 
   const [registered] = await db().select().from(benchmarkTable).where(eq(benchmarkTable.id, id)).limit(1)
-  const missing = registered ? comparisonMissing(registered, withProv) : ['registered benchmark evidence']
+  const spec = BENCHMARKS.find(candidate => candidate.id === id)
+  const taskContextRecovery = registered && spec ? recoverComparisonTask(registered, withProv, spec.task) : null
+  const missing = registered ? comparisonMissing({ ...registered, ...(taskContextRecovery ? { taskHash: taskContextRecovery.taskHash } : {}) }, withProv) : ['registered benchmark evidence']
   return {
     id, agentReps, manualReps, agentBatch, manualBatch, earlierSittings, scored,
-    complete: missing.length === 0, missing,
+    complete: missing.length === 0, missing, taskContextRecovery,
   }
 }
 

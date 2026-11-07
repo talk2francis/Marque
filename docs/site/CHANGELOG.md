@@ -4,6 +4,12 @@
 
 A public record of meaningful product changes. Evidence and limitations travel with each release.
 
+## 7 November 2026 · Original Ledger comparisons preserved
+
+A later reproduction changed the registered task block for ADV-01 and ADV-03, making their complete original comparisons appear incomplete. The Ledger now verifies and shows the original task context against every saved comparison manifest, with both hashes and blocks disclosed. ADV-02 and ADV-04 already matched.
+
+Reproductions can no longer replace a registration. Original runs, blind grades, timings, costs and provenance are unchanged. Complete means comparable evidence, not a winning score.
+
 ## 6 November 2026 · Clearer public pages and stronger read performance
 
 Public pages render without scripts, including the native questions and answers. Links and controls have larger usable targets, address fields retain their height on phones, and missing registry portraits can be recovered from the identity's own declaration through checked image handling. Unavailable artwork keeps a labelled fallback.

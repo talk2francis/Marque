@@ -1,7 +1,7 @@
 import 'server-only'
 import { desc, eq, inArray } from 'drizzle-orm'
 import { db, benchmark as benchmarkTable, benchmarkRun, benchmarkRunProvenance, sealedCall } from '@marque/db'
-import { trackRecord, isReproduction, comparisonMissing, type SealOutcome } from '@marque/ledger'
+import { trackRecord, isReproduction, comparisonMissing, recoverComparisonTask, benchmarkById, type ComparisonTaskRecovery, type SealOutcome } from '@marque/ledger'
 
 /**
  * The Ledger, as the web process reads it.
@@ -68,6 +68,7 @@ export interface LedgerBenchmark {
   /** What is still missing before this can be published as a result. */
   missing: string[]
   complete: boolean
+  taskContextRecovery?: ComparisonTaskRecovery | null
 }
 
 type ProvenanceRow = typeof benchmarkRunProvenance.$inferSelect
@@ -137,28 +138,31 @@ export async function readLedger(): Promise<LedgerBenchmark[]> {
     ).size
 
     const mine = current.map((r) => toRun(r, provenance))
-    const missing = comparisonMissing(
-      b,
-      mine.map((r) => ({
-        arm: r.arm,
-        rep: r.rep,
-        blockNumber: r.blockNumber,
-        effectiveBlock: r.effectiveBlock,
-        blockRecovered: r.blockProvenance !== null,
-        scoreTotal: r.scoreTotal,
-        scoreOutOf: r.scoreOutOf,
-        scoredBlind: r.scoredBlind,
-        manifest: r.manifest,
-      })),
-    )
+    const comparisonRuns = mine.map((r) => ({
+      id: r.id,
+      arm: r.arm,
+      rep: r.rep,
+      blockNumber: r.blockNumber,
+      effectiveBlock: r.effectiveBlock,
+      blockRecovered: r.blockProvenance !== null,
+      blockRecoveryTaskHash: r.blockProvenance?.sourceTaskHash ?? null,
+      scoreTotal: r.scoreTotal,
+      scoreOutOf: r.scoreOutOf,
+      scoredBlind: r.scoredBlind,
+      manifest: r.manifest,
+    }))
+    const spec = benchmarkById(b.id)
+    const taskContextRecovery = spec ? recoverComparisonTask(b, comparisonRuns, spec.task) : null
+    const context = taskContextRecovery ?? b
+    const missing = comparisonMissing({ ...b, taskHash: context.taskHash }, comparisonRuns)
     return {
       id: b.id,
       title: b.title,
       category: b.category,
       agentId: b.agentId,
       agentName: b.agentName,
-      task: b.task,
-      taskHash: b.taskHash,
+      task: context.task,
+      taskHash: context.taskHash,
       input: b.input,
       inputHash: b.inputHash,
       rubricVersion: b.rubricVersion,
@@ -172,6 +176,7 @@ export async function readLedger(): Promise<LedgerBenchmark[]> {
       earlierSittings,
       missing,
       complete: missing.length === 0,
+      taskContextRecovery,
     }
   })
 }

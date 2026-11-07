@@ -348,6 +348,8 @@ The September proof record documents a PancakeSwap V3 rebalance on **BSC mainnet
 
 ### The human benchmark recordings
 
+The Ledger verifies all four original comparison contexts. ADV-01 and ADV-03 disclose a recovered original task after a later reproduction changed the registration block; saved runs, blind grades, timing and costs are unchanged. [Repair and verification](./docs/operations/RELEASE_HARDENING_2026-11-06.md). Complete evidence does not mean an agent won.
+
 The original September manual arms remain available. A recording establishes what was recorded; use each Ledger manifest for case binding, grading and current completion status.
 
 | Manual arm | Recording |

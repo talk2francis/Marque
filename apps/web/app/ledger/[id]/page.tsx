@@ -110,7 +110,7 @@ export default async function BenchmarkPage({ params }: { params: Promise<{ id: 
         </header>
 
         <section className={styles.section}>
-          <h2 className={styles.h2}>The registered task</h2>
+          <h2 className={styles.h2}>{b.taskContextRecovery ? 'The original comparison task' : 'The registered task'}</h2>
           <div className={styles.hashes}>
             <span>task hash <code>{b.taskHash}</code></span>
             <span>input hash <code>{b.inputHash}</code></span>
@@ -121,6 +121,22 @@ export default async function BenchmarkPage({ params }: { params: Promise<{ id: 
           </div>
           <pre className={styles.output}>{b.task}</pre>
         </section>
+
+        {b.taskContextRecovery && (
+          <section id="comparison-context" className={styles.section}>
+            <h2 className={styles.h2}>Original comparison context</h2>
+            <p className={styles.note}>
+              A later reproduction changed the registration to block {b.taskContextRecovery.registrationBlock}.
+              The original task at block {b.taskContextRecovery.block} exactly matches the saved manifests for
+              runs {b.taskContextRecovery.runIds.join(', ')}. The input and rubric hashes, grades, timings,
+              costs and raw records are unchanged. Future reproductions cannot replace this registration.
+            </p>
+            <div className={styles.hashes}>
+              <span>original task <code>{b.taskContextRecovery.taskHash}</code></span>
+              <span>later registration <code>{b.taskContextRecovery.registrationTaskHash}</code></span>
+            </div>
+          </section>
+        )}
 
         <section className={styles.section}>
           <h2 className={styles.h2}>The rubric</h2>

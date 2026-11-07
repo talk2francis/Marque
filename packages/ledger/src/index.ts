@@ -23,3 +23,4 @@ export {
   type SealInput, type SealResult,
 } from './seal-store.js'
 export { comparisonMissing, trustedBlock, type CompletionRun } from './completion.js'
+export { recoverComparisonTask, type ComparisonTaskRecovery, type RegisteredTaskContext } from './comparison-context.js'
