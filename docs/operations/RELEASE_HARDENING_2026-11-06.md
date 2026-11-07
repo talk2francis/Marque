@@ -60,6 +60,8 @@ One artwork host remains unavailable. Historical private Bench attempts and badg
 
 ## Backup and activation
 
+The first outside-workflow activation stopped in setup-node before making any requests: its automatic package-manager cache expected pnpm, although the observer uses only Node built-ins. Package-manager caching is disabled for that job, as it already is for the standalone smoke job. The [failed setup run](https://github.com/talk2francis/Marque/actions/runs/42368897719) is retained; successful activation and actual observations belong in the operational receipt.
+
 The existing 03:17 Europe/Berlin backup ran on 7 November. Its local dump completed at 02:28:00 UTC; the encrypted Google Drive copy was verified at 02:30:45 UTC with zero differences and matching local/offsite latest pointers. No new restore test or schedule change is claimed.
 
 Promotion uses the verified prepared artifact and existing blue/green flow, then public health/source checks, smoke, close guard, film delivery, keyless MCP metadata and actual outside observations. Production activation and process scope are recorded only after they occur in the operational receipt. No money-worker restart is required. The normal quiet window and the confirmed broken-Ledger exception are documented with the actual rollout time if the exception is used.

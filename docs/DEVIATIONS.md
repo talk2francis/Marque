@@ -1,5 +1,7 @@
 # Deviations
 
+7 November rollout: the first outside observer failed during setup-node's automatic pnpm-cache detection before any public request. The Node-only job now disables package-manager caching; the failed run and real subsequent activation are retained in the release verification and operational receipt. Application inputs and grading are unchanged.
+
 Every reduction, substitution or change of direction, logged under the AGENTS.md
 degradation ladder. One entry each: **planned · shipped · why · cost · restore**.
 

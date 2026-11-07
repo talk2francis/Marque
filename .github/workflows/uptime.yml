@@ -20,6 +20,8 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 22
+          # This observer uses only Node built-ins; no pnpm executable is installed.
+          package-manager-cache: false
       - name: Read public pages and APIs
         run: node scripts/uptime-check.mjs "$RUNNER_TEMP/observation.json"
       - uses: actions/upload-artifact@v4
