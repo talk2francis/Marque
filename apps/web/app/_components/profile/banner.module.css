@@ -1,0 +1,32 @@
+.open { min-height: 44px; }
+.open svg, .actions svg { width: 16px; height: 16px; flex: none; }
+.editor { display: grid; gap: 16px; flex-basis: 100%; width: 100%; min-width: 0; padding: 18px; border: 1px solid var(--hair); border-radius: var(--r-2); background: var(--panel); }
+.editor > header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.editor h4 { margin: 0 0 5px; font-size: 16px; font-weight: 500; }
+.editor p, .cropper p { margin: 0; font-size: 12.5px; line-height: 1.6; color: var(--ink-2); max-width: 66ch; }
+.close { display: grid; place-items: center; flex: none; min-width: 44px; min-height: 44px; border: 1px solid var(--hair-2); border-radius: var(--r-2); color: var(--ink); background: transparent; cursor: pointer; }
+.close svg { width: 16px; height: 16px; }
+.existing { margin: 0; display: grid; gap: 8px; }
+.existing img { width: 100%; max-width: 640px; height: auto; aspect-ratio: 3 / 1; object-fit: cover; border-radius: var(--r-2); }
+.existing figcaption { color: var(--ink-2); font-size: 12px; }
+.cropper { display: grid; gap: 14px; width: 100%; max-width: 640px; min-width: 0; }
+.frame { position: relative; width: 100%; aspect-ratio: 3 / 1; overflow: hidden; background: var(--sunk); border: 1px solid var(--hair-2); border-radius: var(--r-2); touch-action: none; cursor: grab; }
+.frame:active { cursor: grabbing; }
+.frame img { position: absolute; left: 0; top: 0; max-width: none; user-select: none; pointer-events: none; }
+.slider, .pan label { display: grid; gap: 8px; font-size: 12px; color: var(--ink-2); }
+.slider input, .pan input { width: 100%; height: 28px; accent-color: var(--ink); }
+.pan { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.actions > * { min-height: 44px; }
+.pick { display: grid; justify-items: start; gap: 8px; padding: 20px; border: 1px dashed var(--hair-2); border-radius: var(--r-2); cursor: pointer; }
+.pick svg { width: 22px; height: 22px; color: var(--ink-2); }
+.pick b { font-size: 14px; font-weight: 500; }
+.pick span { font-size: 12px; color: var(--ink-2); }
+.pick input { max-width: 100%; font: inherit; font-size: 12px; }
+.note { padding-top: 12px; border-top: 1px solid var(--hair); }
+.error { color: var(--breach-ink) !important; }
+.close:focus-visible, .pick:focus-within { outline: 2px solid var(--focus); outline-offset: 3px; }
+@media (max-width: 560px) { .editor { padding: 14px; } .pan { grid-template-columns: minmax(0, 1fr); gap: 10px; } .pick { padding: 14px; } }
+
+.fileInput { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+.actions label:focus-within { outline: 2px solid var(--focus); outline-offset: 3px; }

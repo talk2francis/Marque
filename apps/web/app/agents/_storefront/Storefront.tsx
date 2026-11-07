@@ -4,6 +4,7 @@ import { SECTIONS, type SectionId } from './sections'
 import { BRAND, Limits, ProvenanceChip } from '@marque/ui'
 import { AgentAvatar } from '../../_components/AgentAvatar'
 import { AgentBrandHero } from '../../_components/AgentBrandHero'
+import { AgentBannerHero } from '../../_components/AgentBannerHero'
 import { AgentIdentityHero } from '../../_components/AgentIdentityHero'
 import { agentBrand } from '../../../lib/agent-brand'
 import { AddressChip, Badge, HashChip, Stars } from '../../_components/ui'
@@ -152,6 +153,11 @@ export function Storefront({ d, section = 'overview', evidence = null, lens = nu
               <h1 className={styles.title}>{d.name}</h1>
               {proof}
             </AgentBrandHero>
+          ) : d.bannerUrl ? (
+            <AgentBannerHero agentId={d.agentId} tokenId={d.tokenId} name={d.name} category={d.category} imageUrl={d.imageUrl} bannerUrl={d.bannerUrl}>
+              <h1 className={styles.title}>{d.name}</h1>
+              {proof}
+            </AgentBannerHero>
           ) : (
             <AgentIdentityHero agentId={d.agentId} tokenId={d.tokenId} name={d.name} category={d.category} imageUrl={d.imageUrl}>
               <h1 className={styles.title}>{d.name}</h1>

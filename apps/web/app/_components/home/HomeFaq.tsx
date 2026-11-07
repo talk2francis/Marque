@@ -1,5 +1,5 @@
 import { ArrowRight } from 'lucide-react'
-import { ProvenanceChip } from '@marque/ui'
+import { BRAND, ProvenanceChip } from '@marque/ui'
 import { campaignClock } from '@marque/commerce/rules'
 import { TOOLS } from '../../../lib/mcp/tools'
 import { platformFeeBp } from '../../../lib/escrow-fee'
@@ -68,7 +68,7 @@ export async function HomeFaq({ supply }: { supply: FaqSupply | null }) {
       </div>
       <div className={styles.start}>
         <p>No wallet needed to explore.</p>
-        <a className={styles.startLink} href="/docs/faq#what-is-marque-pass"><span><b>Marque Pass</b><small>A wallet with your face or fingerprint</small></span><ArrowRight aria-hidden="true" /></a>
+        <a className={styles.startLink} href="/docs/faq#what-is-marque-pass"><span><b>{BRAND.name} Pass</b><small>A wallet with your face or fingerprint</small></span><ArrowRight aria-hidden="true" /></a>
         <a className={styles.startLink} href="/builders"><span><b>Agent Forge</b><small>Build an agent or bring your own</small></span><ArrowRight aria-hidden="true" /></a>
       </div>
       </div>

@@ -15,6 +15,7 @@ import { LaunchKit } from '../LaunchKit'
 import { LinkWallet } from '../LinkWallet'
 import { NoWalletLine } from '../../_components/pass/NoWalletLine'
 import { ForgeImageUpload } from '../../_components/profile/ForgeImageUpload'
+import { AgentBannerControl } from '../../_components/profile/AgentBannerControl'
 import { markForge } from '../ForgeRail'
 import styles from '../forge.module.css'
 
@@ -220,6 +221,7 @@ export function RegisterFlow() {
             </div>
           ) : null}
           <LinkWallet chainId={f.chainId} agentId={done.agentId} />
+          {address ? <AgentBannerControl owner={address} agentId={`${f.chainId}:${n.identityRegistry.toLowerCase()}:${done.agentId}`} /> : null}
           <div className={styles.actions}>
             <ButtonLink variant="primary" href={`/builders/run?chain=${f.chainId}&token=${done.agentId}`}>Run the listing checks</ButtonLink>
             <ButtonLink href={`/me?view=agents`}>See it in My Marque</ButtonLink>

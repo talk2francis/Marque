@@ -218,6 +218,13 @@
       "when": 1794059643616,
       "tag": "0030_quote_read_indexes",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1794080542175,
+      "tag": "0031_agent_banners",
+      "breakpoints": true
     }
   ]
 }

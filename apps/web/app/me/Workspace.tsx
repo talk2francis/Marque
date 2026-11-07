@@ -22,6 +22,7 @@ import { savedAgents, watched, saveWatched, hireLimit, setHireLimit, firedAlerts
 import { ProfileAvatar } from '../_components/profile/ProfileAvatar'
 import { ProfileEditor } from '../_components/profile/ProfileEditor'
 import { AgentPortraitControl } from '../_components/profile/AgentPortraitControl'
+import { AgentBannerControl } from '../_components/profile/AgentBannerControl'
 import { RegistrationEditor } from '../_components/profile/RegistrationEditor'
 import { useWalletProfile } from '../../lib/profile-client'
 import styles from './workspace.module.css'
@@ -578,7 +579,7 @@ function Allowances({ address, chainId, own }: { address: string; chainId: Chain
 
 /* ---------------------------------------------------------------- agents (building) */
 
-interface OwnerAgent { agentKey: string; chainId: number; agentId: string; name: string; imageUrl?: string | null; portraitByOwner?: boolean; category: string | null; listedOnMarque: boolean; quality: { checks: Array<{ id: string; pass: boolean; fix: string | null }> }; jobsReceived: number; jobsPaid: number; jobEvidence?: { funded: number | null; paymentReleased: number | null }; seller?: {jobs:{received:number;funded:number;paid:number}; recentJobs?: Array<{chainId:number;jobId:string;state:string;createdAt:string|null}>}; listingEvidence?: {ownerListed:boolean} }
+interface OwnerAgent { firstParty?: boolean; agentKey: string; chainId: number; agentId: string; name: string; imageUrl?: string | null; portraitByOwner?: boolean; category: string | null; listedOnMarque: boolean; quality: { checks: Array<{ id: string; pass: boolean; fix: string | null }> }; jobsReceived: number; jobsPaid: number; jobEvidence?: { funded: number | null; paymentReleased: number | null }; seller?: {jobs:{received:number;funded:number;paid:number}; recentJobs?: Array<{chainId:number;jobId:string;state:string;createdAt:string|null}>}; listingEvidence?: {ownerListed:boolean} }
 interface QuestBuild { build: { agents: Array<{ chainId: number; tokenId: string; observed: number; checks: Record<string, { state: string; reason: string; next?: { label: string; href: string } | null }> }> } }
 const CRIT: Array<[string, string]> = [['registered', 'Registered'], ['card', 'Agent card'], ['probes', 'Answers'], ['hires', '3 hirers'], ['actions', 'Actions'], ['category', 'In category']]
 
@@ -643,6 +644,7 @@ export function Agents({ address, own = false }: { address: string; own?: boolea
               <a className={styles.agentMinorLink} href={`/builders/my-agents?wallet=${address}&agent=${a.chainId}:${a.agentId}#your-agents`}>Full job and answer workspace <ArrowUpRight aria-hidden="true" /></a>
             </details>
             <div className={styles.agentSettings} role="group" aria-label="Agent profile settings">
+            {own && !a.firstParty ? <AgentBannerControl owner={address} agentId={a.agentKey} /> : null}
             {own ? (
               <AgentPortraitControl owner={address} agentId={a.agentKey} hasPortrait={a.agentKey in portraits ? portraits[a.agentKey] !== null : Boolean(a.portraitByOwner)}
                 onChanged={(url) => setPortraits((p) => ({ ...p, [a.agentKey]: url }))} />

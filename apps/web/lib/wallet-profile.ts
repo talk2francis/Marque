@@ -7,6 +7,7 @@ import { chainClient, isSupportedChain, network } from '@marque/commerce'
 import { serverToken } from './claim'
 import { inspectImage, type ImageFacts } from './image-check'
 import { agentPortraits } from './agent-portraits'
+import { BANNER_SIZE } from './agent-banner-model'
 import { addressAccent, ACCENTS, avatarSchema, defaultProfile, imageUrlOf, prefsSchema, type Accent, type ProfileInput, type WalletProfile } from './profile-model'
 
 /**
@@ -79,13 +80,17 @@ export function readSession(header: string | null): ProfileSession | null {
 
 /* ------------------------------------------------------------------ images */
 
-export async function storeImage(owner: string, dataUrl: string): Promise<{ ok: true; id: string; url: string; facts: ImageFacts } | { ok: false; detail: string }> {
+export async function storeImage(owner: string, dataUrl: string, scope: 'profile' | 'agent-banner' = 'profile'): Promise<{ ok: true; id: string; url: string; facts: ImageFacts } | { ok: false; detail: string }> {
   const m = /^data:image\/(png|jpeg|webp);base64,([A-Za-z0-9+/=]+)$/.exec(dataUrl)
   if (!m) return { ok: false, detail: 'Send the image as a PNG, JPEG or WebP data URL.' }
   const bytes = new Uint8Array(Buffer.from(m[2]!, 'base64'))
   const check = inspectImage(bytes)
   if (!check.ok) return check
-  const id = createHash('sha256').update(bytes).digest('hex').slice(0, 32)
+  if (scope === 'agent-banner' && (check.facts.width !== BANNER_SIZE.width || check.facts.height !== BANNER_SIZE.height)) return { ok: false, detail: 'Frame the image as a wide banner before saving.' }
+  // Existing portrait IDs stay identical. Banner IDs include the uploader so the same art can be used by two owners.
+  const digest = createHash('sha256')
+  if (scope === 'agent-banner') digest.update(`agent-banner:${owner.toLowerCase()}:`)
+  const id = digest.update(bytes).digest('hex').slice(0, 32)
   await guarded(() => db().execute(sql`insert into profile_image (id, owner, mime, width, height, bytes)
     values (${id}, ${owner.toLowerCase()}, ${check.facts.mime}, ${check.facts.width}, ${check.facts.height}, ${Buffer.from(bytes)})
     on conflict (id) do nothing`))
@@ -190,5 +195,6 @@ export async function saveWalletProfile(session: ProfileSession, input: ProfileI
 export async function deleteWalletProfile(session: ProfileSession): Promise<void> {
   await guarded(() => db().execute(sql`delete from wallet_profile where address = ${session.address}`))
   await guarded(() => db().execute(sql`delete from profile_image i where i.owner = ${session.address}
-    and not exists (select 1 from agent_portrait p where p.image_id = i.id)`))
+    and not exists (select 1 from agent_portrait p where p.image_id = i.id)
+    and not exists (select 1 from agent_banner b where b.image_id = i.id)`))
 }

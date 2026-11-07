@@ -7,6 +7,7 @@ import { ArrowUpRight, Check, ChevronRight, RefreshCw, Search, ShieldCheck } fro
 import { ProvenanceChip } from '@marque/ui'
 import { AgentAvatar } from '../_components/AgentAvatar'
 import { AgentPortraitControl } from '../_components/profile/AgentPortraitControl'
+import { AgentBannerControl } from '../_components/profile/AgentBannerControl'
 import { RegistrationEditor } from '../_components/profile/RegistrationEditor'
 import { Skeleton, Tabs } from '../_components/ui'
 import {
@@ -633,6 +634,7 @@ function AgentDetail({
                 </dl>
                 {ownsIdentity ? (
                   <div className={styles.editors}>
+                    {!a.firstParty ? <AgentBannerControl owner={wallet} agentId={a.agentKey} /> : null}
                     <AgentPortraitControl
                       owner={wallet}
                       agentId={a.agentKey}
@@ -651,7 +653,7 @@ function AgentDetail({
                   </div>
                 ) : (
                   <p className={styles.fine}>
-                    Connect the identity owner&apos;s wallet to edit its name or portrait. Public
+                    Connect the identity owner&apos;s wallet to edit its name, portrait or banner. Public
                     records remain readable without signing.
                   </p>
                 )}

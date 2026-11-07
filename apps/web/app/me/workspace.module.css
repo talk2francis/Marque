@@ -291,3 +291,5 @@ a.stat:hover { border-color: var(--hair-2); }
 .recheckAnswer { padding: 16px; border: 1px solid var(--hair); border-radius: var(--r-2); background: var(--panel); min-width: 0; }
 .recheckAnswer > a { display: inline-flex; align-items: center; min-height: 36px; font-size: 13px; color: var(--ink); text-underline-offset: 4px; }
 @media (max-width: 560px) { .recheckPanel { padding: 16px; } .recheckToggle { width: 100%; } .recheckAnswer { padding: 12px; } }
+
+@media (max-width: 560px) { .agentActivity dt { min-height: 2.8em; } }

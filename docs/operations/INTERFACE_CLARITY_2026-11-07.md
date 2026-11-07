@@ -1,6 +1,6 @@
 # Interface clarity, 7 November 2026
 
-This follows verified live release `02aacc8512ef9270d35f1044abf83104ae44fea3`. Its scope is the homepage FAQ/category/hero help, My Marque agent entries and shared delivery record, and Today spacing/answer-selector controls. Other surfaces retain their current design.
+This follows verified live release `02aacc8512ef9270d35f1044abf83104ae44fea3`. Its scope is the homepage FAQ/category/hero help, My Marque agent entries and shared delivery record, and Today spacing/answer-selector controls. The user then added optional owner-uploaded agent banners. Other surfaces retain their current design.
 
 ## What changes
 
@@ -10,10 +10,12 @@ This follows verified live release `02aacc8512ef9270d35f1044abf83104ae44fea3`. I
 - Personal agent entries separate identity, recent activity, management buttons, campaign checklist, delivery record, job history and owner-only profile controls. Every original evidence link and timestamp remains reachable.
 - Today separates the task board and answer-check panel. Rating links have clear affordances; the answer-selector is a primary button with its existing expansion behavior. Actual comparisons still run only after the existing explicit per-answer action.
 
+- Owners can optionally upload a hero banner after listing/registration or in profile tools. A banner uses the reference masthead layout with the owner’s own art and portrait. Without a saved banner the current header stays. [Owner guide](AGENT_BANNERS.md).
+
 ## Preservation
 
-No data reader, count definition, test criterion, saved observation, campaign predicate, price/freshness rule, ownership gate or signing implementation changes. No new testnet or mainnet transaction is required for this presentation work. Documentation and generated changelog are updated together.
+Existing price, count, test, observation, campaign and signed money paths retain their rules. The banner adds a separate presentation reader/write endpoint, additive table 0031 and a guard against deleting active banner images during wallet-profile cleanup. The existing session verification and canonical on-chain ownership reader are reused. No testnet or mainnet transaction is required for this work. Documentation and generated changelog are updated together.
 
 ## Verification status
 
-Initial native web typecheck, scoped lint/copy and 41 existing FAQ, lifecycle, daily-work and original-answer comparison regressions passed. A pinned production build, responsive visual/accessibility review and interaction checks are the next gates. Final acceptance and activation will be added after actual results; this candidate description alone does not claim deployment.
+Initial native web typecheck, scoped lint/copy and 41 existing FAQ, lifecycle, daily-work and original-answer comparison regressions passed. Initial interface source `8cefc3d61fd2511342dab434e083f4867640cb14` built all 44 pages and passed six viewport/theme interaction cases and eighteen AXE scans. Nineteen banner model/authority/HTTP cases and six isolated PostgreSQL cases passed, including real signed-session HTTP persistence. The final combined build, banner browser review and exact-source CI are the next gates. Final acceptance and activation will be added after actual results; this candidate description alone does not claim deployment.

@@ -1,5 +1,6 @@
 'use client'
 import { useCallback, useEffect, useState } from 'react'
+import type { AgentBanner } from './agent-banner-model'
 import { PREFS_EVENT, PREFS_KEY, storeMode } from './theme'
 import { defaultProfile, type Prefs, type ProfileInput, type WalletProfile } from './profile-model'
 
@@ -68,6 +69,16 @@ export async function uploadImage(address: string, dataUrl: string): Promise<{ i
 
 export async function setAgentPortrait(address: string, agentId: string, image: string | null): Promise<void> {
   await call('/api/v1/me/portrait', { method: 'PUT', body: JSON.stringify({ agentId, image }), session: readSession(address) })
+}
+
+/** Optional agent art, separate from its registry portrait and listing eligibility. */
+export async function fetchAgentBanner(agentId: string, signal?: AbortSignal): Promise<AgentBanner | null> {
+  const value = await call<{ banner: AgentBanner | null }>(`/api/v1/me/banner?agentId=${encodeURIComponent(agentId)}`, { signal })
+  return value.banner
+}
+export async function saveAgentBannerImage(address: string, agentId: string, dataUrl: string | null): Promise<AgentBanner | null> {
+  const value = await call<{ banner: AgentBanner | null }>('/api/v1/me/banner', { method: 'PUT', body: JSON.stringify({ agentId, dataUrl }), session: readSession(address) })
+  return value.banner
 }
 
 function announce(address: string) { window.dispatchEvent(new CustomEvent(PROFILE_EVENT, { detail: address.toLowerCase() })) }

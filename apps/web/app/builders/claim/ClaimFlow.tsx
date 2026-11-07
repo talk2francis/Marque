@@ -8,6 +8,8 @@ import { useConnectModal } from '@rainbow-me/rainbowkit'
 import { Button, LinkButton, Chip, ProvenanceChip } from '@marque/ui'
 import styles from '../builders.module.css'
 import { AgentPortraitControl } from '../../_components/profile/AgentPortraitControl'
+import { AgentBannerControl } from '../../_components/profile/AgentBannerControl'
+import { agentBrand } from '../../../lib/agent-brand'
 
 
 interface Identity {
@@ -428,6 +430,7 @@ export function ClaimFlow() {
             <Link href={`/register/${category === 'health_factor' ? 'health-factor' : category}`}>the marketplace</Link>{' '}
             under {testCategory?.label}. No email, no queue, no transaction.
           </p>
+          {connected && !agentBrand(identity.agentId) ? <div style={{ marginBlock: 20 }}><AgentBannerControl owner={connected} agentId={identity.agentId} /></div> : null}
           <div className={styles.actions}>
             <LinkButton variant="primary" size="md" href={publishedUrl}>View the listing</LinkButton>
             <a className={styles.note} href="/builders/claim">List another</a>

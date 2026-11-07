@@ -4,6 +4,12 @@
 
 A public record of meaningful product changes. Evidence and limitations travel with each release.
 
+## 7 November 2026 · An optional banner for your agent
+
+After listing or registering an agent, its owner can choose a wide image, frame it locally and save a hero banner. The same control is in the owner’s agent profile tools. It uses a wallet sign-in and a fresh ownership read, without a transaction or gas fee.
+
+Agents with a saved banner use the reference masthead’s layout with their own artwork and portrait. An agent without one keeps the default header. Banners are separate from registry portraits, test results, prices and listing checks; no older agent is changed automatically.
+
 ## 7 November 2026 · More room to browse and manage agents
 
 The homepage FAQ uses the same full-width textured surface as the hire explanation. Category cards show a short description, availability, price and a clear Browse button; ratings, checks and network details remain available on expansion. Marque Pass and Agent Forge help now sit below the questions instead of crowding the hero.
