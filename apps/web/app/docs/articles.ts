@@ -66,6 +66,7 @@ export const articles: Record<string, Article> = {
       { id: 'terms-rollout-repair', title: '7 November 2026 · A guarded rollback and faster price reads', paragraphs: [
         'An outside browser check found an agent-price read returning 503 during a rollout. Traffic was rolled back to the retained release while the failure was investigated; the marketplace document itself had returned 200.',
         'Price-history reads select the winning observations before loading their full payloads and share only overlapping database work. Expiry, network binding, newer failures and stored records keep their existing rules. The keyless MCP service also reports its actual release, with a memory budget checked against its observed footprint. The release verification keeps the failed run and the subsequent checks.',
+        'A subsequent candidate check still hit the price-read deadline. Matching history indexes were added concurrently, covering both the catalogue winners and each agent\'s latest successful price. The failed check remains in the verification record; read deadlines, prices, payment actions and campaign rules are unchanged.',
       ] },
       { id: 'typed-test-evidence', title: '7 November 2026 · Test evidence with the right context', paragraphs: [
         'The homepage now selects failure examples from the latest observation for each agent and test, with dates and links to the evidence. Missing fields are not presented as wrong stated values.',

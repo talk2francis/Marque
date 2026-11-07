@@ -1,0 +1,97 @@
+{
+  "at": "2026-11-07T14:06:36.314413+00:00",
+  "additiveOnly": true,
+  "productionMigrationRegistered": true,
+  "preparedConcurrently": true,
+  "lockTimeoutMs": 2000,
+  "statementTimeoutMs": 120000,
+  "indexes": [
+    {
+      "index": "commerce_quote_service_latest_idx",
+      "created": true,
+      "valid": true,
+      "bytes": 12337152,
+      "elapsedMs": 2055
+    },
+    {
+      "index": "commerce_quote_agent_read_idx",
+      "created": true,
+      "valid": true,
+      "bytes": 28983296,
+      "elapsedMs": 2638
+    },
+    {
+      "index": "commerce_quote_agent_ok_idx",
+      "created": true,
+      "valid": true,
+      "bytes": 14778368,
+      "elapsedMs": 1846
+    }
+  ],
+  "plans": {
+    "at": "2026-11-07T13:59:59.627Z",
+    "agents": 15,
+    "statementTimeoutMs": 4000,
+    "readOnly": true,
+    "rows": [
+      {
+        "query": "agent-service-winners",
+        "executionMs": 37.864,
+        "planningMs": 3.535,
+        "rows": 15,
+        "hitBlocks": 7028,
+        "readBlocks": 0,
+        "indexes": [
+          {
+            "name": "commerce_quote_agent_read_idx",
+            "kind": "Index Only Scan",
+            "heapFetches": 6495
+          },
+          {
+            "name": "commerce_quote_pkey",
+            "kind": "Index Scan",
+            "heapFetches": null
+          }
+        ]
+      },
+      {
+        "query": "agent-last-success",
+        "executionMs": 0.451,
+        "planningMs": 1.195,
+        "rows": 15,
+        "hitBlocks": 63,
+        "readBlocks": 0,
+        "indexes": [
+          {
+            "name": "commerce_quote_agent_ok_idx",
+            "kind": "Index Scan",
+            "heapFetches": null
+          }
+        ]
+      },
+      {
+        "query": "global-service-winners",
+        "executionMs": 568.536,
+        "planningMs": 1.072,
+        "rows": 2534,
+        "hitBlocks": 57248,
+        "readBlocks": 5397,
+        "indexes": [
+          {
+            "name": "commerce_quote_service_latest_idx",
+            "kind": "Index Only Scan",
+            "heapFetches": 46444
+          },
+          {
+            "name": "commerce_quote_pkey",
+            "kind": "Index Scan",
+            "heapFetches": null
+          }
+        ]
+      }
+    ]
+  },
+  "noObservationEdited": true,
+  "noWorkerRestarted": true,
+  "scope": "Actual index creation and read-only plans; not a website capacity guarantee."
+}

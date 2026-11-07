@@ -85,12 +85,14 @@ start_slot() {
 
 # The key-less MCP process (V4-10) runs the same release as the slot that serves the site.
 start_mcp() {
+  local -a mcp_ready_args=()
+  [ "${2:-candidate}" = legacy ] && mcp_ready_args=(--legacy)
   ln -sfn "$REL/$1" "$REL/mcp"
   pm2 delete marque-mcp >/dev/null 2>&1 || true
   pm2 start "$ROOT/ecosystem.config.cjs" --only marque-mcp >/dev/null
   for _ in $(seq 1 30); do
     if [ "$(http_health http://127.0.0.1:3297/api/health 3)" = '200 0' ]; then
-      EXPECTED_RELEASE_SHA="$(cat "$REL/$1/RELEASE_SHA")" WEB_INSTANCES=1 node "$ROOT/scripts/check-web-ready.mjs" http://127.0.0.1:3297 >>"$LOG" 2>&1 || return 1
+      EXPECTED_RELEASE_SHA="$(cat "$REL/$1/RELEASE_SHA")" WEB_INSTANCES=1 node "$ROOT/scripts/check-web-ready.mjs" http://127.0.0.1:3297 "${mcp_ready_args[@]}" >>"$LOG" 2>&1 || return 1
       say "marque-mcp on :3297 -> $1"; return 0
     fi
     sleep 2
@@ -136,7 +138,7 @@ if [ "${1:-}" = "--rollback" ]; then
   if [ "$(http_health "http://127.0.0.1:$PREV/api/health" 3)" != "200 0" ]; then start_slot "$PREV"; fi
   # A retained release from before /api/ready must remain a usable rollback.
   healthy "$PREV" legacy || { say "previous slot is not healthy; not switching"; exit 1; }
-  start_mcp "$(basename -- "$(readlink -f "$REL/slot-$PREV")")"
+  start_mcp "$(basename -- "$(readlink -f "$REL/slot-$PREV")")" legacy
   persist_processes
   switch_to "$PREV"
   retire_later "$(name_of "$LIVE")"
@@ -240,7 +242,7 @@ for u in / /register /quest /api/health "/api/v1/marketplace?limit=3&offset=0" /
 done
 if [ "$fails" -gt 0 ]; then
   say "public smoke failed ($fails); switching back to :$LIVE"
-  switch_to "$LIVE"; start_mcp "$(basename -- "$(readlink -f "$REL/slot-$LIVE")")"; exit 1
+  switch_to "$LIVE"; start_mcp "$(basename -- "$(readlink -f "$REL/slot-$LIVE")")" legacy; exit 1
 fi
 
 retire_later "$(name_of "$LIVE")"

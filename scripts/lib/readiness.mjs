@@ -1,5 +1,18 @@
 import { setTimeout as sleep } from 'node:timers/promises'
 
+/** Retained releases may predate /api/ready; still verify their complete liveness body and release. */
+export async function verifyLegacyRelease(base, options = {}) {
+  const expected = options.release ?? process.env.EXPECTED_RELEASE_SHA
+  if (!/^[a-f0-9]{40}$/.test(expected ?? '')) throw Error('legacy release metadata required')
+  const read = options.read ?? (async () => {
+    const r = await fetch(base + '/api/health', { cache: 'no-store', signal: AbortSignal.timeout(5000) })
+    return { status: r.status, body: await r.json() }
+  })
+  const { status, body } = await read()
+  if (status !== 200 || body?.ok !== true || body.release !== expected) throw Error('legacy release mismatch')
+  return { legacy: true, release: expected }
+}
+
 /** Check each cluster worker using fresh connections rather than one sticky socket. */
 export async function verifyReadiness(base, options = {}) {
   const instances = options.instances ?? 2

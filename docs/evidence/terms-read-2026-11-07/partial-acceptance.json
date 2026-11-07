@@ -1,0 +1,349 @@
+{
+  "at": "2026-11-07T14:06:36.313091+00:00",
+  "buildSource": "0f1418a31c077d6f8385c41cab4eaa3de802c155",
+  "functionalAccepted": false,
+  "heldFromPromotion": true,
+  "passed": {
+    "productionBuildPages": 44,
+    "routeThemeAxeScans": 12,
+    "viewportAudits": 40,
+    "ledgerRouteThemeAxeScans": 18,
+    "categoryComparisonReads": 4,
+    "closeGuardWallets": 9
+  },
+  "failed": {
+    "fullSmoke": "Marketplace terms returned 503 and network-idle navigation reached the unchanged 90-second deadline. Candidate verifier and load test did not run."
+  },
+  "observedDatabaseCause": "PostgreSQL timeout log identifies both exact price queries while repeated global history reads competed for I/O. New matching indexes were subsequently prepared concurrently. This record describes the pre-index candidate.",
+  "postIndexDiagnostic": {
+    "sameCompiledArtifact": true,
+    "requests": 25,
+    "all200": true,
+    "p95Ms": 1685,
+    "maxMs": 1768,
+    "notWebsiteCapacity": true
+  },
+  "visualReview": {
+    "at": "2026-11-07T14:06:34.922920+00:00",
+    "release": "0f1418a31c077d6f8385c41cab4eaa3de802c155",
+    "auditCapturesReviewed": 40,
+    "browserCapturesReviewed": 11,
+    "ledgerCapturesReviewed": 25,
+    "nativeContextCapturesReviewed": 2,
+    "method": "All contact sheets viewed; both comparison context viewports also inspected at native size. The separate fresh marketplace trace was inspected. Full-page sheets assess overall layout; native contexts provide readable hash/copy checks."
+  },
+  "captures": [
+    {
+      "file": "audit/screens/agents_97_2718/day-768.png",
+      "sha256": "65a111c00c52b931f526a633cd43622b79b6d46f1fb4520fb41edfd779bfd9b3"
+    },
+    {
+      "file": "audit/screens/agents_97_2718/night-1440.png",
+      "sha256": "767fbe03553c03b992a850f21ad49e7f409efa4503a1cbce7146eb2a14cf6d9d"
+    },
+    {
+      "file": "audit/screens/agents_97_2718/night-768.png",
+      "sha256": "5b16137d37f87f81b7e1b9607516fb64c18329a0643bf7cb7d802d5b915d4685"
+    },
+    {
+      "file": "audit/screens/agents_97_2718/night-1024.png",
+      "sha256": "e969095d3155dbf72980a542ff7cffc119497536d22fc44509749da180863efd"
+    },
+    {
+      "file": "audit/screens/agents_97_2718/night-390.png",
+      "sha256": "c9065cd0cfe318daab199c54c867e26952989c73e517b2e15324420c8c30b693"
+    },
+    {
+      "file": "audit/screens/agents_97_2718/day-390.png",
+      "sha256": "1b3c61136841da27f0f793b79ac71ec32555b4307719778eb8154ef7cbda23e7"
+    },
+    {
+      "file": "audit/screens/agents_97_2718/day-1440.png",
+      "sha256": "3de341c478afda0fd6b5fcf2fd91b15f3a59cdd2cd9348603e035106f02e8df0"
+    },
+    {
+      "file": "audit/screens/agents_97_2718/day-1024.png",
+      "sha256": "f2f6da6511e7d2543a5fd4a65853d98b0b63e9046968cac517e0b9d1da7ead0c"
+    },
+    {
+      "file": "audit/screens/register/day-768.png",
+      "sha256": "762489c368ebd947ea913a343c84d8906724d4451b30a1f9ec27f4906159a02b"
+    },
+    {
+      "file": "audit/screens/register/night-1440.png",
+      "sha256": "c855051b55505f26bee2fe1e0f92ef22cb27dfa444f082d49765657313872ea7"
+    },
+    {
+      "file": "audit/screens/register/night-768.png",
+      "sha256": "2f1e62fed167171cab26f7e97e19ef8b5513b0d55a7ef2cc7533acf686adcf03"
+    },
+    {
+      "file": "audit/screens/register/night-1024.png",
+      "sha256": "a370a94825b598472fd41f616d4bab6d9889961287f203764208bec6da8b29e3"
+    },
+    {
+      "file": "audit/screens/register/night-390.png",
+      "sha256": "5592ada37a7dde2455fa05f9fb9e100755cae033973cef891d2e349f969875a1"
+    },
+    {
+      "file": "audit/screens/register/day-390.png",
+      "sha256": "53a8071b438cc2da0c62004a73c43efa4358e04d6a32f8ea800ef3f9e4fd3cc6"
+    },
+    {
+      "file": "audit/screens/register/day-1440.png",
+      "sha256": "133f35a2f01ab252f809a935ed7cd2bcfccbc389729bb8dbf6c328c32553ba56"
+    },
+    {
+      "file": "audit/screens/register/day-1024.png",
+      "sha256": "3ea216ab7ad8b4945a1dd7ff71396a61bb34dde99a8ac026a9d31300a57f33cf"
+    },
+    {
+      "file": "audit/screens/docs_changelog/day-768.png",
+      "sha256": "ac4c6bb22d8a7c9ec17d8492ee4e2c397f3d3d94f6c88f422b63ba2ff2042614"
+    },
+    {
+      "file": "audit/screens/docs_changelog/night-1440.png",
+      "sha256": "80e6039b8c89bef02279a3dcfe2ef7741c2deccf3aaa796f06138c491d590ce7"
+    },
+    {
+      "file": "audit/screens/docs_changelog/night-768.png",
+      "sha256": "173ac758786ceeb607c5ff8ae3a43cd1aad3b898578475bd373852dc76ed32f0"
+    },
+    {
+      "file": "audit/screens/docs_changelog/night-1024.png",
+      "sha256": "ca282931744bc82cb5a674d48c813f7700f78dacf77ac5c1c967d4ec31b5c4eb"
+    },
+    {
+      "file": "audit/screens/docs_changelog/night-390.png",
+      "sha256": "17be51077b360fe025d0432ec865e8834e1d249d2a28be2a5689af6d189c1516"
+    },
+    {
+      "file": "audit/screens/docs_changelog/day-390.png",
+      "sha256": "f1cadd8b916bc757e0c0e5638f9f5de10cffd8594d103235958697db23c2a075"
+    },
+    {
+      "file": "audit/screens/docs_changelog/day-1440.png",
+      "sha256": "047591b6cf37fb466da453318a1380a8a49d5bde6d5e81d756c1abc05b6e3b4f"
+    },
+    {
+      "file": "audit/screens/docs_changelog/day-1024.png",
+      "sha256": "1f159cb8241900c7dfaa664cbe1afcac025ba9178f24366b361b04f187a37af0"
+    },
+    {
+      "file": "audit/screens/status/day-768.png",
+      "sha256": "3558dfda717b83cbfdb3d1510535d81eae3086f6d7e1edda35334606acf41360"
+    },
+    {
+      "file": "audit/screens/status/night-1440.png",
+      "sha256": "1459c6cc02f0c948be6d0c8dcd2051f73225feb94cf6a36034fa3fcb3d985759"
+    },
+    {
+      "file": "audit/screens/status/night-768.png",
+      "sha256": "c59e337c1bece4a03de76e5389b06561e418be5ca69cac702460dedd3339fb1f"
+    },
+    {
+      "file": "audit/screens/status/night-1024.png",
+      "sha256": "68608e9536f82fdb80a7d0af1efee035b7a0f7c7861f752b49167a92c2fc2e2f"
+    },
+    {
+      "file": "audit/screens/status/night-390.png",
+      "sha256": "88d0f97860c477ca00cf5afc4f8d3f2c9c07fa4ad40789c8b197c87f4bdb7ebe"
+    },
+    {
+      "file": "audit/screens/status/day-390.png",
+      "sha256": "09da379f49520cdc68185ab6abddc3902f85635ba232326a304c592ece47fe9b"
+    },
+    {
+      "file": "audit/screens/status/day-1440.png",
+      "sha256": "def4d099dafdd4cb848cd126d7c88cd7fec00949ea3fde4329438370c25af4f6"
+    },
+    {
+      "file": "audit/screens/status/day-1024.png",
+      "sha256": "ddfe6b925d3d359d21dbf55d470f0c02834c37e2ff1858ecd880d25b3f561682"
+    },
+    {
+      "file": "audit/screens/root/day-768.png",
+      "sha256": "e7d95619d122ff22395a71bf7c06d94ca59177e3226082549fbff5dd5e5ddb73"
+    },
+    {
+      "file": "audit/screens/root/night-1440.png",
+      "sha256": "997bc83de421a91b05e91cfa31f20ee22fd082ee4bc4567cdb517ae8a77f59aa"
+    },
+    {
+      "file": "audit/screens/root/night-768.png",
+      "sha256": "603f23390c0c15ea2b49581a18eb637af49a421a923f1f7d5b65670f0ee14119"
+    },
+    {
+      "file": "audit/screens/root/night-1024.png",
+      "sha256": "42984ac0f37a8fcc88f08c79795b6b48afe8aab601136358c915988186146546"
+    },
+    {
+      "file": "audit/screens/root/night-390.png",
+      "sha256": "956225cf5e17cb604483e2c73c717bfe6f669addcb57497b0dbb42e1746da2cc"
+    },
+    {
+      "file": "audit/screens/root/day-390.png",
+      "sha256": "daf55a6466370095dc9130f7ab9e3325490bc67d02c8769ff0c9acb242266104"
+    },
+    {
+      "file": "audit/screens/root/day-1440.png",
+      "sha256": "20a1b59d053f38a34b3ce3fd41001ab558e564fb50ed137dcc5dabddeec07808"
+    },
+    {
+      "file": "audit/screens/root/day-1024.png",
+      "sha256": "218f7527be308d6cefcc448d3c338878559deb01dd8f7c70e14523d06cd245a7"
+    },
+    {
+      "file": "browser/why-390-day.png",
+      "sha256": "f7ea2758bd6a5e4b22432204d0de036236f077cd400391b80f1ad89abd5263c4"
+    },
+    {
+      "file": "browser/veyra-390-day.png",
+      "sha256": "6f1781e071f5dcf0dce18168f671f33234b159bff55731c9f2f8eaa2f0efefe9"
+    },
+    {
+      "file": "browser/why-1440-night.png",
+      "sha256": "adb93f84a93e3264ef160324c6078b498295e4b976910cadf1d4dbd68aeaf7ca"
+    },
+    {
+      "file": "browser/no-js-home-390.png",
+      "sha256": "b48694873e07cda254062ac46d353bebf9a35a3ebf9fb6f614f5bb87134e969b"
+    },
+    {
+      "file": "browser/why-768-day.png",
+      "sha256": "2f0883926eafca737e5a2f253dd98e4dcbb1bd3051806b5654ac63278c37ac16"
+    },
+    {
+      "file": "browser/veyra-1440-day.png",
+      "sha256": "1cbed95d168277dccc11d12ee291e6c1d4735ce668dbcaff12a6065b3a0b5001"
+    },
+    {
+      "file": "browser/veyra-390-night.png",
+      "sha256": "c7ae8c4882b2818ee3c2f23a0f8b899d9a2faeed4805c74afeb86f3479aa0462"
+    },
+    {
+      "file": "browser/why-1440-day.png",
+      "sha256": "5bd3d300e25f0783254cb053a7f35ebf50a5e7102675883c2cc65c2c4996912d"
+    },
+    {
+      "file": "browser/veyra-1440-night.png",
+      "sha256": "d8335fcd64c71b8f0efad0fcae7f399b37f83114445d986089b7d99cec0703da"
+    },
+    {
+      "file": "browser/why-390-night.png",
+      "sha256": "b7696eac3313c397ad0901bae74d4c7eb66674b13db7c9c11a4bf8c754aeeec0"
+    },
+    {
+      "file": "browser/why-768-night.png",
+      "sha256": "9c182f422ca017b77e9ffd3f4aafb7fc8297b78fed265689e6f153102ccbdc7f"
+    },
+    {
+      "file": "ledger-browser/ledger-390-night.png",
+      "sha256": "47ff657b9a5f70f55e41c2872d4dd6ec4875f18c2358a2cda527431c9148f587"
+    },
+    {
+      "file": "ledger-browser/ledger-1440-day.png",
+      "sha256": "fc6683c588f4e75f147c544eea825187a08b3531bb1ba81268b95c7aa623e322"
+    },
+    {
+      "file": "ledger-browser/ledger-ADV-03-context-1440-day.png",
+      "sha256": "13d4de568bf458bd3f05f5a3967c92f0b9a0a44b70e68e3e81de98ee2fc7790b"
+    },
+    {
+      "file": "ledger-browser/ledger-ADV-03-context-390-day.png",
+      "sha256": "b34c313a72c93d6c0226ae1b706a30c3a43b88dfcec56418c7e0576f7d775379"
+    },
+    {
+      "file": "ledger-browser/ledger-ADV-03-390-night.png",
+      "sha256": "386c59d03f36a8fa922857a441a5e1f8b8a39e9fb3d1ca6bb9d2ca568d9d1c19"
+    },
+    {
+      "file": "ledger-browser/ledger-1440-night.png",
+      "sha256": "77afe0c878d673466702773073b0cb76c80283c45c6228ffaf6e670ea84c1978"
+    },
+    {
+      "file": "ledger-browser/ledger-ADV-03-1440-day.png",
+      "sha256": "319147a10453a950e4305d70960da2206c256b8a1986f24951899ca83fa0b925"
+    },
+    {
+      "file": "ledger-browser/ledger-ADV-01-context-1440-day.png",
+      "sha256": "5111c54d1ec62e11a32187878830a6dabe39b37cb77841d1601a0a41ecf58a99"
+    },
+    {
+      "file": "ledger-browser/ledger-ADV-01-1440-night.png",
+      "sha256": "1392a5e66303900b570eadfeb6729dcb9e0cf1ccf1c30c8a719e438ed78726ed"
+    },
+    {
+      "file": "ledger-browser/ledger-ADV-01-390-night.png",
+      "sha256": "1142aa34351414376237d35bfe1be3db28f5842487686074ae209959e1282cc8"
+    },
+    {
+      "file": "ledger-browser/ledger-ADV-01-1440-day.png",
+      "sha256": "9cdb91709f9cf4c607dde80283555fab9848fc6491497ba8d3fc612150cb17d9"
+    },
+    {
+      "file": "ledger-browser/ledger-ADV-01-390-day.png",
+      "sha256": "6ff2b1aaf2e5b9e4f63d451a7795e7f5a583bc959b2b98fb621db5acbafb741f"
+    },
+    {
+      "file": "ledger-browser/first-comparison-1440-day.png",
+      "sha256": "07c57650b1fadd4783d51fcad04e5ffa35b1f4f286fb2e0e4a37caef258431d5"
+    },
+    {
+      "file": "ledger-browser/first-comparison-1440-night.png",
+      "sha256": "1ce0da4a45cdf11bfb642fe8be7a0f98e332922cb1ae52fddbe108a45cfc3c7d"
+    },
+    {
+      "file": "ledger-browser/ledger-ADV-03-context-390-night.png",
+      "sha256": "33b0c45d53df7fa7d2a644328eb96b5ef182f2c69df60c14c214f96171c18f64"
+    },
+    {
+      "file": "ledger-browser/ledger-ADV-03-390-day.png",
+      "sha256": "b2b83a0e0d5daa62d98f2769951c6a539f4ce8f5212bae1a5e85a713400de8a5"
+    },
+    {
+      "file": "ledger-browser/first-comparison-390-night.png",
+      "sha256": "c0c47a3b7fdf8251d9ff2558622e0edd8d4e4b1f835264833e00ce7fbe7a0eb6"
+    },
+    {
+      "file": "ledger-browser/ledger-ADV-01-context-390-night.png",
+      "sha256": "e91e64f622d680ece1a7c3f53a9d24292bedb4925b9cc2c9d8f60f9f6c57960b"
+    },
+    {
+      "file": "ledger-browser/ledger-ADV-01-context-390-day.png",
+      "sha256": "418e6809f44daa892ea2c0b7cff12767dde0f15c75990abc8842d14867bdeb55"
+    },
+    {
+      "file": "ledger-browser/first-comparison-390-day.png",
+      "sha256": "f86fa65bf277d7b2576674e118926cb7f8cfdd92f9e3df79bb6e5296bd07a993"
+    },
+    {
+      "file": "ledger-browser/ledger-ADV-01-context-1440-night.png",
+      "sha256": "9ab1a66b39b3c83b93b1044a24cbc198b8fc72f81e3738908d2c3c01b062aa10"
+    },
+    {
+      "file": "ledger-browser/ledger-ADV-03-1440-night.png",
+      "sha256": "cdd44592c7038a3b01c56c4156db6379712bdc3b7d545d43095fdf103a30a2c3"
+    },
+    {
+      "file": "ledger-browser/ledger-no-js-390.png",
+      "sha256": "d9e2a511ea8fbe29e13a843728c292c77bbf21af93a1a49e7d431af9147c3503"
+    },
+    {
+      "file": "ledger-browser/ledger-ADV-03-context-1440-night.png",
+      "sha256": "19edea0a7663343d9b1b60cf828fa8673dad1fab90fe78f908455aca16511287"
+    },
+    {
+      "file": "ledger-browser/ledger-390-day.png",
+      "sha256": "5cb5150ba98488f55f78ae016ee6480f242116b22230283b565171a785debd10"
+    },
+    {
+      "file": "public-context/ledger-context-phone.png",
+      "sha256": "fc743d5b67747e8149edb62c7de013a7798babee38637a02821383177fb4d66c"
+    },
+    {
+      "file": "public-context/ledger-context-desktop.png",
+      "sha256": "5b32b7fe46d2588989ab040a16819f6e33bb9e17d948f144bce2ed321a7fff99"
+    }
+  ]
+}

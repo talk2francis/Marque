@@ -952,6 +952,17 @@ export const commerceQuote = pgTable('commerce_quote', {
   agentCreatedIdx: index('commerce_quote_agent_created_idx').on(t.agentId, t.createdAt.desc()),
   serviceCreatedIdx: index('commerce_quote_service_created_idx').on(t.serviceId, t.createdAt.desc()),
   hashIdx: index('commerce_quote_hash_idx').on(t.quoteHash),
+  // Match the read queries' exact timestamp/id order, including PostgreSQL's
+  // DESC null ordering. Narrow keys keep historical JSON out of winner scans.
+  serviceLatestIdx: index('commerce_quote_service_latest_idx')
+    .on(t.serviceId, t.createdAt.desc().nullsFirst(), t.id.desc().nullsFirst())
+    .where(sql`${t.serviceId} is not null`),
+  agentReadIdx: index('commerce_quote_agent_read_idx')
+    .on(t.agentId, t.createdAt.desc().nullsFirst(), t.id.desc().nullsFirst(), t.serviceId)
+    .where(sql`${t.serviceId} is not null`),
+  agentOkIdx: index('commerce_quote_agent_ok_idx')
+    .on(t.agentId, t.createdAt.desc().nullsFirst(), t.id.desc().nullsFirst())
+    .where(sql`${t.ok} and ${t.chainId}::text = split_part(${t.agentId}, ':', 1)`),
 }))
 
 /**
