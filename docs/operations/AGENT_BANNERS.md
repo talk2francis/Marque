@@ -10,6 +10,8 @@ A hero banner is an optional wide image at the top of an agent’s profile on Ma
 4. If asked, sign in with the wallet that currently owns the identity. This is a message signature, with no transaction, gas fee or spending approval.
 5. Open **View agent profile** to inspect the result. **Remove banner** restores the default header.
 
+The public profile can take a moment to show a change. If you still see the previous header, refresh it again shortly; the editor confirms whether the save succeeded.
+
 If ownership cannot be confirmed, the save is refused. A former owner’s saved session does not bypass the fresh ownership read. If a session is no longer accepted, the next Save asks for a fresh sign-in. A failed save keeps the local crop available to retry.
 
 ## What the banner changes

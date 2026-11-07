@@ -2,7 +2,7 @@
 .open svg, .actions svg { width: 16px; height: 16px; flex: none; }
 .editor { display: grid; gap: 16px; flex-basis: 100%; width: 100%; min-width: 0; padding: 18px; border: 1px solid var(--hair); border-radius: var(--r-2); background: var(--panel); }
 .editor > header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
-.editor h4 { margin: 0 0 5px; font-size: 16px; font-weight: 500; }
+.editor h2 { margin: 0 0 5px; font-size: 16px; font-weight: 500; }
 .editor p, .cropper p { margin: 0; font-size: 12.5px; line-height: 1.6; color: var(--ink-2); max-width: 66ch; }
 .close { display: grid; place-items: center; flex: none; min-width: 44px; min-height: 44px; border: 1px solid var(--hair-2); border-radius: var(--r-2); color: var(--ink); background: transparent; cursor: pointer; }
 .close svg { width: 16px; height: 16px; }

@@ -26,7 +26,7 @@ describe.skipIf(!enabled)('owner banner persistence on an isolated schema', () =
     const receipt = process.env['BANNER_RENDER_RECEIPT']
     if (receipt && capturedImage) {
       mocked.owner = owner
-      const registry = network(97).identityRegistry, bannerId = agentId + '2', plainId = agentId + '3'
+      const registry = network(97).identityRegistry, prefix = `97:${registry.toLowerCase()}:9${String(Date.now()).slice(-9)}`, bannerId = prefix + '1', plainId = prefix + '2'
       for (const [id, name] of [[bannerId, 'Banner layout fixture'], [plainId, 'Default layout fixture']]) await db().execute(sql`insert into agent(id,chain_id,token_id,contract_address,owner_address,agent_wallet,name,description) values (${id!},97,${id!.split(':')[2]},${registry},${owner},${owner},${name!},'Isolated browser fixture. No production agent or paid work.')`)
       const saved = await saveAgentBanner(session, bannerId, image)
       if (!saved.ok || !saved.banner) throw new Error('Browser fixture banner was not saved')

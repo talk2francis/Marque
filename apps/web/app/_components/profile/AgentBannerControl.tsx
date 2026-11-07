@@ -30,14 +30,14 @@ export function AgentBannerControl({ owner, agentId }: { owner: string; agentId:
       if (!readSession(owner)) await signInProfile(owner, message => signMessageAsync({ message }))
       const next = await saveAgentBannerImage(owner, agentId, dataUrl)
       setBanner(next); setSaved(true)
-      toast({ tone: 'success', title: next ? 'Banner saved' : 'Banner removed', body: next ? `It now appears at the top of this agent’s profile on ${BRAND.name}.` : 'This agent uses the default profile header again.' })
+      toast({ tone: 'success', title: next ? 'Banner saved' : 'Banner removed', body: next ? `Your banner is saved on ${BRAND.name}. The agent profile may take a moment to update.` : 'This agent uses the default profile header again.' })
     } catch (e) { if (e instanceof ProfileError && e.status === 401) signOutProfile(owner); setError(e instanceof ProfileError ? e.message : /reject|denied|cancel/i.test(String(e)) ? 'You cancelled the signature. The banner was not saved.' : 'The banner could not be confirmed. Try again.') }
     finally { setBusy(false) }
   }
   if (!open) return <button type="button" className={`btn ${styles.open}`} onClick={() => { setOpen(true); setSaved(false) }}><ImagePlus aria-hidden="true" />Hero banner</button>
   const url = hostedBannerUrl(banner?.url), parts = agentId.split(':')
   return <section className={styles.editor} aria-label="Agent hero banner">
-    <header><div><h4>Hero banner</h4><p>Optional artwork at the top of your agent&apos;s profile. Your portrait stays separate.</p></div><button type="button" className={styles.close} aria-label="Close banner editor" disabled={busy} onClick={() => setOpen(false)}><X aria-hidden="true" /></button></header>
+    <header><div><h2>Hero banner</h2><p>Optional artwork at the top of your agent&apos;s profile. Your portrait stays separate.</p></div><button type="button" className={styles.close} aria-label="Close banner editor" disabled={busy} onClick={() => setOpen(false)}><X aria-hidden="true" /></button></header>
     {loading ? <p role="status">Reading your banner...</p> : <>
       {url ? <figure className={styles.existing}><img src={url} alt="Your agent’s current hero banner" width={960} height={320} /><figcaption>{saved ? `Saved on ${BRAND.name}.` : `Current banner on ${BRAND.name}.`}</figcaption></figure> : saved ? <p role="status">Banner removed. The default profile header is back.</p> : !error ? <p>No banner yet. Your agent keeps the default header until you choose one.</p> : null}
       {!saved && !readFailed ? <BannerCropper busy={busy} onSave={value => void save(value)} /> : null}
