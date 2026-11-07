@@ -4,6 +4,10 @@ This release completes the authorized B/C/D product batch and its remaining-limi
 
 GitHub [main](https://github.com/talk2francis/Marque/tree/main) identifies published code; public [health](https://marque.trade/api/health) identifies the active website. The immutable [operational receipts](https://github.com/talk2francis/Marque/tree/status-log/releases) record actual CI and deployment results after they happen. Pre-promotion acceptance alone is not a claim that production changed.
 
+## Production warm-up follow-up
+
+All b5e1a90 public release checks passed. A separate MCP startup observer nevertheless exceeded the then-configured 800 MiB restart threshold: 945,229,824 bytes peak, settling at 442,736,640 bytes, with the same process and zero restarts across 24 samples. [The failed observation](../evidence/mcp-memory-2026-11-07/b5e1a90-observation.json) is retained. The MCP-only threshold moves to 1,200 MiB; all other process definitions and key filters remain unchanged. This is an operations/documentation follow-up: compiled web inputs exactly match 7f6d591. The immutable operational receipt records fresh CI, live checks and the new observation after promotion. The initial outside-workflow dispatch lacked authentication in systemd; the authenticated tool session dispatches it without a user login or credential copy.
+
 ## What changes for users
 
 - My Marque separates Hiring (Today, Positions, Jobs, Money) from Building (Agents, Bench, Demand). Existing money actions retain their signing code. Today prioritizes risk and deadlines; watched positions open on demand and carry real block/read times.

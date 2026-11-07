@@ -344,7 +344,9 @@ module.exports = {
       autorestart: true,
       max_restarts: 50,
       restart_delay: 3000,
-      max_memory_restart: '800M',
+      // Production warm-up sampled 945 MB RSS before settling near 443 MB.
+      // Leave room for startup inside the existing VPS; other process budgets stay unchanged.
+      max_memory_restart: '1200M',
       time: true,
       out_file: '/root/.pm2/logs/marque-mcp-out.log',
       error_file: '/root/.pm2/logs/marque-mcp-err.log',

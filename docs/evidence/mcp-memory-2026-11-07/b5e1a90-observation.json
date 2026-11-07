@@ -1,0 +1,188 @@
+{
+  "release": "b5e1a906554e1d9a2ef91f901ddbed41ed72fded",
+  "observedAt": "2026-11-07T18:10:42.195Z",
+  "samples": 24,
+  "windowStart": "2026-11-07T18:07:42.503Z",
+  "windowEnd": "2026-11-07T18:10:42.195Z",
+  "peakRssBytes": 945229824,
+  "restartBudgetBytes": 838860800,
+  "stablePidAndRestartCount": true,
+  "scope": "Production startup RSS samples only. No continuous uptime or capacity guarantee.",
+  "accepted": false,
+  "observerExit": 1,
+  "endingRssBytes": 442736640,
+  "newConfiguredRestartBudgetBytes": 1258291200,
+  "newBudgetAcceptance": "Requires a separate fresh observation after promotion. This failed measurement remains unchanged.",
+  "availableMemoryBeforeChangeMiB": 6339,
+  "newCost": false,
+  "readings": [
+    {
+      "at": "2026-11-07T18:07:42.503Z",
+      "status": "online",
+      "restarts": 0,
+      "rss": 570994688,
+      "limit": 838860800
+    },
+    {
+      "at": "2026-11-07T18:07:50.203Z",
+      "status": "online",
+      "restarts": 0,
+      "rss": 690925568,
+      "limit": 838860800
+    },
+    {
+      "at": "2026-11-07T18:07:58.499Z",
+      "status": "online",
+      "restarts": 0,
+      "rss": 945229824,
+      "limit": 838860800
+    },
+    {
+      "at": "2026-11-07T18:08:06.924Z",
+      "status": "online",
+      "restarts": 0,
+      "rss": 742039552,
+      "limit": 838860800
+    },
+    {
+      "at": "2026-11-07T18:08:14.215Z",
+      "status": "online",
+      "restarts": 0,
+      "rss": 742039552,
+      "limit": 838860800
+    },
+    {
+      "at": "2026-11-07T18:08:22.094Z",
+      "status": "online",
+      "restarts": 0,
+      "rss": 742039552,
+      "limit": 838860800
+    },
+    {
+      "at": "2026-11-07T18:08:30.102Z",
+      "status": "online",
+      "restarts": 0,
+      "rss": 742039552,
+      "limit": 838860800
+    },
+    {
+      "at": "2026-11-07T18:08:38.496Z",
+      "status": "online",
+      "restarts": 0,
+      "rss": 742039552,
+      "limit": 838860800
+    },
+    {
+      "at": "2026-11-07T18:08:46.816Z",
+      "status": "online",
+      "restarts": 0,
+      "rss": 742039552,
+      "limit": 838860800
+    },
+    {
+      "at": "2026-11-07T18:08:54.820Z",
+      "status": "online",
+      "restarts": 0,
+      "rss": 742039552,
+      "limit": 838860800
+    },
+    {
+      "at": "2026-11-07T18:09:03.193Z",
+      "status": "online",
+      "restarts": 0,
+      "rss": 453066752,
+      "limit": 838860800
+    },
+    {
+      "at": "2026-11-07T18:09:10.825Z",
+      "status": "online",
+      "restarts": 0,
+      "rss": 441425920,
+      "limit": 838860800
+    },
+    {
+      "at": "2026-11-07T18:09:18.374Z",
+      "status": "online",
+      "restarts": 0,
+      "rss": 441556992,
+      "limit": 838860800
+    },
+    {
+      "at": "2026-11-07T18:09:25.199Z",
+      "status": "online",
+      "restarts": 0,
+      "rss": 441688064,
+      "limit": 838860800
+    },
+    {
+      "at": "2026-11-07T18:09:32.426Z",
+      "status": "online",
+      "restarts": 0,
+      "rss": 442081280,
+      "limit": 838860800
+    },
+    {
+      "at": "2026-11-07T18:09:40.602Z",
+      "status": "online",
+      "restarts": 0,
+      "rss": 442474496,
+      "limit": 838860800
+    },
+    {
+      "at": "2026-11-07T18:09:47.714Z",
+      "status": "online",
+      "restarts": 0,
+      "rss": 442474496,
+      "limit": 838860800
+    },
+    {
+      "at": "2026-11-07T18:09:54.911Z",
+      "status": "online",
+      "restarts": 0,
+      "rss": 442474496,
+      "limit": 838860800
+    },
+    {
+      "at": "2026-11-07T18:10:04.801Z",
+      "status": "online",
+      "restarts": 0,
+      "rss": 442605568,
+      "limit": 838860800
+    },
+    {
+      "at": "2026-11-07T18:10:12.909Z",
+      "status": "online",
+      "restarts": 0,
+      "rss": 442736640,
+      "limit": 838860800
+    },
+    {
+      "at": "2026-11-07T18:10:20.700Z",
+      "status": "online",
+      "restarts": 0,
+      "rss": 442736640,
+      "limit": 838860800
+    },
+    {
+      "at": "2026-11-07T18:10:28.105Z",
+      "status": "online",
+      "restarts": 0,
+      "rss": 442736640,
+      "limit": 838860800
+    },
+    {
+      "at": "2026-11-07T18:10:35.008Z",
+      "status": "online",
+      "restarts": 0,
+      "rss": 442736640,
+      "limit": 838860800
+    },
+    {
+      "at": "2026-11-07T18:10:42.195Z",
+      "status": "online",
+      "restarts": 0,
+      "rss": 442736640,
+      "limit": 838860800
+    }
+  ]
+}
