@@ -375,3 +375,5 @@ BSC mainnet's ERC-8004 IdentityRegistry is [`0x8004A169FB4a3325136EB29fA0ceB6D2e
 ---
 
 [Documentation map](./docs/README.md) · [Changelog](https://marque.trade/docs/changelog) · [Security](./docs/SECURITY.md) · [Deviations](./docs/DEVIATIONS.md). Report issues with the route, chain, agent or job id and the time; never include keys.
+
+The [7 November VEYRA test review](./docs/operations/VEYRA_TEST_REVIEW_2026-11-07.md) records a platform parsing error transparently: three preserved wrapped answers replay 8/8 against their original cases, and the latest actual run already passed. The correction keeps the historical observations and numeric criteria intact.

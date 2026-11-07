@@ -2,7 +2,7 @@
 export const MCS_CODE_ANCHOR = {
   "version": 1,
   "algorithm": "SHA-256",
-  "sha256": "0xee74a1285f3e7d6400dc910c43df40c8c03c878d51edd9a1b3590d1a2b4152ad",
+  "sha256": "0x66057d145adf50c8c2a54c682bdaccc1940f9ed9363bc62c0e3d650718032418",
   "scope": "local MCS implementation and imported workspace source; lockfile pins external dependencies; not deployed-bytecode or issuer attestation",
   "files": [
     {
@@ -19,7 +19,7 @@ export const MCS_CODE_ANCHOR = {
     },
     {
       "path": "packages/conformance/src/adapters.ts",
-      "sha256": "0x9cb6dedba71e9622a3ede75a258a23fb5c416a1e65aae175609d6079f470eadd"
+      "sha256": "0xf9fbefb56925dda888619a295d2a9bb351fe93cd60ffd6aa299dc3f20427f4b9"
     },
     {
       "path": "packages/conformance/src/cases.ts",

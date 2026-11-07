@@ -155,34 +155,53 @@ export async function funnelLine(supply: SupplyNow): Promise<FunnelLine> {
 }
 
 export interface PassFail {
-  pass: { agent: string; testId: string; fields: string[] } | null
-  fail: { agent: string; testId: string; failedFields: number; thirdPartyRuns: number; thirdPartyPasses: number } | null
+  pass: { agent: string; testId: string; fields: string[]; at: string; href: string } | null
+  fail: { agent: string; testId: string; failedFields: number; thirdPartyRuns: number; thirdPartyPasses: number; at: string; href: string } | null
 }
 
-/** One real pass and one real named failure, side by side. */
+/** Dated examples; a failure must still be the latest observation for that agent/test. */
 export async function passFail(): Promise<PassFail> {
   const [p, f, counts] = await Promise.all([
     db().execute(sql`
-      select ${oneAgentIdSql(sql`cr.agent_id`)} as agent_id, cr.test_id, cr.diffs, a.name from conformance_result cr
+      select ${oneAgentIdSql(sql`cr.agent_id`)} as agent_id, cr.test_id, cr.diffs, cr.ran_at, a.name from conformance_result cr
       left join agent a on a.id = ${oneAgentIdSql(sql`cr.agent_id`)}
       where cr.pass = true and cr.agent_id in ${firstPartyIdListSql()} order by cr.ran_at desc limit 1`).then(rowsOf).catch(() => []),
     db().execute(sql`
-      select cr.test_id, a.name, jsonb_array_length(cr.failed_fields) as n
-      from conformance_result cr join agent a on a.id = cr.agent_id
+      with latest as (
+        select distinct on (agent_id, test_id) id from conformance_result
+        order by agent_id, test_id, ran_at desc, id desc
+      )
+      select cr.agent_id, cr.test_id, cr.ran_at, a.name, jsonb_array_length(cr.failed_fields) as n
+      from latest l join conformance_result cr on cr.id = l.id join agent a on a.id = cr.agent_id
       where cr.pass = false and cr.error is null and cr.agent_id not like 'stub:%'
         and cr.agent_id not in ${firstPartyIdListSql()} and jsonb_array_length(cr.failed_fields) > 0
-      order by jsonb_array_length(cr.failed_fields) desc, cr.ran_at desc limit 1`).then(rowsOf).catch(() => []),
+        and exists (
+          select 1 from jsonb_array_elements(cr.diffs) d
+          where d->>'pass' = 'false' and coalesce(d->>'missing', 'false') <> 'true'
+            and coalesce(d->>'actual', '') <> ''
+            and d->>'actual' not like '(not %' and d->>'actual' not like '(no %'
+        )
+      order by cr.ran_at desc, cr.id desc limit 1`).then(rowsOf).catch(() => []),
     db().execute(sql`
       select count(*)::int as runs, count(*) filter (where pass)::int as passes from conformance_result
       where agent_id not like 'stub:%' and agent_id not in ${firstPartyIdListSql()}`).then(rowsOf).catch(() => []),
   ])
   const pr = p[0]
   const fr = f[0]
+  const profile = (r: Record<string, unknown>) => {
+    const agentId = String(r['agent_id'] ?? '')
+    const reference = referenceAgent(agentId)
+    if (reference) return `/agents/${reference.slug}`
+    const id = agentId.match(/^(56|97):0x[0-9a-f]{40}:(\d+)$/i)
+    return id ? `/agents/${id[1]}/${id[2]}` : `/standard/${String(r['test_id'])}`
+  }
+  const at = (r: Record<string, unknown>) => new Date(r['ran_at'] as string | Date).toISOString()
   const diffs = Array.isArray(pr?.['diffs']) ? (pr!['diffs'] as Array<Record<string, unknown>>) : []
   return {
-    pass: pr ? { agent: String(pr['name'] ?? referenceAgent(String(pr['agent_id']))?.name ?? String(pr['agent_id']).replace('marque:', '')), testId: String(pr['test_id']), fields: diffs.slice(0, 5).map((d) => String(d['field'])) } : null,
+    pass: pr ? { agent: String(pr['name'] ?? referenceAgent(String(pr['agent_id']))?.name ?? String(pr['agent_id']).replace('marque:', '')), testId: String(pr['test_id']), fields: diffs.slice(0, 5).map((d) => String(d['field'])), at: at(pr), href: profile(pr) } : null,
     fail: fr ? {
       agent: String(fr['name']), testId: String(fr['test_id']), failedFields: Number(fr['n']),
+      at: at(fr), href: profile(fr),
       thirdPartyRuns: Number(counts[0]?.['runs'] ?? 0), thirdPartyPasses: Number(counts[0]?.['passes'] ?? 0),
     } : null,
   }

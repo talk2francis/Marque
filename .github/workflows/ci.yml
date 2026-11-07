@@ -81,6 +81,9 @@ jobs:
           packages/commerce/src/feedback-proof.integration.test.ts
           apps/web/lib/marketplace-scope.integration.test.ts
           apps/web/lib/agent-state.integration.test.ts
+          apps/web/lib/post-close.integration.test.ts
+          apps/web/lib/agent-job-scope.integration.test.ts
+          apps/web/lib/home-test-proof.integration.test.ts
           packages/commerce/src/latest-quote.integration.test.ts
           packages/commerce/src/seller-current-probe.integration.test.ts
           --maxWorkers=1 --minWorkers=1

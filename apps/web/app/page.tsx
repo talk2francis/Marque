@@ -5,6 +5,7 @@ import { Stars, Tape } from './_components/ui'
 import { RecentHires } from './_components/RecentHires'
 import { ReadyNow } from './_components/home/ReadyNow'
 import { UNote } from './_components/ui/UNote'
+import { ReferenceMark } from './_components/ReferenceMark'
 import { SnapshotAge } from './_components/home/SnapshotAge'
 import { HomeFaq } from './_components/home/HomeFaq'
 import { FilmSection } from './_components/film/FilmSection'
@@ -245,6 +246,8 @@ export default async function Home() {
                 <div className={styles.pfCol} data-tone="pass">
                   <span className={styles.pfHead}><BadgeCheck aria-hidden="true" />Passed <a href={`/standard/${pf.pass.testId}`} className="mono">{pf.pass.testId}</a></span>
                   <span className={styles.pfWho}>{pf.pass.agent}</span>
+                  <ReferenceMark compact />
+                  <p><time dateTime={pf.pass.at}>{pf.pass.at.slice(0, 16).replace('T', ' ')} UTC</time>. <a href={pf.pass.href}>Test evidence</a></p>
                   <ul>{pf.pass.fields.map((f) => <li key={f}><Check aria-hidden="true" /><span className="mono">{f}</span></li>)}</ul>
                 </div>
               ) : null}
@@ -252,7 +255,8 @@ export default async function Home() {
                 <div className={styles.pfCol} data-tone="fail">
                   <span className={styles.pfHead}>Failed <a href={`/standard/${pf.fail.testId}`} className="mono">{pf.fail.testId}</a></span>
                   <span className={styles.pfWho}>{pf.fail.agent}</span>
-                  <p>Registered on BNB Chain, answers when called, and got {pf.fail.failedFields} checked {pf.fail.failedFields === 1 ? 'field' : 'fields'} wrong. It stays on the record with its reasons.</p>
+                  <p>{pf.fail.failedFields} {pf.fail.failedFields === 1 ? 'check did' : 'checks did'} not pass in this recorded test. Open the evidence for the inputs, answer and reasons.</p>
+                  <p><time dateTime={pf.fail.at}>{pf.fail.at.slice(0, 16).replace('T', ' ')} UTC</time>. <a href={pf.fail.href}>Test evidence</a></p>
                 </div>
               ) : null}
             </div>

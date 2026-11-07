@@ -31,6 +31,22 @@ describe('conformance protocol addressing', () => {
 })
 
 describe('A2A JSON-RPC reply classification', () => {
+  const answer = { currentTick: -74609, inRange: true, proposedTickLower: -75250, proposedTickUpper: -74050 }
+  it('extracts a structured DataPart without grading its wrapper', () => {
+    expect(extractJsonPayload({ kind: 'data', data: answer })).toEqual(answer)
+    expect(extractJsonPayload({ jsonrpc: '2.0', id: 1, result: { kind: 'message', parts: [{ kind: 'data', data: answer }] } })).toEqual(answer)
+    expect(extractJsonPayload({ result: { kind: 'task', artifacts: [{ parts: [{ kind: 'data', data: answer }] }] } })).toEqual(answer)
+  })
+  it('preserves application keys and leaves an untagged business data object intact', () => {
+    const payload = { result: { value: 1 }, parts: [{ value: 2 }], text: 'application data' }
+    const wrapper = { kind: 'data', data: payload }, before = JSON.stringify(wrapper)
+    expect(extractJsonPayload(wrapper)).toEqual(payload)
+    expect(JSON.stringify(wrapper)).toBe(before)
+    expect(extractJsonPayload({ data: answer })).toEqual({ data: answer })
+  })
+  it.each([null, [], 'not a structured object', 3])('rejects an invalid DataPart payload: %j', data => {
+    expect(extractJsonPayload({ kind: 'data', data })).toBeNull()
+  })
   it('treats an error envelope as no answer, never as a gradeable object', () => {
     expect(isJsonRpcError({ jsonrpc: '2.0', id: 1, error: { code: -32000, message: 'private detail' } })).toBe(true)
     expect(isJsonRpcError({ jsonrpc: '2.0', id: 1, result: { recommend: 'stay' } })).toBe(false)

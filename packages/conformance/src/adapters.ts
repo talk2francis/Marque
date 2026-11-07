@@ -82,6 +82,12 @@ export function extractJsonPayload(body: unknown): unknown {
     // JSON-RPC envelope.
     const result = rec['result']
     if (result !== undefined) return extractJsonPayload(result)
+    // A2A DataPart carries the answer in `data`, not on the protocol wrapper.
+    // Its payload is application data: do not recursively interpret its keys.
+    if (rec['kind'] === 'data') {
+      const data = rec['data']
+      return data && typeof data === 'object' && !Array.isArray(data) ? data : null
+    }
     // A2A task shape: artifacts/parts carrying text.
     for (const key of ['artifacts', 'parts', 'messages']) {
       const arr = rec[key]

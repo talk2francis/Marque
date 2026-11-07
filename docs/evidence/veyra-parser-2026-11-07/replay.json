@@ -1,0 +1,427 @@
+{
+  "at": "2026-11-07T07:05:28.317915+00:00",
+  "agentId": "97:0x8004a818bfb912233c491871b3d84c89a494bd9e:2718",
+  "latestRecordedResult": {
+    "id": 16024,
+    "at": "2026-11-07T02:05:10.916760Z",
+    "pass": true,
+    "checksPassed": 8,
+    "checks": 8
+  },
+  "offlineOnly": true,
+  "newAgentCalled": false,
+  "originalRecordsChanged": false,
+  "rows": [
+    {
+      "id": 15989,
+      "at": "2026-11-03 18:03:20.995576+01",
+      "caseId": "REB-1-twt-wbnb-2500-claim-1793725398093-6f55d0",
+      "block": "131469547",
+      "recordedPass": false,
+      "recordedFailedFields": [
+        "currentTick",
+        "inRange",
+        "distanceToBound",
+        "proposedTickSpacing",
+        "amounts",
+        "slippageBound"
+      ],
+      "protocolDataPart": true,
+      "immutableHashesVerified": true,
+      "offlineUnwrappedPassed": 8,
+      "offlineChecks": 8,
+      "offlineFailedFields": [],
+      "diffs": [
+        {
+          "field": "currentTick",
+          "pass": true,
+          "expected": "-74609",
+          "actual": "-74609",
+          "tolerance": "exact match",
+          "detail": "",
+          "missing": false
+        },
+        {
+          "field": "inRange",
+          "pass": true,
+          "expected": "true",
+          "actual": "true",
+          "tolerance": "exact match",
+          "detail": "",
+          "missing": false
+        },
+        {
+          "field": "distanceToBound",
+          "pass": true,
+          "expected": "100",
+          "actual": "100",
+          "tolerance": "\u00b10.5 percentage points",
+          "detail": "",
+          "missing": false
+        },
+        {
+          "field": "proposedTickSpacing",
+          "pass": true,
+          "expected": "both ticks multiples of tickSpacing 50",
+          "actual": "lower -75250, upper -74050",
+          "tolerance": "must hold",
+          "detail": "",
+          "missing": false
+        },
+        {
+          "field": "tickOrdering",
+          "pass": true,
+          "expected": "proposedTickLower < proposedTickUpper",
+          "actual": "lower -75250, upper -74050",
+          "tolerance": "must hold",
+          "detail": "",
+          "missing": false
+        },
+        {
+          "field": "policyRange",
+          "pass": true,
+          "expected": "[-75250, -74050] \u00b150 ticks",
+          "actual": "[-75250, -74050]",
+          "tolerance": "must hold",
+          "detail": "",
+          "missing": false
+        },
+        {
+          "field": "amounts",
+          "pass": true,
+          "expected": "amounts consistent with the V3 liquidity formula within 0.5%",
+          "actual": "0.9731394634348418 TWT / 0.0006428934012193737 WBNB",
+          "tolerance": "must hold",
+          "detail": "",
+          "missing": false
+        },
+        {
+          "field": "slippageBound",
+          "pass": true,
+          "expected": "a stated slippage bound, 0 < bps < 10000",
+          "actual": "55",
+          "tolerance": "must hold",
+          "detail": "",
+          "missing": false
+        }
+      ],
+      "originalResponse": {
+        "data": {
+          "amount0": 0.9731394634348418,
+          "amount1": 0.0006428934012193737,
+          "inRange": true,
+          "assumptions": [
+            "Read on chain 56 at block 131469547; pool 0x8cCB4544b3030dACF3d4D71C658f04e8688e25b1, fee 2500, tickSpacing 50.",
+            "Same liquidity (848440906917818290) re-centred at \u00b16% around spot; ticks rounded to the nearest multiple of 50."
+          ],
+          "blockNumber": "131469547",
+          "currentTick": -74609,
+          "maxSlippageBps": 55,
+          "pctToNearestBound": 100,
+          "proposedTickLower": -75250,
+          "proposedTickUpper": -74050
+        },
+        "kind": "data"
+      },
+      "originalGroundTruth": {
+        "fee": 2500,
+        "pool": "0x8cCB4544b3030dACF3d4D71C658f04e8688e25b1",
+        "inRange": true,
+        "tokenId": "7683201",
+        "decimals0": 18,
+        "decimals1": 18,
+        "liquidity": "848440906917818290",
+        "tickLower": -887250,
+        "tickUpper": 887250,
+        "tickCurrent": -74609,
+        "tickSpacing": 50,
+        "priceCurrent": 0.0005754101445703697,
+        "sqrtPriceX96": "1900407492629485243588411392",
+        "token0Symbol": "TWT",
+        "token1Symbol": "WBNB",
+        "policyAmount0": 0.9748992146362077,
+        "policyAmount1": 0.000641880872902414,
+        "policyTickLower": -75250,
+        "policyTickUpper": -74050,
+        "pctToNearestBound": 100
+      },
+      "responseHash": "0x6ea1c3d1c3132610d01e699560994530c28a73f088412176ff04955c814672fe",
+      "groundTruthHash": "0x746f76be170162712c1e1ccdf36e0e07b17b79edcafa3256ebbff44b9b7c63f1",
+      "requestHash": "0x5f86f4f1449ff2b5651ddba0c38f954c82602a645551f1f2d124af0913f96b04"
+    },
+    {
+      "id": 15988,
+      "at": "2026-11-03 17:58:55.729099+01",
+      "caseId": "REB-1-twt-wbnb-2500-claim-1793725132930-9fd308",
+      "block": "131468958",
+      "recordedPass": false,
+      "recordedFailedFields": [
+        "currentTick",
+        "inRange",
+        "distanceToBound",
+        "proposedTickSpacing",
+        "amounts",
+        "slippageBound"
+      ],
+      "protocolDataPart": true,
+      "immutableHashesVerified": true,
+      "offlineUnwrappedPassed": 8,
+      "offlineChecks": 8,
+      "offlineFailedFields": [],
+      "diffs": [
+        {
+          "field": "currentTick",
+          "pass": true,
+          "expected": "-74609",
+          "actual": "-74609",
+          "tolerance": "exact match",
+          "detail": "",
+          "missing": false
+        },
+        {
+          "field": "inRange",
+          "pass": true,
+          "expected": "true",
+          "actual": "true",
+          "tolerance": "exact match",
+          "detail": "",
+          "missing": false
+        },
+        {
+          "field": "distanceToBound",
+          "pass": true,
+          "expected": "100",
+          "actual": "100",
+          "tolerance": "\u00b10.5 percentage points",
+          "detail": "",
+          "missing": false
+        },
+        {
+          "field": "proposedTickSpacing",
+          "pass": true,
+          "expected": "both ticks multiples of tickSpacing 50",
+          "actual": "lower -75250, upper -74050",
+          "tolerance": "must hold",
+          "detail": "",
+          "missing": false
+        },
+        {
+          "field": "tickOrdering",
+          "pass": true,
+          "expected": "proposedTickLower < proposedTickUpper",
+          "actual": "lower -75250, upper -74050",
+          "tolerance": "must hold",
+          "detail": "",
+          "missing": false
+        },
+        {
+          "field": "policyRange",
+          "pass": true,
+          "expected": "[-75250, -74050] \u00b150 ticks",
+          "actual": "[-75250, -74050]",
+          "tolerance": "must hold",
+          "detail": "",
+          "missing": false
+        },
+        {
+          "field": "amounts",
+          "pass": true,
+          "expected": "amounts consistent with the V3 liquidity formula within 0.5%",
+          "actual": "0.9731394634348418 TWT / 0.0006428934012193737 WBNB",
+          "tolerance": "must hold",
+          "detail": "",
+          "missing": false
+        },
+        {
+          "field": "slippageBound",
+          "pass": true,
+          "expected": "a stated slippage bound, 0 < bps < 10000",
+          "actual": "55",
+          "tolerance": "must hold",
+          "detail": "",
+          "missing": false
+        }
+      ],
+      "originalResponse": {
+        "data": {
+          "amount0": 0.9731394634348418,
+          "amount1": 0.0006428934012193737,
+          "inRange": true,
+          "assumptions": [
+            "Read on chain 56 at block 131468958; pool 0x8cCB4544b3030dACF3d4D71C658f04e8688e25b1, fee 2500, tickSpacing 50.",
+            "Same liquidity (848440906917818290) re-centred at \u00b16% around spot; ticks rounded to the nearest multiple of 50."
+          ],
+          "blockNumber": "131468958",
+          "currentTick": -74609,
+          "maxSlippageBps": 55,
+          "pctToNearestBound": 100,
+          "proposedTickLower": -75250,
+          "proposedTickUpper": -74050
+        },
+        "kind": "data"
+      },
+      "originalGroundTruth": {
+        "fee": 2500,
+        "pool": "0x8cCB4544b3030dACF3d4D71C658f04e8688e25b1",
+        "inRange": true,
+        "tokenId": "7683201",
+        "decimals0": 18,
+        "decimals1": 18,
+        "liquidity": "848440906917818290",
+        "tickLower": -887250,
+        "tickUpper": 887250,
+        "tickCurrent": -74609,
+        "tickSpacing": 50,
+        "priceCurrent": 0.0005754101445703697,
+        "sqrtPriceX96": "1900407492629485243588411392",
+        "token0Symbol": "TWT",
+        "token1Symbol": "WBNB",
+        "policyAmount0": 0.9748992146362077,
+        "policyAmount1": 0.000641880872902414,
+        "policyTickLower": -75250,
+        "policyTickUpper": -74050,
+        "pctToNearestBound": 100
+      },
+      "responseHash": "0x9387dd0070daae21c10295d8c0c2af5fd3fb4704816914e069df38465787d3a3",
+      "groundTruthHash": "0x746f76be170162712c1e1ccdf36e0e07b17b79edcafa3256ebbff44b9b7c63f1",
+      "requestHash": "0xde00f45591ea02ba3ad377fc8ba4cd74a1bc57f35b337bed109c63a70ec3d6b3"
+    },
+    {
+      "id": 15987,
+      "at": "2026-11-03 17:56:04.995924+01",
+      "caseId": "REB-1-twt-wbnb-2500-claim-1793724962912-22f4f3",
+      "block": "131468579",
+      "recordedPass": false,
+      "recordedFailedFields": [
+        "currentTick",
+        "inRange",
+        "distanceToBound",
+        "proposedTickSpacing",
+        "amounts",
+        "slippageBound"
+      ],
+      "protocolDataPart": true,
+      "immutableHashesVerified": true,
+      "offlineUnwrappedPassed": 8,
+      "offlineChecks": 8,
+      "offlineFailedFields": [],
+      "diffs": [
+        {
+          "field": "currentTick",
+          "pass": true,
+          "expected": "-74609",
+          "actual": "-74609",
+          "tolerance": "exact match",
+          "detail": "",
+          "missing": false
+        },
+        {
+          "field": "inRange",
+          "pass": true,
+          "expected": "true",
+          "actual": "true",
+          "tolerance": "exact match",
+          "detail": "",
+          "missing": false
+        },
+        {
+          "field": "distanceToBound",
+          "pass": true,
+          "expected": "100",
+          "actual": "100",
+          "tolerance": "\u00b10.5 percentage points",
+          "detail": "",
+          "missing": false
+        },
+        {
+          "field": "proposedTickSpacing",
+          "pass": true,
+          "expected": "both ticks multiples of tickSpacing 50",
+          "actual": "lower -75250, upper -74050",
+          "tolerance": "must hold",
+          "detail": "",
+          "missing": false
+        },
+        {
+          "field": "tickOrdering",
+          "pass": true,
+          "expected": "proposedTickLower < proposedTickUpper",
+          "actual": "lower -75250, upper -74050",
+          "tolerance": "must hold",
+          "detail": "",
+          "missing": false
+        },
+        {
+          "field": "policyRange",
+          "pass": true,
+          "expected": "[-75250, -74050] \u00b150 ticks",
+          "actual": "[-75250, -74050]",
+          "tolerance": "must hold",
+          "detail": "",
+          "missing": false
+        },
+        {
+          "field": "amounts",
+          "pass": true,
+          "expected": "amounts consistent with the V3 liquidity formula within 0.5%",
+          "actual": "0.9731394634348418 TWT / 0.0006428934012193737 WBNB",
+          "tolerance": "must hold",
+          "detail": "",
+          "missing": false
+        },
+        {
+          "field": "slippageBound",
+          "pass": true,
+          "expected": "a stated slippage bound, 0 < bps < 10000",
+          "actual": "55",
+          "tolerance": "must hold",
+          "detail": "",
+          "missing": false
+        }
+      ],
+      "originalResponse": {
+        "data": {
+          "amount0": 0.9731394634348418,
+          "amount1": 0.0006428934012193737,
+          "inRange": true,
+          "assumptions": [
+            "Read on chain 56 at block 131468579; pool 0x8cCB4544b3030dACF3d4D71C658f04e8688e25b1, fee 2500, tickSpacing 50.",
+            "Same liquidity (848440906917818290) re-centred at \u00b16% around spot; ticks rounded to the nearest multiple of 50."
+          ],
+          "blockNumber": "131468579",
+          "currentTick": -74609,
+          "maxSlippageBps": 55,
+          "pctToNearestBound": 100,
+          "proposedTickLower": -75250,
+          "proposedTickUpper": -74050
+        },
+        "kind": "data"
+      },
+      "originalGroundTruth": {
+        "fee": 2500,
+        "pool": "0x8cCB4544b3030dACF3d4D71C658f04e8688e25b1",
+        "inRange": true,
+        "tokenId": "7683201",
+        "decimals0": 18,
+        "decimals1": 18,
+        "liquidity": "848440906917818290",
+        "tickLower": -887250,
+        "tickUpper": 887250,
+        "tickCurrent": -74609,
+        "tickSpacing": 50,
+        "priceCurrent": 0.0005754101445703697,
+        "sqrtPriceX96": "1900407492629485243588411392",
+        "token0Symbol": "TWT",
+        "token1Symbol": "WBNB",
+        "policyAmount0": 0.9748992146362077,
+        "policyAmount1": 0.000641880872902414,
+        "policyTickLower": -75250,
+        "policyTickUpper": -74050,
+        "pctToNearestBound": 100
+      },
+      "responseHash": "0xa236860a5810da5d90036802ea13e82b1a6e4a36dd1147ffd3a0a7812f6fe128",
+      "groundTruthHash": "0x746f76be170162712c1e1ccdf36e0e07b17b79edcafa3256ebbff44b9b7c63f1",
+      "requestHash": "0x83837ef496200b4aba4bf84bbc5d59f2f7820d40cd57f221b2194096c1eff332"
+    }
+  ]
+}
