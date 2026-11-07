@@ -1,6 +1,5 @@
 import 'server-only'
 import { cachedProjection } from '@marque/db'
-import { publicClient } from '@marque/chain'
 import { normalizeAnswer, validateTask, type ChainId } from '@marque/commerce'
 import { venusReader, pancakeV3Reader, yieldReader, priceInUsdt, netAprAtSize, type YieldVenue } from '@marque/positions'
 import { erc20Abi } from 'viem'
@@ -12,6 +11,7 @@ import { compareRecheck, gridAssetForRecheck, validRecheckBlocks, type FreshRead
 import { RecheckResult } from './recheck-schema'
 import { boundedWork } from './bounded-work'
 import { recheckRecord } from './recheck-record'
+import { comparisonClient } from './comparison-client'
 
 const ADDRESS = /^0x[0-9a-fA-F]{40}$/
 // Official PancakeSwap token list, read 6 Nov 2026. Addresses are used only for the new read-only comparison.
@@ -33,7 +33,7 @@ async function build(chainId: ChainId, jobId: string) {
   if (kept?.category === 'security') { base.category = 'security'; return empty('Security reviews have no live recheck. Read the original findings and their sources.', 'unsupported') }
   if (!kept?.block || !Array.isArray(kept.checks) || !kept.checks.length) return empty('No original checks pinned to a block are recorded for this job.')
   base.answerBlock = kept.block
-  const c = publicClient()
+  const c = comparisonClient()
   const job = kept.job
   if (!job) return empty('This indexed job could not be read.')
   base.category = kept.category

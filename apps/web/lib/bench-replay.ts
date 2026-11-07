@@ -1,9 +1,8 @@
 import 'server-only'
-import { sql } from 'drizzle-orm'
-import { db } from '@marque/db'
 import { checksFor, grade, loadCaseById } from '@marque/conformance'
-import { normalizeAnswer, questJob, type ChainId } from '@marque/commerce'
+import { normalizeAnswer, type ChainId } from '@marque/commerce'
 import { onchainJobTask } from './job-description'
+import { recheckRecord } from './recheck-record'
 
 export type ReplayTarget = { caseId: string } | { chainId: ChainId; jobId: string }
 
@@ -16,15 +15,10 @@ export async function replaySuppliedAnswer(target: ReplayTarget, answer: unknown
     return { kind: 'case' as const, at: new Date().toISOString(), block: loaded.testCase.blockNumber.toString(), source: loaded.testCase.id,
       rows: diffs.map(d => ({ field: d.field, label: d.field.replace(/([a-z])([A-Z])/g, '$1 $2'), actual: d.actual, expected: d.expected, pass: d.pass as boolean | null, detail: `${d.tolerance}. ${d.detail}` })) }
   }
-  const kept = await db().transaction(async tx => {
-    await tx.execute(sql`set transaction read only`); await tx.execute(sql`set local statement_timeout = '1500ms'`)
-    const r = await tx.execute(sql`select block from lens_result where chain_id = ${target.chainId} and job_id = ${target.jobId} limit 1`)
-    return ((r as unknown as { rows?: Array<{ block: string | null }> }).rows ?? r as unknown as Array<{ block: string | null }>)[0]
-  })
+  const [kept, task] = await Promise.all([recheckRecord(target.chainId, target.jobId), onchainJobTask(target.chainId, target.jobId)])
   if (!kept?.block || !/^[1-9]\d{0,15}$/.test(kept.block)) throw new Error('block_unavailable')
-  const [job, task] = await Promise.all([questJob(target.chainId, target.jobId), onchainJobTask(target.chainId, target.jobId)])
-  if (!job?.agent?.category) throw new Error('category_unavailable')
-  const lens = normalizeAnswer(job.agent.category, answer)
+  if (!kept.job || !kept.category) throw new Error('category_unavailable')
+  const lens = normalizeAnswer(kept.category, answer)
   if (lens.meta.block !== null && lens.meta.block !== kept.block) throw new Error('block_mismatch')
   const checks = await checksFor(lens, task?.task ?? null, BigInt(kept.block))
   return { kind: 'job' as const, at: new Date().toISOString(), block: kept.block, source: `${target.chainId}:${target.jobId}`,

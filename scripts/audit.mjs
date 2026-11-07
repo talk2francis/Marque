@@ -96,7 +96,7 @@ async function auditRoute(browser, route, viewport, theme) {
     status = res?.status() ?? 0
   } catch (err) {
     await context.close()
-    return { route, viewport: viewport.name, status: 0, error: String(err).slice(0, 200), issues: ['navigation failed'] }
+    return { route, viewport: viewport.name, theme, status: 0, error: String(err).slice(0, 200), issues: ['navigation failed'] }
   }
 
   // Let one-shot entrance animations settle before capturing.
@@ -302,6 +302,7 @@ async function main() {
     for (const viewport of WIDTHS) for (const theme of THEMES) {
       const r = await auditRoute(browser, route, viewport, theme)
       results.push(r)
+      writeFileSync(join(OUT, 'audit.partial.json'), JSON.stringify({ base: BASE, ranAt: new Date().toISOString(), results }, null, 2))
       const mark = r.issues.length === 0 ? 'ok  ' : 'ISSUE'
       console.log(`${mark} ${route.padEnd(28)} ${viewport.name.padEnd(5)} ${theme} ${r.issues.join(' · ') || 'clean'}`)
     }
@@ -331,7 +332,11 @@ async function main() {
 
   console.log(`\nscreenshots: playwright-report/screens/  ·  report: playwright-report/audit.md`)
   console.log(`${withIssues.length} of ${results.length} combinations have issues`)
-  process.exitCode = 0
+  // Heuristic contrast/target warnings remain reviewable. A broken document or
+  // runtime error must fail the command, even when screenshots were produced.
+  process.exitCode = results.some((r) => r.status === 0 || r.status >= 400
+    || r.consoleErrors?.length || r.pageErrors?.length || r.overflow
+    || r.missingAlt?.length || r.focusVisible?.ok === false) ? 1 : 0
 }
 
 main().catch((err) => { console.error(err); process.exit(1) })
