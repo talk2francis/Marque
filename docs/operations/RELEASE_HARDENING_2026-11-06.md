@@ -40,7 +40,7 @@ All four raw registrations, **41 runs and eight provenance supplements** retaine
 | Visual review | The prior 80 audit, 52 mobile and 13 control captures were reviewed in this pass. All 72 new audit captures and the context images specified in the [new review record](../evidence/release-hardening-2026-11-07/ledger-review.json) were inspected. Capture hashes and source revisions are separate from review coverage; file existence alone is not called review. |
 | Integrity | Four sampled original lens rows retain exact values/row versions. Candidate and earlier live nine-wallet close guards show zero eligibility differences. The protected money, worker, count, migration and inline revoke paths match the baseline, apart from the documented deployment-readiness gate. |
 
-The conformance implementation fingerprint is now `0x66057d145adf50c8c2a54c682bdaccc1940f9ed9363bc62c0e3d650718032418`. Grading arithmetic, tolerances and old issued fingerprints are preserved. The original close checksum and existing BSC testnet anchor remain; no new mainnet transaction was sent.
+The parser correction's implementation fingerprint was `0x66057d145adf50c8c2a54c682bdaccc1940f9ed9363bc62c0e3d650718032418`. Grading arithmetic, tolerances and old issued fingerprints are preserved. The original close checksum and existing BSC testnet anchor remain; no new mainnet transaction was sent.
 
 ## VEYRA Keeper: platform correction
 
@@ -93,3 +93,5 @@ PostgreSQL's existing timeout log identified both exact price queries hitting th
 Read-only plans after indexing took 37.864 ms for the agent service winners, 0.451 ms for last successful quotes and 568.536 ms for global service winners. Index-only scans still fetched heap pages where visibility required it. On the unchanged 0f1418a artifact, the same 25 overlapping reads all returned 200, with p50 1,612 ms, p95 1,685 ms and maximum 1,768 ms. These are measured diagnostic requests on a shared VPS, not a supported mixed visitor capacity. The earlier 5,100 ms cold p95 and failed smoke are preserved. [Index preparation and actual plans](../evidence/quote-indexes-2026-11-07/preparation.json) describe the change.
 
 The final index build and affected acceptance are recorded separately. Prior visual/accessibility evidence is reused only for byte-identical renderer inputs; the additional changelog paragraph receives fresh checks. Exact-source GitHub CI and public activation remain separate gates.
+
+The additive schema index declarations also change the imported-source implementation fingerprint to `0x9d575ac646f73f2200bbd0e83a2062879ad5619b84c7ed4f516b5448b1ed3947` across 48 files. The manifest differs only at `packages/db/src/schema.ts`; numeric grading code, criteria and tolerances are byte-identical. Earlier issued fingerprints and observations remain untouched. [Fingerprint comparison](../evidence/quote-indexes-2026-11-07/implementation-fingerprint.json).

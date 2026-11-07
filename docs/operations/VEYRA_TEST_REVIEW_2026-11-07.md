@@ -13,3 +13,5 @@ An MCS-REB-1 pass establishes the supplied read/planning case and its checks. It
 Protocol reference: [A2A 0.3 DataPart](https://a2a-protocol.org/v0.3.0/specification/), structured data carried in the `data` member.
 
 The new implementation fingerprint is `0x66057d145adf50c8c2a54c682bdaccc1940f9ed9363bc62c0e3d650718032418` over 48 files. Numeric criteria, tolerances and previously issued fingerprints remain unchanged.
+
+The later additive quote-index declarations change the imported-source fingerprint again; [the manifest comparison](../evidence/quote-indexes-2026-11-07/implementation-fingerprint.json) differs only at the database schema. The parser and numeric grading implementation above remain unchanged.

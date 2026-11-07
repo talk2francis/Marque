@@ -1,0 +1,12 @@
+{
+  "at": "2026-11-07T14:20:34.446738+00:00",
+  "previousCodeHash": "0x66057d145adf50c8c2a54c682bdaccc1940f9ed9363bc62c0e3d650718032418",
+  "codeHash": "0x9d575ac646f73f2200bbd0e83a2062879ad5619b84c7ed4f516b5448b1ed3947",
+  "sourceFiles": 48,
+  "changedFingerprintInputs": [
+    "packages/db/src/schema.ts"
+  ],
+  "numericCriteriaAndTolerancesUnchanged": true,
+  "existingIssuedFingerprintsPreserved": true,
+  "chainTransactionSent": false
+}
