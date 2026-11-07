@@ -5,10 +5,10 @@ This follows verified live release `02aacc8512ef9270d35f1044abf83104ae44fea3`. I
 ## What changes
 
 - The FAQ reaches the viewport edges using the existing hire band's textured sage material and shared content width. Questions retain native expansion, single-answer behavior, deep links and unchanged search-engine answer copy.
-- Category doors prioritize a short explanation, measured mainnet availability, snapshot price and a clear Browse link. Supporting ratings, checks, operator counts, testnet availability, times and the supply-target measure remain in explicit disclosures.
+- Category doors prioritize a short explanation, measured mainnet availability, snapshot price and a clear Browse link. Supporting ratings, checks, operator counts, testnet availability, times and the supply-target measure remain in explicit disclosures. Expanding one card does not stretch its closed neighbours.
 - Wallet-free browsing, Marque Pass and Agent Forge help moves from the hero to the FAQ footer.
 - Personal agent entries separate identity, recent activity, management buttons, campaign checklist, delivery record, job history and owner-only profile controls. Every original evidence link and timestamp remains reachable.
-- Today separates the task board and answer-check panel. Rating links have clear affordances; the answer-selector is a primary button with its existing expansion behavior. Actual comparisons still run only after the existing explicit per-answer action.
+- Today separates the task board and answer-check panel. Rating links have clear affordances; the answer-selector is a primary button with its existing expansion behavior. Actual comparisons still run only after the existing explicit per-answer action, with a bordered 44-pixel button. Mobile activity labels reserve space so their values align.
 
 - Owners can optionally upload a hero banner after listing/registration or in profile tools. A banner uses the reference masthead layout with the owner’s own art and portrait. Without a saved banner the current header stays. [Owner guide](AGENT_BANNERS.md).
 

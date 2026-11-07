@@ -146,7 +146,7 @@
 .kpiFoot a { color: var(--ink-2); }
 
 /* Categories: four equal doors, each marked with its reference agent's material. */
-.tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); align-items: start; gap: 14px; }
 .tile {
   --tone: var(--ink-3);
   position: relative;
