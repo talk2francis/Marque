@@ -1,0 +1,441 @@
+{
+  "version": 1,
+  "at": "2026-11-07T17:43:51.220Z",
+  "buildSource": "7f6d5912443718699bb83de556ccbf7fd648d8d9",
+  "functionalAccepted": true,
+  "allCapacityTargetsPassed": false,
+  "scope": "Fresh compiled equivalent global-winner lookup, retaining additive indexes and explicit rollback checks. Prior renderer evidence is reused with exact source comparison; earlier failed smoke remains failed.",
+  "build": "44 static pages and standalone assembly",
+  "sourceChecks": {
+    "affectedTypechecks": [
+      "commerce",
+      "web via production build"
+    ],
+    "retainedTypecheckSource": "13f54af78448c1ef3b73b2ce537ce60f73a24731",
+    "retainedUnchangedTypechecks": [
+      "database",
+      "conformance",
+      "maintenance helper"
+    ],
+    "focusedPassed": 29,
+    "retainedParserPassed": 10,
+    "retainedParserSource": "13f54af78448c1ef3b73b2ce537ce60f73a24731",
+    "isolatedQuoteHistoryPassed": 12,
+    "retainedReadinessAndMcpPassed": 10,
+    "retainedOperationsSource": "13f54af78448c1ef3b73b2ce537ce60f73a24731",
+    "lintPassed": true,
+    "copyLintPassed": true,
+    "generatedSiteDocsPassed": true,
+    "notes": "The original fixture was admin-owned and refused migration; a fresh empty application-owned fixture was used without changing permissions or copying production data. The first isolated web typecheck hit its default 1 GiB heap; it passed with a 3 GiB heap. Both failed logs remain retained.",
+    "additionalCommerceStateUnitPassed": 1
+  },
+  "unchangedExactStatementBudgetMs": 4000,
+  "unchangedLockBudgetMs": 500,
+  "priceReadBurst": {
+    "requests": 25,
+    "agents": 15,
+    "peak": 25,
+    "all200": true,
+    "p50Ms": 2099,
+    "p95Ms": 2201,
+    "maxMs": 2220,
+    "note": "Overlapping GETs of one actual selection on two private web workers; not a supported website visitor capacity."
+  },
+  "mcp": {
+    "at": "2026-11-07T17:28:09.191Z",
+    "release": "7f6d5912443718699bb83de556ccbf7fd648d8d9",
+    "healthReleaseMatches": true,
+    "tools": 11,
+    "allReadOnlyHints": true,
+    "noToolInvoked": true,
+    "peakSampledRssBytes": 726999040,
+    "restartBudgetBytes": 838860800,
+    "samples": 7
+  },
+  "browser": {
+    "freshRouteThemeCases": 4,
+    "freshChangelogAxeCases": 2,
+    "freshViewportAudits": 8,
+    "captureCount": 20,
+    "review": {
+      "at": "2026-11-07T17:43:51.058906+00:00",
+      "release": "7f6d5912443718699bb83de556ccbf7fd648d8d9",
+      "auditCapturesReviewed": 8,
+      "browserCapturesReviewed": 12,
+      "additionalContextCapturesReviewed": 1,
+      "method": "Viewed all three contact sheets covering the twenty standard captures, then inspected the fresh mobile Night context at native size. Changelog paragraph, responsive marketplace cards and controls show no new overlap.",
+      "coldTotalsObservation": {
+        "initialNightCaptureOmittedOptionalTotals": true,
+        "warmMobileContextTotalsPresent": true,
+        "warmContextHadNoErrorsOrWrites": true,
+        "existingUnavailableProjectionFallbackRetained": true,
+        "contextFile": "marketplace-night-warm-context.png",
+        "sha256": "ed406618609d7e0b8f53c9a7eb9c2f7ad4ffa476d07ab2463446482040961033"
+      }
+    },
+    "rendererEquivalence": {
+      "at": "2026-11-07T17:12:55.092Z",
+      "source": "7f6d5912443718699bb83de556ccbf7fd648d8d9",
+      "visualEvidenceSource": "0f1418a31c077d6f8385c41cab4eaa3de802c155",
+      "allRendererInputsUnchangedExceptOneChangelogParagraph": true,
+      "changedCompiledInputs": [
+        "apps/web/app/docs/articles.ts",
+        "packages/commerce/src/latest-quote.integration.test.ts",
+        "packages/commerce/src/supply.ts",
+        "packages/conformance/src/code-anchor.ts",
+        "packages/db/drizzle/0030_quote_read_indexes.sql",
+        "packages/db/drizzle/meta/_journal.json",
+        "packages/db/src/schema.ts"
+      ],
+      "newChangelogRequiresFreshChecks": true,
+      "priorAcceptanceScope": "Twelve AXE route/theme cases, forty viewport audits, eighteen Ledger route/theme cases and 78 inspected captures. The earlier full smoke failed and is not reused as a pass."
+    },
+    "reusedEvidence": {
+      "buildSource": "0f1418a31c077d6f8385c41cab4eaa3de802c155",
+      "routeThemeAxeCases": 12,
+      "viewportAudits": 40,
+      "ledgerRouteThemeAxeCases": 18,
+      "inspectedCaptures": 78,
+      "acceptedScope": "Only unchanged renderer/accessibility and integrity checks. Prior full smoke failed and is never reused as a pass."
+    }
+  },
+  "ledger": {
+    "comparisons": [
+      {
+        "id": "ADV-01",
+        "complete": true,
+        "rawRunsUnchanged": true
+      },
+      {
+        "id": "ADV-02",
+        "complete": true,
+        "rawRunsUnchanged": true
+      },
+      {
+        "id": "ADV-03",
+        "complete": true,
+        "rawRunsUnchanged": true
+      },
+      {
+        "id": "ADV-04",
+        "complete": true,
+        "rawRunsUnchanged": true
+      }
+    ],
+    "noScriptCompleteComparisons": 4
+  },
+  "api": [
+    {
+      "category": "health_factor",
+      "status": 200,
+      "ms": 1914,
+      "fields": 3
+    },
+    {
+      "category": "grid",
+      "status": 200,
+      "ms": 1002,
+      "fields": 1
+    },
+    {
+      "category": "rebalancing",
+      "status": 200,
+      "ms": 914,
+      "fields": 3
+    },
+    {
+      "category": "yield",
+      "status": 200,
+      "ms": 742,
+      "fields": 2
+    }
+  ],
+  "replay": {
+    "status": 200,
+    "block": "131771231",
+    "rows": 3
+  },
+  "closeGuardWalletsUnchanged": 9,
+  "smokeRoutes": 4,
+  "candidateRouteWidthCases": 36,
+  "integrity": {
+    "at": "2026-11-07T17:36:53.298Z",
+    "rawVersionsAndWholeRowFingerprintsEqual": true,
+    "benchmarks": 4,
+    "runs": 41,
+    "provenance": 8,
+    "lens": 4,
+    "veyra": 6,
+    "recordsWritten": 0
+  },
+  "protectedPaths": {
+    "protectedPathsChanged": [],
+    "exceptions": {
+      "priceRead": [
+        "packages/commerce/src/terms-read.ts",
+        "packages/commerce/src/read-budget.ts",
+        "packages/commerce/src/supply.ts latestCommerceQuoteQuery only"
+      ],
+      "unchangedCommercialStateAndCountFunctions": true,
+      "additiveIndexes": [
+        "packages/db/drizzle/0030_quote_read_indexes.sql",
+        "packages/db/drizzle/meta/_journal.json"
+      ],
+      "originalSchemaColumnsAndConstraintsUnchanged": true,
+      "unchanged": [
+        "executeRead",
+        "boundedCommerceRead",
+        "terms expiry and ranking tail"
+      ],
+      "processConfig": "Validated MCP release metadata plus 500M to 800M only; prior metadata equivalence retained",
+      "deployChange": "Readiness gate and explicit legacy rollback only"
+    }
+  },
+  "codeHash": "0x9d575ac646f73f2200bbd0e83a2062879ad5619b84c7ed4f516b5448b1ed3947",
+  "sourceFiles": 48,
+  "numericCriteriaAndTolerancesUnchanged": true,
+  "retainedFailures": [
+    {
+      "kind": "preceding guarded load held",
+      "buildSource": "13f54af78448c1ef3b73b2ce537ce60f73a24731",
+      "detail": "The 25-visitor stage stopped with three catalogue/wallet 503s, page p95 7831.557603 ms and API p95 16319.981055 ms. No higher stage ran. Full metrics remain in held-load.json."
+    },
+    {
+      "kind": "earlier candidate held",
+      "buildSource": "0f1418a31c077d6f8385c41cab4eaa3de802c155",
+      "detail": "Marketplace terms returned 503 and network-idle navigation reached the unchanged 90-second deadline. Candidate verifier and load test did not run."
+    },
+    {
+      "kind": "earlier candidate timeout",
+      "detail": "The first pre-index Day marketplace check reached its 60-second network-idle deadline. Missing pending-request telemetry prevents definitive attribution of that individual timeout. A later full smoke reproduced a terms 503 and PostgreSQL logged both exact reads timing out."
+    }
+  ],
+  "capacity": {
+    "guardedStages": [
+      {
+        "stage": 25,
+        "exit": 99,
+        "metrics": {
+          "vus_max": {
+            "value": 25,
+            "min": 25,
+            "max": 25
+          },
+          "http_req_duration": {
+            "p(90)": 4116.857328599997,
+            "p(95)": 7980.635999399986,
+            "p(99)": 12803.007362280001,
+            "max": 14008.600203,
+            "avg": 2212.874061105263,
+            "med": 1129.128805
+          },
+          "page_duration": {
+            "avg": 2426.362101133333,
+            "med": 1131.742166,
+            "p(90)": 5674.175708999999,
+            "p(95)": 9320.183600199993,
+            "p(99)": 13070.916882439997,
+            "max": 14008.600203,
+            "thresholds": {
+              "p(95)<800": true,
+              "p(95)<2000": true
+            }
+          },
+          "vus": {
+            "value": 25,
+            "min": 0,
+            "max": 25
+          },
+          "iteration_duration": {
+            "avg": 3246.652382315789,
+            "med": 2099.8182,
+            "p(90)": 5501.637618799997,
+            "p(95)": 9357.740824899985,
+            "p(99)": 14112.574362580002,
+            "max": 15301.282747
+          },
+          "iterations": {
+            "count": 19,
+            "rate": 0.8721228927977237
+          },
+          "http_req_tls_handshaking": {
+            "med": 0,
+            "p(90)": 0,
+            "p(95)": 0,
+            "p(99)": 0,
+            "max": 0,
+            "avg": 0
+          },
+          "http_req_failed": {
+            "passes": 0,
+            "fails": 19,
+            "value": 0
+          },
+          "data_sent": {
+            "rate": 211.6963569254264,
+            "count": 4612
+          },
+          "http_req_blocked": {
+            "p(90)": 1.126684399999999,
+            "p(95)": 2.5546258999999982,
+            "p(99)": 3.1362411800000003,
+            "max": 3.281645,
+            "avg": 0.5914976842105263,
+            "med": 0.449319
+          },
+          "http_req_waiting": {
+            "p(95)": 3455.110659799997,
+            "p(99)": 4454.2071887600005,
+            "max": 4703.981321,
+            "avg": 1384.3920440000002,
+            "med": 1128.353558,
+            "p(90)": 3075.8116105999998
+          },
+          "http_req_connecting": {
+            "avg": 0.36075726315789475,
+            "med": 0.266047,
+            "p(90)": 0.5611733999999998,
+            "p(95)": 0.9888881999999949,
+            "p(99)": 2.6985800400000004,
+            "max": 3.126003
+          },
+          "api_duration": {
+            "p(99)": 3252.679291819999,
+            "max": 3318.356111,
+            "avg": 1412.293911,
+            "med": 915.931083,
+            "p(90)": 2661.5879192,
+            "p(95)": 2989.972015099999,
+            "thresholds": {
+              "p(95)<1500": true
+            }
+          },
+          "http_5xx": {
+            "passes": 0,
+            "fails": 19,
+            "thresholds": {
+              "rate<0.005": false
+            },
+            "value": 0
+          },
+          "http_req_sending": {
+            "avg": 627.0044665789474,
+            "med": 0.110898,
+            "p(90)": 0.2916436,
+            "p(95)": 1191.3599358999747,
+            "p(99)": 9766.995664780005,
+            "max": 11910.904597
+          },
+          "http_req_duration{expected_response:true}": {
+            "max": 14008.600203,
+            "avg": 2212.874061105263,
+            "med": 1129.128805,
+            "p(90)": 4116.857328599997,
+            "p(95)": 7980.635999399986,
+            "p(99)": 12803.007362280001
+          },
+          "data_received": {
+            "count": 3329494,
+            "rate": 152827.78625435074
+          },
+          "http_req_receiving": {
+            "p(90)": 306.14578999999964,
+            "p(95)": 906.183848899996,
+            "p(99)": 2266.5875529800005,
+            "max": 2606.688479,
+            "avg": 201.4775505263158,
+            "med": 1.99337
+          },
+          "http_reqs": {
+            "rate": 0.8721228927977237,
+            "count": 19
+          }
+        }
+      }
+    ],
+    "higherStagesRunAfterFailure": false,
+    "note": "Stop on first nonzero stage. The load generator shares the VPS; the isolated web candidate has a two-core CPU quota. No higher supported capacity is claimed."
+  },
+  "captures": [
+    {
+      "file": "browser/changelog-1440-day.png",
+      "sha256": "888b1b9198a3bf0954690c6d2a2a7632a37da729fffd365e539287152d27b26b"
+    },
+    {
+      "file": "browser/changelog-1440-night.png",
+      "sha256": "d73b510a2eccb9d310eb3a6705c85d2ea0969d32e9c6c51beb490108f1cb7fda"
+    },
+    {
+      "file": "browser/changelog-390-day.png",
+      "sha256": "7bec23f48e495b7bdd55394d39a27b558bdf6042ad6ecb4c85883c9b7ccf9e5c"
+    },
+    {
+      "file": "browser/changelog-390-night.png",
+      "sha256": "9d1eac3141f2017b0f24fdea94c7cee8016e1e820972d56a527680732f91bef9"
+    },
+    {
+      "file": "browser/changelog-768-day.png",
+      "sha256": "f5f0660682a87b9001723ffc58198b19b4c92163fa3c5355ba360a3614d0e97c"
+    },
+    {
+      "file": "browser/changelog-768-night.png",
+      "sha256": "f5a9d3a651770cb4ec5b07db26929e77e098c483111d1b4aaa4e677074dd9eac"
+    },
+    {
+      "file": "browser/marketplace-1440-day.png",
+      "sha256": "77f079db9bcc81419255570fb28b6941c2489a46a87823126073f4509f16a0f4"
+    },
+    {
+      "file": "browser/marketplace-1440-night.png",
+      "sha256": "6385fc8e21505c4a87063e6d49d06baa6747328d4dd2c53038d9537839bbf7c8"
+    },
+    {
+      "file": "browser/marketplace-390-day.png",
+      "sha256": "6ea6c2ded4c6e02ae6cbced62953a373381cfdd158967ba491edf233042824e1"
+    },
+    {
+      "file": "browser/marketplace-390-night.png",
+      "sha256": "960fc066d6ebcff7ebcb7b9b70b569457a041a8faf869538a0e2a363b4a97fc3"
+    },
+    {
+      "file": "browser/marketplace-768-day.png",
+      "sha256": "73f33c268fc3f86e862e1996ae067250ae9dbc57e7d26b30abb15e69238a54be"
+    },
+    {
+      "file": "browser/marketplace-768-night.png",
+      "sha256": "9f782b1afe17c3424246055b6ff582d59f0e1526b5643473181bbd78f5bca020"
+    },
+    {
+      "file": "audit/screens/docs_changelog/day-1024.png",
+      "sha256": "0bfececc3056ed4b604afa87becbd3c2917472450cf13abf9dabb117e3fc5a67"
+    },
+    {
+      "file": "audit/screens/docs_changelog/day-1440.png",
+      "sha256": "615ab50d2bc0a18e345ef1657b8ec89aea382c5c08197e5f51c05ff1d900e71f"
+    },
+    {
+      "file": "audit/screens/docs_changelog/day-390.png",
+      "sha256": "417eff4d66dbd299ccecfd0de5d19f1edd4f7a5dd18bae1f8fe2cc6753088420"
+    },
+    {
+      "file": "audit/screens/docs_changelog/day-768.png",
+      "sha256": "0d2841d0ef9334ce81be9e3bce9f64518b7db0810e445032ab0a3ff650473f7f"
+    },
+    {
+      "file": "audit/screens/docs_changelog/night-1024.png",
+      "sha256": "7a911a22ca52edbafd7aa38f8f58b44e0effed4a737035c759fb749b7a69ccb9"
+    },
+    {
+      "file": "audit/screens/docs_changelog/night-1440.png",
+      "sha256": "fb10ac984f912e8489ea298701f40c7d902446be1186079a47e12ca5a10637d5"
+    },
+    {
+      "file": "audit/screens/docs_changelog/night-390.png",
+      "sha256": "7af033a84f0313934a19336c32c2211b97d17a73f99c8ce9002d7bc7e785d785"
+    },
+    {
+      "file": "audit/screens/docs_changelog/night-768.png",
+      "sha256": "bb4a7c750245084669ef61fa3601f75f3637e7239a71368b50634bf96c7e610a"
+    }
+  ]
+}

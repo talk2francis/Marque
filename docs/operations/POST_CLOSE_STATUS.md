@@ -23,3 +23,7 @@ The [baseline axe report](../audit/2026-11-close/baseline.json) contains sixteen
 No money action, count definition, observation row, proxy route, process name, RPC provider or running worker was changed.
 
 The Status introduction distinguishes database/chain activity timestamps from outside request observations. It no longer says there is no outside observer when the separately disclosed observation log is present. Only explanatory text changed; the projection, counts and observation denominator are unchanged.
+
+### 7 November index follow-up
+
+The [fresh compiled index acceptance](../evidence/quote-indexes-2026-11-07/compiled-acceptance.json) records a guarded 25-visitor stage ending with exit 99, page p95 9320.2 ms and API p95 2990.0 ms. Higher stages do not run after a failure. The separate 25-read price burst returned 200 throughout, with p95 2201 ms; it does not establish mixed website capacity. Earlier failed observations retain their original source and remain available.
