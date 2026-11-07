@@ -51,6 +51,12 @@ function loadAgentEnv(name) {
 
 const env = loadEnv()
 const ROOT = '/root/marque'
+function releaseOf(directory) {
+  try {
+    const sha = fs.readFileSync(`${directory}/RELEASE_SHA`, 'utf8').trim()
+    return /^[a-f0-9]{40}$/.test(sha) ? sha : ''
+  } catch { return '' }
+}
 // The MCP process holds no private key (V4 invariant 40): key-like and unneeded secrets are dropped, and PM2's shell
 // env is filtered (filter_env), so an MCP tool can never reach a signing key even if it were tricked into trying.
 const keyless = Object.fromEntries(Object.entries(env).filter(([k]) => !/(_PK$|PRIVATE|MNEMONIC|SEED|WALLET_PASSWORD|TELEGRAM|ANTHROPIC|OPENAI|DEEPSEEK|ELEVENLABS)/.test(k)))
@@ -333,7 +339,7 @@ module.exports = {
       cwd: `${ROOT}/releases/mcp/apps/web`,
       script: `${ROOT}/releases/mcp/apps/web/server.js`,
       interpreter: 'node',
-      env: { ...keyless, NODE_ENV: 'production', PORT: '3297', HOSTNAME: '127.0.0.1', MARQUE_ROOT: ROOT, MARQUE_CAMPAIGN_CHAIN: '56', NEXT_PUBLIC_MARQUE_CAMPAIGN_CHAIN: '56' },
+      env: { ...keyless, NODE_ENV: 'production', PORT: '3297', HOSTNAME: '127.0.0.1', MARQUE_ROOT: ROOT, MARQUE_RELEASE_SHA: releaseOf(`${ROOT}/releases/mcp`), MARQUE_CAMPAIGN_CHAIN: '56', NEXT_PUBLIC_MARQUE_CAMPAIGN_CHAIN: '56' },
       filter_env: true,
       autorestart: true,
       max_restarts: 50,

@@ -454,3 +454,5 @@ The Ledger read view can recover a block-only registration drift only when the u
 ### 7 November typed conformance data and homepage evidence
 
 The conformance adapter unwraps explicitly tagged A2A DataParts, returning their application object without interpreting its reserved-looking keys. Invalid DataPart payloads are unusable responses. Numeric graders are unchanged. Homepage failure selection uses the latest observation per identity/test and the existing stated-wrong-value distinction; missing fields do not become wrong facts. Dated links preserve the source result. Raw observations are never edited. See [the VEYRA review](operations/VEYRA_TEST_REVIEW_2026-11-07.md).
+
+The hosted MCP process takes its public release identifier from `releases/mcp/RELEASE_SHA`, independently of a web slot's launch environment. Its existing key filter is retained. Promotion checks one initialized MCP worker against that exact identifier before switching web traffic.

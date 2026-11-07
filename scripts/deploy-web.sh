@@ -89,10 +89,14 @@ start_mcp() {
   pm2 delete marque-mcp >/dev/null 2>&1 || true
   pm2 start "$ROOT/ecosystem.config.cjs" --only marque-mcp >/dev/null
   for _ in $(seq 1 30); do
-    [ "$(curl -s -o /dev/null -w '%{http_code}' -m 3 http://127.0.0.1:3297/api/health)" = "200" ] && { say "marque-mcp on :3297 -> $1"; return 0; }
+    if [ "$(http_health http://127.0.0.1:3297/api/health 3)" = '200 0' ]; then
+      EXPECTED_RELEASE_SHA="$(cat "$REL/$1/RELEASE_SHA")" WEB_INSTANCES=1 node "$ROOT/scripts/check-web-ready.mjs" http://127.0.0.1:3297 >>"$LOG" 2>&1 || return 1
+      say "marque-mcp on :3297 -> $1"; return 0
+    fi
     sleep 2
   done
   say "marque-mcp did not answer on :3297 (the site still works; /api/mcp answers 503 until it does)"
+  return 1
 }
 
 # Save while both slots are available, before the proxy can depend on the new one.
