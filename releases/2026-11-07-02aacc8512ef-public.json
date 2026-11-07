@@ -1,0 +1,97 @@
+{
+  "version": 1,
+  "release": "02aacc8512ef9270d35f1044abf83104ae44fea3",
+  "buildSource": "7f6d5912443718699bb83de556ccbf7fd648d8d9",
+  "productionVerifiedAt": "2026-11-07T19:05:56.819Z",
+  "githubMainMatchesLive": true,
+  "website": "https://marque.trade",
+  "liveRevision": "https://marque.trade/api/health",
+  "code": "https://github.com/talk2francis/Marque/commit/02aacc8512ef9270d35f1044abf83104ae44fea3",
+  "ci": {
+    "url": "https://github.com/talk2francis/Marque/actions/runs/42402755561",
+    "conclusion": "success",
+    "jobs": [
+      {
+        "name": "Act on the answer, BSC mainnet fork",
+        "conclusion": "success"
+      },
+      {
+        "name": "Typecheck, lint, tests, build",
+        "conclusion": "success"
+      },
+      {
+        "name": "Smoke (home, marketplace, storefront, quest; no wallet)",
+        "conclusion": "success"
+      }
+    ],
+    "ordinary": {
+      "passed": 1374,
+      "skipped": 128
+    },
+    "isolatedDatabase": {
+      "passed": 115
+    },
+    "act": {
+      "total": 15,
+      "unit": 7,
+      "pinnedBscFork": 8
+    },
+    "note": "Separate suite totals overlap and are not added as unique tests."
+  },
+  "publicVerification": {
+    "ledgerComparisonsComplete": 4,
+    "selectedOriginalRunsUnchanged": 16,
+    "closeDownloadsExact": 17,
+    "brainProfilesWithRecordedPass": 6,
+    "veyraLatestPassed8of8": true,
+    "homepageStaleFailureRemoved": true,
+    "filmPassed": true,
+    "publicBrowserCases": 6,
+    "publicCapturesInspected": 6,
+    "noPageErrorsOrOverflowInCheckedCases": true,
+    "mcpMetadataSameRelease": true
+  },
+  "outsideObservation": {
+    "url": "https://github.com/talk2francis/Marque/actions/runs/42404356457",
+    "at": "2026-11-07T19:04:00.586Z",
+    "checks": [
+      {
+        "path": "/",
+        "status": 200,
+        "error": null
+      },
+      {
+        "path": "/register",
+        "status": 200,
+        "error": null
+      },
+      {
+        "path": "/proof",
+        "status": 200,
+        "error": null
+      },
+      {
+        "path": "/quest",
+        "status": 200,
+        "error": null
+      },
+      {
+        "path": "/api/v1/phase2/coverage",
+        "status": 200,
+        "error": null
+      },
+      {
+        "path": "/api/v1/proof",
+        "status": 200,
+        "error": null
+      }
+    ],
+    "note": "Discrete outside requests; no continuous uptime claim."
+  },
+  "evidence": {
+    "releaseReport": "https://github.com/talk2francis/Marque/blob/main/docs/operations/RELEASE_HARDENING_2026-11-06.md",
+    "veyraReview": "https://github.com/talk2francis/Marque/blob/main/docs/operations/VEYRA_TEST_REVIEW_2026-11-07.md",
+    "compiledAcceptance": "https://github.com/talk2francis/Marque/blob/main/docs/evidence/quote-indexes-2026-11-07/compiled-acceptance.json"
+  },
+  "scope": "Public release verification only; detailed internal operations receipt retained on the server."
+}
