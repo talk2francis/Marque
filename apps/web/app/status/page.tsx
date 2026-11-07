@@ -30,10 +30,8 @@ export const metadata = {
  * time it was measured, and anything past its expected cadence is called stale
  * on the page rather than quietly served.
  *
- * Nothing here is a synthetic uptime percentage. We do not run an external
- * prober against ourselves, so publishing "99.9%" would be a number we did not
- * measure (invariant 4). What we can honestly report is when each moving part
- * last did its job.
+ * Activity timestamps and outside request observations are distinct evidence.
+ * We never infer uptime from worker activity or invent observations (invariant 4).
  */
 
 const unwrap = (r: unknown): Array<Record<string, unknown>> =>
@@ -229,8 +227,8 @@ export default async function StatusPage() {
           <p className={styles.note}>
             <ProvenanceChip provenance="MEASURED" />
             Read from the database and the chain {measuredAt(projection.computedAt, measuredAgo)}, and
-            refreshed at most every 30 seconds. No uptime percentage is shown, because we do not run
-            an external prober against ourselves and would have to invent one.
+            refreshed at most every 30 seconds. These activity reads are separate from the outside
+            request observations shown below; each has its own timestamp and evidence.
           </p>
         </header>
 

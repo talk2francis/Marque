@@ -21,3 +21,5 @@ The repository's private vulnerability reporting setting was checked and enabled
 The [baseline axe report](../audit/2026-11-close/baseline.json) contains sixteen actual route/theme checks of the live release. All eight requested routes passed in Day and Night with no serious or critical violations. Candidate accessibility and visual acceptance are recorded separately after the complete B/C/D build.
 
 No money action, count definition, observation row, proxy route, process name, RPC provider or running worker was changed.
+
+The Status introduction distinguishes database/chain activity timestamps from outside request observations. It no longer says there is no outside observer when the separately disclosed observation log is present. Only explanatory text changed; the projection, counts and observation denominator are unchanged.
