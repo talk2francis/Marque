@@ -1,0 +1,43 @@
+{
+  "at": "2026-11-07T12:24:23.302Z",
+  "agents": 15,
+  "readOnlyRepeatableSnapshot": true,
+  "unchangedStatementsAndLockBudgets": true,
+  "recordsWritten": 0,
+  "pairs": [
+    {
+      "query": "latest-per-service",
+      "equal": true,
+      "rows": 15,
+      "original": {
+        "executionMs": 303.414,
+        "rows": 15,
+        "hitBlocks": 38253,
+        "readBlocks": 0
+      },
+      "optimized": {
+        "executionMs": 79.793,
+        "rows": 15,
+        "hitBlocks": 8221,
+        "readBlocks": 0
+      }
+    },
+    {
+      "query": "latest-success-per-agent",
+      "equal": true,
+      "rows": 15,
+      "original": {
+        "executionMs": 110.353,
+        "rows": 15,
+        "hitBlocks": 8125,
+        "readBlocks": 0
+      },
+      "optimized": {
+        "executionMs": 90.294,
+        "rows": 15,
+        "hitBlocks": 12383,
+        "readBlocks": 0
+      }
+    }
+  ]
+}

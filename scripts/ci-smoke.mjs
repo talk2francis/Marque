@@ -21,8 +21,10 @@ for (const p of PAGES) {
   const errors = []
   page.on('pageerror', (e) => errors.push(`pageerror: ${e.message.slice(0, 160)}`))
   page.on('console', (m) => { if (m.type() === 'error') errors.push(`console: ${m.text().slice(0, 160)}`) })
+  page.on('response', (r) => { if (r.status() >= 500) errors.push(`http: ${r.status()} ${new URL(r.url()).pathname}`) })
   const res = await page.goto(`${BASE}${p.path}`, { waitUntil: 'networkidle', timeout: 90_000 }).catch((e) => ({ status: () => 0, e }))
   const status = res.status()
+  if (res.e) errors.push(`navigation: ${res.e.message.slice(0, 160)}`)
   const text = status === 200 ? await page.locator('body').innerText() : ''
   const ok = status === 200 && p.expect.test(text) && errors.length === 0
   console.log(`${ok ? 'ok  ' : 'FAIL'} ${status} ${p.path}  ${p.what}${errors.length ? `  ${errors.join(' | ')}` : ''}`)

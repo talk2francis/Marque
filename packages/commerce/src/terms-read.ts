@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm'
-import { boundedCommerceRead } from './read-budget.js'
+import { coalescedExactRead } from './read-budget.js'
 import { serviceCommerceFromQuote, type CommercialState, type ServiceCommerce } from './supply.js'
 import { termsOf, type LastQuote, type Terms } from './terms.js'
 
@@ -7,6 +7,8 @@ import { termsOf, type LastQuote, type Terms } from './terms.js'
  * Server side of current terms: read the newest quote observation of each service of the
  * named agents (indexed by agent and time, so this never scans the catalog), plus each
  * agent's newest successful quote so a lapsed price can be shown dated rather than lost.
+ * Select winning row IDs before loading raw expiry/signature payloads. Only overlapping
+ * database work is shared; each caller evaluates expiry and state against its own clock.
  * The profile rail, the terms API and the hire sheet all call this.
  */
 
@@ -26,27 +28,36 @@ export async function currentTermsMany(agentIds: readonly string[], now = Date.n
   const out = new Map<string, AgentTerms>()
   if (!ids.length) return out
   const list = sql.join(ids.map((id) => sql`${id}`), sql`, `)
+  const requested = sql.join(ids.map((id) => sql`(${id}::text)`), sql`, `)
   const [latest, lastOk] = await Promise.all([
-    boundedCommerceRead(sql`
-      select distinct on (q.service_id) q.service_id, q.agent_id, q.ok, q.failure, q.detail, q.chain_id, q.provider, q.price_raw, q.token,
+    coalescedExactRead(sql`
+      with latest as (
+        select distinct on (q.service_id) q.id
+        from commerce_quote q
+        where q.agent_id in (${list}) and q.service_id is not null and q.created_at > now() - interval '7 days'
+        order by q.service_id, q.created_at desc, q.id desc
+      )
+      select q.service_id, q.agent_id, q.ok, q.failure, q.detail, q.chain_id, q.provider, q.price_raw, q.token,
              q.token_symbol, q.token_decimals, q.created_at, q.quote_expires_at, q.negotiation_hash, q.provider_sig, q.signed, q.latency_ms,
              q.raw->'quote_expires_at' as provider_expiry, q.raw#>'{response,quote_expires_at}' as response_expiry
-      from commerce_quote q
-      where q.agent_id in (${list}) and q.service_id is not null and q.created_at > now() - interval '7 days'
-      order by q.service_id, q.created_at desc, q.id desc`, 'exact').then(rowsOf),
-    boundedCommerceRead(sql`
-      select distinct on (q.agent_id) q.agent_id, q.price_raw, q.token, q.token_symbol, q.token_decimals, q.chain_id, q.created_at, q.signed
-      from commerce_quote q
-      where q.agent_id in (${list}) and q.ok and q.chain_id::text = split_part(q.agent_id, ':', 1) and q.created_at > now() - interval '7 days'
-      order by q.agent_id, q.created_at desc, q.id desc`, 'exact').then(rowsOf),
+      from latest l join commerce_quote q on q.id = l.id
+      order by q.service_id, q.created_at desc, q.id desc`).then(rowsOf),
+    coalescedExactRead(sql`
+      select q.* from (values ${requested}) as requested(agent_id)
+      cross join lateral (
+        select q.agent_id, q.price_raw, q.token, q.token_symbol, q.token_decimals, q.chain_id, q.created_at, q.signed
+        from commerce_quote q
+        where q.agent_id = requested.agent_id and q.ok and q.chain_id::text = split_part(q.agent_id, ':', 1) and q.created_at > now() - interval '7 days'
+        order by q.created_at desc, q.id desc limit 1
+      ) q order by q.agent_id`).then(rowsOf),
   ])
   const providers = [...new Set(latest.map((q) => (q['provider'] ? String(q['provider']).toLowerCase() : '')).filter(Boolean))]
   const delivered = new Map<string, number>()
   if (providers.length) {
-    const jobs = rowsOf(await boundedCommerceRead(sql`
+    const jobs = rowsOf(await coalescedExactRead(sql`
       select chain_id, lower(provider) as provider, count(*)::int as n from commerce_job
       where state in ('COMPLETED', 'PAID') and lower(provider) in (${sql.join(providers.map((p) => sql`${p}`), sql`, `)})
-      group by 1, 2`, 'exact').catch(() => []))
+      group by 1, 2`).catch(() => []))
     for (const r of jobs) delivered.set(`${r['chain_id']}:${r['provider']}`, Number(r['n']))
   }
   const last = new Map<string, LastQuote>()

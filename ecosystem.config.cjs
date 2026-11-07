@@ -344,7 +344,7 @@ module.exports = {
       autorestart: true,
       max_restarts: 50,
       restart_delay: 3000,
-      max_memory_restart: '500M',
+      max_memory_restart: '800M',
       time: true,
       out_file: '/root/.pm2/logs/marque-mcp-out.log',
       error_file: '/root/.pm2/logs/marque-mcp-err.log',

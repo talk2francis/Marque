@@ -1,0 +1,14 @@
+{
+  "compiledSource": "361d1ee5b82d40374654dd854b16575db0920b82",
+  "method": "localhost-only Next MCP process using the production key filter and an explicit 150-second stop; RSS sampled every five seconds",
+  "samples": 29,
+  "startedAt": "2026-11-07T12:33:31.419Z",
+  "lastAt": "2026-11-07T12:35:51.853Z",
+  "peakSampledRssBytes": 729554944,
+  "lastSampledRssBytes": 424042496,
+  "previousRestartLimitBytes": 524288000,
+  "newRestartLimitBytes": 838860800,
+  "otherProcessLimitsChanged": false,
+  "newSigningKeysPresent": false,
+  "newRecurringCost": false
+}

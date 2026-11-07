@@ -24,7 +24,9 @@ export async function GET(req: NextRequest) {
       observedAt: new Date(now).toISOString(), provenance: 'MEASURED',
       agents: ids.map((id) => { const t = m.get(id); return { agentId: id, serviceId: t?.serviceId ?? null, terms: t?.terms ?? null } }),
     }, { headers: { 'Cache-Control': 'no-store', 'Access-Control-Allow-Origin': '*' } })
-  } catch {
+  } catch (error) {
+    const code = (error as { code?: unknown } | null)?.code
+    console.warn('[terms]', typeof code === 'string' && /^[A-Z0-9]{5,20}$/.test(code) ? code : 'read_failure')
     return NextResponse.json({ error: 'terms_unavailable', detail: 'Prices could not be read just now. Try again in a minute.' }, { status: 503, headers: { 'Cache-Control': 'no-store' } })
   }
 }
