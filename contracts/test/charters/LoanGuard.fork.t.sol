@@ -2,6 +2,7 @@
 pragma solidity 0.8.24;
 
 import {Test, console2} from "forge-std/Test.sol";
+import {Vm} from "forge-std/Vm.sol";
 import {CharterFactory} from "../../src/charters/CharterFactory.sol";
 import {LoanGuard} from "../../src/charters/LoanGuard.sol";
 import {IComptroller, IPriceOracle} from "../../src/charters/VenusInterfaces.sol";
@@ -11,36 +12,43 @@ interface IVBep20Full {
     function borrow(uint256) external returns (uint256);
     function borrowBalanceStored(address) external view returns (uint256);
     function underlying() external view returns (address);
+    function getAccountSnapshot(address) external view returns (uint256, uint256, uint256, uint256);
 }
 
 interface IComptrollerFull {
     function enterMarkets(address[] calldata) external returns (uint256[] memory);
     function getAccountLiquidity(address) external view returns (uint256, uint256, uint256);
     function oracle() external view returns (address);
+    function actionPaused(address, uint8) external view returns (bool);
+    function markets(address) external view returns (bool, uint256, bool, uint256, uint256, uint96, bool);
 }
 
 interface IERC20Full {
     function approve(address, uint256) external returns (bool);
     function balanceOf(address) external view returns (uint256);
+    function decimals() external view returns (uint8);
 }
 
-/// Real Venus Core on a BSC fork. Not run in CI by default (needs an archive-capable RPC):
-///   FORK_URL=<bsc rpc> forge test --match-contract LoanGuardFork -vvv
-///   FORK_URL=<bsc testnet rpc> FORK_CHAIN=97 forge test --match-contract LoanGuardFork -vvv
-/// Mandatory before any deployment (P2). Record block number, results and gas in CAPABILITY_REPORT.md.
+/// Real Venus Core on a fork of BSC mainnet (56) or BSC testnet (97). Skips without FORK_URL.
+///   FORK_URL=<bsc archive rpc> forge test --match-contract LoanGuardFork -vv
+///   FORK_URL=<bsc testnet rpc> forge test --match-contract LoanGuardFork -vv
+/// Mandatory before any deployment. The chain is read from the fork, so one suite covers both.
 contract LoanGuardFork is Test {
-    address constant COMP_56 = 0xfD36E2c2a6789Db23113685031d7F16329158384;
-    address constant VUSDT_56 = 0xfD5840Cd36d94D7229439859C0112a4185BC0255;
-    address constant VUSDC_56 = 0xecA88125a5ADbe82614ffC12D0DB554E2e2867C8;
-    address constant VFDUSD_56 = 0xC4eF4229FEc74Ccfe17B2bdeF7715fAC740BA0ba;
-    address constant VBTC_56 = 0x882C173bC7Ff3b7786CA16dfeD3DFFfb9Ee7847B;
+    uint8 constant REPAY = 3;
 
+    struct Net {
+        address comptroller;
+        address[3] debt; // vUSDT, vUSDC, vFDUSD
+        address collateral; // vBTC: supplied in every restore test
+        address thresholdCollateral; // a market whose liquidation threshold differs from its collateral factor
+        address thresholdDebt; // borrowed against it in the threshold test
+    }
+
+    Net net;
     CharterFactory factory;
+    IComptrollerFull comp;
     address user = makeAddr("fork-user");
     address agent = makeAddr("fork-agent");
-    IComptrollerFull comp = IComptrollerFull(COMP_56);
-    IVBep20Full vUSDT = IVBep20Full(VUSDT_56);
-    IVBep20Full vBTC = IVBep20Full(VBTC_56);
 
     function setUp() public {
         string memory url = vm.envOr("FORK_URL", string(""));
@@ -49,79 +57,263 @@ contract LoanGuardFork is Test {
             return;
         }
         vm.createSelectFork(url);
+        if (block.chainid == 56) {
+            net = Net({
+                comptroller: 0xfD36E2c2a6789Db23113685031d7F16329158384,
+                debt: [
+                    0xfD5840Cd36d94D7229439859C0112a4185BC0255,
+                    0xecA88125a5ADbe82614ffC12D0DB554E2e2867C8,
+                    0xC4eF4229FEc74Ccfe17B2bdeF7715fAC740BA0ba
+                ],
+                collateral: 0x882C173bC7Ff3b7786CA16dfeD3DFFfb9Ee7847B,
+                thresholdCollateral: 0xC4eF4229FEc74Ccfe17B2bdeF7715fAC740BA0ba, // vFDUSD: CF 0.65, LT 0.75
+                thresholdDebt: 0xfD5840Cd36d94D7229439859C0112a4185BC0255
+            });
+        } else if (block.chainid == 97) {
+            net = Net({
+                comptroller: 0x94d1820b2D1c7c7452A163983Dc888CEC546b77D,
+                debt: [
+                    0xb7526572FFE56AB9D7489838Bf2E18e3323b441A,
+                    0xD5C4C2e2facBEB59D0216D0595d63FcDc6F9A1a7,
+                    0xF06e662a00796c122AaAE935EC4F0Be3F74f5636
+                ],
+                collateral: 0xb6e9322C49FD75a367Fcb17B0Fcd62C5070EbCBe,
+                thresholdCollateral: 0xb7526572FFE56AB9D7489838Bf2E18e3323b441A, // vUSDT: CF 0.75, LT 0.80
+                thresholdDebt: 0xD5C4C2e2facBEB59D0216D0595d63FcDc6F9A1a7
+            });
+        } else {
+            revert("fork a BSC chain (56 or 97)");
+        }
+        comp = IComptrollerFull(net.comptroller);
         address[] memory m = new address[](3);
-        m[0] = VUSDT_56;
-        m[1] = VUSDC_56;
-        m[2] = VFDUSD_56;
-        factory = new CharterFactory(IComptroller(COMP_56), m);
+        for (uint256 i; i < 3; ++i) m[i] = net.debt[i];
+        factory = new CharterFactory(IComptroller(net.comptroller), m);
+        console2.log("chain", block.chainid, "block", block.number);
     }
 
-    /// Supply BTCB, borrow USDT, push the BTC price down through a mocked oracle read,
-    /// and require the guard to restore the target as Venus itself measures it.
-    function test_fork_restoresTargetOnRealVenus() public {
-        address btcb = vBTC.underlying();
-        address usdt = vUSDT.underlying();
-        deal(btcb, user, 1e18); // 1 BTCB
-        deal(usdt, user, 50_000e18); // reserve held in the user's own wallet
+    // ------------------------------------------------------------------ helpers
 
+    function _supply(address vToken, uint256 amount) internal {
+        address u = IVBep20Full(vToken).underlying();
+        deal(u, user, IERC20Full(u).balanceOf(user) + amount);
         vm.startPrank(user);
-        IERC20Full(btcb).approve(address(vBTC), type(uint256).max);
-        require(vBTC.mint(1e18) == 0, "mint");
+        IERC20Full(u).approve(vToken, amount);
+        require(IVBep20Full(vToken).mint(amount) == 0, "mint");
         address[] memory enter = new address[](1);
-        enter[0] = address(vBTC);
+        enter[0] = vToken;
         comp.enterMarkets(enter);
-        (uint256 hf0,,) = factory.healthOf(user);
-        console2.log("health before borrow", hf0);
-        // Borrow a third of the BTC value in USDT.
-        uint256 btcPrice = IPriceOracle(comp.oracle()).getUnderlyingPrice(address(vBTC)); // 1e18 scale for 18 dp
-        uint256 borrowAmt = btcPrice / 3;
-        require(vUSDT.borrow(borrowAmt) == 0, "borrow");
         vm.stopPrank();
+    }
 
-        (uint256 hf1, uint256 coll, uint256 debt) = factory.healthOf(user);
-        console2.log("health after borrow", hf1);
-        console2.log("weighted collateral usd", coll);
-        console2.log("debt usd", debt);
+    function _borrow(address vToken, uint256 amount) internal {
+        vm.prank(user);
+        require(IVBep20Full(vToken).borrow(amount) == 0, "borrow");
+    }
 
+    /// Underlying units worth `usd` dollars (18-decimal USD) at the oracle price.
+    function _units(address vToken, uint256 usd) internal view returns (uint256) {
+        return usd * 1e18 / IPriceOracle(comp.oracle()).getUnderlyingPrice(vToken);
+    }
+
+    function _guard(address vDebt, uint256 trigger, uint256 target, uint256 budget, uint256 tip, bytes32 salt)
+        internal
+        returns (LoanGuard g, uint256 gasCreate)
+    {
         CharterFactory.Params memory p = CharterFactory.Params({
-            vDebt: VUSDT_56,
-            trigger: hf1 - 0.2e18,
-            target: hf1,
-            budget: 50_000e18,
-            tip: 0,
+            vDebt: vDebt, trigger: trigger, target: target, budget: budget, tip: tip,
             expiresAt: uint64(block.timestamp + 7 days)
         });
+        address token = IVBep20Full(vDebt).underlying();
+        address predicted = factory.predict(user, p, salt);
         vm.startPrank(user);
-        address g = factory.create(p, bytes32("fork"));
-        IERC20Full(usdt).approve(g, 50_000e18);
+        IERC20Full(token).approve(predicted, budget);
+        uint256 g0 = gasleft();
+        g = LoanGuard(factory.create(p, salt));
+        gasCreate = g0 - gasleft();
         vm.stopPrank();
+        assertEq(address(g), predicted, "predicted address");
+    }
 
-        // Healthy: refused.
-        vm.expectRevert();
-        vm.prank(agent);
-        LoanGuard(g).act();
-
-        // BTC falls 25%. Mock only the BTC spot read that the liquidation path uses.
+    function _dropCollateralPrice(uint256 pct) internal {
+        uint256 price = IPriceOracle(comp.oracle()).getUnderlyingPrice(net.collateral);
         vm.mockCall(
             comp.oracle(),
-            abi.encodeWithSelector(IPriceOracle.getUnderlyingPrice.selector, address(vBTC)),
-            abi.encode(btcPrice * 75 / 100)
+            abi.encodeWithSelector(IPriceOracle.getUnderlyingPrice.selector, net.collateral),
+            abi.encode(price * (100 - pct) / 100)
         );
-        (uint256 hf2,,) = factory.healthOf(user);
-        console2.log("health after drop", hf2);
-        assertLt(hf2, p.trigger);
+    }
 
-        uint256 debtBefore = vUSDT.borrowBalanceStored(user);
+    // ------------------------------------------------------------------ the tests
+
+    /// A05: Venus's getAccountLiquidity weighs collateral by the liquidation threshold, not the collateral factor.
+    /// The collateral here has the two set differently, so the result can only match one of them.
+    function test_fork_liquidityUsesLiquidationThreshold() public {
+        _supply(net.thresholdCollateral, _units(net.thresholdCollateral, 10_000e18));
+        _borrow(net.thresholdDebt, _units(net.thresholdDebt, 3_000e18));
+
+        (uint256 err, uint256 liq, uint256 shortfall) = comp.getAccountLiquidity(user);
+        assertEq(err, 0);
+        (, uint256 cf,, uint256 lt,,,) = comp.markets(net.thresholdCollateral);
+        assertTrue(cf != lt, "this market must have CF and LT set apart");
+        IPriceOracle oracle = IPriceOracle(comp.oracle());
+
+        (, uint256 bal,, uint256 rate) = IVBep20Full(net.thresholdCollateral).getAccountSnapshot(user);
+        uint256 p = oracle.getUnderlyingPrice(net.thresholdCollateral);
+        uint256 byLT = (((lt * rate) / 1e18) * p / 1e18) * bal / 1e18;
+        uint256 byCF = (((cf * rate) / 1e18) * p / 1e18) * bal / 1e18;
+        (,, uint256 owed,) = IVBep20Full(net.thresholdDebt).getAccountSnapshot(user);
+        uint256 debt = oracle.getUnderlyingPrice(net.thresholdDebt) * owed / 1e18;
+        uint256 venusCollateral = debt + liq - shortfall;
+        console2.log("venus collateral", venusCollateral);
+        console2.log("by liquidation threshold", byLT);
+        console2.log("by collateral factor", byCF);
+        assertApproxEqAbs(venusCollateral, byLT, 10, "Venus weighs collateral by the liquidation threshold");
+        assertTrue(venusCollateral > byCF + 1e15, "and not by the collateral factor");
+
+        // The factory's health is Venus's own number.
+        (uint256 hf, uint256 coll, uint256 d) = factory.healthOf(user);
+        assertEq(coll, venusCollateral);
+        assertEq(d, debt);
+        assertEq(hf, venusCollateral * 1e18 / debt);
+    }
+
+    function test_fork_restoresTarget_vUSDT() public {
+        _restore(net.debt[0], "usdt");
+    }
+
+    function test_fork_restoresTarget_vUSDC() public {
+        _restore(net.debt[1], "usdc");
+    }
+
+    function test_fork_restoresTarget_vFDUSD() public {
+        _restore(net.debt[2], "fdusd");
+    }
+
+    function _restore(address vDebt, bytes32 salt) internal {
+        _supply(net.collateral, _units(net.collateral, 30_000e18));
+        _borrow(vDebt, _units(vDebt, 10_000e18));
+        (uint256 hf1,,) = factory.healthOf(user);
+        console2.log("health after borrow", hf1);
+
+        address token = IVBep20Full(vDebt).underlying();
+        uint256 reserve = _units(vDebt, 20_000e18);
+        deal(token, user, reserve);
+        (LoanGuard g, uint256 gasCreate) = _guard(vDebt, hf1 - 0.3e18, hf1 - 0.05e18, reserve, 0, salt);
+
+        vm.expectRevert(abi.encodeWithSelector(LoanGuard.Healthy.selector, hf1, hf1 - 0.3e18));
         vm.prank(agent);
-        uint256 repaid = LoanGuard(g).act();
-        console2.log("repaid", repaid);
-        assertEq(debtBefore - vUSDT.borrowBalanceStored(user) >= repaid - 1, true);
+        g.act();
 
+        _dropCollateralPrice(25);
+        (uint256 hf2,,) = factory.healthOf(user);
+        console2.log("health after a 25% fall", hf2);
+        assertLt(hf2, g.trigger());
+        (uint8 state,, uint256 would,,,) = g.preview();
+        assertEq(state, 1, "preview says it would act");
+
+        uint256 debtBefore = IVBep20Full(vDebt).borrowBalanceStored(user);
+        uint256 balBefore = IERC20Full(token).balanceOf(user);
+        vm.prank(agent);
+        uint256 g0 = gasleft();
+        uint256 repaid = g.act();
+        uint256 gasAct = g0 - gasleft();
+        console2.log("repaid", repaid, "preview said", would);
+
+        assertEq(IERC20Full(token).balanceOf(user), balBefore - repaid, "only the repayment left the wallet");
+        assertGe(debtBefore - IVBep20Full(vDebt).borrowBalanceStored(user) + 1, repaid, "debt fell by the repayment");
+        assertEq(IERC20Full(token).balanceOf(address(g)), 0, "the guard holds nothing");
         (uint256 hf3,,) = factory.healthOf(user);
         console2.log("health after act", hf3);
-        assertGe(hf3, p.target, "target restored by Venus's own measure");
-        (, uint256 liq, uint256 shortfall) = comp.getAccountLiquidity(user);
-        assertGt(liq, 0);
+        assertGe(hf3, g.target(), "target restored by Venus's own measure");
+        (,, uint256 shortfall) = comp.getAccountLiquidity(user);
         assertEq(shortfall, 0);
+
+        vm.prank(user);
+        uint256 g1 = gasleft();
+        g.end();
+        uint256 gasEnd = g1 - gasleft();
+        console2.log("gas create", gasCreate);
+        console2.log("gas act", gasAct);
+        console2.log("gas end", gasEnd);
+    }
+
+    /// Debt in two markets: the guard repays only its own market, and only up to the debt there.
+    function test_fork_twoDebtMarkets() public {
+        _supply(net.collateral, _units(net.collateral, 30_000e18));
+        _borrow(net.debt[0], _units(net.debt[0], 6_000e18));
+        _borrow(net.debt[1], _units(net.debt[1], 4_000e18));
+        (uint256 hf1,,) = factory.healthOf(user);
+        address token = IVBep20Full(net.debt[0]).underlying();
+        uint256 reserve = _units(net.debt[0], 20_000e18);
+        deal(token, user, reserve);
+        (LoanGuard g,) = _guard(net.debt[0], hf1 - 0.3e18, hf1 - 0.05e18, reserve, 0, "two");
+        uint256 otherBefore = IVBep20Full(net.debt[1]).borrowBalanceStored(user);
+        _dropCollateralPrice(25);
+        vm.prank(agent);
+        uint256 repaid = g.act();
+        assertGt(repaid, 0);
+        assertGe(IVBep20Full(net.debt[1]).borrowBalanceStored(user), otherBefore, "the other loan is untouched");
+        (uint256 hf3,,) = factory.healthOf(user);
+        assertTrue(hf3 >= g.target() || IVBep20Full(net.debt[0]).borrowBalanceStored(user) == 0);
+    }
+
+    /// When Venus pauses repayments in the market, act() reverts and nothing moves.
+    function test_fork_repayPausedRevertsWithNothingMoved() public {
+        address vDebt = net.debt[0];
+        _supply(net.collateral, _units(net.collateral, 30_000e18));
+        _borrow(vDebt, _units(vDebt, 10_000e18));
+        (uint256 hf1,,) = factory.healthOf(user);
+        address token = IVBep20Full(vDebt).underlying();
+        deal(token, user, _units(vDebt, 20_000e18));
+        (LoanGuard g,) = _guard(vDebt, hf1 - 0.3e18, hf1 - 0.05e18, _units(vDebt, 20_000e18), 0, "paused");
+        _dropCollateralPrice(25);
+
+        // Find Venus's own pause flag for (vDebt, REPAY) by recording the slot actionPaused reads, then set it.
+        vm.record();
+        assertFalse(comp.actionPaused(vDebt, REPAY));
+        (bytes32[] memory reads,) = vm.accesses(net.comptroller);
+        bool set;
+        for (uint256 i; i < reads.length && !set; ++i) {
+            bytes32 old = vm.load(net.comptroller, reads[i]);
+            // The flag is false now, so its slot holds zero; non-zero slots (the Diamond's implementation
+            // pointer among them) are left alone.
+            if (old != bytes32(0)) continue;
+            vm.store(net.comptroller, reads[i], bytes32(uint256(1)));
+            // Some slots it reads are the Diamond's routing; a wrong write there reverts, so restore and move on.
+            try comp.actionPaused(vDebt, REPAY) returns (bool paused) {
+                if (paused) set = true;
+                else vm.store(net.comptroller, reads[i], old);
+            } catch {
+                vm.store(net.comptroller, reads[i], old);
+            }
+        }
+        assertTrue(set, "found the pause flag");
+
+        uint256 bal = IERC20Full(token).balanceOf(user);
+        uint256 debt = IVBep20Full(vDebt).borrowBalanceStored(user);
+        vm.prank(agent);
+        vm.expectRevert();
+        g.act();
+        assertEq(IERC20Full(token).balanceOf(user), bal, "nothing moved");
+        assertEq(IVBep20Full(vDebt).borrowBalanceStored(user), debt);
+        assertEq(g.spent(), 0);
+    }
+
+    /// An outside caller earns the owner's tip, paid after the repayment and counted inside the budget.
+    function test_fork_tipToAgent() public {
+        address vDebt = net.debt[0];
+        _supply(net.collateral, _units(net.collateral, 30_000e18));
+        _borrow(vDebt, _units(vDebt, 10_000e18));
+        (uint256 hf1,,) = factory.healthOf(user);
+        address token = IVBep20Full(vDebt).underlying();
+        uint256 reserve = _units(vDebt, 20_000e18);
+        uint256 tip = _units(vDebt, 1e18);
+        deal(token, user, reserve);
+        (LoanGuard g,) = _guard(vDebt, hf1 - 0.3e18, hf1 - 0.05e18, reserve, tip, "tip");
+        _dropCollateralPrice(25);
+        vm.prank(agent);
+        uint256 repaid = g.act();
+        assertEq(IERC20Full(token).balanceOf(agent), tip);
+        assertEq(g.spent(), repaid + tip);
     }
 }
