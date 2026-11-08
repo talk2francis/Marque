@@ -36,11 +36,14 @@ export const FILM = {
     posted: '2026-11-05',
     measured: 'the close of Set and Earn, Thu 5 Nov 2026, 12:00 UTC',
     /**
-     * The record the film shows, read at 12:00:24 UTC on 5 Nov from /api/v1/funnel, /api/v1/phase2/coverage
-     * and /api/v1/proof (BSC mainnet, jobs created 1 Oct 12:00 to 5 Nov 12:00 UTC). The film's own source keeps
-     * the same object (assets/record.js); these are frozen figures of a dated film, never a live count.
+     * The record the film shows. Registry figures (registered, answering, checked) were read at 12:00:24 UTC on
+     * 5 Nov from /api/v1/funnel and /api/v1/phase2/coverage. Job figures come from the preserved job snapshot
+     * (docs/evidence/set-and-earn-close-2026-11-05/proof.json, read 15:49:58 UTC; BSC mainnet, jobs created
+     * 1 Oct 12:00 to 5 Nov 12:00 UTC), which includes 57188 and 57189: outside jobs created in the last three
+     * minutes before the close and indexed after the first read. The film's own source keeps the same object
+     * (assets/record.js); these are frozen figures of a dated film, never a live count.
      */
-    record: { registered: 406451, answering: 42446, checked: 14, outsideMainnet: 48, outsideWallets: 6, outsideAlsoOperator: 34, checksAgreed: 78, checksDecided: 81 },
+    record: { registered: 406451, answering: 42446, checked: 14, outsideMainnet: 50, outsideWallets: 6, outsideAlsoOperator: 34, checksAgreed: 78, checksDecided: 81 },
     /** The end card's "Find an agent", in percent of the frame (measured from the film source at 57.5 s). */
     cta: { from: 55.8, left: 36.1, top: 66.3, width: 14.32, height: 6.85, href: '/register', label: 'Find an agent' },
   },
