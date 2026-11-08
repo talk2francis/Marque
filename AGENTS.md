@@ -372,3 +372,34 @@ Anything not in `BUILD-PROMPTS.md`, specifically: a new escrow or payment contra
 6. `NewFeedback` indexes `tag1` as a hash (indexed string). Read the plain `tag1` from the data, not the topic.
 7. The reference sellers are pinned to `@bnbagent/sdk 0.5.5`. The buyer package pins `0.6.0`. Both read the same deployments. Do not bump the sellers during the campaign unless a mainnet test proves a need.
 8. RainbowKit stays as the connector UI (it already speaks EIP-6963 and WalletConnect for mobile). Theme it; do not replace it.
+
+
+---
+
+## 14. CHARTERS (LOAN GUARD)
+
+This section governs the Charters feature. It supersedes earlier planning text about Altana user wallets and the quarantined `AltanaCharterService` path for this scope. Where section 13.9 lists Altana integration as out of scope, this section governs it for Charters. It does not relax any invariant above.
+
+**C1. The chain decides.** A charter acts only when its contract reads the condition from the protocol in the same transaction. No server, agent or relay decides that a charter should act; they may only ask the contract, which refuses when the condition is false.
+
+**C2. One destination.** A charter's code may move the owner's tokens only to the owner's own position in the named protocol, plus an optional owner-set tip to the caller counted inside the budget. No charter contract has an admin, owner change, pause, upgrade, arbitrary call or arbitrary recipient.
+
+**C3. Lifetime budgets.** A charter's budget is a lifetime total that never refills. Periodic caps are never presented as the protection.
+
+**C4. Money stays with the owner.** The reserve stays in the owner's wallet under an exact allowance to that charter's own contract. Never ask an owner to move funds into a new account for a charter in this version.
+
+**C5. Ending always works.** `end()` is owner only and depends on nothing else: not expiry, oracle, relay, server or watcher. The UI keeps the end path reachable for every guard that exists, even if the feature flag is off.
+
+**C6. The button is public.** `act()` is permissionless and attributed. Agents earn the "Charter-ready" mark only from their own successful onchain actions, never by declaration.
+
+**C7. Altana is the agent's leash, not the owner's wallet.** Keel's Altana sessions are scoped to `{ to: guard, signature: 'act()' }`, expire with the guard, are registered on KeyStore, and are revoked when the guard ends. The charter page shows the key and its state separately from the guard's state.
+
+**C8. Show what it can never do.** Every grant surface shows the "This charter can never" list beside what it does, before any wallet prompt.
+
+**C9. Simulate before sending.** Every watcher simulates `act()` with `eth_call` immediately before sending and never resends blindly after a timeout.
+
+**C10. State the limits.** Docs and FAQ say plainly that a charter cannot guarantee against liquidation, cannot act while the protocol refuses, and that the contracts are unaudited until an audit exists.
+
+**Vocabulary.** The feature is **Charters**. The first kind is **Loan Guard**. Its contract is a guard. The button is **Grant a charter** and the result is **Charter granted**. The trigger and target are health values; always pair them with a price translation in the UI.
+
+**Mainnet.** Deploying factories, funding watcher accounts and any canary position are Marque-controlled mainnet writes and need Francis's written "approved, mainnet" under an exact action table.
