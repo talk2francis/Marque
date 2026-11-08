@@ -37,6 +37,13 @@ contract GuardHandler is Test {
     bool[2] public ghostOtherGuardMoved;
     bool[2] public ghostEndFailed;
     uint256 public acts;
+    uint256 public calls;
+
+    modifier counted() {
+        calls += 1;
+        _;
+    }
+    uint256 public limitedOrRestored;
 
     constructor() {
         vm.warp(1_762_600_000);
@@ -77,40 +84,61 @@ contract GuardHandler is Test {
 
     // ------------------------------------------------------------- the world moves
 
-    function moveCollateral(uint8 who, uint256 usd) external {
+    function moveCollateral(uint8 who, uint256 usd) external counted {
         comp.setWeighted(owners[who % 2], bound(usd, 0, 2600 * E));
     }
 
-    function accrue(uint8 who, uint256 amount) external {
+    /// A dip: collateral set to between 60% and 99.9% of what the trigger needs for today's debt, so health lands
+    /// just under the trigger. Without this the random walk reaches the would-act state too rarely to test it.
+    function crash(uint8 who, uint256 depthBps) external counted {
+        address o = owners[who % 2];
+        uint256 debt = vUSDT.borrowBalanceStored(o);
+        if (debt == 0) {
+            vUSDT.setBorrow(o, 1000 * E);
+            debt = 1000 * E;
+        }
+        uint256 atTrigger = debt * TRIGGER / 1e18;
+        comp.setWeighted(o, atTrigger * bound(depthBps, 6000, 9990) / 10_000);
+    }
+
+    /// The owner borrows again after a repayment, so a guard can be needed more than once.
+    function borrowMore(uint8 who, uint256 amount) external counted {
+        address o = owners[who % 2];
+        vUSDT.setBorrow(o, vUSDT.borrowBalanceStored(o) + bound(amount, 0, 500 * E));
+    }
+
+    function accrue(uint8 who, uint256 amount) external counted {
         vUSDT.setAccrue(owners[who % 2], bound(amount, 0, 50 * E));
     }
 
-    function topUp(uint8 who, uint256 amount) external {
+    function topUp(uint8 who, uint256 amount) external counted {
         usdt.mint(owners[who % 2], bound(amount, 0, 1000 * E));
     }
 
-    function drain(uint8 who, uint256 amount) external {
+    function drain(uint8 who, uint256 amount) external counted {
         address o = owners[who % 2];
         uint256 a = bound(amount, 0, usdt.balanceOf(o));
         vm.prank(o);
         usdt.transfer(address(0xdead), a);
     }
 
-    function setAllowance(uint8 who, uint256 amount) external {
+    function setAllowance(uint8 who, uint256 amount) external counted {
         uint256 i = who % 2;
         vm.prank(owners[i]);
         usdt.approve(address(guards[i]), bound(amount, 0, 3000 * E));
     }
 
-    function warp(uint256 secs) external {
+    function warp(uint256 secs) external counted {
         // Short steps, so a 30-day guard lives through many actions before it expires.
         vm.warp(block.timestamp + bound(secs, 0, 6 hours));
     }
 
-    function end(uint8 who, uint8 chance) external {
+    function end(uint8 who, uint8 chance) external counted {
         // Rare, so most of a run exercises live guards; the ended path is still reached in many runs.
-        if (chance % 40 != 0) return;
         uint256 i = who % 2;
+        // The fuzzer favours round numbers, so a bare "1 in 40" ended both guards on the first two calls of
+        // some runs. A guard is ended only after it has acted, so every run reaches the button first.
+        if (chance % 40 != 0 || guards[i].acts() == 0) return;
         vm.prank(owners[i]);
         try guards[i].end() {} catch { ghostEndFailed[i] = true; }
     }
@@ -135,7 +163,7 @@ contract GuardHandler is Test {
         uint256 spentTotal;
     }
 
-    function act(uint8 who, uint8 callerSeed) external {
+    function act(uint8 who, uint8 callerSeed) external counted {
         uint256 i = who % 2;
         LoanGuard g = guards[i];
         Before memory b;
@@ -170,6 +198,7 @@ contract GuardHandler is Test {
 
         // The Acted event carries the health Venus showed in the same transaction.
         ActedLog memory l = _acted();
+        if (l.repaid > 0) limitedOrRestored += 1;
         if (l.repaid != repaid || l.tipPaid != tipPaid || l.spentTotal != spentAfter) ghostTipToOwner[i] = true;
         if (l.healthBefore >= TRIGGER) ghostActedAboveTrigger[i] = true;
         if (l.healthAfter < TARGET) {
@@ -207,6 +236,19 @@ contract LoanGuardInvariantTest is Test {
     function setUp() public {
         h = new GuardHandler();
         targetContract(address(h));
+        // Only the actions; the handler's getters and the inherited Test helpers would dilute every run.
+        bytes4[] memory actions = new bytes4[](10);
+        actions[0] = GuardHandler.moveCollateral.selector;
+        actions[1] = GuardHandler.crash.selector;
+        actions[2] = GuardHandler.borrowMore.selector;
+        actions[3] = GuardHandler.accrue.selector;
+        actions[4] = GuardHandler.topUp.selector;
+        actions[5] = GuardHandler.drain.selector;
+        actions[6] = GuardHandler.setAllowance.selector;
+        actions[7] = GuardHandler.warp.selector;
+        actions[8] = GuardHandler.end.selector;
+        actions[9] = GuardHandler.act.selector;
+        targetSelector(FuzzSelector({addr: address(h), selectors: actions}));
     }
 
     /// 1. Tokens leave an owner only through act(), as repayment plus a tip to someone else.
@@ -276,6 +318,11 @@ contract LoanGuardInvariantTest is Test {
 
     function afterInvariant() external view {
         // A suite that never acted proves little: the handler must actually reach the would-act state.
-        assertGt(h.acts(), 0, "the run must include real actions");
+        // A full run must reach real repayments. Short sequences (the shrinker's) are exempt, so a failure here
+        // always points at a long run that never exercised the button.
+        if (h.calls() >= 100) {
+            assertGt(h.acts(), 0, "a long run must include real actions");
+            assertGt(h.limitedOrRestored(), 0, "and at least one must have repaid");
+        }
     }
 }
