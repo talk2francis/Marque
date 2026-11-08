@@ -39,4 +39,6 @@ Additive migration 0031 was applied successfully. Production banner storage was 
 
 Promotion uses the existing prepared-artifact checks, both-worker readiness, route verifier, blue/green switch and rollback checks. The [live release endpoint](https://marque.trade/api/health) identifies the promoted revision; a verification report is not itself a deployment claim. Public release summaries are retained in the repository's [release record](https://github.com/talk2francis/Marque/tree/status-log/releases).
 
+CI keeps push and pull-request concurrency groups separate. A merged pull-request run must not cancel the main-branch release checks. The cancelled run remains recorded; promotion still requires successful checks for the exact published revision.
+
 The existing short storefront page cache remains. The editor confirms storage immediately and explains that the public profile may take a moment to update. The earlier capacity limit remains unchanged: the guarded 25-visitor run failed latency targets and higher stages were not established. This presentation work makes no new capacity claim.
