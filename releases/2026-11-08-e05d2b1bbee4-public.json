@@ -1,0 +1,119 @@
+{
+  "version": 1,
+  "release": "e05d2b1bbee4327759bfc95909a57131c4a7a856",
+  "applicationBuildSource": "d518b2493e73b0c6271f8d292629d845427df58d",
+  "website": "https://marque.trade",
+  "promotedAt": "2026-11-08T11:24:58Z",
+  "healthEndpoint": "https://marque.trade/api/health",
+  "ci": {
+    "url": "https://github.com/talk2francis/Marque/actions/runs/42453735229",
+    "successfulJobs": 3
+  },
+  "publicVerification": {
+    "candidateRouteWidthCases": 36,
+    "candidateIssues": 0,
+    "publicSmoke": "passed",
+    "closeGuardWallets": 9,
+    "ledgerComparisonsComplete": 4,
+    "selectedOriginalLedgerRunsUnchanged": true,
+    "matchingCloseRecordDownloads": 17,
+    "brainOnBnbProfilesWithRecordedPasses": 6,
+    "erroneousRetestBadgesInThoseProfiles": 0,
+    "veyraLatestRecordedTest": {
+      "passed": 8,
+      "total": 8,
+      "block": 132117587
+    },
+    "filmChecks": "passed",
+    "mcpCatalog": {
+      "httpStatus": 200,
+      "tools": 11,
+      "allAdvertisedReadOnly": true,
+      "noToolInvoked": true
+    },
+    "preservedMcsFingerprintInputs": 48,
+    "preservedCloseSnapshotFiles": 15,
+    "screenshotReview": {
+      "total": 12,
+      "settled": 10,
+      "initialLoadingStatesRetained": 2,
+      "widths": [
+        390,
+        1440
+      ],
+      "themes": [
+        "night",
+        "day"
+      ]
+    },
+    "settledToday": {
+      "cases": 2,
+      "rateLinksPerCase": 3,
+      "selectorHeightPixels": 44,
+      "unexpectedWrites": 0
+    }
+  },
+  "outsideObservation": {
+    "workflow": "https://github.com/talk2francis/Marque/actions/runs/42475734056",
+    "version": 1,
+    "at": "2026-11-08T11:26:22.033Z",
+    "checks": [
+      {
+        "path": "/",
+        "status": 200,
+        "ttfbMs": 3138,
+        "totalMs": 3534,
+        "error": null
+      },
+      {
+        "path": "/register",
+        "status": 200,
+        "ttfbMs": 1004,
+        "totalMs": 3099,
+        "error": null
+      },
+      {
+        "path": "/proof",
+        "status": 200,
+        "ttfbMs": 5510,
+        "totalMs": 6399,
+        "error": null
+      },
+      {
+        "path": "/quest",
+        "status": 200,
+        "ttfbMs": 1815,
+        "totalMs": 3495,
+        "error": null
+      },
+      {
+        "path": "/api/v1/phase2/coverage",
+        "status": 200,
+        "ttfbMs": 3107,
+        "totalMs": 3108,
+        "error": null
+      },
+      {
+        "path": "/api/v1/proof",
+        "status": 200,
+        "ttfbMs": 3503,
+        "totalMs": 3688,
+        "error": null
+      }
+    ]
+  },
+  "scope": [
+    "Optional owner-uploaded agent banners.",
+    "Homepage FAQ, category cards and hero-help refinement.",
+    "Clearer agent management groups and Today answer controls."
+  ],
+  "limits": [
+    "The outside observation establishes availability at the recorded instant, not a new capacity result.",
+    "This release verification did not commission a funded hire or use a real Marque Pass credential.",
+    "Recorded test passes do not establish autonomous financial execution."
+  ],
+  "documentation": {
+    "banners": "https://github.com/talk2francis/Marque/blob/main/docs/operations/AGENT_BANNERS.md",
+    "interface": "https://github.com/talk2francis/Marque/blob/main/docs/operations/INTERFACE_CLARITY_2026-11-07.md"
+  }
+}
