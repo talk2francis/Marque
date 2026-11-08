@@ -1,0 +1,46 @@
+import { describe, expect, it } from 'vitest'
+import { formatUnitsTrim, healthOf, healthToNumber, NO_DEBT, parseDecimal, repayToTarget, WAD } from './health'
+
+describe('parseDecimal (budget and health inputs)', () => {
+  it('reads plain decimals at the token\'s precision', () => {
+    expect(parseDecimal('500', 18)).toBe(500n * WAD)
+    expect(parseDecimal('1.30', 18)).toBe(13n * 10n ** 17n)
+    expect(parseDecimal('0.000001', 6)).toBe(1n)
+    expect(parseDecimal('.5', 6)).toBe(500_000n)
+    expect(parseDecimal(' 12.5 ', 6)).toBe(12_500_000n)
+    expect(parseDecimal('7.', 6)).toBe(7_000_000n)
+  })
+  it('rejects exponents, signs, separators, excess places and empty input', () => {
+    for (const bad of ['1e3', '-1', '+1', '1,000', '', ' ', '.', '1.0000001', 'abc', '0x10', '1.2.3', 'Infinity', 'NaN']) {
+      expect(parseDecimal(bad, 6), bad).toBeNull()
+    }
+    expect(parseDecimal('1.0000001', 18)).toBe(1_000_000_100_000_000_000n)
+  })
+})
+
+describe('formatUnitsTrim', () => {
+  it('groups thousands and trims zeros, rounding down', () => {
+    expect(formatUnitsTrim(1_234_567_890_000n, 6)).toBe('1,234,567.89')
+    expect(formatUnitsTrim(500n * WAD, 18)).toBe('500')
+    expect(formatUnitsTrim(1n, 6, 2)).toBe('0')
+    expect(formatUnitsTrim(1n, 6, 6)).toBe('0.000001')
+  })
+})
+
+describe('health', () => {
+  it('is collateral over debt, and has no value without debt', () => {
+    expect(healthOf({ collateralUsd: 1500n * WAD, debtUsd: 1000n * WAD })).toBe(15n * 10n ** 17n)
+    expect(healthOf({ collateralUsd: 5n, debtUsd: 0n })).toBe(NO_DEBT)
+    expect(healthToNumber(NO_DEBT)).toBeNull()
+    expect(healthToNumber(13n * 10n ** 17n)).toBe(1.3)
+  })
+  it('repays exactly enough to reach the target, plus one unit', () => {
+    // 1300 / 1.8 = 722.22...; repay 277.77... USDT at $1 (18 decimals).
+    const r = repayToTarget({ collateralUsd: 1300n * WAD, debtUsd: 1000n * WAD }, 18n * 10n ** 17n, WAD)
+    expect(r).toBe(277_777_777_777_777_777_779n)
+    // A 6-decimal token at $1 has a Venus price of 1e30.
+    const r6 = repayToTarget({ collateralUsd: 1300n * WAD, debtUsd: 1000n * WAD }, 18n * 10n ** 17n, 10n ** 30n)
+    expect(r6).toBe(277_777_778n)
+    expect(repayToTarget({ collateralUsd: 2000n * WAD, debtUsd: 1000n * WAD }, 18n * 10n ** 17n, WAD)).toBe(0n)
+  })
+})
