@@ -17,6 +17,7 @@ import { chromium } from 'playwright'
 import { mkdirSync, writeFileSync, rmSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { isVerificationRpcRead } from './lib/verification-rpc.mjs'
 
 const HERE = dirname(fileURLToPath(import.meta.url))
 const OUT = process.env.AUDIT_OUT ?? join(HERE, '..', 'playwright-report')
@@ -52,9 +53,9 @@ const DEFAULT_ROUTES = [
 ]
 
 function routes() {
-  const arg = process.argv.find((a) => a.startsWith('--routes'))
+  const arg = process.argv.find((a) => a === '--routes' || a.startsWith('--routes='))
   if (!arg) return DEFAULT_ROUTES
-  const value = arg.includes('=') ? arg.split('=')[1] : process.argv[process.argv.indexOf(arg) + 1]
+  const value = arg.includes('=') ? arg.slice(arg.indexOf('=') + 1) : process.argv[process.argv.indexOf(arg) + 1]
   return value.split(',').map((r) => r.trim()).filter(Boolean)
 }
 
@@ -73,6 +74,7 @@ async function auditRoute(browser, route, viewport, theme) {
     const request = r.request()
     if (['GET', 'HEAD', 'OPTIONS'].includes(request.method())) return r.continue()
     if (new URL(request.url()).pathname === '/api/v1/events') return r.fulfill({ status: 204, body: '' })
+    if (isVerificationRpcRead(request.url(), request.postData())) return r.continue()
     blockedWrites.push(request.url())
     return r.abort('blockedbyclient')
   })

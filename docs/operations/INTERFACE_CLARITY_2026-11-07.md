@@ -16,8 +16,27 @@ This follows verified live release `02aacc8512ef9270d35f1044abf83104ae44fea3`. I
 
 Existing price, count, test, observation, campaign and signed money paths retain their rules. The banner adds a separate presentation reader/write endpoint, additive table 0031 and a guard against deleting active banner images during wallet-profile cleanup. The existing session verification and canonical on-chain ownership reader are reused. No testnet or mainnet transaction is required for this work. Documentation and generated changelog are updated together.
 
-## Verification status
+## Verification, completed 8 November 2026
 
-Initial native web typecheck, scoped lint/copy and 41 existing FAQ, lifecycle, daily-work and original-answer comparison regressions passed. Initial interface source `8cefc3d61fd2511342dab434e083f4867640cb14` built all 44 pages and passed six viewport/theme interaction cases and eighteen AXE scans. Nineteen banner model/authority/HTTP cases and six isolated PostgreSQL cases passed, including real signed-session HTTP persistence. The final combined build, banner browser review and exact-source CI are the next gates. Final acceptance and activation will be added after actual results; this candidate description alone does not claim deployment.
+The final application was built from `d518b2493e73b0c6271f8d292629d845427df58d`. GitHub CI [42415062380](https://github.com/talk2francis/Marque/actions/runs/42415062380) passed typecheck, lint/copy, build, 1,393 ordinary tests (134 skipped), 121 isolated database tests and 15 Act/fork checks. These groups overlap. The final published revision must also pass its own main-branch CI before promotion.
 
-The first combined-source browser pass at `c45455f` passed all six interface cases and eighteen accessibility scans with no serious or critical findings. Six editor cases and actual cropped-image persistence also passed. Editor review found a moderate heading-order issue; the final polish changes its heading level without changing its appearance and clarifies the normal profile-update delay. Final-source acceptance remains pending.
+| Check | Actual result |
+| --- | --- |
+| Home and public workspace interactions | Six cases at 390, 768 and 1440, Night and Day; 18 accessibility scans without serious or critical findings; 48 captures reviewed. Evidence retains source `c45455f`; strict source comparison proves those rendering inputs unchanged in the final application. |
+| Final owner banner editor | All six size/theme cases passed; no accessibility violations, including heading order. Choosing, moving and zooming upload nothing. Cancelled signatures retain the crop and send no session or image write. |
+| Actual prepared image | Six isolated PostgreSQL tests passed using the browser's real 960 by 320 WebP. Signed-session save/read, invalid session, changed owner, shared artwork, profile cleanup and pointer removal were checked. |
+| Final profile headers | Twelve isolated banner/default cases passed across the same six size/theme combinations, without reference badges or overflow. All 18 final editor/header captures were reviewed. |
+| Repository browser audit | Four routes, four widths including 1024, both themes: 32 combinations, zero issues. All captures reviewed; navigation snapshots include loading states, complemented by the settled interaction cases above. |
+| Read-only answer action | Mainnet job 57125 returned HTTP 200 with one compared field. The testnet example returned an honest `nothing_to_recheck`; not every recorded answer has a supported comparison. |
+| Preserved records | Nine-wallet close guard passed. Four Ledger comparisons and six Brain on BNB profile checks passed. Original benchmark, answer and selected test row fingerprints remain unchanged. |
+| Source and document preservation | Money/revoke and sign-in handlers, portrait cropper, reference masthead CSS, workers, commerce rules, dependencies and first-party configuration retain their existing behavior. All 21 README image-reference lines and its Mermaid block remain. |
+
+The auditor now uses the existing strict JSON-RPC read classifier rather than blocking all POST requests. Its ten guard tests pass; signing, broadcast and arbitrary POST requests remain blocked. Query strings containing equals signs are preserved in its route arguments. Earlier failed harness attempts are retained separately and are not counted as passes.
+
+Additive migration 0031 was applied successfully. Production banner storage was verified empty before activation; no production owner image or funded hire was submitted for these checks. Real read-only registry checks accepted the expected owner and rejected another address for one mainnet and one testnet identity. The signed save path was exercised on an isolated database with throwaway actors. No real Marque Pass credential was used.
+
+## Activation and limits
+
+Promotion uses the existing prepared-artifact checks, both-worker readiness, route verifier, blue/green switch and rollback checks. The [live release endpoint](https://marque.trade/api/health) identifies the promoted revision; a verification report is not itself a deployment claim. Public release summaries are retained in the repository's [release record](https://github.com/talk2francis/Marque/tree/status-log/releases).
+
+The existing short storefront page cache remains. The editor confirms storage immediately and explains that the public profile may take a moment to update. The earlier capacity limit remains unchanged: the guarded 25-visitor run failed latency targets and higher stages were not established. This presentation work makes no new capacity claim.
