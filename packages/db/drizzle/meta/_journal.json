@@ -225,6 +225,13 @@
       "when": 1794080542175,
       "tag": "0031_agent_banners",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1794183628410,
+      "tag": "0032_charters",
+      "breakpoints": true
     }
   ]
 }

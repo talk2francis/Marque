@@ -16,7 +16,7 @@
 import { sql } from 'drizzle-orm'
 import {
   pgTable, text, integer, bigint, boolean, timestamp, jsonb, doublePrecision, uuid,
-  uniqueIndex, index, primaryKey, serial,
+  uniqueIndex, index, primaryKey, serial, numeric, smallint, unique,
 } from 'drizzle-orm/pg-core'
 
 /** How a number came to be known. Never widen without updating the UI legend. */
@@ -1215,4 +1215,109 @@ export const outcome = pgTable('outcome', {
   agentIdx: index('outcome_agent_idx').on(t.agentKey, t.createdAt.desc()),
   jobIdx: index('outcome_job_idx').on(t.jobKey),
   txUq: uniqueIndex('outcome_tx_uq').on(t.chainId, t.confirmedBlock, t.userAddress, t.action),
+}))
+
+
+// ---------------------------------------------------------------------------------------------------------------
+// Charters, kind 1: Loan Guard (AGENTS.md section 14). Migration 0032. Amounts and health values are integers as the
+// chain holds them (health with 18 decimals), stored as numeric strings so nothing is rounded.
+
+/** DERIVED. One row per guard a CharterFactory created, rebuilt from GuardCreated, Acted and Ended. */
+export const charterGuard = pgTable('charter_guard', {
+  chainId: integer('chain_id').notNull(),
+  address: text('address').notNull(),
+  owner: text('owner').notNull(),
+  vDebt: text('v_debt').notNull(),
+  token: text('token').notNull(),
+  trigger: numeric('trigger', { precision: 78, scale: 0 }).notNull(),
+  target: numeric('target', { precision: 78, scale: 0 }).notNull(),
+  budget: numeric('budget', { precision: 78, scale: 0 }).notNull(),
+  tip: numeric('tip', { precision: 78, scale: 0 }).notNull(),
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+  createdBlock: bigint('created_block', { mode: 'bigint' }).notNull(),
+  createdTx: text('created_tx').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull(),
+  spent: numeric('spent', { precision: 78, scale: 0 }).notNull().default('0'),
+  acts: integer('acts').notNull().default(0),
+  endedAt: timestamp('ended_at', { withTimezone: true }),
+  endedTx: text('ended_tx'),
+  /** 15 or more blocks deep. */
+  final: boolean('final').notNull().default(false),
+}, (t) => ({
+  pk: primaryKey({ name: 'charter_guard_pk', columns: [t.chainId, t.address] }),
+  byOwner: index('charter_guard_owner_idx').on(t.chainId, t.owner),
+}))
+
+/** DERIVED. Every GuardCreated, Acted, Ended and Swept log, one row each. */
+export const charterGuardEvent = pgTable('charter_guard_event', {
+  chainId: integer('chain_id').notNull(),
+  address: text('address').notNull(),
+  kind: text('kind').notNull(),
+  blockNumber: bigint('block_number', { mode: 'bigint' }).notNull(),
+  blockHash: text('block_hash').notNull(),
+  txHash: text('tx_hash').notNull(),
+  logIndex: integer('log_index').notNull(),
+  caller: text('caller'),
+  data: jsonb('data').notNull(),
+  blockTime: timestamp('block_time', { withTimezone: true }),
+  final: boolean('final').notNull().default(false),
+  observedAt: timestamp('observed_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({
+  uq: unique('charter_guard_event_uq').on(t.chainId, t.txHash, t.logIndex),
+  byGuard: index('charter_guard_event_guard_idx').on(t.chainId, t.address, t.blockNumber),
+}))
+
+/** FIRST-PARTY. What preview() said, sampled; the health history on a charter page. Never deleted. */
+export const charterGuardSample = pgTable('charter_guard_sample', {
+  chainId: integer('chain_id').notNull(),
+  address: text('address').notNull(),
+  blockNumber: bigint('block_number', { mode: 'bigint' }).notNull(),
+  state: smallint('state').notNull(),
+  health: numeric('health', { precision: 78, scale: 0 }),
+  debt: numeric('debt', { precision: 78, scale: 0 }),
+  available: numeric('available', { precision: 78, scale: 0 }),
+  wouldRepay: numeric('would_repay', { precision: 78, scale: 0 }),
+  readAt: timestamp('read_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({
+  byGuard: index('charter_guard_sample_idx').on(t.chainId, t.address, t.readAt),
+}))
+
+/** FIRST-PARTY. Every act() a Marque watcher prepared, written before it is sent. Never deleted. */
+export const charterAttempt = pgTable('charter_attempt', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  chainId: integer('chain_id').notNull(),
+  address: text('address').notNull(),
+  /** 'altana' (Keel through its session) or 'backup' (direct). */
+  path: text('path').notNull(),
+  /** prepared, sent, pending, confirmed, reverted, failed, superseded */
+  status: text('status').notNull(),
+  callsId: text('calls_id'),
+  txHash: text('tx_hash'),
+  error: text('error'),
+  preparedAt: timestamp('prepared_at', { withTimezone: true }).notNull().defaultNow(),
+  sentAt: timestamp('sent_at', { withTimezone: true }),
+  closedAt: timestamp('closed_at', { withTimezone: true }),
+  leaseUntil: timestamp('lease_until', { withTimezone: true }).notNull(),
+})
+
+/** DERIVED plus our bookkeeping. Keel's Altana session for one guard: public data only, never a key. */
+export const charterWatchKey = pgTable('charter_watch_key', {
+  chainId: integer('chain_id').notNull(),
+  guard: text('guard').notNull(),
+  walletAddress: text('wallet_address').notNull(),
+  sessionPublicKey: text('session_public_key'),
+  keyId: text('key_id'),
+  /** serializeSession() output: the public half of the session. */
+  session: jsonb('session'),
+  expiry: timestamp('expiry', { withTimezone: true }).notNull(),
+  grantTx: text('grant_tx'),
+  revokeTx: text('revoke_tx'),
+  registered: boolean('registered').notNull().default(false),
+  /** granting, registered, failed, revoking, revoked */
+  status: text('status').notNull(),
+  error: text('error'),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  lastCheckedAt: timestamp('last_checked_at', { withTimezone: true }),
+}, (t) => ({
+  pk: primaryKey({ name: 'charter_watch_key_pk', columns: [t.chainId, t.guard] }),
 }))

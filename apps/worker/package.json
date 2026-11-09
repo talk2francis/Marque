@@ -13,7 +13,9 @@
     "classify": "tsx src/classify.ts",
     "classify:once": "tsx src/classify.ts --once",
     "conform": "tsx src/conform.ts",
-    "conform:once": "tsx src/conform.ts --once"
+    "conform:once": "tsx src/conform.ts --once",
+    "charters": "tsx src/charters.ts",
+    "charters:once": "tsx src/charters.ts --once"
   },
   "dependencies": {
     "@marque/db": "workspace:*",
@@ -22,7 +24,10 @@
     "drizzle-orm": "^0.38.2",
     "@marque/probe": "workspace:*",
     "@marque/conformance": "workspace:*",
-    "@marque/commerce": "workspace:*"
+    "@marque/commerce": "workspace:*",
+    "@marque/charters": "workspace:*",
+    "@altananetwork/sdk": "0.9.0",
+    "viem": "^2.21.55"
   },
   "devDependencies": {
     "typescript": "^5.7.2",
