@@ -232,6 +232,13 @@
       "when": 1794183628410,
       "tag": "0032_charters",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1794240000000,
+      "tag": "0033_charters_v2",
+      "breakpoints": true
     }
   ]
 }

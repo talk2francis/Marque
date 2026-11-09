@@ -27,3 +27,15 @@ describe('session key derivation', () => {
     expect(() => deriveSessionKey(master, 97, 'not-an-address')).toThrow()
   })
 })
+
+import { deriveSessionKeyV2 } from './session-key.js'
+describe('deriveSessionKeyV2', () => {
+  const m = `0x${'11'.repeat(32)}` as const
+  const a = '0x18677666Ed041b2b5424e3ccb8D919583BF77384'
+  it('is stable, differs by kind and chain, and never equals the v1 key', () => {
+    expect(deriveSessionKeyV2(m, 97, 'grid', a)).toBe(deriveSessionKeyV2(m, 97, 'grid', a.toLowerCase()))
+    expect(deriveSessionKeyV2(m, 97, 'grid', a)).not.toBe(deriveSessionKeyV2(m, 97, 'range', a))
+    expect(deriveSessionKeyV2(m, 97, 'grid', a)).not.toBe(deriveSessionKeyV2(m, 56, 'grid', a))
+    expect(deriveSessionKeyV2(m, 97, 'loan', a)).not.toBe(deriveSessionKey(m, 97, a))
+  })
+})

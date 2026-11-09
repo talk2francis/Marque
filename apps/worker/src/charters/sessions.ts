@@ -20,7 +20,8 @@ export const networkOf = (chainId: CharterChainId) => (chainId === 56 ? BNB : BN
 const rowsOf = <T = Record<string, unknown>>(r: unknown) => ((r as { rows?: unknown[] }).rows ?? (r as unknown[])) as T[]
 
 export interface Keel {
-  key: Hex
+  /** The watcher's admin key: loaded only by the short-lived charters-keys process (S11). */
+  key?: Hex
   address: Address
   master: Hex
 }
@@ -30,6 +31,7 @@ export type AltanaClient = ReturnType<typeof createClient>
 /** An Altana client for exactly the chains the worker runs on, with Keel's account set up on each (no transaction). */
 export async function altanaFor(chains: CharterChainId[], keel: Keel): Promise<AltanaClient> {
   const client = createClient({ chains: chains.map(networkOf), defaultChainId: chains[0] })
+  if (!keel.key) return client // session-only client: execute() through a session needs no admin key
   const w = await client.createWallet({ signer: signerFromPrivateKey(keel.key) })
   if (w.address.toLowerCase() !== keel.address.toLowerCase()) throw new Error('Altana wallet is not the watcher address')
   return client
@@ -48,6 +50,7 @@ export interface SessionPass { granted: number; revoked: number; failed: Array<{
 
 export async function sessionsOnce(client: PublicClient, altana: AltanaClient, chainId: CharterChainId, keel: Keel, opts: { dryRun: boolean; log: (e: string, d: Record<string, unknown>) => void }): Promise<SessionPass> {
   const out: SessionPass = { granted: 0, revoked: 0, failed: [] }
+  if (!keel.key) throw new Error('sessionsOnce needs the watcher admin key (charters-keys process only)')
   const admin = signerFromPrivateKey(keel.key)
   const wallet = { address: keel.address }
 
