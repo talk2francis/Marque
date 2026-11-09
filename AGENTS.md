@@ -376,30 +376,34 @@ Anything not in `BUILD-PROMPTS.md`, specifically: a new escrow or payment contra
 
 ---
 
-## 14. CHARTERS (LOAN GUARD)
+## 14. CHARTERS (FOUR KINDS), revised 9 Nov 2026
 
-This section governs the Charters feature. It supersedes earlier planning text about Altana user wallets and the quarantined `AltanaCharterService` path for this scope. Where section 13.9 lists Altana integration as out of scope, this section governs it for Charters. It does not relax any invariant above.
+Replaces the 8 Nov "Charters (Loan Guard)" section. It does not relax any invariant above.
 
-**C1. The chain decides.** A charter acts only when its contract reads the condition from the protocol in the same transaction. No server, agent or relay decides that a charter should act; they may only ask the contract, which refuses when the condition is false.
+**C1. The chain decides.** A charter acts only when its contract reads the condition from the protocol in the same transaction (Venus health, wallet balance, pool TWAP and spot). No server, agent or relay decides; they may only ask the contract, which refuses when the condition is false.
 
-**C2. One destination.** A charter's code may move the owner's tokens only to the owner's own position in the named protocol, plus an optional owner-set tip to the caller counted inside the budget. No charter contract has an admin, owner change, pause, upgrade, arbitrary call or arbitrary recipient.
+**C2. Fixed destinations.** A charter's code may move assets only between the owner and the named protocol position: the owner's own Venus loan (Loan Guard), the owner's own Venus supply (Yield Sweep), the named pool with output to the owner (Grid Band), and the owner's own position in the named pool with every leftover to the owner (Range Keeper); plus an optional tip to the caller from a separate tip budget. No admin, owner change, pause, upgrade, arbitrary call or arbitrary recipient.
 
-**C3. Lifetime budgets.** A charter's budget is a lifetime total that never refills. Periodic caps are never presented as the protection.
+**C3. Gross lifetime limits.** Every kind's capital limit is a lifetime total that never refills (budget, supply cap, buy and sell caps, rebalance count). Periodic caps are never presented as the protection.
 
-**C4. Money stays with the owner.** The reserve stays in the owner's wallet under an exact allowance to that charter's own contract. Never ask an owner to move funds into a new account for a charter in this version.
+**C4. One wallet unless custody is required.** Funds stay in the owner's wallet under exact allowances. The only custody is Range Keeper's one position NFT, because continuous re-centring requires it; every surface says so in plain words and never claims the NFT stays in the wallet.
 
-**C5. Ending always works.** `end()` is owner only and depends on nothing else: not expiry, oracle, relay, server or watcher. The UI keeps the end path reachable for every guard that exists, even if the feature flag is off.
+**C5. An allowance is a ceiling, not a reservation.** The product shows charters that draw the same token together, against the wallet balance, before granting and on My Marque.
 
-**C6. The button is public.** `act()` is permissionless and attributed. Agents earn the "Charter-ready" mark only from their own successful onchain actions, never by declaration.
+**C6. Ending always works.** `end()` is owner only and depends on nothing but the charter (Range Keeper's NFT return is attempted and, if it fails, `release()` retries). Charter pages for existing charters stay reachable even with the feature flag off.
 
-**C7. Altana is the agent's leash, not the owner's wallet.** Keel's Altana sessions are scoped to `{ to: guard, signature: 'act()' }`, expire with the guard, are registered on KeyStore, and are revoked when the guard ends. The charter page shows the key and its state separately from the guard's state.
+**C7. Who may act is a property of the kind.** Loan Guard and Yield Sweep are open because every possible action is value-neutral for the owner. Grid Band and Range Keeper are closed to the owner and named executors because timing has value. Never open a closed kind to anyone.
 
-**C8. Show what it can never do.** Every grant surface shows the "This charter can never" list beside what it does, before any wallet prompt.
+**C8. Capability is earned and narrow.** Agents are advice-only, charter-compatible (declared + conformance-tested, per kind) or executed (chain-counted, per kind, per chain). No chip implies general safety.
 
-**C9. Simulate before sending.** Every watcher simulates `act()` with `eth_call` immediately before sending and never resends blindly after a timeout.
+**C9. Altana is the agent's leash.** Sessions are scoped `{to: charter, signature: 'act()'}`, expire with the charter, are registered on KeyStore and revoked on end; the charter page shows the key's state separately. Admin keys are used only by the short-lived keys process.
 
-**C10. State the limits.** Docs and FAQ say plainly that a charter cannot guarantee against liquidation, cannot act while the protocol refuses, and that the contracts are unaudited until an audit exists.
+**C10. Simulate before sending, never resend blind.**
 
-**Vocabulary.** The feature is **Charters**. The first kind is **Loan Guard**. Its contract is a guard. The button is **Grant a charter** and the result is **Charter granted**. The trigger and target are health values; always pair them with a price translation in the UI.
+**C11. Testnet fixtures are labelled.** Any pool or price moved by Marque on testnet says so on every page that shows it, and nothing from a fixture appears in a mainnet figure.
 
-**Mainnet.** Deploying factories, funding watcher accounts and any canary position are Marque-controlled mainnet writes and need Francis's written "approved, mainnet" under an exact action table.
+**C12. State the limits.** Docs and builders say: unaudited; cannot act while the protocol refuses; Loan Guard cannot guarantee against liquidation; grids hold inventory in a fall; kept ranges can underperform holding.
+
+**Vocabulary.** Charters; Loan Guard, Yield Sweep, Grid Band, Range Keeper; "Grant a charter" and "Charter granted"; the Seal. Never show ticks or raw health mantissas.
+
+**Mainnet.** Any Marque-controlled mainnet write (deploys, funding, canaries, retiring the v1 canary, key rotation transfers) needs Francis's written "approved, mainnet" under an exact action table.
