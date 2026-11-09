@@ -80,3 +80,6 @@ agents/*/.agent-data/
 
 # Film media live outside the app, served by Caddy (ops/media.caddy). A local copy for development only.
 apps/web/public/media/
+
+# Foundry deployment records stay out of the repo; addresses live in packages/charters/src/addresses.ts.
+contracts/broadcast/

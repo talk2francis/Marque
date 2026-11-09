@@ -9,13 +9,17 @@ import {IComptroller} from "../src/charters/VenusInterfaces.sol";
 ///
 /// Addresses come from venus-protocol/deployments/{bscmainnet,bsctestnet}_addresses.json and MUST be
 /// re-checked against the live chain in P1 (comptroller(), underlying(), not paused) before use.
-/// Run with an encrypted keystore account, never a raw key on the command line:
-///   forge script script/DeployCharters.s.sol --rpc-url bsc_testnet --account marque-ops --broadcast --verify
+/// Never put a raw key on the command line. Either an encrypted keystore account:
+///   forge script script/DeployCharters.s.sol --rpc-url bsc_testnet --account marque-ops --broadcast
+/// or the key in this process's environment only, as CHARTERS_DEPLOYER_KEY (read here, never logged).
+/// No --verify before launch: contracts stay unverified until the launch day.
 /// Mainnet needs Francis's written "approved, mainnet" for this exact action table first.
 contract DeployCharters is Script {
     function run() external returns (CharterFactory factory) {
         (address comptroller, address[] memory markets) = _manifest(block.chainid);
-        vm.startBroadcast();
+        uint256 key = vm.envOr("CHARTERS_DEPLOYER_KEY", uint256(0));
+        if (key != 0) vm.startBroadcast(key);
+        else vm.startBroadcast();
         factory = new CharterFactory(IComptroller(comptroller), markets);
         vm.stopBroadcast();
         console2.log("CharterFactory", address(factory));
