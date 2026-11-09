@@ -1,3 +1,4 @@
+import { AgentActsBlock } from '../../_components/charters/AgentActsBlock'
 import { SiteHeader, SiteFooter } from '../../_components/SiteHeader'
 import { agentEvidence } from '../../../lib/agent-evidence'
 import { jobLens } from '../../../lib/lens'
@@ -21,7 +22,8 @@ export async function AgentSection({ d, section }: { d: Data; section: SectionId
   return (
     <>
       <SiteHeader active="register" />
-      <main><Storefront d={d} section={section} evidence={evidence} lens={lens} twins={twins} acted={acted} standing={standing} /></main>
+      <main><Storefront d={d} section={section} evidence={evidence} lens={lens} twins={twins} acted={acted} standing={standing}
+        charter={section === 'overview' ? <AgentActsBlock agentId={d.agentId} chainId={d.chainId} /> : null} /></main>
       <SiteFooter />
     </>
   )

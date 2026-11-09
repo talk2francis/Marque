@@ -78,7 +78,7 @@ export function agentBase(d: Pick<Data, 'slug' | 'chainId' | 'tokenId'>): string
   return d.slug && d.chainId === 56 ? `/agents/${d.slug}` : `/agents/${d.chainId}/${d.tokenId}`
 }
 
-export function Storefront({ d, section = 'overview', evidence = null, lens = null, twins = [], acted = [], standing = null }: { d: Data; section?: SectionId; evidence?: AgentEvidence | null; lens?: JobLens | null; twins?: Twin[]; acted?: OutcomeView[]; standing?: StandingEvidence | null }) {
+export function Storefront({ d, section = 'overview', evidence = null, lens = null, twins = [], acted = [], standing = null, charter = null }: { d: Data; section?: SectionId; evidence?: AgentEvidence | null; lens?: JobLens | null; twins?: Twin[]; acted?: OutcomeView[]; standing?: StandingEvidence | null; charter?: React.ReactNode }) {
   const c = d.commerce
   // Badges follow the same terms as the rail (invariant 41); the rail island re-reads them live.
   const hireable = d.terms.state === 'fresh'
@@ -167,6 +167,7 @@ export function Storefront({ d, section = 'overview', evidence = null, lens = nu
           {tabs}
           {section === 'overview' ? <AnchorRedirect base={base} /> : null}
 
+          {section === 'overview' ? charter : null}
           {section === 'overview' ? <Overview d={d} cat={cat} shown={shown} tenderHref={tenderHref} tryHref={tryHref} delivery={delivery} lens={lens} base={base} standing={standing} /> : null}
           {section === 'evidence' ? <Evidence d={d} tests={d.tests} own={own} evidence={evidence} cat={cat} /> : null}
           {section === 'record' ? <TrackRecord d={d} net={net} acted={acted} /> : null}
