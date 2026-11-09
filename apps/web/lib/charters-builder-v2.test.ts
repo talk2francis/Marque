@@ -45,6 +45,12 @@ describe('yield sweep', () => {
     expect(d.supplyCap).toBeGreaterThanOrEqual(d.minAction)
     expect(yieldProblem({ vToken: '0x0000000000000000000000000000000000000001', ...d, minHealthAfter: 0n }, 0n)).toBeNull()
   })
+  it('starts a small wallet with a band around what it holds', () => {
+    const d = yieldDefaults(12n * E / 10n, 18) // 1.2 USDC
+    expect(d.ceiling).toBeLessThan(12n * E / 10n)
+    expect(d.minAction).toBeGreaterThanOrEqual(E / 10n)
+    expect(d.ceiling - d.floor).toBeGreaterThanOrEqual(2n * d.minAction)
+  })
   it('names each problem the factory would refuse', () => {
     const base = { vToken: '0x0000000000000000000000000000000000000001' as const, floor: 200n * E, ceiling: 300n * E, minAction: 20n * E, supplyCap: 5_000n * E, minHealthAfter: 0n }
     expect(yieldProblem({ ...base, ceiling: 230n * E }, 0n)).toBe('band')

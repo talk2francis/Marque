@@ -100,7 +100,11 @@ export interface YieldParams { vToken: Address; floor: bigint; ceiling: bigint; 
 /** Starting point from the wallet balance (06_YIELD_SWEEP, Parameters). */
 export function yieldDefaults(balance: bigint, decimals: number): Pick<YieldParams, 'floor' | 'ceiling' | 'minAction' | 'supplyCap'> {
   const floor = balance / 5n > 0n ? balance / 5n : 10n * one(decimals)
-  const minAction = floor / 20n > 10n * one(decimals) ? floor / 20n : 10n * one(decimals)
+  // The spec's 10-token floor on the smallest move suits real wallets; a small wallet gets a twentieth of its balance
+  // (never under 0.1 token), so the starting band sits around what it holds, not far above it.
+  const small = balance < 200n * one(decimals)
+  const tenth = one(decimals) / 10n
+  const minAction = small ? (balance / 20n > tenth ? balance / 20n : tenth) : floor / 20n > 10n * one(decimals) ? floor / 20n : 10n * one(decimals)
   let ceiling = floor + floor / 2n
   if (ceiling < floor + 2n * minAction) ceiling = floor + 2n * minAction
   const excess = balance > ceiling ? balance - (floor + ceiling) / 2n : 0n

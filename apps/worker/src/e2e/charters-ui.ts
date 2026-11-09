@@ -13,6 +13,8 @@
  */
 import { chromium, type Page } from 'playwright'
 import { mkdirSync, writeFileSync } from 'node:fs'
+import { createCipheriv, randomBytes, randomUUID, scryptSync } from 'node:crypto'
+import { keccak256, toHex } from 'viem'
 import { createPublicClient, createWalletClient, encodeFunctionData, http, numberToHex, parseAbi, parseEther, type Abi, type Hex, type PrivateKeyAccount } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 import { bsc, bscTestnet } from 'viem/chains'
@@ -78,6 +80,8 @@ async function unwind56(acc: PrivateKeyAccount) {
   const balOf = (t: Hex) => pub.readContract({ address: t, abi: parseAbi(['function balanceOf(address) view returns (uint256)']), functionName: 'balanceOf', args: [acc.address] })
   if (kind === 'loan') {
     const vUSDT = CHARTER_CHAINS[56].markets[0]!.vToken
+    // A full repayment includes interest accrued since the borrow: the demo wallet adds a cent so it can close.
+    await send(demo56(), M56.USDT, call('function transfer(address,uint256) returns (bool)', 'transfer', [acc.address, parseEther('0.01')]), 0n, 'demo adds 0.01 USDT for accrued interest')
     await send(acc, M56.USDT, call('function approve(address,uint256) returns (bool)', 'approve', [vUSDT, await balOf(M56.USDT)]), 0n, 'allow the repayment')
     await send(acc, vUSDT, call('function repayBorrow(uint256) returns (uint256)', 'repayBorrow', [2n ** 256n - 1n]), 0n, 'repay the loan in full')
     await send(acc, M56.USDT, call('function approve(address,uint256) returns (bool)', 'approve', [vUSDT, 0n]), 0n, 'clear the repayment allowance')
@@ -193,6 +197,22 @@ async function injectWallet(page: Page, acc: PrivateKeyAccount) {
   })
 }
 
+/** A mainnet Pass key is kept, encrypted (same format as charters-keystore.mjs), until its position is unwound. */
+function keepKey(key: Hex, address: string) {
+  const dir = `/root/.marque/charters/e2e-pass-${chainId}-${address.toLowerCase()}`
+  mkdirSync(`${dir}/wallets`, { recursive: true, mode: 0o700 })
+  const password = randomBytes(32).toString('base64url')
+  const salt = randomBytes(32), iv = randomBytes(16)
+  const dk = scryptSync(Buffer.from(password, 'utf8'), salt, 32, { N: 262144, r: 8, p: 1, maxmem: 512 * 1024 * 1024 })
+  const c = createCipheriv('aes-128-ctr', dk.subarray(0, 16), iv)
+  const ct = Buffer.concat([c.update(Buffer.from(key.slice(2), 'hex')), c.final()])
+  const mac = keccak256(toHex(Buffer.concat([dk.subarray(16, 32), ct]))).slice(2)
+  writeFileSync(`${dir}/wallets/pass.json`, JSON.stringify({ version: 3, id: randomUUID(), address: address.slice(2).toLowerCase(), crypto: { cipher: 'aes-128-ctr', cipherparams: { iv: iv.toString('hex') }, ciphertext: ct.toString('hex'), kdf: 'scrypt', kdfparams: { dklen: 32, n: 262144, r: 8, p: 1, salt: salt.toString('hex') }, mac } }), { mode: 0o600 })
+  writeFileSync(`${dir}/.env.local`, `WALLET_PASSWORD=${password}\n`, { mode: 0o600 })
+  step(`Pass key kept encrypted in ${dir}`)
+}
+let ownerForUnwind: PrivateKeyAccount | null = null
+
 const ready = (page: Page) => page.waitForFunction(() => { const el = document.querySelector('[class*="hfValue"]'); return Boolean(el && el.textContent && el.textContent !== '…') }, null, { timeout: 240_000 })
 
 async function connect(page: Page, name: 'Test Wallet' | 'Marque Pass') {
@@ -213,6 +233,7 @@ async function connect(page: Page, name: 'Test Wallet' | 'Marque Pass') {
 
 let lastPage: Page | null = null
 async function main() {
+  if (process.env['E2E_UNWIND_DIR']) { await unwind56(privateKeyToAccount(loadKeystore(process.env['E2E_UNWIND_DIR']))); return }
   const browser = await chromium.launch()
   const ctx = await browser.newContext({ viewport: { width: 1440, height: 1000 } })
   const page = await ctx.newPage()
@@ -250,6 +271,7 @@ async function main() {
     await page.getByRole('dialog').getByRole('button', { name: 'Done' }).click()
     owner = privateKeyToAccount(key)
     if (owner.address.toLowerCase() !== address.toLowerCase()) throw new Error('exported key does not match the Pass address')
+    if (chainId === 56) { keepKey(key, address); ownerForUnwind = owner }
     await setup(owner)
     await page.reload({ waitUntil: 'domcontentloaded' })
   }
@@ -261,6 +283,12 @@ async function main() {
     await page.fill('#budget', chainId === 56 ? '0.2' : '3')
   }
   await page.waitForTimeout(1500)
+  // A wallet on the other network: use the builder's own Switch network action, then wait for the blocker to clear.
+  if (/Switch network/.test(await page.locator('[class*="blocker"]').first().innerText().catch(() => ''))) {
+    await page.locator('[class*="blocker"]').getByRole('button', { name: 'Switch network' }).click()
+    await page.waitForFunction(() => !/Switch network/.test(document.body.innerText), null, { timeout: 60_000 })
+    await page.waitForTimeout(1500)
+  }
   await shot('builder')
   const blocker = await page.locator('[class*="blocker"]').first().innerText().catch(() => '')
   if (blocker) step(`blocker: ${blocker}`)
@@ -276,6 +304,14 @@ async function main() {
   await shot('granted')
   step(`granted ${href}`)
   report['charter'] = href
+  // Testnet grid and range: move Marque's labelled fixture pool past the charter's condition (R6), so the cell does
+  // not depend on the random walk. Grid: the base price falls about 2.5%; range: the price leaves the range upward.
+  if (chainId === 97 && (kind === 'grid' || kind === 'range') && process.env['CHARTERS_FIXTURE_MM']) {
+    const pool = V2[97].pools[0]!
+    const [, t] = await pub.readContract({ address: pool.address, abi: parseAbi(['function slot0() view returns (uint160, int24, uint16, uint16, uint16, uint32, bool)']), functionName: 'slot0' })
+    const op = privateKeyToAccount(loadKeystore('/root/.marque/charters/fixture-mm-97'))
+    await send(op, process.env['CHARTERS_FIXTURE_MM'] as Hex, call('function moveTo(int24)', 'moveTo', [t + (kind === 'grid' ? 250 : 420)]), 0n, 'fixture market maker moves the test price')
+  }
   // Wait for a real action by the worker (grid and range wait for the fixture market maker).
   const [, , , addr] = (href ?? '').split('/')
   const until = Date.now() + (chainId === 56 ? 3 : kind === 'grid' || kind === 'range' ? 60 : 12) * 60_000
@@ -310,4 +346,6 @@ async function main() {
   writeFileSync(`${out}/${kind}-${walletType}-${chainId}.json`, JSON.stringify(report, null, 2))
   await browser.close()
 }
-main().catch(async (e) => { step(`FAILED: ${(e as Error).message.slice(0, 300)}`); await lastPage?.screenshot({ path: `${out}/${kind}-${walletType}-failed.png` }).catch(() => undefined); writeFileSync(`${out}/${kind}-${walletType}-${chainId}.json`, JSON.stringify(report, null, 2)); process.exit(1) })
+main().catch(async (e) => { step(`FAILED: ${(e as Error).message.slice(0, 300)}`); await lastPage?.screenshot({ path: `${out}/${kind}-${walletType}-failed.png` }).catch(() => undefined)
+  // A failed mainnet run still returns everything it set up: end any charter this owner granted first, then unwind.
+  if (chainId === 56 && ownerForUnwind) await unwind56(ownerForUnwind).catch((x) => step(`unwind failed: ${(x as Error).message.slice(0, 200)}`)); writeFileSync(`${out}/${kind}-${walletType}-${chainId}.json`, JSON.stringify(report, null, 2)); process.exit(1) })
