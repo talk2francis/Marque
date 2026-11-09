@@ -42,7 +42,7 @@ async function main() {
       const [, before] = await test.readContract({ address: FIXTURE.address, abi: poolAbi, functionName: 'slot0' })
       if (DRY) log('would_move', { mainTick, offset, target, before })
       else {
-        const hash = await wallet.writeContract({ address: MM, abi: mmAbi, functionName: 'moveTo', args: [target], gasPrice: 1_000_000_000n })
+        const hash = await wallet.writeContract({ address: MM, abi: mmAbi, functionName: 'moveTo', args: [target], gasPrice: 500_000_000n })
         const r = await test.waitForTransactionReceipt({ hash, timeout: 120_000 })
         log('moved', { mainTick, offset, target, before, tx: hash, status: r.status })
       }
