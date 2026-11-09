@@ -11,7 +11,8 @@ import { CHARTER_CHAINS, charterFactoryAbi, loanGuardAbi, type CharterChainId } 
  */
 export const FINALITY = 15n
 const CHUNK = 2_000n
-const GUARD_BATCH = 100
+// Public nodes cap eth_getLogs at 10 addresses per request (publicnode, 9 Nov 2026).
+const GUARD_BATCH = 10
 
 const rowsOf = <T = Record<string, unknown>>(r: unknown) => ((r as { rows?: unknown[] }).rows ?? (r as unknown[])) as T[]
 /** Keyed by the factory too, so a new factory version starts from its own deployment block. */

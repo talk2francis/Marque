@@ -48,10 +48,13 @@ const V2_ON = env('CHARTERS_V2', '0') === '1'
 const V2_KINDS = new Set(env('CHARTERS_V2_KINDS', 'loan,yield,grid,range').split(',').filter(Boolean) as CharterKind[])
 const ALTANA_KINDS = new Set(env('CHARTERS_ALTANA_KINDS', 'loan,grid,range').split(',').filter(Boolean) as CharterKind[])
 const KEYS_IN_WORKER = env('CHARTERS_KEYS_IN_WORKER', '0') === '1'
-const RPC: Record<CharterChainId, string[]> = {
-  56: ['https://bsc-dataseed.bnbchain.org', 'https://bsc-dataseed1.defibit.io', 'https://bsc-rpc.publicnode.com'],
-  97: ['https://data-seed-prebsc-1-s1.bnbchain.org:8545', 'https://bsc-testnet-rpc.publicnode.com', 'https://data-seed-prebsc-2-s1.bnbchain.org:8545'],
+const RPC_DEFAULT: Record<CharterChainId, string[]> = {
+  56: ['https://bsc-rpc.publicnode.com', 'https://bsc-dataseed.bnbchain.org', 'https://bsc-dataseed1.defibit.io'],
+  97: ['https://bsc-testnet-rpc.publicnode.com', 'https://data-seed-prebsc-1-s1.bnbchain.org:8545', 'https://data-seed-prebsc-2-s1.bnbchain.org:8545'],
 }
+// The operator's own endpoints first (BSC_RPC_URLS, BSC_TESTNET_RPC), then public nodes that serve eth_getLogs.
+const fromEnv = (k: string) => (process.env[k] ?? '').split(',').map((x) => x.trim()).filter(Boolean)
+const RPC: Record<CharterChainId, string[]> = { 56: [...fromEnv('BSC_RPC_URLS'), ...RPC_DEFAULT[56]], 97: [...fromEnv('BSC_TESTNET_RPC'), ...RPC_DEFAULT[97]] }
 
 const log = (event: string, data: Record<string, unknown>) => console.log(JSON.stringify({ t: new Date().toISOString(), worker: 'charters', event, ...data }, (_k, v) => (typeof v === 'bigint' ? v.toString() : v)))
 let stopping = false

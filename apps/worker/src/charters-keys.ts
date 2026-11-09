@@ -22,8 +22,8 @@ const CHAINS = (process.env['CHARTERS_CHAINS'] ?? '97').split(',').map(Number).f
 const DRY = process.argv.includes('--dry-run')
 const ALTANA_KINDS = new Set((process.env['CHARTERS_ALTANA_KINDS'] ?? 'loan,grid,range').split(',').filter(Boolean) as CharterKind[])
 const RPC: Record<56 | 97, string[]> = {
-  56: ['https://bsc-dataseed.bnbchain.org', 'https://bsc-dataseed1.defibit.io', 'https://bsc-rpc.publicnode.com'],
-  97: ['https://data-seed-prebsc-1-s1.bnbchain.org:8545', 'https://bsc-testnet-rpc.publicnode.com', 'https://data-seed-prebsc-2-s1.bnbchain.org:8545'],
+  56: ['https://bsc-rpc.publicnode.com', 'https://bsc-dataseed.bnbchain.org', 'https://bsc-dataseed1.defibit.io'],
+  97: ['https://bsc-testnet-rpc.publicnode.com', 'https://data-seed-prebsc-1-s1.bnbchain.org:8545', 'https://data-seed-prebsc-2-s1.bnbchain.org:8545'],
 }
 const log = (event: string, data: Record<string, unknown>) => console.log(JSON.stringify({ t: new Date().toISOString(), worker: 'charters-keys', event, ...data }, (_k, v) => (typeof v === 'bigint' ? v.toString() : v)))
 const readEnv = (name: string) => { try { return readFileSync(`${DIR}/charters.env`, 'utf8').match(new RegExp(`^${name}=(.+)$`, 'm'))?.[1]?.trim() } catch { return undefined } }

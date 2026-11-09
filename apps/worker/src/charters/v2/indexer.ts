@@ -14,8 +14,10 @@ import {
  * read again. Totals are folded from the events themselves, so a reorg that removes an event removes its effect.
  */
 export const FINALITY = 15n
-const CHUNK = 2_000n
-const BATCH = 100
+const CHUNK = 500n
+const MIN_SPLIT = 25n
+// Public nodes cap eth_getLogs at 10 addresses per request (publicnode, 9 Nov 2026).
+const BATCH = 10
 
 const CHARTER_ABI: Record<CharterKind, Abi> = { loan: loanGuardV2Abi, yield: yieldSweepAbi, grid: gridBandAbi, range: rangeKeeperAbi }
 const FACTORY_ABI: Record<CharterKind, Abi> = { loan: loanGuardFactoryV2Abi, yield: yieldSweepFactoryAbi, grid: gridBandFactoryAbi, range: rangeKeeperFactoryAbi }
@@ -114,6 +116,25 @@ export function fold(kind: CharterKind, events: Array<{ event: string; data: Rec
   return { totals: t, actions, tipsPaid: tips.toString(), executors: [...executors].filter(([, on]) => on).map(([a]) => a), endedIndex }
 }
 
+/**
+ * getLogs that halves its block range when a node refuses a request as too large (public BSC nodes cap the result
+ * size, and the charter list only grows). Never skips a block: both halves are always read.
+ */
+async function logsIn(client: PublicClient, address: Address | Address[], from: bigint, to: bigint): Promise<Log[]> {
+  let last: unknown = null
+  // A public node under load answers 429 and the fallback lands on a node that refuses getLogs: retry before splitting.
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try { return await client.getLogs({ address, fromBlock: from, toBlock: to }) } catch (e) { last = e; await new Promise((r) => setTimeout(r, 1500 * (attempt + 1))) }
+  }
+  {
+    const e = last
+    const tooBig = /exceeds|limit|too many|range|10000/i.test(e instanceof Error ? e.message : String(e))
+    if (!tooBig || to - from < MIN_SPLIT) throw e
+    const mid = from + (to - from) / 2n
+    return [...await logsIn(client, address, from, mid), ...await logsIn(client, address, mid + 1n, to)]
+  }
+}
+
 export async function indexOnceV2(client: PublicClient, chainId: CharterChainId): Promise<{ from: bigint; to: bigint; head: bigint; events: number; reorgFrom: bigint | null }> {
   const fs = factories(chainId)
   if (!fs.length) throw new Error(`no v2 factories on chain ${chainId}`)
@@ -127,12 +148,12 @@ export async function indexOnceV2(client: PublicClient, chainId: CharterChainId)
   const factoryKinds = new Map(fs.map((f) => [f.address.toLowerCase(), f.kind]))
   const charterKinds = new Map(rowsOf<{ address: string; kind: number }>(await db().execute(sql`select address, kind from charter_v2 where chain_id = ${chainId}`))
     .map((r) => [r.address.toLowerCase(), KIND_BY_CODE[r.kind]!] as const))
-  const createdLogs = await client.getLogs({ address: fs.map((f) => f.address), fromBlock: from, toBlock: to })
+  const createdLogs = await logsIn(client, fs.map((f) => f.address), from, to)
   const created = createdLogs.map((l) => decodeLog(l, factoryKinds, charterKinds)).filter((d): d is Decoded => d?.event === 'Created')
   for (const c of created) charterKinds.set(c.charter.toLowerCase(), c.kind)
   const addrs = [...charterKinds.keys()] as Address[]
   const logs: Log[] = []
-  for (let i = 0; i < addrs.length; i += BATCH) logs.push(...await client.getLogs({ address: addrs.slice(i, i + BATCH), fromBlock: from, toBlock: to }))
+  for (let i = 0; i < addrs.length; i += BATCH) logs.push(...await logsIn(client, addrs.slice(i, i + BATCH), from, to))
   const decoded = [...created, ...logs.map((l) => decodeLog(l, factoryKinds, charterKinds)).filter((d): d is Decoded => d !== null && d.event !== 'Created')]
   decoded.sort((a, b) => Number(a.log.blockNumber! - b.log.blockNumber!) || a.log.logIndex! - b.log.logIndex!)
 
