@@ -98,13 +98,13 @@ export async function indexOnce(client: PublicClient, chainId: CharterChainId): 
       const caller = d.kind === 'Acted' ? String(d.args['caller']).toLowerCase() : d.kind === 'Ended' ? String(d.args['by']).toLowerCase() : d.kind === 'GuardCreated' ? String(d.args['owner']).toLowerCase() : null
       const at = times.get(l.blockNumber!) ?? null
       await tx.execute(sql`insert into charter_guard_event (chain_id, address, kind, block_number, block_hash, tx_hash, log_index, caller, data, block_time, final)
-        values (${chainId}, ${address.toLowerCase()}, ${d.kind}, ${l.blockNumber!.toString()}, ${l.blockHash!}, ${l.transactionHash!}, ${l.logIndex!}, ${caller}, ${JSON.stringify(json(d.args))}::jsonb, ${at}, false)
+        values (${chainId}, ${address.toLowerCase()}, ${d.kind}, ${l.blockNumber!.toString()}, ${l.blockHash!}, ${l.transactionHash!}, ${l.logIndex!}, ${caller}, ${JSON.stringify(json(d.args))}::jsonb, ${at ? at.toISOString() : null}, false)
         on conflict (chain_id, tx_hash, log_index) do nothing`)
       if (d.kind === 'GuardCreated') {
         const a = d.args as { owner: string; vDebt: string; token: string; trigger: bigint; target: bigint; budget: bigint; tip: bigint; expiresAt: bigint }
         await tx.execute(sql`insert into charter_guard (chain_id, address, owner, v_debt, token, trigger, target, budget, tip, expires_at, created_block, created_tx, created_at, final)
           values (${chainId}, ${address.toLowerCase()}, ${a.owner.toLowerCase()}, ${a.vDebt.toLowerCase()}, ${a.token.toLowerCase()}, ${a.trigger.toString()}, ${a.target.toString()},
-            ${a.budget.toString()}, ${a.tip.toString()}, ${new Date(Number(a.expiresAt) * 1000)}, ${l.blockNumber!.toString()}, ${l.transactionHash!}, ${at ?? new Date()}, false)
+            ${a.budget.toString()}, ${a.tip.toString()}, ${new Date(Number(a.expiresAt) * 1000).toISOString()}, ${l.blockNumber!.toString()}, ${l.transactionHash!}, ${(at ?? new Date()).toISOString()}, false)
           on conflict (chain_id, address) do nothing`)
       }
     }

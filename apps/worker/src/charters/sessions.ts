@@ -62,7 +62,7 @@ export async function sessionsOnce(client: PublicClient, altana: AltanaClient, c
     const expiry = Math.floor(new Date(g.expires_at).getTime() / 1000)
     if (opts.dryRun) { opts.log('session_would_grant', { chainId, guard: g.address }); continue }
     await db().execute(sql`insert into charter_watch_key (chain_id, guard, wallet_address, expiry, status, updated_at)
-      values (${chainId}, ${g.address}, ${keel.address.toLowerCase()}, ${new Date(expiry * 1000)}, 'granting', now())
+      values (${chainId}, ${g.address}, ${keel.address.toLowerCase()}, ${new Date(expiry * 1000).toISOString()}, 'granting', now())
       on conflict (chain_id, guard) do update set status = 'granting', error = null, updated_at = now()`)
     try {
       const granted = await altana.grantSession({

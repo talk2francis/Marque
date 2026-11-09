@@ -99,13 +99,13 @@ async function main() {
           if (!spend.keelStart.has(c)) spend.keelStart.set(c, bal)
           const used = (spend.keelStart.get(c) ?? bal) > bal ? (spend.keelStart.get(c)! - bal) : 0n
           spend.relay.set(c, used)
-          if (used > MAX_RELAY) { altanaOk = false; log('altana_paused_cap', { chainId: c, usedBnb: formatEther(used), capBnb: formatEther(MAX_RELAY) }) }
+          if (used >= MAX_RELAY) { altanaOk = false; log('altana_paused_cap', { chainId: c, usedBnb: formatEther(used), capBnb: formatEther(MAX_RELAY) }) }
           chainStatus['keel'] = { address: keel.address, balanceBnb: formatEther(bal), relaySpentTodayBnb: formatEther(used), path: altanaOk ? 'ok' : 'paused' }
         }
         if (altanaOk && altana && keel) chainStatus['sessions'] = await sessionsOnce(pub, altana, c, keel, { dryRun: DRY, log })
 
         const gasUsed = spend.gas.get(c) ?? 0n
-        const backupOk = BACKUP_ON && backups.has(c) && gasUsed <= MAX_GAS
+        const backupOk = BACKUP_ON && backups.has(c) && gasUsed < MAX_GAS // a zero cap means the path never sends
         if (backupAccount) {
           const bal = await pub.getBalance({ address: backupAccount.address })
           chainStatus['backup'] = { address: backupAccount.address, balanceBnb: formatEther(bal), gasSpentTodayBnb: formatEther(gasUsed), path: backupOk ? 'ok' : 'paused' }
