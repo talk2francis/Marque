@@ -1,5 +1,6 @@
 import { Statement, EmptyState } from '@marque/ui'
 import { SiteHeader, SiteFooter } from '../../_components/SiteHeader'
+import { HistoricalBanner } from '../HistoricalBanner'
 import { NetworkBadge } from '../../_components/NetworkBadge'
 import { PolicyPreview } from './PolicyPreview'
 import { TEMPLATES, CATEGORY_ORDER, isCharterCategory } from '../../../lib/charter-templates'
@@ -18,6 +19,7 @@ export default async function CharterDeskPage({ searchParams }: {
   return <>
     <SiteHeader active="charters" />
     <main className={styles.page}>
+      <HistoricalBanner />
       <header className={styles.head}>
         <Statement as="h1">Policy preview</Statement>
         <p className={styles.lede}>Review proposed limits without connecting a wallet. New grants and execution are unavailable while buyer-owned onchain enforcement remains unverified.</p>

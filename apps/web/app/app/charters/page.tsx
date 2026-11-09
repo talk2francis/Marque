@@ -1,5 +1,6 @@
 import { Statement, EmptyState, LinkButton } from '@marque/ui'
 import { SiteHeader, SiteFooter } from '../../_components/SiteHeader'
+import { HistoricalBanner } from '../HistoricalBanner'
 import { listCharters, CHARTER_CHAIN_NAME } from '../../../lib/charters'
 import { CharterCard } from './CharterCard'
 import styles from './charters.module.css'
@@ -25,6 +26,7 @@ export default async function ChartersPage() {
     <>
       <SiteHeader active="charters" />
       <main className={styles.page}>
+        <HistoricalBanner />
         <header className={styles.head}>
           <Statement as="h1">Charters</Statement>
           <p className={styles.lede}>

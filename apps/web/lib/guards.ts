@@ -236,3 +236,32 @@ export async function agentActs(agentId: string) {
 }
 
 export const WATCHERS = { keel: KEEL_WATCHER as Address, backup: BACKUP_WATCHER as Address }
+
+/**
+ * Watcher health per chain for /status (03_EXPERIENCE: Status rows): armed charters and the last action from the
+ * index, the last check from the newest sample, and each path's state from the worker's own status file (same
+ * server; absent means unknown, never assumed fine).
+ */
+export async function chartersStatus() {
+  const rows = rowsOf<Record<string, unknown>>(await chartersDb().execute(sql`
+    select c.chain_id,
+      (select count(*)::int from charter_guard g where g.chain_id = c.chain_id and g.ended_at is null and g.expires_at > now()) as armed,
+      (select max(read_at) from charter_guard_sample s where s.chain_id = c.chain_id) as last_check,
+      (select max(block_time) from charter_guard_event e where e.chain_id = c.chain_id and e.kind = 'Acted') as last_action
+    from (values (56), (97)) as c(chain_id)`))
+  let file: { updatedAt?: string; chains?: Record<string, { ok?: boolean; keel?: { path?: string }; backup?: { path?: string }; index?: { behind?: number } }> } | null = null
+  try {
+    const { readFile } = await import('node:fs/promises')
+    file = JSON.parse(await readFile(process.env['CHARTERS_STATUS_FILE'] ?? '/root/.marque/charters/status.json', 'utf8'))
+  } catch { file = null }
+  return ([56, 97] as const).map((chainId) => {
+    const r = rows.find((x) => Number(x['chain_id']) === chainId)
+    const w = file?.chains?.[String(chainId)]
+    return {
+      chainId, live: CHARTER_CHAINS[chainId].factory !== null,
+      armed: Number(r?.['armed'] ?? 0), lastCheck: iso(r?.['last_check']), lastAction: iso(r?.['last_action']),
+      keel: w?.keel?.path ?? null, backup: w?.backup?.path ?? null, workerOk: w ? w.ok !== false : null, indexBehind: w?.index?.behind ?? null,
+      workerUpdatedAt: file?.updatedAt ?? null,
+    }
+  })
+}

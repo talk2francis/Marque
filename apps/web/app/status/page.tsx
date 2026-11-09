@@ -6,7 +6,10 @@ import { publicClient } from '@marque/chain'
 import { tierFreshness } from '@marque/probe'
 import { indexerStatus, questStats, campaignChainId } from '@marque/commerce'
 import { Statement, Chip, ProvenanceChip } from '@marque/ui'
+import { cookies } from 'next/headers'
 import { SiteHeader, SiteFooter } from '../_components/SiteHeader'
+import { chartersVisible, PREVIEW_COOKIE } from '../../lib/charters-access'
+import { chartersStatus } from '../../lib/guards'
 import styles from './status.module.css'
 import { Capacity } from '../_components/Capacity'
 import { OutsideChecks } from '../_components/OutsideChecks'
@@ -141,6 +144,10 @@ function measuredAt(iso: string, ago: string) {
 }
 
 export default async function StatusPage() {
+  // Charters rows (AGENTS.md section 14): shown once public or to a preview browser; a failed read says so.
+  const charters = chartersVisible((await cookies()).get(PREVIEW_COOKIE)?.value)
+    ? await withDeadline(chartersStatus(), 4000).catch(() => 'unavailable' as const)
+    : null
   // Incidents the alerts worker has paged and not yet seen recover (ops/marque-alerts.mjs), in its own words.
   const openIncidents = (() => {
     try {
@@ -337,6 +344,34 @@ export default async function StatusPage() {
             <Link href="/pancakeswap">the PancakeSwap Desk</Link> is only as dense as this series.
           </p>
         </section>
+
+        {charters ? (
+          <section className={styles.section}>
+            <h2 className={styles.h2}>Charters watchers</h2>
+            {charters === 'unavailable' ? <p className={styles.note}>The charters index could not be read just now.</p> : (
+              <table className={styles.table} tabIndex={0} aria-label="Charters watchers per chain">
+                <thead><tr><th>Network</th><th>Armed</th><th>Last check</th><th>Keel via Altana</th><th>Backup watcher</th><th>Last action</th></tr></thead>
+                <tbody>{charters.map((c) => {
+                  const chip = (path: string | null) => path === 'ok' ? <Chip tone="holds">ok</Chip> : path === 'paused' ? <Chip tone="watch">degraded</Chip> : <Chip tone="watch">unknown</Chip>
+                  const t = (v: string | null) => (v ? new Date(v).toISOString().replace('T', ' ').slice(0, 16) + ' UTC' : 'none yet')
+                  return (
+                    <tr key={c.chainId}>
+                      <td>{c.chainId === 56 ? 'BNB Smart Chain' : 'BSC testnet'}</td>
+                      {c.live ? <>
+                        <td className="mono">{c.armed}</td>
+                        <td className="mono">{t(c.lastCheck)}</td>
+                        <td>{chip(c.keel)}</td>
+                        <td>{chip(c.backup)}</td>
+                        <td className="mono">{t(c.lastAction)}</td>
+                      </> : <td colSpan={5}>Not live on this network yet.</td>}
+                    </tr>
+                  )
+                })}</tbody>
+              </table>
+            )}
+            <p className={styles.note}>Armed charters, checks and actions come from the chain&apos;s events and the watchers&apos; sampled reads; each path&apos;s state is the watcher process&apos;s own report. A guard can always be acted on by anyone, and ended by its owner, whatever these show.</p>
+          </section>
+        ) : null}
 
         <section className={styles.section}>
           <h2 className={styles.h2}>Quest index</h2>

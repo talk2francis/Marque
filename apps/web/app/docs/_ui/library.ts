@@ -12,3 +12,14 @@ export const LIBRARY: Array<{ slug: string; href: string; label: string }> = [
   { slug: 'terms', href: '/docs/terms', label: 'Terms of use' },
   { slug: 'privacy', href: '/docs/privacy', label: 'Privacy' },
 ]
+
+/** Charters' two guides join the library once CHARTERS_PUBLIC is on (AGENTS.md section 14), or on their own pages. */
+const CHARTER_DOCS = [
+  { slug: 'charters', href: '/docs/charters', label: 'Charters (Loan Guard)' },
+  { slug: 'charters-dev', href: '/docs/developers/charters', label: 'Charters for builders' },
+]
+export function libraryFor(current: string, env: Record<string, string | undefined> = process.env) {
+  if (env['CHARTERS_PUBLIC'] !== '1' && !current.startsWith('charters')) return LIBRARY
+  const i = LIBRARY.findIndex((l) => l.slug === 'mcp') + 1
+  return [...LIBRARY.slice(0, i), ...CHARTER_DOCS, ...LIBRARY.slice(i)]
+}

@@ -8,7 +8,7 @@ export interface FaqGroup { group: string; intro: string; items: Faq[] }
 
 export const faqSlug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
 
-export const FAQ: FaqGroup[] = [
+const BASE_FAQ: FaqGroup[] = [
   {
     group: 'The basics',
     intro: 'What Marque is, who runs the agents, and what you can do without a wallet.',
@@ -91,3 +91,22 @@ export const FAQ: FaqGroup[] = [
     ],
   },
 ]
+
+/** Charters (AGENTS.md section 14): listed once CHARTERS_PUBLIC is on. The launch build sets it, so this static page carries them. */
+export const CHARTERS_FAQ: FaqGroup = {
+  group: 'Charters',
+  intro: 'Loan Guard: an agent that repays your own Venus loan inside a line you draw.',
+  items: [
+    { q: 'What is a charter?', a: 'An onchain limit on what an agent may do for you. You sign it once, it ends on the date you choose, and you can end it sooner in one transaction. The first kind is Loan Guard.', href: '/docs/charters', link: 'Charters, in full' },
+    { q: 'How does Loan Guard protect my loan?', a: 'You choose a trigger and a target health. If Venus reports your loan under the trigger, an agent repays from your wallet into your own loan until it reaches the target, never past your budget. It does not spend on a loan it cannot lift back to 1.00.', href: '/charters/new', link: 'Draw your line' },
+    { q: 'Where is my money while a charter is armed?', a: 'In your wallet. You give your guard an allowance up to your budget. Tokens move only at the moment the guard repays your loan.' },
+    { q: 'Could an agent take my money?', a: "The guard's code has one destination: your own Venus loan. It acts only when Venus says your loan is under your trigger, and only up to your budget, plus any thank-you you chose for the agent that acts." },
+    { q: "What if Marque's servers go down?", a: "Your charter keeps working. Anyone can press the guard's button, including a backup watcher, any agent and you. Ending it needs only your wallet." },
+    { q: 'Does ending a charter move money?', a: 'No. Ending stops every future action. You can clear the allowance in the same step.' },
+    { q: 'Does a charter guarantee I will not be liquidated?', a: 'No. It acts quickly and from several places, but a very fast crash, a paused Venus market or an unavailable price can still lead to liquidation. Set a budget large enough for the drop you want to cover.' },
+    { q: 'Which loans can I guard?', a: 'Venus Core loans in USDT, USDC and FDUSD on BNB Smart Chain and its testnet, from Marque Pass or any browser wallet. BNB debt and isolated pools come later.' },
+    { q: 'What is the tip?', a: 'Optional. A small amount, paid from your budget only when an agent actually repays for you. It lets any agent on Marque compete to protect you.' },
+    { q: "What is Keel's Altana key?", a: "Keel acts through a key on Altana's KeyStore that can call only your guard's act function, until your charter ends. Anyone can check it on chain. When you end your charter, Keel's key is revoked." },
+  ],
+}
+export const FAQ: FaqGroup[] = process.env['CHARTERS_PUBLIC'] === '1' ? [...BASE_FAQ, CHARTERS_FAQ] : BASE_FAQ

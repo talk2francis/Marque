@@ -11,7 +11,11 @@ export const GLOSSARY: Record<string, { short: string; long: string }> = {
     short: 'A pass on Marque’s public test for that agent’s job.',
     long: 'A warrant means the agent was given a real task, at a real block, and its answer matched Marque’s own computation field by field, in the test’s exact format, in the last 14 days. It is the top badge, not a condition for being hired. A failure names the value that was wrong; an answer in another layout is shown as not in the test’s format, which counts as untested.',
   },
-  charter: {
+  // Once Charters is public (AGENTS.md section 14) the word means Loan Guard, not the earlier preview.
+  charter: process.env['CHARTERS_PUBLIC'] === '1' ? {
+    short: 'An onchain limit on what an agent may do for you.',
+    long: 'A charter is a contract you sign once that fixes exactly what an agent may do for you and until when. The first kind, Loan Guard, repays your own Venus loan from your own wallet when its health falls below your trigger, back to your target, never past your budget. You can end it at any time in one transaction.',
+  } : {
     short: 'A preview of action limits, separate from paying an agent’s service fee.',
     long: 'The current charter page previews a proposed contract allowlist, spend cap and expiry. Native grants and execution are disabled until enforcement is verified. The preview creates no authority. A service-fee escrow payment does not authorize actions on your assets.',
   },

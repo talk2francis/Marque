@@ -1,5 +1,5 @@
 import { SiteHeader, SiteFooter } from '../../_components/SiteHeader'
-import { LIBRARY } from './library'
+import { libraryFor } from './library'
 import { ScrollSpy } from './ScrollSpy'
 import styles from '../docs.module.css'
 
@@ -34,7 +34,7 @@ export function DocShell({ current, label, title, lede, actions, sections, child
             <nav className={styles.library} aria-label="Documentation library">
               <span className="t-label">Library</span>
               <ul>
-                {LIBRARY.map((l) => (
+                {libraryFor(current).map((l) => (
                   <li key={l.slug}><a href={l.href} aria-current={l.slug === current ? 'page' : undefined}>{l.label}</a></li>
                 ))}
               </ul>
