@@ -75,15 +75,18 @@ export function YieldBuilder({ initialChain, initialAccount, demo }: { initialCh
     setCollateralMode(false)
   }, [m?.vToken, account])
 
-  const floor = band ? units(band.low.toFixed(Math.min(d, 6)), d) ?? 0n : 0n
-  const ceiling = band ? units(band.high.toFixed(Math.min(d, 6)), d) ?? 0n : 0n
+  const scaleMax = Math.max(num(balance, d) * 2, band ? band.high * 1.3 : 0, 10)
+  const step = scaleMax > 2000 ? 10 : scaleMax > 200 ? 1 : 0.1
+  // Handle positions are floats; round them to the instrument's step before they become token amounts (120, not 119.9999).
+  const places = (st: number) => (st >= 1 ? 0 : st >= 0.1 ? 1 : 2)
+  const toUnits = (v: number) => units(v.toFixed(Math.min(d, places(step))), d) ?? 0n
+  const floor = band ? toUnits(band.low) : 0n
+  const ceiling = band ? toUnits(band.high) : 0n
   const minA = units(minAction || '0', d) ?? 0n
   const capU = units(cap || '0', d) ?? 0n
   const minHealthWad = collateralMode ? (units(minHealth || '0', 18) ?? 0n) : 0n
   const problem = band ? yieldProblem({ vToken: vToken!, floor, ceiling, minAction: minA, supplyCap: capU, minHealthAfter: minHealthWad }, 0n) : null
   const nowAct = yieldNow(balance, { floor, ceiling })
-  const scaleMax = Math.max(num(balance, d) * 2, band ? band.high * 1.3 : 0, 10)
-  const step = scaleMax > 2000 ? 10 : scaleMax > 200 ? 1 : 0.1
   const expiresAt = useMemo(() => expiryFor(days, Math.floor(Date.now() / 1000)), [days])
   const until = dateWords(expiresAt)
   const sym = m?.symbol ?? 'USDT'

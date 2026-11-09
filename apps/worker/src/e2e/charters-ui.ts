@@ -141,6 +141,9 @@ async function setup(acc: PrivateKeyAccount) {
 
 async function injectWallet(page: Page, acc: PrivateKeyAccount) {
   const w = createWalletClient({ account: acc, chain, transport: http(RPC, { timeout: 30_000 }) })
+  // E2E_REFUSE_STEP=n: the wallet cannot batch, and the person refuses the nth transaction once (A23).
+  const refuseAt = Number(process.env['E2E_REFUSE_STEP'] ?? '0')
+  let sends = 0
   const batches = new Map<string, Hex[]>()
   await page.exposeFunction('__mqWallet', async (method: string, params: unknown[]) => {
     try {
@@ -150,9 +153,15 @@ async function injectWallet(page: Page, acc: PrivateKeyAccount) {
           case 'eth_chainId': return numberToHex(chainId)
           case 'net_version': return String(chainId)
           case 'wallet_switchEthereumChain': return null
-          case 'wallet_getCapabilities': return { [numberToHex(chainId)]: { atomic: { status: 'unsupported' } } }
-          case 'eth_sendTransaction': { const t = params[0] as { to: Hex; data?: Hex; value?: Hex }; return w.sendTransaction({ to: t.to, data: t.data, value: t.value ? BigInt(t.value) : 0n, gasPrice }) }
+          case 'wallet_getCapabilities': return refuseAt ? {} : { [numberToHex(chainId)]: { atomic: { status: 'unsupported' } } }
+          case 'eth_sendTransaction': {
+            sends += 1
+            if (refuseAt && sends === refuseAt) { step(`wallet refuses step ${sends}`); throw Object.assign(new Error('User rejected the request.'), { code: 4001 }) }
+            const t = params[0] as { to: Hex; data?: Hex; value?: Hex; gas?: Hex }
+            return w.sendTransaction({ to: t.to, data: t.data, value: t.value ? BigInt(t.value) : 0n, gasPrice, gas: t.gas ? BigInt(t.gas) : undefined })
+          }
           case 'wallet_sendCalls': {
+            if (refuseAt) throw Object.assign(new Error('Method wallet_sendCalls not supported'), { code: 4200 })
             const req = params[0] as { calls: Array<{ to: Hex; data?: Hex; value?: Hex }> }
             const hashes: Hex[] = []
             let nonce = await pub.getTransactionCount({ address: acc.address, blockTag: 'pending' })
@@ -176,7 +185,7 @@ async function injectWallet(page: Page, acc: PrivateKeyAccount) {
         }
       })()
       return { ok: true, value: JSON.parse(JSON.stringify(v, (_k, x) => (typeof x === 'bigint' ? numberToHex(x) : x))) }
-    } catch (e) { return { ok: false, code: (e as { code?: number }).code ?? -32603, message: (e as Error).message.slice(0, 300) } }
+    } catch (e) { if ((e as { code?: number }).code !== 4001 && (e as { code?: number }).code !== 4200) step(`wallet error on ${method}: ${(e as Error).message.split('\n')[0]!.slice(0, 200)}`); return { ok: false, code: (e as { code?: number }).code ?? -32603, message: (e as Error).message.slice(0, 300) } }
   })
   await page.addInitScript(() => {
     const listeners: Record<string, Array<(...a: unknown[]) => void>> = {}
@@ -299,6 +308,12 @@ async function main() {
   await shot('seal')
   await seal.getByRole('button', { name: /Open your wallet|Seal with your fingerprint/ }).click()
   if (walletType === 'pass') await page.getByRole('button', { name: /^Confirm/ }).last().click({ timeout: 60_000 })
+  if (process.env['E2E_REFUSE_STEP']) {
+    await seal.getByRole('button', { name: 'Try again' }).waitFor({ timeout: 300_000 })
+    await shot('seal-refused')
+    step(`after the refusal the Seal says: ${(await seal.innerText()).replace(/\s+/g, ' ').slice(-260)}`)
+    await seal.getByRole('button', { name: 'Try again' }).click()
+  }
   await page.getByRole('link', { name: 'Open the charter' }).waitFor({ timeout: 420_000 })
   const href = await page.getByRole('link', { name: 'Open the charter' }).getAttribute('href')
   await shot('granted')

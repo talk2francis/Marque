@@ -9,7 +9,7 @@ import { chromium } from 'playwright'
 import { AxeBuilder } from '@axe-core/playwright'
 import { writeFileSync } from 'node:fs'
 
-const args = Object.fromEntries(process.argv.slice(2).map((a) => { const [k, v] = a.replace(/^--/, '').split('='); return [k, v ?? true] }))
+const args = Object.fromEntries(process.argv.slice(2).map((a) => { const s = a.replace(/^--/, ''); const i = s.indexOf('='); return i < 0 ? [s, true] : [s.slice(0, i), s.slice(i + 1)] }))
 const BASE = args.base ?? 'https://marque.trade'
 const ROUTES = String(args.routes ?? '/,/register,/agents/keel,/protocol,/status').split(',')
 const THEMES = ['night', 'day']
