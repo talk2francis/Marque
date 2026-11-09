@@ -86,7 +86,7 @@
       linear-gradient(to right, transparent 0, #000 8%, #000 94%, transparent 100%),
       linear-gradient(to bottom, transparent 0, #000 10%, #000 60%, transparent 100%);
   }
-  .id { flex-direction: column; align-items: flex-start; gap: 14px; margin-top: -40px; padding-left: 4px; }
+  .id { flex-direction: column; align-items: flex-start; gap: 14px; margin-top: -40px; padding-left: 0; }
   .portrait { width: 76px; height: 76px; }
   .frame :global(.agent-avatar) { width: 76px !important; height: 76px !important; border-radius: 12px !important; }
   .frame { border-radius: 12px; }

@@ -92,6 +92,7 @@
 @media (max-width: 640px) {
   .dock { left: 12px; right: 12px; bottom: calc(10px + env(safe-area-inset-bottom)); max-width: none; display: flex; justify-content: flex-end; }
   .dock[data-tray] { display: none; }
+  .dock[data-closed][data-scrolled]:not([data-open]) { display: none; }
   .pill { height: 42px; border-radius: 21px; padding: 0 15px 0 8px; }
   .dock[data-open] { left: 0; right: 0; bottom: 0; }
   .dock[data-open] .panel {

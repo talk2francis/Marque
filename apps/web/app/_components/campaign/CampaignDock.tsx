@@ -90,6 +90,16 @@ export function CampaignDock() {
     return () => mo.disconnect()
   }, [])
 
+  // After the close the pill carries no action, so on phones it steps aside once the reader scrolls into the page
+  // instead of covering the last line on screen (the home FAQ's last question, Codex review 9 Nov).
+  const [scrolled, setScrolled] = useState(false)
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > window.innerHeight * 0.5)
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
   const collapse = useCallback(() => {
     setOpen(false)
     setPrefs((p) => { const n = { ...(p ?? dockPrefs()), collapsed: true }; saveDockPrefs(n); return n })
@@ -123,7 +133,7 @@ export function CampaignDock() {
   const details = address ? `/quest/${address}` : '/quest'
 
   return (
-    <div className={styles.dock} data-open={open || undefined} data-warn={warn || undefined} data-tray={tray || undefined} role="complementary" aria-label="Set and Earn companion">
+    <div className={styles.dock} data-open={open || undefined} data-warn={warn || undefined} data-tray={tray || undefined} data-closed={clock.closed || undefined} data-scrolled={scrolled || undefined} role="complementary" aria-label="Set and Earn companion">
       {!open ? (
         <button type="button" className={styles.pill} onClick={() => setOpen(true)} aria-expanded="false" aria-label={`${pill}. Open the Set and Earn companion`}>
           <Emblem hire={agents} build={buildObserved} warn={warn} team={team} size={30} />
