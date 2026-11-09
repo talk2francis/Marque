@@ -1,0 +1,28 @@
+/* BandRule: the MeasureRule with two handles over a token or price scale. Same marks as HealthRule. */
+.rule { position: relative; padding: 48px 12px 4px; user-select: none; touch-action: pan-y; }
+.track { position: relative; height: 3px; border-radius: 2px; background: var(--hair-2); }
+.band { position: absolute; top: -5px; bottom: -5px; background: var(--brass-tint); border-radius: 3px; }
+.ghost { position: absolute; top: -2px; bottom: -2px; background: repeating-linear-gradient(90deg, color-mix(in srgb, var(--moss) 55%, transparent) 0 4px, transparent 4px 7px); border-radius: 2px; }
+.mark { position: absolute; top: 50%; width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px; border-radius: 50%; border: 1.5px solid var(--ink-3); background: var(--panel, var(--deck-raised)); box-sizing: border-box; }
+.mark[data-state='buy'] { border-color: var(--moss); }
+.mark[data-state='hold'] { background: var(--brass-mark); border-color: var(--brass-mark); }
+.now { position: absolute; top: -26px; bottom: -8px; width: 2px; margin-left: -1px; background: var(--ink); transition: left 400ms ease; z-index: 1; }
+.now span { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); white-space: nowrap; font-size: 12px; font-weight: 600; color: var(--ink); }
+.now[data-off] span::after { content: ' (off the rule)'; font-weight: 400; color: var(--ink-3); }
+.handle {
+  position: absolute; top: 50%; width: 18px; height: 18px; margin: -9px 0 0 -9px; border-radius: 50%; z-index: 2;
+  background: var(--panel, var(--deck-raised)); border: 3px solid var(--amber); box-sizing: border-box; cursor: grab; outline: none;
+}
+.handle[data-tone='moss'] { border-color: var(--moss); }
+.handle[data-tone='brass'] { border-color: var(--brass-mark); }
+.handle::before { content: ''; position: absolute; inset: -13px; border-radius: 50%; }
+.handle[data-dragging='true'] { cursor: grabbing; }
+.handle:focus-visible { box-shadow: 0 0 0 3px color-mix(in srgb, var(--brass-mark) 55%, transparent); }
+.rule[data-variant='read'] .handle { cursor: default; }
+.handleLabel { position: absolute; top: 16px; left: 50%; transform: translateX(-50%); display: grid; justify-items: center; line-height: 1.15; white-space: nowrap; }
+.handleLabel span { font-size: 13px; font-weight: 600; color: var(--ink); }
+.handleLabel small { font-size: 11px; color: var(--ink-3); }
+.rule[data-close='true'] .handle[data-which='low'] .handleLabel { transform: translateX(-88%); justify-items: end; }
+.rule[data-close='true'] .handle[data-which='high'] .handleLabel { transform: translateX(-12%); justify-items: start; }
+.ends { display: flex; justify-content: space-between; margin-top: 48px; font-size: 11px; color: var(--ink-3); }
+@media (prefers-reduced-motion: reduce) { .now { transition: none; } }

@@ -27,6 +27,8 @@ export const pctOfTicks = (n: number) => (Math.pow(1.0001, n) - 1) * 100
 
 export function fmtPrice(p: number): string {
   if (!Number.isFinite(p)) return 'unavailable'
+  if (p >= 1e9) return 'no upper limit'
+  if (p > 0 && p < 1e-6) return 'near zero'
   if (p >= 1000) return `$${Math.round(p).toLocaleString('en-US')}`
   if (p >= 1) return `$${p.toFixed(2)}`
   return `$${p.toPrecision(3)}`
@@ -49,6 +51,14 @@ export function amount(v: bigint, decimals: number, max = 4): string {
   return `${neg ? '-' : ''}${whole.toLocaleString('en-US')}${frac ? `.${frac}` : ''}`
 }
 const one = (decimals: number) => 10n ** BigInt(decimals)
+/** Amounts too large to read digit by digit (testnet markets report trillions) in words, never rounded down to look smaller. */
+export function compact(v: bigint, decimals: number): string {
+  const whole = v / 10n ** BigInt(decimals)
+  if (whole >= 10n ** 12n) return 'over a trillion'
+  if (whole >= 10n ** 9n) return `${(Number(whole / 10n ** 7n) / 100).toFixed(2)} billion`
+  if (whole >= 10n ** 6n) return `${(Number(whole / 10n ** 4n) / 100).toFixed(2)} million`
+  return amount(v, decimals, 2)
+}
 
 // ---------- shared ----------
 
@@ -181,6 +191,8 @@ export const RANGE_DEFAULTS = { twapWindow: 600, maxDeviation: 20, slipTicks: 50
  * 9 Nov: 400 ticks with 20 of deviation refused with TooMuchLeftOver). Review L-01 asked for at least 4 x slip.
  */
 export const minRangeWidth = (p: Pick<RangeParams, 'slipTicks' | 'maxDeviation'>) => Math.max(4 * p.slipTicks, 25 * p.maxDeviation)
+/** A position this wide is always in range (full range is 1,774,540 ticks): there is nothing to keep. */
+export const isFullRange = (lower: number, upper: number) => upper - lower >= 400_000
 /** Same width, centred on the average tick, aligned to the pool's spacing (mirrors RangeKeeper.centeredRange). */
 export function centeredRange(twapTick: number, width: number, spacing: number): { lower: number; upper: number } {
   const c = twapTick - Math.trunc(width / 2) // Solidity int division truncates toward zero

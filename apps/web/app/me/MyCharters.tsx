@@ -26,6 +26,13 @@ export function useChartersOn() {
     queryFn: async () => (await fetch('/api/v1/guards/stats', { cache: 'no-store' })).ok })
 }
 
+type V2 = {
+  chainId: 56 | 97; address: string; kind: 'loan' | 'yield' | 'grid' | 'range'; kindName: string; params: { p?: Record<string, string> }; totals: Record<string, string | number | boolean>
+  actions: number; expiresAt: string; status: 'armed' | 'ended' | 'expired'; fixture: boolean; pool: { baseSymbol: string; quoteSymbol: string } | null
+  lastSample: { state: number; stateName: string; readAt: string } | null
+}
+type Claims = { chainId: 56 | 97; tokens: Array<{ token: string; symbol: string; balance: string; needsTotal: string; short: boolean; claims: Array<{ charter: string; kind: string; need: string; needIs: string }> }>; needsYou: number }
+
 export function useMyGuards(address: string, enabled: boolean) {
   return useQuery({ queryKey: ['my-guards', address.toLowerCase()], enabled, staleTime: 30_000, retry: false,
     queryFn: async () => {
@@ -33,6 +40,62 @@ export function useMyGuards(address: string, enabled: boolean) {
       if (!r.ok) throw new Error('unavailable')
       return ((await r.json()) as { guards: Guard[] }).guards
     } })
+}
+export function useMyCharters(address: string, enabled: boolean) {
+  return useQuery({ queryKey: ['my-charters-v2', address.toLowerCase()], enabled, staleTime: 30_000, retry: false,
+    queryFn: async () => {
+      const r = await fetch(`/api/v1/guards?owner=${address}&state=all&limit=50`, { cache: 'no-store' })
+      if (!r.ok) throw new Error('unavailable')
+      return ((await r.json()) as { charters?: V2[] }).charters ?? []
+    } })
+}
+/** Claims per token on each chain where this address has an armed charter (AGENTS.md C5). */
+export function useClaims(address: string, chains: Array<56 | 97>) {
+  return useQuery({ queryKey: ['my-claims', address.toLowerCase(), chains.join()], enabled: chains.length > 0, staleTime: 60_000, retry: false,
+    queryFn: async () => Promise.all(chains.map(async (c) => {
+      const r = await fetch(`/api/v1/guards/claims?chainId=${c}&owner=${address}`, { cache: 'no-store' })
+      return r.ok ? ((await r.json()) as Claims) : null
+    })).then((x) => x.filter((y): y is Claims => y !== null)) })
+}
+const v2Line = (c: V2) => {
+  const p = c.params.p ?? {}
+  if (c.kind === 'loan') return `Acts below ${(Number(BigInt(p['trigger'] ?? '0') / 10n ** 16n) / 100).toFixed(2)}, lifts to ${(Number(BigInt(p['target'] ?? '0') / 10n ** 16n) / 100).toFixed(2)}`
+  if (c.kind === 'yield') return 'Keeps your wallet inside its band, the rest in Venus'
+  if (c.kind === 'grid') return `${p['slots']} levels on ${c.pool ? `${c.pool.baseSymbol}/${c.pool.quoteSymbol}` : 'PancakeSwap'}, ${c.totals['sells'] ?? 0} round trips`
+  return `${c.totals['rebalances'] ?? 0} of ${p['maxRebalances']} moves used${c.totals['returned'] ? ', position returned' : ''}`
+}
+function V2Row({ c }: { c: V2 }) {
+  const acting = c.lastSample ? ['would_act', 'would_supply', 'would_withdraw', 'would_buy', 'would_sell', 'would_move'].includes(c.lastSample.stateName) : false
+  const stuck = c.lastSample ? ['no_funds', 'limit_reached', 'cap_reached', 'below_minimum', 'nothing_held'].includes(c.lastSample.stateName) : false
+  const word = c.status === 'ended' ? 'Ended' : c.status === 'expired' ? 'Expired' : stuck ? 'Needs you' : acting ? 'Acting' : 'Armed'
+  const tone = word === 'Armed' ? 'moss' : word === 'Needs you' || word === 'Acting' ? 'amber' : 'ink'
+  return (
+    <li>
+      <a className={styles.row} href={`/charters/${c.chainId}/${c.address}`}>
+        <span className={styles.title}><b>{c.kindName}</b><small>{v2Line(c)} · {c.chainId === 56 ? 'mainnet' : 'testnet'}{c.fixture ? ' fixture pool' : ''}</small></span>
+        <span className={styles.left}>{c.actions ? `acted ${c.actions} time${c.actions === 1 ? '' : 's'}` : 'no actions yet'}</span>
+        <span className={styles.status} data-tone={tone}>{word}</span>
+        <ChevronRight aria-hidden="true" className={styles.chev} />
+      </a>
+    </li>
+  )
+}
+function ClaimsPanel({ claims }: { claims: Claims[] }) {
+  const rows = claims.flatMap((c) => c.tokens.filter((t) => t.claims.length > 1 || t.short).map((t) => ({ ...t, chainId: c.chainId })))
+  if (!rows.length) return null
+  return (
+    <section className={styles.suggest} aria-labelledby="claims-h">
+      <div>
+        <p id="claims-h"><b>Claims on your wallet</b> An allowance is a ceiling, not a reservation: charters drawing the same token share one balance.</p>
+        <ul className={styles.list}>
+          {rows.map((t) => (
+            <li key={`${t.chainId}:${t.token}`}><span className={styles.title}><b>{t.symbol}</b><small>{t.claims.length} charter{t.claims.length === 1 ? '' : 's'} may draw it · {t.chainId === 56 ? 'mainnet' : 'testnet'}</small></span>
+              <span className={styles.status} data-tone={t.short ? 'amber' : 'moss'}>{t.short ? 'Needs you: their next needs exceed the balance' : 'Covered today'}</span></li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  )
 }
 
 /** What needs the owner, in section 5's words: nothing it can use, a loan it cannot save, or ending within 3 days. */
@@ -66,6 +129,9 @@ function Row({ g }: { g: Guard }) {
 
 export function MyCharters({ address }: { address: string }) {
   const q = useMyGuards(address, true)
+  const v2 = useMyCharters(address, true)
+  const chains = [...new Set([...(q.data ?? []), ...(v2.data ?? [])].filter((x) => x.status === 'armed').map((x) => x.chainId))] as Array<56 | 97>
+  const claims = useClaims(address, chains)
   if (q.isPending) return <Skeleton h={120} />
   if (q.isError) return <p className={styles.note}>Charters could not be read just now. <button type="button" className={styles.link} onClick={() => void q.refetch()}>Try again</button></p>
   const guards = q.data ?? []
@@ -78,14 +144,20 @@ export function MyCharters({ address }: { address: string }) {
           <a className="btn btn--sm" href={`/charters/${needs[0]!.chainId}/${needs[0]!.address}`}>Review</a>
         </div>
       ) : null}
-      {guards.length ? <ul className={styles.list}>{guards.map((g) => <Row key={`${g.chainId}:${g.address}`} g={g} />)}</ul> : (
+      {claims.data ? <ClaimsPanel claims={claims.data} /> : null}
+      {guards.length || v2.data?.length ? (
+        <ul className={styles.list}>
+          {(v2.data ?? []).map((c) => <V2Row key={`${c.chainId}:${c.address}`} c={c} />)}
+          {guards.map((g) => <Row key={`${g.chainId}:${g.address}`} g={g} />)}
+        </ul>
+      ) : (
         <div className={styles.empty}>
-          <p>No charters yet. A Loan Guard repays your own Venus loan from your wallet if its health falls below a line you draw.</p>
-          <a className="btn btn--primary" href={`/charters/new?account=${address}`}>Guard a loan</a>
+          <p>No charters yet. A charter does one job for you, only when the chain shows the condition: guard a Venus loan, sweep idle stablecoins into Venus, trade a price band, or keep a PancakeSwap range.</p>
+          <a className="btn btn--primary" href={`/charters/new?account=${address}`}>Grant a charter</a>
         </div>
       )}
-      {guards.length && !guards.some((g) => g.status === 'armed') ? (
-        <div className={styles.suggest}><p>None of your charters is armed now.</p><a className="btn btn--sm" href={`/charters/new?account=${address}`}>Guard a loan</a></div>
+      {(guards.length || v2.data?.length) && !guards.some((g) => g.status === 'armed') && !(v2.data ?? []).some((c) => c.status === 'armed') ? (
+        <div className={styles.suggest}><p>None of your charters is armed now.</p><a className="btn btn--sm" href={`/charters/new?account=${address}`}>Grant a charter</a></div>
       ) : null}
     </div>
   )

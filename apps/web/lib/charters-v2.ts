@@ -104,7 +104,7 @@ export async function charterV2Detail(chainId: CharterChainId, address: string) 
         from charter_v2_sample where chain_id = ${chainId} and address = ${a} and read_at > now() - interval '30 days') t
       order by bucket, read_at desc`).then(rowsOf<Record<string, unknown>>),
   ])
-  const live = await livePreview(chainId, charter.kind, charter.address)
+  const [live, allowances] = await Promise.all([livePreview(chainId, charter.kind, charter.address), allowancesOf(chainId, charter)])
   const key = keys[0] ?? null
   const agentOf = (addr: string | null) => {
     if (!addr) return null
@@ -112,7 +112,7 @@ export async function charterV2Detail(chainId: CharterChainId, address: string) 
     return hit ? hit[0] : addr.toLowerCase() === charter.owner.toLowerCase() ? 'owner' : 'other'
   }
   return {
-    charter, live,
+    charter, live, allowances,
     events: events.map((e) => ({ event: String(e['event']), blockNumber: String(e['block_number']), txHash: String(e['tx_hash']), logIndex: Number(e['log_index']),
       caller: e['caller'] ? getAddress(String(e['caller'])) : null, callerIs: agentOf(e['caller'] ? String(e['caller']) : null),
       data: e['data'] as Record<string, unknown>, at: iso(e['block_time']), final: Boolean(e['final']) })),
@@ -122,6 +122,18 @@ export async function charterV2Detail(chainId: CharterChainId, address: string) 
     history: samples.map((x) => ({ state: Number(x['state']), data: x['data'] as Record<string, unknown>, at: iso(x['read_at'])! })),
     readAt: new Date().toISOString(),
   }
+}
+
+/** The tokens a charter may draw from its owner, with the allowance the owner gave it now (what End can clear). */
+export async function allowancesOf(chainId: CharterChainId, c: CharterV2Summary) {
+  const p = (c.params['p'] ?? {}) as Record<string, string>
+  const m = (v: string | undefined) => CHARTER_CHAINS[chainId].markets.find((x) => x.vToken.toLowerCase() === String(v).toLowerCase())
+  const list: Array<{ token: Address; symbol: string; decimals: number }> = []
+  if (c.kind === 'loan') { const x = m(p['vDebt']); if (x) list.push({ token: x.token, symbol: x.symbol, decimals: x.decimals }) }
+  if (c.kind === 'yield') { const x = m(p['vToken']); if (x) list.push({ token: x.token, symbol: x.symbol, decimals: x.decimals }, { token: x.vToken, symbol: `v${x.symbol}`, decimals: 8 }) }
+  if (c.kind === 'grid' && c.pool) list.push({ token: c.pool.quote, symbol: c.pool.quoteSymbol, decimals: 18 }, { token: c.pool.base, symbol: c.pool.baseSymbol, decimals: 18 })
+  const client = chainClient(chainId)
+  return Promise.all(list.map(async (t) => ({ ...t, allowance: await client.readContract({ address: t.token, abi: erc20Abi, functionName: 'allowance', args: [c.owner, c.address] }).then(String).catch(() => null) })))
 }
 
 /** Counts per chain and kind, with the read time. Zero is an honest zero. */
@@ -265,7 +277,10 @@ export async function claimsFor(chainId: CharterChainId, owner: Address) {
   const tokens = await Promise.all([...byToken.entries()].map(async ([token, claims]) => {
     const balance = await client.readContract({ address: token as Address, abi: erc20Abi, functionName: 'balanceOf', args: [owner] })
     const needs = claims.reduce((s, c) => s + BigInt(c.need), 0n)
-    return { token: getAddress(token), balance: balance.toString(), claims, needsTotal: needs.toString(), short: needs > balance }
+    const m = CHARTER_CHAINS[chainId].markets.find((x) => x.token.toLowerCase() === token)
+    const pl = V2[chainId].pools.find((x) => x.base.toLowerCase() === token || x.quote.toLowerCase() === token)
+    const symbol = m?.symbol ?? (pl ? (pl.base.toLowerCase() === token ? pl.baseSymbol : pl.quoteSymbol) : 'token')
+    return { token: getAddress(token), symbol, decimals: m?.decimals ?? 18, balance: balance.toString(), claims, needsTotal: needs.toString(), short: needs > balance }
   }))
   return { chainId, owner: getAddress(owner), tokens, needsYou: tokens.filter((t) => t.short).length, readAt: new Date().toISOString(), fromChain: true as const }
 }

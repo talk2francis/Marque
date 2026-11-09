@@ -4,6 +4,7 @@ import { CHARTER_CHAINS } from '@marque/charters'
 import { SiteHeader, SiteFooter } from '../_components/SiteHeader'
 import { chartersVisible, PREVIEW_COOKIE } from '../../lib/charters-access'
 import { guardStats, listGuards } from '../../lib/guards'
+import { chartersV2Stats, listChartersV2 } from '../../lib/charters-v2'
 import { tokens } from '../../lib/charters-builder'
 import { NightReplay } from './_components/NightReplay'
 import styles from './_components/hub.module.css'
@@ -11,17 +12,23 @@ import styles from './_components/hub.module.css'
 export const dynamic = 'force-dynamic'
 export const metadata = {
   title: 'Charters',
-  description: 'Draw a line under your Venus loan. If the chain shows it crossing, an agent repays from your own wallet, into your own loan, never past the budget you set.',
+  description: 'Four kinds of charter on BNB Chain: guard a Venus loan, sweep idle stablecoins into Venus, trade a price band, keep a PancakeSwap range. Each does one job, only when the chain shows the condition, inside limits you sign.',
   robots: { index: false },
 }
 
 const CHAIN_NAME = { 56: 'BNB Smart Chain', 97: 'BSC testnet' } as const
 const PROMISES: Array<[string, string]> = [
-  ['Your money stays with you.', 'Nothing moves until your loan needs it.'],
-  ['One destination.', 'It can only repay your own loan.'],
-  ['The chain decides when.', 'Venus’s own numbers, checked in the same transaction.'],
-  ['One tap to end it.', 'No server, relay or agent can stop you.'],
+  ['One job each.', 'A charter does exactly one thing, and nothing else.'],
+  ['The chain decides when.', 'Venus and PancakeSwap’s own numbers, checked in the same transaction.'],
+  ['Limits you sign.', 'Lifetime totals that never refill.'],
+  ['One step to end it.', 'No server, relay or agent can stop you.'],
 ]
+const KINDS = [
+  { kind: 'loan', name: 'Loan Guard', agent: 'Keel', cta: 'Guard a loan', promise: 'Repays your own Venus loan back to a health you choose when it falls below another, from your wallet.' },
+  { kind: 'yield', name: 'Yield Sweep', agent: 'Sluicegate', cta: 'Sweep idle money', promise: 'Keeps your wallet between a floor and a ceiling and puts the rest into Venus in your name.' },
+  { kind: 'grid', name: 'Grid Band', agent: 'Lattice', cta: 'Grid a pair', promise: 'Buys a fixed amount at each level on the way down and sells it one level up, on one reviewed PancakeSwap pool.' },
+  { kind: 'range', name: 'Range Keeper', agent: 'Bound', cta: 'Keep a range', promise: 'Moves your PancakeSwap position back into range when the price leaves it, within loss, frequency and count limits.' },
+] as const
 const ago = (iso: string | null) => {
   if (!iso) return null
   const s = Math.max(0, Math.round((Date.now() - Date.parse(iso)) / 1000))
@@ -31,11 +38,14 @@ const ago = (iso: string | null) => {
 /** /charters (03_EXPERIENCE sections 2 and 3.1). Behind CHARTERS_PUBLIC until launch. */
 export default async function ChartersHub() {
   if (!chartersVisible((await cookies()).get(PREVIEW_COOKIE)?.value)) notFound()
-  const [stats, live] = await Promise.all([
+  const [stats, v2stats, live] = await Promise.all([
     guardStats().catch(() => null),
-    // The newest armed charter, mainnet first: what "See a live charter" opens.
+    chartersV2Stats().catch(() => null),
+    // The newest armed charter, mainnet first, any kind: what "See a live charter" opens.
     (async () => {
       for (const chainId of [56, 97] as const) {
+        const r2 = await listChartersV2({ chainId, state: 'armed', limit: 1 }).catch(() => null)
+        if (r2?.charters[0]) return r2.charters[0]
         if (!CHARTER_CHAINS[chainId].factory) continue
         const r = await listGuards({ chainId, state: 'armed', limit: 1 }).catch(() => null)
         if (r?.guards[0]) return r.guards[0]
@@ -43,6 +53,12 @@ export default async function ChartersHub() {
       return null
     })(),
   ])
+  // Counts per kind and chain; Loan Guard adds its v1 guards to v2 (both are Loan Guards to a reader).
+  const count = (kind: string, chainId: 56 | 97) => {
+    const v2 = v2stats?.chains.find((c) => c.chainId === chainId)?.kinds.find((k) => k.kind === kind)
+    const v1 = kind === 'loan' ? stats?.chains.find((c) => c.chainId === chainId) : null
+    return { armed: (v2?.armed ?? 0) + (v1?.armed ?? 0), actions: (v2?.actions ?? 0) + (v1?.acts ?? 0), live: Boolean(v2?.deployed || v1?.deployed) }
+  }
   return (
     <>
       <SiteHeader />
@@ -50,10 +66,10 @@ export default async function ChartersHub() {
         <section className={styles.hero}>
           <div className={styles.heroText}>
             <span className={styles.eyebrow}>New on Marque: Charters</span>
-            <h1 className={styles.title}>Your loan, guarded <em>while you sleep.</em></h1>
-            <p className={styles.lede}>Draw a line under your Venus loan. If the chain shows it crossing, an agent repays from your own wallet, into your own loan, never past the budget you set. End it whenever you like.</p>
+            <h1 className={styles.title}>Agents that act for you, <em>only inside your limits.</em></h1>
+            <p className={styles.lede}>Every charter can do exactly one job for you, only when the chain shows the condition, only inside lifetime limits you sign, and you can end it in one step. Guard a loan, sweep idle money, trade a band, keep a range.</p>
             <div className={styles.ctas}>
-              <a className={styles.primary} href="/charters/new">Guard a loan</a>
+              <a className={styles.primary} href="/charters/new?kind=loan">Grant a charter</a>
               {live ? <a className={styles.secondary} href={`/charters/${live.chainId}/${live.address}`}>See a live charter</a> : null}
             </div>
             <ul className={styles.promises}>
@@ -64,7 +80,7 @@ export default async function ChartersHub() {
         </section>
 
         <section className={styles.band} aria-labelledby="live-h">
-          <h2 id="live-h" className={styles.h2}>On chain now</h2>
+          <h2 id="live-h" className={styles.h2}>Loan Guard on chain now</h2>
           <div className={styles.stats}>
             {(stats?.chains ?? []).map((c) => (
               <div key={c.chainId} className={styles.stat}>
@@ -84,14 +100,22 @@ export default async function ChartersHub() {
         </section>
 
         <section className={styles.band} aria-labelledby="kinds-h">
-          <h2 id="kinds-h" className={styles.h2}>Kinds of charter</h2>
+          <h2 id="kinds-h" className={styles.h2}>Four kinds of charter</h2>
           <ul className={styles.kinds}>
-            <li data-live="true"><b>Loan Guard</b><span>Live</span><p>Repays your Venus stablecoin loan back to a health you choose when it falls below another.</p></li>
-            <li><b>Range Keeper</b><span>Next</span></li>
-            <li><b>Yield Sweep</b><span>Next</span></li>
-            <li><b>Grid Band</b><span>Next</span></li>
+            {KINDS.map((k) => {
+              const m = count(k.kind, 56)
+              const t = count(k.kind, 97)
+              return (
+                <li key={k.kind} data-live="true">
+                  <b>{k.name}</b><span>Live</span>
+                  <p>{k.promise}</p>
+                  <p className={styles.fine}>{m.live ? `Mainnet: ${m.armed} armed, ${m.actions} actions.` : 'Mainnet: not live yet.'} {t.live ? `Testnet: ${t.armed} armed, ${t.actions} actions.` : ''} Acts: {k.agent}, or any agent you name.</p>
+                  <a className={styles.secondary} href={`/charters/new?kind=${k.kind}`}>{k.cta}</a>
+                </li>
+              )
+            })}
           </ul>
-          <p className={styles.fine}><a href="https://t.me/marque_marketplace" target="_blank" rel="noreferrer">Tell us which comes next</a></p>
+          {v2stats ? <p className={styles.prov}>Counts from the chain&apos;s events (onchain), read {new Date(v2stats.readAt).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' })} UTC.</p> : <p className={styles.statEmpty}>The charter index could not be read just now.</p>}
         </section>
 
         <section className={styles.band} aria-labelledby="build-h">
@@ -100,7 +124,7 @@ export default async function ChartersHub() {
         </section>
 
         <p className={styles.footLine}>
-          Charters are new and unaudited. Read the contracts and their tests before you rely on one: <a href="https://github.com/talk2francis/Marque/tree/main/contracts/src/charters" target="_blank" rel="noreferrer">source</a>, <a href="/docs/charters">docs</a>. The earlier policy records stay at <a href="/app/charters">/app/charters</a>.
+          Charters are new and unaudited. A Loan Guard cannot guarantee against liquidation, a grid holds what it bought in a fall, and a kept range can be worth less than holding. Read the contracts and their tests before you rely on one: <a href="https://github.com/talk2francis/Marque/tree/main/contracts/src/charters" target="_blank" rel="noreferrer">source</a>, <a href="/docs/charters">docs</a>. The earlier policy records stay at <a href="/app/charters">/app/charters</a>.
         </p>
       </main>
       <SiteFooter slim />
