@@ -9,9 +9,11 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
+    "@altananetwork/sdk": "0.9.0",
     "@marque/act": "workspace:*",
     "@marque/agent-engines": "workspace:*",
     "@marque/chain": "workspace:*",
+    "@marque/charters": "workspace:*",
     "@marque/commerce": "workspace:*",
     "@marque/conformance": "workspace:*",
     "@marque/db": "workspace:*",
@@ -34,8 +36,7 @@
     "sharp": "0.35.4",
     "viem": "^2.21.55",
     "wagmi": "^2.14.11",
-    "zod": "^3.24.1",
-    "@marque/charters": "workspace:*"
+    "zod": "^3.24.1"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",

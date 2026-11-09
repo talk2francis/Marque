@@ -90,8 +90,15 @@ async function main() {
       const pub = client(c)
       const chainStatus: Record<string, unknown> = { at: new Date().toISOString() }
       try {
-        const idx = await indexOnce(pub, c)
-        chainStatus['index'] = { head: idx.head, cursor: idx.to, behind: Number(idx.head - idx.to), events: idx.events, reorgFrom: idx.reorgFrom }
+        // Behind (after a restart), a tick indexes up to ten chunks, so a new guard is seen within a tick or two.
+        let idx = await indexOnce(pub, c)
+        let events = idx.events
+        for (let n = 1; n < 10 && idx.head - idx.to > 0n && !stopping; n++) {
+          if (idx.reorgFrom !== null) log('reorg', { chainId: c, from: idx.reorgFrom })
+          idx = await indexOnce(pub, c)
+          events += idx.events
+        }
+        chainStatus['index'] = { head: idx.head, cursor: idx.to, behind: Number(idx.head - idx.to), events, reorgFrom: idx.reorgFrom }
         if (idx.reorgFrom !== null) log('reorg', { chainId: c, from: idx.reorgFrom })
 
         // Keel's relay spending today, measured from its balance; over the cap, the Altana path pauses.

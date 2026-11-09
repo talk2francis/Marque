@@ -85,6 +85,21 @@ Each line links to something you can check on the live site or on chain.
 12. **Builders ship from Marque.** The [Agent Forge](https://marque.trade/builders): check an agent card, register an ERC-8004 identity from your own wallet, link the seller's key as the identity's agent wallet, start from a category kit, test against the Standard, get listed. Each kit includes a daily action for BSC testnet (a Venus supply, a PancakeSwap v3 swap or a re-centred position) that runs from the builder's own key on the builder's own host; each category was run end to end on testnet. A [build checklist](https://marque.trade/builders/progress/97/2672) per agent marks every campaign check Met, Not yet or "Marque cannot verify".
 13. **Set and Earn, read from chain.** Progress on BNB Chain's campaign for any wallet, from hires recorded on BNB Chain's ERC-8183 escrow on mainnet and testnet (a marketplace that settles through its own contract is not visible, and the quest marks which ones it can read): [Quest](https://marque.trade/quest), [`/api/v1/quest/{address}`](https://marque.trade/api/v1/quest/0x15A97307cAA68C24E4b5a0b83D331A6AA1EA195F). Each wallet's page leads with its one next step; a [free practice hire](https://marque.trade/quest/practice) takes a Marque Pass, free test tokens and one agent it has not hired yet, outside builds first; progress can be shared without showing the address.
 
+## Charters: agents that act for you
+
+A charter is an onchain limit on what an agent may do for you. The first kind, **Loan Guard**, keeps a Venus loan healthy:
+
+> If my loan health falls below 1.30, repay my USDT loan back to 1.80, using up to 500 USDT from my wallet, until 8 Dec.
+
+- Your reserve stays in your wallet under an allowance to your own guard contract.
+- The guard acts only when Venus's own `getAccountLiquidity` shows your loan under the trigger, in the same transaction, and only repays your own loan. It never spends on a loan it cannot lift back to 1.00.
+- `act()` is open to anyone. Keel acts through an Altana session key scoped to your guard alone and registered on Altana KeyStore; a backup watcher covers relay outages; you can press Protect now; any agent can act and earn an optional tip.
+- You end it with one transaction that depends on nothing else.
+
+Contracts: `contracts/src/charters` (CharterFactory v1, LoanGuard, CharterRules, HealthMath). Tests: `contracts/test/charters`. Addresses: `packages/charters/src/addresses.ts`. Docs: https://marque.trade/docs/charters
+
+Charters are new and unaudited. Read the code and tests before you rely on one.
+
 ## How a hire works
 
 ```mermaid

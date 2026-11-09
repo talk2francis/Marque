@@ -3,8 +3,9 @@ import { sql } from 'drizzle-orm'
 import { erc20Abi, getAddress, parseAbi, type Address } from 'viem'
 import { chartersDb } from '@marque/db'
 import { chainClient } from '@marque/commerce'
+import { BNB, BNB_TESTNET } from '@altananetwork/sdk'
 import {
-  BACKUP_WATCHER, CHARTER_CHAINS, DECLARED_EXECUTORS, HEALTH_ONE, KEEL_WATCHER, marketOf, readLoan, readPreview, readReserve,
+  BACKUP_WATCHER, CHARTER_CHAINS, loanGuardAbi, DECLARED_EXECUTORS, HEALTH_ONE, KEEL_WATCHER, marketOf, readLoan, readPreview, readReserve,
   dropToHealth, priceAtHealth, priceToUsd, repayAtTrigger, smartDefaults, callerKind,
   type CharterChainId, type GuardSummary, type LivePreview,
 } from '@marque/charters'
@@ -57,12 +58,41 @@ export async function listGuards(q: { chainId?: CharterChainId; owner?: string; 
 
 const factoryAbi = parseAbi(['function isGuard(address) view returns (bool)'])
 
+/** Altana KeyStore for a chain, from the SDK's own config (06_ALTANA: never a second hardcoded copy). */
+export const keyStoreOf = (chainId: CharterChainId): Address => ((chainId === 56 ? BNB : BNB_TESTNET) as { keyStore: Address }).keyStore
+
+/**
+ * A guard the index has not reached yet (created a moment ago, or the worker is catching up), read from the guard
+ * itself once the factory confirms it made it. Never used for a contract the factory did not make.
+ */
+async function guardFromChain(chainId: CharterChainId, address: Address): Promise<GuardSummary | null> {
+  const client = chainClient(chainId)
+  const factory = CHARTER_CHAINS[chainId].factory
+  if (!factory) return null
+  const made = await client.readContract({ address: factory, abi: factoryAbi, functionName: 'isGuard', args: [address] }).catch(() => false)
+  if (!made) return null
+  const names = ['owner', 'vDebt', 'token', 'trigger', 'target', 'budget', 'tip', 'expiresAt', 'createdAt', 'spent', 'acts', 'ended'] as const
+  const r = await client.multicall({ contracts: names.map((functionName) => ({ address, abi: loanGuardAbi, functionName })), allowFailure: false }) as unknown[]
+  const v = Object.fromEntries(names.map((n, i) => [n, r[i]])) as Record<(typeof names)[number], unknown>
+  const m = marketOf(chainId, String(v.vDebt))
+  const expiresAt = new Date(Number(v.expiresAt) * 1000).toISOString()
+  const ended = Boolean(v.ended)
+  return {
+    chainId, address: getAddress(address), owner: getAddress(String(v.owner)), vDebt: getAddress(String(v.vDebt)), token: getAddress(String(v.token)),
+    symbol: m?.symbol ?? 'token', decimals: m?.decimals ?? 18,
+    trigger: String(v.trigger), target: String(v.target), budget: String(v.budget), tip: String(v.tip), spent: String(v.spent), acts: Number(v.acts),
+    expiresAt, createdAt: new Date(Number(v.createdAt) * 1000).toISOString(), createdTx: '', endedAt: null,
+    status: ended ? 'ended' : Date.parse(expiresAt) <= Date.now() ? 'expired' : 'armed', final: false, lastSample: null,
+  }
+}
+
 /** A guard's whole record: the index row, every event, Keel's key, the health history and a live read. */
 export async function guardDetail(chainId: CharterChainId, address: string) {
   const a = address.toLowerCase()
   const [row] = rowsOf<GuardRow>(await chartersDb().execute(sql`${SELECT} where g.chain_id = ${chainId} and g.address = ${a}`))
-  if (!row) return null
-  const guard = toSummary(row)
+  const guard = row ? toSummary(row) : await guardFromChain(chainId, getAddress(address))
+  if (!guard) return null
+  const indexed = Boolean(row)
   const [events, keyRows, samples] = await Promise.all([
     chartersDb().execute(sql`select kind, block_number, tx_hash, log_index, caller, data, block_time, final from charter_guard_event
       where chain_id = ${chainId} and address = ${a} order by block_number, log_index`).then(rowsOf<Record<string, unknown>>),
@@ -97,6 +127,9 @@ export async function guardDetail(chainId: CharterChainId, address: string) {
     reserve: reserve ? { balance: reserve.balance.toString(), allowance: reserve.allowance.toString() } : null,
     madeByFactory: isGuard,
     factory: CHARTER_CHAINS[chainId].factory,
+    /** False for a guard read straight from chain because the index has not reached it yet. */
+    indexed,
+    keyStore: keyStoreOf(chainId),
     events: events.map((e) => ({
       kind: String(e['kind']), blockNumber: String(e['block_number']), txHash: String(e['tx_hash']), logIndex: Number(e['log_index']),
       caller: s(e['caller']), callerKind: e['caller'] ? callerKind(String(e['caller']), guard.owner) : null,

@@ -7,3 +7,5 @@
 .title { margin: 6px 0 0; font-family: var(--font-statement); font-weight: 400; font-size: clamp(34px, 5vw, 52px); line-height: 1.04; letter-spacing: -0.02em; }
 .title em { color: var(--brass-mark); }
 .lede { margin: 0; font-size: 15.5px; line-height: 1.55; color: var(--ink-2); }
+.crumbs { display: flex; gap: 8px; margin-bottom: 18px; font-size: 13.5px; color: var(--ink-3); }
+.crumbs a { color: var(--ink-2); text-decoration: none; }

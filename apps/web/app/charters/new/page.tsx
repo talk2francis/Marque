@@ -36,7 +36,7 @@ export default async function NewCharterPage({ searchParams }: { searchParams: P
       <main id="main" className={styles.page}>
         <header className={styles.head}>
           <div>
-            <span className={styles.eyebrow}>Loan Guard</span>
+            <span className={styles.eyebrow}>Guard this loan</span>
             <h1 className={styles.title}>Draw the line. <em>We&apos;ll hold it.</em></h1>
           </div>
           <p className={styles.lede}>Drag the two marks. Everything else on this page follows them, in plain words and in prices. Nothing is signed until you seal the charter.</p>
