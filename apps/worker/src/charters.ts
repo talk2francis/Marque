@@ -64,6 +64,8 @@ async function main() {
   if (!CHAINS.length) throw new Error('CHARTERS_CHAINS names no supported chain')
   for (const c of CHAINS) if (!CHARTER_CHAINS[c].factory) throw new Error(`no CharterFactory on chain ${c}`)
   mkdirSync(DIR, { recursive: true })
+  // Before launch the worker writes to its own dark database (chartersDb); the URL lives beside the master.
+  process.env['CHARTERS_DATABASE_URL'] ??= readEnvFile(`${DIR}/charters.env`, 'CHARTERS_DATABASE_URL')
   const master = (process.env['CHARTERS_SESSION_MASTER'] ?? readEnvFile(`${DIR}/charters.env`, 'CHARTERS_SESSION_MASTER')) as Hex | undefined
   let keel: Keel | null = null
   let altana: AltanaClient | null = null

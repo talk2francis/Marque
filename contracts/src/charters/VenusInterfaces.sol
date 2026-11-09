@@ -23,6 +23,11 @@ interface IComptroller {
     function getAssetsIn(address account) external view returns (address[] memory);
     function oracle() external view returns (address);
     function vaiController() external view returns (address);
+    /// Venus Core returns more fields after these three; only the leading ones are decoded.
+    function markets(address vToken)
+        external
+        view
+        returns (bool isListed, uint256 collateralFactorMantissa, bool isVenus);
 }
 
 interface IPriceOracle {

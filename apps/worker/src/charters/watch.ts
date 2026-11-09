@@ -168,7 +168,7 @@ export async function watchOnce(ctx: WatchContext): Promise<WatchPass> {
     const p = previews[i]!
     if (p.status !== 'success') { out.readErrors += 1; continue } // Venus could not price a market: nothing can act now
     const [stateCode, health, wouldRepay, , available, debt] = p.result
-    const state: GuardState = STATE_CODES[stateCode] ?? 'watching'
+    const state: GuardState | 'unknown' = STATE_CODES[stateCode] ?? 'unknown' // never act on a state this worker does not know
     out.states[state] = (out.states[state] ?? 0) + 1
 
     const last = lastSampleState.get(guard)

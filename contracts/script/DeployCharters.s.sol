@@ -24,7 +24,9 @@ contract DeployCharters is Script {
         vm.stopBroadcast();
         console2.log("CharterFactory", address(factory));
         console2.log("chainId", block.chainid);
-        for (uint256 i; i < markets.length; ++i) console2.log("market", markets[i]);
+        for (uint256 i; i < markets.length; ++i) {
+            console2.log("market", markets[i]);
+        }
     }
 
     function _manifest(uint256 chainId) internal pure returns (address comptroller, address[] memory m) {

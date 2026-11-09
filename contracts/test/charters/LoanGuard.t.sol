@@ -5,7 +5,8 @@ import {Test} from "forge-std/Test.sol";
 import {CharterFactory} from "../../src/charters/CharterFactory.sol";
 import {LoanGuard} from "../../src/charters/LoanGuard.sol";
 import {HealthMath} from "../../src/charters/HealthMath.sol";
-import {IComptroller} from "../../src/charters/VenusInterfaces.sol";
+import {CharterRules} from "../../src/charters/CharterRules.sol";
+import {IComptroller, IVToken} from "../../src/charters/VenusInterfaces.sol";
 import {
     MockERC20,
     MockQuietERC20,
@@ -472,9 +473,13 @@ contract LoanGuardTest is Test {
     /// Whatever the collateral, debt, budget and allowance: one act never exceeds any bound,
     /// only ever moves the owner's tokens into the owner's own loan, and either restores the
     /// target or exhausts what the owner made available.
-    function testFuzz_actRespectsEveryBound(uint96 collat, uint96 debt, uint96 budget, uint96 allow, uint96 bal)
-        public
-    {
+    function testFuzz_actRespectsEveryBound(
+        uint96 collat,
+        uint96 debt,
+        uint96 budget,
+        uint96 allow,
+        uint96 bal
+    ) public {
         collat = uint96(bound(collat, 10 * E, 1e9 * E));
         debt = uint96(bound(debt, 1 * E, 1e9 * E));
         budget = uint96(bound(budget, 1, 1e9 * E));
@@ -509,9 +514,168 @@ contract LoanGuardTest is Test {
             uint256 hf1 = _health(o);
             bool limited = repaid == budget || repaid == allow || repaid == bal || repaid == debt;
             assertTrue(hf1 >= 1.8e18 || limited, "target reached or a limit hit");
+            assertGe(hf1, 1e18, "an act never leaves the loan below 1.00");
         } catch {
             assertEq(usdt.balanceOf(o), bal, "a refused act moves nothing");
             assertEq(vUSDT.borrows(o), debt);
         }
+    }
+
+    // ---------------------------------------------------------------- a guard checks itself (review L-1)
+
+    function _deploy(address own, address comptroller_, address vDebt_, address token_, uint256 tip_)
+        internal
+        returns (LoanGuard)
+    {
+        return new LoanGuard(
+            own,
+            IComptroller(comptroller_),
+            IVToken(vDebt_),
+            token_,
+            1.4e18,
+            1.8e18,
+            100 * E,
+            tip_,
+            uint64(block.timestamp + 30 days)
+        );
+    }
+
+    function test_directDeploymentObeysTheSameRules() public {
+        // A faithful direct deployment works (on the local chain the comptroller's own listing decides).
+        LoanGuard ok = _deploy(owner, address(comp), address(vUSDT), address(usdt), 0);
+        assertEq(ok.owner(), owner);
+        assertEq(ok.factory(), address(this), "factory() is only who deployed it; check isGuard");
+        assertFalse(factory.isGuard(address(ok)));
+
+        // A market the comptroller does not list (the review's attacker market) cannot be used.
+        MockVToken fake = new MockVToken(address(usdt), address(comp));
+        comp.setDelisted(address(fake), true);
+        vm.expectRevert(abi.encodeWithSelector(CharterRules.UnsupportedMarket.selector, address(fake)));
+        _deploy(owner, address(comp), address(fake), address(usdt), 0);
+
+        // A market that names another comptroller cannot be used.
+        MockVToken foreign = new MockVToken(address(usdt), address(0xC0FFEE));
+        vm.expectRevert(abi.encodeWithSelector(CharterRules.UnsupportedMarket.selector, address(foreign)));
+        _deploy(owner, address(comp), address(foreign), address(usdt), 0);
+
+        // The reserve token must be the market's own underlying.
+        vm.expectRevert(abi.encodeWithSelector(CharterRules.WrongToken.selector, address(usdc)));
+        _deploy(owner, address(comp), address(vUSDT), address(usdc), 0);
+
+        // Bounds hold without the factory.
+        vm.expectRevert(CharterRules.BadTip.selector);
+        _deploy(owner, address(comp), address(vUSDT), address(usdt), 10 * E + 1);
+
+        vm.expectRevert(LoanGuard.ZeroOwner.selector);
+        _deploy(address(0), address(comp), address(vUSDT), address(usdt), 0);
+    }
+
+    function test_onBscOnlyTheRealVenusAndReviewedMarketsAreAccepted() public {
+        vm.chainId(56);
+        vm.expectRevert(abi.encodeWithSelector(CharterRules.WrongComptroller.selector, address(comp)));
+        _deploy(owner, address(comp), address(vUSDT), address(usdt), 0);
+        address[] memory m = new address[](1);
+        m[0] = address(vUSDT);
+        vm.expectRevert(abi.encodeWithSelector(CharterFactory.WrongComptroller.selector, address(comp)));
+        new CharterFactory(IComptroller(address(comp)), m);
+
+        vm.chainId(97);
+        vm.expectRevert(abi.encodeWithSelector(CharterRules.WrongComptroller.selector, address(comp)));
+        _deploy(owner, address(comp), address(vUSDT), address(usdt), 0);
+
+        vm.chainId(1);
+        vm.expectRevert(abi.encodeWithSelector(CharterRules.UnsupportedChain.selector, 1));
+        _deploy(owner, address(comp), address(vUSDT), address(usdt), 0);
+        vm.expectRevert(abi.encodeWithSelector(CharterRules.UnsupportedChain.selector, 1));
+        new CharterFactory(IComptroller(address(comp)), m);
+    }
+
+    function test_factoryRejectsDuplicateMarkets() public {
+        address[] memory m = new address[](2);
+        m[0] = address(vUSDT);
+        m[1] = address(vUSDT);
+        vm.expectRevert(abi.encodeWithSelector(CharterFactory.DuplicateMarket.selector, address(vUSDT)));
+        new CharterFactory(IComptroller(address(comp)), m);
+    }
+
+    // ---------------------------------------------------------------- a loan it cannot save (review L-2)
+
+    function test_neverSpendsOnALoanItCannotSave() public {
+        LoanGuard g = _guard(100 * E, 5 * E, 100 * E);
+        comp.setWeighted(owner, 800 * E); // health 0.80: a 200 USDT deficit, the budget covers 100
+        (uint8 state,, uint256 wouldRepay,,,) = g.preview();
+        assertEq(state, 6, "preview says it cannot rescue");
+        assertEq(wouldRepay, 0);
+        uint256 bal = usdt.balanceOf(owner);
+        vm.prank(keel);
+        vm.expectRevert(abi.encodeWithSelector(LoanGuard.CannotRescue.selector, 0.8e18, 100 * E));
+        g.act();
+        assertEq(usdt.balanceOf(owner), bal, "nothing moved");
+        assertEq(vUSDT.borrows(owner), 1000 * E);
+    }
+
+    function test_rescuesBelowOneWhenTheBudgetLiftsItOut() public {
+        LoanGuard g = _guard(100 * E, 0, 100 * E);
+        comp.setWeighted(owner, 950 * E); // health 0.95: a 50 USDT deficit; the budget covers it but not the target
+        vm.prank(keel);
+        uint256 repaid = g.act();
+        assertEq(repaid, 100 * E, "the whole budget, short of target");
+        uint256 hf = _health(owner);
+        assertGe(hf, 1e18, "out of liquidation");
+        assertLt(hf, 1.8e18);
+    }
+
+    function test_rescueCheckIsExactAtTheBoundary() public {
+        LoanGuard g = _guard(50 * E, 0, 50 * E);
+        comp.setWeighted(owner, 950 * E); // deficit exactly 50 USDT, budget exactly 50
+        vm.prank(keel);
+        assertEq(g.act(), 50 * E);
+        assertEq(_health(owner), 1e18, "lands exactly on 1.00");
+
+        // Debt is now 950 USDT. Weighted collateral 900 makes the deficit 50 USDT, one unit over a 50 - 1e-18 budget.
+        LoanGuard h = _guardWithSalt(50 * E - 1, keccak256("two"));
+        comp.setWeighted(owner, 900 * E);
+        vm.prank(keel);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                LoanGuard.CannotRescue.selector, uint256(900 * E) * E / (950 * E), 50 * E - 1
+            )
+        );
+        h.act();
+    }
+
+    function _guardWithSalt(uint256 budget, bytes32 salt) internal returns (LoanGuard g) {
+        CharterFactory.Params memory p = _params(budget, 0);
+        address predicted = factory.predict(owner, p, salt);
+        vm.startPrank(owner);
+        usdt.approve(predicted, budget);
+        g = LoanGuard(factory.create(p, salt));
+        vm.stopPrank();
+    }
+
+    // ---------------------------------------------------------------- reads that answer (review I-2)
+
+    function test_previewOfAnEndedOrExpiredGuardNeedsNoVenus() public {
+        LoanGuard g = _guard(100 * E, 0, 100 * E);
+        comp.setErr(9); // Venus refuses every liquidity read
+        vm.expectRevert();
+        g.preview();
+        vm.prank(owner);
+        g.end();
+        (uint8 state, uint256 health,,, uint256 available, uint256 debt) = g.preview();
+        assertEq(state, 2);
+        assertEq(health, 0, "not read");
+        assertEq(debt, 0, "not read");
+        assertEq(available, 100 * E);
+
+        LoanGuard h = _guardWithSalt(100 * E, keccak256("three"));
+        vm.warp(block.timestamp + 31 days);
+        (state,,,,,) = h.preview();
+        assertEq(state, 3);
+    }
+
+    function test_quoteRefusesAZeroTarget() public {
+        vm.expectRevert(CharterFactory.BadTarget.selector);
+        factory.quote(owner, address(vUSDT), 0);
     }
 }

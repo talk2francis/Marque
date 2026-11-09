@@ -21,7 +21,7 @@ describe('health.ts matches the contracts', () => {
   it('has the exported vectors', () => {
     expect(vectors.length).toBe(60)
     expect(vectors.some((v) => v.decimals === 6)).toBe(true)
-    expect(new Set(vectors.map((v) => v.previewState))).toEqual(new Set([0, 1, 5]))
+    expect(new Set(vectors.map((v) => v.previewState))).toEqual(new Set([0, 1, 5, 6]))
   })
 
   it.each(vectors.map((v, i) => [i, v] as const))('vector %i', (_i, v) => {

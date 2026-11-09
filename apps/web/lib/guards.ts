@@ -80,7 +80,8 @@ export async function guardDetail(chainId: CharterChainId, address: string) {
   try {
     const block = await client.getBlockNumber()
     const p = await readPreview(client, guard.address as Address, block)
-    live = { state: p.state, health: p.health === (1n << 256n) - 1n ? null : p.health.toString(), wouldRepay: p.wouldRepay.toString(), available: p.available.toString(), debt: p.debt.toString(), blockNumber: block.toString(), readAt, fromChain: true, unavailableReason: null }
+    const unread = p.state === 'ended' || p.state === 'expired'
+    live = { state: p.state, health: unread || p.health === (1n << 256n) - 1n ? null : p.health.toString(), wouldRepay: p.wouldRepay.toString(), available: p.available.toString(), debt: unread ? '0' : p.debt.toString(), blockNumber: block.toString(), readAt, fromChain: true, unavailableReason: null }
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e)
     live = { state: 'unavailable', health: null, wouldRepay: '0', available: '0', debt: '0', blockNumber: null, readAt, fromChain: true,

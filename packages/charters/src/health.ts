@@ -32,8 +32,9 @@ export function repayToTarget(h: Health, target: bigint, debtPrice: bigint): big
 /** USD value of `units` of a token at a Venus price, truncated as Venus truncates. */
 export const usdOf = (price: bigint, units: bigint): bigint => (price * units) / WAD
 
-export type GuardState = 'watching' | 'would_act' | 'ended' | 'expired' | 'no_debt' | 'no_funds'
-export const STATE_CODES: Record<number, GuardState> = { 0: 'watching', 1: 'would_act', 2: 'ended', 3: 'expired', 4: 'no_debt', 5: 'no_funds' }
+export type GuardState = 'watching' | 'would_act' | 'ended' | 'expired' | 'no_debt' | 'no_funds' | 'cannot_rescue'
+/** LoanGuard.preview()'s state codes. 6: below 1.00, and the most the guard may repay would not lift it to 1.00. */
+export const STATE_CODES: Record<number, GuardState> = { 0: 'watching', 1: 'would_act', 2: 'ended', 3: 'expired', 4: 'no_debt', 5: 'no_funds', 6: 'cannot_rescue' }
 
 export interface ActInput {
   /** Venus's weighted collateral and total debt for the owner, after interest accrual on the debt market. */
@@ -64,6 +65,15 @@ export interface ActResult {
 }
 
 /** What act() would do, step for step. A state other than would_act means act() would revert. */
+/**
+ * LoanGuard._rescues: does repaying `amount` lift health to at least 1.00? Always at or above 1.00; below it, the
+ * repayment's value must cover the deficit.
+ */
+export function rescues(h: Health, amount: bigint, price: bigint): boolean {
+  if (h.collateralUsd >= h.debtUsd) return true
+  return (price * amount) / WAD >= h.debtUsd - h.collateralUsd
+}
+
 export function simulateAct(x: ActInput): ActResult {
   const healthBefore = healthOf(x.health)
   const none = (state: GuardState): ActResult => ({ state, repaid: 0n, tipPaid: 0n, healthBefore, healthAfter: healthBefore, debtInMarketAfter: x.debtInMarket })
@@ -75,6 +85,7 @@ export function simulateAct(x: ActInput): ActResult {
   const avail = minBig(x.allowance, x.balance)
   const repaid = minBig(repayToTarget(x.health, x.target, x.price), x.debtInMarket, left, avail)
   if (repaid === 0n) return none('no_funds')
+  if (!rescues(x.health, repaid, x.price)) return none('cannot_rescue')
   const tipPaid = x.callerIsOwner ? 0n : minBig(x.tip, repaid, left - repaid, avail - repaid)
   const debtInMarketAfter = x.debtInMarket - repaid
   const debtUsdAfter = x.health.debtUsd - usdOf(x.price, x.debtInMarket) + usdOf(x.price, debtInMarketAfter)

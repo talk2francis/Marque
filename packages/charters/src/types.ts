@@ -32,7 +32,8 @@ export const QuoteQuery = z.object({
 export const AgentActsQuery = z.object({ chainId: ChainIdSchema.optional(), agentId: z.string().regex(/^(56|97):0x[0-9a-fA-F]{40}:\d{1,30}$/) }).strict()
 
 export const LivePreview = z.object({
-  state: z.enum(['watching', 'would_act', 'ended', 'expired', 'no_debt', 'no_funds', 'unavailable']),
+  state: z.enum(['watching', 'would_act', 'ended', 'expired', 'no_debt', 'no_funds', 'cannot_rescue', 'unavailable']),
+  /** null when there is no debt, and for an ended or expired guard, whose preview does not read Venus. */
   health: uint.nullable(),
   wouldRepay: uint,
   available: uint,

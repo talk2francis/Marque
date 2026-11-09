@@ -125,6 +125,17 @@ contract MockComptroller {
         weighted[a] = usd;
     }
 
+    /// Every market counts as listed unless a test delists it.
+    mapping(address => bool) public delisted;
+
+    function setDelisted(address v, bool d) external {
+        delisted[v] = d;
+    }
+
+    function markets(address v) external view returns (bool, uint256, bool) {
+        return (!delisted[v], 0.8e18, false);
+    }
+
     function getAssetsIn(address a) external view returns (address[] memory) {
         return _assets[a];
     }

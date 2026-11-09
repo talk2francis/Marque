@@ -90,7 +90,7 @@ export interface StormResult {
   actions: number
   /** Debt-token units the guard would use. */
   used: bigint
-  /** Budget, allowance or balance ran out on the way down. */
+  /** Budget, allowance or balance ran out on the way down, or what was left could no longer lift health to 1.00. */
   ranOut: boolean
 }
 
@@ -104,7 +104,7 @@ export function storm(x: FramingInput, g: StormGuard, dropPct: number): StormRes
   const mainNow = (((x.main.supplied * x.main.price) / WAD) * x.main.liquidationThreshold) / WAD
   const others = x.collateralUsd > mainNow ? x.collateralUsd - mainNow : 0n
   let debtUsd = x.debtUsd, debtInMarket = g.debtInMarket, left = minBig(g.budgetLeft, g.allowance, g.balance), used = 0n, actions = 0
-  let withLiquidated = false
+  let withLiquidated = false, refused = false
   let collateralUsd = x.collateralUsd
   for (let s = 0; s <= steps; s++) {
     collateralUsd = others + (mainNow * BigInt(2000 - Math.min(2000, s * 10))) / 2000n
@@ -116,7 +116,7 @@ export function storm(x: FramingInput, g: StormGuard, dropPct: number): StormRes
       left -= r.repaid
       debtUsd = debtUsd - usdOf(g.debtPrice, debtInMarket) + usdOf(g.debtPrice, r.debtInMarketAfter)
       debtInMarket = r.debtInMarketAfter
-    }
+    } else if (r.state === 'cannot_rescue') refused = true
     if (debtUsd > 0n && (collateralUsd * WAD) / debtUsd < WAD) withLiquidated = true
   }
   const finalCollateral = collateralUsd
@@ -126,6 +126,6 @@ export function storm(x: FramingInput, g: StormGuard, dropPct: number): StormRes
     with: { health: debtUsd === 0n ? null : (finalCollateral * WAD) / debtUsd, liquidated: withLiquidated },
     actions,
     used,
-    ranOut: left === 0n,
+    ranOut: left === 0n || refused,
   }
 }

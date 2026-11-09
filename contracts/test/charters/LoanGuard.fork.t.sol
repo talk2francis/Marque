@@ -5,7 +5,8 @@ import {Test, console2} from "forge-std/Test.sol";
 import {Vm} from "forge-std/Vm.sol";
 import {CharterFactory} from "../../src/charters/CharterFactory.sol";
 import {LoanGuard} from "../../src/charters/LoanGuard.sol";
-import {IComptroller, IPriceOracle} from "../../src/charters/VenusInterfaces.sol";
+import {IComptroller, IPriceOracle, IVToken} from "../../src/charters/VenusInterfaces.sol";
+import {CharterRules} from "../../src/charters/CharterRules.sol";
 
 interface IVBep20Full {
     function mint(uint256) external returns (uint256);
@@ -86,7 +87,9 @@ contract LoanGuardFork is Test {
         }
         comp = IComptrollerFull(net.comptroller);
         address[] memory m = new address[](3);
-        for (uint256 i; i < 3; ++i) m[i] = net.debt[i];
+        for (uint256 i; i < 3; ++i) {
+            m[i] = net.debt[i];
+        }
         factory = new CharterFactory(IComptroller(net.comptroller), m);
         console2.log("chain", block.chainid, "block", block.number);
     }
@@ -120,7 +123,11 @@ contract LoanGuardFork is Test {
         returns (LoanGuard g, uint256 gasCreate)
     {
         CharterFactory.Params memory p = CharterFactory.Params({
-            vDebt: vDebt, trigger: trigger, target: target, budget: budget, tip: tip,
+            vDebt: vDebt,
+            trigger: trigger,
+            target: target,
+            budget: budget,
+            tip: tip,
             expiresAt: uint64(block.timestamp + 7 days)
         });
         address token = IVBep20Full(vDebt).underlying();
@@ -220,7 +227,11 @@ contract LoanGuardFork is Test {
         console2.log("repaid", repaid, "preview said", would);
 
         assertEq(IERC20Full(token).balanceOf(user), balBefore - repaid, "only the repayment left the wallet");
-        assertGe(debtBefore - IVBep20Full(vDebt).borrowBalanceStored(user) + 1, repaid, "debt fell by the repayment");
+        assertGe(
+            debtBefore - IVBep20Full(vDebt).borrowBalanceStored(user) + 1,
+            repaid,
+            "debt fell by the repayment"
+        );
         assertEq(IERC20Full(token).balanceOf(address(g)), 0, "the guard holds nothing");
         (uint256 hf3,,) = factory.healthOf(user);
         console2.log("health after act", hf3);
@@ -252,7 +263,9 @@ contract LoanGuardFork is Test {
         vm.prank(agent);
         uint256 repaid = g.act();
         assertGt(repaid, 0);
-        assertGe(IVBep20Full(net.debt[1]).borrowBalanceStored(user), otherBefore, "the other loan is untouched");
+        assertGe(
+            IVBep20Full(net.debt[1]).borrowBalanceStored(user), otherBefore, "the other loan is untouched"
+        );
         (uint256 hf3,,) = factory.healthOf(user);
         assertTrue(hf3 >= g.target() || IVBep20Full(net.debt[0]).borrowBalanceStored(user) == 0);
     }
@@ -316,4 +329,51 @@ contract LoanGuardFork is Test {
         assertEq(IERC20Full(token).balanceOf(agent), tip);
         assertEq(g.spent(), repaid + tip);
     }
+
+    // ------------------------------------------------------------------ a stray copy (review L-1), on chain
+
+    /// The review's attack, against the real comptroller: an attacker-made "market" that takes the tokens. A guard
+    /// deployed outside the factory with it, or with a fake comptroller, or with a listed but unreviewed market,
+    /// cannot exist; a faithful stray copy is bound to the real Venus market and the owner's own loan.
+    function test_fork_strayDeploymentCannotUseAFakeMarket() public {
+        address token = IVBep20Full(net.debt[0]).underlying();
+        FakeMarket fake = new FakeMarket(token, net.comptroller);
+        uint64 exp = uint64(block.timestamp + 30 days);
+        vm.expectRevert(abi.encodeWithSelector(CharterRules.UnsupportedMarket.selector, address(fake)));
+        new LoanGuard(
+            user, IComptroller(net.comptroller), IVToken(address(fake)), token, 1.4e18, 1.8e18, 100e18, 0, exp
+        );
+
+        FakeComptroller fc = new FakeComptroller();
+        vm.expectRevert(abi.encodeWithSelector(CharterRules.WrongComptroller.selector, address(fc)));
+        new LoanGuard(
+            user, IComptroller(address(fc)), IVToken(net.debt[0]), token, 1.4e18, 1.8e18, 100e18, 0, exp
+        );
+
+        // vBTC is listed on Venus but is not a reviewed debt market.
+        address btc = IVBep20Full(net.collateral).underlying();
+        vm.expectRevert(abi.encodeWithSelector(CharterRules.UnsupportedMarket.selector, net.collateral));
+        new LoanGuard(
+            user, IComptroller(net.comptroller), IVToken(net.collateral), btc, 1.4e18, 1.8e18, 100e18, 0, exp
+        );
+
+        LoanGuard ok = new LoanGuard(
+            user, IComptroller(net.comptroller), IVToken(net.debt[0]), token, 1.4e18, 1.8e18, 100e18, 0, exp
+        );
+        assertEq(address(ok.vDebt()), net.debt[0]);
+        assertFalse(factory.isGuard(address(ok)));
+    }
 }
+
+/// A "market" that reports the real comptroller and swallows whatever it is asked to repay.
+contract FakeMarket {
+    address public underlying;
+    address public comptroller;
+
+    constructor(address u, address c) {
+        underlying = u;
+        comptroller = c;
+    }
+}
+
+contract FakeComptroller {}

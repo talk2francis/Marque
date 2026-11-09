@@ -36,6 +36,7 @@ contract GuardHandler is Test {
     bool[2] public ghostTipToOwner;
     bool[2] public ghostOtherGuardMoved;
     bool[2] public ghostEndFailed;
+    bool[2] public ghostLeftBelowOne;
     uint256 public acts;
     uint256 public calls;
 
@@ -66,7 +67,11 @@ contract GuardHandler is Test {
             vUSDT.setBorrow(o, 1000 * E);
             usdt.mint(o, 5000 * E);
             CharterFactory.Params memory p = CharterFactory.Params({
-                vDebt: address(vUSDT), trigger: TRIGGER, target: TARGET, budget: 1500 * E, tip: 5 * E,
+                vDebt: address(vUSDT),
+                trigger: TRIGGER,
+                target: TARGET,
+                budget: 1500 * E,
+                tip: 5 * E,
                 expiresAt: uint64(block.timestamp + 30 days)
             });
             bytes32 salt = bytes32("same-salt");
@@ -140,7 +145,10 @@ contract GuardHandler is Test {
         // some runs. A guard is ended only after it has acted, so every run reaches the button first.
         if (chance % 40 != 0 || guards[i].acts() == 0) return;
         vm.prank(owners[i]);
-        try guards[i].end() {} catch { ghostEndFailed[i] = true; }
+        try guards[i].end() {}
+        catch {
+            ghostEndFailed[i] = true;
+        }
     }
 
     // ------------------------------------------------------------- the button
@@ -194,13 +202,18 @@ contract GuardHandler is Test {
         ghostOutflow[i] += repaid + tipPaid;
         if (b.ownerCalls && tipPaid != 0) ghostTipToOwner[i] = true;
         if (!b.ownerCalls && usdt.balanceOf(b.caller) != b.callerBal + tipPaid) ghostTipToOwner[i] = true;
-        if (b.ownerBal - usdt.balanceOf(o) != (b.ownerCalls ? repaid : repaid + tipPaid)) ghostTipToOwner[i] = true;
+        if (b.ownerBal - usdt.balanceOf(o) != (b.ownerCalls ? repaid : repaid + tipPaid)) {
+            ghostTipToOwner[i] = true;
+        }
 
         // The Acted event carries the health Venus showed in the same transaction.
         ActedLog memory l = _acted();
         if (l.repaid > 0) limitedOrRestored += 1;
-        if (l.repaid != repaid || l.tipPaid != tipPaid || l.spentTotal != spentAfter) ghostTipToOwner[i] = true;
+        if (l.repaid != repaid || l.tipPaid != tipPaid || l.spentTotal != spentAfter) {
+            ghostTipToOwner[i] = true;
+        }
         if (l.healthBefore >= TRIGGER) ghostActedAboveTrigger[i] = true;
+        if (l.healthAfter < 1e18) ghostLeftBelowOne[i] = true;
         if (l.healthAfter < TARGET) {
             // Allowed only when a bound was hit.
             bool limited = spentAfter >= g.budget() || l.debtAfter == 0 || usdt.allowance(o, address(g)) == 0
@@ -270,12 +283,23 @@ contract LoanGuardInvariantTest is Test {
 
     /// 3. Every action happened while Venus showed health strictly below the trigger.
     function invariant_actsOnlyBelowTrigger() public view {
-        for (uint256 i; i < 2; ++i) assertFalse(h.ghostActedAboveTrigger(i));
+        for (uint256 i; i < 2; ++i) {
+            assertFalse(h.ghostActedAboveTrigger(i));
+        }
     }
 
     /// 4. After an action, health is at the target, or a bound was hit.
     function invariant_targetOrABoundWasHit() public view {
-        for (uint256 i; i < 2; ++i) assertFalse(h.ghostMissedTargetWithoutLimit(i));
+        for (uint256 i; i < 2; ++i) {
+            assertFalse(h.ghostMissedTargetWithoutLimit(i));
+        }
+    }
+
+    /// 4b. An action never leaves the loan below 1.00: the guard does not spend on a loan it cannot save.
+    function invariant_neverLeavesTheLoanLiquidatable() public view {
+        for (uint256 i; i < 2; ++i) {
+            assertFalse(h.ghostLeftBelowOne(i));
+        }
     }
 
     /// 5. The guard never holds tokens and never leaves an allowance to the market.

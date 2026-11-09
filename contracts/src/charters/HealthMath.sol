@@ -61,7 +61,11 @@ library HealthMath {
 
     /// @notice Underlying units of the debt market to repay so health returns to `target`.
     /// Rounded up by one unit so the result lands at or above target, never just under it.
-    function repayToTarget(Health memory h, uint256 target, uint256 debtPrice) internal pure returns (uint256) {
+    function repayToTarget(Health memory h, uint256 target, uint256 debtPrice)
+        internal
+        pure
+        returns (uint256)
+    {
         if (h.debtUsd == 0) return 0;
         uint256 keep = h.collateralUsd * WAD / target; // debt that health `target` can carry
         if (keep >= h.debtUsd) return 0;

@@ -4,6 +4,7 @@ pragma solidity 0.8.24;
 import {IERC20Min, IVToken, IComptroller, IPriceOracle} from "./VenusInterfaces.sol";
 import {HealthMath} from "./HealthMath.sol";
 import {SafeToken} from "./SafeToken.sol";
+import {CharterRules} from "./CharterRules.sol";
 
 /// @title LoanGuard (Marque charter, kind 1)
 /// @notice One owner, one Venus Core debt market, one reserve token, one budget, one end date.
@@ -16,8 +17,13 @@ import {SafeToken} from "./SafeToken.sol";
 ///
 /// There is no other destination, no admin, no upgrade, no owner change and no way to borrow,
 /// redeem or move collateral. The worst a caller can do is make the owner's loan smaller, within
-/// the budget, while Venus says it is below the trigger. The owner can end the charter at any
-/// time, independent of every server, relay, oracle and expiry.
+/// the budget, while Venus says it is below the trigger. The guard never spends on a loan it
+/// cannot save: if even the largest repayment it may make would leave Venus health below 1.00,
+/// it does nothing. The owner can end the charter at any time, independent of every server,
+/// relay, oracle and expiry.
+///
+/// The guard checks its own rules when it is deployed (CharterRules), so a copy deployed outside
+/// CharterFactory is bound to the same Venus Core comptroller, reviewed markets and bounds.
 contract LoanGuard {
     using SafeToken for address;
 
@@ -48,6 +54,7 @@ contract LoanGuard {
     uint8 internal constant S_EXPIRED = 3;
     uint8 internal constant S_NO_DEBT = 4; // nothing borrowed in this market
     uint8 internal constant S_NO_FUNDS = 5; // below trigger, but budget, allowance or balance is empty
+    uint8 internal constant S_CANNOT_RESCUE = 6; // below 1.00, and the most it may repay would not lift it to 1.00
 
     event Acted(
         address indexed caller,
@@ -73,6 +80,8 @@ contract LoanGuard {
     error RepayNotApplied(uint256 debtBefore, uint256 debtAfter, uint256 amount);
     error Residual(uint256 balance);
     error Reentrant();
+    error CannotRescue(uint256 health, uint256 repayable);
+    error ZeroOwner();
 
     modifier nonReentrant() {
         if (_lock != 1) revert Reentrant();
@@ -92,7 +101,24 @@ contract LoanGuard {
         uint256 tip_,
         uint64 expiresAt_
     ) {
-        // Bounds are validated by CharterFactory; the guard trusts only its own factory.
+        // The guard enforces its own rules, whoever deploys it (L-1 in the independent review).
+        if (owner_ == address(0)) revert ZeroOwner();
+        address canonical = CharterRules.comptrollerFor(block.chainid);
+        if (canonical != address(0)) {
+            if (address(comptroller_) != canonical) {
+                revert CharterRules.WrongComptroller(address(comptroller_));
+            }
+            if (!CharterRules.reviewedMarket(block.chainid, address(vDebt_))) {
+                revert CharterRules.UnsupportedMarket(address(vDebt_));
+            }
+        }
+        (bool listed,,) = comptroller_.markets(address(vDebt_));
+        if (!listed || vDebt_.comptroller() != address(comptroller_)) {
+            revert CharterRules.UnsupportedMarket(address(vDebt_));
+        }
+        if (vDebt_.underlying() != token_) revert CharterRules.WrongToken(token_);
+        CharterRules.checkBounds(trigger_, target_, budget_, tip_, expiresAt_, block.timestamp);
+
         owner = owner_;
         factory = msg.sender;
         comptroller = comptroller_;
@@ -125,13 +151,16 @@ contract LoanGuard {
         if (price == 0) revert HealthMath.PriceUnavailable(address(vDebt));
 
         uint256 left = budget - spent;
-        uint256 avail = _min(IERC20Min(token).allowance(owner, address(this)), IERC20Min(token).balanceOf(owner));
+        uint256 avail =
+            _min(IERC20Min(token).allowance(owner, address(this)), IERC20Min(token).balanceOf(owner));
         repaid = _min(_min(HealthMath.repayToTarget(h, target, price), debtBefore), _min(left, avail));
         if (repaid == 0) revert NothingAvailable();
+        if (!_rescues(h, repaid, price)) revert CannotRescue(h.hf, repaid);
 
         // Repayment always comes first; a tip is paid only from what is left, never to the owner, and never
         // more than the repayment it rewards (so a dust repayment in this market cannot collect a full tip).
-        uint256 tipPaid = msg.sender == owner ? 0 : _min(_min(tip, repaid), _min(left - repaid, avail - repaid));
+        uint256 tipPaid =
+            msg.sender == owner ? 0 : _min(_min(tip, repaid), _min(left - repaid, avail - repaid));
 
         spent += repaid + tipPaid;
         acts += 1;
@@ -181,26 +210,47 @@ contract LoanGuard {
     function preview()
         external
         view
-        returns (uint8 state, uint256 health, uint256 wouldRepay, uint256 tipIfAgent, uint256 available, uint256 debt)
+        returns (
+            uint8 state,
+            uint256 health,
+            uint256 wouldRepay,
+            uint256 tipIfAgent,
+            uint256 available,
+            uint256 debt
+        )
     {
+        uint256 left = budget - spent;
+        available = _min(
+            left, _min(IERC20Min(token).allowance(owner, address(this)), IERC20Min(token).balanceOf(owner))
+        );
+        // An ended or expired charter answers without touching Venus, so it reads even when Venus does not
+        // (health and debt are then 0: not read).
+        if (ended) return (S_ENDED, 0, 0, 0, available, 0);
+        if (block.timestamp >= expiresAt) return (S_EXPIRED, 0, 0, 0, available, 0);
         HealthMath.Health memory h = HealthMath.read(comptroller, owner);
         health = h.hf;
         debt = vDebt.borrowBalanceStored(owner);
-        uint256 left = budget - spent;
-        available = _min(left, _min(IERC20Min(token).allowance(owner, address(this)), IERC20Min(token).balanceOf(owner)));
-        if (ended) return (S_ENDED, health, 0, 0, available, debt);
-        if (block.timestamp >= expiresAt) return (S_EXPIRED, health, 0, 0, available, debt);
         if (debt == 0) return (S_NO_DEBT, health, 0, 0, available, debt);
         if (h.hf >= trigger) return (S_WATCHING, health, 0, 0, available, debt);
         uint256 price = IPriceOracle(comptroller.oracle()).getUnderlyingPrice(address(vDebt));
+        if (price == 0) revert HealthMath.PriceUnavailable(address(vDebt));
         wouldRepay = _min(_min(HealthMath.repayToTarget(h, target, price), debt), available);
         if (wouldRepay == 0) return (S_NO_FUNDS, health, 0, 0, available, debt);
+        if (!_rescues(h, wouldRepay, price)) return (S_CANNOT_RESCUE, health, 0, 0, available, debt);
         tipIfAgent = _min(_min(tip, wouldRepay), available - wouldRepay);
         state = S_WOULD_ACT;
     }
 
     function remaining() external view returns (uint256) {
         return budget - spent;
+    }
+
+    /// Does repaying `amount` lift health to at least 1.00? Always true at or above 1.00. Below it, the repayment's
+    /// value must cover the deficit; the debt sum falls by at least floor(price * amount / 1e18) (the review's
+    /// proof of invariant 4), so this check passing means health after is at least 1.00.
+    function _rescues(HealthMath.Health memory h, uint256 amount, uint256 price) private pure returns (bool) {
+        if (h.collateralUsd >= h.debtUsd) return true;
+        return price * amount / 1e18 >= h.debtUsd - h.collateralUsd;
     }
 
     function _min(uint256 a, uint256 b) private pure returns (uint256) {

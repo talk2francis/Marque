@@ -23,6 +23,8 @@ library SafeToken {
     function _call(address token, bytes memory data) private {
         if (token.code.length == 0) revert TokenCallFailed(token, bytes4(data));
         (bool ok, bytes memory ret) = token.call(data);
-        if (!ok || (ret.length != 0 && !abi.decode(ret, (bool)))) revert TokenCallFailed(token, bytes4(data));
+        if (!ok || (ret.length != 0 && !abi.decode(ret, (bool)))) {
+            revert TokenCallFailed(token, bytes4(data));
+        }
     }
 }

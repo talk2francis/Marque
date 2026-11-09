@@ -91,7 +91,11 @@ contract LoanGuardVectors is Test {
         comp.setWeighted(w.owner, c.collateralUsd);
         w.token.mint(w.owner, c.balance);
         CharterFactory.Params memory p = CharterFactory.Params({
-            vDebt: address(vDebt), trigger: c.trigger, target: c.target, budget: c.budget, tip: c.tip,
+            vDebt: address(vDebt),
+            trigger: c.trigger,
+            target: c.target,
+            budget: c.budget,
+            tip: c.tip,
             expiresAt: uint64(block.timestamp + 30 days)
         });
         vm.startPrank(w.owner);

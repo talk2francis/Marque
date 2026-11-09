@@ -14,7 +14,8 @@ const CHUNK = 2_000n
 const GUARD_BATCH = 100
 
 const rowsOf = <T = Record<string, unknown>>(r: unknown) => ((r as { rows?: unknown[] }).rows ?? (r as unknown[])) as T[]
-const cursorKey = (chainId: number) => `charters:${chainId}`
+/** Keyed by the factory too, so a new factory version starts from its own deployment block. */
+const cursorKey = (chainId: CharterChainId) => `charters:${chainId}:${(CHARTER_CHAINS[chainId].factory ?? 'none').toLowerCase()}`
 
 async function cursor(chainId: CharterChainId): Promise<bigint> {
   const [row] = rowsOf<{ last_block: string }>(await db().execute(sql`select last_block from chain_cursor where chain_id = ${chainId} and contract = ${cursorKey(chainId)}`))

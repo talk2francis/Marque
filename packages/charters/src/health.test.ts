@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { formatUnitsTrim, healthOf, healthToNumber, NO_DEBT, parseDecimal, repayToTarget, WAD } from './health'
+import { formatUnitsTrim, healthOf, healthToNumber, NO_DEBT, parseDecimal, repayToTarget, rescues, simulateAct, WAD } from './health'
 
 describe('parseDecimal (budget and health inputs)', () => {
   it('reads plain decimals at the token\'s precision', () => {
@@ -42,5 +42,24 @@ describe('health', () => {
     const r6 = repayToTarget({ collateralUsd: 1300n * WAD, debtUsd: 1000n * WAD }, 18n * 10n ** 17n, 10n ** 30n)
     expect(r6).toBe(277_777_778n)
     expect(repayToTarget({ collateralUsd: 2000n * WAD, debtUsd: 1000n * WAD }, 18n * 10n ** 17n, WAD)).toBe(0n)
+  })
+})
+
+describe('the rescue rule (LoanGuard._rescues)', () => {
+  const h = (c: bigint, d: bigint) => ({ collateralUsd: c * WAD, debtUsd: d * WAD })
+  it('always rescues at or above 1.00, and below it only when the repayment covers the deficit', () => {
+    expect(rescues(h(1200n, 1000n), 1n, WAD)).toBe(true)
+    expect(rescues(h(950n, 1000n), 50n * WAD, WAD)).toBe(true)
+    expect(rescues(h(950n, 1000n), 50n * WAD - 1n, WAD)).toBe(false)
+    // 6-decimal token: price is scaled to 1e30, so 50 USDC is 50e6 units.
+    expect(rescues(h(950n, 1000n), 50_000_000n, 10n ** 30n)).toBe(true)
+    expect(rescues(h(950n, 1000n), 49_999_999n, 10n ** 30n)).toBe(false)
+  })
+  it('makes simulateAct refuse a loan the budget cannot save, moving nothing', () => {
+    const r = simulateAct({ health: h(800n, 1000n), debtInMarket: 1000n * WAD, price: WAD, trigger: 14n * 10n ** 17n, target: 18n * 10n ** 17n,
+      budget: 100n * WAD, spent: 0n, allowance: 100n * WAD, balance: 100n * WAD, tip: 0n, callerIsOwner: false })
+    expect(r.state).toBe('cannot_rescue')
+    expect(r.repaid).toBe(0n)
+    expect(r.healthAfter).toBe(r.healthBefore)
   })
 })

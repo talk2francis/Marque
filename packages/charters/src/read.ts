@@ -140,7 +140,10 @@ export interface GuardPreview {
 /** LoanGuard.preview(). It reverts when Venus cannot price a borrowed market; that surfaces as an error. */
 export async function readPreview(client: PublicClient, guard: Address, blockNumber?: bigint): Promise<GuardPreview> {
   const [state, health, wouldRepay, tipIfAgent, available, debt] = await client.readContract({ address: guard, abi: loanGuardAbi, functionName: 'preview', blockNumber })
-  return { state: STATE_CODES[state] ?? 'watching', health, wouldRepay, tipIfAgent, available, debt }
+  const name = STATE_CODES[state]
+  // A state this code does not know means the guard is newer than the reader: never guess at a calm one.
+  if (!name) throw new Error(`unknown LoanGuard preview state ${state}`)
+  return { state: name, health, wouldRepay, tipIfAgent, available, debt }
 }
 
 /** The owner's balance of the debt token and its allowance to a guard address (which may not exist yet). */
