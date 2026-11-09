@@ -62,7 +62,7 @@ export function GridBuilder({ initialChain, initialAccount, demo }: { initialCha
   const twapBt = pool && pool.twapTick300 !== null ? toBt(pool.twapTick300, pool.baseIsToken0) : null
   const price = twapBt !== null ? priceAt(twapBt) : null
   const spot = pool ? priceAt(toBt(pool.spotTick, pool.baseIsToken0)) : null
-  useEffect(() => { if (price) { setBand({ low: price * 0.9, high: twoSided ? price * 1.05 : price * 0.995 }) } }, [pool?.address, twoSided]) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (price) { setBand({ low: price * 0.9, high: twoSided ? price * 1.05 : price * 0.995 }) } }, [pool?.address, twoSided])
   useEffect(() => { setBuyCap(String(Number(order || 0) * levels * 3)) }, [order, levels])
 
   const minStep = pool ? (pool.minStepAtSlip30 ?? minStepFor(pool.fee)) : 72

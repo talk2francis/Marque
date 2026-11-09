@@ -73,7 +73,7 @@ export function YieldBuilder({ initialChain, initialAccount, demo }: { initialCh
     setMinAction(amount(df.minAction, m.decimals, 2).replace(/,/g, ''))
     setCap(amount(df.supplyCap, m.decimals, 0).replace(/,/g, ''))
     setCollateralMode(false)
-  }, [m?.vToken, account]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [m?.vToken, account])
 
   const floor = band ? units(band.low.toFixed(Math.min(d, 6)), d) ?? 0n : 0n
   const ceiling = band ? units(band.high.toFixed(Math.min(d, 6)), d) ?? 0n : 0n

@@ -5,7 +5,7 @@ import { chartersDb } from '@marque/db'
 import { chainClient } from '@marque/commerce'
 import {
   V2, KIND_CODES, KIND_BY_CODE, KIND_NAMES, EXECUTORS, OPEN_KINDS, CHARTER_CHAINS, stateName, factoryFor,
-  loanGuardV2Abi, yieldSweepAbi, gridBandAbi, rangeKeeperAbi, gridBandFactoryAbi, yieldSweepFactoryAbi,
+  loanGuardV2Abi, yieldSweepAbi, gridBandAbi, rangeKeeperAbi, gridBandFactoryAbi,
   type CharterChainId, type CharterKind,
 } from '@marque/charters'
 
