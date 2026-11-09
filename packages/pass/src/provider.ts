@@ -17,6 +17,8 @@ export type PassChain = 56 | 97
 export interface PassTxRequest { from?: Hex; to?: Hex; data?: Hex; value?: Hex; gas?: Hex; gasPrice?: Hex; nonce?: Hex }
 export type ConfirmRequest =
   | { kind: 'transaction'; chainId: PassChain; tx: { to: Hex; data: Hex; value: bigint }; feeWei: bigint; sponsored: boolean }
+  /** An EIP-5792 batch: every step shown at once, one confirmation and one passkey prompt for all of them. */
+  | { kind: 'calls'; chainId: PassChain; calls: Array<{ to: Hex; data: Hex; value: bigint }>; feeWei: bigint }
   | { kind: 'message'; chainId: PassChain; message: string }
   | { kind: 'typedData'; chainId: PassChain; typedData: unknown }
 
@@ -43,6 +45,11 @@ const MIN_GAS_PRICE: Record<PassChain, bigint> = { 56: 50_000_000n, 97: 100_000_
 
 type Listener = (...args: unknown[]) => void
 
+/** EIP-5792 call batches this provider sent, by id, for wallet_getCallsStatus (memory only). */
+interface Batch { chainId: PassChain; hashes: Hex[]; total: number; failedAt: number | null }
+interface SendCallsRequest { version?: string; chainId?: Hex; from?: Hex; atomicRequired?: boolean; calls?: Array<{ to?: Hex; data?: Hex; value?: Hex }> }
+const MAX_CALLS = 6
+
 export function createPassProvider(opts: PassProviderOptions) {
   let chainId: PassChain = 97
   const listeners = new Map<string, Set<Listener>>()
@@ -55,6 +62,75 @@ export function createPassProvider(opts: PassProviderOptions) {
   const emit = (event: string, ...args: unknown[]) => { for (const l of listeners.get(event) ?? []) { try { l(...args) } catch { /* listener error */ } } }
   const log = opts.log ?? (() => undefined)
   const need = () => { const a = opts.address(); if (!a) throw new ProviderRpcError(4100, 'Marque Pass is locked or not set up on this device.'); return a }
+  const gasPriceFor = (c: PassChain, network: bigint) => (network > MIN_GAS_PRICE[c] ? network : MIN_GAS_PRICE[c])
+  const batches = new Map<Hex, Batch>()
+
+  /**
+   * EIP-5792 wallet_sendCalls, not atomic: one confirmation lists every step, one passkey prompt unlocks the key,
+   * then each call is signed and sent in order with consecutive nonces, self-paid (no MegaFuel for batches). A call
+   * whose gas cannot be estimated before the earlier ones land (it depends on them) is estimated after the previous
+   * receipt. Returns once every call is broadcast, so leaving the page cannot strand half a batch unsigned.
+   */
+  async function sendCalls(req: SendCallsRequest): Promise<{ id: Hex }> {
+    const from = need()
+    if (req.from && req.from.toLowerCase() !== from.toLowerCase()) throw new ProviderRpcError(4100, 'Those calls are for a different account.')
+    if (req.chainId && Number(req.chainId) !== chainId) throw new ProviderRpcError(5710, 'Marque Pass is on a different network. Switch network first.')
+    if (req.atomicRequired) throw new ProviderRpcError(5760, 'Marque Pass sends a batch one transaction after another, not atomically.')
+    const list = req.calls ?? []
+    if (list.length === 0 || list.length > MAX_CALLS) throw new ProviderRpcError(-32602, `Send between 1 and ${MAX_CALLS} calls.`)
+    if (list.some((x) => !x.to)) throw new ProviderRpcError(4200, 'Marque Pass does not deploy contracts.')
+    const c = client(chainId)
+    const calls = list.map((x) => ({ to: x.to as Hex, data: (x.data ?? '0x') as Hex, value: x.value ? hexToBigInt(x.value) : 0n }))
+    const [startNonce, networkGasPrice, estimates] = await Promise.all([
+      c.getTransactionCount({ address: from, blockTag: 'pending' }),
+      c.getGasPrice(),
+      Promise.all(calls.map((tx) => c.estimateGas({ account: from, ...tx }).then((g) => (g * 12n) / 10n).catch(() => null))),
+    ])
+    if (estimates[0] === null) await c.estimateGas({ account: from, ...calls[0]! }) // the first call must stand on its own: surface its revert now
+    const gasPrice = gasPriceFor(chainId, networkGasPrice)
+    // A call estimated later is shown at the largest estimate in the batch, so the fee shown is never an undercount.
+    const known = estimates.filter((g): g is bigint => g !== null)
+    const largest = known.reduce((m, g) => (g > m ? g : m), 0n)
+    const feeWei = estimates.reduce<bigint>((sum, g) => sum + (g ?? largest), 0n) * gasPrice
+    const batchChain = chainId
+    const account = await opts.confirm({ kind: 'calls', chainId: batchChain, calls, feeWei })
+    const id = keccak256(`0x${Array.from(crypto.getRandomValues(new Uint8Array(32)), (b) => b.toString(16).padStart(2, '0')).join('')}`)
+    const batch: Batch = { chainId: batchChain, hashes: [], total: calls.length, failedAt: null }
+    batches.set(id, batch)
+    for (let i = 0; i < calls.length; i++) {
+      const tx = calls[i]!
+      let gas = estimates[i]
+      if (gas === null || gas === undefined) {
+        const prev = batch.hashes[i - 1]
+        if (prev) {
+          const r = await c.waitForTransactionReceipt({ hash: prev, timeout: 120_000 })
+          if (r.status !== 'success') { batch.failedAt = i - 1; break }
+        }
+        gas = (await c.estimateGas({ account: from, ...tx }) * 12n) / 10n
+      }
+      const raw = await account.signTransaction({ type: 'legacy', chainId: batchChain, nonce: startNonce + i, to: tx.to, data: tx.data, value: tx.value, gas, gasPrice })
+      batch.hashes.push(await c.sendRawTransaction({ serializedTransaction: raw }))
+    }
+    log('pass_batch', { id, chainId: batchChain, calls: calls.length, sent: batch.hashes.length })
+    return { id }
+  }
+
+  /** EIP-5792 wallet_getCallsStatus: 100 pending, 200 all confirmed, 500 all reverted, 600 some reverted. */
+  async function callsStatus(id: Hex) {
+    const batch = batches.get(id)
+    if (!batch) throw new ProviderRpcError(5730, 'Marque Pass does not know that batch on this page.')
+    const c = client(batch.chainId)
+    const receipts = await Promise.all(batch.hashes.map((hash) => c.getTransactionReceipt({ hash }).catch(() => null)))
+    const landed = receipts.filter((r): r is NonNullable<typeof r> => r !== null)
+    const reverted = landed.filter((r) => r.status !== 'success').length
+    const complete = landed.length === batch.hashes.length && (batch.failedAt !== null || batch.hashes.length === batch.total)
+    // Complete: all confirmed (200); nothing applied (500); some applied (600).
+    const status = !complete ? 100 : reverted === 0 && batch.hashes.length === batch.total ? 200 : reverted === landed.length ? 500 : 600
+    return {
+      version: '2.0.0', id, chainId: numberToHex(batch.chainId), status, atomic: false,
+      receipts: landed.map((r) => ({ logs: r.logs.map((l) => ({ address: l.address, data: l.data, topics: l.topics })), status: r.status === 'success' ? '0x1' : '0x0', blockHash: r.blockHash, blockNumber: numberToHex(r.blockNumber), gasUsed: numberToHex(r.gasUsed), transactionHash: r.transactionHash })),
+    }
+  }
 
   async function sendTransaction(req: PassTxRequest): Promise<Hex> {
     const from = need()
@@ -68,7 +144,7 @@ export function createPassProvider(opts: PassProviderOptions) {
       c.getGasPrice(),
     ])
     const gas = req.gas ? gasEstimate : (gasEstimate * 12n) / 10n
-    const gasPrice = req.gasPrice ? hexToBigInt(req.gasPrice) : networkGasPrice > MIN_GAS_PRICE[chainId] ? networkGasPrice : MIN_GAS_PRICE[chainId]
+    const gasPrice = req.gasPrice ? hexToBigInt(req.gasPrice) : gasPriceFor(chainId, networkGasPrice)
     // MegaFuel sponsors ERC-8183 hire calls on testnet, never ERC-20 approve (FACTS 5).
     let sponsored = false
     if (chainId === 97 && opts.relay) {
@@ -114,7 +190,13 @@ export function createPassProvider(opts: PassProviderOptions) {
           }
           throw new ProviderRpcError(4902, target === 56 ? 'Marque Pass works on BSC testnet for now. Use a wallet app for mainnet.' : 'Marque Pass works on BSC only.')
         }
-        case 'wallet_getCapabilities': return {}
+        case 'wallet_getCapabilities': {
+          // EIP-5792: batches work on both chains, one transaction after another (not atomic).
+          const chains: PassChain[] = opts.mainnetEnabled ? [56, 97] : [97]
+          return Object.fromEntries(chains.map((c) => [numberToHex(c), { atomic: { status: 'unsupported' } }]))
+        }
+        case 'wallet_sendCalls': return sendCalls((p[0] ?? {}) as SendCallsRequest)
+        case 'wallet_getCallsStatus': return callsStatus(p[0] as Hex)
         case 'eth_sendTransaction': return sendTransaction(p[0] as PassTxRequest)
         case 'personal_sign': {
           need()

@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom'
 import { decodeFunctionData, erc20Abi, formatUnits, parseAbi, type Hex } from 'viem'
 import type { PrivateKeyAccount } from 'viem/accounts'
 import { agenticCommerceAbi, evaluatorRouterAbi } from '@marque/commerce/client'
+import { CHARTER_CHAINS, charterFactoryAbi, loanGuardAbi, marketOf, type CharterChainId } from '@marque/charters/client'
 import { createPass, restorePass, unlockPass, exportKey as deriveExport, loadRecord, UNSUPPORTED_REASON, type ConfirmRequest, type PassRecord } from '@marque/pass'
 import { registerHost, heldAccount, holdAccount } from './bridge'
 import { track } from '../../../lib/track'
@@ -27,6 +28,46 @@ const TOKENS: Record<string, { symbol: string; decimals: number }> = {
   '0x55d398326f99059ff775485246999027b3197955': { symbol: 'USDT', decimals: 18 },
   '0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d': { symbol: 'USDC', decimals: 18 },
 }
+// The Loan Guard reserve tokens, by chain (testnet USDT and USDC have 6 decimals).
+const tokenOf = (chainId: number, address: string) => {
+  const m = (CHARTER_CHAINS[chainId as CharterChainId]?.markets ?? []).find((x) => x.token.toLowerCase() === address.toLowerCase())
+  return m ? { symbol: m.symbol, decimals: m.decimals } : TOKENS[address.toLowerCase()]
+}
+const short = (a: string) => `${a.slice(0, 6)}…${a.slice(-4)}`
+const health = (v: unknown) => (Number(BigInt(String(v)) / 10n ** 14n) / 10_000).toFixed(2)
+const day = (v: unknown) => new Date(Number(v) * 1000).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' })
+type Call = { to: Hex; data: Hex; value: bigint }
+
+/** A Loan Guard call in plain words, or null when it is not one. `batch` is the whole confirmation, for context. */
+function describeCharter(chainId: number, tx: Call, batch: readonly Call[]): string | null {
+  const chain = CHARTER_CHAINS[chainId as CharterChainId]
+  if (!chain) return null
+  try {
+    const d = decodeFunctionData({ abi: charterFactoryAbi, data: tx.data })
+    if (d.functionName === 'create' && chain.factory && tx.to.toLowerCase() === chain.factory.toLowerCase()) {
+      const [p] = d.args as unknown as [{ vDebt: string; trigger: bigint; target: bigint; budget: bigint; tip: bigint; expiresAt: bigint }]
+      const m = marketOf(chainId as CharterChainId, p.vDebt)
+      const budget = m ? `${formatUnits(p.budget, m.decimals)} ${m.symbol}` : 'its budget'
+      return `Create your Loan Guard: below health ${health(p.trigger)} it repays your ${m?.symbol ?? ''} loan back to ${health(p.target)}, using at most ${budget} from your wallet, until ${day(p.expiresAt)}`.replace('  ', ' ')
+    }
+  } catch { /* not the factory */ }
+  try {
+    const d = decodeFunctionData({ abi: loanGuardAbi, data: tx.data })
+    if (d.functionName === 'end') return `End the Loan Guard ${short(tx.to)} for good. It moves no money`
+    if (d.functionName === 'act') return `Protect your loan now: the guard ${short(tx.to)} repays what Venus says it needs, within its budget`
+  } catch { /* not a guard call */ }
+  try {
+    const d = decodeFunctionData({ abi: erc20Abi, data: tx.data })
+    if (d.functionName !== 'approve') return null
+    const [spender, amount] = d.args as [string, bigint]
+    const t = tokenOf(chainId, tx.to)
+    if (amount === 0n) return `Clear the ${t?.symbol ?? 'token'} allowance you gave ${short(spender)}`
+    const creates = batch.some((c) => chain.factory && c.to.toLowerCase() === chain.factory.toLowerCase())
+    if (creates) return `Allow your new Loan Guard (${short(spender)}) to take up to ${formatUnits(amount, t?.decimals ?? 18)} ${t?.symbol ?? 'tokens'}, only when your loan needs it`
+  } catch { /* not an approval */ }
+  return null
+}
+
 /** Venus Core Pool markets Marque builds for (Act on the answer), by vToken. */
 const VENUS: Record<string, string> = {
   '0xfd5840cd36d94d7229439859c0112a4185bc0255': 'vUSDT', '0xeca88125a5adbe82614ffc12d0db554e2e2867c8': 'vUSDC',
@@ -42,7 +83,9 @@ const extraAbi = parseAbi([
 ])
 
 /** The transaction in the same plain words the hire sheet uses. */
-export function describe(req: Extract<ConfirmRequest, { kind: 'transaction' }>): string {
+export function describe(req: Extract<ConfirmRequest, { kind: 'transaction' }>, batch: readonly Call[] = [req.tx]): string {
+  const charter = describeCharter(req.chainId, req.tx, batch)
+  if (charter) return charter
   const data = req.tx.data
   for (const abi of [agenticCommerceAbi, evaluatorRouterAbi, erc20Abi, extraAbi] as const) {
     try {
@@ -165,19 +208,29 @@ function Confirm({ pending, busy, error, run, close, done }: {
   })
   return (
     <>
-      <h2 id="pass-title" className={styles.title}>{req.kind === 'transaction' ? describe(req) : req.kind === 'message' ? 'Sign a message' : 'Sign structured data'}</h2>
+      <h2 id="pass-title" className={styles.title}>{req.kind === 'transaction' ? describe(req) : req.kind === 'calls' ? `${req.calls.length} steps, one confirmation` : req.kind === 'message' ? 'Sign a message' : 'Sign structured data'}</h2>
+      {req.kind === 'calls' ? (
+        <ol className={styles.steps}>
+          {req.calls.map((c, i) => <li key={i}>{describe({ kind: 'transaction', chainId: req.chainId, tx: c, feeWei: 0n, sponsored: false }, req.calls)}</li>)}
+        </ol>
+      ) : null}
       <dl className={styles.rows}>
         <div><dt>Network</dt><dd>{net}{req.chainId === 97 ? ' · test tokens, no real value' : ''}</dd></div>
+        {req.kind === 'calls' ? <div><dt>Network fee</dt><dd>{`about ${Number(formatUnits(req.feeWei, 18)).toPrecision(2)} ${req.chainId === 97 ? 'tBNB' : 'BNB'} for all ${req.calls.length}, sent one after another`}</dd></div> : null}
         {req.kind === 'transaction' ? <div><dt>Network fee</dt><dd>{req.sponsored ? `None if BNB Chain’s MegaFuel sponsors it, as it offers to; otherwise about ${Number(formatUnits(req.feeWei, 18)).toPrecision(2)} ${req.chainId === 97 ? 'tBNB' : 'BNB'}` : `about ${Number(formatUnits(req.feeWei, 18)).toPrecision(2)} ${req.chainId === 97 ? 'tBNB' : 'BNB'}`}</dd></div> : null}
         {req.kind === 'message' ? <div><dt>Message</dt><dd className={styles.msg}>{req.message.slice(0, 600)}</dd></div> : null}
       </dl>
       {req.chainId === 56 ? <p className={styles.warn}>Marque Pass is best for small amounts. For larger balances, use a hardware or app wallet.</p> : null}
-      {req.kind === 'transaction' ? (
+      {req.kind === 'transaction' || req.kind === 'calls' ? (
         <details className={styles.raw}>
           <summary>Transaction details</summary>
-          <p>To <code>{req.tx.to}</code></p>
-          {req.tx.value > 0n ? <p>Value {formatUnits(req.tx.value, 18)}</p> : null}
-          <p className={styles.data}><code>{req.tx.data as Hex}</code></p>
+          {(req.kind === 'calls' ? req.calls : [req.tx]).map((tx, i) => (
+            <div key={i}>
+              <p>{req.kind === 'calls' ? `${i + 1}. ` : ''}To <code>{tx.to}</code></p>
+              {tx.value > 0n ? <p>Value {formatUnits(tx.value, 18)}</p> : null}
+              <p className={styles.data}><code>{tx.data as Hex}</code></p>
+            </div>
+          ))}
         </details>
       ) : null}
       {error ? <p className={styles.error} role="alert">{error}</p> : null}

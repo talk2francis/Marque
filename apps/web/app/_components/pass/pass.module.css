@@ -2,6 +2,7 @@
 .dialog { width: min(460px, 100%); max-height: calc(100dvh - 32px); overflow: auto; padding: 22px 22px 18px; border-radius: 18px; border: 1px solid var(--hair-2); background: var(--panel); color: var(--ink); box-shadow: var(--elev-3, var(--elev-2)); display: grid; gap: 14px; font-family: var(--font-ui); }
 .title { margin: 0; font-size: 18px; line-height: 1.35; font-weight: 600; }
 .facts { margin: 0; padding-left: 18px; display: grid; gap: 6px; font-size: 14px; line-height: 1.5; color: var(--ink-2); }
+.steps { margin: 0; padding-left: 20px; display: grid; gap: 8px; font-size: 14.5px; line-height: 1.45; color: var(--ink); }
 .rows { margin: 0; display: grid; gap: 8px; }
 .rows > div { display: grid; grid-template-columns: 110px 1fr; gap: 10px; font-size: 14px; }
 .rows dt { color: var(--ink-3); }
