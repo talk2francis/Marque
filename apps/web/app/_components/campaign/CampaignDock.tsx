@@ -82,11 +82,13 @@ export function CampaignDock() {
   useEffect(() => {
     const check = () => {
       setCovered(Boolean(document.querySelector('[aria-modal="true"], [data-hire-sheet], dialog[open], body[data-theater], body[data-film-active]')))
-      setTray(Boolean(document.querySelector('[data-compare-tray]')))
+      // Any bottom bar that is showing (the compare tray, the charter builder's Grant bar) moves the dock up, or on phones hides it.
+      const bar = document.querySelector<HTMLElement>('[data-compare-tray], [data-bottom-bar]')
+      setTray(Boolean(bar && bar.getClientRects().length > 0)) // offsetParent is null for fixed bars; rects are empty only when not displayed
     }
     check()
     const mo = new MutationObserver(check)
-    mo.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['aria-modal', 'open', 'data-compare-tray', 'data-theater', 'data-film-active'] })
+    mo.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['aria-modal', 'open', 'data-compare-tray', 'data-bottom-bar', 'data-theater', 'data-film-active'] })
     return () => mo.disconnect()
   }, [])
 

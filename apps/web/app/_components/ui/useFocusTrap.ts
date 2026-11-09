@@ -41,6 +41,10 @@ export function useFocusTrap(ref: RefObject<HTMLElement | null>, open: boolean, 
     body.style.overflow = 'hidden'
     if (gap > 0) body.style.paddingRight = `${gap}px`
     const onKey = (e: KeyboardEvent) => {
+      // A dialog stacked above this one (the Marque Pass confirmation over the Seal) owns the keyboard while focus
+      // is in it: its Escape and Tab are not this dialog's.
+      const above = (document.activeElement as HTMLElement | null)?.closest('[aria-modal="true"]')
+      if (above && ref.current && !ref.current.contains(above) && !above.contains(ref.current)) return
       if (e.key === 'Escape') { e.preventDefault(); close.current(); return }
       if (e.key !== 'Tab') return
       const f = focusables()

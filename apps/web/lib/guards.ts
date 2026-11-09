@@ -1,6 +1,6 @@
 import 'server-only'
 import { sql } from 'drizzle-orm'
-import { getAddress, parseAbi, type Address } from 'viem'
+import { erc20Abi, getAddress, parseAbi, type Address } from 'viem'
 import { chartersDb } from '@marque/db'
 import { chainClient } from '@marque/commerce'
 import {
@@ -159,8 +159,8 @@ export async function guardQuote(q: { chainId: CharterChainId; account: string; 
   const trigger = parseH(q.trigger) ?? defaults?.trigger ?? null
   const target = parseH(q.target) ?? defaults?.target ?? null
   const market = chosen ? CHARTER_CHAINS[q.chainId].markets.find((m) => m.vToken.toLowerCase() === chosen.vToken.toLowerCase()) ?? null : null
-  const reserve = market && CHARTER_CHAINS[q.chainId].factory
-    ? await readReserve(client, market.token as Address, account, CHARTER_CHAINS[q.chainId].factory! as Address).catch(() => null) : null
+  // The wallet's balance of the debt token, whether or not a factory exists on this chain yet.
+  const balance = market ? await client.readContract({ address: market.token as Address, abi: erc20Abi, functionName: 'balanceOf', args: [account] }).catch(() => null) : null
   const priceOf = (h: bigint | null) => (framing && h !== null ? priceAtHealth(framing, h) : null)
   const usd = (p: bigint | null) => (p !== null && main ? priceToUsd(p, main.decimals) : null)
   return {
@@ -185,7 +185,7 @@ export async function guardQuote(q: { chainId: CharterChainId; account: string; 
       repayAtTrigger: chosen ? repayAtTrigger(framing, trigger, target, chosen.price).toString() : null,
       actsNow: trigger > loan.health,
     } : null,
-    wallet: reserve && market ? { balance: reserve.balance.toString(), symbol: market.symbol, decimals: market.decimals } : null,
+    wallet: balance !== null && market ? { balance: balance.toString(), symbol: market.symbol, decimals: market.decimals } : null,
   }
 }
 

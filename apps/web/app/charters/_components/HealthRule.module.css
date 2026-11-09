@@ -1,0 +1,37 @@
+/* HealthRule: the MeasureRule with two handles. 3px track, oxide under the trigger, brass lift band, ink Now. */
+.rule { position: relative; padding: 48px 12px 4px; user-select: none; touch-action: pan-y; }
+.rule[data-variant='mini'] { padding: 9px 6px; height: 22px; box-sizing: border-box; }
+.track { position: relative; height: 3px; border-radius: 2px; background: var(--hair-2); }
+.danger { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 2px 0 0 2px; background: color-mix(in srgb, var(--oxide) 70%, transparent); }
+.lift { position: absolute; top: -5px; bottom: -5px; background: var(--brass-tint); border-radius: 3px; }
+.liq { position: absolute; left: 0; top: -10px; bottom: -10px; width: 1px; background: var(--oxide); }
+.now { position: absolute; top: -26px; bottom: -8px; width: 2px; margin-left: -1px; background: var(--ink); transition: left 400ms ease; }
+.now span { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); white-space: nowrap; font-size: 12px; font-weight: 600; color: var(--ink); }
+.now[data-off] span::after { content: ' (off the rule)'; font-weight: 400; color: var(--ink-3); }
+
+.handle {
+  position: absolute; top: 50%; width: 18px; height: 18px; margin: -9px 0 0 -9px; border-radius: 50%;
+  background: var(--panel, var(--deck-raised)); border: 3px solid var(--amber); box-sizing: border-box; cursor: grab; outline: none;
+}
+.handle[data-which='target'] { border-color: var(--moss); }
+/* A 44px hit area around the 18px handle (section 7). */
+.handle::before { content: ''; position: absolute; inset: -13px; border-radius: 50%; }
+.handle[data-dragging='true'] { cursor: grabbing; }
+.handle:focus-visible { box-shadow: 0 0 0 3px color-mix(in srgb, var(--brass-mark) 55%, transparent); }
+.rule[data-variant='read'] .handle, .rule[data-variant='mini'] .handle { cursor: default; }
+.rule[data-variant='mini'] .handle { width: 10px; height: 10px; margin: -5px 0 0 -5px; border-width: 2px; }
+.rule[data-variant='mini'] .handle::before { display: none; }
+.handleLabel { position: absolute; top: 16px; left: 50%; transform: translateX(-50%); display: grid; justify-items: center; line-height: 1.15; white-space: nowrap; }
+.handleLabel span { font-size: 13px; font-weight: 600; color: var(--ink); }
+.handleLabel small { font-size: 11px; color: var(--ink-3); }
+/* Close handles: the trigger's label leans left, the target's right, so they never sit on each other. */
+.rule[data-close='true'] .handle[data-which='trigger'] .handleLabel { transform: translateX(-88%); justify-items: end; }
+.rule[data-close='true'] .handle[data-which='target'] .handleLabel { transform: translateX(-12%); justify-items: start; }
+
+.ticks { position: relative; height: 14px; margin-top: 48px; }
+.ticks > span { position: absolute; transform: translateX(-50%); font-size: 11px; color: var(--ink-3); white-space: nowrap; }
+.ticks > .liqTick { transform: none; color: var(--oxide); font-family: var(--font-ui); }
+.ticks > .liqTick span { font-size: 11px; }
+
+@media (prefers-reduced-motion: reduce) { .now { transition: none; } }
+@media (max-width: 560px) { .liqWord { display: none; } }

@@ -1,0 +1,101 @@
+/* The Seal: the one bold moment. The chamber dims, the charter composes, the mark presses. */
+.chamber {
+  position: fixed; inset: 0; z-index: 2147483000;
+  display: flex; align-items: center; justify-content: center;
+  padding: var(--s6) var(--s4);
+  background: color-mix(in srgb, var(--deck) 88%, transparent);
+  overflow-y: auto;
+  animation: dim 260ms var(--ease-settle, ease) both;
+}
+@keyframes dim { from { opacity: 0; } to { opacity: 1; } }
+
+.doc {
+  width: min(100%, 560px); margin: auto;
+  color: var(--deck-ink);
+  padding: var(--s6) var(--s6) var(--s5);
+  border: 1px solid var(--deck-rule); border-top: 2px solid var(--brass-mark); border-radius: 14px;
+  background: color-mix(in srgb, var(--deck-ink) 3%, var(--deck));
+  box-shadow: var(--elev-3, 0 24px 60px rgba(0, 0, 0, 0.45));
+  font-family: var(--font-ui);
+}
+.head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--s3); margin-bottom: var(--s4); }
+.title { margin: 0; font-family: var(--font-statement); font-weight: 400; font-size: clamp(28px, 4vw, 34px); line-height: 1.1; letter-spacing: -0.015em; }
+.close {
+  flex: none; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%;
+  border: 1px solid var(--deck-rule); background: none; color: var(--deck-ink); cursor: pointer;
+}
+.close svg { width: 18px; height: 18px; }
+.close:disabled { opacity: 0.35; cursor: not-allowed; }
+
+.lines { margin: 0; }
+.line {
+  display: grid; grid-template-columns: 110px 1fr; gap: var(--s3); align-items: baseline;
+  padding: 12px 0; border-top: 1px solid var(--deck-rule); opacity: 0;
+}
+.line:last-child { border-bottom: 1px solid var(--deck-rule); }
+.line[data-shown='true'] { animation: compose 300ms var(--ease-settle, ease) both; animation-delay: calc(var(--i) * 60ms); }
+@keyframes compose { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+.line dt { font-size: var(--size-caption); color: var(--ink-2); }
+.line dd { margin: 0; text-align: right; font-size: 15px; font-weight: 500; overflow-wrap: anywhere; }
+
+.steps { list-style: none; margin: var(--s4) 0 0; padding: 0; display: grid; gap: var(--s2); }
+.step { display: grid; grid-template-columns: 28px 1fr; gap: var(--s3); align-items: start; }
+.stepDot {
+  display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%;
+  border: 1px solid var(--deck-rule); font-size: 12px; color: var(--ink-2);
+}
+.stepDot svg { width: 14px; height: 14px; }
+.step[data-state='signing'] .stepDot, .step[data-state='pending'] .stepDot { border-color: var(--brass-mark); color: var(--brass-lit); }
+.step[data-state='done'] .stepDot { border-color: var(--moss); color: var(--moss); }
+.step[data-state='failed'] .stepDot { border-color: var(--oxide); color: var(--oxide); }
+.stepBody { display: grid; gap: 2px; min-width: 0; }
+.stepLabel { font-size: 14px; line-height: 1.4; }
+.stepState { font-size: 12.5px; color: var(--ink-3); }
+.step[data-state='failed'] .stepState { color: var(--oxide); }
+.hash { font-size: 12px; color: var(--deck-ink); overflow-wrap: anywhere; text-decoration: underline; text-underline-offset: 3px; }
+.caret { display: inline-block; width: 6px; height: 12px; margin-left: 2px; background: var(--brass-lit); animation: blink 900ms steps(2, start) infinite; }
+@keyframes blink { to { visibility: hidden; } }
+
+.mark { display: flex; align-items: center; gap: var(--s3); margin-top: var(--s4); padding-top: var(--s3); border-top: 1px solid var(--deck-rule); }
+.markGlyph {
+  display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; flex: none;
+  color: var(--brass-lit); border: 1px solid var(--brass-mark); transform: scale(1.12); opacity: 0.35;
+  transition: transform 420ms var(--ease-settle, ease), opacity 420ms var(--ease-settle, ease);
+}
+.mark[data-pressed='true'] .markGlyph { transform: none; opacity: 1; animation: bloom 420ms var(--ease-settle, ease) both; }
+@keyframes bloom {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--brass-lit) 0%, transparent); }
+  40% { box-shadow: 0 0 0 8px color-mix(in srgb, var(--brass-lit) 26%, transparent); }
+  100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--brass-lit) 0%, transparent); }
+}
+.markText { font-size: var(--size-caption); color: var(--ink-2); }
+
+.wallet { margin: var(--s4) 0 0; display: grid; justify-items: center; gap: var(--s2); text-align: center; font-size: 14px; color: var(--ink-2); }
+.print { width: 40px; height: 40px; color: var(--brass-mark); stroke-width: 1.25; }
+.note { margin: var(--s3) 0 0; font-size: 14px; line-height: 1.5; color: var(--ink-2); }
+.error { margin: var(--s3) 0 0; font-size: 14px; line-height: 1.5; color: var(--oxide); }
+
+.actions { display: grid; gap: var(--s2); margin-top: var(--s4); }
+.primary {
+  display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 var(--s5);
+  border: 0; border-radius: 999px; background: var(--brass-lit); color: var(--ink-inverse);
+  font: inherit; font-size: 15px; font-weight: 600; text-decoration: none; cursor: pointer;
+}
+.primary:disabled { opacity: 0.55; cursor: progress; }
+.primary:focus-visible, .secondary:focus-visible, .close:focus-visible { outline: 2px solid var(--brass-mark); outline-offset: 3px; }
+.secondary { min-height: 44px; border: 0; background: none; color: var(--ink-2); font: inherit; font-size: 14px; cursor: pointer; }
+.secondary:hover { color: var(--deck-ink); }
+
+@media (prefers-reduced-motion: reduce) {
+  .chamber { animation: none; }
+  .line, .line[data-shown='true'] { animation: none; opacity: 1; transform: none; }
+  .markGlyph { transition: none; transform: none; opacity: 1; }
+  .mark[data-pressed='true'] .markGlyph { animation: none; }
+  .caret { display: none; }
+}
+@media (max-width: 520px) {
+  .chamber { align-items: flex-end; padding: 0; }
+  .doc { border-radius: 16px 16px 0 0; padding: var(--s5) var(--s4) calc(var(--s4) + env(safe-area-inset-bottom)); }
+  .line { grid-template-columns: 1fr; gap: 2px; }
+  .line dd { text-align: left; }
+}
