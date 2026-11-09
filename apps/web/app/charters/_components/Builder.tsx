@@ -84,7 +84,10 @@ export function Builder({ initialChain, initialAccount, initialMarket, demo }: {
     return m?.vToken ?? null
   }, [market, chainId])
 
+  // Only the newest read may land: a slow read for the previous account must never replace the current one.
+  const readSeq = useRef(0)
   const read = useCallback(async (quiet: boolean) => {
+    const my = ++readSeq.current
     if (!quiet) setLoad({ state: 'loading' })
     const q = new URLSearchParams({ chainId: String(chainId), account })
     if (marketParam) q.set('market', marketParam)
@@ -94,12 +97,13 @@ export function Builder({ initialChain, initialAccount, initialMarket, demo }: {
         const r = await fetch(`/api/v1/guards/quote?${q}`, { cache: 'no-store' })
         const j = await r.json() as Quote & { detail?: string; error?: string }
         if (!r.ok) throw Object.assign(new Error(j.detail ?? 'The loan could not be read just now.'), { status: r.status })
+        if (my !== readSeq.current) return
         setLoad({ state: 'ok', quote: j, at: Date.now() })
         return
       } catch (e) {
         const last = quiet || attempt === 1 || (e as { status?: number }).status === 400
         if (!last) { await new Promise((r) => setTimeout(r, 1500)); continue }
-        if (!quiet) setLoad({ state: 'error', detail: e instanceof Error ? e.message : 'The loan could not be read just now.' })
+        if (!quiet && my === readSeq.current) setLoad({ state: 'error', detail: e instanceof Error ? e.message : 'The loan could not be read just now.' })
         return
       }
     }

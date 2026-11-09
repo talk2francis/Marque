@@ -134,14 +134,14 @@ async function range() {
   const createType = created.inputs.find((i) => i.name === 'params')!
   const create = {
     p: { pool: pool.address, mode: 0, feesToOwner: true, twapWindow: 300, maxDeviation: 20, slipTicks: 50, bufferTicks: 20, maxLossBps: 100, maxLeftoverBps: 500, minInterval: 600, maxRebalances: 5 },
-    expiresAt: days(2), tipToken: pool.quote, tipPerAction: 0n, tipBudget: 0n, executors: [EXECUTORS.bound, EXECUTORS.backup], userSalt: `0x${Date.now().toString(16).padStart(64, '0')}` as Hex,
+    expiresAt: days(Number(process.env['E2E_DAYS'] ?? '2')), tipToken: pool.quote, tipPerAction: 0n, tipBudget: 0n, executors: [EXECUTORS.bound, EXECUTORS.backup], userSalt: `0x${Date.now().toString(16).padStart(64, '0')}` as Hex,
   }
   const data = encodeAbiParameters([createType], [create])
   const tx = await send(w.writeContract({ address: c97.npm, abi: npmAbi, functionName: 'safeTransferFrom', args: [owner.address, c97.rangeFactory!, id, data], ...GAS }), 'grant: send the position to the Range Keeper factory')
   const rr = await pub.getTransactionReceipt({ hash: tx })
   const moved = rr.logs.filter((l) => l.address.toLowerCase() === c97.npm.toLowerCase() && l.topics.length === 4)
   const keeper = `0x${moved[moved.length - 1]!.topics[2]!.slice(26)}`
-  save('range', { address: keeper, tx, at: new Date().toISOString(), tokenId: id.toString(), lower, upper: lower + 400 })
+  save(process.env['E2E_KEY'] ?? 'range', { address: keeper, tx, at: new Date().toISOString(), tokenId: id.toString(), lower, upper: lower + 400 })
   console.log('range keeper', keeper, 'position', id)
 }
 

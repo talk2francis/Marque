@@ -1,5 +1,5 @@
 'use client'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useConfig } from 'wagmi'
 import { getPublicClient } from '@wagmi/core'
 import { ArrowRight, ShieldCheck, X } from 'lucide-react'
@@ -40,12 +40,16 @@ export function YieldBuilder({ initialChain, initialAccount, demo }: { initialCh
   const [spend, setSpend] = useState(0)
   const grant = useGrantSteps()
 
+  // Only the newest read may land: switching account or network while one is in flight must never show the old one.
+  const seq = useRef(0)
   const read = useCallback(async () => {
+    const my = ++seq.current
     setLoad('loading')
     try {
       const r = await fetch(`/api/v1/guards/quote?kind=yield&chainId=${chainId}&account=${account}`, { cache: 'no-store' })
       if (!r.ok) throw new Error('read')
       const q = await r.json() as Quote
+      if (my !== seq.current) return
       setQuote(q); setLoad('ok')
       // A market the owner is not a member of, with money in the wallet; otherwise the first.
       const pick = q.markets.find((m) => !m.collateralMember && BigInt(m.balance) > 0n) ?? q.markets.find((m) => !m.collateralMember) ?? q.markets[0]
@@ -54,7 +58,7 @@ export function YieldBuilder({ initialChain, initialAccount, demo }: { initialCh
       const g = await fetch(`/api/v1/guards?chainId=${chainId}&owner=${account}&state=armed&kind=loan&limit=20`, { cache: 'no-store' }).then((x) => (x.ok ? x.json() : null)).catch(() => null)
       const targets = [...(g?.guards ?? []).map((x: { target: string }) => Number(x.target) / 1e18), ...(g?.charters ?? []).map((x: { params: { p: { target: string } } }) => Number(x.params.p.target) / 1e18)]
       setGuardTarget(targets.length ? Math.max(...targets) : null)
-    } catch { setLoad('error') }
+    } catch { if (my === seq.current) setLoad('error') }
   }, [chainId, account])
   useEffect(() => { void read() }, [read])
 

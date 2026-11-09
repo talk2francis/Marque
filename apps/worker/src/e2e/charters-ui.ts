@@ -33,7 +33,8 @@ const step = (s: string) => { (report['steps'] as string[]).push(`${new Date().t
 
 async function send(acc: PrivateKeyAccount, to: Hex, data: Hex | undefined, value: bigint, what: string) {
   const w = createWalletClient({ account: acc, chain, transport: http(RPC, { timeout: 30_000 }) })
-  const hash = await w.sendTransaction({ to, data, value, gasPrice })
+  const gas = (await pub.estimateGas({ account: acc.address, to, data, value })) * 13n / 10n // a tick-initialising mint once used exactly its estimate
+  const hash = await w.sendTransaction({ to, data, value, gasPrice, gas })
   const r = await pub.waitForTransactionReceipt({ hash, timeout: 180_000 })
   step(`${what}: ${r.status} ${hash}`)
   if (r.status !== 'success') throw new Error(`${what} reverted`)
@@ -42,8 +43,70 @@ const call = (abi: string, fn: string, args: unknown[]): Hex =>
   encodeFunctionData({ abi: parseAbi([abi]) as Abi, functionName: fn, args } as Parameters<typeof encodeFunctionData>[0])
 
 /** What the charter needs in the owner's account, set up from this process (testnet faucets). */
+const demo56 = () => privateKeyToAccount(loadKeystore('/root/.marque/charters/demo-wallet'))
+const M56 = { USDT: '0x55d398326f99059fF775485246999027B3197955', USDC: '0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d', WBNB: '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c', VBNB: '0xA07c5b74C9B40447a954e1466938b865b6BBea36' } as const
+
+/** Mainnet Pass cells (grant and end with cents): the position comes from Marque's demo wallet, never anyone else's. */
+async function setup56(acc: PrivateKeyAccount) {
+  const d = demo56()
+  const give = (t: Hex, v: bigint, what: string) => send(d, t, call('function transfer(address,uint256) returns (bool)', 'transfer', [acc.address, v]), 0n, what)
+  if (kind === 'loan') {
+    await send(acc, M56.VBNB, call('function mint() payable', 'mint', []), parseEther('0.002'), 'supply 0.002 BNB to Venus')
+    await send(acc, CHARTER_CHAINS[56].comptroller, call('function enterMarkets(address[]) returns (uint256[])', 'enterMarkets', [[M56.VBNB]]), 0n, 'use it as collateral')
+    await send(acc, CHARTER_CHAINS[56].markets[0]!.vToken, call('function borrow(uint256) returns (uint256)', 'borrow', [parseEther('0.3')]), 0n, 'borrow 0.3 USDT')
+  } else if (kind === 'yield') {
+    await give(M56.USDC, parseEther('1.2'), 'demo gives the Pass 1.2 USDC')
+  } else if (kind === 'grid') {
+    await give(M56.USDT, parseEther('5'), 'demo gives the Pass 5 USDT')
+  } else {
+    await give(M56.USDT, parseEther('2.5'), 'demo gives the Pass 2.5 USDT')
+    await give(M56.WBNB, parseEther('0.004'), 'demo gives the Pass 0.004 WBNB')
+    const pool = V2[56].pools[0]!
+    const [, tick] = await pub.readContract({ address: pool.address, abi: parseAbi(['function slot0() view returns (uint160, int24, uint16, uint16, uint16, uint32, bool)']), functionName: 'slot0' })
+    const [t0, t1] = pool.base.toLowerCase() < pool.quote.toLowerCase() ? [pool.base, pool.quote] : [pool.quote, pool.base]
+    const amt = (t: string) => (t.toLowerCase() === M56.USDT.toLowerCase() ? parseEther('2.5') : parseEther('0.004'))
+    for (const t of [t0, t1]) await send(acc, t, call('function approve(address,uint256) returns (bool)', 'approve', [V2[56].npm, amt(t)]), 0n, 'allow the position manager for this mint')
+    await send(acc, V2[56].npm, call('function mint((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256)) payable returns (uint256,uint128,uint256,uint256)', 'mint',
+      [[t0, t1, 100, tick - 250, tick + 250, amt(t0), amt(t1), 0n, 0n, acc.address, BigInt(Math.floor(Date.now() / 1000) + 900)]]), 0n, 'mint a 500-tick position')
+    for (const t of [t0, t1]) await send(acc, t, call('function approve(address,uint256) returns (bool)', 'approve', [V2[56].npm, 0n]), 0n, 'clear the mint allowance')
+  }
+}
+
+/** After End on mainnet: unwind the Pass's position and send everything back to Marque's deployer. */
+async function unwind56(acc: PrivateKeyAccount) {
+  const to = funder.address
+  const balOf = (t: Hex) => pub.readContract({ address: t, abi: parseAbi(['function balanceOf(address) view returns (uint256)']), functionName: 'balanceOf', args: [acc.address] })
+  if (kind === 'loan') {
+    const vUSDT = CHARTER_CHAINS[56].markets[0]!.vToken
+    await send(acc, M56.USDT, call('function approve(address,uint256) returns (bool)', 'approve', [vUSDT, await balOf(M56.USDT)]), 0n, 'allow the repayment')
+    await send(acc, vUSDT, call('function repayBorrow(uint256) returns (uint256)', 'repayBorrow', [2n ** 256n - 1n]), 0n, 'repay the loan in full')
+    await send(acc, M56.USDT, call('function approve(address,uint256) returns (bool)', 'approve', [vUSDT, 0n]), 0n, 'clear the repayment allowance')
+    await send(acc, M56.VBNB, call('function redeem(uint256) returns (uint256)', 'redeem', [await balOf(M56.VBNB)]), 0n, 'redeem the BNB collateral')
+  }
+  if (kind === 'yield') {
+    const v = CHARTER_CHAINS[56].markets[1]!.vToken
+    const vb = await balOf(v)
+    if (vb > 0n) await send(acc, v, call('function redeem(uint256) returns (uint256)', 'redeem', [vb]), 0n, 'redeem the vUSDC')
+  }
+  if (kind === 'range') {
+    const npm = V2[56].npm
+    const n = await pub.readContract({ address: npm, abi: parseAbi(['function balanceOf(address) view returns (uint256)']), functionName: 'balanceOf', args: [acc.address] })
+    for (let i = 0n; i < n; i++) {
+      const id = await pub.readContract({ address: npm, abi: parseAbi(['function tokenOfOwnerByIndex(address,uint256) view returns (uint256)']), functionName: 'tokenOfOwnerByIndex', args: [acc.address, 0n] })
+      const pos = await pub.readContract({ address: npm, abi: parseAbi(['function positions(uint256) view returns (uint96, address, address, address, uint24, int24, int24, uint128, uint256, uint256, uint128, uint128)']), functionName: 'positions', args: [id] })
+      if (pos[7] > 0n) await send(acc, npm, call('function decreaseLiquidity((uint256,uint128,uint256,uint256,uint256)) returns (uint256,uint256)', 'decreaseLiquidity', [[id, pos[7], 0n, 0n, BigInt(Math.floor(Date.now() / 1000) + 900)]]), 0n, 'remove the liquidity')
+      await send(acc, npm, call('function collect((uint256,address,uint128,uint128)) returns (uint256,uint256)', 'collect', [[id, to, 2n ** 128n - 1n, 2n ** 128n - 1n]]), 0n, 'collect it to the deployer')
+      await send(acc, npm, call('function burn(uint256)', 'burn', [id]), 0n, 'burn the empty position')
+    }
+  }
+  for (const t of [M56.USDT, M56.USDC, M56.WBNB]) { const b = await balOf(t); if (b > 0n) await send(acc, t, call('function transfer(address,uint256) returns (bool)', 'transfer', [to, b]), 0n, 'return tokens to the deployer') }
+  const gp = await pub.getGasPrice()
+  const left = await pub.getBalance({ address: acc.address }) - 21_000n * gp * 2n
+  if (left > 0n) { const h = await createWalletClient({ account: acc, chain, transport: http(RPC) }).sendTransaction({ to, value: left, gas: 21_000n, gasPrice: gp }); await pub.waitForTransactionReceipt({ hash: h }); step(`return BNB to the deployer ${h}`) }
+}
+
 async function setup(acc: PrivateKeyAccount) {
-  if (chainId !== 97) return // mainnet setups are prepared by the Q8 table, never here
+  if (chainId === 56) return setup56(acc)
   const m = CHARTER_CHAINS[97].markets
   if (kind === 'loan') {
     const debt = await pub.readContract({ address: m[0]!.vToken, abi: parseAbi(['function borrowBalanceStored(address) view returns (uint256)']), functionName: 'borrowBalanceStored', args: [acc.address] })
@@ -178,7 +241,7 @@ async function main() {
     const address = JSON.parse(rec).address as Hex
     step(`Pass created ${address}`)
     // Fund the Pass for gas, then read its key through the site's own Export key flow (never printed).
-    await send(funder, address, undefined, chainId === 97 ? parseEther('0.008') : parseEther(process.env['E2E_PASS_BNB'] ?? '0.002'), 'fund the Pass with BNB for gas')
+    await send(funder, address, undefined, chainId === 97 ? parseEther(kind === 'loan' ? '0.008' : '0.006') : parseEther(process.env['E2E_PASS_BNB'] ?? '0.002'), 'fund the Pass with BNB for gas')
     await page.getByRole('button', { name: new RegExp(address.slice(2, 6), 'i') }).first().click().catch(async () => { await page.locator('header button').filter({ hasText: /0x/ }).first().click() })
     await page.getByRole('menuitem', { name: 'Export key' }).click()
     await page.getByRole('dialog').getByRole('button', { name: 'Confirm with passkey' }).click()
@@ -195,7 +258,7 @@ async function main() {
   await page.waitForFunction(() => !/Connect the wallet that owns/.test(document.body.innerText), null, { timeout: 60_000 })
   if (kind === 'loan') {
     await page.getByRole('button', { name: 'Test it now' }).click()
-    await page.fill('#budget', '3')
+    await page.fill('#budget', chainId === 56 ? '0.2' : '3')
   }
   await page.waitForTimeout(1500)
   await shot('builder')
@@ -215,7 +278,7 @@ async function main() {
   report['charter'] = href
   // Wait for a real action by the worker (grid and range wait for the fixture market maker).
   const [, , , addr] = (href ?? '').split('/')
-  const until = Date.now() + (kind === 'grid' || kind === 'range' ? 60 : 12) * 60_000
+  const until = Date.now() + (chainId === 56 ? 3 : kind === 'grid' || kind === 'range' ? 60 : 12) * 60_000
   let actions = 0
   while (Date.now() < until) {
     const d = await fetch(`${BASE}/api/v1/guards/${chainId}/${addr}`).then((r) => (r.ok ? r.json() : null)).catch(() => null) as { charter?: { actions: number } } | null
@@ -242,6 +305,7 @@ async function main() {
   await page.waitForTimeout(3000)
   await shot('ended')
   step('ended from the charter page')
+  if (chainId === 56 && walletType === 'pass') await unwind56(owner)
   report['errors'] = errors
   writeFileSync(`${out}/${kind}-${walletType}-${chainId}.json`, JSON.stringify(report, null, 2))
   await browser.close()

@@ -1,5 +1,5 @@
 'use client'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useConfig } from 'wagmi'
 import { getPublicClient } from '@wagmi/core'
 import { ArrowRight, ShieldCheck, X } from 'lucide-react'
@@ -45,16 +45,20 @@ export function RangeBuilder({ initialChain, initialAccount, demo }: { initialCh
   const [backup, setBackup] = useState(true)
   const grant = useGrantSteps()
 
+  // Only the newest read may land: switching account or network while one is in flight must never show the old one.
+  const seq = useRef(0)
   const read = useCallback(async () => {
+    const my = ++seq.current
     setLoad('loading')
     try {
       const r = await fetch(`/api/v1/guards/quote?kind=range&chainId=${chainId}&account=${account}`, { cache: 'no-store' })
       if (!r.ok) throw new Error('read')
       const q = await r.json() as Quote
+      if (my !== seq.current) return
       setQuote(q); setLoad('ok')
       const keepable = q.positionsOnReviewedPools.filter((x) => !isFullRange(x.lower, x.upper))
       setPick((p) => (p && keepable.some((x) => x.tokenId === p) ? p : keepable[0]?.tokenId ?? null))
-    } catch { setLoad('error') }
+    } catch { if (my === seq.current) setLoad('error') }
   }, [chainId, account])
   useEffect(() => { void read() }, [read])
 
