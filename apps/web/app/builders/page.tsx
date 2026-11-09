@@ -1,3 +1,5 @@
+import { chartersPublic } from '../../lib/charters-access'
+import { CharterKit } from '../_components/charters/CharterKit'
 import { BRAND } from '@marque/ui'
 import { ArrowRight, Check, Hammer, Link2, Radar } from 'lucide-react'
 import { SiteHeader, SiteFooter } from '../_components/SiteHeader'
@@ -100,6 +102,8 @@ export default async function ForgePage({ searchParams }: { searchParams: Promis
             </ul>
           ) : <p className={styles.fine}>No task shape went under-priced 3 or more times in the last 7 days. This fills from real requests buyers send through Compare; aggregates only, never addresses.</p>}
         </section>
+
+        {chartersPublic() ? <CharterKit className={styles.section} /> : null}
 
         <section className={styles.section} aria-labelledby="split">
           <h2 id="split">Who does what</h2>

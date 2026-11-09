@@ -1,3 +1,6 @@
+import { cookies } from 'next/headers'
+import { chartersVisible, PREVIEW_COOKIE } from '../../lib/charters-access'
+import { ChartersJudge } from '../_components/charters/ChartersJudge'
 import { cachedProjection } from '@marque/db'
 import { venusReader } from '@marque/positions'
 import { archiveClient, publicClient } from '@marque/chain'
@@ -127,6 +130,7 @@ export default async function JudgePage() {
       action: <><a className="btn btn--sm" href={`/quest/${QUEST}`}>{funderClass(QUEST) === 'team' ? 'A team wallet\'s quest' : 'A wallet\'s quest'}</a><a className="btn btn--sm" href="/docs/mcp">MCP</a></>,
     },
   ]
+  const chartersOn = chartersVisible((await cookies()).get(PREVIEW_COOKIE)?.value)
   return (
     <>
       <SiteHeader />
@@ -136,6 +140,7 @@ export default async function JudgePage() {
           <h1 className="t-display">Marque in six steps.</h1>
           <p className={styles.lede}>From a position that needs work to the action its owner would sign.</p>
         </header>
+        {chartersOn ? <ChartersJudge className={styles.jobs} /> : null}
         {isClosed(Date.now()) ? (
           <section aria-labelledby="after-close">
             <h2 id="after-close" className={styles.jobsTitle}>Since Set and Earn closed, start here</h2>
