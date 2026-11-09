@@ -34,11 +34,16 @@
 .iconBtn:hover, .iconBtn:focus-visible { color: var(--ink); background: color-mix(in srgb, var(--ink) 7%, transparent); }
 .iconBtn svg { width: 16px; height: 16px; }
 .tag { display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 10px; margin-left: 4px; border-radius: var(--r-pill); font-size: 12px; color: var(--lane-practice); border: 1px solid color-mix(in srgb, var(--lane-practice) 45%, transparent); background: color-mix(in srgb, var(--lane-practice) 10%, transparent); }
-.toggle { display: inline-flex; padding: 4px; gap: 4px; border: 1px solid var(--hair-2); border-radius: 14px; background: var(--sunk); }
-.toggle button { appearance: none; display: inline-flex; align-items: center; gap: 8px; border: 0; background: none; font: inherit; font-size: 14px; font-weight: 500; color: var(--ink-2); height: 38px; padding: 0 18px; border-radius: 10px; cursor: pointer; transition: background-color var(--t-fast) var(--ease), color var(--t-fast) var(--ease); }
-.toggle button svg { width: 16px; height: 16px; }
+.toggle { display: inline-grid; grid-template-columns: 1fr 1fr; padding: 4px; gap: 4px; border: 1px solid var(--hair-2); border-radius: 16px; background: var(--sunk); }
+.toggle button { appearance: none; display: inline-flex; align-items: center; gap: 10px; border: 0; background: none; font: inherit; text-align: left; color: var(--ink-2); min-height: 52px; padding: 6px 16px 6px 14px; border-radius: 12px; cursor: pointer; transition: background-color var(--t-fast) var(--ease), color var(--t-fast) var(--ease); }
+.toggle button span { display: grid; gap: 1px; line-height: 1.2; }
+.toggle button b { font-size: 14.5px; font-weight: 600; }
+.toggle button small { font-size: 11.5px; color: var(--ink-3); }
+.toggle button svg { flex: none; width: 18px; height: 18px; }
 .toggle button[data-on] { background: var(--panel-2); color: var(--ink); box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 6px 16px -10px rgba(0, 0, 0, 0.6); }
-.toggle button[data-on] svg { color: var(--v-gold); }
+.toggle button[data-on][data-side='hiring'] svg { color: var(--v-gold); }
+.toggle button[data-on][data-side='building'] svg { color: var(--v-azure); }
+@media (max-width: 520px) { .toggle { width: 100%; } .toggle button small { display: none; } }
 .toggle button:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 
 /* ---- at a glance: four tiles, each with a colour edge */
@@ -294,3 +299,26 @@ a.stat:hover { border-color: var(--hair-2); }
 @media (max-width: 560px) { .recheckPanel { padding: 16px; } .recheckToggle { width: 100%; } .recheckAnswer { padding: 12px; } }
 
 @media (max-width: 560px) { .agentActivity dt { min-height: 2.8em; } }
+
+/* ---- The Workshop: switching to Building changes the room, not just the numbers.
+   Steel replaces gold, a faint blueprint grid sits behind the title, and the body settles in. */
+.wrap { position: relative; isolation: isolate; }
+.wrap[data-room='building']::before {
+  content: ''; position: absolute; z-index: -1; inset: -40px calc(-1 * var(--margin, 16px)) auto; height: 360px; pointer-events: none;
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--v-azure) 9%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--v-azure) 9%, transparent) 1px, transparent 1px);
+  background-size: 28px 28px;
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, transparent 100%);
+  animation: roomFade 420ms var(--ease, ease) both;
+}
+.wrap[data-room='building'] .kicker { color: var(--v-azure); }
+.wrap[data-room='building'] .portrait { box-shadow: 0 0 0 2px color-mix(in srgb, var(--v-azure) 55%, transparent); border-radius: 50%; }
+.body[data-room-body] { animation: roomIn 280ms var(--ease, ease) both; }
+@keyframes roomIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes roomFade { from { opacity: 0; } to { opacity: 1; } }
+.agentLine { margin: 0; font-size: 13.5px; color: var(--ink-2); }
+@media (prefers-reduced-motion: reduce) {
+  .wrap[data-room='building']::before, .body[data-room-body] { animation: none; }
+}

@@ -295,9 +295,12 @@ export function Marketplace({ category: fixedCategory, initial }: { category?: s
   // keystroke of a Ready search doubled the load of typing.
   const ladderQs = ready && state.tab === 'listed' ? apiQuery({ ...state, tab: 'listed', stage: null, page: 0 }) : null
   useEffect(() => {
-    if (!ladderQs) return
+    // The default view (mainnet, no filters) has an empty query string: '' is a real query here, only null means
+    // "not on All listed". A falsy check left the ladder at "…" in exactly the most common view (9 Nov).
+    if (ladderQs === null) return
+    setLadder(null) // never show the last filters' counts under new ones
     const controller = new AbortController()
-    fetch(`/api/v1/marketplace/ladder?${ladderQs}`, { cache: 'no-store', signal: controller.signal })
+    fetch(`/api/v1/marketplace/ladder${ladderQs ? `?${ladderQs}` : ''}`, { cache: 'no-store', signal: controller.signal })
       .then((r) => (r.ok ? r.json() : null)).then((j: { ladder?: LadderCounts } | null) => { if (j?.ladder) setLadder(j.ladder) })
       .catch(() => undefined)
     return () => controller.abort()

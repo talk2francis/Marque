@@ -1,9 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import { Button, Chip, ProvenanceChip } from '@marque/ui'
-import styles from '../builders.module.css'
+import { Check, X } from 'lucide-react'
+import { Button } from '@marque/ui'
+import { testName } from '../../../lib/builder-journey'
 import { track } from '../../../lib/track'
+import styles from './testform.module.css'
 
 interface Diff {
   field: string
@@ -52,11 +54,11 @@ const HINT: Record<string, string> = {
 }
 
 const TESTS = [
-  { id: 'MCS-REB-1', label: 'Rebalancing: PancakeSwap V3 range' },
-  { id: 'MCS-GRID-1', label: 'Grid trading: spacing, allocation, fee drag' },
-  { id: 'MCS-YIELD-1', label: 'Yield: net APR at size, sourced' },
-  { id: 'MCS-HF-1', label: 'Health factor: Venus, exact repay' },
-  { id: 'MCS-RYIELD-1', label: 'Realised yield: Venus rates between archived blocks' },
+  { id: 'MCS-REB-1', label: 'PancakeSwap V3 range' },
+  { id: 'MCS-GRID-1', label: 'spacing, allocation, fee drag' },
+  { id: 'MCS-YIELD-1', label: 'net APR at size, sourced' },
+  { id: 'MCS-HF-1', label: 'Venus, exact repay' },
+  { id: 'MCS-RYIELD-1', label: 'Venus rates between archived blocks' },
 ] as const
 
 /**
@@ -72,12 +74,24 @@ const REFERENCE_ENDPOINTS = [
   { slug: 'tidemark', name: 'Tidemark', cat: 'realised yield', testId: 'MCS-RYIELD-1' },
 ] as const
 const refUrl = (slug: string) => `https://marque.trade/agents/${slug}/.well-known/agent-card.json`
+/** "healthFactor" -> "Health factor": a field as a person reads it (the exact key stays in the full table). */
+const words = (f: string) => f.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/^./, (c) => c.toUpperCase()).replace(/ ([A-Z])(?=[a-z])/g, (m) => m.toLowerCase())
 
-export function TestForm({ initialEndpoint = '', initialTestId = 'MCS-REB-1', initialKind = 'a2a', onResult }: { initialEndpoint?: string; initialTestId?: string; initialKind?: 'a2a' | 'mcp'; onResult?: (result: BenchResult) => void }) {
+/**
+ * The Bench test (SPEC-BUILDERS 6): three steps, then a verdict. Where it goes, permission to send it, run.
+ * The settings that are almost always right (interface, test) are shown as one line with Change; the long
+ * explanations sit behind "What happens?" and "What goes here?".
+ */
+export function TestForm({ initialEndpoint = '', initialTestId = 'MCS-REB-1', initialKind = 'a2a', onResult, showReference = true }: {
+  initialEndpoint?: string; initialTestId?: string; initialKind?: 'a2a' | 'mcp'; onResult?: (result: BenchResult) => void
+  /** Offer Marque's reference agents as targets (off in My Marque, where the builder tests their own). */
+  showReference?: boolean
+}) {
   const [endpoint, setEndpoint] = useState(initialEndpoint)
   const [testId, setTestId] = useState<string>(initialTestId)
   const [kind, setKind] = useState<'a2a' | 'mcp'>(initialKind)
   const [taskConsent, setTaskConsent] = useState(false)
+  const [changing, setChanging] = useState(false)
   const [running, setRunning] = useState(false)
   const [result, setResult] = useState<BenchResult | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -92,125 +106,147 @@ export function TestForm({ initialEndpoint = '', initialTestId = 'MCS-REB-1', in
         body: JSON.stringify({ endpoint: endpoint.trim(), testId, kind, taskConsent }),
       })
       const body = (await res.json()) as BenchResult & { error?: string; detail?: string }
-      if (!res.ok) { setError(body.detail ?? body.error ?? `run failed (${res.status})`); return }
+      if (!res.ok) { setError(body.detail ?? body.error ?? `The test could not run (${res.status}).`); return }
       setResult(body)
       onResult?.(body)
       track('builder_test_run', { test: testId })
       track('preflight_run', { via: 'builders' })
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'the run failed')
+      setError(err instanceof Error ? err.message : 'The test could not run.')
     } finally {
       setRunning(false)
     }
   }
 
   const failed = result?.diffs.filter((d) => !d.pass) ?? []
+  const test = TESTS.find((t) => t.id === testId)
 
   return (
-    <>
+    <div className={styles.tf}>
       <form onSubmit={run}>
-        <p className={styles.note}>This tool sends a real A2A or MCP task. It does not pay an agent or authorize asset actions. Use only an endpoint you control or have permission to test, configured to accept this task without payment or other side effects.</p>
-        <label className={styles.note}><input type="checkbox" checked={taskConsent} onChange={e => setTaskConsent(e.target.checked)} /> I have permission and this endpoint accepts the test without payment or other side effects.</label>
-        <div className={styles.field}>
-          <label htmlFor="endpoint">Your agent&rsquo;s endpoint</label>
-          <input
-            id="endpoint" type="url" required value={endpoint} spellCheck={false} autoComplete="off"
-            onChange={(e) => { setEndpoint(e.target.value); setTaskConsent(false) }}
-            placeholder="https://your-agent.example/.well-known/agent-card.json"
-          />
-          <span className={styles.hint}>
-            For A2A, the agent card URL. We read the card and call the <code>url</code> inside it: posting at the card itself is a mistake that once looked like thirty dead agents and
-            was a broken client.
-          </span>
+        <ol className={styles.steps}>
+          <li>
+            <span className={styles.num} aria-hidden="true">1</span>
+            <div className={styles.stepBody}>
+              <label htmlFor="endpoint" className={styles.stepTitle}>Where we send the task</label>
+              <input
+                id="endpoint" type="url" required value={endpoint} spellCheck={false} autoComplete="off" className={styles.input}
+                onChange={(e) => { setEndpoint(e.target.value); setTaskConsent(false) }}
+                placeholder="https://your-agent.example/.well-known/agent-card.json"
+              />
+              <div className={styles.settings}>
+                <span><b>{kind === 'a2a' ? 'A2A' : 'MCP'}</b> · <b>{testName(testId)}</b>{test ? <span className={styles.muted}> ({test.label})</span> : null}</span>
+                <button type="button" className={styles.textBtn} aria-expanded={changing} onClick={() => setChanging((v) => !v)}>{changing ? 'Done' : 'Change'}</button>
+              </div>
+              {changing ? (
+                <div className={styles.selects}>
+                  <label>How it talks
+                    <select value={kind} onChange={(e) => { setTaskConsent(false); setKind(e.target.value as 'a2a' | 'mcp') }}>
+                      <option value="a2a">A2A (agent card, message/send)</option>
+                      <option value="mcp">MCP (streamable HTTP)</option>
+                    </select>
+                  </label>
+                  <label>Which test
+                    <select value={testId} onChange={(e) => { setTaskConsent(false); setTestId(e.target.value) }}>
+                      {TESTS.map((t) => <option key={t.id} value={t.id}>{testName(t.id)}: {t.label}</option>)}
+                    </select>
+                  </label>
+                </div>
+              ) : null}
+              <details className={styles.more}>
+                <summary>What goes here?</summary>
+                <p>For A2A, your agent card&apos;s address (it usually ends in <code>/.well-known/agent-card.json</code>). We read the card and send the task to the <code>url</code> written inside it. For MCP, the server&apos;s streamable HTTP address.</p>
+              </details>
+            </div>
+          </li>
+          <li>
+            <span className={styles.num} aria-hidden="true">2</span>
+            <div className={styles.stepBody}>
+              <label className={styles.consent}>
+                <input type="checkbox" checked={taskConsent} onChange={(e) => setTaskConsent(e.target.checked)} />
+                <span>I run this agent, or have permission to test it, and it answers tests without asking for payment.</span>
+              </label>
+              <details className={styles.more}>
+                <summary>What happens when I run it?</summary>
+                <p>We capture a real case from the chain, send your agent one task about it, and compare each field of its answer with what the chain says. Nothing is paid, nothing is signed, and no money or asset moves. The result is private to this page: it does not change your agent&apos;s public record.</p>
+              </details>
+            </div>
+          </li>
+          <li>
+            <span className={styles.num} aria-hidden="true">3</span>
+            <div className={styles.stepBody}>
+              <div className={styles.runRow}>
+                <Button variant="primary" size="md" type="submit" disabled={running || !taskConsent || !endpoint.trim()}>
+                  {running ? 'Testing…' : 'Run the test'}
+                </Button>
+                <span className={styles.muted} aria-live="polite">{running ? 'Reading the chain, then asking your agent. Usually under a minute.' : !taskConsent ? 'Tick step 2 first.' : ''}</span>
+              </div>
+            </div>
+          </li>
+        </ol>
+      </form>
+
+      {showReference ? (
+        <details className={styles.more}>
+          <summary>No agent of your own? Try one of Marque&apos;s</summary>
           <div className={styles.refRow}>
-            <span className={styles.refLabel}>No agent of your own? Try a reference endpoint:</span>
             {REFERENCE_ENDPOINTS.map((r) => (
-              <button
-                key={r.slug}
-                type="button"
-                className={styles.refChip}
-                onClick={() => { setTaskConsent(false); setEndpoint(refUrl(r.slug)); setKind('a2a'); setTestId(r.testId) }}
-              >
-                {r.name} <span className={styles.refCat}>{r.cat}</span>
+              <button key={r.slug} type="button" className={styles.refChip}
+                onClick={() => { setTaskConsent(false); setEndpoint(refUrl(r.slug)); setKind('a2a'); setTestId(r.testId) }}>
+                {r.name} <span>{r.cat}</span>
               </button>
             ))}
           </div>
-        </div>
+        </details>
+      ) : null}
 
-        <div className={styles.field}>
-          <label htmlFor="kind">Interface</label>
-          <select id="kind" value={kind} onChange={(e) => { setTaskConsent(false); setKind(e.target.value as 'a2a' | 'mcp') }}>
-            <option value="a2a">A2A: agent card and message/send</option>
-            <option value="mcp">MCP: streamable HTTP</option>
-          </select>
-        </div>
+      {error ? <p className={styles.error} role="alert">{error}</p> : null}
 
-        <div className={styles.field}>
-          <label htmlFor="test">Category</label>
-          <select id="test" value={testId} onChange={(e) => { setTaskConsent(false); setTestId(e.target.value) }}>
-            {TESTS.map((t) => <option key={t.id} value={t.id}>{t.id} · {t.label}</option>)}
-          </select>
-        </div>
-
-        <div className={styles.actions}>
-          <Button variant="primary" size="md" type="submit" disabled={running || !taskConsent}>
-            {running ? 'Capturing a case and running…' : 'Run the test'}
-          </Button>
-          {running && <span className={styles.note}>Reading chain state, then calling your endpoint.</span>}
-        </div>
-      </form>
-
-      {error && <p className={styles.warn}>{error}</p>}
-
-      {result && (
-        <div className={styles.section}>
+      {result ? (
+        <section className={styles.result} data-pass={result.pass ? 'true' : 'false'} aria-live="polite">
           <div className={styles.verdict}>
-            <span className={`${styles.verdictWord} ${result.pass ? styles.pass : styles.fail}`}>
-              {result.pass ? 'Pass' : 'Fail'}
-            </span>
-            <Chip tone="chain">{result.testId}</Chip>
-            <span className={styles.note}>
-              {result.latencyMs} ms · case {result.caseId} · block {result.blockNumber}
-            </span>
+            <span className={styles.verdictIcon} aria-hidden="true">{result.pass ? <Check /> : <X />}</span>
+            <div>
+              <h3>{result.error ? 'No answer we could check' : result.pass ? 'Passed' : 'Did not pass'}</h3>
+              <p>{result.error
+                ? 'Your agent did not send back an answer we could compare. That is recorded as no answer, which is different from a wrong one.'
+                : failed.length === 0 ? `All ${result.diffs.length} checks matched the chain.` : `${failed.length} of ${result.diffs.length} checks did not match. Fix these first:`}</p>
+            </div>
           </div>
-
-          {result.error ? (
-            <p className={styles.warn}>
-              Your endpoint did not produce an answer we could grade: {result.error}
-              <br />
-              Failing to answer is recorded as a different fact from answering wrongly, so no
-              field diff is shown: there was nothing to compare.
-            </p>
-          ) : (
-            <>
-              <p className={styles.note}>
-                <ProvenanceChip provenance="TESTED" />
-                {failed.length === 0
-                  ? `All ${result.diffs.length} checks passed.`
-                  : `${failed.length} of ${result.diffs.length} checks failed. Failures are marked and listed first.`}
-              </p>
-              <table className={styles.diffs}>
-                <thead>
-                  <tr><th>Field</th><th>Expected</th><th>Your answer</th><th>Tolerance</th><th>Why it failed</th></tr>
-                </thead>
-                <tbody>
-                  {[...failed, ...result.diffs.filter((d) => d.pass)].map((d) => (
-                    <tr key={d.field} className={`${styles.diffRow} ${d.pass ? '' : styles.diffFail}`}>
-                      <td className="mono">{d.field}</td>
-                      <td className="mono">{d.expected}</td>
-                      <td className="mono">{d.actual}</td>
-                      <td className="mono">{d.tolerance}</td>
-                      <td className="wrap">{d.pass ? '' : <>{d.detail ?? ''}{HINT[d.field] ? <span className={styles.hint}>{HINT[d.field]}</span> : null}</>}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </>
-          )}
-
-          <p className={styles.note}>{result.note}</p>
-        </div>
-      )}
-    </>
+          {result.error ? <p className={styles.errText}>{result.error}</p> : null}
+          {failed.length ? (
+            <ul className={styles.fails}>
+              {failed.map((d) => (
+                <li key={d.field}>
+                  <b>{words(d.field)}</b>
+                  <span>Expected <code>{d.expected}</code>, got <code>{d.actual}</code>{d.tolerance ? <span className={styles.muted}> (allowed: {d.tolerance})</span> : null}</span>
+                  {d.detail ? <span className={styles.muted}>{d.detail}</span> : null}
+                  {HINT[d.field] ? <span className={styles.hint}>How to fix: {HINT[d.field]}</span> : null}
+                </li>
+              ))}
+            </ul>
+          ) : null}
+          <p className={styles.meta}>{testName(result.testId)} · answered in {result.latencyMs.toLocaleString('en-US')} ms · case {result.caseId} at block {Number(result.blockNumber).toLocaleString('en-US')}</p>
+          {result.diffs.length ? (
+            <details className={styles.more}>
+              <summary>All {result.diffs.length} checks</summary>
+              <div className={styles.tableWrap}>
+                <table className={styles.table}>
+                  <thead><tr><th>Field</th><th>Expected</th><th>Your answer</th><th>Allowed</th><th>Result</th></tr></thead>
+                  <tbody>
+                    {[...failed, ...result.diffs.filter((d) => d.pass)].map((d) => (
+                      <tr key={d.field} data-pass={d.pass ? 'true' : 'false'}>
+                        <td className="mono">{d.field}</td><td className="mono">{d.expected}</td><td className="mono">{d.actual}</td><td className="mono">{d.tolerance}</td><td>{d.pass ? 'Matches' : 'Differs'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              {result.note ? <p className={styles.muted}>{result.note}</p> : null}
+            </details>
+          ) : null}
+        </section>
+      ) : null}
+    </div>
   )
 }

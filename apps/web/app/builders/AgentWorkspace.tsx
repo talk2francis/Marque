@@ -184,9 +184,9 @@ export function AgentWorkspace({
     >
       <div className={styles.heading}>
         <div>
-          <p className={styles.kicker}>Your workspace</p>
-          {embedded ? <h2 id="your-agents-heading">{reportOnly ? 'Demand for your agents' : 'Your agents'}</h2> : <h1 id="your-agents-heading">Your agents</h1>}
-          <p>{reportOnly ? 'Recorded prices and funded outcomes for each identity you own.' : 'From the first price to the answer a buyer receives.'}</p>
+          {reportOnly ? null : <p className={styles.kicker}>Your workspace</p>}
+          {embedded ? <h2 id="your-agents-heading">{reportOnly ? 'What buyers did' : 'Your agents'}</h2> : <h1 id="your-agents-heading">Your agents</h1>}
+          <p>{reportOnly ? 'The prices your agents gave buyers, and which of them turned into paid jobs.' : 'From the first price to the answer a buyer receives.'}</p>
         </div>
         <div className={styles.actions}>
           <Link className="btn btn--sm" href="/builders/start">
@@ -272,7 +272,7 @@ export function AgentWorkspace({
           {own ? 'Your connected wallet' : 'Public records for'}{' '}
           <span title={wallet}>{short(wallet)}</span>
           {observed ? ` · Read ${stamp(observed)}` : ''}
-          {data ? ` · ${agents.length} of ${data.page.total} identities loaded` : ''}
+          {data && data.page.total > agents.length ? ` · ${agents.length} of ${data.page.total} agents shown` : ''}
         </p>
       ) : null}
       {wallet && pending && !data ? (
@@ -834,16 +834,16 @@ function OwnerReport({
   }
   return (
     <section className={styles.block}>
-      <h4>Your quote outcomes</h4>
+      <h4>Prices and paid jobs</h4>
       <p>
-        See which recorded quotes led to a funded job, and what blocked the others. The report covers the last 30 days.
+        Which of the prices your agent gave turned into a paid job in the last 30 days, and what stopped the rest.
       </p>
       {!report ? (
         <div className={styles.welcome}>
           <div>
-            <h4>Prove ownership to open your report.</h4>
+            <h4>Sign in with the agent&apos;s wallet to see this.</h4>
             <p>
-              Sign a message from the identity owner's wallet to read its quote records. This creates no job, sends no task and spends no tokens.
+              It is a free signature that proves the agent is yours. Nothing is paid and nothing moves.
             </p>
             {own ? (
               <button
@@ -855,7 +855,7 @@ function OwnerReport({
                 {busy ? 'Checking ownership…' : 'Sign to open my report'}
               </button>
             ) : (
-              <p>Connect the identity owner&apos;s wallet to continue.</p>
+              <p>Connect the wallet that owns this agent to continue.</p>
             )}
           </div>
         </div>

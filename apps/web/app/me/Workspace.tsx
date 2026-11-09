@@ -31,6 +31,8 @@ import { RecheckList } from './RecheckList'
 import { AgentLoop } from '../builders/AgentLoop'
 import { AgentWorkspace } from '../builders/AgentWorkspace'
 import { WorkspaceBench } from './Bench'
+import { JourneyRail, NextStep, WorkshopStrip, WorkshopTools } from './Workshop'
+import { journeyOf, type JourneyAgent } from '../../lib/builder-journey'
 import { workspaceNavigation, todayLanes, type TodayLane, type WorkspaceNeed } from '../../lib/workspace-nav'
 
 /**
@@ -51,6 +53,11 @@ const until = (iso: string | null) => {
   if (ms <= 0) return 'now'
   const h = Math.floor(ms / 3_600_000)
   return h >= 48 ? `in ${Math.floor(h / 24)} days` : h >= 1 ? `in ${h} h` : `in ${Math.max(1, Math.floor(ms / 60_000))} min`
+}
+/** "just now", "4 min ago", "2 h ago": when something was read, as a person says it (the exact time stays in the title). */
+const sinceWords = (iso: string) => {
+  const s = Math.max(0, Math.round((Date.now() - Date.parse(iso)) / 1000))
+  return s < 45 ? 'just now' : s < 3600 ? `${Math.max(1, Math.round(s / 60))} min ago` : s < 86_400 ? `${Math.round(s / 3600)} h ago` : new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' })
 }
 const urgency = (iso: string | null) => { if (!iso) return 'calm'; const h = (Date.parse(iso) - Date.now()) / 3_600_000; return h < 24 ? 'urgent' : h < 72 ? 'soon' : 'calm' }
 
@@ -74,6 +81,8 @@ export function Workspace({ addrParam }: { addrParam: string | null }) {
     if (nav.view !== view) setView(nav.view)
   }, [nav.view, view])
   const tab = nav.tab
+  // The Workshop's "Test it now" opens the Test bench on that agent.
+  const [benchPick, setBenchPick] = useState<string | null>(null)
   const { profile } = useWalletProfile(address)
   const [editing, setEditing] = useState(false)
   // The wallet menu's "Edit profile" lands here with ?edit=profile.
@@ -107,6 +116,16 @@ export function Workspace({ addrParam }: { addrParam: string | null }) {
   if (!address) return <Landing onConnect={openConnectModal} />
   const isPass = own && connector?.id === MARQUE_PASS_ID
 
+  function openBench(agentKey?: string) {
+    if (agentKey) setBenchPick(agentKey)
+    setTab('bench')
+    requestAnimationFrame(() => document.getElementById('me-sections')?.scrollIntoView({ block: 'start', behavior: 'smooth' }))
+  }
+  const openFromStrip = (agentKey: string, t: 'agents' | 'bench') => {
+    if (t === 'bench') { openBench(agentKey); return }
+    setTab('agents')
+    requestAnimationFrame(() => document.getElementById(`agent-${agentKey}`)?.scrollIntoView({ block: 'start', behavior: 'smooth' }))
+  }
   const hiringTabs = [
     { id: 'today', label: 'Today', content: <div className={styles.todayContent}><Dockets address={address} own={own} view="hiring" /><RecheckList address={address} compact /></div> },
     { id: 'positions', label: 'Positions', content: <><WorkspacePositions address={address} /><Watching /></> },
@@ -114,13 +133,13 @@ export function Workspace({ addrParam }: { addrParam: string | null }) {
     { id: 'money', label: 'Money', content: <Money address={address} own={own} /> },
   ]
   const buildingTabs = [
-    { id: 'agents', label: 'Agents', content: <>{nav.history ? <details open><summary>Wallet event history</summary><Logbook address={address} building /></details> : null}<Agents address={address} own={own} /></> },
-    { id: 'bench', label: 'Bench', content: <WorkspaceBench address={address} /> },
-    { id: 'demand', label: 'Demand', content: <AgentWorkspace key={address} initialWallet={address} embedded reportOnly /> },
+    { id: 'agents', label: 'Your agents', content: <>{nav.history ? <details open><summary>Wallet event history</summary><Logbook address={address} building /></details> : null}<Agents address={address} own={own} onTest={openBench} /></> },
+    { id: 'bench', label: 'Test bench', content: <WorkspaceBench address={address} pick={benchPick} /> },
+    { id: 'demand', label: 'Buyers', content: <AgentWorkspace key={address} initialWallet={address} embedded reportOnly /> },
   ]
   const tabs = view === 'building' ? buildingTabs : hiringTabs
   return (
-    <div className={styles.wrap}>
+    <div className={styles.wrap} data-room={view}>
       <header className={styles.hero}>
         <div className={styles.heroId}>
           <span className={styles.portrait}>
@@ -128,7 +147,7 @@ export function Workspace({ addrParam }: { addrParam: string | null }) {
             {own ? <button type="button" className={styles.portraitEdit} onClick={() => setEditing(true)} aria-label="Edit your profile" title="Edit your profile"><Pencil aria-hidden="true" /></button> : null}
           </span>
           <div className={styles.heroText}>
-            <span className={styles.kicker}>My Marque{own ? '' : ' · viewing an address'}</span>
+            <span className={styles.kicker}>{view === 'building' ? 'My Marque · Workshop' : 'My Marque'}{own ? '' : ' · viewing an address'}</span>
             {profile?.displayName ? <h1 className={styles.displayName}>{profile.displayName}</h1> : null}
             <div className={styles.identity}>
               <span className={styles.addrText} data-sub={profile?.displayName ? '' : undefined} title={address}>{short(address)}</span>
@@ -142,24 +161,28 @@ export function Workspace({ addrParam }: { addrParam: string | null }) {
           </div>
         </div>
         {own && profile ? <ProfileEditor address={address} profile={profile} open={editing} onClose={closeEditor} /> : null}
-        <div className={styles.toggle} role="radiogroup" aria-label="View">
-          {(['hiring', 'building'] as const).map((v) => <button key={v} type="button" role="radio" aria-checked={view === v} data-on={view === v || undefined} onClick={() => pickView(v)}>{v === 'hiring' ? <ShoppingBag aria-hidden="true" /> : <Hammer aria-hidden="true" />}{v === 'hiring' ? 'Hiring' : 'Building'}</button>)}
+        <div className={styles.toggle} role="radiogroup" aria-label="Which side of Marque">
+          {(['hiring', 'building'] as const).map((v) => (
+            <button key={v} type="button" role="radio" aria-checked={view === v} data-on={view === v || undefined} data-side={v} onClick={() => pickView(v)}>
+              {v === 'hiring' ? <ShoppingBag aria-hidden="true" /> : <Hammer aria-hidden="true" />}
+              <span><b>{v === 'hiring' ? 'Hiring' : 'Building'}</b><small>{v === 'hiring' ? 'Jobs you pay agents for' : 'Agents you run for others'}</small></span>
+            </button>
+          ))}
         </div>
       </header>
-      <Summary address={address} view={view} />
-      <div className={styles.body}>
+      {view === 'building' ? <WorkshopStrip key={address} address={address} onOpen={openFromStrip} /> : <Summary address={address} view={view} />}
+      <div className={styles.body} key={view} data-room-body="">
         <div className={styles.main}>
           <div id="me-sections" style={{ scrollMarginTop: 'calc(var(--header-h) + 16px)' }}><Tabs label="My Marque sections" tabs={tabs} value={tabs.some((t) => t.id === tab) ? tab : tabs[0]!.id} onChange={setTab} /></div>
         </div>
-        <aside className={styles.aside} aria-label="Wallet">
+        <aside className={styles.aside} aria-label={view === 'building' ? 'Workshop tools and wallet' : 'Wallet'}>
+          {view === 'building' ? <WorkshopTools onTest={() => openBench()} /> : null}
           <Balances address={address} own={own} />
           {view === 'hiring' ? (
             <a className={styles.asideLink} href="?view=money" onClick={(e) => { e.preventDefault(); setTab('money') }}>
               <ShieldCheck aria-hidden="true" /><span><b>Spending controls</b><small>Allowances to the escrow, and your own reminder line</small></span>
             </a>
-          ) : (
-            <a className={styles.asideLink} href="/builders"><Hammer aria-hidden="true" /><span><b>Agent Forge</b><small>Make, check and list an agent</small></span></a>
-          )}
+          ) : null}
         </aside>
       </div>
     </div>
@@ -328,7 +351,7 @@ function Dockets({ address, own, view }: { address: string; own: boolean; view: 
   return (
     <section className={styles.needs} aria-labelledby="needs-title">
       <h2 id="needs-title" className={styles.h2}>Today{items ? <span className={styles.count}>{total}</span> : null}</h2>
-      {checkedAt && total > 0 ? <p className={styles.fine}>Job and spending checks read {new Date(checkedAt).toISOString().replace('T', ' ').slice(0, 19)} UTC. Mainnet and testnet stay separate.</p> : null}
+      {checkedAt && total > 0 ? <p className={styles.fine} title={`${new Date(checkedAt).toISOString().replace('T', ' ').slice(0, 19)} UTC`}>Things that need you, checked {sinceWords(checkedAt)}.</p> : null}
       {team ? <p className={styles.fine}>A published Marque team wallet: its activity is shown, never counted for Set and Earn.</p> : null}
       {unavailable ? <p className={styles.fine} role="status">Some of today&apos;s wallet checks could not be read. No all-clear is assumed. <button type="button" className={styles.textBtn} onClick={load}>Try again</button></p> : items === null ? <div className={styles.skel}><Skeleton h={56} /></div> : null}
       {total === 0 && (unavailable || items === null) ? null
@@ -579,11 +602,11 @@ function Allowances({ address, chainId, own }: { address: string; chainId: Chain
 
 /* ---------------------------------------------------------------- agents (building) */
 
-interface OwnerAgent { firstParty?: boolean; agentKey: string; chainId: number; agentId: string; name: string; imageUrl?: string | null; portraitByOwner?: boolean; category: string | null; listedOnMarque: boolean; quality: { checks: Array<{ id: string; pass: boolean; fix: string | null }> }; jobsReceived: number; jobsPaid: number; jobEvidence?: { funded: number | null; paymentReleased: number | null }; seller?: {jobs:{received:number;funded:number;paid:number}; recentJobs?: Array<{chainId:number;jobId:string;state:string;createdAt:string|null}>}; listingEvidence?: {ownerListed:boolean} }
+interface OwnerAgent { firstParty?: boolean; agentKey: string; chainId: number; agentId: string; name: string; imageUrl?: string | null; portraitByOwner?: boolean; category: string | null; listedOnMarque: boolean; quality: { checks: Array<{ id: string; pass: boolean; fix: string | null }> }; jobsReceived: number; jobsPaid: number; jobEvidence?: { funded: number | null; paymentReleased: number | null }; seller?: {jobs:{received:number;funded:number;paid:number}; recentJobs?: Array<{chainId:number;jobId:string;state:string;createdAt:string|null}>; services?: Array<{ kind: string; declaredNow: boolean; quote?: { state: string; nextStep?: string | null } }>}; listingEvidence?: {ownerListed:boolean} }
 interface QuestBuild { build: { agents: Array<{ chainId: number; tokenId: string; observed: number; checks: Record<string, { state: string; reason: string; next?: { label: string; href: string } | null }> }> } }
 const CRIT: Array<[string, string]> = [['registered', 'Registered'], ['card', 'Agent card'], ['probes', 'Answers'], ['hires', '3 hirers'], ['actions', 'Actions'], ['category', 'In category']]
 
-export function Agents({ address, own = false }: { address: string; own?: boolean }) {
+export function Agents({ address, own = false, onTest }: { address: string; own?: boolean; onTest?: (agentKey: string) => void }) {
   const [owner, setOwner] = useState<OwnerAgent[] | null>(null)
   const [ownerError, setOwnerError] = useState(false)
   const [ownerTotal, setOwnerTotal] = useState<number | null>(null)
@@ -609,28 +632,35 @@ export function Agents({ address, own = false }: { address: string; own?: boolea
       {owner.map((a) => {
         const q = quest?.build.agents.find((x) => x.chainId === a.chainId && x.tokenId === a.agentId)
         return (
-          <li key={a.agentKey} className={styles.agent}>
+          <li key={a.agentKey} id={`agent-${a.agentKey}`} className={styles.agent}>
             <div className={styles.agentTop}>
               <AgentAvatar id={a.agentKey} reference={false} imageUrl={a.agentKey in portraits ? portraits[a.agentKey] ?? null : a.imageUrl ?? null} size={40} />
               <a href={`/agents/${a.chainId}/${a.agentId}`}><b>{names[a.agentKey] ?? a.name}</b></a>
               <span className={styles.fine}>#{a.agentId} · {net(a.chainId)}</span>
-              <span className={styles.pill} data-tone={a.listingEvidence?.ownerListed ? 'good' : undefined}>{a.listingEvidence?.ownerListed ? 'Owner-listed' : 'Owner listing not established'}</span>
+              <span className={styles.pill} data-tone={a.listingEvidence?.ownerListed ? 'good' : undefined}>{a.listingEvidence?.ownerListed ? 'Listed by you' : 'Not listed yet'}</span>
             </div>
-            <div className={styles.agentActivity}>
-              <p>Last 30 days</p>
-              <dl>
-                <div><dt>Jobs received</dt><dd>{a.seller?.jobs.received ?? 'Unavailable'}</dd></div>
-                <div><dt>Funded</dt><dd>{a.seller?.jobs.funded ?? 'Unavailable'}</dd></div>
-                <div><dt>Payment released</dt><dd>{a.seller?.jobs.paid ?? 'Unavailable'}</dd></div>
-              </dl>
-            </div>
+            {(() => {
+              const steps = journeyOf(a as unknown as JourneyAgent, address)
+              const next = steps.find((x) => x.state === 'next')
+              return <>
+                <JourneyRail steps={steps} />
+                {next ? <NextStep step={next} onTest={() => onTest?.(a.agentKey)} /> : <p className={styles.fine}>Every step is done. Keep it answering and its record grows with each job.</p>}
+              </>
+            })()}
+            <p className={styles.agentLine}>
+              {a.seller ? (a.seller.jobs.received === 0
+                ? 'No jobs in the last 30 days.'
+                : `Last 30 days: ${a.seller.jobs.received} job${a.seller.jobs.received === 1 ? '' : 's'} received, ${a.seller.jobs.funded} funded, ${a.seller.jobs.paid} paid out.`)
+                : 'Job counts could not be read just now.'}
+            </p>
             <div className={styles.agentActions}>
-              <a className="btn btn--primary" href={`/builders/my-agents?wallet=${address}&agent=${a.chainId}:${a.agentId}#your-agents`}>Manage agent <ArrowUpRight aria-hidden="true" /></a>
-              <a className="btn" href={`/builders/check/${a.chainId}/${a.agentId}`}>Fix report <ArrowUpRight aria-hidden="true" /></a>
+              <a className="btn" href={`/builders/my-agents?wallet=${address}&agent=${a.chainId}:${a.agentId}#your-agents`}>Manage <ArrowUpRight aria-hidden="true" /></a>
+              <a className="btn" href={`/builders/check/${a.chainId}/${a.agentId}`}>Full check report <ArrowUpRight aria-hidden="true" /></a>
+              <a className="btn" href={`/agents/${a.chainId}/${a.agentId}`}>Its public page <ArrowUpRight aria-hidden="true" /></a>
             </div>
             {q ? (
               <details className={styles.agentDisclosure}>
-                <summary><span>Campaign checklist <small>{q.observed} of 6 observed</small></span><ChevronDown aria-hidden="true" /></summary>
+                <summary><span>Set and Earn checklist <small>{q.observed} of 6 done</small></span><ChevronDown aria-hidden="true" /></summary>
                 <div className={styles.crit} aria-label={`Set and Earn: ${q.observed} of 6 criteria observed`}>
                   {CRIT.map(([k, label]) => { const c = k === 'registered' ? (q.checks['registered']?.state === 'observed' && q.checks['listed']?.state === 'observed' ? 'observed' : q.checks['listed']?.state ?? 'not_yet') : q.checks[k]?.state ?? 'not_yet'; return <span key={k} className={styles.critChip} data-state={c} title={q.checks[k]?.reason ?? ''}>{label}</span> })}
                 </div>

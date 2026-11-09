@@ -2,25 +2,39 @@
 import { useEffect, useState } from 'react'
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { z } from 'zod'
+import { Check, Download, X } from 'lucide-react'
 import type { BuilderAgent, BuilderPage } from '../../lib/builder-workspace'
+import { testName, when } from '../../lib/builder-journey'
 import { TestForm, type BenchResult } from '../builders/test/TestForm'
 import { AnswerReplay } from '../builders/AnswerReplay'
 import type { ReplayTarget } from '../../lib/bench-replay'
+import { AgentAvatar } from '../_components/AgentAvatar'
 import { Button, Skeleton } from '../_components/ui'
 import styles from '../builders/bench.module.css'
 
-const Check = z.object({ key: z.string(), label: z.string(), state: z.string(), agent: z.string().nullable(), marque: z.string().nullable(), how: z.string(), detail: z.string().nullable() })
+/**
+ * The Workshop's Test bench: send your own agent a practice task and see, field by field, whether its answer
+ * matches the chain. Private and free; published results and paid-job misses sit beside it so a fix can be tried
+ * against the exact case that failed. Every rule from before holds (permission before any call, private runs only
+ * in this browser, published records untouched); the words now say them once, plainly.
+ */
+const Check0 = z.object({ key: z.string(), label: z.string(), state: z.string(), agent: z.string().nullable(), marque: z.string().nullable(), how: z.string(), detail: z.string().nullable() })
 const History = z.object({ agentId: z.string(), standard: z.string().nullable(), observedAt: z.string().datetime(),
   tests: z.array(z.object({ id: z.number(), testId: z.string(), caseId: z.string().nullable(), pass: z.boolean(), at: z.string().nullable(), block: z.string().nullable(), failedFields: z.unknown() })).max(20),
-  misses: z.array(z.object({ chainId: z.union([z.literal(56), z.literal(97)]), jobId: z.string(), block: z.string().nullable(), checks: z.array(Check) })).max(20),
+  misses: z.array(z.object({ chainId: z.union([z.literal(56), z.literal(97)]), jobId: z.string(), block: z.string().nullable(), checks: z.array(Check0) })).max(20),
 })
 type LocalRun = { receivedAt: string; result: BenchResult }
 const LocalRuns = z.array(z.object({ receivedAt: z.string().datetime(), result: z.object({ testId: z.string(), pass: z.boolean(), error: z.string().nullable(), latencyMs: z.number().finite(), caseId: z.string(), blockNumber: z.string(), note: z.string(), diffs: z.array(z.object({ field: z.string(), pass: z.boolean(), expected: z.string(), actual: z.string(), tolerance: z.string(), detail: z.string().optional() })) }) }))
 const standards = new Set(['MCS-HF-1', 'MCS-REB-1', 'MCS-GRID-1', 'MCS-YIELD-1', 'MCS-RYIELD-1'])
 const storageKey = (agentId: string) => `marque:bench:v1:${agentId}`
+const netName = (c: number) => (c === 56 ? 'BSC mainnet' : 'BSC testnet')
 
-export function WorkspaceBench({ address }: { address: string }) {
-  const [selected, setSelected] = useState('')
+function Verdict({ pass }: { pass: boolean }) {
+  return <span className={styles.verdict} data-pass={pass ? 'true' : 'false'}>{pass ? <Check aria-hidden="true" /> : <X aria-hidden="true" />}{pass ? 'Passed' : 'Did not pass'}</span>
+}
+
+export function WorkspaceBench({ address, pick }: { address: string; pick?: string | null }) {
+  const [selected, setSelected] = useState(pick ?? '')
   const owner = useInfiniteQuery({ queryKey: ['bench-owner', address], initialPageParam: null as string | null, retry: false, staleTime: 60_000,
     queryFn: async ({ pageParam, signal }) => {
       const r = await fetch(`/api/v1/phase2/owner/${address}${pageParam ? `?cursor=${pageParam}` : ''}`, { signal })
@@ -32,12 +46,30 @@ export function WorkspaceBench({ address }: { address: string }) {
   })
   const agents = owner.data?.pages.flatMap(p => p.agents) ?? []
   const active = agents.find(a => a.agentKey === selected) ?? agents[0]
-  useEffect(() => { setSelected('') }, [address])
+  useEffect(() => { setSelected(pick ?? '') }, [address, pick])
   return <div className={styles.bench}>
-    <h3>Bench</h3><p>Check a fix without a paid job. Fresh endpoint tests require permission; recorded answer replays compare supplied JSON at the original block. Neither changes a published result.</p>
-    {owner.isPending ? <Skeleton h={60} /> : owner.isError ? <p>The owned identities could not be read. <button type="button" onClick={() => void owner.refetch()}>Read again</button></p> : !agents.length ? <p>No owned identity is indexed for this wallet. <a href="/builders/test">Open the standalone Bench for an endpoint you control</a>, or <a href="/builders">build or bring an agent</a>.</p> : <>
-      <label>Agent<select value={active?.agentKey ?? ''} onChange={e => setSelected(e.target.value)}>{agents.map(a => <option value={a.agentKey} key={a.agentKey}>{a.name} · {a.chainId === 56 ? 'BSC mainnet' : 'BSC testnet'} · #{a.agentId}</option>)}</select></label>
-      {owner.hasNextPage ? <Button size="sm" loading={owner.isFetchingNextPage} onClick={() => void owner.fetchNextPage()}>Load more agents</Button> : null}
+    <header className={styles.head}>
+      <h2>Test your agent</h2>
+      <p>Send it a practice task and see whether its answer matches the chain, field by field. Free and private: nothing here changes its public record.</p>
+    </header>
+    {owner.isPending ? <Skeleton h={60} /> : owner.isError ? <p className={styles.note}>Your agents could not be read just now. <button type="button" className={styles.textBtn} onClick={() => void owner.refetch()}>Try again</button></p> : !agents.length ? (
+      <div className={styles.empty}>
+        <p>No agent is registered to this wallet yet.</p>
+        <div className={styles.row}><a className="btn btn--primary" href="/builders">Build an agent</a><a className="btn" href="/builders/test">Test any endpoint</a></div>
+      </div>
+    ) : <>
+      {agents.length > 1 ? (
+        <div className={styles.pickRow} role="radiogroup" aria-label="Agent to test">
+          {agents.map(a => (
+            <button key={a.agentKey} type="button" role="radio" aria-checked={active?.agentKey === a.agentKey} className={styles.pick} onClick={() => setSelected(a.agentKey)}>
+              <AgentAvatar id={a.agentKey} imageUrl={a.imageUrl ?? null} size={24} /><span>{a.name}<small>{netName(a.chainId)}</small></span>
+            </button>
+          ))}
+          {owner.hasNextPage ? <Button size="sm" loading={owner.isFetchingNextPage} onClick={() => void owner.fetchNextPage()}>More agents</Button> : null}
+        </div>
+      ) : active ? (
+        <div className={styles.solo}><AgentAvatar id={active.agentKey} imageUrl={active.imageUrl ?? null} size={28} /><span><b>{active.name}</b><small>{netName(active.chainId)} · #{active.agentId}</small></span></div>
+      ) : null}
       {active ? <AgentBench key={active.agentKey} agent={active} /> : null}
     </>}
   </div>
@@ -47,7 +79,8 @@ function AgentBench({ agent }: { agent: BuilderAgent }) {
   const [local, setLocal] = useState<LocalRun[]>([]), [saveError, setSaveError] = useState(false)
   const [canPersist, setCanPersist] = useState(false)
   const [all, setAll] = useState(false)
-  const [replay, setReplay] = useState<{ target: ReplayTarget; block: string | null } | null>(null)
+  const [tab, setTab] = useState<'public' | 'private'>('public')
+  const [replay, setReplay] = useState<{ target: ReplayTarget; block: string | null; label: string } | null>(null)
   const q = useQuery({ queryKey: ['bench-history', agent.agentKey], staleTime: 60_000, retry: false, queryFn: async ({ signal }) => {
     const r = await fetch(`/api/v1/builders/bench/history?agentId=${encodeURIComponent(agent.agentKey)}`, { signal })
     if (!r.ok) throw new Error('unavailable')
@@ -60,7 +93,7 @@ function AgentBench({ agent }: { agent: BuilderAgent }) {
   }, [agent.agentKey])
   const record = (result: BenchResult) => {
     const next = [{ receivedAt: new Date().toISOString(), result }, ...local]
-    setLocal(next)
+    setLocal(next); setTab('private')
     try { if (!canPersist) throw new Error('existing_history_unreadable'); LocalRuns.parse(next); localStorage.setItem(storageKey(agent.agentKey), JSON.stringify(next)); setSaveError(false) } catch { setSaveError(true) }
   }
   const exportRuns = () => {
@@ -68,17 +101,67 @@ function AgentBench({ agent }: { agent: BuilderAgent }) {
     const a = document.createElement('a'); a.href = url; a.download = `marque-bench-${agent.chainId}-${agent.agentId}.json`; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000)
   }
   const endpoint = agent.seller.services.find(s => s.declaredNow && s.kind === 'a2a') ?? agent.seller.services.find(s => s.declaredNow && s.kind === 'mcp')
+  const misses = q.data?.misses ?? []
   return <>
-    {q.isPending ? <Skeleton h={100} /> : q.isError ? <p>The saved test history could not be read. <button type="button" onClick={() => void q.refetch()}>Read again</button> · <a href="/builders/test">Standalone Bench</a></p> : q.data ? <>
-      {q.data.standard && standards.has(q.data.standard) ? <TestForm key={`${agent.agentKey}:${q.data.standard}`} initialEndpoint={endpoint?.endpoint ?? ''} initialKind={endpoint?.kind === 'mcp' ? 'mcp' : 'a2a'} initialTestId={q.data.standard} onResult={record} /> : <p>This identity has no supported published Bench standard. <a href={`/agents/${agent.chainId}/${agent.agentId}/evidence`}>Read its existing evidence</a>. A category test is not substituted for a different capability.</p>}
-      <h4>Published test history</h4><p>Latest recorded results, up to 20, read {q.data.observedAt.replace('T', ' ').slice(0, 19)} UTC. These published records are separate from private Bench attempts.</p>
-      {q.data.tests.length ? <ul className={styles.history}>{q.data.tests.map(t => <li key={t.id}><a href={`/api/v1/conformance/${t.id}`}>{t.testId} · {t.pass ? 'Passed' : 'Did not pass'}</a> · block {t.block ?? 'not recorded'} · {t.at?.replace('T', ' ').slice(0, 16) ?? 'Time not recorded'}{t.caseId ? <> · <button type="button" onClick={() => setReplay({ target: { caseId: t.caseId! }, block: t.block })}>Replay supplied answer</button></> : null}</li>)}</ul> : <p>No published test result is indexed for this identity.</p>}
-      <h4>Replay a delivery miss</h4><p>Latest exact-identity jobs with a disagreeing chain check, up to 20. Original field values and blocks are preserved.</p>
-      {q.data.misses.length ? <div>{q.data.misses.map(m => <article key={`${m.chainId}:${m.jobId}`}><p><a href={`/jobs/${m.chainId}/${m.jobId}`}>Job {m.jobId} · {m.chainId === 56 ? 'BSC mainnet' : 'BSC testnet'}</a> · block {m.block ?? 'not recorded'}</p><dl className={styles.diffs}>{m.checks.filter(c => c.state === 'differs').map(c => <div key={c.key}><dt>{c.label}</dt><dd>Agent: {c.agent ?? 'not given'}</dd><dd>Chain at that block: {c.marque ?? 'not available'}</dd></div>)}</dl>{m.block ? <Button size="sm" onClick={() => setReplay({ target: { chainId: m.chainId, jobId: m.jobId }, block: m.block })}>Replay this case on the Bench</Button> : null}</article>)}</div> : <p>No paid-answer chain disagreement is recorded in this exact-identity history.</p>}
+    {q.isPending ? <Skeleton h={160} /> : q.isError ? <p className={styles.note}>This agent&apos;s test history could not be read just now. <button type="button" className={styles.textBtn} onClick={() => void q.refetch()}>Try again</button> or use the <a href="/builders/test">standalone test page</a>.</p> : q.data ? <>
+      <section className={styles.card} aria-label="Run a test">
+        {q.data.standard && standards.has(q.data.standard)
+          ? <TestForm key={`${agent.agentKey}:${q.data.standard}`} initialEndpoint={endpoint?.endpoint ?? ''} initialKind={endpoint?.kind === 'mcp' ? 'mcp' : 'a2a'} initialTestId={q.data.standard} onResult={record} showReference={false} />
+          : <p className={styles.note}>There is no Marque test for this agent&apos;s kind of work yet, so nothing is run in its place. <a href={`/agents/${agent.chainId}/${agent.agentId}/evidence`}>See its existing evidence</a>.</p>}
+      </section>
+
+      {misses.length ? (
+        <section className={styles.card} data-tone="warn" aria-labelledby="miss-h">
+          <h3 id="miss-h">Paid answers that did not match the chain</h3>
+          <p className={styles.note}>A buyer paid for these. Try your fix against the exact same case.</p>
+          <ul className={styles.list}>
+            {misses.map(m => (
+              <li key={`${m.chainId}:${m.jobId}`}>
+                <div className={styles.listMain}>
+                  <a href={`/jobs/${m.chainId}/${m.jobId}`}>Job {m.jobId}</a><span className={styles.muted}>{netName(m.chainId)}</span>
+                  <ul className={styles.diffs}>{m.checks.filter(c => c.state === 'differs').map(c => <li key={c.key}><b>{c.label}</b>: your agent said {c.agent ?? 'nothing'}, the chain said {c.marque ?? 'not available'}</li>)}</ul>
+                </div>
+                {m.block ? <Button size="sm" onClick={() => setReplay({ target: { chainId: m.chainId, jobId: m.jobId }, block: m.block, label: `job ${m.jobId}` })}>Try a fix</Button> : null}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
+      <section className={styles.card} aria-labelledby="res-h">
+        <div className={styles.cardHead}>
+          <h3 id="res-h">Results</h3>
+          <div className={styles.seg} role="tablist" aria-label="Which results">
+            <button type="button" role="tab" aria-selected={tab === 'public'} onClick={() => setTab('public')}>Public <span>{q.data.tests.length}</span></button>
+            <button type="button" role="tab" aria-selected={tab === 'private'} onClick={() => setTab('private')}>Your tries <span>{local.length}</span></button>
+          </div>
+        </div>
+        {tab === 'public' ? <>
+          <p className={styles.note}>What buyers see on the agent&apos;s page{misses.length === 0 && (agent.seller.jobs?.completed ?? 0) > 0 ? '. Every paid answer so far matched the chain' : ''}.</p>
+          {q.data.tests.length ? <ul className={styles.list}>{q.data.tests.map(t => (
+            <li key={t.id}>
+              <div className={styles.listMain}><Verdict pass={t.pass} /><span>{testName(t.testId)}</span><span className={styles.muted} title={t.block ? `Block ${t.block}` : undefined}>{when(t.at)}</span></div>
+              <div className={styles.listActs}>
+                {t.caseId && !t.pass ? <Button size="sm" onClick={() => setReplay({ target: { caseId: t.caseId! }, block: t.block, label: `${testName(t.testId)}, ${when(t.at)}` })}>Try a fix</Button> : null}
+                <a className={styles.textLink} href={`/api/v1/conformance/${t.id}`}>Raw record</a>
+              </div>
+            </li>
+          ))}</ul> : <p className={styles.empty}>No public result yet. Buyers see one after Marque tests the agent.</p>}
+        </> : <>
+          <p className={styles.note}>Saved only in this browser. Nobody else sees them.</p>
+          {saveError ? <p className={styles.note} role="status">This browser could not save every try. Nothing already saved was removed; export what you see to keep it.</p> : null}
+          {local.length ? <>
+            <ul className={styles.list}>{(all ? local : local.slice(0, 5)).map((run, i) => (
+              <li key={`${run.receivedAt}:${i}`}><div className={styles.listMain}><Verdict pass={run.result.pass} /><span>{testName(run.result.testId)}</span><span className={styles.muted} title={`Block ${run.result.blockNumber}`}>{when(run.receivedAt)}</span></div></li>
+            ))}</ul>
+            <div className={styles.row}>
+              {local.length > 5 ? <button type="button" className={styles.textBtn} onClick={() => setAll(v => !v)}>{all ? 'Show fewer' : `Show all ${local.length}`}</button> : null}
+              <button type="button" className={styles.textBtn} onClick={exportRuns}><Download aria-hidden="true" />Export</button>
+            </div>
+          </> : <p className={styles.empty}>No tries yet. Run a test above; it appears here.</p>}
+        </>}
+      </section>
     </> : null}
-    {replay ? <AnswerReplay key={JSON.stringify(replay.target)} target={replay.target} block={replay.block} /> : null}
-    <h4>Bench runs saved on this device</h4><p>Private attempts started here are saved only in this browser. The server does not publish these outcomes against your identity. No older private attempts are invented.</p>
-    {saveError ? <p role="status">This browser could not save or read the complete local history. Existing saved entries were not cleared. Export the visible results.</p> : null}
-    {local.length ? <><ul className={styles.history}>{(all ? local : local.slice(0, 5)).map((run, i) => <li key={`${run.receivedAt}:${i}`}>{run.result.testId} · {run.result.pass ? 'Passed' : 'Did not pass'} · block {run.result.blockNumber} · received {run.receivedAt.replace('T', ' ').slice(0, 19)} UTC</li>)}</ul>{local.length > 5 ? <button type="button" onClick={() => setAll(v => !v)}>{all ? 'Show fewer runs' : `Show all ${local.length} saved runs`}</button> : null}<Button size="sm" onClick={exportRuns}>Export saved results</Button></> : <p>No Bench run is saved on this device for this identity.</p>}
+    {replay ? <AnswerReplay key={JSON.stringify(replay.target)} target={replay.target} block={replay.block} label={replay.label} onClose={() => setReplay(null)} /> : null}
   </>
 }

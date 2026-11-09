@@ -1,0 +1,61 @@
+/* The Workshop: steel instead of gold, a faint blueprint grid, and every agent's next step. */
+.strip { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+.stripNote { margin: 0; font-size: 14px; color: var(--ink-2); }
+.tile {
+  appearance: none; display: grid; gap: 12px; align-content: start; min-width: 0; padding: 16px 18px; text-align: left;
+  border: 1px solid var(--hair-2); border-radius: 16px; color: inherit; font: inherit; text-decoration: none; cursor: pointer;
+  background: color-mix(in srgb, var(--v-azure) 5%, var(--panel));
+  transition: border-color var(--t-fast, 120ms) ease, transform var(--t-fast, 120ms) ease;
+}
+.tile:hover { border-color: color-mix(in srgb, var(--v-azure) 55%, transparent); }
+.tile:focus-visible { outline: 2px solid var(--v-azure); outline-offset: 3px; }
+.tile[data-empty='true'] { grid-template-columns: 36px 1fr; align-items: center; border-style: dashed; background: none; }
+.tileTop { display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; align-items: center; gap: 10px; }
+.tileName { display: grid; gap: 2px; min-width: 0; }
+.tileName b { font-size: 15px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tileName small { font-size: 12px; color: var(--ink-3); line-height: 1.4; }
+.tileNext { font-size: 13px; color: var(--v-azure); }
+.tileNext::after { content: ' \2192'; }
+.standing { font-size: 12px; padding: 2px 9px; border-radius: var(--r-pill, 999px); border: 1px solid var(--hair-2); color: var(--ink-2); white-space: nowrap; }
+.standing[data-tone='good'] { color: var(--moss); border-color: color-mix(in srgb, var(--moss) 45%, transparent); }
+.standing[data-tone='work'] { color: var(--amber); border-color: color-mix(in srgb, var(--amber) 45%, transparent); }
+.plus { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; border: 1px dashed var(--hair-2); color: var(--ink-2); }
+.plus svg { width: 16px; height: 16px; }
+
+/* The road: six marks joined by a line; done in steel, the next one ringed. */
+.rail { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.rail li { position: relative; display: grid; justify-items: center; gap: 6px; min-width: 0; }
+.rail li::before { content: ''; position: absolute; top: 9px; left: -50%; right: 50%; height: 2px; background: var(--hair-2); }
+.rail li:first-child::before { display: none; }
+.rail li[data-state='done']::before, .rail li[data-state='next']::before { background: var(--v-azure); }
+.mark { position: relative; z-index: 1; display: grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--hair-2); background: var(--panel); color: var(--ink-inverse); box-sizing: border-box; }
+.mark svg { width: 12px; height: 12px; stroke-width: 3; }
+.rail li[data-state='done'] .mark { background: var(--v-azure); border-color: var(--v-azure); }
+.rail li[data-state='next'] .mark { border-color: var(--v-azure); box-shadow: 0 0 0 4px color-mix(in srgb, var(--v-azure) 22%, transparent); }
+.railLabel { font-size: 12px; color: var(--ink-3); text-align: center; overflow-wrap: anywhere; }
+.rail li[data-state='done'] .railLabel { color: var(--ink-2); }
+.rail li[data-state='next'] .railLabel { color: var(--ink); font-weight: 600; }
+.rail[data-compact='true'] li::before { top: 5px; }
+.rail[data-compact='true'] .mark { width: 12px; height: 12px; border-width: 2px; }
+.rail[data-compact='true'] .mark svg { display: none; }
+.rail[data-compact='true'] li[data-state='next'] .mark { box-shadow: 0 0 0 3px color-mix(in srgb, var(--v-azure) 22%, transparent); }
+
+.next { display: grid; gap: 8px; padding: 14px 16px; border-radius: 12px; border: 1px solid color-mix(in srgb, var(--v-azure) 40%, transparent); background: color-mix(in srgb, var(--v-azure) 6%, transparent); }
+.nextLabel { font-size: 11.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--v-azure); }
+.next p { margin: 0; font-size: 15px; line-height: 1.5; }
+.nextRow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; }
+.nextRow :global(.btn) svg { width: 15px; height: 15px; }
+.why { font-size: 13px; color: var(--ink-3); }
+.why summary { cursor: pointer; min-height: 32px; display: inline-flex; align-items: center; }
+.why p { margin: 6px 0 0; font-size: 13px; line-height: 1.55; color: var(--ink-2); overflow-wrap: anywhere; max-width: 64ch; }
+
+.tools { display: grid; gap: 2px; padding: 8px; border: 1px solid var(--hair); border-radius: 14px; }
+.toolsHead { padding: 6px 8px 4px; font-size: 11.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3); }
+.tools a, .tools button { appearance: none; display: flex; align-items: flex-start; gap: 12px; padding: 10px 8px; border: 0; border-radius: 10px; background: none; color: inherit; font: inherit; text-align: left; text-decoration: none; cursor: pointer; }
+.tools a:hover, .tools button:hover { background: color-mix(in srgb, var(--v-azure) 8%, transparent); }
+.tools svg { flex: none; width: 18px; height: 18px; margin-top: 1px; color: var(--v-azure); }
+.tools span { display: grid; gap: 2px; }
+.tools b { font-size: 14px; font-weight: 500; }
+.tools small { font-size: 12.5px; color: var(--ink-3); line-height: 1.4; }
+
+@media (prefers-reduced-motion: reduce) { .tile { transition: none; } }
