@@ -38,8 +38,10 @@ export const CHARTER_CHAINS: Record<CharterChainId, CharterChain> = {
       { vToken: '0xecA88125a5ADbe82614ffC12D0DB554E2e2867C8', token: '0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d', symbol: 'USDC', decimals: 18 },
       { vToken: '0xC4eF4229FEc74Ccfe17B2bdeF7715fAC740BA0ba', token: '0xc5f0f7b66764F6ec8C8Dff7BA683102295E16409', symbol: 'FDUSD', decimals: 18 },
     ],
-    factory: null,
-    factoryBlock: null,
+    // Deployed 9 Nov 2026 by the mainnet deployer under Francis's "approved, mainnet", tx
+    // 0xb353084727766a672a18f01b5130f6d8835447224163a6344ac78f201a2dac4f.
+    factory: '0x45422fCF1314c576Fe771Af1F3828fD88Fe0b761',
+    factoryBlock: 132552112n,
     explorer: 'https://bscscan.com',
   },
   97: {
