@@ -134,7 +134,7 @@ export function RangeBuilder({ initialChain, initialAccount, demo }: { initialCh
                 </div>
               </div>
               <div className={styles.hfBig}>
-                <span className={`mono ${styles.hfValue}`}>{nowP !== null ? fmtPrice(nowP) : '…'}</span>
+                <span className={`mono ${styles.hfValue}`}>{nowP !== null ? fmtPrice(nowP) : load === 'loading' ? '…' : 'n/a'}</span>
                 <span className={styles.caption}>10-minute average price</span>
               </div>
             </div>
@@ -187,7 +187,8 @@ export function RangeBuilder({ initialChain, initialAccount, demo }: { initialCh
 
         <aside className={`${styles.panel} ${styles.paper}`} aria-labelledby="rk-charter">
           <h2 id="rk-charter" className={styles.panelTitle}>Your charter</h2>
-          {pos ? <p className={styles.sentence}>{rangeSentence({ pair, low: fmtPrice(lowP), high: fmtPrice(highP), minutes: RANGE_DEFAULTS.twapWindow / 60, moves, hours, lossPct: (lossBps / 100).toFixed(2), until, exit })}</p> : <div className={styles.skeleton} aria-hidden="true" />}
+          {!pos && load !== 'loading' ? <p className={styles.fine}>Pick a position on a reviewed pool to see its charter. Mint one in PancakeSwap first if this address has none.</p> : null}
+          {pos ? <p className={styles.sentence}>{rangeSentence({ pair, low: fmtPrice(lowP), high: fmtPrice(highP), minutes: RANGE_DEFAULTS.twapWindow / 60, moves, hours, lossPct: (lossBps / 100).toFixed(2), until, exit })}</p> : load === 'loading' ? <div className={styles.skeleton} aria-hidden="true" /> : null}
           {!exit ? (
             <>
               <div className={styles.field}>
