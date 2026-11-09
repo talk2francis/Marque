@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers'
 import { chartersVisible, PREVIEW_COOKIE } from '../../lib/charters-access'
-import { ChartersJudge } from '../_components/charters/ChartersJudge'
+import { chartersJudgeSteps } from '../_components/charters/ChartersJudge'
 import { cachedProjection } from '@marque/db'
 import { venusReader } from '@marque/positions'
 import { archiveClient, publicClient } from '@marque/chain'
@@ -130,7 +130,7 @@ export default async function JudgePage() {
       action: <><a className="btn btn--sm" href={`/quest/${QUEST}`}>{funderClass(QUEST) === 'team' ? 'A team wallet\'s quest' : 'A wallet\'s quest'}</a><a className="btn btn--sm" href="/docs/mcp">MCP</a></>,
     },
   ]
-  const chartersOn = chartersVisible((await cookies()).get(PREVIEW_COOKIE)?.value)
+  const charterSteps = chartersVisible((await cookies()).get(PREVIEW_COOKIE)?.value) ? await chartersJudgeSteps().catch(() => null) : null
   return (
     <>
       <SiteHeader />
@@ -140,7 +140,23 @@ export default async function JudgePage() {
           <h1 className="t-display">Marque in six steps.</h1>
           <p className={styles.lede}>From a position that needs work to the action its owner would sign.</p>
         </header>
-        {chartersOn ? <ChartersJudge className={styles.jobs} /> : null}
+        {charterSteps ? (
+          <section aria-labelledby="charters-60">
+            <h2 id="charters-60" className={styles.jobsTitle}>Charters, in 60 seconds</h2>
+            <ol className={styles.steps}>
+              {charterSteps.map((s, i) => (
+                <li key={s.title} className={styles.step}>
+                  <span className={styles.stepIndex}>{i + 1}</span>
+                  <div className={styles.stepBody}>
+                    <span className={styles.stepTitle}>{s.title}</span>
+                    <div className={styles.stepWhy}>{s.note}</div>
+                    <div className={styles.stepActions}><a className="btn btn--sm" href={s.href}>{s.cta}</a></div>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </section>
+        ) : null}
         {isClosed(Date.now()) ? (
           <section aria-labelledby="after-close">
             <h2 id="after-close" className={styles.jobsTitle}>Since Set and Earn closed, start here</h2>

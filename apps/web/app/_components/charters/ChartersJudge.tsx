@@ -1,8 +1,8 @@
 import { CHARTER_CHAINS } from '@marque/charters'
 import { listGuards } from '../../../lib/guards'
 
-/** The Judge page's Charters section (11_PUBLIC_COPY): the 60-second path, with the live charter read from the index. */
-export async function ChartersJudge({ className, stepClass }: { className?: string; stepClass?: string }) {
+/** The Judge page's Charters steps (11_PUBLIC_COPY): the 60-second path, with the live charter read from the index. */
+export async function chartersJudgeSteps(): Promise<Array<{ title: string; note: string; href: string; cta: string }>> {
   let live: { chainId: number; address: string } | null = null
   for (const chainId of [56, 97] as const) {
     if (!CHARTER_CHAINS[chainId].factory) continue
@@ -16,16 +16,5 @@ export async function ChartersJudge({ className, stepClass }: { className?: stri
     { title: 'Draw a line on a real loan', note: 'The builder reads the demo address’s Venus loan. Drag the two marks. No wallet needed.', href: '/charters/new', cta: 'Open the builder' },
     { title: 'Read the contracts', note: 'CharterFactory, LoanGuard and CharterRules, with 34 unit tests, 9 invariants and fork suites on both chains.', href: 'https://github.com/talk2francis/Marque/tree/main/contracts/src/charters', cta: 'Read the source' },
   ]
-  return (
-    <section aria-labelledby="charters-60" className={className}>
-      <h2 id="charters-60">Charters, in 60 seconds</h2>
-      <ol>
-        {steps.map((s, i) => (
-          <li key={s.title} className={stepClass}>
-            <b>{i + 1}. {s.title}</b> <span>{s.note}</span> <a className="btn btn--sm" href={s.href}>{s.cta}</a>
-          </li>
-        ))}
-      </ol>
-    </section>
-  )
+  return steps
 }
