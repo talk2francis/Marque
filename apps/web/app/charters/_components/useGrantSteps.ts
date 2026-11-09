@@ -105,7 +105,10 @@ export function useGrantSteps() {
     for (let i = from; i < grant.steps.length; i++) {
       mark(i, { state: 'signing' })
       try {
-        const hash = await sendTransaction(config, { account: grant.owner, chainId: grant.chainId, to: grant.steps[i]!.to, data: grant.steps[i]!.data, value: grant.steps[i]!.value })
+        // 30% over the estimate: a position mint or transfer that initialises ticks can use exactly its estimate and run out.
+        const st = grant.steps[i]!
+        const est = await getPublicClient(config, { chainId: grant.chainId })!.estimateGas({ account: grant.owner, to: st.to, data: st.data, value: st.value }).catch(() => grant.gasFallback[i]!)
+        const hash = await sendTransaction(config, { account: grant.owner, chainId: grant.chainId, to: st.to, data: st.data, value: st.value, gas: est * 13n / 10n })
         mark(i, { state: 'pending', hash })
         const r = await waitForTransactionReceipt(config, { chainId: grant.chainId, hash, timeout: 180_000 })
         if (r.status !== 'success') throw new Error('The transaction reverted on chain.')
