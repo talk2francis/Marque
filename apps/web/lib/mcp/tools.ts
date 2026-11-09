@@ -5,11 +5,13 @@ import { referenceAgent } from '../reference-agents'
 import { storefrontByToken } from '../storefront'
 import { fieldsFromText } from '../task-parse'
 import { sealHeld } from '../held-quote'
+import { chartersPublic } from '../charters-access'
 
 /**
  * Marque for agents (SPEC-ACCESS 3, invariant 40): eleven tools over Marque's own public APIs. Read and plan only:
  * no private key, no signing, every agent call through the same safeFetch paths the website uses. Every result says
- * its source, its block or observation time, and its network.
+ * its source, its block or observation time, and its network. The three Charters tools join the list only when
+ * CHARTERS_PUBLIC=1 (AGENTS.md section 14); until then they are not listed and not callable.
  */
 export interface Ctx { origin: string; self: string; clientIp: string }
 type Json = Record<string, unknown>
@@ -224,3 +226,46 @@ export const TOOLS: ToolDef[] = [
     },
   },
 ]
+
+const CHAIN = { type: 'integer', enum: [56, 97], description: '56 (BSC mainnet, real tokens) or 97 (BSC testnet, test tokens).' }
+const ADDR = { type: 'string', pattern: '^0x[0-9a-fA-F]{40}$' }
+const HEALTH = { type: 'string', pattern: '^\\d{1,2}(\\.\\d{1,2})?$', description: 'A Venus health such as "1.30".' }
+const query = (o: Json) => new URLSearchParams(Object.entries(o).filter(([, v]) => v !== undefined && v !== '').map(([k, v]) => [k, String(v)])).toString()
+
+/** Charters (Loan Guard), read only. Creating, funding and ending a charter is always the owner's own signature on the site. */
+export const CHARTER_TOOLS: ToolDef[] = [
+  {
+    name: 'charters_list', title: 'List Loan Guard charters',
+    description: 'Loan Guard charters on Venus: each guard\'s owner, debt market, trigger and target health, budget, spend and last health reading, newest first.',
+    inputSchema: { type: 'object', properties: { chainId: CHAIN, owner: ADDR, state: { type: 'string', enum: ['armed', 'ended', 'all'] } }, additionalProperties: false },
+    async run(a, ctx) {
+      const { status, json } = await api(ctx, `/api/v1/guards?${query({ chainId: a['chainId'], owner: a['owner'], state: a['state'] })}`)
+      if (status !== 200) fail(json, 'The charters could not be read.')
+      return { ...json, page: `${ctx.origin}/charters`, source: 'CharterFactory and LoanGuard events, indexed by Marque (ONCHAIN); amounts are the token\'s integer units, health has 18 decimals' }
+    },
+  },
+  {
+    name: 'charter_get', title: 'Get a Loan Guard charter',
+    description: 'One Loan Guard: its rules, every action with who called it, Keel\'s watch key, its health history and a live read of what it would do now.',
+    inputSchema: { type: 'object', properties: { chainId: CHAIN, guard: ADDR }, required: ['chainId', 'guard'], additionalProperties: false },
+    async run(a, ctx) {
+      const { status, json } = await api(ctx, `/api/v1/guards/${Number(a['chainId'])}/${String(a['guard'])}`)
+      if (status === 404) throw new ToolError(`No Loan Guard ${a['guard']} on ${netOf(Number(a['chainId']))}.`)
+      if (status !== 200) fail(json, 'The charter could not be read.')
+      return { network: netOf(Number(a['chainId'])), ...json, page: `${ctx.origin}/charters/${a['chainId']}/${a['guard']}`, source: 'Index of chain events (ONCHAIN) plus the guard\'s own preview() read live at the stated block' }
+    },
+  },
+  {
+    name: 'charter_quote', title: 'Quote a Loan Guard',
+    description: 'Read a Venus loan the way a Loan Guard reads it: health, repayable markets, the collateral price at the trigger and target, and the repayment at the trigger.',
+    inputSchema: { type: 'object', properties: { chainId: CHAIN, account: ADDR, market: { ...ADDR, description: 'The vToken of the debt to guard; the largest repayable debt when left out.' }, trigger: HEALTH, target: HEALTH }, required: ['chainId', 'account'], additionalProperties: false },
+    async run(a, ctx) {
+      const { status, json } = await api(ctx, `/api/v1/guards/quote?${query({ chainId: a['chainId'], account: a['account'], market: a['market'], trigger: a['trigger'], target: a['target'] })}`)
+      if (status !== 200) fail(json, 'The loan could not be read.')
+      return { network: netOf(Number(a['chainId'])), ...json, build: `${ctx.origin}/charters/new?chain=${a['chainId']}&account=${a['account']}`, source: 'Venus Comptroller and oracle, read on chain (ONCHAIN); prices are what Venus uses, not a market feed' }
+    },
+  },
+]
+
+/** The tools this process lists and runs right now. */
+export const activeTools = (env: Record<string, string | undefined> = process.env): ToolDef[] => (chartersPublic(env) ? [...TOOLS, ...CHARTER_TOOLS] : TOOLS)

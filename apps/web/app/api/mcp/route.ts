@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { TOOLS, ToolError, type Ctx } from '../../../lib/mcp/tools'
+import { activeTools, ToolError, type Ctx } from '../../../lib/mcp/tools'
 import { checkWindow, clientKey } from '../../../lib/limits'
 
 export const dynamic = 'force-dynamic'
@@ -35,11 +35,11 @@ async function handle(m: Msg, req: Request): Promise<unknown | null> {
     }
     case 'notifications/initialized': case 'notifications/cancelled': return null
     case 'ping': return ok(m.id, {})
-    case 'tools/list': return ok(m.id, { tools: TOOLS.map(({ name, title, description, inputSchema }) => ({ name, title, description, inputSchema, annotations: { readOnlyHint: true, openWorldHint: true } })) })
+    case 'tools/list': return ok(m.id, { tools: activeTools().map(({ name, title, description, inputSchema }) => ({ name, title, description, inputSchema, annotations: { readOnlyHint: true, openWorldHint: true } })) })
     case 'tools/call': {
       const rate = checkWindow('mcp-tool', clientKey(req.headers), 60, 60_000, 'Marque allows 60 tool calls a minute per client.')
       if (!rate.ok) return ok(m.id, { content: [{ type: 'text', text: rate.detail ?? 'Rate limited.' }], isError: true })
-      const tool = TOOLS.find((t) => t.name === m.params?.['name'])
+      const tool = activeTools().find((t) => t.name === m.params?.['name'])
       if (!tool) return err(m.id, -32602, `Unknown tool: ${String(m.params?.['name'])}`)
       const args = (m.params?.['arguments'] ?? {}) as Record<string, unknown>
       const missing = ((tool.inputSchema['required'] as string[] | undefined) ?? []).filter((k) => args[k] === undefined || args[k] === '')

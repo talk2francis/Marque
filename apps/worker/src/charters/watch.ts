@@ -1,6 +1,6 @@
 import { sql } from 'drizzle-orm'
 import { BaseError, ContractFunctionRevertedError, decodeErrorResult, encodeFunctionData, type Address, type Hex, type PublicClient, type WalletClient } from 'viem'
-import { db } from '@marque/db'
+import { chartersDb as db } from '@marque/db'
 import { loanGuardAbi, STATE_CODES, type CharterChainId, type GuardState } from '@marque/charters'
 import { networkOf, sessionFor, type AltanaClient, type Keel } from './sessions.js'
 

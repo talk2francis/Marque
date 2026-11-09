@@ -235,6 +235,29 @@
       "chainIds": [
         97
       ]
+    },
+    {
+      "address": "0x0cC5DB909cEcE1856d1896d633d32Bd305ce26c2",
+      "role": "Charters testnet test owner (BSC testnet only; opens test loans and guards for the worker and interface tests)",
+      "chainIds": [
+        97
+      ]
+    },
+    {
+      "address": "0xDaE9D20B10c95e666351e3C8Ae401D7cF193B292",
+      "role": "Keel watcher: Keel's Altana account that calls act() on Loan Guards",
+      "chainIds": [
+        56,
+        97
+      ]
+    },
+    {
+      "address": "0xfF12C2bb6A8C4488Dc1159Bc0dBE8A1DcEfBc1B7",
+      "role": "Charters backup watcher: calls act() directly when the Altana path is slow or down",
+      "chainIds": [
+        56,
+        97
+      ]
     }
   ]
 }

@@ -1,6 +1,6 @@
 import { sql } from 'drizzle-orm'
 import { decodeEventLog, getAddress, type Address, type Log, type PublicClient } from 'viem'
-import { db } from '@marque/db'
+import { chartersDb as db } from '@marque/db'
 import { CHARTER_CHAINS, charterFactoryAbi, loanGuardAbi, type CharterChainId } from '@marque/charters'
 
 /**

@@ -61,3 +61,14 @@ export function guardPageVisible(
   const o = owner.toLowerCase()
   return !teamWallets.some((w) => w.toLowerCase() === o)
 }
+
+/** The preview cookie's value from a request's Cookie header, or null. */
+export function previewCookieFrom(headers: Headers): string | null {
+  const raw = headers.get('cookie')
+  if (!raw) return null
+  for (const part of raw.split(';')) {
+    const [k, ...v] = part.trim().split('=')
+    if (k === PREVIEW_COOKIE) return decodeURIComponent(v.join('='))
+  }
+  return null
+}

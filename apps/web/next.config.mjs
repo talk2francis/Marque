@@ -10,7 +10,7 @@ const nextConfig = {
   outputFileTracingIncludes: { '/**': ['../../config/first-party.json', '../../config/team-wallets.json', './assets/fonts/InstrumentSerif-Regular.ttf'], '/api/v1/record-at-close/*': ['../../docs/evidence/set-and-earn-close-2026-11-05/**/*'] },
   reactStrictMode: true,
   // Workspace packages ship TypeScript source, not a build step.
-  transpilePackages: ['@marque/db', '@marque/ui', '@marque/chain', '@marque/registry', '@marque/probe', '@marque/positions', '@marque/mandates', '@marque/execution', '@marque/conformance', '@marque/ledger', '@marque/agent-engines', '@marque/commerce', '@marque/pass'],
+  transpilePackages: ['@marque/db', '@marque/ui', '@marque/chain', '@marque/registry', '@marque/probe', '@marque/positions', '@marque/mandates', '@marque/execution', '@marque/conformance', '@marque/ledger', '@marque/agent-engines', '@marque/commerce', '@marque/pass', '@marque/charters'],
   webpack(config) {
     // Those packages use TypeScript's ESM convention of importing './x.js' from
     // './x.ts'. Node and tsx resolve that natively; webpack needs telling.

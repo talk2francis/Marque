@@ -79,3 +79,28 @@ export const BOUNDS = {
   maxDays: 90,
   tipDivisor: 10n,
 } as const
+
+/**
+ * Who pressed the button. An Acted caller counts for an agent only when that address is a declared executor of the
+ * agent (AGENTS.md C6: earned from onchain actions, never declared capability). Keel's watcher is Marque's health
+ * agent acting through Altana; the backup watcher is Marque's own fallback, never presented as an agent.
+ */
+export const KEEL_WATCHER: Address = '0xDaE9D20B10c95e666351e3C8Ae401D7cF193B292'
+export const BACKUP_WATCHER: Address = '0xfF12C2bb6A8C4488Dc1159Bc0dBE8A1DcEfBc1B7'
+
+/** Agent identity (chainId:registry:tokenId, as the Register keys agents) to its declared executor addresses. */
+export const DECLARED_EXECUTORS: Record<string, readonly Address[]> = {
+  '56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341556': [KEEL_WATCHER], // Keel, BSC mainnet
+  '97:0x8004a818bfb912233c491871b3d84c89a494bd9e:2238': [KEEL_WATCHER], // Keel, BSC testnet
+}
+
+export type CallerKind = 'keel' | 'backup' | 'owner' | 'agent'
+
+/** How a caller is named on a charter page. */
+export function callerKind(caller: string, owner: string): CallerKind {
+  const c = caller.toLowerCase()
+  if (c === owner.toLowerCase()) return 'owner'
+  if (c === KEEL_WATCHER.toLowerCase()) return 'keel'
+  if (c === BACKUP_WATCHER.toLowerCase()) return 'backup'
+  return 'agent'
+}

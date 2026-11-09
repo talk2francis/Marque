@@ -1,7 +1,7 @@
 import { ArrowRight } from 'lucide-react'
 import { BRAND, ProvenanceChip } from '@marque/ui'
 import { campaignClock } from '@marque/commerce/rules'
-import { TOOLS } from '../../../lib/mcp/tools'
+import { activeTools } from '../../../lib/mcp/tools'
 import { platformFeeBp } from '../../../lib/escrow-fee'
 import { withDeadline } from '../../../lib/deadline'
 import { FAQ } from '../../docs/faq/faq'
@@ -25,7 +25,7 @@ const ALL = FAQ.reduce((n, g) => n + g.items.length, 0)
 export async function HomeFaq({ supply }: { supply: FaqSupply | null }) {
   const clock = campaignClock(Date.now())
   const feeBp = await withDeadline(platformFeeBp(56), 2500).catch(() => null)
-  const ctx: FaqContext = { feeBp, closed: clock.closed, afterCloseDays: clock.afterCloseDays, tools: TOOLS.length }
+  const ctx: FaqContext = { feeBp, closed: clock.closed, afterCloseDays: clock.afterCloseDays, tools: activeTools().length }
   const items = faqFor(ctx)
   return (
     <section className={styles.faq} aria-labelledby="questions" data-reveal>

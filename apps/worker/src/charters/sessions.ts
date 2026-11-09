@@ -1,7 +1,7 @@
 import { sql } from 'drizzle-orm'
 import { keccak256, parseAbi, parseEther, type Address, type Hex, type PublicClient } from 'viem'
 import { BNB, BNB_TESTNET, createClient, deserializeSession, serializeSession, signerFromPrivateKey, type Session } from '@altananetwork/sdk'
-import { db } from '@marque/db'
+import { chartersDb as db } from '@marque/db'
 import type { CharterChainId } from '@marque/charters'
 import { deriveSessionKey } from '@marque/charters/session-key'
 

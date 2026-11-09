@@ -26,6 +26,23 @@ export function db() {
   return dbInstance
 }
 
+let chartersSql: postgres.Sql | undefined
+let chartersInstance: ReturnType<typeof drizzle<typeof schema>> | undefined
+
+/**
+ * The Charters tables' database. CHARTERS_DATABASE_URL when set (before launch, the dark worker writes to its own
+ * database), otherwise the main one. A small pool of its own, so charter reads can never starve the site.
+ */
+export function chartersDb() {
+  const own = process.env.CHARTERS_DATABASE_URL
+  if (!own || own === process.env.DATABASE_URL) return db()
+  if (!chartersInstance) {
+    chartersSql = postgres(own, { max: Number(process.env.CHARTERS_PGPOOL_MAX ?? 4), idle_timeout: 30, connect_timeout: 10, onnotice: () => {} })
+    chartersInstance = drizzle(chartersSql, { schema })
+  }
+  return chartersInstance
+}
+
 /** Raw driver, for the rare query Drizzle cannot express. */
 export function raw(): postgres.Sql {
   db()
@@ -40,5 +57,10 @@ export async function closeDb(): Promise<void> {
     await sql.end({ timeout: 5 })
     sql = undefined
     dbInstance = undefined
+  }
+  if (chartersSql) {
+    await chartersSql.end({ timeout: 5 })
+    chartersSql = undefined
+    chartersInstance = undefined
   }
 }
