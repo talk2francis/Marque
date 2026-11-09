@@ -31,7 +31,7 @@ import { altanaFor, sessionsOnce, type AltanaClient, type Keel } from './charter
 import { watchOnce } from './charters/watch.js'
 import { indexOnceV2 } from './charters/v2/indexer.js'
 import { watchOnceV2 } from './charters/v2/watch.js'
-import { V2, type CharterKind } from '@marque/charters'
+import { EXECUTORS, V2, type CharterKind } from '@marque/charters'
 
 const DIR = process.env['CHARTERS_DIR'] ?? '/root/.marque/charters'
 const CHAINS = (process.env['CHARTERS_CHAINS'] ?? '97').split(',').map(Number).filter(isCharterChain)
@@ -163,6 +163,16 @@ async function main() {
           })
           if (sluice) chainStatus['sluicegate'] = { address: sluice.address, balanceBnb: formatEther(await pub.getBalance({ address: sluice.address })), gasSpentTodayBnb: formatEther(spend.direct.get(c) ?? 0n) }
         }
+        // Every agent executor's native balance (R3): Altana's relay refuses calls from an account that cannot cover its
+        // fee reserve, which shows only as "Invalid parameters"; Status says it plainly instead.
+        const LOW = parseEther(env('CHARTERS_LOW_BNB', '0.002'))
+        const agents: Record<string, { address: string; balanceBnb: string; low: boolean }> = {}
+        for (const [name, address] of Object.entries(EXECUTORS)) {
+          const b = await pub.getBalance({ address: address as `0x${string}` }).catch(() => null)
+          if (b !== null) agents[name] = { address, balanceBnb: formatEther(b), low: b < LOW }
+          if (b !== null && b < LOW) log('agent_balance_low', { chainId: c, agent: name, balanceBnb: formatEther(b) })
+        }
+        chainStatus['agents'] = agents
         chainStatus['ok'] = true
       } catch (e) {
         chainStatus['ok'] = false

@@ -297,7 +297,7 @@ export async function chartersV2Status() {
       (select max(read_at) from charter_v2_sample s where s.chain_id = k.chain_id and s.kind = k.kind) as last_check,
       (select max(block_time) from charter_v2_event e where e.chain_id = k.chain_id and e.kind = k.kind and e.event in ('Repaid','Supplied','Withdrew','Traded','Rebalanced','Exited')) as last_action
     from (values (56, 1), (56, 2), (56, 3), (56, 4), (97, 1), (97, 2), (97, 3), (97, 4)) as k(chain_id, kind)`))
-  type W = { ok?: boolean; keel?: { path?: string }; backup?: { path?: string }; sluicegate?: unknown; watchV2?: { readErrors?: Record<string, number> } }
+  type W = { ok?: boolean; keel?: { path?: string }; backup?: { path?: string }; sluicegate?: unknown; watchV2?: { readErrors?: Record<string, number> }; agents?: Record<string, { low?: boolean }> }
   let file: { chains?: Record<string, W> } | null = null
   try { const { readFile } = await import('node:fs/promises'); file = JSON.parse(await readFile(process.env['CHARTERS_STATUS_FILE'] ?? '/root/.marque/charters/status.json', 'utf8')) } catch { file = null }
   return rows.map((r) => {
@@ -305,7 +305,10 @@ export async function chartersV2Status() {
     const kind = KIND_BY_CODE[r.kind]!
     const w = file?.chains?.[String(chainId)]
     const altana = w?.keel?.path ?? null // the worker reports one Altana path state per chain
-    const primary = kind === 'yield' ? (w?.sluicegate ? 'ok' : w ? 'paused' : null) : altana
+    const agent = { loan: 'keel', yield: 'sluicegate', grid: 'lattice', range: 'bound' }[kind]
+    const base = kind === 'yield' ? (w?.sluicegate ? 'ok' : w ? 'paused' : null) : altana
+    // An agent below its fee reserve cannot act: its path is degraded whatever the relay says.
+    const primary = w?.agents?.[agent]?.low ? 'paused' : base
     return {
       chainId, kind, live: factoryFor(chainId, kind) !== null, armed: r.armed, lastCheck: iso(r.last_check), lastAction: iso(r.last_action),
       primary, backup: w?.backup?.path ?? null, readErrors: w?.watchV2?.readErrors?.[kind] ?? 0,
