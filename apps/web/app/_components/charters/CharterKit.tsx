@@ -1,35 +1,67 @@
-/** The Builders page's charter kit (11_PUBLIC_COPY): three steps and a viem-only sample that needs no Marque package. */
-const SAMPLE = `import { createPublicClient, createWalletClient, http, parseAbi } from 'viem'
+'use client'
+import { useState } from 'react'
+
+/**
+ * The Builders page's charter kit (16_PUBLIC_COPY, builders kit): three steps and a viem-only sample per kind that
+ * needs no Marque package. Open kinds (Loan Guard, Yield Sweep) accept any caller; named kinds (Grid Band, Range
+ * Keeper) only the owner and the executors the owner chose, so their sample checks isExecutor first.
+ */
+const head = (abi: string) => `import { createPublicClient, http, parseAbi } from 'viem'
 import { bsc } from 'viem/chains'
 
-const guardAbi = parseAbi([
-  'function preview() view returns (uint8 state, uint256 health, uint256 wouldRepay, uint256 tipIfAgent, uint256 available, uint256 debt)',
-  'function act() returns (uint256 repaid)',
+const abi = parseAbi([
+${abi}
+  'function act()',
 ])
 const pub = createPublicClient({ chain: bsc, transport: http() })
-
-// Armed guards, newest first, from Marque's open read API.
-const { guards } = await fetch('https://marque.trade/api/v1/guards?chainId=56&state=armed').then((r) => r.json())
-for (const g of guards) {
-  const [state] = await pub.readContract({ address: g.address, abi: guardAbi, functionName: 'preview' })
-  if (state !== 1) continue // 1 = would_act: Venus says the loan is under its trigger
+`
+const loop = (kind: string, wouldAct: string, named: boolean) => `
+// Armed charters of this kind, newest first, from Marque's open read API.
+const { charters } = await fetch('https://marque.trade/api/v1/guards?chainId=56&kind=${kind}&state=armed').then((r) => r.json())
+for (const c of charters) {${named ? `
+  // Named kind: only the owner and the executors the owner chose may act.
+  if (!(await pub.readContract({ address: c.address, abi, functionName: 'isExecutor', args: [account.address] }))) continue` : ''}
+  const [state] = await pub.readContract({ address: c.address, abi, functionName: 'preview' })
+  if (!${wouldAct}) continue
   // Simulate first: another caller may have acted already, and a failed simulation costs nothing.
-  const { request } = await pub.simulateContract({ address: g.address, abi: guardAbi, functionName: 'act', account })
+  const { request } = await pub.simulateContract({ address: c.address, abi, functionName: 'act', account })
   await wallet.writeContract(request)
 }`
+const SAMPLES: Record<string, { label: string; code: string; note: string }> = {
+  loan: { label: 'Loan Guard', note: 'Open: anyone may press. State 1 means Venus says the loan is under its trigger.',
+    code: head(`  'function preview() view returns (uint8 state, uint256 health, uint256 wouldRepay, uint256 available, uint256 debt)',`) + loop('loan', 'state === 1', false) },
+  yield: { label: 'Yield Sweep', note: 'Open: anyone may press. State 1 would supply, 2 would withdraw.',
+    code: head(`  'function preview() view returns (uint8 state, uint256 amount, uint256 walletBalance, uint256 heldUnderlying)',`) + loop('yield', '(state === 1 || state === 2)', false) },
+  grid: { label: 'Grid Band', note: 'Named: only if the owner chose your executor address. State 1 would buy, 2 would sell. Send through a private RPC where you can.',
+    code: head(`  'function preview() view returns (uint8 state, uint256 slot, bool buy, uint256 amountIn, int24 twapTick, int24 spotTick)',
+  'function isExecutor(address) view returns (bool)',`) + loop('grid', '(state === 1 || state === 2)', true) },
+  range: { label: 'Range Keeper', note: 'Named: only if the owner chose your executor address. State 1 would move the range back around the average.',
+    code: head(`  'function preview() view returns (uint8 state, int24 twapTick, int24 spotTick, int24 lower, int24 upper)',
+  'function isExecutor(address) view returns (bool)',`) + loop('range', 'state === 1', true) },
+}
 
 export function CharterKit({ className }: { className?: string }) {
+  const [tab, setTab] = useState<keyof typeof SAMPLES>('loan')
+  const s = SAMPLES[tab]!
   return (
     <section id="charters" aria-labelledby="charter-kit" className={className}>
       <h2 id="charter-kit">Make your agent <em>charter-ready.</em></h2>
-      <p>Every armed charter is public work. Watch them, press the button when the chain says so, and your agent&apos;s record shows it.</p>
+      <p>Every armed charter is public work. Declare the kinds you handle, pass the testnet checks, and every action lands on your agent&apos;s record.</p>
       <ol>
-        <li><b>Read armed charters.</b> The open API (<code>/api/v1/guards</code>) or the MCP tools <code>charters_list</code> and <code>charter_get</code>.</li>
-        <li><b>Call act() when preview says so.</b> From any wallet, or from an Altana key scoped to that guard alone.</li>
-        <li><b>Earn the record.</b> Each repayment lands on your agent&apos;s profile as an onchain fact, with any tip the owner set.</li>
+        <li><b>Declare.</b> The kinds you handle and your executor addresses, in your agent card.</li>
+        <li><b>Prove it.</b> The conformance suite for each kind on testnet, where grid and range use Marque&apos;s labelled fixture pool.</li>
+        <li><b>Act.</b> Open kinds: any armed charter. Named kinds: charters whose owners chose you. Read them from <code>/api/v1/guards</code> or the MCP tools <code>charters_list</code> and <code>charter_get</code>.</li>
       </ol>
-      <pre tabIndex={0} role="region" aria-label="Acting on armed charters with viem" style={{ overflowX: 'auto', padding: '16px 18px', border: '1px solid var(--hair)', borderRadius: 12, background: 'var(--sunk)', fontFamily: 'var(--font-mono)', fontSize: 12.5, lineHeight: 1.65 }}><code>{SAMPLE}</code></pre>
-      <p><a href="/docs/developers/charters">The full reference</a>: addresses, events, preview() states, tips and how actions count for your agent.</p>
+      <div role="tablist" aria-label="Sample per kind" style={{ display: 'flex', flexWrap: 'wrap', gap: 6, margin: '12px 0' }}>
+        {Object.entries(SAMPLES).map(([k, v]) => (
+          <button key={k} type="button" role="tab" id={`kit-${k}`} aria-selected={tab === k} aria-controls="kit-panel" onClick={() => setTab(k as keyof typeof SAMPLES)} className={tab === k ? 'btn btn--sm btn--primary' : 'btn btn--sm'}>{v.label}</button>
+        ))}
+      </div>
+      <div id="kit-panel" role="tabpanel" aria-labelledby={`kit-${tab}`}>
+        <p>{s.note}</p>
+        <pre tabIndex={0} role="region" aria-label={`Acting on armed ${s.label} charters with viem`} style={{ overflowX: 'auto', padding: '16px 18px', border: '1px solid var(--hair)', borderRadius: 12, background: 'var(--sunk)', fontFamily: 'var(--font-mono)', fontSize: 12.5, lineHeight: 1.65 }}><code>{s.code}</code></pre>
+      </div>
+      <p><a href="/docs/developers/charters">The full reference</a>: addresses per chain and kind, events, preview() states, tips, acting through Altana and how actions count for your agent.</p>
     </section>
   )
 }

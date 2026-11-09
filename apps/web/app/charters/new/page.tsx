@@ -15,10 +15,10 @@ import b from '../_components/builder.module.css'
 export const dynamic = 'force-dynamic'
 
 const KINDS: Array<{ kind: CharterKind; name: string; agent: string; eyebrow: string; title: [string, string]; lede: string }> = [
-  { kind: 'loan', name: 'Loan Guard', agent: 'Keel', eyebrow: 'Guard this loan', title: ['Draw the line.', 'We’ll hold it.'], lede: 'Drag the two marks. Everything else on this page follows them, in plain words and in prices. Nothing is signed until you seal the charter.' },
-  { kind: 'yield', name: 'Yield Sweep', agent: 'Sluicegate', eyebrow: 'Sweep idle money', title: ['Keep what you need.', 'Park the rest.'], lede: 'Set a floor and a ceiling for your wallet. Above the ceiling, the rest goes into Venus in your name; below the floor, it comes back.' },
+  { kind: 'loan', name: 'Loan Guard', agent: 'Keel', eyebrow: 'Guard this loan', title: ['Draw the line.', 'We’ll hold it.'], lede: 'Drag the two marks. Everything follows them, in plain words and in BNB prices.' },
+  { kind: 'yield', name: 'Yield Sweep', agent: 'Sluicegate', eyebrow: 'Sweep idle money', title: ['Keep enough.', 'Put the rest to work.'], lede: 'Set the band your wallet should stay in. The excess goes to Venus in your name and comes back when you need it.' },
   { kind: 'grid', name: 'Grid Band', agent: 'Lattice', eyebrow: 'Trade this band', title: ['Buy lower.', 'Sell one step higher.'], lede: 'Choose the price band and the order size. Every level is a promise in code: a completed round trip never returns less than it spent.' },
-  { kind: 'range', name: 'Range Keeper', agent: 'Bound', eyebrow: 'Keep this range', title: ['Stay in range.', 'Within your limits.'], lede: 'When the price has left your range for a while, your keeper moves it back around the price, same width, within the loss, frequency and count limits you set.' },
+  { kind: 'range', name: 'Range Keeper', agent: 'Bound', eyebrow: 'Keep this range', title: ['Stay in range,', 'without watching.'], lede: 'When the price leaves your range and stays out, your keeper moves it back, same width, inside your limits.' },
 ]
 const ALIAS: Record<string, CharterKind> = { loan: 'loan', 'loan-guard': 'loan', yield: 'yield', 'yield-sweep': 'yield', grid: 'grid', 'grid-band': 'grid', range: 'range', 'range-keeper': 'range' }
 

@@ -10,6 +10,7 @@ import { cookies } from 'next/headers'
 import { SiteHeader, SiteFooter } from '../_components/SiteHeader'
 import { chartersVisible, PREVIEW_COOKIE } from '../../lib/charters-access'
 import { chartersStatus } from '../../lib/guards'
+import { chartersV2Status } from '../../lib/charters-v2'
 import styles from './status.module.css'
 import { Capacity } from '../_components/Capacity'
 import { OutsideChecks } from '../_components/OutsideChecks'
@@ -147,6 +148,9 @@ export default async function StatusPage() {
   // Charters rows (AGENTS.md section 14): shown once public or to a preview browser; a failed read says so.
   const charters = chartersVisible((await cookies()).get(PREVIEW_COOKIE)?.value)
     ? await withDeadline(chartersStatus(), 4000).catch(() => 'unavailable' as const)
+    : null
+  const chartersV2 = chartersVisible((await cookies()).get(PREVIEW_COOKIE)?.value)
+    ? await withDeadline(chartersV2Status(), 4000).catch(() => 'unavailable' as const)
     : null
   // Incidents the alerts worker has paged and not yet seen recover (ops/marque-alerts.mjs), in its own words.
   const openIncidents = (() => {
@@ -369,7 +373,31 @@ export default async function StatusPage() {
                 })}</tbody>
               </table>
             )}
-            <p className={styles.note}>Armed charters, checks and actions come from the chain&apos;s events and the watchers&apos; sampled reads; each path&apos;s state is the watcher process&apos;s own report. A guard can always be acted on by anyone, and ended by its owner, whatever these show.</p>
+            <p className={styles.note}>Loan Guard v1. Armed charters, checks and actions come from the chain&apos;s events and the watchers&apos; sampled reads; each path&apos;s state is the watcher process&apos;s own report. A guard can always be acted on by anyone, and ended by its owner, whatever these show.</p>
+            {chartersV2 && chartersV2 !== 'unavailable' ? (
+              <table className={styles.table} tabIndex={0} aria-label="Charters per network and kind">
+                <thead><tr><th>Network</th><th>Kind</th><th>Armed</th><th>Last check</th><th>Primary path</th><th>Backup path</th><th>Last action</th></tr></thead>
+                <tbody>{chartersV2.map((c) => {
+                  const chip = (path: string | null) => path === 'ok' ? <Chip tone="holds">ok</Chip> : path === 'paused' ? <Chip tone="watch">degraded</Chip> : <Chip tone="watch">unknown</Chip>
+                  const t = (v: string | null) => (v ? new Date(v).toISOString().replace('T', ' ').slice(0, 16) + ' UTC' : 'none yet')
+                  const name = { loan: 'Loan Guard', yield: 'Yield Sweep', grid: 'Grid Band', range: 'Range Keeper' }[c.kind]
+                  return (
+                    <tr key={`${c.chainId}-${c.kind}`}>
+                      <td>{c.chainId === 56 ? 'BNB Smart Chain' : 'BSC testnet'}</td>
+                      <td>{name}{c.fixture ? ' (fixture pool)' : ''}</td>
+                      {c.live ? <>
+                        <td className="mono">{c.armed}</td>
+                        <td className="mono">{t(c.lastCheck)}</td>
+                        <td>{chip(c.primary)}</td>
+                        <td>{chip(c.backup)}</td>
+                        <td className="mono">{t(c.lastAction)}</td>
+                      </> : <td colSpan={5}>Not live on this network yet.</td>}
+                    </tr>
+                  )
+                })}</tbody>
+              </table>
+            ) : chartersV2 === 'unavailable' ? <p className={styles.note}>The v2 charters index could not be read just now.</p> : null}
+            <p className={styles.note}>On BSC testnet, Grid Band and Range Keeper run on Marque&apos;s labelled fixture pool: prices are moved by Marque&apos;s test market maker.</p>
           </section>
         ) : null}
 

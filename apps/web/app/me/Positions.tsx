@@ -6,6 +6,7 @@ import { MeasureRule, ProvenanceChip } from '@marque/ui'
 import { watched, WATCH_EVENT } from '../../lib/local-watch'
 import { Button, Skeleton } from '../_components/ui'
 import { GuardLine } from '../_components/charters/GuardLine'
+import { KindLines } from '../_components/charters/KindLines'
 import styles from './positions.module.css'
 
 const Finite = z.number().finite()
@@ -45,6 +46,7 @@ function PositionRead({ address, line, own }: { address: string; line: number | 
           <MeasureRule value={hf} lower={0} upper={Math.max(3, hf)} threshold={line ?? 1} thresholdLabel={line !== null ? `Your line ${line}` : 'Liquidation 1'} valueLabel={hf.toFixed(3)} state={hf < 1 ? 'breach' : line !== null && hf < line ? 'watch' : 'holds'} label={`Venus health factor ${hf}, liquidation line 1${line !== null ? `, your alert line ${line}` : ''}`} animate={false} />
           <a className="btn btn--sm" href={`/tender?category=health_factor&account=${address}`}>Ask agents about this</a>
           <GuardLine owner={address} />
+          <KindLines owner={address} />
         </article> : <p>No Venus borrowing position with a health factor was returned for this wallet.</p>}
         {!s.pancakeV3.ok ? <p>PancakeSwap V3 could not be read. No empty position list is assumed.</p> : s.pancakeV3.positions.map(p => <article key={p.tokenId} className={styles.position}>
           <h4>PancakeSwap V3 · {p.pair} · #{p.tokenId}</h4>

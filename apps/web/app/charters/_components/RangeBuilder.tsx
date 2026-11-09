@@ -228,7 +228,7 @@ export function RangeBuilder({ initialChain, initialAccount, demo }: { initialCh
               {!exit ? <li><X aria-hidden="true" />Lose more than {(lossBps / 100).toFixed(2)}% per move at the average price: the move is cancelled</li> : null}
             </ul>
           </div>
-          <p className={styles.custody} role="note"><b>Your position NFT moves into your own Range Keeper contract.</b>Every new position it makes is held there too. Take it back any time with End; after {until} anyone can send it back to you. Your wallet will show this step as sending an NFT to the Range Keeper factory: that is the grant, and in the same transaction it becomes your keeper&apos;s.</p>
+          <p className={styles.custody} role="note"><b>Your position NFT moves into your own Range Keeper contract while the charter runs. Take it back any time with End.</b>Every new position it makes is held there too. Take it back any time with End; after {until} anyone can send it back to you. Your wallet will show this step as sending an NFT to the Range Keeper factory: that is the grant, and in the same transaction it becomes your keeper&apos;s.</p>
           <div className={styles.grant}>
             <button type="button" className={styles.primary} disabled={Boolean(blocker) || grant.checking} onClick={() => void start()}>{grant.checking ? 'Checking the network fee…' : 'Grant a charter'}</button>
             {blocker ? <p className={styles.blocker} role="status">{blocker.words}{blocker.action ? <> <button type="button" className={styles.link} onClick={blocker.action.run}>{blocker.action.label}</button></> : null}</p>

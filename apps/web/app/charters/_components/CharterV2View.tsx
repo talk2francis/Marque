@@ -165,6 +165,7 @@ export function CharterV2View({ initial, teamOwner }: { initial: V2Detail; teamO
   return (
     <div className={styles.view}>
       {teamOwner ? <p className={styles.notice}>A Marque team test charter.</p> : null}
+      {kind === 'range' && !t['returned'] ? <p className={styles.notice}>Your position NFT moves into your own Range Keeper contract while the charter runs. Take it back any time with End.</p> : null}
       {c.fixture ? <p className={styles.notice}>Testnet fixture pool: prices are moved by Marque&apos;s test market maker.</p> : null}
       <header className={styles.top}>
         <span className={styles.pill} data-tone={pill.tone}><i aria-hidden="true" />{pill.label}</span>

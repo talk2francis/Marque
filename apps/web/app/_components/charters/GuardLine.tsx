@@ -18,7 +18,13 @@ export function GuardLine({ owner, chainId = 56 }: { owner: string; chainId?: 56
     setState(null)
     fetch(`/api/v1/guards?chainId=${chainId}&owner=${owner}&state=armed&limit=5`, { cache: 'no-store' })
       .then((r) => (r.ok ? r.json() : null))
-      .then((j: { guards?: Guard[] } | null) => { if (live) setState(j ? { on: true, guards: j.guards ?? [] } : { on: false, guards: [] }) })
+      .then((j: { guards?: Guard[]; charters?: Array<{ chainId: number; address: string; kind: string; params: { p?: { trigger?: string; vDebt?: string } }; expiresAt: string }> } | null) => {
+        if (!live) return
+        if (!j) { setState({ on: false, guards: [] }); return }
+        // Loan Guard v2 charters read as guards here too: a reader cannot tell the versions apart, nor should they.
+        const v2 = (j.charters ?? []).filter((c) => c.kind === 'loan').map((c) => ({ chainId: c.chainId, address: c.address, symbol: 'Venus', trigger: c.params.p?.trigger ?? '0', expiresAt: c.expiresAt }))
+        setState({ on: true, guards: [...(j.guards ?? []), ...v2] })
+      })
       .catch(() => { if (live) setState({ on: false, guards: [] }) })
     return () => { live = false }
   }, [owner, chainId])
@@ -38,7 +44,7 @@ export function GuardLine({ owner, chainId = 56 }: { owner: string; chainId?: 56
   }
   return (
     <p style={style}>
-      <a className="btn btn--sm" href={`/charters/new?chain=${chainId}&account=${owner}`}>Guard this loan</a>
+      <a className="btn btn--sm" href={`/charters/new?kind=loan&chain=${chainId}&account=${owner}`}>Guard this loan</a>
       <span>An agent repays from your wallet into this loan if its health falls below a line you draw.</span>
     </p>
   )

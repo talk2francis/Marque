@@ -1,5 +1,6 @@
 'use client'
 import { GuardLine } from '../_components/charters/GuardLine'
+import { KindLines } from '../_components/charters/KindLines'
 
 import { useCallback, useEffect, useState } from 'react'
 import { MeasureRule, Chip, DataCell, ProvenanceChip, EmptyState, Button } from '@marque/ui'
@@ -266,6 +267,7 @@ export function Desk({
               </dl>
               {hfNeedsWork ? <RowAction label="Get a repay plan" brief={{ category: 'health_factor', address, targetHf: 1.5 }} /> : null}
               <GuardLine owner={address} />
+          <KindLines owner={address} />
             </article>
           ) : (
             <article className={styles.position}>

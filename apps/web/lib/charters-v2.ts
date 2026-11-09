@@ -285,3 +285,31 @@ export async function claimsFor(chainId: CharterChainId, owner: Address) {
   return { chainId, owner: getAddress(owner), tokens, needsYou: tokens.filter((t) => t.short).length, readAt: new Date().toISOString(), fromChain: true as const }
 }
 
+
+/**
+ * Status rows per chain and kind (16_PUBLIC_COPY, Status page rows): armed, last check and last action from the
+ * index, and each path's state from the worker's own status file (same server; absent means unknown, never fine).
+ */
+export async function chartersV2Status() {
+  const rows = rowsOf<{ chain_id: number; kind: number; armed: number; last_check: string | null; last_action: string | null }>(await chartersDb().execute(sql`
+    select k.chain_id, k.kind,
+      (select count(*)::int from charter_v2 c where c.chain_id = k.chain_id and c.kind = k.kind and c.ended_at is null and c.expires_at > now()) as armed,
+      (select max(read_at) from charter_v2_sample s where s.chain_id = k.chain_id and s.kind = k.kind) as last_check,
+      (select max(block_time) from charter_v2_event e where e.chain_id = k.chain_id and e.kind = k.kind and e.event in ('Repaid','Supplied','Withdrew','Traded','Rebalanced','Exited')) as last_action
+    from (values (56, 1), (56, 2), (56, 3), (56, 4), (97, 1), (97, 2), (97, 3), (97, 4)) as k(chain_id, kind)`))
+  type W = { ok?: boolean; keel?: { path?: string }; backup?: { path?: string }; sluicegate?: unknown; watchV2?: { readErrors?: Record<string, number> } }
+  let file: { chains?: Record<string, W> } | null = null
+  try { const { readFile } = await import('node:fs/promises'); file = JSON.parse(await readFile(process.env['CHARTERS_STATUS_FILE'] ?? '/root/.marque/charters/status.json', 'utf8')) } catch { file = null }
+  return rows.map((r) => {
+    const chainId = r.chain_id as CharterChainId
+    const kind = KIND_BY_CODE[r.kind]!
+    const w = file?.chains?.[String(chainId)]
+    const altana = w?.keel?.path ?? null // the worker reports one Altana path state per chain
+    const primary = kind === 'yield' ? (w?.sluicegate ? 'ok' : w ? 'paused' : null) : altana
+    return {
+      chainId, kind, live: factoryFor(chainId, kind) !== null, armed: r.armed, lastCheck: iso(r.last_check), lastAction: iso(r.last_action),
+      primary, backup: w?.backup?.path ?? null, readErrors: w?.watchV2?.readErrors?.[kind] ?? 0,
+      fixture: (kind === 'grid' || kind === 'range') && V2[chainId].pools.every((p) => p.fixture),
+    }
+  })
+}

@@ -18,16 +18,16 @@ export const metadata = {
 
 const CHAIN_NAME = { 56: 'BNB Smart Chain', 97: 'BSC testnet' } as const
 const PROMISES: Array<[string, string]> = [
-  ['One job each.', 'A charter does exactly one thing, and nothing else.'],
+  ['Your limits are code, not settings.', 'Lifetime totals that never refill.'],
   ['The chain decides when.', 'Venus and PancakeSwap’s own numbers, checked in the same transaction.'],
-  ['Limits you sign.', 'Lifetime totals that never refill.'],
-  ['One step to end it.', 'No server, relay or agent can stop you.'],
+  ['You can end it in one step.', 'No server, relay or agent can stop you.'],
+  ['Every action is on the record.', 'Each one with its transaction and receipt.'],
 ]
 const KINDS = [
-  { kind: 'loan', name: 'Loan Guard', agent: 'Keel', cta: 'Guard a loan', promise: 'Repays your own Venus loan back to a health you choose when it falls below another, from your wallet.' },
-  { kind: 'yield', name: 'Yield Sweep', agent: 'Sluicegate', cta: 'Sweep idle money', promise: 'Keeps your wallet between a floor and a ceiling and puts the rest into Venus in your name.' },
-  { kind: 'grid', name: 'Grid Band', agent: 'Lattice', cta: 'Grid a pair', promise: 'Buys a fixed amount at each level on the way down and sells it one level up, on one reviewed PancakeSwap pool.' },
-  { kind: 'range', name: 'Range Keeper', agent: 'Bound', cta: 'Keep a range', promise: 'Moves your PancakeSwap position back into range when the price leaves it, within loss, frequency and count limits.' },
+  { kind: 'loan', name: 'Loan Guard', agent: 'Keel', cta: 'Guard a loan', promise: 'Keeps your Venus loan healthy. Repays from your wallet, only into your loan.' },
+  { kind: 'yield', name: 'Yield Sweep', agent: 'Sluicegate', cta: 'Sweep idle money', promise: 'Keeps your wallet topped up and the rest earning in Venus, in your name.' },
+  { kind: 'grid', name: 'Grid Band', agent: 'Lattice', cta: 'Grid a pair', promise: 'Buys the dips and sells one step up, between prices you choose.' },
+  { kind: 'range', name: 'Range Keeper', agent: 'Bound', cta: 'Keep a range', promise: 'Keeps your PancakeSwap position in range, within loss limits you set.' },
 ] as const
 const ago = (iso: string | null) => {
   if (!iso) return null
@@ -66,8 +66,8 @@ export default async function ChartersHub() {
         <section className={styles.hero}>
           <div className={styles.heroText}>
             <span className={styles.eyebrow}>New on Marque: Charters</span>
-            <h1 className={styles.title}>Agents that act for you, <em>only inside your limits.</em></h1>
-            <p className={styles.lede}>Every charter can do exactly one job for you, only when the chain shows the condition, only inside lifetime limits you sign, and you can end it in one step. Guard a loan, sweep idle money, trade a band, keep a range.</p>
+            <h1 className={styles.title}>Agents that act for you, <em>inside lines you draw.</em></h1>
+            <p className={styles.lede}>Pick what you want handled. Draw the limits. An agent acts only when the chain shows your condition, only inside your limits, and you can end it any time.</p>
             <div className={styles.ctas}>
               <a className={styles.primary} href="/charters/new?kind=loan">Grant a charter</a>
               {live ? <a className={styles.secondary} href={`/charters/${live.chainId}/${live.address}`}>See a live charter</a> : null}

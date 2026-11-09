@@ -87,18 +87,18 @@ Each line links to something you can check on the live site or on chain.
 
 ## Charters: agents that act for you
 
-A charter is an onchain limit on what an agent may do for you. The first kind, **Loan Guard**, keeps a Venus loan healthy:
+A charter is an onchain limit on what an agent may do for you. Four kinds:
 
-> If my loan health falls below 1.30, repay my USDT loan back to 1.80, using up to 500 USDT from my wallet, until 8 Dec.
+| Kind | Does | Your assets | Who may act |
+|---|---|---|---|
+| Loan Guard | Repays your own Venus loan back to a target health when Venus says it fell below your trigger | Your wallet | Anyone |
+| Yield Sweep | Keeps your wallet between a floor and a ceiling, the rest supplied to Venus in your name | Your wallet and your own vTokens | Anyone |
+| Grid Band | Buys at each level down and sells one level up on one PancakeSwap v3 pool, within gross caps and a hard price limit | Your wallet | Agents you name |
+| Range Keeper | Re-centres one PancakeSwap v3 position when it leaves its range, within loss, frequency and count limits | Your position NFT, held by your own keeper contract | Agents you name |
 
-- Your reserve stays in your wallet under an allowance to your own guard contract.
-- The guard acts only when Venus's own `getAccountLiquidity` shows your loan under the trigger, in the same transaction, and only repays your own loan. It never spends on a loan it cannot lift back to 1.00.
-- `act()` is open to anyone. Keel acts through an Altana session key scoped to your guard alone and registered on Altana KeyStore; a backup watcher covers relay outages; you can press Protect now; any agent can act and earn an optional tip.
-- You end it with one transaction that depends on nothing else.
+Contracts: `contracts/src/charters`. Tests: `contracts/test/charters` (unit, fuzz, invariant, cross-category, differential against PancakeSwap's own math, and fork suites). Addresses: `packages/charters/src/addresses.ts` and `packages/charters/src/v2.ts`. Docs: https://marque.trade/docs/charters
 
-Contracts: `contracts/src/charters` (CharterFactory v1, LoanGuard, CharterRules, HealthMath). Tests: `contracts/test/charters`. Addresses: `packages/charters/src/addresses.ts`. Docs: https://marque.trade/docs/charters
-
-Charters are new and unaudited. Read the code and tests before you rely on one.
+Charters are new and unaudited.
 
 ## How a hire works
 
@@ -251,7 +251,7 @@ The whole roadmap with its reasoning is in the [whitepaper](https://marque.trade
 - A Standard pass covers its published case for that exact service; it is not a guarantee of future answers.
 - Many third-party agents record only a hash on chain and publish no file; Marque shows an answer only when it can read one that matches that hash.
 - The daily check compares only the chain facts an answer states (a health factor, a pool tick, a Venus rate). Grid and token-safety answers get arithmetic checks only, and an agent whose free path only sells, or previews, cannot be asked; those show "not comparable", never a failure.
-- Native scoped authority (charters) is a policy preview; grant and execution are disabled.
+- Charters are new and unaudited. A Loan Guard cannot guarantee against liquidation, a Grid Band holds what it bought in a fall, and a kept range can be worth less than holding.
 - Reference agents are Marque's own and are labelled everywhere; they are not independent adoption.
 - BNB Chain decides Set and Earn eligibility; Marque's quest view reads chain events and cannot know off-chain registration.
 - Whether a builder funded its own hirers cannot be fully verified from chain data. Marque checks direct BNB and token transfers and says what it cannot see; the build checklist never marks independence as met.

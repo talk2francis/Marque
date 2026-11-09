@@ -15,7 +15,7 @@ export const LIBRARY: Array<{ slug: string; href: string; label: string }> = [
 
 /** Charters' two guides join the library once CHARTERS_PUBLIC is on (AGENTS.md section 14), or on their own pages. */
 const CHARTER_DOCS = [
-  { slug: 'charters', href: '/docs/charters', label: 'Charters (Loan Guard)' },
+  { slug: 'charters', href: '/docs/charters', label: 'Charters' },
   { slug: 'charters-dev', href: '/docs/developers/charters', label: 'Charters for builders' },
 ]
 export function libraryFor(current: string, env: Record<string, string | undefined> = process.env) {

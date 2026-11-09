@@ -1,20 +1,28 @@
-import { CHARTER_CHAINS } from '@marque/charters'
+import { CHARTER_CHAINS, KIND_NAMES, type CharterKind } from '@marque/charters'
 import { listGuards } from '../../../lib/guards'
+import { listChartersV2 } from '../../../lib/charters-v2'
 
-/** The Judge page's Charters steps (11_PUBLIC_COPY): the 60-second path, with the live charter read from the index. */
+/** The Judge page's Charters steps (16_PUBLIC_COPY): the 60-second path, with one live charter per kind read from the index. */
 export async function chartersJudgeSteps(): Promise<Array<{ title: string; note: string; href: string; cta: string }>> {
-  let live: { chainId: number; address: string } | null = null
-  for (const chainId of [56, 97] as const) {
-    if (!CHARTER_CHAINS[chainId].factory) continue
-    const r = await listGuards({ chainId, state: 'armed', limit: 1 }).catch(() => null)
-    if (r?.guards[0]) { live = r.guards[0]; break }
+  const kinds: CharterKind[] = ['loan', 'yield', 'grid', 'range']
+  const live: Array<{ kind: CharterKind; chainId: number; address: string }> = []
+  for (const kind of kinds) {
+    for (const chainId of [56, 97] as const) {
+      const r = await listChartersV2({ chainId, kind, state: 'all', limit: 5 }).catch(() => null)
+      const c = r?.charters.find((x) => x.actions > 0) ?? r?.charters[0]
+      if (c) { live.push({ kind, chainId, address: c.address }); break }
+      if (kind === 'loan' && CHARTER_CHAINS[chainId].factory) {
+        const g = await listGuards({ chainId, state: 'all', limit: 1 }).catch(() => null)
+        if (g?.guards[0]) { live.push({ kind, chainId, address: g.guards[0].address }); break }
+      }
+    }
   }
-  const steps: Array<{ title: string; note: string; href: string; cta: string }> = [
-    { title: 'Watch the Night Replay', note: 'A labelled simulation of a night BNB fell 40%, run through the guard’s real repayment math.', href: '/charters', cta: 'Open Charters' },
-    ...(live ? [{ title: `Open the live ${live.chainId === 56 ? 'mainnet' : 'testnet'} charter`, note: 'Read its action, the health before and after, and the receipt, all from the chain.', href: `/charters/${live.chainId}/${live.address}`, cta: 'Open the charter' }] : []),
-    { title: 'Check Keel’s key', note: 'On the charter page, Check it yourself links to Altana KeyStore: one contract, one function, until a date.', href: live ? `/charters/${live.chainId}/${live.address}#verify-h` : '/charters', cta: 'See the key' },
-    { title: 'Draw a line on a real loan', note: 'The builder reads the demo address’s Venus loan. Drag the two marks. No wallet needed.', href: '/charters/new', cta: 'Open the builder' },
-    { title: 'Read the contracts', note: 'CharterFactory, LoanGuard and CharterRules, with 34 unit tests, 9 invariants and fork suites on both chains.', href: 'https://github.com/talk2francis/Marque/tree/main/contracts/src/charters', cta: 'Read the source' },
+  const first = live[0]
+  return [
+    { title: 'Open Charters', note: 'Four kinds, each with its sentence and its live charter.', href: '/charters', cta: 'Open Charters' },
+    ...live.map((l) => ({ title: `Open a live ${KIND_NAMES[l.kind]}${l.chainId === 56 ? '' : ' (testnet)'}`, note: 'Read the action, the before and after, and the receipt, all from the chain.', href: `/charters/${l.chainId}/${l.address}`, cta: 'Open the charter' })),
+    { title: 'Click an agent’s KeyStore key', note: 'On a charter page, Check it yourself names the agent’s key on Altana KeyStore: one contract, one function, until a date.', href: first ? `/charters/${first.chainId}/${first.address}#verify-h` : '/charters', cta: 'See the key' },
+    { title: 'Drag the marks, no wallet needed', note: 'Open any builder with the demo address and drag the marks.', href: '/charters/new?kind=grid', cta: 'Open a builder' },
+    { title: 'Read the contracts and tests', note: 'Unit, fuzz, invariant, cross-category, differential and fork suites.', href: 'https://github.com/talk2francis/Marque/tree/main/contracts/src/charters', cta: 'Read the source' },
   ]
-  return steps
 }

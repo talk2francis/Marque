@@ -1,88 +1,107 @@
 import { cookies } from 'next/headers'
 import { notFound } from 'next/navigation'
-import { CHARTER_CHAINS, KEEL_WATCHER, BACKUP_WATCHER, STATE_CODES } from '@marque/charters'
+import { CHARTER_CHAINS, EXECUTORS, KIND_NAMES, STATES, V2, type CharterKind } from '@marque/charters'
 import { chartersVisible, PREVIEW_COOKIE } from '../../../../lib/charters-access'
 import styles from '../../docs.module.css'
 import { DocSection, DocShell } from '../../_ui/DocShell'
 
 export const dynamic = 'force-dynamic'
-export const metadata = { title: 'Charters for builders', description: 'Addresses, ABIs, preview() states, the read API and MCP tools, acting through Altana, tips and executors for Loan Guard charters.' }
+export const metadata = { title: 'Charters for builders', description: 'Addresses, interfaces, preview() states, the read API and MCP tools, acting through Altana, named executors and tips for Loan Guard, Yield Sweep, Grid Band and Range Keeper.' }
 
 const sections = [
   { id: 'addresses', label: 'Addresses' }, { id: 'calls', label: 'Calls and events' }, { id: 'states', label: 'preview() states' },
-  { id: 'watch', label: 'Watching charters' }, { id: 'altana', label: 'Acting through Altana' }, { id: 'tips', label: 'Tips' },
-  { id: 'executors', label: 'Your agent’s record' }, { id: 'testnet', label: 'Testnet walkthrough' },
+  { id: 'watch', label: 'Watching charters' }, { id: 'altana', label: 'Acting through Altana' }, { id: 'named', label: 'Named executors' },
+  { id: 'tips', label: 'Tips' }, { id: 'record', label: 'Your agent’s record' }, { id: 'testnet', label: 'Testnet walkthrough' },
 ]
-const STATE_WORDS: Record<string, string> = {
-  watching: 'Armed; health is at or above the trigger.', would_act: 'Health is under the trigger and there is something to use: act() would repay now.',
-  ended: 'Ended by its owner. Never acts again. Health and debt read as 0 (not read).', expired: 'Past its end date. Never acts again. Health and debt read as 0.',
-  no_debt: 'No debt in the guarded market.', no_funds: 'Under the trigger, but budget, allowance or balance is empty.',
-  cannot_rescue: 'Under 1.00, and the most it may repay would not lift health to 1.00, so act() refuses (CannotRescue).',
-}
+const KINDS: CharterKind[] = ['loan', 'yield', 'grid', 'range']
+const WOULD: Record<CharterKind, string> = { loan: '1', yield: '1 (supply), 2 (withdraw)', grid: '1 (buy), 2 (sell)', range: '1 (move)' }
+const CALLS = `// Every v2 charter (CharterBase)
+act()                                      // Loan Guard, Yield Sweep: anyone. Grid Band, Range Keeper: owner and named executors
+preview() view                             // what act() would do now, in the numbers it acts on (shapes below)
+end()                                      // owner only, depends on nothing else
+isExecutor(address) view returns (bool)
+setExecutor(address who, bool allowed)     // owner only (named kinds)
+sweep(address token)                       // owner only: tokens sent here by mistake
+event Ended(address indexed by, uint64 at)
+event ExecutorSet(address indexed executor, bool allowed)
+event TipPaid(address indexed to, address token, uint256 amount)
 
-/** /docs/developers/charters (11_PUBLIC_COPY, reference). Behind CHARTERS_PUBLIC until launch. */
+// Loan Guard v2
+preview() returns (uint8 state, uint256 health, uint256 wouldRepay, uint256 available, uint256 debt)
+event Repaid(address indexed caller, uint256 repaid, uint256 healthBefore, uint256 healthAfter, uint256 debtBefore, uint256 debtAfter, uint256 spentTotal)
+
+// Yield Sweep
+preview() returns (uint8 state, uint256 amount, uint256 walletBalance, uint256 heldUnderlying)
+event Supplied(address indexed caller, uint256 amount, uint256 vTokens, uint256 walletAfter, uint256 grossSupplied)
+event Withdrew(address indexed caller, uint256 amount, uint256 vTokens, uint256 walletAfter, uint256 heldV)
+
+// Grid Band
+preview() returns (uint8 state, uint256 slot, bool buy, uint256 amountIn, int24 twapTick, int24 spotTick)
+event Traded(address indexed caller, uint256 slot, bool buy, uint256 amountIn, uint256 amountOut, int24 twapTick, int24 spotTickBefore, int24 spotTickAfter)
+
+// Range Keeper (granted by NPM.safeTransferFrom(owner, factory, tokenId, abi.encode(Create)))
+preview() returns (uint8 state, int24 twapTick, int24 spotTick, int24 lower, int24 upper)
+release()                                  // anyone, after expiry or once ended: the NFT to its owner
+event Rebalanced(address indexed caller, uint256 oldTokenId, uint256 newTokenId, int24 newLower, int24 newUpper, uint128 newLiquidity)
+event RebalanceValue(uint256 newTokenId, uint256 valueBefore, uint256 valueAfter, uint256 fees0, uint256 fees1, uint256 left0, uint256 left1)
+event Returned(uint256 tokenId, address to)
+
+// Factories: create(...) / predict(owner, ..., salt) / isCharter(address) view / event Created(owner, charter, ...)`
+
+/** /docs/developers/charters (16_PUBLIC_COPY, reference, four kinds). Behind CHARTERS_PUBLIC until launch. */
 export default async function ChartersDevDocs() {
   if (!chartersVisible((await cookies()).get(PREVIEW_COOKIE)?.value)) notFound()
-  return <DocShell current="charters-dev" label="Docs · Charters for builders" title="Make your agent charter-ready." lede="Every armed charter is public work. Watch them, press the button when the chain says so, and your agent's record shows it." sections={sections}>
+  return <DocShell current="charters-dev" label="Docs · Charters for builders" title="Make your agent charter-ready." lede="Every armed charter is public work. Declare the kinds you handle, pass the testnet checks, and every action lands on your agent's record." sections={sections}
+    actions={<><a className="btn btn--primary" href="/builders#charters">The charter kit</a><a className="btn" href="/docs/charters">The user guide</a></>}>
     <DocSection id="addresses" title="Addresses">
       <div className={styles.tableWrap}><table className={styles.table}>
-        <thead><tr><th>Network</th><th>CharterFactory v1</th><th>Venus Core comptroller</th><th>Debt markets</th></tr></thead>
-        <tbody>{([56, 97] as const).map((c) => {
-          const ch = CHARTER_CHAINS[c]
-          return <tr key={c}><th>{ch.name} ({c})</th><td className="mono">{ch.factory ?? 'at launch'}{ch.factoryBlock ? <><br /><span className={styles.note}>from block {ch.factoryBlock.toString()}</span></> : null}</td><td className="mono">{ch.comptroller}</td><td>{ch.markets.map((m) => m.symbol).join(', ')}</td></tr>
-        })}</tbody>
+        <thead><tr><th>Network</th><th>Loan Guard v2</th><th>Yield Sweep</th><th>Grid Band</th><th>Range Keeper</th></tr></thead>
+        <tbody>{([56, 97] as const).map((c) => (
+          <tr key={c}><th>{CHARTER_CHAINS[c].name} ({c}){V2[c].fromBlock ? <><br /><span className={styles.note}>from block {V2[c].fromBlock!.toString()}</span></> : null}</th>
+            {[V2[c].loanFactory, V2[c].yieldFactory, V2[c].gridFactory, V2[c].rangeFactory].map((a, i) => <td key={i} className="mono">{a ?? 'at launch'}</td>)}</tr>
+        ))}</tbody>
       </table></div>
-      <p>Keel&apos;s watcher: <code>{KEEL_WATCHER}</code>. Backup watcher: <code>{BACKUP_WATCHER}</code>. ABIs, addresses and the guard&apos;s math in TypeScript are in <code>packages/charters</code>; the contracts are in <code>contracts/src/charters</code>.</p>
+      <p>Loan Guard v1 (<code>CharterFactory</code>) stays live for the guards it made: <code>{CHARTER_CHAINS[56].factory ?? 'n/a'}</code> on 56. Reviewed pools: {([56, 97] as const).map((c) => `${c}: ${V2[c].pools.map((p) => `${p.baseSymbol}/${p.quoteSymbol} ${p.fee / 10_000}%${p.fixture ? ' (testnet fixture)' : ''}`).join(', ')}`).join('; ')}.</p>
+      <p>Marque&apos;s executors (the same on both chains): Keel <code>{EXECUTORS.keel}</code>, Sluicegate <code>{EXECUTORS.sluicegate}</code>, Lattice <code>{EXECUTORS.lattice}</code>, Bound <code>{EXECUTORS.bound}</code>, backup <code>{EXECUTORS.backup}</code>. ABIs, addresses and math in TypeScript are in <code>packages/charters</code>; the contracts are in <code>contracts/src/charters</code>.</p>
     </DocSection>
     <DocSection id="calls" title="Calls and events">
-      <pre className={styles.code} tabIndex={0} role="region" aria-label="LoanGuard interface"><code>{`// CharterFactory
-create((address vDebt, uint256 trigger, uint256 target, uint256 budget, uint256 tip, uint64 expiresAt) p, bytes32 salt) returns (address guard)
-predict(address owner, Params p, bytes32 salt) view returns (address)
-isGuard(address) view returns (bool)
-healthOf(address account) view returns (uint256 health, uint256 collateralUsd, uint256 debtUsd)
-event GuardCreated(address indexed owner, address indexed guard, address indexed vDebt, address token, uint256 trigger, uint256 target, uint256 budget, uint256 tip, uint64 expiresAt, bytes32 salt)
-
-// LoanGuard
-act() returns (uint256 repaid)            // anyone
-preview() view returns (uint8 state, uint256 health, uint256 wouldRepay, uint256 tipIfAgent, uint256 available, uint256 debt)
-end()                                     // owner only
-event Acted(address indexed caller, uint256 repaid, uint256 tipPaid, uint256 healthBefore, uint256 healthAfter, uint256 debtBefore, uint256 debtAfter, uint256 spentTotal)
-event Ended(address indexed by, uint64 at)
-
-// act() reverts with: CharterEnded, CharterExpired, Healthy, NoDebtInMarket, NothingAvailable,
-// CannotRescue, VenusError, PriceUnavailable, TransferMismatch, RepayNotApplied, Residual, Reentrant`}</code></pre>
-      <p>Health uses 18 decimals (1e18 = 1.00). Bounds: trigger 1.02 to 10.00, target at least 0.05 above it and at most 20.00, a tip at most a tenth of the budget, a duration from 1 to 90 days. Every guard checks these rules itself when it is deployed, and only the Venus Core comptroller and the listed debt markets are accepted.</p>
+      <pre className={styles.code} tabIndex={0} role="region" aria-label="Charter interfaces"><code>{CALLS}</code></pre>
+      <p>Health uses 18 decimals (1e18 = 1.00). Durations 1 to 180 days. Ticks are pool ticks; Grid Band levels are base ticks (pool tick, negated when the base is token1). Every limit is a lifetime total that never refills.</p>
     </DocSection>
     <DocSection id="states" title="preview() states">
       <div className={styles.tableWrap}><table className={styles.table}>
-        <thead><tr><th>Code</th><th>State</th><th>Meaning</th></tr></thead>
-        <tbody>{Object.entries(STATE_CODES).map(([code, name]) => <tr key={code}><th className="mono">{code}</th><td className="mono">{name}</td><td>{STATE_WORDS[name]}</td></tr>)}</tbody>
+        <thead><tr><th>Kind</th><th>Codes, in order from 0</th><th>Would act</th></tr></thead>
+        <tbody>{KINDS.map((k) => <tr key={k}><th>{KIND_NAMES[k]}</th><td className="mono">{STATES[k].join(', ')}</td><td className="mono">{WOULD[k]}</td></tr>)}</tbody>
       </table></div>
-      <p>An unknown state code means the guard is newer than your reader: treat it as &ldquo;do not act&rdquo;.</p>
+      <p>An unknown state code means the charter is newer than your reader: treat it as &ldquo;do not act&rdquo;.</p>
     </DocSection>
     <DocSection id="watch" title="Watching charters">
       <ul>
-        <li><code>GET /api/v1/guards?chainId=56&amp;state=armed</code>: armed guards, newest first, with cursor paging.</li>
-        <li><code>GET /api/v1/guards/{'{chainId}'}/{'{guard}'}</code>: one guard with its events and a live <code>preview()</code> read.</li>
-        <li>MCP: <code>charters_list</code>, <code>charter_get</code>, <code>charter_quote</code> on Marque&apos;s MCP server.</li>
+        <li><code>GET /api/v1/guards?chainId=56&amp;kind=grid&amp;state=armed</code>: charters, newest first, with cursor paging (<code>guards</code> holds Loan Guard v1, <code>charters</code> holds v2 of every kind).</li>
+        <li><code>GET /api/v1/guards/{'{chainId}'}/{'{charter}'}</code>: one charter with its events, the agent&apos;s key and a live <code>preview()</code> read.</li>
+        <li><code>GET /api/v1/guards/claims?chainId=&amp;owner=</code>: per token, the balance beside every armed charter that may draw it.</li>
+        <li>MCP: <code>charters_list</code>, <code>charter_get</code>, <code>charter_quote</code> (with <code>kind</code>), <code>charter_claims</code>.</li>
       </ul>
-      <p>Poll <code>preview()</code> for each armed guard (a multicall per block range is enough); when the state is <code>would_act</code>, simulate <code>act()</code> first and send only if the simulation passes. Another caller may land first; a failed simulation costs nothing.</p>
+      <p>Poll <code>preview()</code> for each armed charter; when it shows a would-act state, simulate <code>act()</code> first and send only if the simulation passes. Another caller may land first; a failed simulation costs nothing. Never resend blind after a timeout: each charter re-reads the chain when it acts. For Grid Band and Range Keeper, send through a private RPC where you can.</p>
     </DocSection>
     <DocSection id="altana" title="Acting through Altana">
-      <p>Scope a session to <code>{'{ to: guard, signature: \'act()\' }'}</code> with an expiry no later than the guard&apos;s own, and register it on Altana KeyStore so anyone can check it. Revoke it when the guard ends. That is exactly what Keel does for every charter.</p>
+      <p>Scope a session to <code>{'{ to: charter, signature: \'act()\' }'}</code> with an expiry no later than the charter&apos;s own, and register it on Altana KeyStore so anyone can check it. Revoke it when the charter ends. That is what Keel, Lattice and Bound do for every charter they serve; Sluicegate sends Yield Sweep actions from its own account. Keep the account&apos;s native balance above the relay&apos;s fee reserve.</p>
+    </DocSection>
+    <DocSection id="named" title="Named executors">
+      <p>Grid Band and Range Keeper accept <code>act()</code> only from their owner and the executors the owner named at creation or later with <code>setExecutor</code>. Declare your executor addresses in your agent card, so owners can choose you in the builder and your actions count for your agent.</p>
     </DocSection>
     <DocSection id="tips" title="Tips">
-      <p>An owner may set a thank-you per action, paid to the caller (never to the owner) from what is left of the budget after the repayment, and never more than the repayment itself. It counts inside the budget. When the repayment uses the whole budget, the tip is zero: repayment always comes first.</p>
+      <p>An owner may set a tip per action, in one of the charter&apos;s own tokens, from a separate tip budget. It is paid after the action, only to a caller who is not the owner, and a tip that cannot be paid is skipped: it never blocks the action. Yield Sweep tips are always smaller than its smallest move.</p>
     </DocSection>
-    <DocSection id="executors" title="Your agent's record">
-      <p>Each <code>Acted</code> event names its caller. An action counts on your agent&apos;s profile when the caller is one of your agent&apos;s declared executor addresses. Today that list is kept in <code>packages/charters/src/addresses.ts</code>: write to us on <a href="https://t.me/marque_marketplace" target="_blank" rel="noreferrer">Telegram</a> with your agent id and the addresses that act for it.</p>
+    <DocSection id="record" title="Your agent's record">
+      <p>Every action event names its caller. An action counts on your agent&apos;s profile, per kind and per chain, when the caller is one of your agent&apos;s declared executor addresses (Executed). Passing the testnet checks for a kind earns Charter-compatible for that kind. Neither is a claim about anything else.</p>
     </DocSection>
     <DocSection id="testnet" title="Testnet walkthrough">
       <ol>
-        <li>Get test BNB from the BNB Chain faucet, then test stablecoins and collateral from Venus&apos;s testnet faucet.</li>
-        <li>Supply collateral and borrow USDC or USDT on Venus Core testnet.</li>
-        <li>Open <a href="/charters/new?chain=97">the builder</a> on BSC testnet and choose <b>Test it now</b>: the trigger sits just above your health, so a watcher acts within a minute.</li>
-        <li>Point your agent at the guard, watch <code>preview()</code> turn to <code>would_act</code>, and press act() before Keel does.</li>
+        <li>Get test BNB from the BNB Chain faucet. Venus testnet USDT and USDC have a public <code>allocateTo(address, amount)</code>.</li>
+        <li><b>Loan Guard:</b> supply collateral, borrow USDT or USDC on Venus Core testnet, and open <a href="/charters/new?kind=loan&amp;chain=97">the builder</a> with Test it now.</li>
+        <li><b>Yield Sweep:</b> hold a stablecoin you do not borrow and open <a href="/charters/new?kind=yield&amp;chain=97">the builder</a>; a ceiling under your balance supplies at the next check.</li>
+        <li><b>Grid Band and Range Keeper:</b> testnet AMM liquidity is too thin, so they run on Marque&apos;s labelled fixture pool (tUSDT/tWBNB, both with a public <code>faucet(address, amount)</code>), whose price Marque&apos;s test market maker moves every 10 to 20 minutes. Fixture prices never reach a mainnet figure.</li>
       </ol>
     </DocSection>
   </DocShell>

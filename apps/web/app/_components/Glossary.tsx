@@ -14,11 +14,21 @@ export const GLOSSARY: Record<string, { short: string; long: string }> = {
   // Once Charters is public (AGENTS.md section 14) the word means Loan Guard, not the earlier preview.
   charter: process.env['CHARTERS_PUBLIC'] === '1' ? {
     short: 'An onchain limit on what an agent may do for you.',
-    long: 'A charter is a contract you sign once that fixes exactly what an agent may do for you and until when. The first kind, Loan Guard, repays your own Venus loan from your own wallet when its health falls below your trigger, back to your target, never past your budget. You can end it at any time in one transaction.',
+    long: 'A charter is a contract you sign once that fixes exactly what an agent may do for you and until when. Four kinds: Loan Guard keeps your Venus loan healthy; Yield Sweep keeps your wallet topped up and the rest earning in Venus; Grid Band buys the dips and sells one step up; Range Keeper keeps your PancakeSwap position in range. You can end any of them at any time in one transaction.',
   } : {
     short: 'A preview of action limits, separate from paying an agent’s service fee.',
     long: 'The current charter page previews a proposed contract allowlist, spend cap and expiry. Native grants and execution are disabled until enforcement is verified. The preview creates no authority. A service-fee escrow payment does not authorize actions on your assets.',
   },
+  'loan guard': { short: 'Keeps your Venus loan healthy.', long: 'Repays from your wallet, only into your own loan, when Venus shows its health below your trigger, back to your target and never past your budget.' },
+  'yield sweep': { short: 'Keeps your wallet topped up and the rest earning.', long: 'Keeps your wallet between a floor and a ceiling; the excess goes to Venus in your name and comes back when you run low.' },
+  'grid band': { short: 'Buys the dips and sells one step up.', long: 'Buys a fixed order at each level as the price falls and sells it one level higher, between prices you choose, on one reviewed PancakeSwap pool.' },
+  'range keeper': { short: 'Keeps your PancakeSwap position in range.', long: 'Moves your position back around the price when it leaves its range, same width, within loss, frequency and count limits you set. It holds your position NFT while it runs.' },
+  trigger: { short: 'The health below which a Loan Guard acts.', long: 'When Venus shows your loan health below the trigger, the guard may repay. The target is the health it repays back to.' },
+  floor: { short: 'The least a Yield Sweep keeps in your wallet.', long: 'Below the floor it brings back what it supplied; above the ceiling it supplies the rest to Venus in your name.' },
+  level: { short: 'A price where a Grid Band buys, and sells one level up.', long: 'Levels are spaced so that a completed round trip at the worst allowed prices, fees included, never returns less than it spent.' },
+  range: { short: 'The prices where a PancakeSwap position earns fees.', long: 'Outside its range a position earns nothing; a Range Keeper moves it back around the price.' },
+  limit: { short: 'The most a charter can ever use, tips separate.', long: 'Every charter limit is a lifetime total that never refills: a budget, a supply cap, buy and sell totals, or a number of moves.' },
+  'named agent': { short: 'An agent you allowed to act on a Grid Band or Range Keeper.', long: 'Because the moment of a trade has value, only the owner and the agents the owner names may act on these kinds.' },
   seal: {
     short: 'A recommendation written to the blockchain before anyone knows if it worked.',
     long: 'When an agent gives advice, Marque hashes it and records it on chain straight away. That means a track record cannot be assembled after the fact by quietly dropping the calls that went wrong.',
