@@ -12,7 +12,8 @@ import { LazyQuestBar } from './shell/LazyQuestBar'
 import { ThemeMenu } from './shell/ThemeMenu'
 import { LazyWallet } from './shell/LazyWallet'
 import { FooterPulse } from './shell/FooterPulse'
-import type { Active } from './nav-items'
+import { navWith, type Active } from './nav-items'
+import { chartersPublic } from '../../lib/charters-access'
 import { footerActions } from '../../lib/post-close'
 
 /**
@@ -25,6 +26,8 @@ import { footerActions } from '../../lib/post-close'
  * folded into its dot), Connect, theme. Under 1024 px the nav and pills move into the drawer.
  */
 export function SiteHeader({ active }: { active?: Active }) {
+  const until = Date.parse(process.env['CHARTERS_NEW_UNTIL'] ?? '')
+  const nav = navWith({ on: chartersPublic(), isNew: Number.isFinite(until) && Date.now() < until })
   return (
     <>
       <a href="#main" className="skip-link">Skip to content</a>
@@ -32,13 +35,13 @@ export function SiteHeader({ active }: { active?: Active }) {
       <header className="site-header">
         <div className="site-header-inner">
           <LockupLink />
-          <NavLinks active={active} />
+          <NavLinks active={active} nav={nav} />
           <div className="header-tools">
             <span className="hide-lt-lg hpill-slot"><NetworkPill /></span>
             <span className="hide-lt-md"><LazyWallet /></span>
             <span className="show-lt-md"><LazyWallet compact /></span>
             <span className="hide-lt-lg"><ThemeMenu /></span>
-            <MobileNav active={active} />
+            <MobileNav active={active} nav={nav} />
           </div>
         </div>
         <LazyQuestBar />

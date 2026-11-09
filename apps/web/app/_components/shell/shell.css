@@ -376,3 +376,5 @@
   @media (pointer: coarse) { .footer-cols a { min-height: 40px; margin: 0; } }
 }
 
+/* The small "New" mark beside a nav item (Charters, for 14 days after launch). */
+.nav-new { margin-left: 6px; font-size: 10.5px; font-weight: 500; letter-spacing: 0.02em; color: var(--brass-mark); vertical-align: 1px; }

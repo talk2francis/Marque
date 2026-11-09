@@ -1,7 +1,7 @@
 'use client'
 import { ChevronDown } from 'lucide-react'
 import { useCallback, useEffect, useId, useRef, useState } from 'react'
-import { NAV, DOC_GROUPS, PROOF_GROUPS, PROOF_KEYS, type Active } from '../nav-items'
+import { NAV, DOC_GROUPS, PROOF_GROUPS, PROOF_KEYS, type Active, type NavLink } from '../nav-items'
 import { NavGlyph } from './icons'
 
 /**
@@ -9,7 +9,7 @@ import { NavGlyph } from './icons'
  * soft highlight glides to whichever entry the pointer is on; the current page
  * carries an accent dot.
  */
-export function NavLinks({ active }: { active?: Active }) {
+export function NavLinks({ active, nav = NAV }: { active?: Active; nav?: NavLink[] }) {
   const wrap = useRef<HTMLElement>(null)
   const [hi, setHi] = useState<{ x: number; w: number } | null>(null)
   // Measured against the capsule, not offsetLeft: a menu button sits inside its own
@@ -24,9 +24,9 @@ export function NavLinks({ active }: { active?: Active }) {
   return (
     <nav ref={wrap} className="nav-capsule" aria-label="Main" onPointerLeave={() => setHi(null)}>
       <span className="nav-hi" data-on={hi ? '' : undefined} style={hi ? { width: hi.w, transform: `translateX(${hi.x}px)` } : undefined} aria-hidden="true" />
-      {NAV.filter(n => n.key !== 'docs').map((n) => (
+      {nav.filter(n => n.key !== 'docs').map((n) => (
         <a key={n.key} href={n.href} className="nav-link" aria-current={active === n.key ? 'page' : undefined} onPointerEnter={(e) => track(e.currentTarget)} onFocus={(e) => track(e.currentTarget)}>
-          {n.spark ? <span className="nav-spark" aria-hidden="true" /> : null}{n.label}
+          {n.spark ? <span className="nav-spark" aria-hidden="true" /> : null}{n.label}{n.isNew ? <span className="nav-new">New</span> : null}
         </a>
       ))}
       <ProofMenu label="Docs" groups={DOC_GROUPS} current={active === 'docs'} onHover={track} />

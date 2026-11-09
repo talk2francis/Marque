@@ -46,7 +46,7 @@ export default async function ChartersHub() {
   return (
     <>
       <SiteHeader />
-      <main id="main" className={styles.page}>
+      <main className={styles.page}>
         <section className={styles.hero}>
           <div className={styles.heroText}>
             <span className={styles.eyebrow}>New on Marque: Charters</span>

@@ -43,7 +43,7 @@ export default async function CharterPage(p: Params) {
   return (
     <>
       <SiteHeader />
-      <main id="main" className={styles.page}>
+      <main className={styles.page}>
         <nav className={styles.crumbs} aria-label="Breadcrumb"><a href="/charters">Charters</a><span aria-hidden="true">/</span><span aria-current="page">Loan Guard</span></nav>
         <CharterView initial={JSON.parse(JSON.stringify(d))} teamOwner={team} />
       </main>

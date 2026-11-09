@@ -1,7 +1,7 @@
 'use client'
 import { ArrowUpRight, Menu } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { NAV, DOC_GROUPS, PROOF_GROUPS, type Active } from '../nav-items'
+import { NAV, DOC_GROUPS, PROOF_GROUPS, type Active, type NavLink } from '../nav-items'
 import { Drawer } from '../ui/Overlay'
 import { NavGlyph } from './icons'
 import { NetworkPill } from './Pills'
@@ -14,7 +14,7 @@ import { LockupLink } from './Brand'
  * and status, theme, wallet. Focus is trapped while open; Escape, the scrim, a
  * link, or widening the window closes it.
  */
-export function MobileNav({ active }: { active?: Active }) {
+export function MobileNav({ active, nav = NAV }: { active?: Active; nav?: NavLink[] }) {
   const [open, setOpen] = useState(false)
   useEffect(() => {
     const mq = window.matchMedia('(min-width: 1024px)')
@@ -28,8 +28,8 @@ export function MobileNav({ active }: { active?: Active }) {
       <button type="button" className="icon-btn menu-btn" aria-label="Open menu" aria-expanded={open} onClick={() => setOpen(true)}><Menu /></button>
       <Drawer open={open} onClose={close} label="Menu" head={<LockupLink />}>
         <nav className="dnav" aria-label="Main">
-          {NAV.map((n) => (
-            <a key={n.key} href={n.href} className="dnav-link" aria-current={active === n.key ? 'page' : undefined} onClick={close}>{n.spark ? <span className="nav-spark" aria-hidden="true" /> : null}{n.label}</a>
+          {nav.map((n) => (
+            <a key={n.key} href={n.href} className="dnav-link" aria-current={active === n.key ? 'page' : undefined} onClick={close}>{n.spark ? <span className="nav-spark" aria-hidden="true" /> : null}{n.label}{n.isNew ? <span className="nav-new">New</span> : null}</a>
           ))}
         </nav>
         <div className="dsec">

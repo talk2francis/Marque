@@ -9,9 +9,9 @@
 
 export type Active =
   | 'register' | 'quest' | 'positions' | 'builders' | 'docs' | 'me'
-  | 'proof' | 'standard' | 'ledger' | 'receipts' | 'status' | 'protocol' | 'pancake' | 'charters' | 'benchmarks'
+  | 'proof' | 'standard' | 'ledger' | 'receipts' | 'status' | 'protocol' | 'pancake' | 'charters' | 'benchmarks' | 'guards'
 
-export interface NavLink { label: string; href: string; key: Active; spark?: boolean }
+export interface NavLink { label: string; href: string; key: Active; spark?: boolean; isNew?: boolean }
 export interface NavMenuItem { label: string; href: string; note: string; icon: NavIcon; external?: boolean }
 export type NavIcon = 'standard' | 'ledger' | 'receipt' | 'proof' | 'status' | 'protocol' | 'desk' | 'charter' | 'compare' | 'api'
 
@@ -24,6 +24,16 @@ export const NAV: NavLink[] = [
   { label: 'Positions', href: '/positions', key: 'positions' },
   { label: 'Docs', href: '/docs', key: 'docs' },
 ]
+
+/**
+ * The main links with Charters (AGENTS.md section 14) after Positions once CHARTERS_PUBLIC is on, with its small
+ * "New" mark until CHARTERS_NEW_UNTIL. The header decides on the server and hands the list to the client nav.
+ */
+export function navWith(charters: { on: boolean; isNew: boolean }): NavLink[] {
+  if (!charters.on) return NAV
+  const i = NAV.findIndex((n) => n.key === 'positions') + 1
+  return [...NAV.slice(0, i), { label: 'Charters', href: '/charters', key: 'guards', isNew: charters.isNew }, ...NAV.slice(i)]
+}
 
 export const PROOF_GROUPS: Array<{ label: string; items: NavMenuItem[] }> = [
   {

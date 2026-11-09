@@ -33,7 +33,7 @@ export default async function NewCharterPage({ searchParams }: { searchParams: P
   return (
     <>
       <SiteHeader />
-      <main id="main" className={styles.page}>
+      <main className={styles.page}>
         <header className={styles.head}>
           <div>
             <span className={styles.eyebrow}>Guard this loan</span>
