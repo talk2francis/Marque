@@ -1,4 +1,5 @@
 import 'server-only'
+import { executedBy } from './charters-v2'
 import { sql } from 'drizzle-orm'
 import { erc20Abi, getAddress, parseAbi, type Address } from 'viem'
 import { chartersDb } from '@marque/db'
@@ -225,13 +226,16 @@ export async function guardQuote(q: { chainId: CharterChainId; account: string; 
 /** What an agent's declared executors have done across every guard, from Acted events (ONCHAIN). */
 export async function agentActs(agentId: string) {
   const executors = (DECLARED_EXECUTORS[agentId.toLowerCase()] ?? []).map((x) => x.toLowerCase())
-  if (!executors.length) return { agentId, executors: [], chains: [] as Array<{ chainId: number; guards: number; acts: number; lastAction: string | null }> }
+  if (!executors.length) return { agentId, executors: [], chains: [] as Array<{ chainId: number; guards: number; acts: number; lastAction: string | null }>, kinds: [] as Awaited<ReturnType<typeof executedBy>> }
   const rows = rowsOf<Record<string, unknown>>(await chartersDb().execute(sql`
     select chain_id, count(distinct address)::int as guards, count(*)::int as acts, max(block_time) as last_action
     from charter_guard_event where kind = 'Acted' and caller in (${sql.join(executors.map((x) => sql`${x}`), sql`, `)}) group by chain_id`))
+  const v2 = (await Promise.all(executors.map((x) => executedBy(x)))).flat()
   return {
     agentId, executors: executors.map((x) => getAddress(x)),
     chains: rows.map((r) => ({ chainId: Number(r['chain_id']), guards: Number(r['guards']), acts: Number(r['acts']), lastAction: iso(r['last_action']) })),
+    /** v2 actions per chain and kind by the same executors (chain-counted: the "executed" level, C8). */
+    kinds: v2,
   }
 }
 

@@ -11,18 +11,25 @@ export const ChainIdSchema = z.coerce.number().refine((n): n is 56 | 97 => n ===
 /** A health value as people type it ("1.30"), between the factory's bounds. */
 export const HealthInputSchema = z.string().regex(/^\d{1,2}(\.\d{1,2})?$/, 'a health such as 1.30')
 
+export const KindSchema = z.enum(['loan', 'yield', 'grid', 'range'])
+
 export const GuardListQuery = z.object({
   chainId: ChainIdSchema.optional(),
+  /** A v2 kind; without it the list carries v1 guards and v2 charters of every kind. */
+  kind: KindSchema.optional(),
   owner: address.optional(),
   state: z.enum(['armed', 'ended', 'all']).default('all'),
   cursor: z.string().regex(/^\d{1,20}$/).optional(),
   limit: z.coerce.number().int().min(1).max(100).default(50),
 }).strict()
 
+export const ClaimsQuery = z.object({ chainId: ChainIdSchema, owner: address }).strict()
+
 export const GuardKey = z.object({ chainId: ChainIdSchema, address }).strict()
 
 export const QuoteQuery = z.object({
   chainId: ChainIdSchema,
+  kind: KindSchema.default('loan'),
   account: address,
   market: address.optional(),
   trigger: HealthInputSchema.optional(),

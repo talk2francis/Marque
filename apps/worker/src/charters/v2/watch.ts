@@ -24,6 +24,7 @@ export const ORDER: CharterKind[] = ['loan', 'yield', 'grid', 'range']
 const SAMPLE_EVERY_MS = 10 * 60_000
 const LEASE_MS = 90_000
 const DEGRADED_MS = 5 * 60_000
+const SESSION_WAIT_MS = 3 * 60_000
 const rowsOf = <T = Record<string, unknown>>(r: unknown) => ((r as { rows?: unknown[] }).rows ?? (r as unknown[])) as T[]
 const actData = (kind: CharterKind) => encodeFunctionData({ abi: ABI[kind], functionName: 'act' })
 
@@ -156,8 +157,8 @@ export async function watchOnceV2(ctx: WatchV2Context): Promise<WatchV2Pass> {
     const key = `${ctx.chainId}:${kind}`
     if (Date.now() < (nextRead.get(key) ?? 0)) continue
     nextRead.set(key, Date.now() + CADENCE_MS[kind][ctx.chainId])
-    const armed = rowsOf<{ address: string; executors: string[] }>(await db().execute(sql`
-      select address, executors from charter_v2 where chain_id = ${ctx.chainId} and kind = ${KIND_CODES[kind]} and ended_at is null and expires_at > now() order by created_block`))
+    const armed = rowsOf<{ address: string; executors: string[]; created_at: string }>(await db().execute(sql`
+      select address, executors, created_at from charter_v2 where chain_id = ${ctx.chainId} and kind = ${KIND_CODES[kind]} and ended_at is null and expires_at > now() order by created_block`))
     out.armed[kind] = armed.length
     if (!armed.length) continue
     const block = await ctx.client.getBlockNumber()
@@ -187,6 +188,10 @@ export async function watchOnceV2(ctx: WatchV2Context): Promise<WatchV2Pass> {
         open: openRow ? { path: openRow.path, status: openRow.status, sentAt: openRow.sent_at ? new Date(openRow.sent_at).getTime() : null } : null,
         altanaReady, direct: allowed.direct, backup: allowed.backup && ctx.enabled.backup && ctx.backup !== null, now: Date.now(), graceMs: ctx.graceMs,
       })
+      // A new charter's agent session is granted within a minute or two of creation: give the agent that long before
+      // another path acts, so the reference agent is the one that presses its own charters' first button.
+      if (choice.action === 'send' && choice.path !== 'altana' && !openRow && ctx.enabled.altana && ctx.altanaKinds.has(kind)
+        && (!k || k.status === 'granting' || k.status === 'failed') && Date.now() - new Date(armed[i]!.created_at).getTime() < SESSION_WAIT_MS) continue
       if (choice.action === 'none') { ctx.log('v2_no_path', { chainId: ctx.chainId, charter, kind }); continue }
       if (choice.action === 'wait') continue
       if (ctx.dryRun) { ctx.log('v2_would_send', { chainId: ctx.chainId, charter, kind, path: choice.path }); continue }

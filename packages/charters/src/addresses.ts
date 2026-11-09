@@ -96,6 +96,13 @@ export const BACKUP_WATCHER: Address = '0xfF12C2bb6A8C4488Dc1159Bc0dBE8A1DcEfBc1
 export const DECLARED_EXECUTORS: Record<string, readonly Address[]> = {
   '56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341556': [KEEL_WATCHER], // Keel, BSC mainnet
   '97:0x8004a818bfb912233c491871b3d84c89a494bd9e:2238': [KEEL_WATCHER], // Keel, BSC testnet
+  // v2 executors (9 Nov 2026), one account per reference agent, the same address on both chains.
+  '56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341555': ['0xbe527145766262800dABd795aDE6063a85D5F31e'], // Sluicegate
+  '97:0x8004a818bfb912233c491871b3d84c89a494bd9e:2237': ['0xbe527145766262800dABd795aDE6063a85D5F31e'],
+  '56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341554': ['0xe05eb57da6d52eDA9dbb396c323055046B29bd43'], // Lattice
+  '97:0x8004a818bfb912233c491871b3d84c89a494bd9e:2236': ['0xe05eb57da6d52eDA9dbb396c323055046B29bd43'],
+  '56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341553': ['0x03d8adB84E30fAd68144331A5cBdCC99a0ec316b'], // Bound
+  '97:0x8004a818bfb912233c491871b3d84c89a494bd9e:2234': ['0x03d8adB84E30fAd68144331A5cBdCC99a0ec316b'],
 }
 
 export type CallerKind = 'keel' | 'backup' | 'owner' | 'agent'

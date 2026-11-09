@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { guardStats } from '../../../../../lib/guards'
+import { chartersV2Stats } from '../../../../../lib/charters-v2'
 import { gate, unavailable, NO_STORE } from '../../../../../lib/guards-api'
 
 export const dynamic = 'force-dynamic'
@@ -8,5 +9,8 @@ export const dynamic = 'force-dynamic'
 export async function GET(request: Request) {
   const blocked = gate(request, 'stats', 60)
   if (blocked) return blocked
-  try { return NextResponse.json(await guardStats(), { headers: NO_STORE }) } catch { return unavailable() }
+  try {
+    const [v1, v2] = await Promise.all([guardStats(), chartersV2Stats()])
+    return NextResponse.json({ ...v1, v2: v2.chains }, { headers: NO_STORE })
+  } catch { return unavailable() }
 }

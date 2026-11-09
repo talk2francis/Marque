@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { teamWallets } from '@marque/commerce'
 import { GuardKey } from '@marque/charters'
 import { guardDetail } from '../../../../../../lib/guards'
+import { charterV2Detail } from '../../../../../../lib/charters-v2'
 import { guardPageVisible, previewCookieFrom } from '../../../../../../lib/charters-access'
 import { checkWindow, clientKey } from '../../../../../../lib/limits'
 import { NO_STORE, notFound, unavailable } from '../../../../../../lib/guards-api'
@@ -18,6 +19,12 @@ export async function GET(request: Request, { params }: { params: Promise<{ chai
   const key = GuardKey.safeParse(await params)
   if (!key.success) return NextResponse.json({ error: 'bad_request', detail: 'Use /api/v1/guards/56 or 97/<guard address>.' }, { status: 400, headers: NO_STORE })
   try {
+    // v2 charters first (any kind); then a v1 Loan Guard, indexed or read from its factory.
+    const v2 = await charterV2Detail(key.data.chainId, key.data.address)
+    if (v2) {
+      if (!guardPageVisible(previewCookieFrom(request.headers), v2.charter.owner, teamWallets())) return notFound()
+      return NextResponse.json({ version: 2, ...v2 }, { headers: NO_STORE })
+    }
     const d = await guardDetail(key.data.chainId, key.data.address)
     if (!d || !guardPageVisible(previewCookieFrom(request.headers), d.guard.owner, teamWallets())) return notFound()
     return NextResponse.json(d, { headers: NO_STORE })

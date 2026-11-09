@@ -19,7 +19,7 @@ import {
 const DIR = '/root/.marque/charters'
 const OUT = '/root/marque-charters-pack/probe/q3-97.json'
 const RPC = 'https://bsc-testnet-rpc.publicnode.com'
-const GAS = { gasPrice: 1_000_000_000n } as const
+const GAS = { gasPrice: 500_000_000n } as const
 const pub = createPublicClient({ chain: bscTestnet, transport: http(RPC, { timeout: 30_000 }) })
 const owner = privateKeyToAccount(loadKeystore(`${DIR}/${process.env['E2E_OWNER'] ?? 'e2e-owner-97'}`))
 const w = createWalletClient({ account: owner, chain: bscTestnet, transport: http(RPC, { timeout: 30_000 }) })
@@ -54,23 +54,33 @@ async function send(p: Promise<Hex>, what: string): Promise<Hex> {
 const approve = (token: Address, spender: Address, amount: bigint, what: string) => send(w.writeContract({ address: token, abi: erc20, functionName: 'approve', args: [spender, amount], ...GAS }), what)
 
 async function loan() {
+  const debt = await pub.readContract({ address: usdt.vToken, abi: parseAbi(['function borrowBalanceStored(address) view returns (uint256)']), functionName: 'borrowBalanceStored', args: [owner.address] })
+  if (debt === 0n) await loanSetup()
+  await loanCreate()
+}
+
+async function loanSetup() {
   await send(w.writeContract({ address: usdt.token, abi: erc20, functionName: 'allocateTo', args: [owner.address, 1_000n * 10n ** 6n], ...GAS }), 'faucet USDT')
   await send(w.writeContract({ address: V_BNB, abi: venus, functionName: 'mint', value: parseEther('0.004'), ...GAS }), 'supply 0.004 tBNB to vBNB')
   await send(w.writeContract({ address: CHARTER_CHAINS[97].comptroller, abi: venus, functionName: 'enterMarkets', args: [[V_BNB]], ...GAS }), 'enterMarkets vBNB')
   const [, liq] = await pub.readContract({ address: CHARTER_CHAINS[97].comptroller, abi: venus, functionName: 'getAccountLiquidity', args: [owner.address] })
   const borrow = liq * 2n / 3n / 10n ** 12n // health about 1.5 (USD 1e18 to USDT 6 decimals at about 1 USD)
   await send(w.writeContract({ address: usdt.vToken, abi: venus, functionName: 'borrow', args: [borrow], ...GAS }), `borrow ${borrow} USDT units`)
-  const a = { p: { vDebt: usdt.vToken, trigger: parseEther('1.6'), target: parseEther('1.8'), budget: 5n * 10n ** 6n, minRepay: 10_000n }, expiresAt: days(2), tipPerAction: 0n, tipBudget: 0n }
+}
+
+async function loanCreate() {
+  const a = { p: { vDebt: usdt.vToken, trigger: parseEther(process.env['E2E_TRIGGER'] ?? '1.6'), target: parseEther(process.env['E2E_TARGET'] ?? '1.8'), budget: 5n * 10n ** 6n, minRepay: 10_000n }, expiresAt: days(2), tipPerAction: 0n, tipBudget: 0n }
   const salt = `0x${Date.now().toString(16).padStart(64, '0')}` as Hex
   const predicted = await pub.readContract({ address: c97.loanFactory!, abi: loanGuardFactoryV2Abi, functionName: 'predict', args: [owner.address, a, salt] })
   await approve(usdt.token, predicted, a.p.budget, 'approve USDT budget to the predicted guard')
   const tx = await send(w.writeContract({ address: c97.loanFactory!, abi: loanGuardFactoryV2Abi, functionName: 'create', args: [a, salt], ...GAS }), 'create Loan Guard v2')
-  save('loan', { address: predicted, tx, at: new Date().toISOString(), token: usdt.token })
+  save(process.env['E2E_KEY'] ?? 'loan', { address: predicted, tx, at: new Date().toISOString(), token: usdt.token })
   console.log('loan guard', predicted)
 }
 
 async function yieldSweep() {
-  await send(w.writeContract({ address: usdc.token, abi: erc20, functionName: 'allocateTo', args: [owner.address, 300n * 10n ** 6n], ...GAS }), 'faucet USDC')
+  const held = await pub.readContract({ address: usdc.token, abi: erc20, functionName: 'balanceOf', args: [owner.address] })
+  if (held < 150n * 10n ** 6n) await send(w.writeContract({ address: usdc.token, abi: erc20, functionName: 'allocateTo', args: [owner.address, 300n * 10n ** 6n], ...GAS }), 'faucet USDC')
   const u = 10n ** 6n
   const a = { p: { vToken: usdc.vToken, floor: 50n * u, ceiling: 100n * u, minAction: 10n * u, supplyCap: 1_000n * u, minHealthAfter: 0n }, expiresAt: days(2), tipPerAction: 0n, tipBudget: 0n }
   const salt = `0x${Date.now().toString(16).padStart(64, '0')}` as Hex

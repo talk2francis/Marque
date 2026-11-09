@@ -2,6 +2,8 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 
 const lib = vi.hoisted(() => ({ listGuards: vi.fn(), guardDetail: vi.fn(), guardQuote: vi.fn(), guardStats: vi.fn(), agentActs: vi.fn() }))
 vi.mock('../../../../lib/guards', () => lib)
+const v2 = vi.hoisted(() => ({ listChartersV2: vi.fn(), charterV2Detail: vi.fn(), chartersV2Stats: vi.fn(), quoteV2: vi.fn(), claimsFor: vi.fn() }))
+vi.mock('../../../../lib/charters-v2', () => v2)
 vi.mock('@marque/commerce', () => ({ teamWallets: () => ['0x0cc5db909cece1856d1896d633d32bd305ce26c2'] }))
 
 import { previewCookieValue } from '../../../../lib/charters-access'
@@ -26,6 +28,10 @@ beforeEach(() => {
   vi.stubEnv('CHARTERS_PUBLIC', '0')
   vi.stubEnv('CHARTERS_PREVIEW_TOKEN', TOKEN)
   for (const f of Object.values(lib)) f.mockReset()
+  for (const f of Object.values(v2)) f.mockReset()
+  v2.listChartersV2.mockResolvedValue({ charters: [], nextCursor: null, readAt: '2026-11-09T00:00:00.000Z' })
+  v2.charterV2Detail.mockResolvedValue(null)
+  v2.chartersV2Stats.mockResolvedValue({ chains: [], readAt: '2026-11-09T00:00:00.000Z' })
 })
 afterEach(() => vi.unstubAllEnvs())
 
@@ -119,4 +125,42 @@ it('sets the preview cookie only for the right token, as a hash, and clears it',
   const end = await preview(req('/api/v1/guards/preview?end=1'))
   expect(end.status).toBe(303)
   expect(end.headers.get('set-cookie')).toMatch(/Max-Age=0/i)
+})
+
+it('lists v2 charters beside v1 guards, and a v2 kind without touching v1', async () => {
+  vi.stubEnv('CHARTERS_PUBLIC', '1')
+  lib.listGuards.mockResolvedValue({ guards: [{ address: GUARD }], nextCursor: null, readAt: 'x' })
+  v2.listChartersV2.mockResolvedValue({ charters: [{ address: OUTSIDE_OWNER, kind: 'grid' }], nextCursor: '5', readAt: 'y' })
+  const all = await (await list(req('/api/v1/guards?chainId=97'))).json()
+  expect(all.guards).toHaveLength(1)
+  expect(all.charters).toHaveLength(1)
+  expect(all.nextCursor).toBe('5')
+  lib.listGuards.mockClear()
+  const grid = await list(req('/api/v1/guards?chainId=97&kind=grid'))
+  expect(grid.status).toBe(200)
+  expect(lib.listGuards).not.toHaveBeenCalled()
+  expect((await list(req('/api/v1/guards?kind=swap'))).status).toBe(400)
+})
+
+it('serves a v2 charter of any kind by address, owner visibility unchanged', async () => {
+  vi.stubEnv('CHARTERS_PUBLIC', '0')
+  v2.charterV2Detail.mockResolvedValue({ charter: { owner: OUTSIDE_OWNER, kind: 'range' }, live: {}, events: [], key: null, history: [], readAt: 'z' })
+  const r = await detail(req(`/api/v1/guards/97/${GUARD}`), params('97', GUARD))
+  expect(r.status).toBe(200)
+  expect((await r.json()).version).toBe(2)
+  expect(lib.guardDetail).not.toHaveBeenCalled()
+  v2.charterV2Detail.mockResolvedValue({ charter: { owner: TEAM_OWNER, kind: 'grid' }, live: {}, events: [], key: null, history: [], readAt: 'z' })
+  expect((await detail(req(`/api/v1/guards/97/${GUARD}`), params('97', GUARD))).status).toBe(404)
+})
+
+it('routes a kind quote to the v2 reader and keeps claims behind the flag', async () => {
+  vi.stubEnv('CHARTERS_PUBLIC', '1')
+  v2.quoteV2.mockResolvedValue({ kind: 'yield', markets: [] })
+  const r = await quote(req(`/api/v1/guards/quote?chainId=97&account=${OUTSIDE_OWNER}&kind=yield`))
+  expect(r.status).toBe(200)
+  expect(v2.quoteV2).toHaveBeenCalledWith('yield', 97, OUTSIDE_OWNER)
+  expect(lib.guardQuote).not.toHaveBeenCalled()
+  vi.stubEnv('CHARTERS_PUBLIC', '0')
+  const { GET: claims } = await import('./claims/route')
+  expect((await claims(req(`/api/v1/guards/claims?chainId=97&owner=${OUTSIDE_OWNER}`))).status).toBe(404)
 })

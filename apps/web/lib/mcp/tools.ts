@@ -232,37 +232,52 @@ const ADDR = { type: 'string', pattern: '^0x[0-9a-fA-F]{40}$' }
 const HEALTH = { type: 'string', pattern: '^\\d{1,2}(\\.\\d{1,2})?$', description: 'A Venus health such as "1.30".' }
 const query = (o: Json) => new URLSearchParams(Object.entries(o).filter(([, v]) => v !== undefined && v !== '').map(([k, v]) => [k, String(v)])).toString()
 
-/** Charters (Loan Guard), read only. Creating, funding and ending a charter is always the owner's own signature on the site. */
+const KIND = { type: 'string', enum: ['loan', 'yield', 'grid', 'range'], description: 'loan = Loan Guard, yield = Yield Sweep, grid = Grid Band, range = Range Keeper.' }
+
+/**
+ * Charters, four kinds, read only. Creating, funding and ending a charter is always the owner's own signature on
+ * the site. Testnet grid and range charters sit on Marque's labelled fixture pool (`fixture: true`).
+ */
 export const CHARTER_TOOLS: ToolDef[] = [
   {
-    name: 'charters_list', title: 'List Loan Guard charters',
-    description: 'Loan Guard charters on Venus: each guard\'s owner, debt market, trigger and target health, budget, spend and last health reading, newest first.',
-    inputSchema: { type: 'object', properties: { chainId: CHAIN, owner: ADDR, state: { type: 'string', enum: ['armed', 'ended', 'all'] } }, additionalProperties: false },
+    name: 'charters_list', title: 'List charters',
+    description: 'Charters of every kind (Loan Guard, Yield Sweep, Grid Band, Range Keeper), newest first: owner, limits, what each has used, actions and the last reading. `guards` holds Loan Guard v1, `charters` holds v2 of every kind.',
+    inputSchema: { type: 'object', properties: { chainId: CHAIN, owner: ADDR, kind: KIND, state: { type: 'string', enum: ['armed', 'ended', 'all'] } }, additionalProperties: false },
     async run(a, ctx) {
-      const { status, json } = await api(ctx, `/api/v1/guards?${query({ chainId: a['chainId'], owner: a['owner'], state: a['state'] })}`)
+      const { status, json } = await api(ctx, `/api/v1/guards?${query({ chainId: a['chainId'], owner: a['owner'], kind: a['kind'], state: a['state'] })}`)
       if (status !== 200) fail(json, 'The charters could not be read.')
-      return { ...json, page: `${ctx.origin}/charters`, source: 'CharterFactory and LoanGuard events, indexed by Marque (ONCHAIN); amounts are the token\'s integer units, health has 18 decimals' }
+      return { ...json, page: `${ctx.origin}/charters`, source: 'Charter factory and charter events, indexed by Marque (ONCHAIN); amounts are the token\'s integer units, health has 18 decimals' }
     },
   },
   {
-    name: 'charter_get', title: 'Get a Loan Guard charter',
-    description: 'One Loan Guard: its rules, every action with who called it, Keel\'s watch key, its health history and a live read of what it would do now.',
-    inputSchema: { type: 'object', properties: { chainId: CHAIN, guard: ADDR }, required: ['chainId', 'guard'], additionalProperties: false },
+    name: 'charter_get', title: 'Get a charter',
+    description: 'One charter of any kind: its rules, every action with who called it, its agent\'s Altana key, its history and a live read of what it would do now.',
+    inputSchema: { type: 'object', properties: { chainId: CHAIN, guard: { ...ADDR, description: 'The charter address.' } }, required: ['chainId', 'guard'], additionalProperties: false },
     async run(a, ctx) {
       const { status, json } = await api(ctx, `/api/v1/guards/${Number(a['chainId'])}/${String(a['guard'])}`)
-      if (status === 404) throw new ToolError(`No Loan Guard ${a['guard']} on ${netOf(Number(a['chainId']))}.`)
+      if (status === 404) throw new ToolError(`No charter ${a['guard']} on ${netOf(Number(a['chainId']))}.`)
       if (status !== 200) fail(json, 'The charter could not be read.')
-      return { network: netOf(Number(a['chainId'])), ...json, page: `${ctx.origin}/charters/${a['chainId']}/${a['guard']}`, source: 'Index of chain events (ONCHAIN) plus the guard\'s own preview() read live at the stated block' }
+      return { network: netOf(Number(a['chainId'])), ...json, page: `${ctx.origin}/charters/${a['chainId']}/${a['guard']}`, source: 'Index of chain events (ONCHAIN) plus the charter\'s own preview() read live at the stated block' }
     },
   },
   {
-    name: 'charter_quote', title: 'Quote a Loan Guard',
-    description: 'Read a Venus loan the way a Loan Guard reads it: health, repayable markets, the collateral price at the trigger and target, and the repayment at the trigger.',
-    inputSchema: { type: 'object', properties: { chainId: CHAIN, account: ADDR, market: { ...ADDR, description: 'The vToken of the debt to guard; the largest repayable debt when left out.' }, trigger: HEALTH, target: HEALTH }, required: ['chainId', 'account'], additionalProperties: false },
+    name: 'charter_quote', title: 'Quote a charter',
+    description: 'What a builder reads for an address and a kind. loan: Venus health, repayable markets, price at trigger and target. yield: wallet balances, Venus membership, supply room and cash per stablecoin market. grid: reviewed pools with spot and 5-minute average, minimum safe level spacing and balances. range: the address\'s PancakeSwap v3 positions on reviewed pools with their range and the average price.',
+    inputSchema: { type: 'object', properties: { chainId: CHAIN, account: ADDR, kind: KIND, market: { ...ADDR, description: 'loan only: the vToken of the debt to guard; the largest repayable debt when left out.' }, trigger: HEALTH, target: HEALTH }, required: ['chainId', 'account'], additionalProperties: false },
     async run(a, ctx) {
-      const { status, json } = await api(ctx, `/api/v1/guards/quote?${query({ chainId: a['chainId'], account: a['account'], market: a['market'], trigger: a['trigger'], target: a['target'] })}`)
-      if (status !== 200) fail(json, 'The loan could not be read.')
-      return { network: netOf(Number(a['chainId'])), ...json, build: `${ctx.origin}/charters/new?chain=${a['chainId']}&account=${a['account']}`, source: 'Venus Comptroller and oracle, read on chain (ONCHAIN); prices are what Venus uses, not a market feed' }
+      const { status, json } = await api(ctx, `/api/v1/guards/quote?${query({ chainId: a['chainId'], account: a['account'], kind: a['kind'], market: a['market'], trigger: a['trigger'], target: a['target'] })}`)
+      if (status !== 200) fail(json, 'The address could not be read.')
+      return { network: netOf(Number(a['chainId'])), ...json, build: `${ctx.origin}/charters/new?kind=${a['kind'] ?? 'loan'}&chain=${a['chainId']}&account=${a['account']}`, source: 'Venus and PancakeSwap v3 contracts, read on chain (ONCHAIN) at the stated block' }
+    },
+  },
+  {
+    name: 'charter_claims', title: 'Claims on a wallet',
+    description: 'For an owner on one chain: each token, the wallet balance and every armed charter that may draw it, with its allowance and next need. An allowance is a ceiling, not a reservation: when the needs exceed the balance, `short` is true.',
+    inputSchema: { type: 'object', properties: { chainId: CHAIN, owner: ADDR }, required: ['chainId', 'owner'], additionalProperties: false },
+    async run(a, ctx) {
+      const { status, json } = await api(ctx, `/api/v1/guards/claims?${query({ chainId: a['chainId'], owner: a['owner'] })}`)
+      if (status !== 200) fail(json, 'The claims could not be read.')
+      return { network: netOf(Number(a['chainId'])), ...json, source: 'Index of charters plus balances and allowances read on chain (ONCHAIN)' }
     },
   },
 ]
