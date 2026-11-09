@@ -3,7 +3,8 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useConfig } from 'wagmi'
 import { getCallsStatus, getPublicClient, sendCalls, sendTransaction, waitForTransactionReceipt } from '@wagmi/core'
 import { BaseError, ContractFunctionRevertedError, encodeFunctionData, erc20Abi, formatEther, type Address, type Hex } from 'viem'
-import { CHARTER_CHAINS, charterFactoryAbi, type CharterChainId } from '@marque/charters/client'
+import { CHARTER_CHAINS, V2, charterFactoryAbi, loanGuardFactoryV2Abi, type CharterChainId } from '@marque/charters/client'
+import { loanCalls, minRepayFor } from '../../../lib/charters-builder-v2'
 import {
   cannotBatch, clearPending, expiryStillValid, grantCalls, loadPending, newSalt, paramsOf, savePending, tokens,
   type GrantParams, type PendingGrant,
@@ -23,7 +24,20 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 const GAS_FALLBACK = { approve: 70_000n, create: 2_300_000n }
 
 export interface GrantInput { chainId: CharterChainId; owner: Address; token: Address; symbol: string; decimals: number; params: GrantParams }
-type Prepared = GrantInput & { salt: Hex; predicted: Address }
+type Prepared = GrantInput & { salt: Hex; predicted: Address; factory: Address; v2: boolean; calls: Array<{ to: Address; data: Hex }> }
+
+/**
+ * Loan Guard v2 (05_LOAN_GUARD) where its factory is deployed: tips have their own budget (ten actions' worth of the
+ * chosen tip) and the smallest repayment is derived from the budget. v1 stays the fallback (decision L5).
+ */
+function v2Create(input: GrantInput) {
+  const t = input.params
+  return {
+    p: { vDebt: t.vDebt, trigger: t.trigger, target: t.target, budget: t.budget, minRepay: minRepayFor(t.budget, input.decimals) },
+    expiresAt: t.expiresAt, tipPerAction: t.tip, tipBudget: t.tip * 10n,
+  }
+}
+export const tipBudgetOf = (tip: bigint) => tip * 10n
 
 /** A revert in words, when it is one of the factory's or the guard's rules. */
 function reason(e: unknown): string {
@@ -65,13 +79,17 @@ export function useGrant() {
     setPreError(null); setChecking(true)
     try {
       const pub = client(input.chainId)
-      const factory = CHARTER_CHAINS[input.chainId].factory
+      const v2 = V2[input.chainId].loanFactory !== null
+      const factory = (V2[input.chainId].loanFactory ?? CHARTER_CHAINS[input.chainId].factory) as Address | null
       if (!factory) throw new Error('There is no Loan Guard factory on this network yet.')
       const salt = reuse?.salt ?? newSalt()
-      const predicted = await pub.readContract({ address: factory, abi: charterFactoryAbi, functionName: 'predict', args: [input.owner, input.params, salt] }) as Address
+      const create = v2Create(input)
+      const predicted = (v2
+        ? await pub.readContract({ address: factory, abi: loanGuardFactoryV2Abi, functionName: 'predict', args: [input.owner, create, salt] })
+        : await pub.readContract({ address: factory, abi: charterFactoryAbi, functionName: 'predict', args: [input.owner, input.params, salt] })) as Address
       // A resumed grant is re-derived from the chain, never trusted from storage.
       if (reuse && predicted.toLowerCase() !== reuse.predicted.toLowerCase()) throw new Error('That unfinished charter no longer matches this factory. Clear its allowance and grant again.')
-      const calls = grantCalls(input.chainId, input.token, predicted, input.params, salt)
+      const calls = v2 ? loanCalls(factory, input.token, predicted, create.p, create.expiresAt, create.tipPerAction, create.tipBudget, salt) : grantCalls(input.chainId, input.token, predicted, input.params, salt)
       // The create must pass the factory's own checks now; a node a block behind can answer stale, so ask twice.
       let createGas: bigint | null = null
       let lastErr: unknown = null
@@ -94,7 +112,7 @@ export function useGrant() {
       }
       if (createGas === null && lastErr && !(lastErr instanceof BaseError && /insufficient funds|gas required exceeds/i.test(lastErr.message))) throw new Error(reason(lastErr))
       if (!alive.current) return
-      setPrep({ ...input, salt, predicted })
+      setPrep({ ...input, salt, predicted, factory, v2, calls: calls.map((c) => ({ to: c.to as Address, data: c.data as Hex })) })
       setSteps([{ key: 'approve', label: labels[0], state: reuse?.approved ? 'done' : 'waiting' }, { key: 'create', label: labels[1], state: 'waiting' }])
       setError(null); setNote(null); setGranted(null); setPhase('review')
     } catch (e) {
@@ -103,7 +121,10 @@ export function useGrant() {
   }, [client])
 
   const finish = useCallback(async (p: Prepared) => {
-    const ok = await client(p.chainId).readContract({ address: CHARTER_CHAINS[p.chainId].factory!, abi: charterFactoryAbi, functionName: 'isGuard', args: [p.predicted] }).catch(() => false)
+    const pub = client(p.chainId)
+    const ok = await (p.v2
+      ? pub.readContract({ address: p.factory, abi: loanGuardFactoryV2Abi, functionName: 'isCharter', args: [p.predicted] })
+      : pub.readContract({ address: p.factory, abi: charterFactoryAbi, functionName: 'isGuard', args: [p.predicted] })).catch(() => false)
     if (!alive.current) return
     if (ok) {
       clearPending(p.chainId, p.owner)
@@ -130,7 +151,7 @@ export function useGrant() {
 
   /** Sequential path: one prompt per step, each waiting for its receipt. */
   const oneByOne = useCallback(async (p: Prepared, from: 0 | 1) => {
-    const calls = grantCalls(p.chainId, p.token, p.predicted, p.params, p.salt)
+    const calls = p.calls
     for (let i = from; i < 2; i++) {
       mark(i, { state: 'signing' })
       try {
@@ -157,7 +178,7 @@ export function useGrant() {
       chainId: p.chainId, owner: p.owner, token: p.token, symbol: p.symbol, decimals: p.decimals, predicted: p.predicted, salt: p.salt, at: Date.now(),
       params: { vDebt: p.params.vDebt, trigger: String(p.params.trigger), target: String(p.params.target), budget: String(p.params.budget), tip: String(p.params.tip), expiresAt: String(p.params.expiresAt) },
     })
-    const calls = grantCalls(p.chainId, p.token, p.predicted, p.params, p.salt)
+    const calls = p.calls
     setSteps((s) => s.map((x) => ({ ...x, state: 'signing' as const })))
     let id: string | null = null
     try {
@@ -218,9 +239,12 @@ export function useGrant() {
 /** An unfinished grant from an earlier visit, checked against the chain: finished, still open (with its allowance), or gone. */
 export async function checkPending(pub: { readContract: (a: never) => Promise<unknown> }, owner: Address, chainId: CharterChainId): Promise<{ pending: PendingGrant; allowance: bigint } | null> {
   const p = loadPending(chainId, owner)
-  const factory = CHARTER_CHAINS[chainId].factory
+  const v2 = V2[chainId].loanFactory
+  const factory = v2 ?? CHARTER_CHAINS[chainId].factory
   if (!p || !factory) return null
-  const exists = await pub.readContract({ address: factory, abi: charterFactoryAbi, functionName: 'isGuard', args: [p.predicted] } as never).catch(() => null)
+  const exists = await pub.readContract((v2
+    ? { address: v2, abi: loanGuardFactoryV2Abi, functionName: 'isCharter', args: [p.predicted] }
+    : { address: factory, abi: charterFactoryAbi, functionName: 'isGuard', args: [p.predicted] }) as never).catch(() => null)
   if (exists === true) { clearPending(chainId, owner); return null }
   const allowance = await pub.readContract({ address: p.token, abi: erc20Abi, functionName: 'allowance', args: [owner, p.predicted] } as never).catch(() => null) as bigint | null
   if (allowance === null) return null

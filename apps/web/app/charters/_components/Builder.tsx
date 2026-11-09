@@ -6,7 +6,7 @@ import { getPublicClient, switchChain } from '@wagmi/core'
 import { getAddress, isAddress, type Address } from 'viem'
 import { ArrowRight, ShieldCheck, X } from 'lucide-react'
 import {
-  CHARTER_CHAINS, dropToHealth, HEALTH_ONE, priceAtHealth, priceToUsd, repayAtTrigger, type CharterChainId,
+  V2,  CHARTER_CHAINS, dropToHealth, HEALTH_ONE, priceAtHealth, priceToUsd, repayAtTrigger, type CharterChainId,
 } from '@marque/charters/client'
 import { AgentAvatar } from '../../_components/AgentAvatar'
 import { AddressChip } from '../../_components/ui'
@@ -17,7 +17,8 @@ import {
 import { HealthRule } from './HealthRule'
 import { StormTest } from './StormTest'
 import { Seal } from './Seal'
-import { checkPending, useGrant } from './useGrant'
+import { checkPending, tipBudgetOf, useGrant } from './useGrant'
+import { minRepayFor } from '../../../lib/charters-builder-v2'
 import styles from './builder.module.css'
 
 /**
@@ -168,7 +169,7 @@ export function Builder({ initialChain, initialAccount, initialMarket, demo }: {
   } : null), [rule, debtMarket, budgetUnits])
 
   // Why the Grant button cannot be pressed, in the words of section 5; null when it can.
-  const factory = CHARTER_CHAINS[chainId].factory
+  const factory = V2[chainId].loanFactory ?? CHARTER_CHAINS[chainId].factory
   const isOwner = Boolean(wallet && wallet.toLowerCase() === account.toLowerCase())
   const blocker: { words: string; action?: { label: string; run: () => void } } | null = (() => {
     if (!factory) return { words: `Loan Guard is not on ${CHAIN_NAME[chainId]} yet. You can draw and test a charter here; granting opens when the guard is live on this network.` }
@@ -196,7 +197,8 @@ export function Builder({ initialChain, initialAccount, initialMarket, demo }: {
       { label: 'Guards', value: `${p.symbol} loan of ${short(p.owner)}` },
       { label: 'Where', value: `Venus Core, ${CHAIN_NAME[p.chainId]}` },
       { label: 'Acts', value: `below ${fmtHealth(toHundredths(t.trigger))}, lifts to ${fmtHealth(toHundredths(t.target))}` },
-      { label: 'Can use', value: `at most ${tokens(t.budget, p.decimals)} ${p.symbol}, from your wallet${t.tip > 0n ? `, a thank-you of up to ${tokens(t.tip, p.decimals)} per action included` : ''}` },
+      { label: 'Can use', value: `at most ${tokens(t.budget, p.decimals)} ${p.symbol}, from your wallet, never less than ${tokens(minRepayFor(t.budget, p.decimals), p.decimals)} at a time unless that restores your target` },
+      ...(t.tip > 0n ? [{ label: 'Can tip', value: `${tokens(t.tip, p.decimals)} per action to the agent that acts, at most ${tokens(tipBudgetOf(t.tip), p.decimals)} in total, apart from the budget` }] : []),
       { label: 'Can pay', value: 'only your own loan' },
       { label: 'Ends', value: `${new Date(Number(t.expiresAt) * 1000).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' })}, or when you end it` },
     ]
@@ -207,7 +209,7 @@ export function Builder({ initialChain, initialAccount, initialMarket, demo }: {
     void grant.prepare({
       chainId, owner: wallet, token: debtMarket.token, symbol, decimals,
       params: { vDebt: debtMarket.vToken, trigger: toWad(rule.trigger), target: toWad(rule.target), budget: budgetUnits, tip: tipUnits, expiresAt },
-    }, [`Allow up to ${tokens(budgetUnits, decimals)} ${symbol} for this guard only`, 'Create the guard'])
+    }, [`Allow up to ${tokens(budgetUnits + tipBudgetOf(tipUnits), decimals)} ${symbol} for this guard only`, 'Create the guard'])
   }
 
   const resume = () => {

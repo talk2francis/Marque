@@ -194,6 +194,12 @@ export async function watchOnceV2(ctx: WatchV2Context): Promise<WatchV2Pass> {
         && (!k || k.status === 'granting' || k.status === 'failed') && Date.now() - new Date(armed[i]!.created_at).getTime() < SESSION_WAIT_MS) continue
       if (choice.action === 'none') { ctx.log('v2_no_path', { chainId: ctx.chainId, charter, kind }); continue }
       if (choice.action === 'wait') continue
+      // The relay takes one pending call per agent account at a time: an agent's next session call waits for its last.
+      if (choice.path === 'altana') {
+        const [busy] = rowsOf<{ n: number }>(await db().execute(sql`select count(*)::int as n from charter_attempt where chain_id = ${ctx.chainId}
+          and path = 'altana' and status in ('prepared', 'pending') and sender = ${EXECUTORS[agentFor(kind)].toLowerCase()}`))
+        if ((busy?.n ?? 0) > 0) continue
+      }
       if (ctx.dryRun) { ctx.log('v2_would_send', { chainId: ctx.chainId, charter, kind, path: choice.path }); continue }
       const from = (choice.path === 'altana' ? EXECUTORS[agentFor(kind)] : choice.path === 'direct' ? ctx.direct[kind]!.account!.address : ctx.backup!.account!.address) as Address
       let reason: string | null = null
@@ -211,7 +217,9 @@ export async function watchOnceV2(ctx: WatchV2Context): Promise<WatchV2Pass> {
         out.sent.push({ charter, kind, path: choice.path, ref })
         ctx.log('v2_act_sent', { chainId: ctx.chainId, charter, kind, path: choice.path, ref })
       } catch (e) {
-        const error = e instanceof Error ? e.message.slice(0, 300) : String(e)
+        // Keep the relay's own words (viem puts them in `details`), not only the generic RPC message.
+        const details = (e as { details?: unknown; cause?: { details?: unknown } }).details ?? (e as { cause?: { details?: unknown } }).cause?.details
+        const error = `${e instanceof Error ? e.message.split('\n')[0]!.slice(0, 200) : String(e)}${details ? ` | ${String(details).slice(0, 400)}` : ''}`
         await close(id, 'failed', { error })
         if (choice.path === 'altana') degraded.set(charter, Date.now() + DEGRADED_MS)
         ctx.log('v2_act_send_failed', { chainId: ctx.chainId, charter, kind, path: choice.path, error })

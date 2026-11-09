@@ -107,6 +107,7 @@ export async function keysOnceV2(x: {
       if (await valid(admin.address, k.key_id as Hex)) {
         const r = await x.altana.revokeSession({ wallet: { address: admin.address }, signer: signerFromPrivateKey(admin.key), session: sessionForV2(x.master, x.chainId, KIND_BY_CODE[k.kind]!, k.guard, k.session), chainId: x.chainId })
         tx = r.transactionHash ?? null
+        x.log('v2_session_revoke_sent', { chainId: x.chainId, charter: k.guard, status: r.status, statusCode: r.statusCode ?? null, callsId: r.callsId })
       }
       const after = await valid(admin.address, k.key_id as Hex)
       await db().execute(sql`update charter_watch_key set status = ${after ? 'revoking' : 'revoked'}, revoke_tx = coalesce(${tx}, revoke_tx),
