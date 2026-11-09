@@ -231,7 +231,14 @@ async function main() {
   await page.getByRole('button', { name: 'End charter' }).first().click()
   await page.getByRole('dialog').getByRole('button', { name: 'End charter' }).click()
   if (walletType === 'pass') await page.getByRole('button', { name: /^Confirm/ }).last().click({ timeout: 60_000 })
-  await page.getByRole('heading', { name: /^(Allowances|Your position)$/ }).waitFor({ timeout: 300_000 })
+  // Confirmed from the index, not from the page's own refresh.
+  const endBy = Date.now() + 300_000
+  while (Date.now() < endBy) {
+    const d = await fetch(`${BASE}/api/v1/guards/${chainId}/${addr}`).then((r) => (r.ok ? r.json() : null)).catch(() => null) as { charter?: { status: string }; allowances?: Array<{ allowance: string | null }> } | null
+    if (d?.charter?.status === 'ended') { report['allowancesAfter'] = d.allowances?.map((a) => a.allowance); break }
+    await new Promise((r) => setTimeout(r, 10_000))
+  }
+  await page.reload({ waitUntil: 'domcontentloaded' })
   await page.waitForTimeout(3000)
   await shot('ended')
   step('ended from the charter page')

@@ -53,13 +53,14 @@ export interface V2Chain {
 
 export const V2: Record<CharterChainId, V2Chain> = {
   56: {
-    loanFactory: null,
-    yieldFactory: null,
-    gridFactory: null,
-    rangeFactory: null,
-    rangeBlueprint: null,
-    blueprintCodeHash: null,
-    fromBlock: null,
+    // Deployed 9 Nov 2026 from 0x5766...35C7 (blocks 132642035 to 132642053), source as reviewed (fork suites green at 132640832).
+    loanFactory: '0x60bB1B002c1469DF778Ff1e49F2e5e43cde9eA7d',
+    yieldFactory: '0xb32a26c068d5C650e6C17F390b5c2a72A1968d03',
+    gridFactory: '0x2267640b997dc00139d46cC6A94a89822D43F0a5',
+    rangeFactory: '0x374b739439FE25E12B8664EB9231a13EaEC138F4',
+    rangeBlueprint: '0x81bC7F48c854b6D1117556EA9d1C1306F26d6f19',
+    blueprintCodeHash: '0xf80350b91a38fd580c1ac1ad3cb8240d36abee72d64d1b7410f8cd9c2ee256c5',
+    fromBlock: 132642035n,
     npm: '0x46A15B0b27311cedF172AB29E4f4766fbE7F4364',
     pcsFactory: '0x0BFbCF9fa4f9C56B0F40a671Ad40E0805A091865',
     // Reviewed 9 Nov 2026: deepest pools with at least an hour of observations (PROJECT_STATE, Q1).
