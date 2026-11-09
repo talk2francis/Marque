@@ -77,7 +77,8 @@ it('builds the grant as an exact allowance to the predicted guard, then the crea
   expect(b!.to).toBe(c.factory)
   const d = decodeFunctionData({ abi: charterFactoryAbi, data: b!.data })
   expect(d.functionName).toBe('create')
-  expect(() => grantCalls(56, usdc.token, predicted, p, `0x${'ab'.repeat(32)}`)).toThrow()
+  // Mainnet builds against its own factory (deployed 9 Nov).
+  expect(grantCalls(56, usdc.token, predicted, p, `0x${'ab'.repeat(32)}`)[1]!.to).toBe(CHARTER_CHAINS[56].factory)
 })
 
 it('falls back to one prompt per step only when the wallet cannot batch, never after a refusal', () => {
