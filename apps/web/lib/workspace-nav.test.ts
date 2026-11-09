@@ -34,3 +34,9 @@ describe('Today priority', () => {
     expect(groups[0]!.rows[0]!.deadline).toBeNull()
   })
 })
+
+describe('the Charters tab', () => {
+  it('opens on the hiring side from /me?view=charters', () => {
+    expect(workspaceNavigation('charters', null, 'building')).toEqual({ view: 'hiring', tab: 'charters', history: false })
+  })
+})

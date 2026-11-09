@@ -1,5 +1,5 @@
 export type WorkspaceView = 'hiring' | 'building'
-export type HiringTab = 'today' | 'positions' | 'jobs' | 'money'
+export type HiringTab = 'today' | 'positions' | 'charters' | 'jobs' | 'money'
 export type BuildingTab = 'agents' | 'bench' | 'demand'
 export interface WorkspaceNavigation { view: WorkspaceView; tab: HiringTab | BuildingTab; history: boolean }
 
@@ -10,7 +10,7 @@ export function workspaceNavigation(view: string | null, tab: string | null, pre
   if (asked && ['agents', 'bench', 'demand'].includes(asked)) return { view: 'building', tab: asked as BuildingTab, history: false }
   if (asked === 'logbook' || asked === 'history') return { view: side, tab: side === 'building' ? 'agents' : 'jobs', history: true }
   if (asked === 'watching') return { view: 'hiring', tab: 'positions', history: false }
-  if (asked && ['today', 'positions', 'jobs', 'money'].includes(asked)) return { view: 'hiring', tab: asked as HiringTab, history: false }
+  if (asked && ['today', 'positions', 'charters', 'jobs', 'money'].includes(asked)) return { view: 'hiring', tab: asked as HiringTab, history: false }
   return { view: side, tab: side === 'building' ? 'agents' : 'today', history: false }
 }
 

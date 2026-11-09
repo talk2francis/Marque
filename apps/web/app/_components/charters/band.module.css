@@ -1,0 +1,13 @@
+/* The Home band for Charters: words left, the Night Replay right. */
+.band { display: grid; gap: 28px; align-items: start; padding-block: 56px; border-top: 1px solid var(--hair); }
+@media (min-width: 1024px) { .band { grid-template-columns: minmax(0, 1fr) minmax(0, 540px); gap: 48px; } }
+.text { display: grid; gap: 14px; align-content: start; }
+.eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ink-2); }
+.eyebrow::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--moss); }
+.title { margin: 0; font-family: var(--font-statement); font-weight: 400; font-size: clamp(32px, 4.4vw, 48px); line-height: 1.06; letter-spacing: -0.02em; }
+.title em { color: var(--brass-mark); }
+.body { margin: 0; max-width: 58ch; font-size: 16px; line-height: 1.6; color: var(--ink-2); }
+.promises { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; font-size: 14.5px; line-height: 1.5; color: var(--ink-3); }
+.promises b { color: var(--ink); font-weight: 600; }
+.ctas { display: flex; flex-wrap: wrap; gap: 10px; }
+.live { margin: 0; font-size: 13.5px; color: var(--ink-3); }

@@ -31,6 +31,7 @@ import { RecheckList } from './RecheckList'
 import { AgentLoop } from '../builders/AgentLoop'
 import { AgentWorkspace } from '../builders/AgentWorkspace'
 import { WorkspaceBench } from './Bench'
+import { CharterToday, MyCharters, useChartersOn } from './MyCharters'
 import { JourneyRail, NextStep, WorkshopStrip, WorkshopTools } from './Workshop'
 import { journeyOf, type JourneyAgent } from '../../lib/builder-journey'
 import { workspaceNavigation, todayLanes, type TodayLane, type WorkspaceNeed } from '../../lib/workspace-nav'
@@ -81,6 +82,7 @@ export function Workspace({ addrParam }: { addrParam: string | null }) {
     if (nav.view !== view) setView(nav.view)
   }, [nav.view, view])
   const tab = nav.tab
+  const chartersOn = useChartersOn().data === true
   // The Workshop's "Test it now" opens the Test bench on that agent.
   const [benchPick, setBenchPick] = useState<string | null>(null)
   const { profile } = useWalletProfile(address)
@@ -127,8 +129,10 @@ export function Workspace({ addrParam }: { addrParam: string | null }) {
     requestAnimationFrame(() => document.getElementById(`agent-${agentKey}`)?.scrollIntoView({ block: 'start', behavior: 'smooth' }))
   }
   const hiringTabs = [
-    { id: 'today', label: 'Today', content: <div className={styles.todayContent}><Dockets address={address} own={own} view="hiring" /><RecheckList address={address} compact /></div> },
+    { id: 'today', label: 'Today', content: <div className={styles.todayContent}><CharterToday address={address} /><Dockets address={address} own={own} view="hiring" /><RecheckList address={address} compact /></div> },
     { id: 'positions', label: 'Positions', content: <><WorkspacePositions address={address} /><Watching /></> },
+    // Charters (AGENTS.md section 14): the tab exists only once the guards API answers this browser.
+    ...(chartersOn ? [{ id: 'charters', label: 'Charters', content: <MyCharters address={address} /> }] : []),
     { id: 'jobs', label: 'Jobs', content: <Jobs address={address} historyInitially={nav.history} /> },
     { id: 'money', label: 'Money', content: <Money address={address} own={own} /> },
   ]

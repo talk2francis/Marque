@@ -1,3 +1,4 @@
+import { HomeChartersBand } from './_components/charters/HomeChartersBand'
 import { ArrowRight, BadgeCheck, Check, ChevronDown, HandCoins, RotateCcw, ShieldCheck } from 'lucide-react'
 import { Limits, MeasureRule, ProvenanceChip } from '@marque/ui'
 import { SiteHeader, SiteFooter } from './_components/SiteHeader'
@@ -224,6 +225,9 @@ export default async function Home() {
             </ol>
           </div>
         </section>
+
+        {/* ---- Charters (AGENTS.md section 14): only once public ---- */}
+        <HomeChartersBand />
 
         {/* ---- Ready to hire now (D1): re-read in the browser, so a cached page never shows a lapsed price as current ---- */}
         <section className={styles.section} aria-labelledby="ready" data-reveal>
