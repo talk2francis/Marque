@@ -93,6 +93,20 @@ contract LoanGuardV2Test is Test {
         assertEq(vUSDT.borrows(owner), 0);
     }
 
+    /// Review L-02: a repayment under the minimum that fully restores the target is not dust and goes through.
+    function test_minRepay_neverBlocksAFullRestore() public {
+        usdt.mint(owner, 1_000 * E);
+        LoanGuardV2 g = _create(2_000 * E, 500 * E, 0, 0, 2_000 * E);
+        comp.setWeighted(owner, 1390 * E); // health 1.39: about 228 USDT restores 1.80
+        (uint8 st,, uint256 would,,) = g.preview();
+        assertEq(st, 1);
+        assertLt(would, 500 * E);
+        uint256 r = g.act();
+        assertEq(r, would);
+        (uint256 hf,,) = factory.healthOf(owner);
+        assertGe(hf, 1.8e18);
+    }
+
     function test_tipsHaveTheirOwnBudget_andNeverReduceRepayment() public {
         LoanGuardV2 g = _create(300 * E, 5 * E, 2 * E, 3 * E, 303 * E);
         comp.setWeighted(owner, 1300 * E);
@@ -179,7 +193,11 @@ contract LoanGuardV2Test is Test {
             assertLe(r, allow);
             assertLe(r, bal);
             assertLe(r, debt);
-            assertTrue(r >= budget / 4 || r == debt, "never below the minimum unless it pays the debt off");
+            // Under the minimum only when nothing cut it short: the loan is back at the target, or the market is paid off.
+            if (r < budget / 4 && r != debt) {
+                (uint256 hfAfter,,) = factory.healthOf(o);
+                assertGe(hfAfter + 1e9, 1.8e18, "under the minimum only when it restores the target");
+            }
             assertEq(usdt.balanceOf(address(g)), 0);
         } catch {
             assertEq(usdt.balanceOf(o), bal);

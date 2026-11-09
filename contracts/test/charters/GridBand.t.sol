@@ -233,7 +233,7 @@ abstract contract GridBandBase is PcsFixture {
         address[] memory pools = new address[](1);
         pools[0] = address(thin);
         GridBandFactory f2 = new GridBandFactory(IPancakeV3Factory(address(pcs)), pools);
-        GridBandFactory.Create memory a = _params(-1250, 0, 3_000 * E, 0);
+        GridBandFactory.Create memory a = _params(-1250, 0, 3_000 * E, 100 * E);
         a.p.pool = address(thin);
         a.p.base = address(lo);
         a.fullFrom = 6;
@@ -287,6 +287,9 @@ abstract contract GridBandBase is PcsFixture {
         factory.create(a, 0);
         a = _params(bt0 - 650, 0, 3_000 * E, 0); // slots above the price but no base for them
         vm.expectRevert(abi.encodeWithSelector(GridBandFactory.BadGrid.selector, uint8(8)));
+        factory.create(a, 0);
+        a = _params(bt0 - 1250, 0, 3_000 * E, 0); // review L-06: a grid that could never sell
+        vm.expectRevert(abi.encodeWithSelector(GridBandFactory.BadGrid.selector, uint8(10)));
         factory.create(a, 0);
     }
 

@@ -273,7 +273,14 @@ contract RangeKeeper is CharterBase {
 
         // 7. The economic bound for the whole operation, measured at the TWAP.
         uint256 leftValue = PoolMath.valueIn1(s.sqrtTwap, s.left0, s.left1);
-        s.valueAfter = PoolMath.valueIn1(s.sqrtTwap, s.used0, s.used1) + leftValue;
+        {
+            // The new position is valued like the old one: its liquidity's amounts at the TWAP, not the amounts
+            // deposited at spot, so an off-centre mint cannot hide a loss.
+            (uint256 x, uint256 y) = PoolMath.amountsForLiquidity(
+                s.sqrtTwap, PoolMath.sqrtAt(s.newLower), PoolMath.sqrtAt(s.newUpper), s.newLiquidity
+            );
+            s.valueAfter = PoolMath.valueIn1(s.sqrtTwap, x, y) + leftValue;
+        }
         if (s.valueAfter * 10_000 < s.valueBefore * (10_000 - uint256(maxLossBps))) {
             revert ValueLoss(s.valueBefore, s.valueAfter);
         }

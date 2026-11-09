@@ -132,5 +132,6 @@ contract GridBandFactory is FactoryBase {
         uint256 full = p.slots - fullFrom;
         if (full != 0 && (p.baseOrder == 0 || p.sellCap < full * p.baseOrder)) revert BadGrid(8);
         if (full == 0 && p.baseOrder != 0) revert BadGrid(9);
+        if (p.sellCap == 0) revert BadGrid(10); // a grid that can never sell is not a grid
     }
 }

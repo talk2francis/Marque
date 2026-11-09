@@ -89,12 +89,12 @@ contract LoanGuardV2 is CharterBase {
         uint256 price = IPriceOracle(comptroller.oracle()).getUnderlyingPrice(address(vDebt));
         if (price == 0) revert HealthMath.PriceUnavailable(address(vDebt));
 
-        repaid = _min(
-            _min(HealthMath.repayToTarget(h, target, price), debtBefore),
-            _min(budget - spent, _available())
-        );
+        uint256 need = _min(HealthMath.repayToTarget(h, target, price), debtBefore);
+        repaid = _min(need, _min(budget - spent, _available()));
         if (repaid == 0) revert NothingAvailable();
-        if (repaid < minRepay && repaid != debtBefore) revert BelowMinimum(repaid, minRepay);
+        // The minimum stops dust only when a limit (budget, allowance, balance) cut the repayment short. A small
+        // repayment that fully restores the target, or pays the market off, always goes through.
+        if (repaid < minRepay && repaid != need) revert BelowMinimum(repaid, minRepay);
 
         spent += repaid;
         actions += 1;
@@ -133,9 +133,10 @@ contract LoanGuardV2 is CharterBase {
         if (debt == 0) return (S_NO_DEBT, health, 0, available, debt);
         if (h.hf >= trigger) return (S_WATCHING, health, 0, available, debt);
         uint256 price = IPriceOracle(comptroller.oracle()).getUnderlyingPrice(address(vDebt));
-        wouldRepay = _min(_min(HealthMath.repayToTarget(h, target, price), debt), available);
+        uint256 need = _min(HealthMath.repayToTarget(h, target, price), debt);
+        wouldRepay = _min(need, available);
         if (wouldRepay == 0) return (S_NO_FUNDS, health, 0, available, debt);
-        if (wouldRepay < minRepay && wouldRepay != debt) return (S_BELOW_MIN, health, wouldRepay, available, debt);
+        if (wouldRepay < minRepay && wouldRepay != need) return (S_BELOW_MIN, health, wouldRepay, available, debt);
         state = S_WOULD_ACT;
     }
 

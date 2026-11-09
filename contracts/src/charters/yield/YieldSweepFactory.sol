@@ -70,6 +70,8 @@ contract YieldSweepFactory is FactoryBase {
         if (!supported[p.vToken]) revert UnsupportedMarket(p.vToken);
         if (p.minAction == 0 || p.ceiling < p.floor + 2 * p.minAction) revert BadBand();
         if (p.supplyCap < p.minAction) revert BadCap();
+        // The tip is paid in the swept token: a tip of minAction or more could push the wallet back across the band.
+        if (a.tipPerAction >= p.minAction) revert BadCap();
         if (p.minHealthAfter != 0 && p.minHealthAfter < 1.1e18) revert BadBand();
         token = IVTokenSupply(p.vToken).underlying();
         c = _common(a.expiresAt, token, a.tipPerAction, a.tipBudget, new address[](0), true, token, token);

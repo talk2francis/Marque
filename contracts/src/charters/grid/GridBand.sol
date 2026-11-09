@@ -52,6 +52,8 @@ contract GridBand is CharterBase {
     uint256 public baseSold;
     /// 0 = EMPTY (waiting to buy); otherwise FULL, holding this much base to sell.
     mapping(uint256 => uint256) public slotBase;
+    /// Base each slot held when it last became FULL (bought, or placed at creation); the yardstick for sell dust.
+    mapping(uint256 => uint256) public slotOrder;
 
     address private _payToken;
     uint256 private _payMax;
@@ -115,6 +117,7 @@ contract GridBand is CharterBase {
         minFillBps = p.minFillBps;
         for (uint256 s = fullFrom; s < p.slots; ++s) {
             slotBase[s] = p.baseOrder;
+            slotOrder[s] = p.baseOrder;
         }
     }
 
@@ -141,13 +144,17 @@ contract GridBand is CharterBase {
         if (amountIn * 10_000 < wanted * minFillBps) revert FillTooSmall(amountIn, wanted);
 
         if (buy) {
+            // A buy that returned no base would leave the slot empty and buy again: refuse it.
+            if (amountOut == 0) revert FillTooSmall(0, wanted);
             quoteSpent += amountIn;
             slotBase[slot] = amountOut;
+            slotOrder[slot] = amountOut;
         } else {
             baseSold += amountIn;
             uint256 rest = slotBase[slot] - amountIn;
             // A sell that stopped at the price limit keeps the rest for later, unless the rest is dust.
-            slotBase[slot] = rest * 20 < wanted ? 0 : rest;
+            // Dust is measured against the slot's whole order, so partial sells cannot repeat down to nothing.
+            slotBase[slot] = rest * 20 < slotOrder[slot] ? 0 : rest;
         }
         emit Traded(msg.sender, slot, buy, amountIn, amountOut, twap, spot, PoolOracle.spotTick(pool));
         _payTip();

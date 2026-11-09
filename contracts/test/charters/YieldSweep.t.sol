@@ -239,6 +239,35 @@ contract YieldSweepTest is Test {
         assertEq(amount, 750 * E);
     }
 
+    /// Review M-01: a vToken donated to the charter must not block withdrawals.
+    function test_donatedVTokenCannotBlockWithdrawals() public {
+        YieldSweep s = _std();
+        s.act();
+        vm.startPrank(owner);
+        vUSDT.transfer(address(s), 1);
+        usdt.transfer(lp, 150 * E); // wallet 100, under the floor
+        vm.stopPrank();
+        vm.prank(keeper);
+        (bool supplied, uint256 got) = s.act();
+        assertFalse(supplied);
+        assertApproxEqAbs(got, 150 * E, 1e9);
+        assertEq(vUSDT.balanceOf(address(s)), 1, "the donation stays for the owner to sweep");
+    }
+
+    /// Review L-03: a tip of minAction or more could push the wallet back across the band, so it is refused.
+    function test_factoryRefusesATipThatCouldCrossTheBand() public {
+        YieldSweepFactory.Create memory a = YieldSweepFactory.Create({
+            p: YieldSweep.Params(address(vUSDT), 200 * E, 300 * E, 20 * E, 5_000 * E, 0),
+            expiresAt: uint64(block.timestamp + 60 days),
+            tipPerAction: 20 * E,
+            tipBudget: 100 * E
+        });
+        vm.expectRevert(YieldSweepFactory.BadCap.selector);
+        factory.create(a, bytes32("t"));
+        a.tipPerAction = 20 * E - 1;
+        factory.create(a, bytes32("t"));
+    }
+
     function test_holdsInACollateralMarketByDefault() public {
         YieldSweep s = _std();
         comp.setMember(owner, address(vUSDT), true);

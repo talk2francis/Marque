@@ -155,12 +155,14 @@ contract YieldSweep is CharterBase {
         heldV -= _min(heldV, v);
         actions += 1;
         uint256 held = IERC20Lite(token).balanceOf(address(this));
+        // Compared with the balance before, not with zero: a vToken donated to this contract cannot block withdrawals.
+        uint256 vBefore = vToken.balanceOf(address(this));
         address(vToken).safeTransferFrom(owner, address(this), v);
         uint256 err = vToken.redeem(v);
         if (err != 0) revert VenusError(err);
         got = IERC20Lite(token).balanceOf(address(this)) - held;
         token.safeTransfer(owner, got);
-        if (vToken.balanceOf(address(this)) != 0) revert Residual();
+        if (vToken.balanceOf(address(this)) != vBefore) revert Residual();
         emit Withdrew(msg.sender, got, v, bal + got, heldV);
     }
 
