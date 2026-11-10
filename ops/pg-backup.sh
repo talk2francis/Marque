@@ -33,6 +33,18 @@ cp "${PRIMARY}/${NAME}" "${SECONDARY}/${NAME}"
 SIZE="$(du -h "${PRIMARY}/${NAME}" | cut -f1)"
 echo "$(date -u +%FT%TZ) backup ${NAME} (${SIZE}) -> ${PRIMARY}, ${SECONDARY}"
 
+# Charters keeps its index and first-party samples in its own database when CHARTERS_DATABASE_URL names one
+# (AGENTS.md invariant 12: measurements are backed up nightly). Same two locations, same 7 days.
+if [ -n "${CHARTERS_DATABASE_URL:-}" ] && [ "${CHARTERS_DATABASE_URL}" != "${DATABASE_URL:-}" ]; then
+  CNAME="charters-${STAMP}.sql.gz"
+  DATABASE_URL="$CHARTERS_DATABASE_URL" node /root/marque/ops/pg-command.mjs pg_dump --no-owner --no-privileges \
+    | gzip -9 > "${PRIMARY}/${CNAME}.partial"
+  mv "${PRIMARY}/${CNAME}.partial" "${PRIMARY}/${CNAME}"
+  cp "${PRIMARY}/${CNAME}" "${SECONDARY}/${CNAME}"
+  find "$PRIMARY" "$SECONDARY" -maxdepth 1 -name 'charters-*.sql.gz' -mtime +"$KEEP_DAYS" -delete
+  echo "$(date -u +%FT%TZ) backup ${CNAME} -> ${PRIMARY}, ${SECONDARY}"
+fi
+
 # Record local success independently of the offsite result.
 echo "${STAMP}" > "${PRIMARY}/LATEST"
 
