@@ -23,7 +23,12 @@ const day = (iso: string) => new Date(iso).toLocaleDateString('en-GB', { day: 'n
 /** Is Charters reachable for this browser? One cheap read, shared by the tab list and Today. */
 export function useChartersOn() {
   return useQuery({ queryKey: ['charters-on'], staleTime: 10 * 60_000, retry: false,
-    queryFn: async () => (await fetch('/api/v1/guards/stats', { cache: 'no-store' })).ok })
+    queryFn: async ({ signal }) => {
+      const response = await fetch('/api/v1/guards/stats', { cache: 'no-store', signal })
+      // Finish the response even though this read only needs its status; an unread body can leave the request open.
+      await response.arrayBuffer()
+      return response.ok
+    } })
 }
 
 type V2 = {
