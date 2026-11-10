@@ -139,6 +139,8 @@ const SIGNALS = [
       const hist = {}
       const looping = []
       for (const p of list.filter((x) => x.name.startsWith('marque-'))) {
+        // A successful keys pass exits on purpose; PM2 starts a fresh process after the configured delay.
+        if (p.name === 'marque-charters-keys' && p.pm2_env.exit_code === 0) continue
         const n = p.pm2_env.restart_time ?? 0
         const h = (prev[p.name] ?? []).filter((e) => now - e.at < 10 * 60_000)
         if (!h.length || h[h.length - 1].n !== n) h.push({ at: now, n })
