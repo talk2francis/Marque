@@ -590,3 +590,5 @@ Each film has its own cue target and analytics id, preventing transcript links o
 Film Escape handling remains active while a play request buffers or seeks. Cancelling a request invalidates its pending promise; only an explicit autoplay-policy refusal may retry muted. Compact Charters chapters remain visible through the mobile breakpoint.
 
 When the Charters end-card link is visible, empty control padding lets clicks reach it. Buttons and the in-frame seek bar retain their own pointer targets; the launch player's hit areas are unchanged.
+
+The promises follow the film in document order, while the desktop grid places them beneath the introduction. Mobile no longer paints the promises before an earlier film panel has arrived in the HTML stream. A responsive AVIF preload precedes the header so the poster can start loading earlier.
