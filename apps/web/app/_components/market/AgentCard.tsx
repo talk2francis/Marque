@@ -1,4 +1,5 @@
 'use client'
+import { ExecutionChips } from '../charters/ExecutionChips'
 import { Check } from 'lucide-react'
 import { useAgentTerms } from '../terms/useTerms'
 import { TermsLine } from '../terms/TermsLine'
@@ -128,6 +129,7 @@ export function AgentCard({ a, compare, base = '', variant = 'default' }: {
               : <span className={styles.untested}>{a.category === 'security' || !a.category || a.category === 'unclassified' ? 'No test for its category yet' : 'Not yet tested'}</span>}
       </p>
 
+      <ExecutionChips executions={a.charterExecutions} />
       <dl className={styles.stats} title={a.track.computedAt ? `Job and review index observed ${a.track.computedAt}${a.track.sourceStale ? ' (cached, refresh pending)' : ''}` : 'Index observation time unavailable'}>
         <div>
           <dt>Price</dt>
