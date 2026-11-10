@@ -238,5 +238,123 @@
     "file": "poster-1920.f95a4431a3.jpg"
    }
   ]
+ },
+ "charters": {
+  "base": "/media/film/",
+  "codecs": {
+   "h264": "avc1.64002A",
+   "av1": "av01.0.09M.10"
+  },
+  "storyboard": {
+   "cols": 10,
+   "w": 192,
+   "h": 108,
+   "every": 1
+  },
+  "variants": {
+   "main": {
+    "h264": {
+     "file": "draw-the-line.11a01d6901.h264.mp4",
+     "bytes": 26498985,
+     "sha256": "11a01d69017a7847a902fdb7c258cef502c7e530e3677a120ab382bdb4fbc7bd"
+    },
+    "av1": {
+     "file": "draw-the-line.4bdd6b1fab.av1.mp4",
+     "bytes": 22898682,
+     "sha256": "4bdd6b1fabd0161e8c3ee53c21ec781c3d0e6022f069cbb249360df9d7850cf5"
+    },
+    "storyboard": {
+     "file": "charters-storyboard.406180a8ef.webp",
+     "bytes": 141712,
+     "sha256": "406180a8ef41e526d81ce902c8d1bd4dfd818e5d117c00cf1355ada7d3295b92"
+    }
+   }
+  },
+  "poster": {
+   "avif": [
+    {
+     "w": 480,
+     "file": "charters-poster-480.811f83559d.avif",
+     "bytes": 4939,
+     "sha256": "811f83559deeb739f92e2fb01ddcebbb889f0f8d2a76cd8a4a085dd5510379f6"
+    },
+    {
+     "w": 800,
+     "file": "charters-poster-800.86010b8620.avif",
+     "bytes": 10340,
+     "sha256": "86010b8620f4f11196422a0558908b9b9206b0ac0be85d6acb0ebaf9086240d6"
+    },
+    {
+     "w": 1280,
+     "file": "charters-poster-1280.8c16a57002.avif",
+     "bytes": 18104,
+     "sha256": "8c16a57002a3e0ded7946697aba9ba71c62f1627c251a328f9e76e859b6ded2e"
+    },
+    {
+     "w": 1920,
+     "file": "charters-poster-1920.b01ead64f6.avif",
+     "bytes": 29349,
+     "sha256": "b01ead64f6198d41f6e6136b5826231e4c6cdf7b2b0fe3790afd5fdfebcde005"
+    }
+   ],
+   "webp": [
+    {
+     "w": 480,
+     "file": "charters-poster-480.339a83f32e.webp",
+     "bytes": 7214,
+     "sha256": "339a83f32e13a9eb6ca566b9d52dfe40abb88c992962153024484cf934ac721b"
+    },
+    {
+     "w": 800,
+     "file": "charters-poster-800.7987b322c4.webp",
+     "bytes": 15056,
+     "sha256": "7987b322c404cd29d5f1c2ab57fa333a80310baa3f92a2edf78fc021fdc2622f"
+    },
+    {
+     "w": 1280,
+     "file": "charters-poster-1280.1ff4eaf361.webp",
+     "bytes": 28742,
+     "sha256": "1ff4eaf361057a0280556a02aaaff2827b435980235c8ad1b2630f4a2a2549a8"
+    },
+    {
+     "w": 1920,
+     "file": "charters-poster-1920.050931b964.webp",
+     "bytes": 50728,
+     "sha256": "050931b964b147a6a4ae52334a96583e84f72ac8c4a715f8fb9ea01b2a937495"
+    }
+   ],
+   "jpg": [
+    {
+     "w": 480,
+     "file": "charters-poster-480.dc6104986b.jpg",
+     "bytes": 11285,
+     "sha256": "dc6104986b668f67c8ba4a4b90db0e9c530697a04e9369b577ab3c5fddc20138"
+    },
+    {
+     "w": 800,
+     "file": "charters-poster-800.77ce25677c.jpg",
+     "bytes": 24758,
+     "sha256": "77ce25677c838bf21325f13b1fb0478ad661ce988c4d2419943c184d67abdb72"
+    },
+    {
+     "w": 1280,
+     "file": "charters-poster-1280.dbb7b70a57.jpg",
+     "bytes": 48833,
+     "sha256": "dbb7b70a578b2bbf2abc46236fe98fb5b3f1f68d2b31911050d6bd52603af31e"
+    },
+    {
+     "w": 1920,
+     "file": "charters-poster-1920.2e4da8dfdf.jpg",
+     "bytes": 92876,
+     "sha256": "2e4da8dfdfdcd2f8b22793b166f81e121171c04b4be8b93f1ca538840dfeefc1"
+    }
+   ]
+  },
+  "og": {
+   "file": "charters-end.c6e8d90335.jpg",
+   "bytes": 184321,
+   "sha256": "c6e8d90335dda2789c7a8384598923849312138de07321145dca971ee8a2185b"
+  },
+  "sourceSha256": "8db7a84a6da6ab2e0ec380a3616a47655e05eba6da661546b8b9cfeec7b7a89e"
  }
 }

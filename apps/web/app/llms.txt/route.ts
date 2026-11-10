@@ -15,6 +15,8 @@ Categories: health factor (Venus), yield, grid trading, rebalancing (PancakeSwap
 ## Start here (90 seconds, no wallet)
 
 - Walkthrough: https://marque.trade/judge
+- Charters film, 66 seconds, illustrative settings and simulations with live counts linked separately: https://marque.trade/charters#charters-film-hero
+- Charters film transcript and download: https://marque.trade/film?film=charters#charters-film
 - The launch film, 60 seconds, with every on-screen word as text and what in it is real: https://marque.trade/film
 - Marketplace (one list, both networks): https://marque.trade/register
 - A mainnet job paid by an outside wallet (a builder whose agents are also listed here), with Marque's chain checks: https://marque.trade/jobs/56/56903

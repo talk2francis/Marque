@@ -340,3 +340,10 @@ systemctl status caddy postgresql pm2-root marque-janitor
 tail /var/log/marque-backup.log /var/log/marque-restore-test.log
 sudo fail2ban-client status sshd
 ```
+
+
+### Charters film, 10 November 2026
+
+`node scripts/film-prepare-charters.mjs /root/charters-film <output-directory>` checks the uploaded SHA256SUMS, produces H.264 and AV1 MP4s with faststart and audio, a one-frame-per-second storyboard, responsive posters and an end-card JPEG, then generates the manifest's `charters` entry. It preserves the launch entries. Publish only the content-hashed files referenced there to the existing media directory; keep the uploaded original and source ZIP outside git. No Caddy route change is needed. Run `scripts/film-verify.mjs` on disk and over HTTP for both films after publication.
+
+`/charters` shows the film on load without fetching video bytes until intent. `/charters/chapters.vtt` serves its chapter track; `/film?film=charters#charters-film` has its transcript and download. The launch player, date-based selection and old chapter URL retain their behavior.

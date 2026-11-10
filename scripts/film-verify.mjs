@@ -21,10 +21,14 @@ const url = arg('url')
 if (!dir && !url) { console.error('usage: --dir <media dir> and/or --url <origin>'); process.exit(64) }
 
 const files = []
-for (const [key, v] of Object.entries(media.variants)) {
-  for (const k of ['av1', 'h264', 'storyboard']) files.push({ ...v[k], what: `${key} ${k}` })
+for (const [id, assets] of [['launch', media], ...(media.charters ? [['charters', media.charters]] : [])]) {
+for (const [key, v] of Object.entries(assets.variants)) {
+  for (const k of ['av1', 'h264', 'storyboard']) files.push({ ...v[k], what: `${id} ${key} ${k}` })
 }
-for (const kind of ['avif', 'webp', 'jpg']) for (const p of media.poster[kind]) files.push({ file: p.file, what: `poster ${p.w} ${kind}` })
+for (const kind of ['avif', 'webp', 'jpg']) for (const p of assets.poster[kind]) files.push({ ...p, what: `${id} poster ${p.w} ${kind}` })
+
+if (assets.og) files.push({ ...assets.og, what: `${id} open graph` })
+}
 
 let failed = 0
 const ok = (m) => console.log(`  ok    ${m}`)
@@ -64,7 +68,7 @@ if (url) {
     ok(`${f.what}`)
   }
   // Seeking needs byte ranges (Safari will not play without them).
-  const mp4 = media.variants.d9.h264.file
+  for (const mp4 of [media.variants.d9.h264.file, ...(media.charters ? Object.values(media.charters.variants).flatMap(v => [v.h264.file, v.av1.file]) : [])]) {
   const rr = await fetch(`${origin}${media.base}${mp4}`, { headers: { Range: 'bytes=1000-1999' } })
   const body = rr.ok ? Buffer.from(await rr.arrayBuffer()) : Buffer.alloc(0)
   if (rr.status === 206 && body.length === 1000) ok('byte ranges: 206 with exactly the requested bytes')
@@ -74,7 +78,12 @@ if (url) {
   const moov = head.indexOf('moov'), mdat = head.indexOf('mdat')
   if (moov > 0 && (mdat < 0 || moov < mdat)) ok('faststart: moov before mdat')
   else bad('faststart: moov is not at the front')
+  }
   for (const [path, check] of [
+    ...(media.charters ? [
+      ['/charters/chapters.vtt', (r, t) => r.status === 200 && t.startsWith('WEBVTT') && t.includes('00:01:06.000') && /text\/vtt/.test(r.headers.get('content-type') ?? '')],
+      ['/charters', (r, t) => r.status === 200 && t.includes('charters-film-hero') && t.includes('application/ld+json')],
+    ] : []),
     ['/film/chapters.vtt', (r, t) => r.status === 200 && t.startsWith('WEBVTT') && /text\/vtt/.test(r.headers.get('content-type') ?? '')],
     ['/film', (r, t) => r.status === 200 && t.includes('id="film"') && t.includes('application/ld+json')],
     ['/', (r, t) => r.status === 200 && t.includes('id="film"') && t.includes('Watch the film')],

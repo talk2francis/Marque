@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { BRAND } from '@marque/ui/brand'
 import { SiteHeader, SiteFooter } from '../_components/SiteHeader'
+import { ChartersFilm } from '../_components/film/ChartersFilm'
 import { FilmSection } from '../_components/film/FilmSection'
 import { FILM, mediaUrl } from '../../lib/film'
 import { FILM_MEDIA } from '../../lib/film-media'
@@ -32,6 +33,7 @@ export default function FilmPage() {
       <SiteHeader />
       <main style={{ width: '100%', maxWidth: 'var(--maxw)', margin: '0 auto', padding: '0 var(--margin)' }}>
         <FilmSection context="page" />
+        <ChartersFilm archive />
       </main>
       <SiteFooter />
     </>

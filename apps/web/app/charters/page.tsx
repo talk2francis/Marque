@@ -1,3 +1,7 @@
+import { BRAND } from '@marque/ui/brand'
+import { CHARTERS_MEDIA } from '../../lib/film-media'
+import { mediaUrl } from '../../lib/film'
+import { ChartersFilm } from '../_components/film/ChartersFilm'
 import { cookies } from 'next/headers'
 import { notFound } from 'next/navigation'
 import { CHARTER_CHAINS } from '@marque/charters'
@@ -14,6 +18,8 @@ export const metadata = {
   title: 'Charters',
   description: 'Four kinds of charter on BNB Chain: guard a Venus loan, sweep idle stablecoins into Venus, trade a price band, keep a PancakeSwap range. Each does one job, only when the chain shows the condition, inside limits you sign.',
   robots: { index: false },
+  openGraph: { title: `${BRAND.name}: Charters`, type: 'video.other', images: [{ url: mediaUrl(CHARTERS_MEDIA.og.file), width: 1920, height: 1080, alt: 'Agents that act for you, inside lines you draw.' }] },
+  twitter: { card: 'summary_large_image' as const, images: [mediaUrl(CHARTERS_MEDIA.og.file)] },
 }
 
 const CHAIN_NAME = { 56: 'BNB Smart Chain', 97: 'BSC testnet' } as const
@@ -76,12 +82,13 @@ export default async function ChartersHub() {
               {PROMISES.map(([a, b]) => <li key={a}><b>{a}</b><span>{b}</span></li>)}
             </ul>
           </div>
-          <NightReplay />
+          <ChartersFilm />
         </section>
 
         <section className={styles.band} aria-labelledby="live-h">
           <h2 id="live-h" className={styles.h2}>Earlier Loan Guards on chain</h2>
           <p className={styles.fine}>Version 1 only. Current totals, including version 2, appear by kind below.</p>
+          <div className={styles.loanReplay}><NightReplay /></div>
           <div className={styles.stats}>
             {(stats?.chains ?? []).map((c) => (
               <div key={c.chainId} className={styles.stat}>

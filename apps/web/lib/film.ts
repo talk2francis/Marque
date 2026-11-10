@@ -1,5 +1,5 @@
 import { campaignClock } from '@marque/commerce/rules'
-import { FILM_MEDIA, type FilmVariantKey } from './film-media'
+import { FILM_MEDIA, type FilmVariantKey, type FilmAssets } from './film-media'
 
 /**
  * "On the record", the 60-second film, as the product shows it: the launch film (posted 27 Oct 2026) with its
@@ -166,9 +166,9 @@ export const CHAPTERS: readonly FilmChapter[] = [
 ] as const
 
 /** The chapter playing at `t` seconds (the last one once the film ends). */
-export function chapterAt(t: number): FilmChapter {
-  for (let i = CHAPTERS.length - 1; i >= 0; i--) if (t >= CHAPTERS[i]!.start) return CHAPTERS[i]!
-  return CHAPTERS[0]!
+export function chapterAt(t: number, chapters: readonly FilmChapter[] = CHAPTERS): FilmChapter {
+  for (let i = chapters.length - 1; i >= 0; i--) if (t >= chapters[i]!.start) return chapters[i]!
+  return chapters[0]!
 }
 
 /**
@@ -196,13 +196,13 @@ export function filmCta(nowMs: number) {
 export const mediaUrl = (file: string) => `${FILM_MEDIA.base}${file}`
 
 /** The poster as <picture> sources, widest last. */
-export function posterSources() {
+export function posterSources(media: FilmAssets = FILM_MEDIA) {
   const set = (list: ReadonlyArray<{ w: number; file: string }>) => list.map((p) => `${mediaUrl(p.file)} ${p.w}w`).join(', ')
   return {
-    avif: set(FILM_MEDIA.poster.avif),
-    webp: set(FILM_MEDIA.poster.webp),
-    jpg: set(FILM_MEDIA.poster.jpg),
-    fallback: mediaUrl(FILM_MEDIA.poster.jpg[FILM_MEDIA.poster.jpg.length - 1]!.file),
+    avif: set(media.poster.avif),
+    webp: set(media.poster.webp),
+    jpg: set(media.poster.jpg),
+    fallback: mediaUrl(media.poster.jpg[media.poster.jpg.length - 1]!.file),
   }
 }
 
@@ -213,9 +213,9 @@ export const clock = (s: number) => {
 }
 
 /** WebVTT chapters, served at /film/chapters.vtt for native players. */
-export function chaptersVtt(): string {
+export function chaptersVtt(chapters: readonly FilmChapter[] = CHAPTERS): string {
   const ts = (s: number) => `00:${String(Math.floor(s / 60)).padStart(2, '0')}:${String(Math.floor(s % 60)).padStart(2, '0')}.000`
-  return ['WEBVTT', '', ...CHAPTERS.flatMap((c) => [c.id, `${ts(c.start)} --> ${ts(c.end)}`, c.title, ''])].join('\n')
+  return ['WEBVTT', '', ...chapters.flatMap((c) => [c.id, `${ts(c.start)} --> ${ts(c.end)}`, c.title, ''])].join('\n')
 }
 
 /** schema.org VideoObject for search and link previews: the film that plays from the close. */
@@ -235,4 +235,22 @@ export function filmJsonLd(origin: string) {
     inLanguage: 'en',
     hasPart: CHAPTERS.map((c) => ({ '@type': 'Clip', name: c.title, startOffset: c.start, endOffset: c.end, url: `${origin}/film?t=${c.start}` })),
   }
+}
+
+/** Shared player input. The launch definition preserves its date-based cuts. */
+export interface FilmCta {
+  from: number; left: number; top: number; width: number; height: number
+  href: string; label: string; visible?: boolean
+}
+export interface FilmDefinition {
+  id: string; title: string; name: string; duration: number
+  chapters: readonly FilmChapter[]; media: FilmAssets
+  variant: (nowMs: number) => string
+  cta: (nowMs: number) => FilmCta
+  chaptersUrl: string; pageUrl: string
+}
+export const LAUNCH_FILM: FilmDefinition = {
+  id: 'on-the-record', title: FILM.title, name: FILM.name, duration: FILM.duration,
+  chapters: CHAPTERS, media: FILM_MEDIA, variant: filmVariant, cta: filmCta,
+  chaptersUrl: '/film/chapters.vtt', pageUrl: '/film',
 }

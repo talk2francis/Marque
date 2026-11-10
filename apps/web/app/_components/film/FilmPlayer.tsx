@@ -1,8 +1,8 @@
 'use client'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { CHAPTERS, FILM, chapterAt, clock, filmCta, filmVariant, mediaUrl, posterSources, type FilmChapter } from '../../../lib/film'
-import { FILM_MEDIA, type FilmCodec, type FilmVariantKey } from '../../../lib/film-media'
+import { LAUNCH_FILM, chapterAt, clock, mediaUrl, posterSources, type FilmChapter, type FilmDefinition, type FilmCta } from '../../../lib/film'
+import { type FilmCodec } from '../../../lib/film-media'
 import { track } from '../../../lib/track'
 import styles from './film.module.css'
 
@@ -30,25 +30,27 @@ const AV1_PROBE = (codecs: string) => ({
 })
 
 /** AV1 only where it decodes smoothly and in hardware; everything else gets H.264. */
-async function pickCodec(): Promise<FilmCodec> {
+async function pickCodec(codecs: FilmDefinition['media']['codecs']): Promise<FilmCodec> {
   try {
     const v = document.createElement('video')
-    if (!v.canPlayType(`video/mp4; codecs="${FILM_MEDIA.codecs.av1}"`)) return 'h264'
+    if (!v.canPlayType(`video/mp4; codecs="${codecs.av1}"`)) return 'h264'
     if (!('mediaCapabilities' in navigator)) return 'h264'
-    const r = await navigator.mediaCapabilities.decodingInfo(AV1_PROBE(FILM_MEDIA.codecs.av1))
+    const r = await navigator.mediaCapabilities.decodingInfo(AV1_PROBE(codecs.av1))
     return r.supported && r.smooth && r.powerEfficient ? 'av1' : 'h264'
   } catch {
     return 'h264'
   }
 }
 
-export function FilmPlayer() {
+export function FilmPlayer({ film = LAUNCH_FILM, compact = false, priority = false }: { film?: FilmDefinition; compact?: boolean; priority?: boolean }) {
+  const FILM = film, CHAPTERS = film.chapters, FILM_MEDIA = film.media
+  const filmVariant = film.variant, filmCta = film.cta
   const rootRef = useRef<HTMLDivElement>(null)
   const frameRef = useRef<HTMLDivElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
   const railRef = useRef<HTMLDivElement>(null)
   const codecRef = useRef<FilmCodec>('h264')
-  const variantRef = useRef<FilmVariantKey>('d9')
+  const variantRef = useRef<string>(film.variant(Date.now()))
   const pendingSeek = useRef<number | null>(null)
   const seenSincePlay = useRef(false)
   const quarters = useRef(new Set<number>())
@@ -61,7 +63,7 @@ export function FilmPlayer() {
   const [full, setFull] = useState(false)
   const [theater, setTheater] = useState(false)
   const [idle, setIdle] = useState(false)
-  const [cta, setCta] = useState<ReturnType<typeof filmCta> | null>(null)
+  const [cta, setCta] = useState<FilmCta | null>(null)
   const [startAt, setStartAt] = useState(0)
   const [pip, setPip] = useState(false)
   const [hover, setHover] = useState<{ x: number; t: number } | null>(null)
@@ -71,22 +73,32 @@ export function FilmPlayer() {
   const tapRef = useRef<{ type: string; wasIdle: boolean }>({ type: 'mouse', wasIdle: false })
   const playBtnRef = useRef<HTMLButtonElement>(null)
 
-  const chapter = chapterAt(t)
+  const chapter = chapterAt(t, CHAPTERS)
   const live = phase === 'playing' || phase === 'paused' || phase === 'ended' || phase === 'loading'
-  const poster = useMemo(() => posterSources(), [])
+  const poster = useMemo(() => posterSources(FILM_MEDIA), [FILM_MEDIA])
+
+  // Two entries on /film still have only one soundtrack playing at a time.
+  useEffect(() => {
+    const onOtherFilm = (e: Event) => {
+      if ((e as CustomEvent<string>).detail !== film.id) videoRef.current?.pause()
+    }
+    window.addEventListener('marque:film-playing', onOtherFilm)
+    return () => window.removeEventListener('marque:film-playing', onOtherFilm)
+  }, [film.id])
 
   // ---- mount: codec, deep link (?t=30), archive state, readiness for the hero cue
   useEffect(() => {
     setMounted(true)
     setCta(filmCta(Date.now()))
     setPip(typeof document !== 'undefined' && 'pictureInPictureEnabled' in document && document.pictureInPictureEnabled)
-    const q = Number(new URL(window.location.href).searchParams.get('t'))
+    const params = new URL(window.location.href).searchParams
+    const q = (params.get('film') ?? LAUNCH_FILM.id) === film.id ? Number(params.get('t')) : 0
     if (Number.isFinite(q) && q > 0 && q < FILM.duration) { setStartAt(Math.floor(q)); setT(Math.floor(q)) }
-    const pick = () => { void pickCodec().then((c) => { codecRef.current = c }) }
+    const pick = () => { void pickCodec(FILM_MEDIA.codecs).then((c) => { codecRef.current = c }) }
     if (typeof window.requestIdleCallback === 'function') window.requestIdleCallback(pick)
     else setTimeout(pick, 400)
     rootRef.current?.setAttribute('data-film-ready', '')
-  }, [])
+  }, [film, filmCta, FILM.duration, FILM_MEDIA.codecs])
 
   // ---- the frame loop: progress as a CSS variable every frame, the clock text four times a second
   useEffect(() => {
@@ -103,7 +115,7 @@ export function FilmPlayer() {
     }
     raf = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(raf)
-  }, [phase])
+  }, [phase, FILM.duration])
 
   // ---- lights down: the page dims around the screen; the Dock steps aside; Escape works from anywhere
   useEffect(() => {
@@ -160,7 +172,7 @@ export function FilmPlayer() {
     if (!v) return
     const key = filmVariant(Date.now())
     const codec = codecRef.current
-    const src = mediaUrl(FILM_MEDIA.variants[key][codec].file)
+    const src = mediaUrl(FILM_MEDIA.variants[key]![codec].file)
     if (v.dataset.src !== src) {
       const at = v.dataset.src && from === null ? v.currentTime : null
       v.src = src
@@ -182,6 +194,7 @@ export function FilmPlayer() {
       navigator.mediaSession.metadata = new MediaMetadata({ title: FILM.title, artist: 'Marque', album: 'Marque', artwork: art ? [{ src: mediaUrl(art.file), sizes: `${art.w}x${Math.round((art.w * 9) / 16)}`, type: 'image/jpeg' }] : [] })
     }
     const p = v.play()
+    window.dispatchEvent(new CustomEvent('marque:film-playing', { detail: film.id }))
     setPhase((ph) => (ph === 'poster' || ph === 'ended' ? 'loading' : ph))
     setTheater(true)
     wake()
@@ -191,8 +204,8 @@ export function FilmPlayer() {
       // Sound refused (the gesture was lost): play muted rather than not at all, and say so.
       v.muted = true; setMuted(true); void v.play().catch(() => setPhase('paused'))
     })
-    track('film_play', { from: source, cut: key, codec }, { once: source === 'poster' })
-  }, [muted, phase, wake])
+    track('film_play', { film: film.id, from: source, cut: key, codec }, { once: source === 'poster' })
+  }, [muted, phase, wake, film.id, filmVariant, FILM_MEDIA, FILM.title])
 
   const pause = useCallback(() => { videoRef.current?.pause() }, [])
   const toggle = useCallback((source: Source) => {
@@ -210,23 +223,24 @@ export function FilmPlayer() {
     else pendingSeek.current = s
     setT(s)
     rootRef.current?.style.setProperty('--p', String(s / FILM.duration))
-  }, [])
+  }, [FILM.duration])
 
   const goChapter = useCallback((c: FilmChapter, source: Source) => {
-    track('film_chapter', { c: c.id })
+    track('film_chapter', { film: film.id, c: c.id })
     if (phase === 'poster' || phase === 'ended' || videoRef.current?.paused) play(c.start, source)
     else seek(c.start)
-  }, [phase, play, seek])
+  }, [phase, play, seek, film.id])
 
   // ---- the hero's "Watch the film", and transcript times, reach the player through one event
   useEffect(() => {
     const onCue = (e: Event) => {
-      const d = (e as CustomEvent<{ from?: number; source?: Source }>).detail ?? {}
+      const d = (e as CustomEvent<{ from?: number; source?: Source; film?: string }>).detail ?? {}
+      if ((d.film ?? LAUNCH_FILM.id) !== film.id) return
       play(typeof d.from === 'number' ? d.from : (phase === 'poster' ? startAt || null : null), d.source ?? 'hero')
     }
     window.addEventListener('marque:film', onCue)
     return () => window.removeEventListener('marque:film', onCue)
-  }, [play, phase, startAt])
+  }, [play, phase, startAt, film.id])
 
   // ---- video events
   const onLoadedMeta = () => {
@@ -241,7 +255,7 @@ export function FilmPlayer() {
     spriteLoaded.current = true
     const img = new Image()
     img.decoding = 'async'
-    img.src = mediaUrl(FILM_MEDIA.variants[filmVariant(Date.now())].storyboard.file)
+    img.src = mediaUrl(FILM_MEDIA.variants[filmVariant(Date.now())]!.storyboard.file)
   }
   const onPause = () => {
     const v = videoRef.current
@@ -249,7 +263,7 @@ export function FilmPlayer() {
     setPhase('paused'); setTheater(false); setIdle(false); setT(v.currentTime)
   }
   const onEnded = () => {
-    if (!quarters.current.has(100)) { quarters.current.add(100); track('film_quarter', { q: 100, cut: variantRef.current }) }
+    if (!quarters.current.has(100)) { quarters.current.add(100); track('film_quarter', { film: film.id, q: 100, cut: variantRef.current }) }
     setPhase('ended'); setTheater(false); setIdle(false); setT(FILM.duration)
     rootRef.current?.style.setProperty('--p', '1')
   }
@@ -265,7 +279,7 @@ export function FilmPlayer() {
     if (!v) return
     if (v.paused) sync()
     const q = Math.floor((v.currentTime / FILM.duration) * 4) * 25
-    if (q > 0 && !quarters.current.has(q)) { quarters.current.add(q); track('film_quarter', { q, cut: variantRef.current }) }
+    if (q > 0 && !quarters.current.has(q)) { quarters.current.add(q); track('film_quarter', { film: film.id, q, cut: variantRef.current }) }
   }
   const onError = () => {
     // A decoder that promised AV1 and then failed: fall back to H.264 where it stopped.
@@ -278,7 +292,7 @@ export function FilmPlayer() {
     }
     const at = v.currentTime
     codecRef.current = 'h264'
-    const src = mediaUrl(FILM_MEDIA.variants[variantRef.current].h264.file)
+    const src = mediaUrl(FILM_MEDIA.variants[variantRef.current]!.h264.file)
     v.src = src; v.dataset.src = src; pendingSeek.current = at
     void v.play().catch(() => setPhase('paused'))
   }
@@ -326,7 +340,7 @@ export function FilmPlayer() {
   // ---- the rail: scrub by pointer, step by keys
   const onRailDown = (e: React.PointerEvent) => {
     if (e.button !== 0) return
-    const to = railTimeIn(e, e.currentTarget)
+    const to = railTimeIn(e, e.currentTarget, FILM.duration)
     ;(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId)
     if (phase === 'poster' || phase === 'ended') { play(to, 'rail'); return }
     const v = videoRef.current
@@ -335,7 +349,7 @@ export function FilmPlayer() {
     seek(to)
   }
   const onRailMove = (e: React.PointerEvent) => {
-    const to = railTimeIn(e, e.currentTarget)
+    const to = railTimeIn(e, e.currentTarget, FILM.duration)
     const r = railRef.current?.getBoundingClientRect()
     if (r && e.pointerType === 'mouse') setHover({ x: e.clientX - r.left, t: to })
     if (scrubbing.current) seek(to)
@@ -357,9 +371,9 @@ export function FilmPlayer() {
     else seek(to)
   }
 
-  const hoverChapter = hover ? chapterAt(hover.t) : null
+  const hoverChapter = hover ? chapterAt(hover.t, CHAPTERS) : null
   const sb = FILM_MEDIA.storyboard
-  const sprite = mounted ? mediaUrl(FILM_MEDIA.variants[filmVariant(Date.now())].storyboard.file) : null
+  const sprite = mounted ? mediaUrl(FILM_MEDIA.variants[filmVariant(Date.now())]!.storyboard.file) : null
   const thumbIdx = hover ? Math.min(Math.floor(hover.t / sb.every), Math.floor(FILM.duration / sb.every) - 1) : 0
   const ctaLive = cta !== null && (phase === 'playing' || phase === 'paused' || phase === 'ended') && t >= cta.from
   const ev = chapter.evidence
@@ -368,7 +382,8 @@ export function FilmPlayer() {
   return (
     <div
       ref={rootRef}
-      className={styles.player}
+      className={`${styles.player} ${compact ? styles.compact : ''}`}
+      data-film-id={film.id}
       data-phase={phase}
       data-theater={theater || undefined}
       data-idle={(idle && phase === 'playing') || undefined}
@@ -388,7 +403,7 @@ export function FilmPlayer() {
             className={styles.video}
             preload="none"
             playsInline
-            aria-label={`${FILM.name}, a 1 minute film`}
+            aria-label={`${FILM.name}, ${clock(FILM.duration)}`}
             onLoadedMetadata={onLoadedMeta}
             onPlaying={onPlaying}
             onPause={onPause}
@@ -404,14 +419,14 @@ export function FilmPlayer() {
               toggle('key')
             }}
           >
-            <track kind="chapters" src="/film/chapters.vtt" srcLang="en" label="Chapters" />
+            <track kind="chapters" src={film.chaptersUrl} srcLang="en" label="Chapters" />
           </video>
 
           {/* The poster: a still from 0:07, date-free, so it is true on any day. */}
           <picture className={styles.poster} aria-hidden="true">
             <source type="image/avif" srcSet={poster.avif} sizes="(max-width: 720px) 100vw, min(1184px, 92vw)" />
             <source type="image/webp" srcSet={poster.webp} sizes="(max-width: 720px) 100vw, min(1184px, 92vw)" />
-            <img src={poster.fallback} srcSet={poster.jpg} sizes="(max-width: 720px) 100vw, min(1184px, 92vw)" alt="" loading="lazy" decoding="async" fetchPriority="low" width={1920} height={1080} />
+            <img src={poster.fallback} srcSet={poster.jpg} sizes="(max-width: 720px) 100vw, min(1184px, 92vw)" alt="" loading={priority ? 'eager' : 'lazy'} decoding="async" fetchPriority={priority ? 'high' : 'low'} width={1920} height={1080} />
           </picture>
 
           {phase === 'poster' || phase === 'ended' ? (
@@ -420,7 +435,7 @@ export function FilmPlayer() {
               className={styles.start}
               onClick={() => play(phase === 'ended' ? 0 : startAt || null, phase === 'ended' ? 'replay' : 'poster')}
               onPointerEnter={() => { const v = videoRef.current; if (v && v.preload === 'none') v.preload = 'metadata' }}
-              aria-label={phase === 'ended' ? 'Watch the film again' : `${label}: ${FILM.title}, 1 minute, with sound`}
+              aria-label={phase === 'ended' ? 'Watch the film again' : `${label}: ${FILM.title}, ${clock(FILM.duration)}, with sound`}
             >
               <span className={styles.pill}>
                 <span className={styles.pillDisc} aria-hidden="true">{phase === 'ended' ? <IconReplay /> : <IconPlay />}</span>
@@ -432,7 +447,7 @@ export function FilmPlayer() {
 
           {live ? (
             <a className={styles.evidence} key={chapter.id} href={ev.href ?? undefined} target={ev.href ? '_blank' : undefined} rel="noopener" data-prov={ev.provenance ?? 'none'}
-              onClick={() => track('film_evidence', { c: chapter.id })} aria-label={`${ev.label}${ev.href ? ', opens in a new tab' : ''}`}>
+              onClick={() => track('film_evidence', { film: film.id, c: chapter.id })} aria-label={`${ev.label}${ev.href ? ', opens in a new tab' : ''}`}>
               {ev.provenance ? <span className={`prov prov--${ev.provenance === 'ILLUSTRATIVE' ? 'claimed' : ev.provenance.toLowerCase()}`}>{ev.provenance}</span> : null}
               <span className={styles.evText}>{ev.label}</span>
               {ev.href ? <IconOut /> : null}
@@ -440,9 +455,9 @@ export function FilmPlayer() {
           ) : null}
 
           {ctaLive && cta ? (
-            <a className={styles.cta} href={cta.href} onClick={() => track('film_cta', { to: cta.href.slice(1), at: Math.round(t) })}
-              style={{ left: `${cta.left}%`, top: `${cta.top}%`, width: `${cta.width}%`, height: `${cta.height}%` }}>
-              <span className="sr-only">{cta.label}</span>
+            <a className={`${styles.cta} ${cta.visible ? styles.ctaVisible : ''}`} href={cta.href} onClick={() => track('film_cta', { film: film.id, to: cta.href.slice(1), at: Math.round(t) })}
+              style={cta.visible ? undefined : { left: `${cta.left}%`, top: `${cta.top}%`, width: `${cta.width}%`, height: `${cta.height}%` }}>
+              <span className={cta.visible ? undefined : 'sr-only'}>{cta.label}</span>
             </a>
           ) : null}
 
@@ -450,7 +465,7 @@ export function FilmPlayer() {
             <div className={styles.controls}>
               <div
                 className={styles.scrub}
-                onPointerDown={onRailDown} onPointerMove={(e) => { if (scrubbing.current) seek(railTimeIn(e, e.currentTarget)) }} onPointerUp={onRailUp} onPointerCancel={onRailUp}
+                onPointerDown={onRailDown} onPointerMove={(e) => { if (scrubbing.current) seek(railTimeIn(e, e.currentTarget, FILM.duration)) }} onPointerUp={onRailUp} onPointerCancel={onRailUp}
                 role="slider" tabIndex={-1} aria-label="Seek" aria-valuemin={0} aria-valuemax={FILM.duration} aria-valuenow={Math.round(t)} aria-valuetext={`${clock(t)}, ${chapter.title}`}
               >
                 <span className={styles.scrubLine} />
@@ -489,7 +504,7 @@ export function FilmPlayer() {
           aria-valuemin={0}
           aria-valuemax={FILM.duration}
           aria-valuenow={Math.round(t)}
-          aria-valuetext={`${clock(t)} of 1:00, ${chapter.title}`}
+          aria-valuetext={`${clock(t)} of ${clock(FILM.duration)}, ${chapter.title}`}
           onPointerDown={onRailDown}
           onPointerMove={onRailMove}
           onPointerUp={onRailUp}
@@ -505,7 +520,7 @@ export function FilmPlayer() {
             <i key={c.id} className={styles.railMark} data-done={t >= c.start && live ? '' : undefined} style={{ left: `${(c.start / FILM.duration) * 100}%` }} />
           ))}
           <i className={`${styles.railMark} ${styles.railEnd}`} data-done={phase === 'ended' ? '' : undefined} style={{ left: '100%' }} />
-          <span className={styles.railEndLabel} aria-hidden="true">1:00</span>
+          <span className={styles.railEndLabel} aria-hidden="true">{clock(FILM.duration)}</span>
           {hover && hoverChapter ? (
             <span className={styles.peek} style={{ left: `clamp(${sb.w / 2}px, ${hover.x}px, calc(100% - ${sb.w / 2}px))` }} aria-hidden="true">
               {sprite ? <span className={styles.peekImg} style={{ backgroundImage: `url(${sprite})`, backgroundPosition: `-${(thumbIdx % sb.cols) * sb.w}px -${Math.floor(thumbIdx / sb.cols) * sb.h}px`, backgroundSize: `${sb.cols * sb.w}px auto`, width: sb.w, height: sb.h }} /> : null}
@@ -529,9 +544,9 @@ export function FilmPlayer() {
   )
 }
 
-function railTimeIn(e: React.PointerEvent, el: Element) {
+function railTimeIn(e: React.PointerEvent, el: Element, duration: number) {
   const r = el.getBoundingClientRect()
-  return Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * FILM.duration
+  return Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * duration
 }
 
 /* ---- icons: drawn for the player, one stroke weight ---- */

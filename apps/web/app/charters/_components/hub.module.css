@@ -1,7 +1,7 @@
 /* /charters: the hero with the Night Replay, the promises, live counts, kinds, builders. */
 .page { width: 100%; max-width: 1240px; margin: 0 auto; padding: 40px var(--margin, 16px) 72px; box-sizing: border-box; display: grid; gap: 48px; }
 .hero { display: grid; gap: 32px; align-items: start; }
-@media (min-width: 1024px) { .hero { grid-template-columns: minmax(0, 1fr) minmax(0, 560px); gap: 48px; } }
+@media (min-width: 901px) { .hero { grid-template-columns: minmax(0, 1fr) minmax(0, 560px); gap: 48px; } }
 .heroText { display: grid; gap: 16px; align-content: start; }
 .eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ink-2); }
 .eyebrow::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--moss); }
@@ -76,3 +76,11 @@
 .fine { margin: 0; font-size: 13.5px; color: var(--ink-3); }
 .footLine { margin: 0; padding-top: 20px; border-top: 1px solid var(--hair); font-size: 13px; line-height: 1.6; color: var(--ink-3); }
 @media (prefers-reduced-motion: reduce) { .moneyLine i { transition: none; } }
+
+.loanReplay { max-width: 680px; }
+@media (max-width: 900px) {
+  .hero { gap: 20px; }
+  .heroText { display: contents; }
+  .hero > section { order: 1; }
+  .hero .promises { order: 2; }
+}
