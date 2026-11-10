@@ -15,6 +15,11 @@ describe('earned charter experience', () => {
     expect(result.get('97:0x8004a818bfb912233c491871b3d84c89a494bd9e:2237')?.[0]?.actions).toBe(7)
     expect(result.get('56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341556')).toEqual([])
   })
+  it('keeps an unknown event time unavailable instead of inventing an epoch date', async () => {
+    mocks.execute.mockResolvedValue([{ caller:'0xbe527145766262800dabd795ade6063a85d5f31e', chain_id:56, kind:2, actions:1, last:null }])
+    const { charterExperience } = await import('./charter-experience')
+    expect((await charterExperience()).get('56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:341555')?.[0]?.lastAction).toBeNull()
+  })
   it('does not turn a failed evidence read into zero execution', async () => {
     mocks.execute.mockRejectedValue(new Error('unavailable'))
     const { charterExperience } = await import('./charter-experience')
