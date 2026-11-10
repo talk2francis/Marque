@@ -9,6 +9,7 @@ import {
   cannotBatch, clearPending, expiryStillValid, grantCalls, loadPending, newSalt, paramsOf, savePending, tokens,
   type GrantParams, type PendingGrant,
 } from '../../../lib/charters-builder'
+import { grantRetryPolicy } from '../../../lib/charter-grant-retry'
 import { assertGrantWallet, checkStartingFunds } from '../../../lib/charter-funding'
 import type { SealPhase, SealStep } from './Seal'
 
@@ -123,7 +124,7 @@ export function useGrant() {
     } finally { setChecking(false) }
   }, [client, config])
 
-  const finish = useCallback(async (p: Prepared) => {
+  const finish = useCallback(async (p: Prepared, pending = false) => {
     const pub = client(p.chainId)
     const ok = await (p.v2
       ? pub.readContract({ address: p.factory, abi: loanGuardFactoryV2Abi, functionName: 'isCharter', args: [p.predicted] })
@@ -133,10 +134,10 @@ export function useGrant() {
       clearPending(p.chainId, p.owner)
       setGranted(p.predicted)
       setPhase('sealed')
-      setNote('Keel is registering its key. Your money has not moved.')
+      setNote('Charter confirmed on chain. Open it for the latest activity and Keel’s key state.')
     } else {
       setPhase('failed')
-      setError('The create confirmed, but the factory does not list this guard yet. Open the charter in a minute, or try again.')
+      setError(pending ? 'The wallet has not confirmed every request yet. Check its activity, then check again or open My Marque.' : 'The create confirmed. The factory read is catching up; check again to verify it without signing again.')
     }
   }, [client])
 
@@ -177,6 +178,8 @@ export function useGrant() {
   const sign = useCallback(async () => {
     const p = prep
     if (!p) return
+    const retry = grantRetryPolicy(steps.map(s => s.state))
+    if (retry !== 'submit') { setError(null); setPhase('signing'); await finish(p, retry === 'wait'); return }
     try {
       assertGrantWallet(getAccount(config), p.owner, p.chainId)
       await checkStartingFunds(client(p.chainId), p.owner, [{ token: p.token, symbol: p.symbol, minimum: minRepayFor(p.params.budget, p.decimals) }])
@@ -219,16 +222,22 @@ export function useGrant() {
       await sleep(1500)
     }
     if (alive.current) { setPhase('failed'); setError('The wallet has not reported the result yet. Check your wallet’s activity, then open My Marque.') }
-  }, [prep, config, oneByOne, finish, afterApproveFailure])
+  }, [prep, steps, config, client, oneByOne, finish, afterApproveFailure])
 
   /** After a failed create: send only the create, same salt and parameters, so the guard lands where the allowance points. */
   const retryCreate = useCallback(async () => {
     const p = prep
     if (!p) return
+    const retry = grantRetryPolicy(steps.map(s => s.state))
+    if (retry !== 'submit') { setError(null); setPhase('signing'); await finish(p, retry === 'wait'); return }
+    try {
+      assertGrantWallet(getAccount(config), p.owner, p.chainId)
+      await checkStartingFunds(client(p.chainId), p.owner, [{ token: p.token, symbol: p.symbol, minimum: minRepayFor(p.params.budget, p.decimals) }])
+    } catch (e) { setError(reason(e)); setPhase('failed'); return }
     setError(null); setNote(null); setPhase('signing')
     mark(1, { state: 'waiting', hash: null })
     if (await oneByOne(p, 1)) await finish(p)
-  }, [prep, oneByOne, finish])
+  }, [prep, steps, config, client, oneByOne, finish])
 
   /** Set the allowance this unfinished charter holds back to zero. */
   const clearAllowance = useCallback(async (p: { chainId: CharterChainId; owner: Address; token: Address; predicted: Address }) => {

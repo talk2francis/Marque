@@ -5,6 +5,7 @@ import { getAccount, getCallsStatus, getPublicClient, sendCalls, sendTransaction
 import { BaseError, ContractFunctionRevertedError, formatEther, type Address, type Hex } from 'viem'
 import type { CharterChainId } from '@marque/charters/client'
 import { cannotBatch } from '../../../lib/charters-builder'
+import { grantRetryPolicy } from '../../../lib/charter-grant-retry'
 import { assertGrantWallet } from '../../../lib/charter-funding'
 import type { SealPhase, SealStep } from './Seal'
 
@@ -93,10 +94,10 @@ export function useGrantSteps() {
     } catch (e) { setPreError(e instanceof Error && !(e instanceof BaseError) ? e.message : reasonOf(e)) } finally { setChecking(false) }
   }, [config])
 
-  const finish = useCallback(async (grant: StepsGrant) => {
+  const finish = useCallback(async (grant: StepsGrant, pending = false) => {
     const at = await grant.verify(receipts.current).catch(() => null)
     if (!alive.current) return
-    if (at) { setGranted(at); setPhase('sealed') } else { setPhase('failed'); setError('The last step confirmed, but the factory does not list this charter yet. Open My Marque in a minute, or try again.') }
+    if (at) { setGranted(at); setPhase('sealed') } else { setPhase('failed'); setError(pending ? 'The wallet has not confirmed every request yet. Check its activity, then check again or open My Marque.' : 'The last step confirmed. The factory read is catching up; check again to verify it without signing again.') }
   }, [])
 
   const failAt = useCallback((i: number, e: unknown) => {
@@ -127,6 +128,8 @@ export function useGrantSteps() {
   const sign = useCallback(async () => {
     if (!g) return
     setError(null); setNote(null); setPhase('signing')
+    const retry = grantRetryPolicy(steps.map(s => s.state))
+    if (retry !== 'submit') { await finish(g, retry === 'wait'); return }
     try { assertGrantWallet(getAccount(config), g.owner, g.chainId); await g.preflight() } catch (e) { failAt(0, e); return }
     const from = steps.findIndex((s) => s.state !== 'done')
     if (from > 0) { if (await oneByOne(g, from)) await finish(g); return } // a retry continues where it stopped
