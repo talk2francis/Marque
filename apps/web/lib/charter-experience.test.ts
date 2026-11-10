@@ -19,5 +19,7 @@ describe('earned charter experience', () => {
     mocks.execute.mockRejectedValue(new Error('unavailable'))
     const { charterExperience } = await import('./charter-experience')
     await expect(charterExperience()).rejects.toThrow('unavailable')
+    await expect(charterExperience()).rejects.toThrow('unavailable')
+    expect(mocks.execute).toHaveBeenCalledTimes(1)
   })
 })
