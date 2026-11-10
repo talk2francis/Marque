@@ -1,3 +1,7 @@
+import { BRAND } from '@marque/ui/brand'
+import { CHARTERS_MEDIA } from '../../lib/film-media'
+import { mediaUrl, posterSources } from '../../lib/film'
+import { ChartersFilm } from '../_components/film/ChartersFilm'
 import { cookies } from 'next/headers'
 import { notFound } from 'next/navigation'
 import { CHARTER_CHAINS } from '@marque/charters'
@@ -14,6 +18,8 @@ export const metadata = {
   title: 'Charters',
   description: 'Four kinds of charter on BNB Chain: guard a Venus loan, sweep idle stablecoins into Venus, trade a price band, keep a PancakeSwap range. Each does one job, only when the chain shows the condition, inside limits you sign.',
   robots: { index: false },
+  openGraph: { title: `${BRAND.name}: Charters`, type: 'video.other', images: [{ url: mediaUrl(CHARTERS_MEDIA.og.file), width: 1920, height: 1080, alt: 'Agents that act for you, inside lines you draw.' }] },
+  twitter: { card: 'summary_large_image' as const, images: [mediaUrl(CHARTERS_MEDIA.og.file)] },
 }
 
 const CHAIN_NAME = { 56: 'BNB Smart Chain', 97: 'BSC testnet' } as const
@@ -61,6 +67,7 @@ export default async function ChartersHub() {
   }
   return (
     <>
+      <link rel="preload" as="image" type="image/avif" href={mediaUrl(CHARTERS_MEDIA.poster.avif.find(p => p.w === 800)!.file)} imageSrcSet={posterSources(CHARTERS_MEDIA).avif} imageSizes="(max-width: 720px) 100vw, min(1184px, 92vw)" fetchPriority="high" />
       <SiteHeader />
       <main className={styles.page}>
         <section className={styles.hero}>
@@ -72,15 +79,17 @@ export default async function ChartersHub() {
               <a className={styles.primary} href="/charters/new?kind=loan">Grant a charter</a>
               {live ? <a className={styles.secondary} href={`/charters/${live.chainId}/${live.address}`}>See a live charter</a> : null}
             </div>
-            <ul className={styles.promises}>
-              {PROMISES.map(([a, b]) => <li key={a}><b>{a}</b><span>{b}</span></li>)}
-            </ul>
           </div>
-          <NightReplay />
+          <ChartersFilm />
+          <ul className={styles.promises}>
+            {PROMISES.map(([a, b]) => <li key={a}><b>{a}</b><span>{b}</span></li>)}
+          </ul>
         </section>
 
         <section className={styles.band} aria-labelledby="live-h">
-          <h2 id="live-h" className={styles.h2}>Loan Guard on chain now</h2>
+          <h2 id="live-h" className={styles.h2}>Earlier Loan Guards on chain</h2>
+          <p className={styles.fine}>Version 1 only. Current totals, including version 2, appear by kind below.</p>
+          <div className={styles.loanReplay}><NightReplay /></div>
           <div className={styles.stats}>
             {(stats?.chains ?? []).map((c) => (
               <div key={c.chainId} className={styles.stat}>

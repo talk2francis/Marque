@@ -9,17 +9,17 @@ import styles from './film.module.css'
  * glides to the screen while the lights go down. Without the player (no script yet, or another
  * page), it is a plain link to the film.
  */
-function cue(e: React.MouseEvent, from: number | undefined, source: 'hero' | 'transcript') {
-  const host = document.querySelector('[data-film-ready]')
+function cue(e: React.MouseEvent, from: number | undefined, source: 'hero' | 'transcript', filmId = 'on-the-record') {
+  const host = document.querySelector(`[data-film-ready][data-film-id="${filmId}"]`)
   if (!host || e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return
   e.preventDefault()
   // On the home page the film is folded: open it first, inside this click, so it can start with sound.
   const fold = host.closest('details')
   if (fold && !fold.open) fold.open = true
-  window.dispatchEvent(new CustomEvent('marque:film', { detail: { from, source } }))
+  window.dispatchEvent(new CustomEvent('marque:film', { detail: { from, source, film: filmId } }))
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
   host.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'center' })
-  if (source === 'hero') track('film_cta', { to: 'film', from: 'hero' })
+  if (source === 'hero') track('film_cta', { film: filmId, to: 'film', from: 'hero' })
 }
 
 export function FilmCue({ href = '#film' }: { href?: string }) {
@@ -34,9 +34,9 @@ export function FilmCue({ href = '#film' }: { href?: string }) {
   )
 }
 
-export function FilmTime({ at }: { at: number }) {
+export function FilmTime({ at, filmId = 'on-the-record' }: { at: number; filmId?: string }) {
   return (
-    <a className={styles.tTime} href={`/film?t=${at}`} onClick={(e) => cue(e, at, 'transcript')} aria-label={`Play from ${clock(at)}`}>
+    <a className={styles.tTime} href={filmId === 'charters' ? `/film?film=charters&t=${at}#charters-film` : `/film?t=${at}`} onClick={(e) => cue(e, at, 'transcript', filmId)} aria-label={`Play from ${clock(at)}`}>
       {clock(at)}
     </a>
   )

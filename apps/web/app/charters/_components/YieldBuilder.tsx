@@ -10,6 +10,7 @@ import { AddressChip } from '../../_components/ui'
 import { amount, compact, dateWords, expiryFor, KIND_DURATIONS, newSalt, units, yieldCalls, yieldDefaults, yieldNow, yieldProblem, yieldSentence } from '../../../lib/charters-builder-v2'
 import { BandRule } from './BandRule'
 import { CHAIN_NAME, WhoBar, ago, promptWords, useWho } from './BuilderShell'
+import { checkStartingFunds } from '../../../lib/charter-funding'
 import { Seal } from './Seal'
 import { useGrantSteps } from './useGrantSteps'
 import styles from './builder.module.css'
@@ -20,7 +21,7 @@ import styles from './builder.module.css'
  * block) or from what the person typed; the spend simulation is labelled as one.
  */
 interface Market { vToken: Address; token: Address; symbol: string; decimals: number; balance: string; collateralMember: boolean; borrows: boolean; cash: string; supplyCapRoom: string; unlimitedCap: boolean }
-interface Quote { markets: Market[]; blockNumber: string; readAt: string; factory: Address | null }
+interface Quote { account: string; chainId: number; markets: Market[]; blockNumber: string; readAt: string; factory: Address | null }
 const num = (v: bigint, d: number) => Number(v) / 10 ** d
 
 export function YieldBuilder({ initialChain, initialAccount, demo }: { initialChain: CharterChainId; initialAccount: string | null; demo: Record<CharterChainId, string> }) {
@@ -57,6 +58,7 @@ export function YieldBuilder({ initialChain, initialAccount, demo }: { initialCh
       // Loan Guards on this account set the lowest health a collateral-mode sweep may leave (target + 0.20).
       const g = await fetch(`/api/v1/guards?chainId=${chainId}&owner=${account}&state=armed&kind=loan&limit=20`, { cache: 'no-store' }).then((x) => (x.ok ? x.json() : null)).catch(() => null)
       const targets = [...(g?.guards ?? []).map((x: { target: string }) => Number(x.target) / 1e18), ...(g?.charters ?? []).map((x: { params: { p: { target: string } } }) => Number(x.params.p.target) / 1e18)]
+      if (my !== seq.current) return
       setGuardTarget(targets.length ? Math.max(...targets) : null)
     } catch { if (my === seq.current) setLoad('error') }
   }, [chainId, account])
@@ -98,7 +100,9 @@ export function YieldBuilder({ initialChain, initialAccount, demo }: { initialCh
   const factory = V2[chainId].yieldFactory
   const blocker = (() => {
     if (!factory) return { words: `Yield Sweep is not on ${CHAIN_NAME[chainId]} yet.` }
+    if (load !== 'ok' || quote?.chainId !== chainId || quote.account.toLowerCase() !== account.toLowerCase()) return { words: 'Read your wallet successfully before granting.' }
     if (!m || !band) return { words: 'Reading your wallet and Venus.' }
+    if (balance < minA || balance === 0n) return { words: `Add ${sym} to this wallet before granting a sweep, then read it again. A new sweep has no Venus supply of its own to withdraw.` }
     if (m.collateralMember && !collateralMode) return { words: `You ${m.borrows ? 'borrow' : 'use'} ${sym} on Venus, so Venus counts ${sym} you supply as collateral: liquidators could take it, and taking it out would lower your loan health. Use another stablecoin, or turn on collateral mode below.` }
     if (collateralMode && (Number(minHealth) < healthFloor || !minHealth)) return { words: `Set the lowest health a withdrawal may leave: at least ${healthFloor.toFixed(2)}${guardTarget !== null ? ' (your Loan Guard target plus 0.20)' : ''}.` }
     if (problem === 'band') return { words: 'Keep the ceiling at least two smallest moves above the floor, so a supply cannot be followed straight away by a withdrawal.' }
@@ -126,6 +130,7 @@ export function YieldBuilder({ initialChain, initialAccount, demo }: { initialCh
           { label: `Allow it to bring back only what it supplied (v${sym})`, ...calls[1]! },
           { label: 'Create the sweep', ...calls[2]! },
         ].map((s) => ({ label: s.label, to: s.to as Address, data: s.data as Hex })),
+        preflight: () => checkStartingFunds(pub, who.wallet!, [{ token: m.token, symbol: sym, minimum: minA > 0n ? minA : 1n }]),
         gasFallback: [70_000n, 70_000n, 2_600_000n],
         verify: async () => ((await pub.readContract({ address: factory, abi: yieldSweepFactoryAbi, functionName: 'isCharter', args: [predicted] })) ? predicted : null),
       })
@@ -144,6 +149,7 @@ export function YieldBuilder({ initialChain, initialAccount, demo }: { initialCh
   return (
     <div className={styles.builder}>
       <WhoBar who={who} placeholder="Paste any address" onChain={() => setVToken(null)} />
+      <div><button type="button" className={styles.ghost} disabled={load === 'loading' || grant.checking || grant.phase === 'signing'} onClick={() => void read()}>{load === 'loading' ? 'Reading…' : 'Refresh balances'}</button></div>
       <div className={styles.grid}>
         <div className={styles.left}>
           <section className={`${styles.panel} ${styles.position}`} aria-labelledby="ys-h" aria-busy={load === 'loading'}>
@@ -264,7 +270,7 @@ export function YieldBuilder({ initialChain, initialAccount, demo }: { initialCh
         primary={grant.phase === 'sealed' || grant.phase === 'signing' ? null : grant.phase === 'failed' ? 'Try again' : who.pass ? 'Seal with your fingerprint' : 'Open your wallet'}
         onPrimary={() => void grant.sign()} onClose={grant.close} error={grant.error} note={grant.note}
         explorerTx={(h) => `${CHARTER_CHAINS[chainId].explorer}/tx/${h}`}
-        done={grant.granted ? { href: `/charters/${chainId}/${grant.granted}`, label: 'Open the charter' } : null} />
+        done={grant.granted ? { href: `/charters/${chainId}/${grant.granted}?granted=1`, label: 'Open the charter' } : null} />
     </div>
   )
 }

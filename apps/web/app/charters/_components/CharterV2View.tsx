@@ -10,6 +10,7 @@ import type { charterV2Detail } from '../../../lib/charters-v2'
 import { AgentAvatar } from '../../_components/AgentAvatar'
 import { useFocusTrap } from '../../_components/ui'
 import { amount, fmtPrice, priceAt } from '../../../lib/charters-builder-v2'
+import { CharterHistory } from './CharterHistory'
 import { useCalls } from './useCalls'
 import styles from './charter.module.css'
 
@@ -63,8 +64,8 @@ export function CharterV2View({ initial, teamOwner }: { initial: V2Detail; teamO
     return () => clearInterval(a)
   }, [refresh])
 
-  const ended = c.status === 'ended'
-  const expired = c.status === 'expired'
+  const ended = c.status === 'ended' || (live.ok && live.state === 'ended')
+  const expired = !ended && (c.status === 'expired' || (live.ok && live.state === 'expired'))
   const isOwner = Boolean(wallet && wallet.toLowerCase() === c.owner.toLowerCase())
   const named = c.executors.map((e) => e.toLowerCase())
   const mayPress = c.open || isOwner || Boolean(wallet && named.includes(wallet.toLowerCase()))
@@ -85,22 +86,22 @@ export function CharterV2View({ initial, teamOwner }: { initial: V2Detail; teamO
     if (kind === 'loan') return {
       sentence: `Guards the ${sym} loan of ${short(c.owner)} on Venus. Acts below ${health(p['trigger'])}, lifts back to ${health(p['target'])}.`,
       status: !live.ok ? 'The live read failed just now; nothing is assumed.' : live.state === 'would_act' ? 'Below the trigger: the next check repays.' : live.state === 'watching' ? `Watching. Health ${health(f['health'])}, trigger ${health(p['trigger'])}.` : live.state === 'no_funds' ? `Below the trigger, but nothing in the wallet or allowance to repay with.` : live.state === 'below_minimum' ? 'Below the trigger, but what is available is under the smallest repayment.' : live.state.replace('_', ' '),
-      facts: [['Health now', ended || expired ? 'not read' : health(f['health'])], [`${sym} left of ${amount(B(p['budget']), dec)}`, amount(B(p['budget']) - B(t['spent']), dec)], ['Times it acted', String(c.actions)], [ended || expired ? 'Status' : 'Days left', ended ? 'ended' : expired ? 'expired' : String(daysLeft)]],
+      facts: [['Health now', ended || expired ? 'not read' : !live.ok ? 'unavailable' : health(f['health'])], [`${sym} left of ${amount(B(p['budget']), dec)}`, amount(B(p['budget']) - B(t['spent']), dec)], ['Times it acted', String(c.actions)], [ended || expired ? 'Status' : 'Days left', ended ? 'ended' : expired ? 'expired' : String(daysLeft)]],
     }
     if (kind === 'yield') return {
       sentence: `Keeps ${short(c.owner)} between ${amount(B(p['floor']), dec)} and ${amount(B(p['ceiling']), dec)} ${sym}, the rest in Venus in their name, supplying at most ${amount(B(p['supplyCap']), dec)} over its life.`,
       status: !live.ok ? 'The live read failed just now; nothing is assumed.' : ({ in_band: 'Inside your band. Nothing to do.', would_supply: `Ready to put ${amount(B(f['amount']), dec)} ${sym} in Venus.`, would_withdraw: `Ready to bring ${amount(B(f['amount']), dec)} ${sym} back.`, collateral_hold: 'You use this market as collateral, so the sweep is holding. Nothing moves.', liquidity_short: `Venus has too little free ${sym} to pay out right now. Your supply is safe; the sweep will try again.`, cap_reached: `This charter has supplied its ${amount(B(p['supplyCap']), dec)} ${sym} lifetime limit.`, nothing_held: 'Below your floor, but nothing this charter supplied is left to bring back.', health_limit: 'A withdrawal would take loan health below your limit: holding.' } as Record<string, string>)[live.state] ?? live.state,
-      facts: [['Wallet now', live.ok ? `${amount(B(f['walletBalance']), dec)} ${sym}` : 'n/a'], ['In Venus via this charter', live.ok ? `${amount(B(f['heldUnderlying']), dec)} ${sym}` : 'n/a'], [`Supplied of ${amount(B(p['supplyCap']), dec)}`, amount(B(t['grossSupplied']), dec)], [ended || expired ? 'Status' : 'Days left', ended ? 'ended' : expired ? 'expired' : String(daysLeft)]],
+      facts: [['Wallet now', ended || expired ? 'not read' : live.ok ? `${amount(B(f['walletBalance']), dec)} ${sym}` : 'n/a'], ['In Venus via this charter', ended || expired ? 'not read' : live.ok ? `${amount(B(f['heldUnderlying']), dec)} ${sym}` : 'n/a'], [`Supplied of ${amount(B(p['supplyCap']), dec)}`, amount(B(t['grossSupplied']), dec)], [ended || expired ? 'Status' : 'Days left', ended ? 'ended' : expired ? 'expired' : String(daysLeft)]],
     }
     if (kind === 'grid') return {
       sentence: `Buys ${amount(B(p['orderQuote']), 18)} ${pool?.quoteSymbol ?? ''} of ${pool?.baseSymbol ?? ''} at each of ${p['slots']} levels from ${tickPrice(b0 ? p['lowerBt'] : -Number(p['lowerBt']))} as the price falls, and sells each one a level higher, on PancakeSwap.`,
       status: !live.ok ? (live.reason === 'pool_history' ? 'The pool has not built up enough history for its average yet.' : 'The live read failed just now; nothing is assumed.') : ({ idle: `No level reached. The 5-minute average is ${tickPrice(f['twapTick'])}.`, would_buy: `A level is reached: buying ${amount(B(f['amountIn']), 18)} ${pool?.quoteSymbol ?? ''} of ${pool?.baseSymbol ?? ''}.`, would_sell: `A level is reached: selling ${amount(B(f['amountIn']), 18)} ${pool?.baseSymbol ?? ''}.`, unsettled: 'The price is moving fast: waiting for it to settle near the average.', no_funds: 'A level is reached, but the wallet has too little for this order.' } as Record<string, string>)[live.state] ?? live.state,
-      facts: [['Price now', live.ok ? tickPrice(f['twapTick']) : 'n/a'], [`Bought of ${amount(B(p['buyCap']), 18)} ${pool?.quoteSymbol ?? ''}`, amount(B(t['quoteSpent']), 18)], [`Sold of ${amount(B(p['sellCap']), 18)} ${pool?.baseSymbol ?? ''}`, amount(B(t['baseSold']), 18)], ['Round trips', String(t['sells'] ?? 0)]],
+      facts: [['Price now', live.ok ? tickPrice(f['twapTick']) : 'n/a'], [`Bought of ${amount(B(p['buyCap']), 18)} ${pool?.quoteSymbol ?? ''}`, amount(B(t['quoteSpent']), 18)], [`Sold of ${amount(B(p['sellCap']), 18)} ${pool?.baseSymbol ?? ''}`, amount(B(t['baseSold']), 18)], ['Round trips', d.indexing ? 'syncing' : String(t['sells'] ?? 0)]],
     }
     return {
       sentence: `Keeps a ${pool ? `${pool.baseSymbol.replace(/^W/, '')}/${pool.quoteSymbol}` : ''} PancakeSwap position of ${short(c.owner)} in range: moves it back around the price when it leaves, same width, at most ${p['maxRebalances']} times, one every ${Math.round(Number(p['minInterval']) / 3600)} hours at most, each losing at most ${(Number(p['maxLossBps']) / 100).toFixed(2)}% at the average price.`,
       status: !live.ok ? 'The live read failed just now; nothing is assumed.' : ({ in_range: 'In range. Earning fees.', would_move: `Out of range: ready to move it around ${tickPrice(f['twapTick'])}.`, unsettled: 'The price is moving fast: waiting for it to settle near the average.', too_soon: 'Out of range, but it moved recently: the next move waits for its interval.', limit_reached: `All ${p['maxRebalances']} moves used. End it to take your position back.`, not_held: t['returned'] ? 'Your position is back in your wallet.' : 'The keeper does not hold the position.' } as Record<string, string>)[live.state] ?? live.state,
-      facts: [['Now', live.ok ? (live.state === 'in_range' ? 'in range' : 'out of range') : 'n/a'], ['Range', live.ok && f['lower'] !== undefined && Number(f['upper']) !== 0 ? `${tickPrice(b0 ? f['lower'] : f['upper'])} to ${tickPrice(b0 ? f['upper'] : f['lower'])}` : 'n/a'], [`Moves used of ${p['maxRebalances']}`, String(t['rebalances'] ?? 0)], [ended || expired ? 'Status' : 'Days left', ended ? 'ended' : expired ? 'expired' : String(daysLeft)]],
+      facts: [['Now', ended ? 'ended' : expired ? 'expired' : live.ok ? (live.state === 'in_range' ? 'in range' : 'out of range') : 'n/a'], ['Range', live.ok && f['lower'] !== undefined && Number(f['upper']) !== 0 ? `${tickPrice(b0 ? f['lower'] : f['upper'])} to ${tickPrice(b0 ? f['upper'] : f['lower'])}` : 'n/a'], [`Moves used of ${p['maxRebalances']}`, String(t['rebalances'] ?? 0)], [ended || expired ? 'Status' : 'Days left', ended ? 'ended' : expired ? 'expired' : String(daysLeft)]],
     }
   })()
 
@@ -152,6 +153,7 @@ export function CharterV2View({ initial, teamOwner }: { initial: V2Detail; teamO
   const open = d.allowances.filter((a) => a.allowance && a.allowance !== '0')
   const keyLine = (() => {
     const k = d.key
+    if (d.indexing) return 'key status is being indexed'
     if (!c.open && !agentNamed) return 'not named by the owner'
     if (!k) return ended || expired ? 'held no key for this charter' : 'registering its key on Altana'
     if (k.status === 'none') return kind === 'yield' ? 'acts from its own account, no session key' : 'acts from its own account'
@@ -164,6 +166,7 @@ export function CharterV2View({ initial, teamOwner }: { initial: V2Detail; teamO
 
   return (
     <div className={styles.view}>
+      {d.indexing ? <p className={styles.notice} role="status">Confirmed on chain. The receipt, history and complete agent list are syncing. This page updates automatically; the owner can End now.</p> : null}
       {teamOwner ? <p className={styles.notice}>A Marque team test charter.</p> : null}
       {kind === 'range' && !t['returned'] ? <p className={styles.notice}>Your position NFT moves into your own Range Keeper contract while the charter runs. Take it back any time with End.</p> : null}
       {c.fixture ? <p className={styles.notice}>Testnet fixture pool: prices are moved by Marque&apos;s test market maker.</p> : null}
@@ -171,7 +174,7 @@ export function CharterV2View({ initial, teamOwner }: { initial: V2Detail; teamO
         <span className={styles.pill} data-tone={pill.tone}><i aria-hidden="true" />{pill.label}</span>
         <h1 className={styles.title}>{view.sentence}</h1>
         <p className={styles.meta}>
-          {KIND_NAMES[kind]}. Granted {day(c.createdAt)}. {ended ? `Ended ${day(c.endedAt)}.` : `Ends ${day(c.expiresAt)}.`} {CHAIN_NAME[chainId]}.{' '}
+          {KIND_NAMES[kind]}. Granted {day(c.createdAt)}. {ended ? (c.endedAt ? `Ended ${day(c.endedAt)}.` : 'Ended.') : `Ends ${day(c.expiresAt)}.`} {CHAIN_NAME[chainId]}.{' '}
           <span title={live.ok ? `Read at block ${live.blockNumber}` : undefined}>Last checked {ago(live.readAt, now)}{live.ok ? `, block ${Number(live.blockNumber).toLocaleString('en-US')}` : ''}.</span>{stale ? ' Checking again.' : ''}
         </p>
       </header>
@@ -179,9 +182,10 @@ export function CharterV2View({ initial, teamOwner }: { initial: V2Detail; teamO
         <div className={styles.main}>
           <p className={styles.status} data-tone={pill.tone} role="status">{ended ? 'Ended. It can never act again.' : expired ? 'Past its end date. It can never act again.' : view.status}</p>
           <dl className={styles.facts}>{view.facts.map(([k, v]) => <div key={k}><dt>{k}</dt><dd className="mono">{v}</dd></div>)}</dl>
+          <CharterHistory kind={kind} samples={d.history} decimals={dec} symbol={sym} baseIs0={b0} />
           <section aria-labelledby="tl-h">
             <h2 id="tl-h" className={styles.h2}>What happened</h2>
-            {timeline.length === 0 ? <p className={styles.fine}>Nothing yet. Every action will appear here with its transaction.</p> : (
+            {timeline.length === 0 ? <p className={styles.fine}>{d.indexing ? 'Receipts are syncing from chain.' : 'Nothing yet. Every action will appear here with its transaction.'}</p> : (
               <ol className={styles.timeline}>
                 {timeline.map((i) => (
                   <li key={i.key} data-tone={i.tone}>

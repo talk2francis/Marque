@@ -28,6 +28,8 @@ const ROUTES: Array<{ path: string; priority: number; changeFrequency: MetadataR
   { path: '/builders/claim', priority: 0.7, changeFrequency: 'weekly' },
   { path: '/app/charter', priority: 0.6, changeFrequency: 'weekly' },
   { path: '/status', priority: 0.4, changeFrequency: 'hourly' },
+  { path: '/charters', priority: 0.7, changeFrequency: 'daily' },
+  { path: '/film?film=charters', priority: 0.5, changeFrequency: 'weekly' },
   { path: '/film', priority: 0.6, changeFrequency: 'weekly' },
 ]
 

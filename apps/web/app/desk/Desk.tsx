@@ -220,6 +220,7 @@ export function Desk({
                     <div><dt>Holding</dt><dd><DataCell align="left">{fmtNum(p.amount0)} {p.token0} + {fmtNum(p.amount1)} {p.token1}</DataCell></dd></div>
                     <div><dt>Uncollected fees</dt><dd><DataCell align="left">{fmtNum(p.fees0)} {p.token0} + {fmtNum(p.fees1)} {p.token1}</DataCell></dd></div>
                   </dl>
+                  <KindLines owner={address} kinds={['range']} positionId={p.tokenId} />
                   {nearEdge(p) ? <RowAction label="Get a re-centre plan" brief={{ category: 'rebalancing', positionId: p.tokenId, address }} /> : null}
                 </article>
               )
@@ -267,7 +268,7 @@ export function Desk({
               </dl>
               {hfNeedsWork ? <RowAction label="Get a repay plan" brief={{ category: 'health_factor', address, targetHf: 1.5 }} /> : null}
               <GuardLine owner={address} />
-          <KindLines owner={address} />
+
             </article>
           ) : (
             <article className={styles.position}>
@@ -335,6 +336,7 @@ export function Desk({
             ) : (
               <p className={styles.absent}>No tracked balances at this address.</p>
             )}
+            <KindLines owner={address} kinds={['yield', 'grid']} />
           </article>
         </div>
       )}

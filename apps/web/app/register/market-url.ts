@@ -17,6 +17,7 @@ import type { MarketTab } from './market-model'
 export type MarketView = 'list' | 'grid'
 
 export interface MarketState {
+  charterKind?: 'loan' | 'yield' | 'grid' | 'range' | null
   /** Ready to hire (default), Try free, All tested, Registry. */
   tab: MarketTab
   search: string
@@ -57,6 +58,7 @@ export const STAGE_LABEL: Record<MarketStageKey, string> = {
 }
 
 export const DEFAULT_STATE: MarketState = {
+  charterKind: null,
   tab: 'ready',
   search: '',
   category: null,
@@ -95,6 +97,7 @@ export function apiQuery(s: MarketState): string {
   // All listed is the API's default set (no tab); Registry is its own table.
   if (s.tab !== 'registry' && s.tab !== 'listed') p.set('tab', s.tab)
   if (s.lane !== 'mainnet') p.set('lane', s.lane)
+  if (s.charterKind) p.set('charterKind', s.charterKind)
   if (s.token) p.set('token', s.token)
   if (s.maxPrice !== null) p.set('maxPrice', String(s.maxPrice))
   if (s.minRating !== null) p.set('minRating', String(s.minRating))
@@ -119,6 +122,7 @@ export function stateToParams(s: MarketState, opts: { fixedCategory?: boolean } 
   const p = new URLSearchParams()
   if (s.tab !== DEFAULT_STATE.tab) p.set('tab', s.tab)
   if (s.lane !== DEFAULT_STATE.lane) p.set('lane', s.lane)
+  if (s.charterKind) p.set('charterKind', s.charterKind)
   if (s.token) p.set('token', s.token)
   if (s.maxPrice !== null) p.set('maxPrice', String(s.maxPrice))
   if (s.minRating !== null) p.set('minRating', String(s.minRating))
@@ -166,6 +170,7 @@ export function paramsToState(
   const rawNet = p.get('network')
   const rawToken = p.get('token')
   return {
+    charterKind: (['loan', 'yield', 'grid', 'range'] as const).find(k => k === p.get('charterKind')) ?? null,
     tab: rawTab && TAB_VALUES.includes(rawTab) ? rawTab : DEFAULT_STATE.tab,
     // `lane=practice` is the address; the older `network=97` link still lands in the practice lane.
     lane: p.get('lane') === 'practice' || rawNet === '97' ? 'practice' : p.get('lane') === 'mainnet' || rawNet === '56' ? 'mainnet' : 'all',
@@ -205,6 +210,7 @@ export interface ActiveFilter {
 
 export function activeFilters(s: MarketState, ifaceLabel: (v: string) => string): ActiveFilter[] {
   const out: ActiveFilter[] = []
+  if (s.charterKind) out.push({ key: 'charterKind', label: `Executed ${({ loan: 'Loan Guard', yield: 'Yield Sweep', grid: 'Grid Band', range: 'Range Keeper' })[s.charterKind]}`, clear: { charterKind: null } })
   if (s.stage && s.tab === 'listed') out.push({ key: 'stage', label: STAGE_LABEL[s.stage], clear: { stage: null } })
   if (s.liveNow) out.push({ key: 'liveNow', label: 'Live now', clear: { liveNow: false } })
   if (s.warranted) out.push({ key: 'warranted', label: 'Warranted', clear: { warranted: false } })
@@ -220,6 +226,7 @@ export function activeFilters(s: MarketState, ifaceLabel: (v: string) => string)
 }
 
 export const CLEARED_FILTERS: Partial<MarketState> = {
+  charterKind: null,
   token: null,
   maxPrice: null,
   minRating: null,

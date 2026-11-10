@@ -1,4 +1,5 @@
 import 'server-only'
+import { charterExperience, type CharterExecution } from './charter-experience'
 import { sql } from 'drizzle-orm'
 import { db, firstPartyAgentsAllLanes, firstPartyIds, canonicalAgentIdSql, loadBlob, storeBlob } from '@marque/db'
 import { agentPortraits } from './agent-portraits'
@@ -37,6 +38,7 @@ export type Qual = 'warranted' | 'failed' | 'callable' | 'unbound' | 'dead'
 const QUAL_RANK: Record<Qual, number> = { warranted: 0, failed: 1, callable: 2, unbound: 3, dead: 4 }
 
 export interface MarketRow {
+  charterExecutions?: CharterExecution[]
   /** All-networks view: the networks this agent sells on, and its twin on the other one (see foldNetworks). */
   networks?: Array<56 | 97>
   twin?: { agentId: string; chainId: 56 | 97; price: string | null; hireable: boolean } | null
@@ -125,6 +127,7 @@ export const MARKET_STAGES: readonly MarketStage[] = ['answering', 'priced', 'hi
 export interface MarketLadder { listed: number; answering: number; priced: number; hireable: number; checked: number; warranted: number; delivered: number }
 
 export interface MarketQuery {
+  charterKind?: 'loan' | 'yield' | 'grid' | 'range' | null
   /** One rung of the evidence ladder, over the whole listed set (the Registry view). */
   stage?: MarketStage | null
   /** Internal selection, applied before per-agent capability resolution. */
@@ -848,6 +851,9 @@ export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: Ma
     return out
   }
   // The ladder counts the whole listed set (the Registry view) under the same category, network and search.
+  const executions = await charterExperience().catch(() => null)
+  if (q.charterKind && !executions) throw new Error('Charter execution evidence is temporarily unavailable')
+  if (executions) all = all.map(r => ({ ...r, charterExecutions: [ ...(executions.get(r.agentId.toLowerCase()) ?? []), ...(r.twin ? executions.get(r.twin.agentId.toLowerCase()) ?? [] : []) ] }))
   const universe = scope(all, null)
   all = scope(all)
   // The same view's pulled agents (a recent wrong answer, or a paid job left undelivered): out of the list and the counts,
@@ -882,6 +888,7 @@ export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: Ma
     hasPrice: q.hasPrice ? (r) => !!r.price : null,
     iface: q.iface ? hasIface(q.iface) : null,
     token: q.token ? (r) => quoteToken(r) === q.token!.toLowerCase() : null,
+    charter: q.charterKind ? (r) => (r.charterExecutions ?? []).some(e => e.kind === q.charterKind && e.actions > 0) : null,
     stage: q.stage ? atStage[q.stage] : null,
   }
   // Clone groups collapse after filtering, so facet counts and the total agree.

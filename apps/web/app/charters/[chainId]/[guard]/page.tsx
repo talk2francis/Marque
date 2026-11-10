@@ -1,5 +1,6 @@
 import { cookies } from 'next/headers'
 import { notFound } from 'next/navigation'
+import { cache } from 'react'
 import { getAddress, isAddress } from 'viem'
 import { teamWallets } from '@marque/commerce'
 import { isCharterChain } from '@marque/charters'
@@ -9,30 +10,31 @@ import { guardDetail } from '../../../../lib/guards'
 import { charterV2Detail } from '../../../../lib/charters-v2'
 import { CharterView } from '../../_components/CharterView'
 import { CharterV2View } from '../../_components/CharterV2View'
+import { PendingCharter } from '../../_components/PendingCharter'
 import { KIND_NAMES } from '@marque/charters'
 import styles from '../../charters.module.css'
 
 export const dynamic = 'force-dynamic'
 
-type Params = { params: Promise<{ chainId: string; guard: string }> }
+type Params = { params: Promise<{ chainId: string; guard: string }>; searchParams: Promise<{ granted?: string }> }
 
-async function load({ params }: Params) {
-  const { chainId, guard } = await params
+const load = cache(async (chainId: string, guard: string) => {
   const c = Number(chainId)
   if (!isCharterChain(c) || !isAddress(guard)) return null
   const cookie = (await cookies()).get(PREVIEW_COOKIE)?.value
   // v2 charters (any kind) first, then a v1 Loan Guard. Reachable whenever the owner is outside the team list, so an
   // owner can always find End (AGENTS.md C6).
-  const v2 = await charterV2Detail(c, getAddress(guard)).catch(() => null)
+  const v2 = await charterV2Detail(c, getAddress(guard)).catch(() => { throw new Error('Charter chain read is temporarily unavailable') })
   if (v2) return guardPageVisible(cookie, v2.charter.owner, teamWallets()) ? { v2, v1: null } : null
-  const d = await guardDetail(c, getAddress(guard)).catch(() => null)
+  const d = await guardDetail(c, getAddress(guard)).catch(() => { throw new Error('Charter index read is temporarily unavailable') })
   if (!d) return null
   if (!guardPageVisible(cookie, d.guard.owner, teamWallets())) return null
   return { v2: null, v1: d }
-}
+})
 
 export async function generateMetadata(p: Params) {
-  const r = await load(p)
+  const key = await p.params
+  const r = await load(key.chainId, key.guard)
   if (!r) return { title: 'Charter' }
   if (r.v2) return { title: `${KIND_NAMES[r.v2.charter.kind]} ${r.v2.charter.address.slice(0, 6)}…${r.v2.charter.address.slice(-4)}`, description: `A ${KIND_NAMES[r.v2.charter.kind]} charter on ${r.v2.charter.chainId === 56 ? 'BNB Smart Chain' : 'BSC testnet'}. Every action is on chain.`, robots: { index: false } }
   const d = r.v1!
@@ -46,8 +48,12 @@ export async function generateMetadata(p: Params) {
 
 /** /charters/{chainId}/{guard}: the public page of one Loan Guard (03_EXPERIENCE section 2). */
 export default async function CharterPage(p: Params) {
-  const r = await load(p)
-  if (!r) notFound()
+  const key = await p.params
+  const r = await load(key.chainId, key.guard)
+  if (!r) {
+    if ((await p.searchParams).granted === '1' && isCharterChain(Number(key.chainId)) && isAddress(key.guard)) return <><SiteHeader /><main className={styles.page}><PendingCharter /></main><SiteFooter slim /></>
+    notFound()
+  }
   if (r.v2) {
     const team2 = teamWallets().includes(r.v2.charter.owner.toLowerCase())
     return (

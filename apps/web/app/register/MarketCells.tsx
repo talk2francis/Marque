@@ -1,4 +1,5 @@
 'use client'
+import { ExecutionChips } from '../_components/charters/ExecutionChips'
 import { ProvenanceChip } from '@marque/ui'
 import { useAgentTerms } from '../_components/terms/useTerms'
 import { TermsLine } from '../_components/terms/TermsLine'
@@ -57,6 +58,7 @@ export function QualCell({ a, compact = false }: { a: MarketRow; compact?: boole
           {q.flag}
         </span>
       )}
+      <ExecutionChips executions={a.charterExecutions} />
       {!compact && q.tone === 'failed' && q.detail && (
         <span className={`mono ${styles.qualRaw}`} title={q.title}>
           {q.detail}

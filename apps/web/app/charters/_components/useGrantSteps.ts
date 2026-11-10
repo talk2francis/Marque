@@ -1,10 +1,12 @@
 'use client'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useConfig } from 'wagmi'
-import { getCallsStatus, getPublicClient, sendCalls, sendTransaction, waitForTransactionReceipt } from '@wagmi/core'
+import { getAccount, getCallsStatus, getPublicClient, sendCalls, sendTransaction, waitForTransactionReceipt } from '@wagmi/core'
 import { BaseError, ContractFunctionRevertedError, formatEther, type Address, type Hex } from 'viem'
 import type { CharterChainId } from '@marque/charters/client'
 import { cannotBatch } from '../../../lib/charters-builder'
+import { grantRetryPolicy } from '../../../lib/charter-grant-retry'
+import { assertGrantWallet } from '../../../lib/charter-funding'
 import type { SealPhase, SealStep } from './Seal'
 
 /**
@@ -23,6 +25,7 @@ export interface StepsGrant {
   verify: (receipts: Array<{ transactionHash: Hex }>) => Promise<Address | null>
   /** Gas used when estimation cannot run (a step depends on an earlier one): measured per kind on the fork suites. */
   gasFallback: bigint[]
+  preflight: () => Promise<void>
 }
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 export const refused = (e: unknown) => /user (rejected|denied)|rejected the request|cancel/i.test(`${(e as Error)?.message ?? ''} ${(e as BaseError)?.shortMessage ?? ''}`) || (e as { code?: number })?.code === 4001
@@ -71,6 +74,8 @@ export function useGrantSteps() {
   const prepare = useCallback(async (grant: StepsGrant) => {
     setPreError(null); setChecking(true)
     try {
+      assertGrantWallet(getAccount(config), grant.owner, grant.chainId)
+      await grant.preflight()
       const pub = getPublicClient(config, { chainId: grant.chainId })!
       const [balance, gasPrice] = await Promise.all([pub.getBalance({ address: grant.owner }), pub.getGasPrice()])
       // The last step is the create (it may depend on the approvals); estimate the approvals, use the measured fallback for the rest.
@@ -89,10 +94,10 @@ export function useGrantSteps() {
     } catch (e) { setPreError(e instanceof Error && !(e instanceof BaseError) ? e.message : reasonOf(e)) } finally { setChecking(false) }
   }, [config])
 
-  const finish = useCallback(async (grant: StepsGrant) => {
+  const finish = useCallback(async (grant: StepsGrant, pending = false) => {
     const at = await grant.verify(receipts.current).catch(() => null)
     if (!alive.current) return
-    if (at) { setGranted(at); setPhase('sealed') } else { setPhase('failed'); setError('The last step confirmed, but the factory does not list this charter yet. Open My Marque in a minute, or try again.') }
+    if (at) { setGranted(at); setPhase('sealed') } else { setPhase('failed'); setError(pending ? 'The wallet has not confirmed every request yet. Check its activity, then check again or open My Marque.' : 'The last step confirmed. The factory read is catching up; check again to verify it without signing again.') }
   }, [])
 
   const failAt = useCallback((i: number, e: unknown) => {
@@ -106,6 +111,7 @@ export function useGrantSteps() {
       mark(i, { state: 'signing' })
       try {
         // 30% over the estimate: a position mint or transfer that initialises ticks can use exactly its estimate and run out.
+        assertGrantWallet(getAccount(config), grant.owner, grant.chainId)
         const st = grant.steps[i]!
         const est = await getPublicClient(config, { chainId: grant.chainId })!.estimateGas({ account: grant.owner, to: st.to, data: st.data, value: st.value }).catch(() => grant.gasFallback[i]!)
         const hash = await sendTransaction(config, { account: grant.owner, chainId: grant.chainId, to: st.to, data: st.data, value: st.value, gas: est * 13n / 10n })
@@ -122,6 +128,9 @@ export function useGrantSteps() {
   const sign = useCallback(async () => {
     if (!g) return
     setError(null); setNote(null); setPhase('signing')
+    const retry = grantRetryPolicy(steps.map(s => s.state))
+    if (retry !== 'submit') { await finish(g, retry === 'wait'); return }
+    try { assertGrantWallet(getAccount(config), g.owner, g.chainId); await g.preflight() } catch (e) { failAt(0, e); return }
     const from = steps.findIndex((s) => s.state !== 'done')
     if (from > 0) { if (await oneByOne(g, from)) await finish(g); return } // a retry continues where it stopped
     setSteps((s) => s.map((x) => ({ ...x, state: 'signing' as const })))

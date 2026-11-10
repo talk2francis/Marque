@@ -92,8 +92,10 @@ start_mcp() {
   pm2 start "$ROOT/ecosystem.config.cjs" --only marque-mcp >/dev/null
   for _ in $(seq 1 30); do
     if [ "$(http_health http://127.0.0.1:3297/api/health 3)" = '200 0' ]; then
-      EXPECTED_RELEASE_SHA="$(cat "$REL/$1/RELEASE_SHA")" WEB_INSTANCES=1 node "$ROOT/scripts/check-web-ready.mjs" http://127.0.0.1:3297 "${mcp_ready_args[@]}" >>"$LOG" 2>&1 || return 1
-      say "marque-mcp on :3297 -> $1"; return 0
+      if EXPECTED_RELEASE_SHA="$(cat "$REL/$1/RELEASE_SHA")" WEB_INSTANCES=1 node "$ROOT/scripts/check-web-ready.mjs" http://127.0.0.1:3297 "${mcp_ready_args[@]}" >>"$LOG" 2>&1; then
+        say "marque-mcp on :3297 -> $1"; return 0
+      fi
+      say "MCP answered health; waiting for release readiness"
     fi
     sleep 2
   done

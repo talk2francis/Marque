@@ -1,5 +1,12 @@
 # DESIGN-SYSTEM.md
 
+## 10 November 2026: Hiring and charter evidence
+
+Hiring uses the existing gold token for a faint horizontal ledger ruling, the profile ring and kicker. Building keeps its blue blueprint grid. Both room treatments share dimensions, day/night tokens and reduced-motion behaviour. The closed campaign dock stays off workspace and charter routes so it cannot obscure controls or receipts.
+
+Grid's interactive path rehearsal visits user-selected thresholds without forecasting fills or returns. Range's drift instrument uses the contract's buffer and centring arithmetic, with assumptions stated beside it. Both are labelled Simulation. Charter history charts show dated stored chain samples only, disclose their sampling interval, and wait for two observations. Register execution chips appear in both cards and lists and name the kind, network and onchain provenance; the filter is called Charter experience because past action does not promise future performance.
+
+
 ## 6 November 2026: readable documents and usable small controls
 
 Public content no longer sits behind a whole-page streamed loading fallback. While a route resolves, client navigation keeps the current document instead of replacing it with the global mark. Native questions and evidence disclosures remain readable and operable without JavaScript.
@@ -572,3 +579,18 @@ The four category doors use a short description, measured mainnet availability, 
 My Marque agent entries separate identity, recent activity, management links and expandable records. Campaign checks and delivery milestones are distinct. The shared delivery record expands to every original milestone, timestamp, expiry and evidence link. Profile-edit actions retain the original owner gates and signed handlers. Today uses consistent section gaps, bordered answer groups and a primary 44px answer-selector button. Rating links have visible borders and focus states. These refinements are local to the requested surfaces; global tokens and unrelated layouts are unchanged.
 
 Owner banners use the existing reference masthead layout and image masks, with a separate uploaded-image source and the agent’s actual portrait. The upload is optional, presented after listing/registration and under owner-only profile tools. New/older agents without an upload keep the current compact header. A responsive wide crop offers drag, zoom and keyboard position sliders; nothing uploads before Save banner. The caption identifies owner-supplied art. It never adds a reference badge or implies verification.
+
+
+## 10 November: the Charters film
+
+The Charters hero shows the uploaded 66-second "Draw the line" film immediately as an eager responsive poster, with a reserved 16:9 frame. Video and audio load only on user intent. The existing player accepts a film definition; the launch film remains its default. Compact chapter buttons fit the hero column, with the same rail, storyboard, evidence chip, sound controls, keyboard actions and Escape pause. Below 901px it stacks under the introduction. The Loan Guard Night Replay remains a labelled simulation in the Loan Guard band.
+
+Each film has its own cue target and analytics id, preventing transcript links on `/film` from starting both players. Charters chapters are illustrative except the four-kind chapter, which links to current onchain counts by network. The evidence disclosure distinguishes example settings and simulated paths from live results. The transcript and download are also available at `/film?film=charters#charters-film`.
+
+Film Escape handling remains active while a play request buffers or seeks. Cancelling a request invalidates its pending promise; only an explicit autoplay-policy refusal may retry muted. Compact Charters chapters remain visible through the mobile breakpoint.
+
+When the Charters end-card link is visible, empty control padding lets clicks reach it. Buttons and the in-frame seek bar retain their own pointer targets; the launch player's hit areas are unchanged.
+
+The promises follow the film in document order, while the desktop grid places them beneath the introduction. Mobile no longer paints the promises before an earlier film panel has arrived in the HTML stream. A responsive AVIF preload precedes the header so the poster can start loading earlier.
+
+Charters film end-card action pairs `--brass-lit` with `--ink-inverse`, so its text follows the surface contrast in both Day and Night.

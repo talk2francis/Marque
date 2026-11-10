@@ -49,6 +49,7 @@ jobs:
           node --test scripts/lib/previous-assets.check.mjs
           node --test scripts/lib/verification-rpc.check.mjs
           node --test scripts/lib/readiness.check.mjs
+          node --test scripts/lib/mcp-start.check.mjs
           node --test ops/mcp-release.check.mjs
           node scripts/lib/warm-projections.check.mjs
           node --test scripts/load/run.check.mjs

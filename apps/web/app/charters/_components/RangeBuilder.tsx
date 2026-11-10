@@ -3,13 +3,14 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useConfig } from 'wagmi'
 import { getPublicClient } from '@wagmi/core'
 import { ArrowRight, ShieldCheck, X } from 'lucide-react'
-import { getAddress, keccak256, toBytes, type Address } from 'viem'
+import { getAddress, parseAbi, keccak256, toBytes, type Address } from 'viem'
 import { CHARTER_CHAINS, V2, rangeKeeperFactoryAbi, type CharterChainId, type ReviewedPool } from '@marque/charters/client'
 import { AgentAvatar } from '../../_components/AgentAvatar'
 import { AddressChip } from '../../_components/ui'
 import {
   RANGE_DEFAULTS, centeredRange, isFullRange, dateWords, defaultExecutors, expiryFor, fmtPrice, KIND_DURATIONS, minRangeWidth, newSalt, priceAt, rangeGrantCall, rangeSentence,
 } from '../../../lib/charters-builder-v2'
+import { RangeDrift } from './RangeDrift'
 import { BandRule } from './BandRule'
 import { CHAIN_NAME, FixtureNote, WhoBar, ago, promptWords, useWho } from './BuilderShell'
 import { Seal } from './Seal'
@@ -22,20 +23,20 @@ import styles from './builder.module.css'
  * ticks; the re-centred range is a preview of what the contract would do at today's average, labelled as such.
  */
 interface Position { tokenId: string; pool: ReviewedPool; token0: Address; token1: Address; fee: number; lower: number; upper: number; liquidity: string; spotTick: number; twapTick600: number | null; inRange: boolean }
-interface Quote { positionsOnReviewedPools: Position[]; positionsTotal: number; blockNumber: string; readAt: string; factory: Address | null; npm: Address }
+interface Quote { account: string; chainId: number; positionsOnReviewedPools: Position[]; positionsTotal: number; blockNumber: string; readAt: string; factory: Address | null; npm: Address }
 const SPACING: Record<number, number> = { 100: 1, 500: 10, 2500: 50, 10000: 200 }
 const TRANSFER = keccak256(toBytes('Transfer(address,address,uint256)'))
 
 /** Base price for a pool tick (base may be token0 or token1). */
 const basePrice = (tick: number, baseIs0: boolean) => priceAt(baseIs0 ? tick : -tick)
 
-export function RangeBuilder({ initialChain, initialAccount, demo }: { initialChain: CharterChainId; initialAccount: string | null; demo: Record<CharterChainId, string> }) {
+export function RangeBuilder({ initialChain, initialAccount, initialPosition, demo }: { initialChain: CharterChainId; initialAccount: string | null; initialPosition?: string | null; demo: Record<CharterChainId, string> }) {
   const who = useWho(initialChain, initialAccount, demo)
   const config = useConfig()
   const { chainId, account } = who
   const [quote, setQuote] = useState<Quote | null>(null)
   const [load, setLoad] = useState<'loading' | 'ok' | 'error'>('loading')
-  const [pick, setPick] = useState<string | null>(null)
+  const [pick, setPick] = useState<string | null>(initialPosition ?? null)
   const [exit, setExit] = useState(false)
   const [feesToOwner, setFeesToOwner] = useState(true)
   const [hours, setHours] = useState(6)
@@ -83,7 +84,7 @@ export function RangeBuilder({ initialChain, initialAccount, demo }: { initialCh
 
   const blocker = (() => {
     if (!factory) return { words: `Range Keeper is not on ${CHAIN_NAME[chainId]} yet.` }
-    if (load === 'loading') return { words: 'Reading your PancakeSwap positions.' }
+    if (load !== 'ok' || quote?.chainId !== chainId || quote.account.toLowerCase() !== account.toLowerCase()) return { words: 'Reading your PancakeSwap positions.' }
     if (!pos) return { words: quote?.positionsOnReviewedPools.length ? 'Every position here is full range, so it is always in range: there is nothing for a keeper to do.' : `No PancakeSwap v3 position with liquidity on a reviewed pool was found for this address on ${CHAIN_NAME[chainId]}.` }
     if (twap === null) return { words: 'This pool has no 10-minute history to read yet.' }
     if (tooNarrow && !exit) return { words: `This range is too narrow for a keeper to re-centre it within its limits (it needs a range at least ${(Math.pow(1.0001, minRangeWidth(p)) * 100 - 100).toFixed(1)}% wide). Widen the position in PancakeSwap, or choose Close it if it leaves.` }
@@ -99,6 +100,11 @@ export function RangeBuilder({ initialChain, initialAccount, demo }: { initialCh
     await grant.prepare({
       chainId, owner: who.wallet, gasFallback: [3_500_000n],
       steps: [{ label: `Send position #${pos.tokenId} to the Range Keeper factory, which makes your keeper in the same transaction`, to: call.to, data: call.data }],
+      preflight: async () => {
+        const owner = await pub.readContract({ address: quote.npm, abi: parseAbi(['function ownerOf(uint256) view returns (address)']), functionName: 'ownerOf', args: [BigInt(pos.tokenId)] })
+        if (owner.toLowerCase() !== who.wallet!.toLowerCase()) throw new Error('This wallet no longer owns the position. Read your positions again.')
+        await pub.estimateGas({ account: who.wallet!, to: call.to, data: call.data })
+      },
       // The keeper is the NFT's new holder: the factory forwards it in the same transaction.
       verify: async (rs) => {
         const r = await pub.getTransactionReceipt({ hash: rs[0]!.transactionHash })
@@ -122,6 +128,7 @@ export function RangeBuilder({ initialChain, initialAccount, demo }: { initialCh
   return (
     <div className={styles.builder}>
       <WhoBar who={who} placeholder="Paste any address" onChain={() => setPick(null)} />
+      <div><button type="button" className={styles.ghost} disabled={load === 'loading' || grant.checking || grant.phase === 'signing'} onClick={() => void read()}>{load === 'loading' ? 'Reading…' : 'Refresh positions'}</button></div>
       <div className={styles.grid}>
         <div className={styles.left}>
           <section className={`${styles.panel} ${styles.position}`} aria-labelledby="rk-h" aria-busy={load === 'loading'}>
@@ -179,6 +186,7 @@ export function RangeBuilder({ initialChain, initialAccount, demo }: { initialCh
               </>
             ) : <div className={styles.skeleton} aria-hidden="true" />}
           </section>
+          {pos && twap !== null ? <RangeDrift key={pos.tokenId} tick={twap} lower={pos.lower} upper={pos.upper} buffer={p.bufferTicks} spacing={spacing} baseIs0={baseIs0} exit={exit} /> : null}
           <section className={styles.panel} aria-labelledby="rk-left">
             <h2 id="rk-left" className={styles.panelTitle}>What remains</h2>
             <p className={styles.fine}>Re-centring realises impermanent loss: if the price trends, each move sells the token that gained. A position kept in range earns fees but can be worth less than holding. The bound limits the cost of each move, not market movement. Contracts are unaudited.</p>
@@ -253,7 +261,7 @@ export function RangeBuilder({ initialChain, initialAccount, demo }: { initialCh
         primary={grant.phase === 'sealed' || grant.phase === 'signing' ? null : grant.phase === 'failed' ? 'Try again' : who.pass ? 'Seal with your fingerprint' : 'Open your wallet'}
         onPrimary={() => void grant.sign()} onClose={grant.close} error={grant.error} note={grant.note}
         explorerTx={(h) => `${CHARTER_CHAINS[chainId].explorer}/tx/${h}`}
-        done={grant.granted ? { href: `/charters/${chainId}/${grant.granted}`, label: 'Open the charter' } : null} />
+        done={grant.granted ? { href: `/charters/${chainId}/${grant.granted}?granted=1`, label: 'Open the charter' } : null} />
     </div>
   )
 }

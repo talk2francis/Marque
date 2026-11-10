@@ -11,13 +11,18 @@ export type FilmVariantKey = 'd9' | 'd8' | 'd7' | 'd6' | 'd5' | 'd4' | 'd3' | 'd
 export type FilmCodec = 'av1' | 'h264'
 export interface FilmFile { file: string; bytes: number; sha256: string }
 export interface FilmVariant { av1: FilmFile; h264: FilmFile; storyboard: FilmFile }
-export interface FilmMedia {
+export interface FilmAssets {
   base: string
   codecs: Record<FilmCodec, string>
   /** Storyboard sprites: one frame a second, `cols` across, each `w` by `h`. */
   storyboard: { cols: number; w: number; h: number; every: number }
-  variants: Record<FilmVariantKey, FilmVariant>
+  variants: Record<string, FilmVariant>
   poster: { avif: Array<{ w: number; file: string }>; webp: Array<{ w: number; file: string }>; jpg: Array<{ w: number; file: string }> }
 }
 
+export interface FilmMedia extends FilmAssets {
+  variants: Record<FilmVariantKey, FilmVariant>
+  charters: FilmAssets & { og: FilmFile; sourceSha256: string }
+}
 export const FILM_MEDIA = media as FilmMedia
+export const CHARTERS_MEDIA = FILM_MEDIA.charters

@@ -46,13 +46,15 @@ function PositionRead({ address, line, own }: { address: string; line: number | 
           <MeasureRule value={hf} lower={0} upper={Math.max(3, hf)} threshold={line ?? 1} thresholdLabel={line !== null ? `Your line ${line}` : 'Liquidation 1'} valueLabel={hf.toFixed(3)} state={hf < 1 ? 'breach' : line !== null && hf < line ? 'watch' : 'holds'} label={`Venus health factor ${hf}, liquidation line 1${line !== null ? `, your alert line ${line}` : ''}`} animate={false} />
           <a className="btn btn--sm" href={`/tender?category=health_factor&account=${address}`}>Ask agents about this</a>
           <GuardLine owner={address} />
-          <KindLines owner={address} />
+
         </article> : <p>No Venus borrowing position with a health factor was returned for this wallet.</p>}
+        <KindLines owner={address} kinds={['yield', 'grid']} />
         {!s.pancakeV3.ok ? <p>PancakeSwap V3 could not be read. No empty position list is assumed.</p> : s.pancakeV3.positions.map(p => <article key={p.tokenId} className={styles.position}>
           <h4>PancakeSwap V3 · {p.pair} · #{p.tokenId}</h4>
           <p>{p.inRange ? 'Inside the range' : 'Outside the range'}. Price {p.priceCurrent.toLocaleString('en-US', { maximumSignificantDigits: 6 })} {p.priceUnit}.</p>
           <MeasureRule value={p.priceCurrent} lower={p.priceLower} upper={p.priceUpper} valueLabel={p.priceCurrent.toLocaleString('en-US', { maximumSignificantDigits: 5 })} lowerLabel={p.priceLower.toLocaleString('en-US', { maximumSignificantDigits: 5 })} upperLabel={p.priceUpper.toLocaleString('en-US', { maximumSignificantDigits: 5 })} state={p.inRange ? 'holds' : 'watch'} label={`${p.pair}, current price ${p.priceCurrent}, range ${p.priceLower} to ${p.priceUpper}`} animate={false} />
           <a className="btn btn--sm" href={`/tender?category=rebalancing&owner=${address}&position=${p.tokenId}`}>Ask agents about this</a>
+          <KindLines owner={address} kinds={['range']} positionId={p.tokenId} />
         </article>)}
         {s.venus.ok && s.pancakeV3.ok && !s.venus.hasPosition && !s.pancakeV3.positions.length ? <p>No Venus loan or active PancakeSwap V3 range was returned. Paste any address to watch it below, or <a href="/positions?addr=0x2e010AaDFdFEbC2AdFCAFA5F83e9687ffA47C573">read the demo wallet</a>.</p> : null}
       </> : null}
