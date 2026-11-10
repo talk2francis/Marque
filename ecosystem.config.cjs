@@ -269,7 +269,7 @@ module.exports = {
       script: 'src/charters-fixture-mm.ts',
       interpreter: 'node',
       node_args: '--import tsx',
-      env: { ...env, NODE_ENV: 'production', CHARTERS_FIXTURE_MM: process.env.CHARTERS_FIXTURE_MM || '' },
+      env: { ...env, NODE_ENV: 'production', CHARTERS_FIXTURE_MM: process.env.CHARTERS_FIXTURE_MM || env.CHARTERS_FIXTURE_MM || '' },
       autorestart: true,
       max_restarts: 10,
       restart_delay: 60000,
