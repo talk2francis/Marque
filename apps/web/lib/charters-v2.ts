@@ -50,6 +50,7 @@ export function summarize(r: Row) {
     owner: getAddress(r.owner), factory: getAddress(r.factory), params: str(params.params ?? {}) as Record<string, unknown>,
     executors: r.executors.map((e) => getAddress(e)), tipToken: r.tip_token ? getAddress(r.tip_token) : null,
     tipPerAction: String(r.tip_per_action), tipBudget: String(r.tip_budget), tipsPaid: String(r.tips_paid),
+    positionId: kind === 'range' ? String(r.totals['tokenId'] ?? r.params['tokenId'] ?? '') || null : null,
     totals: r.totals, actions: Number(r.actions), expiresAt: iso(r.expires_at)!, createdAt: iso(r.created_at)!, createdTx: r.created_tx,
     endedAt: iso(r.ended_at), endedTx: r.ended_tx, status: ended ? 'ended' as const : expired ? 'expired' as const : 'armed' as const, final: Boolean(r.final),
     fixture: pool?.fixture ?? false, pool: pool ? { ...pool } : null,
@@ -92,8 +93,8 @@ export async function livePreview(chainId: CharterChainId, kind: CharterKind, ad
 
 export async function charterV2Detail(chainId: CharterChainId, address: string) {
   const a = address.toLowerCase()
-  const [row] = rowsOf<Row>(await chartersDb().execute(sql`${SELECT} where c.chain_id = ${chainId} and c.address = ${a}`))
-  if (!row) return null
+  const [row] = rowsOf<Row>(await chartersDb().execute(sql`${SELECT} where c.chain_id = ${chainId} and c.address = ${a}`).catch(() => []))
+  if (!row) return charterV2FromChain(chainId, getAddress(address))
   const charter = summarize(row)
   const [events, keys, samples] = await Promise.all([
     chartersDb().execute(sql`select event, block_number, tx_hash, log_index, caller, data, block_time, final from charter_v2_event
@@ -112,7 +113,7 @@ export async function charterV2Detail(chainId: CharterChainId, address: string) 
     return hit ? hit[0] : addr.toLowerCase() === charter.owner.toLowerCase() ? 'owner' : 'other'
   }
   return {
-    charter, live, allowances,
+    charter, live, allowances, indexing: false,
     events: events.map((e) => ({ event: String(e['event']), blockNumber: String(e['block_number']), txHash: String(e['tx_hash']), logIndex: Number(e['log_index']),
       caller: e['caller'] ? getAddress(String(e['caller'])) : null, callerIs: agentOf(e['caller'] ? String(e['caller']) : null),
       data: e['data'] as Record<string, unknown>, at: iso(e['block_time']), final: Boolean(e['final']) })),
@@ -124,8 +125,58 @@ export async function charterV2Detail(chainId: CharterChainId, address: string) 
   }
 }
 
+/**
+ * A confirmed grant is usable before the indexer's next pass. Authenticate it against our factory registry,
+ * then read the same immutable settings and counters directly. No derived row or observation is invented.
+ * History, creation receipt and the complete executor list explicitly wait for indexing.
+ */
+export async function charterV2FromChain(chainId: CharterChainId, address: Address) {
+  const client = chainClient(chainId)
+  const blockNumber = await client.getBlockNumber({ cacheTime: 0 })
+  const registryAbi = parseAbi(['function isCharter(address) view returns (bool)'])
+  const kinds: CharterKind[] = ['loan', 'yield', 'grid', 'range']
+  const registered = await Promise.all(kinds.map(async (kind) => {
+    const factory = factoryFor(chainId, kind)
+    return factory && await client.readContract({ address: factory, abi: registryAbi, functionName: 'isCharter', args: [address], blockNumber }) ? { kind, factory } : null
+  }))
+  const hit = registered.find((x) => x !== null)
+  if (!hit) return null
+  const { kind, factory } = hit
+  const read = (functionName: string) => client.readContract({ address, abi: ABI_BY_KIND[kind], functionName, blockNumber })
+  const fields: Record<CharterKind, string[]> = {
+    loan: ['vDebt', 'trigger', 'target', 'budget', 'minRepay'],
+    yield: ['vToken', 'floor', 'ceiling', 'minAction', 'supplyCap', 'minHealthAfter'],
+    grid: ['pool', 'base', 'lowerBt', 'stepTicks', 'slots', 'orderQuote', 'buyCap', 'sellCap', 'twapWindow', 'maxDeviation', 'slipTicks', 'minFillBps'],
+    range: ['pool', 'mode', 'feesToOwner', 'twapWindow', 'maxDeviation', 'slipTicks', 'bufferTicks', 'maxLossBps', 'maxLeftoverBps', 'minInterval', 'maxRebalances'],
+  }
+  const counters: Record<CharterKind, string[]> = {
+    loan: ['spent'], yield: ['grossSupplied', 'heldV'], grid: ['quoteSpent', 'baseSold'], range: ['rebalances', 'tokenId', 'returned'],
+  }
+  const common = ['owner', 'createdAt', 'expiresAt', 'ended', 'tipToken', 'tipPerAction', 'tipBudget', 'tipsPaid', 'actions']
+  const names = [...common, ...fields[kind], ...counters[kind]]
+  const values = Object.fromEntries(await Promise.all(names.map(async (n) => [n, await read(n)])))
+  const executors = OPEN_KINDS.has(kind) ? [] : (await Promise.all(Object.values(EXECUTORS).map(async (executor) =>
+    await client.readContract({ address, abi: ABI_BY_KIND[kind], functionName: 'isExecutor', args: [executor], blockNumber }) ? executor : null))).filter((x): x is Address => x !== null)
+  const p = Object.fromEntries(fields[kind].map((n) => [n, str(values[n])]))
+  const pool = typeof p['pool'] === 'string' ? poolOf(chainId, p['pool']) : null
+  const expiresAt = new Date(Number(values['expiresAt']) * 1000).toISOString()
+  const charter = {
+    chainId, address, kind, kindName: KIND_NAMES[kind], version: 2 as const, open: OPEN_KINDS.has(kind),
+    owner: getAddress(String(values['owner'])), factory,
+    params: { p, expiresAt: String(values['expiresAt']), tipPerAction: String(values['tipPerAction']), tipBudget: String(values['tipBudget']) } as Record<string, unknown>,
+    executors, tipToken: getAddress(String(values['tipToken'])), tipPerAction: String(values['tipPerAction']), tipBudget: String(values['tipBudget']), tipsPaid: String(values['tipsPaid']),
+    positionId: kind === 'range' ? String(values['tokenId']) : null,
+    totals: Object.fromEntries(counters[kind].map((n) => [n, str(values[n])])), actions: Number(values['actions']),
+    expiresAt, createdAt: new Date(Number(values['createdAt']) * 1000).toISOString(), createdTx: null,
+    endedAt: null, endedTx: null, status: values['ended'] ? 'ended' as const : Date.parse(expiresAt) <= Date.now() ? 'expired' as const : 'armed' as const,
+    final: false, fixture: pool?.fixture ?? false, pool, lastSample: null,
+  }
+  const [live, allowances] = await Promise.all([livePreview(chainId, kind, address), allowancesOf(chainId, charter)])
+  return { charter, live, allowances, indexing: true, events: [], key: null, history: [], readAt: new Date().toISOString() }
+}
+
 /** The tokens a charter may draw from its owner, with the allowance the owner gave it now (what End can clear). */
-export async function allowancesOf(chainId: CharterChainId, c: CharterV2Summary) {
+export async function allowancesOf(chainId: CharterChainId, c: Pick<CharterV2Summary, 'params' | 'kind' | 'pool' | 'owner' | 'address'>) {
   const p = (c.params['p'] ?? {}) as Record<string, string>
   const m = (v: string | undefined) => CHARTER_CHAINS[chainId].markets.find((x) => x.vToken.toLowerCase() === String(v).toLowerCase())
   const list: Array<{ token: Address; symbol: string; decimals: number }> = []

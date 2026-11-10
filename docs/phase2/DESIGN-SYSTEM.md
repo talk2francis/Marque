@@ -1,5 +1,12 @@
 # DESIGN-SYSTEM.md
 
+## 10 November 2026: Hiring and charter evidence
+
+Hiring uses the existing gold token for a faint horizontal ledger ruling, the profile ring and kicker. Building keeps its blue blueprint grid. Both room treatments share dimensions, day/night tokens and reduced-motion behaviour. The closed campaign dock stays off workspace and charter routes so it cannot obscure controls or receipts.
+
+Grid's interactive path rehearsal visits user-selected thresholds without forecasting fills or returns. Range's drift instrument uses the contract's buffer and centring arithmetic, with assumptions stated beside it. Both are labelled Simulation. Charter history charts show dated stored chain samples only, disclose their sampling interval, and wait for two observations. Register execution chips name the kind and network; the filter is called Charter experience because past action does not promise future performance.
+
+
 ## 6 November 2026: readable documents and usable small controls
 
 Public content no longer sits behind a whole-page streamed loading fallback. While a route resolves, client navigation keeps the current document instead of replacing it with the global mark. Native questions and evidence disclosures remain readable and operable without JavaScript.

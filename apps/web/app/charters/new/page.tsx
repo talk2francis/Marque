@@ -70,7 +70,7 @@ export default async function NewCharterPage({ searchParams }: { searchParams: P
           {kind === 'loan' ? <Builder initialChain={chain} initialAccount={acc} initialMarket={market && /^[\w]{2,12}$|^0x[0-9a-fA-F]{40}$/.test(market) ? market : null} demo={DEMO.loan} />
             : kind === 'yield' ? <YieldBuilder key={`y${chain}`} initialChain={chain} initialAccount={acc} demo={DEMO.yield} />
               : kind === 'grid' ? <GridBuilder key={`g${chain}`} initialChain={chain} initialAccount={acc} demo={DEMO.grid} />
-                : <RangeBuilder key={`r${chain}`} initialChain={chain} initialAccount={acc} demo={DEMO.range} />}
+                : <RangeBuilder key={`r${chain}`} initialChain={chain} initialAccount={acc} initialPosition={/^\d{1,78}$/.test(one('position') ?? '') ? one('position') : null} demo={DEMO.range} />}
         </div>
       </main>
       <SiteFooter slim />

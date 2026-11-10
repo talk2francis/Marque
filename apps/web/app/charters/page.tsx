@@ -80,7 +80,8 @@ export default async function ChartersHub() {
         </section>
 
         <section className={styles.band} aria-labelledby="live-h">
-          <h2 id="live-h" className={styles.h2}>Loan Guard on chain now</h2>
+          <h2 id="live-h" className={styles.h2}>Earlier Loan Guards on chain</h2>
+          <p className={styles.fine}>Version 1 only. Current totals, including version 2, appear by kind below.</p>
           <div className={styles.stats}>
             {(stats?.chains ?? []).map((c) => (
               <div key={c.chainId} className={styles.stat}>

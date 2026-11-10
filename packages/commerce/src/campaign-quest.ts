@@ -1,3 +1,4 @@
+import { completedDuringCampaign } from './campaign-window.js'
 import { sql } from 'drizzle-orm'
 import { getAddress, parseAbi } from 'viem'
 import { db } from '@marque/db'
@@ -347,8 +348,8 @@ async function buildChecks(a: OwnedAgent) {
   // 4. Completed hires from 3 distinct independent wallets.
   const providers = [...builder]
   const jobs = rowsOf(await db().execute(sql`
-    select job_id, client from campaign_job where chain_id = ${a.chainId} and provider = any(${pgArray(providers)}::text[]) and status = 3 order by completed_at nulls last`))
-  const clients = [...new Set(jobs.map((j) => String(j['client'])).filter((c) => !builder.has(c)))]
+    select job_id, client, funded_at, completed_at from campaign_job where chain_id = ${a.chainId} and provider = any(${pgArray(providers)}::text[]) and status = 3 order by completed_at nulls last`))
+  const clients = [...new Set(jobs.filter((j) => completedDuringCampaign({ fundedAt: iso(j['funded_at']), completedAt: iso(j['completed_at']) })).map((j) => String(j['client'])).filter((c) => !builder.has(c)))]
   const fundedSet = await fundedP
   const funded = fundedSet ?? new Set<string>()
   const method = fundedSet ? 'token_and_bnb_transfers_checked' : 'transfers_not_checked'

@@ -10,6 +10,7 @@ import type { charterV2Detail } from '../../../lib/charters-v2'
 import { AgentAvatar } from '../../_components/AgentAvatar'
 import { useFocusTrap } from '../../_components/ui'
 import { amount, fmtPrice, priceAt } from '../../../lib/charters-builder-v2'
+import { CharterHistory } from './CharterHistory'
 import { useCalls } from './useCalls'
 import styles from './charter.module.css'
 
@@ -95,7 +96,7 @@ export function CharterV2View({ initial, teamOwner }: { initial: V2Detail; teamO
     if (kind === 'grid') return {
       sentence: `Buys ${amount(B(p['orderQuote']), 18)} ${pool?.quoteSymbol ?? ''} of ${pool?.baseSymbol ?? ''} at each of ${p['slots']} levels from ${tickPrice(b0 ? p['lowerBt'] : -Number(p['lowerBt']))} as the price falls, and sells each one a level higher, on PancakeSwap.`,
       status: !live.ok ? (live.reason === 'pool_history' ? 'The pool has not built up enough history for its average yet.' : 'The live read failed just now; nothing is assumed.') : ({ idle: `No level reached. The 5-minute average is ${tickPrice(f['twapTick'])}.`, would_buy: `A level is reached: buying ${amount(B(f['amountIn']), 18)} ${pool?.quoteSymbol ?? ''} of ${pool?.baseSymbol ?? ''}.`, would_sell: `A level is reached: selling ${amount(B(f['amountIn']), 18)} ${pool?.baseSymbol ?? ''}.`, unsettled: 'The price is moving fast: waiting for it to settle near the average.', no_funds: 'A level is reached, but the wallet has too little for this order.' } as Record<string, string>)[live.state] ?? live.state,
-      facts: [['Price now', live.ok ? tickPrice(f['twapTick']) : 'n/a'], [`Bought of ${amount(B(p['buyCap']), 18)} ${pool?.quoteSymbol ?? ''}`, amount(B(t['quoteSpent']), 18)], [`Sold of ${amount(B(p['sellCap']), 18)} ${pool?.baseSymbol ?? ''}`, amount(B(t['baseSold']), 18)], ['Round trips', String(t['sells'] ?? 0)]],
+      facts: [['Price now', live.ok ? tickPrice(f['twapTick']) : 'n/a'], [`Bought of ${amount(B(p['buyCap']), 18)} ${pool?.quoteSymbol ?? ''}`, amount(B(t['quoteSpent']), 18)], [`Sold of ${amount(B(p['sellCap']), 18)} ${pool?.baseSymbol ?? ''}`, amount(B(t['baseSold']), 18)], ['Round trips', d.indexing ? 'syncing' : String(t['sells'] ?? 0)]],
     }
     return {
       sentence: `Keeps a ${pool ? `${pool.baseSymbol.replace(/^W/, '')}/${pool.quoteSymbol}` : ''} PancakeSwap position of ${short(c.owner)} in range: moves it back around the price when it leaves, same width, at most ${p['maxRebalances']} times, one every ${Math.round(Number(p['minInterval']) / 3600)} hours at most, each losing at most ${(Number(p['maxLossBps']) / 100).toFixed(2)}% at the average price.`,
@@ -152,6 +153,7 @@ export function CharterV2View({ initial, teamOwner }: { initial: V2Detail; teamO
   const open = d.allowances.filter((a) => a.allowance && a.allowance !== '0')
   const keyLine = (() => {
     const k = d.key
+    if (d.indexing) return 'key status is being indexed'
     if (!c.open && !agentNamed) return 'not named by the owner'
     if (!k) return ended || expired ? 'held no key for this charter' : 'registering its key on Altana'
     if (k.status === 'none') return kind === 'yield' ? 'acts from its own account, no session key' : 'acts from its own account'
@@ -164,6 +166,7 @@ export function CharterV2View({ initial, teamOwner }: { initial: V2Detail; teamO
 
   return (
     <div className={styles.view}>
+      {d.indexing ? <p className={styles.notice} role="status">Confirmed on chain. The receipt, history and complete agent list are syncing. This page updates automatically; the owner can End now.</p> : null}
       {teamOwner ? <p className={styles.notice}>A Marque team test charter.</p> : null}
       {kind === 'range' && !t['returned'] ? <p className={styles.notice}>Your position NFT moves into your own Range Keeper contract while the charter runs. Take it back any time with End.</p> : null}
       {c.fixture ? <p className={styles.notice}>Testnet fixture pool: prices are moved by Marque&apos;s test market maker.</p> : null}
@@ -171,7 +174,7 @@ export function CharterV2View({ initial, teamOwner }: { initial: V2Detail; teamO
         <span className={styles.pill} data-tone={pill.tone}><i aria-hidden="true" />{pill.label}</span>
         <h1 className={styles.title}>{view.sentence}</h1>
         <p className={styles.meta}>
-          {KIND_NAMES[kind]}. Granted {day(c.createdAt)}. {ended ? `Ended ${day(c.endedAt)}.` : `Ends ${day(c.expiresAt)}.`} {CHAIN_NAME[chainId]}.{' '}
+          {KIND_NAMES[kind]}. Granted {day(c.createdAt)}. {ended ? (c.endedAt ? `Ended ${day(c.endedAt)}.` : 'Ended.') : `Ends ${day(c.expiresAt)}.`} {CHAIN_NAME[chainId]}.{' '}
           <span title={live.ok ? `Read at block ${live.blockNumber}` : undefined}>Last checked {ago(live.readAt, now)}{live.ok ? `, block ${Number(live.blockNumber).toLocaleString('en-US')}` : ''}.</span>{stale ? ' Checking again.' : ''}
         </p>
       </header>
@@ -179,9 +182,10 @@ export function CharterV2View({ initial, teamOwner }: { initial: V2Detail; teamO
         <div className={styles.main}>
           <p className={styles.status} data-tone={pill.tone} role="status">{ended ? 'Ended. It can never act again.' : expired ? 'Past its end date. It can never act again.' : view.status}</p>
           <dl className={styles.facts}>{view.facts.map(([k, v]) => <div key={k}><dt>{k}</dt><dd className="mono">{v}</dd></div>)}</dl>
+          <CharterHistory kind={kind} samples={d.history} decimals={dec} symbol={sym} baseIs0={b0} />
           <section aria-labelledby="tl-h">
             <h2 id="tl-h" className={styles.h2}>What happened</h2>
-            {timeline.length === 0 ? <p className={styles.fine}>Nothing yet. Every action will appear here with its transaction.</p> : (
+            {timeline.length === 0 ? <p className={styles.fine}>{d.indexing ? 'Receipts are syncing from chain.' : 'Nothing yet. Every action will appear here with its transaction.'}</p> : (
               <ol className={styles.timeline}>
                 {timeline.map((i) => (
                   <li key={i.key} data-tone={i.tone}>

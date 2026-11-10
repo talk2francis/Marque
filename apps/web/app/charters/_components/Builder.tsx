@@ -177,12 +177,14 @@ export function Builder({ initialChain, initialAccount, initialMarket, demo }: {
   const isOwner = Boolean(wallet && wallet.toLowerCase() === account.toLowerCase())
   const blocker: { words: string; action?: { label: string; run: () => void } } | null = (() => {
     if (!factory) return { words: `Loan Guard is not on ${CHAIN_NAME[chainId]} yet. You can draw and test a charter here; granting opens when the guard is live on this network.` }
-    if (!quote || !rule) return { words: 'Reading the loan.' }
+    if (!quote || !rule || quote.chainId !== chainId || quote.account.toLowerCase() !== account.toLowerCase()) return { words: 'Reading the loan.' }
     if (quote.noLoan) return { words: `No Venus loan found for this address on ${CHAIN_NAME[chainId]}.` }
     if (!debtMarket) return { words: 'Automatic repayment is not available for this debt yet. Stablecoin loans first.' }
     if (!wallet) return { words: 'Connect the wallet that owns this loan to grant a charter. You can explore everything without one.', action: openConnectModal ? { label: 'Connect', run: openConnectModal } : undefined }
     if (!isOwner) return { words: `This loan belongs to ${short(account)}. Switch to that wallet to grant a charter for it.`, action: { label: 'Show my own loan', run: () => setChosen(null) } }
     if (walletChain !== chainId) return { words: `This loan is on ${CHAIN_NAME[chainId]}. Your wallet is on ${walletChain === 56 || walletChain === 97 ? CHAIN_NAME[walletChain] : 'another network'}.`, action: { label: 'Switch network', run: () => { void switchChain(config, { chainId }).catch(() => undefined) } } }
+    if (load.state !== 'ok') return { words: 'Read your wallet successfully before granting.' }
+    if (walletBalance === null || walletBalance === 0n || (budgetUnits !== null && walletBalance < minRepayFor(budgetUnits, debtMarket.decimals))) return { words: `Add ${debtMarket.symbol} for at least one repayment before granting, then read your wallet again.` }
     if ('error' in parsedBudget) return { words: parsedBudget.error }
     return null
   })()
@@ -453,7 +455,7 @@ export function Builder({ initialChain, initialAccount, initialMarket, demo }: {
         error={grant.error}
         note={grant.note}
         explorerTx={(h) => `${CHARTER_CHAINS[chainId].explorer}/tx/${h}`}
-        done={grant.granted ? { href: `/charters/${chainId}/${grant.granted}`, label: 'Open the charter' } : null}
+        done={grant.granted ? { href: `/charters/${chainId}/${grant.granted}?granted=1`, label: 'Open the charter' } : null}
       />
     </div>
   )

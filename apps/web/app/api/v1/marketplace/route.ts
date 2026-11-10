@@ -31,6 +31,7 @@ export async function GET(req: NextRequest) {
     network: f.network ?? null, token: f.token ?? null, maxPrice: f.maxPrice ?? null, minRating: f.minRating ?? null,
     sort: f.sort ?? 'best', limit: f.limit ?? 120, offset: f.offset ?? 0,
   } : {
+    charterKind: (['loan', 'yield', 'grid', 'range'] as const).find(k => k === p.get('charterKind')) ?? null,
     category: p.get('category'),
     search: p.get('q'),
     liveNow: bool('live'),

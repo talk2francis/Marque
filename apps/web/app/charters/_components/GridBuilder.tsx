@@ -11,8 +11,10 @@ import {
   GRID_DEVIATION, GRID_MIN_FILL, GRID_SLIP, GRID_WINDOW, amount, dateWords, defaultExecutors, expiryFor, fmtPrice, fullFromFor, gridCalls,
   gridSentence, KIND_DURATIONS, minStepFor, newSalt, pctOfTicks, planGrid, priceAt, toBt, units,
 } from '../../../lib/charters-builder-v2'
+import { GridReplay } from './GridReplay'
 import { BandRule } from './BandRule'
 import { CHAIN_NAME, FixtureNote, WhoBar, ago, promptWords, useWho } from './BuilderShell'
+import { checkStartingFunds } from '../../../lib/charter-funding'
 import { Seal } from './Seal'
 import { useGrantSteps } from './useGrantSteps'
 import styles from './builder.module.css'
@@ -23,7 +25,7 @@ import styles from './builder.module.css'
  * ticks never appear. Every price shown is the pool's own 5-minute average or spot, read on chain with its block.
  */
 type Pool = ReviewedPool & { spotTick: number; twapTick300: number | null; minStepAtSlip30: number | null; quoteBalance: string; baseBalance: string; baseIsToken0: boolean }
-interface Quote { pools: Pool[]; blockNumber: string; readAt: string; factory: Address | null }
+interface Quote { account: string; chainId: number; pools: Pool[]; blockNumber: string; readAt: string; factory: Address | null }
 const E18 = 10n ** 18n
 const WBNB: Record<CharterChainId, Address> = { 56: '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c', 97: '0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd' }
 
@@ -86,12 +88,14 @@ export function GridBuilder({ initialChain, initialAccount, demo }: { initialCha
   const minOrder = chainId === 56 ? 5 : 1
 
   const blocker = (() => {
+    if (load !== 'ok' || quote?.chainId !== chainId || quote.account.toLowerCase() !== account.toLowerCase()) return { words: 'Read your wallet successfully before granting.' }
     if (!factory) return { words: `Grid Band is not on ${CHAIN_NAME[chainId]} yet.` }
     if (!pool || !plan || price === null) return { words: pool && pool.twapTick300 === null ? 'This pool has no 5-minute history to read yet.' : 'Reading the pool.' }
     if (Number(order) < minOrder) return { words: `Use an order of at least ${minOrder} ${pool.quoteSymbol}: below that, the caller's gas outweighs the trade.` }
     if (buyCapU < orderU) return { words: 'The buy limit must cover at least one order.' }
     if (!twoSided && full > 0) return { words: `${full} of your levels sit above today's average price of ${fmtPrice(price)}. Lower the highest level, or turn on two-sided to start them holding ${pool.baseSymbol}.` }
     if (twoSided && full > 0 && !isWbnb && baseBal < needBase) return { words: `Two-sided needs ${amount(needBase, 18)} ${pool.baseSymbol} for the levels above the price; this wallet holds ${amount(baseBal, 18)}.` }
+    if (plan.slots > full && quoteBal < orderU) return { words: `Add enough ${pool.quoteSymbol} for at least one ${amount(orderU, 18)} ${pool.quoteSymbol} buy before granting, then read your wallet again.` }
     return who.walletBlocker('wallet')
   })()
 
@@ -116,6 +120,10 @@ export function GridBuilder({ initialChain, initialAccount, demo }: { initialCha
       ]
       await grant.prepare({
         chainId, owner: who.wallet, steps, gasFallback: [...(wrapNeed > 0n ? [50_000n] : []), 70_000n, 70_000n, 3_200_000n],
+        preflight: () => checkStartingFunds(pub, who.wallet!, [
+          ...(plan.slots > Number(ff) ? [{ token: pool.quote, symbol: pool.quoteSymbol, minimum: orderU }] : []),
+          ...(Number(ff) > 0 ? [{ token: pool.base, symbol: pool.baseSymbol, minimum: baseOrder * BigInt(ff), nativeWrap: wrapNeed }] : []),
+        ]),
         verify: async () => ((await pub.readContract({ address: factory, abi: gridBandFactoryAbi, functionName: 'isCharter', args: [predicted] })) ? predicted : null),
       })
     } catch (e) { grant.setPreError(e instanceof Error ? e.message.slice(0, 200) : 'The factory could not be read.') }
@@ -185,6 +193,7 @@ export function GridBuilder({ initialChain, initialAccount, demo }: { initialCha
               </>
             ) : <div className={styles.skeleton} aria-hidden="true" />}
           </section>
+          {plan && price !== null ? <GridReplay key={pool?.address} plan={plan} start={price} /> : null}
           <section className={styles.panel} aria-labelledby="gb-left">
             <h2 id="gb-left" className={styles.panelTitle}>What remains</h2>
             <p className={styles.fine}>In a long fall the grid holds {pool?.baseSymbol ?? 'the base token'} bought above the price until the price recovers to the next level. That is the strategy, not a fault. The average price can be pushed by sustained trading in a shallow pool, which is why only reviewed deep pools are offered. Contracts are unaudited.</p>
@@ -245,7 +254,7 @@ export function GridBuilder({ initialChain, initialAccount, demo }: { initialCha
         primary={grant.phase === 'sealed' || grant.phase === 'signing' ? null : grant.phase === 'failed' ? 'Try again' : who.pass ? 'Seal with your fingerprint' : 'Open your wallet'}
         onPrimary={() => void grant.sign()} onClose={grant.close} error={grant.error} note={grant.note}
         explorerTx={(h) => `${CHARTER_CHAINS[chainId].explorer}/tx/${h}`}
-        done={grant.granted ? { href: `/charters/${chainId}/${grant.granted}`, label: 'Open the charter' } : null} />
+        done={grant.granted ? { href: `/charters/${chainId}/${grant.granted}?granted=1`, label: 'Open the charter' } : null} />
     </div>
   )
 }

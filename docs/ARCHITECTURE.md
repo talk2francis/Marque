@@ -481,3 +481,12 @@ The global latest-quote reader now walks from one service's winner to the next u
 `PUT /api/v1/me/banner` requires the existing signed profile session, a bounded JSON body, a per-owner burst check and a fresh canonical-registry `ownerOf` read before either save or removal. Browser framing produces a 960 by 320 raster; the server rechecks format, dimensions and the existing 1.5 MB limit. Banner image IDs are scoped to their uploader, so identical bytes from two owners do not collide with the existing portrait ownership check. Default portrait hashes remain unchanged. The public GET returns only image URL, dimensions and update time.
 
 Removal clears only the presentation pointer; image bytes and proof are not deleted. Wallet-profile image cleanup excludes active banner references. Storefronts read the optional banner outside the existing cached projection, so a changed/removed banner is not kept by the page’s 30-second projection. Reference art retains its existing branch. Uploaded art shares its masthead geometry and masks without acquiring a reference label. No paid service, registry write, pricing change or signing-key access is added.
+
+
+## 10 November 2026: confirmed charter reads
+
+A v2 detail lookup first reads the derived index. Before indexing catches up, it authenticates the address with the configured factory's `isCharter`, pins fresh getter reads to a chain block, and returns immutable settings, live counters and allowances without writing synthetic rows. Receipts, key state and the complete executor list are marked syncing. Owner End remains available. Read failures propagate as unavailable; only a successful negative registry read can establish absence. Post-grant links carry a transient pending hint so node propagation cannot become an immediate not-found page.
+
+Grant hooks check account/network and usable token funds before review and again before signing. Range checks current NFT ownership. The fee check remains separate; a lifetime cap is never treated as a reservation. Register charter experience is counted from action events by agent-declared executor, per kind and chain; category and registration alone earn no capability badge.
+
+Builder campaign hires use chain funding and completion timestamps inside the published campaign window. Late indexing of an in-window completion counts; post-close completion does not. Stored observations and the saved close snapshot remain unchanged.

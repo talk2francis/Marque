@@ -84,6 +84,10 @@ function Facets({
         ]}
         onPick={(v) => patch({ warranted: v === 'warranted', tested: v === 'tested' })} />
 
+      <Choice id="charter-group" group="Charter experience" value={state.charterKind ?? 'any'}
+        options={[{ value: 'any', label: 'Any' }, { value: 'loan', label: 'Executed Loan Guard' }, { value: 'yield', label: 'Executed Yield Sweep' }, { value: 'grid', label: 'Executed Grid Band' }, { value: 'range', label: 'Executed Range Keeper' }]}
+        onPick={v => patch({ charterKind: v === 'any' ? null : v as 'loan' | 'yield' | 'grid' | 'range' })} />
+      <p className={styles.filterHint}>Actions by the agent&apos;s declared executor, counted on chain per kind. Past execution does not guarantee future results.</p>
       <PriceSlider state={state} patch={patch} facets={f} />
 
       <Choice id="live-group" group="Availability" value={state.liveNow ? 'live' : 'any'}

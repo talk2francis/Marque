@@ -135,7 +135,8 @@ The files are not first-party observations; the pack they came from is the backu
 
 **Nightly** (cron, 03:17 server local time, Europe/Berlin): `ops/pg-backup.sh`
 writes `pg_dump | gzip` to both backup directories with local seven-day rotation.
-The configured offsite destination is Google Drive through rclone. The dump is
+When `CHARTERS_DATABASE_URL` names a separate database, both databases receive local copies. With owner-approved `MARQUE_CHARTERS_OFFSITE=1` in protected backup settings, Charters follows the existing encrypted offsite path too. `OFFSITE_LATEST` advances only after both uploads verify; `OFFSITE_MARKETPLACE_LATEST` records the main dump independently.
+The configured offsite destination is Google Drive through rclone. Each dump is
 encrypted with age before upload, checked against the remote, and only then
 advances `OFFSITE_LATEST`. This is separate from the local `LATEST` receipt.
 It is a Drive backup, not a Google Cloud Storage bucket. Cron follows the server

@@ -1,7 +1,7 @@
 'use client'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useConfig } from 'wagmi'
-import { getCallsStatus, getPublicClient, sendCalls, sendTransaction, waitForTransactionReceipt } from '@wagmi/core'
+import { getAccount, getCallsStatus, getPublicClient, sendCalls, sendTransaction, waitForTransactionReceipt } from '@wagmi/core'
 import { BaseError, ContractFunctionRevertedError, encodeFunctionData, erc20Abi, formatEther, type Address, type Hex } from 'viem'
 import { CHARTER_CHAINS, V2, charterFactoryAbi, loanGuardFactoryV2Abi, type CharterChainId } from '@marque/charters/client'
 import { loanCalls, minRepayFor } from '../../../lib/charters-builder-v2'
@@ -9,6 +9,7 @@ import {
   cannotBatch, clearPending, expiryStillValid, grantCalls, loadPending, newSalt, paramsOf, savePending, tokens,
   type GrantParams, type PendingGrant,
 } from '../../../lib/charters-builder'
+import { assertGrantWallet, checkStartingFunds } from '../../../lib/charter-funding'
 import type { SealPhase, SealStep } from './Seal'
 
 /**
@@ -78,7 +79,9 @@ export function useGrant() {
   const prepare = useCallback(async (input: GrantInput, labels: [string, string], reuse?: { salt: Hex; predicted: Address; approved: boolean }) => {
     setPreError(null); setChecking(true)
     try {
+      assertGrantWallet(getAccount(config), input.owner, input.chainId)
       const pub = client(input.chainId)
+      await checkStartingFunds(pub, input.owner, [{ token: input.token, symbol: input.symbol, minimum: minRepayFor(input.params.budget, input.decimals) }])
       const v2 = V2[input.chainId].loanFactory !== null
       const factory = (V2[input.chainId].loanFactory ?? CHARTER_CHAINS[input.chainId].factory) as Address | null
       if (!factory) throw new Error('There is no Loan Guard factory on this network yet.')
@@ -118,7 +121,7 @@ export function useGrant() {
     } catch (e) {
       setPreError(e instanceof Error ? e.message : reason(e))
     } finally { setChecking(false) }
-  }, [client])
+  }, [client, config])
 
   const finish = useCallback(async (p: Prepared) => {
     const pub = client(p.chainId)
@@ -155,6 +158,7 @@ export function useGrant() {
     for (let i = from; i < 2; i++) {
       mark(i, { state: 'signing' })
       try {
+        assertGrantWallet(getAccount(config), p.owner, p.chainId)
         const hash = await sendTransaction(config, { account: p.owner, chainId: p.chainId, to: calls[i]!.to, data: calls[i]!.data })
         mark(i, { state: 'pending', hash })
         const r = await waitForTransactionReceipt(config, { chainId: p.chainId, hash, timeout: 180_000 })
@@ -173,6 +177,10 @@ export function useGrant() {
   const sign = useCallback(async () => {
     const p = prep
     if (!p) return
+    try {
+      assertGrantWallet(getAccount(config), p.owner, p.chainId)
+      await checkStartingFunds(client(p.chainId), p.owner, [{ token: p.token, symbol: p.symbol, minimum: minRepayFor(p.params.budget, p.decimals) }])
+    } catch (e) { setError(reason(e)); setPhase('failed'); return }
     setError(null); setNote(null); setPhase('signing')
     savePending({
       chainId: p.chainId, owner: p.owner, token: p.token, symbol: p.symbol, decimals: p.decimals, predicted: p.predicted, salt: p.salt, at: Date.now(),

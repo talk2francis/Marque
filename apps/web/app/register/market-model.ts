@@ -17,6 +17,7 @@ export { WARRANT_TTL_MS, warrantIsStale } from '../../lib/warrant-freshness'
 
 /** Mirrors the `/api/v1/marketplace` row exactly. Nothing added, nothing renamed. */
 export interface MarketRow {
+  charterExecutions?: Array<{ chainId: number; kind: 'loan' | 'yield' | 'grid' | 'range'; actions: number; lastAction: string }>
   agentId: string
   /** The networks this agent sells on, in the all-networks view (one card per agent; the network is picked when hiring). */
   networks?: Array<56 | 97>

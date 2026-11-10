@@ -20,6 +20,7 @@ SECONDARY="/var/backups/marque"
 KEEP_DAYS=7
 STAMP="$(date -u +%Y%m%dT%H%M%SZ)"
 NAME="marque-${STAMP}.sql.gz"
+BACKUP_NAMES=("$NAME")
 
 mkdir -p "$PRIMARY" "$SECONDARY"
 
@@ -37,6 +38,8 @@ echo "$(date -u +%FT%TZ) backup ${NAME} (${SIZE}) -> ${PRIMARY}, ${SECONDARY}"
 # (AGENTS.md invariant 12: measurements are backed up nightly). Same two locations, same 7 days.
 if [ -n "${CHARTERS_DATABASE_URL:-}" ] && [ "${CHARTERS_DATABASE_URL}" != "${DATABASE_URL:-}" ]; then
   CNAME="charters-${STAMP}.sql.gz"
+  # Opt in only after the owner approves exporting this additional database.
+  if [ "${MARQUE_CHARTERS_OFFSITE:-0}" = 1 ]; then BACKUP_NAMES+=("$CNAME"); fi
   DATABASE_URL="$CHARTERS_DATABASE_URL" node /root/marque/ops/pg-command.mjs pg_dump --no-owner --no-privileges \
     | gzip -9 > "${PRIMARY}/${CNAME}.partial"
   mv "${PRIMARY}/${CNAME}.partial" "${PRIMARY}/${CNAME}"
@@ -53,12 +56,19 @@ if [ -n "${MARQUE_BACKUP_REMOTE:-}" ]; then
   command -v rclone >/dev/null
   command -v age >/dev/null
   : "${MARQUE_BACKUP_RECIPIENT:?Set the age public recipient in backup.env}"
-  age -r "$MARQUE_BACKUP_RECIPIENT" -o "${PRIMARY}/${NAME}.age.partial" "${PRIMARY}/${NAME}"
-  mv "${PRIMARY}/${NAME}.age.partial" "${PRIMARY}/${NAME}.age"
-  rclone --config /root/.marque/rclone.conf copyto "${PRIMARY}/${NAME}.age" "${MARQUE_BACKUP_REMOTE}/${NAME}.age"
-  rclone --config /root/.marque/rclone.conf check "${PRIMARY}" "${MARQUE_BACKUP_REMOTE}" --include "/${NAME}.age" --one-way
-  echo "${STAMP}" > "${PRIMARY}/OFFSITE_LATEST"
-  echo "$(date -u +%FT%TZ) encrypted offsite copy verified"
+  for BACKUP_NAME in "${BACKUP_NAMES[@]}"; do
+    age -r "$MARQUE_BACKUP_RECIPIENT" -o "${PRIMARY}/${BACKUP_NAME}.age.partial" "${PRIMARY}/${BACKUP_NAME}"
+    mv "${PRIMARY}/${BACKUP_NAME}.age.partial" "${PRIMARY}/${BACKUP_NAME}.age"
+    rclone --config /root/.marque/rclone.conf copyto "${PRIMARY}/${BACKUP_NAME}.age" "${MARQUE_BACKUP_REMOTE}/${BACKUP_NAME}.age"
+    rclone --config /root/.marque/rclone.conf check "${PRIMARY}" "${MARQUE_BACKUP_REMOTE}" --include "/${BACKUP_NAME}.age" --one-way
+  done
+  echo "${STAMP}" > "${PRIMARY}/OFFSITE_MARKETPLACE_LATEST"
+  if [ -z "${CNAME:-}" ] || [ "${MARQUE_CHARTERS_OFFSITE:-0}" = 1 ]; then
+    echo "${STAMP}" > "${PRIMARY}/OFFSITE_LATEST"
+  else
+    echo "Charters offsite upload is awaiting owner opt-in; local Charters copies completed" >&2
+  fi
+  echo "$(date -u +%FT%TZ) configured encrypted offsite copies verified"
 else
   echo "$(date -u +%FT%TZ) WARNING: offsite backup is not configured" >&2
 fi
@@ -66,7 +76,7 @@ fi
 # --- rotate
 find "$PRIMARY"   -name 'marque-*.sql.gz' -mtime +${KEEP_DAYS} -delete
 # The encrypted copies made for the offsite upload rotate locally too (the Drive copies stay).
-find "$PRIMARY"   -name 'marque-*.sql.gz.age' -mtime +${KEEP_DAYS} -delete
+find "$PRIMARY" -maxdepth 1 \( -name 'marque-*.sql.gz.age' -o -name 'charters-*.sql.gz.age' \) -mtime +${KEEP_DAYS} -delete
 find "$SECONDARY" -name 'marque-*.sql.gz' -mtime +${KEEP_DAYS} -delete
 
 # --- record the latest for the health monitor / status page to read

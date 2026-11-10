@@ -20,7 +20,7 @@ interface DockQuest {
   suggestion: { name: string | null; free: boolean; href: string } | null
 }
 
-const HIDDEN_ROUTES = [/^\/quest(\/|$)/, /^\/_ui/]
+const HIDDEN_ROUTES = [/^\/me(\/|$)/, /^\/charters(\/|$)/, /^\/quest(\/|$)/, /^\/_ui/]
 const short = (a: string) => `${a.slice(0, 6)}…${a.slice(-4)}`
 
 /**

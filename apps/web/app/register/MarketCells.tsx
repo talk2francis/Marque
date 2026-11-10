@@ -1,4 +1,5 @@
 'use client'
+import { KIND_NAMES } from '@marque/charters/client'
 import { ProvenanceChip } from '@marque/ui'
 import { useAgentTerms } from '../_components/terms/useTerms'
 import { TermsLine } from '../_components/terms/TermsLine'
@@ -57,6 +58,9 @@ export function QualCell({ a, compact = false }: { a: MarketRow; compact?: boole
           {q.flag}
         </span>
       )}
+      {a.charterExecutions?.map(e => <span key={`${e.chainId}-${e.kind}`} className={styles.qualEvidence} title={`Onchain: ${e.actions} action${e.actions === 1 ? '' : 's'}, last ${e.lastAction}`}>
+        Executed {KIND_NAMES[e.kind]} · {e.chainId === 56 ? 'mainnet' : 'testnet'} · {e.actions}
+      </span>)}
       {!compact && q.tone === 'failed' && q.detail && (
         <span className={`mono ${styles.qualRaw}`} title={q.title}>
           {q.detail}

@@ -322,3 +322,17 @@ a.stat:hover { border-color: var(--hair-2); }
 @media (prefers-reduced-motion: reduce) {
   .wrap[data-room='building']::before, .body[data-room-body] { animation: none; }
 }
+
+/* Hiring: a quiet ledger room, with ruled gold lines and a matching profile ring. */
+.wrap[data-room='hiring']::before {
+  content: ''; position: absolute; z-index: -1; inset: -40px calc(-1 * var(--margin, 16px)) auto; height: 360px; pointer-events: none;
+  background-image: linear-gradient(color-mix(in srgb, var(--v-gold) 10%, transparent) 1px, transparent 1px), radial-gradient(ellipse at 20% 0%, color-mix(in srgb, var(--v-gold) 9%, transparent), transparent 70%);
+  background-size: 100% 28px, 100% 100%;
+  -webkit-mask-image: linear-gradient(to bottom, #000, transparent);
+  mask-image: linear-gradient(to bottom, #000, transparent);
+  animation: roomFade 420ms var(--ease, ease) both;
+}
+.wrap[data-room='hiring'] .kicker { color: var(--v-gold); }
+.wrap[data-room='hiring'] .portrait { box-shadow: 0 0 0 2px color-mix(in srgb, var(--v-gold) 55%, transparent); border-radius: 50%; }
+.wrap[data-room='hiring'] .summary { border-top-color: color-mix(in srgb, var(--v-gold) 40%, var(--hair)); }
+@media (prefers-reduced-motion: reduce) { .wrap[data-room='hiring']::before { animation: none; } }
