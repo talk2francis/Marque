@@ -279,7 +279,8 @@ module.exports = {
       autorestart: true,
       max_restarts: 10,
       restart_delay: 60000,
-      max_memory_restart: '350M',
+      // Its keystore startup reached 450 MB RSS before settling below 200 MB.
+      max_memory_restart: '650M',
       time: true,
       out_file: '/root/.pm2/logs/charters-fixture-mm-out.log',
       error_file: '/root/.pm2/logs/charters-fixture-mm-err.log',
