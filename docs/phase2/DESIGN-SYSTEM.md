@@ -588,3 +588,5 @@ The Charters hero shows the uploaded 66-second "Draw the line" film immediately 
 Each film has its own cue target and analytics id, preventing transcript links on `/film` from starting both players. Charters chapters are illustrative except the four-kind chapter, which links to current onchain counts by network. The evidence disclosure distinguishes example settings and simulated paths from live results. The transcript and download are also available at `/film?film=charters#charters-film`.
 
 Film Escape handling remains active while a play request buffers or seeks. Cancelling a request invalidates its pending promise; only an explicit autoplay-policy refusal may retry muted. Compact Charters chapters remain visible through the mobile breakpoint.
+
+When the Charters end-card link is visible, empty control padding lets clicks reach it. Buttons and the in-frame seek bar retain their own pointer targets; the launch player's hit areas are unchanged.
