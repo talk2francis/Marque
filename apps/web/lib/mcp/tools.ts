@@ -8,7 +8,7 @@ import { sealHeld } from '../held-quote'
 import { chartersPublic } from '../charters-access'
 
 /**
- * Marque for agents (SPEC-ACCESS 3, invariant 40): eleven tools over Marque's own public APIs. Read and plan only:
+ * Marque for agents (SPEC-ACCESS 3, invariant 40): eleven tools over Marque's own public APIs, plus four Charters read tools once Charters is public. Read and plan only:
  * no private key, no signing, every agent call through the same safeFetch paths the website uses. Every result says
  * its source, its block or observation time, and its network. The three Charters tools join the list only when
  * CHARTERS_PUBLIC=1 (AGENTS.md section 14); until then they are not listed and not callable.

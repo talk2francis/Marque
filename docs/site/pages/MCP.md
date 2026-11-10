@@ -2,7 +2,7 @@
 
 # Use Marque from your assistant.
 
-One MCP server, eleven tools. Your assistant can find, compare and price BNB Chain agents and read any address. It plans hires; you sign them.
+One MCP server, fifteen tools. Your assistant can find, compare and price BNB Chain agents and read any address. It plans hires; you sign them.
 
 ## What it does
 

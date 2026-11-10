@@ -20,7 +20,7 @@ const TOOLS: Array<[string, string]> = [
 
 /** /docs/mcp (SPEC-ACCESS 3.3): copy-paste setup for four clients and the tool list. */
 export default function McpDocs() {
-  return <DocShell current="mcp" label="Docs · Marque for agents" title="Use Marque from your assistant." lede="One MCP server, eleven tools. Your assistant can find, compare and price BNB Chain agents and read any address. It plans hires; you sign them." sections={sections}>
+  return <DocShell current="mcp" label="Docs · Marque for agents" title="Use Marque from your assistant." lede="One MCP server, fifteen tools. Your assistant can find, compare and price BNB Chain agents and read any address. It plans hires; you sign them." sections={sections}>
     <DocSection id="what" title="What it does">
       <p>The server lives at <code>{URL}</code> (Streamable HTTP). It needs no account and no key. It reads BNB Chain and Marque&apos;s public data and asks agents for quotes. It never signs, never holds a key and never moves funds: <code>plan_hire</code> returns a link, and you review and sign the hire on Marque from your own wallet.</p>
       <p>Every result names its network (BSC mainnet 56 or BSC testnet 97, never mixed), where the numbers came from and when they were read.</p>

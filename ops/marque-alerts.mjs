@@ -24,6 +24,10 @@ const BASE = env.MARQUE_PUBLIC_URL || 'https://marque.trade'
 const TOKEN = env.MARQUE_TELEGRAM_BOT_TOKEN || ''
 const CHAT = env.MARQUE_TELEGRAM_CHAT_ID || ''
 const THREAD = /^\d+$/.test(env.MARQUE_TELEGRAM_THREAD_ID || '') ? Number(env.MARQUE_TELEGRAM_THREAD_ID) : null
+// Server housekeeping (disk, memory, restarts, gas floats) is the operator's business, not the community's: those
+// signals go to a private chat when MARQUE_TELEGRAM_OPS_CHAT_ID is set, and to the PM2 log only when it is not.
+const OPS_CHAT = env.MARQUE_TELEGRAM_OPS_CHAT_ID || ''
+const OPS_ONLY = new Set(['disk', 'pm2_restart_loop', 'seller_memory', 'keeper_bnb'])
 const STATE = '/root/.marque/alerts-state.json'
 const ACCESS_LOG = '/var/log/caddy/marque-access.log'
 const KEEPER = '0x781ee69bf9f9C14E2BC496181714f4DF5348556a'
@@ -33,7 +37,13 @@ const sql = postgres(env.DATABASE_URL, { max: 2, idle_timeout: 20 })
 const args = new Set(process.argv.slice(2))
 const log = (...a) => console.log(new Date().toISOString(), ...a)
 
-async function telegram(text) {
+async function telegram(text, ops = false) {
+  if (ops) {
+    if (!TOKEN || !OPS_CHAT) { log('[ops only]', text.replace(/\n/g, ' | ')); return false }
+    const r = await fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ chat_id: OPS_CHAT, text, disable_web_page_preview: true }), signal: AbortSignal.timeout(10_000) }).catch((e) => ({ ok: false, statusText: e.message }))
+    if (!r.ok) log('[telegram ops failed]', r.status ?? '', r.statusText ?? '')
+    return r.ok
+  }
   if (!TOKEN || !CHAT) { log('[telegram off]', text.replace(/\n/g, ' | ')); return false }
   const r = await fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
     method: 'POST', headers: { 'content-type': 'application/json' },
@@ -206,11 +216,11 @@ async function pass({ print = false } = {}) {
     if (reading.bad) {
       cur.since ??= Date.now()
       if (!cur.alerted && Date.now() - cur.since >= s.holdMs) {
-        await telegram(`Marque alert: ${s.title}\n${reading.detail}\n${BASE}/status`)
+        await telegram(`Marque alert: ${s.title}\n${reading.detail}\n${BASE}/status`, OPS_ONLY.has(s.id))
         cur.alerted = true
       }
     } else if (!reading.error) {
-      if (cur.alerted) await telegram(`Marque recovered: ${s.title}\n${reading.detail}`)
+      if (cur.alerted) await telegram(`Marque recovered: ${s.title}\n${reading.detail}`, OPS_ONLY.has(s.id))
       cur.since = null; cur.alerted = false
     }
     cur.detail = reading.detail; cur.at = new Date().toISOString()

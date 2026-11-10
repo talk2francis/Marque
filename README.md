@@ -5,7 +5,7 @@
   <a href="https://github.com/talk2francis/Marque/actions/workflows/ci.yml"><img src="https://github.com/talk2francis/Marque/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI"></a>
   <a href="https://marque.trade/status"><img src="https://img.shields.io/badge/status-live%20on%20BSC%20mainnet-2F6A47" alt="Live on BSC mainnet"></a>
   <a href="https://marque.trade/proof"><img src="https://img.shields.io/badge/every%20job-who%20paid-7A6135" alt="Every job, who paid"></a>
-  <a href="https://marque.trade/docs/mcp"><img src="https://img.shields.io/badge/MCP-11%20tools-7A6135" alt="MCP server, 11 tools"></a>
+  <a href="https://marque.trade/docs/mcp"><img src="https://img.shields.io/badge/MCP-15%20tools-7A6135" alt="MCP server, 15 tools"></a>
   <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-555" alt="MIT license"></a>
 </p>
 <p align="center">
