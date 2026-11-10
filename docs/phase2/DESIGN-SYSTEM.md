@@ -583,7 +583,7 @@ Owner banners use the existing reference masthead layout and image masks, with a
 
 ## 10 November: the Charters film
 
-The Charters hero shows the uploaded 66-second "Draw the line" film immediately as an eager responsive poster, with a reserved 16:9 frame. Video and audio load only on user intent. The existing player accepts a film definition; the launch film remains its default. Compact chapter buttons fit the hero column, with the same rail, storyboard, evidence chip, sound controls, keyboard actions and Escape pause. Below 901px it stacks under the introduction. The Loan Guard Night Replay remains a labelled simulation in the Loan Guard band.
+The Charters hero keeps the labelled Loan Guard Night Replay at its right. The uploaded 66-second "Draw the line" film follows the complete hero as a visible screening room, using the home film's width, screen/sidebar proportions and responsive breakpoint. Chapters form one vertical list beside the screen on desktop and beneath it on smaller screens. The film is never folded. Its 16:9 poster reserves space; video and audio load only on user intent. The shared player, rail, storyboard, evidence, sound controls and Escape behavior remain the same.
 
 Each film has its own cue target and analytics id, preventing transcript links on `/film` from starting both players. Charters chapters are illustrative except the four-kind chapter, which links to current onchain counts by network. The evidence disclosure distinguishes example settings and simulated paths from live results. The transcript and download are also available at `/film?film=charters#charters-film`.
 
@@ -591,6 +591,6 @@ Film Escape handling remains active while a play request buffers or seeks. Cance
 
 When the Charters end-card link is visible, empty control padding lets clicks reach it. Buttons and the in-frame seek bar retain their own pointer targets; the launch player's hit areas are unchanged.
 
-The promises follow the film in document order, while the desktop grid places them beneath the introduction. Mobile no longer paints the promises before an earlier film panel has arrived in the HTML stream. A responsive AVIF preload precedes the header so the poster can start loading earlier.
+The introduction, simulation and promises all precede the film in document order. The hub uses the same maximum width and margins as the home screening room, aligning their leading edges. The below-hero poster uses normal image loading rather than competing with the hero text through an eager preload.
 
 Charters film end-card action pairs `--brass-lit` with `--ink-inverse`, so its text follows the surface contrast in both Day and Night.
