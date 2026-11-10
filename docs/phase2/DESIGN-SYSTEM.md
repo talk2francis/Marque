@@ -592,3 +592,5 @@ Film Escape handling remains active while a play request buffers or seeks. Cance
 When the Charters end-card link is visible, empty control padding lets clicks reach it. Buttons and the in-frame seek bar retain their own pointer targets; the launch player's hit areas are unchanged.
 
 The promises follow the film in document order, while the desktop grid places them beneath the introduction. Mobile no longer paints the promises before an earlier film panel has arrived in the HTML stream. A responsive AVIF preload precedes the header so the poster can start loading earlier.
+
+Charters film end-card action pairs `--brass-lit` with `--ink-inverse`, so its text follows the surface contrast in both Day and Night.
