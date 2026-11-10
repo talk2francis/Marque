@@ -52,6 +52,7 @@ export function FilmPlayer({ film = LAUNCH_FILM, compact = false, priority = fal
   const codecRef = useRef<FilmCodec>('h264')
   const variantRef = useRef<string>(film.variant(Date.now()))
   const pendingSeek = useRef<number | null>(null)
+  const playRequest = useRef(0)
   const seenSincePlay = useRef(false)
   const quarters = useRef(new Set<number>())
   const hideTimer = useRef<number | null>(null)
@@ -76,15 +77,16 @@ export function FilmPlayer({ film = LAUNCH_FILM, compact = false, priority = fal
   const chapter = chapterAt(t, CHAPTERS)
   const live = phase === 'playing' || phase === 'paused' || phase === 'ended' || phase === 'loading'
   const poster = useMemo(() => posterSources(FILM_MEDIA), [FILM_MEDIA])
+  const pause = useCallback(() => { playRequest.current++; videoRef.current?.pause() }, [])
 
   // Two entries on /film still have only one soundtrack playing at a time.
   useEffect(() => {
     const onOtherFilm = (e: Event) => {
-      if ((e as CustomEvent<string>).detail !== film.id) videoRef.current?.pause()
+      if ((e as CustomEvent<string>).detail !== film.id) pause()
     }
     window.addEventListener('marque:film-playing', onOtherFilm)
     return () => window.removeEventListener('marque:film-playing', onOtherFilm)
-  }, [film.id])
+  }, [film.id, pause])
 
   // ---- mount: codec, deep link (?t=30), archive state, readiness for the hero cue
   useEffect(() => {
@@ -121,10 +123,15 @@ export function FilmPlayer({ film = LAUNCH_FILM, compact = false, priority = fal
   useEffect(() => {
     if (!theater) return
     document.body.setAttribute('data-theater', '')
-    const onEsc = (e: KeyboardEvent) => { if (e.key === 'Escape' && !document.fullscreenElement) videoRef.current?.pause() }
-    window.addEventListener('keydown', onEsc)
-    return () => { document.body.removeAttribute('data-theater'); window.removeEventListener('keydown', onEsc) }
+    return () => { document.body.removeAttribute('data-theater') }
   }, [theater])
+
+  // Escape also cancels a play request that is still buffering or seeking.
+  useEffect(() => {
+    const onEsc = (e: KeyboardEvent) => { if (e.key === 'Escape' && !document.fullscreenElement) pause() }
+    window.addEventListener('keydown', onEsc)
+    return () => window.removeEventListener('keydown', onEsc)
+  }, [pause])
 
   // ---- scrolled away: lights up below half visible; pause once it is all but gone
   useEffect(() => {
@@ -138,11 +145,11 @@ export function FilmPlayer({ film = LAUNCH_FILM, compact = false, priority = fal
       if (!seenSincePlay.current) return
       if (r < 0.5) setTheater(false)
       else if (phase === 'playing') setTheater(true)
-      if (r < 0.1 && phase === 'playing') videoRef.current?.pause()
+      if (r < 0.1 && phase === 'playing') pause()
     }, { threshold: [0, 0.1, 0.5, 0.6, 1] })
     io.observe(el)
     return () => io.disconnect()
-  }, [live, phase])
+  }, [live, phase, pause])
 
   // ---- the Campaign Dock steps aside while the film is in use and on screen (it would cover the controls)
   useEffect(() => {
@@ -170,6 +177,7 @@ export function FilmPlayer({ film = LAUNCH_FILM, compact = false, priority = fal
   const play = useCallback((from: number | null, source: Source) => {
     const v = videoRef.current
     if (!v) return
+    const request = ++playRequest.current
     const key = filmVariant(Date.now())
     const codec = codecRef.current
     const src = mediaUrl(FILM_MEDIA.variants[key]![codec].file)
@@ -200,14 +208,17 @@ export function FilmPlayer({ film = LAUNCH_FILM, compact = false, priority = fal
     wake()
     // Keys work at once: focus moves from the poster button (which goes away) to the play control.
     requestAnimationFrame(() => { if (rootRef.current?.contains(document.activeElement) || document.activeElement === document.body) playBtnRef.current?.focus({ preventScroll: true }) })
-    if (p) p.catch(() => {
-      // Sound refused (the gesture was lost): play muted rather than not at all, and say so.
-      v.muted = true; setMuted(true); void v.play().catch(() => setPhase('paused'))
+    if (p) p.catch((error: unknown) => {
+      const name = error instanceof DOMException ? error.name : null
+      if (request !== playRequest.current || name === 'AbortError') return
+      if (name !== 'NotAllowedError') return
+      // Only an autoplay-policy refusal may retry muted. Cancellation never restarts playback.
+      v.muted = true; setMuted(true)
+      void v.play().catch(() => { if (request === playRequest.current) setPhase('paused') })
     })
     track('film_play', { film: film.id, from: source, cut: key, codec }, { once: source === 'poster' })
   }, [muted, phase, wake, film.id, filmVariant, FILM_MEDIA, FILM.title])
 
-  const pause = useCallback(() => { videoRef.current?.pause() }, [])
   const toggle = useCallback((source: Source) => {
     const v = videoRef.current
     if (!v) return
