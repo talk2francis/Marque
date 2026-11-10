@@ -1,6 +1,6 @@
 /**
  * charters-keys: the only process that loads agent admin keys (03_DECISIONS S11). One pass, then exit; PM2 runs
- * it again every minute. It grants each armed charter its agent's Altana session (scoped to act() on that charter,
+ * it again a minute after exit. It grants each armed charter its agent's Altana session (scoped to act() on that charter,
  * expiring with it, registered on KeyStore) and revokes sessions of charters that ended or expired, verifying both
  * on chain. The long-running worker only ever holds session keys, derived from the master.
  *
