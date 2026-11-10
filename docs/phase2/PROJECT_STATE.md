@@ -1,3 +1,5 @@
+> 10 November 2026 charter follow-up validation: application commit `1364388` passed CI typecheck, lint, copy checks, 1,566 tests, 121 isolated database checks, the BSC mainnet fork suite and web build. The VPS compiled candidate and responsive acceptance remain required before promotion. The live release endpoint is authoritative; no deployment is claimed by this checkpoint.
+
 > 10 November 2026 owner-authorized charter follow-up: fix confirmed-grant access before indexing, prevent empty-wallet approvals, investigate supply attrition, theme Hiring, complete recorded UX/ops follow-ups, commit/push/deploy. Candidate validation and activation are in progress; the public release endpoint remains authoritative.
 
 Requests: [2026-11-10] [Francis production follow-up] [A/B shared implementation] [charter reads/grants, Register evidence, campaign cutoff correction, workspace theme, backup/deploy tooling] Preserve observations and the original close snapshot; no new discretionary mainnet writes.
