@@ -34,7 +34,7 @@ describe('charter starting funds', () => {
 
 
 describe('grid starting inventory', () => {
-  const pool = { quote: token, base: owner, quoteSymbol: 'USDT', baseSymbol: 'WBNB' }
+  const pool = { quote: token, base: owner, quoteSymbol: 'USDT', baseSymbol: 'WBNB' } as const
   it('a buy-only grid needs quote, and does not demand base it has yet to buy', () => {
     expect(gridStartingFunds(pool,4,4,50n,2n)).toEqual([{ token, symbol:'USDT', minimum:50n }])
   })
