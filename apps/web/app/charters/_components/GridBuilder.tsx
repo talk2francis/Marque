@@ -14,7 +14,7 @@ import {
 import { GridReplay } from './GridReplay'
 import { BandRule } from './BandRule'
 import { CHAIN_NAME, FixtureNote, WhoBar, ago, promptWords, useWho } from './BuilderShell'
-import { checkStartingFunds } from '../../../lib/charter-funding'
+import { checkStartingFunds, gridStartingFunds } from '../../../lib/charter-funding'
 import { Seal } from './Seal'
 import { useGrantSteps } from './useGrantSteps'
 import styles from './builder.module.css'
@@ -120,10 +120,7 @@ export function GridBuilder({ initialChain, initialAccount, demo }: { initialCha
       ]
       await grant.prepare({
         chainId, owner: who.wallet, steps, gasFallback: [...(wrapNeed > 0n ? [50_000n] : []), 70_000n, 70_000n, 3_200_000n],
-        preflight: () => checkStartingFunds(pub, who.wallet!, [
-          ...(plan.slots > Number(ff) ? [{ token: pool.quote, symbol: pool.quoteSymbol, minimum: orderU }] : []),
-          ...(Number(ff) > 0 ? [{ token: pool.base, symbol: pool.baseSymbol, minimum: baseOrder * BigInt(ff), nativeWrap: wrapNeed }] : []),
-        ]),
+        preflight: () => checkStartingFunds(pub, who.wallet!, gridStartingFunds(pool, plan.slots, Number(ff), orderU, baseOrder, wrapNeed)),
         verify: async () => ((await pub.readContract({ address: factory, abi: gridBandFactoryAbi, functionName: 'isCharter', args: [predicted] })) ? predicted : null),
       })
     } catch (e) { grant.setPreError(e instanceof Error ? e.message.slice(0, 200) : 'The factory could not be read.') }

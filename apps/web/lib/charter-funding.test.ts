@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { assertGrantWallet, checkStartingFunds } from './charter-funding'
+import { assertGrantWallet, checkStartingFunds, gridStartingFunds } from './charter-funding'
 const owner = '0x0000000000000000000000000000000000000001'
 const token = '0x0000000000000000000000000000000000000002'
 const need = { token, symbol: 'USDT', minimum: 100n } as const
@@ -29,5 +29,19 @@ describe('charter starting funds', () => {
     expect(() => assertGrantWallet({ address: owner, chainId: 97 }, owner, 97)).not.toThrow()
     expect(() => assertGrantWallet({ address: token, chainId: 97 }, owner, 97)).toThrow('wallet changed')
     expect(() => assertGrantWallet({ address: owner, chainId: 56 }, owner, 97)).toThrow('network changed')
+  })
+})
+
+
+describe('grid starting inventory', () => {
+  const pool = { quote: token, base: owner, quoteSymbol: 'USDT', baseSymbol: 'WBNB' }
+  it('a buy-only grid needs quote, and does not demand base it has yet to buy', () => {
+    expect(gridStartingFunds(pool,4,4,50n,2n)).toEqual([{ token, symbol:'USDT', minimum:50n }])
+  })
+  it('an initially full grid needs its base inventory, without demanding unused quote', () => {
+    expect(gridStartingFunds(pool,4,0,50n,2n)).toEqual([{ token:owner, symbol:'WBNB', minimum:8n, nativeWrap:0n }])
+  })
+  it('a mixed grid funds one buy and every initially full slot', () => {
+    expect(gridStartingFunds(pool,4,2,50n,2n,4n)).toEqual([{ token, symbol:'USDT', minimum:50n },{ token:owner, symbol:'WBNB', minimum:4n, nativeWrap:4n }])
   })
 })

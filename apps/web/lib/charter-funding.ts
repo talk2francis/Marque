@@ -22,3 +22,12 @@ export async function checkStartingFunds(
     if (balance < need.minimum) throw new Error(`Your wallet has too little ${need.symbol} for this charter to start. Add ${need.symbol}, then read your wallet again. The lifetime limit is a ceiling, not a deposit.`)
   }
 }
+
+/** fullFrom is the FIRST full slot, not a count: lower slots buy, upper slots already hold base. */
+export function gridStartingFunds(pool: { quote: Address; base: Address; quoteSymbol: string; baseSymbol: string }, slots: number, fullFrom: number, orderQuote: bigint, baseOrder: bigint, nativeWrap = 0n): StartingFunds[] {
+  if (!Number.isInteger(fullFrom) || fullFrom < 0 || fullFrom > slots) throw new Error('The grid’s starting levels changed. Read the pool again.')
+  return [
+    ...(fullFrom > 0 ? [{ token: pool.quote, symbol: pool.quoteSymbol, minimum: orderQuote }] : []),
+    ...(fullFrom < slots ? [{ token: pool.base, symbol: pool.baseSymbol, minimum: baseOrder * BigInt(slots - fullFrom), nativeWrap }] : []),
+  ]
+}
