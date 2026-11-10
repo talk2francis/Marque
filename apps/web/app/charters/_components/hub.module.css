@@ -1,10 +1,10 @@
 /* /charters: the hero with the Night Replay, the promises, live counts, kinds, builders. */
-.page { width: 100%; max-width: 1240px; margin: 0 auto; padding: 40px var(--margin, 16px) 72px; box-sizing: border-box; display: grid; gap: 48px; }
+.page { width: 100%; max-width: var(--maxw); margin: 0 auto; padding: 40px var(--margin, 16px) 72px; box-sizing: border-box; display: grid; gap: 48px; }
 .hero { display: grid; gap: 32px; align-items: start; }
 @media (min-width: 901px) {
   .hero { grid-template-columns: minmax(0, 1fr) minmax(0, 560px); grid-template-rows: min-content 1fr; gap: 16px 48px; }
   .heroText { grid-column: 1; grid-row: 1; }
-  .hero > section { grid-column: 2; grid-row: 1 / span 2; }
+  .heroReplay { grid-column: 2; grid-row: 1 / span 2; }
   .hero > .promises { grid-column: 1; grid-row: 2; align-self: start; }
 }
 .heroText { display: grid; gap: 16px; align-content: start; }
@@ -82,7 +82,7 @@
 .footLine { margin: 0; padding-top: 20px; border-top: 1px solid var(--hair); font-size: 13px; line-height: 1.6; color: var(--ink-3); }
 @media (prefers-reduced-motion: reduce) { .moneyLine i { transition: none; } }
 
-.loanReplay { max-width: 680px; }
+.heroReplay { min-width: 0; }
 @media (max-width: 900px) {
   .hero { gap: 20px; }
   .heroText { display: contents; }

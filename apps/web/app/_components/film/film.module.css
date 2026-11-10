@@ -305,7 +305,9 @@ a.evidence:hover svg { color: var(--accent); }
 }
 @media (max-width: 1023.98px) { .split { grid-template-columns: minmax(0, 1fr); } }
 
-/* The Charters hero uses this player at column width, with a readable chapter list. */
+/* Charters uses the home screening-room proportions, visible below its complete hero. */
+.chartersBand { margin-top: 0; }
+.chartersBand .chartersMeta { margin-top: 16px; }
 .chartersFilm { min-width: 0; display: grid; gap: 16px; scroll-margin-top: calc(var(--header-h) + 16px); }
 .chartersFilm:has([data-theater]) { position: relative; z-index: 56; }
 .chartersFilm > h2 { font-family: var(--font-serif); font-size: clamp(30px, 4vw, 48px); font-weight: 400; }

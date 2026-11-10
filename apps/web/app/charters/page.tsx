@@ -1,6 +1,6 @@
 import { BRAND } from '@marque/ui/brand'
 import { CHARTERS_MEDIA } from '../../lib/film-media'
-import { mediaUrl, posterSources } from '../../lib/film'
+import { mediaUrl } from '../../lib/film'
 import { ChartersFilm } from '../_components/film/ChartersFilm'
 import { cookies } from 'next/headers'
 import { notFound } from 'next/navigation'
@@ -67,7 +67,6 @@ export default async function ChartersHub() {
   }
   return (
     <>
-      <link rel="preload" as="image" type="image/avif" href={mediaUrl(CHARTERS_MEDIA.poster.avif.find(p => p.w === 800)!.file)} imageSrcSet={posterSources(CHARTERS_MEDIA).avif} imageSizes="(max-width: 720px) 100vw, min(1184px, 92vw)" fetchPriority="high" />
       <SiteHeader />
       <main className={styles.page}>
         <section className={styles.hero}>
@@ -80,16 +79,17 @@ export default async function ChartersHub() {
               {live ? <a className={styles.secondary} href={`/charters/${live.chainId}/${live.address}`}>See a live charter</a> : null}
             </div>
           </div>
-          <ChartersFilm />
+          <div className={styles.heroReplay}><NightReplay /></div>
           <ul className={styles.promises}>
             {PROMISES.map(([a, b]) => <li key={a}><b>{a}</b><span>{b}</span></li>)}
           </ul>
         </section>
 
+        <ChartersFilm />
+
         <section className={styles.band} aria-labelledby="live-h">
           <h2 id="live-h" className={styles.h2}>Earlier Loan Guards on chain</h2>
           <p className={styles.fine}>Version 1 only. Current totals, including version 2, appear by kind below.</p>
-          <div className={styles.loanReplay}><NightReplay /></div>
           <div className={styles.stats}>
             {(stats?.chains ?? []).map((c) => (
               <div key={c.chainId} className={styles.stat}>
