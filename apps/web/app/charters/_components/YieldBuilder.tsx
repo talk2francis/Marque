@@ -149,6 +149,7 @@ export function YieldBuilder({ initialChain, initialAccount, demo }: { initialCh
   return (
     <div className={styles.builder}>
       <WhoBar who={who} placeholder="Paste any address" onChain={() => setVToken(null)} />
+      <div><button type="button" className={styles.ghost} disabled={load === 'loading' || grant.checking || grant.phase === 'signing'} onClick={() => void read()}>{load === 'loading' ? 'Reading…' : 'Refresh balances'}</button></div>
       <div className={styles.grid}>
         <div className={styles.left}>
           <section className={`${styles.panel} ${styles.position}`} aria-labelledby="ys-h" aria-busy={load === 'loading'}>

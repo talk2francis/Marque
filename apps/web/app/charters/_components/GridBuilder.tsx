@@ -139,6 +139,7 @@ export function GridBuilder({ initialChain, initialAccount, demo }: { initialCha
   return (
     <div className={styles.builder}>
       <WhoBar who={who} placeholder="Paste any address" onChain={() => setPoolAt(0)} />
+      <div><button type="button" className={styles.ghost} disabled={load === 'loading' || grant.checking || grant.phase === 'signing'} onClick={() => void read()}>{load === 'loading' ? 'Reading…' : 'Refresh balances and price'}</button></div>
       <div className={styles.grid}>
         <div className={styles.left}>
           <section className={`${styles.panel} ${styles.position}`} aria-labelledby="gb-h" aria-busy={load === 'loading'}>
