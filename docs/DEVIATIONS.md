@@ -1,5 +1,7 @@
 # Deviations
 
+- 11 November follow-up: scroll profiling under a 4x CPU throttle produced variable results; the first trace also added profiler overhead. All raw attempts are retained. These measurements do not establish a universal frame-rate improvement or request capacity. The code change removes redundant scheduling/style queries and hidden header filtering while preserving visual output. Overnight capacity testing will use an external runner and additional admission/host guards, recorded as method differences from historical runs; historical failures remain published.
+
 7 November rollout: the first outside observer failed during setup-node's automatic pnpm-cache detection before any public request. The Node-only job now disables package-manager caching; the failed run and real subsequent activation are retained in the release verification and operational receipt. Application inputs and grading are unchanged.
 
 Every reduction, substitution or change of direction, logged under the AGENTS.md

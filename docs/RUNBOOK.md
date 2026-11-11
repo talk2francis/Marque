@@ -1,5 +1,9 @@
 # Marque operations runbook
 
+### One-shot external capacity tests (11 November 2026)
+
+`scripts/load/night-controller.mjs <private-config.json>` uses the operator's existing GitHub CLI authentication to dispatch the manual-only `capacity.yml` workflow. The private config contains only `release` (exact live SHA), `notBefore` (UTC ISO time) and `out` (new evidence directory). It exports no VPS credentials or database data. Run it from the repository with Node 22, `gh` and `pm2` on PATH, under a dated systemd service/timer with `Persistent=true` and an explicit UTC `OnCalendar`. Never run this command early to test it: its time guard rejects early/late starts. Use workflow input `dry_run=true` for setup checks; that path makes no production HTTP requests. Update the pinned release only after deployment acceptance. Preserve raw failed artifacts and record timer/run IDs, generator location, exact release, workload hash, status codes and whether each hold completed. The default dry run prevents accidental load from an unconfigured manual dispatch.
+
 Written for whoever operates this next; assume that is not the person who built
 it. If BNB or anyone else adopts Marque, they run it from this page.
 

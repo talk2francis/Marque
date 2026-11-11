@@ -53,6 +53,7 @@ jobs:
           node --test ops/mcp-release.check.mjs
           node scripts/lib/warm-projections.check.mjs
           node --test scripts/load/run.check.mjs
+          node --test scripts/load/capacity-guards.check.mjs
           node --test scripts/uptime-check.check.mjs
           pnpm exec redocly lint apps/web/public/api/v1/openapi.json
       - run: pnpm test
