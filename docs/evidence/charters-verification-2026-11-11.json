@@ -1,0 +1,229 @@
+{
+  "verifiedAt": "2026-11-11T08:20:06.225Z",
+  "contracts": [
+    {
+      "chainId": 56,
+      "name": "LoanGuardFactoryV2",
+      "address": "0x60bB1B002c1469DF778Ff1e49F2e5e43cde9eA7d",
+      "match": "exact_match",
+      "creationMatch": "exact_match",
+      "runtimeMatch": "exact_match",
+      "verificationId": "d1827036-e1f8-4e42-b80a-db5beacc25d1",
+      "url": "https://repo.sourcify.dev/56/0x60bB1B002c1469DF778Ff1e49F2e5e43cde9eA7d"
+    },
+    {
+      "chainId": 56,
+      "name": "YieldSweepFactory",
+      "address": "0xb32a26c068d5C650e6C17F390b5c2a72A1968d03",
+      "match": "exact_match",
+      "creationMatch": "exact_match",
+      "runtimeMatch": "exact_match",
+      "verificationId": "b330aebf-0e62-4604-a7df-2e00e577946c",
+      "url": "https://repo.sourcify.dev/56/0xb32a26c068d5C650e6C17F390b5c2a72A1968d03"
+    },
+    {
+      "chainId": 56,
+      "name": "GridBandFactory",
+      "address": "0x2267640b997dc00139d46cC6A94a89822D43F0a5",
+      "match": "exact_match",
+      "creationMatch": "exact_match",
+      "runtimeMatch": "exact_match",
+      "verificationId": "e8315e72-fc3c-484e-a7fa-64468d65e178",
+      "url": "https://repo.sourcify.dev/56/0x2267640b997dc00139d46cC6A94a89822D43F0a5"
+    },
+    {
+      "chainId": 56,
+      "name": "RangeKeeperFactory",
+      "address": "0x374b739439FE25E12B8664EB9231a13EaEC138F4",
+      "match": "exact_match",
+      "creationMatch": "exact_match",
+      "runtimeMatch": "exact_match",
+      "verificationId": "3c6db58a-0c37-4c34-bcfd-c2156133edfb",
+      "url": "https://repo.sourcify.dev/56/0x374b739439FE25E12B8664EB9231a13EaEC138F4"
+    },
+    {
+      "chainId": 56,
+      "name": "CharterFactory",
+      "address": "0x45422fCF1314c576Fe771Af1F3828fD88Fe0b761",
+      "match": "exact_match",
+      "creationMatch": "exact_match",
+      "runtimeMatch": "exact_match",
+      "verificationId": "7a43e15d-2dd9-422f-9f9b-53cd60bcfa8a",
+      "url": "https://repo.sourcify.dev/56/0x45422fCF1314c576Fe771Af1F3828fD88Fe0b761"
+    },
+    {
+      "chainId": 97,
+      "name": "LoanGuardFactoryV2",
+      "address": "0x63F9040AA802c1259B59A6AEc0a8856287684748",
+      "match": "exact_match",
+      "creationMatch": "exact_match",
+      "runtimeMatch": "exact_match",
+      "verificationId": "983344c8-1d7e-4ff7-97b4-c1bca7b3da3e",
+      "url": "https://repo.sourcify.dev/97/0x63F9040AA802c1259B59A6AEc0a8856287684748"
+    },
+    {
+      "chainId": 97,
+      "name": "YieldSweepFactory",
+      "address": "0xd46c7D475fbA434e3A00D3f92feA25E56f55B012",
+      "match": "exact_match",
+      "creationMatch": "exact_match",
+      "runtimeMatch": "exact_match",
+      "verificationId": "2aa3e6f0-4fec-413a-8431-82df3d21df22",
+      "url": "https://repo.sourcify.dev/97/0xd46c7D475fbA434e3A00D3f92feA25E56f55B012"
+    },
+    {
+      "chainId": 97,
+      "name": "GridBandFactory",
+      "address": "0x5F89CF9a3fb4fb98C620b6aA796554f171030CC4",
+      "match": "exact_match",
+      "creationMatch": "exact_match",
+      "runtimeMatch": "exact_match",
+      "verificationId": "79ae6a30-a3eb-4638-8a19-b0bedda9a719",
+      "url": "https://repo.sourcify.dev/97/0x5F89CF9a3fb4fb98C620b6aA796554f171030CC4"
+    },
+    {
+      "chainId": 97,
+      "name": "RangeKeeperFactory",
+      "address": "0xB5F9c7B3A872D5DbbCEBc6049Ab7254140b6168B",
+      "match": "exact_match",
+      "creationMatch": "exact_match",
+      "runtimeMatch": "exact_match",
+      "verificationId": "620da8a8-dda3-4658-ad71-546a26429f9f",
+      "url": "https://repo.sourcify.dev/97/0xB5F9c7B3A872D5DbbCEBc6049Ab7254140b6168B"
+    },
+    {
+      "chainId": 56,
+      "name": "LoanGuardV2",
+      "address": "0xa369c039153c64Ee68f0BB54a1526a9CA6ab19A8",
+      "match": "exact_match",
+      "creationMatch": "exact_match",
+      "runtimeMatch": "exact_match",
+      "verificationId": "83cbeb23-4168-48c4-b8bd-8c0be494953a",
+      "url": "https://repo.sourcify.dev/56/0xa369c039153c64Ee68f0BB54a1526a9CA6ab19A8"
+    },
+    {
+      "chainId": 56,
+      "name": "YieldSweep",
+      "address": "0x81d80c5884f7d3E2a09f114c9d0401DaAF9C7121",
+      "match": "exact_match",
+      "creationMatch": "exact_match",
+      "runtimeMatch": "exact_match",
+      "verificationId": "97f88522-ca67-4492-8fd3-cf334784b187",
+      "url": "https://repo.sourcify.dev/56/0x81d80c5884f7d3E2a09f114c9d0401DaAF9C7121"
+    },
+    {
+      "chainId": 56,
+      "name": "GridBand",
+      "address": "0xDCD39B3645020CB4E1cFAa5Ca39a5d5dedD7c835",
+      "match": "exact_match",
+      "creationMatch": "exact_match",
+      "runtimeMatch": "exact_match",
+      "verificationId": "08641897-2539-42c9-b83f-0ce6d558fbfc",
+      "url": "https://repo.sourcify.dev/56/0xDCD39B3645020CB4E1cFAa5Ca39a5d5dedD7c835"
+    },
+    {
+      "chainId": 56,
+      "name": "RangeKeeper",
+      "address": "0x20fd32e487Ed9611235b3Eb33F95a95d8ee1fe48",
+      "match": "exact_match",
+      "creationMatch": "exact_match",
+      "runtimeMatch": "exact_match",
+      "verificationId": "437d7796-8ca3-4b2a-8a92-cb48e4eed012",
+      "url": "https://repo.sourcify.dev/56/0x20fd32e487Ed9611235b3Eb33F95a95d8ee1fe48"
+    },
+    {
+      "chainId": 56,
+      "name": "LoanGuard",
+      "address": "0xe8482b345264a1CA5D4Bb616B12974172EC3a2FF",
+      "match": "exact_match",
+      "creationMatch": "exact_match",
+      "runtimeMatch": "exact_match",
+      "verificationId": "76b755a8-f3c3-40b7-8789-9abac8451606",
+      "url": "https://repo.sourcify.dev/56/0xe8482b345264a1CA5D4Bb616B12974172EC3a2FF"
+    },
+    {
+      "chainId": 97,
+      "name": "LoanGuard",
+      "address": "0x0fFf6F690dc26fdFfb51F844f5dBEbFB26d4f57B",
+      "match": "match",
+      "creationMatch": null,
+      "runtimeMatch": "match",
+      "verificationId": "6f1ede2b-6bd6-44d8-9dc9-57986ed945e7",
+      "url": "https://repo.sourcify.dev/97/0x0fFf6F690dc26fdFfb51F844f5dBEbFB26d4f57B"
+    },
+    {
+      "chainId": 97,
+      "name": "LoanGuardV2",
+      "address": "0x5357BE009054FC73b8d5ae33707bb7E0699f4257",
+      "match": "exact_match",
+      "creationMatch": null,
+      "runtimeMatch": "exact_match",
+      "verificationId": "5730697e-5473-4d22-83e9-6078d4c609be",
+      "url": "https://repo.sourcify.dev/97/0x5357BE009054FC73b8d5ae33707bb7E0699f4257"
+    },
+    {
+      "chainId": 97,
+      "name": "YieldSweep",
+      "address": "0xa81c4aFf4a47B1701292a6961d285105F042eCCa",
+      "match": "exact_match",
+      "creationMatch": null,
+      "runtimeMatch": "exact_match",
+      "verificationId": "44405cea-c38c-41b1-b558-c259886598fc",
+      "url": "https://repo.sourcify.dev/97/0xa81c4aFf4a47B1701292a6961d285105F042eCCa"
+    },
+    {
+      "chainId": 97,
+      "name": "GridBand",
+      "address": "0x02195Ba716345f7891E45e85AEaE66331549fCd2",
+      "match": "exact_match",
+      "creationMatch": null,
+      "runtimeMatch": "exact_match",
+      "verificationId": "c0ef5146-1910-48d7-852c-d01b1094b6db",
+      "url": "https://repo.sourcify.dev/97/0x02195Ba716345f7891E45e85AEaE66331549fCd2"
+    },
+    {
+      "chainId": 97,
+      "name": "RangeKeeper",
+      "address": "0xD18c3eC08d0D502D64823DFACFD967409355f0b2",
+      "match": "exact_match",
+      "creationMatch": null,
+      "runtimeMatch": "exact_match",
+      "verificationId": "659c8752-7424-4a0a-8853-48cf444c0fad",
+      "url": "https://repo.sourcify.dev/97/0xD18c3eC08d0D502D64823DFACFD967409355f0b2"
+    },
+    {
+      "chainId": 97,
+      "name": "CharterFactory",
+      "address": "0xaf53e33562B8894314B65F40EB8D199525a6358d",
+      "match": "match",
+      "creationMatch": "match",
+      "runtimeMatch": "match",
+      "verificationId": "9e4a2101-a4c4-4b53-bfb7-06e79d0d8510",
+      "url": "https://repo.sourcify.dev/97/0xaf53e33562B8894314B65F40EB8D199525a6358d"
+    }
+  ],
+  "blueprints": [
+    {
+      "chainId": 56,
+      "address": "0x81bC7F48c854b6D1117556EA9d1C1306F26D6F19",
+      "at": "2026-11-11T08:11:11.504Z",
+      "bytes": 22511,
+      "codeHash": "0xf80350b91a38fd580c1ac1ad3cb8240d36abee72d64d1b7410f8cd9c2ee256c5",
+      "initCodeHash": "0x4e97c57f79c80d01ed352341d70818fcccc945cc9091fcbfdb815b6c4325db71",
+      "matchesCompiledRangeKeeperCreationCode": true,
+      "format": "non-executable 0xfe prefix followed by RangeKeeper creation bytecode",
+      "sourcifySolidityContractMatch": false
+    },
+    {
+      "chainId": 97,
+      "address": "0x21f4B4722b7FAaDFa91D69f91E0c03055945C198",
+      "at": "2026-11-11T08:11:11.605Z",
+      "bytes": 22511,
+      "codeHash": "0xf80350b91a38fd580c1ac1ad3cb8240d36abee72d64d1b7410f8cd9c2ee256c5",
+      "initCodeHash": "0x4e97c57f79c80d01ed352341d70818fcccc945cc9091fcbfdb815b6c4325db71",
+      "matchesCompiledRangeKeeperCreationCode": true,
+      "format": "non-executable 0xfe prefix followed by RangeKeeper creation bytecode",
+      "sourcifySolidityContractMatch": false
+    }
+  ]
+}

@@ -1,8 +1,8 @@
 # LOAD-TEST.md
 
-## 11 November: overnight external test requested, results pending
+## 11 November: overnight external test scheduled, results pending
 
-The owner requested 22:00 UTC+1 on 11 November (21:00 UTC). The one-shot supervisor dispatches `.github/workflows/capacity.yml` from the VPS to a standard external GitHub Actions runner. Actual timer activation and the tested release are recorded in the operator acceptance notes. No new capacity pass is claimed here.
+The active one-shot timer `marque-capacity-20261111.timer` is waiting for 22:00 UTC+1 on 11 November (21:00 UTC). It dispatches `.github/workflows/capacity.yml` from the VPS to a standard external GitHub Actions runner, pinned to live release `87118f208578417d1da2f9896e03ecf382444248`. The [traffic-free setup run](https://github.com/talk2francis/Marque/actions/runs/42989158840) passed and recorded zero stages/requests. The scheduled production test has not run yet; no new capacity pass is claimed here.
 
 The generator pins k6 0.54.0 and records the SHA-256 of the unchanged November `read-mix.js`. It attempts 25, 50, 100 and 250 virtual users in order, with the original 20-second ramp, 90-second hold, 5-second ramp-down and 20 seconds between successful stages. No cold job-room prewarming, workload substitution, forged client IPs or rate-limit bypass is allowed. The first unsuccessful stage stops all higher stages. Existing page/API latency targets and 5xx stop rules remain enforced. An HTTP 429 additionally stops the test; other HTTP errors also prevent a stage passing. One external source IP can reach an admission limit, which must be reported separately from backend capacity.
 
