@@ -37,11 +37,15 @@ export function FacetField() {
   // Created after first paint, when the browser is idle: never on the critical path.
   const [ready, setReady] = useState(false)
   useEffect(() => {
+    if (density === 0 || ready) return
     const w = window as Window & { requestIdleCallback?: (f: () => void, o?: { timeout: number }) => number }
-    if (w.requestIdleCallback) { w.requestIdleCallback(() => setReady(true), { timeout: 3000 }); return }
+    if (w.requestIdleCallback) {
+      const id = w.requestIdleCallback(() => setReady(true), { timeout: 3000 })
+      return () => w.cancelIdleCallback?.(id)
+    }
     const t = setTimeout(() => setReady(true), 1200)
     return () => clearTimeout(t)
-  }, [])
+  }, [density, ready])
 
   useEffect(() => {
     const canvas = ref.current
@@ -51,14 +55,26 @@ export function FacetField() {
     const nav = navigator as Navigator & { connection?: { saveData?: boolean } }
     const still = matchMedia('(prefers-reduced-motion: reduce)').matches || nav.connection?.saveData === true || document.documentElement.dataset['motion'] === 'calm'
     let surface: FacetSurface | null = null
-    let w = 0, h = 0, raf = 0, last = 0, running = true
+    let w = 0, h = 0, raf = 0, clipRaf = 0, last = 0, running = false
+    let timer: ReturnType<typeof setTimeout> | undefined
+    let hero = document.querySelector('[data-agent-brand-hero]')
     const start = performance.now() - Math.random() * 240_000 // each visit meets the light somewhere else
+    const readPalette = () => {
+      const css = getComputedStyle(document.documentElement)
+      const day = document.documentElement.dataset['theme'] !== 'night'
+      return {
+        ink: rgbOf(css.getPropertyValue('--ink'), day ? [21, 22, 15] : [232, 233, 224]),
+        glint: rgbOf(css.getPropertyValue('--brass-lit'), [217, 174, 69]),
+        strength: density * (day ? 5 : 8),
+        day,
+      }
+    }
+    let palette = readPalette()
 
     // Only the six branded reference storefronts carry this marker. Clip the fixed
     // field in viewport coordinates: clear above the masthead, visible below it.
     const clipHero = () => {
-      const hero = document.querySelector('[data-agent-brand-hero]')
-      const bottom = hero ? Math.max(0, Math.ceil(hero.getBoundingClientRect().bottom)) : 0
+      const bottom = hero?.isConnected ? Math.max(0, Math.ceil(hero.getBoundingClientRect().bottom)) : 0
       const clip = bottom > 0 ? `inset(${bottom}px 0 0)` : ''
       if (canvas.style.clipPath !== clip) {
         canvas.style.clipPath = clip
@@ -78,47 +94,57 @@ export function FacetField() {
     const draw = (now: number) => {
       if (!surface) return
       clipHero()
-      const css = getComputedStyle(document.documentElement)
-      const day = document.documentElement.dataset['theme'] !== 'night'
       ctx.clearRect(0, 0, w, h)
-      drawSurface(ctx, surface, (now - start) / 1000, {
-        ink: rgbOf(css.getPropertyValue('--ink'), day ? [21, 22, 15] : [232, 233, 224]),
-        glint: rgbOf(css.getPropertyValue('--brass-lit'), [217, 174, 69]),
-        // Raised twice on 29 Oct (owner: clearly visible, still off on the landing page); the reading column fades it.
-        strength: density * (day ? 5 : 8),
-        day,
-      })
+      drawSurface(ctx, surface, (now - start) / 1000, palette)
     }
-    const loop = (now: number) => {
-      raf = requestAnimationFrame(loop)
-      if (!running || now - last < 1000 / FPS) return
-      last = now
-      draw(now)
+    const stop = () => {
+      clearTimeout(timer); timer = undefined
+      cancelAnimationFrame(raf); raf = 0
     }
-    const visibility = () => { running = !document.hidden && !document.querySelector('[aria-modal="true"]') }
+    // Wake only for a frame that can actually be painted, keeping the same 12 fps budget.
+    const schedule = () => {
+      if (still || !running || timer !== undefined || raf) return
+      timer = setTimeout(() => {
+        timer = undefined
+        raf = requestAnimationFrame(now => {
+          raf = 0
+          if (!running) return
+          last = now; draw(now); schedule()
+        })
+      }, Math.max(0, 1000 / FPS - (performance.now() - last)))
+    }
+    const visibility = () => {
+      running = !document.hidden && !document.querySelector('[aria-modal="true"]')
+      if (running) schedule()
+      else stop()
+    }
     const resize = () => { build(); draw(performance.now()) }
-    const retheme = () => draw(performance.now())
+    const retheme = () => { palette = readPalette(); draw(performance.now()) }
+    const onScroll = () => {
+      if (hero && !clipRaf) clipRaf = requestAnimationFrame(() => { clipRaf = 0; clipHero() })
+    }
 
     build()
     draw(performance.now())
     addEventListener('resize', resize)
     addEventListener('marque:theme', retheme)
-    addEventListener('scroll', clipHero, { passive: true })
-    const layout = new ResizeObserver(clipHero)
+    addEventListener('scroll', onScroll, { passive: true })
+    const layout = new ResizeObserver(() => { hero = document.querySelector('[data-agent-brand-hero]'); clipHero() })
     layout.observe(document.body)
     const cleanup = () => {
       layout.disconnect()
-      removeEventListener('scroll', clipHero)
+      cancelAnimationFrame(clipRaf)
+      removeEventListener('scroll', onScroll)
       removeEventListener('resize', resize)
       removeEventListener('marque:theme', retheme)
     }
     if (still) return cleanup
-    raf = requestAnimationFrame(loop)
+    visibility()
     const mo = new MutationObserver(visibility)
     mo.observe(document.body, { childList: true })
     document.addEventListener('visibilitychange', visibility)
     return () => {
-      cancelAnimationFrame(raf); mo.disconnect()
+      stop(); mo.disconnect()
       document.removeEventListener('visibilitychange', visibility)
       cleanup()
     }

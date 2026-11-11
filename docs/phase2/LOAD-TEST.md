@@ -1,5 +1,15 @@
 # LOAD-TEST.md
 
+## 11 November: overnight external test requested, results pending
+
+The owner requested 22:00 UTC+1 on 11 November (21:00 UTC). The one-shot supervisor dispatches `.github/workflows/capacity.yml` from the VPS to a standard external GitHub Actions runner. Actual timer activation and the tested release are recorded in the operator acceptance notes. No new capacity pass is claimed here.
+
+The generator pins k6 0.54.0 and records the SHA-256 of the unchanged November `read-mix.js`. It attempts 25, 50, 100 and 250 virtual users in order, with the original 20-second ramp, 90-second hold, 5-second ramp-down and 20 seconds between successful stages. No cold job-room prewarming, workload substitution, forged client IPs or rate-limit bypass is allowed. The first unsuccessful stage stops all higher stages. Existing page/API latency targets and 5xx stop rules remain enforced. An HTTP 429 additionally stops the test; other HTTP errors also prevent a stage passing. One external source IP can reach an admission limit, which must be reported separately from backend capacity.
+
+The external runner checks health and the exact deployed release every five seconds. The VPS supervisor records memory, CPU counters, load, memory pressure and persistent Marque restart counters, cancelling on health/release changes, persistent process changes or available memory below 1 GiB. The normal short-lived Charters keys process is excluded from persistent restart comparisons. A build in progress prevents dispatch. The start window expires after 30 minutes, so a delayed/rebooted timer cannot start a daytime load test. Workflow artifacts retain raw metrics, summaries and failed attempts for 30 days; the supervisor downloads them to the VPS. A traffic-free workflow dry run validates the wiring before the scheduled test. Completed holds and aborted attempts must be distinguished in the resulting report.
+
+This external generator and its additional admission/host guards differ from the historical same-VPS runs. Results must carry those method differences and cannot establish a ranking against a different project or workload.
+
 ## 6 November 2026: current workload, aborted at every attempted level
 
 Release `0e9f5c59444a0036a05f0f9e0d0bf742864abdbf`, production through Caddy, 02:30:15 to 02:33:15 UTC. The November mix includes marketplace search and previously unviewed mainnet and testnet job rooms, with receipt, chain and IPFS reads. It is different from the September mix below. These brief aborted attempts do not establish a supported visitor count or a comparable throughput improvement.

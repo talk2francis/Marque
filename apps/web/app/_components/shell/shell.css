@@ -25,6 +25,9 @@
   .site-header[data-scrolled] {
     /* Nearly opaque once the page moves: scrolled content must not ghost through above sticky toolbars. */
     background: var(--canvas);
+    /* This surface is opaque: filtering pixels behind it changes no visible colour. */
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
     border-bottom-color: var(--hair);
     box-shadow: 0 10px 30px -22px rgba(var(--shadow-ink), 0.6);
   }
@@ -377,4 +380,4 @@
 }
 
 /* The small "New" mark beside a nav item (Charters, for 14 days after launch). */
-.nav-new { margin-left: 6px; font-size: 10.5px; font-weight: 500; letter-spacing: 0.02em; color: var(--brass-mark); vertical-align: 1px; }
+.nav-new { margin-left: 6px; font-size: 10.5px; font-weight: 500; letter-spacing: 0.02em; color: var(--brass-lit); vertical-align: 1px; }

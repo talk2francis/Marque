@@ -1,0 +1,62 @@
+name: Guarded external capacity test
+run-name: capacity-${{ inputs.run_key }}
+on:
+  workflow_dispatch:
+    inputs:
+      expected_release:
+        description: Exact live release SHA
+        required: true
+        type: string
+      not_before:
+        description: Approved UTC start (30-minute start window)
+        required: true
+        type: string
+      run_key:
+        description: Unique observation identifier
+        required: true
+        type: string
+      dry_run:
+        description: Validate setup without any production traffic
+        default: true
+        type: boolean
+permissions:
+  contents: read
+concurrency:
+  group: production-capacity
+  cancel-in-progress: false
+jobs:
+  capacity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          package-manager-cache: false
+      - name: Install the original benchmark's k6 version, with checksum
+        shell: bash
+        run: |
+          cd "$RUNNER_TEMP"
+          curl -fsSL --retry 2 -o k6.tar.gz https://github.com/grafana/k6/releases/download/v0.54.0/k6-v0.54.0-linux-amd64.tar.gz
+          echo 'c7f03434854f837b6790ee81572e4b0f955241974c79a43cbb9f8d0fef069589  k6.tar.gz' | sha256sum --check
+          tar -xzf k6.tar.gz
+          echo "$RUNNER_TEMP/k6-v0.54.0-linux-amd64" >> "$GITHUB_PATH"
+      - name: Record tool version and inspect workload (no traffic)
+        run: |
+          k6 version
+          k6 inspect scripts/load/read-mix.js
+      - name: Guarded stages
+        env:
+          EXPECTED_RELEASE: ${{ inputs.expected_release }}
+          NOT_BEFORE: ${{ inputs.not_before }}
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: node scripts/load/external.mjs
+      - name: Retain every attempted stage, including failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: capacity-results
+          path: capacity-results/
+          if-no-files-found: warn
+          retention-days: 30
