@@ -99,6 +99,8 @@ export const agent = pgTable('agent', {
 }, (t) => ({
   chainTokenUq: uniqueIndex('agent_chain_token_uq').on(t.chainId, t.tokenId),
   chainIdx: index('agent_chain_idx').on(t.chainId),
+  // Full population counts can join identity and chain without reading wide metadata rows.
+  idChainCoverIdx: index('agent_id_chain_cover_idx').on(t.id, t.chainId),
   ownerIdx: index('agent_owner_idx').on(t.ownerAddress),
   walletIdx: index('agent_wallet_idx').on(t.agentWallet),
   // Seller history matches a normalized provider on its chain, not raw casing.
@@ -143,6 +145,8 @@ export const agentCategory = pgTable('agent_category', {
   pk: primaryKey({ columns: [t.agentId, t.category] }),
   categoryIdx: index('agent_category_category_idx').on(t.category),
   classifiedIdx: index('agent_category_classified_idx').on(t.agentId).where(sql`${t.category} <> 'unclassified'`),
+  latestCoverIdx: index('agent_category_latest_cover_idx')
+    .on(t.agentId, sql`(${t.category} <> 'unclassified') desc`, t.confidence.desc(), t.assignedAt.desc(), t.category),
 }))
 
 export const ingestCursor = pgTable('ingest_cursor', {
@@ -952,6 +956,7 @@ export const commerceQuote = pgTable('commerce_quote', {
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => ({
   agentCreatedIdx: index('commerce_quote_agent_created_idx').on(t.agentId, t.createdAt.desc()),
+  createdIdx: index('commerce_quote_created_idx').on(t.createdAt.desc()),
   serviceCreatedIdx: index('commerce_quote_service_created_idx').on(t.serviceId, t.createdAt.desc()),
   hashIdx: index('commerce_quote_hash_idx').on(t.quoteHash),
   // Match the read queries' exact timestamp/id order, including PostgreSQL's

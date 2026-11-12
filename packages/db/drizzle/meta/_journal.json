@@ -253,6 +253,13 @@
       "when": 1794470401000,
       "tag": "0035_probe_skills_read_index",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1794508086879,
+      "tag": "0036_registry_read_cover_indexes",
+      "breakpoints": true
     }
   ]
 }

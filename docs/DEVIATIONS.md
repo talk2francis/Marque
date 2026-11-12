@@ -1661,3 +1661,6 @@ Planned: a reproduction cannot change a published comparison. Found: the reprodu
 
 
 12 November 16:33 UTC retest: the unchanged external workload again stopped at 25 peak users before the hold, with page p95 8,802 ms, API p95 2,568 ms, zero HTTP errors and no persistent restarts. No higher stage ran. This is a retained failure, not a capacity pass or sustained-throughput result. The follow-up addresses observed quote-history work and duplicate background registry refreshes without truncating history or relaxing targets, rate limits, evidence or financial rules. Query diagnostic improvements do not establish traffic capacity.
+
+
+12 November database-only follow-up: external run 43273718671 still stopped at 25 peak users before a hold (page p95 9,535 ms, API p95 2,604 ms), with zero HTTP errors and no persistent restarts. No higher stage ran. The subsequent index/session-default rollout retains the `b67f005` application artifact and all query, financial, freshness, workload and admission rules. Physical indexes are live and migration 0036 records them; this does not constitute a new web build or capacity pass. All failed runs remain published as aggregates, with raw diagnostics private.
