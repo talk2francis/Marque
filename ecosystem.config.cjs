@@ -51,6 +51,13 @@ function loadAgentEnv(name) {
 
 const env = loadEnv()
 const ROOT = '/root/marque'
+// All web runtimes share the same public walkthrough inputs and projection cache.
+// Keep these outside signing environments so keyless readers cannot refresh a different example.
+const publicWalkthrough = {
+  JUDGE_JOB: '56:56903',
+  JUDGE_QUEST_ADDRESS: '0x5aC2448FC79Ef8d33710b1Bced5AEff90138b452',
+  JUDGE_EARLIER_ACT: '56:57066',
+}
 function releaseOf(directory) {
   try {
     const sha = fs.readFileSync(`${directory}/RELEASE_SHA`, 'utf8').trim()
@@ -377,7 +384,7 @@ module.exports = {
       env: { ...env, NODE_ENV: 'production', PORT: port, HOSTNAME: '127.0.0.1', MARQUE_RELEASE_SHA: process.env.MARQUE_RELEASE_SHA || '', MARQUE_ROOT: ROOT, MARQUE_CAMPAIGN_CHAIN: '56', NEXT_PUBLIC_MARQUE_CAMPAIGN_CHAIN: '56', MARQUE_MCP_UPSTREAM: 'http://127.0.0.1:3297/api/mcp',
         // /judge (V4.2 L0): the featured job is an outside buyer's, chosen as the eligible mainnet job with the most decided
         // checks that all agree (56903, Keel, 3 of 3); the quest example is a team wallet, labelled on the page.
-        JUDGE_JOB: '56:56903', JUDGE_QUEST_ADDRESS: '0x5aC2448FC79Ef8d33710b1Bced5AEff90138b452', JUDGE_EARLIER_ACT: '56:57066' },
+        ...publicWalkthrough },
       autorestart: true,
       max_restarts: 50,
       restart_delay: 3000,
@@ -396,7 +403,7 @@ module.exports = {
       cwd: `${ROOT}/releases/mcp/apps/web`,
       script: `${ROOT}/releases/mcp/apps/web/server.js`,
       interpreter: 'node',
-      env: { ...keyless, NODE_ENV: 'production', PORT: '3297', HOSTNAME: '127.0.0.1', MARQUE_ROOT: ROOT, MARQUE_RELEASE_SHA: releaseOf(`${ROOT}/releases/mcp`), MARQUE_CAMPAIGN_CHAIN: '56', NEXT_PUBLIC_MARQUE_CAMPAIGN_CHAIN: '56' },
+      env: { ...keyless, ...publicWalkthrough, NODE_ENV: 'production', PORT: '3297', HOSTNAME: '127.0.0.1', MARQUE_ROOT: ROOT, MARQUE_RELEASE_SHA: releaseOf(`${ROOT}/releases/mcp`), MARQUE_CAMPAIGN_CHAIN: '56', NEXT_PUBLIC_MARQUE_CAMPAIGN_CHAIN: '56' },
       filter_env: true,
       autorestart: true,
       max_restarts: 50,
