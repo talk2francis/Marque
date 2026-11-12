@@ -1,4 +1,4 @@
-import { sql } from 'drizzle-orm'
+import { sql, type SQL } from 'drizzle-orm'
 import { db, cachedProjection } from '@marque/db'
 
 /**
@@ -77,63 +77,81 @@ export async function funnel(chainId = 56): Promise<FunnelRow[]> {
   return memoised(`funnel:${chainId}`, () => funnelUncached(chainId))
 }
 
+/** Complete registry counts without materialising every wide identity for each stage. */
+export function funnelSourceQuery(chainId = 56) {
+  return sql`
+WITH totals AS (
+  SELECT count(*) AS registered,
+         count(*) FILTER (WHERE detail_fetched = true) AS metadata_readable
+  FROM agent WHERE chain_id = ${chainId}
+),
+fresh_services AS MATERIALIZED (
+  SELECT s.agent_id, s.currently_declared, s.kind, p.liveness,
+         (p.executable_endpoint IS NOT NULL) AS executable, p.task_kinds
+  FROM agent_service s
+  JOIN agent a ON a.id = s.agent_id AND a.chain_id = ${chainId}
+  JOIN probe_schedule ps ON ps.service_id = s.id
+  JOIN probe p ON p.id = ps.last_probe_id
+  WHERE p.checked_at > now() - interval '24 hours'
+    AND p.liveness IN ('live','discovered','unbound','bad_schema')
+),
+service_flags AS (
+  SELECT agent_id,
+         true AS reachable,
+         bool_or(liveness = 'live' AND executable AND kind IN ('a2a','mcp')) AS callable,
+         bool_or(liveness = 'live' AND executable AND kind IN ('a2a','mcp')
+           AND jsonb_array_length(coalesce(task_kinds, '[]'::jsonb)) > 0) AS compatible
+  FROM fresh_services WHERE currently_declared IS DISTINCT FROM false
+  GROUP BY agent_id
+),
+service_counts AS (
+  SELECT count(*) AS reachable,
+         count(*) FILTER (WHERE callable) AS callable,
+         count(*) FILTER (WHERE compatible) AS compatible
+  FROM service_flags
+),
+qualified AS (
+  SELECT agent_id FROM (
+    SELECT DISTINCT ON (agent_id) agent_id, pass
+    FROM conformance_result ORDER BY agent_id, ran_at DESC
+  ) latest WHERE pass
+),
+task_ready AS (
+  SELECT DISTINCT s.agent_id
+  FROM fresh_services s
+  JOIN LATERAL (
+    SELECT category FROM agent_category c WHERE c.agent_id = s.agent_id
+    ORDER BY (category <> 'unclassified') DESC, confidence DESC, assigned_at DESC LIMIT 1
+  ) c ON true
+  WHERE s.liveness = 'live' AND s.executable AND s.kind IN ('a2a','mcp')
+    AND s.task_kinds ? CASE c.category
+      WHEN 'rebalancing' THEN 'rebalance' WHEN 'grid' THEN 'grid'
+      WHEN 'yield' THEN 'yield' WHEN 'health_factor' THEN 'health_factor'
+      ELSE '__unsupported__' END
+)
+SELECT totals.registered, totals.metadata_readable,
+       (SELECT count(DISTINCT s.agent_id) FROM agent_service s
+        JOIN agent a ON a.id = s.agent_id WHERE a.chain_id = ${chainId}) AS with_parseable_service,
+       service_counts.reachable, service_counts.callable, service_counts.compatible,
+       (SELECT count(*) FROM qualified q JOIN agent a ON a.id = q.agent_id WHERE a.chain_id = ${chainId}) AS qualified,
+       (SELECT count(*) FROM task_ready) AS hireable
+FROM totals CROSS JOIN service_counts
+  `
+}
+
+/** Bound background aggregation and its sort memory without changing other database sessions. */
+async function registryAggregateRead(query: SQL) {
+  return db().transaction(async tx => {
+    await tx.execute(sql`set transaction read only`)
+    await tx.execute(sql`select set_config('statement_timeout', '30000ms', true),
+      set_config('lock_timeout', '500ms', true), set_config('jit', 'off', true),
+      set_config('work_mem', '16MB', true)`)
+    return tx.execute(query)
+  })
+}
+
 async function funnelUncached(chainId = 56): Promise<FunnelRow[]> {
-  const d = db()
-  const rows = await d.execute(sql`
-    with base as (select id, detail_fetched, owner_address from agent where chain_id = ${chainId}),
-    svc as (
-      select distinct agent_id from agent_service
-    ),
-    latest_service_probe as (
-      select ps.service_id, p.liveness, p.executable_endpoint, p.task_kinds, p.checked_at
-      from probe_schedule ps join probe p on p.id = ps.last_probe_id
-    ),
-    service_state as (
-      select s.agent_id,
-        bool_or(p.liveness in ('live','discovered','unbound','bad_schema') and p.checked_at > now() - interval '24 hours') as reachable,
-        bool_or(p.liveness = 'live' and p.executable_endpoint is not null
-          and p.checked_at > now() - interval '24 hours' and s.kind in ('a2a','mcp')) as callable,
-        bool_or(p.liveness = 'live' and p.executable_endpoint is not null
-          and p.checked_at > now() - interval '24 hours' and s.kind in ('a2a','mcp')
-          and jsonb_array_length(coalesce(p.task_kinds, '[]'::jsonb)) > 0) as compatible
-      from agent_service s left join latest_service_probe p on p.service_id = s.id
-      where s.currently_declared is distinct from false
-      group by s.agent_id
-    ),
-    latest_category as (
-      select distinct on (agent_id) agent_id, category
-      from agent_category order by agent_id, (category <> 'unclassified') desc, confidence desc, assigned_at desc
-    ),
-    qualified as (
-      -- The latest stored result passes: a test the agent has since failed does not qualify it.
-      select agent_id from (
-        select distinct on (agent_id) agent_id, pass from conformance_result order by agent_id, ran_at desc
-      ) latest where pass
-    ),
-    hireable as (
-      select distinct s.agent_id
-      from agent_service s
-      join latest_service_probe p on p.service_id = s.id
-      join latest_category c on c.agent_id = s.agent_id
-      where p.liveness = 'live' and p.executable_endpoint is not null
-        and p.checked_at > now() - interval '24 hours' and s.kind in ('a2a','mcp')
-        and p.task_kinds ? case c.category
-          when 'rebalancing' then 'rebalance'
-          when 'grid' then 'grid'
-          when 'yield' then 'yield'
-          when 'health_factor' then 'health_factor'
-          else '__unsupported__' end
-    )
-    select
-      (select count(*) from base) as registered,
-      (select count(*) from base where detail_fetched = true) as metadata_readable,
-      (select count(*) from base b join svc s on s.agent_id = b.id) as with_parseable_service,
-      (select count(*) from base b join service_state s on s.agent_id = b.id where s.reachable) as reachable,
-      (select count(*) from base b join service_state s on s.agent_id = b.id where s.callable) as callable,
-      (select count(*) from base b join service_state s on s.agent_id = b.id where s.compatible) as compatible,
-      (select count(*) from base b join qualified q on q.agent_id = b.id) as qualified,
-      (select count(*) from base b join hireable h on h.agent_id = b.id) as hireable
-  `)
+  const rows = await registryAggregateRead(funnelSourceQuery(chainId))
   const r = (((rows as unknown as { rows?: unknown[] }).rows ?? (rows as unknown as unknown[]))[0] ?? {}) as Record<string, unknown>
   const n = (k: string): number => Number(r[k] ?? 0)
 

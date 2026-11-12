@@ -107,20 +107,43 @@
       "stages": [
         {
           "visitors": 25,
-          "peakVus": 24,
           "requests": 27,
           "requestsPerSecond": 1.3504410543859728,
           "pageP95Ms": 6121.935113999998,
           "apiP95Ms": 10245.15321235,
           "error5xxRate": 0.043478260869565216,
           "restarts": 0,
-          "completed": false
+          "completed": false,
+          "peakVus": 24
         }
       ],
       "processRestarts": 0,
       "betweenStageRestarts": 0,
       "note": "Stopped during the first stage. The 90-second hold did not complete; 50, 100 and 250 visitors were not attempted. The 5xx rate counts completed script reads; redirects are excluded.",
       "evidenceUrl": "https://github.com/talk2francis/Marque/actions/runs/43099335414"
+    },
+    {
+      "date": "2026-11-12T11:37:05.979Z",
+      "release": "f4a4d22",
+      "method": "External GitHub Actions runner, November mix with search and cold job rooms",
+      "stages": [
+        {
+          "visitors": 25,
+          "requests": 54,
+          "requestsPerSecond": 2.454885797345927,
+          "pageP95Ms": 7700.1193751499995,
+          "apiP95Ms": 4633.052161199995,
+          "error5xxRate": 0,
+          "restarts": 0,
+          "completed": false,
+          "peakVus": 25,
+          "passed": false
+        }
+      ],
+      "processRestarts": 0,
+      "betweenStageRestarts": 0,
+      "note": "Stopped at the first unsuccessful stage. Higher targets were not attempted. Rates from incomplete holds are aborted-run averages. The 5xx rate counts completed script reads; redirects are excluded.",
+      "evidenceUrl": "https://github.com/talk2francis/Marque/actions/runs/43210667907"
     }
   ]
 }

@@ -81,6 +81,7 @@ jobs:
           apps/web/lib/status-cursors.integration.test.ts
           packages/registry/src/service-refresh.integration.test.ts
           packages/registry/src/classify-candidates.integration.test.ts
+          packages/registry/src/funnel.integration.test.ts
           apps/worker/src/registry-services.integration.test.ts
           packages/commerce/src/hire-p02.integration.test.ts
           packages/commerce/src/feedback-proof.integration.test.ts

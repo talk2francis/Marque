@@ -1,4 +1,5 @@
 import 'server-only'
+import { cache } from 'react'
 import { sql } from 'drizzle-orm'
 import { cachedProjection, canonicalAgentIdSql, db, firstPartyAgentsAllLanes } from '@marque/db'
 import { agentPortraits } from './agent-portraits'
@@ -195,11 +196,13 @@ async function computeStorefront(agentId: string): Promise<Storefront | null> {
 }
 
 /** The storefront for an ERC-8004 token on BSC mainnet, or null when Marque has not indexed it. */
-export async function storefrontByToken(tokenId: string, chainId: 56 | 97 = 56): Promise<Storefront | null> {
+// Metadata and page rendering share one lookup for this request. Unavailable
+// storage must propagate as an error, never become a cached missing identity.
+export const storefrontByToken = cache(async (tokenId: string, chainId: 56 | 97 = 56): Promise<Storefront | null> => {
   if (!/^\d{1,12}$/.test(tokenId)) return null
-  const [r] = rowsOf(await db().execute(sql`select id from agent where chain_id = ${chainId} and token_id = ${tokenId} order by id limit 1`).catch(() => []))
+  const [r] = rowsOf(await db().execute(sql`select id from agent where chain_id = ${chainId} and token_id = ${tokenId} order by id limit 1`))
   return r ? storefront(String(r['id'])) : null
-}
+})
 
 /** Quick answers committed in the canonical feedback JSON (SPEC-WORKSPACE 2.3), when the buyer gave any. */
 function quickOf(canonical: unknown): StoreReview['quick'] {

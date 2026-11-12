@@ -15,5 +15,5 @@ export function questChains(raw: string | null): ChainId[] | null {
 }
 
 export function questProjection(address: string, chains: ChainId[] = [56, 97]): Promise<Projection<QuestResult>> {
-  return cachedProjection(`quest:v1:${chains.join(',')}:${address.toLowerCase()}`, () => questFor(address, chains), { freshMs: 60_000, timeoutMs: 12_000 })
+  return cachedProjection(`quest:v1:${chains.join(',')}:${address.toLowerCase()}`, () => questFor(address, chains), { freshMs: 60_000, timeoutMs: 12_000, staleWhileRevalidate: true })
 }
