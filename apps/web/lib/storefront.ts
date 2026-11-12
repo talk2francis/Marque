@@ -92,6 +92,12 @@ export async function storefront(agentId: string): Promise<Storefront | null> {
   return { ...value, commerce: t.commerce ? { ...t.commerce, priceLabel: t.terms.priceLabel } : null, terms: t.terms }
 }
 
+/** Match the existing agent/time index; DESC alone defaults to NULLS FIRST. */
+export function latestStorefrontProbeQuery(agentId: string) {
+  return sql`select p.checked_at, p.liveness, p.latency_ms, p.failure_class, p.detail from probe p
+    where p.agent_id = ${agentId} order by p.checked_at desc nulls last limit 1`
+}
+
 async function computeStorefront(agentId: string): Promise<Storefront | null> {
   const [a] = rowsOf(await db().execute(sql`
     select a.*, (select category from agent_category c where c.agent_id = a.id
@@ -108,9 +114,7 @@ async function computeStorefront(agentId: string): Promise<Storefront | null> {
     db().execute(sql`
       select test_id, case_id, pass, failed_fields, diffs, ran_at, block_number, error, latency_ms from conformance_result
       where ${canonicalAgentIdSql(sql`agent_id`)} = ${agentId} order by ran_at desc limit 30`).then(rowsOf).catch(() => []),
-    db().execute(sql`
-      select p.checked_at, p.liveness, p.latency_ms, p.failure_class, p.detail from probe p
-      where p.agent_id = ${agentId} order by p.checked_at desc limit 1`).then(rowsOf).catch(() => []),
+    db().execute(latestStorefrontProbeQuery(agentId)).then(rowsOf).catch(() => []),
     db().execute(sql`
       select count(*)::int as total, count(*) filter (where liveness = 'live')::int as live,
         count(*) filter (where status_code between 200 and 299)::int as reachable from probe

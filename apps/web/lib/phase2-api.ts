@@ -7,7 +7,7 @@ export const HEADERS = { 'Cache-Control': 'public, max-age=15', 'Access-Control-
 
 export async function served<T>(key: string, name: string, build: () => Promise<T>): Promise<NextResponse> {
   try {
-    const p = await cachedProjection(key, build, { freshMs: 15_000, timeoutMs: 10_000 })
+    const p = await cachedProjection(key, build, { freshMs: 15_000, timeoutMs: 10_000, staleWhileRevalidate: true })
     return NextResponse.json(p.value, { headers: {
       ...HEADERS,
       'Cache-Control': p.stale ? 'no-store' : `public, max-age=${Math.max(0, 15 - Math.ceil(p.ageMs / 1000))}`,

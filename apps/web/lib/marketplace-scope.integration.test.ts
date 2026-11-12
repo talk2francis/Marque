@@ -7,7 +7,7 @@ const enabled = !!url && /^marque_vnext_fixture_/.test(new URL(url).pathname.sli
 const stamp = Date.now()
 const owner = `0x${stamp.toString(16).padStart(40, '0')}`
 const other = `0x${(stamp + 1).toString(16).padStart(40, '0')}`
-const ids = Array.from({ length: 8 }, (_, i) => `56:catalog-scope:${stamp + i}`)
+const ids = Array.from({ length: 9 }, (_, i) => `56:catalog-scope:${stamp + i}`)
 const asRows = (r: unknown) => r as Array<Record<string, unknown>>
 describe.skipIf(!enabled)('catalog owner partition, real isolated PostgreSQL', () => {
   beforeAll(async () => {
@@ -39,7 +39,7 @@ describe.skipIf(!enabled)('catalog owner partition, real isolated PostgreSQL', (
   it('preserves clone counts including an unbound sibling and remote-image fallback metadata', async () => {
     const rows = asRows(await db().execute(marketplaceSourceQuery([owner])))
     const live = rows.find(r => r.agent_id === ids[0])!
-    expect(Number(live.identities)).toBe(2) // live and unbound siblings share owner/host; conformance-only has no host
+    expect(Number(live.identities)).toBe(3) // includes the unclassified sibling before the compact result filters it
     expect(live.meta_image).toBe('https://8004scan.io/scope.png')
     expect(rows.some(r => r.agent_id === ids[1])).toBe(true)
   })
@@ -65,7 +65,16 @@ describe.skipIf(!enabled)('catalog owner partition, real isolated PostgreSQL', (
     const all = asRows(await db().execute(marketplaceSourceQuery())).filter(row => row.category === 'health_factor' && [owner, other].includes(String(row.owner_address)))
     const scoped = asRows(await db().execute(marketplaceSourceQuery(owners))).filter(row => row.category === 'health_factor')
     expect(scoped).toEqual(all)
-    expect(Number(scoped.find(row => row.agent_id === ids[0])!.identities)).toBe(2)
+    expect(Number(scoped.find(row => row.agent_id === ids[0])!.identities)).toBe(3)
+  })
+  it('compact rows equal the original result filtered after complete owner-partition counts', async () => {
+    const full = asRows(await db().execute(marketplaceSourceQuery([owner, other])))
+    const compact = asRows(await db().execute(marketplaceSourceQuery([owner, other], 56, [])))
+    expect(compact).toEqual(full.filter(row => row.category && row.category !== 'unclassified' || row.conf_test !== null))
+    expect(compact.some(row => row.agent_id === ids[8])).toBe(false)
+    expect(Number(compact.find(row => row.agent_id === ids[0])!.identities)).toBe(3)
+    const quoted = asRows(await db().execute(marketplaceSourceQuery([owner, other], 56, [ids[8]!])))
+    expect(quoted).toEqual(full.filter(row => row.category && row.category !== 'unclassified' || row.conf_test !== null || row.agent_id === ids[8]))
   })
   it('keeps the default classified catalog while excluding unclassified and unsupported networks', async () => {
     const selected = asRows(await db().execute(marketplaceCategoryQuery())).map(row => row.agent_id)

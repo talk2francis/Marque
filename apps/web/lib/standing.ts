@@ -59,7 +59,7 @@ function own(r: MarketRow, ev: StandingEvidence | undefined, now: number): Stand
  */
 export function withStanding<T extends MarketRow>(rows: T[], evidence: Record<string, StandingEvidence>, mainnetRows: readonly MarketRow[] = [], now = Date.now()): T[] {
   const main = new Map<string, Standing>()
-  for (const m of mainnetRows) {
+  for (const m of rows.some(row => row.agentId.startsWith('97:')) ? mainnetRows : []) {
     const k = twinKey(m)
     if (!k || !m.agentId.startsWith('56:')) continue
     const s = own(m, evidence[m.agentId], now)

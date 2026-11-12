@@ -1,8 +1,24 @@
 # LOAD-TEST.md
 
-## 11 November: overnight external test scheduled, results pending
+## 11 November 2026: external run failed its first stage
 
-The active one-shot timer `marque-capacity-20261111.timer` is waiting for 22:00 UTC+1 on 11 November (21:00 UTC). It dispatches `.github/workflows/capacity.yml` from the VPS to a standard external GitHub Actions runner, pinned to live release `87118f208578417d1da2f9896e03ecf382444248`. The [traffic-free setup run](https://github.com/talk2francis/Marque/actions/runs/42989158840) passed and recorded zero stages/requests. The scheduled production test has not run yet; no new capacity pass is claimed here.
+The scheduled 21:00 UTC test ran against release `87118f208578417d1da2f9896e03ecf382444248`. [External workflow 43099335414](https://github.com/talk2francis/Marque/actions/runs/43099335414) stopped at its first target of 25 virtual visitors, reaching a peak of 24 before aborting after about 20 seconds. No 90-second hold completed. The 50, 100 and 250 stages were not attempted.
+
+| Target visitors | Peak | Logical reads | Requests/s | Page p95 | API p95 | Logical-read 5xx | Hold completed | Targets met |
+|---|---|---|---|---|---|---|---|---|
+| 25 | 24 | 23 | 1.35 | 6.12 s | 10.25 s | 4.35% (1 read) | No | No |
+
+The HTTP client recorded 27 HTTP requests including redirects: 22 HTTP 200, four HTTP 308 and one HTTP 503. The rate is an aborted-run average, not sustained throughput. Server observations also recorded a second marketplace 503 around generator shutdown; this is separate from the completed client measurements. Both marketplace failures reached the application's 12-second request deadline. Host samples showed no persistent process restart and at least 5,657 MiB available memory; that alone does not rule out CPU, I/O or database contention.
+
+The one-shot timer has expired. The traffic-free setup [run 42989158840](https://github.com/talk2francis/Marque/actions/runs/42989158840) made no requests and is not a capacity result. Raw host records and request-level diagnostics remain in private operational storage; the public capacity record contains aggregate measurements only.
+
+## 12 November repair and retest procedure
+
+The repair narrows the ordinary mainnet catalogue to classified and quoted identities while preserving full owner partitions for identity counts, all eligibility rules, explicit unclassified browsing and cross-network reads. It adds a partial classification index, corrects latest-probe ordering to match the existing index, batches canonical task-specific agent evidence, coalesces immutable job and policy reads, and serves dated last-good public projections during refresh. Isolated database tests compare the narrowed result with the original projection and verify the probe index plan. Diagnostic timings are not capacity passes.
+
+The owner requested a fresh external run after the repaired release is deployed and accepted. Pin the new live release and a fresh start window; wait for normal old-slot retirement and finish all build/browser work first. Use the unchanged November request mix and thresholds below, with all release, host and admission guards enabled. Record each attempted stage, actual peak, completed hold, threshold outcome and any HTTP error. Stop at the first unsuccessful stage. An aborted run establishes no supported visitor count.
+
+`/adopt` and `/status` read the schema-validated aggregate record at `MARQUE_ROOT/docs/evidence/capacity-record.json`. Completing a hold and passing targets are displayed separately. Append verified measurements atomically after reviewing client and host evidence, then commit the aggregate file and report. Application rebuilds are unnecessary for measurement-only updates. If the runtime record is missing or invalid, the page visibly labels its bundled historical fallback. Explicit generator failures, including admission errors, cannot become passes merely because latency targets were met.
 
 The generator pins k6 0.54.0 and records the SHA-256 of the unchanged November `read-mix.js`. It attempts 25, 50, 100 and 250 virtual users in order, with the original 20-second ramp, 90-second hold, 5-second ramp-down and 20 seconds between successful stages. No cold job-room prewarming, workload substitution, forged client IPs or rate-limit bypass is allowed. The first unsuccessful stage stops all higher stages. Existing page/API latency targets and 5xx stop rules remain enforced. An HTTP 429 additionally stops the test; other HTTP errors also prevent a stage passing. One external source IP can reach an admission limit, which must be reported separately from backend capacity.
 

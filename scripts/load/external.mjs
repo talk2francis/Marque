@@ -4,7 +4,7 @@ import { createWriteStream } from 'node:fs'
 import { mkdir, readFile, writeFile, open } from 'node:fs/promises'
 import { createHash } from 'node:crypto'
 import { setTimeout as delay } from 'node:timers/promises'
-import { validateWindow, checkHealth, collectResponses, completedStage } from './capacity-guards.mjs'
+import { validateWindow, checkHealth, collectResponses, completedStage, measuredHoldCompleted } from './capacity-guards.mjs'
 
 const out = process.env.CAPACITY_OUT ?? 'capacity-results'
 const release = process.env.EXPECTED_RELEASE
@@ -14,6 +14,7 @@ const workload = 'scripts/load/read-mix.js'
 const manifest = {
   startedAt: new Date().toISOString(), release, notBefore, dryRun,
   generator: 'GitHub Actions ubuntu-latest; one external source IP',
+  generatorRevision: process.env.GITHUB_SHA ?? null,
   workloadSHA256: createHash('sha256').update(await readFile(workload)).digest('hex'),
   stages: [],
 }
@@ -85,10 +86,13 @@ if (dryRun) {
       await sample()
       log.end()
       Object.assign(stage, { ...result, endedAt: new Date().toISOString() })
+      try { stage.completedHold = measuredHoldCompleted(JSON.parse(await readFile(`${out}/summary-${vus}.json`, 'utf8'))) }
+      catch { stage.holdCompletionUnknown = true }
       try {
         if (guardError) throw guardError
         completedStage(result.code, stage.counts)
-        stage.completedHold = true
+        if (!stage.completedHold) throw new Error('A full hold was not measured; no higher stage may start')
+        stage.passed = true
       } catch (error) { stage.failure = error.message; await save(); throw error }
       await save()
       if (vus !== 250) await delay(20_000)

@@ -142,6 +142,7 @@ export const agentCategory = pgTable('agent_category', {
 }, (t) => ({
   pk: primaryKey({ columns: [t.agentId, t.category] }),
   categoryIdx: index('agent_category_category_idx').on(t.category),
+  classifiedIdx: index('agent_category_classified_idx').on(t.agentId).where(sql`${t.category} <> 'unclassified'`),
 }))
 
 export const ingestCursor = pgTable('ingest_cursor', {

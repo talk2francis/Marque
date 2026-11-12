@@ -47,6 +47,22 @@ export async function agentStates(
   requestedTask: TaskKind | null,
   now = new Date(),
 ): Promise<Map<string, AgentStateView>> {
+  return readAgentStates(agentIds, () => requestedTask, now)
+}
+
+/** One evidence read for a mixed-category page; each identity keeps its own requested task. */
+export async function agentStatesForTasks(
+  requests: ReadonlyMap<string, TaskKind | null>,
+  now = new Date(),
+): Promise<Map<string, AgentStateView>> {
+  return readAgentStates([...requests.keys()], id => requests.get(id) ?? null, now)
+}
+
+async function readAgentStates(
+  agentIds: readonly string[],
+  taskFor: (agentId: string) => TaskKind | null,
+  now: Date,
+): Promise<Map<string, AgentStateView>> {
   const ids = [...new Set(agentIds)].filter(Boolean)
   if (ids.length === 0) return new Map()
   const idList = sql.join(ids.map((id) => sql`${id}`), sql`, `)
@@ -87,6 +103,7 @@ export async function agentStates(
   const result = new Map<string, AgentStateView>()
   for (const identity of rowsOf(identityResult)) {
     const agentId = String(identity['id'])
+    const requestedTask = taskFor(agentId)
     const services: ServiceCapabilityEvidence[] = serviceRows
       .filter((row) => String(row['agent_id']) === agentId)
       .map((row) => ({

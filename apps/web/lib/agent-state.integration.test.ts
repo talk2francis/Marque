@@ -1,7 +1,8 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { sql } from 'drizzle-orm'
 import { db, closeDb } from '@marque/db'
-import { agentState, agentStates, agentServiceEvidenceQuery } from './agent-state'
+import { agentState, agentStates, agentStatesForTasks, agentServiceEvidenceQuery } from './agent-state'
+import { latestStorefrontProbeQuery } from './storefront'
 
 const url = process.env['MARQUE_INTEGRATION_DB']
 const enabled = !!url && /^marque_vnext_fixture_/.test(new URL(url).pathname.slice(1))
@@ -49,6 +50,24 @@ describe.skipIf(!enabled)('exact latest-probe reads in isolated PostgreSQL', () 
   it('matches independent single-identity evaluations when batched', async () => {
     const batch = await agentStates(ids, 'yield', now)
     for (const id of ids) expect(batch.get(id)).toEqual(await agentState(id, 'yield', now))
+  })
+  it('mixed task requests match independent canonical evaluations', async () => {
+    const requests = new Map([[ids[0]!, 'yield' as const], [ids[1]!, 'grid' as const]])
+    const batch = await agentStatesForTasks(requests, now)
+    for (const [id, task] of requests) expect(batch.get(id)).toEqual(await agentState(id, task, now))
+    expect(batch.get(ids[1]!)?.hireable).toBe(false)
+  })
+  it('the storefront newest observation uses the existing agent-time index without a history sort', async () => {
+    const newest = rows(await db().execute(latestStorefrontProbeQuery(ids[0]!)))[0]!
+    expect(newest.liveness).toBe('dead')
+    const result = await db().transaction(async tx => {
+      await tx.execute(sql`set local enable_seqscan = off`)
+      await tx.execute(sql`set local enable_bitmapscan = off`)
+      return tx.execute(sql`explain (format json) ${latestStorefrontProbeQuery(ids[0]!)}`)
+    })
+    const plan = JSON.stringify(rows(result)[0]!['QUERY PLAN'])
+    expect(plan).toContain('probe_agent_checked_idx')
+    expect(plan).not.toContain('"Node Type":"Sort"')
   })
   it('keeps a never-probed service explicitly unknown', async () => {
     const row = rows(await db().execute(agentServiceEvidenceQuery([ids[0]!]))).find(row => Number(row.service_id) === unprobed)!

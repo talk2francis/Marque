@@ -9,8 +9,8 @@ let statements: string[]
 function fixture(result: Promise<unknown>) {
   mocked.transaction.mockImplementation(async (fn: (tx: { execute: (q: SQL) => Promise<unknown> }) => Promise<unknown>) => fn({ execute: async q => {
     const text = dialect.sqlToQuery(q).sql
-    statements.push(text)
-    return text.startsWith('select') ? result : []
+    statements.push(text + ` ${JSON.stringify(dialect.sqlToQuery(q).params)}`)
+    return text.startsWith('select') && !text.startsWith('select set_config') ? result : []
   } }))
 }
 beforeEach(() => { mocked.transaction.mockReset(); statements = [] })
@@ -25,9 +25,8 @@ describe('overlapping exact database reads', () => {
     expect(await first).toEqual(await second)
     await coalescedExactRead(query)
     expect(mocked.transaction).toHaveBeenCalledTimes(2)
-    expect(statements).toContain('set transaction read only')
-    expect(statements).toContain("set local statement_timeout = '4000ms'")
-    expect(statements).toContain("set local lock_timeout = '500ms'")
+    expect(statements.some(text => text.startsWith('set transaction read only'))).toBe(true)
+    expect(statements.some(text => text.includes("set_config('statement_timeout'") && text.includes('4000ms') && text.includes("set_config('lock_timeout', '500ms'"))).toBe(true)
   })
   it('drops a failed flight so a later read can recover', async () => {
     fixture(Promise.resolve([]))
@@ -43,7 +42,7 @@ describe('overlapping exact database reads', () => {
     expect(mocked.transaction).toHaveBeenCalledTimes(3)
     release([])
     await Promise.all(reads)
-    expect(statements).toContain("set local statement_timeout = '4000ms'")
-    expect(statements).toContain("set local statement_timeout = '8000ms'")
+    expect(statements.some(text => text.includes("set_config('statement_timeout'") && text.includes('4000ms'))).toBe(true)
+    expect(statements.some(text => text.includes("set_config('statement_timeout'") && text.includes('8000ms'))).toBe(true)
   })
 })

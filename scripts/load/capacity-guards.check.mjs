@@ -4,7 +4,7 @@ import { mkdtempSync, writeFileSync, readFileSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, dirname, resolve } from 'node:path'
 import { spawnSync } from 'node:child_process'
-import { validateWindow, checkHealth, persistentProcesses, checkHost, collectResponses, completedStage } from './capacity-guards.mjs'
+import { validateWindow, checkHealth, persistentProcesses, checkHost, collectResponses, completedStage, measuredHoldCompleted } from './capacity-guards.mjs'
 const sha = 'a'.repeat(40), start = '2026-11-11T21:00:00Z', ms = Date.parse(start)
 test('only the exact approved start window and complete SHA are accepted', () => {
   validateWindow(sha, start, ms)
@@ -34,6 +34,14 @@ test('count only request duration points, retaining 429 and other HTTP errors', 
   assert.throws(() => completedStage(0, {}))
   for (const code of [69, 99, 108, 1, null]) assert.throws(() => completedStage(code, { 200: 20 }))
   completedStage(0, { 200: 20 })
+})
+
+test('hold completion is measured independently of whether thresholds passed', () => {
+  assert.equal(measuredHoldCompleted({ metrics: { http_reqs: { count: 27, rate: 1.35 } } }), false)
+  assert.equal(measuredHoldCompleted({ metrics: { http_reqs: { count: 1150, rate: 10 } } }), true)
+  assert.equal(measuredHoldCompleted({ metrics: { http_reqs: { count: 1090, rate: 10 } } }), false)
+  assert.equal(measuredHoldCompleted({ metrics: { http_reqs: { count: 0, rate: 0 } } }), false)
+  assert.equal(measuredHoldCompleted({}), false)
 })
 
 for (const [exit, status] of [[69, '200'], [0, '429']]) test(`external runner stops all higher stages after exit ${exit}, HTTP ${status}`, () => {
