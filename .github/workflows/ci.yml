@@ -85,6 +85,7 @@ jobs:
           apps/worker/src/registry-services.integration.test.ts
           packages/commerce/src/hire-p02.integration.test.ts
           packages/commerce/src/feedback-proof.integration.test.ts
+          packages/commerce/src/quest-rating.integration.test.ts
           apps/web/lib/marketplace-scope.integration.test.ts
           apps/web/lib/agent-state.integration.test.ts
           apps/web/lib/post-close.integration.test.ts

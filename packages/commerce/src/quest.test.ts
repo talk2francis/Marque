@@ -21,7 +21,7 @@ beforeEach(() => {
     const { sql } = new PgDialect().sqlToQuery(q)
     if (sql.includes('from commerce_job')) return jobs
     if (sql.includes('from rating')) return ratings
-    if (sql.includes('from commerce_event')) return [{ block_number: 200 }]
+    if (sql.includes('from commerce_event')) return jobs.map(j => ({ chain_id: j.chain_id, job_id: j.job_id, block_number: 200 }))
     if (sql.includes('from builder_listing')) return []
     throw new Error('Unexpected query in read-only quest regression')
   })
@@ -32,6 +32,24 @@ describe('local quest protections and economic states', () => {
     expect(Object.keys(view.quest.categories)).toEqual(['yield', 'grid', 'rebalancing', 'health_factor'])
     expect(view.totals).toMatchObject({ deposits: 4, delivered: 4, settled: 0, ratings: 0 })
     expect(view.hires.every(h => h.tx.submitted && !h.tx.completed && !h.tx.paymentReleased)).toBe(true)
+    expect(view.quest.ratedAll).toBe(false)
+  })
+  it('does not read submission blocks when a client has no ratings, regardless of hire history size', async () => {
+    jobs = Array.from({ length: 240 }, (_, i) => ({ ...jobs[i % 4]!, job_id: String(i) }))
+    const view = await walletQuest(wallet, 56)
+    expect(view.hires).toHaveLength(240)
+    const queries = execute.mock.calls.map(([q]) => new PgDialect().sqlToQuery(q).sql)
+    expect(queries.filter(q => q.includes("name = 'JobSubmitted'"))).toHaveLength(0)
+    expect(queries).toHaveLength(3)
+  })
+  it('reads submission blocks once for a large rated history and retains revoked feedback and decimal values', async () => {
+    jobs = Array.from({ length: 240 }, (_, i) => ({ ...jobs[i % 4]!, job_id: String(i) }))
+    ratings = [{ chain_id: 56, agent_token_id: '900000', value: 9500, value_decimals: 2, tx_hash: 'rated', block_number: 300, revoked: true }]
+    const view = await walletQuest(wallet, 56)
+    const queries = execute.mock.calls.map(([q]) => new PgDialect().sqlToQuery(q).sql)
+    expect(queries.filter(q => q.includes("name = 'JobSubmitted'"))).toHaveLength(1)
+    expect(view.hires.filter(h => h.rating)).toHaveLength(1)
+    expect(view.hires[0]!.rating).toEqual({ value: 95, stars: 5, tx: 'rated', revoked: true })
     expect(view.quest.ratedAll).toBe(false)
   })
   it('keeps team activity visible and ineligible', async () => {

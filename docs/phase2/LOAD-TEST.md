@@ -122,3 +122,9 @@ Box: 11,960 MB. Postgres resident about 960 MB (shared_buffers 128 MB). Redis 5 
 ```
 bash scripts/load/run.sh https://marque.trade /root/.marque/load/<name>
 ```
+
+## 12 November, database access-path retest
+
+[External run 43283433112](https://github.com/talk2francis/Marque/actions/runs/43283433112) kept web release b67f005 after database migration 0036 and the scoped JIT default; generator/database source was 46c6d9b. The original workload hash and all targets/guards were unchanged. The first stage reached 25 virtual users and stopped before its hold, with 93 HTTP requests (88 successful responses and five redirects), page p95 6,769.97 ms, API p95 1,101.91 ms, zero completed HTTP errors/5xx and no persistent process restarts. No 50, 100 or 250 stage ran. The 4.23 requests/second figure is an aborted-run average, not sustained throughput. API latency met its target in this attempt; the overall test failed.
+
+The subsequent Job Room diagnosis found one submission-block query per delivered hire during feedback attribution, including clients with no feedback. Two read-only jobs outside the workload returned identical complete results after batching: query counts fell from 13 to 10 and from 15 to 9. Their separate diagnostic timings are not a traffic-capacity comparison. Further immutable-description sharing, background Lens refresh and bounded deliverable hedging are in validation. Production activation and a new guarded external test remain required.

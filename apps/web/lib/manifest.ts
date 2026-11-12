@@ -48,11 +48,7 @@ export const gatewayUrl = (url: string): string => gatewayUrls(url)[0]!
 export async function readManifest(url: string, onchainHash: string | null): Promise<Manifest | null> {
   const urls = gatewayUrls(url)
   if (urls.length > 1) {
-    for (const u of urls) {
-      const m = await readOne(u, onchainHash)
-      if (m !== MISSING && m && (m.matches === true || !onchainHash)) return m
-    }
-    return null
+    return firstMatching(urls, onchainHash)
   }
   url = urls[0]!
   const m = await readOne(url, onchainHash)
@@ -66,6 +62,34 @@ export async function readManifest(url: string, onchainHash: string | null): Pro
 }
 
 const MISSING = Symbol('missing')
+
+/** Hedge a slow location after 150 ms; at most two guarded reads run at once. */
+async function firstMatching(urls: readonly string[], hash: string | null): Promise<Manifest | null> {
+  if (!urls.length) return null
+  return new Promise(resolve => {
+    let next = 0, active = 0, settled = false
+    const finish = (value: Manifest | null) => {
+      settled = true
+      clearTimeout(hedge)
+      resolve(value)
+    }
+    const start = () => {
+      if (settled || active >= 2) return
+      if (next === urls.length) { if (!active) finish(null); return }
+      const url = urls[next++]!
+      active++
+      void readOne(url, hash).then(m => {
+        if (!settled && m !== MISSING && m && (m.matches === true || !hash)) finish(m)
+      }).finally(() => {
+        active--
+        if (!settled) start()
+      })
+    }
+    const hedge = setTimeout(start, 150)
+    start()
+  })
+}
+
 async function readOne(url: string, onchainHash: string | null): Promise<Manifest | null | typeof MISSING> {
   try {
     const r = await safeFetch(url, { timeoutMs: 8_000, maxBytes: 512 * 1024 })
@@ -128,10 +152,8 @@ async function loadJobManifest(chainId: number, jobId: string, job: ManifestJob,
   const key = `${chainId}:${jobId}:${hash.toLowerCase()}`
   const known = FOUND.get(key)
   if (known !== undefined) return known ? readManifest(known, hash) : null
-  for (const url of await candidates(chainId, jobId, job?.provider ?? null, hash)) {
-    const m = await readOne(url, hash)
-    if (m !== MISSING && m?.matches === true) { FOUND.set(key, url); return m }
-  }
+  const found = await firstMatching(await candidates(chainId, jobId, job?.provider ?? null, hash), hash)
+  if (found?.matches === true && found.url) { FOUND.set(key, found.url); return found }
   FOUND.set(key, null)
   setTimeout(() => FOUND.delete(key), 10 * 60_000).unref?.()
   return null
