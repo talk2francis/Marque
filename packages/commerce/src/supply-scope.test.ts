@@ -40,9 +40,9 @@ it('bounds global discovery separately while preserving its unscoped query', asy
   expect(query.sql).not.toContain('where ps.agent_id =')
   expect(query.sql).not.toContain('from agent_category\n      where agent_id =')
   expect(queries.some(q => q.sql.includes('read only'))).toBe(true)
-  expect(queries.some(q => q.sql.includes("statement_timeout = '8000ms'"))).toBe(true)
-  expect(queries.some(q => q.sql.includes("statement_timeout = '4000ms'"))).toBe(false)
-  expect(queries.some(q => q.sql.includes("lock_timeout = '500ms'"))).toBe(true)
+  expect(queries.some(q => q.sql.includes("set_config('statement_timeout'") && q.params.includes('8000ms'))).toBe(true)
+  expect(queries.some(q => q.sql.includes("set_config('statement_timeout'") && q.params.includes('4000ms'))).toBe(false)
+  expect(queries.some(q => q.sql.includes("set_config('lock_timeout', '500ms'"))).toBe(true)
 })
 
 describe('stored quote truth', () => {
