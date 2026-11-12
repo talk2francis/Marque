@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   encodeAbiParameters,
   encodeEventTopics,
@@ -15,15 +15,31 @@ const h = vi.hoisted(() => ({
   receipt: {} as Record<string, unknown>,
   noReceipt: false,
   job: null as Record<string, unknown> | null,
+  slowPrimary: false,
+  hedgeDelays: [] as number[],
+  awaitReceipt: false,
+  receiptStarted: false,
+  releaseTx: undefined as (() => void) | undefined,
 }))
-vi.mock('@marque/commerce', async (original) => ({
-  ...(await original<object>()),
-  chainClient: () => ({
-    getTransaction: async () => h.tx,
-    getTransactionReceipt: async () => { if (h.noReceipt) throw new Error('receipt not found'); return h.receipt },
+vi.mock('@marque/commerce', async (original) => {
+  const client = () => ({
+    getTransaction: async () => { if (h.awaitReceipt) await new Promise<void>(resolve => { h.releaseTx = resolve }); return h.tx },
+    getTransactionReceipt: async () => { h.receiptStarted = true; h.releaseTx?.(); if (h.noReceipt) throw new Error('receipt not found'); return h.receipt },
     readContract: async () => h.job,
-  }),
-}))
+  })
+  type Client = ReturnType<typeof client>
+  return { ...(await original<object>()), chainClient: client,
+    fromAny: async <T,>(_chain: number, read: (c: Client) => Promise<T>, valid: (v: T) => boolean, delay = 0) => {
+      h.hedgeDelays.push(delay)
+      const checked = async (c: Client) => { const value = await read(c); if (!valid(value)) throw Error('No validated result'); return value }
+      if (!h.slowPrimary) return checked(client())
+      return Promise.any([
+        checked({ ...client(), getTransaction: () => new Promise<Record<string, unknown>>(() => {}) }),
+        new Promise<T>((resolve, reject) => setTimeout(() => { checked(client()).then(resolve, reject) }, delay)),
+      ])
+    },
+  }
+})
 import { network } from '@marque/commerce'
 import { readSubmissionManifest, submissionPayload } from './submission-manifest'
 import { MAX_DELIVERY_BYTES } from './delivery-bytes'
@@ -42,6 +58,8 @@ const input = (value = raw, digest = hash, id = 123n) =>
   encodeFunctionData({ abi, functionName: 'submit', args: [id, digest, stringToHex(value)] })
 beforeEach(() => {
   h.noReceipt = false
+  h.slowPrimary = false; h.hedgeDelays.length = 0
+  h.awaitReceipt = false; h.receiptStarted = false; h.releaseTx = undefined
   txHash = `0x${(++serial).toString(16).padStart(64, '0')}`
   hash = sha256(toBytes(raw))
   const blockHash = `0x${'a'.repeat(64)}`
@@ -71,8 +89,22 @@ beforeEach(() => {
     ],
   }
 })
+afterEach(() => { vi.useRealTimers() })
 const read = () => readSubmissionManifest(56, jobId, hash, provider, txHash)
 describe('public answers in kernel submissions are bound to the transaction and exact bytes', () => {
+  it('starts the transaction and receipt reads together, then validates both before accepting bytes', async () => {
+    vi.useFakeTimers(); h.awaitReceipt = true
+    const result = read(); await vi.advanceTimersByTimeAsync(1)
+    expect(h.receiptStarted).toBe(true)
+    expect(await result).toMatchObject({ matches: true, source: 'submission_calldata' })
+  })
+  it('uses a validated alternate node when the primary cannot return the submission', async () => {
+    vi.useFakeTimers(); h.slowPrimary = true
+    const result = read()
+    await vi.advanceTimersByTimeAsync(151)
+    expect(await result).toMatchObject({ matches: true, source: 'submission_calldata' })
+    expect(h.hedgeDelays).toEqual([150])
+  })
   it('when the node no longer has the receipt, trusts the job as the escrow holds it, and nothing less', async () => {
     h.noReceipt = true
     h.job = { provider, deliverable: hash, submittedAt: 1n }

@@ -306,6 +306,8 @@ module.exports = {
     },
     {
       name: 'marque-quotes',
+      // Finish in-flight quote observations before a maintenance restart.
+      kill_timeout: 120000,
       cwd: `${ROOT}/apps/worker`,
       script: 'src/quotes.ts',
       // One process, so PM2's memory limit watches the worker itself (a tsx wrapper

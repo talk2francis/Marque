@@ -69,7 +69,7 @@ export const MIN_THIRD_PARTY_PER_CATEGORY = 2
 const MEMO_TTL_MS = 90_000
 
 async function memoised<T>(key: string, fn: () => Promise<T>): Promise<T> {
-  const p = await cachedProjection(`registry:${key}`, fn, { freshMs: MEMO_TTL_MS, timeoutMs: 60_000, staleWhileRevalidate: true })
+  const p = await cachedProjection(`registry:${key}`, fn, { freshMs: MEMO_TTL_MS, timeoutMs: 60_000, staleWhileRevalidate: true, staleRefreshLeaseMs: 45_000 })
   return p.value
 }
 
@@ -145,7 +145,7 @@ async function registryAggregateRead(query: SQL) {
     await tx.execute(sql`set transaction read only`)
     await tx.execute(sql`select set_config('statement_timeout', '30000ms', true),
       set_config('lock_timeout', '500ms', true), set_config('jit', 'off', true),
-      set_config('work_mem', '16MB', true)`)
+      set_config('work_mem', '16MB', true), set_config('max_parallel_workers_per_gather', '0', true)`)
     return tx.execute(query)
   })
 }
@@ -178,12 +178,11 @@ export async function categoryFunnel(chainId = 56): Promise<CategoryFunnelRow[]>
 }
 
 async function categoryFunnelUncached(chainId = 56): Promise<CategoryFunnelRow[]> {
-  const d = db()
   const owners = MARQUE_REFERENCE_OWNERS.length > 0
     ? sql`lower(b.owner_address) in (${sql.join(MARQUE_REFERENCE_OWNERS.map((o) => sql`${o.toLowerCase()}`), sql`, `)})`
     : sql`false`
 
-  const rows = await d.execute(sql`
+  const rows = await registryAggregateRead(sql`
     with base as (select id, detail_fetched, owner_address from agent where chain_id = ${chainId}),
     latest_service_probe as (
       select ps.service_id, p.liveness, p.executable_endpoint, p.task_kinds, p.checked_at
@@ -247,8 +246,7 @@ export async function failureHistogram(): Promise<Array<{ failureClass: string; 
 }
 
 async function failureHistogramUncached(): Promise<Array<{ failureClass: string; count: number; share: number }>> {
-  const d = db()
-  const rows = await d.execute(sql`
+  const rows = await registryAggregateRead(sql`
     with latest as (
       select ps.service_id, p.ok, p.failure_class
       from probe_schedule ps join probe p on p.id = ps.last_probe_id

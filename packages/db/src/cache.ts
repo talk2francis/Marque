@@ -1,4 +1,5 @@
 import Redis from 'ioredis'
+import { randomUUID } from 'node:crypto'
 
 /**
  * Last-good projection cache (AGENTS 13.8, "Batching of pages").
@@ -72,7 +73,7 @@ function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {
 export async function cachedProjection<T>(
   key: string,
   compute: () => Promise<T>,
-  opts: { freshMs?: number; timeoutMs?: number; keepMs?: number; staleWhileRevalidate?: boolean } = {},
+  opts: { freshMs?: number; timeoutMs?: number; keepMs?: number; staleWhileRevalidate?: boolean; staleRefreshLeaseMs?: number } = {},
 ): Promise<Projection<T>> {
   const freshMs = opts.freshMs ?? 60_000
   const timeoutMs = opts.timeoutMs ?? 5_000
@@ -89,10 +90,35 @@ export async function cachedProjection<T>(
     // A hard ceiling on the refresh itself: a compute that never settles (a hung RPC or
     // query) once stayed in `inflight` for hours, so every reader waited on it, timed
     // out and got the stale value (the coverage snapshot sat 4.5 h old on 26 Sep).
-    run = withTimeout(compute(), Math.max(timeoutMs * 6, 60_000)).then(async (value) => {
-      await writeStored(key, { at: Date.now(), value }, keepMs)
-      return value
-    })
+    run = (async () => {
+      // Only coordinate background refreshes when a last-good value exists.
+      // Cold reads and Redis outages retain their ordinary compute path.
+      const r = stored && opts.staleWhileRevalidate && (opts.staleRefreshLeaseMs ?? 0) > 0 ? redis() : null
+      const leaseKey = `proj:refresh:${key}`, token = randomUUID()
+      let owned = false
+      if (r) {
+        try {
+          owned = await r.set(leaseKey, token, 'PX', Math.ceil(opts.staleRefreshLeaseMs!), 'NX') === 'OK'
+          if (!owned) return stored!.value as T
+        } catch { /* Redis unavailable: refresh normally, retaining memory fallback. */ }
+      }
+      try {
+        const value = await withTimeout(Promise.resolve().then(compute), Math.max(timeoutMs * 6, 60_000))
+        const entry = { at: Date.now(), value }
+        if (owned && r) {
+          try {
+            const published = await r.eval("if redis.call('get', KEYS[1]) == ARGV[1] then redis.call('set', KEYS[2], ARGV[2], 'PX', ARGV[3]); return 1 else return 0 end", 2, leaseKey, `proj:${key}`, token, JSON.stringify(entry), String(keepMs))
+            if (Number(published) === 1) memory.set(key, entry)
+          } catch { memory.set(key, entry) }
+        } else await writeStored(key, entry, keepMs)
+        return value
+      } finally {
+        if (owned && r) {
+          // An expired owner's completion must never release its successor's lease.
+          await r.eval("if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end", 1, leaseKey, token).catch(() => undefined)
+        }
+      }
+    })()
     inflight.set(key, run)
     run.finally(() => inflight.delete(key)).catch(() => undefined)
   }

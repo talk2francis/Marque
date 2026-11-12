@@ -1,6 +1,6 @@
 import 'server-only'
-import { decodeFunctionData, hexToBytes, parseAbi, parseEventLogs, type Hex } from 'viem'
-import { agenticCommerceAbi, chainClient, isSupportedChain, network } from '@marque/commerce'
+import { decodeFunctionData, hexToBytes, parseAbi, parseEventLogs, type Hex, type TransactionReceipt } from 'viem'
+import { agenticCommerceAbi, chainClient, fromAny, isSupportedChain, network } from '@marque/commerce'
 import { deliveryContent, deliveryDigest, MAX_DELIVERY_BYTES } from './delivery-bytes'
 import type { Manifest } from './manifest'
 
@@ -82,8 +82,7 @@ const FOUND = new Map<string, { until: number; manifest: Manifest }>()
  * every practice job older than a few days was unread), so otherwise through the job as the escrow holds it now: the
  * same provider and the same deliverable hash, set once by the only call that can set it, which this transaction is.
  */
-async function isSubmission(client: ReturnType<typeof chainClient>, tx: Awaited<ReturnType<ReturnType<typeof chainClient>['getTransaction']>>, escrow: Hex, jobId: string, hash: string, provider: string, direct: boolean): Promise<boolean> {
-  const receipt = await client.getTransactionReceipt({ hash: tx.hash }).catch(() => null)
+async function isSubmission(client: ReturnType<typeof chainClient>, tx: Awaited<ReturnType<ReturnType<typeof chainClient>['getTransaction']>>, receipt: TransactionReceipt | null, escrow: Hex, jobId: string, hash: string, provider: string, direct: boolean): Promise<boolean> {
   if (receipt) {
     if (receipt.status !== 'success' || !same(receipt.transactionHash, tx.hash) || tx.blockHash !== receipt.blockHash || (direct && !same(receipt.to, escrow))) return false
     return parseEventLogs({ abi: SUBMIT, eventName: 'JobSubmitted', logs: receipt.logs.filter((l) => same(l.address, escrow)), strict: true })
@@ -119,18 +118,20 @@ export async function readSubmissionManifest(
   if (known && known.until > Date.now()) return known.manifest
   let timer: ReturnType<typeof setTimeout> | undefined
   try {
-    const client = chainClient(chainId)
     const escrow = network(chainId).commerce as Hex
     const result = await Promise.race([
-      (async () => {
-        const tx = await client.getTransaction({ hash: txHash as Hex })
+      fromAny(chainId, async client => {
+        const [tx, receipt] = await Promise.all([
+          client.getTransaction({ hash: txHash as Hex }),
+          client.getTransactionReceipt({ hash: txHash as Hex }).catch(() => null),
+        ])
         if ((tx.chainId !== undefined && tx.chainId !== chainId) || !same(tx.hash, txHash) || tx.blockHash === null) return null
         // A direct call comes from the provider to the kernel; a relayed one (the provider is a contract) must show the
         // kernel's own JobSubmitted event, or the job as the kernel holds it, naming this provider and this hash.
         const direct = same(tx.to, escrow) && same(tx.from, provider)
         if (same(tx.to, escrow) && !direct) return null
-        return (await isSubmission(client, tx, escrow, jobId, hash, provider, direct)) ? tx : null
-      })(),
+        return (await isSubmission(client, tx, receipt, escrow, jobId, hash, provider, direct)) ? tx : null
+      }, tx => tx !== null, 150),
       new Promise<null>((resolve) => {
         timer = setTimeout(() => resolve(null), 8000)
         timer.unref?.()
