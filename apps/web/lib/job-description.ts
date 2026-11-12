@@ -1,4 +1,5 @@
 import 'server-only'
+import { loadBlob, storeBlob } from '@marque/db'
 import { taskFromDescription } from './job-task'
 import { agenticCommerceAbi, fromAny, isSupportedChain, network, type ChainId } from '@marque/commerce'
 
@@ -31,12 +32,31 @@ export async function onchainJobTask(chainId: number, jobId: string): Promise<{ 
 async function readTask(chainId: ChainId, jobId: string, key: string): Promise<Task | null> {
   let empty = false
   try {
+    // The escrow's description is immutable. Share successful, identity-bound
+    // reads across web workers and releases; missing jobs and failures never enter
+    // this cache. The page's changing state and signing checks still read freshly.
+    const escrow = network(chainId).commerce.toLowerCase()
+    const cacheKey = `job-description:v1:${chainId}:${escrow}:${jobId}`
+    try {
+      const bytes = await loadBlob(cacheKey)
+      if (bytes && bytes.length <= 512 * 1024) {
+        const stored = JSON.parse(bytes.toString('utf8')) as { chainId?: unknown; escrow?: unknown; jobId?: unknown; description?: unknown }
+        if (stored.chainId === chainId && stored.escrow === escrow && stored.jobId === jobId && typeof stored.description === 'string' && stored.description.length) {
+          const out = { description: stored.description, task: taskFromDescription(stored.description) }
+          memo.set(key, out)
+          while (memo.size > MAX_TASKS) memo.delete(memo.keys().next().value!)
+          return out
+        }
+      }
+    } catch { /* cache failure or invalid bytes: retain the validated RPC path */ }
     const job = await fromAny(chainId, async client => {
       const value = await client.readContract({ address: network(chainId).commerce, abi: agenticCommerceAbi, functionName: 'getJob', args: [BigInt(jobId)] }) as { id: bigint; description: string }
       if (!value || value.id === 0n || !value.description) empty = true
       return value
     }, value => value?.id === BigInt(jobId) && Boolean(value.description), 150)
     const out = { description: job.description, task: taskFromDescription(job.description) }
+    const bytes = Buffer.from(JSON.stringify({ chainId, escrow, jobId, description: out.description }))
+    if (bytes.length <= 512 * 1024) void storeBlob(cacheKey, bytes, 7 * 24 * 3600_000).catch(() => undefined)
     memo.set(key, out)
     misses.delete(key)
     while (memo.size > MAX_TASKS) memo.delete(memo.keys().next().value!)

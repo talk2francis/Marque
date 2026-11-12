@@ -173,10 +173,15 @@ async function attachRatings(wallet: string, hires: QuestHire[]): Promise<void> 
   const rows = rowsOf(await db().execute(sql`
     select chain_id, agent_token_id, value, value_decimals, tx_hash, block_number, revoked from rating
     where client = ${wallet} order by block_number`))
+  if (!rows.length) return
+  // A Job Room loads the client's full history to bind feedback correctly. Read
+  // submission blocks once for that history, rather than issuing one query per
+  // delivered hire on every visit (including visits by clients with no ratings).
+  const submitted = await submissionBlocks(hires)
   // Each rating belongs to exactly one hire: the latest job of that agent delivered at or
   // before the rating's block. A rating no delivery precedes attaches to the agent's latest
   // hire flagged rating_unbound, so it is shown but never counts.
-  const cand = await Promise.all(hires.map(async (h) => ({ h, tid: tokenOnChain(h), submitted: h.tx.submitted ? await submittedAt(h.chainId, h.jobId) : null })))
+  const cand = hires.map(h => ({ h, tid: tokenOnChain(h), submitted: h.tx.submitted ? submitted.get(h.jobKey) ?? null : null }))
   const taken = new Set<QuestHire>()
   for (const r of rows) {
     const block = Number(r['block_number'])
@@ -192,9 +197,17 @@ async function attachRatings(wallet: string, hires: QuestHire[]): Promise<void> 
   }
 }
 
-async function submittedAt(chainId: number, jobId: string): Promise<number | null> {
-  const [r] = rowsOf(await db().execute(sql`select block_number from commerce_event where chain_id = ${chainId} and job_id = ${jobId} and name = 'JobSubmitted' limit 1`))
-  return r ? Number(r['block_number']) : null
+async function submissionBlocks(hires: readonly QuestHire[]): Promise<Map<string, number>> {
+  const jobs = [...new Map(hires.filter(h => h.tx.submitted).map(h => [h.jobKey, { chain_id: h.chainId, job_id: h.jobId }])).values()]
+  if (!jobs.length) return new Map()
+  const rows = rowsOf(await db().execute(sql`
+    select e.chain_id, e.job_id, min(e.block_number) as block_number
+    from commerce_event e
+    join jsonb_to_recordset(${JSON.stringify(jobs)}::jsonb) wanted(chain_id integer, job_id text)
+      on wanted.chain_id = e.chain_id and wanted.job_id = e.job_id
+    where e.name = 'JobSubmitted'
+    group by e.chain_id, e.job_id`))
+  return new Map(rows.map(r => [`${r['chain_id']}:${r['job_id']}`, Number(r['block_number'])]))
 }
 
 export function isAddress(a: string): boolean { return /^0x[0-9a-fA-F]{40}$/.test(a) }

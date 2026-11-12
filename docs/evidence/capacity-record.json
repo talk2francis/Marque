@@ -190,6 +190,29 @@
       "betweenStageRestarts": 0,
       "note": "Stopped at the first unsuccessful stage. Higher targets were not attempted. Rates from incomplete holds are aborted-run averages. The 5xx rate counts completed script reads; redirects are excluded.",
       "evidenceUrl": "https://github.com/talk2francis/Marque/actions/runs/43273718671"
+    },
+    {
+      "date": "2026-11-12T18:47:19.902Z",
+      "release": "b67f005",
+      "method": "External GitHub Actions runner, November mix with search and cold job rooms",
+      "stages": [
+        {
+          "visitors": 25,
+          "requests": 93,
+          "requestsPerSecond": 4.228180272150512,
+          "pageP95Ms": 6769.97313245,
+          "apiP95Ms": 1101.9147990499998,
+          "error5xxRate": 0,
+          "restarts": 0,
+          "completed": false,
+          "peakVus": 25,
+          "passed": false
+        }
+      ],
+      "processRestarts": 0,
+      "betweenStageRestarts": 0,
+      "note": "Stopped at the first unsuccessful stage. Higher targets were not attempted. Rates from incomplete holds are aborted-run averages. The 5xx rate counts completed script reads; redirects are excluded. This run used web release b67f005 after database migration 0036 and the scoped JIT default; generator/database source was 46c6d9b.",
+      "evidenceUrl": "https://github.com/talk2francis/Marque/actions/runs/43283433112"
     }
   ]
 }

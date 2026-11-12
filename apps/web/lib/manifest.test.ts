@@ -1,12 +1,54 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { keccak256, sha256, toBytes } from 'viem'
 import type { SafeFetchResult } from '@marque/probe'
 import { jobManifest, readManifest } from './manifest'
-const h = vi.hoisted(() => ({ reads: 0, response: { ok: true, status: 200, headers: {}, body: '', bytes: 0, latencyMs: 1, finalUrl: 'https://example.invalid/file', redirects: 0 } as SafeFetchResult }))
-vi.mock('@marque/probe', () => ({ safeFetch: async () => { h.reads++; return h.response } }))
+const h = vi.hoisted(() => ({ reads: 0, override: null as null | ((url: string) => Promise<SafeFetchResult>), response: { ok: true, status: 200, headers: {}, body: '', bytes: 0, latencyMs: 1, finalUrl: 'https://example.invalid/file', redirects: 0 } as SafeFetchResult }))
+vi.mock('@marque/probe', () => ({ safeFetch: async (url: string) => { h.reads++; return h.override ? h.override(url) : h.response } }))
 const http = (status: number, body: string): Extract<SafeFetchResult, { ok: true }> => ({ ok: true, status, body, headers: {}, bytes: body.length, latencyMs: 1, finalUrl: 'https://example.invalid/file', redirects: 0 })
 const currentHttp = () => { if (!h.response.ok) throw Error('Expected the HTTP fixture'); return h.response }
-beforeEach(() => { h.reads = 0; h.response = http(200, JSON.stringify({ response: { content: JSON.stringify({ recommend: false, netAprPct: 0 }) } })) })
+beforeEach(() => { h.reads = 0; h.override = null; h.response = http(200, JSON.stringify({ response: { content: JSON.stringify({ recommend: false, netAprPct: 0 }) } })) })
+afterEach(() => vi.useRealTimers())
+describe('guarded deliverable gateway hedging', () => {
+  it('uses a verified alternate without waiting for a stalled primary and starts no extra read after winning', async () => {
+    vi.useFakeTimers()
+    const good = currentHttp().body, hash = keccak256(toBytes(good))
+    let complete!: (value: SafeFetchResult) => void
+    h.override = url => url.includes('filebase') ? new Promise(resolve => { complete = resolve }) : Promise.resolve(http(200, good))
+    const read = readManifest('ipfs://synthetic-cid/answer', hash)
+    await vi.advanceTimersByTimeAsync(149)
+    expect(h.reads).toBe(1)
+    await vi.advanceTimersByTimeAsync(1)
+    expect(await read).toMatchObject({ matches: true, hash })
+    complete(http(200, '{"wrong":true}'))
+    await vi.advanceTimersByTimeAsync(1000)
+    expect(h.reads).toBe(2)
+  })
+  it('never accepts a fast mismatch or withheld disclosure in place of the committed gateway bytes', async () => {
+    const good = currentHttp().body, hash = keccak256(toBytes(good))
+    h.override = async url => url.includes('filebase') ? http(200, '{"wrong":true}')
+      : url.includes('ipfs.io') ? http(409, JSON.stringify({ schema: 'marque.withheld-error-deliverable.v1', originalPreserved: true, originalContentHash: hash }))
+      : http(200, good)
+    expect(await readManifest('ipfs://synthetic-cid/answer', hash)).toMatchObject({ matches: true, hash })
+    expect(h.reads).toBe(3)
+  })
+  it('keeps at most two locations active and advances only when one finishes', async () => {
+    vi.useFakeTimers()
+    const good = currentHttp().body, hash = keccak256(toBytes(good))
+    const finishes: Array<(value: SafeFetchResult) => void> = []
+    h.override = () => new Promise(resolve => { finishes.push(resolve) })
+    const read = readManifest('ipfs://synthetic-bounded-cid/answer', hash)
+    await vi.advanceTimersByTimeAsync(1000)
+    expect(h.reads).toBe(2)
+    finishes[0]!(http(404, ''))
+    await vi.advanceTimersByTimeAsync(0)
+    expect(h.reads).toBe(3)
+    finishes[2]!(http(200, good))
+    expect(await read).toMatchObject({ matches: true })
+    finishes[1]!(http(404, ''))
+    await vi.advanceTimersByTimeAsync(1000)
+    expect(h.reads).toBe(3)
+  })
+})
 describe('shared verified job answers', () => {
   it('deduplicates concurrent page/lens reads, binds inputs and returns isolated values', async () => {
     const hash = keccak256(toBytes(currentHttp().body))
