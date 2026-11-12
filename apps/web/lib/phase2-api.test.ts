@@ -8,6 +8,7 @@ it('preserves the response body and exposes snapshot age to cross-origin clients
   const body = { jobs: 3 }
   cachedProjection.mockResolvedValue({ value: body, computedAt: '2026-10-16T00:00:00.000Z', ageMs: 4500, stale: false })
   const response = await served('test', 'test', async () => body)
+  expect(cachedProjection).toHaveBeenCalledWith('test', expect.any(Function), expect.objectContaining({ staleWhileRevalidate: true }))
   expect(await response.json()).toEqual(body)
   expect(response.headers.get('X-Marque-Projection-Age-Ms')).toBe('4500')
   expect(response.headers.get('X-Marque-Projection-Stale')).toBe('false')

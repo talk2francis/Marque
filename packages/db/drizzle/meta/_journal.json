@@ -239,6 +239,13 @@
       "when": 1794240000000,
       "tag": "0033_charters_v2",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1794470400000,
+      "tag": "0034_classified_catalog_index",
+      "breakpoints": true
     }
   ]
 }

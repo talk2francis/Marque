@@ -10,8 +10,7 @@ async function executeRead(query: SQL, scope: 'exact' | 'catalog', options: { ji
     await tx.execute(sql`set transaction read only`)
     // A background projection refresh (nobody waits on it) may take a longer, still bounded, budget.
     const ms = options.timeoutMs && options.timeoutMs > 0 && options.timeoutMs <= 60_000 ? Math.round(options.timeoutMs) : scope === 'exact' ? 4000 : 8000
-    await tx.execute(sql.raw(`set local statement_timeout = '${ms}ms'`))
-    await tx.execute(sql`set local lock_timeout = '500ms'`)
+    await tx.execute(sql`select set_config('statement_timeout', ${`${ms}ms`}, true), set_config('lock_timeout', '500ms', true)`)
     // Compilation can dominate discovery's indexed single-row lookups. This
     // opt-in policy ends with the read-only transaction; other reads keep JIT.
     if (options.jit === false) await tx.execute(sql`set local jit = 'off'`)

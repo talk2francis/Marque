@@ -69,11 +69,15 @@ export function poolClients(chainId: ChainId): PublicClient[] {
 }
 
 /** The first answer from any node in the pool that passes `valid` (a node behind head fails it). */
-export async function fromAny<T>(chainId: ChainId, read: (c: PublicClient) => Promise<T>, valid: (v: T) => boolean = () => true): Promise<T> {
-  return Promise.any(poolClients(chainId).map(async (c) => {
+export async function fromAny<T>(chainId: ChainId, read: (c: PublicClient) => Promise<T>, valid: (v: T) => boolean = () => true, hedgeDelayMs = 0): Promise<T> {
+  let winner: { value: T } | undefined
+  return Promise.any(poolClients(chainId).map(async (c, index) => {
+    if (hedgeDelayMs > 0 && index > 0) await new Promise(resolve => setTimeout(resolve, index * hedgeDelayMs))
+    if (winner) return winner.value
     const v = await read(c)
     if (!valid(v)) throw new Error('not yet on this node')
-    return v
+    winner ??= { value: v }
+    return winner.value
   }))
 }
 
@@ -93,13 +97,20 @@ export async function receiptFromAny(chainId: ChainId, hash: Hex, timeoutMs = 45
 }
 
 const windowCache = new Map<ChainId, { at: number; seconds: number }>()
+const windowReads = new Map<ChainId, Promise<number>>()
 
 /** OptimisticPolicy.disputeWindow(), measured live and cached for an hour. */
 export async function disputeWindowSeconds(chainId: ChainId): Promise<number> {
   const hit = windowCache.get(chainId)
   if (hit && Date.now() - hit.at < 3600_000) return hit.seconds
-  const v = await chainClient(chainId).readContract({ address: network(chainId).policy, abi: optimisticPolicyAbi, functionName: 'disputeWindow' }) as bigint
-  const seconds = Number(v)
-  windowCache.set(chainId, { at: Date.now(), seconds })
-  return seconds
+  const existing = windowReads.get(chainId)
+  if (existing) return existing
+  const run = fromAny(chainId, client => client.readContract({ address: network(chainId).policy, abi: optimisticPolicyAbi, functionName: 'disputeWindow' }) as Promise<bigint>, value => Number.isSafeInteger(Number(value)) && value >= 0n, 150)
+    .then(value => {
+      const seconds = Number(value)
+      windowCache.set(chainId, { at: Date.now(), seconds })
+      return seconds
+    })
+  windowReads.set(chainId, run)
+  try { return await run } finally { if (windowReads.get(chainId) === run) windowReads.delete(chainId) }
 }

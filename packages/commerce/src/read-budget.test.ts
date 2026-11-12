@@ -9,7 +9,7 @@ const dialect = new PgDialect()
 
 function reads(finalRead: () => Promise<unknown>) {
   mocks.transaction.mockImplementation(async (callback: (tx: { execute: ReturnType<typeof vi.fn> }) => Promise<unknown>) => {
-    return callback({ execute: vi.fn(async query => dialect.sqlToQuery(query).sql.trimStart().startsWith('set ') ? [] : finalRead()) })
+    return callback({ execute: vi.fn(async query => /^(set |select set_config)/.test(dialect.sqlToQuery(query).sql.trimStart()) ? [] : finalRead()) })
   })
 }
 
@@ -58,17 +58,17 @@ describe('pending catalog read coalescing', () => {
   it('keeps compilation policy local while retaining exact-service and catalog budgets', async () => {
     const statements: string[] = []
     mocks.transaction.mockImplementation(async callback => callback({ execute: vi.fn(async query => {
-      statements.push(dialect.sqlToQuery(query).sql)
+      const compiled = dialect.sqlToQuery(query)
+      statements.push(compiled.sql + (compiled.params.length ? ` ${JSON.stringify(compiled.params)}` : ''))
       return []
     }) }))
     await coalescedCatalogRead(sql`select ${'discovery'}`, { jit: false })
     expect(statements).toContain("set local jit = 'off'")
     expect(statements).toContain('set transaction read only')
-    expect(statements).toContain("set local statement_timeout = '8000ms'")
-    expect(statements).toContain("set local lock_timeout = '500ms'")
+    expect(statements.some(query => query.includes("set_config('statement_timeout'") && query.includes('8000ms') && query.includes("set_config('lock_timeout', '500ms'"))).toBe(true)
     statements.length = 0
     await boundedCommerceRead(sql`select ${'exact'}`, 'exact')
-    expect(statements).toContain("set local statement_timeout = '4000ms'")
+    expect(statements.some(query => query.includes("set_config('statement_timeout'") && query.includes('4000ms'))).toBe(true)
     expect(statements.some(query => query.includes('jit'))).toBe(false)
     statements.length = 0
     await coalescedCatalogRead(sql`select ${'ordinary catalog'}`)

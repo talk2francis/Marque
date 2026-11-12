@@ -7,7 +7,7 @@ import { gzip, gunzip } from 'node:zlib'
 import { promisify } from 'node:util'
 import { boundedCommerceRead, coalescedCatalogRead } from '@marque/commerce/reads'
 import { chainOf, commercialStates, formatAmount, teamWallets, type CommercialState, type Lane } from '@marque/commerce'
-import { agentStates, TASK_FOR_CATEGORY, type AgentStateView } from './agent-state'
+import { agentStates, agentStatesForTasks, TASK_FOR_CATEGORY, type AgentStateView } from './agent-state'
 import { agentTracks, trackFromSource, type AgentTrack } from './agent-track'
 import { selectedAgentRows } from './compare-selection'
 import { expireMarketQuote } from './quote-expiry'
@@ -219,6 +219,8 @@ function originOf(v: unknown): string | null {
  */
 const baseMemo = new Map<number, { at: number; rows: MarketRow[] }>()
 const baseInflight = new Map<number, Promise<MarketRow[]>>()
+const listedMemo = new Map<number, { at: number; rows: MarketRow[] }>()
+const listedInflight = new Map<number, Promise<MarketRow[]>>()
 const BASE_TTL_MS = 3 * 60_000
 const gzipAsync = promisify(gzip)
 const gunzipAsync = promisify(gunzip)
@@ -235,9 +237,12 @@ const BLOB_EVERY_MS = 10 * 60_000
 const blobKey = (chainId: 56 | 97) => `market:base:v3:${chainId}`
 const lastStored = new Map<number, number>()
 const storeLoads = new Map<number, Promise<{ at: number; rows: MarketRow[] } | null>>()
+const listedStored = new Map<number, number>()
+const listedLoads = new Map<number, Promise<{ at: number; rows: MarketRow[] } | null>>()
+const listedBlobKey = (chainId: 56 | 97) => `market:listed:v1:${chainId}`
 
-async function fromStore(chainId: 56 | 97): Promise<{ at: number; rows: MarketRow[] } | null> {
-  const b = await loadBlob(blobKey(chainId))
+async function fromStore(chainId: 56 | 97, listed = false): Promise<{ at: number; rows: MarketRow[] } | null> {
+  const b = await loadBlob(listed ? listedBlobKey(chainId) : blobKey(chainId))
   if (!b) return null
   try {
     const j = JSON.parse((await gunzipAsync(b)).toString('utf8')) as { at: number; rows: MarketRow[] }
@@ -245,28 +250,32 @@ async function fromStore(chainId: 56 | 97): Promise<{ at: number; rows: MarketRo
   } catch { return null }
 }
 
-function toStore(chainId: 56 | 97, entry: { at: number; rows: MarketRow[] }): void {
-  if (Date.now() - (lastStored.get(chainId) ?? 0) < BLOB_EVERY_MS) return
-  lastStored.set(chainId, Date.now())
-  void gzipAsync(Buffer.from(JSON.stringify(entry))).then((gz) => storeBlob(blobKey(chainId), gz, BLOB_KEEP_MS)).catch(() => undefined)
+function toStore(chainId: 56 | 97, entry: { at: number; rows: MarketRow[] }, listed = false): void {
+  const stored = listed ? listedStored : lastStored
+  if (Date.now() - (stored.get(chainId) ?? 0) < BLOB_EVERY_MS) return
+  stored.set(chainId, Date.now())
+  void gzipAsync(Buffer.from(JSON.stringify(entry))).then((gz) => storeBlob(listed ? listedBlobKey(chainId) : blobKey(chainId), gz, BLOB_KEEP_MS)).catch(() => undefined)
 }
 
-async function marketplaceBase(chainId: 56 | 97 = 56): Promise<MarketRow[]> {
-  let memo = baseMemo.get(chainId)
+async function marketplaceBase(chainId: 56 | 97 = 56, listed = false, states?: Awaited<ReturnType<typeof commercialStates>>): Promise<MarketRow[]> {
+  const memos = listed ? listedMemo : baseMemo
+  const loads = listed ? listedLoads : storeLoads
+  const inflight = listed ? listedInflight : baseInflight
+  let memo = memos.get(chainId)
   if (!memo) {
-    let load = storeLoads.get(chainId)
-    if (!load) { load = fromStore(chainId); storeLoads.set(chainId, load) }
+    let load = loads.get(chainId)
+    if (!load) { load = fromStore(chainId, listed); loads.set(chainId, load) }
     const stored = await load.catch(() => null)
-    if (stored && !baseMemo.has(chainId)) baseMemo.set(chainId, stored)
-    memo = baseMemo.get(chainId)
+    if (stored && !memos.has(chainId)) memos.set(chainId, stored)
+    memo = memos.get(chainId)
   }
   if (memo && Date.now() - memo.at < BASE_TTL_MS) return memo.rows
-  let run = baseInflight.get(chainId)
+  let run = inflight.get(chainId)
   if (!run) {
-    run = queryAgents(undefined, undefined, chainId)
-      .then((rows) => { const entry = { at: Date.now(), rows }; baseMemo.set(chainId, entry); toStore(chainId, entry); return rows })
-      .finally(() => { baseInflight.delete(chainId) })
-    baseInflight.set(chainId, run)
+    run = queryAgents(undefined, states, chainId, listed)
+      .then((rows) => { const entry = { at: Date.now(), rows }; memos.set(chainId, entry); toStore(chainId, entry, listed); return rows })
+      .finally(() => { inflight.delete(chainId) })
+    inflight.set(chainId, run)
     // A background refresh that fails keeps serving the last good set.
     if (memo) run.catch(() => undefined)
   }
@@ -322,7 +331,7 @@ function categoryIds(category: string | null | undefined, chainId: 56 | 97): Pro
 }
 
 /** Same eligibility and owner/host counts; scope only whole owner partitions. */
-export function marketplaceSourceQuery(owners?: readonly string[], chainId: 56 | 97 = 56) {
+export function marketplaceSourceQuery(owners?: readonly string[], chainId: 56 | 97 = 56, quotedIds?: readonly string[]) {
   return sql`
     with latest as (
       -- Newest probe per service by primary key (probe_schedule), not a scan of history.
@@ -435,7 +444,7 @@ export function marketplaceSourceQuery(owners?: readonly string[], chainId: 56 |
         and a.id <> 'canary:ssrf'
         ${owners ? sql`and a.owner_address in (${sql.join(owners.map(owner => sql`${owner}`), sql`, `)})` : sql``}
     )
-    select
+    , projected as (select
       id as agent_id,
       token_id,
       name,
@@ -462,7 +471,11 @@ export function marketplaceSourceQuery(owners?: readonly string[], chainId: 56 |
       conf_at,
       coalesce(conf_wrong, false) as conf_wrong,
       category
-    from qualifying
+    from qualifying)
+    select * from projected
+    ${quotedIds ? sql`where (category is not null and category <> 'unclassified')
+      or conf_test is not null
+      ${quotedIds.length ? sql`or agent_id in (${sql.join(quotedIds.map(id => sql`${id}`), sql`, `)})` : sql``}` : sql``}
     order by identities desc, agent_id
   `
 }
@@ -485,6 +498,13 @@ export async function marketPageAgentStates(page: readonly Pick<MarketRow, 'agen
     const task = TASK_FOR_CATEGORY[row.category ?? ''] ?? null
     groups.set(task, [...(groups.get(task) ?? []), row.agentId])
   }
+  if (!groups.size) return new Map<string, AgentStateView>()
+  try {
+    return await agentStatesForTasks(new Map([...groups].flatMap(([task, ids]) => ids.map(id => [id, task] as const))))
+  } catch {
+    // Preserve partial availability if one task group cannot be read. This path
+    // retries only after the single mixed-page read fails.
+  }
   const results = await Promise.all([...groups].map(([task, ids]) =>
     agentStates(ids, task).catch(() => new Map<string, AgentStateView>()),
   ))
@@ -499,14 +519,28 @@ const scopeInflight = new Map<string, Promise<{ rows: MarketRow[]; at: number }>
 /** Above this many ids a scoped read costs more than the memoised whole catalog, which the later filters narrow the same way. */
 const SCOPE_MAX_IDS = 300
 
-async function scopedBase(ids: readonly string[], states?: Awaited<ReturnType<typeof commercialStates>>, chainId: 56 | 97 = 56) {
+async function scopedBase(ids: readonly string[], states?: Awaited<ReturnType<typeof commercialStates>>, chainId: 56 | 97 = 56, listed = false): Promise<{ rows: MarketRow[]; at: number }> {
   if (!ids.length) return { rows: [] as MarketRow[], at: Date.now() }
   // Every classified agent (the default view) is thousands of owners: one owner-scoped query per request took longer
   // than its 8 s limit on a fresh process. The whole catalog is memoised, starts from Redis, and refreshes in the
   // background; the category, ready and selection filters after this return exactly the same rows.
   if (ids.length > SCOPE_MAX_IDS) {
-    const rows = await marketplaceBase(chainId)
-    return { rows, at: baseMemo.get(chainId)?.at ?? Date.now() }
+    const rows = await marketplaceBase(chainId, listed, states)
+    const at = (listed ? listedMemo : baseMemo).get(chainId)?.at ?? Date.now()
+    if (listed && states) {
+      // A newly quoted identity may not have existed in the compact snapshot. Read
+      // its complete owner partition instead of hiding it until the next refresh.
+      const present = new Set(rows.map(row => row.agentId))
+      const missing = [...new Set([...states.values()].filter(c => c.agentId.startsWith(`${chainId}:`)
+        && (c.state === 'hireable' || c.state === 'settleable') && !present.has(c.agentId)).map(c => c.agentId))]
+      if (missing.length) {
+        const extra = await scopedBase(missing, states, chainId)
+        const merged = new Map(rows.map(row => [row.agentId, row]))
+        for (const row of extra.rows) merged.set(row.agentId, row)
+        return { rows: [...merged.values()], at: Math.min(at, extra.at) }
+      }
+    }
+    return { rows, at }
   }
   const key = `${chainId}|${[...new Set(ids)].sort().join(',')}`
   const memo = scopeMemos.get(key)
@@ -548,15 +582,29 @@ function bestCommerceByAgent(commerce: Awaited<ReturnType<typeof commercialState
   return bestByAgent
 }
 
-async function queryAgents(owners?: readonly string[], states?: Awaited<ReturnType<typeof commercialStates>>, chainId: 56 | 97 = 56): Promise<MarketRow[]> {
+async function queryAgents(owners?: readonly string[], states?: Awaited<ReturnType<typeof commercialStates>>, chainId: 56 | 97 = 56, listed = false): Promise<MarketRow[]> {
   const fp = new Set(firstPartyIds())
+  const commerceRead = states ? Promise.resolve(states) : commercialStates()
+  const quotedIds = listed ? [...new Set([...(await commerceRead).values()].map(c => c.agentId))] : undefined
+  let queryOwners = owners
+  if (listed && !owners) {
+    // Keep complete owner partitions for the identity counts, but do not join
+    // every unrelated service/probe just to discard its unclassified row later.
+    const candidates = [...new Set([...await categoryIds(null, chainId), ...(quotedIds ?? [])])]
+    const selected = candidates.length ? await boundedCommerceRead(sql`select distinct owner_address from agent
+      where chain_id = ${chainId} and id in (${sql.join(candidates.map(id => sql`${id}`), sql`, `)})`, 'exact') : []
+    const partitions = selected as unknown as Array<{ owner_address: string | null }>
+    // A null owner is one complete partition in the original query. Fall back
+    // to that original scope rather than dropping unknown-owner identities.
+    if (!partitions.some(row => row.owner_address === null)) queryOwners = partitions.map(row => row.owner_address!)
+  }
   // Independent observations share the request deadline; do not add their
   // cold read times serially before filtering and pagination can begin.
   const [commerce, rows, tracks, listings] = await Promise.all([
-    states ?? commercialStates(),
+    commerceRead,
     // The whole-catalog read refreshes a memo in the background (requests are served from the last good set), so it
     // gets 30 s instead of 8: a fresh slot on a busy host took 9 to 16 s and returned 503 to its first visitors.
-    coalescedCatalogRead(marketplaceSourceQuery(owners, chainId), owners ? { jit: false } : { jit: false, timeoutMs: 30_000 }),
+    queryOwners?.length === 0 ? Promise.resolve([]) : coalescedCatalogRead(marketplaceSourceQuery(queryOwners, chainId, quotedIds), listed || !owners ? { jit: false, timeoutMs: 30_000 } : { jit: false }),
     agentTracks(chainId),
     builderListings(chainId),
   ])
@@ -775,15 +823,17 @@ export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: Ma
   const chains: Array<56 | 97> = both ? [56, 97] : [chainId]
   const inLane = (agentId: string) => chains.some((c) => agentId.startsWith(`${c}:`))
   const hireable = q.tab === 'ready' || q.hireableOnly === true
-  const shared = hireable ? await sharedCommercialStates() : null
-  const states = shared?.value
+  let shared = hireable ? await sharedCommercialStates() : null
+  let states = shared?.value
   const readyIds = states ? [...new Set([...states.values()].filter(c => (c.state === 'hireable' || c.state === 'settleable') && inLane(c.agentId)).map(c => c.agentId))] : null
   let ids = q.agentIds ? (readyIds ? q.agentIds.filter(id => readyIds.includes(id)) : q.agentIds.filter(inLane)) : readyIds
   if (ids === null && (q.category || !q.includeUnclassified)) {
     ids = (await Promise.all(chains.map((c) => categoryIds(q.category, c)))).flat()
     // Listed includes any agent with a live price (see scope below): a small network's scoped read must load those too.
     if (!q.category) {
-      const priced = await sharedCommercialStates().then((r) => [...r.value.values()].filter((c) => (c.state === 'hireable' || c.state === 'settleable') && inLane(c.agentId)).map((c) => c.agentId)).catch(() => [] as string[])
+      shared ??= await sharedCommercialStates()
+      states ??= shared.value
+      const priced = [...states.values()].filter(c => (c.state === 'hireable' || c.state === 'settleable') && inLane(c.agentId)).map(c => c.agentId)
       ids = [...new Set([...ids, ...priced])]
     }
   }
@@ -793,7 +843,7 @@ export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: Ma
   const memoised = ids === null || ids.length > SCOPE_MAX_IDS
   const overlay = !states && memoised ? sharedCommercialStates().then((r) => r.value).catch(() => undefined) : Promise.resolve(undefined)
   const bases = await Promise.all(chains.map(async (c) => ids
-    ? scopedBase(ids.filter((id) => id.startsWith(`${c}:`)), states, c)
+    ? scopedBase(ids.filter((id) => id.startsWith(`${c}:`)), states, c, !both && chainId === 56 && !q.agentIds && !q.includeUnclassified)
     : { rows: await marketplaceBase(c), at: baseMemo.get(c)?.at ?? Date.now() }))
   const base = { rows: bases.flatMap((b) => b.rows), at: Math.min(...bases.map((b) => b.at)) }
   // Clone: the base is memoised and the sort below is in place.

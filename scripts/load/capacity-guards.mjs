@@ -38,3 +38,10 @@ export function completedStage(exitCode, counts) {
   if (!Object.values(counts).some(n => n > 0)) throw new Error('No request measurements')
   if (Object.keys(counts).some(status => Number(status) >= 400 || Number(status) === 0)) throw new Error('HTTP errors prevent a capacity pass')
 }
+
+/** k6 counter rates use the measured engine duration, excluding wrapper/setup time. */
+export function measuredHoldCompleted(summary) {
+  const requests = summary?.metrics?.http_reqs
+  const seconds = requests?.rate > 0 && requests?.count >= 0 ? requests.count / requests.rate : null
+  return seconds !== null && Number.isFinite(seconds) && seconds >= 110 // 20s ramp plus the 90s hold
+}

@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { PgDialect } from 'drizzle-orm/pg-core'
-const mocks = vi.hoisted(() => ({ states: vi.fn(), read: vi.fn(), capabilities: vi.fn(), tracks: vi.fn().mockResolvedValue(null) }))
+const mocks = vi.hoisted(() => ({ states: vi.fn(), read: vi.fn(), capabilities: vi.fn(), batch: vi.fn().mockRejectedValue(new Error('synthetic mixed read unavailable')), tracks: vi.fn().mockResolvedValue(null) }))
 vi.mock('@marque/commerce', async original => ({ ...await original<object>(), commercialStates: mocks.states }))
 vi.mock('@marque/commerce/reads', () => ({ boundedCommerceRead: mocks.read, coalescedCatalogRead: mocks.read }))
-vi.mock('./agent-state', async original => ({ ...await original<object>(), agentStates: mocks.capabilities }))
+vi.mock('./agent-state', async original => ({ ...await original<object>(), agentStates: mocks.capabilities, agentStatesForTasks: mocks.batch }))
 vi.mock('./agent-track', async original => ({ ...await original<object>(), agentTracks: mocks.tracks }))
 vi.mock('./agent-standing', () => ({ standingEvidence: async () => ({}) }))
 import { marketplaceAgents, marketPageAgentStates, resetSharedMarketReads } from './marketplace'
@@ -149,6 +149,18 @@ describe('ready selection before the broad catalog read', () => {
 })
 
 describe('paged capability evaluation', () => {
+  it('reads mixed categories together without changing any identity task', async () => {
+    mocks.capabilities.mockReset()
+    mocks.batch.mockClear().mockResolvedValueOnce(new Map([['A', { agentId: 'A' }], ['B', { agentId: 'B' }]]))
+    const result = await marketPageAgentStates([
+      { agentId: 'A', category: 'yield', isReference: false },
+      { agentId: 'B', category: 'grid', isReference: false },
+      { agentId: 'reference', category: 'grid', isReference: true },
+    ])
+    expect([...mocks.batch.mock.calls[0]![0]]).toEqual([['A', 'yield'], ['B', 'grid']])
+    expect([...result.keys()]).toEqual(['A', 'B'])
+    expect(mocks.capabilities).not.toHaveBeenCalled()
+  })
   it('batches exact identities by their own task and excludes reference agents', async () => {
     mocks.capabilities.mockReset().mockImplementation(async (ids: string[]) => new Map(ids.map(id => [id, { agentId: id }])))
     const result = await marketPageAgentStates([
