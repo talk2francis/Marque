@@ -1,3 +1,9 @@
+## 12 November 2026: first repaired release, external retest
+
+[Run 43210667907](https://github.com/talk2francis/Marque/actions/runs/43210667907) used release `f4a4d2285ae7499f2388d967bed4b595c86392ee` and the unchanged November workload (`7cc2ed4ddaf1d7224cdada6b5d252f8f048f1b5999eaba350a2d973ed0308e09`). The first stage reached 25 users, then aborted on latency before a 90-second hold: page p95 **7,700 ms**, API p95 **4,633 ms**. There were 54 HTTP requests (47 successful responses and seven redirects), 47 logical reads, zero HTTP errors, zero persistent process restarts and no admission rejection. Its aborted 2.45 requests/second is not sustained throughput. Higher stages were not attempted.
+
+Private host samples retained at least 6,065 MiB available memory and no CPU throttling or sampled steal time. The failure does not establish a memory shortage. Builders, Judge, job-room and agent-page reads accounted for the slowest observed routes. Subsequent read-only diagnosis found a full-registry background funnel query repeatedly sorting/materialising hundreds of thousands of identities and spilling temporary files. A complete-count rewrite, local transaction bounds and cold/error read fixes are under validation. These query diagnostics do not establish a capacity pass; the next external run must measure that separately.
+
 # LOAD-TEST.md
 
 ## 11 November 2026: external run failed its first stage
