@@ -144,6 +144,29 @@
       "betweenStageRestarts": 0,
       "note": "Stopped at the first unsuccessful stage. Higher targets were not attempted. Rates from incomplete holds are aborted-run averages. The 5xx rate counts completed script reads; redirects are excluded.",
       "evidenceUrl": "https://github.com/talk2francis/Marque/actions/runs/43210667907"
+    },
+    {
+      "date": "2026-11-12T16:33:10.963Z",
+      "release": "69e9dc4",
+      "method": "External GitHub Actions runner, November mix with search and cold job rooms",
+      "stages": [
+        {
+          "visitors": 25,
+          "requests": 51,
+          "requestsPerSecond": 2.3185592279834966,
+          "pageP95Ms": 8801.988498499999,
+          "apiP95Ms": 2568.344576199995,
+          "error5xxRate": 0,
+          "restarts": 0,
+          "completed": false,
+          "peakVus": 25,
+          "passed": false
+        }
+      ],
+      "processRestarts": 0,
+      "betweenStageRestarts": 0,
+      "note": "Stopped at the first unsuccessful stage. Higher targets were not attempted. Rates from incomplete holds are aborted-run averages. The 5xx rate counts completed script reads; redirects are excluded.",
+      "evidenceUrl": "https://github.com/talk2francis/Marque/actions/runs/43259875614"
     }
   ]
 }

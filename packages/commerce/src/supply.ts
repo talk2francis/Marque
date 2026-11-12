@@ -215,15 +215,50 @@ export async function recordQuote(source: 'probe' | 'user', c: Pick<SellerCandid
 
 export { quoteIntervalMinutes } from './quote-schedule.js'
 
+/** The complete latest probe observations, without reading historical payloads. */
+export function latestQuoteProbeQuery() {
+  return sql`
+with recursive latest_ids as (
+  (select service_id, id from commerce_quote
+   where source = 'probe' and service_id is not null
+   order by service_id, created_at desc, id desc limit 1)
+  union all
+  select next.service_id, next.id from latest_ids previous
+  cross join lateral (
+    select service_id, id from commerce_quote
+    where source = 'probe' and service_id > previous.service_id
+    order by service_id, created_at desc, id desc limit 1
+  ) next
+)
+select q.service_id, q.created_at, q.ok, q.signed, q.quote_expires_at,
+       q.raw->'quote_expires_at' as provider_expiry,
+       q.raw#>'{response,quote_expires_at}' as response_expiry
+from latest_ids l join commerce_quote q on q.id = l.id
+order by q.service_id
+  `
+}
+
+/** Latest success and strictly later failures in the unchanged recovery window. */
+export function quoteProbeRecoveryQuery() {
+  return sql`
+with recent as (
+  select service_id, ok, created_at,
+         max(created_at) filter (where ok) over (partition by service_id) as last_ok
+  from commerce_quote
+  where source = 'probe' and service_id is not null
+    and created_at > now() - interval '2 days'
+)
+select service_id, max(last_ok) as last_ok,
+       count(*) filter (where not ok and created_at > last_ok)::int as fails
+from recent where last_ok is not null group by service_id order by service_id
+  `
+}
+
 /** One pass of the quote probe: every seller whose next quote is due. Never creates a job. */
 export async function runQuoteProbe(opts: { concurrency?: number; limit?: number } = {}): Promise<{ attempted: number; ok: number; failures: Record<string, number> }> {
   const candidates = await sellerCandidates()
   const last = new Map<number, QuoteProbeObservation>()
-  for (const r of rowsOf(await db().execute(sql`
-    select distinct on (service_id) service_id, created_at, ok, signed, quote_expires_at,
-      raw->'quote_expires_at' as provider_expiry, raw#>'{response,quote_expires_at}' as response_expiry
-    from commerce_quote where source = 'probe' and service_id is not null
-    order by service_id, created_at desc, id desc`))) {
+  for (const r of await supplyRows(latestQuoteProbeQuery(), false, { jit: false })) {
     const at = new Date(r['created_at'] as string).getTime()
     let expiresAt = r['quote_expires_at'] ? new Date(r['quote_expires_at'] as string).getTime() : Number.NaN
     if (r['signed'] === false) expiresAt = Math.min(expiresAt, at + 900_000)
@@ -233,11 +268,7 @@ export async function runQuoteProbe(opts: { concurrency?: number; limit?: number
     last.set(Number(r['service_id']), { at, ok: r['ok'] === true, expiresAt })
   }
   // Recovery evidence for the cadence ladder: the last success and the failures since it (2 days).
-  for (const r of rowsOf(await db().execute(sql`
-    with recent as (select service_id, ok, created_at from commerce_quote where source = 'probe' and service_id is not null and created_at > now() - interval '2 days'),
-    oks as (select service_id, max(created_at) as last_ok from recent where ok group by service_id)
-    select o.service_id, o.last_ok, (select count(*) from recent r where r.service_id = o.service_id and not r.ok and r.created_at > o.last_ok)::int as fails
-    from oks o`))) {
+  for (const r of await supplyRows(quoteProbeRecoveryQuery(), false, { jit: false })) {
     const id = Number(r['service_id'])
     const obs = last.get(id)
     if (obs) last.set(id, { ...obs, lastOkAt: new Date(r['last_ok'] as string).getTime(), failStreak: obs.ok ? 0 : Number(r['fails'] ?? 1) })

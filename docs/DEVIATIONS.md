@@ -1658,3 +1658,6 @@ Planned: a reproduction cannot change a published comparison. Found: the reprodu
 
 
 12 November follow-up capacity diagnosis: the first repaired release completed only an aborted 25-user stage, with page p95 7,700 ms and API p95 4,633 ms, zero HTTP errors and zero persistent process restarts. No 50/100/250 stage ran. The full-registry funnel is being restructured without reducing its counted population, with dated wallet refresh fallback and request-scoped identity lookup. No latency threshold, request mix, admission limit or financial rule is relaxed. The failed run remains in the aggregate history; query diagnostic timings are not capacity claims.
+
+
+12 November 16:33 UTC retest: the unchanged external workload again stopped at 25 peak users before the hold, with page p95 8,802 ms, API p95 2,568 ms, zero HTTP errors and no persistent restarts. No higher stage ran. This is a retained failure, not a capacity pass or sustained-throughput result. The follow-up addresses observed quote-history work and duplicate background registry refreshes without truncating history or relaxing targets, rate limits, evidence or financial rules. Query diagnostic improvements do not establish traffic capacity.
