@@ -186,6 +186,7 @@ export const probe = pgTable('probe', {
   manifest: jsonb('manifest').$type<Record<string, unknown>>(),
 }, (t) => ({
   agentCheckedIdx: index('probe_agent_checked_idx').on(t.agentId, t.checkedAt.desc()),
+  agentSkillsCheckedIdx: index('probe_agent_skills_checked_idx').on(t.agentId, sql`${t.checkedAt} desc nulls first`).where(sql`jsonb_array_length(${t.skills}) > 0`),
   serviceCheckedIdx: index('probe_service_checked_idx').on(t.serviceId, t.checkedAt.desc()),
   serviceAgentCheckedIdx: index('probe_service_agent_checked_idx').on(t.serviceId, t.agentId, sql`${t.checkedAt} desc nulls last`),
   checkedIdx: index('probe_checked_idx').on(t.checkedAt.desc()),

@@ -1649,3 +1649,5 @@ Planned: a reproduction cannot change a published comparison. Found: the reprodu
 
 
 12 November 2026 capacity repair: the scheduled external November run failed at the first 25-visitor target; higher stages were not attempted. Its aborted rate is retained and is not described as sustained capacity. The repair preserves the workload, target thresholds, admission limits, financial rules and all observations. Existing raw operational diagnostics stay private; only verified aggregate measurements are added to the public record. Exact-source CI, one compiled production artifact, responsive/browser acceptance and the normal deployment gate precede the owner-requested retest. No capacity improvement is claimed until that test measures it.
+
+12 November compiled review: the first artifact passed its build and automatic checks, but visual inspection found the mobile capacity caption in a narrow column. It was withheld from production. The caption correction is batched with additional background-classifier index coverage before a second exact-source build; neither the first build nor its failed startup read is relabelled or deleted.
