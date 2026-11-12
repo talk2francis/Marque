@@ -5,10 +5,16 @@ import { setTimeout as sleep } from 'node:timers/promises'
 const ROUTES = ['/', '/protocol', '/register', '/quest']
 export async function warmCandidateProjections(base, options = {}) {
   const fetchPage = options.fetchPage ?? (async (path) => {
-    const response = await fetch(base + path, { signal: AbortSignal.timeout(30000) })
-    const html = await response.text()
-    if (!response.ok || !html.includes('</html>')) throw new Error(`incomplete projection ${path}: ${response.status}`)
-    return { cache: response.headers.get('x-nextjs-cache'), html }
+    try {
+      // The ISR wait exceeds Next's idle socket timeout. Match readiness's
+      // independent connections; a reset or incomplete body must still fail.
+      const response = await fetch(base + path, { headers: { Connection: 'close' }, signal: AbortSignal.timeout(30000) })
+      const html = await response.text()
+      if (!response.ok || !html.includes('</html>')) throw new Error(`incomplete projection ${path}: ${response.status}`)
+      return { cache: response.headers.get('x-nextjs-cache'), html }
+    } catch (cause) {
+      throw new Error(`projection read failed for ${path}`, { cause })
+    }
   })
   const wait = options.wait ?? sleep
   const now = options.now ?? Date.now
