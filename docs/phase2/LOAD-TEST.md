@@ -1,3 +1,9 @@
+## 12 November 2026, 17:51 UTC: refreshed reads, latency still missed
+
+[Run 43273718671](https://github.com/talk2francis/Marque/actions/runs/43273718671) tested release `b67f005f01abc7a0a8c1b99b40fd060c6a7a19d7` after the accepted deployment and quote-worker activation, using the unchanged November workload and guards. It reached 25 users but aborted before the hold: page p95 **9,535 ms**, API p95 **2,604 ms**. Its 50 HTTP requests were 45 successful responses and five redirects; there were zero HTTP errors, admission rejections or persistent process restarts. The aborted 2.27 requests/second is not sustained throughput. Higher stages were not attempted.
+
+The database observer confirmed a single serial registry aggregate, but its full count still read wide identity pages. Other background aggregates sorted all category rows and compiled expensive freshness expressions. The next database-only rollout adds three prepared covering/time indexes and a JIT-off default for new application sessions, without changing queries or counted populations. Read-only comparisons retained complete results; these diagnostic timings do not establish a capacity pass. [Configuration, measured plans and limits](../operations/DATABASE-READ-PERFORMANCE-2026-11-12.md).
+
 ## 12 November 2026, 16:33 UTC: continued external retest
 
 [Run 43259875614](https://github.com/talk2francis/Marque/actions/runs/43259875614) used deployed release `69e9dc4165f2789148131f2fc915c9e5642c70a0`, with the identical November workload hash and all original targets and admission controls. It reached 25 users, then aborted before the hold: page p95 **8,802 ms**, API p95 **2,568 ms**. Its 51 HTTP requests comprised 45 successful responses and six redirects, with zero HTTP errors and no persistent process restarts. The aborted average of 2.32 requests/second is not sustained throughput. Higher stages were not attempted.
