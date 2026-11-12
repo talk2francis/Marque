@@ -92,3 +92,10 @@ Mark each with evidence in `PROJECT_STATE.md`.
 **J. Handoff**: sent, answers from Gwen recorded, any required change shipped.
 
 Verdict format: SHIP / SHIP AFTER LISTED FIXES / DO NOT SHIP, with the open risks named.
+
+
+### Sealed artifacts and projection reads
+
+Run compiled previews from a separate working copy of the prepared standalone tree. Next ISR can update cached HTML/meta/RSC during a preview, so running directly from a checksummed package invalidates its seal. Never recalculate checksums to accept that mutation. Preserve it and restore only exact original build bytes after matching their hashes to the original manifest, or prepare a fresh package from the unchanged original build. Deployment stages its own runtime copy.
+
+Projection freshness reads use Connection: close like readiness checks. Keep the real ISR interval, complete HTML/body requirement and current-data check; a reset still fails with its route and cause. An operational-only change outside the guarded application inputs can use the same verified compiled artifact after fresh CI and source-input equality, with new release metadata. It must pass the complete deployment gate before traffic moves.

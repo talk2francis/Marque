@@ -1,5 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
+import { createServer } from 'node:http'
 import { warmCandidateProjections } from './warm-projections.mjs'
 const START = Date.parse('2026-10-19T19:00:00Z')
 function fixture(reply) {
@@ -32,4 +33,22 @@ test('fails closed when a route never completes revalidation', async () => {
 test('does not hide transport failures', async () => {
   const f = fixture(() => { throw Error('synthetic transport failure') })
   await assert.rejects(warmCandidateProjections('http://candidate.invalid', f.options), /synthetic transport failure/)
+})
+
+test('real projection reads use independent connections and consume complete current HTML', async () => {
+  const seen = []
+  const server = createServer((request, response) => {
+    seen.push({ path: request.url, connection: request.headers.connection })
+    if (request.headers.connection !== 'close') { request.socket.destroy(); return }
+    response.setHeader('x-nextjs-cache', 'HIT')
+    response.end(home(Date.now()))
+  })
+  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve))
+  try {
+    const result = await warmCandidateProjections(`http://127.0.0.1:${server.address().port}`, { wait: async () => {} })
+    assert.equal(result.records.length, 4)
+    assert.equal(seen.length, 8)
+    assert.ok(seen.every(request => request.connection === 'close'))
+    assert.deepEqual(seen.map(request => request.path), ['/', '/protocol', '/register', '/quest', '/', '/protocol', '/register', '/quest'])
+  } finally { await new Promise(resolve => server.close(resolve)) }
 })
