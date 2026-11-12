@@ -246,6 +246,13 @@
       "when": 1794470400000,
       "tag": "0034_classified_catalog_index",
       "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1794470401000,
+      "tag": "0035_probe_skills_read_index",
+      "breakpoints": true
     }
   ]
 }

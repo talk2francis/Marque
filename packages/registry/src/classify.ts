@@ -36,25 +36,46 @@ interface Row {
  * Skills come from the most recent probe, because a live endpoint's own
  * declared skills are far better classification evidence than registry copy.
  */
-async function candidates(limit: number, onlyLive: boolean): Promise<Row[]> {
-  const d = db()
+export function classifierCandidatesQuery(limit: number, onlyLive: boolean) {
   const liveFilter = onlyLive
     ? sql`and exists (select 1 from probe p where p.agent_id = a.id and p.liveness = 'live')`
     : sql``
-  const rows = await d.execute(sql`
+  return sql`
+    -- Stage narrow keys before metadata. A nested anti-join over the wide agent
+    -- table repeatedly scanned the already-labelled prefix on a busy registry.
+    with unlabeled as materialized (
+      (select id from agent order by id)
+      except
+      (select agent_id from agent_category order by agent_id)
+    )
     select a.id, a.name, a.description, a.tags,
            coalesce((
              select p.skills from probe p
              where p.agent_id = a.id and jsonb_array_length(p.skills) > 0
              order by p.checked_at desc limit 1
            ), '[]'::jsonb) as skills
-    from agent a
-    where a.chain_id in (56, 97)
-      and not exists (select 1 from agent_category c where c.agent_id = a.id)
-      and (a.name is not null or a.description is not null or jsonb_array_length(a.tags) > 0)
+    from unlabeled u
+    cross join lateral (
+      select a.id, a.name, a.description, a.tags from agent a
+      where a.id = u.id and a.chain_id in (56, 97)
+        and (a.name is not null or a.description is not null or jsonb_array_length(a.tags) > 0)
+      offset 0
+    ) a
+    where true
       ${liveFilter}
     limit ${limit}
-  `)
+  `
+}
+
+async function candidates(limit: number, onlyLive: boolean): Promise<Row[]> {
+  const rows = await db().transaction(async tx => {
+    await tx.execute(sql`set transaction read only`)
+    // This is background discovery, not a financial action. Bound the work and
+    // avoid LLVM optimisation dominating a mostly already-labelled registry.
+    await tx.execute(sql`select set_config('statement_timeout', '30000ms', true),
+      set_config('lock_timeout', '500ms', true), set_config('jit', 'off', true)`)
+    return tx.execute(classifierCandidatesQuery(limit, onlyLive))
+  })
   const list = (rows as unknown as { rows?: unknown[] }).rows ?? (rows as unknown as unknown[])
   return (list as Array<Record<string, unknown>>).map((r) => ({
     id: String(r['id']),

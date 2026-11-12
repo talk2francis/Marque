@@ -69,6 +69,20 @@ describe.skipIf(!enabled)('exact latest-probe reads in isolated PostgreSQL', () 
     expect(plan).toContain('probe_agent_checked_idx')
     expect(plan).not.toContain('"Node Type":"Sort"')
   })
+  it('can read the classifier latest nonempty skills through its exact partial index', async () => {
+    await db().execute(sql`update probe set skills = '["fixture.skills"]'::jsonb where agent_id = ${ids[0]!}`)
+    const query = sql`select p.skills from probe p where p.agent_id = ${ids[0]!}
+      and jsonb_array_length(p.skills) > 0 order by p.checked_at desc limit 1`
+    expect(rows(await db().execute(query))[0]!.skills).toEqual(['fixture.skills'])
+    const result = await db().transaction(async tx => {
+      await tx.execute(sql`set local enable_seqscan = off`)
+      await tx.execute(sql`set local enable_bitmapscan = off`)
+      return tx.execute(sql`explain (format json) ${query}`)
+    })
+    const plan = JSON.stringify(rows(result)[0]!['QUERY PLAN'])
+    expect(plan).toContain('probe_agent_skills_checked_idx')
+    expect(plan).not.toContain('"Node Type":"Sort"')
+  })
   it('keeps a never-probed service explicitly unknown', async () => {
     const row = rows(await db().execute(agentServiceEvidenceQuery([ids[0]!]))).find(row => Number(row.service_id) === unprobed)!
     expect(row.probe_id).toBeNull(); expect(row.checked_at).toBeNull(); expect(row.liveness).toBeNull()
