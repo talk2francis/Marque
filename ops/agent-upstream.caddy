@@ -1,0 +1,9 @@
+# Imported inside each existing seller handle_path with its loopback port.
+# Node sellers advertise a five-second HTTP/1.1 idle timeout. Retire pooled
+# connections first; a reused closed socket can otherwise turn a POST into 502.
+# This does not enable request retries or change active request deadlines.
+reverse_proxy 127.0.0.1:{args[0]} {
+	transport http {
+		keepalive 2s
+	}
+}
