@@ -55,5 +55,10 @@
   },
   "dependencies": {
     "@altananetwork/sdk": "^0.9.0"
+  },
+  "pnpm": {
+    "patchedDependencies": {
+      "next@15.5.25": "patches/next@15.5.25.patch"
+    }
   }
 }

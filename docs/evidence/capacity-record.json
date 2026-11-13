@@ -374,6 +374,29 @@
       "betweenStageRestarts": 0,
       "evidenceUrl": "https://github.com/talk2francis/Marque/actions/runs/43472294781",
       "note": "The original workload and targets were unchanged. The first stage reached 25 peak visitors and stopped on latency before a completed hold. There were 36 successful responses and two redirects, with zero HTTP errors or persistent process restarts. No higher stage ran. The aborted request average is not sustained throughput. Capacity remains unestablished; Adopt publication stays withheld."
+    },
+    {
+      "date": "2026-11-13T21:07:22.439Z",
+      "release": "d20100fdbd87627b66e67cac2f7dc4eab05b16f6",
+      "method": "External GitHub Actions runner, November mix with search and cold job rooms",
+      "stages": [
+        {
+          "visitors": 25,
+          "requests": 21,
+          "requestsPerSecond": 0.9548406099704,
+          "pageP95Ms": 14866.321272649995,
+          "apiP95Ms": 10854.9778605,
+          "error5xxRate": 0,
+          "restarts": 0,
+          "completed": false,
+          "peakVus": 25,
+          "passed": false
+        }
+      ],
+      "processRestarts": 0,
+      "betweenStageRestarts": 0,
+      "evidenceUrl": "https://github.com/talk2francis/Marque/actions/runs/43507778448",
+      "note": "The original workload and targets were unchanged. The first stage reached 25 peak visitors and stopped on latency before a completed hold. Twenty successful responses and one redirect completed, with zero HTTP errors or persistent restarts. No higher stage ran. The aborted request average is not sustained throughput. Capacity remains unestablished; Adopt publication stays withheld."
     }
   ]
 }

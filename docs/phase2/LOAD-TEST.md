@@ -1,3 +1,17 @@
+## 13 November 2026, 21:07 UTC: catalogue binding still misses latency
+
+[Uninstrumented run 43507778448](https://github.com/talk2francis/Marque/actions/runs/43507778448) tested live and generator release d20100f with the original workload and targets. It reached 25 peak visitors and stopped before the hold: page p95 **14,866 ms**, API p95 **10,855 ms**. Its 21 HTTP requests comprised 20 successes and one redirect, with no completed HTTP errors or persistent restarts. Minimum observed available memory was 5,524,520 KiB. No higher stage ran. The aborted 0.95 requests/second is not sustained throughput. Capacity remains unestablished and Adopt stays withheld.
+
+Subsequent original-workload runs were diagnostics, separately labelled rather than substituted for capacity acceptance:
+
+| Diagnostic | Page p95 | API p95 | Completed HTTP | Result |
+| --- | --- | --- | --- | --- |
+| [43508693790](https://github.com/talk2francis/Marque/actions/runs/43508693790), temporary scheduling preference | 11,661 ms | 1,925 ms | 43 successes, 4 redirects | Failed at 25 peak, before hold |
+| [43511118154](https://github.com/talk2francis/Marque/actions/runs/43511118154), one-worker allocation sampling | 4,886 ms | 3,798 ms | 44 successes, 2 redirects | Failed at 25 peak, before hold |
+| [43513520698](https://github.com/talk2francis/Marque/actions/runs/43513520698), native call-chain sampling | 7,815 ms | 2,679 ms | 64 successes, 4 redirects | Failed at 25 peak, before hold |
+
+All three retained zero completed HTTP errors and no persistent restarts; no higher stage ran. Different random requests, cache state and instrumentation prevent treating their differences as isolated causal improvements. The scheduling preference was reverted, its fallback timer cancelled, and temporary inspectors and native sampling closed. No CPU quota was found. Native samples identified substantial garbage-collection and compilation work; a complete-manifest reproduction then identified retained framework VM contexts. [Candidate scope, exact field parity and remaining acceptance requirements](../operations/CLIENT-MANIFEST-REALMS-2026-11-13.md).
+
 ## 13 November 2026, 17:23 UTC: maintained read models still miss latency
 
 [External run 43472294781](https://github.com/talk2francis/Marque/actions/runs/43472294781) used release 37ab51e with the original workload and targets. It reached 25 peak visitors and stopped before the hold: page p95 **6,272 ms**, API p95 **8,497 ms**. Its 38 HTTP requests comprised 36 successes and two redirects, with no completed HTTP errors or persistent restarts. Minimum observed available memory was 5,830,768 KiB. No higher stage ran. The aborted 1.73 requests/second is not sustained throughput. Capacity remains unestablished and Adopt stays withheld.
