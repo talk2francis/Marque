@@ -62,6 +62,7 @@ export class RpcPool {
   private readonly failureThreshold: number
   private readonly cooldownMs: number
   private readonly maxAttempts: number
+  private readonly timeoutMs: number
 
   constructor(urls: readonly string[], chainId: number, opts: PoolOptions = {}) {
     if (urls.length === 0) throw new Error('RpcPool requires at least one URL')
@@ -69,6 +70,7 @@ export class RpcPool {
     this.cooldownMs = opts.cooldownMs ?? 30_000
     this.maxAttempts = opts.maxAttempts ?? Math.min(urls.length, 4)
     const timeout = opts.timeoutMs ?? 10_000
+    this.timeoutMs = timeout
 
     this.endpoints = urls.map((url) => ({
       url,
@@ -128,16 +130,27 @@ export class RpcPool {
   }
 
   /** Perform one JSON-RPC request, moving to the next endpoint on endpoint faults. */
-  request = async (args: RpcRequest): Promise<unknown> => {
+  request = async (args: RpcRequest, signal?: AbortSignal): Promise<unknown> => {
     let lastError: unknown
     const attempts = Math.max(1, Math.min(this.maxAttempts, this.endpoints.length))
     for (let attempt = 0; attempt < attempts; attempt++) {
+      signal?.throwIfAborted()
       const ep = this.next(Date.now())
       try {
-        const result = await ep.request(args as Parameters<EIP1193RequestFn>[0])
+        const request = signal ? http(ep.url, {
+          timeout: this.timeoutMs, retryCount: 0,
+          fetchFn: (input, init) => {
+            signal.throwIfAborted()
+            return fetch(input, { ...init, signal: init?.signal ? AbortSignal.any([signal, init.signal]) : signal })
+          },
+        })({ chain: undefined, retryCount: 0 }).request : ep.request
+        const result = await request(args as Parameters<EIP1193RequestFn>[0])
+        signal?.throwIfAborted()
         this.succeed(ep)
         return result
       } catch (err) {
+        // Cancellation belongs to this read, not to an endpoint's health record.
+        signal?.throwIfAborted()
         lastError = err
         this.fail(ep)
         if (!isEndpointFault(err)) throw err
@@ -154,8 +167,8 @@ export class RpcPool {
    * cast happens here, once, at the boundary — rather than leaking `any` into
    * every call site.
    */
-  transport(): Transport {
-    const request = this.request as unknown as EIP1193RequestFn
+  transport(signal?: AbortSignal): Transport {
+    const request = ((args: RpcRequest) => this.request(args, signal)) as unknown as EIP1193RequestFn
     return (() => ({
       config: { key: 'marque-pool', name: 'Marque RPC pool', type: 'marque-pool', request },
       request,

@@ -98,3 +98,28 @@ it('lets an expired lease recover without the previous owner overwriting or unlo
   next.resolve('successor value'); await flush()
   expect(await a.cachedProjection('funnel', async () => 'wrong', options)).toMatchObject({ value: 'successor value', stale: false })
 })
+
+it('reuses opt-in immutable history across process caches without re-dating or renewing it', async () => {
+  const a = await instance(), b = await instance()
+  const original = await a.cachedProjection('original', async () => 'saved original', options)
+  const until = h.data.get('proj:original')!.until
+  await vi.advanceTimersByTimeAsync(1_001)
+  const compute = vi.fn(async () => 'should not replace history')
+  const kept = await b.cachedProjection('original', compute, { ...options, reuseStored: value => value === 'saved original' })
+  expect(kept).toMatchObject({ value: 'saved original', computedAt: original.computedAt, ageMs: 1_001, stale: true })
+  expect(compute).not.toHaveBeenCalled(); expect(h.acquisitions).toHaveLength(0)
+  expect(h.data.get('proj:original')!.until).toBe(until)
+})
+
+it('refreshes incomplete history and ordinary live projections at their original interval', async () => {
+  const a = await instance()
+  await a.cachedProjection('incomplete', async () => 'unavailable', options)
+  await a.cachedProjection('live-price', async () => 'old quote', options)
+  await vi.advanceTimersByTimeAsync(1_001)
+  const historical = vi.fn(async () => 'now complete'), live = vi.fn(async () => 'new quote')
+  await a.cachedProjection('incomplete', historical, { ...options, reuseStored: value => value === 'complete' })
+  await a.cachedProjection('live-price', live, options)
+  await flush()
+  expect(historical).toHaveBeenCalledOnce(); expect(live).toHaveBeenCalledOnce()
+  expect(await a.cachedProjection('live-price', live, options)).toMatchObject({ value: 'new quote', stale: false })
+})

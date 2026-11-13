@@ -45,7 +45,14 @@ export function rpcPool(): RpcPool {
 }
 
 /** The shared BSC mainnet public client, backed by the failover pool. */
-export function publicClient(): PublicClient {
+export function publicClient(signal?: AbortSignal): PublicClient {
+  if (signal) {
+    return createPublicClient({
+      chain: bsc,
+      transport: rpcPool().transport(signal),
+      batch: { multicall: { batchSize: 1024, wait: 16 } },
+    })
+  }
   if (!client) {
     client = createPublicClient({
       chain: bsc,

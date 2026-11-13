@@ -259,6 +259,29 @@
       "betweenStageRestarts": 0,
       "note": "Stopped during the first stage, reaching 24 peak users. The 90-second hold did not complete; higher stages were not attempted. One of 29 completed script reads returned 503. Aborted request averages are not sustained throughput.",
       "evidenceUrl": "https://github.com/talk2francis/Marque/actions/runs/43383364290"
+    },
+    {
+      "date": "2026-11-13T08:09:33.529Z",
+      "release": "3184f81",
+      "method": "External GitHub Actions runner, November mix with search and cold job rooms",
+      "stages": [
+        {
+          "visitors": 25,
+          "requests": 54,
+          "requestsPerSecond": 2.455103777060707,
+          "pageP95Ms": 11432.377737199999,
+          "apiP95Ms": 5015.341957799999,
+          "error5xxRate": 0,
+          "restarts": 0,
+          "completed": false,
+          "peakVus": 25,
+          "passed": false
+        }
+      ],
+      "processRestarts": 0,
+      "betweenStageRestarts": 0,
+      "note": "Stopped at the first latency failure before a completed hold. Higher stages were not attempted. There were 52 successful responses and two redirects, with zero completed HTTP errors or persistent process restarts. The aborted request average is not sustained throughput.",
+      "evidenceUrl": "https://github.com/talk2francis/Marque/actions/runs/43390999342"
     }
   ]
 }

@@ -1,3 +1,9 @@
+## 13 November 2026, 08:09 UTC: coordinated catalogue release still misses latency
+
+[External run 43390999342](https://github.com/talk2francis/Marque/actions/runs/43390999342) tested live and generator release 3184f81 using the original workload and stop rules. It reached 25 virtual visitors, then stopped before the hold: page p95 **11,432 ms**, API p95 **5,015 ms**. The 54 HTTP requests were 52 successful responses and two redirects, with zero completed HTTP errors and no persistent process restarts. No higher stage ran. Its aborted 2.46 requests/second is not sustained throughput. The observer retained at least 6,039,696 KiB available memory.
+
+The stage observer saw one catalogue query leader; the prior overlapping broad refreshes were reduced, but latency still failed. Separate read-only diagnostics identified historical verification fan-out and background scan work as additional contributors. Their capped/profiled times are not production capacity. [Candidate scope, feature-preservation requirements and limits](../operations/HISTORICAL-PROOF-READS-2026-11-13.md). Adopt remains withheld; all failed aggregates are retained.
+
 ## 13 November 2026, 07:07 UTC: rendering follow-up still fails the first stage
 
 [External run 43383364290](https://github.com/talk2francis/Marque/actions/runs/43383364290) tested live and generator release bffa7f5 with the unchanged November workload and targets. The first target was 25 users; it reached 24 before aborting, with page p95 **6,187 ms** and API p95 **9,748 ms**. Thirty HTTP requests comprised 28 successes, one redirect and one marketplace-search 503. The 5xx rate is 1/29 completed script reads (3.45%); redirects are outside that denominator. No hold completed and no higher stage ran. The 1.50 requests/second aborted average is not sustained capacity. Persistent restart counters stayed unchanged and the supervisor retained at least 5,467,420 KiB available memory.
