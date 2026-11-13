@@ -156,6 +156,40 @@ export async function loadBlob(key: string): Promise<Buffer | null> {
   try { return await r.getBuffer(`blob:${key}`) } catch { return null }
 }
 
+/** Publish a complete binary snapshot only while this process owns its refresh. */
+export async function refreshBlob<T>(
+  key: string,
+  compute: () => Promise<{ value: T; blob: Buffer }>,
+  opts: { coordinate: boolean; keepMs: number; leaseMs: number },
+): Promise<T | null> {
+  const r = opts.coordinate ? redis() : null
+  const leaseKey = `blob:refresh:${key}`, token = randomUUID()
+  let owned = false
+  if (r) {
+    try {
+      owned = await r.set(leaseKey, token, 'PX', opts.leaseMs, 'NX') === 'OK'
+      if (!owned) return null
+    } catch { /* Redis outage retains the ordinary local computation. */ }
+  }
+  try {
+    const entry = await compute()
+    if (owned && r) {
+      try {
+        const published = await r.eval(
+          "if redis.call('get', KEYS[1]) == ARGV[1] then redis.call('set', KEYS[2], ARGV[2], 'PX', ARGV[3]); return 1 else return 0 end",
+          2, leaseKey, `blob:${key}`, token, entry.blob, String(opts.keepMs),
+        )
+        if (Number(published) !== 1) return null
+      } catch { /* Keep the complete local value if Redis becomes unavailable. */ }
+    } else await storeBlob(key, entry.blob, opts.keepMs)
+    return entry.value
+  } finally {
+    if (owned && r) {
+      await r.eval("if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end", 1, leaseKey, token).catch(() => undefined)
+    }
+  }
+}
+
 /** For tests and shutdown. */
 export async function closeCache(): Promise<void> {
   closed = true

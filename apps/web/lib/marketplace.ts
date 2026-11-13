@@ -1,7 +1,7 @@
 import 'server-only'
 import { charterExperience, type CharterExecution } from './charter-experience'
 import { sql } from 'drizzle-orm'
-import { db, firstPartyAgentsAllLanes, firstPartyIds, canonicalAgentIdSql, loadBlob, storeBlob } from '@marque/db'
+import { db, firstPartyAgentsAllLanes, firstPartyIds, canonicalAgentIdSql, loadBlob, refreshBlob } from '@marque/db'
 import { agentPortraits } from './agent-portraits'
 import { gunzip } from 'node:zlib'
 import { promisify } from 'node:util'
@@ -16,6 +16,7 @@ import { withStanding, dedupePulled, isHireable, isChecked, isWarrantedNow, hasD
 import { standingEvidence } from './agent-standing'
 import { testFits } from './test-fit'
 import { encodeCatalogue, mapCatalogue } from './catalogue-work'
+import { catalogueCache } from './catalogue-cache'
 export { expireMarketQuote } from './quote-expiry'
 
 /**
@@ -218,10 +219,8 @@ function originOf(v: unknown): string | null {
  * that refresh. Recomputing inline stalled whichever request came next for 2 to 5 s, and on a
  * cold process after a deploy, concurrent home loads piled onto it for 20 s (P2-11 swap proof).
  */
-const baseMemo = new Map<number, { at: number; rows: MarketRow[] }>()
-const baseInflight = new Map<number, Promise<MarketRow[]>>()
-const listedMemo = new Map<number, { at: number; rows: MarketRow[] }>()
-const listedInflight = new Map<number, Promise<MarketRow[]>>()
+const baseCaches = new Map<number, ReturnType<typeof catalogueCache<MarketRow>>>()
+const listedCaches = new Map<number, ReturnType<typeof catalogueCache<MarketRow>>>()
 const BASE_TTL_MS = 3 * 60_000
 const gunzipAsync = promisify(gunzip)
 
@@ -232,13 +231,8 @@ const gunzipAsync = promisify(gunzip)
  * shows these rows states their read time (generatedAt), so a copy is never presented as newer than it is.
  */
 const BLOB_KEEP_MS = 24 * 3600_000
-const BLOB_EVERY_MS = 10 * 60_000
 // v2 (28 Oct): rows carry track.jobs.outsideDelivered; a v1 copy would read every agent as 0.
 const blobKey = (chainId: 56 | 97) => `market:base:v3:${chainId}`
-const lastStored = new Map<number, number>()
-const storeLoads = new Map<number, Promise<{ at: number; rows: MarketRow[] } | null>>()
-const listedStored = new Map<number, number>()
-const listedLoads = new Map<number, Promise<{ at: number; rows: MarketRow[] } | null>>()
 const listedBlobKey = (chainId: 56 | 97) => `market:listed:v1:${chainId}`
 
 async function fromStore(chainId: 56 | 97, listed = false): Promise<{ at: number; rows: MarketRow[] } | null> {
@@ -250,36 +244,27 @@ async function fromStore(chainId: 56 | 97, listed = false): Promise<{ at: number
   } catch { return null }
 }
 
-function toStore(chainId: 56 | 97, entry: { at: number; rows: MarketRow[] }, listed = false): void {
-  const stored = listed ? listedStored : lastStored
-  if (Date.now() - (stored.get(chainId) ?? 0) < BLOB_EVERY_MS) return
-  stored.set(chainId, Date.now())
-  void encodeCatalogue(entry).then((gz) => storeBlob(listed ? listedBlobKey(chainId) : blobKey(chainId), gz, BLOB_KEEP_MS)).catch(() => undefined)
+function baseCache(chainId: 56 | 97, listed = false) {
+  const caches = listed ? listedCaches : baseCaches
+  let cache = caches.get(chainId)
+  if (!cache) {
+    cache = catalogueCache<MarketRow>({ load: () => fromStore(chainId, listed), freshMs: BASE_TTL_MS })
+    caches.set(chainId, cache)
+  }
+  return cache
 }
 
 async function marketplaceBase(chainId: 56 | 97 = 56, listed = false, states?: Awaited<ReturnType<typeof commercialStates>>): Promise<MarketRow[]> {
-  const memos = listed ? listedMemo : baseMemo
-  const loads = listed ? listedLoads : storeLoads
-  const inflight = listed ? listedInflight : baseInflight
-  let memo = memos.get(chainId)
-  if (!memo) {
-    let load = loads.get(chainId)
-    if (!load) { load = fromStore(chainId, listed); loads.set(chainId, load) }
-    const stored = await load.catch(() => null)
-    if (stored && !memos.has(chainId)) memos.set(chainId, stored)
-    memo = memos.get(chainId)
-  }
-  if (memo && Date.now() - memo.at < BASE_TTL_MS) return memo.rows
-  let run = inflight.get(chainId)
-  if (!run) {
-    run = queryAgents(undefined, states, chainId, listed)
-      .then((rows) => { const entry = { at: Date.now(), rows }; memos.set(chainId, entry); toStore(chainId, entry, listed); return rows })
-      .finally(() => { inflight.delete(chainId) })
-    inflight.set(chainId, run)
-    // A background refresh that fails keeps serving the last good set.
-    if (memo) run.catch(() => undefined)
-  }
-  return memo ? memo.rows : run
+  const entry = await baseCache(chainId, listed).read(coordinate => refreshBlob(
+    listed ? listedBlobKey(chainId) : blobKey(chainId),
+    async () => {
+      const rows = await queryAgents(undefined, states, chainId, listed)
+      const value = { at: Date.now(), rows }
+      return { value, blob: await encodeCatalogue(value) }
+    },
+    { coordinate, keepMs: BLOB_KEEP_MS, leaseMs: 90_000 },
+  ))
+  return entry.rows
 }
 
 /**
@@ -526,7 +511,7 @@ async function scopedBase(ids: readonly string[], states?: Awaited<ReturnType<ty
   // background; the category, ready and selection filters after this return exactly the same rows.
   if (ids.length > SCOPE_MAX_IDS) {
     const rows = await marketplaceBase(chainId, listed, states)
-    const at = (listed ? listedMemo : baseMemo).get(chainId)?.at ?? Date.now()
+    const at = baseCache(chainId, listed).peek()?.at ?? Date.now()
     if (listed && states) {
       // A newly quoted identity may not have existed in the compact snapshot. Read
       // its complete owner partition instead of hiding it until the next refresh.
@@ -554,7 +539,7 @@ async function scopedBase(ids: readonly string[], states?: Awaited<ReturnType<ty
     // original path rather than dropping unknown-owner clones from its counts.
     if (owners.some(row => row.owner_address === null)) {
       const rows = await marketplaceBase(chainId)
-      return { rows, at: baseMemo.get(chainId)?.at ?? Date.now() }
+      return { rows, at: baseCache(chainId).peek()?.at ?? Date.now() }
     }
     const addresses = [...new Set(owners.map(row => row.owner_address!))]
     const rows = addresses.length ? await queryAgents(addresses, states, chainId) : []
@@ -844,7 +829,7 @@ export async function marketplaceAgents(q: MarketQuery = {}): Promise<{ rows: Ma
   const overlay = !states && memoised ? sharedCommercialStates().then((r) => r.value).catch(() => undefined) : Promise.resolve(undefined)
   const bases = await Promise.all(chains.map(async (c) => ids
     ? scopedBase(ids.filter((id) => id.startsWith(`${c}:`)), states, c, !both && chainId === 56 && !q.agentIds && !q.includeUnclassified)
-    : { rows: await marketplaceBase(c), at: baseMemo.get(c)?.at ?? Date.now() }))
+    : { rows: await marketplaceBase(c), at: baseCache(c).peek()?.at ?? Date.now() }))
   const base = { rows: bases.flatMap((b) => b.rows), at: Math.min(...bases.map((b) => b.at)) }
   // Clone: the base is memoised and the sort below is in place.
   const observedAt = Date.now()
