@@ -98,7 +98,7 @@ export default async function AdoptPage() {
         <section className={styles.sec} aria-labelledby="zero">
           <h2 id="zero">2. Running from zero</h2>
           <p>On an Ubuntu server with Node 22, pnpm, PostgreSQL 16, Redis, Caddy and PM2 installed. These are the commands the production server runs; a rehearsal on a clean server has not been recorded yet.</p>
-          <pre className={styles.code}>{[
+          <pre className={styles.code} tabIndex={0}>{[
             'git clone https://github.com/talk2francis/Marque /root/marque && cd /root/marque',
             'pnpm install --frozen-lockfile',
             'sudo -u postgres createuser marque && sudo -u postgres createdb -O marque marque',
