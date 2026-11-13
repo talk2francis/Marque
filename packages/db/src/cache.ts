@@ -1,12 +1,13 @@
 import Redis from 'ioredis'
 import { randomUUID } from 'node:crypto'
+import { setTimeout as pause } from 'node:timers/promises'
 
 /**
  * Last-good projection cache (AGENTS 13.8, "Batching of pages").
  *
  * A read either gets a fresh value (younger than `freshMs`), or a newly computed one if
  * the computation finishes inside `timeoutMs`, or, when it does not, the last good value
- * with its age. It never returns an error while any good value exists. Values live in
+ * with its age. It retains last-good values within any explicit maximum age. Values live in
  * Redis so they survive a web restart or a blue/green swap; if Redis is unreachable the
  * cache degrades to process memory rather than failing the request.
  */
@@ -21,7 +22,8 @@ export interface Projection<T> {
 let client: Redis | null = null
 let closed = false
 const memory = new Map<string, { at: number; value: unknown }>()
-const inflight = new Map<string, Promise<unknown>>()
+type Entry<T> = { at: number; value: T }
+const inflight = new Map<string, Promise<Entry<unknown>>>()
 
 function redis(): Redis | null {
   if (closed) return null
@@ -80,13 +82,14 @@ function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {
 export async function cachedProjection<T>(
   key: string,
   compute: () => Promise<T>,
-  opts: { freshMs?: number; timeoutMs?: number; keepMs?: number; staleWhileRevalidate?: boolean; staleRefreshLeaseMs?: number; reuseStored?: (value: T) => boolean } = {},
+  opts: { freshMs?: number; timeoutMs?: number; keepMs?: number; staleWhileRevalidate?: boolean; staleRefreshLeaseMs?: number; reuseStored?: (value: T) => boolean; coordinateCold?: boolean; maxStaleMs?: number; observedAt?: (value: T) => number } = {},
 ): Promise<Projection<T>> {
   const freshMs = opts.freshMs ?? 60_000
   const timeoutMs = opts.timeoutMs ?? 5_000
   const keepMs = opts.keepMs ?? 24 * 3600_000
+  const previous = await readStored(key)
   const now = Date.now()
-  const stored = await readStored(key)
+  const stored = previous && (opts.maxStaleMs === undefined || now - previous.at < opts.maxStaleMs) ? previous : null
   if (stored && now - stored.at < freshMs) {
     return { value: stored.value as T, computedAt: new Date(stored.at).toISOString(), ageMs: now - stored.at, stale: false }
   }
@@ -97,33 +100,49 @@ export async function cachedProjection<T>(
   }
 
   // One computation per key per process, however many requests arrive together.
-  let run = inflight.get(key) as Promise<T> | undefined
+  let run = inflight.get(key) as Promise<Entry<T>> | undefined
   if (!run) {
     // A hard ceiling on the refresh itself: a compute that never settles (a hung RPC or
     // query) once stayed in `inflight` for hours, so every reader waited on it, timed
     // out and got the stale value (the coverage snapshot sat 4.5 h old on 26 Sep).
     run = (async () => {
-      // Only coordinate background refreshes when a last-good value exists.
-      // Cold reads and Redis outages retain their ordinary compute path.
-      const r = stored && opts.staleWhileRevalidate && (opts.staleRefreshLeaseMs ?? 0) > 0 ? redis() : null
+      // Cold coalescing is opt-in. Redis outages retain ordinary computation.
+      const r = (opts.coordinateCold || (stored && opts.staleWhileRevalidate)) && (opts.staleRefreshLeaseMs ?? 0) > 0 ? redis() : null
       const leaseKey = `proj:refresh:${key}`, token = randomUUID()
       let owned = false
       if (r) {
         try {
-          owned = await r.set(leaseKey, token, 'PX', Math.ceil(opts.staleRefreshLeaseMs!), 'NX') === 'OK'
-          if (!owned) return stored!.value as T
-        } catch { /* Redis unavailable: refresh normally, retaining memory fallback. */ }
+          const deadline = Date.now() + Math.max(timeoutMs * 6, 60_000)
+          for (;;) {
+            const shared = await readStored(key)
+            if (shared && (!previous || shared.at !== previous.at)
+              && (opts.maxStaleMs === undefined || Date.now() - shared.at < opts.maxStaleMs)) return shared as Entry<T>
+            owned = await r.set(leaseKey, token, 'PX', Math.ceil(opts.staleRefreshLeaseMs!), 'NX') === 'OK'
+            if (owned) break
+            if (stored && opts.staleWhileRevalidate) return stored as Entry<T>
+            // A peer owns this cold computation. Wait for complete published data,
+            // preserving its real observation date, or recover its released lease.
+            if (Date.now() >= deadline) throw new TimeoutError('projection peer exceeded its deadline')
+            await pause(50)
+          }
+        } catch (err) {
+          if (err instanceof TimeoutError) throw err
+          // Redis unavailable: refresh normally, retaining memory fallback.
+        }
       }
       try {
         const value = await withTimeout(Promise.resolve().then(compute), Math.max(timeoutMs * 6, 60_000))
-        const entry = { at: Date.now(), value }
+        const at = opts.observedAt?.(value) ?? Date.now()
+        if (!Number.isFinite(at)) throw new Error('projection observation date is invalid')
+        if (opts.maxStaleMs !== undefined && Date.now() - at >= opts.maxStaleMs) throw new TimeoutError('projection observation is too old')
+        const entry = { at, value }
         if (owned && r) {
           try {
             const published = await r.eval("if redis.call('get', KEYS[1]) == ARGV[1] then redis.call('set', KEYS[2], ARGV[2], 'PX', ARGV[3]); return 1 else return 0 end", 2, leaseKey, `proj:${key}`, token, JSON.stringify(entry), String(keepMs))
             if (Number(published) === 1) memory.set(key, entry)
           } catch { memory.set(key, entry) }
         } else await writeStored(key, entry, keepMs)
-        return value
+        return entry
       } finally {
         if (owned && r) {
           // An expired owner's completion must never release its successor's lease.
@@ -142,11 +161,13 @@ export async function cachedProjection<T>(
   }
 
   try {
-    const value = await withTimeout(run, timeoutMs)
-    return { value, computedAt: new Date().toISOString(), ageMs: 0, stale: false }
+    const entry = await withTimeout(run, timeoutMs)
+    const ageMs = Math.max(0, Date.now() - entry.at)
+    if (opts.maxStaleMs !== undefined && ageMs >= opts.maxStaleMs) throw new TimeoutError('projection observation is too old')
+    return { value: entry.value, computedAt: new Date(entry.at).toISOString(), ageMs, stale: ageMs >= freshMs }
   } catch (err) {
-    if (stored) {
-      return { value: stored.value as T, computedAt: new Date(stored.at).toISOString(), ageMs: now - stored.at, stale: true }
+    if (stored && (opts.maxStaleMs === undefined || Date.now() - stored.at < opts.maxStaleMs)) {
+      return { value: stored.value as T, computedAt: new Date(stored.at).toISOString(), ageMs: Date.now() - stored.at, stale: true }
     }
     throw err
   }

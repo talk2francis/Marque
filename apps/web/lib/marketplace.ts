@@ -1,7 +1,7 @@
 import 'server-only'
 import { charterExperience, type CharterExecution } from './charter-experience'
 import { sql } from 'drizzle-orm'
-import { db, firstPartyAgentsAllLanes, firstPartyIds, canonicalAgentIdSql, loadBlob, refreshBlob } from '@marque/db'
+import { db, cachedProjection, firstPartyAgentsAllLanes, firstPartyIds, canonicalAgentIdSql, loadBlob, refreshBlob } from '@marque/db'
 import { agentPortraits } from './agent-portraits'
 import { gunzip } from 'node:zlib'
 import { promisify } from 'node:util'
@@ -278,14 +278,21 @@ const STATES_FRESH_MS = 10_000
 const STATES_STALE_MS = 30_000
 let statesMemo: { at: number; value: Awaited<ReturnType<typeof commercialStates>> } | null = null
 let statesInflight: Promise<{ at: number; value: Awaited<ReturnType<typeof commercialStates>> }> | null = null
+let statesGeneration = 0
 
 async function sharedCommercialStates(): Promise<{ at: number; value: Awaited<ReturnType<typeof commercialStates>> }> {
   const age = statesMemo ? Date.now() - statesMemo.at : Infinity
   if (statesMemo && age < STATES_FRESH_MS) return statesMemo
   if (!statesInflight) {
-    const at = Date.now()
-    statesInflight = commercialStates()
-      .then((value) => (statesMemo = { at, value }))
+    statesInflight = cachedProjection(`market:commercial:v1:${statesGeneration}`, async () => {
+      const at = Date.now()
+      return { at, entries: [...await commercialStates()] }
+    }, {
+      freshMs: STATES_FRESH_MS, maxStaleMs: STATES_STALE_MS, keepMs: STATES_STALE_MS,
+      timeoutMs: 8_000, staleWhileRevalidate: true, staleRefreshLeaseMs: 90_000,
+      coordinateCold: true, observedAt: value => value.at,
+    })
+      .then(({ value }) => (statesMemo = { at: value.at, value: new Map(value.entries) }))
       .finally(() => { statesInflight = null })
     // A background refresh that fails keeps serving the last good read until it is too old.
     if (statesMemo) statesInflight.catch(() => undefined)
@@ -297,6 +304,7 @@ async function sharedCommercialStates(): Promise<{ at: number; value: Awaited<Re
 export function resetSharedMarketReads(): void {
   statesMemo = null
   statesInflight = null
+  statesGeneration++
   categoryIdsMemo.clear()
 }
 

@@ -8,14 +8,20 @@ export async function warmWorkerRoutes(base, { instances, routes }) {
   const workers = new Set()
   for (let attempt = 0; attempt < instances * 8 && workers.size < instances; attempt++) {
     const agent = new http.Agent({ keepAlive: true, maxSockets: 1 })
-    const read = path => new Promise((resolve, reject) => {
+    const read = (path, redirects = 0) => new Promise((resolve, reject) => {
       const request = http.get(new URL(path, origin), { agent }, response => {
         let body = ''
         response.setEncoding('utf8')
         response.on('data', chunk => { body += chunk })
         response.on('error', reject)
-        response.on('end', () => response.complete && response.statusCode === 200
-          ? resolve(body) : reject(Error(`Incomplete worker initialization: ${path}`)))
+        response.on('end', () => {
+          if (!response.complete) return reject(Error(`Incomplete worker initialization: ${path}`))
+          if (response.statusCode === 200) return resolve(body)
+          const location = response.headers.location
+          if ([301, 302, 307, 308].includes(response.statusCode) && redirects < 4
+            && location?.startsWith('/') && new URL(location, origin).origin === origin.origin) return resolve(read(location, redirects + 1))
+          reject(Error(`Incomplete worker initialization: ${path}`))
+        })
       })
       const timer = setTimeout(() => request.destroy(Error('Worker initialization timed out')), 45000)
       request.on('close', () => clearTimeout(timer))

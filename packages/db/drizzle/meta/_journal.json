@@ -260,6 +260,13 @@
       "when": 1794508086879,
       "tag": "0036_registry_read_cover_indexes",
       "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1794580874288,
+      "tag": "0037_quote_probe_cover_indexes",
+      "breakpoints": true
     }
   ]
 }

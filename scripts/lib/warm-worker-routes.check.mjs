@@ -10,7 +10,7 @@ async function fixture(run, page = '<html></html>') {
     if (!sockets.has(request.socket)) sockets.set(request.socket, sequence++ % 4)
     const worker = sockets.get(request.socket)
     if (request.url === '/api/ready') response.end(JSON.stringify({ ready: true, instance: `${String(worker).padStart(8, '0')}-0000-4000-8000-000000000000` }))
-    else { visits.add(worker); if (typeof page === 'function') page(response); else response.end(page) }
+    else { visits.add(worker); if (typeof page === 'function') page(response, request); else response.end(page) }
   })
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve))
   try { await run(`http://127.0.0.1:${server.address().port}`, visits) }
@@ -40,4 +40,19 @@ test('refuses to credit another worker after a keep-alive connection is replaced
   await fixture(async base => {
     await assert.rejects(warmWorkerRoutes(base, { instances: 4, routes: ['/featured-job'] }), /Worker changed/)
   }, response => { response.setHeader('Connection', 'close'); response.end('<html></html>') })
+})
+
+test('initializes local canonical redirects on the same worker connection', async () => {
+  await fixture(async base => {
+    assert.equal((await warmWorkerRoutes(base, { instances: 4, routes: ['/canonical'] })).workers, 4)
+  }, (response, request) => {
+    if (request.url === '/canonical') { response.writeHead(308, { Location: '/profile' }); response.end() }
+    else response.end('<html></html>')
+  })
+})
+
+test('refuses remote and protocol-relative redirect destinations', async () => {
+  for (const location of ['https://example.invalid/profile', '//example.invalid/profile', '/\\example.invalid/profile']) await fixture(async base => {
+    await assert.rejects(warmWorkerRoutes(base, { instances: 4, routes: ['/canonical'] }), /Incomplete/)
+  }, response => { response.writeHead(308, { Location: location }); response.end() })
 })

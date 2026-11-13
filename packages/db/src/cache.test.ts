@@ -42,6 +42,83 @@ const pending = () => {
   const promise = new Promise<string>((yes, no) => { resolve = yes; reject = no })
   return { promise, resolve, reject }
 }
+
+it('coalesces opt-in cold reads across workers and preserves the producer observation date', async () => {
+  const a = await instance(), b = await instance(), job = pending()
+  const firstCompute = vi.fn(() => job.promise), duplicate = vi.fn(async () => 'duplicate')
+  const opts = { ...options, coordinateCold: true }
+  const first = a.cachedProjection('cold-shared', firstCompute, opts)
+  await flush()
+  const second = b.cachedProjection('cold-shared', duplicate, opts)
+  await flush(); expect(firstCompute).toHaveBeenCalledOnce(); expect(duplicate).not.toHaveBeenCalled()
+  job.resolve('complete'); const owner = await first
+  await vi.advanceTimersByTimeAsync(100)
+  const follower = await second
+  expect(follower).toMatchObject({ value: 'complete', computedAt: owner.computedAt })
+  expect(follower.ageMs).toBeGreaterThan(0); expect(follower.ageMs).toBeLessThanOrEqual(100)
+  expect(duplicate).not.toHaveBeenCalled(); expect(h.acquisitions).toHaveLength(1)
+})
+
+it('recovers a released cold lease after the owner fails, without publishing an empty value', async () => {
+  const a = await instance(), b = await instance(), job = pending(), opts = { ...options, coordinateCold: true }
+  const owner = a.cachedProjection('cold-failure', () => job.promise, opts)
+  const rejected = expect(owner).rejects.toThrow('Synthetic failure')
+  await flush(); const recover = vi.fn(async () => 'complete recovery')
+  const follower = b.cachedProjection('cold-failure', recover, opts)
+  await flush(); job.reject(Error('Synthetic failure')); await rejected
+  expect(h.data.has('proj:cold-failure')).toBe(false)
+  await vi.advanceTimersByTimeAsync(100)
+  expect((await follower).value).toBe('complete recovery'); expect(recover).toHaveBeenCalledOnce()
+})
+
+it('keeps explicit source dates and refuses data beyond the maximum stale age, including memory fallback', async () => {
+  const a = await instance(), at = Date.now(), opts = { ...options, maxStaleMs: 2000, observedAt: (v: { at: number }) => v.at }
+  const first = await a.cachedProjection('dated', async () => ({ at: at - 500 }), opts)
+  expect(first).toMatchObject({ computedAt: new Date(at - 500).toISOString(), ageMs: 500 })
+  await vi.advanceTimersByTimeAsync(2000); h.offline = true
+  const failed = vi.fn(async (): Promise<{ at: number }> => { throw Error('Synthetic failed refresh') })
+  await expect(a.cachedProjection('dated', failed, opts)).rejects.toThrow('Synthetic failed refresh')
+  expect(failed).toHaveBeenCalledOnce()
+})
+
+it('retains ordinary cold computation during a Redis outage', async () => {
+  h.offline = true; const a = await instance(), compute = vi.fn(async () => 'local result')
+  expect((await a.cachedProjection('cold-offline', compute, { ...options, coordinateCold: true })).value).toBe('local result')
+  expect(compute).toHaveBeenCalledOnce()
+})
+
+it('fences a late cold owner after its lease expires', async () => {
+  const a = await instance(), b = await instance(), job = pending()
+  const opts = { ...options, coordinateCold: true, staleRefreshLeaseMs: 1000 }
+  const owner = a.cachedProjection('cold-expiry', () => job.promise, opts); await flush()
+  await vi.advanceTimersByTimeAsync(1001)
+  expect((await b.cachedProjection('cold-expiry', async () => 'successor', opts)).value).toBe('successor')
+  job.resolve('late owner'); await owner
+  expect((await b.cachedProjection('cold-expiry', async () => 'wrong', opts)).value).toBe('successor')
+})
+
+it('does not re-date a stale peer value as a fresh blocking result', async () => {
+  const a = await instance(), b = await instance(), job = pending()
+  await a.cachedProjection('blocking-peer', async () => 'old', options)
+  await vi.advanceTimersByTimeAsync(1001)
+  await a.cachedProjection('blocking-peer', () => job.promise, options); await flush()
+  const duplicate = vi.fn(async () => 'duplicate')
+  const follower = b.cachedProjection('blocking-peer', duplicate, { ...options, staleWhileRevalidate: false, coordinateCold: true })
+  await flush(); expect(duplicate).not.toHaveBeenCalled()
+  job.resolve('fresh'); await flush(); await vi.advanceTimersByTimeAsync(100)
+  expect((await follower).value).toBe('fresh'); expect(duplicate).not.toHaveBeenCalled()
+})
+
+it('never publishes or falls back to a live snapshot that aged beyond its maximum during work', async () => {
+  const a = await instance(), at = Date.now(), job = pending()
+  const opts = { ...options, maxStaleMs: 2000, observedAt: (v: { at: number }) => v.at }
+  await a.cachedProjection('live-age', async () => ({ at }), opts)
+  await vi.advanceTimersByTimeAsync(1500)
+  await a.cachedProjection('live-age', async () => { await job.promise; return { at } }, opts)
+  await vi.advanceTimersByTimeAsync(1000); job.resolve('done'); await flush()
+  expect(JSON.parse(h.data.get('proj:live-age')!.value).at).toBe(at)
+  await expect(a.cachedProjection('live-age', async () => ({ at }), opts)).rejects.toThrow('too old')
+})
 beforeEach(() => {
   vi.useFakeTimers(); vi.setSystemTime(new Date('2026-11-12T10:00:00Z'))
   vi.stubEnv('REDIS_URL', 'redis://fixture.invalid'); h.data.clear(); h.acquisitions.length = 0; h.offline = false
