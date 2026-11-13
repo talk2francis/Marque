@@ -2,10 +2,12 @@ import 'server-only'
 import { keccak256, toBytes } from 'viem'
 import { safeFetch } from '@marque/probe'
 import { sql } from 'drizzle-orm'
-import { db } from '@marque/db'
+import { db, peekProjection } from '@marque/db'
+import { isSupportedChain, network } from '@marque/commerce'
 import { deliveryContent, deliveryDigest, type DeliveryHashAlgorithm } from './delivery-bytes'
 import { readSubmissionManifest } from './submission-manifest'
 import { originalAnswerCache } from './recheck-original'
+import { manifestFromStored } from './stored-manifest'
 
 /**
  * Read an ERC-8183 deliverable manifest and check it against the hash on chain.
@@ -125,7 +127,19 @@ const verifiedAnswers = originalAnswerCache(64, true)
 
 export function jobManifest(chainId: number, jobId: string, job: ManifestJob, onchainHash?: string | null): Promise<Manifest | null> {
   const hash = job?.deliverable?.hash ?? onchainHash ?? null
-  const load = () => loadJobManifest(chainId, jobId, job, onchainHash)
+  const load = async () => {
+    if (hash && isSupportedChain(chainId) && /^\d{1,20}$/.test(jobId)) {
+      // Lens keeps complete original bytes even when no category check exists.
+      // Re-hash those bytes against the current job commitment; checks and dates
+      // are neither reused here nor refreshed as a side effect of this read.
+      const stored = await peekProjection<{ manifest?: unknown }>(`lens:v9:${chainId}:${jobId}`).catch(() => null)
+      const tx = job?.events?.find(e => e.name === 'JobSubmitted')?.tx
+      const submissionUrl = tx && /^0x[0-9a-fA-F]{64}$/.test(tx) ? `${network(chainId).explorer}/tx/${tx}` : null
+      const recovered = manifestFromStored(stored?.value?.manifest, hash, submissionUrl)
+      if (recovered) return recovered
+    }
+    return loadJobManifest(chainId, jobId, job, onchainHash)
+  }
   if (!hash || !/^0x[0-9a-fA-F]{64}$/.test(hash)) return load()
   const submitted = job?.events?.find(e => e.name === 'JobSubmitted')?.tx ?? ''
   // Bind the cache to every input of receipt/byte validation. Never cache missing,

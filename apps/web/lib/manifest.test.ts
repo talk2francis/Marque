@@ -2,11 +2,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { keccak256, sha256, toBytes } from 'viem'
 import type { SafeFetchResult } from '@marque/probe'
 import { jobManifest, readManifest } from './manifest'
-const h = vi.hoisted(() => ({ reads: 0, override: null as null | ((url: string) => Promise<SafeFetchResult>), response: { ok: true, status: 200, headers: {}, body: '', bytes: 0, latencyMs: 1, finalUrl: 'https://example.invalid/file', redirects: 0 } as SafeFetchResult }))
+const h = vi.hoisted(() => ({ reads: 0, stored: null as unknown, cacheError: false, override: null as null | ((url: string) => Promise<SafeFetchResult>), response: { ok: true, status: 200, headers: {}, body: '', bytes: 0, latencyMs: 1, finalUrl: 'https://example.invalid/file', redirects: 0 } as SafeFetchResult }))
 vi.mock('@marque/probe', () => ({ safeFetch: async (url: string) => { h.reads++; return h.override ? h.override(url) : h.response } }))
+vi.mock('@marque/db', async original => ({ ...await original<typeof import('@marque/db')>(), peekProjection: async () => { if (h.cacheError) throw Error('Synthetic cache outage'); return h.stored } }))
 const http = (status: number, body: string): Extract<SafeFetchResult, { ok: true }> => ({ ok: true, status, body, headers: {}, bytes: body.length, latencyMs: 1, finalUrl: 'https://example.invalid/file', redirects: 0 })
 const currentHttp = () => { if (!h.response.ok) throw Error('Expected the HTTP fixture'); return h.response }
-beforeEach(() => { h.reads = 0; h.override = null; h.response = http(200, JSON.stringify({ response: { content: JSON.stringify({ recommend: false, netAprPct: 0 }) } })) })
+beforeEach(() => { h.reads = 0; h.stored = null; h.cacheError = false; h.override = null; h.response = http(200, JSON.stringify({ response: { content: JSON.stringify({ recommend: false, netAprPct: 0 }) } })) })
 afterEach(() => vi.useRealTimers())
 describe('guarded deliverable gateway hedging', () => {
   it('uses a verified alternate without waiting for a stalled primary and starts no extra read after winning', async () => {
@@ -50,6 +51,20 @@ describe('guarded deliverable gateway hedging', () => {
   })
 })
 describe('shared verified job answers', () => {
+  it('recovers verified bytes from a no-check projection without another provider or RPC read', async () => {
+    const raw = currentHttp().body, hash = keccak256(toBytes(raw))
+    h.stored = { value: { state: 'no-check', checks: [], manifest: { raw, hash, matches: true, url: 'https://example.invalid/file' } }, computedAt: '2026-01-01T00:00:00Z' }
+    expect(await jobManifest(56, '910001', { deliverable: { hash, url: 'https://example.invalid/file' } })).toMatchObject({ matches: true, content: { recommend: false, netAprPct: 0 } })
+    expect(h.reads).toBe(0)
+  })
+  it('falls back to the guarded provider read when saved bytes changed or the cache fails', async () => {
+    const hash = keccak256(toBytes(currentHttp().body))
+    h.stored = { value: { manifest: { raw: '{"changed":true}', hash, matches: true } } }
+    expect(await jobManifest(56, '910002', { deliverable: { hash, url: 'https://example.invalid/file' } })).toMatchObject({ matches: true })
+    h.cacheError = true
+    expect(await jobManifest(56, '910003', { deliverable: { hash, url: 'https://example.invalid/file' } })).toMatchObject({ matches: true })
+    expect(h.reads).toBe(2)
+  })
   it('deduplicates concurrent page/lens reads, binds inputs and returns isolated values', async () => {
     const hash = keccak256(toBytes(currentHttp().body))
     const job = { provider: `0x${'1'.repeat(40)}`, deliverable: { hash, url: 'https://example.invalid/deduplicated' } }

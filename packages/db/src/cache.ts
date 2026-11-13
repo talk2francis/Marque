@@ -61,6 +61,13 @@ async function writeStored(key: string, entry: { at: number; value: unknown }, k
   }
 }
 
+/** Read existing projection bytes without refreshing, re-dating or extending retention. */
+export async function peekProjection<T>(key: string): Promise<{ value: T; computedAt: string; ageMs: number } | null> {
+  const stored = await readStored(key)
+  if (!stored || !Number.isFinite(stored.at)) return null
+  return { value: structuredClone(stored.value) as T, computedAt: new Date(stored.at).toISOString(), ageMs: Date.now() - stored.at }
+}
+
 class TimeoutError extends Error {}
 
 function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {

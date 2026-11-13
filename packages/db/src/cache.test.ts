@@ -48,6 +48,22 @@ beforeEach(() => {
 })
 afterEach(async () => { for (const c of instances.splice(0)) await c.closeCache(); vi.useRealTimers(); vi.unstubAllEnvs() })
 
+it('peeks at existing bytes without refreshing, mutating, re-dating or renewing retention', async () => {
+  const a = await instance(), b = await instance()
+  expect(await a.peekProjection('absent')).toBeNull()
+  const first = await a.cachedProjection('answer', async () => ({ raw: 'original' }), options)
+  const until = h.data.get('proj:answer')!.until
+  await vi.advanceTimersByTimeAsync(1_001)
+  const kept = await b.peekProjection<{ raw: string }>('answer')
+  expect(kept).toMatchObject({ value: { raw: 'original' }, computedAt: first.computedAt, ageMs: 1_001 })
+  kept!.value.raw = 'changed'
+  expect((await b.peekProjection<{ raw: string }>('answer'))?.value.raw).toBe('original')
+  h.offline = true
+  const memory = await a.peekProjection<{ raw: string }>('answer'); memory!.value.raw = 'changed'
+  expect((await a.peekProjection<{ raw: string }>('answer'))?.value.raw).toBe('original')
+  expect(h.data.get('proj:answer')!.until).toBe(until); expect(h.acquisitions).toHaveLength(0)
+})
+
 it('shares a stale refresh between separate process caches and preserves the observation date', async () => {
   const a = await instance(), b = await instance(), job = pending()
   const first = await a.cachedProjection('funnel', async () => 'old', options)

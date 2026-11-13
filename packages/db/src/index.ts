@@ -1,5 +1,5 @@
 export * from './schema.js'
 export { db, raw, closeDb, chartersDb } from './client.js'
 export * from './first-party.js'
-export { cachedProjection, closeCache, loadBlob, storeBlob, refreshBlob, type Projection } from './cache.js'
+export { cachedProjection, peekProjection, closeCache, loadBlob, storeBlob, refreshBlob, type Projection } from './cache.js'
 export { firstPartyIdListSql, oneAgentIdSql, canonicalAgentIdSql } from './first-party-sql.js'
