@@ -236,6 +236,29 @@
       "betweenStageRestarts": 0,
       "evidenceUrl": "https://github.com/talk2francis/Marque/actions/runs/43330998606",
       "note": "Web and generator revision 5437604. The original workload and all targets were unchanged. The first stage reached 25 peak users, then aborted on latency before the hold; neither page nor API latency target was met. 108 successful responses and eight redirects, zero completed HTTP errors or persistent process restarts. No higher stage ran. The aborted request average is not sustained throughput; capacity remains unestablished."
+    },
+    {
+      "date": "2026-11-13T07:07:02.624Z",
+      "release": "bffa7f5",
+      "method": "External GitHub Actions runner, November mix with search and cold job rooms",
+      "stages": [
+        {
+          "visitors": 25,
+          "requests": 30,
+          "requestsPerSecond": 1.5003966924321865,
+          "pageP95Ms": 6187.186254799997,
+          "apiP95Ms": 9747.908906,
+          "error5xxRate": 0.034482758620689655,
+          "restarts": 0,
+          "completed": false,
+          "peakVus": 24,
+          "passed": false
+        }
+      ],
+      "processRestarts": 0,
+      "betweenStageRestarts": 0,
+      "note": "Stopped during the first stage, reaching 24 peak users. The 90-second hold did not complete; higher stages were not attempted. One of 29 completed script reads returned 503. Aborted request averages are not sustained throughput.",
+      "evidenceUrl": "https://github.com/talk2francis/Marque/actions/runs/43383364290"
     }
   ]
 }
