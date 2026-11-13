@@ -28,7 +28,7 @@ export function plainLadderQuery(lane: 'mainnet' | 'practice' | 'all'): LadderQu
 
 export async function marketLadder(q: LadderQuery): Promise<LadderValue> {
   const p = await cachedProjection(`market:ladder:v3:${JSON.stringify(q)}`, () => compute(q), {
-    freshMs: 60_000, timeoutMs: 20_000, keepMs: 60 * 60_000, staleWhileRevalidate: true,
+    freshMs: 60_000, timeoutMs: 20_000, keepMs: 60 * 60_000, staleWhileRevalidate: true, staleRefreshLeaseMs: 150_000,
   })
   return p.value
 }

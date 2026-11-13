@@ -2,12 +2,12 @@
 export const MCS_CODE_ANCHOR = {
   "version": 1,
   "algorithm": "SHA-256",
-  "sha256": "0x9d575ac646f73f2200bbd0e83a2062879ad5619b84c7ed4f516b5448b1ed3947",
+  "sha256": "0x0b7a19681f9590a3c54a6fb4fddfa16cb5d14fe90bcb594d3916d2fb3db89cb7",
   "scope": "local MCS implementation and imported workspace source; lockfile pins external dependencies; not deployed-bytecode or issuer attestation",
   "files": [
     {
       "path": "packages/chain/src/client.ts",
-      "sha256": "0x3c4a778c2f980fbb8479614b0390bacdaa3ba791c4e5567f91826ae54b7978c4"
+      "sha256": "0x9cf1bd8353ae1c6c4221f886bbccee56da206a8ef39dc05e6982c533020764d5"
     },
     {
       "path": "packages/chain/src/index.ts",
@@ -15,7 +15,7 @@ export const MCS_CODE_ANCHOR = {
     },
     {
       "path": "packages/chain/src/pool.ts",
-      "sha256": "0xc0699e82b03301e2e65afb8184026ee706be70bc7d88c43d6b23f0de0b6b6fc3"
+      "sha256": "0x117e5c8ca24e8e8c76aa236af7f86ca61821ecc5855ad8bec1bf5263d02ac644"
     },
     {
       "path": "packages/conformance/src/adapters.ts",
@@ -91,11 +91,11 @@ export const MCS_CODE_ANCHOR = {
     },
     {
       "path": "packages/db/src/cache.ts",
-      "sha256": "0x45c51585a44584834a17f23a73aa7ff9ffb16e00b4c070a486c236b1ebc0350e"
+      "sha256": "0x56457b5133a6c93aa6278dad82d8e90419a10b876ec45af2892556a3d2d0de61"
     },
     {
       "path": "packages/db/src/client.ts",
-      "sha256": "0xdb440147022ea5674b2c0ac97e30d27ef84db5eca934f6c40d797a4cd5cbc176"
+      "sha256": "0x241e4720221596ff7ad4e52f14090906ea801595ee09ba0c51497920b8219a04"
     },
     {
       "path": "packages/db/src/first-party-sql.ts",
@@ -107,7 +107,7 @@ export const MCS_CODE_ANCHOR = {
     },
     {
       "path": "packages/db/src/index.ts",
-      "sha256": "0x3cd4861274e0ff03ee9260b98d9f8fb28234b1510121d3e985e3c51c3ecc671a"
+      "sha256": "0x70c9626f6f254dcdc632c1834c3c01399d653f5c5d8602f0b4c92fd3e224e5f1"
     },
     {
       "path": "packages/db/src/migrate.ts",
@@ -115,7 +115,7 @@ export const MCS_CODE_ANCHOR = {
     },
     {
       "path": "packages/db/src/schema.ts",
-      "sha256": "0x8ffcb34c89e9f18fb36f5e526f83431c4b1303fd5d332e7ed5ad3e9714d0cc5d"
+      "sha256": "0x67f4456d0170d679027d2b64d30b8b947a859cfd9af0e287e88e178d4f8862e5"
     },
     {
       "path": "packages/positions/src/abis.ts",
@@ -195,7 +195,7 @@ export const MCS_CODE_ANCHOR = {
     },
     {
       "path": "pnpm-lock.yaml",
-      "sha256": "0xf029dd3b4b7b0545284d49ed51092840c5b9b75af2e674f1b28b1438040e06ad"
+      "sha256": "0x0431457329052dfcbce7d9c02fe1ba972438f3c5db148c5f5b080ab074434989"
     }
   ]
 } as const

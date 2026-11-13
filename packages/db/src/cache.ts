@@ -73,7 +73,7 @@ function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {
 export async function cachedProjection<T>(
   key: string,
   compute: () => Promise<T>,
-  opts: { freshMs?: number; timeoutMs?: number; keepMs?: number; staleWhileRevalidate?: boolean; staleRefreshLeaseMs?: number } = {},
+  opts: { freshMs?: number; timeoutMs?: number; keepMs?: number; staleWhileRevalidate?: boolean; staleRefreshLeaseMs?: number; reuseStored?: (value: T) => boolean } = {},
 ): Promise<Projection<T>> {
   const freshMs = opts.freshMs ?? 60_000
   const timeoutMs = opts.timeoutMs ?? 5_000
@@ -82,6 +82,11 @@ export async function cachedProjection<T>(
   const stored = await readStored(key)
   if (stored && now - stored.at < freshMs) {
     return { value: stored.value as T, computedAt: new Date(stored.at).toISOString(), ageMs: now - stored.at, stale: false }
+  }
+  // Opt-in for immutable historical evidence. Keep the original observation date
+  // and age; this does not make an old value current or extend its Redis TTL.
+  if (stored && opts.reuseStored?.(stored.value as T)) {
+    return { value: stored.value as T, computedAt: new Date(stored.at).toISOString(), ageMs: now - stored.at, stale: true }
   }
 
   // One computation per key per process, however many requests arrive together.

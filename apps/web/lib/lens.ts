@@ -6,6 +6,7 @@ import { checksFor, type LensCheck } from '@marque/conformance'
 import { criteriaFor, criterionByText, evaluateCriteria, type CriterionResult } from '@marque/conformance/criteria'
 import { jobManifest, type Manifest } from './manifest'
 import { onchainJobTask } from './job-description'
+import { reusableStoredLens } from './stored-lens'
 
 /**
  * Result Lens, server side (SPEC-WORKSPACE 2.1): the delivered answer read for its category, and
@@ -124,9 +125,12 @@ function missingInput(lens: Lens, task: string | null): string {
   return 'Marque has no check for this kind of answer yet'
 }
 
-/** Cached 10 minutes per job: a delivered answer does not change; checks are pinned to its block. */
+/** Saved complete checks describe the original block; incomplete reads retain their ten-minute refresh. */
 export function jobLens(chainId: ChainId, jobId: string, job?: ReadJob) {
-  return cachedProjection(`lens:v9:${chainId}:${jobId}`, () => build(chainId, jobId, { job }), { freshMs: 10 * 60_000, timeoutMs: 20_000, staleWhileRevalidate: true })
+  return cachedProjection(`lens:v9:${chainId}:${jobId}`, () => build(chainId, jobId, { job }), {
+    freshMs: 10 * 60_000, timeoutMs: 20_000, staleWhileRevalidate: true, staleRefreshLeaseMs: 150_000,
+    reuseStored: value => reusableStoredLens(value, job === undefined ? undefined : job?.deliverable?.hash ?? null),
+  })
 }
 
 /** Recompute a job's checks and terms from chain now, ignoring and never writing the stored result (the replay command). */
