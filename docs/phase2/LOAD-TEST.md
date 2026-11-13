@@ -1,4 +1,8 @@
-## 13 November 2026, 08:09 UTC: coordinated catalogue release still misses latency
+## 13 November 2026, 17:23 UTC: maintained read models still miss latency
+
+[External run 43472294781](https://github.com/talk2francis/Marque/actions/runs/43472294781) used release 37ab51e with the original workload and targets. It reached 25 peak visitors and stopped before the hold: page p95 **6,272 ms**, API p95 **8,497 ms**. Its 38 HTTP requests comprised 36 successes and two redirects, with no completed HTTP errors or persistent restarts. Minimum observed available memory was 5,830,768 KiB. No higher stage ran. The aborted 1.73 requests/second is not sustained throughput. Capacity remains unestablished and Adopt stays withheld.
+
+A separate [diagnostic run 43478321086](https://github.com/talk2francis/Marque/actions/runs/43478321086) used the same workload while sampling one live worker. It also stopped at 25 peak visitors before the hold: page p95 8,747 ms and API p95 2,211 ms, 55 successes and five redirects, no completed HTTP errors or persistent restarts. Profiling makes this a diagnostic observation rather than an uninstrumented capacity measurement. The loopback inspector was closed and serving PIDs and restart counters were unchanged. The trace captured query construction, rendering and garbage collection, with substantial sampling gaps; it does not attribute every delay to one function or establish a CPU hardware fault. No passing result is substituted for either failure.
 
 ## 13 November 2026, 15:27 UTC: shared-read release still fails latency
 
@@ -18,6 +22,8 @@ Both runs used live and generator release 3639502 with the original workload and
 
 No persistent process restarted. Minimum observed available memory was 6,238,356 KiB and 6,134,320 KiB respectively. The aborted averages, 1.95 and 2.32 requests/second, are not sustained throughput. Online nonunique quote/probe indexes and ordinary VACUUM preceded the second run; these uncontrolled runs do not establish their isolated effect. Capacity remains unproven and Adopt publication stays withheld. See [shared read coordination](../operations/SHARED-READS-2026-11-13.md) for the next candidate and its limits.
 
+
+## 13 November 2026, 08:09 UTC: coordinated catalogue release still misses latency
 
 [External run 43390999342](https://github.com/talk2francis/Marque/actions/runs/43390999342) tested live and generator release 3184f81 using the original workload and stop rules. It reached 25 virtual visitors, then stopped before the hold: page p95 **11,432 ms**, API p95 **5,015 ms**. The 54 HTTP requests were 52 successful responses and two redirects, with zero completed HTTP errors and no persistent process restarts. No higher stage ran. Its aborted 2.46 requests/second is not sustained throughput. The observer retained at least 6,039,696 KiB available memory.
 

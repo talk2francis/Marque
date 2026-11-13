@@ -1,7 +1,7 @@
 import 'server-only'
 import { charterExperience, type CharterExecution } from './charter-experience'
 import { sql } from 'drizzle-orm'
-import { db, cachedProjection, firstPartyAgentsAllLanes, firstPartyIds, canonicalAgentIdSql, loadBlob, refreshBlob } from '@marque/db'
+import { db, cachedProjection, firstPartyAgentsAllLanes, firstPartyIds, canonicalAgentIdSql, textArraySql, loadBlob, refreshBlob } from '@marque/db'
 import { agentPortraits } from './agent-portraits'
 import { gunzip } from 'node:zlib'
 import { promisify } from 'node:util'
@@ -333,7 +333,7 @@ export function marketplaceSourceQuery(owners?: readonly string[], chainId: 56 |
       from probe_schedule ps join probe p on p.id = ps.last_probe_id
       ${owners ? sql`where ps.service_id in (
         select ss.id from agent_service ss join agent scoped on scoped.id = ss.agent_id
-        where scoped.chain_id = ${chainId} and scoped.owner_address in (${sql.join(owners.map(owner => sql`${owner}`), sql`, `)})
+        where scoped.chain_id = ${chainId} and scoped.owner_address = any(${textArraySql(owners)})
       )` : sql``}
     ),
     svc as (
@@ -359,7 +359,7 @@ export function marketplaceSourceQuery(owners?: readonly string[], chainId: 56 |
       where s.currently_declared is distinct from false
       ${owners ? sql`and s.agent_id in (
         select scoped.id from agent scoped where scoped.chain_id = ${chainId}
-          and scoped.owner_address in (${sql.join(owners.map(owner => sql`${owner}`), sql`, `)})
+          and scoped.owner_address = any(${textArraySql(owners)})
       )` : sql``}
       group by s.agent_id
     ),
@@ -390,7 +390,7 @@ export function marketplaceSourceQuery(owners?: readonly string[], chainId: 56 |
       where agent_id in (select agent_id from svc where any_reachable union select agent_id from conf)
       ${owners ? sql`and agent_id in (
         select scoped.id from agent scoped where scoped.chain_id = ${chainId}
-          and scoped.owner_address in (${sql.join(owners.map(owner => sql`${owner}`), sql`, `)})
+          and scoped.owner_address = any(${textArraySql(owners)})
       )` : sql``}
       order by agent_id, (category <> 'unclassified') desc, confidence desc, assigned_at desc
     ),
@@ -435,7 +435,7 @@ export function marketplaceSourceQuery(owners?: readonly string[], chainId: 56 |
       where a.chain_id = ${chainId}
         and (s.any_reachable or c.agent_id is not null)
         and a.id <> 'canary:ssrf'
-        ${owners ? sql`and a.owner_address in (${sql.join(owners.map(owner => sql`${owner}`), sql`, `)})` : sql``}
+        ${owners ? sql`and a.owner_address = any(${textArraySql(owners)})` : sql``}
     )
     , projected as (select
       id as agent_id,
@@ -468,7 +468,7 @@ export function marketplaceSourceQuery(owners?: readonly string[], chainId: 56 |
     select * from projected
     ${quotedIds ? sql`where (category is not null and category <> 'unclassified')
       or conf_test is not null
-      ${quotedIds.length ? sql`or agent_id in (${sql.join(quotedIds.map(id => sql`${id}`), sql`, `)})` : sql``}` : sql``}
+      ${quotedIds.length ? sql`or agent_id = any(${textArraySql(quotedIds)})` : sql``}` : sql``}
     order by identities desc, agent_id
   `
 }
@@ -541,7 +541,7 @@ async function scopedBase(ids: readonly string[], states?: Awaited<ReturnType<ty
   const pending = scopeInflight.get(key)
   if (pending) return pending
   const promise = (async () => {
-    const result = await boundedCommerceRead(sql`select id, owner_address from agent where id in (${sql.join([...new Set(ids)].map(id => sql`${id}`), sql`, `)})`, 'exact')
+    const result = await boundedCommerceRead(sql`select id, owner_address from agent where id = any(${textArraySql([...new Set(ids)])})`, 'exact')
     const owners = Array.from(result as unknown as Array<{ owner_address: string | null }>)
     // SQL groups null owners together. Preserve that entire partition using the
     // original path rather than dropping unknown-owner clones from its counts.
@@ -585,7 +585,7 @@ async function queryAgents(owners?: readonly string[], states?: Awaited<ReturnTy
     // every unrelated service/probe just to discard its unclassified row later.
     const candidates = [...new Set([...await categoryIds(null, chainId), ...(quotedIds ?? [])])]
     const selected = candidates.length ? await boundedCommerceRead(sql`select distinct owner_address from agent
-      where chain_id = ${chainId} and id in (${sql.join(candidates.map(id => sql`${id}`), sql`, `)})`, 'exact') : []
+      where chain_id = ${chainId} and id = any(${textArraySql(candidates)})`, 'exact') : []
     const partitions = selected as unknown as Array<{ owner_address: string | null }>
     // A null owner is one complete partition in the original query. Fall back
     // to that original scope rather than dropping unknown-owner identities.

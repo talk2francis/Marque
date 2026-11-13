@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { sql } from 'drizzle-orm'
-import { db, closeDb } from '@marque/db'
+import { db, closeDb, textArraySql } from '@marque/db'
 import { marketplaceSourceQuery, marketplaceCategoryQuery } from './marketplace'
 const url = process.env['MARQUE_INTEGRATION_DB']
 const enabled = !!url && /^marque_vnext_fixture_/.test(new URL(url).pathname.slice(1))
@@ -31,6 +31,16 @@ describe.skipIf(!enabled)('catalog owner partition, real isolated PostgreSQL', (
     }
   })
   afterAll(async () => { await closeDb() })
+  it('round-trips arbitrary array elements through PostgreSQL without SQL interpolation', async () => {
+    const values = ['', 'NULL', 'null', 'a,b', '{braces}', '"quoted"', '\\', 'a\\"b', 'with space', 'line\nbreak', '雪', "'); select pg_sleep(10); --"]
+    const rows = asRows(await db().execute(sql`select value from unnest(${textArraySql(values)}) as value`))
+    expect(rows.map(row => row.value)).toEqual(values)
+    expect(asRows(await db().execute(sql`select value from unnest(${textArraySql([])}) as value`))).toEqual([])
+  })
+  it('keeps an empty owner scope empty and duplicates harmless', async () => {
+    expect(asRows(await db().execute(marketplaceSourceQuery([])))).toEqual([])
+    expect(asRows(await db().execute(marketplaceSourceQuery([owner, owner])))).toEqual(asRows(await db().execute(marketplaceSourceQuery([owner]))))
+  })
   it('matches the original full query restricted to complete owner partitions', async () => {
     const all = asRows(await db().execute(marketplaceSourceQuery())).filter(r => r.owner_address === owner)
     const scoped = asRows(await db().execute(marketplaceSourceQuery([owner])))

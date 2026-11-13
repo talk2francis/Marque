@@ -6,7 +6,15 @@ vi.mock('@marque/commerce/reads', () => ({ boundedCommerceRead: mocks.read, coal
 vi.mock('./agent-state', async original => ({ ...await original<object>(), agentStates: mocks.capabilities, agentStatesForTasks: mocks.batch }))
 vi.mock('./agent-track', async original => ({ ...await original<object>(), agentTracks: mocks.tracks }))
 vi.mock('./agent-standing', () => ({ standingEvidence: async () => ({}) }))
-import { marketplaceAgents, marketPageAgentStates, resetSharedMarketReads } from './marketplace'
+import { marketplaceAgents, marketplaceSourceQuery, marketPageAgentStates, resetSharedMarketReads } from './marketplace'
+it('keeps a large complete owner partition in a bounded number of query parameters', () => {
+  const owners = Array.from({ length: 3000 }, (_, i) => `owner-${i}`)
+  const query = new PgDialect().sqlToQuery(marketplaceSourceQuery(owners, 56, ['56:quoted']))
+  expect(query.params.length).toBeLessThan(40)
+  expect(query.sql.length).toBeLessThan(10_000)
+  expect(query.params.filter(value => value === '{"56:quoted"}')).toHaveLength(1)
+  expect(query.params.filter(value => typeof value === 'string' && value.includes('owner-2999'))).toHaveLength(4)
+})
 describe('ready selection before the broad catalog read', () => {
   beforeEach(() => resetSharedMarketReads())
   it('retains independent owner selections when views alternate', async () => {
@@ -92,15 +100,15 @@ describe('ready selection before the broad catalog read', () => {
     mocks.read.mockResolvedValueOnce([{ id: '56:synthetic-null', owner_address: null }]).mockRejectedValueOnce(Error('captured source query'))
     await expect(marketplaceAgents({ agentIds: ['56:synthetic-null'] })).rejects.toThrow('captured source query')
     const query = new PgDialect().sqlToQuery(mocks.read.mock.calls[1]![0])
-    expect(query.sql).not.toContain('and a.owner_address in')
+    expect(query.sql).not.toContain('and a.owner_address = any(')
   })
   it('scopes complete owner groups rather than only selected identities', async () => {
     mocks.states.mockResolvedValue(new Map()); mocks.read.mockReset()
     mocks.read.mockResolvedValueOnce([{ id: '56:synthetic-owned', owner_address: 'synthetic-owner' }]).mockRejectedValueOnce(Error('captured source query'))
     await expect(marketplaceAgents({ agentIds: ['56:synthetic-owned'] })).rejects.toThrow('captured source query')
     const query = new PgDialect().sqlToQuery(mocks.read.mock.calls[1]![0])
-    expect(query.sql).toContain('and a.owner_address in')
-    expect(query.params).toContain('synthetic-owner')
+    expect(query.sql).toContain('and a.owner_address = any(')
+    expect(query.params).toContain('{"synthetic-owner"}')
     expect(query.params).not.toContain('56:synthetic-owned')
   })
 
