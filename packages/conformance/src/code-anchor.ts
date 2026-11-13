@@ -2,7 +2,7 @@
 export const MCS_CODE_ANCHOR = {
   "version": 1,
   "algorithm": "SHA-256",
-  "sha256": "0x3dd70d2164108d6cdfa782e5b1a709d3974bffdbe53ef6483f25f0db73b9fcc6",
+  "sha256": "0xa142a1a4d6e2395c3032b8e683d731b5f021f5b5568ec55d383d005be56dde3f",
   "scope": "local MCS implementation and imported workspace source; lockfile pins external dependencies; not deployed-bytecode or issuer attestation",
   "files": [
     {
@@ -199,7 +199,7 @@ export const MCS_CODE_ANCHOR = {
     },
     {
       "path": "pnpm-lock.yaml",
-      "sha256": "0x0431457329052dfcbce7d9c02fe1ba972438f3c5db148c5f5b080ab074434989"
+      "sha256": "0x8afd6f40170342a210fe8347442a0b57007a584376af3bfe6d0af64ef190e69f"
     }
   ]
 } as const

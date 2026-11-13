@@ -1,0 +1,44 @@
+diff --git a/dist/esm/server/load-manifest.external.js b/dist/esm/server/load-manifest.external.js
+index 950166422e3c2135451fc935618af8ac35749668..316d15bc6dc3f7fc55018697b3b47fd0a512e163 100644
+--- a/dist/esm/server/load-manifest.external.js
++++ b/dist/esm/server/load-manifest.external.js
+@@ -36,6 +36,17 @@ export function evalManifest(path, shouldCache = true, cache = sharedCache) {
+     }
+     let contextObject = {};
+     runInNewContext(content, contextObject);
++    // Client-reference manifests contain immutable build data. Copy that data
++    // into this realm before caching it so it does not retain a complete VM
++    // context (and its builtins) for every route for the life of the worker.
++    // Keep evaluation sandboxed and retain unusual plugin output unchanged.
++    if (path.endsWith('_client-reference-manifest.js')) {
++        try {
++            contextObject = structuredClone(contextObject);
++        } catch {
++            // A non-cloneable extension keeps the original loader behavior.
++        }
++    }
+     // Freeze the context object so it cannot be modified if we're caching it.
+     if (shouldCache) {
+         contextObject = deepFreeze(contextObject);
+diff --git a/dist/server/load-manifest.external.js b/dist/server/load-manifest.external.js
+index ec202b784b1f8cc2b698ad6acb4856a86c5caf5d..eb86444984035c42562ba5ccf15cd5d8f067879b 100644
+--- a/dist/server/load-manifest.external.js
++++ b/dist/server/load-manifest.external.js
+@@ -66,6 +66,17 @@ function evalManifest(path, shouldCache = true, cache = sharedCache) {
+     }
+     let contextObject = {};
+     (0, _vm.runInNewContext)(content, contextObject);
++    // Client-reference manifests contain immutable build data. Copy that data
++    // into this realm before caching it so it does not retain a complete VM
++    // context (and its builtins) for every route for the life of the worker.
++    // Keep evaluation sandboxed and retain unusual plugin output unchanged.
++    if (path.endsWith('_client-reference-manifest.js')) {
++        try {
++            contextObject = structuredClone(contextObject);
++        } catch {
++            // A non-cloneable extension keeps the original loader behavior.
++        }
++    }
+     // Freeze the context object so it cannot be modified if we're caching it.
+     if (shouldCache) {
+         contextObject = (0, _deepfreeze.deepFreeze)(contextObject);
