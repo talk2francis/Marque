@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { sql } from 'drizzle-orm'
 import { PgDialect } from 'drizzle-orm/pg-core'
 import { boundedCommerceRead, coalescedCatalogRead } from './read-budget'
+import { textArraySql } from '../../db/src/text-array'
 
 const mocks = vi.hoisted(() => ({ transaction: vi.fn() }))
 vi.mock('@marque/db', () => ({ db: () => mocks }))
@@ -53,6 +54,25 @@ describe('pending catalog read coalescing', () => {
     const bytes = new Uint8Array([1, 2])
     await Promise.all([coalescedCatalogRead(sql`select ${bytes}`), coalescedCatalogRead(sql`select ${bytes}`)])
     expect(mocks.transaction).toHaveBeenCalledTimes(2)
+  })
+
+  it('shares equal bound arrays while retaining the values captured before mutation', async () => {
+    const captured: unknown[][] = []
+    let finish!: (value: []) => void
+    const pending = new Promise<[]>(resolve => { finish = resolve })
+    reads(() => pending)
+    const mutable = ['first', 'NULL']
+    const query = sql`select unnest(${textArraySql(mutable)})`
+    mutable[0] = 'changed'
+    captured.push(dialect.sqlToQuery(query).params)
+    const first = coalescedCatalogRead(query)
+    const same = coalescedCatalogRead(sql`select unnest(${textArraySql(['first', 'NULL'])})`)
+    expect(mocks.transaction).toHaveBeenCalledTimes(1)
+    const changed = coalescedCatalogRead(sql`select unnest(${textArraySql(mutable)})`)
+    expect(mocks.transaction).toHaveBeenCalledTimes(2)
+    expect(captured).toEqual([['{"first","NULL"}']])
+    finish([])
+    await Promise.all([first, same, changed])
   })
 
   it('keeps compilation policy local while retaining exact-service and catalog budgets', async () => {
