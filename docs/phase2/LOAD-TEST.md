@@ -1,3 +1,9 @@
+## 12 November 2026, 23:42 UTC: Job Room follow-up still misses latency
+
+[External run 43330998606](https://github.com/talk2francis/Marque/actions/runs/43330998606) tested serving and generator release 5437604c382d38f3fcd9207dcd6030bfdba41589 with the original workload hash and unchanged targets. It reached 25 peak users, then aborted before the hold: page p95 **6,346 ms**, API p95 **1,937 ms**. The 116 HTTP requests were 108 successful responses and eight redirects, with zero HTTP errors or persistent process restarts. Neither latency target passed. Its aborted average of 5.27 requests/second is not sustained throughput; no higher stage ran.
+
+The actual-stage observer found the two serving web workers busy across its sampled 20.8-second window, with over 6 GiB available memory. Parent cgroups imposed no CPU quota and all six CPUs were allowed. A separate capped, cache-isolated warm-render profile identified catalogue projection/serialization and garbage collection; these diagnostics are not capacity measurements or proof of every delay. The next batch addresses event-loop blocking, duplicate refreshes, worker allocation and per-worker Job Room module initialization. All earlier failures remain retained.
+
 ## 12 November 2026, 17:51 UTC: refreshed reads, latency still missed
 
 [Run 43273718671](https://github.com/talk2francis/Marque/actions/runs/43273718671) tested release `b67f005f01abc7a0a8c1b99b40fd060c6a7a19d7` after the accepted deployment and quote-worker activation, using the unchanged November workload and guards. It reached 25 users but aborted before the hold: page p95 **9,535 ms**, API p95 **2,604 ms**. Its 50 HTTP requests were 45 successful responses and five redirects; there were zero HTTP errors, admission rejections or persistent process restarts. The aborted 2.27 requests/second is not sustained throughput. Higher stages were not attempted.

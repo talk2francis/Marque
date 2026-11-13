@@ -149,7 +149,7 @@ export function weeklyOutside(rows: readonly ProofRow[]): Array<{ week: string; 
 export function proofProjection() {
   // Fresh for 90 s (was 10 min, so a new hire could take 20 minutes to appear); still one rebuild at a time, however
   // many visitors, and a stale copy answers at once while it runs. v4: rows carry createdAt.
-  return cachedProjection('proof:v5', build, { freshMs: 90_000, timeoutMs: 180_000, staleWhileRevalidate: true })
+  return cachedProjection('proof:v5', build, { freshMs: 90_000, timeoutMs: 180_000, staleWhileRevalidate: true, staleRefreshLeaseMs: 210_000 })
 }
 
 const CSV_COLS = ['chain', 'job_id', 'escrow', 'agent', 'agent_key', 'operator_class', 'funder_class', 'client', 'counted', 'state', 'funded', 'delivered', 'settled', 'refunded', 'rated', 'checks_decided', 'checks_agreed', 'terms_met', 'terms_of', 'terms_source', 'act', 'act_tx', 'hire_tx', 'verify_url'] as const

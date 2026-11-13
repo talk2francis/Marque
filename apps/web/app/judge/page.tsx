@@ -71,7 +71,7 @@ export default async function JudgePage() {
       planNote: live && !live.ok ? live.reason : live && live.ok ? 'Built and simulated at the current block.' : null,
     }
   }
-  const d = await cachedProjection('judge:v4', load, { freshMs: 60_000, timeoutMs: 20_000, staleWhileRevalidate: true }).then((p) => p.value).catch(load)
+  const d = await cachedProjection('judge:v4', load, { freshMs: 60_000, timeoutMs: 20_000, staleWhileRevalidate: true, staleRefreshLeaseMs: 60_000 }).then((p) => p.value).catch(load)
   // Every job (2 Nov): the record behind the walkthrough, here rather than in the site's navigation. At most 3 s on a cold cache.
   const proof = await Promise.race([proofProjection().then((p) => p.value), new Promise<null>((r) => setTimeout(() => r(null), 3000))]).catch(() => null)
   const { hf, keelTest, acted } = d

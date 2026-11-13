@@ -19,6 +19,7 @@ import { warmCandidateProjections } from './lib/warm-projections.mjs'
 import { verifyPreviousAssets } from './lib/previous-assets.mjs'
 import { isVerificationRpcRead } from './lib/verification-rpc.mjs'
 import { verifyReadiness } from './lib/readiness.mjs'
+import webRuntime from '../ops/web-runtime.cjs'
 
 const BASE = process.argv[2] ?? 'http://127.0.0.1:3299'
 // Deployment metadata from the slot, checked before Chromium or a traffic switch.
@@ -34,7 +35,7 @@ if (process.env.PREVIOUS_BASE_URL) {
   const count = await verifyPreviousAssets(BASE, process.env.PREVIOUS_BASE_URL)
   console.log(`ok   ${count} previous-release static assets remain available`)
 }
-console.log('ok   public read readiness: ' + JSON.stringify(await verifyReadiness(BASE, { instances: Number(process.env.WEB_INSTANCES ?? 2) })))
+console.log('ok   public read readiness: ' + JSON.stringify(await verifyReadiness(BASE, { instances: Number(process.env.WEB_INSTANCES ?? webRuntime.instances) })))
 const projections = await warmCandidateProjections(BASE)
 console.log('ok   runtime projections refreshed before browser acceptance: ' + JSON.stringify(projections))
 // An address with real first-party history — charters, hires, receipts, seals —
@@ -44,7 +45,7 @@ const ACTIVE_ADDR = '0x60AA3AEE06E2345A17E4d4B12c53E046F4F63CAf'
 const HIRER_ADDR = '0x5aC2448FC79Ef8d33710b1Bced5AEff90138b452'
 const DEAD_ADDR = '0x000000000000000000000000000000000000dEaD'
 const ROUTES = [
-  '/', '/judge', '/ledger', '/ledger/methodology', '/register', '/docs', '/standard',
+  '/', '/judge', webRuntime.warmRoute, '/ledger', '/ledger/methodology', '/register', '/docs', '/standard',
   '/pancakeswap', '/positions',
   '/me', `/me?addr=${ACTIVE_ADDR}`, `/me?addr=${DEAD_ADDR}`,
 ]
