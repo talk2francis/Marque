@@ -102,7 +102,7 @@ async function compute(): Promise<Record<string, StandingEvidence>> {
 /** Cached two minutes: jobs, Lens results and check calls change at the indexer's and the daily sweep's pace. */
 export async function standingEvidence(): Promise<Record<string, StandingEvidence>> {
   try {
-    const p = await cachedProjection('agent:standing:v1', compute, { freshMs: 120_000, timeoutMs: 8_000, staleWhileRevalidate: true })
+    const p = await cachedProjection('agent:standing:v1', compute, { freshMs: 120_000, timeoutMs: 8_000, staleWhileRevalidate: true, staleRefreshLeaseMs: 90_000, coordinateCold: true })
     return p.value
   } catch {
     return {}

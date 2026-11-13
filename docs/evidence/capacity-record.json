@@ -282,6 +282,52 @@
       "betweenStageRestarts": 0,
       "note": "Stopped at the first latency failure before a completed hold. Higher stages were not attempted. There were 52 successful responses and two redirects, with zero completed HTTP errors or persistent process restarts. The aborted request average is not sustained throughput.",
       "evidenceUrl": "https://github.com/talk2francis/Marque/actions/runs/43390999342"
+    },
+    {
+      "date": "2026-11-13T12:45:57.481Z",
+      "release": "36395026a5c0b92ffc83d0e9a2e50aa461b67156",
+      "method": "External GitHub Actions runner, November mix with search and cold job rooms",
+      "stages": [
+        {
+          "visitors": 25,
+          "requests": 43,
+          "requestsPerSecond": 1.9548590725864696,
+          "pageP95Ms": 5916.28049814999,
+          "apiP95Ms": 5416.538108550007,
+          "error5xxRate": 0.02631578947368421,
+          "restarts": 0,
+          "completed": false,
+          "peakVus": 25,
+          "passed": false
+        }
+      ],
+      "processRestarts": 0,
+      "betweenStageRestarts": 0,
+      "evidenceUrl": "https://github.com/talk2francis/Marque/actions/runs/43427915442",
+      "note": "Stopped at the first latency failure before a completed hold. Higher stages were not attempted. HTTP status counts: 200: 37, 308: 5, 503: 1. No persistent process restarts. Redirects are excluded from the script-read 5xx denominator. The aborted request average is not sustained throughput. Capacity remains unestablished; Adopt publication remains withheld."
+    },
+    {
+      "date": "2026-11-13T13:42:00.241Z",
+      "release": "36395026a5c0b92ffc83d0e9a2e50aa461b67156",
+      "method": "External GitHub Actions runner, November mix with search and cold job rooms",
+      "stages": [
+        {
+          "visitors": 25,
+          "requests": 51,
+          "requestsPerSecond": 2.3189928479832447,
+          "pageP95Ms": 5919.74185975,
+          "apiP95Ms": 2746.5085820999993,
+          "error5xxRate": 0,
+          "restarts": 0,
+          "completed": false,
+          "peakVus": 25,
+          "passed": false
+        }
+      ],
+      "processRestarts": 0,
+      "betweenStageRestarts": 0,
+      "evidenceUrl": "https://github.com/talk2francis/Marque/actions/runs/43435902914",
+      "note": "Stopped at the first latency failure before a completed hold. Higher stages were not attempted. HTTP status counts: 200: 49, 308: 2. No persistent process restarts. Redirects are excluded from the script-read 5xx denominator. The aborted request average is not sustained throughput. Capacity remains unestablished; Adopt publication remains withheld."
     }
   ]
 }

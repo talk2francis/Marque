@@ -69,7 +69,7 @@ export const MIN_THIRD_PARTY_PER_CATEGORY = 2
 const MEMO_TTL_MS = 90_000
 
 async function memoised<T>(key: string, fn: () => Promise<T>): Promise<T> {
-  const p = await cachedProjection(`registry:${key}`, fn, { freshMs: MEMO_TTL_MS, timeoutMs: 60_000, staleWhileRevalidate: true, staleRefreshLeaseMs: 45_000 })
+  const p = await cachedProjection(`registry:${key}`, fn, { freshMs: MEMO_TTL_MS, timeoutMs: 60_000, staleWhileRevalidate: true, staleRefreshLeaseMs: 90_000, coordinateCold: true })
   return p.value
 }
 

@@ -78,11 +78,15 @@ export async function storefront(agentId: string): Promise<Storefront | null> {
   // request from the agent's own newest quotes, the same reader the marketplace and the
   // terms API use, so the rail can never contradict a marketplace row (defect D2).
   const live = currentTerms(agentId).catch(() => null)
+  const build = () => computeStorefront(agentId, live)
+  const options = { freshMs: 30_000, timeoutMs: 12_000, staleWhileRevalidate: true, staleRefreshLeaseMs: 90_000, coordinateCold: true }
   let value: Storefront | null
   try {
-    value = (await cachedProjection(`storefront:v9:${agentId}`, () => computeStorefront(agentId), { freshMs: 30_000, timeoutMs: 12_000, staleWhileRevalidate: true })).value
+    value = (await cachedProjection(`storefront:v9:${agentId}`, build, options)).value
   } catch {
-    value = await computeStorefront(agentId)
+    // Rejoin a timed-out shared computation; do not launch a second fan-out
+    // while the original still runs. A genuine failed read can still retry.
+    value = (await cachedProjection(`storefront:v9:${agentId}`, build, { ...options, timeoutMs: 60_000 })).value
   }
   if (!value) return null
   // An owner-set portrait is read per request, outside the projection, so a change shows at once.
@@ -99,7 +103,7 @@ export function latestStorefrontProbeQuery(agentId: string) {
     where p.agent_id = ${agentId} order by p.checked_at desc nulls last limit 1`
 }
 
-async function computeStorefront(agentId: string): Promise<Storefront | null> {
+async function computeStorefront(agentId: string, live: Promise<Awaited<ReturnType<typeof currentTerms>> | null>): Promise<Storefront | null> {
   const [a] = rowsOf(await db().execute(sql`
     select a.*, (select category from agent_category c where c.agent_id = a.id
                  order by (category <> 'unclassified') desc, confidence desc, assigned_at desc limit 1) as category
@@ -126,7 +130,7 @@ async function computeStorefront(agentId: string): Promise<Storefront | null> {
       from rating r left join rating_comment c on lower(c.feedback_hash) = lower(r.feedback_hash) and c.chain_id = r.chain_id and c.agent_token_id = r.agent_token_id and lower(c.client) = lower(r.client)
       where r.chain_id = ${chainId} and r.agent_token_id = ${tokenId} and not r.revoked and r.tag1 = 'starred'
       order by r.block_number desc limit 8`).then(rowsOf).catch(() => []),
-    currentTerms(agentId).catch(() => null),
+    live,
     agentTrack(tokenId, chainId),
     disputeWindowSeconds(chainId).catch(() => null),
     sellerFor(agentId, null).catch(() => null),

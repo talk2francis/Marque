@@ -1,5 +1,17 @@
 ## 13 November 2026, 08:09 UTC: coordinated catalogue release still misses latency
 
+## 13 November 2026, 12:45 and 13:42 UTC: further first-stage failures
+
+Both runs used live and generator release 3639502 with the original workload and targets. Each reached 25 peak virtual visitors, aborted before the hold and attempted no higher stage.
+
+| External run | HTTP requests | Page p95 | API p95 | Completed script-read 5xx rate |
+| --- | --- | --- | --- | --- |
+| [43427915442](https://github.com/talk2francis/Marque/actions/runs/43427915442) | 43: 37 successes, 5 redirects, 1 unavailable | 5,916 ms | 5,417 ms | 1/38 (2.63%) |
+| [43435902914](https://github.com/talk2francis/Marque/actions/runs/43435902914) | 51: 49 successes, 2 redirects | 5,920 ms | 2,747 ms | 0/49 (0%) |
+
+No persistent process restarted. Minimum observed available memory was 6,238,356 KiB and 6,134,320 KiB respectively. The aborted averages, 1.95 and 2.32 requests/second, are not sustained throughput. Online nonunique quote/probe indexes and ordinary VACUUM preceded the second run; these uncontrolled runs do not establish their isolated effect. Capacity remains unproven and Adopt publication stays withheld. See [shared read coordination](../operations/SHARED-READS-2026-11-13.md) for the next candidate and its limits.
+
+
 [External run 43390999342](https://github.com/talk2francis/Marque/actions/runs/43390999342) tested live and generator release 3184f81 using the original workload and stop rules. It reached 25 virtual visitors, then stopped before the hold: page p95 **11,432 ms**, API p95 **5,015 ms**. The 54 HTTP requests were 52 successful responses and two redirects, with zero completed HTTP errors and no persistent process restarts. No higher stage ran. Its aborted 2.46 requests/second is not sustained throughput. The observer retained at least 6,039,696 KiB available memory.
 
 The stage observer saw one catalogue query leader; the prior overlapping broad refreshes were reduced, but latency still failed. Separate read-only diagnostics identified historical verification fan-out and background scan work as additional contributors. Their capped/profiled times are not production capacity. [Candidate scope, feature-preservation requirements and limits](../operations/HISTORICAL-PROOF-READS-2026-11-13.md). Adopt remains withheld; all failed aggregates are retained.

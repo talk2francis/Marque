@@ -206,6 +206,8 @@ export const probe = pgTable('probe', {
  * cycle, and so a live, classified or first-party service is never queued behind
  * thousands of dead endpoints burning their full timeout (P2-00 probe incident).
  */
+// Migration 0037 also maintains probe_schedule_last_probe_cover_idx with INCLUDE
+// (agent_id); Drizzle 0.38 cannot represent included columns in its index builder.
 export const probeSchedule = pgTable('probe_schedule', {
   serviceId: integer('service_id').primaryKey(),
   agentId: text('agent_id').notNull(),
@@ -929,6 +931,8 @@ export const agentAlias = pgTable('agent_alias', {
  * Failed attempts are stored too, with the reason: a seller that will not quote is a
  * published observation.
  */
+// Migration 0037 maintains commerce_quote_agent_history_cover_idx with INCLUDE
+// (ok), which Drizzle 0.38 cannot represent. Preserve this manual covering index.
 export const commerceQuote = pgTable('commerce_quote', {
   id: serial('id').primaryKey(),
   source: text('source').$type<'probe' | 'user'>().notNull(),
@@ -957,6 +961,8 @@ export const commerceQuote = pgTable('commerce_quote', {
 }, (t) => ({
   agentCreatedIdx: index('commerce_quote_agent_created_idx').on(t.agentId, t.createdAt.desc()),
   createdIdx: index('commerce_quote_created_idx').on(t.createdAt.desc()),
+  okCreatedAgentCoverIdx: index('commerce_quote_ok_created_agent_cover_idx')
+    .on(t.createdAt.desc(), t.agentId).where(sql`${t.ok}`),
   serviceCreatedIdx: index('commerce_quote_service_created_idx').on(t.serviceId, t.createdAt.desc()),
   hashIdx: index('commerce_quote_hash_idx').on(t.quoteHash),
   // Match the read queries' exact timestamp/id order, including PostgreSQL's
