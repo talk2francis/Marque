@@ -3,7 +3,7 @@ import { charterExperience, type CharterExecution } from './charter-experience'
 import { sql } from 'drizzle-orm'
 import { db, firstPartyAgentsAllLanes, firstPartyIds, canonicalAgentIdSql, loadBlob, storeBlob } from '@marque/db'
 import { agentPortraits } from './agent-portraits'
-import { gzip, gunzip } from 'node:zlib'
+import { gunzip } from 'node:zlib'
 import { promisify } from 'node:util'
 import { boundedCommerceRead, coalescedCatalogRead } from '@marque/commerce/reads'
 import { chainOf, commercialStates, formatAmount, teamWallets, type CommercialState, type Lane } from '@marque/commerce'
@@ -15,6 +15,7 @@ import { marketSupply, type MarketSupplyCategory } from './market-supply'
 import { withStanding, dedupePulled, isHireable, isChecked, isWarrantedNow, hasDelivered, type Standing } from './standing'
 import { standingEvidence } from './agent-standing'
 import { testFits } from './test-fit'
+import { encodeCatalogue, mapCatalogue } from './catalogue-work'
 export { expireMarketQuote } from './quote-expiry'
 
 /**
@@ -222,7 +223,6 @@ const baseInflight = new Map<number, Promise<MarketRow[]>>()
 const listedMemo = new Map<number, { at: number; rows: MarketRow[] }>()
 const listedInflight = new Map<number, Promise<MarketRow[]>>()
 const BASE_TTL_MS = 3 * 60_000
-const gzipAsync = promisify(gzip)
 const gunzipAsync = promisify(gunzip)
 
 /** One memo per lane: the two networks never share a base set (invariant 32). */
@@ -254,7 +254,7 @@ function toStore(chainId: 56 | 97, entry: { at: number; rows: MarketRow[] }, lis
   const stored = listed ? listedStored : lastStored
   if (Date.now() - (stored.get(chainId) ?? 0) < BLOB_EVERY_MS) return
   stored.set(chainId, Date.now())
-  void gzipAsync(Buffer.from(JSON.stringify(entry))).then((gz) => storeBlob(listed ? listedBlobKey(chainId) : blobKey(chainId), gz, BLOB_KEEP_MS)).catch(() => undefined)
+  void encodeCatalogue(entry).then((gz) => storeBlob(listed ? listedBlobKey(chainId) : blobKey(chainId), gz, BLOB_KEEP_MS)).catch(() => undefined)
 }
 
 async function marketplaceBase(chainId: 56 | 97 = 56, listed = false, states?: Awaited<ReturnType<typeof commercialStates>>): Promise<MarketRow[]> {
@@ -616,7 +616,7 @@ async function queryAgents(owners?: readonly string[], states?: Awaited<ReturnTy
   const noStandardTokens = new Set(firstPartyAgentsAllLanes().filter((a) => a.standard === null).flatMap((a) => [`${a.chainId}:${a.tokenId}`, ...(a.testnet ? [`${a.testnet.chainId}:${a.testnet.tokenId}`] : [])]))
 
   const now = Date.now()
-  const thirdParty: Array<Omit<MarketRow, 'track'>> = list.map((r) => {
+  const thirdParty: Array<Omit<MarketRow, 'track'>> = await mapCatalogue(list, (r) => {
     const best = bestByAgent.get(String(r['agent_id']))
     // A priced answer to `negotiate` in the last hour proves the agent answers, whatever
     // the card probe concluded (sellers that only sell never pass a free work probe).

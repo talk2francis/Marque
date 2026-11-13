@@ -19,7 +19,7 @@ const reexpire = (r: Result): Result => {
 
 export async function marketplaceAgentsCached(q: MarketQuery = {}): Promise<Result> {
   const p = await cachedProjection(`market:result:v2:${JSON.stringify(q)}`, () => marketplaceAgents(q), {
-    freshMs: 15_000, timeoutMs: 12_000, keepMs: 15 * 60_000, staleWhileRevalidate: true,
+    freshMs: 15_000, timeoutMs: 12_000, keepMs: 15 * 60_000, staleWhileRevalidate: true, staleRefreshLeaseMs: 30_000,
   })
   return reexpire(p.value)
 }

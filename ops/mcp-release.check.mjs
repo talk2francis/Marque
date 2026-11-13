@@ -2,6 +2,7 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { runInNewContext } from 'node:vm'
+import webRuntime from './web-runtime.cjs'
 const source = readFileSync(new URL('../ecosystem.config.cjs', import.meta.url), 'utf8')
 const sha = 'a'.repeat(40)
 function load(release) {
@@ -14,7 +15,7 @@ function load(release) {
       throw new Error('missing fixture file')
     },
   }
-  runInNewContext(source, { module, require: name => { assert.equal(name, 'node:fs'); return fs }, process: { env: { MARQUE_RELEASE_SHA: 'b'.repeat(40) } } })
+  runInNewContext(source, { module, require: name => { if (name === './ops/web-runtime.cjs') return webRuntime; assert.equal(name, 'node:fs'); return fs }, process: { env: { MARQUE_RELEASE_SHA: 'b'.repeat(40) } } })
   return JSON.parse(JSON.stringify(module.exports.apps))
 }
 test('MCP metadata follows the active release file rather than another slot shell value', () => {
@@ -44,4 +45,9 @@ test('both web slots and the keyless reader use the same public walkthrough cont
   for (const name of ['marque-web', 'marque-web-b', 'marque-mcp']) {
     assert.deepEqual(context(apps.find(app => app.name === name)), expected)
   }
+})
+test('web slots and deployment share four workers and the same public warm-up example', () => {
+  assert.equal(webRuntime.instances, 4)
+  for (const name of ['marque-web', 'marque-web-b']) assert.equal(load(sha).find(app => app.name === name).instances, webRuntime.instances)
+  assert.equal(webRuntime.warmRoute, `/jobs/${webRuntime.walkthrough.JUDGE_JOB.replace(':', '/')}`)
 })

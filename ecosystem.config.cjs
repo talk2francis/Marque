@@ -8,6 +8,7 @@
  * PM2 has no dotenv of its own, so each app loads it via a tiny preload.
  */
 const fs = require('node:fs')
+const webRuntime = require('./ops/web-runtime.cjs')
 
 const SECRETS = '/root/.marque/secrets.env'
 
@@ -53,11 +54,7 @@ const env = loadEnv()
 const ROOT = '/root/marque'
 // All web runtimes share the same public walkthrough inputs and projection cache.
 // Keep these outside signing environments so keyless readers cannot refresh a different example.
-const publicWalkthrough = {
-  JUDGE_JOB: '56:56903',
-  JUDGE_QUEST_ADDRESS: '0x5aC2448FC79Ef8d33710b1Bced5AEff90138b452',
-  JUDGE_EARLIER_ACT: '56:57066',
-}
+const publicWalkthrough = webRuntime.walkthrough
 function releaseOf(directory) {
   try {
     const sha = fs.readFileSync(`${directory}/RELEASE_SHA`, 'utf8').trim()
@@ -376,9 +373,9 @@ module.exports = {
       cwd: `${ROOT}/releases/slot-${port}/apps/web`,
       script: `${ROOT}/releases/slot-${port}/apps/web/server.js`,
       interpreter: 'node',
-      // Two processes per slot (Node cluster, one shared port): one Next process is one
-      // core, and the P2-11 load test saturated it at about 15 requests a second.
-      instances: 2,
+      // Four serving processes use more of the existing six-core host. The
+      // deployment verifier requires every configured worker to initialize.
+      instances: webRuntime.instances,
       exec_mode: 'cluster',
       // Set and Earn runs on BSC mainnet (P2-05 step 8); testnet 97 stays as staging.
       env: { ...env, NODE_ENV: 'production', PORT: port, HOSTNAME: '127.0.0.1', MARQUE_RELEASE_SHA: process.env.MARQUE_RELEASE_SHA || '', MARQUE_ROOT: ROOT, MARQUE_CAMPAIGN_CHAIN: '56', NEXT_PUBLIC_MARQUE_CAMPAIGN_CHAIN: '56', MARQUE_MCP_UPSTREAM: 'http://127.0.0.1:3297/api/mcp',

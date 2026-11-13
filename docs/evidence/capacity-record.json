@@ -213,6 +213,29 @@
       "betweenStageRestarts": 0,
       "note": "Stopped at the first unsuccessful stage. Higher targets were not attempted. Rates from incomplete holds are aborted-run averages. The 5xx rate counts completed script reads; redirects are excluded. This run used web release b67f005 after database migration 0036 and the scoped JIT default; generator/database source was 46c6d9b.",
       "evidenceUrl": "https://github.com/talk2francis/Marque/actions/runs/43283433112"
+    },
+    {
+      "date": "2026-11-12T23:42:00.714Z",
+      "release": "5437604c382d38f3fcd9207dcd6030bfdba41589",
+      "method": "November mix with search and cold job rooms, guarded external generator",
+      "stages": [
+        {
+          "visitors": 25,
+          "peakVus": 25,
+          "requests": 116,
+          "requestsPerSecond": 5.273807166488623,
+          "pageP95Ms": 6346.104798,
+          "apiP95Ms": 1937.1223549999966,
+          "error5xxRate": 0,
+          "restarts": 0,
+          "completed": false,
+          "passed": false
+        }
+      ],
+      "processRestarts": 0,
+      "betweenStageRestarts": 0,
+      "evidenceUrl": "https://github.com/talk2francis/Marque/actions/runs/43330998606",
+      "note": "Web and generator revision 5437604. The original workload and all targets were unchanged. The first stage reached 25 peak users, then aborted on latency before the hold; neither page nor API latency target was met. 108 successful responses and eight redirects, zero completed HTTP errors or persistent process restarts. No higher stage ran. The aborted request average is not sustained throughput; capacity remains unestablished."
     }
   ]
 }
