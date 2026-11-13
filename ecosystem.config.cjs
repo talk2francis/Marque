@@ -54,7 +54,9 @@ const env = loadEnv()
 const ROOT = '/root/marque'
 // All web runtimes share the same public walkthrough inputs and projection cache.
 // Keep these outside signing environments so keyless readers cannot refresh a different example.
-const publicWalkthrough = webRuntime.walkthrough
+let cacheDomain
+try { cacheDomain = `${fs.readFileSync('/proc/sys/kernel/random/boot_id', 'utf8').trim()}:${fs.readlinkSync('/proc/self/ns/pid')}` } catch { /* Unknown locality retains the ordinary lease expiry. */ }
+const publicWalkthrough = { ...webRuntime.walkthrough, ...(cacheDomain ? { MARQUE_CACHE_COORDINATION_DOMAIN: cacheDomain } : {}) }
 function releaseOf(directory) {
   try {
     const sha = fs.readFileSync(`${directory}/RELEASE_SHA`, 'utf8').trim()
@@ -400,7 +402,7 @@ module.exports = {
       cwd: `${ROOT}/releases/mcp/apps/web`,
       script: `${ROOT}/releases/mcp/apps/web/server.js`,
       interpreter: 'node',
-      env: { ...keyless, ...publicWalkthrough, NODE_ENV: 'production', PORT: '3297', HOSTNAME: '127.0.0.1', MARQUE_ROOT: ROOT, MARQUE_RELEASE_SHA: releaseOf(`${ROOT}/releases/mcp`), MARQUE_CAMPAIGN_CHAIN: '56', NEXT_PUBLIC_MARQUE_CAMPAIGN_CHAIN: '56' },
+      env: { ...keyless, ...publicWalkthrough, NODE_ENV: 'production', PORT: '3297', HOSTNAME: '127.0.0.1', MARQUE_ROOT: ROOT, MARQUE_RELEASE_SHA: releaseOf(`${ROOT}/releases/mcp`), MARQUE_REFRESH_READ_MODELS: '1', MARQUE_CAMPAIGN_CHAIN: '56', NEXT_PUBLIC_MARQUE_CAMPAIGN_CHAIN: '56' },
       filter_env: true,
       autorestart: true,
       max_restarts: 50,

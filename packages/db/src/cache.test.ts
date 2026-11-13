@@ -43,6 +43,37 @@ const pending = () => {
   return { promise, resolve, reject }
 }
 
+it('recovers a confirmed exited local owner without waiting for its lease expiry', async () => {
+  vi.stubEnv('MARQUE_CACHE_COORDINATION_DOMAIN', 'fixture-namespace')
+  const probe = vi.spyOn(process, 'kill').mockImplementation(() => { throw Object.assign(Error('Synthetic absent process'), { code: 'ESRCH' }) })
+  h.data.set('proj:refresh:orphan', { value: JSON.stringify({ token: 'old', domain: 'fixture-namespace', pid: 7777777 }), until: Date.now() + 90_000 })
+  const a = await instance(), compute = vi.fn(async () => 'complete replacement')
+  expect((await a.cachedProjection('orphan', compute, { ...options, coordinateCold: true })).value).toBe('complete replacement')
+  expect(compute).toHaveBeenCalledOnce()
+  expect(probe).toHaveBeenCalledWith(7777777, 0)
+  expect(h.acquisitions).toHaveLength(1)
+})
+
+it('never reclaims a live, foreign-namespace or uncertain owner', async () => {
+  vi.stubEnv('MARQUE_CACHE_COORDINATION_DOMAIN', 'fixture-namespace')
+  const probe = vi.spyOn(process, 'kill'), a = await instance()
+  for (const kind of ['live', 'foreign', 'uncertain'] as const) {
+    probe.mockReset()
+    if (kind === 'uncertain') probe.mockImplementation(() => { throw Object.assign(Error('Synthetic inaccessible process'), { code: 'EPERM' }) })
+    else probe.mockReturnValue(true)
+    await a.cachedProjection(kind, async () => 'original', options)
+    await vi.advanceTimersByTimeAsync(1_001)
+    const token = JSON.stringify({ token: kind, domain: kind === 'foreign' ? 'other-namespace' : 'fixture-namespace', pid: process.pid })
+    h.data.set(`proj:refresh:${kind}`, { value: token, until: Date.now() + 90_000 })
+    const compute = vi.fn(async () => 'must not replace')
+    expect((await a.cachedProjection(kind, compute, options)).value).toBe('original')
+    await flush()
+    expect(compute).not.toHaveBeenCalled()
+    expect(h.data.get(`proj:refresh:${kind}`)!.value).toBe(token)
+    expect(probe).toHaveBeenCalledTimes(kind === 'foreign' ? 0 : 1)
+  }
+})
+
 it('coalesces opt-in cold reads across workers and preserves the producer observation date', async () => {
   const a = await instance(), b = await instance(), job = pending()
   const firstCompute = vi.fn(() => job.promise), duplicate = vi.fn(async () => 'duplicate')
@@ -123,7 +154,7 @@ beforeEach(() => {
   vi.useFakeTimers(); vi.setSystemTime(new Date('2026-11-12T10:00:00Z'))
   vi.stubEnv('REDIS_URL', 'redis://fixture.invalid'); h.data.clear(); h.acquisitions.length = 0; h.offline = false
 })
-afterEach(async () => { for (const c of instances.splice(0)) await c.closeCache(); vi.useRealTimers(); vi.unstubAllEnvs() })
+afterEach(async () => { for (const c of instances.splice(0)) await c.closeCache(); vi.useRealTimers(); vi.unstubAllEnvs(); vi.restoreAllMocks() })
 
 it('peeks at existing bytes without refreshing, mutating, re-dating or renewing retention', async () => {
   const a = await instance(), b = await instance()

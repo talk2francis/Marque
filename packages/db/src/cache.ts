@@ -79,6 +79,18 @@ function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {
   })
 }
 
+/** Only a demonstrably absent process in this same host/PID namespace may be reclaimed. */
+function exitedLeaseOwner(raw: string | null): boolean {
+  const domain = process.env.MARQUE_CACHE_COORDINATION_DOMAIN
+  if (!domain || !raw) return false
+  try {
+    const owner = JSON.parse(raw) as { domain?: unknown; pid?: unknown }
+    if (owner.domain !== domain || typeof owner.pid !== 'number' || !Number.isSafeInteger(owner.pid) || owner.pid <= 0) return false
+    try { process.kill(owner.pid, 0); return false }
+    catch (error) { return (error as NodeJS.ErrnoException).code === 'ESRCH' }
+  } catch { return false }
+}
+
 export async function cachedProjection<T>(
   key: string,
   compute: () => Promise<T>,
@@ -108,7 +120,11 @@ export async function cachedProjection<T>(
     run = (async () => {
       // Cold coalescing is opt-in. Redis outages retain ordinary computation.
       const r = (opts.coordinateCold || (stored && opts.staleWhileRevalidate)) && (opts.staleRefreshLeaseMs ?? 0) > 0 ? redis() : null
-      const leaseKey = `proj:refresh:${key}`, token = randomUUID()
+      const domain = process.env.MARQUE_CACHE_COORDINATION_DOMAIN
+      const leaseKey = `proj:refresh:${key}`, token = domain ? JSON.stringify({ token: randomUUID(), domain, pid: process.pid }) : randomUUID()
+      const release = async (owner = token) => {
+        if (r) await r.eval("if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end", 1, leaseKey, owner).catch(() => undefined)
+      }
       let owned = false
       if (r) {
         try {
@@ -119,6 +135,8 @@ export async function cachedProjection<T>(
               && (opts.maxStaleMs === undefined || Date.now() - shared.at < opts.maxStaleMs)) return shared as Entry<T>
             owned = await r.set(leaseKey, token, 'PX', Math.ceil(opts.staleRefreshLeaseMs!), 'NX') === 'OK'
             if (owned) break
+            const owner = await r.get(leaseKey)
+            if (exitedLeaseOwner(owner)) { await release(owner!); continue }
             if (stored && opts.staleWhileRevalidate) return stored as Entry<T>
             // A peer owns this cold computation. Wait for complete published data,
             // preserving its real observation date, or recover its released lease.
@@ -146,7 +164,7 @@ export async function cachedProjection<T>(
       } finally {
         if (owned && r) {
           // An expired owner's completion must never release its successor's lease.
-          await r.eval("if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end", 1, leaseKey, token).catch(() => undefined)
+          await release()
         }
       }
     })()

@@ -1,5 +1,12 @@
 ## 13 November 2026, 08:09 UTC: coordinated catalogue release still misses latency
 
+## 13 November 2026, 15:27 UTC: shared-read release still fails latency
+
+[External run 43452766214](https://github.com/talk2francis/Marque/actions/runs/43452766214) used live and generator release 6273b25 with the unchanged workload and targets. It reached 25 peak visitors and aborted before the hold: page p95 **8,717 ms**, API p95 **11,005 ms**. Thirty-one HTTP requests comprised 29 successes and two redirects, with no completed HTTP errors or persistent restarts. No higher stage ran. Minimum observed available memory was 5,353,924 KiB. Its aborted 1.41 requests/second is not sustained throughput.
+
+Functional and compiled acceptance passed, but shared-read coordination has not resolved the latency bottleneck. The stage observer captured a registry query running beyond 12 seconds. Separate read-only query plans also show substantial candidate-cardinality underestimates and repeated intermediate-result scans. Alternative plans require complete-result parity and measured improvement before implementation. All failures remain recorded and Adopt publication stays withheld.
+
+
 ## 13 November 2026, 12:45 and 13:42 UTC: further first-stage failures
 
 Both runs used live and generator release 3639502 with the original workload and targets. Each reached 25 peak virtual visitors, aborted before the hold and attempted no higher stage.
