@@ -13,6 +13,7 @@ import { chartersStatus } from '../../lib/guards'
 import { chartersV2Status } from '../../lib/charters-v2'
 import styles from './status.module.css'
 import { Capacity } from '../_components/Capacity'
+import { CapacityHeadline } from '../_components/CapacityHeadline'
 import { OutsideChecks } from '../_components/OutsideChecks'
 import { withDeadline } from '../../lib/deadline'
 import { cursorReading, serviceReconciliationQuery, statusCursorsQuery } from '../../lib/status-cursors'
@@ -241,6 +242,7 @@ export default async function StatusPage() {
             refreshed at most every 30 seconds. These activity reads are separate from the outside
             request observations shown below; each has its own timestamp and evidence.
           </p>
+          <CapacityHeadline />
         </header>
 
         {brokenQueries.length > 0 && (

@@ -19,12 +19,12 @@ export interface Horizon { key: string; title: string; when: string; lead?: stri
 export interface PaperSection { id: string; n: string; title: string; blocks: Block[]; links?: Array<{ label: string; href: string }> }
 
 export const PAPER = {
-  edition: '4.0',
-  publishedAt: '24 October 2026',
-  label: 'Whitepaper · v4.0 · October 2026',
+  edition: '5.0',
+  publishedAt: '16 November 2026',
+  label: 'Whitepaper · v5.0 · November 2026',
   title: 'An agent market built around evidence.',
   lede: 'How Marque finds BNB Chain agents, tests them against answers computed from chain state, and lets anyone hire them through BNB Chain\'s own escrow, with every step on the record.',
-  version: 'Version 4.0, 24 October 2026. Roadmap rewritten for V4; numerical September snapshots remain explicitly dated.',
+  version: 'Version 5.0, 16 November 2026. Adds Charters, the measured load test and how agents are counted; every figure is dated.',
 }
 
 /**
@@ -32,11 +32,13 @@ export const PAPER = {
  * live and linked (a test checks every Live link resolves to a route); Next names one milestone with a measurable exit
  * per outcome; Then and Later are direction, not promises.
  */
-export const ROADMAP_CHECKED = '24 October 2026'
+export const ROADMAP_CHECKED = '16 November 2026'
 export const ROADMAP: Horizon[] = [
   {
-    key: 'shipped', title: 'Live', when: 'V4 · October 2026',
+    key: 'shipped', title: 'Live', when: 'V4 to V5 · November 2026',
     items: [
+      { title: 'Charters: agents that act inside lines you draw', text: 'Loan Guard, Yield Sweep, Grid Band and Range Keeper on BSC mainnet. Each acts only when the chain shows the condition, only within limits fixed in its own contract, and ends in one transaction.', href: '/charters' },
+      { title: 'Load tested from outside: 100 visitors at once', text: 'An edge cache, cheaper rendering and a corrected network queue. Every run, including the misses, is published with its raw evidence.', href: '/adopt' },
       { title: 'One marketplace, both networks', text: 'Every agent is listed once. Hire it on BSC mainnet with real money, or free on BSC testnet; you pick the network when you hire, and amounts are never mixed.', href: '/register' },
       { title: 'Act on the answer, with the outcome measured on chain', text: 'Marque rebuilds the agent\'s decision from its own allowlist, checks it against the current block and simulates it. You sign; the result is read back from chain and added to the agent\'s record.', href: '/agents/keel/record' },
       { title: 'Marque for agents: an MCP server any assistant can use', text: 'Eleven read-and-plan tools: search, quotes, tenders, positions and hire plans a person signs. Holds no keys.', href: '/docs/mcp' },
@@ -77,11 +79,12 @@ export const SECTIONS: PaperSection[] = [
     blocks: [
       { kind: 'p', text: 'BNB Chain now has the parts an agent economy needs: ERC-8004 gives an agent an identity and a reputation, and ERC-8183 gives a buyer an escrow that pays only for delivered work. What it lacks is a place where a buyer can see which of the hundreds of thousands of registered agents actually work, and hire one without trusting anyone\'s word.' },
       { kind: 'p', text: 'Marque is that place. It indexes every agent identity on BNB Smart Chain, calls each endpoint it can reach, checks answers against the right answer computed from chain state, and publishes the passes and the failures side by side. When a buyer hires, the agent returns a quote, the buyer\'s own wallet pays it into BNB Chain\'s escrow, the agent delivers on chain, and the buyer rates it on the ERC-8004 registry. Marque never holds the money and never signs for the buyer.' },
+      { kind: 'p', text: 'Since 10 November an agent can also act for a person, not only answer. A charter is a small contract the person signs once: what the agent may do, with what, how much at most and until when. The agent acts only when the chain shows the condition, only inside those limits, and the person can end it in one transaction without Marque.' },
       { kind: 'figures', items: [
-        { value: '360,000+', label: 'Agent identities indexed', note: 'ERC-8004 on BSC, 29 Sep 2026' },
-        { value: '2,462', label: 'Answered a probe', note: '29 Sep 2026 snapshot' },
-        { value: '20', label: 'Hireable in snapshot', note: '29 Sep 2026; not current availability' },
-        { value: '5', label: 'Warranted in snapshot', note: '29 Sep 2026; not current qualification' },
+        { value: '419,600+', label: 'Agent identities indexed', note: 'ERC-8004 on BSC, 16 Nov 2026' },
+        { value: '4,858', label: 'Answered a probe in 24 hours', note: '16 Nov 2026, 17:22 UTC snapshot' },
+        { value: '32', label: 'Hireable in snapshot', note: '16 Nov 2026; not current availability' },
+        { value: '11', label: 'Warranted in snapshot', note: '16 Nov 2026; not current qualification' },
       ] },
       { kind: 'p', text: 'The gap between the first and the third number is the product. A registration says who an agent is. It never says how good it is, or whether anyone can pay it.' },
     ],
@@ -184,7 +187,28 @@ export const SECTIONS: PaperSection[] = [
     ],
   },
   {
-    id: 'quest', n: '7', title: 'Set and Earn: attribution without a private scoreboard',
+    id: 'charters', n: '7', title: 'Charters: agents that act inside lines you draw',
+    blocks: [
+      { kind: 'p', text: 'A charter is an onchain limit on what an agent may do for you. You sign it once. Everything it may do is fixed in its own small contract when you create it, and nobody, including Marque, can widen it afterwards. It ends on the date you choose, or sooner if you end it.' },
+      { kind: 'table', head: ['Kind', 'What it does', 'Who may press act', 'Where your assets are'], rows: [
+        ['Loan Guard', 'When your Venus health falls below your trigger, repays your loan back to your target, from a budget you set', 'Anyone: every possible action is safe for you', 'Your wallet, under an exact allowance'],
+        ['Yield Sweep', 'Keeps a stablecoin band in your wallet; supplies the excess to Venus in your name and brings it back when you run low', 'Anyone', 'Your wallet; the Venus vTokens are yours'],
+        ['Grid Band', 'Buys at each level as the price falls and sells one level higher, in one reviewed PancakeSwap v3 pool', 'You and the agents you name', 'Your wallet, under exact allowances'],
+        ['Range Keeper', 'When the average price has left your range, moves the position back around it, same width, with a bounded loss', 'You and the agents you name', 'Your position NFT, in your own Range Keeper contract'],
+      ] },
+      { kind: 'list', items: [
+        'Decisions read the protocol\'s own numbers when the charter acts: Venus\'s health and prices, the pool\'s 5-minute average price, never a single trade.',
+        'Marque\'s agents Keel, Sluicegate, Lattice and Bound act for charters. Keel, Lattice and Bound use a session key that can call only your charter\'s act function until it ends; Sluicegate sends directly.',
+        'An allowance is a ceiling, not a reservation: tokens move only at the moment a charter acts.',
+        'End charter is one transaction from your wallet and works without Marque, from BscScan\'s write tab if needed. A Range Keeper position comes back in the same transaction.',
+      ] },
+      { kind: 'p', text: 'On mainnet, the index of charter events read on 16 November 2026 shows Loan Guard repayments 3 times, Yield Sweep 2 supplies and 2 withdrawals, Grid Band 8 trades and Range Keeper 5 rebalances, each with its transaction. The contracts\' sources were checked against the deployed bytecode on Sourcify on 11 November.' },
+      { kind: 'callout', title: 'Limits, stated plainly', text: 'The charter contracts are new and unaudited. No charter can act while Venus or the pool refuses. A crash faster than a check can still reach liquidation, and a grid holds inventory in a fall. Read the contracts and their tests before you rely on one.' },
+    ],
+    links: [{ label: 'Charters', href: '/charters' }, { label: 'How charters work', href: '/docs/charters' }, { label: 'For builders', href: '/docs/developers/charters' }],
+  },
+  {
+    id: 'quest', n: '8', title: 'Set and Earn: attribution without a private scoreboard',
     blocks: [
       { kind: 'p', text: 'The local stretch quest tracks hires in four categories, ratings and a listing. Hire events come from chain; listing checks also use endpoint observations and records. The official campaign instead requires three distinct agents across two shortlisted marketplaces and a build meeting all six organizer criteria, including actual category execution. Register before tasks; local progress does not establish qualification. Marque binds a job to the marketplace through a hire intent created before the wallet signs, and publishes the rules and the evidence per wallet.' },
       { kind: 'table', head: ['Step', 'Counted when'], rows: [
@@ -200,7 +224,7 @@ export const SECTIONS: PaperSection[] = [
     links: [{ label: 'The quest', href: '/quest' }, { label: 'Quest config and rules (API)', href: '/api/v1/phase2/config' }],
   },
   {
-    id: 'supply', n: '8', title: 'Supply, counted honestly',
+    id: 'supply', n: '9', title: 'Supply, counted honestly',
     blocks: [
       { kind: 'p', text: 'Marque counts an agent as hireable only when its latest accepted quote is unexpired, with signature mode recorded, payable into ERC-8183 escrow to the wallet its identity names. That is stricter than counting endpoints that once answered a census, and it is what a buyer can actually act on. Only safety takes a priced agent out of the count (a paid job left undelivered, or a chain fact stated wrongly, in the last 14 days); the published test is a badge on top, never a gate.' },
       { kind: 'list', items: [
@@ -208,12 +232,14 @@ export const SECTIONS: PaperSection[] = [
         'Sellers that work from structured input (a JSON loan, not a sentence) are asked in their own format, taken from their card.',
         'Operator fleets count once: a hundred template identities behind one operator are one supplier.',
         'A deep sweep in September asked 1,407 live A2A agents on every host for a price. None sold through escrow; the platforms hosting nearly all of them do not take price requests.',
+        'Answering means a check reached the agent in the last 24 hours. Since 16 November a dropped connection to a slow platform is recorded but does not overwrite an answer from earlier that day; 24 hours without an answer still removes the agent. Each probe cycle shares its slots between hosts, and services marked dead are re-checked on a reserved slice of every cycle.',
+        'The registry\'s largest hosting platform answers a price request only with an account (HTTP 401 on 16 November). Its agents can be listed as answering, but not hired through open escrow by anyone.',
       ] },
       { kind: 'p', text: 'The local target is at least three hireable listings per core category, including third-party supply. This is not a permanent availability guarantee or a numeric rule in the original main-track rubric. Recorded owners and endpoints do not prove independent people or funding.' },
     ],
   },
   {
-    id: 'builders', n: '9', title: 'Builders: five checks to be listed',
+    id: 'builders', n: '10', title: 'Builders: five checks to be listed',
     blocks: [
       { kind: 'list', ordered: true, items: [
         'You own the agent\'s ERC-8004 identity (read from the registry).',
@@ -227,7 +253,7 @@ export const SECTIONS: PaperSection[] = [
     links: [{ label: 'Check an agent', href: '/builders' }],
   },
   {
-    id: 'architecture', n: '10', title: 'Architecture and security',
+    id: 'architecture', n: '11', title: 'Architecture and security',
     blocks: [
       { kind: 'p', text: 'Marque is a Next.js application over PostgreSQL and Redis, with workers that each own one job. It holds two kinds of data: derived records that mirror public chain and registry state and can be rebuilt, and first-party observations (probes, raw test responses, quotes, benchmarks) that cannot be recreated and are backed up.' },
       { kind: 'table', head: ['Worker', 'What it does', 'Cadence'], rows: [
@@ -238,6 +264,8 @@ export const SECTIONS: PaperSection[] = [
         ['quotes', 'Asks sellers for quotes with explicit signature mode; re-notifies stalled jobs', 'Before expiry; 1 min to 6 h failure backoff'],
         ['indexer', 'Reads commerce and reputation events', 'Every 6 s, 3 confirmations'],
         ['keeper', 'Settles jobs whose review window closed', 'Sponsored gas, capped per hour'],
+        ['charters', 'Watches armed charters and calls act when the chain shows the condition', 'Continuous'],
+        ['charters-keys', 'Grants and revokes the narrow session keys Marque\'s agents use for charters', 'Each minute; exits at once when idle'],
         ['alerts', 'Health, restart loops, stale data, to the team', 'Every minute'],
       ] },
       { kind: 'list', items: [
@@ -245,13 +273,14 @@ export const SECTIONS: PaperSection[] = [
         'No server holds a buyer key. Reference agents sign with their own keystores; the keeper can only settle, never move a buyer\'s funds elsewhere.',
         'Chain reads use several public RPC pools and take the first real answer, because one lagging node can otherwise hide a receipt or report an old block.',
         'Deploys are blue-green behind Caddy with automatic rollback; the database has nightly local backups and an encrypted offsite workflow. The dated restore drill and unresolved independent key custody are documented in the recovery record.',
-        'Load, measured on 27 September, not a current capacity guarantee: every target met through 100 concurrent users (page p95 462 ms, API p95 489 ms, no errors); at 250 users there were still no errors, but latency exceeded target.',
+        'An edge cache sits between Caddy and the web workers: repeat public reads are served from memory, one render per address at a time, and personal pages, writes and quotes never pass through it. If it stops, Caddy serves the web workers directly.',
+        'Load, measured from an external runner on 16 November with the unchanged November workload (search, agent pages and 120 job rooms): every target met at 25, 50 and 100 concurrent visitors in three runs, at 100 with a page p95 of 0.39 to 0.48 s and zero server errors. At 250 visitors the hold completed with zero server errors at up to 164 requests a second, but the page target was missed, so 250 is not a supported figure.',
       ] },
     ],
-    links: [{ label: 'Live status', href: '/status' }],
+    links: [{ label: 'Live status', href: '/status' }, { label: 'Capacity, every run', href: '/adopt#capacity-heading' }],
   },
   {
-    id: 'limits', n: '11', title: 'Trust and limitations',
+    id: 'limits', n: '12', title: 'Trust and limitations',
     blocks: [
       { kind: 'p', text: 'Users still rely on smart contracts, wallet software, RPC providers, agent operators, index freshness and this interface. Escrow removes the need to trust the seller with money before delivery; it does not remove contract risk or guarantee that a valid answer is good advice.' },
       { kind: 'list', items: [
@@ -259,13 +288,14 @@ export const SECTIONS: PaperSection[] = [
         'Reference agents are run by the Marque team and labelled. Buying one buys an answer; it never grants control of a portfolio.',
         'Team wallets are disclosed and excluded from the quest and from verified ratings.',
         'Mainnet and testnet are kept apart everywhere; nothing on testnet is presented as real money.',
+        'Charter contracts are new and unaudited; a charter limits what an agent may do, it does not guarantee an outcome.',
         'Figures in this paper are dated. The live pages are the current record.',
       ] },
     ],
     links: [{ label: 'Risk disclosure', href: '/docs/risks' }],
   },
   {
-    id: 'roadmap', n: '12', title: 'Roadmap',
+    id: 'roadmap', n: '13', title: 'Roadmap',
     blocks: [
       { kind: 'p', text: 'Marque climbs from a market people use to a market agents use. The order is deliberate: evidence first, then hiring, then letting software hire software within limits a person sets. Live means live and verified; Next ships when its stated outcome is met, not on a date.' },
       { kind: 'roadmap', horizons: ROADMAP },

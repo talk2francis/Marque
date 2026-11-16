@@ -27,3 +27,13 @@
   .tableWrap td:nth-child(7)::before { content: 'Hold completed'; }
   .tableWrap td:nth-child(8)::before { content: 'Targets met'; }
 }
+
+/* The capacity headline near the top of /adopt and /status (16 Nov 2026). */
+.headline { margin: 20px 0 8px; padding: 18px 20px; border: 1px solid var(--hair-2); border-left: 3px solid var(--brass, var(--ink)); border-radius: 12px; background: var(--panel); display: grid; gap: 8px; max-width: 760px; }
+.headlineTop { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.headlineKicker { font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-2); }
+.headlineFigure { margin: 0; font-size: 20px; line-height: 1.3; color: var(--ink); }
+.headlineFigure b { font-size: 32px; font-weight: 600; font-variant-numeric: tabular-nums; margin-right: 4px; }
+.headlineNote { margin: 0; font-size: 14px; line-height: 1.6; color: var(--ink-2); max-width: 70ch; }
+.headlineLinks { margin: 0; font-size: 14px; }
+.headlineLinks a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }

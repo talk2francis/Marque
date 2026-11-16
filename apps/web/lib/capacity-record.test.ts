@@ -2,7 +2,7 @@ import { mkdtemp, mkdir, writeFile, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { expect, it } from 'vitest'
-import { capacityRecordSchema, capacityStagePassed, loadCapacityRecord, shownCapacityRuns } from './capacity-record'
+import { capacityHeadline, capacityRecordSchema, capacityStagePassed, loadCapacityRecord, shownCapacityRuns } from './capacity-record'
 import historical from './capacity-record.json'
 
 it('does not equate a completed 250-visitor hold with passing its latency targets', () => {
@@ -33,4 +33,13 @@ it('shows the latest run and marked milestones, and counts the rest without hidi
   expect(shown.slice(1).every(r => r.featured)).toBe(true)
   expect(shown.length + rest).toBe(runtime.runs.length)
   expect(restUnpassed).toBeLessThanOrEqual(rest)
+})
+
+it('headlines the highest stage the latest run passed, and says so plainly when none passed', () => {
+  const stage = (visitors: number, pageP95Ms: number, completed = true) => ({ visitors, requests: 100, requestsPerSecond: visitors * 0.75, pageP95Ms, apiP95Ms: 300, error5xxRate: 0, restarts: 0, completed })
+  const run = (date: string, stages: ReturnType<typeof stage>[]) => ({ date, release: 'abcdef1', method: 'm', stages, processRestarts: 0 })
+  const h = capacityHeadline([run('2026-11-16T15:29:00.000Z', [stage(25, 420), stage(50, 390), stage(100, 424), stage(250, 1279)]), run('2026-11-16T10:00:00.000Z', [stage(250, 500)])])
+  expect(h).toMatchObject({ passed: true, visitors: 100, stages: [25, 50, 100] })
+  expect(capacityHeadline([run('2026-11-17T00:00:00.000Z', [stage(25, 900)]), run('2026-11-16T00:00:00.000Z', [stage(100, 400)])])).toMatchObject({ passed: false })
+  expect(capacityHeadline([])).toBeNull()
 })

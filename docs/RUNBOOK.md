@@ -12,6 +12,15 @@ No containers, no cloud control plane.
 
 ---
 
+### Edge cache, host tuning and probe settings (16 November 2026)
+
+- **Edge cache:** `pm2 restart marque-edge` applies an `ops/edge` change without a web build, but starts the cache empty; a deploy's slot switch does not. Health `curl -s 127.0.0.1:3190/__edge/health`, counters `/__edge/stats`. Pass everything through: `curl -s -X POST '127.0.0.1:3190/__edge/cache?mode=off'`. Stop it and Caddy serves the slot directly within five seconds.
+- **Host network:** `/etc/sysctl.d/90-marque-web-tcp.conf` sets CUBIC, `fq_codel` and no slow start after idle; `marque-initcwnd.service` sets an initial congestion window of 80 and re-applies `fq_codel` on eth0 at boot. `fq` paced every connection to about 4 Mbit/s and made large pages slow to arrive. Revert: set `default_qdisc = fq`, run `tc qdisc replace dev eth0 root fq`, and change the unit back to `initcwnd 40`.
+- **Memory:** `/etc/sysctl.d/91-marque-vm.conf` (swappiness 10, compaction only on demand).
+- **CPU priority:** `marque-worker-priority.timer` runs `/opt/marque-ops/worker-priority.sh` every minute: background workers at nice 10, MCP at 5, the edge at -5, on every thread; Caddy runs at -5 through `/etc/systemd/system/caddy.service.d/marque-priority.conf`. Web and Postgres stay at 0. Revert: disable the timer and delete the drop-in.
+- **Probe:** `PROBE_MAX_PER_HOST_PER_CYCLE` (120), `PROBE_RETRY_DEAD_SLOTS` (40), `PROBE_PER_HOST_RPS` (1) and `PROBE_PER_HOST_CONCURRENCY` (2). Cycle logs report `softFailures`, `confirmed`, `recovered`, `skippedDeadline` and `deferredHostDown`.
+- **Load tests:** wait until the previous web slot has stopped (`pm2 jlist`) before starting `scripts/load/night-controller.mjs`; its guard cancels a run when a persistent process changes mid-test, as on 16 November. Record every run, passed or not, in `docs/evidence/capacity-record.json`; the page reads it at runtime.
+
 ## 0. Where things are
 
 | | |
