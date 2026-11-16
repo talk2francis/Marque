@@ -68,7 +68,7 @@ export const hostOfUrl = (u: string): string => { try { return new URL(u).host }
  * The earlier version took the global slot first and then waited in the host's queue, so a cycle full of one slow
  * platform's services left every other host's probes waiting behind it (16 Nov).
  */
-export async function runByHost<T, R>(items: readonly T[], hostOf: (item: T) => string, limits: { concurrency: number; perHost: number; perHostRps: number }, fn: (item: T) => Promise<R>): Promise<R[]> {
+export async function runByHost<T, R>(items: readonly T[], hostOf: (item: T) => string, limits: { concurrency: number; perHost: number; perHostRps: number; /** True when `fn` will return at once without a request (deadline passed, host deferred): it then takes no pacing turn and no slot. */ skip?: (item: T) => boolean }, fn: (item: T) => Promise<R>): Promise<R[]> {
   const out = new Array<R>(items.length)
   const byHost = new Map<string, number[]>()
   items.forEach((item, i) => { const host = hostOf(item); const list = byHost.get(host); if (list) list.push(i); else byHost.set(host, [i]) })
@@ -92,6 +92,9 @@ export async function runByHost<T, R>(items: readonly T[], hostOf: (item: T) => 
         const k = cursor++
         if (k >= indexes.length) return
         const i = indexes[k] as number
+        // 16 Nov: 213 items past the deadline each waited a 1 s pacing turn before being skipped, and the cycle ran
+        // 470 s against its 240 s deadline. Work that sends no request takes no turn.
+        if (limits.skip?.(items[i] as T)) { out[i] = await fn(items[i] as T); continue }
         if (gapMs > 0) await pace()
         await acquire()
         try { out[i] = await fn(items[i] as T) } finally { release() }
@@ -129,7 +132,10 @@ export async function runProbeCycle(opts: { limit?: number; concurrency?: number
   const connectionFailure = (o: { failureClass?: string | null }): boolean => Boolean(o.failureClass && CONNECTION_FAILURES.has(o.failureClass))
   const deferred: DueService[] = []
   let skippedDeadline = 0
-  const results = await runByHost(candidates, (c) => hostOfUrl(c.url), { concurrency, perHost: PER_HOST_CONCURRENCY, perHostRps: PER_HOST_RPS }, async (c) => {
+  const results = await runByHost(candidates, (c) => hostOfUrl(c.url), {
+    concurrency, perHost: PER_HOST_CONCURRENCY, perHostRps: PER_HOST_RPS,
+    skip: (c) => Date.now() > deadline || (c.tier !== 'T0' && (hostFails.get(hostOfUrl(c.url)) ?? 0) >= 3),
+  }, async (c) => {
     const host = hostOfUrl(c.url)
     // Checked when the probe is about to start: the deadline or the breaker may have tripped while it waited.
     if (Date.now() > deadline) { skippedDeadline++; return null }
