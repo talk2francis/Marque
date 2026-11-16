@@ -7,9 +7,9 @@ const mocks = vi.hoisted(() => ({ lookup: vi.fn(), request: vi.fn() }))
 vi.mock('node:dns/promises', () => ({ lookup: mocks.lookup }))
 vi.mock('node:http', () => ({ request: mocks.request }))
 vi.mock('node:https', () => ({ request: mocks.request }))
-import { safeFetch, isBlockedAddress } from './safe-fetch.js'
+import { safeFetch, isBlockedAddress, resetDnsAnswers } from './safe-fetch.js'
 
-afterEach(() => vi.resetAllMocks())
+afterEach(() => { vi.resetAllMocks(); resetDnsAnswers() })
 
 function reply(status = 200, headers: Record<string, string> = {}, text: string | Uint8Array = '{}') {
   return (_url: URL, _options: RequestOptions, callback: (response: Readable) => void) => {
@@ -98,11 +98,55 @@ describe('pinned agent requests', () => {
     expect(options.headers).not.toHaveProperty('cookie')
   })
 
-  it('bounds DNS latency and returns a typed failure', async () => {
+  it('bounds DNS latency and names it: a lookup that hangs on our side is not the endpoint timing out', async () => {
     mocks.lookup.mockImplementation(() => new Promise(() => {}))
     expect(await safeFetch('https://agent.example/', { timeoutMs: 10 }))
-      .toMatchObject({ ok: false, failure: 'timeout' })
+      .toMatchObject({ ok: false, failure: 'dns', detail: 'name resolution did not finish in time' })
     expect(mocks.request).not.toHaveBeenCalled()
+  })
+
+  it('asks for a host name once while many fetches share it, validating the answer every time', async () => {
+    mocks.lookup.mockResolvedValue([{ address: '8.8.8.8', family: 4 }])
+    mocks.request.mockImplementation(reply())
+    const results = await Promise.all(Array.from({ length: 25 }, (_v, i) => safeFetch(`https://platform.example/agents/${i}/card`)))
+    expect(results.every((r) => r.ok)).toBe(true)
+    expect(mocks.lookup).toHaveBeenCalledTimes(1)
+    expect(mocks.request).toHaveBeenCalledTimes(25)
+    for (const call of mocks.request.mock.calls) {
+      const callback = vi.fn()
+      ;(call[1] as RequestOptions).lookup!('platform.example', { all: true }, callback)
+      expect(callback).toHaveBeenCalledWith(null, [{ address: '8.8.8.8', family: 4 }])
+    }
+  })
+
+  it('never reuses a remembered answer to reach a private address', async () => {
+    mocks.lookup.mockResolvedValue([{ address: '10.0.0.7', family: 4 }])
+    for (let i = 0; i < 3; i++) {
+      expect(await safeFetch('https://rebind.example/')).toMatchObject({ ok: false, failure: 'blocked_ssrf' })
+    }
+    expect(mocks.request).not.toHaveBeenCalled()
+  })
+
+  it('gives the endpoint its whole time budget after its name resolves', async () => {
+    mocks.lookup.mockImplementation(() => new Promise((resolve) => setTimeout(() => resolve([{ address: '8.8.8.8', family: 4 }]), 40)))
+    mocks.request.mockImplementation(reply())
+    expect(await safeFetch('https://slow-dns.example/', { timeoutMs: 60 })).toMatchObject({ ok: true })
+  })
+
+  it('still times out an endpoint that resolves and then never answers', async () => {
+    mocks.lookup.mockResolvedValue([{ address: '8.8.8.8', family: 4 }])
+    mocks.request.mockImplementation((_url: URL, options: RequestOptions) => {
+      const req = new EventEmitter() as EventEmitter & { end: () => void }
+      req.end = () => { options.signal!.addEventListener('abort', () => req.emit('error', Object.assign(new Error('aborted'), { name: 'AbortError' }))) }
+      return req
+    })
+    expect(await safeFetch('https://silent.example/', { timeoutMs: 20 })).toMatchObject({ ok: false, failure: 'timeout' })
+  })
+
+  it('remembers a failed lookup briefly, so a dead host costs one lookup and not one per agent', async () => {
+    mocks.lookup.mockRejectedValue(Object.assign(new Error('getaddrinfo ENOTFOUND gone.example'), { code: 'ENOTFOUND' }))
+    for (let i = 0; i < 5; i++) expect((await safeFetch(`https://gone.example/${i}`)).ok).toBe(false)
+    expect(mocks.lookup).toHaveBeenCalledTimes(1)
   })
 
   it('blocks expanded loopback and the full IPv6 link-local range', () => {

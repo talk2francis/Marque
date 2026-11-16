@@ -407,3 +407,12 @@ Replaces the 8 Nov "Charters (Loan Guard)" section. It does not relax any invari
 **Vocabulary.** Charters; Loan Guard, Yield Sweep, Grid Band, Range Keeper; "Grant a charter" and "Charter granted"; the Seal. Never show ticks or raw health mantissas.
 
 **Mainnet.** Any Marque-controlled mainnet write (deploys, funding, canaries, retiring the v1 canary, key rotation transfers) needs Francis's written "approved, mainnet" under an exact action table.
+
+## The edge cache (16 Nov 2026)
+
+Reads pass through `ops/edge` before the web slot (docs/operations/EDGE-CACHE.md). Two rules for every change:
+
+- A route listed in `ops/edge/policy.mjs` must depend on nothing but its URL and the clock. If its server code starts
+  reading a cookie or a request header, add that cookie to `BYPASS_COOKIES` or remove the route in the same change.
+- Never list a route that returns a quote, a balance, a position or anything signed for one wallet.
+

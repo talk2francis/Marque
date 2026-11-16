@@ -1,13 +1,28 @@
-# Imported with the loopback web port as argument 0. Keep this route ordered.
+# Imported with the loopback web port as arg 0.
+#
+# Reads (GET and HEAD) go to the edge cache on 127.0.0.1:3190 first (ops/edge, PM2 marque-edge), which answers
+# repeat anonymous reads from memory and forwards everything else to the web slot named in X-Marque-Upstream-Port.
+# If the edge is not listening, Caddy marks it down for five seconds and sends the request straight to the web slot,
+# so the site works with or without it. Writes never touch the edge.
 route {
 	@marqueRouterState header Next-Router-State-Tree *
 	request_header -X-Marque-Router-State
 	request_header @marqueRouterState X-Marque-Router-State "present:{http.request.header.Next-Router-State-Tree}"
-	# Normalize duplicates to the same value the middleware validates.
 	request_header @marqueRouterState Next-Router-State-Tree "{http.request.header.Next-Router-State-Tree}"
+	# A visitor cannot choose the upstream: this header is always overwritten here.
+	request_header X-Marque-Upstream-Port "{args[0]}"
+	@marqueRead method GET HEAD
+	reverse_proxy @marqueRead 127.0.0.1:3190 127.0.0.1:{args[0]} {
+		lb_policy first
+		lb_retries 1
+		fail_duration 5s
+		max_fails 1
+		transport http {
+			keepalive 2s
+			dial_timeout 2s
+		}
+	}
 	reverse_proxy 127.0.0.1:{args[0]} {
-		# Next.js advertises a five-second HTTP/1.1 idle timeout. Retire pooled
-		# connections first so later asset requests do not reuse closed sockets.
 		transport http {
 			keepalive 2s
 		}

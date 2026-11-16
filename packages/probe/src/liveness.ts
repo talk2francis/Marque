@@ -178,8 +178,15 @@ function skillNames(raw: unknown): string[] {
  * capability RPC proving that `message/send` accepts work, so discovery must
  * not promote a service to callable or task-compatible.
  */
+/**
+ * How long an A2A card may take. The registry's largest platform serves its cards in 1 to 11 s even when we send it
+ * nothing else (measured from the VPS, 16 Nov); at 8 s most of its agents were recorded dead while answering. A slow
+ * card is still a reachable agent, and its latency is recorded with the result.
+ */
+export const A2A_CARD_TIMEOUT_MS = Number(process.env.PROBE_CARD_TIMEOUT_MS ?? 15_000)
+
 export async function probeA2A(url: string): Promise<ProbeOutcome> {
-  const res = await safeFetch(url, { timeoutMs: 8_000, maxBytes: 512 * 1024 })
+  const res = await safeFetch(url, { timeoutMs: A2A_CARD_TIMEOUT_MS, maxBytes: 512 * 1024 })
   if (!res.ok) return dead(res.detail, failureFromFetch(res.failure), res.latencyMs, res.status ?? null)
   if (res.status !== 200) {
     return dead(httpDetail(res.status), httpFailure(res.status), res.latencyMs, res.status)

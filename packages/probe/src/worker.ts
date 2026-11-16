@@ -27,69 +27,78 @@ export interface ProbeCycleResult {
   byTier?: Record<Tier, number>
   /** Not started before the cycle deadline; still due, picked up next cycle. */
   skippedDeadline?: number
-  /** Host failed at the connection level 3 times in a row this cycle; deferred 60 min, not recorded as a verdict. */
+  /** Host failed at the connection level 3 times in a row this cycle; deferred (10 min for classified, 60 min otherwise), not recorded as a verdict. */
   deferredHostDown?: number
+  /** Reachable services whose first attempt failed at the connection level and were asked once more. */
+  confirmed?: number
+  /** Of those, the ones that answered the second time (a false "dead" avoided). */
+  recovered?: number
   scheduleInserted?: number
   scheduleBackfilled?: boolean
 }
 
-async function mapLimit<T, R>(items: readonly T[], limit: number, fn: (t: T) => Promise<R>): Promise<R[]> {
-  const out = new Array<R>(items.length)
-  let cursor = 0
-  const width = Math.max(1, Math.min(limit, items.length))
-  await Promise.all(
-    Array.from({ length: width }, async () => {
-      for (;;) {
-        const i = cursor++
-        if (i >= items.length) return
-        out[i] = await fn(items[i] as T)
-      }
-    }),
-  )
-  return out
-}
-
 /**
- * Per-host concurrency cap.
+ * Per-host limits.
  *
- * Most BSC agents share a handful of hosts — one platform serves hundreds of
- * registrations — so a global concurrency of 20 lands as 20 simultaneous
- * requests on a single third party. That is both rude and self-defeating: it
- * gets us throttled, and a throttled endpoint is indistinguishable from a dead
- * one in our own results. Politeness here is measurement accuracy.
+ * Most BSC agents share a handful of hosts: one platform serves hundreds of registrations. A global concurrency of
+ * 32 would land as 32 simultaneous requests on a single third party. That is both rude and self-defeating: it gets
+ * us throttled, and a throttled endpoint is indistinguishable from a dead one in our own results. Politeness here is
+ * measurement accuracy. So each host gets at most PER_HOST_CONCURRENCY requests in flight and at most
+ * PER_HOST_RPS request starts a second.
  */
-const PER_HOST_CONCURRENCY = Number(process.env.PROBE_PER_HOST_CONCURRENCY ?? 3)
+// 16 Nov: the largest platform answered every card with nothing else from us in flight and stalled past the timeout
+// with three, so each host now gets two requests in flight and one start a second.
+const PER_HOST_CONCURRENCY = Number(process.env.PROBE_PER_HOST_CONCURRENCY ?? 2)
+const PER_HOST_RPS = Number(process.env.PROBE_PER_HOST_RPS ?? 1)
 const CATEGORY_FOR_TASK: Readonly<Record<string, Category | undefined>> = {
   rebalance: 'rebalancing', grid: 'grid', yield: 'yield', health_factor: 'health_factor',
 }
+/** A service whose last verdict was one of these is shown as reachable; it is not declared dead on one failed connection. */
+const REACHABLE = new Set<string>(['live', 'discovered', 'unbound', 'bad_schema'])
+const CONFIRM_PAUSE_MS = 1_500
+const sleep = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
 
-class HostLimiter {
-  private readonly active = new Map<string, number>()
-  private readonly queues = new Map<string, Array<() => void>>()
+export const hostOfUrl = (u: string): string => { try { return new URL(u).host } catch { return u } }
 
-  private hostOf(url: string): string {
-    try { return new URL(url).host } catch { return url }
-  }
-
-  async run<T>(url: string, fn: () => Promise<T>): Promise<T> {
-    const host = this.hostOf(url)
-    while ((this.active.get(host) ?? 0) >= PER_HOST_CONCURRENCY) {
-      await new Promise<void>((resolve) => {
-        const q = this.queues.get(host)
-        if (q) q.push(resolve)
-        else this.queues.set(host, [resolve])
-      })
+/**
+ * Run `fn` over every item with at most `concurrency` in flight overall, `perHost` in flight per host and
+ * `perHostRps` starts a second per host. Results keep the input order.
+ *
+ * Each host has its own short line of runners, and a runner takes a global slot only for the moment it probes.
+ * The earlier version took the global slot first and then waited in the host's queue, so a cycle full of one slow
+ * platform's services left every other host's probes waiting behind it (16 Nov).
+ */
+export async function runByHost<T, R>(items: readonly T[], hostOf: (item: T) => string, limits: { concurrency: number; perHost: number; perHostRps: number }, fn: (item: T) => Promise<R>): Promise<R[]> {
+  const out = new Array<R>(items.length)
+  const byHost = new Map<string, number[]>()
+  items.forEach((item, i) => { const host = hostOf(item); const list = byHost.get(host); if (list) list.push(i); else byHost.set(host, [i]) })
+  let active = 0
+  const waiting: Array<() => void> = []
+  const acquire = async (): Promise<void> => { while (active >= limits.concurrency) await new Promise<void>((resolve) => waiting.push(resolve)); active++ }
+  const release = (): void => { active--; waiting.shift()?.() }
+  const gapMs = limits.perHostRps > 0 ? 1000 / limits.perHostRps : 0
+  await Promise.all([...byHost.values()].flatMap((indexes) => {
+    let cursor = 0
+    // Starts on one host take turns through `gate` and are spaced from the previous actual start, so a late timer on a
+    // busy machine cannot release two of them back to back.
+    let lastStart = -Infinity
+    let gate: Promise<void> = Promise.resolve()
+    const pace = (): Promise<void> => {
+      gate = gate.then(async () => { const wait = lastStart + gapMs - Date.now(); if (wait > 0) await sleep(wait); lastStart = Date.now() })
+      return gate
     }
-    this.active.set(host, (this.active.get(host) ?? 0) + 1)
-    try {
-      return await fn()
-    } finally {
-      this.active.set(host, Math.max(0, (this.active.get(host) ?? 1) - 1))
-      const q = this.queues.get(host)
-      const next = q?.shift()
-      if (next) next()
-    }
-  }
+    return Array.from({ length: Math.max(1, Math.min(limits.perHost, indexes.length)) }, async () => {
+      for (;;) {
+        const k = cursor++
+        if (k >= indexes.length) return
+        const i = indexes[k] as number
+        if (gapMs > 0) await pace()
+        await acquire()
+        try { out[i] = await fn(items[i] as T) } finally { release() }
+      }
+    })
+  }))
+  return out
 }
 
 export async function runProbeCycle(opts: { limit?: number; concurrency?: number; deadCap?: number; deadlineMs?: number; /** Only one chain's services (operator runs). */ chainId?: number } = {}): Promise<ProbeCycleResult> {
@@ -112,28 +121,29 @@ export async function runProbeCycle(opts: { limit?: number; concurrency?: number
   // A cycle never runs past its deadline, so the 5-minute tier is never late behind a
   // wall of timeouts. Unstarted candidates stay due and lead the next cycle.
   const deadline = Date.now() + (opts.deadlineMs ?? Number(process.env.PROBE_CYCLE_DEADLINE_MS ?? 240_000))
-  const limiter = new HostLimiter()
   // Per-cycle host breaker: after 3 connection-level failures in a row on one host, the
   // rest of that host's services this cycle are deferred, not probed and not recorded.
   // An unobserved endpoint gets no verdict; it is simply asked again later.
   const hostFails = new Map<string, number>()
-  const hostOf = (u: string) => { try { return new URL(u).host } catch { return u } }
   const CONNECTION_FAILURES = new Set(['timeout', 'refused', 'dns', 'tls'])
+  const connectionFailure = (o: { failureClass?: string | null }): boolean => Boolean(o.failureClass && CONNECTION_FAILURES.has(o.failureClass))
   const deferred: DueService[] = []
   let skippedDeadline = 0
-  const results = await mapLimit(candidates, concurrency, async (c) => {
-    const host = hostOf(c.url)
+  const results = await runByHost(candidates, (c) => hostOfUrl(c.url), { concurrency, perHost: PER_HOST_CONCURRENCY, perHostRps: PER_HOST_RPS }, async (c) => {
+    const host = hostOfUrl(c.url)
+    // Checked when the probe is about to start: the deadline or the breaker may have tripped while it waited.
     if (Date.now() > deadline) { skippedDeadline++; return null }
     if (c.tier !== 'T0' && (hostFails.get(host) ?? 0) >= 3) { deferred.push(c); return null }
-    // Re-check after waiting in the host's queue: the deadline or the breaker may have tripped.
-    const outcome = await limiter.run(c.url, async () => {
-      if (Date.now() > deadline) return 'deadline' as const
-      if (c.tier !== 'T0' && (hostFails.get(host) ?? 0) >= 3) return 'deferred' as const
-      return probeService(c.kind, c.url)
-    })
-    if (outcome === 'deadline') { skippedDeadline++; return null }
-    if (outcome === 'deferred') { deferred.push(c); return null }
-    if (outcome.failureClass && CONNECTION_FAILURES.has(outcome.failureClass)) hostFails.set(host, (hostFails.get(host) ?? 0) + 1)
+    let outcome = await probeService(c.kind, c.url)
+    // One failed connection is not a verdict on a service that was answering. Ask once more, a moment later, before
+    // a listed agent is recorded dead: a stall on either side of the wire costs one retry, not a false "dead".
+    if (connectionFailure(outcome) && c.lastLiveness !== null && REACHABLE.has(c.lastLiveness) && Date.now() + CONFIRM_PAUSE_MS < deadline) {
+      result.confirmed = (result.confirmed ?? 0) + 1
+      await sleep(CONFIRM_PAUSE_MS)
+      const again = await probeService(c.kind, c.url)
+      if (!connectionFailure(again)) { outcome = again; result.recovered = (result.recovered ?? 0) + 1 }
+    }
+    if (connectionFailure(outcome)) hostFails.set(host, (hostFails.get(host) ?? 0) + 1)
     else hostFails.set(host, 0)
     switch (outcome.liveness) {
       case 'live': result.live++; break
@@ -167,7 +177,10 @@ export async function runProbeCycle(opts: { limit?: number; concurrency?: number
   result.attempted = rows.length
   result.skippedDeadline = skippedDeadline
   result.deferredHostDown = deferred.length
-  await deferServices(deferred, 60)
+  // A classified agent's service is on a 30-minute schedule: a host that failed this cycle is asked again in ten
+  // minutes, not sixty, so one bad cycle cannot age hundreds of listed agents out of the 24-hour reachable window.
+  await deferServices(deferred.filter((c) => c.tier === 'T1'), 10)
+  await deferServices(deferred.filter((c) => c.tier !== 'T1'), 60)
 
   // Probe history is a first-party observation: append only, never updated.
   const probeIds = new Map<number, number>()

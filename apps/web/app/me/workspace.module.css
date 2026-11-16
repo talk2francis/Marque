@@ -300,39 +300,59 @@ a.stat:hover { border-color: var(--hair-2); }
 
 @media (max-width: 560px) { .agentActivity dt { min-height: 2.8em; } }
 
-/* ---- The Workshop: switching to Building changes the room, not just the numbers.
-   Steel replaces gold, a faint blueprint grid sits behind the title, and the body settles in. */
-.wrap { position: relative; isolation: isolate; }
-.wrap[data-room='building']::before {
-  content: ''; position: absolute; z-index: -1; inset: -40px calc(-1 * var(--margin, 16px)) auto; height: 360px; pointer-events: none;
-  background-image:
-    linear-gradient(color-mix(in srgb, var(--v-azure) 9%, transparent) 1px, transparent 1px),
-    linear-gradient(90deg, color-mix(in srgb, var(--v-azure) 9%, transparent) 1px, transparent 1px);
-  background-size: 28px 28px;
-  -webkit-mask-image: linear-gradient(to bottom, #000 0%, transparent 100%);
-  mask-image: linear-gradient(to bottom, #000 0%, transparent 100%);
-  animation: roomFade 420ms var(--ease, ease) both;
+/* ---- Two desks (16 Nov). Hiring and Building are different jobs, so the page says which one you are doing in the
+   places you already look: the desk your name sits on, the switch, and the line under the open tab. One colour per
+   desk, brass for Hiring (you pay) and steel for Building (you make), set once as --room and used everywhere below.
+   No background pattern: the earlier ruled lines and grid were too faint to read as a difference. */
+.wrap { position: relative; isolation: isolate; --room: var(--v-gold); }
+.wrap[data-room='building'] { --room: var(--v-azure); }
+
+/* The desk: the hero is a surface in the room's colour, lit from the side its switch sits on. */
+.wrap[data-room] .hero {
+  position: relative; overflow: hidden; padding: 22px 24px; border-radius: 20px;
+  border: 1px solid color-mix(in srgb, var(--room) 28%, var(--hair));
+  background:
+    radial-gradient(90% 150% at 0% 0%, color-mix(in srgb, var(--room) 15%, transparent), transparent 64%),
+    color-mix(in srgb, var(--room) 3%, var(--panel));
+  box-shadow: inset 0 2px 0 0 color-mix(in srgb, var(--room) 78%, transparent);
+  animation: roomFade 320ms var(--ease, ease) both;
 }
-.wrap[data-room='building'] .kicker { color: var(--v-azure); }
-.wrap[data-room='building'] .portrait { box-shadow: 0 0 0 2px color-mix(in srgb, var(--v-azure) 55%, transparent); border-radius: 50%; }
+.wrap[data-room='building'] .hero {
+  background:
+    radial-gradient(90% 150% at 100% 100%, color-mix(in srgb, var(--room) 17%, transparent), transparent 64%),
+    color-mix(in srgb, var(--room) 3%, var(--panel));
+}
+.hero > * { position: relative; }
+/* The desk's own tool, large and quiet, in the space between your name and the switch. */
+.roomMark { position: absolute; z-index: 0; right: 31%; top: 50%; width: 190px; height: 190px; transform: translateY(-50%) rotate(-8deg); color: var(--room); opacity: 0.1; pointer-events: none; }
+.roomMark svg { width: 100%; height: 100%; stroke-width: 1; }
+.wrap[data-room='building'] .roomMark { transform: translateY(-50%) rotate(10deg); }
+
+/* The desk's name, with its tool, where the page title is read. */
+.wrap[data-room] .kicker { display: inline-flex; align-items: center; gap: 7px; width: fit-content; color: var(--ink-2); }
+.roomName { display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 10px 0 8px; border-radius: var(--r-pill); font-size: 12.5px; font-weight: 600; color: var(--room); border: 1px solid color-mix(in srgb, var(--room) 45%, transparent); background: color-mix(in srgb, var(--room) 12%, transparent); }
+.roomName svg { width: 13px; height: 13px; }
+.wrap[data-room] .portrait { box-shadow: 0 0 0 2px color-mix(in srgb, var(--room) 60%, transparent); border-radius: 50%; }
+
+/* The switch: the side you are on is filled and outlined in its colour; the other stays plain. */
+.wrap[data-room] .toggle { background: color-mix(in srgb, var(--canvas) 70%, var(--sunk)); }
+.wrap[data-room] .toggle button[data-on] {
+  background: color-mix(in srgb, var(--room) 18%, var(--panel-2));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--room) 60%, transparent), 0 6px 16px -10px rgba(0, 0, 0, 0.6);
+}
+.wrap[data-room] .toggle button[data-on] svg { color: var(--room); }
+.wrap[data-room] .toggle button[data-on] small { color: var(--ink-2); }
+
+/* The open tab is underlined in the room's colour, so the desk is still named after the hero has scrolled away. */
+.wrap[data-room] :global(.tabs-ink) { background: var(--room); }
+.wrap[data-room] :global(.tabs-list) button[aria-selected='true'] :global(.tabs-count) { color: var(--room); }
+
 .body[data-room-body] { animation: roomIn 280ms var(--ease, ease) both; }
 @keyframes roomIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
-@keyframes roomFade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes roomFade { from { opacity: 0.4; } to { opacity: 1; } }
 .agentLine { margin: 0; font-size: 13.5px; color: var(--ink-2); }
+@media (max-width: 1000px) { .roomMark { display: none; } }
+@media (max-width: 640px) { .wrap[data-room] .hero { padding: 16px; border-radius: 16px; } }
 @media (prefers-reduced-motion: reduce) {
-  .wrap[data-room='building']::before, .body[data-room-body] { animation: none; }
+  .wrap[data-room] .hero, .body[data-room-body] { animation: none; }
 }
-
-/* Hiring: a quiet ledger room, with ruled gold lines and a matching profile ring. */
-.wrap[data-room='hiring']::before {
-  content: ''; position: absolute; z-index: -1; inset: -40px calc(-1 * var(--margin, 16px)) auto; height: 360px; pointer-events: none;
-  background-image: linear-gradient(color-mix(in srgb, var(--v-gold) 10%, transparent) 1px, transparent 1px), radial-gradient(ellipse at 20% 0%, color-mix(in srgb, var(--v-gold) 9%, transparent), transparent 70%);
-  background-size: 100% 28px, 100% 100%;
-  -webkit-mask-image: linear-gradient(to bottom, #000, transparent);
-  mask-image: linear-gradient(to bottom, #000, transparent);
-  animation: roomFade 420ms var(--ease, ease) both;
-}
-.wrap[data-room='hiring'] .kicker { color: var(--v-gold); }
-.wrap[data-room='hiring'] .portrait { box-shadow: 0 0 0 2px color-mix(in srgb, var(--v-gold) 55%, transparent); border-radius: 50%; }
-.wrap[data-room='hiring'] .summary { border-top-color: color-mix(in srgb, var(--v-gold) 40%, var(--hair)); }
-@media (prefers-reduced-motion: reduce) { .wrap[data-room='hiring']::before { animation: none; } }

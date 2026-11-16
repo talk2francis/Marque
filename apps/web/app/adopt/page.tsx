@@ -7,6 +7,7 @@ import { gasCosts } from '../../lib/gas-costs'
 import { proofProjection, weeklyOutside } from '../../lib/proof'
 import { HONEST_LIMITS } from '../../lib/honest-limits'
 import styles from './adopt.module.css'
+import { Capacity } from '../_components/Capacity'
 
 export const dynamic = 'force-dynamic'
 export const metadata = {
@@ -86,7 +87,8 @@ export default async function AdoptPage() {
             </table>
           </div>
           <dl className={styles.facts}>
-            <div><dt>Server</dt><dd>One VPS: 6 vCPU, 11 GiB RAM, 193 GB disk (75% used), measured 26 Oct 2026. It runs the site, the indexer, probes, quotes, the keeper, the six reference sellers, the MCP server, Postgres and Redis.</dd></div>
+            <div><dt>Server</dt><dd>One VPS: 6 vCPU, 11 GiB RAM, 193 GB disk (71% used), measured 16 Nov 2026. It runs the site, the indexer, probes, quotes, the keeper, the six reference sellers, the MCP server, Postgres and Redis. Since 16 Nov an in-memory edge cache in front of the web workers answers repeat public reads, so a page is rendered once and then served to everyone reading it.</dd></div>
+            <div><dt>Next server</dt><dd>Planned, not yet bought: a server two to three times this one in CPU and memory, so that page rendering, indexing, probing and the database stop sharing six cores. The cost line above changes when it is bought, and the capacity test below is run again on it.</dd></div>
             <div><dt>RPC</dt><dd>Pooled public BSC endpoints for reads and writes; a NodeReal key for transfer history; an archive endpoint used only to replay historical benchmarks.</dd></div>
             <div><dt>Storage</dt><dd>Read 6 Nov 2026, 05:58 UTC: PostgreSQL reported 8,736,054,295 bytes for the database; local backups occupied 10,912,378,397 bytes. Nightly dumps also have an encrypted offsite copy.</dd></div>
             <div><dt>Network fees per hire</dt><dd>{gas && gas.hireBnbMedian !== null ? <>Median {n(gas.hireBnbMedian, 7)} BNB{usd ? ` (about $${(gas.hireBnbMedian * usd).toFixed(3)})` : ''}, {n(gas.hireGasMedian)} gas over {n(gas.hireTxsMedian)} buyer transactions, paid by the buyer. Measured from {gas.hires} mainnet hires&apos; receipts.</> : 'Not measured just now.'}</dd></div>
@@ -163,6 +165,7 @@ export default async function AdoptPage() {
           <h2 id="limits">8. What is not true yet</h2>
           <ul>{HONEST_LIMITS.map((l) => <li key={l}>{l}</li>)}</ul>
         </section>
+        <Capacity />
       </main>
       <SiteFooter />
     </>

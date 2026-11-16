@@ -168,6 +168,40 @@ export interface UrlCheck {
 }
 
 /**
+ * One DNS answer per host, shared for a minute (a failure for thirty seconds).
+ *
+ * `lookup` runs on Node's four-thread pool and cannot be cancelled. A probe cycle asks for hundreds of names at
+ * once, many of them hosts that no longer resolve and hold a thread for seconds; lookups for healthy hosts then
+ * queued behind them until the caller's timeout fired, and a platform that was answering was recorded as timed
+ * out (16 Nov: every "dead" agent on the registry's largest host was a timeout, and each answered when asked
+ * directly). Asking once per host removes almost all of that work.
+ *
+ * Safe against DNS rebinding for the same reason the request is: every address in the answer is validated on every
+ * use, and the request connects only to those addresses (pinnedRequest), never to a second lookup.
+ */
+const DNS_TTL_MS = 60_000
+/** How long a first name resolution may take before the fetch fails as "dns" (never longer than the caller's timeout). */
+const DNS_BUDGET_MS = 5_000
+const DNS_FAILURE_TTL_MS = 30_000
+const DNS_MAX_HOSTS = 4096
+const dnsAnswers = new Map<string, { at: number; failed: boolean; answer: Promise<Array<{ address: string }>> }>()
+
+function resolveHost(host: string): Promise<Array<{ address: string }>> {
+  const hit = dnsAnswers.get(host)
+  if (hit && Date.now() - hit.at < (hit.failed ? DNS_FAILURE_TTL_MS : DNS_TTL_MS)) return hit.answer
+  const entry = { at: Date.now(), failed: false, answer: lookup(host, { all: true }) }
+  dnsAnswers.set(host, entry)
+  entry.answer.catch(() => { entry.failed = true; entry.at = Date.now() })
+  if (dnsAnswers.size > DNS_MAX_HOSTS) {
+    for (const key of dnsAnswers.keys()) { dnsAnswers.delete(key); if (dnsAnswers.size <= DNS_MAX_HOSTS * 0.9) break }
+  }
+  return entry.answer
+}
+
+/** Tests (and only tests) start each case without remembered answers. */
+export function resetDnsAnswers(): void { dnsAnswers.clear() }
+
+/**
  * Validate one URL: scheme, port, and every address its host resolves to.
  * Exported so a caller can pre-screen a URL without fetching it.
  */
@@ -202,7 +236,7 @@ export async function checkUrl(rawUrl: string): Promise<UrlCheck> {
 
   let resolved: Array<{ address: string }>
   try {
-    resolved = await lookup(host, { all: true })
+    resolved = await resolveHost(host)
   } catch (err) {
     return { allowed: false, reason: `dns: ${err instanceof Error ? err.message : String(err)}` }
   }
@@ -322,18 +356,33 @@ export async function safeFetch(rawUrl: string, opts: SafeFetchOptions = {}): Pr
   let currentUrl = rawUrl
   let redirects = 0
   const controller = new AbortController()
-  const timer = setTimeout(() => controller.abort(), timeoutMs)
+  // The endpoint's time budget starts once its name has resolved. Resolution has its own, shorter budget and its own
+  // failure ("dns"), so a slow lookup on our side is never recorded as the endpoint timing out.
+  let timer: ReturnType<typeof setTimeout> | undefined
   let removeAbort = () => {}
   const aborted = new Promise<never>((_resolve, reject) => {
     const onAbort = () => reject(new DOMException('aborted at timeout', 'AbortError'))
     controller.signal.addEventListener('abort', onAbort, { once: true })
     removeAbort = () => controller.signal.removeEventListener('abort', onAbort)
   })
+  // Only a redirect hop waits on this promise; a timeout during the request itself must not go unhandled.
+  aborted.catch(() => {})
   let requestOptions = { ...opts, headers: { ...(opts.headers ?? {}) } }
 
   try {
     for (;;) {
-      const check = await Promise.race([checkUrl(currentUrl), aborted])
+      let check: UrlCheck
+      if (timer === undefined) {
+        let dnsTimer: ReturnType<typeof setTimeout> | undefined
+        const slow = new Promise<'slow'>((resolve) => { dnsTimer = setTimeout(() => resolve('slow'), Math.min(timeoutMs, DNS_BUDGET_MS)) })
+        const first = await Promise.race([checkUrl(currentUrl), slow])
+        clearTimeout(dnsTimer)
+        if (first === 'slow') return { ok: false, failure: 'dns', detail: 'name resolution did not finish in time', latencyMs: Date.now() - started }
+        check = first
+        timer = setTimeout(() => controller.abort(), timeoutMs)
+      } else {
+        check = await Promise.race([checkUrl(currentUrl), aborted])
+      }
       if (!check.allowed) {
         return {
           ok: false,

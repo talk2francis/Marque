@@ -28,7 +28,9 @@ LOG="$LOG_DIR/deploy-web-$STAMP.log"
 
 say() { echo "[deploy-web $(date -u +%H:%M:%S)] $*" | tee -a "$LOG"; }
 name_of() { [ "$1" = 3200 ] && echo marque-web || echo marque-web-b; }
-live_port() { grep -oP '127\.0\.0\.1:\K[0-9]+' "$UPSTREAM" 2>/dev/null || echo 3200; }
+# The upstream file also names the edge cache (127.0.0.1:3190): the live web slot is the 3200 or 3201 in it.
+live_port() { local p; p="$(grep -m1 -oP '127\.0\.0\.1:\K320[01]\b' "$UPSTREAM" 2>/dev/null | head -n1)"; echo "${p:-3200}"; }
+EDGE_URL="${EDGE_URL:-http://127.0.0.1:3190}"
 other() { [ "$1" = 3200 ] && echo 3201 || echo 3200; }
 
 switch_to() {
@@ -49,6 +51,9 @@ switch_to() {
     return 1
   fi
   say "caddy now routes marque.trade to :$port"
+  # Tell the edge cache which slot is live, so it drops the previous release's pages at once and renders the recently
+  # read ones again. Best effort: the edge also notices the new slot by itself, and the site works without it.
+  curl -fsS -m 3 -X POST "$EDGE_URL/__edge/release?port=$port" >>"$LOG" 2>&1 || say "edge cache not reachable (the site is served directly)"
 }
 
 healthy() {

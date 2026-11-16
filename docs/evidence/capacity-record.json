@@ -48,7 +48,8 @@
       ],
       "processRestarts": 0,
       "betweenStageRestarts": 0,
-      "note": "All four holds completed. The 250-visitor stage missed the latency targets."
+      "note": "All four holds completed. The 250-visitor stage missed the latency targets.",
+      "featured": true
     },
     {
       "date": "2026-11-06T02:30:15Z",
@@ -397,6 +398,30 @@
       "betweenStageRestarts": 0,
       "evidenceUrl": "https://github.com/talk2francis/Marque/actions/runs/43507778448",
       "note": "The original workload and targets were unchanged. The first stage reached 25 peak visitors and stopped on latency before a completed hold. Twenty successful responses and one redirect completed, with zero HTTP errors or persistent restarts. No higher stage ran. The aborted request average is not sustained throughput. Capacity remains unestablished; Adopt publication stays withheld."
+    },
+    {
+      "date": "2026-11-13T23:11:09.555Z",
+      "release": "140ab34ced1dd2ad98dda7de4e894e094579890f",
+      "method": "External GitHub Actions runner, November mix with search and cold job rooms",
+      "stages": [
+        {
+          "visitors": 25,
+          "requests": 84,
+          "requestsPerSecond": 3.819162201979818,
+          "pageP95Ms": 6082.227402500001,
+          "apiP95Ms": 3826.0841441499992,
+          "error5xxRate": 0,
+          "restarts": 0,
+          "completed": false,
+          "peakVus": 25,
+          "passed": false
+        }
+      ],
+      "processRestarts": 0,
+      "betweenStageRestarts": 0,
+      "featured": true,
+      "evidenceUrl": "https://github.com/talk2francis/Marque/actions/runs/43525157885",
+      "note": "The last run before the edge cache, with every page rendered per request on four web workers. The first stage reached 25 visitors and stopped on latency before its hold completed: 81 successful responses and 3 redirects, zero HTTP errors, no restarts. No higher stage ran."
     }
   ]
 }

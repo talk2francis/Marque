@@ -1,3 +1,19 @@
+## 16 November 2026: why every November stage failed, and the change
+
+Not yet measured on production. This entry records the cause and what the next run must report.
+
+Cause: nearly every route renders per request (131 `force-dynamic` segments), a render costs a large share of a CPU
+second, and the workers' event loops were blocked by a few of them at a time, so cached pages queued behind them. No
+tuning inside the app could change that. The fix is an edge cache in front of the web slot
+(docs/operations/EDGE-CACHE.md), with the load script and thresholds unchanged.
+
+On a two-core stand-in with the same cost profile and the unchanged script: direct, 25 users, page p95 829 ms (fail);
+through the edge from a cold cache, 25 users 355 ms, 50 and 100 users 1 ms, 250 users 235 requests a second at 1 ms
+with no errors. A stand-in is not the production result.
+
+The next production run must state for each stage whether Job Rooms were already stored, and the edge's hit share
+from `/__edge/stats`.
+
 ## 13 November 2026, 21:07 UTC: catalogue binding still misses latency
 
 [Uninstrumented run 43507778448](https://github.com/talk2francis/Marque/actions/runs/43507778448) tested live and generator release d20100f with the original workload and targets. It reached 25 peak visitors and stopped before the hold: page p95 **14,866 ms**, API p95 **10,855 ms**. Its 21 HTTP requests comprised 20 successes and one redirect, with no completed HTTP errors or persistent restarts. Minimum observed available memory was 5,524,520 KiB. No higher stage ran. The aborted 0.95 requests/second is not sustained throughput. Capacity remains unestablished and Adopt stays withheld.

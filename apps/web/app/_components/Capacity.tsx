@@ -1,10 +1,10 @@
 import { ProvenanceChip } from '@marque/ui'
-import { capacityStagePassed, loadCapacityRecord } from '../../lib/capacity-record'
+import { capacityStagePassed, loadCapacityRecord, shownCapacityRuns } from '../../lib/capacity-record'
 import styles from './capacity.module.css'
 
 export async function Capacity() {
   const { record, source } = await loadCapacityRecord()
-  const runs = [...record.runs].sort((a, b) => b.date.localeCompare(a.date))
+  const { shown: runs, rest, restUnpassed } = shownCapacityRuns(record.runs)
   const latest = runs[0]!
   const passed = latest.stages.filter(capacityStagePassed).map(stage => stage.visitors)
   return <section className={styles.section} aria-labelledby="capacity-heading">
@@ -26,6 +26,7 @@ export async function Capacity() {
       </table></div>
       <p>{run.processRestarts} process restarts across the run{run.betweenStageRestarts ? `, including ${run.betweenStageRestarts} between stages` : ''}. <a href={run.evidenceUrl ?? 'https://github.com/talk2francis/Marque/tree/main/docs/evidence/capacity-2026-11-06'}>Test evidence</a></p>
     </div>)}
-    <p>The September and 6 November generators ran on the server being tested. The 11 November generator ran externally. Generator location, cold reads and admission limits affect comparisons. <a href="https://github.com/talk2francis/Marque/blob/main/docs/phase2/LOAD-TEST.md">Method, context and limits</a></p>
+    {rest ? <p>{rest} other recorded run{rest === 1 ? '' : 's'}{restUnpassed === rest ? `, none of which met its targets,` : ''} {rest === 1 ? 'is' : 'are'} kept in the <a href="https://github.com/talk2francis/Marque/blob/main/docs/evidence/capacity-record.json">full record</a>.</p> : null}
+    <p>The September and 6 November generators ran on the server being tested. Runs from 11 November on ran externally. Generator location, cold reads and admission limits affect comparisons. <a href="https://github.com/talk2francis/Marque/blob/main/docs/phase2/LOAD-TEST.md">Method, context and limits</a></p>
   </section>
 }

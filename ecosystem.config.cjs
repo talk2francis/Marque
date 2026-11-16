@@ -52,6 +52,10 @@ function loadAgentEnv(name) {
 
 const env = loadEnv()
 const ROOT = '/root/marque'
+// Name resolution (dns.lookup), file reads and compression share Node's thread pool, four threads by default. A few
+// lookups for hosts that no longer resolve can hold all four for seconds, and every other lookup in the process then
+// waits behind them. Processes that call many outside hosts get a larger pool (16 Nov, false probe timeouts).
+const OUTBOUND_THREADS = { UV_THREADPOOL_SIZE: '16' }
 // All web runtimes share the same public walkthrough inputs and projection cache.
 // Keep these outside signing environments so keyless readers cannot refresh a different example.
 let cacheDomain
@@ -175,7 +179,7 @@ module.exports = {
       // spawns a child and PM2 saw only the 19 MB wrapper; P2-11 memory budget).
       interpreter: 'node',
       node_args: '--import tsx',
-      env: { ...env, NODE_ENV: 'production' },
+      env: { ...env, NODE_ENV: 'production', UV_THREADPOOL_SIZE: '32' },
       autorestart: true,
       max_restarts: 50,
       restart_delay: 5000,
@@ -227,7 +231,7 @@ module.exports = {
       // spawns a child and PM2 saw only the 19 MB wrapper; P2-11 memory budget).
       interpreter: 'node',
       node_args: '--import tsx',
-      env: { ...env, NODE_ENV: 'production' },
+      env: { ...env, NODE_ENV: 'production', ...OUTBOUND_THREADS },
       autorestart: true,
       max_restarts: 50,
       restart_delay: 5000,
@@ -320,7 +324,7 @@ module.exports = {
       // spawns a child and PM2 saw only the 19 MB wrapper; P2-11 memory budget).
       interpreter: 'node',
       node_args: '--import tsx',
-      env: { ...env, NODE_ENV: 'production' },
+      env: { ...env, NODE_ENV: 'production', ...OUTBOUND_THREADS },
       autorestart: true,
       max_restarts: 50,
       restart_delay: 5000,
@@ -356,7 +360,7 @@ module.exports = {
       // spawns a child and PM2 saw only the 19 MB wrapper; P2-11 memory budget).
       interpreter: 'node',
       node_args: '--import tsx',
-      env: { ...env, NODE_ENV: 'production', CONFORM_DEFER_ON_START: '1' },
+      env: { ...env, NODE_ENV: 'production', CONFORM_DEFER_ON_START: '1', ...OUTBOUND_THREADS },
       autorestart: true,
       max_restarts: 50,
       restart_delay: 30000,
@@ -380,7 +384,7 @@ module.exports = {
       instances: webRuntime.instances,
       exec_mode: 'cluster',
       // Set and Earn runs on BSC mainnet (P2-05 step 8); testnet 97 stays as staging.
-      env: { ...env, NODE_ENV: 'production', PORT: port, HOSTNAME: '127.0.0.1', MARQUE_RELEASE_SHA: process.env.MARQUE_RELEASE_SHA || '', MARQUE_ROOT: ROOT, MARQUE_CAMPAIGN_CHAIN: '56', NEXT_PUBLIC_MARQUE_CAMPAIGN_CHAIN: '56', MARQUE_MCP_UPSTREAM: 'http://127.0.0.1:3297/api/mcp',
+      env: { ...env, ...OUTBOUND_THREADS, NODE_ENV: 'production', PORT: port, HOSTNAME: '127.0.0.1', MARQUE_RELEASE_SHA: process.env.MARQUE_RELEASE_SHA || '', MARQUE_ROOT: ROOT, MARQUE_CAMPAIGN_CHAIN: '56', NEXT_PUBLIC_MARQUE_CAMPAIGN_CHAIN: '56', MARQUE_MCP_UPSTREAM: 'http://127.0.0.1:3297/api/mcp',
         // /judge (V4.2 L0): the featured job is an outside buyer's, chosen as the eligible mainnet job with the most decided
         // checks that all agree (56903, Keel, 3 of 3); the quest example is a team wallet, labelled on the page.
         ...publicWalkthrough },
@@ -402,7 +406,7 @@ module.exports = {
       cwd: `${ROOT}/releases/mcp/apps/web`,
       script: `${ROOT}/releases/mcp/apps/web/server.js`,
       interpreter: 'node',
-      env: { ...keyless, ...publicWalkthrough, NODE_ENV: 'production', PORT: '3297', HOSTNAME: '127.0.0.1', MARQUE_ROOT: ROOT, MARQUE_RELEASE_SHA: releaseOf(`${ROOT}/releases/mcp`), MARQUE_REFRESH_READ_MODELS: '1', MARQUE_CAMPAIGN_CHAIN: '56', NEXT_PUBLIC_MARQUE_CAMPAIGN_CHAIN: '56' },
+      env: { ...keyless, ...publicWalkthrough, ...OUTBOUND_THREADS, NODE_ENV: 'production', PORT: '3297', HOSTNAME: '127.0.0.1', MARQUE_ROOT: ROOT, MARQUE_RELEASE_SHA: releaseOf(`${ROOT}/releases/mcp`), MARQUE_REFRESH_READ_MODELS: '1', MARQUE_CAMPAIGN_CHAIN: '56', NEXT_PUBLIC_MARQUE_CAMPAIGN_CHAIN: '56' },
       filter_env: true,
       autorestart: true,
       max_restarts: 50,
@@ -413,6 +417,26 @@ module.exports = {
       time: true,
       out_file: '/root/.pm2/logs/marque-mcp-out.log',
       error_file: '/root/.pm2/logs/marque-mcp-err.log',
+    },
+    {
+      // The edge cache (ops/edge, docs/operations/EDGE-CACHE.md): Caddy sends reads here first and falls back to the
+      // web slot when it is down. It serves repeat anonymous reads from memory and asks the web slot for at most
+      // four renders at a time. No secret and no database: its environment is these public values only.
+      name: 'marque-edge',
+      cwd: ROOT,
+      script: `${ROOT}/ops/edge/server.mjs`,
+      interpreter: 'node',
+      env: { NODE_ENV: 'production', EDGE_PORT: '3190', EDGE_MAX_MB: '256', EDGE_ORIGIN_CONCURRENCY: String(webRuntime.instances), EDGE_BACKGROUND_CONCURRENCY: '2' },
+      filter_env: true,
+      autorestart: true,
+      max_restarts: 50,
+      restart_delay: 1000,
+      // The store is capped at 256 MB of bodies; this leaves room for buffers in flight.
+      max_memory_restart: '700M',
+      kill_timeout: 5000,
+      time: true,
+      out_file: '/root/.pm2/logs/marque-edge-out.log',
+      error_file: '/root/.pm2/logs/marque-edge-err.log',
     },
     {
       // P2-11 item 5, LAUNCH-RUNBOOK 3: indexer lag, seller quotes, hireable per category,
