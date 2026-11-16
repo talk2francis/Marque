@@ -156,7 +156,7 @@ export function Workspace({ addrParam }: { addrParam: string | null }) {
               <span className={styles.roomName} data-room-name={view}>{view === 'building' ? <Hammer aria-hidden="true" /> : <ShoppingBag aria-hidden="true" />}{view === 'building' ? 'Workshop' : 'Hiring desk'}</span>
               My Marque{own ? '' : ', viewing an address'}
             </span>
-            {profile?.displayName ? <h1 className={styles.displayName}>{profile.displayName}</h1> : null}
+            {profile?.displayName ? <h1 className={styles.displayName}>{profile.displayName}</h1> : <h1 className={styles.srOnly}>My Marque, {short(address)}</h1>}
             <div className={styles.identity}>
               <span className={styles.addrText} data-sub={profile?.displayName ? '' : undefined} title={address}>{short(address)}</span>
               <button type="button" className={styles.iconBtn} onClick={async () => { if (await copyText(address)) toast({ tone: 'success', title: 'Address copied' }) }} aria-label="Copy address" title="Copy address"><Copy aria-hidden="true" /></button>
@@ -241,7 +241,7 @@ function Summary({ address, view }: { address: string; view: View }) {
           <div className={styles.stat} data-tone="gold">
             <span>Jobs</span><b>{v(all.length)}</b>
             <small>{pending ? '' : `${running} running · ${hm.length} on mainnet, ${hp.length} practice`}</small>
-            {agents.length ? <span className={styles.faces} aria-label={`Hired ${agents.map((a) => a.name).join(', ')}`}>{agents.map((a) => <AgentAvatar key={a.agentKey} id={a.agentKey} reference={a.firstParty} size={24} />)}</span> : null}
+            {agents.length ? <span className={styles.faces} role="img" aria-label={`Hired ${agents.map((a) => a.name).join(', ')}`}>{agents.map((a) => <AgentAvatar key={a.agentKey} id={a.agentKey} reference={a.firstParty} size={24} />)}</span> : null}
           </div>
           <div className={styles.stat} data-tone="azure"><span>In escrow now</span><b>{v(sumOf(hm, ['FUNDED', 'SUBMITTED', 'DISPUTED']))}</b><small>{pending ? '' : `practice ${sumOf(hp, ['FUNDED', 'SUBMITTED', 'DISPUTED'])}`}</small></div>
           <div className={styles.stat} data-tone="jade"><span>Paid to agents</span><b>{v(sumOf(hm, ['COMPLETED', 'PAID']))}</b><small>{pending ? '' : `refunded ${sumOf(hm, ['REFUNDED'])}`}</small></div>
