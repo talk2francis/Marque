@@ -28,15 +28,19 @@ const DAY = 86_400
  * stale: further seconds it may be served while one background render replaces it.
  * query: 'none' (any query string leaves the route uncached) or 'any' (the query is part of the key).
  */
+// 16 Nov: at 10 s fresh the edge re-rendered about three pages a second in the background whatever the traffic, one to
+// three cores of rendering for pages that change on a scale of minutes. Public pages are now fresh for 30 s (the home
+// page's own s-maxage) and a Job Room that can still change for 15 s. A reload still gets a render at most two seconds
+// old, and a hirer's in-app refresh is never served stale.
 export const ROUTES = [
   {
-    name: 'job-room', test: /^\/jobs\/(?:56|97)\/\d{1,20}$/, query: 'none', fresh: 5, stale: 120,
+    name: 'job-room', test: /^\/jobs\/(?:56|97)\/\d{1,20}$/, query: 'none', fresh: 15, stale: 120,
     // The page marks a job where nothing more can happen (apps/web/app/jobs/[chainId]/[jobId]/page.tsx).
     settled: { token: 'data-marque-edge="settled"', fresh: 300, stale: DAY },
   },
-  { name: 'judge', test: /^\/judge$/, query: 'none', fresh: 10, stale: 60 },
-  { name: 'builders', test: /^\/builders$/, query: 'none', fresh: 10, stale: 60 },
-  { name: 'public-page', test: /^\/(?:adopt|proof|why|standard|pancakeswap|pancakeswap\/proof)$/, query: 'none', fresh: 10, stale: 60 },
+  { name: 'judge', test: /^\/judge$/, query: 'none', fresh: 30, stale: 120 },
+  { name: 'builders', test: /^\/builders$/, query: 'none', fresh: 30, stale: 120 },
+  { name: 'public-page', test: /^\/(?:adopt|proof|why|standard|pancakeswap|pancakeswap\/proof)$/, query: 'none', fresh: 30, stale: 120 },
   { name: 'status', test: /^\/status$/, query: 'none', fresh: 5, stale: 15 },
   // The human listing only. `format=machine` carries quote expiry and keeps the origin's own Cache-Control.
   { name: 'marketplace', test: /^\/api\/v1\/marketplace$/, query: 'any', denyParams: ['format'], fresh: 5, stale: 10 },
@@ -140,7 +144,7 @@ export function storable({ route, rsc, status, headers, body }) {
     const shared = cc.has('s-maxage') ? Number(cc.get('s-maxage')) : cc.has('public') && cc.has('max-age') ? Number(cc.get('max-age')) : 0
     if (Number.isFinite(shared) && shared > 0) {
       // Documents and JSON stay close to the origin's own freshness; immutable media may stay longer.
-      const fresh = Math.min(shared, HTML_LIKE.test(get('content-type')) || status !== 200 ? 10 : 3600)
+      const fresh = Math.min(shared, HTML_LIKE.test(get('content-type')) || status !== 200 ? 30 : 3600)
       ttl = { fresh, stale: Math.min(60, cc.has('stale-while-revalidate') ? Number(cc.get('stale-while-revalidate')) || 0 : fresh) }
     }
   }

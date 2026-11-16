@@ -77,14 +77,14 @@ test('past fresh, the stored page is served at once while one background render 
   const o = await origin({ '/judge': (_r, n) => page(`render ${n}`) })
   const x = await edgeFor([o.port])
   await x.get(o, '/judge')
-  x.clock.t += 11_000
+  x.clock.t += 31_000
   const stale = await x.get(o, '/judge')
   assert.equal(stale.headers['x-marque-edge'], 'STALE'); assert.match(stale.body.toString(), /render 1/)
-  assert.equal(stale.headers['age'], '11')
+  assert.equal(stale.headers['age'], '31')
   await settle()
   const next = await x.get(o, '/judge')
   assert.equal(next.headers['x-marque-edge'], 'HIT'); assert.match(next.body.toString(), /render 2/)
-  x.clock.t += 80_000 // past fresh + stale: nobody is given a copy this old
+  x.clock.t += 160_000 // past fresh + stale: nobody is given a copy this old
   const cold = await x.get(o, '/judge')
   assert.equal(cold.headers['x-marque-edge'], 'MISS'); assert.match(cold.body.toString(), /render 3/)
 })
@@ -115,7 +115,7 @@ test('an unlisted dynamic page is piped through and never stored', async () => {
   assert.equal(x.edge.entries.size, 0)
 })
 
-test('what the origin itself marks shared is stored for at most ten seconds of freshness', async () => {
+test('what the origin itself marks shared is stored for at most thirty seconds of freshness', async () => {
   const o = await origin({
     '/': (_r, n) => page(`home ${n}`, { 'cache-control': 's-maxage=30, stale-while-revalidate=31535970' }),
     '/api/v1/phase2/owner/x': (_r, n) => ({ headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=15' }, body: JSON.stringify({ n }) }),
@@ -123,7 +123,7 @@ test('what the origin itself marks shared is stored for at most ten seconds of f
   })
   const x = await edgeFor([o.port])
   for (const p of ['/', '/api/v1/phase2/owner/x', '/img/p/1']) { await x.get(o, p); const again = await x.get(o, p); assert.equal(again.headers['x-marque-edge'], 'HIT', p) }
-  x.clock.t += 10_500
+  x.clock.t += 30_500
   assert.equal((await x.get(o, '/')).headers['x-marque-edge'], 'STALE')
   assert.equal((await x.get(o, '/img/p/1')).headers['x-marque-edge'], 'HIT')
   await settle()
@@ -219,7 +219,7 @@ test('when the origin fails, a stored page still answers; with nothing stored th
   const x = await edgeFor([o.port])
   await x.get(o, '/judge')
   down = true
-  x.clock.t += 100_000
+  x.clock.t += 160_000
   const kept = await x.get(o, '/judge')
   assert.equal(kept.status, 200); assert.equal(kept.headers['x-marque-edge'], 'STALE-ERROR')
   const failed = await x.get(o, '/builders')
