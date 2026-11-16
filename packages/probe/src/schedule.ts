@@ -215,6 +215,7 @@ export function capPerHost<T extends { url: string; firstParty: boolean }>(rows:
 }
 
 const MAX_PER_HOST_PER_CYCLE = Number(process.env.PROBE_MAX_PER_HOST_PER_CYCLE ?? 120)
+const RETRY_DEAD_SLOTS = Number(process.env.PROBE_RETRY_DEAD_SLOTS ?? 40)
 
 export async function dueByTier(limit: number, deadCap: number, fpIds: readonly string[], chainId?: number): Promise<DueService[]> {
   const fpList = fpIds.length ? sql.join(fpIds.map((id) => sql`${id}`), sql`, `) : sql`''`
@@ -256,21 +257,50 @@ export async function dueByTier(limit: number, deadCap: number, fpIds: readonly 
   let dead = 0
   // Read ten times the limit, then share the cycle between hosts (capPerHost) before the dead cap applies.
   const ordered = capPerHost(rowsOf(r).map((row) => ({ row, url: String(row['url']), firstParty: row['first_party'] === true })), limit, MAX_PER_HOST_PER_CYCLE)
-  for (const { row } of ordered) {
+  const toDue = (row: Record<string, unknown>): DueService => {
     const input: ScheduleInput = {
       firstParty: row['first_party'] === true,
       classified: row['classified'] === true,
       liveness: (row['last_liveness'] as Liveness | null) ?? null,
       consecutiveDead: Number(row['consecutive_dead'] ?? 0),
     }
-    const tier = tierOf(input)
-    if (tier === 'T3' && ++dead > deadCap) continue
-    out.push({
+    return {
       serviceId: Number(row['service_id']), agentId: String(row['agent_id']), kind: String(row['kind']) as ServiceKind,
-      url: String(row['url']), tier, firstParty: input.firstParty, classified: input.classified, consecutiveDead: input.consecutiveDead,
+      url: String(row['url']), tier: tierOf(input), firstParty: input.firstParty, classified: input.classified, consecutiveDead: input.consecutiveDead,
       lastLiveness: input.liveness,
       lastCheckedAt: row['last_checked_at'] ? new Date(String(row['last_checked_at'])) : null,
-    })
+    }
+  }
+  for (const { row } of ordered) {
+    const due = toDue(row)
+    if (due.tier === 'T3' && ++dead > deadCap) continue
+    out.push(due)
+  }
+
+  // Overdue dead services get a reserved slice of every cycle (16 Nov 2026). Dead ranks last in the order above and
+  // higher-ranked work always filled the cycle, so a service marked dead once was never asked again: 32,144 mainnet
+  // services were overdue by more than a day, 16,037 by more than a week, including sellers that had quoted a price.
+  // Sellers that have quoted before go first, then classified agents, then the longest overdue; at most 10 per host.
+  const retryWant = Math.max(0, RETRY_DEAD_SLOTS - out.filter((d) => d.lastLiveness === 'dead').length)
+  if (retryWant > 0) {
+    const have = new Set(out.map((d) => d.serviceId))
+    const retry = await db().execute(sql`
+      select ps.service_id, ps.agent_id, s.kind, coalesce(s.resolved_endpoint, s.endpoint) as url,
+             ps.last_liveness, ps.consecutive_dead, ps.last_checked_at,
+             (ps.agent_id in (${fpList})) as first_party,
+             (ps.agent_id like '56:%' and exists (select 1 from agent_category c where c.agent_id = ps.agent_id and c.category <> 'unclassified')) as classified
+      from probe_schedule ps
+      join agent_service s on s.id = ps.service_id
+      where ps.next_due_at <= now() and ps.last_liveness = 'dead'
+        and s.currently_declared is distinct from false
+        and (s.is_template = false or s.resolved_endpoint is not null)
+        ${chainId ? sql`and ps.agent_id like ${`${chainId}:%`}` : sql``}
+      order by exists (select 1 from commerce_quote q where q.agent_id = ps.agent_id and q.ok) desc,
+               exists (select 1 from agent_category c where c.agent_id = ps.agent_id and c.category <> 'unclassified') desc,
+               ps.next_due_at asc
+      limit ${retryWant * 10}`)
+    const rows = rowsOf(retry).filter((row) => !have.has(Number(row['service_id'])))
+    for (const { row } of capPerHost(rows.map((row) => ({ row, url: String(row['url']), firstParty: false })), retryWant, 10)) out.push(toDue(row))
   }
   return out
 }
