@@ -8,6 +8,7 @@ import { proofProjection, weeklyOutside } from '../../lib/proof'
 import { HONEST_LIMITS } from '../../lib/honest-limits'
 import styles from './adopt.module.css'
 import { Capacity } from '../_components/Capacity'
+import { CapacityHeadline } from '../_components/CapacityHeadline'
 
 export const dynamic = 'force-dynamic'
 export const metadata = {
@@ -75,6 +76,7 @@ export default async function AdoptPage() {
           <span className={styles.kicker}>For BNB Chain</span>
           <h1 className="t-display">Running <em>Marque.</em></h1>
           <p className={styles.lede}>What it costs, how to run it from nothing, every key and what it can do, what happens when it breaks, and what is not true yet. Every figure is measured, with its source.</p>
+          <CapacityHeadline />
         </header>
 
         <section className={styles.sec} aria-labelledby="cost">

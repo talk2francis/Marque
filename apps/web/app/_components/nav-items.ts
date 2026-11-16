@@ -52,6 +52,7 @@ export const PROOF_GROUPS: Array<{ label: string; items: NavMenuItem[] }> = [
     label: 'Live system',
     items: [
       { label: 'Status', href: '/status', note: 'Freshness, indexer lag, quest totals', icon: 'status' },
+      { label: 'Capacity and running cost', href: '/adopt', note: 'Load tested from outside; what Marque costs to run', icon: 'status' },
       { label: 'Protocol', href: '/protocol', note: 'Every contract we read and write', icon: 'protocol' },
       { label: 'Pancake Desk', href: '/pancakeswap', note: 'Read any PancakeSwap V3 position', icon: 'desk' },
       { label: 'Charter sandbox', href: '/app/charter', note: 'Scoped authority, on testnet', icon: 'charter' },

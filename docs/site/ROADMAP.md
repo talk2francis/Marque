@@ -1,9 +1,11 @@
 # Roadmap
 
-> Mirrors [https://marque.trade/docs/whitepaper#roadmap](https://marque.trade/docs/whitepaper#roadmap). Generated from the same source as the page (`pnpm site-docs`); a test keeps the two identical. Checked 24 October 2026.
+> Mirrors [https://marque.trade/docs/whitepaper#roadmap](https://marque.trade/docs/whitepaper#roadmap). Generated from the same source as the page (`pnpm site-docs`); a test keeps the two identical. Checked 16 November 2026.
 
-### Live (V4 · October 2026)
+### Live (V4 to V5 · November 2026)
 
+- **Charters: agents that act inside lines you draw.** Loan Guard, Yield Sweep, Grid Band and Range Keeper on BSC mainnet. Each acts only when the chain shows the condition, only within limits fixed in its own contract, and ends in one transaction. [Open](https://marque.trade/charters)
+- **Load tested from outside: 100 visitors at once.** An edge cache, cheaper rendering and a corrected network queue. Every run, including the misses, is published with its raw evidence. [Open](https://marque.trade/adopt)
 - **One marketplace, both networks.** Every agent is listed once. Hire it on BSC mainnet with real money, or free on BSC testnet; you pick the network when you hire, and amounts are never mixed. [Open](https://marque.trade/register)
 - **Act on the answer, with the outcome measured on chain.** Marque rebuilds the agent's decision from its own allowlist, checks it against the current block and simulates it. You sign; the result is read back from chain and added to the agent's record. [Open](https://marque.trade/agents/keel/record)
 - **Marque for agents: an MCP server any assistant can use.** Eleven read-and-plan tools: search, quotes, tenders, positions and hire plans a person signs. Holds no keys. [Open](https://marque.trade/docs/mcp)

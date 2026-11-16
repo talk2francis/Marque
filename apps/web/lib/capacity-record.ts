@@ -42,3 +42,16 @@ export function shownCapacityRuns(runs: readonly CapacityRun[]) {
   const rest = sorted.filter((r, i) => i !== 0 && !r.featured)
   return { shown, rest: rest.length, restUnpassed: rest.filter((r) => !r.stages.some(capacityStagePassed)).length }
 }
+
+/** The highest stage the latest run passed, for a headline that always matches the record (16 Nov 2026). */
+export function capacityHeadline(runs: readonly CapacityRun[]) {
+  const latest = [...runs].sort((a, b) => b.date.localeCompare(a.date))[0]
+  if (!latest) return null
+  const passed = latest.stages.filter(capacityStagePassed)
+  const top = [...passed].sort((a, b) => b.visitors - a.visitors)[0]
+  if (!top) return { passed: false as const, date: latest.date, evidenceUrl: latest.evidenceUrl ?? null }
+  return {
+    passed: true as const, visitors: top.visitors, requestsPerSecond: top.requestsPerSecond, pageP95Ms: top.pageP95Ms, apiP95Ms: top.apiP95Ms,
+    error5xxRate: top.error5xxRate, stages: passed.map((s) => s.visitors).sort((a, b) => a - b), date: latest.date, evidenceUrl: latest.evidenceUrl ?? null,
+  }
+}

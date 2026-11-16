@@ -22,8 +22,27 @@ const b64 = (p: string) => readFileSync(resolve(ROOT, p)).toString('base64')
 const uri = (p: string, type: string) => `data:${type};base64,${b64(p)}`
 // Cover art as JPEG: Chromium embeds a JPEG as is, but stores a decoded WebP uncompressed.
 const jpeg = async (p: string) => `data:image/jpeg;base64,${(await sharp(resolve(ROOT, p)).resize({ width: 1654, withoutEnlargement: true }).jpeg({ quality: 84, mozjpeg: true }).toBuffer()).toString('base64')}`
-const COVER_ART = await jpeg('brand-assets/Homepage-dark-theme.png')
-const BACK_ART = await jpeg('brand-assets/Homepage-light-theme.png')
+// The covers' gradient veils are composited into the art here, not drawn by CSS (16 Nov 2026). A CSS gradient with
+// transparency over a full-page photo is written into the PDF as a soft-masked transparency group that viewers
+// recomposite at full resolution: each cover took about 10 s to draw, the "laggy first page". Baked, they draw at once.
+// Each image is cropped to its exact frame with the same focal point the CSS used (background-position).
+const baked = async (p: string, w: number, h: number, fx: number, fy: number, stops: Array<[number, string]>) => {
+  const meta = await sharp(resolve(ROOT, p)).metadata()
+  const scale = Math.max(w / meta.width!, h / meta.height!)
+  const rw = Math.ceil(meta.width! * scale), rh = Math.ceil(meta.height! * scale)
+  const veil = Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"><defs><linearGradient id="v" x1="0" y1="0" x2="0" y2="1">${
+    stops.map(([o, c]) => `<stop offset="${o}" stop-color="${c.split('|')[0]}" stop-opacity="${c.split('|')[1] ?? 1}"/>`).join('')}</linearGradient></defs><rect width="100%" height="100%" fill="url(#v)"/></svg>`)
+  const buf = await sharp(resolve(ROOT, p)).resize(rw, rh).extract({ left: Math.round((rw - w) * fx), top: Math.round((rh - h) * fy), width: w, height: h })
+    .composite([{ input: veil }]).jpeg({ quality: 84, mozjpeg: true }).toBuffer()
+  return `data:image/jpeg;base64,${buf.toString('base64')}`
+}
+// A4 at 150 dpi: 1240 x 1754 for the cover; the back art is the top 170 mm of the page. Fewer pixels to colour-convert,
+// still sharp on screen and in print.
+const COVER_ART = await baked('brand-assets/Homepage-dark-theme.png', 1240, 1754, 0.70, 0.40,
+  [[0, '#111110|0.72'], [0.34, '#111110|0.05'], [0.52, '#111110|0'], [0.78, '#111110|0.86'], [1, '#111110|1']])
+const BACK_ART = await baked('brand-assets/Homepage-light-theme.png', 1240, 1004, 0.72, 0.45,
+  [[0, '#F7F4EE|0'], [0.55, '#F7F4EE|0'], [1, '#F7F4EE|1']])
+void jpeg
 
 // ---- brand: the traced lockup, exactly as the site draws it ----------------
 const wm = readFileSync(resolve(WEB, 'app/_components/brand/Wordmark.tsx'), 'utf8')
@@ -91,8 +110,7 @@ ${font('Plex Mono', 'ibm-plex-mono-400-latin.woff2', 400)}${font('Plex Mono', 'i
 html{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 body{margin:0;font-family:'General Sans',Arial,sans-serif;font-size:10.2pt;line-height:1.58;color:${INK2};background:#fff}
 .cover{page:cover;position:relative;width:210mm;height:297mm;overflow:hidden;background:${NIGHT};color:#EEEBE4}
-.cover .img{position:absolute;inset:0;background:url(${COVER_ART}) 70% 40%/cover no-repeat}
-.cover .veil{position:absolute;inset:0;background:linear-gradient(180deg,rgba(17,17,16,.72) 0%,rgba(17,17,16,.05) 34%,rgba(17,17,16,0) 52%,rgba(17,17,16,.86) 78%,${NIGHT} 100%)}
+.cover .img{position:absolute;inset:0;background:url(${COVER_ART}) 0 0/100% 100% no-repeat}
 .cover .top{position:absolute;left:18mm;right:18mm;top:17mm;display:flex;justify-content:space-between;align-items:center;font-size:8pt;letter-spacing:.2em;text-transform:uppercase;color:rgba(238,235,228,.72)}
 .cover .bottom{position:absolute;left:18mm;right:18mm;bottom:20mm}
 .cover .kick{font-size:8pt;letter-spacing:.24em;text-transform:uppercase;color:${CHAMP};margin:0 0 5mm}
@@ -103,12 +121,12 @@ body{margin:0;font-family:'General Sans',Arial,sans-serif;font-size:10.2pt;line-
 .cover .meta b{display:block;color:#EEEBE4;font-weight:500;font-size:9pt}
 .front{break-after:page}
 .front h3,.eyebrow{font-size:7.6pt;letter-spacing:.22em;text-transform:uppercase;color:${INK3};font-weight:500;margin:0 0 4mm}
-.toc{list-style:none;margin:0 0 12mm;padding:0;columns:2;column-gap:12mm}
-.toc li{display:flex;gap:4mm;padding:2.2mm 0;border-bottom:1px solid ${HAIR};font-size:10.5pt;color:${INK};break-inside:avoid}
+.toc{list-style:none;margin:0 0 9mm;padding:0;columns:2;column-gap:12mm}
+.toc li{display:flex;gap:4mm;padding:1.6mm 0;border-bottom:1px solid ${HAIR};font-size:10.5pt;color:${INK};break-inside:avoid}
 .toc li span{width:7mm;color:${BRONZE};font-variant-numeric:tabular-nums}
 .glance{display:grid;grid-template-columns:1.25fr 1fr;gap:10mm}
 .glance .card{padding:6mm;border:1px solid ${HAIR};border-radius:3mm;background:${PAPERC}}
-.keys{margin-top:10mm;display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-top:1px solid ${INK}}
+.keys{margin-top:7mm;display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-top:1px solid ${INK}}
 .keys div{padding:3.5mm 4mm 0 0}
 .keys div+div{padding-left:4mm;border-left:1px solid ${HAIR}}
 .keys b{display:block;color:${INK};font-weight:500;font-size:9.4pt;margin-bottom:1mm}
@@ -166,14 +184,13 @@ figcaption{font-size:7.8pt;color:${INK3};margin-top:2mm}
 .rmi b{display:block;font-size:8.8pt;font-weight:500;color:${INK};margin-bottom:.6mm}
 .rmi p{font-size:8pt;line-height:1.45;margin:0}
 .back{page:cover;position:relative;width:210mm;height:297mm;overflow:hidden;background:${PAPERC}}
-.back .img{position:absolute;left:0;right:0;top:0;height:170mm;background:url(${BACK_ART}) 72% 45%/cover no-repeat}
-.back .veil{position:absolute;left:0;right:0;top:0;height:171mm;background:linear-gradient(180deg,rgba(247,244,238,0) 55%,${PAPERC} 100%)}
+.back .img{position:absolute;left:0;right:0;top:0;height:170mm;background:url(${BACK_ART}) 0 0/100% 100% no-repeat}
 .back .txt{position:absolute;left:18mm;right:18mm;bottom:22mm}
 .back .txt .pull{font-size:26pt;max-width:140mm}
 .back .row{display:flex;justify-content:space-between;align-items:flex-end;padding-top:6mm;margin-top:8mm;border-top:1px solid ${HAIR};font-size:8.6pt}
 .back .row b{display:block;color:${INK};font-weight:500}
 </style></head><body>`
-const coverHtml = `<div class="cover"><div class="img"></div><div class="veil"></div>
+const coverHtml = `<div class="cover"><div class="img"></div>
   <div class="top">${lockup('#EEEBE4', 30)}<span>${esc(PAPER.label)}</span></div>
   <div class="bottom">
     <p class="kick">BNB Smart Chain · Agent marketplace</p>
@@ -189,12 +206,12 @@ const bodyHtml = `<div class="front">
     <div class="card">
       <h3>At a glance</h3>
       <p class="pull">A registration says who an agent is. It never says <em>how good it is.</em></p>
-      <p>Marque indexes every ERC-8004 agent on BNB Smart Chain, tests the ones it can reach against answers computed from chain state, and lets anyone hire them through BNB Chain's ERC-8183 escrow from their own wallet. Every step, pass and failure is on the record.</p>
+      <p>Marque indexes every ERC-8004 agent on BNB Smart Chain, tests the ones it can reach against answers computed from chain state, and lets anyone hire them through BNB Chain's ERC-8183 escrow from their own wallet. Since November, a charter also lets an agent act for you on chain, only inside limits you sign. Every step, pass and failure is on the record.</p>
     </div>
     <div class="card dark">
       <h3>What comes next</h3>
       <ul>${nextItems}</ul>
-      <p style="margin-top:4mm;color:#B3BEB6">The full roadmap is section 12.</p>
+      <p style="margin-top:4mm;color:#B3BEB6">The full roadmap is section ${SECTIONS.find((s) => s.id === 'roadmap')!.n}.</p>
     </div>
   </div>
   <div class="keys">
@@ -204,7 +221,7 @@ const bodyHtml = `<div class="front">
   </div>
 </div>
 ${body}`
-const backHtml = `<div class="back"><div class="img"></div><div class="veil"></div>
+const backHtml = `<div class="back"><div class="img"></div>
   <div class="txt">
     <p class="pull">Hire agents that <em>actually work.</em></p>
     <p>Try an agent free, then hire it at a live price. Your payment waits in BNB Chain's escrow contract until the work is delivered, and every step is recorded on chain.</p>

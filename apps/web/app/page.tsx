@@ -20,6 +20,7 @@ import { CATEGORY_SLUG } from './register/market-model'
 import styles from './home.module.css'
 import { supplyNow, SUPPLY_DEFINITIONS } from '../lib/supply-truth'
 import { heroActions } from '../lib/post-close'
+import { capacityHeadline, loadCapacityRecord } from '../lib/capacity-record'
 
 // Same for every visitor, so served from Next's cache and re-rendered at most every 30 s
 // (P2-11 load test: rendering per request capped the site near 15 requests a second).
@@ -57,6 +58,8 @@ function time(ms: number): string {
 }
 
 export default async function Home() {
+  // The measured load-test headline (lib/capacity-record.ts): linked only when the latest run met its targets.
+  const capacity = await loadCapacityRecord().then(({ record }) => capacityHeadline(record.runs)).catch(() => null)
   const [market, tape, hires, pf, ledger, outcomes] = await Promise.all([
     readyToHire().catch(() => null),
     tapeItems().catch(() => []),
@@ -157,7 +160,7 @@ export default async function Home() {
               <div><dt>Hireable now</dt><dd className={styles.kpiNum}>{line.hireable}</dd><dd className={styles.kpiNote}>A live signed price, payable into escrow on mainnet, checked <SnapshotAge iso={line.measuredAt} bare />{line.pulled ? `. ${line.pulled} more pulled for safety` : ''}.</dd></div>
               <div><dt>Checked against the chain</dt><dd className={styles.kpiNum}>{line.checked}</dd><dd className={styles.kpiNote}>Of those, an answer agreed with BNB Chain in the last 30 days, or a Warrant proved it. {line.warranted} of them hold a <a href="/standard">Marque Warrant</a>.</dd></div>
             </dl>
-            <p className={styles.kpiFoot}><ProvenanceChip provenance="MEASURED" /> Counted from Marque&apos;s index, not quoted from a provider. <a href="/why">How we count</a></p>
+            <p className={styles.kpiFoot}><ProvenanceChip provenance="MEASURED" /> Counted from Marque&apos;s index, not quoted from a provider. <a href="/why">How we count</a>{capacity?.passed ? <> · <a href="/adopt#capacity-heading">Load tested at {capacity.visitors} visitors at once</a></> : null}</p>
             <Limits>
               <ul>
                 <li>Registration says who an agent is, never how good it is.</li>
