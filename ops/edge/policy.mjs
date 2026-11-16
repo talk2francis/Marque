@@ -43,8 +43,11 @@ export const ROUTES = [
   { name: 'public-page', test: /^\/(?:adopt|proof|why|standard|pancakeswap|pancakeswap\/proof)$/, query: 'none', fresh: 30, stale: 120 },
   { name: 'status', test: /^\/status$/, query: 'none', fresh: 5, stale: 15 },
   // The human listing only. `format=machine` carries quote expiry and keeps the origin's own Cache-Control.
-  { name: 'marketplace', test: /^\/api\/v1\/marketplace$/, query: 'any', denyParams: ['format'], fresh: 5, stale: 10 },
-  { name: 'set-and-earn-api', test: /^\/api\/v1\/phase2\/(?:coverage|stats|config|ratings\/\d{1,12}|wallet\/0x[0-9a-fA-F]{40})$/, query: 'any', fresh: 3, stale: 15 },
+  // 16 Nov: at 5 s and 3 s these public reads were refreshed about 2.8 times a second in the background during a load test,
+  // each a database query, for counts that change on a scale of minutes. A wallet's own view stays at 3 s.
+  { name: 'marketplace', test: /^\/api\/v1\/marketplace$/, query: 'any', denyParams: ['format'], fresh: 15, stale: 30 },
+  { name: 'set-and-earn-api', test: /^\/api\/v1\/phase2\/(?:coverage|stats|config|ratings\/\d{1,12})$/, query: 'any', fresh: 10, stale: 30 },
+  { name: 'set-and-earn-wallet', test: /^\/api\/v1\/phase2\/wallet\/0x[0-9a-fA-F]{40}$/, query: 'any', fresh: 3, stale: 15 },
 ]
 
 const TRACKING = /^(?:utm_[a-z_]+|fbclid|gclid|msclkid|mc_cid|mc_eid|ref_src)$/i

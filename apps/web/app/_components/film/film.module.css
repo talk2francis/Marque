@@ -326,3 +326,7 @@ a.evidence:hover svg { color: var(--accent); }
 /* The visible end-card link remains clickable through empty control padding. */
 .player:has(.ctaVisible) .controls { pointer-events: none; }
 .player:has(.ctaVisible) .ctl, .player:has(.ctaVisible) .scrub { pointer-events: auto; }
+
+/* 16 Nov 2026: on a phone the Charters film's chapter list stacked under the player and filled most of a screen. The same
+   chapters, with their times, stay one tap away in "Read the Charters film" just below; desktop is unchanged. */
+@media (max-width: 760px) { .chartersBand .sideChapters { display: none; } }

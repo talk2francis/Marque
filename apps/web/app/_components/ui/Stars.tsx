@@ -1,5 +1,5 @@
 'use client'
-import { Star } from 'lucide-react'
+import { StarGlyph } from '../brand/BrandArt'
 import { useId, useState } from 'react'
 
 /** Average and review-record count. A review is not a distinct wallet or person. */
@@ -11,9 +11,9 @@ export function Stars({ value, count, label = 'buyer-linked ratings', mine }: { 
   return (
     <span className="stars" aria-label={mine ? `Rated ${Math.round(value)} out of 5` : `Rated ${value.toFixed(1)} out of 5 by ${count} ${label}`}>
       <span className="stars-row" aria-hidden="true">
-        {five.map((i) => <Star key={i} fill="currentColor" strokeWidth={0} />)}
+        {five.map((i) => <StarGlyph key={i} />)}
         <span className="stars-fill" style={{ width: `${pct}%` }}>
-          {five.map((i) => <Star key={i} fill="currentColor" strokeWidth={0} />)}
+          {five.map((i) => <StarGlyph key={i} />)}
         </span>
       </span>
       {mine
@@ -34,7 +34,7 @@ export function StarInput({ value, onChange, legend = 'Your rating', disabled }:
       {[1, 2, 3, 4, 5].map((n) => (
         <label key={n} data-on={n <= shown} onMouseEnter={() => setHover(n)}>
           <input type="radio" name={name} value={n} checked={value === n} onChange={() => onChange(n)} aria-label={`${n} of 5`} />
-          <Star fill="currentColor" strokeWidth={0} aria-hidden="true" />
+          <StarGlyph />
         </label>
       ))}
     </fieldset>
