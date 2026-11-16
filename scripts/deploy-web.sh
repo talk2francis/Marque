@@ -29,7 +29,7 @@ LOG="$LOG_DIR/deploy-web-$STAMP.log"
 say() { echo "[deploy-web $(date -u +%H:%M:%S)] $*" | tee -a "$LOG"; }
 name_of() { [ "$1" = 3200 ] && echo marque-web || echo marque-web-b; }
 # The upstream file also names the edge cache (127.0.0.1:3190): the live web slot is the 3200 or 3201 in it.
-live_port() { grep -m1 -oP '127\.0\.0\.1:\K320[01]\b' "$UPSTREAM" 2>/dev/null | head -n1 || echo 3200; }
+live_port() { local p; p="$(grep -m1 -oP '127\.0\.0\.1:\K320[01]\b' "$UPSTREAM" 2>/dev/null | head -n1)"; echo "${p:-3200}"; }
 EDGE_URL="${EDGE_URL:-http://127.0.0.1:3190}"
 other() { [ "$1" = 3200 ] && echo 3201 || echo 3200; }
 

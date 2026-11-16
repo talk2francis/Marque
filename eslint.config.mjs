@@ -40,6 +40,7 @@ export default tseslint.config(
         process: 'readonly', console: 'readonly', URL: 'readonly',
         document: 'readonly', window: 'readonly', getComputedStyle: 'readonly', Buffer: 'readonly',
         fetch: 'readonly', AbortSignal: 'readonly', setTimeout: 'readonly', clearTimeout: 'readonly',
+        setInterval: 'readonly', clearInterval: 'readonly', URLSearchParams: 'readonly',
         localStorage: 'readonly', history: 'readonly', Image: 'readonly', performance: 'readonly',
       },
     },

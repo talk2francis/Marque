@@ -2,7 +2,7 @@ import { mkdtemp, mkdir, writeFile, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { expect, it } from 'vitest'
-import { capacityRecordSchema, capacityStagePassed, loadCapacityRecord } from './capacity-record'
+import { capacityRecordSchema, capacityStagePassed, loadCapacityRecord, shownCapacityRuns } from './capacity-record'
 import historical from './capacity-record.json'
 
 it('does not equate a completed 250-visitor hold with passing its latency targets', () => {
@@ -24,4 +24,13 @@ it('validates the runtime measurement file and falls back visibly for corrupt da
     await writeFile(file, JSON.stringify(corrupt))
     expect((await loadCapacityRecord(root)).source).toBe('bundled')
   } finally { await rm(root, { recursive: true, force: true }) }
+})
+
+it('shows the latest run and marked milestones, and counts the rest without hiding them from the record', async () => {
+  const runtime = capacityRecordSchema.parse(JSON.parse(await (await import('node:fs/promises')).readFile(join(__dirname, '../../../docs/evidence/capacity-record.json'), 'utf8')))
+  const { shown, rest, restUnpassed } = shownCapacityRuns(runtime.runs)
+  expect(shown[0]!.date).toBe([...runtime.runs].map(r => r.date).sort().at(-1))
+  expect(shown.slice(1).every(r => r.featured)).toBe(true)
+  expect(shown.length + rest).toBe(runtime.runs.length)
+  expect(restUnpassed).toBeLessThanOrEqual(rest)
 })

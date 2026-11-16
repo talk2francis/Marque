@@ -46,8 +46,10 @@ export interface ProbeCycleResult {
  * measurement accuracy. So each host gets at most PER_HOST_CONCURRENCY requests in flight and at most
  * PER_HOST_RPS request starts a second.
  */
-const PER_HOST_CONCURRENCY = Number(process.env.PROBE_PER_HOST_CONCURRENCY ?? 3)
-const PER_HOST_RPS = Number(process.env.PROBE_PER_HOST_RPS ?? 3)
+// 16 Nov: the largest platform answered every card with nothing else from us in flight and stalled past the timeout
+// with three, so each host now gets two requests in flight and one start a second.
+const PER_HOST_CONCURRENCY = Number(process.env.PROBE_PER_HOST_CONCURRENCY ?? 2)
+const PER_HOST_RPS = Number(process.env.PROBE_PER_HOST_RPS ?? 1)
 const CATEGORY_FOR_TASK: Readonly<Record<string, Category | undefined>> = {
   rebalance: 'rebalancing', grid: 'grid', yield: 'yield', health_factor: 'health_factor',
 }
@@ -77,15 +79,20 @@ export async function runByHost<T, R>(items: readonly T[], hostOf: (item: T) => 
   const gapMs = limits.perHostRps > 0 ? 1000 / limits.perHostRps : 0
   await Promise.all([...byHost.values()].flatMap((indexes) => {
     let cursor = 0
-    let nextStart = 0
+    // Starts on one host take turns through `gate` and are spaced from the previous actual start, so a late timer on a
+    // busy machine cannot release two of them back to back.
+    let lastStart = -Infinity
+    let gate: Promise<void> = Promise.resolve()
+    const pace = (): Promise<void> => {
+      gate = gate.then(async () => { const wait = lastStart + gapMs - Date.now(); if (wait > 0) await sleep(wait); lastStart = Date.now() })
+      return gate
+    }
     return Array.from({ length: Math.max(1, Math.min(limits.perHost, indexes.length)) }, async () => {
       for (;;) {
         const k = cursor++
         if (k >= indexes.length) return
         const i = indexes[k] as number
-        const wait = nextStart - Date.now()
-        nextStart = Math.max(Date.now(), nextStart) + gapMs
-        if (wait > 0) await sleep(wait)
+        if (gapMs > 0) await pace()
         await acquire()
         try { out[i] = await fn(items[i] as T) } finally { release() }
       }

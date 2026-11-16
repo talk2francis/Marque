@@ -13,10 +13,11 @@ const stage = z.object({
 const run = z.object({
   date: z.string().datetime(), release: z.string().regex(/^[a-f0-9]{7,40}$/), method: z.string(),
   stages: z.array(stage).min(1).max(16), processRestarts: number.int(), betweenStageRestarts: number.int().optional(),
-  note: z.string().optional(), evidenceUrl: z.string().url().refine(url => url.startsWith('https://')).optional(),
+  note: z.string().optional(), featured: z.boolean().optional(), evidenceUrl: z.string().url().refine(url => url.startsWith('https://')).optional(),
 })
 export const capacityRecordSchema = z.object({ runs: z.array(run).min(1).max(32) })
 export type CapacityStage = z.infer<typeof stage>
+export type CapacityRun = z.infer<typeof run>
 
 /** Completing a hold is necessary, but does not mean its targets passed. */
 export function capacityStagePassed(value: CapacityStage): boolean {
@@ -32,4 +33,12 @@ export async function loadCapacityRecord(root = process.env['MARQUE_ROOT'] ?? pr
   } catch {
     return { record: capacityRecordSchema.parse(bundled), source: 'bundled' as const }
   }
+}
+
+/** The latest run and the runs marked as milestones are shown in full; the rest are counted and linked. */
+export function shownCapacityRuns(runs: readonly CapacityRun[]) {
+  const sorted = [...runs].sort((a, b) => b.date.localeCompare(a.date))
+  const shown = sorted.filter((r, i) => i === 0 || r.featured)
+  const rest = sorted.filter((r, i) => i !== 0 && !r.featured)
+  return { shown, rest: rest.length, restUnpassed: rest.filter((r) => !r.stages.some(capacityStagePassed)).length }
 }
