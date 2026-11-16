@@ -24,8 +24,9 @@ background render replaces it.
 | Job Room, job can still change | 15 s | 120 s |
 | Job Room, settled (`lib/job-settled.ts`) | 5 min | 24 h |
 | `/status` | 5 s | 15 s |
-| `/api/v1/marketplace` (human listing) | 5 s | 10 s |
-| Set and Earn read API | 3 s | 15 s |
+| `/api/v1/marketplace` (human listing) | 15 s | 30 s |
+| `/api/v1/phase2/coverage`, `stats`, `config`, `ratings/<id>` | 10 s | 30 s |
+| `/api/v1/phase2/wallet/<address>` | 3 s | 15 s |
 | Media the origin marks public | up to 1 h | up to 60 s |
 
 Never stored: writes, anything with `Authorization`, `Range` or the charters preview cookie, `/api/health`, `/api/mcp`,

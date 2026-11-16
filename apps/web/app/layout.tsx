@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next'
+import { BrandSprite } from './_components/brand/BrandArt'
 import localFont from 'next/font/local'
 import { BRAND } from '@marque/ui/brand'
 import { Suspense } from 'react'
@@ -88,6 +89,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script dangerouslySetInnerHTML={{ __html: THEME_BOOTSTRAP + PREFS_BOOTSTRAP }} />
       </head>
       <body>
+        <BrandSprite />
         <FacetField />
         <Providers>
           <MarketGlint />

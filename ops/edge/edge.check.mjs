@@ -281,8 +281,8 @@ test('the marketplace listing is keyed by its query; the machine catalogue and i
   assert.equal((await x.get(o, '/api/v1/marketplace?limit=24&offset=0&q=venus')).headers['x-marque-projection-age-ms'], '4400', 'the projection age stays true for a stored copy')
   await x.get(o, '/api/v1/marketplace?format=machine'); await x.get(o, '/api/v1/marketplace?format=machine')
   assert.equal(o.count('/api/v1/marketplace?format=machine'), 2)
-  x.clock.t += 20_000
-  assert.equal((await x.get(o, '/api/v1/marketplace?limit=24&offset=0&q=venus')).headers['x-marque-edge'], 'MISS', 'a listing is never served more than 15 s old')
+  x.clock.t += 50_000
+  assert.equal((await x.get(o, '/api/v1/marketplace?limit=24&offset=0&q=venus')).headers['x-marque-edge'], 'MISS', 'a listing is never served more than 45 s old')
 })
 
 test('link-preview bots get their own render; a query on a page that takes none is not stored', async () => {
@@ -358,7 +358,7 @@ test('policy: keys, freshness and encodings', () => {
   assert.equal(classify('GET', '/judge/', {}, 3200).route, null)
   assert.equal(classify('GET', '/jobs/1/5', {}, 3200).route, null)
   assert.notEqual(classify('GET', '/judge', {}, 3200).key, classify('GET', '/judge', {}, 3201).key)
-  assert.equal(classify('GET', '/api/v1/phase2/wallet/0x4bfD3f9c81a743F852Fb424FD487A1c53d7786D5', {}, 3200).route.name, 'set-and-earn-api')
+  assert.equal(classify('GET', '/api/v1/phase2/wallet/0x4bfD3f9c81a743F852Fb424FD487A1c53d7786D5', {}, 3200).route.name, 'set-and-earn-wallet')
   assert.equal(storable({ route: null, rsc: false, status: 200, headers: [['Cache-Control', NO_STORE]], body: null }), null)
   assert.equal(storable({ route: null, rsc: false, status: 200, headers: [['Cache-Control', 'public, max-age=0']], body: null }), null)
   assert.equal(storable({ route: null, rsc: false, status: 200, headers: [['Cache-Control', 'private, max-age=3600']], body: null }), null)

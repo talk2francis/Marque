@@ -1,4 +1,4 @@
-import { Wordmark } from './brand/Wordmark'
+import { Wordmark } from './brand/BrandArt'
 import { ArrowUpRight } from 'lucide-react'
 import { BRAND } from '@marque/ui/brand'
 import { SDK_NETWORKS } from '@marque/commerce/generated'
