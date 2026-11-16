@@ -1,11 +1,12 @@
 <!-- markdownlint-disable MD033 MD041 -->
 
-> **7-8 November 2026 maintenance:** My Marque organizes daily work, positions, jobs and money, with a separate builder workspace for agent evidence, consented Bench tests and private Demand reports. Recorded answers can be compared with current chain state. Public pages render without scripts, missing registry portraits have a checked recovery path, and deployment verifies both web workers before promotion. The FAQ, test-date labels and Forge showcase are clearer. Original Ledger contexts and A2A structured answers are repaired without rewriting saved scores. Price-history reads and matching additive indexes reduce unnecessary work; measured limits, the MCP startup-budget follow-up and held-candidate failures remain in the verification record. See the [release report and verification](docs/operations/RELEASE_HARDENING_2026-11-06.md), [workspace guide](docs/operations/POST_CLOSE_WORKSPACE.md) and [capacity evidence](docs/operations/POST_CLOSE_STATUS.md). The [live release endpoint](https://marque.trade/api/health) identifies exactly what is deployed. Existing screenshots below retain their dated releases. The [interface clarity follow-up](docs/operations/INTERFACE_CLARITY_2026-11-07.md) tracks the full-width FAQ, simpler category doors and clearer personal-workspace controls. Builders can also add an [optional owner-uploaded hero banner](docs/operations/AGENT_BANNERS.md), separate from the registry portrait and listing checks.
+> **16 November 2026:** load tested from an external runner, Marque met every target at **100 concurrent visitors** (page p95 0.39 s at 77 requests a second, zero server errors; 250 is not yet supported), with every run, including the misses, on [Running Marque](https://marque.trade/adopt). Agents are now counted as their definitions say (Listed rose from about 780 to 1,042 the same day), the [whitepaper](https://marque.trade/docs/whitepaper) is version 5.0, and [Charters](https://marque.trade/charters) have acted on mainnet since 10 November. Details in the [changelog](https://marque.trade/docs/changelog).
 <p align="center">
   <a href="https://github.com/talk2francis/Marque/actions/workflows/ci.yml"><img src="https://github.com/talk2francis/Marque/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI"></a>
   <a href="https://marque.trade/status"><img src="https://img.shields.io/badge/status-live%20on%20BSC%20mainnet-2F6A47" alt="Live on BSC mainnet"></a>
   <a href="https://marque.trade/proof"><img src="https://img.shields.io/badge/every%20job-who%20paid-7A6135" alt="Every job, who paid"></a>
   <a href="https://marque.trade/docs/mcp"><img src="https://img.shields.io/badge/MCP-15%20tools-7A6135" alt="MCP server, 15 tools"></a>
+  <a href="https://marque.trade/adopt"><img src="https://img.shields.io/badge/load%20test-100%20visitors%2C%20every%20target%20met-2F6A47" alt="Load test: 100 concurrent visitors, every target met"></a>
   <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-555" alt="MIT license"></a>
 </p>
 <p align="center">
@@ -48,24 +49,27 @@ Every claim below links to the thing that proves it. Nothing needs a wallet, an 
 |---|---|
 | **What** | A live marketplace where a person (or an AI assistant) finds a BNB Chain agent for a DeFi job, sees whether it actually works, agrees acceptance terms, hires it through BNB Chain's escrow, and gets an answer Marque has checked against the chain. |
 | **Where** | [marque.trade](https://marque.trade), on **BSC mainnet** (real money) and **BSC testnet** (free practice, same agents). No account; browsing needs no wallet; a passkey wallet (Marque Pass) works without any extension. |
-| **Status** | Live on [marque.trade](https://marque.trade). [`/api/health`](https://marque.trade/api/health) reports the deployed GitHub commit as `release`; compare it with [`main`](https://github.com/talk2francis/Marque/commits/main) to check exactly what is running. V4 has been live since 24 October 2026; the [changelog](https://marque.trade/docs/changelog) records subsequent changes. CI runs typecheck, lint, copy lint, 1,240+ tests, a production build, a BSC mainnet fork test of the act-on-the-answer transactions and a live smoke test. |
+| **Status** | Live on [marque.trade](https://marque.trade). [`/api/health`](https://marque.trade/api/health) reports the deployed GitHub commit as `release`; compare it with [`main`](https://github.com/talk2francis/Marque/commits/main) to check exactly what is running. The [changelog](https://marque.trade/docs/changelog) records every release; the [whitepaper](https://marque.trade/docs/whitepaper) is version 5.0 (16 November 2026). |
+| **Capacity** | Load tested from an external GitHub Actions runner with the unchanged November workload (search, agent pages, 120 job rooms): every target met at 25, 50 and **100 concurrent visitors** in three runs on 16 November, at 100 with a page p95 of 0.39 to 0.48 s and zero server errors. 250 completed its hold with zero errors but missed the page target, so it is not claimed. [Every run](https://marque.trade/adopt#capacity-heading), including the misses. |
 | **Who it is for** | Buyers who want a job done and checked; AI assistants that need priced, verifiable agents; builders who want to list an agent and meet BNB Chain's Set and Earn build criteria; BNB Chain, which can [run it and report on it](https://marque.trade/adopt). |
 
 ### Live numbers, each with its source
 
 | Measured | Value | Source |
 |---|---|---|
-| ERC-8004 agents indexed on BSC | **403,471** | [`/api/v1/funnel`](https://marque.trade/api/v1/funnel) |
-| Answering at a declared endpoint (24 h) | **43,083** | same, stage `reachable` |
-| Callable with an executable endpoint | **1,485** | same, stage `callable` |
-| Hireable at the dated read, BSC mainnet: a live signed price payable into escrow to the agent's own wallet, not pulled for safety | **34** (13 checked against the chain, 10 of them warranted; 2 pulled) | [`/api/v1/phase2/coverage`](https://marque.trade/api/v1/phase2/coverage), the funnel, the homepage, its JSON-LD and llms.txt: one count |
-| Hireable by category, mainnet | yield 6 · rebalancing 11 · health factor 7 · grid 4 · security 3 · other 3 | same |
-| Hireable on BSC testnet | **20** (7 checked, 5 carry their mainnet Warrant) | same, `practice` lane |
-| Mainnet hires through Marque by wallets outside the team | **5 wallets: 14 funded, 14 delivered, 7 settled, 10 rated** | [`/api/v1/phase2/stats`](https://marque.trade/api/v1/phase2/stats) |
-| Mainnet jobs by outside buyers in the proof table | **39 jobs from 5 wallets, 38 delivered, 18 completed, 66 of 69 decided chain checks agree** | [`/proof`](https://marque.trade/proof) |
+| ERC-8004 agents indexed on BSC | **419,635** | [`/api/v1/funnel`](https://marque.trade/api/v1/funnel) |
+| Answering at a declared endpoint (24 h) | **4,358** | same, stage `reachable` |
+| Callable with an executable endpoint | **1,362** | same, stage `callable` |
+| Hireable at the dated read, BSC mainnet: a live signed price payable into escrow to the agent's own wallet, not pulled for safety | **32** (13 checked against the chain, 11 of them warranted; 2 pulled) | [`/api/v1/phase2/coverage`](https://marque.trade/api/v1/phase2/coverage), the funnel, the homepage, its JSON-LD and llms.txt: one count |
+| Hireable by category, mainnet | yield 6 · grid 6 · rebalancing 9 · health factor 5 · security 3 · other 3 | same |
+| Hireable on BSC testnet | **15** (9 checked, 6 carry their mainnet Warrant) | same, `practice` lane |
+| Mainnet hires through Marque by wallets outside the team | **6 wallets: 16 funded, 16 delivered, 16 settled, 12 rated** | [`/api/v1/phase2/stats`](https://marque.trade/api/v1/phase2/stats) |
+| Outside mainnet jobs in the campaign window (closed 5 November) | **48 jobs, 45 delivered, 27 settled; 78 of 81 decided chain checks agree** | [`/proof`](https://marque.trade/proof), anchored on chain |
+| Charters acting on mainnet | **Loan Guard 3 repayments · Yield Sweep 2 supplies, 2 withdrawals · Grid Band 8 trades · Range Keeper 5 rebalances** | [`/charters`](https://marque.trade/charters), each with its transaction |
+| Load test, external runner | **100 concurrent visitors, every target met** (page p95 0.39 s, 77 requests a second, zero server errors) | [`/adopt`](https://marque.trade/adopt#capacity-heading), with raw evidence |
 | Network fees per hire, buyer side (median of 47 mainnet hires) | **0.0000583 BNB** over 4 transactions; settlements sponsored | [`/adopt`](https://marque.trade/adopt), from receipts |
 
-Figures above were read on 3 November 2026 at 09:56 UTC, except the fee row (26 October). Every page and API states its own read time. The gap between 403,471 registered and 34 hireable is the product: a registration says who an agent is, never whether it works or can be paid.
+Figures above were read on 16 November 2026 between 20:40 and 21:50 UTC, except the fee row (26 October) and the campaign-window row (closed 5 November). Answering and Callable were still rising after that day's probe scheduling fix (see the [changelog](https://marque.trade/docs/changelog)). Every page and API states its own read time. The gap between 419,635 registered and 32 hireable is the product: a registration says who an agent is, never whether it works or can be paid.
 
 ## What Marque does that a registry cannot
 
@@ -97,6 +101,8 @@ A charter is an onchain limit on what an agent may do for you. Four kinds:
 | Range Keeper | Re-centres one PancakeSwap v3 position when it leaves its range, within loss, frequency and count limits | Your position NFT, held by your own keeper contract | Agents you name |
 
 Contracts: `contracts/src/charters`. Tests: `contracts/test/charters` (unit, fuzz, invariant, cross-category, differential against PancakeSwap's own math, and fork suites). Addresses: `packages/charters/src/addresses.ts` and `packages/charters/src/v2.ts`. Docs: https://marque.trade/docs/charters
+
+On BSC mainnet, the index of charter events read on 16 November 2026 shows Loan Guard repayments 3 times, Yield Sweep 2 supplies and 2 withdrawals, Grid Band 8 trades and Range Keeper 5 rebalances, each with its transaction. Contract sources were checked against the deployed bytecode on Sourcify on 11 November.
 
 Charters are new and unaudited.
 
@@ -218,7 +224,7 @@ Six first-party reference agents keep every category hireable and are always lab
 
 <p align="center"><a href="./docs/ARCHITECTURE.md"><img src="./docs/architecture.svg" alt="Current Marque architecture: buyer wallet, web, workers, reference services, PostgreSQL, Redis and BSC" width="1000"></a></p>
 
-The browser holds the buyer's signing authority. Next.js serves the marketplace and API; supervised workers ingest registry and commerce events, measure service evidence and maintain current projections. External endpoints pass through bounded SSRF-protected fetches. PostgreSQL stores both rebuildable index state and irreplaceable observations; Redis holds transient projections and coordination.
+The browser holds the buyer's signing authority. Next.js serves the marketplace and API; supervised workers ingest registry and commerce events, measure service evidence and maintain current projections. External endpoints pass through bounded SSRF-protected fetches. PostgreSQL stores both rebuildable index state and irreplaceable observations; Redis holds transient projections and coordination. Public reads pass through an edge cache (`ops/edge`) that answers repeat requests from memory, renders each address once at a time and never stores personal pages, writes or quotes; if it stops, Caddy serves the web workers directly ([edge cache](./docs/operations/EDGE-CACHE.md)).
 
 | Path | Responsibility |
 |---|---|
@@ -229,6 +235,7 @@ The browser holds the buyer's signing authority. Next.js serves the marketplace 
 | `packages/registry`, `probe`, `db` | Identity/service projections, bounded protocol inspection and durable storage |
 | `packages/ledger`, `agent-engines`, `ui` | Benchmark evidence, reference engines and shared interface components |
 | `agents/*` | Self-hosted reference runtimes and their existing seller rails |
+| `ops/edge` | The edge cache in front of the web workers: repeat public reads from memory, one render per address at a time |
 | `examples`, `ops`, `scripts` | Consumer examples, operational configuration and verification/deployment tooling |
 
 See [Architecture](./docs/ARCHITECTURE.md), [Security](./docs/SECURITY.md) and the [Runbook](./docs/RUNBOOK.md). Service discovery never authorizes payment or grants a buyer's wallet authority.
@@ -237,7 +244,7 @@ See [Architecture](./docs/ARCHITECTURE.md), [Security](./docs/SECURITY.md) and t
 
 | Horizon | What | Exit criterion |
 |---|---|---|
-| **Live (V4, October 2026)** | One marketplace across mainnet and testnet; act on the answer with measured outcomes; MCP server; quotes from every agent; the Agent Forge with wallet linking; third-party answers found from chain and verified; who paid, named on every job; a free practice hire and a build checklist for Set and Earn | Each item is live on [marque.trade](https://marque.trade) with the evidence above |
+| **Live (V4 to V5, November 2026)** | Charters on BSC mainnet: Loan Guard, Yield Sweep, Grid Band and Range Keeper, each acting only inside limits fixed in its own contract; load tested from outside at 100 concurrent visitors; One marketplace across mainnet and testnet; act on the answer with measured outcomes; MCP server; quotes from every agent; the Agent Forge with wallet linking; third-party answers found from chain and verified; who paid, named on every job; a free practice hire and a build checklist for Set and Earn | Each item is live on [marque.trade](https://marque.trade) with the evidence above |
 | **Next (V5): outcome-ranked market** | The default order uses measured outcomes (health factor reached, yield earned, range kept) | 50 acted-on outcomes across three categories; the live count is on the home page |
 | | Warrants anyone can verify from BSC alone | A warrant readable without Marque, through the ERC-8004 validation registry or MarqueRegistry |
 | | Standing orders: a watched position crossing your line gathers quotes and prepares the action; you sign | Alert to a signed action in under a minute |
