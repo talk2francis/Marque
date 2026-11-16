@@ -44,4 +44,12 @@ describe('runByHost', () => {
     expect(starts[5]!).toBeGreaterThanOrEqual(230)
     for (let i = 1; i < starts.length; i++) expect(starts[i]! - starts[i - 1]!).toBeGreaterThanOrEqual(35)
   })
+
+  it('gives work that sends no request no pacing turn', async () => {
+    const t0 = Date.now()
+    const ran: number[] = []
+    await runByHost(Array.from({ length: 20 }, (_v, i) => `https://one.example/${i}`), hostOfUrl, { concurrency: 4, perHost: 2, perHostRps: 2, skip: (u) => !u.endsWith('/0') }, async (u) => { ran.push(Number(u.split('/').pop())) })
+    expect(ran.sort((a, b) => a - b)).toEqual(Array.from({ length: 20 }, (_v, i) => i))
+    expect(Date.now() - t0).toBeLessThan(400)
+  })
 })
