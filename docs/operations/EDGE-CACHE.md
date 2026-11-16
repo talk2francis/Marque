@@ -19,9 +19,9 @@ background render replaces it.
 
 | Route | Fresh | Stale |
 | --- | --- | --- |
-| Pages the origin marks shared (`/`, `/register`, `/quest`, agent pages) | 10 s | 60 s |
-| `/judge`, `/builders`, `/adopt`, `/proof`, `/why`, `/standard`, `/pancakeswap` | 10 s | 60 s |
-| Job Room, job can still change | 5 s | 120 s |
+| Pages the origin marks shared (`/`, `/register`, `/quest`, agent pages) | up to 30 s | up to 60 s |
+| `/judge`, `/builders`, `/adopt`, `/proof`, `/why`, `/standard`, `/pancakeswap` | 30 s | 120 s |
+| Job Room, job can still change | 15 s | 120 s |
 | Job Room, settled (`lib/job-settled.ts`) | 5 min | 24 h |
 | `/status` | 5 s | 15 s |
 | `/api/v1/marketplace` (human listing) | 5 s | 10 s |
@@ -40,6 +40,10 @@ Three rules keep it honest for a person using the product:
 - When a viewer's refresh renders a page, the stored document for that page is replaced too.
 
 Every stored response carries `Age` and `X-Marque-Edge: HIT | STALE | MISS | BYPASS | STALE-ERROR`.
+
+Until 16 Nov public pages were fresh for 10 s and live Job Rooms for 5 s. The edge then re-rendered about three pages a
+second in the background regardless of traffic, one to three cores of rendering; the longer windows cut that by about
+three times. The two rules below are what keep a person's view current.
 
 ## Failing open
 
