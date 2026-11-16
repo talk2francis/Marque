@@ -46,6 +46,7 @@ jobs:
           bash -n scripts/deploy-web.sh
           bash ops/http-health.test.sh
           node --test ops/alert-readings.check.mjs
+          node --test ops/edge/edge.check.mjs
           node --test scripts/lib/previous-assets.check.mjs
           node --test scripts/lib/verification-rpc.check.mjs
           node --test scripts/lib/readiness.check.mjs

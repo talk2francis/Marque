@@ -88,6 +88,8 @@ export interface DueService {
   firstParty: boolean
   classified: boolean
   consecutiveDead: number
+  /** The verdict before this cycle (null when never probed). */
+  lastLiveness: Liveness | null
 }
 
 const rowsOf = (r: unknown): Array<Record<string, unknown>> =>
@@ -201,7 +203,10 @@ export async function dueByTier(limit: number, deadCap: number, fpIds: readonly 
       end,
       -- Never-probed services all fall due at once: newest first, so the latest registration is not last in line.
       case when ps.last_checked_at is null then s.first_seen end desc nulls last,
-      ps.next_due_at asc
+      ps.next_due_at asc,
+      -- Services pushed back together (a host that failed this cycle) fall due at the same instant: the one checked
+      -- longest ago goes first, so the same tail is not passed over cycle after cycle.
+      ps.last_checked_at asc nulls first
     limit ${limit}`)
   const out: DueService[] = []
   let dead = 0
@@ -217,6 +222,7 @@ export async function dueByTier(limit: number, deadCap: number, fpIds: readonly 
     out.push({
       serviceId: Number(row['service_id']), agentId: String(row['agent_id']), kind: String(row['kind']) as ServiceKind,
       url: String(row['url']), tier, firstParty: input.firstParty, classified: input.classified, consecutiveDead: input.consecutiveDead,
+      lastLiveness: input.liveness,
     })
   }
   return out

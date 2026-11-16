@@ -145,13 +145,17 @@ export function Workspace({ addrParam }: { addrParam: string | null }) {
   return (
     <div className={styles.wrap} data-room={view}>
       <header className={styles.hero}>
+        <span className={styles.roomMark} aria-hidden="true">{view === 'building' ? <Hammer /> : <ShoppingBag />}</span>
         <div className={styles.heroId}>
           <span className={styles.portrait}>
             <ProfileAvatar address={address} profile={profile} size={64} label={profile?.displayName ? `${profile.displayName}'s portrait` : 'Portrait'} />
             {own ? <button type="button" className={styles.portraitEdit} onClick={() => setEditing(true)} aria-label="Edit your profile" title="Edit your profile"><Pencil aria-hidden="true" /></button> : null}
           </span>
           <div className={styles.heroText}>
-            <span className={styles.kicker}>{view === 'building' ? 'My Marque · Workshop' : 'My Marque'}{own ? '' : ' · viewing an address'}</span>
+            <span className={styles.kicker}>
+              <span className={styles.roomName} data-room-name={view}>{view === 'building' ? <Hammer aria-hidden="true" /> : <ShoppingBag aria-hidden="true" />}{view === 'building' ? 'Workshop' : 'Hiring desk'}</span>
+              My Marque{own ? '' : ', viewing an address'}
+            </span>
             {profile?.displayName ? <h1 className={styles.displayName}>{profile.displayName}</h1> : null}
             <div className={styles.identity}>
               <span className={styles.addrText} data-sub={profile?.displayName ? '' : undefined} title={address}>{short(address)}</span>

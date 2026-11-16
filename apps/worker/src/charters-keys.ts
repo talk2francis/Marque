@@ -1,6 +1,6 @@
 /**
  * charters-keys: the only process that loads agent admin keys (03_DECISIONS S11). One pass, then exit; PM2 runs
- * it again a minute after exit. It grants each armed charter its agent's Altana session (scoped to act() on that charter,
+ * it again a minute after exit. A pass with nothing to grant or revoke exits before any key is unlocked. It grants each armed charter its agent's Altana session (scoped to act() on that charter,
  * expiring with it, registered on KeyStore) and revokes sessions of charters that ended or expired, verifying both
  * on chain. The long-running worker only ever holds session keys, derived from the master.
  *
@@ -16,6 +16,7 @@ import { V2, isCharterChain, type CharterKind, type ReferenceAgent } from '@marq
 import { signerFromPrivateKey } from '@altananetwork/sdk'
 import { altanaFor, sessionsOnce } from './charters/sessions.js'
 import { keysOnceV2, type AgentAdmin } from './charters/v2/keys.js'
+import { anyKeyWork, pendingKeyWork } from './charters/pending.js'
 
 const DIR = process.env['CHARTERS_DIR'] ?? '/root/.marque/charters'
 const CHAINS = (process.env['CHARTERS_CHAINS'] ?? '97').split(',').map(Number).filter(isCharterChain)
@@ -32,6 +33,19 @@ async function main() {
   process.env['CHARTERS_DATABASE_URL'] ??= readEnv('CHARTERS_DATABASE_URL')
   const master = (process.env['CHARTERS_SESSION_MASTER'] ?? readEnv('CHARTERS_SESSION_MASTER')) as Hex | undefined
   if (!master) throw new Error('CHARTERS_SESSION_MASTER is not set')
+  // Unlocking the four keystores is the costly part of a pass (scrypt, by design), and most minutes there is nothing
+  // to grant or revoke. Read the pass's own queues first, without any key, and stop here when all are empty. The
+  // keystores, their strength and the pass itself are unchanged. If the queues cannot be read, run the pass as before.
+  const pending = await pendingKeyWork(CHAINS).catch((e) => { log('keys_pending_unreadable', { error: e instanceof Error ? e.message.slice(0, 200) : String(e) }); return null })
+  if (pending && !anyKeyWork(pending)) {
+    try { writeFileSync(`${DIR}/keys-status.json`, JSON.stringify({ at: new Date().toISOString(), idle: true, pending }, null, 2)) } catch { /* best effort */ }
+    await closeDb()
+    // PM2 counts an exit inside its first second as a failed start and stops restarting after max_restarts of them.
+    // An idle pass can be that quick, so it never exits before two seconds of uptime (asleep, not working).
+    await new Promise((r) => setTimeout(r, Math.max(0, 2000 - process.uptime() * 1000)))
+    return
+  }
+  if (pending) log('keys_pending', { pending })
   const keelKey = loadKeystore(`${DIR}/keel-watcher`)
   const keel = { key: keelKey, address: privateKeyToAccount(keelKey).address, master }
   const admins = new Map<ReferenceAgent, AgentAdmin>([['keel', { agent: 'keel', key: keelKey, address: keel.address }]])

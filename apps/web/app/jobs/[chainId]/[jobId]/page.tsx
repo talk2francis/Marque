@@ -25,6 +25,7 @@ import { JobActions } from './JobActions'
 import styles from './job.module.css'
 import { UNote } from '../../../_components/ui/UNote'
 import { Recheck } from '../../../_components/Recheck'
+import { jobSettled } from '../../../../lib/job-settled'
 
 export const dynamic = 'force-dynamic'
 
@@ -115,6 +116,9 @@ export default async function JobRoom({ params }: { params: Promise<{ chainId: s
     return reason ? reason.slice(0, 200) : null
   })() : null
   const reclaimAt = t?.refundFrom ?? expiredAt
+  // Tells the edge cache whether this page can still change (lib/job-settled.ts). Only indexed jobs can be settled.
+  const lastEventAt = events.reduce<number | null>((latest, e) => { const at = e.at ? Math.floor(Date.parse(e.at) / 1000) : NaN; return Number.isFinite(at) && (latest === null || at > latest) ? at : latest }, null)
+  const settled = Boolean(job) && jobSettled({ state, rated: Boolean(job?.rating), lastEventAt, fundingDeadline, now })
 
   // Timeline: what happened (from chain events), then what is still to come.
   const done = events.filter((e) => EVENT_LABEL[e.name] && e.name !== 'JobSettled')
@@ -127,7 +131,7 @@ export default async function JobRoom({ params }: { params: Promise<{ chainId: s
   return (
     <>
       <SiteHeader />
-      <main className={styles.page} data-surface="chamber">
+      <main className={styles.page} data-surface="chamber" data-marque-edge={settled ? 'settled' : 'live'}>
         <div className={styles.inner}>
           <header className={styles.head}>
             <div className={styles.headTop}>

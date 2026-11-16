@@ -48,19 +48,34 @@ async function keyIsValid(client: PublicClient, chainId: CharterChainId, wallet:
 
 export interface SessionPass { granted: number; revoked: number; failed: Array<{ guard: string; step: string; error: string }> }
 
+// The two work queues are read by the pass below and by the key-free check that decides whether a pass is needed
+// (./pending.ts). One definition each, so the check can never disagree with the pass about what is waiting.
+
+/** Grant: final, not ended, not expired, at least ten minutes left, and no key yet (or a failure old enough to retry). */
+export async function sessionGrantQueue(chainId: CharterChainId) {
+  return rowsOf<{ address: string; expires_at: string }>(await db().execute(sql`
+    select g.address, g.expires_at from charter_guard g
+    left join charter_watch_key k on k.chain_id = g.chain_id and k.guard = g.address
+    where g.chain_id = ${chainId} and g.final and g.ended_at is null and g.expires_at > now() + interval '10 minutes'
+      and (k.guard is null or (k.status = 'failed' and k.updated_at < now() - make_interval(secs => ${RETRY_MS / 1000})))
+    order by g.created_block limit 10`))
+}
+
+/** Revoke: the guard ended or expired and Keel's key may still be live. */
+export async function sessionRevokeQueue(chainId: CharterChainId) {
+  return rowsOf<{ guard: string; session: unknown; key_id: string }>(await db().execute(sql`
+    select k.guard, k.session, k.key_id from charter_watch_key k join charter_guard g on g.chain_id = k.chain_id and g.address = k.guard
+    where k.chain_id = ${chainId} and k.status in ('registered', 'revoking') and (g.ended_at is not null or g.expires_at <= now())
+    limit 10`))
+}
+
 export async function sessionsOnce(client: PublicClient, altana: AltanaClient, chainId: CharterChainId, keel: Keel, opts: { dryRun: boolean; log: (e: string, d: Record<string, unknown>) => void }): Promise<SessionPass> {
   const out: SessionPass = { granted: 0, revoked: 0, failed: [] }
   if (!keel.key) throw new Error('sessionsOnce needs the watcher admin key (charters-keys process only)')
   const admin = signerFromPrivateKey(keel.key)
   const wallet = { address: keel.address }
 
-  // Grant: final, not ended, not expired, at least ten minutes left, and no key yet (or a failure old enough to retry).
-  const toGrant = rowsOf<{ address: string; expires_at: string }>(await db().execute(sql`
-    select g.address, g.expires_at from charter_guard g
-    left join charter_watch_key k on k.chain_id = g.chain_id and k.guard = g.address
-    where g.chain_id = ${chainId} and g.final and g.ended_at is null and g.expires_at > now() + interval '10 minutes'
-      and (k.guard is null or (k.status = 'failed' and k.updated_at < now() - make_interval(secs => ${RETRY_MS / 1000})))
-    order by g.created_block limit 10`))
+  const toGrant = await sessionGrantQueue(chainId)
   for (const g of toGrant) {
     const expiry = Math.floor(new Date(g.expires_at).getTime() / 1000)
     if (opts.dryRun) { opts.log('session_would_grant', { chainId, guard: g.address }); continue }
@@ -94,11 +109,7 @@ export async function sessionsOnce(client: PublicClient, altana: AltanaClient, c
     }
   }
 
-  // Revoke: the guard ended or expired and Keel's key may still be live.
-  const toRevoke = rowsOf<{ guard: string; session: unknown; key_id: string }>(await db().execute(sql`
-    select k.guard, k.session, k.key_id from charter_watch_key k join charter_guard g on g.chain_id = k.chain_id and g.address = k.guard
-    where k.chain_id = ${chainId} and k.status in ('registered', 'revoking') and (g.ended_at is not null or g.expires_at <= now())
-    limit 10`))
+  const toRevoke = await sessionRevokeQueue(chainId)
   for (const k of toRevoke) {
     if (opts.dryRun) { opts.log('session_would_revoke', { chainId, guard: k.guard }); continue }
     await db().execute(sql`update charter_watch_key set status = 'revoking', updated_at = now() where chain_id = ${chainId} and guard = ${k.guard}`)

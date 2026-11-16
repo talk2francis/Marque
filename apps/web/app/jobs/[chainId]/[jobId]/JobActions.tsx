@@ -136,10 +136,12 @@ export function JobActions(p: JobActionProps) {
     return send(call, id)
   }, success)
 
+  // An ended job no longer re-reads itself, and the indexer needs a few seconds to see a new rating: read once more
+  // after it has, so this page and the copy the edge cache keeps both show the rating without a reload.
   const submitRating = async () => {
     if (!address || !stars) return
     const tx = await rate({ chainId: p.chainId, jobId: p.jobId, wallet: address, stars, comment: comment.trim() || undefined, quick: { answered, onTime, hireAgain: again } })
-    if (tx) { trackJobStep('rated', p.chainId, p.jobId); toast({ tone: 'success', title: 'Rated on chain', body: `${stars} of 5 for ${p.agentName}, from your wallet.`, href: explorerTx(p.chainId, tx) }); router.refresh() }
+    if (tx) { trackJobStep('rated', p.chainId, p.jobId); toast({ tone: 'success', title: 'Rated on chain', body: `${stars} of 5 for ${p.agentName}, from your wallet.`, href: explorerTx(p.chainId, tx) }); router.refresh(); setTimeout(() => router.refresh(), 8000) }
   }
 
   const hireAgain = p.agentKey ? <ButtonLink href={`/register?hire=${encodeURIComponent(p.agentKey)}`}>Hire {p.agentName} again</ButtonLink> : null

@@ -33,6 +33,26 @@ export function wantsSession(kind: CharterKind, executors: string[], altanaKinds
 
 export interface KeysPass { granted: number; revoked: number; skipped: number; failed: Array<{ charter: string; step: string; error: string }> }
 
+// Read by the pass below and by the key-free check that decides whether a pass is needed (../pending.ts).
+
+/** Final, armed charters with at least ten minutes left and no key row yet, or a failure old enough to retry. */
+export async function v2GrantQueue(chainId: CharterChainId) {
+  return rowsOf<{ address: string; kind: number; executors: string[]; expires_at: string }>(await db().execute(sql`
+    select c.address, c.kind, c.executors, c.expires_at from charter_v2 c
+    left join charter_watch_key k on k.chain_id = c.chain_id and k.guard = c.address
+    where c.chain_id = ${chainId} and c.final and c.ended_at is null and c.expires_at > now() + interval '10 minutes'
+      and (k.guard is null or (k.status = 'failed' and k.updated_at < now() - make_interval(secs => ${RETRY_MS / 1000})))
+    order by c.created_block limit 10`))
+}
+
+/** Sessions of charters that ended or expired and may still be live on KeyStore. */
+export async function v2RevokeQueue(chainId: CharterChainId) {
+  return rowsOf<{ guard: string; kind: number; agent: ReferenceAgent; session: unknown; key_id: string }>(await db().execute(sql`
+    select k.guard, k.kind, k.agent, k.session, k.key_id from charter_watch_key k join charter_v2 c on c.chain_id = k.chain_id and c.address = k.guard
+    where k.chain_id = ${chainId} and k.version = 2 and k.status in ('registered', 'revoking') and (c.ended_at is not null or c.expires_at <= now())
+    limit 10`))
+}
+
 export async function keysOnceV2(x: {
   client: PublicClient; altana: AltanaClient; chainId: CharterChainId; master: Hex
   admins: Map<ReferenceAgent, AgentAdmin>; altanaKinds: ReadonlySet<CharterKind>; dryRun: boolean
@@ -41,12 +61,7 @@ export async function keysOnceV2(x: {
   const out: KeysPass = { granted: 0, revoked: 0, skipped: 0, failed: [] }
   const valid = (wallet: Address, keyId: Hex) => x.client.readContract({ address: networkOf(x.chainId).keyStore, abi: keyStoreAbi, functionName: 'isValidKey', args: [wallet, keyId] })
 
-  const toGrant = rowsOf<{ address: string; kind: number; executors: string[]; expires_at: string }>(await db().execute(sql`
-    select c.address, c.kind, c.executors, c.expires_at from charter_v2 c
-    left join charter_watch_key k on k.chain_id = c.chain_id and k.guard = c.address
-    where c.chain_id = ${x.chainId} and c.final and c.ended_at is null and c.expires_at > now() + interval '10 minutes'
-      and (k.guard is null or (k.status = 'failed' and k.updated_at < now() - make_interval(secs => ${RETRY_MS / 1000})))
-    order by c.created_block limit 10`))
+  const toGrant = await v2GrantQueue(x.chainId)
   for (const c of toGrant) {
     const kind = KIND_BY_CODE[c.kind]!
     const admin = x.admins.get(AGENT_FOR_KIND[kind])
@@ -93,10 +108,7 @@ export async function keysOnceV2(x: {
     }
   }
 
-  const toRevoke = rowsOf<{ guard: string; kind: number; agent: ReferenceAgent; session: unknown; key_id: string }>(await db().execute(sql`
-    select k.guard, k.kind, k.agent, k.session, k.key_id from charter_watch_key k join charter_v2 c on c.chain_id = k.chain_id and c.address = k.guard
-    where k.chain_id = ${x.chainId} and k.version = 2 and k.status in ('registered', 'revoking') and (c.ended_at is not null or c.expires_at <= now())
-    limit 10`))
+  const toRevoke = await v2RevokeQueue(x.chainId)
   for (const k of toRevoke) {
     const admin = x.admins.get(k.agent)
     if (!admin) continue
