@@ -464,7 +464,7 @@
       "method": "External GitHub Actions runner, November mix with search and cold job rooms, through the edge cache",
       "processRestarts": 0,
       "betweenStageRestarts": 0,
-      "featured": true,
+      "featured": false,
       "evidenceUrl": "https://github.com/talk2francis/Marque/actions/runs/43834362609",
       "note": "First full run through the edge cache, with the unchanged script and targets. 25 and 50 visitors completed their holds within target; 100 visitors completed its hold with zero 5xx but a page p95 of 1171 ms, above the 800 ms target, so 250 did not run. Most job rooms had already been read by five earlier runs that morning while the cache and host were being tuned, so this is the warm figure. Zero HTTP errors and no restarts."
     },
@@ -488,7 +488,53 @@
       "processRestarts": 0,
       "betweenStageRestarts": 0,
       "evidenceUrl": "https://github.com/talk2francis/Marque/actions/runs/43846947797",
-      "note": "Same script and targets, ten minutes after the edge cache was restarted, so its memory was empty. First reads of job rooms took 1.5 s at the median and 3.8 s at p95 to render, and the 25 visitor stage stopped on latency before its hold completed, with zero HTTP errors and no restarts. Cached pages stayed under 0.9 s. This is the cold figure."
+      "note": "Same script and targets, ten minutes after the edge cache was restarted, so its memory was empty. First reads of job rooms took 1.5 s at the median and 3.8 s at p95 to render, and the 25 visitor stage stopped on latency before its hold completed, with zero HTTP errors and no restarts. Cached pages stayed under 0.9 s. This is the cold figure.",
+      "featured": true
+    },
+    {
+      "date": "2026-11-16T12:47:20.394Z",
+      "release": "94cdd79958a42b231bd2670c051429e210da148d",
+      "stages": [
+        {
+          "visitors": 25,
+          "requests": 1992,
+          "requestsPerSecond": 17.184333972127828,
+          "pageP95Ms": 763.2425921999999,
+          "apiP95Ms": 406.43780000000004,
+          "error5xxRate": 0,
+          "restarts": 0,
+          "completed": true,
+          "peakVus": 25
+        },
+        {
+          "visitors": 50,
+          "requests": 4086,
+          "requestsPerSecond": 35.01805753787552,
+          "pageP95Ms": 625.6887635,
+          "apiP95Ms": 326.23871575,
+          "error5xxRate": 0,
+          "restarts": 0,
+          "completed": true,
+          "peakVus": 50
+        },
+        {
+          "visitors": 100,
+          "requests": 7638,
+          "requestsPerSecond": 65.98650765366628,
+          "pageP95Ms": 878.6956808499993,
+          "apiP95Ms": 438.73496280000006,
+          "error5xxRate": 0,
+          "restarts": 0,
+          "completed": true,
+          "peakVus": 100
+        }
+      ],
+      "method": "External GitHub Actions runner, November mix with search and cold job rooms, through the edge cache",
+      "processRestarts": 0,
+      "betweenStageRestarts": 0,
+      "featured": true,
+      "evidenceUrl": "https://github.com/talk2francis/Marque/actions/runs/43869703889",
+      "note": "Same script and targets, after web rendering moved to AsyncContextFrame, which halved the CPU a job room render takes. 25 and 50 visitors passed; 100 visitors completed its hold at 66 requests a second with zero 5xx and an API p95 of 0.44 s, but a page p95 of 0.88 s, above the 0.8 s target, so 250 did not run. Server wait was about one network round trip on every route; the rest was transferring uncompressed pages, the home page longest. Most job rooms had been read earlier that day and were already stored."
     }
   ]
 }
