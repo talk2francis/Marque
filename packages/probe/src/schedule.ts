@@ -281,7 +281,9 @@ export async function dueByTier(limit: number, deadCap: number, fpIds: readonly 
   // higher-ranked work always filled the cycle, so a service marked dead once was never asked again: 32,144 mainnet
   // services were overdue by more than a day, 16,037 by more than a week, including sellers that had quoted a price.
   // Sellers that have quoted before go first, then classified agents, then the longest overdue; at most 10 per host.
-  const retryWant = Math.max(0, RETRY_DEAD_SLOTS - out.filter((d) => d.lastLiveness === 'dead').length)
+  // Always added: the main order already holds dead services of higher rank (a slow platform's classified agents), so
+  // counting those against this slice left it empty (16 Nov, first cycle after the change: zero overdue retries).
+  const retryWant = Math.max(0, RETRY_DEAD_SLOTS)
   if (retryWant > 0) {
     const have = new Set(out.map((d) => d.serviceId))
     const retry = await db().execute(sql`
