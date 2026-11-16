@@ -489,7 +489,7 @@
       "betweenStageRestarts": 0,
       "evidenceUrl": "https://github.com/talk2francis/Marque/actions/runs/43846947797",
       "note": "Same script and targets, ten minutes after the edge cache was restarted, so its memory was empty. First reads of job rooms took 1.5 s at the median and 3.8 s at p95 to render, and the 25 visitor stage stopped on latency before its hold completed, with zero HTTP errors and no restarts. Cached pages stayed under 0.9 s. This is the cold figure.",
-      "featured": true
+      "featured": false
     },
     {
       "date": "2026-11-16T12:47:20.394Z",
@@ -532,9 +532,265 @@
       "method": "External GitHub Actions runner, November mix with search and cold job rooms, through the edge cache",
       "processRestarts": 0,
       "betweenStageRestarts": 0,
-      "featured": true,
+      "featured": false,
       "evidenceUrl": "https://github.com/talk2francis/Marque/actions/runs/43869703889",
       "note": "Same script and targets, after web rendering moved to AsyncContextFrame, which halved the CPU a job room render takes. 25 and 50 visitors passed; 100 visitors completed its hold at 66 requests a second with zero 5xx and an API p95 of 0.44 s, but a page p95 of 0.88 s, above the 0.8 s target, so 250 did not run. Server wait was about one network round trip on every route; the rest was transferring uncompressed pages, the home page longest. Most job rooms had been read earlier that day and were already stored."
+    },
+    {
+      "date": "2026-11-16T14:50:28.377Z",
+      "release": "77c7bf5e8dfc5523e905aef9a8f5d35888e01813",
+      "stages": [
+        {
+          "visitors": 25,
+          "requests": 2248,
+          "requestsPerSecond": 19.465681818138883,
+          "pageP95Ms": 414.2737465999999,
+          "apiP95Ms": 244.2785285,
+          "error5xxRate": 0,
+          "restarts": 0,
+          "completed": true,
+          "peakVus": 25
+        },
+        {
+          "visitors": 50,
+          "requests": 4473,
+          "requestsPerSecond": 38.47107266631953,
+          "pageP95Ms": 420.76761515,
+          "apiP95Ms": 265.6280211999999,
+          "error5xxRate": 0,
+          "restarts": 0,
+          "completed": true,
+          "peakVus": 50
+        },
+        {
+          "visitors": 100,
+          "requests": 8868,
+          "requestsPerSecond": 76.5517074853896,
+          "pageP95Ms": 474.6333525999999,
+          "apiP95Ms": 324.68070379999983,
+          "error5xxRate": 0,
+          "restarts": 0,
+          "completed": true,
+          "peakVus": 100
+        },
+        {
+          "visitors": 250,
+          "requests": 16879,
+          "requestsPerSecond": 145.40393313440083,
+          "pageP95Ms": 1639.4511877999964,
+          "apiP95Ms": 1486.5532829999997,
+          "error5xxRate": 0,
+          "restarts": 0,
+          "completed": true,
+          "peakVus": 250
+        }
+      ],
+      "method": "External GitHub Actions runner, November mix with search and cold job rooms, through the edge cache",
+      "processRestarts": 0,
+      "betweenStageRestarts": 0,
+      "note": "First run with lighter pages (the lockup and stars drawn once), web and MCP on AsyncContextFrame and background workers at lower CPU priority. The edge had restarted 25 minutes earlier, so most job rooms were read for the first time. 25, 50 and 100 visitors passed, 100 at a page p95 of 0.48 s; 250 completed its hold at 145 requests a second with zero 5xx but missed the page target. The runner was closer than usual (118 ms round trip). A run started a minute earlier was cancelled by the controller's own guard when the previous web slot retired mid-test; it produced no stage result.",
+      "evidenceUrl": "https://github.com/talk2francis/Marque/actions/runs/43889940901",
+      "featured": true
+    },
+    {
+      "date": "2026-11-16T15:00:24.084Z",
+      "release": "77c7bf5e8dfc5523e905aef9a8f5d35888e01813",
+      "stages": [
+        {
+          "visitors": 25,
+          "requests": 1981,
+          "requestsPerSecond": 17.142988226351306,
+          "pageP95Ms": 714.2970007,
+          "apiP95Ms": 460.2429333000003,
+          "error5xxRate": 0,
+          "restarts": 0,
+          "completed": true,
+          "peakVus": 25
+        },
+        {
+          "visitors": 50,
+          "requests": 4129,
+          "requestsPerSecond": 35.49607035317416,
+          "pageP95Ms": 616.13150805,
+          "apiP95Ms": 384.95667255,
+          "error5xxRate": 0,
+          "restarts": 0,
+          "completed": true,
+          "peakVus": 50
+        },
+        {
+          "visitors": 100,
+          "requests": 7680,
+          "requestsPerSecond": 65.92458134111709,
+          "pageP95Ms": 828.5514317999999,
+          "apiP95Ms": 502.368185,
+          "error5xxRate": 0,
+          "restarts": 0,
+          "completed": true,
+          "peakVus": 100
+        }
+      ],
+      "method": "External GitHub Actions runner, November mix with search and cold job rooms, through the edge cache",
+      "processRestarts": 0,
+      "betweenStageRestarts": 0,
+      "note": "Same release, cache warm, a farther runner (157 ms round trip): 25 and 50 passed; 100 completed its hold with zero 5xx but a page p95 of 0.83 s, 29 ms over target. The slowest pages were mostly the home page, the largest page in the mix.",
+      "evidenceUrl": "https://github.com/talk2francis/Marque/actions/runs/43891735475"
+    },
+    {
+      "date": "2026-11-16T15:10:50.552Z",
+      "release": "77c7bf5e8dfc5523e905aef9a8f5d35888e01813",
+      "stages": [
+        {
+          "visitors": 25,
+          "requests": 2135,
+          "requestsPerSecond": 18.45667245740509,
+          "pageP95Ms": 555.4220984,
+          "apiP95Ms": 318.56237539999995,
+          "error5xxRate": 0,
+          "restarts": 0,
+          "completed": true,
+          "peakVus": 25
+        },
+        {
+          "visitors": 50,
+          "requests": 4205,
+          "requestsPerSecond": 36.203818004645036,
+          "pageP95Ms": 551.8517765999994,
+          "apiP95Ms": 314.15023620000005,
+          "error5xxRate": 0,
+          "restarts": 0,
+          "completed": true,
+          "peakVus": 50
+        },
+        {
+          "visitors": 100,
+          "requests": 7645,
+          "requestsPerSecond": 65.89733971170251,
+          "pageP95Ms": 885.3467625000001,
+          "apiP95Ms": 455.638782899999,
+          "error5xxRate": 0,
+          "restarts": 0,
+          "completed": true,
+          "peakVus": 100
+        }
+      ],
+      "method": "External GitHub Actions runner, November mix with search and cold job rooms, through the edge cache",
+      "processRestarts": 0,
+      "betweenStageRestarts": 0,
+      "note": "Same release after the edge and Caddy were given CPU priority over background re-renders (139 ms round trip): 100 completed its hold with zero 5xx but a page p95 of 0.89 s, over target.",
+      "evidenceUrl": "https://github.com/talk2francis/Marque/actions/runs/43893557874"
+    },
+    {
+      "date": "2026-11-16T15:19:37.926Z",
+      "release": "77c7bf5e8dfc5523e905aef9a8f5d35888e01813",
+      "stages": [
+        {
+          "visitors": 25,
+          "requests": 2289,
+          "requestsPerSecond": 19.837862045311947,
+          "pageP95Ms": 326.85783079999993,
+          "apiP95Ms": 250.94843249999985,
+          "error5xxRate": 0,
+          "restarts": 0,
+          "completed": true,
+          "peakVus": 25
+        },
+        {
+          "visitors": 50,
+          "requests": 4640,
+          "requestsPerSecond": 40.08017996778153,
+          "pageP95Ms": 302.3898205,
+          "apiP95Ms": 216.94260959999994,
+          "error5xxRate": 0,
+          "restarts": 0,
+          "completed": true,
+          "peakVus": 50
+        },
+        {
+          "visitors": 100,
+          "requests": 8965,
+          "requestsPerSecond": 77.26439650597378,
+          "pageP95Ms": 394.3716335999998,
+          "apiP95Ms": 301.4040588999998,
+          "error5xxRate": 0,
+          "restarts": 0,
+          "completed": true,
+          "peakVus": 100
+        },
+        {
+          "visitors": 250,
+          "requests": 19106,
+          "requestsPerSecond": 164.39061845710754,
+          "pageP95Ms": 1028.9264775000001,
+          "apiP95Ms": 920.196509,
+          "error5xxRate": 0,
+          "restarts": 0,
+          "completed": true,
+          "peakVus": 250
+        }
+      ],
+      "method": "External GitHub Actions runner, November mix with search and cold job rooms, through the edge cache",
+      "processRestarts": 0,
+      "betweenStageRestarts": 0,
+      "note": "Same release, after the network queue changed from fq to fq_codel. fq paced every connection to about 4 Mbit/s, so the home page took 0.6 s to arrive; with fq_codel it took 0.14 s at the median. 25, 50 and 100 visitors passed, 100 at 77 requests a second and a page p95 of 0.39 s. 250 completed its hold at 164 requests a second with zero 5xx and an API p95 of 0.92 s, but a page p95 of 1.03 s, over target (128 ms round trip).",
+      "evidenceUrl": "https://github.com/talk2francis/Marque/actions/runs/43895091913",
+      "featured": true
+    },
+    {
+      "date": "2026-11-16T15:29:33.208Z",
+      "release": "77c7bf5e8dfc5523e905aef9a8f5d35888e01813",
+      "stages": [
+        {
+          "visitors": 25,
+          "requests": 2177,
+          "requestsPerSecond": 18.780250809070807,
+          "pageP95Ms": 422.3740725000001,
+          "apiP95Ms": 344.4973869,
+          "error5xxRate": 0,
+          "restarts": 0,
+          "completed": true,
+          "peakVus": 25
+        },
+        {
+          "visitors": 50,
+          "requests": 4465,
+          "requestsPerSecond": 38.444240723297476,
+          "pageP95Ms": 387.5987348,
+          "apiP95Ms": 284.7061632,
+          "error5xxRate": 0,
+          "restarts": 0,
+          "completed": true,
+          "peakVus": 50
+        },
+        {
+          "visitors": 100,
+          "requests": 8738,
+          "requestsPerSecond": 75.15039031176087,
+          "pageP95Ms": 423.8079501499995,
+          "apiP95Ms": 374.8671072000001,
+          "error5xxRate": 0,
+          "restarts": 0,
+          "completed": true,
+          "peakVus": 100
+        },
+        {
+          "visitors": 250,
+          "requests": 17335,
+          "requestsPerSecond": 149.41304057140442,
+          "pageP95Ms": 1279.4369004999999,
+          "apiP95Ms": 1151.6256713500002,
+          "error5xxRate": 0,
+          "restarts": 0,
+          "completed": true,
+          "peakVus": 250
+        }
+      ],
+      "method": "External GitHub Actions runner, November mix with search and cold job rooms, through the edge cache",
+      "processRestarts": 0,
+      "betweenStageRestarts": 0,
+      "note": "Confirmation with the farthest runner of the day (197 ms round trip): 25, 50 and 100 visitors passed, 100 at 75 requests a second and a page p95 of 0.42 s. 250 completed its hold at 149 requests a second with zero 5xx but a page p95 of 1.28 s, over target, so 250 is not yet supported.",
+      "evidenceUrl": "https://github.com/talk2francis/Marque/actions/runs/43896875370",
+      "featured": true
     }
   ]
 }
