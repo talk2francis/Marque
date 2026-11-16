@@ -219,39 +219,54 @@ const RETRY_DEAD_SLOTS = Number(process.env.PROBE_RETRY_DEAD_SLOTS ?? 40)
 
 export async function dueByTier(limit: number, deadCap: number, fpIds: readonly string[], chainId?: number): Promise<DueService[]> {
   const fpList = fpIds.length ? sql.join(fpIds.map((id) => sql`${id}`), sql`, `) : sql`''`
+  // The cycle is shared between hosts inside the query (16 Nov 2026, evening). Applied after reading a window of the
+  // ordered rows, the per-host cap still starved every lower rank: the window was almost all one slow platform's overdue
+  // classified agents, so answering unclassified agents (rank 3) were never re-checked and Answering fell by about a
+  // thousand in an evening as their 24-hour windows lapsed. Each host's rows are now numbered in the same order and at
+  // most MAX_PER_HOST_PER_CYCLE per host reach the window; first-party services are never capped.
   const r = await db().execute(sql`
-    select ps.service_id, ps.agent_id, s.kind, coalesce(s.resolved_endpoint, s.endpoint) as url,
-           ps.last_liveness, ps.consecutive_dead, ps.last_checked_at,
-           (ps.agent_id in (${fpList})) as first_party,
-           (ps.agent_id like '56:%' and exists (select 1 from agent_category c where c.agent_id = ps.agent_id and c.category <> 'unclassified')) as classified
-    from probe_schedule ps
-    join agent_service s on s.id = ps.service_id
-    where ps.next_due_at <= now() + make_interval(secs => ${DUE_GRACE_SECONDS}::int)
-      and s.currently_declared is distinct from false
-      and (s.is_template = false or s.resolved_endpoint is not null)
-      ${chainId ? sql`and ps.agent_id like ${`${chainId}:%`}` : sql``}
+    with due as (
+      select ps.service_id, ps.agent_id, s.kind, coalesce(s.resolved_endpoint, s.endpoint) as url,
+             ps.last_liveness, ps.consecutive_dead, ps.last_checked_at, ps.next_due_at, s.first_seen,
+             lower(split_part(split_part(coalesce(s.resolved_endpoint, s.endpoint), '://', 2), '/', 1)) as host,
+             (ps.agent_id in (${fpList})) as first_party,
+             (ps.agent_id like '56:%' and exists (select 1 from agent_category c where c.agent_id = ps.agent_id and c.category <> 'unclassified')) as classified,
+             case
+               when ps.agent_id in (${fpList}) then 0
+               when ps.agent_id like '56:%' and exists (select 1 from agent_category c where c.agent_id = ps.agent_id and c.category <> 'unclassified') then 1
+               -- A service first seen in the last 48 h and never probed: a builder is usually waiting on it (29 Oct). Never-
+               -- probed services used to rank after every 12-hour re-probe and got no slot at all (T2: 0 of 500 per cycle),
+               -- so a new agent was never checked, never quoted and never listed.
+               when ps.last_checked_at is null and s.first_seen > now() - interval '48 hours' then 2
+               -- Never probed, on the practice lane or classified into a category (2 Nov): 1,565 of 1,630 testnet services had
+               -- never been probed, so testnet builds were never quoted and never listed. A small, finite backlog.
+               when ps.last_checked_at is null and (ps.agent_id like '97:%'
+                 or exists (select 1 from agent_category c where c.agent_id = ps.agent_id and c.category <> 'unclassified')) then 2
+               when ps.last_liveness in ('live', 'discovered', 'unbound', 'bad_schema') then 3
+               when ps.last_checked_at is null then 4
+               else 5
+             end as rnk
+      from probe_schedule ps
+      join agent_service s on s.id = ps.service_id
+      where ps.next_due_at <= now() + make_interval(secs => ${DUE_GRACE_SECONDS}::int)
+        and s.currently_declared is distinct from false
+        and (s.is_template = false or s.resolved_endpoint is not null)
+        ${chainId ? sql`and ps.agent_id like ${`${chainId}:%`}` : sql``}
+    ), ranked as (
+      select *, row_number() over (partition by host order by rnk,
+        case when last_checked_at is null then first_seen end desc nulls last, next_due_at asc, last_checked_at asc nulls first) as host_rank
+      from due
+    )
+    select * from ranked
+    where first_party or host_rank <= ${MAX_PER_HOST_PER_CYCLE}
     order by
-      case
-        when ps.agent_id in (${fpList}) then 0
-        when ps.agent_id like '56:%' and exists (select 1 from agent_category c where c.agent_id = ps.agent_id and c.category <> 'unclassified') then 1
-        -- A service first seen in the last 48 h and never probed: a builder is usually waiting on it (29 Oct). Never-
-        -- probed services used to rank after every 12-hour re-probe and got no slot at all (T2: 0 of 500 per cycle),
-        -- so a new agent was never checked, never quoted and never listed.
-        when ps.last_checked_at is null and s.first_seen > now() - interval '48 hours' then 2
-        -- Never probed, on the practice lane or classified into a category (2 Nov): 1,565 of 1,630 testnet services had
-        -- never been probed, so testnet builds were never quoted and never listed. A small, finite backlog.
-        when ps.last_checked_at is null and (ps.agent_id like '97:%'
-          or exists (select 1 from agent_category c where c.agent_id = ps.agent_id and c.category <> 'unclassified')) then 2
-        when ps.last_liveness in ('live', 'discovered', 'unbound', 'bad_schema') then 3
-        when ps.last_checked_at is null then 4
-        else 5
-      end,
+      rnk,
       -- Never-probed services all fall due at once: newest first, so the latest registration is not last in line.
-      case when ps.last_checked_at is null then s.first_seen end desc nulls last,
-      ps.next_due_at asc,
+      case when last_checked_at is null then first_seen end desc nulls last,
+      next_due_at asc,
       -- Services pushed back together (a host that failed this cycle) fall due at the same instant: the one checked
       -- longest ago goes first, so the same tail is not passed over cycle after cycle.
-      ps.last_checked_at asc nulls first
+      last_checked_at asc nulls first
     limit ${limit * 10}`)
   const out: DueService[] = []
   let dead = 0
