@@ -104,6 +104,30 @@ export async function runByHost<T, R>(items: readonly T[], hostOf: (item: T) => 
   return out
 }
 
+/**
+ * Per-cycle host breaker. A host that is down (three connection failures and no answer this cycle) or failing almost
+ * everything (8 of its last 10) has its remaining services deferred. Until 16 Nov it opened on any three failures in a
+ * row, so the registry's largest platform, where a share of agents time out and most answer, tripped it most cycles
+ * and hundreds of answering agents went unprobed.
+ */
+export class HostBreaker {
+  private readonly hosts = new Map<string, { ok: number; fails: number; recent: boolean[] }>()
+  record(host: string, failed: boolean): void {
+    const h = this.hosts.get(host) ?? { ok: 0, fails: 0, recent: [] }
+    if (failed) h.fails++
+    else h.ok++
+    h.recent.push(failed)
+    if (h.recent.length > 10) h.recent.shift()
+    this.hosts.set(host, h)
+  }
+  open(host: string): boolean {
+    const h = this.hosts.get(host)
+    if (!h) return false
+    if (h.ok === 0 && h.fails >= 3) return true
+    return h.recent.length >= 10 && h.recent.filter(Boolean).length >= 8
+  }
+}
+
 export async function runProbeCycle(opts: { limit?: number; concurrency?: number; deadCap?: number; deadlineMs?: number; /** Only one chain's services (operator runs). */ chainId?: number } = {}): Promise<ProbeCycleResult> {
   const limit = opts.limit ?? 400
   const concurrency = opts.concurrency ?? 12
@@ -124,22 +148,21 @@ export async function runProbeCycle(opts: { limit?: number; concurrency?: number
   // A cycle never runs past its deadline, so the 5-minute tier is never late behind a
   // wall of timeouts. Unstarted candidates stay due and lead the next cycle.
   const deadline = Date.now() + (opts.deadlineMs ?? Number(process.env.PROBE_CYCLE_DEADLINE_MS ?? 240_000))
-  // Per-cycle host breaker: after 3 connection-level failures in a row on one host, the
-  // rest of that host's services this cycle are deferred, not probed and not recorded.
-  // An unobserved endpoint gets no verdict; it is simply asked again later.
-  const hostFails = new Map<string, number>()
+  // Per-cycle host breaker (HostBreaker): a down host's remaining services this cycle are deferred, not probed and
+  // not recorded. An unobserved endpoint gets no verdict; it is simply asked again later.
+  const breaker = new HostBreaker()
   const CONNECTION_FAILURES = new Set(['timeout', 'refused', 'dns', 'tls'])
   const connectionFailure = (o: { failureClass?: string | null }): boolean => Boolean(o.failureClass && CONNECTION_FAILURES.has(o.failureClass))
   const deferred: DueService[] = []
   let skippedDeadline = 0
   const results = await runByHost(candidates, (c) => hostOfUrl(c.url), {
     concurrency, perHost: PER_HOST_CONCURRENCY, perHostRps: PER_HOST_RPS,
-    skip: (c) => Date.now() > deadline || (c.tier !== 'T0' && (hostFails.get(hostOfUrl(c.url)) ?? 0) >= 3),
+    skip: (c) => Date.now() > deadline || (c.tier !== 'T0' && breaker.open(hostOfUrl(c.url))),
   }, async (c) => {
     const host = hostOfUrl(c.url)
     // Checked when the probe is about to start: the deadline or the breaker may have tripped while it waited.
     if (Date.now() > deadline) { skippedDeadline++; return null }
-    if (c.tier !== 'T0' && (hostFails.get(host) ?? 0) >= 3) { deferred.push(c); return null }
+    if (c.tier !== 'T0' && breaker.open(host)) { deferred.push(c); return null }
     let outcome = await probeService(c.kind, c.url)
     // One failed connection is not a verdict on a service that was answering. Ask once more, a moment later, before
     // a listed agent is recorded dead: a stall on either side of the wire costs one retry, not a false "dead".
@@ -149,8 +172,7 @@ export async function runProbeCycle(opts: { limit?: number; concurrency?: number
       const again = await probeService(c.kind, c.url)
       if (!connectionFailure(again)) { outcome = again; result.recovered = (result.recovered ?? 0) + 1 }
     }
-    if (connectionFailure(outcome)) hostFails.set(host, (hostFails.get(host) ?? 0) + 1)
-    else hostFails.set(host, 0)
+    breaker.record(host, connectionFailure(outcome))
     switch (outcome.liveness) {
       case 'live': result.live++; break
       case 'discovered': result.discovered++; break
