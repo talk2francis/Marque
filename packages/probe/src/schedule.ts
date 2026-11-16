@@ -90,6 +90,25 @@ export interface DueService {
   consecutiveDead: number
   /** The verdict before this cycle (null when never probed). */
   lastLiveness: Liveness | null
+  /** When that verdict was recorded (null when never probed). */
+  lastCheckedAt?: Date | null
+}
+
+const REACHABLE_VERDICTS = new Set<string>(['live', 'discovered', 'unbound', 'bad_schema'])
+const CONNECTION_FAILURES = new Set<string>(['timeout', 'refused', 'dns', 'tls'])
+const SOFT_WINDOW_MS = 24 * 3600_000
+
+/**
+ * A connection-level failure (timeout, refused, DNS, TLS) on a service whose recorded verdict is reachable and less than
+ * 24 hours old (16 Nov 2026). The failure is kept in probe history, but it does not replace the verdict: Listed,
+ * Answering and quote candidates all read the newest verdict, so one dropped connection to a slow platform removed an
+ * agent that had answered minutes earlier, and a 25 to 30% timeout rate made Listed ratchet down. An answer that says
+ * the service is broken (HTTP error, bad schema) still counts at once, and 24 hours without an answer still drops it.
+ */
+export function softFailure(due: Pick<DueService, 'lastLiveness' | 'lastCheckedAt'>, failureClass: string | null | undefined, now = Date.now()): boolean {
+  if (!failureClass || !CONNECTION_FAILURES.has(failureClass)) return false
+  if (!due.lastLiveness || !REACHABLE_VERDICTS.has(due.lastLiveness) || !due.lastCheckedAt) return false
+  return now - due.lastCheckedAt.getTime() < SOFT_WINDOW_MS
 }
 
 const rowsOf = (r: unknown): Array<Record<string, unknown>> =>
@@ -201,7 +220,7 @@ export async function dueByTier(limit: number, deadCap: number, fpIds: readonly 
   const fpList = fpIds.length ? sql.join(fpIds.map((id) => sql`${id}`), sql`, `) : sql`''`
   const r = await db().execute(sql`
     select ps.service_id, ps.agent_id, s.kind, coalesce(s.resolved_endpoint, s.endpoint) as url,
-           ps.last_liveness, ps.consecutive_dead,
+           ps.last_liveness, ps.consecutive_dead, ps.last_checked_at,
            (ps.agent_id in (${fpList})) as first_party,
            (ps.agent_id like '56:%' and exists (select 1 from agent_category c where c.agent_id = ps.agent_id and c.category <> 'unclassified')) as classified
     from probe_schedule ps
@@ -250,15 +269,28 @@ export async function dueByTier(limit: number, deadCap: number, fpIds: readonly 
       serviceId: Number(row['service_id']), agentId: String(row['agent_id']), kind: String(row['kind']) as ServiceKind,
       url: String(row['url']), tier, firstParty: input.firstParty, classified: input.classified, consecutiveDead: input.consecutiveDead,
       lastLiveness: input.liveness,
+      lastCheckedAt: row['last_checked_at'] ? new Date(String(row['last_checked_at'])) : null,
     })
   }
   return out
 }
 
 /** Record each verdict on the schedule: new streak, next due time. */
-export async function recordVerdicts(results: ReadonlyArray<{ due: DueService; liveness: Liveness; checkedAt: Date; probeId: number | null }>): Promise<void> {
+export async function recordVerdicts(results: ReadonlyArray<{ due: DueService; liveness: Liveness; checkedAt: Date; probeId: number | null; soft?: boolean }>): Promise<void> {
   if (!results.length) return
-  const rows = results.map(({ due, liveness, checkedAt, probeId }) => {
+  // A soft failure (softFailure) keeps the recorded verdict, its time, probe and streak; it only sets the next check, on
+  // the schedule of the verdict it kept.
+  const soft = results.filter((r) => r.soft)
+  for (let i = 0; i < soft.length; i += 1000) {
+    const values = soft.slice(i, i + 1000).map(({ due, checkedAt }) => {
+      const input: ScheduleInput = { firstParty: due.firstParty, classified: due.classified, liveness: due.lastLiveness, consecutiveDead: due.consecutiveDead }
+      const next = new Date(checkedAt.getTime() + jitteredMinutes(input, due.serviceId) * 60_000)
+      return sql`(${due.serviceId}::int, ${next.toISOString()}::timestamptz)`
+    })
+    await db().execute(sql`update probe_schedule ps set next_due_at = v.next_due_at, updated_at = now()
+      from (values ${sql.join(values, sql`, `)}) as v(service_id, next_due_at) where ps.service_id = v.service_id`)
+  }
+  const rows = results.filter((r) => !r.soft).map(({ due, liveness, checkedAt, probeId }) => {
     const streak = nextStreak(due.consecutiveDead, liveness)
     const input: ScheduleInput = { firstParty: due.firstParty, classified: due.classified, liveness, consecutiveDead: streak }
     const next = new Date(checkedAt.getTime() + jitteredMinutes(input, due.serviceId) * 60_000)

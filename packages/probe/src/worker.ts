@@ -1,7 +1,7 @@
 import { sql, eq, and, inArray, desc } from 'drizzle-orm'
 import { db, agent, agentCategory, agentService, probe, type Category } from '@marque/db'
 import { probeService } from './liveness.js'
-import { syncSchedule, dueByTier, recordVerdicts, deferServices, firstPartyAgentIds, type DueService, type Tier } from './schedule.js'
+import { syncSchedule, dueByTier, recordVerdicts, deferServices, firstPartyAgentIds, softFailure, type DueService, type Tier } from './schedule.js'
 
 /**
  * The probe worker.
@@ -33,6 +33,8 @@ export interface ProbeCycleResult {
   confirmed?: number
   /** Of those, the ones that answered the second time (a false "dead" avoided). */
   recovered?: number
+  /** Connection failures on a service that answered in the last 24 h: kept in history, verdict unchanged (softFailure). */
+  softFailures?: number
   scheduleInserted?: number
   scheduleBackfilled?: boolean
 }
@@ -216,7 +218,10 @@ export async function runProbeCycle(opts: { limit?: number; concurrency?: number
     const ins = await d.insert(probe).values(rows.slice(i, i + 500)).returning({ id: probe.id, serviceId: probe.serviceId })
     for (const r of ins) if (r.serviceId !== null) probeIds.set(r.serviceId, r.id)
   }
-  await recordVerdicts(done.map(({ due, row }) => ({ due, liveness: row.liveness, checkedAt: row.checkedAt, probeId: probeIds.get(row.serviceId) ?? null })))
+  const now = Date.now()
+  const verdicts = done.map(({ due, row }) => ({ due, liveness: row.liveness, checkedAt: row.checkedAt, probeId: probeIds.get(row.serviceId) ?? null, soft: softFailure(due, row.failureClass, now) }))
+  result.softFailures = verdicts.filter((v) => v.soft).length
+  await recordVerdicts(verdicts)
   // A single schema-proven task kind is stronger category evidence than copy.
   // Add the derived label without deleting the historical unclassified row.
   for (const row of rows) {
