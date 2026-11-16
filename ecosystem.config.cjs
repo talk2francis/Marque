@@ -379,6 +379,10 @@ module.exports = {
       cwd: `${ROOT}/releases/slot-${port}/apps/web`,
       script: `${ROOT}/releases/slot-${port}/apps/web/server.js`,
       interpreter: 'node',
+      // 16 Nov 2026: AsyncLocalStorage on AsyncContextFrame (the Node 24 default) instead of async_hooks promise hooks.
+      // Measured on this release, same 10 Job Rooms x 100 renders, three alternating pairs: 162-181 -> 78-89 ms CPU per
+      // render; 18 routes returned the same status and bytes. Next.js 15.5 runs on Node 24, where this is the default.
+      node_args: '--experimental-async-context-frame',
       // Four serving processes use more of the existing six-core host. The
       // deployment verifier requires every configured worker to initialize.
       instances: webRuntime.instances,
@@ -406,6 +410,7 @@ module.exports = {
       cwd: `${ROOT}/releases/mcp/apps/web`,
       script: `${ROOT}/releases/mcp/apps/web/server.js`,
       interpreter: 'node',
+      node_args: '--experimental-async-context-frame', // same as the web slots (16 Nov 2026)
       env: { ...keyless, ...publicWalkthrough, ...OUTBOUND_THREADS, NODE_ENV: 'production', PORT: '3297', HOSTNAME: '127.0.0.1', MARQUE_ROOT: ROOT, MARQUE_RELEASE_SHA: releaseOf(`${ROOT}/releases/mcp`), MARQUE_REFRESH_READ_MODELS: '1', MARQUE_CAMPAIGN_CHAIN: '56', NEXT_PUBLIC_MARQUE_CAMPAIGN_CHAIN: '56' },
       filter_env: true,
       autorestart: true,
