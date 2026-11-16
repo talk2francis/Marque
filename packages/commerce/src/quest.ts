@@ -183,17 +183,27 @@ async function attachRatings(wallet: string, hires: QuestHire[]): Promise<void> 
   // hire flagged rating_unbound, so it is shown but never counts.
   const cand = hires.map(h => ({ h, tid: tokenOnChain(h), submitted: h.tx.submitted ? submitted.get(h.jobKey) ?? null : null }))
   const taken = new Set<QuestHire>()
-  for (const r of rows) {
-    const block = Number(r['block_number'])
-    const same = cand.filter((c) => c.tid && c.h.chainId === Number(r['chain_id']) && c.tid === String(r['agent_token_id']) && !taken.has(c.h))
-    if (!same.length) continue
-    const delivered = same.filter((c) => c.submitted !== null && c.submitted <= block).sort((a, b) => (b.submitted ?? 0) - (a.submitted ?? 0))
-    const pick = delivered[0] ?? same[same.length - 1]!
+  const attach = (r: Record<string, unknown>, pick: (typeof cand)[number], bound: boolean) => {
     const value = Number(r['value']) / 10 ** Number(r['value_decimals'] ?? 0)
     pick.h.rating = { value, stars: Math.round(value / 20), tx: String(r['tx_hash']), revoked: Boolean(r['revoked']) }
     pick.h.tx.rating = String(r['tx_hash'])
-    if (!delivered[0]) pick.h.reasons.push('rating_unbound')
+    if (!bound) pick.h.reasons.push('rating_unbound')
     taken.add(pick.h)
+  }
+  const same = (r: Record<string, unknown>) => cand.filter((c) => c.tid && c.h.chainId === Number(r['chain_id']) && c.tid === String(r['agent_token_id']) && !taken.has(c.h))
+  // Bound ratings first (16 Nov 2026): an earlier rating with no delivery before it used to fall back onto the agent's
+  // latest hire and take it, so the rating that hire actually received was dropped (testnet job 1734 showed a
+  // September rating, unbound, instead of its own). Unbound ratings now only take hires no bound rating claimed.
+  const unbound: Array<Record<string, unknown>> = []
+  for (const r of rows) {
+    const block = Number(r['block_number'])
+    const delivered = same(r).filter((c) => c.submitted !== null && c.submitted <= block).sort((a, b) => (b.submitted ?? 0) - (a.submitted ?? 0))
+    if (delivered[0]) attach(r, delivered[0], true)
+    else unbound.push(r)
+  }
+  for (const r of unbound) {
+    const left = same(r)
+    if (left.length) attach(r, left[left.length - 1]!, false)
   }
 }
 

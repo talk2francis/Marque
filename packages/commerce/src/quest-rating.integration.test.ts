@@ -7,9 +7,9 @@ import { network, questJob, walletQuest } from './index'
 const url = process.env.MARQUE_INTEGRATION_DB
 const enabled = Boolean(url && /^marque_vnext_fixture_/.test(new URL(url).pathname.slice(1)))
 const address = () => `0x${randomBytes(20).toString('hex')}`
-const buyer = address(), earlyBuyer = address(), unratedBuyer = address(), provider = address()
+const buyer = address(), earlyBuyer = address(), unratedBuyer = address(), repeatBuyer = address(), provider = address()
 const first = String(950000000000n + BigInt(Date.now() % 100000000))
-const second = String(BigInt(first) + 1n), early = String(BigInt(first) + 2n), unrated = String(BigInt(first) + 3n)
+const second = String(BigInt(first) + 1n), early = String(BigInt(first) + 2n), unrated = String(BigInt(first) + 3n), repeat = String(BigInt(first) + 4n)
 const hash = () => `0x${randomBytes(32).toString('hex')}`
 
 describe.skipIf(!enabled)('batched submission blocks retain canonical feedback attribution', () => {
@@ -25,6 +25,7 @@ describe.skipIf(!enabled)('batched submission blocks retain canonical feedback a
       { chain: 97, id: first, client: buyer, block: 150 },
       { chain: 56, id: early, client: earlyBuyer, block: 300 },
       { chain: 56, id: unrated, client: unratedBuyer, block: 400 },
+      { chain: 56, id: repeat, client: repeatBuyer, block: 500 },
     ]
     for (const j of jobs) {
       await db().execute(sql`insert into commerce_job(chain_id,job_id,client,provider,funded_raw,state,created_block,updated_block)
@@ -37,6 +38,9 @@ describe.skipIf(!enabled)('batched submission blocks retain canonical feedback a
       { chain: 56, client: buyer, index: '1', block: 250, value: '8500', decimals: 2, revoked: true },
       { chain: 97, client: buyer, index: '0', block: 170, value: '60', decimals: 0, revoked: false },
       { chain: 56, client: earlyBuyer, index: '0', block: 290, value: '100', decimals: 0, revoked: false },
+      // A rating from before this buyer's only indexed delivery, then the rating that delivery received.
+      { chain: 56, client: repeatBuyer, index: '0', block: 450, value: '60', decimals: 0, revoked: false },
+      { chain: 56, client: repeatBuyer, index: '1', block: 520, value: '100', decimals: 0, revoked: false },
     ]) await db().execute(sql`insert into rating(chain_id,agent_token_id,client,feedback_index,value,value_decimals,tx_hash,block_number,revoked)
       values (${r.chain},${first},${r.client},${r.index},${r.value},${r.decimals},${hash()},${r.block},${r.revoked})`)
   })
@@ -58,6 +62,11 @@ describe.skipIf(!enabled)('batched submission blocks retain canonical feedback a
     expect(view.hires[0]?.reasons).toContain('rating_unbound')
     expect(view.hires[0]?.rating?.value).toBe(100)
     expect((await questJob(56, early))?.rating).toBeNull()
+  })
+  it('gives a delivery its own later rating even when an earlier unbound rating exists', async () => {
+    const room = await questJob(56, repeat)
+    expect(room?.rating).toMatchObject({ value: 100, stars: 5 })
+    expect(room?.reasons ?? []).not.toContain('rating_unbound')
   })
   it('keeps delivered jobs without feedback readable without inventing a rating', async () => {
     const view = await questJob(56, unrated)
