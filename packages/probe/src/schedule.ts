@@ -172,6 +172,31 @@ export async function syncSchedule(): Promise<{ inserted: number; backfilled: bo
  * checked every ~10 min, flapping the header's status pill against the 10 min T0
  * freshness window (found 26 Sep).
  */
+/**
+ * At most `maxPerHost` services of one host in a cycle, in the order given (16 Nov 2026). The queue ranks classified
+ * mainnet agents first and most of them sit on one slow platform: its overdue services filled 488 of 500 slots every
+ * cycle, completed about 50, and led the next cycle again, so other hosts' agents were checked about 40% less and
+ * Listed and Answering drifted down as their 24-hour windows lapsed. First-party (T0) services are never capped.
+ */
+export function capPerHost<T extends { url: string; firstParty: boolean }>(rows: readonly T[], limit: number, maxPerHost: number): T[] {
+  const taken = new Map<string, number>()
+  const out: T[] = []
+  for (const row of rows) {
+    if (out.length >= limit) break
+    let host = ''
+    try { host = new URL(row.url).host.toLowerCase() } catch { host = row.url }
+    if (!row.firstParty) {
+      const n = taken.get(host) ?? 0
+      if (n >= maxPerHost) continue
+      taken.set(host, n + 1)
+    }
+    out.push(row)
+  }
+  return out
+}
+
+const MAX_PER_HOST_PER_CYCLE = Number(process.env.PROBE_MAX_PER_HOST_PER_CYCLE ?? 120)
+
 export async function dueByTier(limit: number, deadCap: number, fpIds: readonly string[], chainId?: number): Promise<DueService[]> {
   const fpList = fpIds.length ? sql.join(fpIds.map((id) => sql`${id}`), sql`, `) : sql`''`
   const r = await db().execute(sql`
@@ -207,10 +232,12 @@ export async function dueByTier(limit: number, deadCap: number, fpIds: readonly 
       -- Services pushed back together (a host that failed this cycle) fall due at the same instant: the one checked
       -- longest ago goes first, so the same tail is not passed over cycle after cycle.
       ps.last_checked_at asc nulls first
-    limit ${limit}`)
+    limit ${limit * 10}`)
   const out: DueService[] = []
   let dead = 0
-  for (const row of rowsOf(r)) {
+  // Read ten times the limit, then share the cycle between hosts (capPerHost) before the dead cap applies.
+  const ordered = capPerHost(rowsOf(r).map((row) => ({ row, url: String(row['url']), firstParty: row['first_party'] === true })), limit, MAX_PER_HOST_PER_CYCLE)
+  for (const { row } of ordered) {
     const input: ScheduleInput = {
       firstParty: row['first_party'] === true,
       classified: row['classified'] === true,
