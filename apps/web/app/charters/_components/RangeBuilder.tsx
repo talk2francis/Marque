@@ -120,7 +120,7 @@ export function RangeBuilder({ initialChain, initialAccount, initialPosition, de
     { label: 'Keeps', value: `position #${pos.tokenId}, ${pair}, ${fmtPrice(lowP)} to ${fmtPrice(highP)}` },
     { label: 'Pool', value: `PancakeSwap v3, ${pos.fee / 10_000}%, ${CHAIN_NAME[chainId]}${pos.pool.fixture ? ' (testnet fixture)' : ''}` },
     { label: 'Moves', value: exit ? 'once: closes the position and sends everything to you when it leaves its range' : 'the range back around the 10-minute average when the price has left it, same width' },
-    { label: 'Limits', value: exit ? 'one move' : `at most ${moves} moves, one every ${hours} hours at most, each losing at most ${(lossBps / 100).toFixed(2)}% at the average price` },
+    { label: 'Limits', value: exit ? 'one move' : `at most ${moves} moves, one every ${hours} hours at most, each losing at most ${(lossBps / 100).toFixed(2)}% measured at the pool's average price (if that average is itself pushed away from the market, a move can cost more)` },
     { label: 'Fees', value: feesToOwner ? 'sent to your wallet at each move' : 'added to the position' },
     { label: 'Ends', value: `${until}, or when you end it: the position comes back to you` },
   ] : []

@@ -8,6 +8,7 @@ import {
 } from '@marque/charters'
 import { sessionForV2 } from './keys.js'
 import type { AltanaClient } from '../sessions.js'
+import { LATE_LANDING_WINDOW_MS, STALE_ERROR, droppedTx, lateLanding } from '../settle.js'
 
 /**
  * Watching and acting for v2 charters (AGENTS.md C1, C10). The chain decides: a charter is only ever asked. Every
@@ -43,7 +44,9 @@ const agentFor = (k: CharterKind) => ({ loan: 'keel', yield: 'sluicegate', grid:
 
 /**
  * The path for the next send. The agent first (its session, else its own account), the backup when the agent has
- * no usable path or its send has not landed within the grace window. Never two sends in flight for one charter.
+ * no usable path or its send has not landed within the grace window. At most one open attempt per charter; after a
+ * hand-over the superseded submission can still land (nothing cancels it), so two may be outstanding for a while.
+ * That is safe because the charter re-checks its condition on chain, and reconcileV2 records a late landing.
  */
 export function choosePathV2(x: {
   open: { path: PathV2; status: string; sentAt: number | null } | null
@@ -105,15 +108,30 @@ async function close(id: string, status: string, f: { tx?: string | null; error?
 /** Settle direct and backup sends of v2 charters (relay calls are settled by the v1 reconcile, which reads every attempt). */
 async function reconcileV2(ctx: WatchV2Context): Promise<number> {
   let n = 0
-  const open = rowsOf<{ id: string; address: string; path: PathV2; status: string; tx_hash: string | null; lease_until: string }>(await db().execute(sql`
-    select a.id, a.address, a.path, a.status, a.tx_hash, a.lease_until from charter_attempt a
+  // Superseded direct sends are followed for a day too, so a primary that lands late is recorded (review R-03).
+  const open = rowsOf<{ id: string; address: string; path: PathV2; status: string; tx_hash: string | null; lease_until: string; sent_at: string | null }>(await db().execute(sql`
+    select a.id, a.address, a.path, a.status, a.tx_hash, a.lease_until, a.sent_at from charter_attempt a
     join charter_v2 c on c.chain_id = a.chain_id and c.address = a.address
-    where a.chain_id = ${ctx.chainId} and a.status in ('prepared', 'sent') and a.path in ('direct', 'backup')`))
+    where a.chain_id = ${ctx.chainId} and a.path in ('direct', 'backup') and (a.status in ('prepared', 'sent')
+      or (a.status = 'superseded' and a.tx_hash is not null and a.closed_at > now() - make_interval(secs => ${LATE_LANDING_WINDOW_MS / 1000})))`))
   for (const a of open) {
     if (a.tx_hash) {
       const r = await ctx.client.getTransactionReceipt({ hash: a.tx_hash as Hex }).catch(() => null)
+      if (a.status === 'superseded') {
+        if (r) {
+          const late = lateLanding(r.status)
+          await close(a.id, late.status, { error: late.error }); n += 1
+          ctx.log('v2_attempt_landed_after_supersede', { chainId: ctx.chainId, charter: a.address, status: late.status })
+        }
+        continue
+      }
       if (r) { await close(a.id, r.status === 'success' ? 'confirmed' : 'reverted'); n += 1 }
-    } else if (new Date(a.lease_until).getTime() < Date.now()) {
+      else if (await droppedTx(ctx.client, a.tx_hash, a.sent_at)) {
+        // A send that vanished must not hold the charter's only open attempt for ever (review R-01).
+        await close(a.id, 'failed', { error: STALE_ERROR.dropped }); n += 1
+        ctx.log('v2_attempt_dropped', { chainId: ctx.chainId, charter: a.address, path: a.path, tx: a.tx_hash })
+      }
+    } else if (a.status !== 'superseded' && new Date(a.lease_until).getTime() < Date.now()) {
       await close(a.id, 'failed', { error: 'lease expired before sending' }); n += 1
     }
   }

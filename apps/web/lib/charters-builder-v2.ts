@@ -229,5 +229,5 @@ export function gridSentence(x: { low: string; high: string; pair: string; order
 }
 export function rangeSentence(x: { pair: string; low: string; high: string; minutes: number; moves: number; hours: number; lossPct: string; until: string; exit: boolean }): string {
   if (x.exit) return `When ${x.pair} has been outside my ${x.low} to ${x.high} range for ${x.minutes} minutes, close the position and send everything back to my wallet, until ${x.until}.`
-  return `When ${x.pair} has been outside my ${x.low} to ${x.high} range for ${x.minutes} minutes, move the range back around the price, same width. At most ${x.moves} moves, at most one every ${x.hours} ${x.hours === 1 ? 'hour' : 'hours'}, each losing at most ${x.lossPct}% at the average price, until ${x.until}.`
+  return `When ${x.pair} has been outside my ${x.low} to ${x.high} range for ${x.minutes} minutes, move the range back around the price, same width. At most ${x.moves} moves, at most one every ${x.hours} ${x.hours === 1 ? 'hour' : 'hours'}, each losing at most ${x.lossPct}% measured at the pool's average price, until ${x.until}.`
 }

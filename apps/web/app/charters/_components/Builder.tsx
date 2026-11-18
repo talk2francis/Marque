@@ -423,7 +423,7 @@ export function Builder({ initialChain, initialAccount, initialMarket, demo }: {
                 </button>
               ))}
             </div>
-            <p className={styles.fine}>Paid per action only to a caller other than you, after the repayment, from a separate tip budget of ten actions' worth that never touches the repayment budget. A tip that cannot be paid is skipped. Keel and the backup watcher act without one.</p>
+            <p className={styles.fine}>Paid per action only to a caller other than you, after the repayment, from a tip budget of ten actions' worth, counted apart from the repayment budget (both draw on the one allowance you grant). A tip that cannot be paid is skipped. Keel and the backup watcher act without one.</p>
           </details>
 
           <div className={styles.grant}>

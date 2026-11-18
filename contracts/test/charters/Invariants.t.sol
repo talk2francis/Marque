@@ -118,6 +118,14 @@ contract CharterInvariants is PcsFixture {
         _charters(makeAddr("keel"));
         h = new CharterHandler(grid, sweep, pool, swapper, usdt, owner, makeAddr("keel"), b0);
         targetContract(address(h));
+        // Only the actions (security review R-07): the handler's public getters would otherwise take most calls.
+        bytes4[] memory sel = new bytes4[](5);
+        sel[0] = CharterHandler.movePrice.selector;
+        sel[1] = CharterHandler.gridAct.selector;
+        sel[2] = CharterHandler.sweepAct.selector;
+        sel[3] = CharterHandler.ownerSpends.selector;
+        sel[4] = CharterHandler.ownerEarns.selector;
+        targetSelector(FuzzSelector({addr: address(h), selectors: sel}));
     }
 
     function _charters(address keel) internal {

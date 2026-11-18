@@ -239,7 +239,11 @@ export class RegistryCharterService implements CharterService {
         chain: bscTestnet,
         account: this.account,
       })
-      await this.pub.waitForTransactionReceipt({ hash: txHash })
+      const receipt = await this.pub.waitForTransactionReceipt({ hash: txHash })
+      // viem resolves for reverted receipts too: only a successful anchor is a revocation (review R-04 / MC-CX-003).
+      if (receipt.status !== 'success') {
+        return { ok: false, txHash, detail: `the revocation anchor reverted (tx ${txHash}); the charter is unchanged and can be revoked again` }
+      }
 
       await this.store.patch(charterId, {
         revokeHash,

@@ -177,9 +177,10 @@ export class AltanaCharterService implements CharterService {
   /**
    * Live state, read from chain.
    *
-   * Expiry is arithmetic on a timestamp the chain enforces, and revocation is
-   * read back from the Keystore rather than from our own record of having
-   * called revoke — the two can disagree, and when they do the chain wins.
+   * Expiry is arithmetic on a timestamp the chain enforces. Revocation here is
+   * this provider's own record of a revoke the relay did not report as failed;
+   * it is NOT read back from the Keystore (review R-04). Callers that need the
+   * chain's answer must query KeyStore.isValidKey themselves.
    */
   async state(charterId: string): Promise<CharterState> {
     const stored = this.sessions.get(charterId)
@@ -222,6 +223,10 @@ export class AltanaCharterService implements CharterService {
         wallet, signer: this.admin, session: stored.session,
       })
       const txHash = (result as unknown as { transactionHash?: string })?.transactionHash ?? null
+      // A relay that reports failure has not revoked anything (review R-04): keep the session marked active.
+      if ((result as unknown as { status?: string })?.status === 'FAILED') {
+        return { ok: false, txHash, detail: 'relay reported FAILED; the session was not revoked' }
+      }
       stored.revokedAt = new Date().toISOString()
       stored.revokeTxHash = txHash
       return { ok: true, txHash }
