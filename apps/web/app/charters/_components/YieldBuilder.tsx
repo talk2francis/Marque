@@ -244,7 +244,7 @@ export function YieldBuilder({ initialChain, initialAccount, demo }: { initialCh
             <span className={styles.label}>This charter can never</span>
             <ul className={styles.never}>
               <li><X aria-hidden="true" />Move money anywhere but between your wallet and your own Venus balance</li>
-              <li><X aria-hidden="true" />Touch Venus supply you made yourself: it brings back at most what it supplied</li>
+              <li><X aria-hidden="true" />Bring back more than it supplied: Venus balances are interchangeable, so this caps the amount it can withdraw</li>
               <li><X aria-hidden="true" />Supply more than {amount(capU, d)} {sym} over its life</li>
               <li><X aria-hidden="true" />Borrow, or act after {until}</li>
             </ul>
