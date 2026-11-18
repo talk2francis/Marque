@@ -14,7 +14,9 @@ import {CharterBase} from "../base/CharterBase.sol";
 ///  - tips are accounted apart from capital: `budget` is repayment only, `tipBudget` is tips only;
 ///  - `minRepay`: an action smaller than this reverts unless it pays the market debt off, so an exhausted
 ///    allowance or balance cannot produce a stream of uneconomic dust repayments;
-///  - shared CharterBase (end, sweep, executors, tips) and a kind-wide event shape.
+///  - shared CharterBase (end, sweep, executors, tips) and a kind-wide event shape;
+///  - v1's CannotRescue refusal is gone: below 1.00, v2 repays what it may even when that cannot lift health back to
+///    1.00 (repaying the owner's own debt is value-neutral for the owner; it only shrinks a liquidation).
 /// Unchanged: Venus decides (getAccountLiquidity in the same transaction), one destination, permissionless act().
 contract LoanGuardV2 is CharterBase {
     using SafeToken for address;

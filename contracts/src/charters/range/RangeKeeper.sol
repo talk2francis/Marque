@@ -26,7 +26,10 @@ import {TickMathLite} from "../lib/TickMathLite.sol";
 /// the last rebalance, and fewer than `maxRebalances` have happened.
 /// Economic bound per rebalance: value after (new position at TWAP plus leftovers sent to the owner) is at least
 /// (1 - maxLossBps) of the old position's value at TWAP (plus compounded fees), and leftovers are at most
-/// `maxLeftoverBps` of it, so most of the capital is really redeployed.
+/// `maxLeftoverBps` of it, so most of the capital is really redeployed. Both values are measured at the pool's own
+/// TWAP: the bound limits execution loss against that average, not against a fair price. A price held away from fair
+/// value for the whole `twapWindow` moves the reference too (review R-06); the protection there is the depth of the
+/// reviewed pools, `minInterval` and `maxRebalances`, not this bound.
 /// Mode EXIT instead removes everything to the owner once, and ends.
 contract RangeKeeper is CharterBase {
     using SafeToken for address;
