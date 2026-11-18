@@ -3,6 +3,7 @@ import { BaseError, ContractFunctionRevertedError, decodeErrorResult, encodeFunc
 import { chartersDb as db } from '@marque/db'
 import { loanGuardAbi, STATE_CODES, type CharterChainId, type GuardState } from '@marque/charters'
 import { networkOf, sessionFor, type AltanaClient, type Keel } from './sessions.js'
+import { LATE_LANDING_WINDOW_MS, STALE_ERROR, droppedTx, lateLanding, staleOutcome } from './settle.js'
 
 /**
  * Watching and acting (AGENTS.md C1, C9). The chain decides: a guard is only ever asked, never told. Every send is
@@ -101,24 +102,45 @@ async function close(id: string, status: string, fields: { tx?: string | null; e
 
 /** Settle what is in flight before deciding anything new. */
 async function reconcile(ctx: WatchContext, out: WatchPass) {
-  const open = rowsOf<{ id: string; address: string; path: Path; status: string; calls_id: string | null; tx_hash: string | null; lease_until: string }>(await db().execute(sql`
-    select id, address, path, status, calls_id, tx_hash, lease_until from charter_attempt
-    where chain_id = ${ctx.chainId} and status in ('prepared', 'sent', 'pending')`))
+  // Superseded relay calls are followed for a day too, so a primary that lands late is recorded (review R-03).
+  const open = rowsOf<{ id: string; address: string; path: Path; status: string; calls_id: string | null; tx_hash: string | null; lease_until: string; sent_at: string | null }>(await db().execute(sql`
+    select id, address, path, status, calls_id, tx_hash, lease_until, sent_at from charter_attempt
+    where chain_id = ${ctx.chainId} and (status in ('prepared', 'sent', 'pending')
+      or (status = 'superseded' and path = 'altana' and calls_id is not null and closed_at > now() - make_interval(secs => ${LATE_LANDING_WINDOW_MS / 1000})))`))
   for (const a of open) {
     try {
       if (a.path === 'altana' && a.calls_id) {
         const s = await relayStatus(ctx.chainId, a.calls_id) as { status?: unknown; receipts?: Array<{ transactionHash?: string }> } | null
         const o = relayOutcome(s?.status)
+        if (a.status === 'superseded') {
+          if (o !== 'pending') {
+            const late = lateLanding(o)
+            await close(a.id, late.status, { tx: s?.receipts?.[0]?.transactionHash ?? null, error: late.error })
+            ctx.log('attempt_landed_after_supersede', { chainId: ctx.chainId, guard: a.address, status: late.status })
+          }
+          continue
+        }
         if (o === 'confirmed') { await close(a.id, 'confirmed', { tx: s?.receipts?.[0]?.transactionHash ?? null }); out.closed.push({ guard: a.address, status: 'confirmed' }) }
         else if (o === 'failed') {
           await close(a.id, 'failed', { error: `relay status ${String(s?.status)}` })
           altanaDegradedUntil.set(a.address, Date.now() + ALTANA_DEGRADED_MS)
           out.closed.push({ guard: a.address, status: 'failed' })
           ctx.log('altana_failed', { chainId: ctx.chainId, guard: a.address, status: s?.status ?? null })
+        } else if (staleOutcome({ kind: 'relay', sentAt: a.sent_at ? new Date(a.sent_at).getTime() : null, now: Date.now() }) === 'unsettled') {
+          // A relay call that never settles must not hold the charter's only open attempt for ever (review R-01).
+          await close(a.id, 'failed', { error: STALE_ERROR.unsettled })
+          altanaDegradedUntil.set(a.address, Date.now() + ALTANA_DEGRADED_MS)
+          out.closed.push({ guard: a.address, status: 'failed' })
+          ctx.log('attempt_unsettled', { chainId: ctx.chainId, guard: a.address, callsId: a.calls_id })
         }
       } else if (a.path === 'backup' && a.tx_hash) {
         const r = await ctx.client.getTransactionReceipt({ hash: a.tx_hash as Hex }).catch(() => null)
         if (r) { await close(a.id, r.status === 'success' ? 'confirmed' : 'reverted'); out.closed.push({ guard: a.address, status: r.status === 'success' ? 'confirmed' : 'reverted' }) }
+        else if (await droppedTx(ctx.client, a.tx_hash, a.sent_at)) {
+          await close(a.id, 'failed', { error: STALE_ERROR.dropped })
+          out.closed.push({ guard: a.address, status: 'failed' })
+          ctx.log('attempt_dropped', { chainId: ctx.chainId, guard: a.address, tx: a.tx_hash })
+        }
       } else if (a.status === 'prepared' && new Date(a.lease_until).getTime() < Date.now()) {
         // Prepared but never sent (the process stopped between the two): nothing went out.
         await close(a.id, 'failed', { error: 'lease expired before sending' })
