@@ -246,7 +246,8 @@
   .tabs-list { position: relative; display: flex; gap: 24px; border-bottom: 1px solid var(--hair); overflow-x: auto; scrollbar-width: none; }
   .tabs-list::-webkit-scrollbar { display: none; }
   .tabs-list button {
-    position: relative; height: 44px; padding: 0; border: 0; background: transparent;
+    /* Never shrink below the label (20 Nov): the list scrolls sideways instead, so labels cannot overlap. */
+    position: relative; flex: none; height: 44px; padding: 0; border: 0; background: transparent;
     color: var(--ink-2); font-size: 14.5px; font-weight: 500; white-space: nowrap;
     transition: color var(--t-fast) var(--ease);
   }

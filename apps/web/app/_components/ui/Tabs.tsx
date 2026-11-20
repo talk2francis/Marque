@@ -41,6 +41,13 @@ export function Tabs({ tabs, label, value, onChange, initial }: { tabs: TabDef[]
     setInner(t.id)
     onChange?.(t.id)
     refs.current[i]?.focus({ preventScroll: true })
+    // On a narrow screen the tab row scrolls sideways: bring the chosen tab fully into view (horizontally only).
+    const list = listRef.current, b = refs.current[i]
+    if (list && b) {
+      const pad = 24
+      if (b.offsetLeft < list.scrollLeft) list.scrollTo({ left: Math.max(0, b.offsetLeft - pad), behavior: 'smooth' })
+      else if (b.offsetLeft + b.offsetWidth > list.scrollLeft + list.clientWidth) list.scrollTo({ left: b.offsetLeft + b.offsetWidth - list.clientWidth + pad, behavior: 'smooth' })
+    }
     const hold = () => { if (Math.abs(window.scrollY - y) > 1) window.scrollTo({ top: y }) }
     requestAnimationFrame(() => { hold(); requestAnimationFrame(hold) })
   }
