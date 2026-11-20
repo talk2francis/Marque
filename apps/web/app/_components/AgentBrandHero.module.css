@@ -91,3 +91,20 @@
   .frame :global(.agent-avatar) { width: 76px !important; height: 76px !important; border-radius: 12px !important; }
   .frame { border-radius: 12px; }
 }
+
+/* Owner-supplied banners (20 Nov). The fade, echo and theme filter above belong to Marque's reference art, which was
+   drawn to dissolve into the page. An outside builder's banner is shown whole, exactly as uploaded (960 x 320, so
+   3:1 at every width): no edge mask, no echo, no filter, a hairline frame, and the portrait and name sit below the
+   art instead of over it. */
+.masthead[data-agent-owner-banner] .stage { aspect-ratio: 3 / 1; min-height: 0; }
+.masthead[data-agent-owner-banner] .echo { display: none; }
+.masthead[data-agent-owner-banner] .art,
+:global([data-theme='day']) .masthead[data-agent-owner-banner] .art {
+  -webkit-mask-image: none;
+  mask-image: none;
+  filter: none;
+  background-position: 50% 50%;
+  background-size: cover;
+  box-shadow: inset 0 0 0 1px var(--hair);
+}
+.masthead[data-agent-owner-banner] .id { margin-top: 16px; }
