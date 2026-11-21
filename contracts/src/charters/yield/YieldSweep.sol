@@ -23,7 +23,10 @@ import {HealthMath} from "../HealthMath.sol";
 ///    (`minHealthAfter == 0`) the charter holds in such a market and moves nothing. With `minHealthAfter` set (the
 ///    owner's explicit choice to let savings count as collateral), it supplies, and withdraws only when the loan
 ///    health after the withdrawal, read from Venus in the same transaction, stays at or above `minHealthAfter`.
-///  - It only withdraws vTokens it supplied itself (`heldV`), never the owner's own earlier deposits.
+///  - It withdraws at most the vTokens it supplied itself, net of what it redeemed (`heldV`). vTokens are fungible:
+///    it cannot tell its own units from the owner's earlier deposits, only bound the amount.
+///  - A tip is paid only for an action of at least `minAction`: the final, smaller tranche of a withdrawal moves
+///    without one, so dust cannot be redeemed for a full tip (review R-05).
 /// Anyone may call act(): every action moves the owner's own money between the owner's wallet and the owner's own
 /// Venus balance, at Venus's exchange rate, with no price to manipulate.
 contract YieldSweep is CharterBase {
@@ -93,7 +96,7 @@ contract YieldSweep is CharterBase {
         _checkLive();
         bool collateral = comptroller.checkMembership(owner, address(vToken));
         if (collateral && minHealthAfter == 0) revert CollateralInUse();
-        // If the owner redeemed some of what this charter supplied, forget it: never reach for later deposits.
+        // If the owner's vToken balance fell below what this charter supplied, bound heldV by it.
         uint256 vb = vToken.balanceOf(owner);
         if (heldV > vb) heldV = vb;
         uint256 bal = IERC20Lite(token).balanceOf(owner);
@@ -111,7 +114,7 @@ contract YieldSweep is CharterBase {
         } else {
             revert InBand(bal);
         }
-        _payTip();
+        if (amount >= minAction) _payTip();
     }
 
     function _supplyAmount(uint256 bal) internal view returns (uint256 amount) {

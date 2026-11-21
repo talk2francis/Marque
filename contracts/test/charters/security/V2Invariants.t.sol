@@ -42,7 +42,7 @@ contract LoanV2Handler is Test {
         usdt = u;
         owner = o;
         callers = [makeAddr("c0"), makeAddr("c1"), makeAddr("c2")];
-        execCandidates = [makeAddr("e0"), makeAddr("e1"), makeAddr("e2"), makeAddr("e3")];
+        execCandidates = [address(0), makeAddr("e1"), makeAddr("e2"), makeAddr("e3")];
     }
 
     function setHealth(uint16 weightedUsd) external {
@@ -224,6 +224,7 @@ contract LoanGuardV2InvariantTest is Test {
     }
 
     function invariant_executorBookkeeping() public view {
+        assertFalse(g.isExecutor(address(0)), "zero address is never an executor");
         assertEq(uint256(g.executorCount()), h.countExecutors());
         assertLe(g.executorCount(), g.MAX_EXECUTORS());
     }

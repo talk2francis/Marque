@@ -55,6 +55,8 @@ abstract contract CharterBase {
     event Ended(address indexed by, uint64 at);
     event ExecutorSet(address indexed executor, bool allowed);
     event TipPaid(address indexed to, address indexed token, uint256 amount);
+    /// The tip token refused the transfer (for example a restricted recipient). The action stands; nothing is counted.
+    event TipSkipped(address indexed to, address indexed token, uint256 amount);
     event Swept(address indexed token, uint256 amount);
 
     error NotOwner();
@@ -63,6 +65,7 @@ abstract contract CharterBase {
     error CharterExpired();
     error Reentrant();
     error TooManyExecutors();
+    error ZeroExecutor();
 
     modifier nonReentrant() {
         if (_lock != 1) revert Reentrant();
@@ -99,6 +102,8 @@ abstract contract CharterBase {
 
     /// @notice Add or remove an agent allowed to act on a closed-execution charter. Owner only.
     function setExecutor(address who, bool allowed) external onlyOwner {
+        // The constructor skips the zero address; so does this (review R-09 / MC-CX-002).
+        if (who == address(0)) revert ZeroExecutor();
         if (isExecutor[who] == allowed) return;
         if (allowed) {
             if (executorCount >= MAX_EXECUTORS) revert TooManyExecutors();
@@ -144,7 +149,9 @@ abstract contract CharterBase {
     }
 
     /// Pays the optional tip after a successful action, from what the owner's wallet still makes available. Never
-    /// reverts the action: if the tip budget, allowance or balance is short it pays what it can, or nothing.
+    /// reverts the action: if the tip budget, allowance or balance is short it pays what it can, or nothing; if the
+    /// tip token itself refuses the transfer, the tip is skipped (TipSkipped) and not counted (review R-02).
+    /// Tips and capital are accounted apart (tipBudget vs the kind's cap) but draw on the same ERC-20 allowance.
     function _payTip() internal returns (uint256 paid) {
         if (msg.sender == owner || tipPerAction == 0 || tipsPaid >= tipBudget) return 0;
         paid = tipPerAction;
@@ -156,7 +163,12 @@ abstract contract CharterBase {
         if (b < paid) paid = b;
         if (paid == 0) return 0;
         tipsPaid += paid;
-        tipToken.safeTransferFrom(owner, msg.sender, paid);
+        (bool ok, bytes memory ret) = tipToken.call(abi.encodeWithSelector(0x23b872dd, owner, msg.sender, paid));
+        if (!ok || (ret.length != 0 && (ret.length < 32 || abi.decode(ret, (uint256)) != 1))) {
+            tipsPaid -= paid;
+            emit TipSkipped(msg.sender, tipToken, paid);
+            return 0;
+        }
         emit TipPaid(msg.sender, tipToken, paid);
     }
 
