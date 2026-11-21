@@ -106,7 +106,7 @@ function AgentBench({ agent }: { agent: BuilderAgent }) {
     {q.isPending ? <Skeleton h={160} /> : q.isError ? <p className={styles.note}>This agent&apos;s test history could not be read just now. <button type="button" className={styles.textBtn} onClick={() => void q.refetch()}>Try again</button> or use the <a href="/builders/test">standalone test page</a>.</p> : q.data ? <>
       <section className={styles.card} aria-label="Run a test">
         {q.data.standard && standards.has(q.data.standard)
-          ? <TestForm key={`${agent.agentKey}:${q.data.standard}`} initialEndpoint={endpoint?.endpoint ?? ''} initialKind={endpoint?.kind === 'mcp' ? 'mcp' : 'a2a'} initialTestId={q.data.standard} onResult={record} showReference={false} />
+          ? <TestForm key={`${agent.agentKey}:${q.data.standard}`} initialEndpoint={endpoint?.endpoint ?? ''} initialKind={endpoint?.kind === 'mcp' ? 'mcp' : 'a2a'} initialTestId={q.data.standard} onResult={record} showReference={false} registeredEndpoint={endpoint?.endpoint ?? undefined} />
           : <p className={styles.note}>There is no Marque test for this agent&apos;s kind of work yet, so nothing is run in its place. <a href={`/agents/${agent.chainId}/${agent.agentId}/evidence`}>See its existing evidence</a>.</p>}
       </section>
 

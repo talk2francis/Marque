@@ -82,8 +82,10 @@ const words = (f: string) => f.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/^./,
  * The settings that are almost always right (interface, test) are shown as one line with Change; the long
  * explanations sit behind "What happens?" and "What goes here?".
  */
-export function TestForm({ initialEndpoint = '', initialTestId = 'MCS-REB-1', initialKind = 'a2a', onResult, showReference = true }: {
+export function TestForm({ initialEndpoint = '', initialTestId = 'MCS-REB-1', initialKind = 'a2a', onResult, showReference = true, registeredEndpoint }: {
   initialEndpoint?: string; initialTestId?: string; initialKind?: 'a2a' | 'mcp'; onResult?: (result: BenchResult) => void
+  /** The address registered on chain for this agent (My Marque). Testing another host is allowed, but said plainly. */
+  registeredEndpoint?: string
   /** Offer Marque's reference agents as targets (off in My Marque, where the builder tests their own). */
   showReference?: boolean
 }) {
@@ -134,6 +136,11 @@ export function TestForm({ initialEndpoint = '', initialTestId = 'MCS-REB-1', in
                 onChange={(e) => { setEndpoint(e.target.value); setTaskConsent(false) }}
                 placeholder="https://your-agent.example/.well-known/agent-card.json"
               />
+              {registeredEndpoint && differentHost(endpoint, registeredEndpoint) ? (
+                <p className={styles.muted} role="note">
+                  This is not the address registered for this agent ({hostOf(registeredEndpoint)}). Marque&apos;s daily checks and buyers use the registered one, so a pass here does not change its record. If the agent has moved, update the endpoint in its registration.
+                </p>
+              ) : null}
               <div className={styles.settings}>
                 <span><b>{kind === 'a2a' ? 'A2A' : 'MCP'}</b> · <b>{testName(testId)}</b>{test ? <span className={styles.muted}> ({test.label})</span> : null}</span>
                 <button type="button" className={styles.textBtn} aria-expanded={changing} onClick={() => setChanging((v) => !v)}>{changing ? 'Done' : 'Change'}</button>
@@ -249,4 +256,12 @@ export function TestForm({ initialEndpoint = '', initialTestId = 'MCS-REB-1', in
       ) : null}
     </div>
   )
+}
+
+function hostOf(u: string): string {
+  try { return new URL(u.trim()).host } catch { return u.trim() }
+}
+/** True only when both parse and their hosts differ (a different path on the same host is the same agent). */
+export function differentHost(a: string, b: string): boolean {
+  try { return new URL(a.trim()).host.toLowerCase() !== new URL(b.trim()).host.toLowerCase() } catch { return false }
 }

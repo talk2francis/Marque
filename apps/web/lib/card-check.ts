@@ -24,7 +24,22 @@ export function redact(text: string, max = 600): string {
     .slice(0, max)
 }
 
-export async function checkCard(url: string, want: ForgeCategory | null = null): Promise<CardCheck> {
+/**
+ * A bare agent address (nothing after the host) is the commonest paste (21 Nov: a builder entered the agent's
+ * https address and got a 404). A2A agents publish their card at /.well-known/agent-card.json, so look there.
+ */
+export function resolveCardUrl(url: string): { url: string; resolved: boolean } {
+  try {
+    const u = new URL(url.trim())
+    if (u.protocol === 'https:' && (u.pathname === '' || u.pathname === '/') && !u.search && !u.hash) {
+      return { url: `${u.origin}/.well-known/agent-card.json`, resolved: true }
+    }
+  } catch { /* not a URL: the fetch step reports it */ }
+  return { url, resolved: false }
+}
+
+export async function checkCard(entered: string, want: ForgeCategory | null = null): Promise<CardCheck> {
+  const { url, resolved } = resolveCardUrl(entered)
   const steps: CardStep[] = []
   const done = (category: ForgeCategory | null, name: string | null, endpoint: string | null): CardCheck => ({
     url, ok: steps.every((s) => s.state === 'pass' || s.state === 'warn'), category, name, endpoint, steps, checkedAt: new Date().toISOString(),
@@ -61,7 +76,7 @@ export async function checkCard(url: string, want: ForgeCategory | null = null):
     steps.push({ id: 'fetch', title: TITLES.fetch, state: 'fail', detail: 'The response is not JSON.', fix: 'Return the card as JSON with Content-Type application/json, not an HTML page.', got: redact(r.body), example: example(null) })
     skip(['shape', 'category', 'task', 'domain']); return done(null, null, null)
   }
-  steps.push({ id: 'fetch', title: TITLES.fetch, state: 'pass', detail: `HTTP 200 in ${r.latencyMs} ms, ${r.bytes.toLocaleString('en-US')} bytes of JSON${r.redirects ? ` after ${r.redirects} redirect${r.redirects === 1 ? '' : 's'}` : ''}.` })
+  steps.push({ id: 'fetch', title: TITLES.fetch, state: 'pass', detail: `HTTP 200 in ${r.latencyMs} ms, ${r.bytes.toLocaleString('en-US')} bytes of JSON${r.redirects ? ` after ${r.redirects} redirect${r.redirects === 1 ? '' : 's'}` : ''}.${resolved ? ' You entered the agent\'s address; its card was found at /.well-known/agent-card.json, and that card URL is used from here on.' : ''}` })
   const c = (card ?? {}) as Record<string, unknown>
   const name = typeof c['name'] === 'string' ? c['name'] : null
   const endpoint = typeof c['url'] === 'string' ? c['url'] : null
