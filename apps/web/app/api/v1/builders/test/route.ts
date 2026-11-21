@@ -5,6 +5,7 @@ import {
   CASES, capturePublishedCase, runConformance, adapterFor, buildWarrantBundle, type TestId,
 } from '@marque/conformance'
 import { checkTestBurst, clientKey } from '../../../../../lib/limits'
+import { agentErrorText, benchEndpoint } from '../../../../../lib/bench-explain'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -64,7 +65,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'could_not_capture_case', detail: 'The test case could not be read from BNB Chain just now. Try again in a minute.' }, { status: 503 })
   }
 
-  const adapter = adapterFor(input.kind, 'builders:test', 'endpoint under test', input.endpoint)
+  const adapter = adapterFor(input.kind, 'builders:test', 'endpoint under test', benchEndpoint(input.kind, input.endpoint))
   if (!adapter) {
     return NextResponse.json({
       error: 'unsupported_kind',
@@ -77,7 +78,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       testId: outcome.testId,
       pass: outcome.pass,
-      error: outcome.error ?? null,
+      error: outcome.error ?? agentErrorText(outcome.response, outcome.diffs),
       latencyMs: outcome.latencyMs,
       caseId: outcome.caseId,
       blockNumber: outcome.blockNumber,
