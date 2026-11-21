@@ -5,6 +5,7 @@ import { CASES, capturePublishedCase, runConformance, adapterFor, buildWarrantBu
 import { db, conformanceResult } from '@marque/db'
 import { isSupportedChain } from '@marque/commerce'
 import { readIdentity } from '../../../../../../lib/builder'
+import { agentErrorText, benchEndpoint } from '../../../../../../lib/bench-explain'
 import { withDeadline } from '../../../../../../lib/deadline'
 import { readClaimToken } from '../../../../../../lib/claim'
 import { checkClaimBurst, clientKey } from '../../../../../../lib/limits'
@@ -71,7 +72,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'could_not_capture_case', detail: 'The test case could not be read from BNB Chain just now. Try again in a minute.' }, { status: 503 })
   }
 
-  const adapter = adapterFor(input.kind, claim.agentId, 'listed by owner', input.endpoint)
+  const adapter = adapterFor(input.kind, claim.agentId, 'listed by owner', benchEndpoint(input.kind, input.endpoint))
   if (!adapter) {
     return NextResponse.json({ error: 'unsupported_kind', detail: 'Only A2A and MCP expose a task interface we can address generically.' }, { status: 400 })
   }
@@ -110,7 +111,7 @@ export async function POST(request: Request) {
     testId: outcome.testId,
     category: outcome.category,
     pass: outcome.pass,
-    error: outcome.error ?? null,
+    error: outcome.error ?? agentErrorText(outcome.response, outcome.diffs),
     latencyMs: outcome.latencyMs,
     caseId: outcome.caseId,
     blockNumber: outcome.blockNumber,
