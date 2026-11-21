@@ -35,6 +35,10 @@ function log(event: string, data: Record<string, unknown>): void {
   console.log(JSON.stringify({ t: new Date().toISOString(), worker: 'conform', event, ...data }))
 }
 /** Third-party error text can contain RPC credentials or private endpoint URLs. */
+function captureDetail(error: unknown): string {
+  return (error instanceof Error ? error.message : String(error)).slice(0, 200)
+}
+
 function errorKind(error: unknown): string | null {
   if (!error) return null
   const value = error instanceof Error ? error.message : String(error)
@@ -123,7 +127,8 @@ async function referenceSweep(): Promise<void> {
       caseId = captured.testCase.id
       log('reference_case_captured', { agent: a.slug, block: captured.testCase.blockNumber.toString(), subjectTokenId: captured.testCase.subject['tokenId'] ?? null, hash: captured.groundTruthHash })
     } catch (err) {
-      log('reference_skip', { agent: a.slug, reason: 'fresh case capture failed', error: errorKind(err) })
+      // Capture is Marque's own chain read, so its message is safe to log; without it a dead subject hid for 9 days.
+      log('reference_skip', { agent: a.slug, reason: 'fresh case capture failed', error: errorKind(err), detail: captureDetail(err) })
       continue
     }
     const adapter = a2aAdapter(agentId, a.slug, cardUrl)
@@ -169,8 +174,15 @@ async function renewSweep(): Promise<void> {
     const adapter = adapterFor(String(r['kind'] ?? 'a2a'), agentId, agentId, String(r['endpoint']))
     const spec = CASES.find((c) => c.testId === testId)
     if (!adapter || !spec) continue
+    let captured: Awaited<ReturnType<typeof capturePublishedCase>>
     try {
-      const captured = await capturePublishedCase({ id: `${spec.id}-renew-${agentId.split(':').pop()}-${Date.now()}`, testId, subject: spec.subject, policy: spec.policy })
+      captured = await capturePublishedCase({ id: `${spec.id}-renew-${agentId.split(':').pop()}-${Date.now()}`, testId, subject: spec.subject, policy: spec.policy })
+    } catch (err) {
+      // Our case could not be read: not the agent's failure, so it is not counted against it.
+      log('renew_capture_failed', { agentId, test: testId, detail: captureDetail(err) })
+      continue
+    }
+    try {
       const outcome = await runConformance({ adapter, testId, caseId: captured.testCase.id, selectionSource: 'indexed_service' })
       if (outcome.pass) pass++; else fail++
       log('renew_result', { agentId, test: testId, pass: outcome.pass, failed: outcome.failedFields, error: errorKind(outcome.error) })

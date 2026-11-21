@@ -1,6 +1,6 @@
 import { publicClient } from '@marque/chain'
-import { CASES, REB_FALLBACK_SUBJECTS } from './cases.js'
-import { firstCapturable, observeCase } from './harness.js'
+import { CASES } from './cases.js'
+import { observeCase, withLiveSubjects } from './harness.js'
 import type { LensCheck } from './lens-checks.js'
 import type { TestId } from './tolerances.js'
 import type { TestCase } from './types.js'
@@ -39,8 +39,7 @@ export async function observeCheckCase(category: string, lagBlocks = 30n): Promi
   const head = await publicClient().getBlockNumber()
   const blockNumber = head - lagBlocks
   const id = `check-${testId}-${blockNumber}`
-  const subjects = testId === 'MCS-REB-1' ? [spec.subject, ...REB_FALLBACK_SUBJECTS] : [spec.subject]
-  const observed = await firstCapturable(subjects, (subject) => observeCase({ id, testId, subject, policy: spec.policy, blockNumber }))
+  const observed = await withLiveSubjects(spec, (subject) => observeCase({ id, testId, subject, policy: spec.policy, blockNumber }))
   return observed.testCase
 }
 

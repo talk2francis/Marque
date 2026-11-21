@@ -12,6 +12,7 @@ import { gridGroundTruth, gridPrompt, gradeGrid, type GridPolicy, type GridGroun
 import { yieldGroundTruth, yieldPrompt, gradeYield, type YieldPolicy, type YieldGroundTruth } from './tests/mcs-yield-1.js'
 import { ryieldGroundTruth, ryieldPrompt, gradeRyield, type RyieldPolicy, type RyieldGroundTruth } from './tests/mcs-ryield-1.js'
 import { REB_FALLBACK_SUBJECTS } from './cases.js'
+import { discoverRebSubjects, discoverHfSubjects } from './subject-discovery.js'
 import { MCS_CODE_ANCHOR } from './code-anchor.js'
 
 /**
@@ -153,9 +154,53 @@ export async function captureCase(spec: Parameters<typeof observeCase>[0]): Retu
  * owner/NFT actually read; no old snapshot or substitute answer is reused.
  */
 export async function capturePublishedCase(spec: Parameters<typeof captureCase>[0]): ReturnType<typeof captureCase> {
-  if (spec.testId !== 'MCS-REB-1') return captureCase(spec)
-  return firstCapturable([spec.subject, ...REB_FALLBACK_SUBJECTS], (subject) => captureCase({ ...spec, subject }))
+  if (spec.testId !== 'MCS-REB-1' && spec.testId !== 'MCS-HF-1') return captureCase(spec)
+  return withLiveSubjects(spec, (subject) => captureCase({ ...spec, subject }))
 }
+
+/**
+ * Try the published subjects, then (REB and HF only) a subject that is live now. Listed third-party subjects can
+ * disappear (21 Nov: every REB position had been closed and the HF account had repaid), which silently stopped the
+ * bench, the daily checks and the scheduled tests for those categories. The replacement is remembered per test, in
+ * process, so later attempts do not search again; the published roster itself is unchanged. If nothing works, the
+ * listed subjects' last real error is thrown.
+ */
+export async function withLiveSubjects<T>(
+  spec: { testId: TestId; subject: Record<string, string>; policy: unknown },
+  attempt: (subject: Record<string, string>) => Promise<T>,
+): Promise<T> {
+  const listed = spec.testId === 'MCS-REB-1' ? [spec.subject, ...REB_FALLBACK_SUBJECTS] : [spec.subject]
+  try {
+    return await firstCapturable(listed, attempt)
+  } catch (listedError) {
+    if (spec.testId !== 'MCS-REB-1' && spec.testId !== 'MCS-HF-1') throw listedError
+    const remembered = liveSubjects.get(spec.testId)
+    const key = (x: Record<string, string>) => x['tokenId'] ?? x['address'] ?? ''
+    const tryOne = async (subject: Record<string, string>): Promise<{ ok: true; value: T } | { ok: false }> => {
+      try { const value = await attempt(subject); liveSubjects.set(spec.testId, subject); return { ok: true, value } } catch { return { ok: false } }
+    }
+    if (remembered) {
+      const r = await tryOne(remembered)
+      if (r.ok) return r.value
+      liveSubjects.delete(spec.testId)
+    }
+    let found: Record<string, string>[] = []
+    try {
+      found = spec.testId === 'MCS-REB-1'
+        ? await discoverRebSubjects(publicClient(), { feeTier: Number((spec.policy as RebPolicy).feeTier) })
+        : await discoverHfSubjects(publicClient())
+    } catch { /* keep the listed failure */ }
+    for (const subject of found) {
+      if (remembered && key(subject) === key(remembered)) continue
+      const r = await tryOne(subject)
+      if (r.ok) return r.value
+    }
+    throw listedError
+  }
+}
+
+/** Live replacement subjects that last worked, per test, kept in-process (the listed roster is unchanged). */
+const liveSubjects = new Map<TestId, Record<string, string>>()
 
 /** Preserve candidate order and the last real failure; never return fabricated evidence. */
 export async function firstCapturable<T>(subjects: readonly Record<string, string>[], capture: (subject: Record<string, string>) => Promise<T>): Promise<T> {
