@@ -6,7 +6,7 @@ export type AvatarSource =
   | { kind: 'fallback'; src?: undefined; srcSet?: undefined }
 
 /** A portrait Marque hosts (an owner's upload, checked raster only): /img/p/<id>, or an agent's stable portrait address. */
-const MARQUE_IMAGE = /^\/img\/(?:p\/[0-9a-f]{32}|agent\/(?:56|97)\/0x[0-9a-f]{40}\/\d{1,78}\/(?:portrait|banner))$/
+const MARQUE_IMAGE = /^\/img\/(?:p\/[0-9a-f]{32}|art\/(?:56|97)\/0x[0-9a-f]{40}\/\d{1,78}\/(?:portrait|banner))$/
 
 /** Only render images served by the registry indexer's image proxy, or a portrait Marque hosts. */
 export function registryImageUrl(value: unknown): string | null {

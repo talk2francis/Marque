@@ -7,7 +7,7 @@ export type AgentArtKind = 'portrait' | 'banner'
 
 export function agentArtUrl(agentId: string, kind: AgentArtKind): string | null {
   const m = /^(56|97):(0x[0-9a-fA-F]{40}):(\d{1,78})$/.exec(agentId)
-  return m ? `/img/agent/${m[1]}/${m[2]!.toLowerCase()}/${m[3]}/${kind}` : null
+  return m ? `/img/art/${m[1]}/${m[2]!.toLowerCase()}/${m[3]}/${kind}` : null
 }
 
-export const AGENT_ART_PATH = /^\/img\/agent\/(?:56|97)\/0x[0-9a-f]{40}\/\d{1,78}\/(?:portrait|banner)$/
+export const AGENT_ART_PATH = /^\/img\/art\/(?:56|97)\/0x[0-9a-f]{40}\/\d{1,78}\/(?:portrait|banner)$/

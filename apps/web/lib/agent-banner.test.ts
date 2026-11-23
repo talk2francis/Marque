@@ -68,8 +68,8 @@ describe('owner banner authority and image storage', () => {
     // The per-wallet image count, the image insert, the banner pointer, then the delayed sweep of replaced images.
     expect(mocked.execute).toHaveBeenCalledTimes(4)
     expect(dialect.sqlToQuery(mocked.execute.mock.calls[3]![0]).sql).toContain('now() -')
-    expect(purged.paths).toContain('/img/agent/56/0x8004a169fb4a3325136eb29fa0ceb6d2e539a432/99/banner')
-    expect(result.ok && result.banner?.url).toBe('/img/agent/56/0x8004a169fb4a3325136eb29fa0ceb6d2e539a432/99/banner')
+    expect(purged.paths).toContain('/img/art/56/0x8004a169fb4a3325136eb29fa0ceb6d2e539a432/99/banner')
+    expect(result.ok && result.banner?.url).toBe('/img/art/56/0x8004a169fb4a3325136eb29fa0ceb6d2e539a432/99/banner')
     expect(dialect.sqlToQuery(mocked.execute.mock.calls[0]![0]).sql).toContain('count(*)')
     const query = dialect.sqlToQuery(mocked.execute.mock.calls[2]![0])
     expect(query.sql).toContain('insert into agent_banner'); expect(query.params).toContain(session.message); expect(query.params).toContain(session.signature)

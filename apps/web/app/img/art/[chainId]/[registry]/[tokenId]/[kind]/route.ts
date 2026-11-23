@@ -13,8 +13,8 @@ export const dynamic = 'force-dynamic'
 const rows = (r: unknown) => ((r as { rows?: unknown[] }).rows ?? r) as Array<Record<string, unknown>>
 const NOT_FOUND = () => new Response('Not found', { status: 404, headers: { 'Cache-Control': 'public, max-age=30, s-maxage=30', 'X-Content-Type-Options': 'nosniff' } })
 
-export async function GET(req: Request, { params }: { params: Promise<{ chain: string; registry: string; token: string; kind: string }> }) {
-  const { chain, registry, token, kind } = await params
+export async function GET(req: Request, { params }: { params: Promise<{ chainId: string; registry: string; tokenId: string; kind: string }> }) {
+  const { chainId: chain, registry, tokenId: token, kind } = await params
   if (!/^(56|97)$/.test(chain) || !/^0x[0-9a-fA-F]{40}$/.test(registry) || !/^\d{1,78}$/.test(token) || (kind !== 'portrait' && kind !== 'banner')) return NOT_FOUND()
   const agentId = `${chain}:${registry.toLowerCase()}:${token}`
   let imageId: string | null = null
