@@ -1112,3 +1112,17 @@ a.introBack:hover { color: var(--fg); }
   .depthSteps::-webkit-scrollbar { display: none; }
   .depthSteps::before { right: auto; width: 100%; min-width: 460px; }
 }
+
+/* Recently listed on Marque (23 Nov 2026). */
+.recent { margin-top: var(--s7); }
+.recentHead h2 { margin: 0 0 6px; font-size: 20px; font-weight: 600; letter-spacing: -0.01em; }
+.recentHead p { margin: 0 0 var(--s3); color: var(--ink-2); font-size: 14px; max-width: 62ch; }
+.recentList { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+.recentCard { display: flex; gap: 12px; align-items: center; padding: 12px 14px; border: 1px solid var(--hair); border-radius: var(--r-2); background: var(--panel); color: inherit; text-decoration: none; min-width: 0; transition: border-color var(--t-fast) var(--ease); }
+.recentCard:hover, .recentCard:focus-visible { border-color: var(--hair-2); }
+.recentText { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.recentText b { font-weight: 600; font-size: 14.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.recentText small { color: var(--ink-3); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.recentState { font-size: 12px; color: var(--ink-3); }
+.recentState[data-live] { color: var(--moss, var(--ink-2)); }
+@media (max-width: 520px) { .recentList { grid-template-columns: 1fr; } }

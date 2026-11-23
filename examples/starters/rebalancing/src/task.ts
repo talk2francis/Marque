@@ -1,7 +1,8 @@
 /** The task a buyer sends and the report the Standard grades. Do not rename fields. */
 
 export interface Task {
-  owner: `0x${string}`
+  /** The position's owner, when the task names one. Not needed: the position is read by its NFT id. */
+  owner?: `0x${string}`
   tokenId: string                      // the PancakeSwap V3 position NFT
   rangePct: number                     // re-centre at +/- this percent around spot
   feeTier?: number
@@ -29,10 +30,20 @@ export function fromCase(c: PublishedCase): Task {
 }
 
 /** Read a buyer's plain-words task. Refuse, with a reason, what you cannot answer. */
+/**
+ * Read a task in plain words. Handles both forms Marque sends:
+ *  - the Standard's live test: "Position NFT id: 7826522 ... Block: 135209063 ... re-centre ... at ±6% ..." (no owner);
+ *  - a buyer's job: "My PancakeSwap V3 position #7823778, owned by 0x1eCb...6CFf ... Re-centre it at ±5% ...".
+ * The position is read by its NFT id, so the owner is optional. Never take another address (the pool's) as the owner.
+ */
 export function parseTask(text: string): { ok: true; task: Task } | { ok: false; reason: string } {
-  const owner = text.match(/0x[0-9a-fA-F]{40}/)?.[0]
-  const tokenId = text.match(/(?:position|#|id)\s*#?\s*([0-9]{3,12})/i)?.[1]
-  if (!owner || !tokenId) return { ok: false, reason: 'Send the position number and its owner address.' }
-  const pct = Number(text.match(/([0-9]+(?:\.[0-9]+)?)\s*%/)?.[1] ?? 10)
-  return { ok: true, task: { owner: owner as `0x${string}`, tokenId, rangePct: pct } }
+  const tokenId = text.match(/(?:position\s+nft\s+id|nft\s+id|token\s*id|position\s+(?:nft\s+)?(?:id|number|#)?|nft)\s*[:#]?\s*#?\s*([0-9]{3,12})\b/i)?.[1]
+    ?? text.match(/#\s*([0-9]{3,12})\b/)?.[1]
+  if (!tokenId) return { ok: false, reason: 'Send the PancakeSwap V3 position NFT number, for example "position #7823778".' }
+  const owner = text.match(/(?:owned by|owner(?:\s+address)?\s*[:=]?)\s*(0x[0-9a-fA-F]{40})/i)?.[1]
+  const pct = Number(text.match(/(?:±|\+\/-|plus or minus)\s*([0-9]+(?:\.[0-9]+)?)\s*%/i)?.[1] ?? text.match(/\bat\s+([0-9]+(?:\.[0-9]+)?)\s*%/i)?.[1] ?? 10)
+  const fee = text.match(/fee tier\s*([0-9]{2,6})\b/i)?.[1]
+  const block = text.match(/\bblock\s*[:#]?\s*([0-9]{6,12})\b/i)?.[1]
+  if (!(pct > 0 && pct < 100)) return { ok: false, reason: 'Send the range as a percent around the price, for example ±5%.' }
+  return { ok: true, task: { ...(owner ? { owner: owner as `0x${string}` } : {}), tokenId, rangePct: pct, ...(fee ? { feeTier: Number(fee) } : {}), ...(block ? { blockNumber: BigInt(block) } : {}) } }
 }

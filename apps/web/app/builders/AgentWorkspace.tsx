@@ -10,6 +10,7 @@ import { AgentPortraitControl } from '../_components/profile/AgentPortraitContro
 import { AgentBannerControl } from '../_components/profile/AgentBannerControl'
 import { RegistrationEditor } from '../_components/profile/RegistrationEditor'
 import { Skeleton, Tabs } from '../_components/ui'
+import { useHiddenAgents } from '../../lib/hidden-agents'
 import {
   agentPriceState,
   builderNextStep,
@@ -146,11 +147,18 @@ export function AgentWorkspace({
     return () => clearInterval(timer)
   }, [])
 
-  const agents = data?.agents ?? []
-  const active = selected
-    ? (agents.find((a) => `${a.chainId}:${a.agentId}` === selected) ?? null)
-    : (agents[0] ?? null)
+  const allAgents = data?.agents ?? []
   const own = Boolean(wallet && address && address.toLowerCase() === wallet.toLowerCase())
+  // Owners can hide agents they are done with from this list (this device only; nothing public changes).
+  const { hidden, hide, unhide } = useHiddenAgents(own ? wallet : null)
+  const [showHidden, setShowHidden] = useState(false)
+  const hiddenCount = allAgents.filter((a) => hidden.has(a.agentKey)).length
+  const visible = showHidden ? allAgents : allAgents.filter((a) => !hidden.has(a.agentKey))
+  // An agent chosen by link stays open even when hidden; otherwise the first visible agent opens.
+  const active = selected
+    ? (allAgents.find((a) => `${a.chainId}:${a.agentId}` === selected) ?? null)
+    : (visible[0] ?? null)
+  const agents = active && !visible.includes(active) ? [active, ...visible] : visible
   const choose = (a: BuilderAgent) => {
     const id = `${a.chainId}:${a.agentId}`
     setSelected(id)
@@ -328,6 +336,12 @@ export function AgentWorkspace({
                             </span>
                             <ChevronRight aria-hidden="true" />
                           </button>
+                          {own ? (
+                            <button type="button" className={styles.hideAgent} onClick={() => (hidden.has(a.agentKey) ? unhide(a.agentKey) : hide(a.agentKey))}
+                              title={hidden.has(a.agentKey) ? 'Show this agent in My Marque again' : 'Hide this agent from your My Marque list (this device only; it stays registered and listed)'}>
+                              {hidden.has(a.agentKey) ? 'Unhide' : 'Hide'}
+                            </button>
+                          ) : null}
                         </li>
                       )
                     })}
@@ -335,6 +349,11 @@ export function AgentWorkspace({
                 </div>
               ) : null
             })}
+            {own && hiddenCount ? (
+              <button type="button" className={styles.more} onClick={() => setShowHidden((v) => !v)}>
+                {showHidden ? 'Leave hidden agents out' : `Show ${hiddenCount} hidden`}
+              </button>
+            ) : null}
             {data?.page.nextCursor ? (
               <button
                 type="button"

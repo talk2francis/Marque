@@ -4,6 +4,8 @@ import { Marketplace } from './Marketplace'
 import { initialMarket } from './initial'
 import { RegisterTable } from './RegisterTable'
 import { Disclosure } from './Disclosure'
+import { RecentlyListed } from './RecentlyListed'
+import { recentListings } from '../../lib/recent-listings'
 import { SiteHeader, SiteFooter } from '../_components/SiteHeader'
 import { REFERENCE_AGENTS } from '../../lib/reference-agents'
 import { marketLadder, plainLadderQuery } from '../../lib/market-ladder'
@@ -28,10 +30,11 @@ export const metadata = {
  * from anyone who wants it.
  */
 export default async function RegisterPage() {
-  const [initial, mainnet, testnet] = await Promise.all([
+  const [initial, mainnet, testnet, recent] = await Promise.all([
     initialMarket(),
     marketLadder(plainLadderQuery('mainnet')).catch(() => null),
     marketLadder(plainLadderQuery('practice')).catch(() => null),
+    recentListings().catch(() => []),
   ])
   // The depth of the market, listed to warranted, on BSC mainnet (2 Nov). Server-rendered, so a reader without
   // scripts sees it; its priced, hireable and warranted equal the one supply count on every page.
@@ -76,6 +79,8 @@ export default async function RegisterPage() {
         </header>
 
         <div id="market" className={styles.marketAnchor}><Marketplace initial={initial} /></div>
+
+        <RecentlyListed items={recent} />
 
         <div className={styles.appendix}>
           <Disclosure

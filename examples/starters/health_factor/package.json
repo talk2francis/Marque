@@ -7,7 +7,8 @@
     "node": ">=22"
   },
   "scripts": {
-    "test:mcs": "node --import tsx --test test/mcs.test.ts",
+    "test:mcs": "node --import tsx --test test/live-task.test.ts test/mcs.test.ts",
+    "test:task": "node --import tsx --test test/live-task.test.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

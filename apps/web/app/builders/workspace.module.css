@@ -117,3 +117,9 @@
 }
 .workspace[data-embedded] .lookup { display: none; }
 .workspace[data-embedded] .heading h2 { margin: 0; color: var(--ink); font-size: 22px; letter-spacing: -.02em; }
+/* Hide or unhide an agent in the owner's list (23 Nov 2026): a quiet text control beside the agent. */
+.roster li { position:relative; }
+.roster li button.hideAgent { position:absolute; right:30px; top:50%; transform:translateY(-50%); width:auto; min-height:0; padding:4px 6px; font-size:12px; color:var(--ink-3); border:0; border-radius:6px; background:transparent; opacity:0; }
+.roster li:hover button.hideAgent, .roster li button.hideAgent:focus-visible { opacity:1; }
+@media (hover: none) { .roster li button.hideAgent { opacity:1; } }
+.roster li button.hideAgent:hover { color:var(--ink); background:var(--panel-2); }
