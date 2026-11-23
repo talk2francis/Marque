@@ -6,6 +6,9 @@ import { db } from '@marque/db'
 import { chainClient, isSupportedChain, network } from '@marque/commerce'
 import { serverToken } from './claim'
 import { inspectImage, type ImageFacts } from './image-check'
+import { sanitizeImage } from './image-sanitize'
+import { agentArtUrl } from './agent-art-url'
+import { purgeEdge } from './edge-purge'
 import { agentPortraits } from './agent-portraits'
 import { BANNER_SIZE } from './agent-banner-model'
 import { addressAccent, ACCENTS, avatarSchema, defaultProfile, imageUrlOf, prefsSchema, type Accent, type ProfileInput, type WalletProfile } from './profile-model'
@@ -83,18 +86,44 @@ export function readSession(header: string | null): ProfileSession | null {
 export async function storeImage(owner: string, dataUrl: string, scope: 'profile' | 'agent-banner' = 'profile'): Promise<{ ok: true; id: string; url: string; facts: ImageFacts } | { ok: false; detail: string }> {
   const m = /^data:image\/(png|jpeg|webp);base64,([A-Za-z0-9+/=]+)$/.exec(dataUrl)
   if (!m) return { ok: false, detail: 'Send the image as a PNG, JPEG or WebP data URL.' }
-  const bytes = new Uint8Array(Buffer.from(m[2]!, 'base64'))
+  const raw = new Uint8Array(Buffer.from(m[2]!, 'base64'))
+  const first = inspectImage(raw)
+  if (!first.ok) return first
+  // Store only the picture: trailing data, metadata (EXIF/GPS, XMP, comments), ICC profiles and animation are dropped
+  // by walking the file's own structure, never by decoding pixels (23 Nov 2026).
+  const bytes = sanitizeImage(raw, first.facts.mime)
+  if (!bytes) return { ok: false, detail: 'That image file is damaged or unusual. Export it again as a normal PNG, JPEG or WebP.' }
   const check = inspectImage(bytes)
-  if (!check.ok) return check
+  if (!check.ok || check.facts.mime !== first.facts.mime || check.facts.width !== first.facts.width || check.facts.height !== first.facts.height) {
+    return { ok: false, detail: 'That image file is damaged or unusual. Export it again as a normal PNG, JPEG or WebP.' }
+  }
   if (scope === 'agent-banner' && (check.facts.width !== BANNER_SIZE.width || check.facts.height !== BANNER_SIZE.height)) return { ok: false, detail: 'Frame the image as a wide banner before saving.' }
   // Existing portrait IDs stay identical. Banner IDs include the uploader so the same art can be used by two owners.
   const digest = createHash('sha256')
   if (scope === 'agent-banner') digest.update(`agent-banner:${owner.toLowerCase()}:`)
   const id = digest.update(bytes).digest('hex').slice(0, 32)
+  const room = await makeRoom(owner.toLowerCase())
+  if (!room) return { ok: false, detail: `This wallet already keeps ${MAX_IMAGES_PER_OWNER} images in use. Remove a portrait, banner or avatar first.` }
   await guarded(() => db().execute(sql`insert into profile_image (id, owner, mime, width, height, bytes)
     values (${id}, ${owner.toLowerCase()}, ${check.facts.mime}, ${check.facts.width}, ${check.facts.height}, ${Buffer.from(bytes)})
     on conflict (id) do nothing`))
   return { ok: true, id, url: imageUrlOf(id), facts: check.facts }
+}
+
+/** Images kept per wallet. Older ones that no portrait, banner or avatar uses are removed to make room. */
+export const MAX_IMAGES_PER_OWNER = 24
+
+async function makeRoom(owner: string): Promise<boolean> {
+  const count = Number(rows(await guarded(() => db().execute(sql`select count(*)::int as n from profile_image where owner = ${owner}`)))[0]?.['n'] ?? 0)
+  if (count < MAX_IMAGES_PER_OWNER) return true
+  await guarded(() => db().execute(sql`delete from profile_image where id in (
+    select i.id from profile_image i where i.owner = ${owner}
+      and not exists (select 1 from agent_portrait p where p.image_id = i.id)
+      and not exists (select 1 from agent_banner b where b.image_id = i.id)
+      and not exists (select 1 from wallet_profile w where w.avatar->>'image' = i.id)
+    order by i.created_at asc limit ${count - MAX_IMAGES_PER_OWNER + 1})`))
+  const after = Number(rows(await guarded(() => db().execute(sql`select count(*)::int as n from profile_image where owner = ${owner}`)))[0]?.['n'] ?? 0)
+  return after < MAX_IMAGES_PER_OWNER
 }
 
 export async function readImage(id: string): Promise<{ mime: string; bytes: Buffer } | null> {
@@ -131,6 +160,7 @@ export async function setAgentPortrait(session: ProfileSession, agentId: string,
   if (!(await ownsAgent(session.address, agentId))) return { ok: false, status: 403, detail: 'This wallet does not own that identity on chain.' }
   if (imageId === null) {
     await guarded(() => db().execute(sql`delete from agent_portrait where agent_id = ${agentId}`))
+    await afterArtChange(session.address, agentId, 'portrait')
     return { ok: true }
   }
   if (!(await imageOwnedBy(imageId, session.address))) return { ok: false, status: 404, detail: 'Upload the image from this wallet first.' }
@@ -138,7 +168,33 @@ export async function setAgentPortrait(session: ProfileSession, agentId: string,
     values (${agentId}, ${imageId}, ${session.address}, ${session.message}, ${session.signature})
     on conflict (agent_id) do update set image_id = excluded.image_id, owner = excluded.owner,
       proof_message = excluded.proof_message, proof_signature = excluded.proof_signature, set_at = now()`))
+  await afterArtChange(session.address, agentId, 'portrait')
   return { ok: true }
+}
+
+/** How long a replaced image is kept, so a page copy cached in a browser before the change never shows a broken image. */
+export const REPLACED_IMAGE_GRACE = '1 hour'
+
+/**
+ * After a portrait, banner or avatar changes (23 Nov 2026): the edge drops its copy of the agent's stable image address
+ * so the new picture is served at once, and images of this owner that nothing uses any more (no portrait, banner or
+ * avatar) are deleted once they are over an hour old, their old addresses purged too. Never fails the change itself.
+ */
+export async function afterArtChange(owner: string, agentId: string | null, kind: 'portrait' | 'banner' | null): Promise<void> {
+  const paths: string[] = []
+  if (agentId && kind) { const u = agentArtUrl(agentId, kind); if (u) paths.push(u) }
+  try { for (const id of await sweepReplacedImages(owner)) paths.push(imageUrlOf(id)) } catch { /* the sweep runs again next change */ }
+  if (paths.length) await purgeEdge(paths)
+}
+
+export async function sweepReplacedImages(owner: string): Promise<string[]> {
+  const res = rows(await guarded(() => db().execute(sql`delete from profile_image i where i.owner = ${owner.toLowerCase()}
+    and i.created_at < now() - ${REPLACED_IMAGE_GRACE}::interval
+    and not exists (select 1 from agent_portrait p where p.image_id = i.id)
+    and not exists (select 1 from agent_banner b where b.image_id = i.id)
+    and not exists (select 1 from wallet_profile w where w.avatar->>'image' = i.id)
+    returning i.id`)))
+  return res.map((r) => String(r['id']))
 }
 
 /* ------------------------------------------------------------------ profiles */
@@ -188,6 +244,7 @@ export async function saveWalletProfile(session: ProfileSession, input: ProfileI
     on conflict (address) do update set display_name = excluded.display_name, bio = excluded.bio, avatar = excluded.avatar,
       accent = excluded.accent, prefs = excluded.prefs, public = excluded.public, proof_message = excluded.proof_message,
       proof_signature = excluded.proof_signature, updated_at = now()`))
+  await afterArtChange(session.address, null, null)
   return { ok: true, profile: await readWalletProfile(session.address, session.address) }
 }
 

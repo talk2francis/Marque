@@ -35,5 +35,6 @@ export function parseTask(text: string): { ok: true; task: Task } | { ok: false;
   const asset = (text.match(/\b(USDT|USDC|FDUSD|U)\b/)?.[1] ?? 'USDT') as Task['asset']
   const size = Number(text.replace(/,/g, '').match(/([0-9]+(?:\.[0-9]+)?)\s*(?:usd|\$|usdt|usdc|u\b)/i)?.[1] ?? NaN)
   if (!Number.isFinite(size)) return { ok: false, reason: 'Send an amount, for example 1000 USDT.' }
-  return { ok: true, task: { asset, sizeUsd: size, currentAprPct: 0, minImprovementBps: 50, allowedProtocols: ['venus'], leverageAllowed: false } }
+  const block = text.match(/\bblock\s*[:#]?\s*([0-9]{6,12})\b/i)?.[1]
+  return { ok: true, task: { asset, sizeUsd: size, currentAprPct: 0, minImprovementBps: 50, allowedProtocols: ['venus'], leverageAllowed: false, ...(block ? { blockNumber: BigInt(block) } : {}) } }
 }

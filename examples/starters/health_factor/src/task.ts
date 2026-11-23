@@ -33,5 +33,6 @@ export function parseTask(text: string): { ok: true; task: Task } | { ok: false;
   const address = text.match(/0x[0-9a-fA-F]{40}/)?.[0]
   if (!address) return { ok: false, reason: 'Send the Venus borrower address (0x...).' }
   const target = Number(text.match(/(?:health factor|hf)[^0-9]{0,24}([0-9]+(?:\.[0-9]+)?)/i)?.[1] ?? 1.5)
-  return { ok: true, task: { address: address as `0x${string}`, targetHf: target > 1 ? target : 1.5 } }
+  const block = text.match(/\bblock\s*[:#]?\s*([0-9]{6,12})\b/i)?.[1]
+  return { ok: true, task: { address: address as `0x${string}`, targetHf: target > 1 ? target : 1.5, ...(block ? { blockNumber: BigInt(block) } : {}) } }
 }

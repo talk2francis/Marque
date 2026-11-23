@@ -16,7 +16,14 @@ const agentId = `97:${network(97).identityRegistry.toLowerCase()}:${Date.now()}`
 const session = { address: owner, message: 'isolated fixture proof', signature: 'isolated fixture signature' }
 const rows = (r: unknown) => ((r as { rows?: unknown[] }).rows ?? r) as Array<Record<string, unknown>>
 const capturedImage = process.env['BANNER_TEST_IMAGE']
-const image = capturedImage ? readFileSync(capturedImage, 'utf8').trim() : (() => { const b = new Uint8Array(64); b.set([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0, 0, 0, 13, 0x49, 0x48, 0x44, 0x52]); new DataView(b.buffer).setUint32(16, 960); new DataView(b.buffer).setUint32(20, 320); return 'data:image/png;base64,' + Buffer.from(b).toString('base64') })()
+const image = capturedImage ? readFileSync(capturedImage, 'utf8').trim() : (() => {
+  // A structurally complete PNG (IHDR, IDAT, IEND): uploads are rebuilt from their chunks and refuse a bare header.
+  const b = new Uint8Array(64), v = new DataView(b.buffer)
+  b.set([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0, 0, 0, 13, 0x49, 0x48, 0x44, 0x52]); v.setUint32(16, 960); v.setUint32(20, 320); b[24] = 8; b[25] = 2
+  const idat = 64 - 33 - 24; v.setUint32(33, idat); b.set([0x49, 0x44, 0x41, 0x54], 37)
+  const end = 33 + 12 + idat; v.setUint32(end, 0); b.set([0x49, 0x45, 0x4e, 0x44], end + 4)
+  return 'data:image/png;base64,' + Buffer.from(b).toString('base64')
+})()
 const imageBytes = Buffer.from(image.split(',')[1]!, 'base64').length
 let firstUrl = ''
 describe.skipIf(!enabled)('owner banner persistence on an isolated schema', () => {

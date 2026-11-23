@@ -107,7 +107,7 @@ export function qualityVerdict(f: QualityFacts): QualityVerdict {
       : {
           id: 'callable', label: 'Its endpoint answers a live call', state: !f.lastProbeFailure && f.callabilityUnknown ? 'pending' : 'fail',
           reason: f.lastProbeFailure ? `The last probe did not reach a callable service: ${f.lastProbeFailure.reason}.` : f.callable ? 'The last callable answer is more than 24 hours old.' : f.callabilityUnknown ? 'The card names a runtime, but a consented live call has not been validated.' : 'No probe has reached a callable service yet.',
-          fix: 'Check a live call with permission. A2A must answer message/send with a valid Message or accepted Task; an MCP handshake must expose a task interface.',
+          fix: 'Check a live call with permission. A2A must answer message/send with a valid Message or accepted Task; an MCP handshake must expose a task interface. If the agent moved to a new address, update its registration instead of registering again: in My Marque, Agents, Edit name, endpoint and registration.',
         },
   )
 

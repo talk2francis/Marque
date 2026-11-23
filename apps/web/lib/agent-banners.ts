@@ -2,7 +2,8 @@ import 'server-only'
 import { sql } from 'drizzle-orm'
 import { db } from '@marque/db'
 import { imageUrlOf } from './profile-model'
-import { ownsAgent, storeImage, type ProfileSession } from './wallet-profile'
+import { afterArtChange, ownsAgent, storeImage, type ProfileSession } from './wallet-profile'
+import { agentArtUrl } from './agent-art-url'
 import { BANNER_SIZE, type AgentBanner } from './agent-banner-model'
 
 const stamp = (value: unknown) => value instanceof Date ? value.toISOString() : new Date(String(value)).toISOString()
@@ -13,7 +14,7 @@ export async function readAgentBanner(agentId: string): Promise<AgentBanner | nu
   const r = rows(await db().execute(sql`select b.image_id, i.width, i.height, b.set_at
     from agent_banner b join profile_image i on i.id = b.image_id where b.agent_id = ${agentId} limit 1`))[0]
   if (!r || !/^[0-9a-f]{32}$/.test(String(r['image_id']))) return null
-  return { url: imageUrlOf(String(r['image_id'])), width: Number(r['width']), height: Number(r['height']), updatedAt: stamp(r['set_at']) }
+  return { url: agentArtUrl(agentId, 'banner') ?? imageUrlOf(String(r['image_id'])), width: Number(r['width']), height: Number(r['height']), updatedAt: stamp(r['set_at']) }
 }
 
 /** No chain write: the session proves the wallet, and ownerOf is read again for every set or clear. */
@@ -31,5 +32,6 @@ export async function saveAgentBanner(session: ProfileSession, agentId: string, 
       proof_message = excluded.proof_message, proof_signature = excluded.proof_signature, set_at = now() returning set_at`))
   const at = result[0]?.['set_at']
   if (!at || !Number.isFinite(Date.parse(String(at)))) throw new Error('Banner write was not confirmed.')
-  return { ok: true, banner: imageId === null ? null : { url: imageUrlOf(imageId), width: BANNER_SIZE.width, height: BANNER_SIZE.height, updatedAt: stamp(at) } }
+  await afterArtChange(session.address, agentId, 'banner')
+  return { ok: true, banner: imageId === null ? null : { url: agentArtUrl(agentId, 'banner') ?? imageUrlOf(imageId), width: BANNER_SIZE.width, height: BANNER_SIZE.height, updatedAt: stamp(at) } }
 }

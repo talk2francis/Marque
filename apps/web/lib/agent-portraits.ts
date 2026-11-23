@@ -1,6 +1,7 @@
 import { sql } from 'drizzle-orm'
 import { db } from '@marque/db'
 import { imageUrlOf } from './profile-model'
+import { agentArtUrl } from './agent-art-url'
 
 /**
  * Portraits an agent's owner set on Marque (28 Oct), by agent id. The owner proved control with a signed session and
@@ -13,7 +14,8 @@ export async function agentPortraits(ids: readonly string[]): Promise<Map<string
   try {
     const res = await db().execute(sql`select agent_id, image_id from agent_portrait where agent_id in (${sql.join(ids.map((i) => sql`${i}`), sql`, `)})`)
     const list = ((res as unknown as { rows?: unknown[] }).rows ?? res) as Array<Record<string, unknown>>
-    for (const r of list) out.set(String(r['agent_id']), imageUrlOf(String(r['image_id'])))
+    // The stable address (current image, whatever page copy is cached); the hash URL only for an unusual agent id.
+    for (const r of list) out.set(String(r['agent_id']), agentArtUrl(String(r['agent_id']), 'portrait') ?? imageUrlOf(String(r['image_id'])))
   } catch { /* no table yet, or a slow read: the registry image shows as before */ }
   return out
 }

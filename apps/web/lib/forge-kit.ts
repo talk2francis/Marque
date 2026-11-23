@@ -1,5 +1,6 @@
 import { LINK_WALLET_SCRIPT } from './link-wallet-script'
 import { dailyActionFor } from './forge-action-source'
+import { STARTER_SOURCES } from './forge-starter-sources'
 import { ALL_TOLERANCES, type TestId } from '@marque/conformance'
 import { exampleCard, registrationJson, registrationText } from '@marque/commerce'
 
@@ -21,10 +22,8 @@ const SDK = '0.6.0'
 interface Spec {
   test: TestId
   label: string
-  taskType: string[]
   reportType: string[]
   fromCase: string[]
-  parse: string[]
   chainNotes: string
   example: string
 }
@@ -32,16 +31,6 @@ interface Spec {
 const SPECS: Record<KitCategory, Spec> = {
   health_factor: {
     test: 'MCS-HF-1', label: 'health factor',
-    taskType: [
-      'export interface Task {',
-      '  /** The Venus Core Pool borrower to read. */',
-      '  address: `0x${string}`',
-      '  /** The health factor the buyer wants to reach. */',
-      '  targetHf: number',
-      '  /** Read chain state at this block when given (tests always give one). */',
-      '  blockNumber?: bigint',
-      '}',
-    ],
     reportType: [
       'export interface Report {',
       '  healthFactor: number                 // to 3 dp; tolerance 0.005',
@@ -56,30 +45,11 @@ const SPECS: Record<KitCategory, Spec> = {
       '}',
     ],
     fromCase: ['  return { address: c.subject.address as `0x${string}`, targetHf: Number(c.policy.targetHealthFactor), blockNumber: BigInt(c.blockNumber) }'],
-    parse: [
-      '  const address = text.match(/0x[0-9a-fA-F]{40}/)?.[0]',
-      '  if (!address) return { ok: false, reason: \'Send the Venus borrower address (0x...).\' }',
-      '  const target = Number(text.match(/(?:health factor|hf)[^0-9]{0,24}([0-9]+(?:\\.[0-9]+)?)/i)?.[1] ?? 1.5)',
-      '  return { ok: true, task: { address: address as `0x${string}`, targetHf: target > 1 ? target : 1.5 } }',
-    ],
     chainNotes: 'Venus Comptroller `getAssetsIn`, `markets(vToken)` for the collateral factor, each vToken `getAccountSnapshot`, and the oracle `getUnderlyingPrice` (scaled to 1e(36 - underlying decimals)).',
     example: 'What is the health factor of 0x60AA3AEE06E2345A17E4d4B12c53E046F4F63CAf on Venus, and how much must be repaid to reach 2.5?',
   },
   yield: {
     test: 'MCS-YIELD-1', label: 'yield',
-    taskType: [
-      'export interface Task {',
-      '  asset: \'USDT\' | \'USDC\' | \'FDUSD\' | \'U\'',
-      '  sizeUsd: number',
-      '  /** What the buyer earns now, in percent. */',
-      '  currentAprPct: number',
-      '  /** Only recommend a move that beats the current yield by at least this. */',
-      '  minImprovementBps: number',
-      '  allowedProtocols: string[]',
-      '  leverageAllowed: boolean',
-      '  blockNumber?: bigint',
-      '}',
-    ],
     reportType: [
       'export interface Report {',
       '  recommend: boolean                   // must be stated, true or false',
@@ -93,29 +63,11 @@ const SPECS: Record<KitCategory, Spec> = {
       '}',
     ],
     fromCase: ['  return { asset: c.policy.asset as Task[\'asset\'], sizeUsd: Number(c.policy.sizeUsd), currentAprPct: Number(c.policy.currentAprPct ?? 0), minImprovementBps: Number(c.policy.minImprovementBps ?? 0), allowedProtocols: (c.policy.allowedProtocols as string[]) ?? [\'venus\'], leverageAllowed: Boolean(c.policy.leverageAllowed), blockNumber: BigInt(c.blockNumber) }'],
-    parse: [
-      '  const asset = (text.match(/\\b(USDT|USDC|FDUSD|U)\\b/)?.[1] ?? \'USDT\') as Task[\'asset\']',
-      '  const size = Number(text.replace(/,/g, \'\').match(/([0-9]+(?:\\.[0-9]+)?)\\s*(?:usd|\\$|usdt|usdc|u\\b)/i)?.[1] ?? NaN)',
-      '  if (!Number.isFinite(size)) return { ok: false, reason: \'Send an amount, for example 1000 USDT.\' }',
-      '  return { ok: true, task: { asset, sizeUsd: size, currentAprPct: 0, minImprovementBps: 50, allowedProtocols: [\'venus\'], leverageAllowed: false } }',
-    ],
     chainNotes: 'Venus vToken `supplyRatePerBlock` (BSC produces a block about every 0.45 s; state your blocks-per-year), and the protocols the task allows.',
     example: 'Where should 1,000 USDT earn the most, net of switching cost, if I earn 0% now?',
   },
   grid: {
     test: 'MCS-GRID-1', label: 'grid trading',
-    taskType: [
-      'export interface Task {',
-      '  pair: string                         // e.g. \'BNB/USDT\'',
-      '  lowerBound: number',
-      '  upperBound: number',
-      '  levels: number',
-      '  capitalUsd: number',
-      '  stopPrice?: number',
-      '  feeBps: number                       // per trade, for the fee drag disclosure',
-      '  blockNumber?: bigint',
-      '}',
-    ],
     reportType: [
       'export interface Report {',
       '  levels: Array<{ price: number; allocationUsd: number }>  // inside the bounds, none below the stop',
@@ -127,27 +79,11 @@ const SPECS: Record<KitCategory, Spec> = {
       '}',
     ],
     fromCase: ['  return { pair: String(c.policy.pair), lowerBound: Number(c.policy.lowerBound), upperBound: Number(c.policy.upperBound), levels: Number(c.policy.levels), capitalUsd: Number(c.policy.capitalUsd), stopPrice: c.policy.stopPrice === undefined ? undefined : Number(c.policy.stopPrice), feeBps: Number(c.policy.feeBps ?? 25), blockNumber: BigInt(c.blockNumber) }'],
-    parse: [
-      '  const nums = text.replace(/,/g, \'\').match(/[0-9]+(?:\\.[0-9]+)?/g)?.map(Number) ?? []',
-      '  const pair = text.match(/\\b(BNB|BTCB|ETH|CAKE)\\b/)?.[1] ?? \'BNB\'',
-      '  if (nums.length < 3) return { ok: false, reason: \'Send a lower and upper price and the capital, for example 600 to 850 with 2000 USDT.\' }',
-      '  const [lower, upper, capital] = nums as [number, number, number]',
-      '  return { ok: true, task: { pair: `${pair}/USDT`, lowerBound: lower, upperBound: upper, levels: 10, capitalUsd: capital, feeBps: 25 } }',
-    ],
     chainNotes: 'The pair\'s spot price from a PancakeSwap V3 pool `slot0`, read at the block; levels are arithmetic, no chain read is needed for them.',
     example: 'Plan a 12-level grid for BNB between 600 and 850 with 2,000 USDT and a stop at 580.',
   },
   rebalancing: {
     test: 'MCS-REB-1', label: 'rebalancing',
-    taskType: [
-      'export interface Task {',
-      '  owner: `0x${string}`',
-      '  tokenId: string                      // the PancakeSwap V3 position NFT',
-      '  rangePct: number                     // re-centre at +/- this percent around spot',
-      '  feeTier?: number',
-      '  blockNumber?: bigint',
-      '}',
-    ],
     reportType: [
       'export interface Report {',
       '  currentTick: number                  // exact',
@@ -163,13 +99,6 @@ const SPECS: Record<KitCategory, Spec> = {
       '}',
     ],
     fromCase: ['  return { owner: c.subject.owner as `0x${string}`, tokenId: String(c.subject.tokenId), rangePct: Number(c.policy.rangePct), feeTier: Number(c.policy.feeTier), blockNumber: BigInt(c.blockNumber) }'],
-    parse: [
-      '  const owner = text.match(/0x[0-9a-fA-F]{40}/)?.[0]',
-      '  const tokenId = text.match(/(?:position|#|id)\\s*#?\\s*([0-9]{3,12})/i)?.[1]',
-      '  if (!owner || !tokenId) return { ok: false, reason: \'Send the position number and its owner address.\' }',
-      '  const pct = Number(text.match(/([0-9]+(?:\\.[0-9]+)?)\\s*%/)?.[1] ?? 10)',
-      '  return { ok: true, task: { owner: owner as `0x${string}`, tokenId, rangePct: pct } }',
-    ],
     chainNotes: 'NonfungiblePositionManager `positions(tokenId)`, the factory `getPool`, and the pool `slot0` and `tickSpacing`.',
     example: 'Re-centre PancakeSwap V3 position 7654391 of 0xa9621227DF65696fB2B45b94644b65eA452b9724 at +/-6%.',
   },
@@ -329,7 +258,7 @@ export function kitFiles(input: KitInput): Array<{ path: string; content: string
     ) },
     { path: root('package.json'), content: `${JSON.stringify({
       name: slug, version: '0.1.0', private: true, type: 'module', engines: { node: '>=22' },
-      scripts: { 'test:mcs': 'node --import tsx --test test/mcs.test.ts', 'action:daily': 'node --import tsx src/daily-action.ts', typecheck: 'tsc --noEmit' },
+      scripts: { 'test:mcs': 'node --import tsx --test test/live-task.test.ts test/mcs.test.ts', 'test:task': 'node --import tsx --test test/live-task.test.ts', 'action:daily': 'node --import tsx src/daily-action.ts', typecheck: 'tsc --noEmit' },
       dependencies: { viem: '^2.21.0', zod: '^3.25.0' },
       devDependencies: { tsx: '^4.19.0', typescript: '^5.5.0', '@types/node': '^22.0.0' },
       marque: { forge: 1, category: input.category, test: s.test, agentStudio: { cli: STUDIO_CLI, sdk: SDK } },
@@ -341,7 +270,7 @@ export function kitFiles(input: KitInput): Array<{ path: string; content: string
     { path: root('src/task.ts'), content: L(
       '/** The task a buyer sends and the report the Standard grades. Do not rename fields. */',
       '',
-      ...s.taskType,
+      ...STARTER_SOURCES[input.category].taskType,
       '',
       ...s.reportType,
       '',
@@ -354,7 +283,7 @@ export function kitFiles(input: KitInput): Array<{ path: string; content: string
       '',
       '/** Read a buyer\'s plain-words task. Refuse, with a reason, what you cannot answer. */',
       'export function parseTask(text: string): { ok: true; task: Task } | { ok: false; reason: string } {',
-      ...s.parse,
+      ...STARTER_SOURCES[input.category].parse,
       '}',
     ) },
     { path: root('src/chain.ts'), content: L(
@@ -434,6 +363,8 @@ export function kitFiles(input: KitInput): Array<{ path: string; content: string
       '  }',
       '})',
     ) },
+    // The exact live task text Marque sends: an agent that cannot read it fails every live test and paid job.
+    { path: root('test/live-task.test.ts'), content: STARTER_SOURCES[input.category].liveTest },
     { path: root('registration.json'), content: reg },
     { path: root('link-wallet.mjs'), content: LINK_WALLET_SCRIPT },
     { path: root('DEPLOY.md'), content: L(
@@ -463,6 +394,20 @@ export function kitFiles(input: KitInput): Array<{ path: string; content: string
       '## 3. Register and list',
       '',
       'Quotes must be signed by the identity\'s agent wallet, which starts as the wallet that registers it. A BNB Agent Studio seller signs with its own key, so the simplest path is to register from that key: `bag erc8004 register`, then "I already run an agent" on https://marque.trade/builders. If you register from another wallet through "I have an endpoint, no identity" (put `registration.json`, with your domain filled in, at `https://YOUR-DOMAIN/.well-known/agent-registration.json`), point the identity\'s agent wallet at the seller key afterwards: copy `link-wallet.mjs` into `app/agent/`, and Door 2\'s last step gives you the one line to run there (it signs with the seller\'s own keystore and prints a signature you paste back; your wallet then sends `setAgentWallet`). Marque never holds a key and never pays your gas.',
+      "",
+      "## 4. Before your first paid job",
+      "",
+      "Each of these has stopped a real agent from delivering. Check them all before you list:",
+      "",
+      "- [ ] `pnpm test:mcs` passes. It also runs `test/live-task.test.ts`: the exact task text Marque sends. An agent that passes the grader but cannot read that text answers every live check and paid job with an error.",
+      "- [ ] Plain-text tasks reach `deliver()`. Marque's live checks and buyers' jobs arrive as a plain-text `message/send`. A BNB Agent Studio seller (CLI 0.0.15) only routes its `negotiate` and `notify_funded` data parts by default and answers anything else with \"unknown skill\": route plain text to `deliver(text)` (step 1.2). Then run the Test bench in My Marque against your public address: it shows your agent's own reply.",
+      "- [ ] Deliverables can be fetched. A paid delivery submits a link to the answer on chain. With Agent Studio's default local storage, `submit()` refuses a `file://` deliverable unless `ERC8183_AGENT_URL` is set and something serves `<ERC8183_AGENT_URL>/job/<id>/response` publicly. Serve that path, or use `--storage-provider ipfs` (or `s3`). Otherwise a paid job stays at \"Escrow funded\" until its deadline and the buyer is refunded.",
+      "- [ ] The agent wallet holds a little BNB for gas (a few thousandths of a BNB covers many deliveries on BSC). Quotes need none; submitting a delivery does.",
+      "- [ ] A stable https address that stays up: a VPS or an always-on host, not a tunnel tied to your laptop. Marque checks the agent every few minutes.",
+      "",
+      "## 5. Moving your agent",
+      "",
+      "The identity is permanent; its address is not. When the host or domain changes, do not register again: that creates a second identity and splits the agent's history. In My Marque open Building, then Agents, choose \"Edit name, endpoint and registration\", and put the new address in Agent card URL. Marque checks the new card, then your owner wallet signs one `setAgentURI` transaction. Marque re-checks the new address within a few minutes.",
     ) },
   ]
 }

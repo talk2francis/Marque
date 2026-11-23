@@ -2,8 +2,10 @@
 export const BANNER_SIZE = { width: 960, height: 320 } as const
 export interface AgentBanner { url: string; width: number; height: number; updatedAt: string }
 
+import { AGENT_ART_PATH } from './agent-art-url'
+
 export function hostedBannerUrl(value: string | null | undefined): string | null {
-  return value && /^\/img\/p\/[0-9a-f]{32}$/.test(value) ? value : null
+  return value && (/^\/img\/p\/[0-9a-f]{32}$/.test(value) || AGENT_ART_PATH.test(value)) ? value : null
 }
 
 /** A filled frame: panning can reveal no pixels outside the source image. */

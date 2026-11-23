@@ -7,6 +7,7 @@ import { toast } from '../../lib/toast'
 import { copyText } from '../../lib/clipboard'
 import { journeyOf, standingOf, type JourneyAgent, type JourneyStep } from '../../lib/builder-journey'
 import styles from './workshop.module.css'
+import { useHiddenAgents } from '../../lib/hidden-agents'
 
 /**
  * The Workshop: My Marque's building side. Where the hiring side counts jobs and money, the Workshop answers one
@@ -53,6 +54,7 @@ export function WorkshopStrip({ address, onOpen }: { address: string; onOpen: (a
   const [agents, setAgents] = useState<WorkshopAgent[] | null>(null)
   const [total, setTotal] = useState(0)
   const [failed, setFailed] = useState(false)
+  const { hidden } = useHiddenAgents(address)
   useEffect(() => {
     let live = true
     setAgents(null); setFailed(false)
@@ -65,7 +67,7 @@ export function WorkshopStrip({ address, onOpen }: { address: string; onOpen: (a
   }, [address])
   if (failed) return <p className={styles.stripNote}>Your agents could not be read just now.</p>
   if (agents === null) return <div className={styles.strip}>{[0, 1].map((i) => <Skeleton key={i} h={112} />)}</div>
-  const shown = agents.slice(0, 3)
+  const shown = agents.filter((a) => !hidden.has(a.agentKey)).slice(0, 3)
   return (
     <section className={styles.strip} aria-label="Your agents at a glance">
       {shown.map((a) => {
