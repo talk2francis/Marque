@@ -81,6 +81,14 @@ const nextConfig = {
           { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
         ],
       },
+      {
+        // Images Marque serves (owner uploads, agent art, the registry-image proxy) are never documents: lock them
+        // down completely, so even a crafted file opened directly cannot run anything (23 Nov 2026). The page-wide
+        // policy above matched these paths too and, being set here at the framework level, replaced the stricter
+        // policy each image route sets; the later rule for the same header wins.
+        source: '/img/:path*',
+        headers: [{ key: 'Content-Security-Policy', value: "default-src 'none'; sandbox" }],
+      },
     ]
   },
 }
