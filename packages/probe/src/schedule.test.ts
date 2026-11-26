@@ -27,6 +27,15 @@ describe('intervalMinutes', () => {
     expect(intervalMinutes({ ...base, firstParty: true, liveness: 'dead', consecutiveDead: 7 })).toBe(5)
     expect(intervalMinutes({ ...base, classified: true })).toBe(30)
   })
+  it('re-checks a classified service with nothing to call every 3 h, so it cannot take a host\'s whole share (26 Nov 2026)', () => {
+    expect(intervalMinutes({ ...base, classified: true, liveness: 'unbound' })).toBe(INTERVAL_MINUTES.classifiedIdle)
+    expect(intervalMinutes({ ...base, classified: true, liveness: 'bad_schema' })).toBe(180)
+    expect(intervalMinutes({ ...base, classified: true, liveness: 'live' })).toBe(30)
+    expect(intervalMinutes({ ...base, classified: true, liveness: 'discovered' })).toBe(30)
+    expect(intervalMinutes({ ...base, firstParty: true, classified: true, liveness: 'unbound' })).toBe(5)
+    // 864 idle agents on one host need 864 * 5 / 180 = 24 of its 120 slots per 5-minute cycle, not all 120.
+    expect(Math.ceil(864 * 5 / INTERVAL_MINUTES.classifiedIdle)).toBeLessThan(120 / 2)
+  })
   it('slows a classified service that has been dead 3+ times, but keeps it inside the 60-minute freshness bar', () => {
     expect(intervalMinutes({ ...base, classified: true, liveness: 'dead', consecutiveDead: 2 })).toBe(30)
     expect(intervalMinutes({ ...base, classified: true, liveness: 'dead', consecutiveDead: 3 })).toBe(INTERVAL_MINUTES.priorityDead)
