@@ -7,6 +7,7 @@ import {
 import { createConfig, http } from 'wagmi'
 import { marquePassWallet, passCapableBrowser } from '../pass/connector'
 import { bsc, bscTestnet } from 'wagmi/chains'
+import { keepConnectorsUnique } from './dedupe'
 
 /**
  * The one wagmi config. wagmi keeps its connection state in the config, so every
@@ -46,6 +47,7 @@ export const wagmiConfig = createConfig({
   },
   ssr: true,
 })
+if (typeof window !== 'undefined') keepConnectorsUnique(wagmiConfig)
 
 /**
  * RainbowKit themed from the site tokens (DESIGN-SYSTEM.md section 6,

@@ -8,6 +8,7 @@ import { deliveryContent, deliveryDigest, type DeliveryHashAlgorithm } from './d
 import { readSubmissionManifest } from './submission-manifest'
 import { originalAnswerCache } from './recheck-original'
 import { manifestFromStored } from './stored-manifest'
+import { keepable, keepAnswer, readKeptAnswer } from './answer-store'
 
 /**
  * Read an ERC-8183 deliverable manifest and check it against the hash on chain.
@@ -128,17 +129,23 @@ const verifiedAnswers = originalAnswerCache(64, true)
 export function jobManifest(chainId: number, jobId: string, job: ManifestJob, onchainHash?: string | null): Promise<Manifest | null> {
   const hash = job?.deliverable?.hash ?? onchainHash ?? null
   const load = async () => {
-    if (hash && isSupportedChain(chainId) && /^\d{1,20}$/.test(jobId)) {
+    const valid = Boolean(hash && /^0x[0-9a-fA-F]{64}$/.test(hash) && isSupportedChain(chainId) && /^\d{1,20}$/.test(jobId))
+    if (valid) {
+      const tx = job?.events?.find(e => e.name === 'JobSubmitted')?.tx
+      const submissionUrl = tx && /^0x[0-9a-fA-F]{64}$/.test(tx) ? `${network(chainId).explorer}/tx/${tx}` : null
+      // Marque's kept copy first (answer-store.ts): it outlives the seller's host. Re-hashed here on every read.
+      const kept = manifestFromStored(await readKeptAnswer(chainId, jobId, hash!).catch(() => null), hash!, submissionUrl)
+      if (kept) return kept
       // Lens keeps complete original bytes even when no category check exists.
       // Re-hash those bytes against the current job commitment; checks and dates
       // are neither reused here nor refreshed as a side effect of this read.
       const stored = await peekProjection<{ manifest?: unknown }>(`lens:v9:${chainId}:${jobId}`).catch(() => null)
-      const tx = job?.events?.find(e => e.name === 'JobSubmitted')?.tx
-      const submissionUrl = tx && /^0x[0-9a-fA-F]{64}$/.test(tx) ? `${network(chainId).explorer}/tx/${tx}` : null
-      const recovered = manifestFromStored(stored?.value?.manifest, hash, submissionUrl)
-      if (recovered) return recovered
+      const recovered = manifestFromStored(stored?.value?.manifest, hash!, submissionUrl)
+      if (recovered) { if (keepable(recovered, hash)) await keepAnswer(chainId, jobId, recovered).catch(() => undefined); return recovered }
     }
-    return loadJobManifest(chainId, jobId, job, onchainHash)
+    const read = await loadJobManifest(chainId, jobId, job, onchainHash)
+    if (valid && keepable(read, hash)) await keepAnswer(chainId, jobId, read).catch(() => undefined)
+    return read
   }
   if (!hash || !/^0x[0-9a-fA-F]{64}$/.test(hash)) return load()
   const submitted = job?.events?.find(e => e.name === 'JobSubmitted')?.tx ?? ''

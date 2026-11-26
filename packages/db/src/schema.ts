@@ -8,7 +8,7 @@
  *
  *  FIRST-PARTY OBS.   measurements we made and can never recreate.
  *                     probe, funnelSnapshot, builderListing, conformance*,
- *                     charter, run, receipt, sealedCall, poolTickObservation.
+ *                     charter, run, receipt, sealedCall, poolTickObservation, jobAnswer.
  *                     Never included in a rebuild drill. Never dropped.
  *
  * Tables in the first-party tier are marked FIRST-PARTY below.
@@ -1069,6 +1069,25 @@ export const commerceJob = pgTable('commerce_job', {
   clientIdx: index('commerce_job_client_idx').on(t.client),
   providerIdx: index('commerce_job_provider_idx').on(t.provider),
   intentIdx: index('commerce_job_intent_idx').on(t.intentId),
+}))
+
+/**
+ * FIRST-PARTY OBS. The answer a seller delivered for a job, kept the first time Marque read it and its bytes hashed to
+ * the deliverable on chain (26 Nov 2026). Sellers often serve answers from temporary hosts; once one goes away the
+ * chain still holds the hash, and this keeps the verified original so the job room can still show it. Rows are only
+ * written after the hash check and are re-checked against the chain hash on every read.
+ */
+export const jobAnswer = pgTable('job_answer', {
+  chainId: integer('chain_id').notNull(),
+  jobId: text('job_id').notNull(),
+  hash: text('hash').notNull(),
+  raw: text('raw').notNull(),
+  url: text('url'),
+  source: text('source'),
+  hashAlgorithm: text('hash_algorithm').notNull().default('keccak256'),
+  firstReadAt: timestamp('first_read_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({
+  pk: primaryKey({ columns: [t.chainId, t.jobId, t.hash] }),
 }))
 
 /** DERIVED. ERC-8004 feedback (NewFeedback / FeedbackRevoked). */

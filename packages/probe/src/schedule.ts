@@ -12,6 +12,7 @@ import { db, firstPartyAgentsAllLanes, type Liveness, type ServiceKind } from '@
  *
  *   T0  first-party services (config/first-party.json)               every 5 min
  *   T1  services of mainnet agents classified into a category        every 30 min
+ *       (every 3 h while the last verdict says there is nothing to call: unbound or bad_schema, see classifiedIdle)
  *       (practice-lane agents on BSC testnet are never T1: they ride T1b/T2/T3)
  *   T1b services whose last verdict was live / unbound / bad_schema  every 12 h
  *   T2  services never probed: first seen in the last 48 h ahead of T1b, newest first; older ones after T1b
@@ -29,6 +30,13 @@ export const INTERVAL_MINUTES = {
   T1b: 12 * 60,
   /** A classified or first-party service that has been dead 3+ times in a row. */
   priorityDead: 45,
+  /**
+   * A classified service whose card answers but offers nothing to call (unbound, bad_schema), 26 Nov 2026. It cannot
+   * be hired or tested, so a 30-minute cadence bought nothing, and on one platform 864 such agents took that host's
+   * whole per-cycle share (120 of 120, every cycle), so its other ~47,000 agents were never re-checked and dropped out
+   * of the 24-hour Answering window (7.9k to 5.0k). Three hours still notices a fixed agent the same afternoon.
+   */
+  classifiedIdle: 180,
   /** Indexed by consecutive dead verdicts (1, 2, 3, 4, 5+). */
   dead: [60, 180, 360, 1440, 4320],
 } as const
@@ -58,6 +66,7 @@ export function tierOf(s: ScheduleInput): Tier {
 /** Minutes until the next probe of a service after a verdict. Pure, jitter excluded. */
 export function intervalMinutes(s: ScheduleInput): number {
   const tier = tierOf(s)
+  if (tier === 'T1' && (s.liveness === 'unbound' || s.liveness === 'bad_schema')) return INTERVAL_MINUTES.classifiedIdle
   if (tier === 'T0' || tier === 'T1') {
     return s.liveness === 'dead' && s.consecutiveDead >= 3 && tier === 'T1' ? INTERVAL_MINUTES.priorityDead : INTERVAL_MINUTES[tier]
   }
@@ -379,7 +388,9 @@ export async function tierFreshness(opts: { firstPartyOnly?: boolean } = {}): Pr
     with t as (
       select ps.service_id, ps.last_checked_at,
              case when ps.agent_id in (${fpList}) then 'T0'
-                  when ps.agent_id like '56:%' and exists (select 1 from agent_category c where c.agent_id = ps.agent_id and c.category <> 'unclassified') then 'T1'
+                  -- The 60-minute bar is for classified services with something to call; idle ones run on classifiedIdle.
+                  when ps.agent_id like '56:%' and ps.last_liveness is distinct from 'unbound' and ps.last_liveness is distinct from 'bad_schema'
+                    and exists (select 1 from agent_category c where c.agent_id = ps.agent_id and c.category <> 'unclassified') then 'T1'
              end as tier
       from probe_schedule ps join agent_service s on s.id = ps.service_id
       where (s.is_template = false or s.resolved_endpoint is not null)
