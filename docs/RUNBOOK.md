@@ -337,12 +337,16 @@ net for a short spike, not permission to run unbounded concurrent builds.
 - Agent-supplied metadata is untrusted and never rendered as HTML.
 - Headers: CSP, HSTS, `X-Frame-Options: DENY`, `X-Content-Type-Options`,
   `Referrer-Policy`, `Permissions-Policy`, COOP; set in `apps/web/next.config.mjs`.
-- SSH: root password login disabled would be ideal; currently `fail2ban`
-  (12h bans, 4 retries), `ufw` (SSH rate-limited, C2 IPs blocked outbound),
-  an immutable empty `/etc/ld.so.preload`, and `marque-janitor.service` (a 20s
-  watchdog). This box was root-compromised via SSH brute-force before the
-  hardening; the recovery and the eradication are in
-  `docs/DEVIATIONS.md` (REC-01..06) and the janitor log has stayed empty since.
+- SSH: key-only since 27 November 2026 (password and keyboard-interactive login
+  off, public-key authentication required), plus `fail2ban`, `ufw` (SSH
+  rate-limited, C2 IPs blocked outbound), an immutable empty
+  `/etc/ld.so.preload`, and `marque-janitor.service` (a 20s watchdog). This box
+  was root-compromised in early September 2026 before the hardening; the entry
+  route was not established, because authentication logs from that time were not
+  kept. The recovery and the eradication are in `docs/DEVIATIONS.md`
+  (REC-01..06). Hostile processes appeared again on 8 and 9 September and were
+  stopped by the watchdog; none has been seen since 9 September. SSH has been
+  key-only since 27 November 2026.
 
 ---
 
