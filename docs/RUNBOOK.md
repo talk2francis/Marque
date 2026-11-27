@@ -152,7 +152,13 @@ When `CHARTERS_DATABASE_URL` names a separate database, both databases receive l
 The configured offsite destination is Google Drive through rclone. Each dump is
 encrypted with age before upload, checked against the remote, and only then
 advances `OFFSITE_LATEST`. This is separate from the local `LATEST` receipt.
-It is a Drive backup, not a Google Cloud Storage bucket. Cron follows the server
+It is a Drive backup, not a Google Cloud Storage bucket.
+Retention on Drive (`ops/backup-retention.mjs`, run after each verified upload): the newest
+copy of each of the newest 14 days, of each of the newest 8 ISO weeks, and the earliest copy of
+every month forever, per prefix. Counting is by copies present, so failed nights never age out
+good copies; the newest copy is never deleted; Drive keeps deleted files in its trash for 30
+days. `MARQUE_BACKUP_RETENTION=0` in `backup.env` turns it off. Dry run:
+`node ops/backup-retention.mjs --remote "$MARQUE_BACKUP_REMOTE"`. Cron follows the server
 timezone, so its UTC time changes with daylight saving.
 
 Observed 1 November 2026: the `20261101T021701Z` dump exists in both local

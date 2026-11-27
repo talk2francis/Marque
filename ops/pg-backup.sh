@@ -69,6 +69,12 @@ if [ -n "${MARQUE_BACKUP_REMOTE:-}" ]; then
     echo "Charters offsite upload is awaiting owner opt-in; local Charters copies completed" >&2
   fi
   echo "$(date -u +%FT%TZ) configured encrypted offsite copies verified"
+  # Remote retention (ops/backup-retention.mjs): 14 daily, 8 weekly, every month start kept forever.
+  # Runs only after tonight's upload verified; a retention problem never fails the backup.
+  if [ "${MARQUE_BACKUP_RETENTION:-1}" = 1 ]; then
+    node /root/marque/ops/backup-retention.mjs --remote "$MARQUE_BACKUP_REMOTE" --config /root/.marque/rclone.conf --apply \
+      || echo "$(date -u +%FT%TZ) WARNING: offsite retention did not run; copies are kept" >&2
+  fi
 else
   echo "$(date -u +%FT%TZ) WARNING: offsite backup is not configured" >&2
 fi
