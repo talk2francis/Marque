@@ -123,12 +123,13 @@ single documented run (`docs/pancakeswap-proof.json`, `docs/DEVIATIONS.md` D9b).
   `NEXT_PUBLIC_*` var or any client bundle. Ordinary marketplace reads keep
   using the pooled public dataseeds; only a task that pins an out-of-window
   block touches the archive path.
-- **Rotation:** the VPS was root-compromised via SSH brute-force in early Sep
-  2026 (see below). Every key that touched the old host is considered burned and
+- **Rotation:** the VPS was root-compromised in early Sep 2026 (see below).
+  The entry route was not established: authentication logs from that time were
+  not kept. Every key that touched the old host is considered burned and
   was regenerated on the rebuilt host: new operator wallet, new agent keystores,
   new RPC tokens. The old ERC-8004 registrations were re-done from the new keys
   (`docs/DEVIATIONS.md` D10.5C-05). The compromise post-mortem and the current
-  hardening (fail2ban, ufw default-deny, key-only SSH, immutable
+  hardening (fail2ban, ufw default-deny, key-only SSH since 27 November 2026, immutable
   `ld.so.preload`, a 20s watchdog service) are in `docs/RUNBOOK.md`.
 
 ---
@@ -190,7 +191,7 @@ A review of the server after disk and restart alerts found ordinary internet bac
 
 - **Scanner probes are refused at the edge.** Paths for secrets and other software stacks (`/.env`, `/.git`, `*.php`, `/wp-*` and similar) are answered with 404 by Caddy, never rendered by Next.js. `/.well-known` is untouched.
 - **fail2ban is stricter.** It bans for 24 hours after 3 failures, and a `recidive` jail bans an address that is banned three times in a day for 7 days, on every port.
-- **SSH allows fewer attempts.** `MaxAuthTries 3`, `LoginGraceTime 20`, a `MaxStartups` throttle and no X11 forwarding (`/etc/ssh/sshd_config.d/40-marque-hardening.conf`). Password login remains for the operator; a key is the recommended next step.
+- **SSH allows fewer attempts.** `MaxAuthTries 3`, `LoginGraceTime 20`, a `MaxStartups` throttle and no X11 forwarding (`/etc/ssh/sshd_config.d/40-marque-hardening.conf`). Password login still remained on 23 November; since 27 November 2026 SSH accepts keys only.
 - **The unused printing service (CUPS, a snap) is stopped and disabled.**
 - **Web workers have more room.** The memory cap is 1200M, up from 800M, which ends the hourly restarts that showed up as timeouts and restart-loop alerts.
 

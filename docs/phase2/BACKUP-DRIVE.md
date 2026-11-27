@@ -17,7 +17,7 @@ The normal local backup uses restrictive creation permissions and a lock.
 
 - /root/.marque/backup.env: public encryption recipient and optional MARQUE_BACKUP_REMOTE.
 - /root/.marque/rclone.conf: OAuth credentials, mode 600.
-- /root/.marque/backup-recovery.key: private age identity, mode 600. Never commit or paste it.
+- The private age identity is not on the server. Since 27 November 2026 the operator keeps it offline in two places; the server holds only the public recipient, so it can encrypt backups but cannot decrypt them. Never commit or paste the identity.
 - /root/marque-backups/OFFSITE_LATEST is updated by automation only after an upload and rclone checksum verification. The initial connector archive marker was set after download and hash verification.
 - Local LATEST records local success independently. A configured remote failure exits nonzero.
 

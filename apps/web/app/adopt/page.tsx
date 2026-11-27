@@ -35,15 +35,16 @@ const KEY_ADDRESSES: Record<string, Array<[string, string]>> = {
   'Mainnet deployer key': [['Deployer', '0x2e010AaDFdFEbC2AdFCAFA5F83e9687ffA47C573']],
 }
 
-// The monthly cost, item by item, in US dollars (2 Nov): the operator's own figures from its invoices and plans; a
-// zero is shown only where the service is free by its own terms or on a free plan.
+// The monthly cost, item by item, in US dollars (27 Nov): the operator's own figures from its invoices and plans, not
+// measurements; a zero is shown only where the service is free by its own terms or on a free plan.
 const COSTS: Array<[string, string, string]> = [
-  ['Server: one VPS (6 vCPU, 11 GiB RAM, 193 GB disk) running everything', '12.00', "The operator's hosting invoice"],
+  ['Server 01: the public VPS (6 vCPU, 11 GiB RAM, 193 GB disk) running the site and services ($12 the first month)', '8.50', "The operator's hosting invoice"],
+  ['Server 02: a second VPS (4 vCPU, 8 GB RAM) bought 27 Nov 2026 to hold signing keys apart from the web stack; being set up ($9 the first month, including a $2.40 setup fee)', '6.60', "The operator's hosting invoice"],
   ['Domain marque.trade (about $6 a year)', '0.50', "The operator's registrar invoice, spread over 12 months"],
   ['Public BSC RPC endpoints (reads and writes)', '0', 'Public endpoints, no key or plan'],
   ['NodeReal key (transfer history; MegaFuel gas sponsorship for settles)', '31.00', "The plan on the operator's account"],
   ['Archive RPC (replaying historical benchmarks only)', '0', "A free plan on the operator's account"],
-  ['Encrypted offsite backup (Google Drive)', '1.99', "The operator's storage plan"],
+  ['Encrypted offsite backup (Google Drive, 100 GB; 2,950 naira a month)', '2.00', "The operator's storage plan, converted at about $2"],
   ['Source and CI (public GitHub repository, Actions)', '0', 'Free for public repositories'],
   ['Health alerts (Telegram bot)', '0', 'The Telegram Bot API is free'],
 ]
